@@ -77,6 +77,16 @@ object MediaHub {
         // même en lecture, donc absentes de getActiveSessions(). Comme le launcher d'origine,
         // on se connecte directement à leurs MediaBrowserService pour obtenir leur contrôleur.
         BROWSERS.forEach { connectBrowser(it) }
+        if (legacyRadio) {
+            SaicRadio.connect(context)
+            // Pas de rappel côté radio : relecture de la station toutes les 2 s.
+            main.postDelayed(object : Runnable {
+                override fun run() {
+                    io.launch { val before = SaicRadio.last; SaicRadio.refresh(); if (SaicRadio.last != before) main.post { reevaluate() } }
+                    main.postDelayed(this, 2_000)
+                }
+            }, 1_000)
+        }
         bindAndroidAuto()
         watchAudioSource(context)
         reevaluate()
@@ -141,7 +151,7 @@ object MediaHub {
     }
 
     /** Source affichée, Android Auto ramené à son lecteur. */
-    fun currentSource(): String? = current?.packageName?.let { if (isAndroidAuto(it)) AA_MBS else it }
+    fun currentSource(): String? = if (radioShown) RADIO else current?.packageName?.let { if (isAndroidAuto(it)) AA_MBS else it }
 
     fun cycleSource(dir: Int) {
         if (BuildConfig.MOCK) return
@@ -206,6 +216,7 @@ object MediaHub {
                             pkg == "com.saicmotor.media" && type == 5 -> "com.android.bluetooth"
                             pkg == "com.allgo.app.androidauto" -> AA_MBS
                             pkg == "com.allgo.carplay.service" -> AA_MBS
+                            pkg == SaicRadio.HMI_PKG || pkg == "com.saicmotor.service.radio" -> RADIO
                             else -> pkg
                         }
                         Log.i(TAG, "source audio : $pkg ($type) → $src")
@@ -322,6 +333,16 @@ object MediaHub {
             if (watched.add(c.sessionToken)) c.registerCallback(callback, main)
         }
         val playing = candidates.firstOrNull { it.playbackState?.state == PlaybackState.STATE_PLAYING }
+        // Radio de l'ancien SDK : aucun contrôleur, on l'affiche d'après la source de la voiture, le
+        // choix sur la carte, ou parce qu'elle joue alors qu'aucun autre lecteur ne joue.
+        val showRadio = legacyRadio && SaicRadio.ready && when (pinnedPkg) {
+            RADIO -> true
+            null -> sourcePkg == RADIO || (sourcePkg == null && playing == null && SaicRadio.last?.playing == true)
+            else -> false
+        }
+        if (showRadio != radioShown) Log.i(TAG, "lecteur affiché : ${if (showRadio) "radio (service SAIC)" else "session média"}")
+        radioShown = showRadio
+        if (showRadio) { current = null; publish(); return }
         // Un lecteur peut avoir deux contrôleurs (session active, navigateur média) : on préfère celui
         // qui a un titre, puis celui qui a un état, puis le navigateur.
         fun bestFor(pkg: String): MediaController? {
@@ -375,6 +396,7 @@ object MediaHub {
     }
 
     private fun publish() {
+        if (radioShown) { publishRadio(); return }
         val c = current
         if (c == null) { _now.value = NowPlaying(); return }
         val md = c.metadata
@@ -452,6 +474,34 @@ object MediaHub {
         Log.w(TAG, "pochette illisible : ${e.message}"); null
     }
 
+    /** Radio de l'ancien SDK (SWI68…) : service SAIC au lieu d'un MediaBrowserService. */
+    private val legacyRadio: Boolean get() = app.mg4dash.system.Firmware.family == app.mg4dash.system.Firmware.Family.LEGACY
+    @Volatile private var radioShown = false
+
+    private fun publishRadio() {
+        val st = SaicRadio.last
+        val freq = st?.let { SaicRadio.frequencyLabel(it) }.orEmpty()
+        _now.value = NowPlaying(
+            available = true,
+            packageName = RADIO,
+            source = st?.let { SaicRadio.bandLabel(it.band) } ?: "RADIO",
+            title = st?.name?.takeIf { it.isNotBlank() } ?: freq,
+            artist = if (st?.name.isNullOrBlank()) "" else freq,
+            playing = st?.playing == true,
+            androidAuto = androidAutoAvailable(),
+        )
+    }
+
+    /** Commande radio hors du fil principal, puis relecture de la station. */
+    private fun radioCommand(action: () -> Boolean) {
+        io.launch {
+            val ok = action()
+            kotlinx.coroutines.delay(400); SaicRadio.refresh()
+            main.post { reevaluate() }
+            if (!ok) Log.w(TAG, "commande radio refusée")
+        }
+    }
+
     fun sourceLabel(pkg: String?): String = when {
         pkg == null -> ""
         pkg == "com.android.bluetooth" -> "BLUETOOTH"
@@ -469,6 +519,7 @@ object MediaHub {
 
     fun playPause() {
         if (BuildConfig.MOCK) { _now.value = _now.value.copy(playing = !_now.value.playing); return }
+        if (radioShown) { val playing = SaicRadio.last?.playing == true; radioCommand { if (playing) SaicRadio.pause() else SaicRadio.play() }; return }
         val c = current ?: return
         val playing = isPlaying(c)
         // La voiture est sur une autre source (ex. FM) : un « lecture » envoyé au Bluetooth ou à
@@ -488,11 +539,13 @@ object MediaHub {
     }
 
     fun next() {
+        if (radioShown) { radioCommand { SaicRadio.next() }; return }
         val c = current ?: return
         if (isAndroidAuto(c.packageName)) aaControl(c, AA_NEXT, KeyEvent.KEYCODE_MEDIA_NEXT) else c.transportControls.skipToNext()
     }
 
     fun previous() {
+        if (radioShown) { radioCommand { SaicRadio.previous() }; return }
         val c = current ?: return
         if (isAndroidAuto(c.packageName)) aaControl(c, AA_PREVIOUS, KeyEvent.KEYCODE_MEDIA_PREVIOUS) else c.transportControls.skipToPrevious()
     }
@@ -546,12 +599,14 @@ object MediaHub {
     }
 
     /** Composant à ouvrir quand on touche la carte média. */
-    fun ownerComponent(): ComponentName? = current?.packageName?.let { pkg -> ownerOf(pkg) }
+    fun ownerComponent(): ComponentName? =
+        if (radioShown) ownerOf(RADIO) else current?.packageName?.let { pkg -> ownerOf(pkg) }
 
     /** Appli d'origine d'une source ; le Bluetooth (sans appli à lui) est lu par l'appli Média SAIC. */
     private fun ownerOf(pkg: String): ComponentName? = when (pkg) {
         AA_MBS -> app.mg4dash.system.Apps.ANDROID_AUTO
         "com.android.bluetooth" -> app.mg4dash.system.Apps.MEDIA
+        RADIO -> appContext?.packageManager?.let { pm -> (pm.getLaunchIntentForPackage(pkg) ?: pm.getLaunchIntentForPackage(SaicRadio.HMI_PKG))?.component }
         else -> appContext?.packageManager?.getLaunchIntentForPackage(pkg)?.component
     }
 
@@ -563,6 +618,7 @@ object MediaHub {
      */
     private fun activateSource(pkg: String): Boolean {
         val ctx = appContext ?: return false
+        if (pkg == RADIO && legacyRadio) { radioCommand { SaicRadio.play() }; return true }
         val (target, type) = when (pkg) {
             "com.android.bluetooth" -> ComponentName("com.saicmotor.media", "com.saicmotor.media.service.MediaService") to 2
             "com.saicmotor.media" -> ComponentName("com.saicmotor.media", "com.saicmotor.media.service.MediaService") to 0
