@@ -29,6 +29,8 @@ object WeatherRepo {
     private const val TAG = "Météo"
     private const val REFRESH_MS = 30 * 60 * 1000L
     private const val RETRY_MS = 2 * 60 * 1000L
+    /** Distance parcourue depuis la dernière météo qui déclenche une nouvelle requête (issue #18). */
+    private const val MOVE_M = 5000f
     /** Échecs successifs : nouvel essai de plus en plus espacé, jusqu'à RETRY_MS. */
     private val FAIL_DELAYS = longArrayOf(15_000L, 30_000L, 60_000L, RETRY_MS)
 
@@ -115,8 +117,26 @@ object WeatherRepo {
      * ville de repli jusqu'au rafraîchissement suivant. Dès qu'une position arrive, on la redemande.
      */
     fun onLocation(context: Context) {
-        if (usedFallback) { usedFallback = false; wake.trySend(Unit) }
+        if (usedFallback) { usedFallback = false; wake.trySend(Unit); return }
+        // En roulant, la météo suivait la voiture avec jusqu'à 30 min de retard (issue #18) : après
+        // MOVE_M parcourus depuis la dernière météo réussie, on la redemande. Rien si une requête est
+        // déjà en cours ou si la dernière a échoué (la boucle gère alors ses propres nouveaux essais).
+        val from = fetchedAt ?: return
+        val cur = app.mg4dash.map.LocationRepo.location.value ?: return
+        if (busy || lastFailed) return
+        val dist = FloatArray(1)
+        android.location.Location.distanceBetween(from.first, from.second, cur.latitude, cur.longitude, dist)
+        if (dist[0] >= MOVE_M) {
+            busy = true
+            Log.i(TAG, "${Math.round(dist[0] / 1000)} km parcourus : nouvelle météo")
+            wake.trySend(Unit)
+        }
     }
+
+    /** Position de la dernière météo réussie (null : ville de repli ou pas encore de météo). */
+    @Volatile private var fetchedAt: Pair<Double, Double>? = null
+    /** Requête en cours ou déjà demandée : évite de réveiller la boucle à chaque relevé GPS. */
+    @Volatile private var busy = false
 
     fun refreshNow(context: Context) {
         scope.launch {
@@ -129,6 +149,11 @@ object WeatherRepo {
     // Pas de test préalable de connectivité : sur la voiture, internet passe par l'interface
     // Ethernet de la T-box, et la requête elle-même est le seul test fiable.
     private fun refresh(context: Context): Boolean {
+        busy = true
+        try { return doRefresh(context) } finally { busy = false }
+    }
+
+    private fun doRefresh(context: Context): Boolean {
         Log.i(TAG, "requête Open-Meteo (internet : ${StatusMonitor.hasInternet(context)})")
         val prefs = Prefs(context)
         val loc = app.mg4dash.map.LocationRepo.location.value?.let { it.latitude to it.longitude } ?: lastLocation(context)
@@ -155,6 +180,7 @@ object WeatherRepo {
         } finally { conn.disconnect() }
         _weather.value = parse(JSONObject(body), place)
         Log.i(TAG, "mise à jour : ${_weather.value?.tempC}° à $place")
+        fetchedAt = loc
         return true
     }
 
