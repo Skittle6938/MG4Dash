@@ -369,8 +369,7 @@
     <string name="doors_unknown">Blocco non disponibile</string>
     <string name="en_gun_unlock">SBLOCCA CAVO</string>
     <string name="en_gun_lock">BLOCCA CAVO</string>
-    <string name="power_off_title">Spegnere l\'auto?</string>
-    <string name="power_off_confirm">Spegni</string>
+    <string name="power_off_driving">Non durante la guida</string>
     <string name="aa_title">ANDROID AUTO</string>
     <string name="aa_ready">Telefono connesso · Tocca per aprire</string>
     <string name="aa_waiting">Collega il telefono via USB</string>

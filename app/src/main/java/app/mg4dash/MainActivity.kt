@@ -64,6 +64,7 @@ class MainActivity : AppCompatActivity() {
             simpleMode = true
             builtVertical = Dock.vertical(this)
             builtHideTitles = prefs.hideTitles
+            builtHeating = CarBridge.heatingShown(this)
             val sh = SimpleHome(this)
             simple = sh
             setContentView(sh.root)
@@ -249,6 +250,7 @@ class MainActivity : AppCompatActivity() {
         CarBridge.setForeground(true)
         // Style d'accueil changé dans les paramètres : on reconstruit l'écran
         if ((prefs.homeStyle == 1) != simpleMode || (prefs.homeStyle == 2) != mapLayout || Dock.vertical(this) != builtVertical || prefs.hideTitles != builtHideTitles ||
+            CarBridge.heatingShown(this) != builtHeating ||
             app.mg4dash.ui.Themes.signature(this) != themeSig) { recreate(); return }
         if (simpleMode) { simple?.onResume(); Fullscreen.apply(this); return }
         mapCard.onResume()
@@ -312,10 +314,12 @@ class MainActivity : AppCompatActivity() {
         Dock.mount(this, b.root as LinearLayout, b.dock, Dock.Page.HOME)
         builtVertical = Dock.vertical(this)
         builtHideTitles = prefs.hideTitles
+        builtHeating = CarBridge.heatingShown(this)
     }
 
     private var builtVertical = false
     private var builtHideTitles = false
+    private var builtHeating = false
 
 
     // ── Clim ─────────────────────────────────────────────────────────────────

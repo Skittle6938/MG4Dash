@@ -369,8 +369,7 @@
     <string name="doors_unknown">Bloqueo no disponible</string>
     <string name="en_gun_unlock">DESBLOQUEAR CABLE</string>
     <string name="en_gun_lock">BLOQUEAR CABLE</string>
-    <string name="power_off_title">¿Apagar el coche?</string>
-    <string name="power_off_confirm">Apagar</string>
+    <string name="power_off_driving">No mientras conduces</string>
     <string name="aa_title">ANDROID AUTO</string>
     <string name="aa_ready">Teléfono conectado · Pulse para abrir</string>
     <string name="aa_waiting">Conecte su teléfono por USB</string>

@@ -367,5 +367,4 @@ doors_unlocked|Doors unlocked|Portes déverrouillées|Türen entriegelt|Puertas 
 doors_unknown|Door lock not available|Verrouillage indisponible|Verriegelung nicht verfügbar|Bloqueo no disponible|Blocco non disponibile|Vergrendeling niet beschikbaar
 en_gun_unlock|UNLOCK CABLE|DÉVERROUILLER LE PISTOLET|KABEL ENTRIEGELN|DESBLOQUEAR CABLE|SBLOCCA CAVO|KABEL ONTGRENDELEN
 en_gun_lock|LOCK CABLE|VERROUILLER LE PISTOLET|KABEL VERRIEGELN|BLOQUEAR CABLE|BLOCCA CAVO|KABEL VERGRENDELEN
-power_off_title|Turn off the car?|Éteindre la voiture ?|Fahrzeug ausschalten?|¿Apagar el coche?|Spegnere l'auto?|Auto uitschakelen?
-power_off_confirm|Turn off|Éteindre|Ausschalten|Apagar|Spegni|Uitschakelen
+power_off_driving|Not while driving|Pas en roulant|Nicht während der Fahrt|No mientras conduces|Non durante la guida|Niet tijdens het rijden

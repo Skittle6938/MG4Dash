@@ -369,8 +369,7 @@
     <string name="doors_unknown">Verriegelung nicht verfügbar</string>
     <string name="en_gun_unlock">KABEL ENTRIEGELN</string>
     <string name="en_gun_lock">KABEL VERRIEGELN</string>
-    <string name="power_off_title">Fahrzeug ausschalten?</string>
-    <string name="power_off_confirm">Ausschalten</string>
+    <string name="power_off_driving">Nicht während der Fahrt</string>
     <string name="aa_title">ANDROID AUTO</string>
     <string name="aa_ready">Telefon verbunden · Zum Öffnen tippen</string>
     <string name="aa_waiting">Telefon per USB verbinden</string>

@@ -369,8 +369,7 @@
     <string name="doors_unknown">Vergrendeling niet beschikbaar</string>
     <string name="en_gun_unlock">KABEL ONTGRENDELEN</string>
     <string name="en_gun_lock">KABEL VERGRENDELEN</string>
-    <string name="power_off_title">Auto uitschakelen?</string>
-    <string name="power_off_confirm">Uitschakelen</string>
+    <string name="power_off_driving">Niet tijdens het rijden</string>
     <string name="aa_title">ANDROID AUTO</string>
     <string name="aa_ready">Telefoon verbonden · Tik om te openen</string>
     <string name="aa_waiting">Sluit je telefoon aan via USB</string>

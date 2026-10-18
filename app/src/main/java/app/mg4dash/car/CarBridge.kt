@@ -91,9 +91,13 @@ object CarBridge {
     private const val POWER_MODE = 557897487   // 0x2140d70f : 2 = éteindre (SystemUI d'origine, CarComfortableController)
 
     /** Éteint la voiture, comme le bouton « Éteindre » du panneau rapide d'origine. */
-    fun powerOffCar() {
-        if (BuildConfig.MOCK) return
+    fun powerOffCar(): Boolean {
+        // Jamais en roulant : vitesse inconnue ou au-dessus de 1 km/h = refus
+        val v = state.value.speedKmh
+        if (v == null || v > 1f) { Log.w(TAG, "extinction refusée, vitesse $v"); return false }
+        if (BuildConfig.MOCK) return true
         CarProps.setIntArea(POWER_MODE, 0, 2, "extinction de la voiture")
+        return true
     }
 
     /** Portes verrouillées ? (SystemUI d'origine : 0 = ouvertes, 1 à 4 = verrouillées). */
