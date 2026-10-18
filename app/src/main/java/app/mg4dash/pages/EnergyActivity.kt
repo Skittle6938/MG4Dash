@@ -84,11 +84,6 @@ class EnergyActivity : PageActivity() {
             heating.postDelayed({ refreshProps() }, 1500)
         }.apply { textSize = 18f; setPadding(kit.dp(20), 0, kit.dp(20), 0) }
         header.addView(heating, header.childCount - 1, kit.lp(-2, kit.dp(52), r = 12))   // avant le lien SAIC
-        // Pistolet de charge : verrouiller / déverrouiller (bouton du launcher d'origine), câble branché seulement
-        gunLock = kit.toggleTile(getString(R.string.en_gun_unlock)) {
-            CarBridge.toggleChargeLock(); gunLock.postDelayed({ refreshProps() }, 1500)
-        }.apply { textSize = 18f; setPadding(kit.dp(20), 0, kit.dp(20), 0); visibility = android.view.View.GONE }
-        header.addView(gunLock, header.childCount - 1, kit.lp(-2, kit.dp(52), r = 12))
 
         // ── Colonne 1 : recharge ──
         val c1 = kit.panel(getString(R.string.en_charging))
@@ -106,7 +101,14 @@ class EnergyActivity : PageActivity() {
         power = kit.text("", 18f, R.color.text_sub)
         c1.addView(power, kit.lp(-1, -2, t = 8))
         action = kit.toggleTile("—") { onMainAction() }.apply { textSize = 20f }
-        c1.addView(action, kit.lp(-1, kit.dp(64), t = 12))
+        // Bouton principal et, câble branché, verrou du pistolet (bouton du launcher d'origine)
+        val actRow = kit.row()
+        actRow.addView(action, kit.lp(0, kit.dp(64), 1f))
+        gunLock = kit.toggleTile(getString(R.string.en_gun_unlock)) {
+            CarBridge.toggleChargeLock(); gunLock.postDelayed({ refreshProps() }, 1500)
+        }.apply { textSize = 18f; setPadding(kit.dp(16), 0, kit.dp(16), 0); visibility = android.view.View.GONE }
+        actRow.addView(gunLock, kit.lp(-2, kit.dp(64), l = 10))
+        c1.addView(actRow, kit.lp(-1, -2, t = 12))
         c1.addView(kit.title(getString(R.string.en_limit)), kit.lp(-1, -2, t = 18))
         val limits = listOf(50, 60, 70, 80, 90, 100)
         val (lRow, lSet) = kit.segmented(limits.map { "$it %" }) { i ->

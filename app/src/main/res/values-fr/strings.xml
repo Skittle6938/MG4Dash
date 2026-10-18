@@ -369,6 +369,8 @@
     <string name="doors_unknown">Verrouillage indisponible</string>
     <string name="en_gun_unlock">DÉVERROUILLER LE PISTOLET</string>
     <string name="en_gun_lock">VERROUILLER LE PISTOLET</string>
+    <string name="power_off_title">Éteindre la voiture ?</string>
+    <string name="power_off_confirm">Éteindre</string>
     <string name="aa_title">ANDROID AUTO</string>
     <string name="aa_ready">Téléphone connecté · Appuyer pour ouvrir</string>
     <string name="aa_waiting">Branchez votre téléphone en USB</string>

@@ -228,6 +228,15 @@ object Dock {
                             // Même commande que le launcher d'origine ; un toucher sur l'écran noir le rallume
                             activity.startActivity(Intent(activity, ScreenOffActivity::class.java)); return true
                         }
+                        // Appui long : éteindre la voiture, avec la même confirmation que le bouton d'origine (#12)
+                        override fun onLongPress(e: android.view.MotionEvent) {
+                            android.app.AlertDialog.Builder(activity)
+                                .setTitle(R.string.power_off_title)
+                                .setPositiveButton(R.string.power_off_confirm) { _, _ -> app.mg4dash.car.CarBridge.powerOffCar() }
+                                .setNegativeButton(R.string.cancel, null)
+                                .setOnDismissListener { Fullscreen.apply(activity) }
+                                .show()
+                        }
                         override fun onDown(e: android.view.MotionEvent) = true
                     })
                     cell.setOnTouchListener { v, ev -> v.isPressed = ev.actionMasked == android.view.MotionEvent.ACTION_DOWN; gd.onTouchEvent(ev) }
