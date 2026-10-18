@@ -163,7 +163,11 @@ object EnergyMonitor {
                 if (VehicleState.isPlugged(s.chargeStatus)) continue   // en charge ou V2L : hors conso
                 val p = v * i
                 val h = dt / 3_600_000f
-                val stopped = (s.speedKmh ?: 0f) < 0.5f
+                // Anciens firmwares (SWI68, #19) : pas de vitesse véhicule, la récupération restait à 0 kWh ;
+                // repli sur la vitesse GPS récente.
+                val speed = s.speedKmh ?: app.mg4dash.map.LocationRepo.location.value
+                    ?.takeIf { it.hasSpeed() && android.os.SystemClock.elapsedRealtimeNanos() - it.elapsedRealtimeNanos < 10_000_000_000L }?.speed?.times(3.6f)
+                val stopped = (speed ?: 0f) < 0.5f
                 val hvacOn = s.hvacOn == true
 
                 // Apprentissage à l'arrêt

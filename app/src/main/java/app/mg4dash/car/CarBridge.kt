@@ -225,6 +225,11 @@ object CarBridge {
         val r = CarProps.readIntArea(SEAT_HEAT_R, HEAT_AREA)?.takeIf { it in 0..3 }
         val w = CarProps.readIntArea(WHEEL_HEAT, HEAT_AREA)?.takeIf { it >= 0 }?.let { if (it > 0) 1 else 0 }
         if (l != s.seatHeatL || r != s.seatHeatR || w != s.wheelHeat) _state.value = s.copy(seatHeatL = l, seatHeatR = r, wheelHeat = w)
+        // Une lecture ratée (démarrage, voiture en veille) ne doit plus faire disparaître les boutons (#19)
+        if (l != null) appContext?.let { c ->
+            val sp = app.mg4dash.system.Prefs(c).raw
+            if (!sp.getBoolean("heat_seen", false)) sp.edit().putBoolean("heat_seen", true).apply()
+        }
     }
 
     /**
@@ -261,7 +266,7 @@ object CarBridge {
         return when (p.heatedSeats) {
             1 -> true
             2 -> false
-            else -> BuildConfig.MOCK && p.batteryModel != 51 || p.batteryModel in listOf(64, 77) && _state.value.seatHeatL != null
+            else -> BuildConfig.MOCK && p.batteryModel != 51 || p.batteryModel in listOf(64, 77) && (_state.value.seatHeatL != null || p.raw.getBoolean("heat_seen", false))
         }
     }
 
@@ -344,6 +349,8 @@ object CarBridge {
         // Sans service EV, les propriétés sont la seule source : on les reprend à chaque passage
         // (avant, la première valeur lue restait affichée : % et autonomie figés, issue #13).
         val noEv = ev == null
+        /** Valeur de la propriété si le service réglages manque, sinon celle du service (propriété en repli). */
+        fun fresh(prop: Int?, cur: Int?): Int? = if (vs == null) prop ?: cur else cur ?: prop
         _state.value = s.copy(
             connected = s.connected || soc != null,
             batteryPercent = if (noEv) soc ?: s.batteryPercent else s.batteryPercent ?: soc,
@@ -351,12 +358,14 @@ object CarBridge {
             chargeStatus = if (ev == null) status else s.chargeStatus,
             odometerKm = s.odometerKm ?: i(0x21401566)?.takeIf { it > 0 },
             driveMode = if (vs == null) dm ?: s.driveMode else s.driveMode ?: dm,
-            regenLevel = s.regenLevel ?: i(0x2140a191)?.takeIf { it in 0..7 },
+            // Sans service réglages (SWI68, #19), la propriété est relue à chaque passage : avant, la
+            // première valeur restait affichée et un changement de régénération ne se voyait pas.
+            regenLevel = fresh(i(0x2140a191)?.takeIf { it in 0..7 }, s.regenLevel),
             // Aides à la conduite (relevé sur SWI69 : mêmes échelles que le service réglages)
-            lasMode = s.lasMode ?: i(0x2140a104)?.takeIf { it in 1..5 },
-            fcwState = s.fcwState ?: i(0x2140a108)?.takeIf { it in 1..2 },
-            overSpeedSound = s.overSpeedSound ?: i(0x2140a16c)?.takeIf { it in 0..1 },
-            onePedal = s.onePedal ?: i(0x2140a193)?.takeIf { it in 0..1 } ?: i(0x2140a191)?.let { if (it == 6) 1 else null },
+            lasMode = fresh(i(0x2140a104)?.takeIf { it in 1..5 }, s.lasMode),
+            fcwState = fresh(i(0x2140a108)?.takeIf { it in 1..2 }, s.fcwState),
+            overSpeedSound = fresh(i(0x2140a16c)?.takeIf { it in 0..1 }, s.overSpeedSound),
+            onePedal = fresh(i(0x2140a193)?.takeIf { it in 0..1 } ?: i(0x2140a191)?.let { if (it == 6) 1 else null }, s.onePedal),
         )
     }
 

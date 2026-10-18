@@ -116,6 +116,24 @@ class MapCard(private val context: Context, holder: ViewGroup) {
 
     val available: Boolean get() = map != null || preview != null
 
+    private val tileCache by lazy { try { org.osmdroid.tileprovider.modules.SqlTileWriter() } catch (_: Throwable) { null } }
+
+    /**
+     * Tuile sous la voiture déjà en cache (trajet connu) : sans internet, la carte reste utile et
+     * ne cède plus sa place à la consommation (coupure 4G de plus de 15 min constatée le 2026-10-18).
+     */
+    fun hasCachedTiles(location: Location?): Boolean {
+        if (map == null || location == null) return false
+        val z = zoomLevel.toInt()
+        val n = 1 shl z
+        val x = ((location.longitude + 180.0) / 360.0 * n).toInt().coerceIn(0, n - 1)
+        val lat = Math.toRadians(location.latitude)
+        val y = ((1.0 - Math.log(Math.tan(lat) + 1.0 / Math.cos(lat)) / Math.PI) / 2.0 * n).toInt().coerceIn(0, n - 1)
+        return try {
+            tileCache?.exists(TileSourceFactory.MAPNIK, org.osmdroid.util.MapTileIndex.getTileIndex(z, x, y)) == true
+        } catch (_: Throwable) { false }
+    }
+
 
     private fun screenshotPreview(holder: ViewGroup): android.view.View? = try {
         val cl = javaClass.classLoader!!

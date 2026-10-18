@@ -644,6 +644,12 @@ object MediaHub {
     private fun activateSource(pkg: String): Boolean {
         val ctx = appContext ?: return false
         if (pkg == RADIO && legacyRadio) { radioCommand { SaicRadio.play() }; return true }
+        // SWI68 (issue #19) : la commande 0x8001 ne change pas la source et la radio continuait
+        // par-dessus le Bluetooth ; on met d'abord en pause la radio de l'ancien SDK.
+        if (legacyRadio && SaicRadio.ready && SaicRadio.last?.playing == true) {
+            Log.i(TAG, "ancien SDK : radio en pause avant la bascule vers $pkg")
+            radioCommand { SaicRadio.pause() }
+        }
         val (target, type) = when (pkg) {
             "com.android.bluetooth" -> ComponentName("com.saicmotor.media", "com.saicmotor.media.service.MediaService") to 2
             "com.saicmotor.media" -> ComponentName("com.saicmotor.media", "com.saicmotor.media.service.MediaService") to 0

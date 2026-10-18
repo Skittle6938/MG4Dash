@@ -59,6 +59,13 @@ class MainActivity : AppCompatActivity() {
         prefs = Prefs(this)
         app.mg4dash.ui.Themes.apply(this)
         themeSig = app.mg4dash.ui.Themes.signature(this)
+        // Sièges chauffants lus après la construction de l'écran (redémarrage de l'appli) : on reconstruit
+        // pour afficher leurs boutons, au lieu d'attendre un retour sur l'accueil (#19).
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                CarBridge.state.collect { if (!builtHeating && CarBridge.heatingShown(this@MainActivity)) recreate() }
+            }
+        }
         if (prefs.homeStyle == 1) {
             // Accueil épuré : même activité HOME, autre contenu
             simpleMode = true
@@ -648,7 +655,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     /** 0 = carte, 1 = raccourcis, 2 = consommation. */
-    private fun effectiveWidget(): Int = prefs.homeWidget.let { if (it == 0 && offline()) 2 else it }
+    private fun effectiveWidget(): Int = prefs.homeWidget.let {
+        if (it == 0 && offline() && !mapCard.hasCachedTiles(LocationRepo.location.value)) 2 else it
+    }
 
     private fun applyHomeWidget() {
         val mode = effectiveWidget()
