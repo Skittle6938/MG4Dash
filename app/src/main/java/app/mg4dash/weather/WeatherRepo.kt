@@ -30,7 +30,11 @@ object WeatherRepo {
     private const val REFRESH_MS = 30 * 60 * 1000L
     private const val RETRY_MS = 2 * 60 * 1000L
     /** Distance parcourue depuis la dernière météo qui déclenche une nouvelle requête (issue #18). */
-    private const val MOVE_M = 2000f
+    private const val MOVE_M = 5000f
+    /** Distance qui déclenche la mise à jour du seul nom de ville, plus fréquente que la météo. */
+    private const val CITY_MOVE_M = 2000f
+    /** Délai minimal entre deux essais de nom de ville hors requête météo (échecs hors ligne). */
+    private const val CITY_RETRY_MS = 60_000L
     /** Échecs successifs : nouvel essai de plus en plus espacé, jusqu'à RETRY_MS. */
     private val FAIL_DELAYS = longArrayOf(15_000L, 30_000L, 60_000L, RETRY_MS)
 
@@ -124,6 +128,7 @@ object WeatherRepo {
         val from = fetchedAt ?: return
         val cur = app.mg4dash.map.LocationRepo.location.value ?: return
         if (busy || lastFailed) return
+        updateCity(context, cur.latitude, cur.longitude)
         val dist = FloatArray(1)
         android.location.Location.distanceBetween(from.first, from.second, cur.latitude, cur.longitude, dist)
         if (dist[0] >= MOVE_M) {
@@ -132,6 +137,30 @@ object WeatherRepo {
             wake.trySend(Unit)
         }
     }
+
+    /**
+     * Nom de ville seul, sans nouvelle météo : redemandé après CITY_MOVE_M depuis le dernier nom
+     * obtenu, une requête à la fois et au plus une par CITY_RETRY_MS.
+     */
+    private fun updateCity(context: Context, lat: Double, lon: Double) {
+        val at = cityAt ?: return
+        if (cityBusy || System.currentTimeMillis() - cityTry < CITY_RETRY_MS) return
+        val dist = FloatArray(1)
+        android.location.Location.distanceBetween(at.first, at.second, lat, lon, dist)
+        if (dist[0] < CITY_MOVE_M) return
+        cityBusy = true; cityTry = System.currentTimeMillis()
+        scope.launch {
+            try {
+                val name = cityName(context.applicationContext, lat, lon) ?: return@launch
+                _weather.value?.let { if (it.place != name) { _weather.value = it.copy(place = name); Log.i(TAG, "ville : $name") } }
+            } finally { cityBusy = false }
+        }
+    }
+
+    /** Position du dernier nom de ville obtenu (null tant qu'aucun). */
+    @Volatile private var cityAt: Pair<Double, Double>? = null
+    @Volatile private var cityBusy = false
+    @Volatile private var cityTry = 0L
 
     /** Position de la dernière météo réussie (null : ville de repli ou pas encore de météo). */
     @Volatile private var fetchedAt: Pair<Double, Double>? = null
@@ -196,7 +225,8 @@ object WeatherRepo {
         val cached = sp.getString("city_name", null)
         val dist = FloatArray(1)
         android.location.Location.distanceBetween(lat, lon, cLat, cLon, dist)
-        if (cached != null && dist[0] < 5000f && sp.getString("city_lang", "") == lang) return cached
+        if (cityAt == null && cached != null) cityAt = cLat to cLon
+        if (cached != null && dist[0] < CITY_MOVE_M && sp.getString("city_lang", "") == lang) return cached
         return try {
             val url = String.format(Locale.US, "https://nominatim.openstreetmap.org/reverse?format=json&lat=%.4f&lon=%.4f&zoom=10&accept-language=%s", lat, lon, lang)
             val c = URL(url).openConnection() as HttpURLConnection
@@ -206,6 +236,7 @@ object WeatherRepo {
             val a = JSONObject(body).optJSONObject("address") ?: return cached
             val name = listOf("city", "town", "village", "municipality", "county").map { a.optString(it) }.firstOrNull { it.isNotBlank() } ?: return cached
             sp.edit().putString("city_name", name).putFloat("city_lat", lat.toFloat()).putFloat("city_lon", lon.toFloat()).putString("city_lang", lang).apply()
+            cityAt = lat to lon
             name
         } catch (e: Exception) {
             Log.w(TAG, "ville : ${e.message}"); cached
