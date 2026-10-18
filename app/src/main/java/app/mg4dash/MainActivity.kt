@@ -281,13 +281,14 @@ class MainActivity : AppCompatActivity() {
     override fun onPause() {
         super.onPause()
         CarBridge.setForeground(false)
-        if (!simpleMode) mapCard.onPause()
+        if (!simpleMode) { mapCard.onPause(); setMapFullscreen(false) }   // une page ouverte depuis la barre
         handler.removeCallbacksAndMessages(null)
     }
 
-    /** HOME pressé alors qu'on est déjà l'accueil : rien à faire, mais on ne recrée rien. */
+    /** HOME pressé alors qu'on est déjà l'accueil : on ne recrée rien, la carte reprend sa taille de widget. */
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
+        if (!simpleMode) setMapFullscreen(false)
     }
 
     @Deprecated("Accueil : retour sans effet")
@@ -623,6 +624,7 @@ class MainActivity : AppCompatActivity() {
         }
         b.mapZoomIn.setOnClickListener { mapCard.zoom(1) }
         b.mapZoomOut.setOnClickListener { mapCard.zoom(-1) }
+        b.mapFullscreen.setOnClickListener { setMapFullscreen(hiddenForMap == null) }
         b.mapCenter.setOnClickListener { mapCard.recenter(LocationRepo.location.value); tintMapCenter() }
         tintMapCenter()
         // Carte → Consommation → Raccourcis → Carte (issue #6 : la consommation dans le widget carte)
@@ -659,8 +661,42 @@ class MainActivity : AppCompatActivity() {
         if (it == 0 && offline() && !mapCard.hasCachedTiles(LocationRepo.location.value)) 2 else it
     }
 
+    /** Vues masquées par la carte en plein écran, avec leur visibilité d'avant (null : carte en widget). */
+    private var hiddenForMap: List<Pair<View, Int>>? = null
+
+    /** Appelé par la barre : chacun de ses boutons ramène la carte à sa taille de widget. */
+    fun exitMapFullscreen() = setMapFullscreen(false)
+
+    /**
+     * Carte en plein écran (issue #4) : les autres widgets s'effacent, la barre (verticale ou du bas)
+     * reste. HOME, un bouton de la barre ou le même bouton ramènent la carte à sa taille de widget.
+     */
+    private fun setMapFullscreen(on: Boolean) {
+        if (simpleMode || on == (hiddenForMap != null)) return
+        if (on) {
+            // On remonte de la carte jusqu'à la rangée des colonnes en masquant tout ce qui l'entoure
+            val row = (b.climateCard.parent as View).parent as android.view.ViewGroup
+            val hidden = mutableListOf<Pair<View, Int>>()
+            var child: View = b.mapCard
+            while (child !== row) {
+                val parent = child.parent as? android.view.ViewGroup ?: break
+                for (i in 0 until parent.childCount) {
+                    val v = parent.getChildAt(i)
+                    if (v !== child && v.visibility != View.GONE) { hidden += v to v.visibility; v.visibility = View.GONE }
+                }
+                child = parent
+            }
+            hiddenForMap = hidden
+        } else {
+            hiddenForMap?.forEach { (v, vis) -> v.visibility = vis }
+            hiddenForMap = null
+        }
+        b.mapFullscreen.setImageResource(if (on) R.drawable.ic_fullscreen_exit else R.drawable.ic_fullscreen)
+    }
+
     private fun applyHomeWidget() {
         val mode = effectiveWidget()
+        if (mode != 0) setMapFullscreen(false)
         val consumption = mode == 2
         val cc = consumptionCard ?: app.mg4dash.ui.ConsumptionCard(this).also {
             consumptionCard = it

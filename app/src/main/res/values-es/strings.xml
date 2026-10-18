@@ -217,6 +217,7 @@
     <string name="cd_recenter">Recentrar</string>
     <string name="cd_zoom_in">Acercar</string>
     <string name="cd_zoom_out">Alejar</string>
+    <string name="cd_map_fullscreen">Mapa a pantalla completa</string>
     <string name="cardinals">N,NE,E,SE,S,SO,O,NO</string>
     <string name="cd_widget_toggle">Mapa o accesos directos</string>
     <string name="title_shortcuts">ACCESOS DIRECTOS</string>

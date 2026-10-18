@@ -215,6 +215,7 @@ cd_next|Next|Suivant|Weiter|Siguiente|Successivo|Volgende
 cd_recenter|Recenter|Recentrer|Zentrieren|Recentrar|Ricentra|Centreren
 cd_zoom_in|Zoom in|Zoom avant|Vergrößern|Acercar|Ingrandisci|Inzoomen
 cd_zoom_out|Zoom out|Zoom arrière|Verkleinern|Alejar|Riduci|Uitzoomen
+cd_map_fullscreen|Full screen map|Carte en plein écran|Karte im Vollbild|Mapa a pantalla completa|Mappa a schermo intero|Kaart schermvullend
 cardinals|N,NE,E,SE,S,SW,W,NW|N,NE,E,SE,S,SO,O,NO|N,NO,O,SO,S,SW,W,NW|N,NE,E,SE,S,SO,O,NO|N,NE,E,SE,S,SO,O,NO|N,NO,O,ZO,Z,ZW,W,NW
 cd_widget_toggle|Map or shortcuts|Carte ou raccourcis|Karte oder Verknüpfungen|Mapa o accesos directos|Mappa o scorciatoie|Kaart of snelkoppelingen
 title_shortcuts|SHORTCUTS|RACCOURCIS|VERKNÜPFUNGEN|ACCESOS DIRECTOS|SCORCIATOIE|SNELKOPPELINGEN

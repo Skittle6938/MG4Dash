@@ -217,6 +217,7 @@
     <string name="cd_recenter">Recenter</string>
     <string name="cd_zoom_in">Zoom in</string>
     <string name="cd_zoom_out">Zoom out</string>
+    <string name="cd_map_fullscreen">Full screen map</string>
     <string name="cardinals">N,NE,E,SE,S,SW,W,NW</string>
     <string name="cd_widget_toggle">Map or shortcuts</string>
     <string name="title_shortcuts">SHORTCUTS</string>

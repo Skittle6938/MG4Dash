@@ -320,6 +320,8 @@ object Dock {
         Prefs(activity).dockAaTarget?.let { android.content.ComponentName.unflattenFromString(it) }
 
     private fun open(activity: Activity, item: Item, current: Page) {
+        // Carte en plein écran (issue #4) : tout bouton de la barre la ramène à sa taille de widget
+        (activity as? app.mg4dash.MainActivity)?.exitMapFullscreen()
         when (item.label) {
             R.string.dock_aa -> {
                 val custom = customAa(activity)

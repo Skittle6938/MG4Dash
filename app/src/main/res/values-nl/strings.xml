@@ -217,6 +217,7 @@
     <string name="cd_recenter">Centreren</string>
     <string name="cd_zoom_in">Inzoomen</string>
     <string name="cd_zoom_out">Uitzoomen</string>
+    <string name="cd_map_fullscreen">Kaart schermvullend</string>
     <string name="cardinals">N,NO,O,ZO,Z,ZW,W,NW</string>
     <string name="cd_widget_toggle">Kaart of snelkoppelingen</string>
     <string name="title_shortcuts">SNELKOPPELINGEN</string>

@@ -217,6 +217,7 @@
     <string name="cd_recenter">Zentrieren</string>
     <string name="cd_zoom_in">Vergrößern</string>
     <string name="cd_zoom_out">Verkleinern</string>
+    <string name="cd_map_fullscreen">Karte im Vollbild</string>
     <string name="cardinals">N,NO,O,SO,S,SW,W,NW</string>
     <string name="cd_widget_toggle">Karte oder Verknüpfungen</string>
     <string name="title_shortcuts">VERKNÜPFUNGEN</string>

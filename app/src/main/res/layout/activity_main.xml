@@ -469,6 +469,14 @@
                         android:layout_marginTop="8dp"
                         android:contentDescription="@string/cd_zoom_out"
                         android:src="@drawable/ic_minus" />
+
+                    <!-- Carte en plein écran (issue #4), la barre verticale reste -->
+                    <ImageButton
+                        android:id="@+id/mapFullscreen"
+                        style="@style/RoundButton"
+                        android:layout_marginTop="8dp"
+                        android:contentDescription="@string/cd_map_fullscreen"
+                        android:src="@drawable/ic_fullscreen" />
                 </LinearLayout>
 
                 <TextView

@@ -217,6 +217,7 @@
     <string name="cd_recenter">Ricentra</string>
     <string name="cd_zoom_in">Ingrandisci</string>
     <string name="cd_zoom_out">Riduci</string>
+    <string name="cd_map_fullscreen">Mappa a schermo intero</string>
     <string name="cardinals">N,NE,E,SE,S,SO,O,NO</string>
     <string name="cd_widget_toggle">Mappa o scorciatoie</string>
     <string name="title_shortcuts">SCORCIATOIE</string>
