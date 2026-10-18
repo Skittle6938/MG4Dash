@@ -184,7 +184,7 @@ class SettingsActivity : AppCompatActivity() {
                     val notes = ScrollView(this@SettingsActivity).apply {
                         setPadding(dp(24), dp(8), dp(24), 0)
                         addView(TextView(this@SettingsActivity).apply {
-                            text = plainNotes(newer.notes); setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f)
+                            text = app.mg4dash.system.Updater.plainNotes(newer.notes); setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f)
                             setTextColor(color(R.color.text_value)); setLineSpacing(0f, 1.15f)
                         })
                     }
@@ -331,7 +331,7 @@ class SettingsActivity : AppCompatActivity() {
                 showState()
                 AlertDialog.Builder(this@SettingsActivity)
                     .setTitle(getString(R.string.st_rd_available, r.version))
-                    .setMessage(plainNotes(r.notes))
+                    .setMessage(app.mg4dash.system.Updater.plainNotes(r.notes))
                     .setPositiveButton(R.string.st_update_install) { _, _ ->
                         lifecycleScope.launch {
                             try {
@@ -416,11 +416,6 @@ class SettingsActivity : AppCompatActivity() {
     }
 
     /** Notes de release GitHub (Markdown) en texte lisible. */
-    private fun plainNotes(md: String): String = md
-        .replace("**", "").replace("`", "")
-        .lines().joinToString("\n") { l -> l.trim().let { if (it.startsWith("- ")) "•  " + it.drop(2) else it } }
-        .trim()
-
     private fun onThemeChanged() {
         app.mg4dash.ui.Themes.publish(this)
         recreate()

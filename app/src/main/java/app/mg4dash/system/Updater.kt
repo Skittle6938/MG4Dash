@@ -8,6 +8,7 @@ import android.content.pm.PackageInstaller
 import app.mg4dash.BuildConfig
 import app.mg4dash.MainActivity
 import org.json.JSONArray
+import org.json.JSONObject
 import java.io.File
 import java.net.HttpURLConnection
 import java.net.URL
@@ -21,36 +22,60 @@ import java.net.URL
 object Updater {
     private const val TAG = "MàJ"
     private const val API = "https://api.github.com/repos/Skittle6938/MG4Dash/releases?per_page=10"
+    /** Dernière release non bêta (GitHub ignore les pré-versions et les brouillons). */
+    private const val API_STABLE = "https://api.github.com/repos/Skittle6938/MG4Dash/releases/latest"
 
     data class Release(val version: String, val url: String, val size: Long, val notes: String)
 
     /** Dernière release publiée (pré-versions comprises si [beta]), ou null s'il n'y en a pas. Réseau : hors du fil principal. */
     fun latest(beta: Boolean = true, api: String = API): Release? {
+        val arr = JSONArray(get(api))
+        for (i in 0 until arr.length()) {
+            val r = arr.getJSONObject(i)
+            if (r.optBoolean("draft")) continue
+            if (!beta && r.optBoolean("prerelease")) continue
+            parse(r)?.let { return it }
+        }
+        return null
+    }
+
+    /** Dernière release non bêta, même plus ancienne que les dix dernières pré-versions. Réseau : hors du fil principal. */
+    fun latestStable(): Release? = parse(JSONObject(get(API_STABLE)))
+
+    private fun get(api: String): String {
         val c = URL(api).openConnection() as HttpURLConnection
         try {
             c.connectTimeout = 8000; c.readTimeout = 15000
             c.setRequestProperty("Accept", "application/vnd.github+json")
             c.setRequestProperty("User-Agent", "MG4Dash")
             if (c.responseCode != 200) throw IllegalStateException("HTTP ${c.responseCode}")
-            val arr = JSONArray(c.inputStream.bufferedReader().use { it.readText() })
-            for (i in 0 until arr.length()) {
-                val r = arr.getJSONObject(i)
-                if (r.optBoolean("draft")) continue
-                if (!beta && r.optBoolean("prerelease")) continue
-                val assets = r.optJSONArray("assets") ?: continue
-                for (j in 0 until assets.length()) {
-                    val a = assets.getJSONObject(j)
-                    if (a.getString("name").endsWith(".apk")) {
-                        return Release(r.getString("tag_name").trimStart('v'), a.getString("browser_download_url"),
-                            a.optLong("size"), r.optString("body"))
-                    }
-                }
-            }
-            return null
+            return c.inputStream.bufferedReader().use { it.readText() }
         } finally { c.disconnect() }
     }
 
-    /** true si [remote] est plus récente que la version installée (comparaison numérique 0.8.2 < 0.8.10). */
+    /** Release avec son APK, ou null si elle n'en a pas. */
+    private fun parse(r: JSONObject): Release? {
+        val assets = r.optJSONArray("assets") ?: return null
+        for (j in 0 until assets.length()) {
+            val a = assets.getJSONObject(j)
+            if (a.getString("name").endsWith(".apk")) {
+                return Release(r.getString("tag_name").trimStart('v'), a.getString("browser_download_url"),
+                    a.optLong("size"), r.optString("body"))
+            }
+        }
+        return null
+    }
+
+    /** Notes de release en texte simple (le markdown de GitHub sans gras ni code, puces « • »). */
+    fun plainNotes(md: String): String = md
+        .replace("**", "").replace("`", "")
+        .lines().joinToString("\n") { l -> l.trim().let { if (it.startsWith("- ")) "•  " + it.drop(2) else it } }
+        .trim()
+
+    /**
+     * true si [remote] est plus récente que la version installée (comparaison numérique 0.8.2 < 0.8.10).
+     * À numéros égaux, la version finale l'emporte sur la bêta (1.1.0-beta < 1.1.0).
+     */
     fun isNewer(remote: String, local: String = BuildConfig.VERSION_NAME): Boolean {
         fun parts(v: String) = v.split('.', '-').map { it.toIntOrNull() ?: 0 }
         val a = parts(remote); val b = parts(local)
@@ -58,7 +83,7 @@ object Updater {
             val x = a.getOrElse(i) { 0 }; val y = b.getOrElse(i) { 0 }
             if (x != y) return x > y
         }
-        return false
+        return !remote.contains('-') && local.contains('-')
     }
 
     /** Télécharge l'APK ; [progress] reçoit 0..100. Réseau : hors du fil principal. */

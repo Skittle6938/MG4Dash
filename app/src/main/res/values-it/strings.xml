@@ -302,6 +302,10 @@
     <string name="st_compat_open">Apri nel browser</string>
     <string name="st_compat_no_browser">Nessun browser su questa unità: scansiona il codice QR con il telefono.</string>
     <string name="st_update_beta">Includi versioni beta: %1$s</string>
+    <string name="upd_title">NUOVA VERSIONE DISPONIBILE</string>
+    <string name="upd_skip">Non avvisare più per questa versione</string>
+    <string name="upd_later">Più tardi</string>
+    <string name="upd_now">Aggiorna</string>
     <string name="dock_cp">CarPlay</string>
     <string name="dock_cp_stock">CarPlay (originale)</string>
     <string name="dock_other_app">Altra app…</string>

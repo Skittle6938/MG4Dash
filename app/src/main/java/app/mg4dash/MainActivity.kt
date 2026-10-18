@@ -252,6 +252,7 @@ class MainActivity : AppCompatActivity() {
         if ((prefs.homeStyle == 1) != simpleMode || (prefs.homeStyle == 2) != mapLayout || Dock.vertical(this) != builtVertical || prefs.hideTitles != builtHideTitles ||
             CarBridge.heatingShown(this) != builtHeating ||
             app.mg4dash.ui.Themes.signature(this) != themeSig) { recreate(); return }
+        app.mg4dash.ui.UpdatePrompt.maybeShow(this)
         if (simpleMode) { simple?.onResume(); Fullscreen.apply(this); return }
         mapCard.onResume()
         if (prefs.homeWidget == 1) renderShortcuts()

@@ -150,6 +150,11 @@ class Prefs(context: Context) {
         get() = sp.getBoolean("update_beta", true)
         set(v) = sp.edit().putBoolean("update_beta", v).apply()
 
+    /** Release non bêta pour laquelle l'utilisateur a choisi « ne plus notifier » au démarrage (version, ex. 1.1.0). */
+    var updateSkipped: String?
+        get() = sp.getString("update_skipped", null)
+        set(v) = sp.edit().putString("update_skipped", v).apply()
+
     var energyLog: Boolean
         get() = sp.getBoolean("energy_log", true)
         set(v) = sp.edit().putBoolean("energy_log", v).apply()

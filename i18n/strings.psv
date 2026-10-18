@@ -300,6 +300,10 @@ st_compat_scan|Scan with your phone to open a pre-filled GitHub issue. Nothing i
 st_compat_open|Open in browser|Ouvrir dans le navigateur|Im Browser öffnen|Abrir en el navegador|Apri nel browser|Openen in browser
 st_compat_no_browser|No browser on this head unit: scan the QR code with your phone.|Pas de navigateur sur cet autoradio : scannez le QR code avec votre téléphone.|Kein Browser auf diesem Gerät: QR-Code mit dem Telefon scannen.|No hay navegador en esta unidad: escanee el código QR con su teléfono.|Nessun browser su questa unità: scansiona il codice QR con il telefono.|Geen browser op dit toestel: scan de QR-code met je telefoon.
 st_update_beta|Include beta versions: %1$s|Inclure les versions bêta : %1$s|Beta-Versionen einbeziehen: %1$s|Incluir versiones beta: %1$s|Includi versioni beta: %1$s|Bètaversies meenemen: %1$s
+upd_title|NEW VERSION AVAILABLE|NOUVELLE VERSION DISPONIBLE|NEUE VERSION VERFÜGBAR|NUEVA VERSIÓN DISPONIBLE|NUOVA VERSIONE DISPONIBILE|NIEUWE VERSIE BESCHIKBAAR
+upd_skip|Don't notify me again for this release|Ne plus notifier cette release|Für diese Version nicht mehr melden|No volver a avisar de esta versión|Non avvisare più per questa versione|Niet meer melden voor deze versie
+upd_later|Later|Plus tard|Später|Más tarde|Più tardi|Later
+upd_now|Update|Mettre à jour|Aktualisieren|Actualizar|Aggiorna|Bijwerken
 dock_cp|CarPlay|CarPlay|CarPlay|CarPlay|CarPlay|CarPlay
 dock_cp_stock|CarPlay (original)|CarPlay (d'origine)|CarPlay (original)|CarPlay (original)|CarPlay (originale)|CarPlay (origineel)
 dock_other_app|Another app…|Autre application…|Andere App…|Otra aplicación…|Altra app…|Andere app…

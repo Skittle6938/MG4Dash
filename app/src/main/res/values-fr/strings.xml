@@ -302,6 +302,10 @@
     <string name="st_compat_open">Ouvrir dans le navigateur</string>
     <string name="st_compat_no_browser">Pas de navigateur sur cet autoradio : scannez le QR code avec votre téléphone.</string>
     <string name="st_update_beta">Inclure les versions bêta : %1$s</string>
+    <string name="upd_title">NOUVELLE VERSION DISPONIBLE</string>
+    <string name="upd_skip">Ne plus notifier cette release</string>
+    <string name="upd_later">Plus tard</string>
+    <string name="upd_now">Mettre à jour</string>
     <string name="dock_cp">CarPlay</string>
     <string name="dock_cp_stock">CarPlay (d\'origine)</string>
     <string name="dock_other_app">Autre application…</string>
