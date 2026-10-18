@@ -228,6 +228,10 @@ The SAIC launcher package (`com.saicmotor.launcher`) is never disabled: its serv
 - [MG4_Simple_Launcher](https://github.com/Tommasov/MG4_Simple_Launcher) (Tommasov): notes on the vehicle adapter service of other firmwares.
 - Maps © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors (osmdroid), weather by [Open-Meteo](https://open-meteo.com/).
 
+## Support
+
+MG4Dash is free and will stay free. If it is useful to you and you want to help cover the AI subscription and the time spent on it, you can leave a few euros here: [LIEN_DE_DON](LIEN_DE_DON). Entirely optional, thank you!
+
 ## Licence
 
 MG4Dash is free software under the [GNU General Public License v3](COPYING) or later. This applies to every published version, including the releases before 0.10.0. Parts of the firmware detection and of the SWI68 / SWI165 / SWI133 climate code are adapted from [MG4Control](https://github.com/SliDeeN/MG4Control) (GPL v3; earlier MG4Control code under the MIT licence, notice kept in [licenses/MG4Control-MIT.txt](licenses/MG4Control-MIT.txt)).
