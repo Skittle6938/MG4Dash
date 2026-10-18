@@ -230,7 +230,7 @@ The SAIC launcher package (`com.saicmotor.launcher`) is never disabled: its serv
 
 ## Support
 
-MG4Dash is free and will stay free. If it is useful to you and you want to help cover the AI subscription and the time spent on it, you can leave a few euros here: [LIEN_DE_DON](LIEN_DE_DON). Entirely optional, thank you!
+MG4Dash is free and will stay free. If it is useful to you and you want to help cover the AI subscription and the time spent on it, you can leave a few euros here: [Ko-fi](https://ko-fi.com/PSEUDO_KOFI). Entirely optional, thank you!
 
 ## Licence
 
