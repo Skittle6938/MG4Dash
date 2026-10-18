@@ -208,7 +208,16 @@ object Dock {
                 icon.setImageResource(item.icon)
                 icon.setColorFilter(color(if (selected) R.color.accent_action else R.color.text_sub))
             }
-            cell.addView(icon, android.widget.FrameLayout.LayoutParams(kit.dp(34), kit.dp(34), android.view.Gravity.CENTER))
+            // Véhicule et Accueil sont des dessins plus plats que les autres (et Android Auto plus haut) : retaillés pour
+            // un vide visuel égal entre les icônes, et recentrés (voiture tracée de y=5 à 21, maison de 3 à 20
+            // dans leur cadre de 24) pour que le dessin, et pas seulement son cadre, soit au centre.
+            val size = when { item.label == R.string.dock_vehicle -> 38; item.label == R.string.dock_home -> 37; projection -> 32; else -> 34 }
+            icon.translationY = when (item.label) {
+                R.string.dock_vehicle -> -kit.dp(size) / 24f
+                R.string.dock_home -> kit.dp(size) / 48f
+                else -> 0f
+            }
+            cell.addView(icon, android.widget.FrameLayout.LayoutParams(kit.dp(size), kit.dp(size), android.view.Gravity.CENTER))
             when (item.label) {
                 R.string.dock_settings -> {
                     // Toucher simple (après le délai du double toucher) / double toucher / appui long
