@@ -30,7 +30,7 @@ object WeatherRepo {
     private const val REFRESH_MS = 30 * 60 * 1000L
     private const val RETRY_MS = 2 * 60 * 1000L
     /** Distance parcourue depuis la dernière météo qui déclenche une nouvelle requête (issue #18). */
-    private const val MOVE_M = 5000f
+    private const val MOVE_M = 2000f
     /** Échecs successifs : nouvel essai de plus en plus espacé, jusqu'à RETRY_MS. */
     private val FAIL_DELAYS = longArrayOf(15_000L, 30_000L, 60_000L, RETRY_MS)
 
