@@ -365,6 +365,11 @@ object CarBridge {
             lasMode = fresh(i(0x2140a104)?.takeIf { it in 1..5 }, s.lasMode),
             fcwState = fresh(i(0x2140a108)?.takeIf { it in 1..2 }, s.fcwState),
             overSpeedSound = fresh(i(0x2140a16c)?.takeIf { it in 0..1 }, s.overSpeedSound),
+            // Vitesse sans service général (SWI68, #19) : PERF_VEHICLE_SPEED, comme MG4Control sur
+            // tous les firmwares ; déjà en km/h chez SAIC malgré la spec AOSP, négative en marche arrière.
+            speedKmh = if (general != null) s.speedKmh else
+                (CarProps.readFloatArea(0x11600207, 0x1000000) ?: CarProps.readFloatArea(0x11600207, 0))
+                    ?.takeIf { !it.isNaN() }?.let { Math.abs(it) }?.takeIf { it < 300f } ?: s.speedKmh,
             onePedal = fresh(i(0x2140a193)?.takeIf { it in 0..1 } ?: i(0x2140a191)?.let { if (it == 6) 1 else null }, s.onePedal),
         )
     }
