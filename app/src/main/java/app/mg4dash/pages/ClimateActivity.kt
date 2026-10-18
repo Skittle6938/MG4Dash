@@ -47,7 +47,10 @@ class ClimateActivity : PageActivity() {
 
         // ── Température ──
         val tPanel = kit.panel(getString(R.string.cl_driver_temp))
-        temp = kit.text("—", 120f, light = true).apply { gravity = Gravity.CENTER }
+        temp = kit.text("—", 120f, light = true).apply {
+            gravity = Gravity.CENTER
+            setOnLongClickListener { app.mg4dash.ui.TempCalibration.show(this@ClimateActivity) { render(app.mg4dash.car.CarBridge.state.value) }; true }
+        }
         val tRow = kit.row().apply { gravity = Gravity.CENTER }
         val down = kit.roundButton(R.drawable.ic_minus, 96, R.color.accent_cold) {}
         val up = kit.roundButton(R.drawable.ic_plus, 96, R.color.accent_heat) {}

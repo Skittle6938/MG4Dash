@@ -401,6 +401,8 @@ class MainActivity : AppCompatActivity() {
             }
         }
         b.temp.setOnClickListener { startActivity(Intent(this, ClimateActivity::class.java)) }
+        // Appui long : calibration de la température affichée
+        b.temp.setOnLongClickListener { app.mg4dash.ui.TempCalibration.show(this) { renderClimate(CarBridge.state.value) }; true }
     }
 
     /** Appui = un cran ; appui maintenu = répétition toutes les 350 ms. */

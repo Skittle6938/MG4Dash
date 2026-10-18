@@ -180,12 +180,17 @@ data class VehicleState(
 
         fun onOff(v: Int?): String = when (v) { 0 -> Tr.s(R.string.st_off); 1 -> Tr.s(R.string.st_on); null -> "—"; else -> Tr.s(R.string.value_n, v) }
 
+        /** Calibration de la consigne affichée (appui long sur la température), réglée au démarrage. */
+        @Volatile var tempOffset = 0
+
+        /** LO / HI d'après la consigne de la voiture ; le chiffre affiché inclut la calibration. */
         fun tempLabel(t: Float?): String = when {
             t == null || t.isNaN() || t <= 0f -> "—"
             t <= TEMP_MIN -> "LO"
             t >= TEMP_MAX -> "HI"
-            t % 1f == 0f -> "${t.toInt()}°"
-            else -> String.format(Locale.getDefault(), "%.1f°", t)
+            else -> (t + tempOffset).let { d ->
+                if (d % 1f == 0f) "${d.toInt()}°" else String.format(Locale.getDefault(), "%.1f°", d)
+            }
         }
     }
 }

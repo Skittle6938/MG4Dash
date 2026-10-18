@@ -35,8 +35,14 @@ object WeatherRepo {
     private const val CITY_MOVE_M = 2000f
     /** Délai minimal entre deux essais de nom de ville hors requête météo (échecs hors ligne). */
     private const val CITY_RETRY_MS = 60_000L
-    /** Échecs successifs : nouvel essai de plus en plus espacé, jusqu'à RETRY_MS. */
-    private val FAIL_DELAYS = longArrayOf(15_000L, 30_000L, 60_000L, RETRY_MS)
+    /**
+     * Échecs successifs : nouvel essai rapide, plafonné à 30 s. La carte attend le retour d'internet
+     * pour réapparaître, et sur la voiture le réseau T-box reste « disponible » pendant une coupure
+     * 4G : aucun rappel réseau ne réveille alors la boucle (constaté le 2026-10-18).
+     */
+    private val FAIL_DELAYS = longArrayOf(15_000L, 30_000L)
+    /** Coupure plus courte que ça : la carte reste affichée (tuiles en cache), pas de bascule. */
+    private const val OFFLINE_GRACE_MS = 60_000L
 
     data class Hour(val label: String, val code: Int, val tempC: Int)
     data class Day(val label: String, val code: Int, val minC: Int, val maxC: Int)
@@ -79,6 +85,7 @@ object WeatherRepo {
                     Log.w(TAG, "échec : ${e.javaClass.simpleName} ${e.message}"); false
                 }
                 lastFailed = !ok
+                failingSince = if (ok) 0L else failingSince.takeIf { it != 0L } ?: System.currentTimeMillis()
                 // Échec (pas de réseau) : on réessaie vite. Réussi mais sans position ou sans nom de
                 // ville : on réessaie aussi, plus calmement, au lieu d'attendre 30 min.
                 val wait = when {
@@ -94,8 +101,13 @@ object WeatherRepo {
     }
 
     @Volatile private var lastFailed = false
-    /** Dernière requête météo en échec (pas de connexion réelle), même si Android voit un réseau. */
-    val offline: Boolean get() = lastFailed
+    /** Début de la série d'échecs en cours (0 : dernière requête réussie). */
+    @Volatile private var failingSince = 0L
+    /**
+     * Requêtes météo en échec depuis plus d'une minute (pas de connexion réelle), même si Android
+     * voit un réseau. Une coupure brève (tunnel, zone blanche) ne fait plus disparaître la carte.
+     */
+    val offline: Boolean get() = failingSince != 0L && System.currentTimeMillis() - failingSince > OFFLINE_GRACE_MS
     @Volatile private var missingCity = false
     private val wake = kotlinx.coroutines.channels.Channel<Unit>(kotlinx.coroutines.channels.Channel.CONFLATED)
 

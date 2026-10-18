@@ -196,6 +196,9 @@
     <string name="st_replace_msg">The SAIC home screen will be disabled and MG4Dash will become the home screen. Maintenance mode restores it at any time. Continue?</string>
     <string name="st_replace_btn">Replace</string>
     <string name="cancel">Cancel</string>
+    <string name="temp_cal_title">Temperature calibration</string>
+    <string name="temp_cal_preview">Displayed: %1$s</string>
+    <string name="temp_cal_reset">Reset</string>
     <string name="st_valet_msg">The original SAIC launcher will become the default home screen again. Continue?</string>
     <string name="activate">Activate</string>
     <string name="st_home_changed">Home screen changed</string>

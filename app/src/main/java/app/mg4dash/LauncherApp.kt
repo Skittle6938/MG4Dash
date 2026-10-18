@@ -28,6 +28,7 @@ class LauncherApp : Application() {
                 if (fresh) Log.i("App", "première installation : style Complet, plein écran, barre verticale")
             }
         }
+        app.mg4dash.car.VehicleState.tempOffset = app.mg4dash.system.Prefs(this).tempOffset
         app.mg4dash.system.HomeSwitcher.init(this)
         CarBridge.start(this)
         app.mg4dash.phone.PhoneBookAuto.start(this)

@@ -196,6 +196,9 @@
     <string name="st_replace_msg">Der SAIC-Startbildschirm wird deaktiviert und MG4Dash wird zum Startbildschirm. Der Wartungsmodus stellt ihn jederzeit wieder her. Fortfahren?</string>
     <string name="st_replace_btn">Ersetzen</string>
     <string name="cancel">Abbrechen</string>
+    <string name="temp_cal_title">Temperaturkalibrierung</string>
+    <string name="temp_cal_preview">Angezeigt: %1$s</string>
+    <string name="temp_cal_reset">Zurücksetzen</string>
     <string name="st_valet_msg">Der originale SAIC-Launcher wird wieder Standard-Startbildschirm. Fortfahren?</string>
     <string name="activate">Aktivieren</string>
     <string name="st_home_changed">Startbildschirm geändert</string>

@@ -196,6 +196,9 @@
     <string name="st_replace_msg">La schermata home SAIC verrà disattivata e MG4Dash diventerà la home. La modalità manutenzione la ripristina in qualsiasi momento. Continuare?</string>
     <string name="st_replace_btn">Sostituisci</string>
     <string name="cancel">Annulla</string>
+    <string name="temp_cal_title">Calibrazione della temperatura</string>
+    <string name="temp_cal_preview">Visualizzato: %1$s</string>
+    <string name="temp_cal_reset">Azzera</string>
     <string name="st_valet_msg">Il launcher SAIC originale tornerà la schermata home predefinita. Continuare?</string>
     <string name="activate">Attiva</string>
     <string name="st_home_changed">Home modificata</string>

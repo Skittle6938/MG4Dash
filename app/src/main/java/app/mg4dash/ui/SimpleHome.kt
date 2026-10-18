@@ -185,6 +185,7 @@ class SimpleHome(private val a: AppCompatActivity) {
         climateCard.addView(r2, kit.lp(-1, -2, t = 8))
 
         temp.setOnClickListener { a.startActivity(Intent(a, ClimateActivity::class.java)) }
+        temp.setOnLongClickListener { TempCalibration.show(a) { renderClimate(CarBridge.state.value) }; true }
         return climateCard
     }
 

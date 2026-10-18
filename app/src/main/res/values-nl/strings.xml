@@ -196,6 +196,9 @@
     <string name="st_replace_msg">Het SAIC-startscherm wordt uitgeschakeld en MG4Dash wordt het startscherm. De onderhoudsmodus herstelt het op elk moment. Doorgaan?</string>
     <string name="st_replace_btn">Vervangen</string>
     <string name="cancel">Annuleren</string>
+    <string name="temp_cal_title">Temperatuurkalibratie</string>
+    <string name="temp_cal_preview">Weergegeven: %1$s</string>
+    <string name="temp_cal_reset">Herstellen</string>
     <string name="st_valet_msg">De originele SAIC-launcher wordt weer het standaard startscherm. Doorgaan?</string>
     <string name="activate">Activeren</string>
     <string name="st_home_changed">Startscherm gewijzigd</string>

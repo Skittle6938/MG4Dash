@@ -106,6 +106,24 @@ object MediaHub {
     /** Source choisie à la main sur la carte (puces RADIO / USB-BT), jusqu'à ce que la voiture change de source. */
     @Volatile private var pinnedPkg: String? = null
 
+    /**
+     * La voiture annonce aussi Android Auto comme source quand seul le guidage GPS parle par-dessus
+     * la radio (constaté le 2026-10-18) : on garde la source d'avant tant que le lecteur Android Auto
+     * ne joue pas vraiment.
+     */
+    @Volatile private var aaUnconfirmed = false
+    @Volatile private var sourceBeforeAa: String? = null
+
+    /** Source réelle : celle de la voiture, sauf une bascule Android Auto due au seul guidage. */
+    private fun effectiveSource(candidates: List<MediaController> = lastCandidates): String? {
+        if (sourcePkg != AA_MBS || !aaUnconfirmed) return sourcePkg
+        val aaPlaying = candidates.any { isAndroidAuto(it.packageName) && it.playbackState?.state == PlaybackState.STATE_PLAYING }
+        if (!aaPlaying) return sourceBeforeAa
+        Log.i(TAG, "Android Auto joue un média : la source Android Auto est confirmée")
+        aaUnconfirmed = false; sourceBeforeAa = null; pinnedPkg = null
+        return sourcePkg
+    }
+
     /** Affiche la source donnée sans ouvrir son appli. */
     fun select(pkg: String) {
         if (BuildConfig.MOCK) return
@@ -220,7 +238,13 @@ object MediaHub {
                             else -> pkg
                         }
                         Log.i(TAG, "source audio : $pkg ($type) → $src")
-                        main.post { sourcePkg = src; pinnedPkg = null; reevaluate() }
+                        main.post {
+                            if (src == AA_MBS) {
+                                // Le choix manuel reste tant qu'Android Auto ne joue pas (guidage seul)
+                                if (sourcePkg != AA_MBS) { aaUnconfirmed = true; sourceBeforeAa = sourcePkg }
+                            } else { aaUnconfirmed = false; sourceBeforeAa = null; pinnedPkg = null }
+                            sourcePkg = src; reevaluate()
+                        }
                         null
                     }
                     "hashCode" -> System.identityHashCode(proxy)
@@ -333,11 +357,12 @@ object MediaHub {
             if (watched.add(c.sessionToken)) c.registerCallback(callback, main)
         }
         val playing = candidates.firstOrNull { it.playbackState?.state == PlaybackState.STATE_PLAYING }
+        val source = effectiveSource(candidates)
         // Radio de l'ancien SDK : aucun contrôleur, on l'affiche d'après la source de la voiture, le
         // choix sur la carte, ou parce qu'elle joue alors qu'aucun autre lecteur ne joue.
         val showRadio = legacyRadio && SaicRadio.ready && when (pinnedPkg) {
             RADIO -> true
-            null -> sourcePkg == RADIO || (sourcePkg == null && playing == null && SaicRadio.last?.playing == true)
+            null -> source == RADIO || (source == null && playing == null && SaicRadio.last?.playing == true)
             else -> false
         }
         if (showRadio != radioShown) Log.i(TAG, "lecteur affiché : ${if (showRadio) "radio (service SAIC)" else "session média"}")
@@ -351,7 +376,7 @@ object MediaHub {
                 ?: browserControllers[pkg] ?: all.firstOrNull()
         }
         val pinned = pinnedPkg?.let { bestFor(it) }
-        val fromSource = sourcePkg?.let { bestFor(it) }
+        val fromSource = source?.let { bestFor(it) }
         val chosen = pinned
             ?: fromSource
             ?: playing
@@ -525,7 +550,7 @@ object MediaHub {
         // La voiture est sur une autre source (ex. FM) : un « lecture » envoyé au Bluetooth ou à
         // l'USB est ignoré. On demande d'abord à la voiture de changer de source (comme le launcher
         // d'origine), puis on lance la lecture si elle n'a pas démarré toute seule.
-        if (!playing && !isAndroidAuto(c.packageName) && sourcePkg != null && sourcePkg != c.packageName &&
+        if (!playing && !isAndroidAuto(c.packageName) && effectiveSource().let { it != null && it != c.packageName } &&
             activateSource(c.packageName)) {
             main.postDelayed({
                 current?.takeIf { it.packageName == c.packageName && it.playbackState?.state != PlaybackState.STATE_PLAYING }

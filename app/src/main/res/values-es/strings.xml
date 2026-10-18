@@ -196,6 +196,9 @@
     <string name="st_replace_msg">La pantalla de inicio SAIC se desactivará y MG4Dash será la pantalla de inicio. El modo mantenimiento la restaura en cualquier momento. ¿Continuar?</string>
     <string name="st_replace_btn">Sustituir</string>
     <string name="cancel">Cancelar</string>
+    <string name="temp_cal_title">Calibración de la temperatura</string>
+    <string name="temp_cal_preview">Mostrado: %1$s</string>
+    <string name="temp_cal_reset">Restablecer</string>
     <string name="st_valet_msg">El launcher SAIC original volverá a ser la pantalla de inicio predeterminada. ¿Continuar?</string>
     <string name="activate">Activar</string>
     <string name="st_home_changed">Inicio cambiado</string>

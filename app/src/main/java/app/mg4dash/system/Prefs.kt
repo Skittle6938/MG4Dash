@@ -34,6 +34,11 @@ class Prefs(context: Context) {
         get() = sp.getInt("pressure_unit", 0)
         set(v) = sp.edit().putInt("pressure_unit", v).apply()
 
+    /** Calibration de la consigne affichée, en degrés (−5 à +5) : affichage seulement, la voiture reçoit sa valeur. */
+    var tempOffset: Int
+        get() = sp.getInt("temp_offset", 0).coerceIn(-5, 5)
+        set(v) = sp.edit().putInt("temp_offset", v.coerceIn(-5, 5)).apply()
+
     /** Carte : zoom par défaut (14 à 18) et thème (0 = comme l'appli, 1 = clair, 2 = sombre). */
     var mapZoom: Int
         get() = sp.getInt("map_zoom", 16)

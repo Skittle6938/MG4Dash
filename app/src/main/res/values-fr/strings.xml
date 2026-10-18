@@ -196,6 +196,9 @@
     <string name="st_replace_msg">L\'écran d\'accueil SAIC sera désactivé et MG4Dash deviendra l\'accueil. Le mode Entretien le rétablit à tout moment. Continuer ?</string>
     <string name="st_replace_btn">Remplacer</string>
     <string name="cancel">Annuler</string>
+    <string name="temp_cal_title">Calibration de la température</string>
+    <string name="temp_cal_preview">Affiché : %1$s</string>
+    <string name="temp_cal_reset">Remettre à 0</string>
     <string name="st_valet_msg">Le launcher SAIC d\'origine va redevenir l\'écran d\'accueil par défaut. Continuer ?</string>
     <string name="activate">Activer</string>
     <string name="st_home_changed">Accueil modifié</string>
