@@ -325,8 +325,10 @@ object CarBridge {
         val dc = i(0x2140f43f)?.takeIf { it != 0 && it != 1023 } != null
         val ac = i(0x2140f43e)?.takeIf { it != 0 && it != 1023 } != null
         val status = when { raw != null && raw in 1..15 -> raw; dc || ac -> 7; else -> 0 }
-        // Mode de conduite (propriété) : 0 neige, 1 éco, 3 normal, 4 sport, 7 personnalisé → échelle A9
-        val dm = when (i(0x2140a17c)) { 0 -> 6; 1 -> 2; 3 -> 3; 4 -> 4; 7 -> 7; else -> null }
+        // Mode de conduite (propriété) → échelle A9 (2 éco, 3 normal, 4 sport, 6 neige, 7 personnalisé).
+        // SWI68 donne directement cette échelle (appli Réglages d'origine : 6, 2, 3, 4, 7) ; la table
+        // 0 neige / 1 éco reste pour les firmwares qui l'utilisent. Les valeurs ne se chevauchent pas.
+        val dm = when (val m = i(0x2140a17c)) { 2, 3, 4, 6, 7 -> m; 0 -> 6; 1 -> 2; else -> null }
         // Sans service EV, les propriétés sont la seule source : on les reprend à chaque passage
         // (avant, la première valeur lue restait affichée : % et autonomie figés, issue #13).
         val noEv = ev == null
