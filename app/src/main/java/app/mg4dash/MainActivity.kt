@@ -761,12 +761,12 @@ class MainActivity : AppCompatActivity() {
         row.addView(left, LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f))
         row.addView(right, LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f))
         g.addView(row, LinearLayout.LayoutParams(-1, -2).apply { topMargin = (12 * d).toInt() })
-        // Détail en petit : tension, courant (vert en récupération), température batterie (issue #6)
+        // Détail : tension, courant (vert en récupération), centré dans la place restante sous les chiffres
         powerExtra = TextView(this).apply {
-            setTextColor(color(R.color.text_sub)); setTextSize(TypedValue.COMPLEX_UNIT_SP, 17f); gravity = Gravity.CENTER
+            setTextColor(color(R.color.text_sub)); setTextSize(TypedValue.COMPLEX_UNIT_SP, 24f); gravity = Gravity.CENTER
             fontFeatureSettings = "tnum"
         }
-        g.addView(powerExtra, LinearLayout.LayoutParams(-1, -2).apply { topMargin = (6 * d).toInt() })
+        g.addView(powerExtra, LinearLayout.LayoutParams(-1, 0, 1f))
     }
 
     private var powerExtra: TextView? = null
