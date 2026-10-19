@@ -16,15 +16,15 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 /**
- * Mode chien (à la manière de Tesla, suite de l'issue #26) : la voiture reste allumée, la clim tourne
+ * Clim maintenue (suite de l'issue #26) : la voiture reste allumée, la clim tourne
  * avec ses réglages actuels et un grand écran montre la température intérieure aux passants.
  * La pré-climatisation programmée a été abandonnée : voiture éteinte, l'autoradio ne peut ni la
  * rallumer ni lancer la clim (essais du 2026-10-19).
  * Fin : durée maximale atteinte ou batterie sous 20 % (clim arrêtée et voiture éteinte), voiture qui
  * roule, ou arrêt par le conducteur (la voiture et la clim restent alors comme elles sont).
  */
-object DogMode {
-    private const val TAG = "MG4L.DogMode"
+object ClimateHold {
+    private const val TAG = "MG4L.ClimateHold"
     const val MIN_SOC = 20
     /** Durées maximales proposées, en minutes ; 0 = illimitée (seul le seuil de batterie arrête le mode). */
     val DURATIONS = intArrayOf(0, 15, 30, 60, 120, 240, 480)
@@ -47,10 +47,10 @@ object DogMode {
         stop("nouveau départ")
         val now = SystemClock.elapsedRealtime()
         _status.value = Status(Phase.ON, now, if (maxMin > 0) now + maxMin * 60_000L else 0L)
-        Log.i(TAG, "mode chien : ${if (maxMin > 0) "$maxMin min" else "sans limite"}")
+        Log.i(TAG, "clim maintenue : ${if (maxMin > 0) "$maxMin min" else "sans limite"}")
         val app = context.applicationContext
         wake = (app.getSystemService(Context.POWER_SERVICE) as PowerManager)
-            .newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "mg4dash:dogmode").apply { setReferenceCounted(false); acquire(24 * 3600_000L) }
+            .newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "mg4dash:climhold").apply { setReferenceCounted(false); acquire(24 * 3600_000L) }
         CarBridge.setHvac(true)
         job = scope.launch { loop() }
         show(app)
@@ -99,7 +99,7 @@ object DogMode {
 
     fun show(context: Context) {
         try {
-            context.startActivity(Intent(context, DogModeActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP))
-        } catch (t: Throwable) { Log.w(TAG, "écran du mode chien : $t") }
+            context.startActivity(Intent(context, ClimateHoldActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP))
+        } catch (t: Throwable) { Log.w(TAG, "écran de la clim maintenue : $t") }
     }
 }

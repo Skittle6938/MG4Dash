@@ -81,14 +81,14 @@ class Prefs(context: Context) {
         get() = sp.getString("weather_city", "Paris") ?: "Paris"
         set(v) = sp.edit().putString("weather_city", v).apply()
 
-    /** Mode chien (appui long sur le bouton marche de la clim). Désactivé par défaut. */
-    var dogModeEnabled: Boolean
-        get() = sp.getBoolean("dogmode_enabled", false)
-        set(v) = sp.edit().putBoolean("dogmode_enabled", v).apply()
-    /** Durée maximale du mode chien en minutes ; 0 = illimitée (seul le seuil de batterie l'arrête). */
-    var dogModeMaxMin: Int
-        get() = sp.getInt("dogmode_max_min", 0)
-        set(v) = sp.edit().putInt("dogmode_max_min", v).apply()
+    /** Clim maintenue (appui long sur le bouton marche de la clim). Désactivé par défaut. */
+    var climateHoldEnabled: Boolean
+        get() = sp.getBoolean("climhold_enabled", false)
+        set(v) = sp.edit().putBoolean("climhold_enabled", v).apply()
+    /** Durée maximale de la clim maintenue en minutes ; 0 = illimitée (seul le seuil de batterie l'arrête). */
+    var climateHoldMaxMin: Int
+        get() = sp.getInt("climhold_max_min", 0)
+        set(v) = sp.edit().putInt("climhold_max_min", v).apply()
 
     /** MG4 XPower (320 kW) : reconnue d'elle-même au-delà de 350 ch mesurés, ou choisie dans les réglages. */
     var xpower: Boolean

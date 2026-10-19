@@ -16,11 +16,11 @@ import app.mg4dash.ui.Themes
 import java.util.Locale
 
 /**
- * Écran du mode chien : très gros, lisible depuis l'extérieur à travers la vitre. Température
+ * Écran de la clim maintenue : très gros, lisible depuis l'extérieur à travers la vitre. Température
  * intérieure avec un code couleur, état de la clim, temps restant (ou écoulé), message aux passants,
  * batterie. L'écran reste allumé ; maintenir le bouton arrête le mode.
  */
-class DogModeActivity : AppCompatActivity() {
+class ClimateHoldActivity : AppCompatActivity() {
     private lateinit var kit: Kit
     private lateinit var inside: TextView
     private lateinit var outside: TextView
@@ -64,8 +64,8 @@ class DogModeActivity : AppCompatActivity() {
         bottom.addView(battery, kit.lp(0, -2, 1f))
         bottom.addView(kit.toggleTile(getString(R.string.dm_hold_stop)) {}.apply {
             textSize = 24f
-            setOnClickListener { android.widget.Toast.makeText(this@DogModeActivity, R.string.dm_hold_stop, android.widget.Toast.LENGTH_SHORT).show() }
-            setOnLongClickListener { DogMode.stop("bouton de l'écran"); finish(); true }
+            setOnClickListener { android.widget.Toast.makeText(this@ClimateHoldActivity, R.string.dm_hold_stop, android.widget.Toast.LENGTH_SHORT).show() }
+            setOnLongClickListener { ClimateHold.stop("bouton de l'écran"); finish(); true }
         }, kit.lp(kit.dp(330), kit.dp(72)))
         right.addView(bottom, kit.lp(-1, -2, t = 24))
         root.addView(right, kit.lp(0, -1, 1.25f, l = 40))
@@ -83,14 +83,14 @@ class DogModeActivity : AppCompatActivity() {
 
     private val tick = object : Runnable {
         override fun run() {
-            val st = DogMode.status.value
-            if (st.phase == DogMode.Phase.IDLE) { finish(); return }
+            val st = ClimateHold.status.value
+            if (st.phase == ClimateHold.Phase.IDLE) { finish(); return }
             render(st)
             handler.postDelayed(this, 1000)
         }
     }
 
-    private fun render(st: DogMode.Status) {
+    private fun render(st: ClimateHold.Status) {
         val car = CarBridge.state.value
         val now = SystemClock.elapsedRealtime()
         // Température intérieure relue toutes les 10 s (lecture directe de la voiture)
@@ -107,16 +107,16 @@ class DogModeActivity : AppCompatActivity() {
         outside.text = car.outsideTemp?.let { getString(R.string.dm_outside, String.format(Locale.getDefault(), "%.0f°", it)) } ?: ""
         val on = car.hvacOn == true
         when (st.phase) {
-            DogMode.Phase.ON -> {
+            ClimateHold.Phase.ON -> {
                 state.text = getString(if (on) R.string.dm_clim_on else R.string.dm_clim_off)
                 state.setTextColor(kit.color(if (on) R.color.accent_cold else R.color.accent_heat))
                 if (st.endAt > 0) { time.text = left(st.endAt - now); timeLabel.text = getString(R.string.dm_left) }
                 else { time.text = left(now - st.startAt); timeLabel.text = getString(R.string.dm_since) }
                 timeLabel.text = timeLabel.text.toString() + (car.driverTemp?.let { " · " + getString(R.string.dm_set, String.format(Locale.getDefault(), "%.1f°", it)) } ?: "")
             }
-            DogMode.Phase.DONE, DogMode.Phase.BATTERY -> {
-                state.text = getString(if (st.phase == DogMode.Phase.DONE) R.string.dm_state_done else R.string.dm_state_battery)
-                state.setTextColor(kit.color(if (st.phase == DogMode.Phase.DONE) R.color.text_value else R.color.accent_danger))
+            ClimateHold.Phase.DONE, ClimateHold.Phase.BATTERY -> {
+                state.text = getString(if (st.phase == ClimateHold.Phase.DONE) R.string.dm_state_done else R.string.dm_state_battery)
+                state.setTextColor(kit.color(if (st.phase == ClimateHold.Phase.DONE) R.color.text_value else R.color.accent_danger))
                 time.text = ""; timeLabel.text = ""
             }
             else -> {}

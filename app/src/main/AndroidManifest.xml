@@ -97,8 +97,8 @@
         </receiver>
 
         <!-- Mise à jour depuis GitHub : résultat de l'installation et relance de l'accueil -->
-        <!-- Mode chien : écran lisible de dehors -->
-        <activity android:name=".climate.DogModeActivity" android:exported="false" android:screenOrientation="landscape"
+        <!-- Clim maintenue : écran lisible de dehors -->
+        <activity android:name=".climate.ClimateHoldActivity" android:exported="false" android:screenOrientation="landscape"
             android:theme="@style/Theme.MG4Launcher" android:excludeFromRecents="true" android:launchMode="singleTask" />
         <activity android:name=".ui.ScreenOffActivity" android:exported="false"
             android:theme="@android:style/Theme.NoTitleBar.Fullscreen" android:excludeFromRecents="true" />

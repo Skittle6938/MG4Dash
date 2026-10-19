@@ -388,15 +388,15 @@
     <string name="fx_peak">Peak %1$s kW · %2$s hp</string>
     <string name="st_xpower">MG4 XPower (320 kW)</string>
     <string name="st_xpower_desc">Recognised by itself as soon as more than 350 hp is measured: the car does not report its version. Sets the power scale and the threshold of the full-throttle special.</string>
-    <string name="st_dogmode">Dog mode (long press on the climate power button)</string>
-    <string name="st_dogmode_desc">Keeps the car on with the climate running while you are away, with a large screen showing the cabin temperature to passers-by.</string>
-    <string name="dm_title">DOG MODE</string>
+    <string name="st_climhold">Keep climate on (long press on the climate power button)</string>
+    <string name="st_climhold_desc">Keeps the car on with the climate running while you are away, with a large screen showing the cabin temperature. Never leave a child or an animal alone in the car.</string>
+    <string name="dm_title">KEEP CLIMATE ON</string>
     <string name="dm_max">Maximum duration</string>
     <string name="dm_unlimited">Unlimited</string>
     <string name="dm_note" formatted="false">The car stays on and the climate keeps its current settings. The mode ends below 20 % of battery or after the maximum duration (climate stopped and car switched off), or if the car moves.</string>
     <string name="dm_close">Close</string>
     <string name="dm_activate">Activate</string>
-    <string name="dm_message">My driver will be back soon. Don\'t worry: the climate is on and I\'m fine.</string>
+    <string name="dm_message">The driver will be back soon. The climate is kept on.</string>
     <string name="dm_inside">INSIDE</string>
     <string name="dm_outside">Outside %1$s</string>
     <string name="dm_clim_on">CLIMATE ON</string>
@@ -408,6 +408,7 @@
     <string name="dm_hold_stop">Hold to stop</string>
     <string name="dm_state_done">FINISHED · CAR SWITCHED OFF</string>
     <string name="dm_state_battery" formatted="false">STOPPED: BATTERY BELOW 20 %</string>
+    <string name="dm_warning">Never leave a child or an animal alone in the car: the climate can stop at any time (battery, fault, car switching off).</string>
     <string name="aa_title">ANDROID AUTO</string>
     <string name="aa_ready">Phone connected · Tap to open</string>
     <string name="aa_waiting">Connect your phone via USB</string>

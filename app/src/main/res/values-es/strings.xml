@@ -388,15 +388,15 @@
     <string name="fx_peak">Pico %1$s kW · %2$s CV</string>
     <string name="st_xpower">MG4 XPower (320 kW)</string>
     <string name="st_xpower_desc">Se reconoce sola en cuanto se miden más de 350 CV: el coche no indica su versión. Ajusta la escala de potencia y el umbral de la función especial a fondo.</string>
-    <string name="st_dogmode">Modo perro (pulsación larga en el botón de encendido del clima)</string>
-    <string name="st_dogmode_desc">Mantiene el coche encendido con el clima en marcha mientras no está, con una gran pantalla que muestra la temperatura interior a los transeúntes.</string>
-    <string name="dm_title">MODO PERRO</string>
+    <string name="st_climhold">Clima mantenido (pulsación larga en el botón de encendido del clima)</string>
+    <string name="st_climhold_desc">Mantiene el coche encendido con el clima en marcha mientras no está, con una gran pantalla que muestra la temperatura interior. No deje nunca a un niño o un animal solo en el coche.</string>
+    <string name="dm_title">CLIMA MANTENIDO</string>
     <string name="dm_max">Duración máxima</string>
     <string name="dm_unlimited">Ilimitada</string>
     <string name="dm_note" formatted="false">El coche sigue encendido y el clima mantiene sus ajustes actuales. El modo termina por debajo del 20 % de batería o al cumplirse la duración máxima (clima parado y coche apagado), o si el coche se mueve.</string>
     <string name="dm_close">Cerrar</string>
     <string name="dm_activate">Activar</string>
-    <string name="dm_message">Mi conductor vuelve pronto. No se preocupe: el clima está encendido y estoy bien.</string>
+    <string name="dm_message">El conductor vuelve pronto. El clima sigue encendido.</string>
     <string name="dm_inside">INTERIOR</string>
     <string name="dm_outside">Exterior %1$s</string>
     <string name="dm_clim_on">CLIMA ENCENDIDO</string>
@@ -408,6 +408,7 @@
     <string name="dm_hold_stop">Mantener para detener</string>
     <string name="dm_state_done">TERMINADO · COCHE APAGADO</string>
     <string name="dm_state_battery" formatted="false">DETENIDO: BATERÍA BAJO 20 %</string>
+    <string name="dm_warning">No deje nunca a un niño o un animal solo en el coche: el clima puede detenerse en cualquier momento (batería, avería, coche que se apaga).</string>
     <string name="aa_title">ANDROID AUTO</string>
     <string name="aa_ready">Teléfono conectado · Pulse para abrir</string>
     <string name="aa_waiting">Conecte su teléfono por USB</string>

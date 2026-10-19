@@ -84,7 +84,7 @@ class SettingsActivity : AppCompatActivity() {
         toggle(style, R.string.st_map_vdock, null, { prefs.verticalDock }) { prefs.verticalDock = it; app.mg4dash.ui.Themes.publish(this) }
         toggle(style, R.string.st_fullscreen, null, { prefs.fullscreen }) { prefs.fullscreen = it; Fullscreen.apply(this) }
         toggle(style, R.string.st_stack_auto, null, { prefs.stackAuto }) { prefs.stackAuto = it }
-        toggle(style, R.string.st_dogmode, R.string.st_dogmode_desc, { prefs.dogModeEnabled }) { prefs.dogModeEnabled = it }
+        toggle(style, R.string.st_climhold, R.string.st_climhold_desc, { prefs.climateHoldEnabled }) { prefs.climateHoldEnabled = it }
 
         // ── Thème : fond et couleur des boutons ──
         val theme = panel(left, getString(R.string.st_theme))
