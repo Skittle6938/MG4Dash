@@ -378,16 +378,16 @@
     <string name="en_gun_unlock">DESBLOQUEAR CABLE</string>
     <string name="en_gun_lock">BLOQUEAR CABLE</string>
     <string name="power_off_driving">No mientras conduces</string>
-    <string name="st_power_fx">Animación a plena potencia (widget Potencia en directo):</string>
-    <string name="st_power_fx_desc" formatted="false">Se reproduce por encima del 80 % de la potencia máxima del coche y luego muestra el pico alcanzado (kW y CV) durante 10 segundos.</string>
+    <string name="st_power_fx">Función especial a fondo (widget Potencia en directo):</string>
+    <string name="st_power_fx_desc" formatted="false">Pise a fondo (por encima del 80 % de la potencia máxima del coche) y ya verá… luego el pico alcanzado (kW y CV) se muestra durante 10 segundos.</string>
     <string name="fx_none">Ninguna</string>
+    <string name="fx_random">Aleatoria</string>
     <string name="fx_rocket">Cohete</string>
     <string name="fx_lightning">Rayo</string>
     <string name="fx_flames">Llamas</string>
-    <string name="fx_preview">Vista previa</string>
     <string name="fx_peak">Pico %1$s kW · %2$s CV</string>
     <string name="st_xpower">MG4 XPower (320 kW)</string>
-    <string name="st_xpower_desc" formatted="false">Se reconoce sola en cuanto se miden más de 350 CV: el coche no indica su versión. Ajusta la escala de potencia y el umbral del 80 % de la animación.</string>
+    <string name="st_xpower_desc">Se reconoce sola en cuanto se miden más de 350 CV: el coche no indica su versión. Ajusta la escala de potencia y el umbral de la función especial a fondo.</string>
     <string name="aa_title">ANDROID AUTO</string>
     <string name="aa_ready">Teléfono conectado · Pulse para abrir</string>
     <string name="aa_waiting">Conecte su teléfono por USB</string>

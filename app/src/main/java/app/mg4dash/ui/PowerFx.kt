@@ -33,6 +33,8 @@ import kotlin.math.sin
 class PowerFx(private val context: Context) : Drawable() {
     companion object {
         const val NONE = 0; const val ROCKET = 1; const val LIGHTNING = 2; const val FLAMES = 3
+        /** Choix des réglages seulement : une des trois animations, tirée à chaque déclenchement. */
+        const val RANDOM = 4
         const val HOLD_MS = 10_000L
         private const val FADE_MS = 700L
         /** Chevaux (ch DIN) d'une puissance en kW. */

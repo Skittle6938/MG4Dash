@@ -378,16 +378,16 @@
     <string name="en_gun_unlock">SBLOCCA CAVO</string>
     <string name="en_gun_lock">BLOCCA CAVO</string>
     <string name="power_off_driving">Non durante la guida</string>
-    <string name="st_power_fx">Animazione a piena potenza (widget Potenza in tempo reale):</string>
-    <string name="st_power_fx_desc" formatted="false">Parte oltre l\'80 % della potenza massima dell\'auto, poi mostra il picco raggiunto (kW e CV) per 10 secondi.</string>
+    <string name="st_power_fx">Funzione speciale a tavoletta (widget Potenza in tempo reale):</string>
+    <string name="st_power_fx_desc" formatted="false">Pedale a tavoletta (oltre l\'80 % della potenza massima dell\'auto) e vedrai… poi il picco raggiunto (kW e CV) resta visibile per 10 secondi.</string>
     <string name="fx_none">Nessuna</string>
+    <string name="fx_random">Casuale</string>
     <string name="fx_rocket">Razzo</string>
     <string name="fx_lightning">Fulmine</string>
     <string name="fx_flames">Fiamme</string>
-    <string name="fx_preview">Anteprima</string>
     <string name="fx_peak">Picco %1$s kW · %2$s CV</string>
     <string name="st_xpower">MG4 XPower (320 kW)</string>
-    <string name="st_xpower_desc" formatted="false">Riconosciuta da sola appena si misurano più di 350 CV: l\'auto non indica la sua versione. Imposta la scala di potenza e la soglia dell\'80 % dell\'animazione.</string>
+    <string name="st_xpower_desc">Riconosciuta da sola appena si misurano più di 350 CV: l\'auto non indica la sua versione. Imposta la scala di potenza e la soglia della funzione speciale a tavoletta.</string>
     <string name="aa_title">ANDROID AUTO</string>
     <string name="aa_ready">Telefono connesso · Tocca per aprire</string>
     <string name="aa_waiting">Collega il telefono via USB</string>

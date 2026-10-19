@@ -378,16 +378,16 @@
     <string name="en_gun_unlock">UNLOCK CABLE</string>
     <string name="en_gun_lock">LOCK CABLE</string>
     <string name="power_off_driving">Not while driving</string>
-    <string name="st_power_fx">Full-power animation (Live power widget):</string>
-    <string name="st_power_fx_desc" formatted="false">Plays above 80 % of the car\'s maximum power, then shows the peak reached (kW and hp) for 10 seconds.</string>
+    <string name="st_power_fx">Full-throttle special (Live power widget):</string>
+    <string name="st_power_fx_desc" formatted="false">Floor it (above 80 % of the car\'s maximum power) and see what happens… then the peak reached (kW and hp) stays on screen for 10 seconds.</string>
     <string name="fx_none">None</string>
+    <string name="fx_random">Random</string>
     <string name="fx_rocket">Rocket</string>
     <string name="fx_lightning">Lightning</string>
     <string name="fx_flames">Flames</string>
-    <string name="fx_preview">Preview</string>
     <string name="fx_peak">Peak %1$s kW · %2$s hp</string>
     <string name="st_xpower">MG4 XPower (320 kW)</string>
-    <string name="st_xpower_desc" formatted="false">Recognised by itself as soon as more than 350 hp is measured: the car does not report its version. Sets the power scale and the 80 % threshold of the animation.</string>
+    <string name="st_xpower_desc">Recognised by itself as soon as more than 350 hp is measured: the car does not report its version. Sets the power scale and the threshold of the full-throttle special.</string>
     <string name="aa_title">ANDROID AUTO</string>
     <string name="aa_ready">Phone connected · Tap to open</string>
     <string name="aa_waiting">Connect your phone via USB</string>

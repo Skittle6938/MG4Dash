@@ -354,38 +354,37 @@ class SettingsActivity : AppCompatActivity() {
     /** Animation pleine puissance du widget Puissance en direct : liste déroulante, aperçu sur une mini carte. */
     private fun powerFxSetting(parent: LinearLayout) {
         text(parent, getString(R.string.st_power_fx), 18f, R.color.text_value)
-        val names = listOf(R.string.fx_none, R.string.fx_rocket, R.string.fx_lightning, R.string.fx_flames).map { getString(it) }
-        val preview = app.mg4dash.ui.PowerFxPreview(this).apply {
-            // Même échelle que le widget de l'accueil pour le modèle choisi
-            bar.configureFor(prefs.batteryModel, prefs.xpower)
-        }
+        // Pas d'aperçu : la surprise est pour la route. Ordre affiché : aléatoire d'abord (par défaut).
+        val fx = app.mg4dash.ui.PowerFx
+        val choices = listOf(fx.RANDOM to R.string.fx_random, fx.ROCKET to R.string.fx_rocket, fx.LIGHTNING to R.string.fx_lightning,
+            fx.FLAMES to R.string.fx_flames, fx.NONE to R.string.fx_none).map { it.first to getString(it.second) }
         lateinit var pick: Button
         // Liste déroulante dans la page même : une fenêtre surgissante ferait réapparaître les barres système
         val list = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; visibility = View.GONE }
-        fun label() { pick.text = "${names[prefs.powerFx.coerceIn(0, names.size - 1)]}   ${if (list.visibility == View.VISIBLE) "▴" else "▾"}" }
+        fun label() {
+            val name = choices.firstOrNull { it.first == prefs.powerFx }?.second ?: choices[0].second
+            pick.text = "$name   ${if (list.visibility == View.VISIBLE) "▴" else "▾"}"
+        }
+        fun paint() = choices.forEachIndexed { k, (v, _) ->
+            (list.getChildAt(k) as Button).apply { isSelected = v == prefs.powerFx; setTextColor(color(if (isSelected) R.color.accent_action else R.color.text_value)) }
+        }
         pick = button("") { list.visibility = if (list.visibility == View.VISIBLE) View.GONE else View.VISIBLE; label() }
             .apply { setBackgroundResource(R.drawable.bg_chip); setTextColor(color(R.color.accent_action)) }
-        names.forEachIndexed { i, n ->
-            list.addView(button(n) {
-                prefs.powerFx = i; list.visibility = View.GONE; label()
-                for (k in 0 until list.childCount) (list.getChildAt(k) as Button).apply {
-                    isSelected = k == i; setTextColor(color(if (k == i) R.color.accent_action else R.color.text_value))
-                }
-                if (i != app.mg4dash.ui.PowerFx.NONE) preview.play(i)
-            }.apply {
-                setBackgroundResource(R.drawable.bg_chip); gravity = Gravity.CENTER_VERTICAL or Gravity.START
-                isSelected = i == prefs.powerFx; setTextColor(color(if (i == prefs.powerFx) R.color.accent_action else R.color.text_value))
-            }, LinearLayout.LayoutParams(-1, dp(56)).apply { topMargin = dp(6) })
+        choices.forEach { (v, n) ->
+            list.addView(button(n) { prefs.powerFx = v; list.visibility = View.GONE; label(); paint() }
+                .apply { setBackgroundResource(R.drawable.bg_chip); gravity = Gravity.CENTER_VERTICAL or Gravity.START },
+                LinearLayout.LayoutParams(-1, dp(56)).apply { topMargin = dp(6) })
         }
-        label()
-        row(parent, pick, button(getString(R.string.fx_preview)) { preview.play(prefs.powerFx) }.apply { setBackgroundResource(R.drawable.bg_chip) })
+        paint(); label()
         // Sous le bouton de choix seulement (moitié gauche de la ligne)
-        val half = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
-        half.addView(list, LinearLayout.LayoutParams(0, -2, 1f))
-        half.addView(View(this), LinearLayout.LayoutParams(0, 1, 1f).apply { leftMargin = dp(10) })
-        parent.addView(half, LinearLayout.LayoutParams(-1, -2))
+        val line = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
+        val left = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
+        left.addView(pick, LinearLayout.LayoutParams(-1, dp(56)))
+        left.addView(list, LinearLayout.LayoutParams(-1, -2))
+        line.addView(left, LinearLayout.LayoutParams(0, -2, 1f))
+        line.addView(View(this), LinearLayout.LayoutParams(0, 1, 1f).apply { leftMargin = dp(10) })
+        parent.addView(line, LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(10) })
         text(parent, getString(R.string.st_power_fx_desc), 16f, R.color.text_title)
-        parent.addView(preview, LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(10) })
     }
 
     private fun confirmReplace() {

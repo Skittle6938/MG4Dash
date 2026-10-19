@@ -890,7 +890,8 @@ class MainActivity : AppCompatActivity() {
         powerBar?.kw = if (plugged) 0f else kw ?: 0f
         val bar = powerBar; val under = powerExtra
         if (bar != null && under != null) powerFx?.let { fx ->
-            fx.style = prefs.powerFx
+            // Au hasard : nouveau tirage tant que rien ne joue, gardé pendant l'animation
+            if (!fx.isActive) fx.style = prefs.powerFx.let { if (it == app.mg4dash.ui.PowerFx.RANDOM) (1..3).random() else it }
             // Sur tout l'écran : la fusée arrive du bord gauche, l'éclair et les flammes couvrent l'accueil
             val wide = fx.style != app.mg4dash.ui.PowerFx.NONE
             val host: View = if (wide) window.decorView else b.secondaryCard
