@@ -388,6 +388,37 @@
     <string name="fx_peak">Spitze %1$s kW · %2$s PS</string>
     <string name="st_xpower">MG4 XPower (320 kW)</string>
     <string name="st_xpower_desc">Wird automatisch erkannt, sobald mehr als 350 PS gemessen werden: das Auto meldet seine Version nicht. Legt die Leistungsskala und die Schwelle der Vollgas-Spezialfunktion fest.</string>
+    <string name="st_precool">Geplante Vorklimatisierung (langes Drücken auf die Klima-Ein-Taste)</string>
+    <string name="st_precool_desc">Nachdem Sie mit dem Schlüssel gegangen sind, verriegelt MG4Dash das Auto, schaltet es aus und startet die Klimaanlage zu den geplanten Zeiten (Issue #26).</string>
+    <string name="pc_title">GEPLANTE VORKLIMATISIERUNG</string>
+    <string name="pc_lock_delay">Türen verriegeln nach</string>
+    <string name="pc_start_delay">Erster Zyklus nach dem Verriegeln</string>
+    <string name="pc_duration">Dauer jedes Zyklus</string>
+    <string name="pc_runs">Anzahl der Zyklen</string>
+    <string name="pc_gap">Pause zwischen den Zyklen</string>
+    <string name="pc_note" formatted="false">Die Klimaanlage startet mit ihren aktuellen Einstellungen (Temperatur, Gebläse, A/C). Alles stoppt, wenn eine Tür entriegelt wird oder der Akku unter 20 % fällt.</string>
+    <string name="pc_close">Schließen</string>
+    <string name="pc_activate">Aktivieren</string>
+    <string name="pc_confirm_title">Nehmen Sie den Schlüssel mit!</string>
+    <string name="pc_confirm_msg">Nehmen Sie den Schlüssel mit, schließen Sie die Türen und verriegeln Sie das Auto NICHT selbst: MG4Dash verriegelt es nach der Wartezeit und schaltet es aus. Lassen Sie den Schlüssel nicht im Auto.</string>
+    <string name="pc_confirm_go">Ich habe den Schlüssel, aktivieren</string>
+    <string name="pc_lock_at">Türen verriegelt um %1$s</string>
+    <string name="pc_stop">Programm beenden</string>
+    <string name="pc_lock_in">Verriegelung in</string>
+    <string name="pc_clim_on">KLIMA AN</string>
+    <string name="pc_clim_off">KLIMA IN</string>
+    <string name="pc_clim_refused">KLIMA ABGELEHNT</string>
+    <string name="pc_state_done">VORKLIMATISIERUNG BEENDET</string>
+    <string name="pc_state_battery" formatted="false">GESTOPPT: AKKU UNTER 20 %</string>
+    <string name="pc_state_failed">DAS AUTO HAT DIE KLIMA ABGELEHNT</string>
+    <string name="pc_inside">INNEN</string>
+    <string name="pc_outside">Außen %1$s</string>
+    <string name="pc_until_start">bis zum nächsten Zyklus</string>
+    <string name="pc_until_end">verbleibend in diesem Zyklus</string>
+    <string name="pc_set">Eingestellt auf %1$s</string>
+    <string name="pc_battery">Akku %1$s</string>
+    <string name="pc_hold_stop">Zum Stoppen halten</string>
+    <string name="pc_run_line">Zyklus %1$d · %2$s → %3$s</string>
     <string name="aa_title">ANDROID AUTO</string>
     <string name="aa_ready">Telefon verbunden · Zum Öffnen tippen</string>
     <string name="aa_waiting">Telefon per USB verbinden</string>

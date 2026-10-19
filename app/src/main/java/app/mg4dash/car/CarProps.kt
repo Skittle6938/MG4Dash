@@ -155,7 +155,7 @@ object CarProps {
         if (BuildConfig.MOCK) return mock[id]?.toString() ?: ""
         val m = cpm ?: return ""
         val type = id and 0x00FF0000
-        val areas = areaCache[id]?.let { intArrayOf(it) } ?: intArrayOf(0, 1, 4, 0x10, 0x40, 0x100, 117)
+        val areas = areaCache[id]?.let { intArrayOf(it) } ?: intArrayOf(0, 1, 4, 0x10, 0x40, 0x100, 117, 0x1000000)
         for (area in areas) {
             try {
                 val v = when (type) {

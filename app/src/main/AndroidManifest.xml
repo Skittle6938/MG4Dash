@@ -9,6 +9,7 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
     <!-- Accordées d'office au uid système (version voiture) -->
     <uses-permission android:name="android.permission.MEDIA_CONTENT_CONTROL" />
     <uses-permission android:name="android.permission.SET_PREFERRED_APPLICATIONS" />
@@ -96,6 +97,9 @@
         </receiver>
 
         <!-- Mise à jour depuis GitHub : résultat de l'installation et relance de l'accueil -->
+        <!-- Pré-climatisation programmée : écran de veille lisible de dehors (issue #26) -->
+        <activity android:name=".climate.PreCoolActivity" android:exported="false" android:screenOrientation="landscape"
+            android:theme="@style/Theme.MG4Launcher" android:excludeFromRecents="true" android:launchMode="singleTask" />
         <activity android:name=".ui.ScreenOffActivity" android:exported="false"
             android:theme="@android:style/Theme.NoTitleBar.Fullscreen" android:excludeFromRecents="true" />
         <receiver android:name=".system.Updater$Result" android:exported="false" />

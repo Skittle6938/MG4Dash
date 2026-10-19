@@ -383,6 +383,8 @@ class MainActivity : AppCompatActivity() {
     private fun wireClimate() {
         buildHeating()
         b.climPower.setOnClickListener { CarBridge.togglePower() }
+        // Appui long : pré-climatisation programmée (issue #26), si elle est activée dans les réglages
+        b.climPower.setOnLongClickListener { if (prefs.preCoolEnabled) { app.mg4dash.climate.PreCoolPanel.show(this); true } else false }
         repeatOnHold(b.tempDown) { CarBridge.stepTemp(-1) }
         repeatOnHold(b.tempUp) { CarBridge.stepTemp(1) }
         // Ventilation : sous la vitesse 1, la clim s'arrête ; appui long − = minimum, appui long + = maximum
@@ -433,7 +435,7 @@ class MainActivity : AppCompatActivity() {
         val on = s.hvacOn == true
         val known = s.connected && s.hvacOn != null
         b.climPower.isSelected = on
-        b.climPower.setColorFilter(color(if (on) R.color.accent_energy else R.color.text_sub))
+        b.climPower.setColorFilter(color(if (on) R.color.accent_action else R.color.text_sub))
         b.temp.text = if (on || s.driverTemp != null) VehicleState.tempLabel(s.driverTemp) else getString(R.string.no_data)
         b.temp.setTextColor(color(if (on) R.color.text_value else R.color.text_disabled))
         b.climOutside.text = s.outsideTemp?.let { getString(R.string.cl_outside, Math.round(it)) } ?: ""

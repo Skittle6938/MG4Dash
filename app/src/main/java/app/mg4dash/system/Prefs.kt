@@ -81,6 +81,16 @@ class Prefs(context: Context) {
         get() = sp.getString("weather_city", "Paris") ?: "Paris"
         set(v) = sp.edit().putString("weather_city", v).apply()
 
+    /** Pré-climatisation programmée (issue #26) : appui long sur le bouton marche de la clim. Désactivée par défaut. */
+    var preCoolEnabled: Boolean
+        get() = sp.getBoolean("precool_enabled", false)
+        set(v) = sp.edit().putBoolean("precool_enabled", v).apply()
+    /** Derniers réglages de la pré-climatisation : délai de verrouillage (s), départ (min), durée (min), cycles, pause (min). */
+    var preCoolPlan: IntArray
+        get() = (sp.getString("precool_plan", null) ?: "60,30,15,1,30").split(',').mapNotNull { it.toIntOrNull() }
+            .let { if (it.size == 5) it.toIntArray() else intArrayOf(60, 30, 15, 1, 30) }
+        set(v) = sp.edit().putString("precool_plan", v.joinToString(",")).apply()
+
     /** MG4 XPower (320 kW) : reconnue d'elle-même au-delà de 350 ch mesurés, ou choisie dans les réglages. */
     var xpower: Boolean
         get() = sp.getBoolean("xpower", false)
