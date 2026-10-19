@@ -112,7 +112,7 @@ Grouped by category in one scrolling page. Each on/off option is a single button
 
 | Section | Options |
 |---|---|
-| Home layout | Full, Simple or Map; vertical bar on the left; full screen (hides the SAIC side bar and banner); units (like the car, km · kWh/100 km, miles · mi/kWh); heated seats and steering wheel buttons (auto, yes, no); tyre pressure unit (auto, bar, psi, kPa); default map zoom; map colours; map layout stack back to the battery when plugged in |
+| Home layout | Full, Simple or Map; vertical bar on the left; full screen (hides the SAIC side bar and banner); units (like the car, km · kWh/100 km, miles · mi/kWh); heated seats and steering wheel buttons (auto, yes, no); tyre pressure unit (auto, bar, psi, kPa); default map zoom; map colours; map text size (100, 125 or 150 %); map layout stack back to the battery when plugged in |
 | Theme | background, button colour, light / dark / auto (follows the car's lights) |
 | Energy | usable battery capacity (read from the car, measured, or set by hand), battery model for the health estimate |
 | Home screen | replace the SAIC home, maintenance mode, briefly open the SAIC launcher at startup |

@@ -508,9 +508,9 @@ class MainActivity : AppCompatActivity() {
         b.chargeAction.visibility = if (CarBridge.chargeControl) View.VISIBLE else View.GONE
         b.chargeAction.setBackgroundResource(if (discharge) R.drawable.bg_chip_heat else R.drawable.bg_chip)
         b.chargeAction.setTextColor(androidx.core.content.ContextCompat.getColorStateList(this, if (discharge) R.color.chip_text_heat else R.color.chip_text))
-        b.chargeAction.isSelected = if (discharge) s.dischargeCtrl == 1 else s.chargeCtrl == 1
+        b.chargeAction.isSelected = if (discharge) VehicleState.isDischarging(s) else s.chargeCtrl == 1
         b.chargeAction.text = when {
-            discharge -> getString(if (s.dischargeCtrl == 1) R.string.v2l_stop else R.string.v2l_start)
+            discharge -> getString(if (VehicleState.isDischarging(s)) R.string.v2l_stop else R.string.v2l_start)
             s.chargeCtrl == 1 -> getString(R.string.stop_btn)
             else -> getString(R.string.charge_btn)
         }
@@ -520,7 +520,7 @@ class MainActivity : AppCompatActivity() {
         val s = CarBridge.state.value
         if (!VehicleState.isPlugged(s.chargeStatus)) return
         when {
-            VehicleState.isDischargeMode(s.chargeStatus) -> if (s.dischargeCtrl == 1) CarBridge.stopV2L() else CarBridge.startV2L()
+            VehicleState.isDischargeMode(s.chargeStatus) -> if (VehicleState.isDischarging(s)) CarBridge.stopV2L() else CarBridge.startV2L()
             s.chargeCtrl == 1 -> CarBridge.stopCharge()
             else -> CarBridge.startCharge()
         }

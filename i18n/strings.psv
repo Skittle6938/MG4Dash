@@ -366,6 +366,7 @@ st_pressure|Tyre pressure|Pression des pneus|Reifendruck|Presión de neumáticos
 st_mode_auto_short|Auto|Auto|Auto|Auto|Auto|Auto
 st_map_zoom|Default map zoom|Zoom de la carte par défaut|Standard-Kartenzoom|Zoom del mapa por defecto|Zoom predefinito della mappa|Standaardzoom kaart
 st_map_theme|Map colours|Couleurs de la carte|Kartenfarben|Colores del mapa|Colori della mappa|Kaartkleuren
+st_map_text|Map text size (street names; the whole map is enlarged)|Taille du texte de la carte (noms de rues ; toute la carte est agrandie)|Textgröße der Karte (Straßennamen; die ganze Karte wird vergrößert)|Tamaño del texto del mapa (nombres de calles; se amplía todo el mapa)|Dimensione del testo della mappa (nomi delle vie; tutta la mappa viene ingrandita)|Tekstgrootte van de kaart (straatnamen; de hele kaart wordt vergroot)
 st_map_theme_app|Like the app|Comme l'appli|Wie die App|Como la app|Come l'app|Zoals de app
 st_use_location|Use my position|Utiliser ma position|Meine Position verwenden|Usar mi posición|Usa la mia posizione|Mijn positie gebruiken
 st_no_location|Position not available yet|Position pas encore disponible|Position noch nicht verfügbar|Posición aún no disponible|Posizione non ancora disponibile|Positie nog niet beschikbaar

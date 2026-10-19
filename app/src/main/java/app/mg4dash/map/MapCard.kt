@@ -53,6 +53,8 @@ class MapCard(private val context: Context, holder: ViewGroup) {
                 setMultiTouchControls(true)
                 zoomController.setVisibility(CustomZoomButtonsController.Visibility.NEVER)
                 isTilesScaledToDpi = true
+                // Noms de rues plus lisibles (#4) : les tuiles OSM sont des images, on les agrandit
+                tilesScaleFactor = 1f + 0.25f * app.mg4dash.system.Prefs(context).mapTextScale
                 minZoomLevel = 5.0
                 maxZoomLevel = 19.0
                 controller.setZoom(zoomLevel)

@@ -119,6 +119,11 @@ data class VehicleState(
 
         /** Mode V2L : même règle que le launcher d'origine (11 et ≥ 13 = écran de décharge). */
         fun isDischargeMode(v: Int?): Boolean = v == 11 || (v != null && v >= 13)
+        /**
+         * V2L en cours : bouton V2L à 1, ou état « décharge en cours » (13). Les anciens firmwares
+         * (SWI68, #8) ne renvoient pas l'état du bouton : le bouton restait sur « Lancer ».
+         */
+        fun isDischarging(s: VehicleState): Boolean = s.dischargeCtrl == 1 || s.chargeStatus == 13
         fun isPlugged(v: Int?): Boolean = v != null && v != 0
         fun isCharging(v: Int?): Boolean = v == 1 || v == 3 || v == 10 || v == 12
 

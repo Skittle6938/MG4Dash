@@ -161,7 +161,7 @@ class EnergyActivity : PageActivity() {
         c2.addView(vRow, kit.lp(-1, -2, t = 8))
         v2lAction = kit.toggleTile(getString(R.string.en_v2l_start), heat = true) {
             val s = CarBridge.state.value
-            if (s.dischargeCtrl == 1) CarBridge.stopV2L() else CarBridge.startV2L()
+            if (VehicleState.isDischarging(s)) CarBridge.stopV2L() else CarBridge.startV2L()
         }.apply { textSize = 18f }
         c2.addView(LinearLayout(this), kit.lp(-1, 0, 1f))
         c2.addView(v2lAction, kit.lp(-1, kit.dp(60), t = 10))
@@ -354,18 +354,18 @@ class EnergyActivity : PageActivity() {
         // Démarrer / arrêter la charge et le V2L : seulement là où le service EV répond (voie A9)
         action.visibility = if (CarBridge.chargeControl) android.view.View.VISIBLE else android.view.View.INVISIBLE
         v2lAction.visibility = if (CarBridge.chargeControl) android.view.View.VISIBLE else android.view.View.INVISIBLE
-        action.isSelected = s.chargeCtrl == 1 || s.dischargeCtrl == 1
+        action.isSelected = s.chargeCtrl == 1 || VehicleState.isDischarging(s)
         v2lStatus.text = if (discharge) VehicleState.chargeStatusLabel(s.chargeStatus) +
             (s.dischargeRemainMin?.takeIf { it in 1..6000 }?.let { getString(R.string.en_remaining, it / 60, it % 60) } ?: "")
         else getString(R.string.en_plug_v2l)
         v2lAction.isEnabled = discharge
-        v2lAction.isSelected = s.dischargeCtrl == 1
-        v2lAction.text = getString(if (s.dischargeCtrl == 1) R.string.en_v2l_stopbtn else R.string.en_v2l_start)
+        v2lAction.isSelected = VehicleState.isDischarging(s)
+        v2lAction.text = getString(if (VehicleState.isDischarging(s)) R.string.en_v2l_stopbtn else R.string.en_v2l_start)
     }
 
     private fun mainActionLabel(s: VehicleState): String = when {
         !VehicleState.isPlugged(s.chargeStatus) -> getString(R.string.en_unplugged)
-        VehicleState.isDischargeMode(s.chargeStatus) -> getString(if (s.dischargeCtrl == 1) R.string.en_v2l_stopbtn else R.string.en_v2l_start)
+        VehicleState.isDischargeMode(s.chargeStatus) -> getString(if (VehicleState.isDischarging(s)) R.string.en_v2l_stopbtn else R.string.en_v2l_start)
         s.chargeCtrl == 1 -> getString(R.string.en_stop_charge)
         else -> getString(R.string.en_charge_now)
     }
@@ -374,7 +374,7 @@ class EnergyActivity : PageActivity() {
         val s = CarBridge.state.value
         if (!VehicleState.isPlugged(s.chargeStatus)) return
         when {
-            VehicleState.isDischargeMode(s.chargeStatus) -> if (s.dischargeCtrl == 1) CarBridge.stopV2L() else CarBridge.startV2L()
+            VehicleState.isDischargeMode(s.chargeStatus) -> if (VehicleState.isDischarging(s)) CarBridge.stopV2L() else CarBridge.startV2L()
             s.chargeCtrl == 1 -> CarBridge.stopCharge()
             else -> CarBridge.startCharge()
         }

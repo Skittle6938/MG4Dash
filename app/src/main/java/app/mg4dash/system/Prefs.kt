@@ -46,6 +46,10 @@ class Prefs(context: Context) {
     var mapTheme: Int
         get() = sp.getInt("map_theme", 0)
         set(v) = sp.edit().putInt("map_theme", v).apply()
+    /** Taille du texte de la carte (#4) : 0 = 100 %, 1 = 125 %, 2 = 150 % (tuiles agrandies). */
+    var mapTextScale: Int
+        get() = sp.getInt("map_text_scale", 0)
+        set(v) = sp.edit().putInt("map_text_scale", v.coerceIn(0, 2)).apply()
 
     /** Sièges / volant chauffants : 0 = auto (batterie 64 / 77 kWh), 1 = afficher, 2 = masquer. */
     var heatedSeats: Int
