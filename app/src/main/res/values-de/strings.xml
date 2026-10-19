@@ -393,9 +393,8 @@
     <string name="dm_title">KLIMA BLEIBT AN</string>
     <string name="dm_max">Maximale Dauer</string>
     <string name="dm_unlimited">Unbegrenzt</string>
-    <string name="dm_note" formatted="false">Das Auto bleibt eingeschaltet und die Klimaanlage behält ihre aktuellen Einstellungen. Der Modus endet unter 20 % Akku oder nach der maximalen Dauer (Klima aus, Auto ausgeschaltet) oder wenn das Auto fährt.</string>
+    <string name="dm_note" formatted="false">Die Klimaanlage startet sofort mit ihren aktuellen Einstellungen, dann verriegeln die Türen nach der Wartezeit. Der Modus endet unter 20 % Akku oder nach der maximalen Dauer (Klima aus, Auto ausgeschaltet), wenn die Türen entriegelt werden oder wenn das Auto fährt.</string>
     <string name="dm_close">Schließen</string>
-    <string name="dm_activate">Aktivieren</string>
     <string name="dm_message">Der Fahrer ist gleich zurück. Die Klimaanlage bleibt an.</string>
     <string name="dm_inside">INNEN</string>
     <string name="dm_outside">Außen %1$s</string>
@@ -409,6 +408,12 @@
     <string name="dm_state_done">BEENDET · AUTO AUSGESCHALTET</string>
     <string name="dm_state_battery" formatted="false">GESTOPPT: AKKU UNTER 20 %</string>
     <string name="dm_warning">Lassen Sie niemals ein Kind oder ein Tier allein im Auto: die Klimaanlage kann jederzeit ausgehen (Akku, Störung, Auto schaltet ab).</string>
+    <string name="dm_lock_delay">Türen verriegeln nach</string>
+    <string name="dm_start">Starten</string>
+    <string name="dm_cancel">Abbrechen</string>
+    <string name="dm_lock_in">Die Türen verriegeln in</string>
+    <string name="dm_take_key">NEHMEN SIE DEN SCHLÜSSEL MIT!</string>
+    <string name="dm_lights">Stellen Sie den Lichtschalter auf Standlicht statt AUTO.</string>
     <string name="aa_title">ANDROID AUTO</string>
     <string name="aa_ready">Telefon verbunden · Zum Öffnen tippen</string>
     <string name="aa_waiting">Telefon per USB verbinden</string>

@@ -393,9 +393,8 @@
     <string name="dm_title">AIRCO BLIJFT AAN</string>
     <string name="dm_max">Maximale duur</string>
     <string name="dm_unlimited">Onbeperkt</string>
-    <string name="dm_note" formatted="false">De auto blijft aan en de airco houdt de huidige instellingen. De modus stopt onder 20 % batterij of na de maximale duur (airco uit en auto uitgeschakeld), of als de auto rijdt.</string>
+    <string name="dm_note" formatted="false">De airco start meteen met de huidige instellingen, daarna vergrendelen de deuren na de wachttijd. De modus stopt onder 20 % batterij of na de maximale duur (airco uit en auto uitgeschakeld), als de deuren worden ontgrendeld, of als de auto rijdt.</string>
     <string name="dm_close">Sluiten</string>
-    <string name="dm_activate">Activeren</string>
     <string name="dm_message">De bestuurder is zo terug. De airco blijft aan.</string>
     <string name="dm_inside">BINNEN</string>
     <string name="dm_outside">Buiten %1$s</string>
@@ -409,6 +408,12 @@
     <string name="dm_state_done">KLAAR · AUTO UITGESCHAKELD</string>
     <string name="dm_state_battery" formatted="false">GESTOPT: BATTERIJ ONDER 20 %</string>
     <string name="dm_warning">Laat nooit een kind of een dier alleen in de auto: de airco kan op elk moment stoppen (batterij, storing, auto die uitschakelt).</string>
+    <string name="dm_lock_delay">Deuren vergrendelen na</string>
+    <string name="dm_start">Starten</string>
+    <string name="dm_cancel">Annuleren</string>
+    <string name="dm_lock_in">De deuren vergrendelen over</string>
+    <string name="dm_take_key">NEEM DE SLEUTEL MEE!</string>
+    <string name="dm_lights">Zet de lichtschakelaar op stadslicht in plaats van AUTO.</string>
     <string name="aa_title">ANDROID AUTO</string>
     <string name="aa_ready">Telefoon verbonden · Tik om te openen</string>
     <string name="aa_waiting">Sluit je telefoon aan via USB</string>

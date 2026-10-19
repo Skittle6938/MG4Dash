@@ -58,6 +58,16 @@ object ClimateHoldPanel {
         line.addView(value, kit.lp(kit.dp(220), -2))
         line.addView(kit.roundButton(R.drawable.ic_plus, 60) { step(1) })
         panel.addView(line, kit.lp(-1, -2, t = 18))
+        // Délai avant le verrouillage des portes (le temps de sortir avec la clé)
+        var lockSec = prefs.climateHoldLockSec
+        val lockLine = kit.row()
+        lockLine.addView(kit.text(a.getString(R.string.dm_lock_delay), 26f, R.color.text_sub), kit.lp(0, -2, 1f))
+        val lockValue = kit.text("$lockSec s", 30f).apply { gravity = Gravity.CENTER }
+        val lockStep = { d: Int -> lockSec = (lockSec + d * 10).coerceIn(10, 300); lockValue.text = "$lockSec s"; prefs.climateHoldLockSec = lockSec }
+        lockLine.addView(kit.roundButton(R.drawable.ic_minus, 60) { lockStep(-1) })
+        lockLine.addView(lockValue, kit.lp(kit.dp(220), -2))
+        lockLine.addView(kit.roundButton(R.drawable.ic_plus, 60) { lockStep(1) })
+        panel.addView(lockLine, kit.lp(-1, -2, t = 12))
         panel.addView(kit.text(a.getString(R.string.dm_note), 21f, R.color.text_title).apply { maxLines = 4; setLineSpacing(0f, 1.15f) },
             kit.lp(-1, -2, t = 18))
         // Avertissement bien visible : ce mode ne protège pas un enfant ou un animal laissé seul
@@ -65,8 +75,8 @@ object ClimateHoldPanel {
             kit.lp(-1, -2, t = 14))
         val buttons = kit.row()
         buttons.addView(kit.toggleTile(a.getString(R.string.dm_close)) { close() }.apply { textSize = 22f }, kit.lp(0, kit.dp(64), 1f))
-        buttons.addView(kit.toggleTile(a.getString(R.string.dm_activate)) {
-            close(); ClimateHold.start(a, ClimateHold.DURATIONS[idx])
+        buttons.addView(kit.toggleTile(a.getString(R.string.dm_start)) {
+            close(); ClimateHold.start(a, ClimateHold.DURATIONS[idx], lockSec)
         }.apply { textSize = 22f; isSelected = true }, kit.lp(0, kit.dp(64), 1f, l = 16))
         panel.addView(buttons, kit.lp(-1, -2, t = 24))
     }

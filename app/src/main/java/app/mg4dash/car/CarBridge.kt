@@ -100,6 +100,13 @@ object CarBridge {
         return true
     }
 
+    /** Verrouille les portes (sans rien faire si elles le sont déjà). */
+    fun lockDoors(): Boolean {
+        if (doorsLocked() == true) return true
+        if (BuildConfig.MOCK) return true
+        return CarProps.setIntArea(VEHICLE_LOCK, 0x1000000, 1, "portes : verrouiller")
+    }
+
     /** Met la clim en marche ou l'arrête si elle n'est pas déjà dans cet état. */
     fun setHvac(on: Boolean) { if (_state.value.hvacOn != on) togglePower() }
 
