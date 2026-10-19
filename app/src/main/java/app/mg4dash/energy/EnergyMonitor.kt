@@ -99,7 +99,8 @@ object EnergyMonitor {
         sp.getString("em_months", "")!!.split(';').filter { it.contains('=') }.forEach { e ->
             val (k, v) = e.split('=', limit = 2)
             val f = v.split(',').mapNotNull { it.toFloatOrNull() }
-            if (f.size == 5) months[k] = Totals(f[0], f[1], f[2], f[3], f[4].toInt())
+            // Mois datés de 2019 (heure de l'autoradio pas encore remise au réveil, avant la 1.1.8) : écartés
+            if (f.size == 5 && k >= "2024") months[k] = Totals(f[0], f[1], f[2], f[3], f[4].toInt())
         }
         fun publishMonths() {
             while (months.size > MONTHS) months.remove(months.firstKey())
@@ -111,7 +112,9 @@ object EnergyMonitor {
         publishMonths()
 
         scope.launch {
-            var last = System.currentTimeMillis()
+            // Horloge interne : l'heure système de l'autoradio repart en 2019 à chaque réveil puis revient
+            // (journal du 2026-10-19), ce qui donnait des durées négatives et faussait les kWh.
+            var last = android.os.SystemClock.elapsedRealtime()
             var chargeKm = sp.getInt("em_c_km0", -1)
             var monthKm = -1   // compteur au dernier passage
             var pendingKm = 0  // km parcourus pas encore comptés dans le mois en cours
@@ -130,8 +133,9 @@ object EnergyMonitor {
             while (true) {
                 delay(1000)
                 val now = System.currentTimeMillis()
-                val dt = now - last
-                last = now
+                val tick = android.os.SystemClock.elapsedRealtime()
+                val dt = tick - last
+                last = tick
                 val s = CarBridge.state.value
                 val km = s.odometerKm
                 val soc = s.batteryPercent
@@ -154,13 +158,22 @@ object EnergyMonitor {
                     // Filet : % au-dessus du % de départ de la période → recharge forcément passée (période
                     // restée bloquée avant la 1.1.4, quand la recharge vue % par % n'était pas détectée)
                     val soc0 = sp.getInt("em_c_soc0", -1)
+                    // Période incohérente : plus de 60 kWh/100 sur au moins 10 km (kWh d'une période
+                    // précédente gardés avec le km de la nouvelle, voir l'enregistrement ci-dessous)
+                    val c = _sinceCharge.value
+                    val bogus = c.km >= 10 && c.netKwh / c.km * 100f > 60f
                     if (lowSoc >= 0 && soc >= lowSoc + RECHARGE_PCT || soc0 >= 0 && soc >= soc0 + RECHARGE_PCT ||
-                        chargeKm < 0 && km != null) {
-                        Log.i(TAG, "nouvelle période depuis recharge ($lowSoc → $soc %)")
+                        chargeKm < 0 && km != null || bogus) {
+                        Log.i(TAG, if (bogus) "période depuis recharge incohérente (${"%.1f".format(java.util.Locale.US, c.netKwh)} kWh nets " +
+                            "pour ${c.km} km) : remise à zéro" else "nouvelle période depuis recharge ($lowSoc → $soc %)")
                         _sinceCharge.value = Totals()
                         chargeKm = km ?: -1
                         lowSoc = soc
-                        sp.edit().putInt("em_c_km0", chargeKm).putInt("em_c_soc0", soc).putInt("em_c_low", soc).apply()
+                        // Compteurs remis à zéro enregistrés tout de suite avec le km de départ : avant la 1.1.8,
+                        // ils ne l'étaient qu'au prochain enregistrement (30 s, sauté voiture branchée), et
+                        // MG4Dash arrêté entre-temps rechargeait les anciens kWh avec le nouveau km.
+                        sp.edit().putInt("em_c_km0", chargeKm).putInt("em_c_soc0", soc).putInt("em_c_low", soc)
+                            .putFloat("em_c_out", 0f).putFloat("em_c_rgn", 0f).putFloat("em_c_clim", 0f).putFloat("em_c_acc", 0f).apply()
                     } else if (lowSoc < 0 || soc < lowSoc) {
                         lowSoc = soc; sp.edit().putInt("em_c_low", soc).apply()
                     }
@@ -168,7 +181,7 @@ object EnergyMonitor {
 
                 val v = CarProps.getFloat(CarProps.BMS_PACK_VOL)
                 val i = CarProps.getFloat(CarProps.BMS_PACK_CRNT)
-                if (v == null || i == null || v < 100f || v > 900f || dt > 5000 ||
+                if (v == null || i == null || v < 100f || v > 900f || dt <= 0 || dt > 5000 ||
                     VehicleState.isPlugged(s.chargeStatus)) {   // en charge ou V2L : hors conso
                     sohSoc = null; sohKm = null; continue
                 }
@@ -235,12 +248,15 @@ object EnergyMonitor {
                 _sinceStart.value = add(_sinceStart.value, km, startKm)
                 val mk = monthKey(now)
                 val m = months[mk] ?: Totals()
-                val dKm = pendingKm; pendingKm = 0
-                months[mk] = m.copy(
-                    outKwh = m.outKwh + out / 1000f, regenKwh = m.regenKwh + regen / 1000f,
-                    climKwh = m.climKwh + clim / 1000f, accKwh = m.accKwh + acc / 1000f, km = m.km + dKm,
-                )
-                publishMonths()
+                // Heure système pas encore remise à l'heure (2019 au réveil) : mois inconnu, km gardés pour après
+                if (mk >= "2024") {
+                    val dKm = pendingKm; pendingKm = 0
+                    months[mk] = m.copy(
+                        outKwh = m.outKwh + out / 1000f, regenKwh = m.regenKwh + regen / 1000f,
+                        climKwh = m.climKwh + clim / 1000f, accKwh = m.accKwh + acc / 1000f, km = m.km + dKm,
+                    )
+                    publishMonths()
+                }
 
                 if (++saveTick >= 30) {
                     saveTick = 0
