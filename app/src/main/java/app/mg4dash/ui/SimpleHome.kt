@@ -166,7 +166,7 @@ class SimpleHome(private val a: AppCompatActivity) {
             setImageResource(R.drawable.ic_power); setBackgroundResource(R.drawable.bg_chip)
             scaleType = ImageView.ScaleType.FIT_CENTER; setPadding(kit.dp(12), kit.dp(12), kit.dp(12), kit.dp(12))
             setOnClickListener { CarBridge.togglePower() }
-            setOnLongClickListener { if (app.mg4dash.system.Prefs(context).preCoolEnabled) { app.mg4dash.climate.PreCoolPanel.show(context as android.app.Activity); true } else false }
+            setOnLongClickListener { if (app.mg4dash.system.Prefs(context).dogModeEnabled) { app.mg4dash.climate.DogModePanel.show(context as android.app.Activity); true } else false }
         }
         chipAc = kit.toggleTile(a.getString(R.string.chip_ac)) { CarBridge.toggleAc() }
         chipAuto = kit.toggleTile(a.getString(R.string.chip_auto)) { CarBridge.toggleAuto() }

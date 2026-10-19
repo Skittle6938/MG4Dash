@@ -388,37 +388,26 @@
     <string name="fx_peak">Pico %1$s kW · %2$s CV</string>
     <string name="st_xpower">MG4 XPower (320 kW)</string>
     <string name="st_xpower_desc">Se reconoce sola en cuanto se miden más de 350 CV: el coche no indica su versión. Ajusta la escala de potencia y el umbral de la función especial a fondo.</string>
-    <string name="st_precool">Preclimatización programada (pulsación larga en el botón de encendido del clima)</string>
-    <string name="st_precool_desc">Cuando se va con la llave, MG4Dash cierra y apaga el coche y luego enciende el clima a las horas previstas (issue #26).</string>
-    <string name="pc_title">PRECLIMATIZACIÓN PROGRAMADA</string>
-    <string name="pc_lock_delay">Cerrar las puertas tras</string>
-    <string name="pc_start_delay">Primer ciclo tras el cierre</string>
-    <string name="pc_duration">Duración de cada ciclo</string>
-    <string name="pc_runs">Número de ciclos</string>
-    <string name="pc_gap">Pausa entre ciclos</string>
-    <string name="pc_note" formatted="false">El clima arranca con sus ajustes actuales (temperatura, ventilación, A/C). Todo se detiene si se abre una puerta o por debajo del 20 % de batería.</string>
-    <string name="pc_close">Cerrar</string>
-    <string name="pc_activate">Activar</string>
-    <string name="pc_confirm_title">¡Llévese la llave!</string>
-    <string name="pc_confirm_msg">Llévese la llave, cierre las puertas y NO bloquee usted el coche: MG4Dash lo bloquea tras el retardo y lo apaga. No deje la llave dentro del coche.</string>
-    <string name="pc_confirm_go">Tengo la llave, activar</string>
-    <string name="pc_lock_at">Puertas cerradas a las %1$s</string>
-    <string name="pc_stop">Detener el programa</string>
-    <string name="pc_lock_in">Cierre en</string>
-    <string name="pc_clim_on">CLIMA ENCENDIDO</string>
-    <string name="pc_clim_off">CLIMA EN</string>
-    <string name="pc_clim_refused">CLIMA RECHAZADO</string>
-    <string name="pc_state_done">PRECLIMATIZACIÓN TERMINADA</string>
-    <string name="pc_state_battery" formatted="false">DETENIDA: BATERÍA BAJO 20 %</string>
-    <string name="pc_state_failed">EL COCHE RECHAZÓ EL CLIMA</string>
-    <string name="pc_inside">INTERIOR</string>
-    <string name="pc_outside">Exterior %1$s</string>
-    <string name="pc_until_start">antes del próximo ciclo</string>
-    <string name="pc_until_end">restante en este ciclo</string>
-    <string name="pc_set">Ajustado a %1$s</string>
-    <string name="pc_battery">Batería %1$s</string>
-    <string name="pc_hold_stop">Mantener para detener</string>
-    <string name="pc_run_line">Ciclo %1$d · %2$s → %3$s</string>
+    <string name="st_dogmode">Modo perro (pulsación larga en el botón de encendido del clima)</string>
+    <string name="st_dogmode_desc">Mantiene el coche encendido con el clima en marcha mientras no está, con una gran pantalla que muestra la temperatura interior a los transeúntes.</string>
+    <string name="dm_title">MODO PERRO</string>
+    <string name="dm_max">Duración máxima</string>
+    <string name="dm_unlimited">Ilimitada</string>
+    <string name="dm_note" formatted="false">El coche sigue encendido y el clima mantiene sus ajustes actuales. El modo termina por debajo del 20 % de batería o al cumplirse la duración máxima (clima parado y coche apagado), o si el coche se mueve.</string>
+    <string name="dm_close">Cerrar</string>
+    <string name="dm_activate">Activar</string>
+    <string name="dm_message">Mi conductor vuelve pronto. No se preocupe: el clima está encendido y estoy bien.</string>
+    <string name="dm_inside">INTERIOR</string>
+    <string name="dm_outside">Exterior %1$s</string>
+    <string name="dm_clim_on">CLIMA ENCENDIDO</string>
+    <string name="dm_clim_off">CLIMA APAGADO</string>
+    <string name="dm_left">restante</string>
+    <string name="dm_since">desde la activación</string>
+    <string name="dm_set">ajustado a %1$s</string>
+    <string name="dm_battery">Batería %1$s</string>
+    <string name="dm_hold_stop">Mantener para detener</string>
+    <string name="dm_state_done">TERMINADO · COCHE APAGADO</string>
+    <string name="dm_state_battery" formatted="false">DETENIDO: BATERÍA BAJO 20 %</string>
     <string name="aa_title">ANDROID AUTO</string>
     <string name="aa_ready">Teléfono conectado · Pulse para abrir</string>
     <string name="aa_waiting">Conecte su teléfono por USB</string>
