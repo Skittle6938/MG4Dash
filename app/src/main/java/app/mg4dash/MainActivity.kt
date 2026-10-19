@@ -900,6 +900,7 @@ class MainActivity : AppCompatActivity() {
                 host.overlay.add(fx); fxHost = host
                 fx.corner = if (wide) 0f else resources.getDimension(R.dimen.radius_panel)
                 fx.attach(host, bar, under)
+                fx.shake = b.root
             }
             fx.update(if (plugged) 0f else kw ?: 0f, bar.peakKw * 0.8f, bar.peakKw)
         }
