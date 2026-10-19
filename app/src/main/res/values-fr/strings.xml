@@ -429,6 +429,14 @@
     <string name="dm_message_wait">Le conducteur revient bientôt. La clim se mettra en marche à %1$s.</string>
     <string name="dm_screen_off">Écran éteint une fois verrouillé</string>
     <string name="dm_screen_off_hint">Dormir dedans, discrétion · un toucher l\'affiche 10 s</string>
+    <string name="dm_thermo">Anti-surchauffe</string>
+    <string name="dm_max_temp">Température intérieure maxi</string>
+    <string name="dm_thermo_rule">clim au-dessus de %1$s, arrêt sous %2$s</string>
+    <string name="dm_hyst">Écart de retour</string>
+    <string name="dm_min_switch">Temps mini entre deux bascules</string>
+    <string name="dm_note_thermo" formatted="false">La voiture reste allumée et verrouillée, clim coupée ; la clim ne démarre que si l\'habitacle dépasse le maximum, avec ses réglages actuels, et s\'arrête sous le maximum moins l\'écart. Arrêt sous 20 % de batterie ou au déverrouillage des portes.</string>
+    <string name="dm_watch">SURVEILLANCE</string>
+    <string name="dm_message_thermo">Le conducteur revient bientôt. La clim se met en marche si l\'habitacle dépasse %1$s.</string>
     <string name="aa_title">ANDROID AUTO</string>
     <string name="aa_ready">Téléphone connecté · Appuyer pour ouvrir</string>
     <string name="aa_waiting">Branchez votre téléphone en USB</string>

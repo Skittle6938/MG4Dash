@@ -429,6 +429,14 @@
     <string name="dm_message_wait">El conductor vuelve pronto. El clima se encenderá a las %1$s.</string>
     <string name="dm_screen_off">Pantalla apagada al cerrar</string>
     <string name="dm_screen_off_hint">Para dormir o ser discreto · un toque lo muestra 10 s</string>
+    <string name="dm_thermo">Anti-sobrecalentamiento</string>
+    <string name="dm_max_temp">Temperatura interior máxima</string>
+    <string name="dm_thermo_rule">clima por encima de %1$s, apagado por debajo de %2$s</string>
+    <string name="dm_hyst">Margen de retorno</string>
+    <string name="dm_min_switch">Tiempo mínimo entre cambios</string>
+    <string name="dm_note_thermo" formatted="false">El coche sigue encendido y cerrado con el clima apagado; el clima solo arranca si el habitáculo supera el máximo, con sus ajustes actuales, y se detiene por debajo del máximo menos el margen. Se detiene por debajo del 20 % de batería o al abrir.</string>
+    <string name="dm_watch">VIGILANCIA</string>
+    <string name="dm_message_thermo">El conductor vuelve pronto. El clima se enciende si el interior supera %1$s.</string>
     <string name="aa_title">ANDROID AUTO</string>
     <string name="aa_ready">Teléfono conectado · Pulse para abrir</string>
     <string name="aa_waiting">Conecte su teléfono por USB</string>

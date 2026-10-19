@@ -101,6 +101,20 @@ class Prefs(context: Context) {
     var climateHoldScreenOff: Boolean
         get() = sp.getBoolean("climhold_screen_off", false)
         set(v) = sp.edit().putBoolean("climhold_screen_off", v).apply()
+    /** Clim maintenue : 0 = tout de suite, 1 = à une heure précise, 2 = anti-surchauffe. */
+    var climateHoldMode: Int
+        get() = sp.getInt("climhold_mode", if (sp.getBoolean("climhold_scheduled", false)) 1 else 0)
+        set(v) = sp.edit().putInt("climhold_mode", v).apply()
+    /** Anti-surchauffe : température maxi (°C), écart de retour (°C), temps mini entre deux bascules (min). */
+    var climateHoldMaxTemp: Int
+        get() = sp.getInt("climhold_max_temp", 30)
+        set(v) = sp.edit().putInt("climhold_max_temp", v).apply()
+    var climateHoldHyst: Int
+        get() = sp.getInt("climhold_hyst", 3)
+        set(v) = sp.edit().putInt("climhold_hyst", v).apply()
+    var climateHoldMinSwitch: Int
+        get() = sp.getInt("climhold_min_switch", 5)
+        set(v) = sp.edit().putInt("climhold_min_switch", v).apply()
     var climateHoldRuns: Int
         get() = sp.getInt("climhold_runs", 1)
         set(v) = sp.edit().putInt("climhold_runs", v).apply()

@@ -429,6 +429,14 @@
     <string name="dm_message_wait">Der Fahrer ist gleich zurück. Die Klimaanlage startet um %1$s.</string>
     <string name="dm_screen_off">Bildschirm aus nach dem Verriegeln</string>
     <string name="dm_screen_off_hint">Zum Schlafen oder diskret · Tippen zeigt es 10 s</string>
+    <string name="dm_thermo">Überhitzungsschutz</string>
+    <string name="dm_max_temp">Maximale Innentemperatur</string>
+    <string name="dm_thermo_rule">Klima über %1$s, aus unter %2$s</string>
+    <string name="dm_hyst">Rückkehrabstand</string>
+    <string name="dm_min_switch">Mindestzeit zwischen Umschaltungen</string>
+    <string name="dm_note_thermo" formatted="false">Das Auto bleibt eingeschaltet und verriegelt, Klima aus; die Klimaanlage startet erst über dem Maximum mit ihren aktuellen Einstellungen und stoppt unter Maximum minus Abstand. Stopp unter 20 % Akku oder beim Entriegeln.</string>
+    <string name="dm_watch">ÜBERWACHUNG</string>
+    <string name="dm_message_thermo">Der Fahrer ist gleich zurück. Die Klimaanlage startet, wenn es innen über %1$s wird.</string>
     <string name="aa_title">ANDROID AUTO</string>
     <string name="aa_ready">Telefon verbunden · Zum Öffnen tippen</string>
     <string name="aa_waiting">Telefon per USB verbinden</string>

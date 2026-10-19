@@ -150,7 +150,7 @@ class ClimateHoldActivity : AppCompatActivity() {
         val now = SystemClock.elapsedRealtime()
         // Température intérieure relue toutes les 10 s (lecture directe de la voiture)
         if (now - cabinAt > 10_000) { cabinAt = now; Thread { cabin = CarBridge.cabinTemp() }.start() }
-        val t = cabin
+        val t = if (st.thermo && st.cabin != null) st.cabin else cabin
         inside.text = t?.let { String.format(Locale.getDefault(), "%.0f°", it) } ?: "—"
         inside.setTextColor(kit.color(when {
             t == null -> R.color.text_sub
@@ -179,7 +179,16 @@ class ClimateHoldActivity : AppCompatActivity() {
                 timeLabel.text = getString(R.string.dm_until_start)
                 message.text = getString(R.string.dm_message_wait, next?.let { hhmm(it) } ?: "")
             }
-            ClimateHold.Phase.ON -> {
+            ClimateHold.Phase.ON -> if (st.thermo) {
+                // Anti-surchauffe : surveillance, clim seulement au-dessus du seuil
+                state.text = getString(if (on) R.string.dm_clim_on else R.string.dm_watch)
+                state.setTextColor(kit.color(if (on) R.color.accent_cold else R.color.text_value))
+                if (st.endAt > 0) { time.text = left(st.endAt - now); timeLabel.text = getString(R.string.dm_left) }
+                else { time.text = left(now - st.startAt); timeLabel.text = getString(R.string.dm_since) }
+                val max = String.format(Locale.getDefault(), "%.0f°", st.maxTemp)
+                timeLabel.text = timeLabel.text.toString() + " · " + getString(R.string.dm_thermo_rule, max, String.format(Locale.getDefault(), "%.0f°", st.maxTemp - st.hyst))
+                message.text = getString(R.string.dm_message_thermo, max)
+            } else {
                 message.text = getString(R.string.dm_message)
                 state.text = getString(if (on) R.string.dm_clim_on else R.string.dm_clim_off)
                 state.setTextColor(kit.color(if (on) R.color.accent_cold else R.color.accent_heat))
