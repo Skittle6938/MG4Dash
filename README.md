@@ -24,7 +24,7 @@ Long press the Android Auto button in the dock to make it open Android Auto, Car
 ### Bottom-right widget
 Swipe or tap it to switch between three pages, all readable at a glance while driving:
 - **Trip energy**: one big bar and the share of driving, climate control and accessories since start-up (details on the Energy page).
-- **Live power**: kW drawn from or recovered into the battery, refreshed every second, on a two-way bar from zero (scale following the battery model, with a 10 s peak marker), with the trip average, the battery voltage and current (green while regenerating).
+- **Live power**: kW drawn from or recovered into the battery, refreshed every second, on a two-way bar from zero (scale following the battery model, with a 10 s peak marker), with the trip average, the battery voltage and current (green while regenerating). It also hides a **full-throttle special**: floor it and see what happens (Settings › Energy to pick it or turn it off).
 - **Phone**: three favourite contacts chosen from the phone book (tap to call, long press to change).
 
 | | |

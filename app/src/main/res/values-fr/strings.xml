@@ -378,16 +378,16 @@
     <string name="en_gun_unlock">DÉVERROUILLER LE PISTOLET</string>
     <string name="en_gun_lock">VERROUILLER LE PISTOLET</string>
     <string name="power_off_driving">Pas en roulant</string>
-    <string name="st_power_fx">Animation pleine puissance (widget Puissance en direct) :</string>
-    <string name="st_power_fx_desc" formatted="false">Se joue au-delà de 80 % de la puissance maximale de la voiture, puis affiche le pic atteint (kW et ch) pendant 10 secondes.</string>
+    <string name="st_power_fx">Fonction spéciale pied au plancher (widget Puissance en direct) :</string>
+    <string name="st_power_fx_desc" formatted="false">Mettez le pied au plancher (au-delà de 80 % de la puissance maximale de la voiture) et vous verrez bien… puis le pic atteint (kW et ch) reste affiché 10 secondes.</string>
     <string name="fx_none">Aucune</string>
+    <string name="fx_random">Aléatoire</string>
     <string name="fx_rocket">Fusée</string>
     <string name="fx_lightning">Éclair</string>
     <string name="fx_flames">Flammes</string>
-    <string name="fx_preview">Aperçu</string>
     <string name="fx_peak">Pic %1$s kW · %2$s ch</string>
     <string name="st_xpower">MG4 XPower (320 kW)</string>
-    <string name="st_xpower_desc" formatted="false">Reconnue d\'elle-même dès que plus de 350 ch sont mesurés : la voiture ne donne pas sa version. Règle l\'échelle de puissance et le seuil de 80 % de l\'animation.</string>
+    <string name="st_xpower_desc">Reconnue d\'elle-même dès que plus de 350 ch sont mesurés : la voiture ne donne pas sa version. Règle l\'échelle de puissance et le seuil de la fonction pied au plancher.</string>
     <string name="aa_title">ANDROID AUTO</string>
     <string name="aa_ready">Téléphone connecté · Appuyer pour ouvrir</string>
     <string name="aa_waiting">Branchez votre téléphone en USB</string>

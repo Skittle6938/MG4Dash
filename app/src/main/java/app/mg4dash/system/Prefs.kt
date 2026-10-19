@@ -86,9 +86,9 @@ class Prefs(context: Context) {
         get() = sp.getBoolean("xpower", false)
         set(v) = sp.edit().putBoolean("xpower", v).apply()
 
-    /** Animation pleine puissance du widget Puissance : 0 = aucune, 1 = fusée, 2 = éclair, 3 = flammes. */
+    /** Animation pleine puissance du widget Puissance : 0 = aucune, 1 = fusée, 2 = éclair, 3 = flammes, 4 = au hasard. */
     var powerFx: Int
-        get() = sp.getInt("power_fx", 1)
+        get() = sp.getInt("power_fx", 4)
         set(v) = sp.edit().putInt("power_fx", v).apply()
 
     /** Widget secondaire de la colonne droite : 0 = trajet, 1 = statut, 2 = météo compacte. */

@@ -378,16 +378,16 @@
     <string name="en_gun_unlock">KABEL ENTRIEGELN</string>
     <string name="en_gun_lock">KABEL VERRIEGELN</string>
     <string name="power_off_driving">Nicht während der Fahrt</string>
-    <string name="st_power_fx">Volllast-Animation (Widget Leistung live):</string>
-    <string name="st_power_fx_desc" formatted="false">Startet über 80 % der Höchstleistung des Autos und zeigt dann 10 Sekunden lang die erreichte Spitze (kW und PS).</string>
+    <string name="st_power_fx">Vollgas-Spezialfunktion (Widget Leistung live):</string>
+    <string name="st_power_fx_desc" formatted="false">Voll aufs Pedal (über 80 % der Höchstleistung des Autos) und lassen Sie sich überraschen… danach bleibt die erreichte Spitze (kW und PS) 10 Sekunden lang sichtbar.</string>
     <string name="fx_none">Keine</string>
+    <string name="fx_random">Zufällig</string>
     <string name="fx_rocket">Rakete</string>
     <string name="fx_lightning">Blitz</string>
     <string name="fx_flames">Flammen</string>
-    <string name="fx_preview">Vorschau</string>
     <string name="fx_peak">Spitze %1$s kW · %2$s PS</string>
     <string name="st_xpower">MG4 XPower (320 kW)</string>
-    <string name="st_xpower_desc" formatted="false">Wird automatisch erkannt, sobald mehr als 350 PS gemessen werden: das Auto meldet seine Version nicht. Legt die Leistungsskala und die 80-%-Schwelle der Animation fest.</string>
+    <string name="st_xpower_desc">Wird automatisch erkannt, sobald mehr als 350 PS gemessen werden: das Auto meldet seine Version nicht. Legt die Leistungsskala und die Schwelle der Vollgas-Spezialfunktion fest.</string>
     <string name="aa_title">ANDROID AUTO</string>
     <string name="aa_ready">Telefon verbunden · Zum Öffnen tippen</string>
     <string name="aa_waiting">Telefon per USB verbinden</string>
