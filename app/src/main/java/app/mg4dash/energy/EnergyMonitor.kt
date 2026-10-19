@@ -118,6 +118,8 @@ object EnergyMonitor {
             var startKm = -1
             // Plus bas % de la période en cours (avant la 1.1.4 : dernier % vu, « em_last_soc »)
             var lowSoc = sp.getInt("em_c_low", sp.getInt("em_last_soc", -1))
+            Log.i(TAG, "depuis recharge : départ ${sp.getInt("em_c_soc0", -1)} % à $chargeKm km, plus bas $lowSoc %, " +
+                "${"%.2f".format(java.util.Locale.US, _sinceCharge.value.netKwh)} kWh nets")
             var saveTick = 0
             var sohSoc: Float? = null      // % à la seconde précédente, null hors observation
             var sohPrecise = false

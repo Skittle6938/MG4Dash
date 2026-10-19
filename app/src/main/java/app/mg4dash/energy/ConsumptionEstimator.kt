@@ -43,6 +43,7 @@ object ConsumptionEstimator {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     private var tripStartKm: Int? = null
     private var tripStartSoc: Int? = null
+    private var lastShown: Boolean? = null
 
     fun start(context: Context) {
         val prefs = Prefs(context)
@@ -68,7 +69,15 @@ object ConsumptionEstimator {
                     sp.edit().putInt("ref_low", soc).apply()
                 }
                 // Mesure par puissance batterie si disponible, sinon estimation par le % batterie
-                _average.value = EnergyMonitor.sinceCharge.value.per100 ?: estimate(km - refKm, refSoc - soc, capacity)
+                val sc = EnergyMonitor.sinceCharge.value
+                _average.value = sc.per100 ?: estimate(km - refKm, refSoc - soc, capacity)
+                // Diagnostic (conso « — » sur l'accueil) : références à chaque apparition / disparition
+                val shown = _average.value != null
+                if (shown != lastShown) {
+                    lastShown = shown
+                    Log.i(TAG, "moyenne ${_average.value ?: "—"} : $km km (réf $refKm), $soc % (réf $refSoc, plus bas $lowSoc), " +
+                        "capacité $capacity kWh ; mesure depuis recharge ${sc.km} km, ${"%.2f".format(java.util.Locale.US, sc.netKwh)} kWh nets")
+                }
 
                 // Trajet en cours
                 if (tripStartKm == null) { tripStartKm = km; tripStartSoc = soc }
