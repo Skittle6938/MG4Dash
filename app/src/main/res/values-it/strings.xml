@@ -429,6 +429,14 @@
     <string name="dm_message_wait">Il conducente torna presto. Il clima partirà alle %1$s.</string>
     <string name="dm_screen_off">Schermo spento dopo la chiusura</string>
     <string name="dm_screen_off_hint">Per dormire o restare discreti · un tocco lo mostra 10 s</string>
+    <string name="dm_thermo">Anti-surriscaldamento</string>
+    <string name="dm_max_temp">Temperatura interna massima</string>
+    <string name="dm_thermo_rule">clima sopra %1$s, spento sotto %2$s</string>
+    <string name="dm_hyst">Scarto di ritorno</string>
+    <string name="dm_min_switch">Tempo minimo tra due commutazioni</string>
+    <string name="dm_note_thermo" formatted="false">L\'auto resta accesa e chiusa con il clima spento; il clima parte solo se l\'abitacolo supera il massimo, con le impostazioni attuali, e si ferma sotto il massimo meno lo scarto. Si ferma sotto il 20 % di batteria o allo sblocco.</string>
+    <string name="dm_watch">SORVEGLIANZA</string>
+    <string name="dm_message_thermo">Il conducente torna presto. Il clima si accende se l\'abitacolo supera %1$s.</string>
     <string name="aa_title">ANDROID AUTO</string>
     <string name="aa_ready">Telefono connesso · Tocca per aprire</string>
     <string name="aa_waiting">Collega il telefono via USB</string>
