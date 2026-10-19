@@ -115,7 +115,6 @@
     <string name="en_stock">Original-Energie-App  ›</string>
     <string name="en_charging">LADEN</string>
     <string name="en_limit">LADELIMIT</string>
-    <string name="en_auto_stop">AUTO-STOPP</string>
     <string name="en_ac_current">AC-LADESTROM</string>
     <string name="en_max">Max</string>
     <string name="en_scheduled">GEPLANTES LADEN</string>
@@ -135,8 +134,6 @@
     <string name="en_power">Leistung %1$s kW</string>
     <string name="en_ends_in">fertig in %1$d h %2$02d</string>
     <string name="en_no_limit" formatted="false">Kein Limit: lädt bis 100 %.</string>
-    <string name="en_enforced">MG4Dash stoppt das Laden bei %1$d %% (Bildschirm an).</string>
-    <string name="en_car_limit">" Fahrzeug: %1$d %%."</string>
     <string name="en_car_only">Limit nur an das Fahrzeug übermittelt</string>
     <string name="en_drive">Fahren</string>
     <string name="en_climate">Klimaanlage</string>
@@ -171,6 +168,12 @@
     <string name="vh_speed">Geschwindigkeit</string>
     <string name="vh_outside">Außentemperatur</string>
     <string name="vh_charge">Laden</string>
+    <string name="vh_soh">Batteriezustand (geschätzt)</string>
+    <string name="vh_soh_detail">%1$d %% über 30 Tage, %2$d %% seit der ersten Messung (%3$d Messung(en), verglichen mit einer neuen %4$d-kWh-Batterie).</string>
+    <string name="vh_soh_progress">Messung beim Fahren: %1$s %% der nötigen 15 %% Abnahme, über Fahrten und Tage summiert.</string>
+    <string name="vh_soh_provisional">" Vorläufig: %1$s kWh nutzbar."</string>
+    <string name="vh_soh_model">Neue Batterie</string>
+    <string name="vh_soh_disclaimer">Schätzung von MG4Dash, keine offizielle Messung. Funktion noch im Test.</string>
     <string name="st_home">STARTBILDSCHIRM</string>
     <string name="st_home_desc">„SAIC-Startbildschirm ersetzen“ deaktiviert nur den originalen Startbildschirm (sein Dienst läuft weiter). Der Wartungsmodus aktiviert ihn wieder, z. B. vor einem Werkstatttermin.</string>
     <string name="st_replace">SAIC-Startbildschirm ersetzen</string>
@@ -321,13 +324,11 @@
     <string name="dock_slot_wifi">WLAN-Einstellungen</string>
     <string name="dock_slot_wifi_short">WLAN</string>
     <string name="st_cap_car">Vom Fahrzeug gelesen: %1$s kWh.</string>
-    <string name="st_cap_none" formatted="false">Das Fahrzeug liefert sie nicht: MG4Dash misst sie nach 15 % Abnahme seit dem letzten Laden.</string>
+    <string name="st_cap_none" formatted="false">Das Fahrzeug liefert sie nicht: MG4Dash misst sie beim Fahren, nach 15 % Abnahme (über mehrere Fahrten summiert).</string>
     <string name="st_cap_manual">Manuell eingestellt (Auto: zurück zum Fahrzeug- oder Messwert).</string>
     <string name="st_cap_auto">Auto</string>
     <string name="st_cap_est">Von MG4Dash gemessen: %1$s kWh (%2$d Messung(en) zwischen zwei Ladungen, über 30 Tage geglättet).</string>
-    <string name="st_cap_est_current">Von MG4Dash auf der aktuellen Ladung gemessen: %1$s kWh (vorläufig).</string>
-    <string name="st_soh">Batteriezustand (geschätzt): %1$d %% über 30 Tage, %2$d %% seit der ersten Messung (%3$d Messungen, verglichen mit einer neuen %4$d-kWh-Batterie).</string>
-    <string name="st_soh_none">Batteriezustand: gemessen ab dem nächsten Laden (15 %% Abnahme nötig), verglichen mit einer neuen %1$d-kWh-Batterie. Modell wählen:</string>
+    <string name="st_cap_est_current">Wird von MG4Dash gemessen: %1$s kWh (vorläufig).</string>
     <string name="sw_batt_temp">Batterie %1$d °C</string>
     <string name="st_map_vdock">Senkrechte Leiste links (alle Bildschirme und Radio Dash): %1$s</string>
     <string name="st_map_titles">Widget-Titel ausblenden (alle Layouts): %1$s</string>

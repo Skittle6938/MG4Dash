@@ -108,9 +108,10 @@ class SettingsActivity : AppCompatActivity() {
             capSrc.text = when {
                 prefs.batteryKwhManual -> getString(R.string.st_cap_manual)
                 car != null -> getString(R.string.st_cap_car, String.format(Locale.getDefault(), "%.1f", car))
-                est != null && est.second > 0 -> getString(R.string.st_cap_est, String.format(Locale.getDefault(), "%.1f", est.first), est.second)
-                est != null -> getString(R.string.st_cap_est_current, String.format(Locale.getDefault(), "%.1f", est.first))
-                else -> getString(R.string.st_cap_none)
+                est != null -> getString(R.string.st_cap_est, String.format(Locale.getDefault(), "%.1f", est.first), est.second)
+                else -> app.mg4dash.energy.BatteryCapacity.progress(this).second
+                    ?.let { getString(R.string.st_cap_est_current, String.format(Locale.getDefault(), "%.1f", it)) }
+                    ?: getString(R.string.st_cap_none)
             }
         }
         showCap()
@@ -119,20 +120,6 @@ class SettingsActivity : AppCompatActivity() {
             button("+ 0.5 kWh") { prefs.batteryKwhManual = true; prefs.batteryKwh = (prefs.batteryKwh + 0.5f).coerceAtMost(100f); showCap() },
             button(getString(R.string.st_cap_auto)) { prefs.batteryKwhManual = false; app.mg4dash.energy.BatteryCapacity.apply(this); showCap() },
         )
-        // Santé batterie : capacité mesurée ÷ capacité d'origine du modèle
-        val soh = text(energy, "", 18f, R.color.text_value)
-        fun showSoh() {
-            val h = app.mg4dash.energy.BatteryCapacity.health(this)
-            val n = app.mg4dash.energy.BatteryCapacity.samples(this).size
-            soh.text = if (h == null) getString(R.string.st_soh_none, prefs.batteryModel)
-                else getString(R.string.st_soh, h.first, h.second, n, prefs.batteryModel)
-        }
-        showSoh()
-        row(energy, *app.mg4dash.energy.BatteryCapacity.MODELS.map { (gross, _) ->
-            gross
-        }.let { models ->
-            choiceButtons(models.map { "$it kWh" }, { models.indexOf(prefs.batteryModel) }) { prefs.batteryModel = models[it]; showSoh() }
-        })
         text(energy, getString(R.string.st_capacity_desc), 16f, R.color.text_title)
 
         // ════ Colonne droite : système, connexions, diagnostic ════

@@ -56,13 +56,16 @@ object ConsumptionEstimator {
                 // Référence « depuis la dernière recharge »
                 var refKm = sp.getInt("ref_km", -1)
                 var refSoc = sp.getInt("ref_soc", -1)
-                val lastSoc = sp.getInt("last_soc", -1)
-                if (refKm < 0 || refSoc < 0 || km < refKm || (lastSoc >= 0 && soc > lastSoc + 1)) {
+                // Recharge : le % remonte de quelques points au-dessus du plus bas depuis la référence
+                // (même suivie % par %, MG4Dash pouvant tourner en veille pendant la charge)
+                val lowSoc = sp.getInt("ref_low", sp.getInt("last_soc", -1))
+                if (refKm < 0 || refSoc < 0 || km < refKm || (lowSoc >= 0 && soc >= lowSoc + EnergyMonitor.RECHARGE_PCT)) {
                     Log.i(TAG, "nouvelle référence : $km km, $soc %")
                     refKm = km; refSoc = soc
-                    sp.edit().putInt("ref_km", km).putInt("ref_soc", soc).apply()
+                    sp.edit().putInt("ref_km", km).putInt("ref_soc", soc).putInt("ref_low", soc).apply()
+                } else if (lowSoc < 0 || soc < lowSoc) {
+                    sp.edit().putInt("ref_low", soc).apply()
                 }
-                if (soc != lastSoc) sp.edit().putInt("last_soc", soc).apply()
                 // Mesure par puissance batterie si disponible, sinon estimation par le % batterie
                 _average.value = EnergyMonitor.sinceCharge.value.per100 ?: estimate(km - refKm, refSoc - soc, capacity)
 

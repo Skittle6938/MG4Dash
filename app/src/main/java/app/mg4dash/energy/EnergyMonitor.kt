@@ -33,6 +33,8 @@ import kotlinx.coroutines.launch
 object EnergyMonitor {
     private const val TAG = "EnergyMon"
     private const val SLEEP_GAP_MS = 10 * 60_000L
+    /** Remontée du % (points) qui marque une recharge ; la récupération en descente reste en dessous. */
+    const val RECHARGE_PCT = 3
 
     data class Totals(
         val outKwh: Float = 0f,      // énergie sortie de la batterie
@@ -114,8 +116,11 @@ object EnergyMonitor {
             var monthKm = -1   // compteur au dernier passage
             var pendingKm = 0  // km parcourus pas encore comptés dans le mois en cours
             var startKm = -1
-            var lastSoc = sp.getInt("em_last_soc", -1)
+            // Plus bas % de la période en cours (avant la 1.1.4 : dernier % vu, « em_last_soc »)
+            var lowSoc = sp.getInt("em_c_low", sp.getInt("em_last_soc", -1))
             var saveTick = 0
+            var sohSoc: Float? = null      // % à la seconde précédente, null hors observation
+            var sohPrecise = false
             val learned = HashMap<String, Float>()
             fun get(k: String, def: Float) = learned.getOrPut(k) { sp.getFloat(k, def) }
             fun put(k: String, v: Float) { learned[k] = v }
@@ -138,31 +143,42 @@ object EnergyMonitor {
                     if (km != null) startKm = km
                     _sinceStart.value = Totals()
                 }
-                // Recharge : le % remonte → nouvelle période « depuis la recharge »
+                // Recharge : le % remonte d'au moins RECHARGE_PCT points au-dessus du plus bas de la
+                // période → nouvelle période « depuis la recharge ». Comparer au plus bas (et non au %
+                // précédent) couvre aussi une recharge suivie % par % : MG4Dash peut tourner en veille
+                // pendant la charge (constaté le 2026-10-18, compteurs non remis à zéro).
                 if (soc != null) {
-                    if (lastSoc >= 0 && soc > lastSoc + 1 || chargeKm < 0 && km != null) {
-                        Log.i(TAG, "nouvelle période depuis recharge ($soc %)")
-                        // La période qui se termine devient une mesure de capacité (santé batterie)
-                        val soc0 = sp.getInt("em_c_soc0", -1)
-                        if (soc0 > 0 && lastSoc in 0 until soc0) BatteryCapacity.closePeriod(context, _sinceCharge.value.netKwh, soc0 - lastSoc)
+                    if (lowSoc >= 0 && soc >= lowSoc + RECHARGE_PCT || chargeKm < 0 && km != null) {
+                        Log.i(TAG, "nouvelle période depuis recharge ($lowSoc → $soc %)")
                         _sinceCharge.value = Totals()
                         chargeKm = km ?: -1
-                        sp.edit().putInt("em_c_km0", chargeKm).putInt("em_c_soc0", soc).apply()
-                    }
-                    if (soc != lastSoc) {
-                        lastSoc = soc; sp.edit().putInt("em_last_soc", soc).apply()
-                        // Capacité : énergie nette mesurée depuis la recharge / baisse du %
-                        val soc0 = sp.getInt("em_c_soc0", -1)
-                        if (soc0 > soc) _sinceCharge.value.let { BatteryCapacity.learn(context, it.netKwh, soc0 - soc) }
+                        lowSoc = soc
+                        sp.edit().putInt("em_c_km0", chargeKm).putInt("em_c_soc0", soc).putInt("em_c_low", soc).apply()
+                    } else if (lowSoc < 0 || soc < lowSoc) {
+                        lowSoc = soc; sp.edit().putInt("em_c_low", soc).apply()
                     }
                 }
 
                 val v = CarProps.getFloat(CarProps.BMS_PACK_VOL)
                 val i = CarProps.getFloat(CarProps.BMS_PACK_CRNT)
-                if (v == null || i == null || v < 100f || v > 900f || dt > 5000) continue
-                if (VehicleState.isPlugged(s.chargeStatus)) continue   // en charge ou V2L : hors conso
+                if (v == null || i == null || v < 100f || v > 900f || dt > 5000 ||
+                    VehicleState.isPlugged(s.chargeStatus)) {   // en charge ou V2L : hors conso
+                    sohSoc = null; continue
+                }
                 val p = v * i
                 val h = dt / 3_600_000f
+                // Santé batterie : énergie de cette seconde et baisse du % depuis la seconde précédente.
+                // Le % au dixième si la voiture le donne (même source tout au long d'une séquence observée).
+                val precise = s.socPrecise?.takeIf { soc != null && kotlin.math.abs(it - soc) < 1.5f }
+                val cur = if (sohPrecise) precise else soc?.toFloat()
+                val prev = sohSoc
+                if (prev == null || cur == null || kotlin.math.abs(prev - cur) > 2f) {
+                    sohPrecise = precise != null
+                    sohSoc = precise ?: soc?.toFloat()
+                } else {
+                    BatteryCapacity.accumulate(context, p * h / 1000f, prev - cur)
+                    sohSoc = cur
+                }
                 // Anciens firmwares (SWI68, #19) : pas de vitesse véhicule, la récupération restait à 0 kWh ;
                 // repli sur la vitesse GPS récente.
                 val speed = s.speedKmh ?: app.mg4dash.map.LocationRepo.location.value
@@ -224,6 +240,7 @@ object EnergyMonitor {
                         .putFloat("em_c_clim", c.climKwh).putFloat("em_c_acc", c.accKwh)
                     e.apply()
                     saveMonths()
+                    BatteryCapacity.flush(context)
                 }
             }
         }

@@ -115,7 +115,6 @@
     <string name="en_stock">App Energia originale  ›</string>
     <string name="en_charging">RICARICA</string>
     <string name="en_limit">LIMITE DI RICARICA</string>
-    <string name="en_auto_stop">STOP AUTO</string>
     <string name="en_ac_current">CORRENTE DI RICARICA AC</string>
     <string name="en_max">Max</string>
     <string name="en_scheduled">RICARICA PROGRAMMATA</string>
@@ -135,8 +134,6 @@
     <string name="en_power">Potenza %1$s kW</string>
     <string name="en_ends_in">termina tra %1$d h %2$02d</string>
     <string name="en_no_limit" formatted="false">Nessun limite: ricarica fino al 100 %.</string>
-    <string name="en_enforced">MG4Dash interrompe la ricarica al %1$d %% (schermo acceso).</string>
-    <string name="en_car_limit">" Auto: %1$d %%."</string>
     <string name="en_car_only">Limite inviato solo all\'auto</string>
     <string name="en_drive">Guida</string>
     <string name="en_climate">Climatizzazione</string>
@@ -171,6 +168,12 @@
     <string name="vh_speed">Velocità</string>
     <string name="vh_outside">Temperatura esterna</string>
     <string name="vh_charge">Ricarica</string>
+    <string name="vh_soh">Salute batteria (stimata)</string>
+    <string name="vh_soh_detail">%1$d %% su 30 giorni, %2$d %% dalla prima misura (%3$d misura/e, rispetto a una batteria nuova da %4$d kWh).</string>
+    <string name="vh_soh_progress">Misura in guida: %1$s %% dei 15 %% di calo necessari, sommati su viaggi e giorni.</string>
+    <string name="vh_soh_provisional">" Provvisoria: %1$s kWh utili."</string>
+    <string name="vh_soh_model">Batteria nuova</string>
+    <string name="vh_soh_disclaimer">Stima di MG4Dash, non una misura ufficiale. Funzione ancora in prova.</string>
     <string name="st_home">SCHERMATA HOME</string>
     <string name="st_home_desc">«Sostituisci home SAIC» disattiva solo la schermata home originale (il suo servizio resta attivo). La modalità manutenzione la riattiva, ad esempio prima di un tagliando.</string>
     <string name="st_replace">Sostituisci home SAIC</string>
@@ -321,13 +324,11 @@
     <string name="dock_slot_wifi">Impostazioni Wi-Fi</string>
     <string name="dock_slot_wifi_short">Wi-Fi</string>
     <string name="st_cap_car">Letta dall\'auto: %1$s kWh.</string>
-    <string name="st_cap_none" formatted="false">L\'auto non la fornisce: MG4Dash la misurerà dopo un calo del 15 % dall\'ultima ricarica.</string>
+    <string name="st_cap_none" formatted="false">L\'auto non la fornisce: MG4Dash la misurerà guidando, dopo un calo del 15 % (sommato su più viaggi).</string>
     <string name="st_cap_manual">Impostata a mano (Auto: torna al valore dell\'auto o misurato).</string>
     <string name="st_cap_auto">Auto</string>
     <string name="st_cap_est">Misurata da MG4Dash: %1$s kWh (%2$d misura/e tra due ricariche, livellate su 30 giorni).</string>
-    <string name="st_cap_est_current">Misurata da MG4Dash sulla carica attuale: %1$s kWh (provvisoria).</string>
-    <string name="st_soh">Salute batteria (stimata): %1$d %% su 30 giorni, %2$d %% dalla prima misura (%3$d misure, rispetto a una batteria nuova da %4$d kWh).</string>
-    <string name="st_soh_none">Salute batteria: misurata dalla prossima ricarica (serve un calo del 15 %%), rispetto a una batteria nuova da %1$d kWh. Scegli il modello:</string>
+    <string name="st_cap_est_current">In misurazione da MG4Dash: %1$s kWh (provvisoria).</string>
     <string name="sw_batt_temp">Batteria %1$d °C</string>
     <string name="st_map_vdock">Barra verticale a sinistra (tutte le schermate e Radio Dash): %1$s</string>
     <string name="st_map_titles">Nascondi i titoli dei widget (tutti gli stili): %1$s</string>

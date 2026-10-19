@@ -96,15 +96,10 @@ class Prefs(context: Context) {
         get() = sp.getBoolean("valet_mode", false)
         set(v) = sp.edit().putBoolean("valet_mode", v).commit().let { }
 
-    /** Limite de charge voulue (%), appliquée par MG4Dash si la voiture l'ignore. */
+    /** Limite de charge voulue (%), envoyée à la voiture. */
     var chargeLimit: Int
         get() = sp.getInt("charge_limit", 100)
         set(v) = sp.edit().putInt("charge_limit", v).apply()
-
-    /** Arrêt automatique de la charge par MG4Dash quand la limite est atteinte. */
-    var enforceChargeLimit: Boolean
-        get() = sp.getBoolean("enforce_charge_limit", true)
-        set(v) = sp.edit().putBoolean("enforce_charge_limit", v).apply()
 
     /** Masque la barre latérale et le bandeau SAIC (mode immersif). */
     var fullscreen: Boolean

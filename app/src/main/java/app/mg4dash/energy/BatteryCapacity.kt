@@ -13,17 +13,22 @@ import org.json.JSONObject
  * Capacité :
  *  1) la valeur annoncée par la voiture (INFO_EV_BATTERY_CAPACITY, AOSP, en Wh ; MG4Control l'a
  *     trouvée à 0 sur SWI133, elle peut répondre ailleurs) ;
- *  2) sinon, la mesure de MG4Dash : à chaque période entre deux recharges, énergie sortie de la
- *     batterie (récupération déduite) ÷ baisse du %, dès 15 % de baisse. Les mesures sont gardées
- *     avec leur date et lissées : moyenne pondérée par la baisse de % (une mesure sur 60 % compte
- *     4 fois plus qu'une sur 15 %), sur les 30 derniers jours.
+ *  2) sinon, la mesure de MG4Dash, faite en roulant (décharge) : énergie nette sortie de la batterie
+ *     (récupération déduite) ÷ baisse du %, comptées seulement quand MG4Dash voit les deux (écran
+ *     allumé). Le % perdu voiture fermée, et la recharge, sont hors mesure : la baisse se cumule sur
+ *     plusieurs trajets et plusieurs jours, sans attendre de recharge, et le cumul est gardé avec les
+ *     préférences (conservées par les mises à jour). Dès 15 % de baisse cumulée, la mesure rejoint
+ *     l'historique, datée ; lissage : moyenne pondérée par la baisse de %, sur les 30 derniers jours.
  * Santé : capacité mesurée ÷ capacité utile d'origine du modèle (51, 64 ou 77 kWh), aussi lissée
  * sur 30 jours, et sur toute la période mesurée pour suivre l'évolution.
+ *
+ * Jusqu'à la 1.1.3, la mesure allait d'une recharge à la suivante : elle comptait le % perdu voiture
+ * fermée sans l'énergie correspondante, et ne se terminait pas si la recharge était vue % par %.
  */
 object BatteryCapacity {
     private const val TAG = "Capacité"
     private const val PROP_EV_BATTERY_CAPACITY = 0x11600106
-    private const val MIN_DROP = 15
+    const val MIN_DROP = 15f
     private const val MONTH_MS = 30L * 24 * 3600_000L
     private const val MAX_SAMPLES = 300
 
@@ -57,34 +62,66 @@ object BatteryCapacity {
         return if (w == 0) null else list.sumOf { (it.kwh * it.drop).toDouble() }.toFloat() / w
     }
 
-    /** Capacité mesurée, lissée sur 30 jours (sinon toutes les mesures, sinon la période en cours), et nombre de mesures. */
+    /** Capacité mesurée, lissée sur 30 jours (sinon toutes les mesures), et nombre de mesures. */
     fun estimate(context: Context): Pair<Float, Int>? {
         val all = samples(context)
         val recent = all.filter { System.currentTimeMillis() - it.at < MONTH_MS }
         weighted(recent)?.let { return it to recent.size }
         weighted(all)?.let { return it to all.size }
+        return null
+    }
+
+    // Mesure en cours : énergie nette (kWh) et baisse du % cumulées, gardées en mémoire et
+    // enregistrées par [flush] (toutes les 30 s par EnergyMonitor).
+    private var accKwh = 0f
+    private var accDrop = 0f
+    private var loaded = false
+
+    private fun load(context: Context) {
+        if (loaded) return
         val sp = Prefs(context).raw
-        val cur = sp.getFloat("cap_current", -1f).takeIf { it > 0f } ?: return null
-        return cur to 0
+        accKwh = sp.getFloat("soh_kwh", 0f); accDrop = sp.getFloat("soh_drop", 0f)
+        // Anciennes clés (mesure d'une recharge à l'autre) : plus utilisées
+        if (sp.contains("cap_current")) sp.edit().remove("cap_current").remove("cap_current_drop").apply()
+        loaded = true
     }
 
-    /** Pendant une période : estimation provisoire (affichée tant qu'aucune période n'est terminée). */
-    fun learn(context: Context, netKwh: Float, socDrop: Int) {
-        val est = valid(netKwh, socDrop) ?: return
-        Prefs(context).raw.edit().putFloat("cap_current", est).putInt("cap_current_drop", socDrop).apply()
-        if (samples(context).isEmpty()) apply(context)
+    @Synchronized
+    fun flush(context: Context) {
+        if (!loaded) return
+        Prefs(context).raw.edit().putFloat("soh_kwh", accKwh).putFloat("soh_drop", accDrop).apply()
     }
 
-    /** Fin de période (recharge détectée) : la mesure rejoint l'historique. */
-    fun closePeriod(context: Context, netKwh: Float, socDrop: Int) {
-        val est = valid(netKwh, socDrop) ?: return
-        save(context, samples(context) + Sample(System.currentTimeMillis(), est, socDrop))
-        Prefs(context).raw.edit().remove("cap_current").remove("cap_current_drop").apply()
-        Log.i(TAG, "mesure ${"%.1f".format(est)} kWh sur $socDrop % ajoutée")
-        apply(context)
+    /**
+     * Une seconde observée : [kwh] = énergie sortie de la batterie (négative en récupération),
+     * [drop] = baisse du % sur la même seconde (négative si le % remonte).
+     */
+    @Synchronized
+    fun accumulate(context: Context, kwh: Float, drop: Float) {
+        load(context)
+        accKwh += kwh; accDrop += drop
+        if (accDrop < MIN_DROP) return
+        val est = valid(accKwh, accDrop)
+        if (est != null) {
+            save(context, samples(context) + Sample(System.currentTimeMillis(), est, Math.round(accDrop)))
+            Log.i(TAG, "mesure ${"%.1f".format(est)} kWh sur ${"%.1f".format(accDrop)} % ajoutée")
+        } else {
+            Log.i(TAG, "mesure écartée : ${"%.2f".format(accKwh)} kWh pour ${"%.1f".format(accDrop)} %")
+        }
+        accKwh = 0f; accDrop = 0f
+        flush(context)
+        if (est != null) apply(context)
     }
 
-    private fun valid(netKwh: Float, socDrop: Int): Float? {
+    /** Mesure en cours : baisse cumulée (%) et capacité provisoire (kWh, à partir de 5 %). */
+    @Synchronized
+    fun progress(context: Context): Pair<Float, Float?> {
+        load(context)
+        val prov = if (accDrop >= 5f && accKwh > 0f) (accKwh / accDrop * 100f).takeIf { it in 30f..100f } else null
+        return accDrop.coerceAtLeast(0f) to prov
+    }
+
+    private fun valid(netKwh: Float, socDrop: Float): Float? {
         if (socDrop < MIN_DROP || netKwh < 3f) return null
         return (netKwh / socDrop * 100f).takeIf { it in 30f..100f }
     }

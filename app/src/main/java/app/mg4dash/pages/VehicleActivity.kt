@@ -92,17 +92,52 @@ class VehicleActivity : PageActivity() {
         mid.addView(tires, kit.lp(-1, 0, 1f, t = 12))
         lifecycleScope.launch {
             repeatOnLifecycle(androidx.lifecycle.Lifecycle.State.STARTED) {
-                while (true) { refreshTires(); kotlinx.coroutines.delay(5_000) }
+                while (true) { refreshTires(); renderSoh(); kotlinx.coroutines.delay(5_000) }
             }
         }
 
         // ── État ──
         val state = kit.panel(getString(R.string.vh_state))
         listOf(R.string.vh_battery, R.string.vh_range, R.string.vh_avg_cons, R.string.vh_odometer, R.string.vh_speed, R.string.vh_outside, R.string.vh_charge).forEach { addInfo(state, it) }
+        // Santé batterie estimée par MG4Dash (capacité mesurée ÷ capacité d'origine du modèle)
+        state.addView(kit.divider(), kit.lp(-1, 1, t = 8))
+        addInfo(state, R.string.vh_soh)
+        sohDetail = kit.text("", 16f, R.color.text_sub).apply { maxLines = 3 }
+        state.addView(sohDetail, kit.lp(-1, -2))
+        val mRow = kit.row()
+        mRow.addView(kit.text(getString(R.string.vh_soh_model), 17f, R.color.text_sub), kit.lp(-2, -2, r = 12))
+        val models = app.mg4dash.energy.BatteryCapacity.MODELS.map { it.first }
+        val (chips, pick) = kit.segmented(models.map { "$it kWh" }) { i ->
+            prefs.batteryModel = models[i]; renderSoh()
+        }
+        sohModel = pick
+        mRow.addView(chips, kit.lp(0, -2, 1f))
+        state.addView(mRow, kit.lp(-1, -2, t = 10))
+        state.addView(kit.text(getString(R.string.vh_soh_disclaimer), 15f, R.color.accent_heat).apply { maxLines = 2 }, kit.lp(-1, -2, t = 10))
+        renderSoh()
 
         body.addView(drive, kit.lp(0, -1, 1f, r = 6))
         body.addView(mid, kit.lp(0, -1, 1f, l = 6, r = 6))
         body.addView(state, kit.lp(0, -1, 1f, l = 6))
+    }
+
+    private val prefs by lazy { app.mg4dash.system.Prefs(this) }
+    private lateinit var sohDetail: TextView
+    private lateinit var sohModel: (Int?) -> Unit
+
+    private fun renderSoh() {
+        val bc = app.mg4dash.energy.BatteryCapacity
+        sohModel(bc.MODELS.indexOfFirst { it.first == prefs.batteryModel }.takeIf { it >= 0 })
+        val h = bc.health(this)
+        if (h != null) {
+            set(R.string.vh_soh, "${h.first} %")
+            sohDetail.text = getString(R.string.vh_soh_detail, h.first, h.second, bc.samples(this).size, prefs.batteryModel)
+        } else {
+            set(R.string.vh_soh, "—")
+            val (drop, prov) = bc.progress(this)
+            sohDetail.text = getString(R.string.vh_soh_progress, String.format(Locale.getDefault(), "%.1f", drop)) +
+                (prov?.let { getString(R.string.vh_soh_provisional, String.format(Locale.getDefault(), "%.1f", it)) } ?: "")
+        }
     }
 
     private val tirePressure = mutableListOf<TextView>()

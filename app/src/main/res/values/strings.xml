@@ -115,7 +115,6 @@
     <string name="en_stock">Stock Energy app  ›</string>
     <string name="en_charging">CHARGING</string>
     <string name="en_limit">CHARGE LIMIT</string>
-    <string name="en_auto_stop">AUTO STOP</string>
     <string name="en_ac_current">AC CHARGING CURRENT</string>
     <string name="en_max">Max</string>
     <string name="en_scheduled">SCHEDULED CHARGING</string>
@@ -135,8 +134,6 @@
     <string name="en_power">Power %1$s kW</string>
     <string name="en_ends_in">ends in %1$d h %2$02d</string>
     <string name="en_no_limit" formatted="false">No limit: charges to 100 %.</string>
-    <string name="en_enforced">MG4Dash stops charging at %1$d %% (screen on).</string>
-    <string name="en_car_limit">" Car: %1$d %%."</string>
     <string name="en_car_only">Limit sent to the car only</string>
     <string name="en_drive">Driving</string>
     <string name="en_climate">Climate control</string>
@@ -171,6 +168,12 @@
     <string name="vh_speed">Speed</string>
     <string name="vh_outside">Outside temperature</string>
     <string name="vh_charge">Charging</string>
+    <string name="vh_soh">Battery health (estimated)</string>
+    <string name="vh_soh_detail">%1$d %% over 30 days, %2$d %% since the first measurement (%3$d measurement(s), compared with a new %4$d kWh battery).</string>
+    <string name="vh_soh_progress">Measuring while driving: %1$s %% of the 15 %% drop needed, added up over trips and days.</string>
+    <string name="vh_soh_provisional">" Provisional: %1$s kWh usable."</string>
+    <string name="vh_soh_model">New battery</string>
+    <string name="vh_soh_disclaimer">Estimate made by MG4Dash, not an official measurement. Still being tested.</string>
     <string name="st_home">HOME SCREEN</string>
     <string name="st_home_desc">\"Replace SAIC home\" disables only the original home screen (its service keeps running). Maintenance mode re-enables it, e.g. before a dealer service.</string>
     <string name="st_replace">Replace SAIC home</string>
@@ -321,13 +324,11 @@
     <string name="dock_slot_wifi">Wi-Fi settings</string>
     <string name="dock_slot_wifi_short">Wi-Fi</string>
     <string name="st_cap_car">Read from the car: %1$s kWh.</string>
-    <string name="st_cap_none" formatted="false">The car does not report it: MG4Dash will measure it after a 15 % drop since the last charge.</string>
+    <string name="st_cap_none" formatted="false">The car does not report it: MG4Dash will measure it while driving, after a 15 % drop (added up over several trips).</string>
     <string name="st_cap_manual">Set by hand (Auto: back to the car\'s or the measured value).</string>
     <string name="st_cap_auto">Auto</string>
     <string name="st_cap_est">Measured by MG4Dash: %1$s kWh (%2$d charge-to-charge measurement(s), smoothed over 30 days).</string>
-    <string name="st_cap_est_current">Measured by MG4Dash on the current charge: %1$s kWh (provisional).</string>
-    <string name="st_soh">Battery health (estimated): %1$d %% over 30 days, %2$d %% since the first measurement (%3$d measurements, compared with a new %4$d kWh battery).</string>
-    <string name="st_soh_none">Battery health: measured from the next charge (a 15 %% drop is needed), compared with a new %1$d kWh battery. Choose your model:</string>
+    <string name="st_cap_est_current">Being measured by MG4Dash: %1$s kWh (provisional).</string>
     <string name="sw_batt_temp">Battery %1$d °C</string>
     <string name="st_map_vdock">Vertical bar on the left (all screens and Radio Dash): %1$s</string>
     <string name="st_map_titles">Hide widget titles (all layouts): %1$s</string>

@@ -91,7 +91,7 @@ Temperature in 1° steps (LO → HI), fan speed, combinable air direction, AUTO,
 
 ### Energy
 ![Energy](docs/screenshots/energy.png?v=14)
-Charging (start / stop, charge limit enforced by MG4Dash, AC current, time left, AC input voltage and current, reason when the car stops charging, charging cable lock), scheduled charging, V2L (adapter state, stop threshold, start / stop), battery heating while driving (same switch as the stock Energy app) and consumption (since the last charge, current trip, last 1,000 km or last 12 months: driving, climate, accessories, energy and range recovered by braking, consumption curve).
+Charging (start / stop, charge limit on firmwares where the car applies it, AC current, time left, AC input voltage and current, reason when the car stops charging, charging cable lock), scheduled charging, V2L (adapter state, stop threshold, start / stop), battery heating while driving (same switch as the stock Energy app) and consumption (since the last charge, current trip, last 1,000 km or last 12 months: driving, climate, accessories, energy and range recovered by braking, consumption curve).
 
 ### Vehicle
 ![Vehicle](docs/screenshots/vehicle.png?v=14)
@@ -102,7 +102,7 @@ Drive mode (including Eco, Snow and Custom where the car has them), regeneration
 Recent calls, contacts with a search field and a keypad, from the phone connected over Bluetooth. Calls go through the hands-free (HFP) account, like the stock phone app, whose in-call screen is kept.
 
 ### Battery health (estimated)
-Between two charges, MG4Dash measures the energy actually taken from the battery (regeneration deducted) and divides it by the drop in battery %: from a 15 % drop, that gives the real usable capacity. Each charge-to-charge period is kept as a dated measurement; the average, weighted by the % drop, is shown over the last 30 days and since the first measurement, against the usable capacity of a new battery of your model (51, 64 or 77 kWh, chosen in Settings › Energy). The car's integer % and charging losses make it an estimate: it settles after a few charges.
+Shown on the Vehicle page. While driving, MG4Dash measures the energy actually taken from the battery (regeneration deducted) and divides it by the drop in battery % over the same time. Only what MG4Dash sees with the screen on counts, so the drop adds up over several trips and days, without waiting for a charge; from a 15 % drop, that gives one dated measurement of the usable capacity. The average, weighted by the % drop, is shown over the last 30 days and since the first measurement, against the usable capacity of a new battery of your model (51, 64 or 77 kWh, chosen on the Vehicle page). This is an estimate made by MG4Dash, not an official measurement, and the feature is still being tested.
 
 The car does not share the battery or motor temperature with the head unit, so MG4Dash cannot show them.
 
@@ -114,7 +114,7 @@ Grouped by category in one scrolling page. Each on/off option is a single button
 |---|---|
 | Home layout | Full, Simple or Map; vertical bar on the left; full screen (hides the SAIC side bar and banner); units (like the car, km · kWh/100 km, miles · mi/kWh); heated seats and steering wheel buttons (auto, yes, no); tyre pressure unit (auto, bar, psi, kPa); default map zoom; map colours; map layout stack back to the battery when plugged in |
 | Theme | background, button colour, light / dark / auto (follows the car's lights) |
-| Energy | usable battery capacity (read from the car, measured, or set by hand) and estimated battery health |
+| Energy | usable battery capacity (read from the car, measured, or set by hand) |
 | Home screen | replace the SAIC home, maintenance mode, briefly open the SAIC launcher at startup |
 | Update | check and install, include beta versions; Radio Dash update (SWI69 only) |
 | Weather | fallback city, or use my position |
@@ -139,7 +139,7 @@ MG4Dash detects the head unit firmware at startup (`ro.build.mt2712.version`) an
 
 All MG4 firmwares share the 1920 × 720 screen and the AOSP platform key, so the same APK installs on every one of them.
 
-Features a firmware does not expose are hidden instead of failing (for example MG4Dash's own "auto stop" at the charge limit, which these firmwares already do by themselves). The stock home screen and the stock energy and settings apps are found automatically. Radio Dash only works on SWI69.
+Features a firmware does not expose are hidden instead of failing (for example the charge limit, only shown where the car applies it itself: MG4Dash cannot stop the charge for the car, it is shut down when the car is locked). The stock home screen and the stock energy and settings apps are found automatically. Radio Dash only works on SWI69.
 
 **Help support your firmware**: open Settings › Compatibility › Run the test, then scan the QR code with your phone. It opens a pre-filled [compatibility issue](https://github.com/Skittle6938/MG4Dash/issues/new?template=compatibility.md) with a short report (versions, which services answer, a few car readings: no position, VIN or account). Nothing is sent automatically.
 

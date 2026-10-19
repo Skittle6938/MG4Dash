@@ -145,13 +145,13 @@ class ScreenshotTest {
         shoot(MainActivity::class.java, "home_map_layout_shortcuts.png")
     }
 
-    @Test fun settingsSoh() {
+    @Test fun vehicleSoh() {
         val now = System.currentTimeMillis()
         org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE).edit()
             .putString("cap_samples", "[{\"t\":${now - 86400000L * 40},\"k\":48.6,\"d\":40},{\"t\":${now - 86400000L * 10},\"k\":47.9,\"d\":55},{\"t\":${now - 86400000L * 2},\"k\":48.2,\"d\":30}]")
             .putBoolean("battery_kwh_manual", false).apply()
         app.mg4dash.energy.BatteryCapacity.apply(org.robolectric.RuntimeEnvironment.getApplication())
-        shoot(SettingsActivity::class.java, "settings_soh.png")
+        shoot(app.mg4dash.pages.VehicleActivity::class.java, "vehicle_soh.png")
     }
 
     @Test fun homeMapLayoutVertical() {

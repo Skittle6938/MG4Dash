@@ -115,7 +115,6 @@
     <string name="en_stock">Originele energie-app  ›</string>
     <string name="en_charging">LADEN</string>
     <string name="en_limit">LAADLIMIET</string>
-    <string name="en_auto_stop">AUTO-STOP</string>
     <string name="en_ac_current">AC-LAADSTROOM</string>
     <string name="en_max">Max</string>
     <string name="en_scheduled">GEPLAND LADEN</string>
@@ -135,8 +134,6 @@
     <string name="en_power">Vermogen %1$s kW</string>
     <string name="en_ends_in">klaar over %1$d u %2$02d</string>
     <string name="en_no_limit" formatted="false">Geen limiet: laadt tot 100 %.</string>
-    <string name="en_enforced">MG4Dash stopt het laden bij %1$d %% (scherm aan).</string>
-    <string name="en_car_limit">" Auto: %1$d %%."</string>
     <string name="en_car_only">Limiet alleen naar de auto gestuurd</string>
     <string name="en_drive">Rijden</string>
     <string name="en_climate">Klimaatregeling</string>
@@ -171,6 +168,12 @@
     <string name="vh_speed">Snelheid</string>
     <string name="vh_outside">Buitentemperatuur</string>
     <string name="vh_charge">Laden</string>
+    <string name="vh_soh">Batterijgezondheid (geschat)</string>
+    <string name="vh_soh_detail">%1$d %% over 30 dagen, %2$d %% sinds de eerste meting (%3$d meting(en), vergeleken met een nieuwe %4$d kWh-batterij).</string>
+    <string name="vh_soh_progress">Meting tijdens het rijden: %1$s %% van de benodigde 15 %% daling, opgeteld over ritten en dagen.</string>
+    <string name="vh_soh_provisional">" Voorlopig: %1$s kWh bruikbaar."</string>
+    <string name="vh_soh_model">Nieuwe batterij</string>
+    <string name="vh_soh_disclaimer">Schatting door MG4Dash, geen officiële meting. Functie wordt nog getest.</string>
     <string name="st_home">STARTSCHERM</string>
     <string name="st_home_desc">\"SAIC-start vervangen\" schakelt alleen het originele startscherm uit (de dienst blijft actief). De onderhoudsmodus zet het weer aan, bijvoorbeeld voor een onderhoudsbeurt.</string>
     <string name="st_replace">SAIC-start vervangen</string>
@@ -321,13 +324,11 @@
     <string name="dock_slot_wifi">Wifi-instellingen</string>
     <string name="dock_slot_wifi_short">Wifi</string>
     <string name="st_cap_car">Uitgelezen uit de auto: %1$s kWh.</string>
-    <string name="st_cap_none" formatted="false">De auto geeft hem niet: MG4Dash meet hem na 15 % daling sinds het laatste laden.</string>
+    <string name="st_cap_none" formatted="false">De auto geeft hem niet: MG4Dash meet hem tijdens het rijden, na 15 % daling (opgeteld over meerdere ritten).</string>
     <string name="st_cap_manual">Handmatig ingesteld (Auto: terug naar de waarde van de auto of de meting).</string>
     <string name="st_cap_auto">Auto</string>
     <string name="st_cap_est">Gemeten door MG4Dash: %1$s kWh (%2$d meting(en) tussen twee laadbeurten, afgevlakt over 30 dagen).</string>
-    <string name="st_cap_est_current">Gemeten door MG4Dash op de huidige lading: %1$s kWh (voorlopig).</string>
-    <string name="st_soh">Batterijgezondheid (geschat): %1$d %% over 30 dagen, %2$d %% sinds de eerste meting (%3$d metingen, vergeleken met een nieuwe %4$d kWh-batterij).</string>
-    <string name="st_soh_none">Batterijgezondheid: gemeten vanaf de volgende laadbeurt (15 %% daling nodig), vergeleken met een nieuwe %1$d kWh-batterij. Kies uw model:</string>
+    <string name="st_cap_est_current">Wordt gemeten door MG4Dash: %1$s kWh (voorlopig).</string>
     <string name="sw_batt_temp">Batterij %1$d °C</string>
     <string name="st_map_vdock">Verticale balk links (alle schermen en Radio Dash): %1$s</string>
     <string name="st_map_titles">Widgettitels verbergen (alle stijlen): %1$s</string>

@@ -43,7 +43,6 @@ class EnergyActivity : PageActivity() {
     private lateinit var limitNote: TextView
     private lateinit var setLimit: (Int?) -> Unit
     private lateinit var setCurrent: (Int?) -> Unit
-    private lateinit var enforce: TextView
     private lateinit var heating: TextView
     private lateinit var gunLock: TextView
     // Programmation
@@ -109,21 +108,20 @@ class EnergyActivity : PageActivity() {
         }.apply { textSize = 18f; setPadding(kit.dp(16), 0, kit.dp(16), 0); visibility = android.view.View.GONE }
         actRow.addView(gunLock, kit.lp(-2, kit.dp(64), l = 10))
         c1.addView(actRow, kit.lp(-1, -2, t = 12))
-        c1.addView(kit.title(getString(R.string.en_limit)), kit.lp(-1, -2, t = 18))
-        val limits = listOf(50, 60, 70, 80, 90, 100)
-        val (lRow, lSet) = kit.segmented(limits.map { "$it %" }) { i ->
-            ChargeGuard.setLimit(this, limits[i]); refreshProps()
+        // Limite de charge : seulement là où la voiture l'applique elle-même (ancien SDK). Ailleurs
+        // (MG4 Standard sans la limite d'origine), la voiture l'ignore, et MG4Dash ne peut pas arrêter
+        // la charge à sa place : il est coupé quand la voiture est fermée (constaté le 2026-10-18).
+        if (app.mg4dash.system.Firmware.nativeChargeLimit) {
+            c1.addView(kit.title(getString(R.string.en_limit)), kit.lp(-1, -2, t = 18))
+            val limits = listOf(50, 60, 70, 80, 90, 100)
+            val (lRow, lSet) = kit.segmented(limits.map { "$it %" }) { i ->
+                ChargeGuard.setLimit(this, limits[i]); refreshProps()
+            }
+            setLimit = lSet
+            c1.addView(lRow, kit.lp(-1, -2, t = 8))
+            limitNote = kit.text("", 16f, R.color.text_title).apply { maxLines = 2 }
+            c1.addView(limitNote, kit.lp(-1, -2, t = 8))
         }
-        setLimit = lSet
-        c1.addView(lRow, kit.lp(-1, -2, t = 8))
-        val eRow = kit.row()
-        limitNote = kit.text("", 16f, R.color.text_title).apply { maxLines = 2 }
-        eRow.addView(limitNote, kit.lp(0, -2, 1f))
-        enforce = kit.toggleTile(getString(R.string.en_auto_stop)) {
-            prefs.enforceChargeLimit = !prefs.enforceChargeLimit; renderLimit()
-        }.apply { textSize = 16f }
-        eRow.addView(enforce, kit.lp(kit.dp(150), kit.dp(48), l = 10))
-        c1.addView(eRow, kit.lp(-1, -2, t = 8))
         c1.addView(kit.title(getString(R.string.en_ac_current)), kit.lp(-1, -2, t = 14))
         val (cRow, cSet) = kit.segmented(listOf("6 A", "8 A", "16 A", getString(R.string.en_max))) { i ->
             CarProps.setInt(CarProps.ALTNG_CHRG_CRNT, i + 1, "courant AC"); refreshProps()
@@ -297,18 +295,11 @@ class EnergyActivity : PageActivity() {
     }
 
     private fun renderLimit(carLimit: Int? = null) {
+        if (!::setLimit.isInitialized) return
         val wanted = prefs.chargeLimit
         setLimit(listOf(50, 60, 70, 80, 90, 100).indexOf(wanted).takeIf { it >= 0 })
-        val native = app.mg4dash.system.Firmware.nativeChargeLimit
-        enforce.isSelected = prefs.enforceChargeLimit
-        enforce.visibility = if (native) android.view.View.GONE else android.view.View.VISIBLE
-        limitNote.text = when {
-            wanted >= 100 -> getString(R.string.en_no_limit)
-            native -> getString(R.string.en_car_only) + (carLimit?.let { " ($it %)." } ?: ".")
-            prefs.enforceChargeLimit -> getString(R.string.en_enforced, wanted) +
-                (carLimit?.let { getString(R.string.en_car_limit, it) } ?: "")
-            else -> getString(R.string.en_car_only) + (carLimit?.let { " ($it %)." } ?: ".")
-        }
+        limitNote.text = if (wanted >= 100) getString(R.string.en_no_limit)
+            else getString(R.string.en_car_only) + (carLimit?.let { " ($it %)." } ?: ".")
     }
 
     private fun renderConsumption(c: FloatArray) {
