@@ -308,7 +308,7 @@
     <string name="st_compat_scan">Scansiona con il telefono per aprire una issue GitHub precompilata. Nulla viene inviato automaticamente e il rapporto non contiene dati personali.</string>
     <string name="st_compat_open">Apri nel browser</string>
     <string name="st_compat_no_browser">Nessun browser su questa unità: scansiona il codice QR con il telefono.</string>
-    <string name="st_update_beta">Includi versioni beta: %1$s</string>
+    <string name="st_update_beta">Includi versioni beta (MG4Dash e Radio Dash): %1$s</string>
     <string name="upd_title">NUOVA VERSIONE DISPONIBILE</string>
     <string name="upd_skip">Non avvisare più per questa versione</string>
     <string name="upd_later">Più tardi</string>

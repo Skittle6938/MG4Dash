@@ -311,7 +311,7 @@ class SettingsActivity : AppCompatActivity() {
         row(parent, button(getString(R.string.st_rd_check), R.color.accent_action) {
             state.text = getString(R.string.st_update_checking)
             lifecycleScope.launch {
-                val r = withContext(Dispatchers.IO) { try { R2.latest() } catch (e: Exception) { Log.w("MàJ", "Radio Dash : ${e.message}"); null } }
+                val r = withContext(Dispatchers.IO) { try { R2.latest(prefs.updateBeta) } catch (e: Exception) { Log.w("MàJ", "Radio Dash : ${e.message}"); null } }
                 if (r == null) { state.text = getString(R.string.st_update_error); return@launch }
                 val cur = R2.installedVersion(this@SettingsActivity)
                 if (cur != null && !app.mg4dash.system.Updater.isNewer(r.version, cur)) { state.text = getString(R.string.st_rd_uptodate, cur); return@launch }

@@ -37,7 +37,8 @@ object RadioDashUpdater {
     /** Version installée depuis MG4Dash (null si inconnue : installée par ADB ou clé USB). */
     fun installedVersion(context: Context): String? = Prefs(context).raw.getString("radio_dash_version", null)
 
-    fun latest(): Updater.Release? = Updater.latest(beta = false, api = API)
+    /** Dernière release de Radio Dash ; pré-versions comprises si l'option « versions bêta » de MG4Dash est cochée. */
+    fun latest(beta: Boolean): Updater.Release? = Updater.latest(beta, api = API)
 
     fun download(context: Context, r: Updater.Release, progress: (Int) -> Unit): File =
         Updater.download(context, r, "radio_dash.apk", progress)
