@@ -103,6 +103,7 @@ class MainActivity : AppCompatActivity() {
             if (prefs.hideTitles) hideFullTitles()
         }
         if (!mapLayout) app.mg4dash.ui.SwipeBox.wrap(b.secondaryCard) { dir ->
+            cancelBoost()
             prefs.secondaryWidget = Math.floorMod(prefs.secondaryWidget.coerceIn(0, 2) + dir, 3)
             renderSecondary(); lifecycleScope.launch { updatePower() }
         }
@@ -138,7 +139,7 @@ class MainActivity : AppCompatActivity() {
         fun lp(weight: Float, top: Int) = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0, weight).apply { topMargin = top }
         left.addView(b.weatherCard, lp(40f, 0)); left.addView(b.climateCard, lp(60f, gap))
         // Pile : énergie et widget du bas réunis, on passe d'une page à l'autre en balayant
-        val box = app.mg4dash.ui.SwipeBox(this) { dir -> showStackPage(Math.floorMod(prefs.stackPage + dir, 4)) }
+        val box = app.mg4dash.ui.SwipeBox(this) { dir -> cancelBoost(); showStackPage(Math.floorMod(prefs.stackPage + dir, 4)) }
         box.addView(b.energyCard, android.widget.FrameLayout.LayoutParams(-1, -1))
         box.addView(b.secondaryCard, android.widget.FrameLayout.LayoutParams(-1, -1))
         // Pas de points de page sur la pile : ils ne tombaient pas au même endroit d'une page à l'autre.
@@ -617,6 +618,7 @@ class MainActivity : AppCompatActivity() {
         b.weatherCard.setOnClickListener { WeatherRepo.refreshNow(this) }
         b.secondaryCard.setOnClickListener {
             // Style Carte : le toucher fait avancer la pile (énergie → trajet → puissance → téléphone)
+            cancelBoost()
             if (mapLayout) { showStackPage((prefs.stackPage + 1) % 4); return@setOnClickListener }
             prefs.secondaryWidget = (prefs.secondaryWidget.coerceIn(0, 2) + 1) % 3
             renderSecondary()
@@ -735,12 +737,35 @@ class MainActivity : AppCompatActivity() {
 
     /** Retire l'animation pleine puissance de la carte (autre widget, ou carte reconstruite). */
     private fun dropPowerFx() {
-        powerFx?.let { b.secondaryCard.overlay.remove(it); it.onBadge = null; it.stop() }
-        powerFx = null
+        powerFx?.let { fxHost?.overlay?.remove(it); it.onBadge = null; it.stop() }
+        powerFx = null; fxHost = null
     }
 
+    // Pleine puissance alors que le widget Puissance n'est pas affiché : on le montre le temps de
+    // l'animation et du pic, puis on revient au widget d'avant (styles Complet et Carte).
+    private var fxBoost = false
+    private var fxPrevStack = -1
+    private var fxHost: View? = null
+
+    private fun startBoost() {
+        if (fxBoost) return
+        fxBoost = true
+        android.util.Log.i("MG4L.Power", "pleine puissance : widget Puissance affiché le temps de l'animation")
+        if (mapLayout) { fxPrevStack = prefs.stackPage; showStackPage(2) } else renderSecondary()
+    }
+
+    private fun endBoost() {
+        if (!fxBoost) return
+        fxBoost = false
+        if (mapLayout) { if (fxPrevStack >= 0 && fxPrevStack != 2) showStackPage(fxPrevStack) } else renderSecondary()
+        fxPrevStack = -1
+    }
+
+    /** Le conducteur change lui-même de widget : on ne reviendra pas en arrière. */
+    private fun cancelBoost() { fxBoost = false; fxPrevStack = -1 }
+
     private fun renderSecondary() {
-        val mode = prefs.secondaryWidget.coerceIn(0, 2)
+        val mode = if (fxBoost && !mapLayout) 1 else prefs.secondaryWidget.coerceIn(0, 2)
         b.secondaryDots.text = (0..2).joinToString(" ") { if (it == mode) "●" else "○" }
         if (mode != 1) dropPowerFx()
         when (mode) {
@@ -825,8 +850,10 @@ class MainActivity : AppCompatActivity() {
         // Animation pleine puissance (réglages) : par-dessus la carte, le pic remplace la ligne tension · courant
         dropPowerFx()
         powerFx = app.mg4dash.ui.PowerFx(this).also { fx ->
-            fx.onBadge = { on -> powerExtra?.animate()?.alpha(if (on) 0f else 1f)?.setDuration(250)?.start() }
-            b.secondaryCard.overlay.add(fx)
+            fx.onBadge = { on ->
+                powerExtra?.animate()?.alpha(if (on) 0f else 1f)?.setDuration(250)?.start()
+                if (!on) b.root.post { endBoost() }   // pas pendant le dessin de l'animation
+            }
         }
     }
 
@@ -834,7 +861,7 @@ class MainActivity : AppCompatActivity() {
 
     /** Puissance batterie (tension × courant) : positive = tirée, négative = récupérée. */
     private suspend fun updatePower() {
-        if (builtMode != 1) return
+        if (simpleMode) return
         var volts: Float? = null; var amps: Float? = null
         val kw = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
             val v = app.mg4dash.car.CarProps.getFloat(app.mg4dash.car.CarProps.BMS_PACK_VOL)
@@ -843,22 +870,36 @@ class MainActivity : AppCompatActivity() {
             if (v != null && i != null && v in 100f..900f) v * i / 1000f else null
         }
         val plugged = VehicleState.isCharging(CarBridge.state.value.chargeStatus)
+        // XPower : la voiture ne donne pas sa version ; deux mesures de suite au-delà de 350 ch la trahissent
+        xpowerHits = if (!plugged && kw != null && kw >= app.mg4dash.ui.PowerBar.XPOWER_DETECT_KW) xpowerHits + 1 else 0
+        if (xpowerHits >= 2 && !prefs.xpower) {
+            prefs.xpower = true
+            android.util.Log.i("MG4L.Power", "MG4 XPower reconnue (${kw} kW) : max 320 kW, animation à 80 %")
+            powerBar?.let { val keep = it.maxDrawKw; it.configureFor(prefs.batteryModel, true); it.maxDrawKw = maxOf(keep, it.maxDrawKw) }
+        }
+        if (builtMode != 1) {
+            val peak = app.mg4dash.ui.PowerBar.peakFor(prefs.batteryModel, prefs.xpower)
+            if (prefs.powerFx == app.mg4dash.ui.PowerFx.NONE || plugged || kw == null || kw < peak * 0.8f) return
+            startBoost()
+            if (builtMode != 1) return
+        }
         val regen = kw != null && kw < -0.05f && !plugged
         powerValue?.text = kw?.let { String.format(Locale.getDefault(), "%.1f kW", kotlin.math.abs(it)) } ?: "—"
         powerValue?.setTextColor(color(if (regen) R.color.accent_energy else R.color.text_value))
         powerLabel?.text = getString(when { plugged -> R.string.sw_charging; regen -> R.string.sw_recovering; else -> R.string.sw_drawn })
         powerBar?.kw = if (plugged) 0f else kw ?: 0f
         val bar = powerBar; val under = powerExtra
-        // XPower : la voiture ne donne pas sa version ; deux mesures de suite au-delà de 350 ch la trahissent
-        xpowerHits = if (!plugged && kw != null && kw >= app.mg4dash.ui.PowerBar.XPOWER_DETECT_KW) xpowerHits + 1 else 0
-        if (xpowerHits >= 2 && !prefs.xpower) {
-            prefs.xpower = true
-            android.util.Log.i("MG4L.Power", "MG4 XPower reconnue (${kw} kW) : max 320 kW, animation à 80 %")
-            bar?.let { val keep = it.maxDrawKw; it.configureFor(prefs.batteryModel, true); it.maxDrawKw = maxOf(keep, it.maxDrawKw) }
-        }
         if (bar != null && under != null) powerFx?.let { fx ->
             fx.style = prefs.powerFx
-            fx.place(b.secondaryCard, bar, under)
+            // Sur tout l'écran : la fusée arrive du bord gauche, l'éclair et les flammes couvrent l'accueil
+            val wide = fx.style != app.mg4dash.ui.PowerFx.NONE
+            val host: View = if (wide) window.decorView else b.secondaryCard
+            if (fxHost !== host) {
+                fxHost?.overlay?.remove(fx)
+                host.overlay.add(fx); fxHost = host
+                fx.corner = if (wide) 0f else resources.getDimension(R.dimen.radius_panel)
+                fx.attach(host, bar, under)
+            }
             fx.update(if (plugged) 0f else kw ?: 0f, bar.peakKw * 0.8f, bar.peakKw)
         }
         val avg = app.mg4dash.energy.EnergyMonitor.sinceStart.value.per100
