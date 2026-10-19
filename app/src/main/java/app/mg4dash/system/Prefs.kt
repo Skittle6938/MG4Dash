@@ -90,6 +90,22 @@ class Prefs(context: Context) {
     var climateHoldLockSec: Int
         get() = sp.getInt("climhold_lock_sec", 20)
         set(v) = sp.edit().putInt("climhold_lock_sec", v).apply()
+    /** Clim maintenue à une heure précise (sinon tout de suite), heure du premier cycle (minutes depuis minuit), cycles. */
+    var climateHoldScheduled: Boolean
+        get() = sp.getBoolean("climhold_scheduled", false)
+        set(v) = sp.edit().putBoolean("climhold_scheduled", v).apply()
+    var climateHoldStartMin: Int
+        get() = sp.getInt("climhold_start_min", 18 * 60)
+        set(v) = sp.edit().putInt("climhold_start_min", v).apply()
+    var climateHoldRuns: Int
+        get() = sp.getInt("climhold_runs", 1)
+        set(v) = sp.edit().putInt("climhold_runs", v).apply()
+    var climateHoldRunMin: Int
+        get() = sp.getInt("climhold_run_min", 15)
+        set(v) = sp.edit().putInt("climhold_run_min", v).apply()
+    var climateHoldGapMin: Int
+        get() = sp.getInt("climhold_gap_min", 30)
+        set(v) = sp.edit().putInt("climhold_gap_min", v).apply()
     var climateHoldMaxMin: Int
         get() = sp.getInt("climhold_max_min", 0)
         set(v) = sp.edit().putInt("climhold_max_min", v).apply()

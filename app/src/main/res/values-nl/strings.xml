@@ -393,7 +393,6 @@
     <string name="dm_title">AIRCO BLIJFT AAN</string>
     <string name="dm_max">Maximale duur</string>
     <string name="dm_unlimited">Onbeperkt</string>
-    <string name="dm_note" formatted="false">De airco start meteen met de huidige instellingen, daarna vergrendelen de deuren na de wachttijd. De modus stopt onder 20 % batterij of na de maximale duur (airco uit en auto uitgeschakeld), als de deuren worden ontgrendeld, of als de auto rijdt.</string>
     <string name="dm_close">Sluiten</string>
     <string name="dm_message">De bestuurder is zo terug. De airco blijft aan.</string>
     <string name="dm_inside">BINNEN</string>
@@ -408,12 +407,26 @@
     <string name="dm_state_done">KLAAR · AUTO UITGESCHAKELD</string>
     <string name="dm_state_battery" formatted="false">GESTOPT: BATTERIJ ONDER 20 %</string>
     <string name="dm_warning">Laat nooit een kind of een dier alleen in de auto: de airco kan op elk moment stoppen (batterij, storing, auto die uitschakelt).</string>
-    <string name="dm_lock_delay">Deuren vergrendelen na</string>
     <string name="dm_start">Starten</string>
     <string name="dm_cancel">Annuleren</string>
     <string name="dm_lock_in">De deuren vergrendelen over</string>
     <string name="dm_take_key">NEEM DE SLEUTEL MEE!</string>
     <string name="dm_lights">Zet de lichtschakelaar op stadslicht in plaats van AUTO.</string>
+    <string name="dm_now">Airco nu</string>
+    <string name="dm_at_time">Airco op een vast tijdstip</string>
+    <string name="dm_first_start">Start om</string>
+    <string name="dm_in">over %1$s</string>
+    <string name="dm_max_hint">Daarna stopt de airco en schakelt de auto uit.</string>
+    <string name="dm_runs">Aantal cycli</string>
+    <string name="dm_duration">Duur van elke cyclus</string>
+    <string name="dm_gap">Pauze tussen cycli</string>
+    <string name="dm_note_now" formatted="false">De airco start meteen met de huidige instellingen, daarna vergrendelen de deuren na de wachttijd. Stopt onder 20 % batterij, bij ontgrendelen of als de auto rijdt.</string>
+    <string name="dm_note_at" formatted="false">De auto blijft aan (airco uit, ongeveer 0,2 kW) en vergrendeld tot de eerste cyclus, en start dan de airco met de huidige instellingen. Hij schakelt uit na de laatste cyclus of onder 20 % batterij; ontgrendelen stopt alles.</string>
+    <string name="dm_clim_at">AIRCO OM %1$s</string>
+    <string name="dm_until_start">tot de airco start</string>
+    <string name="dm_run_line">Cyclus %1$d · %2$s → %3$s</string>
+    <string name="dm_lock_delay">Deuren vergrendelen na</string>
+    <string name="dm_message_wait">De bestuurder is zo terug. De airco start om %1$s.</string>
     <string name="aa_title">ANDROID AUTO</string>
     <string name="aa_ready">Telefoon verbonden · Tik om te openen</string>
     <string name="aa_waiting">Sluit je telefoon aan via USB</string>

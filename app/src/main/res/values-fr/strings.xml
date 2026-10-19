@@ -393,7 +393,6 @@
     <string name="dm_title">CLIM MAINTENUE</string>
     <string name="dm_max">Durée maximale</string>
     <string name="dm_unlimited">Illimitée</string>
-    <string name="dm_note" formatted="false">La clim démarre tout de suite avec ses réglages actuels, puis les portes se verrouillent après le délai. Le mode s\'arrête sous 20 % de batterie ou au bout de la durée maximale (clim arrêtée et voiture éteinte), quand les portes sont déverrouillées, ou si la voiture roule.</string>
     <string name="dm_close">Fermer</string>
     <string name="dm_message">Le conducteur revient bientôt. La clim reste en marche.</string>
     <string name="dm_inside">INTÉRIEUR</string>
@@ -408,12 +407,26 @@
     <string name="dm_state_done">TERMINÉ · VOITURE ÉTEINTE</string>
     <string name="dm_state_battery" formatted="false">ARRÊTÉ : BATTERIE SOUS 20 %</string>
     <string name="dm_warning">Ne laissez jamais un enfant ou un animal seul dans la voiture : la clim peut s\'arrêter à tout moment (batterie, panne, voiture qui s\'éteint).</string>
-    <string name="dm_lock_delay">Verrouiller les portes après</string>
     <string name="dm_start">Démarrer</string>
     <string name="dm_cancel">Annuler</string>
     <string name="dm_lock_in">Verrouillage des portes dans</string>
     <string name="dm_take_key">PRENEZ LA CLÉ AVEC VOUS !</string>
     <string name="dm_lights">Mettez le commodo des feux sur veilleuses plutôt qu\'en AUTO.</string>
+    <string name="dm_now">Clim tout de suite</string>
+    <string name="dm_at_time">Clim à une heure précise</string>
+    <string name="dm_first_start">Mise en marche à</string>
+    <string name="dm_in">dans %1$s</string>
+    <string name="dm_max_hint">Ensuite la clim s\'arrête et la voiture s\'éteint.</string>
+    <string name="dm_runs">Nombre de cycles</string>
+    <string name="dm_duration">Durée de chaque cycle</string>
+    <string name="dm_gap">Pause entre les cycles</string>
+    <string name="dm_note_now" formatted="false">La clim démarre tout de suite avec ses réglages actuels, puis les portes se verrouillent après le délai. Arrêt sous 20 % de batterie, au déverrouillage des portes ou si la voiture roule.</string>
+    <string name="dm_note_at" formatted="false">La voiture reste allumée (clim coupée, environ 0,2 kW) et verrouillée jusqu\'au premier cycle, puis lance la clim avec ses réglages actuels. Elle s\'éteint après le dernier cycle ou sous 20 % de batterie, et tout s\'arrête au déverrouillage des portes.</string>
+    <string name="dm_clim_at">CLIM À %1$s</string>
+    <string name="dm_until_start">avant la mise en marche de la clim</string>
+    <string name="dm_run_line">Cycle %1$d · %2$s → %3$s</string>
+    <string name="dm_lock_delay">Verrouiller les portes après</string>
+    <string name="dm_message_wait">Le conducteur revient bientôt. La clim se mettra en marche à %1$s.</string>
     <string name="aa_title">ANDROID AUTO</string>
     <string name="aa_ready">Téléphone connecté · Appuyer pour ouvrir</string>
     <string name="aa_waiting">Branchez votre téléphone en USB</string>
