@@ -314,6 +314,27 @@ class ScreenshotTest {
         File(File("build/screenshots").apply { mkdirs() }, "car_drift_icon.png").outputStream().use { bmp.compress(Bitmap.CompressFormat.PNG, 100, it) }
     }
 
+    /** Pleine puissance depuis l'accueil : bascule sur le widget Puissance, animation, puis retour. */
+    @Test fun boostFlames() = boost(3, "flames")
+    @Test fun boostLightning() = boost(2, "lightning")
+    @Test fun boostRocket() = boost(1, "rocket")
+
+    private fun boost(style: Int, name: String) {
+        val sp = org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE)
+        sp.edit().putInt("theme_mode", 1).putInt("secondary_widget", 0).putInt("power_fx", style).commit()
+        val act = Robolectric.buildActivity(MainActivity::class.java).setup().get()
+        val looper = shadowOf(Looper.getMainLooper())
+        val scratch = Bitmap.createBitmap(1920, 720, Bitmap.Config.ARGB_8888)
+        fun run(ms: Long) { var t = 0L; while (t < ms) { looper.idleFor(32, TimeUnit.MILLISECONDS); Thread.sleep(1); t += 32; act.window.decorView.draw(Canvas(scratch)) } }
+        run(1500)
+        app.mg4dash.car.CarProps.setInt(app.mg4dash.car.CarProps.BMS_PACK_CRNT, 330, "test")
+        run(2600)
+        save(act.window.decorView, "boost_${name}_on.png")
+        app.mg4dash.car.CarProps.setInt(app.mg4dash.car.CarProps.BMS_PACK_CRNT, 20, "test")
+        run(13000)
+        save(act.window.decorView, "boost_${name}_after.png")
+    }
+
     /** Animation pleine puissance : images successives de l'aperçu des réglages, une planche par style. */
     @Test fun powerFx() {
         val sp = org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE)

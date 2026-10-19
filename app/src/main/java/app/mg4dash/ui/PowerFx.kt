@@ -43,6 +43,8 @@ class PowerFx(private val context: Context) : Drawable() {
         set(v) { if (v != field) { field = v; if (active) stop() } }
     /** Appelé quand le badge du pic apparaît (true) ou disparaît (false) : l'hôte masque son texte dessous. */
     var onBadge: ((Boolean) -> Unit)? = null
+    /** Arrondi des bords : celui des cartes, 0 quand l'animation couvre tout l'écran. */
+    var corner = 20 * context.resources.displayMetrics.density
 
     private val d = context.resources.displayMetrics.density
     private val sp = context.resources.displayMetrics.scaledDensity
@@ -79,8 +81,18 @@ class PowerFx(private val context: Context) : Drawable() {
     private val clip = Path()
     private val r = RectF()
 
-    /** Recale l'animation sur la carte, la barre et la zone de texte sous les chiffres. */
-    fun place(card: View, bar: PowerBar, under: View) {
+    private var host: View? = null; private var hBar: PowerBar? = null; private var hUnder: View? = null
+
+    /**
+     * Rattache l'animation : [host] est la vue dont l'overlay la dessine (la carte du widget, ou toute la
+     * fenêtre pour l'éclair et les flammes), [bar] la barre de puissance, [under] la zone du badge.
+     * La géométrie est relue à chaque image : le widget peut venir d'être construit.
+     */
+    fun attach(host: View, bar: PowerBar, under: View) { this.host = host; hBar = bar; hUnder = under; invalidateSelf() }
+
+    private fun relayout() { val h = host; val b = hBar; val u = hUnder; if (h != null && b != null && u != null) place(h, b, u) }
+
+    private fun place(card: View, bar: PowerBar, under: View) {
         setBounds(0, 0, card.width, card.height)
         val c = IntArray(2); card.getLocationInWindow(c)
         val p = IntArray(2); bar.getLocationInWindow(p)
@@ -105,7 +117,11 @@ class PowerFx(private val context: Context) : Drawable() {
                 record = kw; eventAt = now; strike(now)
             }
             lastAbove = now
-        } else heatTarget = 0.15f
+        } else {
+            heatTarget = 0.15f
+            // Fin aussi sans image dessinée (écran éteint, appli en arrière-plan)
+            if (active && now - lastAbove > HOLD_MS + FADE_MS) { stop(); return }
+        }
         invalidateSelf()
     }
 
@@ -118,6 +134,7 @@ class PowerFx(private val context: Context) : Drawable() {
 
     override fun draw(canvas: Canvas) {
         if (!active) return
+        relayout()
         val now = SystemClock.uptimeMillis()
         val dt = if (lastFrame == 0L) 0.016f else ((now - lastFrame) / 1000f).coerceIn(0f, 0.05f)
         lastFrame = now
@@ -130,7 +147,7 @@ class PowerFx(private val context: Context) : Drawable() {
 
         val b = bounds
         canvas.save()
-        clip.reset(); r.set(b); clip.addRoundRect(r, 20 * d, 20 * d, Path.Direction.CW)
+        clip.reset(); r.set(b); clip.addRoundRect(r, corner, corner, Path.Direction.CW)
         canvas.clipPath(clip)
         val layer = if (alpha < 1f) canvas.saveLayerAlpha(r, (alpha * 255).toInt()) else -1
         when (style) {
@@ -178,28 +195,22 @@ class PowerFx(private val context: Context) : Drawable() {
         val text = peakText()
         val (bw, bh) = badgeSize(text, 0f)
         val L = bh * 1.6f
-        val gap = L * 0.5f   // place pour la flamme entre le badge et la fusée posée
-        val total = bw + gap + L
-        val gx = badgeArea.centerX() - total / 2f
-        val cy = badgeArea.centerY()
-        val parkX = gx + bw + gap
-        val t = ((now - eventAt) / 1100f).coerceIn(0f, 1f)
-        // Vol : départ hors de la carte à gauche au premier passage, petit bond sur place pour un nouveau record
-        val launching = t < 1f
-        if (!launching) fly = false
-        val ease = 1f - (1f - t) * (1f - t) * (1f - t)
-        val startX = bounds.left - L * 1.2f
-        val x: Float; val y: Float
+        // La fusée file le long de la barre depuis le bord gauche de l'écran et pose son nez sur le curseur
+        // du pic ; un nouveau record la fait avancer jusqu'au nouveau pic.
+        val target = barX(record) - L
+        val t = ((now - eventAt) / 650f).coerceIn(0f, 1f)
         if (fly) {
-            x = startX + (parkX - startX) * ease
-            y = cy - sin(PI * t).toFloat() * bh * 0.6f
-        } else {
-            x = parkX + if (launching) sin(t * PI * 6).toFloat() * 2 * d * (1 - t) else 0f
-            y = cy + sin(now / 320.0).toFloat() * 2.5f * d - (if (launching) sin(PI * t).toFloat() * bh * 0.5f else 0f)
-        }
-        val boost = if (launching) 1f - t * 0.6f else 0.25f
+            val ease = 1f - (1f - t) * (1f - t) * (1f - t)
+            val startX = bounds.left - L * 1.3f
+            rocketX = startX + (target - startX) * ease
+            if (t >= 1f) { fly = false; badgeAt = now }
+        } else rocketX += (target - rocketX) * (1f - exp(-dt * 7f))
+        val moving = fly || target - rocketX > 1.5f * d
+        val x = rocketX
+        val y = barY + sin(now / 320.0).toFloat() * (if (moving) 0.5f else 1.5f) * d
+        val boost = if (moving) 1f else 0.25f + 0.1f * sin(now / 90.0).toFloat()
         // Fumée et étincelles derrière la tuyère
-        val rate = if (launching) 90f else 12f
+        val rate = if (moving) 110f else 12f
         var n = rate * dt
         while (n > 0f) {
             if (n >= 1f || rnd.nextFloat() < n) {
@@ -218,9 +229,18 @@ class PowerFx(private val context: Context) : Drawable() {
             else { paint.color = cSub; paint.alpha = ((1 - k) * 90).toInt() }
             c.drawCircle(p.x, p.y, p.r * (if (p.spark) 1f else 1f + k * 1.8f), paint)
         }
-        drawBadge(c, gx, cy, bw, bh, cAction, text, gx + bh * 0.45f, revealX = if (fly) x else Float.MAX_VALUE)
+        // Badge du pic sous les chiffres : apparaît quand la fusée arrive
+        val gx = badgeArea.centerX() - bw / 2f
+        val appear = if (fly) 0f else ((now - badgeAt) / 250f).coerceIn(0f, 1f)
+        if (appear > 0f) {
+            val l = c.saveLayerAlpha(gx - 4 * d, badgeArea.centerY() - bh, gx + bw + 4 * d, badgeArea.centerY() + bh, (appear * 255).toInt())
+            drawBadge(c, gx, badgeArea.centerY(), bw, bh, cAction, text, gx + bh * 0.45f)
+            c.restoreToCount(l)
+        }
         drawRocket(c, x, y, L, boost, now)
     }
+    private var rocketX = 0f
+    private var badgeAt = 0L
     private var fly = true
 
     private fun stepPuffs(dt: Float) {
@@ -402,16 +422,17 @@ class PowerFx(private val context: Context) : Drawable() {
         c.drawRect(b, paint); paint.shader = null
         val pulse = 0.75f + 0.25f * sin(now / 180.0).toFloat()
         r.set(b); r.inset(1.5f * d, 1.5f * d)
-        stroke.color = cHeat; stroke.alpha = (90 * pulse * power.coerceAtMost(1f)).toInt(); stroke.strokeWidth = 9 * d; c.drawRoundRect(r, 20 * d, 20 * d, stroke)
-        stroke.alpha = (220 * pulse * power.coerceAtMost(1f)).toInt(); stroke.strokeWidth = 2.5f * d; c.drawRoundRect(r, 20 * d, 20 * d, stroke)
-        // Nouvelles flammes au pied du widget, braises qui montent jusqu'en haut
-        var n = (60f + 380f * power) * dt
+        stroke.color = cHeat; stroke.alpha = (90 * pulse * power.coerceAtMost(1f)).toInt(); stroke.strokeWidth = 9 * d; c.drawRoundRect(r, corner, corner, stroke)
+        stroke.alpha = (220 * pulse * power.coerceAtMost(1f)).toInt(); stroke.strokeWidth = 2.5f * d; c.drawRoundRect(r, corner, corner, stroke)
+        // Nouvelles flammes au pied du widget (ou de l'écran), braises qui montent jusqu'en haut
+        val area = (b.width() / (600 * d)).coerceIn(1f, 4f)
+        var n = (60f + 380f * power) * dt * area
         while (n > 0f) {
             if (n >= 1f || rnd.nextFloat() < n) {
                 val ember = rnd.nextFloat() < 0.08f
                 flames.add(Flame(b.left + rnd.nextFloat() * b.width(), b.bottom + 6 * d,
                     -(b.height() * (0.45f + rnd.nextFloat() * 0.6f) * (0.5f + power)) * (if (ember) 1.3f else 1f),
-                    (if (ember) 2.2f else 10f + rnd.nextFloat() * 12f) * d * (0.7f + power * 0.4f), 0f,
+                    (if (ember) 2.2f else (10f + rnd.nextFloat() * 12f) * (0.8f + 0.25f * area)) * d * (0.7f + power * 0.4f), 0f,
                     if (ember) 1.6f + rnd.nextFloat() else 0.55f + rnd.nextFloat() * 0.5f, rnd.nextFloat() * 6.28f, ember))
             }
             n -= 1f
@@ -423,7 +444,7 @@ class PowerFx(private val context: Context) : Drawable() {
             f.x += sin(f.phase + f.age * 7f) * (if (f.ember) 30f else 18f) * d * dt
             if (f.age >= f.life) it.remove()
         }
-        while (flames.size > 360) flames.removeAt(0)
+        while (flames.size > 360 * area) flames.removeAt(0)
         for (f in flames) {
             val k = f.age / f.life
             if (f.ember) {
@@ -494,6 +515,7 @@ class PowerFxPreview(context: Context) : android.widget.LinearLayout(context) {
         addView(value, LayoutParams(-1, -2).apply { topMargin = (6 * d).toInt() })
         addView(under, LayoutParams(-1, (56 * d).toInt()))
         overlay.add(fx)
+        fx.attach(this, bar, under)
         fx.onBadge = { on -> under.animate().alpha(if (on) 0f else 1f).setDuration(250).start() }
         show(12f)
     }
@@ -517,7 +539,6 @@ class PowerFxPreview(context: Context) : android.widget.LinearLayout(context) {
                 else -> 30f
             }
             show(kw)
-            fx.place(this@PowerFxPreview, bar, under)
             fx.update(kw, pk * 0.8f, pk)
             if (t < 4.5f) handler.postDelayed(this, 100)
         }
