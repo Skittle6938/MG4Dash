@@ -378,6 +378,14 @@
     <string name="en_gun_unlock">SBLOCCA CAVO</string>
     <string name="en_gun_lock">BLOCCA CAVO</string>
     <string name="power_off_driving">Non durante la guida</string>
+    <string name="st_power_fx">Animazione a piena potenza (widget Potenza in tempo reale):</string>
+    <string name="st_power_fx_desc" formatted="false">Parte oltre l\'80 % della potenza massima dell\'auto, poi mostra il picco raggiunto (kW e CV) per 10 secondi.</string>
+    <string name="fx_none">Nessuna</string>
+    <string name="fx_rocket">Razzo</string>
+    <string name="fx_lightning">Fulmine</string>
+    <string name="fx_flames">Fiamme</string>
+    <string name="fx_preview">Anteprima</string>
+    <string name="fx_peak">Picco %1$s kW · %2$s CV</string>
     <string name="aa_title">ANDROID AUTO</string>
     <string name="aa_ready">Telefono connesso · Tocca per aprire</string>
     <string name="aa_waiting">Collega il telefono via USB</string>

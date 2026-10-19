@@ -81,6 +81,11 @@ class Prefs(context: Context) {
         get() = sp.getString("weather_city", "Paris") ?: "Paris"
         set(v) = sp.edit().putString("weather_city", v).apply()
 
+    /** Animation pleine puissance du widget Puissance : 0 = aucune, 1 = fusée, 2 = éclair, 3 = flammes. */
+    var powerFx: Int
+        get() = sp.getInt("power_fx", 1)
+        set(v) = sp.edit().putInt("power_fx", v).apply()
+
     /** Widget secondaire de la colonne droite : 0 = trajet, 1 = statut, 2 = météo compacte. */
     var secondaryWidget: Int
         get() = sp.getInt("secondary_widget", 0)

@@ -302,6 +302,40 @@ class ScreenshotTest {
         File(dir, "climate_icons_preview.png").outputStream().use { bmp.compress(Bitmap.CompressFormat.PNG, 100, it) }
     }
 
+    /** Animation pleine puissance : images successives de l'aperçu des réglages, une planche par style. */
+    @Test fun powerFx() {
+        val sp = org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE)
+        sp.edit().putInt("theme_mode", 1).commit()
+        val act = Robolectric.buildActivity(SettingsActivity::class.java).setup().get()
+        val names = mapOf(1 to "rocket", 2 to "lightning", 3 to "flames")
+        val times = longArrayOf(150, 300, 500, 900, 1300, 2500, 2800, 3200, 4200)
+        for ((style, name) in names) {
+            val root = android.widget.FrameLayout(act)
+            val pv = app.mg4dash.ui.PowerFxPreview(act)
+            root.addView(pv, android.widget.FrameLayout.LayoutParams(-1, -2))
+            act.setContentView(root)
+            val w = 900; val h = 190
+            fun lay() {
+                root.measure(View.MeasureSpec.makeMeasureSpec(w, View.MeasureSpec.EXACTLY), View.MeasureSpec.makeMeasureSpec(h, View.MeasureSpec.EXACTLY))
+                root.layout(0, 0, w, h)
+            }
+            lay()
+            pv.play(style)
+            val sheet = Bitmap.createBitmap(w, h * times.size, Bitmap.Config.ARGB_8888)
+            val c = Canvas(sheet)
+            var t = 0L
+            times.forEachIndexed { i, at ->
+                while (t < at) { shadowOf(Looper.getMainLooper()).idleFor(16, TimeUnit.MILLISECONDS); t += 16; lay(); root.draw(Canvas(Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888))) }
+                val bmp = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
+                bmp.eraseColor(0xFF0B0F17.toInt())
+                root.draw(Canvas(bmp))
+                c.drawBitmap(bmp, 0f, (i * h).toFloat(), null)
+            }
+            val dir = File("build/screenshots").apply { mkdirs() }
+            File(dir, "powerfx_$name.png").outputStream().use { sheet.compress(Bitmap.CompressFormat.PNG, 100, it) }
+        }
+    }
+
     private fun <T : Activity> shoot(cls: Class<T>, name: String) {
         // Captures en mode sombre, sauf si le test a choisi un autre mode
         val sp = org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE)

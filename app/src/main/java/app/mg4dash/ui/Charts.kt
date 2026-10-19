@@ -148,6 +148,23 @@ class PowerBar @JvmOverloads constructor(context: Context, attrs: AttributeSet? 
         path.reset(); rect.set(left, top, right, bottom); path.addRoundRect(rect, radii, Path.Direction.CW)
     }
 
+    /** Abscisse d'une puissance sur la barre (coordonnées de la vue), même calcul que onDraw : pour PowerFx. */
+    fun xAt(v: Float): Float {
+        val h = height.toFloat()
+        val barH = (if (h >= 26 * d) h * 0.42f else h * 0.6f).coerceAtMost(14 * d)
+        val x0 = barH; val x1 = width - barH
+        val zero = x0 + (x1 - x0) * maxRegenKw / (maxRegenKw + maxDrawKw)
+        return if (v >= 0f) zero + (x1 - zero) * (v / maxDrawKw).coerceIn(0f, 1f) else zero - (zero - x0) * (-v / maxRegenKw).coerceIn(0f, 1f)
+    }
+
+    /** Hauteur du milieu de la barre (coordonnées de la vue). */
+    fun barCenterY(): Float {
+        val h = height.toFloat()
+        val labels = h >= 26 * d
+        val barH = (if (labels) h * 0.42f else h * 0.6f).coerceAtMost(14 * d)
+        return (if (labels) 4 * d else (h - barH) / 2f) + barH / 2f
+    }
+
     override fun onDraw(canvas: Canvas) {
         val w = width.toFloat(); val h = height.toFloat()
         val now = System.currentTimeMillis()

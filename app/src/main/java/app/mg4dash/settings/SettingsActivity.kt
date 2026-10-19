@@ -125,6 +125,7 @@ class SettingsActivity : AppCompatActivity() {
         text(energy, getString(R.string.st_battery_model), 18f, R.color.text_value)
         val models = app.mg4dash.energy.BatteryCapacity.MODELS.map { it.first }
         row(energy, *choiceButtons(models.map { "$it kWh" }, { models.indexOf(prefs.batteryModel) }) { prefs.batteryModel = models[it] })
+        powerFxSetting(energy)
 
         // ════ Colonne droite : système, connexions, diagnostic ════
 
@@ -347,6 +348,42 @@ class SettingsActivity : AppCompatActivity() {
                     .show()
             }
         })
+    }
+
+    /** Animation pleine puissance du widget Puissance en direct : liste déroulante, aperçu sur une mini carte. */
+    private fun powerFxSetting(parent: LinearLayout) {
+        text(parent, getString(R.string.st_power_fx), 18f, R.color.text_value)
+        val names = listOf(R.string.fx_none, R.string.fx_rocket, R.string.fx_lightning, R.string.fx_flames).map { getString(it) }
+        val preview = app.mg4dash.ui.PowerFxPreview(this).apply {
+            // Même échelle que le widget de l'accueil pour le modèle choisi
+            if (prefs.batteryModel == 51) { bar.continuousKw = 54f; bar.peakKw = 125f } else { bar.continuousKw = 68f; bar.peakKw = 150f }
+            bar.maxDrawKw = when (prefs.batteryModel) { 77 -> 200f; 64 -> 170f; else -> 140f }
+        }
+        lateinit var pick: Button
+        fun label() { pick.text = "${names[prefs.powerFx.coerceIn(0, names.size - 1)]}   ▾" }
+        pick = button("") {
+            val popup = android.widget.ListPopupWindow(this)
+            popup.anchorView = pick
+            popup.setBackgroundDrawable(getDrawable(R.drawable.bg_panel))
+            popup.setAdapter(object : android.widget.ArrayAdapter<String>(this, 0, names) {
+                override fun getView(position: Int, convertView: View?, parent: android.view.ViewGroup): View =
+                    TextView(context).apply {
+                        text = names[position]; setTextSize(TypedValue.COMPLEX_UNIT_SP, 20f)
+                        setPadding(dp(24), dp(16), dp(24), dp(16))
+                        setTextColor(color(if (position == prefs.powerFx) R.color.accent_action else R.color.text_value))
+                    }
+            })
+            popup.isModal = true
+            popup.setOnItemClickListener { _, _, i, _ ->
+                prefs.powerFx = i; label(); popup.dismiss()
+                if (i != app.mg4dash.ui.PowerFx.NONE) preview.play(i)
+            }
+            popup.show()
+        }.apply { setBackgroundResource(R.drawable.bg_chip); setTextColor(color(R.color.accent_action)) }
+        label()
+        row(parent, pick, button(getString(R.string.fx_preview)) { preview.play(prefs.powerFx) }.apply { setBackgroundResource(R.drawable.bg_chip) })
+        text(parent, getString(R.string.st_power_fx_desc), 16f, R.color.text_title)
+        parent.addView(preview, LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(10) })
     }
 
     private fun confirmReplace() {

@@ -730,10 +730,18 @@ class MainActivity : AppCompatActivity() {
     private var powerLabel: TextView? = null
     private var powerAvg: TextView? = null
     private var powerBar: app.mg4dash.ui.PowerBar? = null
+    private var powerFx: app.mg4dash.ui.PowerFx? = null
+
+    /** Retire l'animation pleine puissance de la carte (autre widget, ou carte reconstruite). */
+    private fun dropPowerFx() {
+        powerFx?.let { b.secondaryCard.overlay.remove(it); it.onBadge = null; it.stop() }
+        powerFx = null
+    }
 
     private fun renderSecondary() {
         val mode = prefs.secondaryWidget.coerceIn(0, 2)
         b.secondaryDots.text = (0..2).joinToString(" ") { if (it == mode) "●" else "○" }
+        if (mode != 1) dropPowerFx()
         when (mode) {
             0 -> renderTripEnergy()
             1 -> if (builtMode != 1) { buildPower(); builtMode = 1; lifecycleScope.launch { updatePower() } }
@@ -815,6 +823,12 @@ class MainActivity : AppCompatActivity() {
             fontFeatureSettings = "tnum"
         }
         g.addView(powerExtra, LinearLayout.LayoutParams(-1, 0, 1f))
+        // Animation pleine puissance (réglages) : par-dessus la carte, le pic remplace la ligne tension · courant
+        dropPowerFx()
+        powerFx = app.mg4dash.ui.PowerFx(this).also { fx ->
+            fx.onBadge = { on -> powerExtra?.animate()?.alpha(if (on) 0f else 1f)?.setDuration(250)?.start() }
+            b.secondaryCard.overlay.add(fx)
+        }
     }
 
     private var powerExtra: TextView? = null
@@ -835,6 +849,12 @@ class MainActivity : AppCompatActivity() {
         powerValue?.setTextColor(color(if (regen) R.color.accent_energy else R.color.text_value))
         powerLabel?.text = getString(when { plugged -> R.string.sw_charging; regen -> R.string.sw_recovering; else -> R.string.sw_drawn })
         powerBar?.kw = if (plugged) 0f else kw ?: 0f
+        val bar = powerBar; val under = powerExtra
+        if (bar != null && under != null) powerFx?.let { fx ->
+            fx.style = prefs.powerFx
+            fx.place(b.secondaryCard, bar, under)
+            fx.update(if (plugged) 0f else kw ?: 0f, bar.peakKw * 0.8f, bar.peakKw)
+        }
         val avg = app.mg4dash.energy.EnergyMonitor.sinceStart.value.per100
         powerAvg?.text = avg?.let { "${app.mg4dash.system.Units.consText(this, it)} ${if (app.mg4dash.system.Units.miles(this)) "mi/kWh" else "kWh/100"}" } ?: "—"
         powerExtra?.let { tv ->
