@@ -260,24 +260,21 @@ class ScreenshotTest {
         shoot(MainActivity::class.java, "home_shortcuts_fr.png")
     }
 
-    /** Pré-climatisation (issue #26) : fenêtre de réglage sur l'accueil, puis l'écran de veille pendant un cycle. */
+    /** Mode chien : fenêtre sur l'accueil, puis son écran (lisible de dehors). */
     @Test @Config(qualifiers = "fr-w1920dp-h720dp-land-mdpi")
-    fun preCool() {
+    fun dogMode() {
         val sp = org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE)
-        sp.edit().putInt("theme_mode", 1).putBoolean("precool_enabled", true).putString("precool_plan", "60,30,15,3,30").commit()
+        sp.edit().putInt("theme_mode", 1).putBoolean("dogmode_enabled", true).putInt("dogmode_max_min", 0).commit()
         val home = Robolectric.buildActivity(MainActivity::class.java).setup().get()
         repeat(5) { shadowOf(Looper.getMainLooper()).idleFor(200, TimeUnit.MILLISECONDS) }
-        app.mg4dash.climate.PreCoolPanel.show(home)
+        app.mg4dash.climate.DogModePanel.show(home)
         shadowOf(Looper.getMainLooper()).idleFor(200, TimeUnit.MILLISECONDS)
-        save(home.window.decorView, "precool_menu.png")
-        // Programme réel en simulation : verrouillage tout de suite, premier cycle aussitôt
-        app.mg4dash.climate.PreCool.start(home, app.mg4dash.climate.PreCool.Plan(0, 0, 15, 3, 30))
-        repeat(80) { Thread.sleep(250); shadowOf(Looper.getMainLooper()).idleFor(250, TimeUnit.MILLISECONDS) }
-        save(home.window.decorView, "precool_follow.png")
-        val standby = Robolectric.buildActivity(app.mg4dash.climate.PreCoolActivity::class.java).setup().get()
-        repeat(4) { shadowOf(Looper.getMainLooper()).idleFor(500, TimeUnit.MILLISECONDS) }
-        save(standby.window.decorView, "precool_standby.png")
-        app.mg4dash.climate.PreCool.stop("fin du test")
+        save(home.window.decorView, "dogmode_menu.png")
+        app.mg4dash.climate.DogMode.start(home, 0)
+        val screen = Robolectric.buildActivity(app.mg4dash.climate.DogModeActivity::class.java).setup().get()
+        repeat(6) { Thread.sleep(300); shadowOf(Looper.getMainLooper()).idleFor(1000, TimeUnit.MILLISECONDS) }
+        save(screen.window.decorView, "dogmode_screen.png")
+        app.mg4dash.climate.DogMode.stop("fin du test")
     }
 
     @Test @Config(qualifiers = "fr-w1920dp-h720dp-land-mdpi")

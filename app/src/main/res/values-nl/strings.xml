@@ -388,37 +388,26 @@
     <string name="fx_peak">Piek %1$s kW · %2$s pk</string>
     <string name="st_xpower">MG4 XPower (320 kW)</string>
     <string name="st_xpower_desc">Wordt vanzelf herkend zodra meer dan 350 pk wordt gemeten: de auto meldt zijn versie niet. Bepaalt de vermogensschaal en de drempel van de speciale functie plankgas.</string>
-    <string name="st_precool">Geplande voorklimatisering (lang drukken op de aan-knop van de airco)</string>
-    <string name="st_precool_desc">Nadat je met de sleutel bent vertrokken, vergrendelt MG4Dash de auto, zet hem uit en start de airco op de geplande tijden (issue #26).</string>
-    <string name="pc_title">GEPLANDE VOORKLIMATISERING</string>
-    <string name="pc_lock_delay">Deuren vergrendelen na</string>
-    <string name="pc_start_delay">Eerste cyclus na vergrendelen</string>
-    <string name="pc_duration">Duur van elke cyclus</string>
-    <string name="pc_runs">Aantal cycli</string>
-    <string name="pc_gap">Pauze tussen cycli</string>
-    <string name="pc_note" formatted="false">De airco start met de huidige instellingen (temperatuur, ventilator, A/C). Alles stopt als een deur wordt ontgrendeld of onder 20 % batterij.</string>
-    <string name="pc_close">Sluiten</string>
-    <string name="pc_activate">Activeren</string>
-    <string name="pc_confirm_title">Neem de sleutel mee!</string>
-    <string name="pc_confirm_msg">Neem de sleutel mee, sluit de deuren en vergrendel de auto NIET zelf: MG4Dash vergrendelt hem na de wachttijd en zet hem uit. Laat de sleutel niet in de auto.</string>
-    <string name="pc_confirm_go">Ik heb de sleutel, activeren</string>
-    <string name="pc_lock_at">Deuren vergrendeld om %1$s</string>
-    <string name="pc_stop">Programma stoppen</string>
-    <string name="pc_lock_in">Vergrendeling over</string>
-    <string name="pc_clim_on">AIRCO AAN</string>
-    <string name="pc_clim_off">AIRCO OVER</string>
-    <string name="pc_clim_refused">AIRCO GEWEIGERD</string>
-    <string name="pc_state_done">VOORKLIMATISERING KLAAR</string>
-    <string name="pc_state_battery" formatted="false">GESTOPT: BATTERIJ ONDER 20 %</string>
-    <string name="pc_state_failed">DE AUTO WEIGERDE DE AIRCO</string>
-    <string name="pc_inside">BINNEN</string>
-    <string name="pc_outside">Buiten %1$s</string>
-    <string name="pc_until_start">tot de volgende cyclus</string>
-    <string name="pc_until_end">resterend in deze cyclus</string>
-    <string name="pc_set">Ingesteld op %1$s</string>
-    <string name="pc_battery">Batterij %1$s</string>
-    <string name="pc_hold_stop">Ingedrukt houden om te stoppen</string>
-    <string name="pc_run_line">Cyclus %1$d · %2$s → %3$s</string>
+    <string name="st_dogmode">Hondenmodus (lang drukken op de aan-knop van de airco)</string>
+    <string name="st_dogmode_desc">Houdt de auto aan met draaiende airco terwijl je weg bent, met een groot scherm dat voorbijgangers de binnentemperatuur toont.</string>
+    <string name="dm_title">HONDENMODUS</string>
+    <string name="dm_max">Maximale duur</string>
+    <string name="dm_unlimited">Onbeperkt</string>
+    <string name="dm_note" formatted="false">De auto blijft aan en de airco houdt de huidige instellingen. De modus stopt onder 20 % batterij of na de maximale duur (airco uit en auto uitgeschakeld), of als de auto rijdt.</string>
+    <string name="dm_close">Sluiten</string>
+    <string name="dm_activate">Activeren</string>
+    <string name="dm_message">Mijn bestuurder is zo terug. Geen zorgen: de airco staat aan en het gaat goed met me.</string>
+    <string name="dm_inside">BINNEN</string>
+    <string name="dm_outside">Buiten %1$s</string>
+    <string name="dm_clim_on">AIRCO AAN</string>
+    <string name="dm_clim_off">AIRCO UIT</string>
+    <string name="dm_left">resterend</string>
+    <string name="dm_since">sinds activering</string>
+    <string name="dm_set">ingesteld op %1$s</string>
+    <string name="dm_battery">Batterij %1$s</string>
+    <string name="dm_hold_stop">Ingedrukt houden om te stoppen</string>
+    <string name="dm_state_done">KLAAR · AUTO UITGESCHAKELD</string>
+    <string name="dm_state_battery" formatted="false">GESTOPT: BATTERIJ ONDER 20 %</string>
     <string name="aa_title">ANDROID AUTO</string>
     <string name="aa_ready">Telefoon verbonden · Tik om te openen</string>
     <string name="aa_waiting">Sluit je telefoon aan via USB</string>

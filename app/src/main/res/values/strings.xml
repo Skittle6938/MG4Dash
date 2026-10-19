@@ -388,37 +388,26 @@
     <string name="fx_peak">Peak %1$s kW · %2$s hp</string>
     <string name="st_xpower">MG4 XPower (320 kW)</string>
     <string name="st_xpower_desc">Recognised by itself as soon as more than 350 hp is measured: the car does not report its version. Sets the power scale and the threshold of the full-throttle special.</string>
-    <string name="st_precool">Scheduled pre-cool (long press on the climate power button)</string>
-    <string name="st_precool_desc">After you leave with the key, MG4Dash locks and switches off the car, then runs the climate at the planned times (issue #26).</string>
-    <string name="pc_title">SCHEDULED PRE-COOL</string>
-    <string name="pc_lock_delay">Lock the doors after</string>
-    <string name="pc_start_delay">First run after locking</string>
-    <string name="pc_duration">Duration of each run</string>
-    <string name="pc_runs">Number of runs</string>
-    <string name="pc_gap">Pause between runs</string>
-    <string name="pc_note" formatted="false">The climate starts with its current settings (temperature, fan, A/C). Everything stops if a door is unlocked or below 20 % of battery.</string>
-    <string name="pc_close">Close</string>
-    <string name="pc_activate">Activate</string>
-    <string name="pc_confirm_title">Leave with the key!</string>
-    <string name="pc_confirm_msg">Take the key with you, close the doors and do NOT lock the car yourself: MG4Dash locks it after the delay and switches it off. Do not leave the key inside the car.</string>
-    <string name="pc_confirm_go">I have the key, activate</string>
-    <string name="pc_lock_at">Doors locked at %1$s</string>
-    <string name="pc_stop">Stop the program</string>
-    <string name="pc_lock_in">Locking in</string>
-    <string name="pc_clim_on">CLIMATE ON</string>
-    <string name="pc_clim_off">CLIMATE STARTS IN</string>
-    <string name="pc_clim_refused">CLIMATE REFUSED</string>
-    <string name="pc_state_done">PRE-COOL FINISHED</string>
-    <string name="pc_state_battery" formatted="false">STOPPED: BATTERY BELOW 20 %</string>
-    <string name="pc_state_failed">THE CAR REFUSED THE CLIMATE</string>
-    <string name="pc_inside">INSIDE</string>
-    <string name="pc_outside">Outside %1$s</string>
-    <string name="pc_until_start">before the next run</string>
-    <string name="pc_until_end">left in this run</string>
-    <string name="pc_set">Set to %1$s</string>
-    <string name="pc_battery">Battery %1$s</string>
-    <string name="pc_hold_stop">Hold to stop</string>
-    <string name="pc_run_line">Run %1$d · %2$s → %3$s</string>
+    <string name="st_dogmode">Dog mode (long press on the climate power button)</string>
+    <string name="st_dogmode_desc">Keeps the car on with the climate running while you are away, with a large screen showing the cabin temperature to passers-by.</string>
+    <string name="dm_title">DOG MODE</string>
+    <string name="dm_max">Maximum duration</string>
+    <string name="dm_unlimited">Unlimited</string>
+    <string name="dm_note" formatted="false">The car stays on and the climate keeps its current settings. The mode ends below 20 % of battery or after the maximum duration (climate stopped and car switched off), or if the car moves.</string>
+    <string name="dm_close">Close</string>
+    <string name="dm_activate">Activate</string>
+    <string name="dm_message">My driver will be back soon. Don\'t worry: the climate is on and I\'m fine.</string>
+    <string name="dm_inside">INSIDE</string>
+    <string name="dm_outside">Outside %1$s</string>
+    <string name="dm_clim_on">CLIMATE ON</string>
+    <string name="dm_clim_off">CLIMATE OFF</string>
+    <string name="dm_left">left</string>
+    <string name="dm_since">since activation</string>
+    <string name="dm_set">set to %1$s</string>
+    <string name="dm_battery">Battery %1$s</string>
+    <string name="dm_hold_stop">Hold to stop</string>
+    <string name="dm_state_done">FINISHED · CAR SWITCHED OFF</string>
+    <string name="dm_state_battery" formatted="false">STOPPED: BATTERY BELOW 20 %</string>
     <string name="aa_title">ANDROID AUTO</string>
     <string name="aa_ready">Phone connected · Tap to open</string>
     <string name="aa_waiting">Connect your phone via USB</string>

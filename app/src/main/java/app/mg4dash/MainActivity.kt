@@ -383,8 +383,8 @@ class MainActivity : AppCompatActivity() {
     private fun wireClimate() {
         buildHeating()
         b.climPower.setOnClickListener { CarBridge.togglePower() }
-        // Appui long : pré-climatisation programmée (issue #26), si elle est activée dans les réglages
-        b.climPower.setOnLongClickListener { if (prefs.preCoolEnabled) { app.mg4dash.climate.PreCoolPanel.show(this); true } else false }
+        // Appui long : mode chien, si elle est activée dans les réglages
+        b.climPower.setOnLongClickListener { if (prefs.dogModeEnabled) { app.mg4dash.climate.DogModePanel.show(this); true } else false }
         repeatOnHold(b.tempDown) { CarBridge.stepTemp(-1) }
         repeatOnHold(b.tempUp) { CarBridge.stepTemp(1) }
         // Ventilation : sous la vitesse 1, la clim s'arrête ; appui long − = minimum, appui long + = maximum

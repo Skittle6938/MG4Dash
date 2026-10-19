@@ -388,37 +388,26 @@
     <string name="fx_peak">Pic %1$s kW · %2$s ch</string>
     <string name="st_xpower">MG4 XPower (320 kW)</string>
     <string name="st_xpower_desc">Reconnue d\'elle-même dès que plus de 350 ch sont mesurés : la voiture ne donne pas sa version. Règle l\'échelle de puissance et le seuil de la fonction pied au plancher.</string>
-    <string name="st_precool">Pré-climatisation programmée (appui long sur le bouton marche de la clim)</string>
-    <string name="st_precool_desc">Après votre départ avec la clé, MG4Dash verrouille et éteint la voiture, puis lance la clim aux heures prévues (issue #26).</string>
-    <string name="pc_title">PRÉ-CLIMATISATION PROGRAMMÉE</string>
-    <string name="pc_lock_delay">Verrouiller les portes après</string>
-    <string name="pc_start_delay">Premier cycle après le verrouillage</string>
-    <string name="pc_duration">Durée de chaque cycle</string>
-    <string name="pc_runs">Nombre de cycles</string>
-    <string name="pc_gap">Pause entre les cycles</string>
-    <string name="pc_note" formatted="false">La clim démarre avec ses réglages actuels (température, ventilation, A/C). Tout s\'arrête si une porte est déverrouillée ou sous 20 % de batterie.</string>
-    <string name="pc_close">Fermer</string>
-    <string name="pc_activate">Activer</string>
-    <string name="pc_confirm_title">Partez avec la clé !</string>
-    <string name="pc_confirm_msg">Prenez la clé avec vous, fermez les portes et ne verrouillez PAS la voiture vous-même : MG4Dash la verrouille après le délai et l\'éteint. Ne laissez pas la clé dans la voiture.</string>
-    <string name="pc_confirm_go">J\'ai la clé, activer</string>
-    <string name="pc_lock_at">Portes verrouillées à %1$s</string>
-    <string name="pc_stop">Arrêter le programme</string>
-    <string name="pc_lock_in">Verrouillage dans</string>
-    <string name="pc_clim_on">CLIM EN MARCHE</string>
-    <string name="pc_clim_off">CLIM DANS</string>
-    <string name="pc_clim_refused">CLIM REFUSÉE</string>
-    <string name="pc_state_done">PRÉ-CLIMATISATION TERMINÉE</string>
-    <string name="pc_state_battery" formatted="false">ARRÊTÉE : BATTERIE SOUS 20 %</string>
-    <string name="pc_state_failed">LA VOITURE A REFUSÉ LA CLIM</string>
-    <string name="pc_inside">INTÉRIEUR</string>
-    <string name="pc_outside">Extérieur %1$s</string>
-    <string name="pc_until_start">avant le prochain cycle</string>
-    <string name="pc_until_end">restant sur ce cycle</string>
-    <string name="pc_set">Réglée à %1$s</string>
-    <string name="pc_battery">Batterie %1$s</string>
-    <string name="pc_hold_stop">Maintenir pour arrêter</string>
-    <string name="pc_run_line">Cycle %1$d · %2$s → %3$s</string>
+    <string name="st_dogmode">Mode chien (appui long sur le bouton marche de la clim)</string>
+    <string name="st_dogmode_desc">Garde la voiture allumée avec la clim en marche pendant votre absence, avec un grand écran qui montre la température intérieure aux passants.</string>
+    <string name="dm_title">MODE CHIEN</string>
+    <string name="dm_max">Durée maximale</string>
+    <string name="dm_unlimited">Illimitée</string>
+    <string name="dm_note" formatted="false">La voiture reste allumée et la clim garde ses réglages actuels. Le mode s\'arrête sous 20 % de batterie ou au bout de la durée maximale (clim arrêtée et voiture éteinte), ou si la voiture roule.</string>
+    <string name="dm_close">Fermer</string>
+    <string name="dm_activate">Activer</string>
+    <string name="dm_message">Mon conducteur revient bientôt. Pas d\'inquiétude : la clim est en marche et je vais bien.</string>
+    <string name="dm_inside">INTÉRIEUR</string>
+    <string name="dm_outside">Extérieur %1$s</string>
+    <string name="dm_clim_on">CLIM EN MARCHE</string>
+    <string name="dm_clim_off">CLIM ARRÊTÉE</string>
+    <string name="dm_left">restant</string>
+    <string name="dm_since">depuis l\'activation</string>
+    <string name="dm_set">réglée à %1$s</string>
+    <string name="dm_battery">Batterie %1$s</string>
+    <string name="dm_hold_stop">Maintenir pour arrêter</string>
+    <string name="dm_state_done">TERMINÉ · VOITURE ÉTEINTE</string>
+    <string name="dm_state_battery" formatted="false">ARRÊTÉ : BATTERIE SOUS 20 %</string>
     <string name="aa_title">ANDROID AUTO</string>
     <string name="aa_ready">Téléphone connecté · Appuyer pour ouvrir</string>
     <string name="aa_waiting">Branchez votre téléphone en USB</string>

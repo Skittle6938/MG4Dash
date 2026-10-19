@@ -100,22 +100,6 @@ object CarBridge {
         return true
     }
 
-    /**
-     * Rallume la voiture (sans « Ready ») : même commande que l'extinction, valeur 1 (POWER_MODE_ON de
-     * CarComfortableController dans la SystemUI d'origine). Pour la pré-climatisation (issue #26).
-     */
-    fun powerOnCar(): Boolean {
-        if (BuildConfig.MOCK) return true
-        return CarProps.setIntArea(POWER_MODE, 0, 1, "allumage de la voiture")
-    }
-
-    /** Verrouille les portes (sans rien faire si elles le sont déjà). */
-    fun lockDoors(): Boolean {
-        if (doorsLocked() == true) return true
-        if (BuildConfig.MOCK) return true
-        return CarProps.setIntArea(VEHICLE_LOCK, 0x1000000, 1, "portes : verrouiller")
-    }
-
     /** Met la clim en marche ou l'arrête si elle n'est pas déjà dans cet état. */
     fun setHvac(on: Boolean) { if (_state.value.hvacOn != on) togglePower() }
 

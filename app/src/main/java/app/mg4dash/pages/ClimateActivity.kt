@@ -43,7 +43,7 @@ class ClimateActivity : PageActivity() {
         outside = kit.text("", 18f, R.color.text_sub)
         header.addView(outside, kit.lp(-2, -2, r = 20))
         power = kit.roundButton(R.drawable.ic_power, 56) { CarBridge.togglePower() }
-            .apply { setOnLongClickListener { if (app.mg4dash.system.Prefs(context).preCoolEnabled) { app.mg4dash.climate.PreCoolPanel.show(context as android.app.Activity); true } else false } }
+            .apply { setOnLongClickListener { if (app.mg4dash.system.Prefs(context).dogModeEnabled) { app.mg4dash.climate.DogModePanel.show(context as android.app.Activity); true } else false } }
         header.addView(power)
 
         // ── Température ──
