@@ -166,6 +166,7 @@ class SimpleHome(private val a: AppCompatActivity) {
             setImageResource(R.drawable.ic_power); setBackgroundResource(R.drawable.bg_chip)
             scaleType = ImageView.ScaleType.FIT_CENTER; setPadding(kit.dp(12), kit.dp(12), kit.dp(12), kit.dp(12))
             setOnClickListener { CarBridge.togglePower() }
+            setOnLongClickListener { if (app.mg4dash.system.Prefs(context).preCoolEnabled) { app.mg4dash.climate.PreCoolPanel.show(context as android.app.Activity); true } else false }
         }
         chipAc = kit.toggleTile(a.getString(R.string.chip_ac)) { CarBridge.toggleAc() }
         chipAuto = kit.toggleTile(a.getString(R.string.chip_auto)) { CarBridge.toggleAuto() }
@@ -369,7 +370,7 @@ class SimpleHome(private val a: AppCompatActivity) {
         paint(heatSeatL, s.seatHeatL, true); paint(heatSeatR, s.seatHeatR, true); paint(heatWheel, s.wheelHeat, false)
         val on = s.hvacOn == true
         val known = s.connected && s.hvacOn != null
-        power.setColorFilter(kit.color(if (on) R.color.accent_energy else R.color.text_sub))
+        power.setColorFilter(kit.color(if (on) R.color.accent_action else R.color.text_sub))
         temp.text = if (on || s.driverTemp != null) VehicleState.tempLabel(s.driverTemp) else a.getString(R.string.no_data)
         temp.setTextColor(kit.color(if (on) R.color.text_value else R.color.text_disabled))
         outside.text = s.outsideTemp?.let { a.getString(R.string.cl_outside, Math.round(it)) } ?: ""

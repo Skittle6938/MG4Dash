@@ -43,6 +43,7 @@ class ClimateActivity : PageActivity() {
         outside = kit.text("", 18f, R.color.text_sub)
         header.addView(outside, kit.lp(-2, -2, r = 20))
         power = kit.roundButton(R.drawable.ic_power, 56) { CarBridge.togglePower() }
+            .apply { setOnLongClickListener { if (app.mg4dash.system.Prefs(context).preCoolEnabled) { app.mg4dash.climate.PreCoolPanel.show(context as android.app.Activity); true } else false } }
         header.addView(power)
 
         // ── Température ──
@@ -152,7 +153,7 @@ class ClimateActivity : PageActivity() {
         val on = s.hvacOn == true
         controls.forEach { it.isEnabled = known }
         power.isSelected = on
-        power.setColorFilter(kit.color(if (on) R.color.accent_energy else R.color.text_sub))
+        power.setColorFilter(kit.color(if (on) R.color.accent_action else R.color.text_sub))
         outside.text = s.outsideTemp?.let { getString(R.string.cl_outside, Math.round(it)) } ?: ""
         temp.text = VehicleState.tempLabel(s.driverTemp)
         temp.setTextColor(kit.color(if (on) R.color.text_value else R.color.text_disabled))

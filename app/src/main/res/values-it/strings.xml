@@ -388,6 +388,37 @@
     <string name="fx_peak">Picco %1$s kW · %2$s CV</string>
     <string name="st_xpower">MG4 XPower (320 kW)</string>
     <string name="st_xpower_desc">Riconosciuta da sola appena si misurano più di 350 CV: l\'auto non indica la sua versione. Imposta la scala di potenza e la soglia della funzione speciale a tavoletta.</string>
+    <string name="st_precool">Preclimatizzazione programmata (pressione lunga sul tasto di accensione del clima)</string>
+    <string name="st_precool_desc">Dopo che sei sceso con la chiave, MG4Dash chiude e spegne l\'auto, poi avvia il clima agli orari previsti (issue #26).</string>
+    <string name="pc_title">PRECLIMATIZZAZIONE PROGRAMMATA</string>
+    <string name="pc_lock_delay">Chiudere le porte dopo</string>
+    <string name="pc_start_delay">Primo ciclo dopo la chiusura</string>
+    <string name="pc_duration">Durata di ogni ciclo</string>
+    <string name="pc_runs">Numero di cicli</string>
+    <string name="pc_gap">Pausa tra i cicli</string>
+    <string name="pc_note" formatted="false">Il clima parte con le impostazioni attuali (temperatura, ventola, A/C). Tutto si ferma se una porta viene sbloccata o sotto il 20 % di batteria.</string>
+    <string name="pc_close">Chiudi</string>
+    <string name="pc_activate">Attiva</string>
+    <string name="pc_confirm_title">Porta con te la chiave!</string>
+    <string name="pc_confirm_msg">Porta con te la chiave, chiudi le porte e NON bloccare tu l\'auto: MG4Dash la blocca dopo il ritardo e la spegne. Non lasciare la chiave in auto.</string>
+    <string name="pc_confirm_go">Ho la chiave, attiva</string>
+    <string name="pc_lock_at">Porte chiuse alle %1$s</string>
+    <string name="pc_stop">Ferma il programma</string>
+    <string name="pc_lock_in">Chiusura tra</string>
+    <string name="pc_clim_on">CLIMA ACCESO</string>
+    <string name="pc_clim_off">CLIMA TRA</string>
+    <string name="pc_clim_refused">CLIMA RIFIUTATO</string>
+    <string name="pc_state_done">PRECLIMATIZZAZIONE FINITA</string>
+    <string name="pc_state_battery" formatted="false">FERMATA: BATTERIA SOTTO 20 %</string>
+    <string name="pc_state_failed">L\'AUTO HA RIFIUTATO IL CLIMA</string>
+    <string name="pc_inside">INTERNO</string>
+    <string name="pc_outside">Esterno %1$s</string>
+    <string name="pc_until_start">prima del prossimo ciclo</string>
+    <string name="pc_until_end">rimanente in questo ciclo</string>
+    <string name="pc_set">Impostato a %1$s</string>
+    <string name="pc_battery">Batteria %1$s</string>
+    <string name="pc_hold_stop">Tieni premuto per fermare</string>
+    <string name="pc_run_line">Ciclo %1$d · %2$s → %3$s</string>
     <string name="aa_title">ANDROID AUTO</string>
     <string name="aa_ready">Telefono connesso · Tocca per aprire</string>
     <string name="aa_waiting">Collega il telefono via USB</string>
