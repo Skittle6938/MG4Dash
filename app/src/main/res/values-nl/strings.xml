@@ -427,6 +427,8 @@
     <string name="dm_run_line">Cyclus %1$d · %2$s → %3$s</string>
     <string name="dm_lock_delay">Deuren vergrendelen na</string>
     <string name="dm_message_wait">De bestuurder is zo terug. De airco start om %1$s.</string>
+    <string name="dm_screen_off">Scherm uit na vergrendelen</string>
+    <string name="dm_screen_off_hint">Om te slapen of discreet · een tik toont het 10 s</string>
     <string name="aa_title">ANDROID AUTO</string>
     <string name="aa_ready">Telefoon verbonden · Tik om te openen</string>
     <string name="aa_waiting">Sluit je telefoon aan via USB</string>

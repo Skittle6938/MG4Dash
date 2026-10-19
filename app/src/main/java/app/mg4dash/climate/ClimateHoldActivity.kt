@@ -30,6 +30,29 @@ class ClimateHoldActivity : AppCompatActivity() {
     private lateinit var battery: TextView
     private lateinit var runs: TextView
     private lateinit var message: TextView
+    private lateinit var blank: android.view.View
+    private var displayOff = false
+    private var wakeUntil = 0L
+
+    /** Écran coupé (rétroéclairage, comme le double toucher sur Énergie) ou rallumé. */
+    private fun display(on: Boolean) {
+        if (on == !displayOff) return
+        displayOff = !on
+        blank.visibility = if (on) android.view.View.GONE else android.view.View.VISIBLE
+        CarBridge.setDisplay(on)
+    }
+
+    /** Écran éteint : le premier toucher le rallume 10 s, sans actionner ce qu'il y a dessous. */
+    override fun dispatchTouchEvent(ev: android.view.MotionEvent): Boolean {
+        if (displayOff) {
+            if (ev.actionMasked == android.view.MotionEvent.ACTION_DOWN) { display(true); wakeUntil = SystemClock.elapsedRealtime() + 10_000 }
+            return true
+        }
+        if (ev.actionMasked == android.view.MotionEvent.ACTION_DOWN && wakeUntil > 0) wakeUntil = SystemClock.elapsedRealtime() + 10_000
+        return super.dispatchTouchEvent(ev)
+    }
+
+    override fun onDestroy() { if (displayOff) CarBridge.setDisplay(true); super.onDestroy() }
     private lateinit var main: android.view.View
     private lateinit var armed: android.view.View
     private lateinit var countdown: TextView
@@ -98,6 +121,9 @@ class ClimateHoldActivity : AppCompatActivity() {
         val frame = android.widget.FrameLayout(this)
         frame.addView(root, android.widget.FrameLayout.LayoutParams(-1, -1))
         frame.addView(arm, android.widget.FrameLayout.LayoutParams(-1, -1))
+        // Écran éteint une fois verrouillé (option) : un voile noir par-dessus, un toucher le lève 10 s
+        blank = android.view.View(this).apply { setBackgroundColor(android.graphics.Color.BLACK); visibility = android.view.View.GONE }
+        frame.addView(blank, android.widget.FrameLayout.LayoutParams(-1, -1))
         setContentView(frame)
         Fullscreen.apply(this)
     }
@@ -136,6 +162,11 @@ class ClimateHoldActivity : AppCompatActivity() {
         outside.text = car.outsideTemp?.let { getString(R.string.dm_outside, String.format(Locale.getDefault(), "%.0f°", it)) } ?: ""
         val on = car.hvacOn == true
         val counting = st.phase == ClimateHold.Phase.ARMED
+        val locked = st.phase == ClimateHold.Phase.WAITING || st.phase == ClimateHold.Phase.ON
+        if (locked && app.mg4dash.system.Prefs(this).climateHoldScreenOff) {
+            if (wakeUntil == 0L) wakeUntil = now + 3000   // le temps de voir le verrouillage
+            if (now >= wakeUntil) display(false)
+        } else display(true)
         armed.visibility = if (counting) android.view.View.VISIBLE else android.view.View.GONE
         main.visibility = if (counting) android.view.View.GONE else android.view.View.VISIBLE
         if (counting) countdown.text = ((st.lockAt - now).coerceAtLeast(0) / 1000 + 1).toString()

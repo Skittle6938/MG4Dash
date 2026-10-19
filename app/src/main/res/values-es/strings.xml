@@ -427,6 +427,8 @@
     <string name="dm_run_line">Ciclo %1$d · %2$s → %3$s</string>
     <string name="dm_lock_delay">Cerrar las puertas tras</string>
     <string name="dm_message_wait">El conductor vuelve pronto. El clima se encenderá a las %1$s.</string>
+    <string name="dm_screen_off">Pantalla apagada al cerrar</string>
+    <string name="dm_screen_off_hint">Para dormir o ser discreto · un toque lo muestra 10 s</string>
     <string name="aa_title">ANDROID AUTO</string>
     <string name="aa_ready">Teléfono conectado · Pulse para abrir</string>
     <string name="aa_waiting">Conecte su teléfono por USB</string>
