@@ -386,6 +386,8 @@
     <string name="fx_flames">Vlammen</string>
     <string name="fx_preview">Voorbeeld</string>
     <string name="fx_peak">Piek %1$s kW · %2$s pk</string>
+    <string name="st_xpower">MG4 XPower (320 kW)</string>
+    <string name="st_xpower_desc" formatted="false">Wordt vanzelf herkend zodra meer dan 350 pk wordt gemeten: de auto meldt zijn versie niet. Bepaalt de vermogensschaal en de drempel van 80 % voor de animatie.</string>
     <string name="aa_title">ANDROID AUTO</string>
     <string name="aa_ready">Telefoon verbonden · Tik om te openen</string>
     <string name="aa_waiting">Sluit je telefoon aan via USB</string>

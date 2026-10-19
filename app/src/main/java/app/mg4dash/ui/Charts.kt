@@ -120,7 +120,12 @@ class PowerBar @JvmOverloads constructor(context: Context, attrs: AttributeSet? 
     /** Appelé quand l'échelle s'élargit (puissance mesurée au-delà du maximum prévu). */
     var onScale: ((Float) -> Unit)? = null
 
-    private companion object { const val PEAK_HOLD_MS = 10_000L; const val DECAY_KW_PER_S = 8f }
+    companion object {
+        private const val PEAK_HOLD_MS = 10_000L; private const val DECAY_KW_PER_S = 8f
+        const val XPOWER_PEAK_KW = 320f
+        /** Au-delà de 350 ch mesurés, seule une XPower (435 ch) est possible : la voiture ne donne pas sa version. */
+        const val XPOWER_DETECT_KW = 257f
+    }
 
     private val paint = Paint(Paint.ANTI_ALIAS_FLAG)
     private val text = Paint(Paint.ANTI_ALIAS_FLAG)
@@ -146,6 +151,19 @@ class PowerBar @JvmOverloads constructor(context: Context, attrs: AttributeSet? 
         val r = (bottom - top) / 2f
         val radii = if (roundRight) floatArrayOf(0f, 0f, r, r, r, r, 0f, 0f) else floatArrayOf(r, r, 0f, 0f, 0f, 0f, r, r)
         path.reset(); rect.set(left, top, right, bottom); path.addRoundRect(rect, radii, Path.Direction.CW)
+    }
+
+    /**
+     * Puissances de référence du modèle (manuel MG4, puissance nette batterie) : 51 kWh 54 kW en continu /
+     * 125 kW max, autres 68 / 150 (#16), XPower 320 kW (435 ch) ; échelle avec une marge pour les pertes.
+     */
+    fun configureFor(batteryModel: Int, xpower: Boolean) {
+        when {
+            xpower -> { continuousKw = 68f; peakKw = XPOWER_PEAK_KW }
+            batteryModel == 51 -> { continuousKw = 54f; peakKw = 125f }
+            else -> { continuousKw = 68f; peakKw = 150f }
+        }
+        maxDrawKw = when { xpower -> 350f; batteryModel == 77 -> 200f; batteryModel == 64 -> 170f; else -> 140f }
     }
 
     /** Abscisse d'une puissance sur la barre (coordonnées de la vue), même calcul que onDraw : pour PowerFx. */

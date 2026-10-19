@@ -81,6 +81,11 @@ class Prefs(context: Context) {
         get() = sp.getString("weather_city", "Paris") ?: "Paris"
         set(v) = sp.edit().putString("weather_city", v).apply()
 
+    /** MG4 XPower (320 kW) : reconnue d'elle-même au-delà de 350 ch mesurés, ou choisie dans les réglages. */
+    var xpower: Boolean
+        get() = sp.getBoolean("xpower", false)
+        set(v) = sp.edit().putBoolean("xpower", v).apply()
+
     /** Animation pleine puissance du widget Puissance : 0 = aucune, 1 = fusée, 2 = éclair, 3 = flammes. */
     var powerFx: Int
         get() = sp.getInt("power_fx", 1)

@@ -731,6 +731,7 @@ class MainActivity : AppCompatActivity() {
     private var powerAvg: TextView? = null
     private var powerBar: app.mg4dash.ui.PowerBar? = null
     private var powerFx: app.mg4dash.ui.PowerFx? = null
+    private var xpowerHits = 0
 
     /** Retire l'animation pleine puissance de la carte (autre widget, ou carte reconstruite). */
     private fun dropPowerFx() {
@@ -802,10 +803,8 @@ class MainActivity : AppCompatActivity() {
             // Échelle selon le modèle (puissance moteur : 51 kWh 170 ch / 125 kW, 64 kWh 204 ch / 150 kW,
             // 77 kWh 245 ch / 180 kW), plus une marge pour les pertes ; elle s'élargit d'elle-même si la
             // voiture tire davantage (XPower 435 ch / 320 kW), par paliers de 50 kW, et s'en souvient.
-            val model = when (prefs.batteryModel) { 77 -> 200f; 64 -> 170f; else -> 140f }
-            // Manuel MG4 (puissance nette batterie) : 51 kWh 54 kW en continu / 125 kW max ; autres 68 / 150 (#16)
-            if (prefs.batteryModel == 51) { continuousKw = 54f; peakKw = 125f } else { continuousKw = 68f; peakKw = 150f }
-            maxDrawKw = maxOf(model, prefs.raw.getFloat("power_scale_kw", 0f))
+            configureFor(prefs.batteryModel, prefs.xpower)
+            maxDrawKw = maxOf(maxDrawKw, prefs.raw.getFloat("power_scale_kw", 0f))
             onScale = { prefs.raw.edit().putFloat("power_scale_kw", it).apply() }
         }
         g.addView(powerBar, LinearLayout.LayoutParams(-1, (40 * d).toInt()).apply { marginStart = (8 * d).toInt(); marginEnd = (8 * d).toInt() })
@@ -850,6 +849,13 @@ class MainActivity : AppCompatActivity() {
         powerLabel?.text = getString(when { plugged -> R.string.sw_charging; regen -> R.string.sw_recovering; else -> R.string.sw_drawn })
         powerBar?.kw = if (plugged) 0f else kw ?: 0f
         val bar = powerBar; val under = powerExtra
+        // XPower : la voiture ne donne pas sa version ; deux mesures de suite au-delà de 350 ch la trahissent
+        xpowerHits = if (!plugged && kw != null && kw >= app.mg4dash.ui.PowerBar.XPOWER_DETECT_KW) xpowerHits + 1 else 0
+        if (xpowerHits >= 2 && !prefs.xpower) {
+            prefs.xpower = true
+            android.util.Log.i("MG4L.Power", "MG4 XPower reconnue (${kw} kW) : max 320 kW, animation à 80 %")
+            bar?.let { val keep = it.maxDrawKw; it.configureFor(prefs.batteryModel, true); it.maxDrawKw = maxOf(keep, it.maxDrawKw) }
+        }
         if (bar != null && under != null) powerFx?.let { fx ->
             fx.style = prefs.powerFx
             fx.place(b.secondaryCard, bar, under)

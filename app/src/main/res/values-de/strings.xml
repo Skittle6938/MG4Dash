@@ -386,6 +386,8 @@
     <string name="fx_flames">Flammen</string>
     <string name="fx_preview">Vorschau</string>
     <string name="fx_peak">Spitze %1$s kW · %2$s PS</string>
+    <string name="st_xpower">MG4 XPower (320 kW)</string>
+    <string name="st_xpower_desc" formatted="false">Wird automatisch erkannt, sobald mehr als 350 PS gemessen werden: das Auto meldet seine Version nicht. Legt die Leistungsskala und die 80-%-Schwelle der Animation fest.</string>
     <string name="aa_title">ANDROID AUTO</string>
     <string name="aa_ready">Telefon verbunden · Zum Öffnen tippen</string>
     <string name="aa_waiting">Telefon per USB verbinden</string>

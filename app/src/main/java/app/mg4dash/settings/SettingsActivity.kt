@@ -125,6 +125,7 @@ class SettingsActivity : AppCompatActivity() {
         text(energy, getString(R.string.st_battery_model), 18f, R.color.text_value)
         val models = app.mg4dash.energy.BatteryCapacity.MODELS.map { it.first }
         row(energy, *choiceButtons(models.map { "$it kWh" }, { models.indexOf(prefs.batteryModel) }) { prefs.batteryModel = models[it] })
+        toggle(energy, R.string.st_xpower, R.string.st_xpower_desc, { prefs.xpower }) { prefs.xpower = it }
         powerFxSetting(energy)
 
         // ════ Colonne droite : système, connexions, diagnostic ════
@@ -356,8 +357,7 @@ class SettingsActivity : AppCompatActivity() {
         val names = listOf(R.string.fx_none, R.string.fx_rocket, R.string.fx_lightning, R.string.fx_flames).map { getString(it) }
         val preview = app.mg4dash.ui.PowerFxPreview(this).apply {
             // Même échelle que le widget de l'accueil pour le modèle choisi
-            if (prefs.batteryModel == 51) { bar.continuousKw = 54f; bar.peakKw = 125f } else { bar.continuousKw = 68f; bar.peakKw = 150f }
-            bar.maxDrawKw = when (prefs.batteryModel) { 77 -> 200f; 64 -> 170f; else -> 140f }
+            bar.configureFor(prefs.batteryModel, prefs.xpower)
         }
         lateinit var pick: Button
         fun label() { pick.text = "${names[prefs.powerFx.coerceIn(0, names.size - 1)]}   ▾" }

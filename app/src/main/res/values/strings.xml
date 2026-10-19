@@ -386,6 +386,8 @@
     <string name="fx_flames">Flames</string>
     <string name="fx_preview">Preview</string>
     <string name="fx_peak">Peak %1$s kW · %2$s hp</string>
+    <string name="st_xpower">MG4 XPower (320 kW)</string>
+    <string name="st_xpower_desc" formatted="false">Recognised by itself as soon as more than 350 hp is measured: the car does not report its version. Sets the power scale and the 80 % threshold of the animation.</string>
     <string name="aa_title">ANDROID AUTO</string>
     <string name="aa_ready">Phone connected · Tap to open</string>
     <string name="aa_waiting">Connect your phone via USB</string>
