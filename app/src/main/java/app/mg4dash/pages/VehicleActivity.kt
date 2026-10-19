@@ -100,9 +100,9 @@ class VehicleActivity : PageActivity() {
         val state = kit.panel(getString(R.string.vh_state))
         listOf(R.string.vh_battery, R.string.vh_range, R.string.vh_avg_cons, R.string.vh_odometer, R.string.vh_speed, R.string.vh_outside, R.string.vh_charge).forEach { addInfo(state, it) }
         // Santé batterie estimée par MG4Dash (capacité mesurée ÷ capacité d'origine du modèle)
-        state.addView(kit.divider(), kit.lp(-1, 1, t = 8))
+        state.addView(kit.divider(), kit.lp(-1, 1, t = 4))
         addInfo(state, R.string.vh_soh)
-        sohDetail = kit.text("", 16f, R.color.text_sub).apply { maxLines = 3 }
+        sohDetail = kit.text("", 16f, R.color.text_sub).apply { maxLines = 2 }
         state.addView(sohDetail, kit.lp(-1, -2))
         val mRow = kit.row()
         mRow.addView(kit.text(getString(R.string.vh_soh_model), 17f, R.color.text_sub), kit.lp(-2, -2, r = 12))
@@ -112,8 +112,8 @@ class VehicleActivity : PageActivity() {
         }
         sohModel = pick
         mRow.addView(chips, kit.lp(0, -2, 1f))
-        state.addView(mRow, kit.lp(-1, -2, t = 10))
-        state.addView(kit.text(getString(R.string.vh_soh_disclaimer), 15f, R.color.accent_heat).apply { maxLines = 2 }, kit.lp(-1, -2, t = 10))
+        state.addView(mRow, kit.lp(-1, -2, t = 6))
+        state.addView(kit.text(getString(R.string.vh_soh_disclaimer), 15f, R.color.accent_heat).apply { maxLines = 1 }, kit.lp(-1, -2, t = 6))
         renderSoh()
 
         body.addView(drive, kit.lp(0, -1, 1f, r = 6))

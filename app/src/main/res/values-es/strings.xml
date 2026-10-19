@@ -170,10 +170,10 @@
     <string name="vh_charge">Carga</string>
     <string name="vh_soh">Salud de la batería (estimada)</string>
     <string name="vh_soh_detail">%1$d %% en 30 días, %2$d %% desde la primera medición (%3$d medición(es), frente a una batería nueva de %4$d kWh).</string>
-    <string name="vh_soh_progress">Medición conduciendo: %1$s %% de los 15 %% de descenso necesarios, sumados en trayectos y días.</string>
-    <string name="vh_soh_provisional">" Provisional: %1$s kWh útiles."</string>
+    <string name="vh_soh_progress">Conduciendo: %1$s %% de 15 %%</string>
+    <string name="vh_soh_provisional">" Provisional: %1$s kWh."</string>
     <string name="vh_soh_model">Batería nueva</string>
-    <string name="vh_soh_disclaimer">Estimación de MG4Dash, no es una medición oficial. Función aún en pruebas.</string>
+    <string name="vh_soh_disclaimer">Estimación de MG4Dash, no oficial. En prueba.</string>
     <string name="st_home">PANTALLA DE INICIO</string>
     <string name="st_home_desc">«Sustituir inicio SAIC» desactiva solo la pantalla de inicio original (su servicio sigue activo). El modo mantenimiento la reactiva, por ejemplo antes de una revisión.</string>
     <string name="st_replace">Sustituir inicio SAIC</string>

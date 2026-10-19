@@ -170,10 +170,10 @@
     <string name="vh_charge">Charge</string>
     <string name="vh_soh">Santé batterie (estimée)</string>
     <string name="vh_soh_detail">%1$d %% sur 30 jours, %2$d %% depuis la première mesure (%3$d mesure(s), comparé à une batterie %4$d kWh neuve).</string>
-    <string name="vh_soh_progress">Mesure en roulant : %1$s %% sur les 15 %% de baisse nécessaires, cumulés sur plusieurs trajets et jours.</string>
-    <string name="vh_soh_provisional">" Provisoire : %1$s kWh utiles."</string>
+    <string name="vh_soh_progress">En roulant : %1$s %% sur 15 %%</string>
+    <string name="vh_soh_provisional">" Provisoire : %1$s kWh."</string>
     <string name="vh_soh_model">Batterie neuve</string>
-    <string name="vh_soh_disclaimer">Estimation faite par MG4Dash, pas une mesure officielle. Fonction encore en test.</string>
+    <string name="vh_soh_disclaimer">Estimation MG4Dash, pas officielle. En test.</string>
     <string name="st_home">ÉCRAN D\'ACCUEIL</string>
     <string name="st_home_desc">« Remplacer l\'accueil SAIC » désactive uniquement l\'écran d\'accueil d\'origine (son service reste actif). Le mode Entretien le réactive, par exemple avant une révision en concession.</string>
     <string name="st_replace">Remplacer l\'accueil SAIC</string>

@@ -170,10 +170,10 @@
     <string name="vh_charge">Laden</string>
     <string name="vh_soh">Batteriezustand (geschätzt)</string>
     <string name="vh_soh_detail">%1$d %% über 30 Tage, %2$d %% seit der ersten Messung (%3$d Messung(en), verglichen mit einer neuen %4$d-kWh-Batterie).</string>
-    <string name="vh_soh_progress">Messung beim Fahren: %1$s %% der nötigen 15 %% Abnahme, über Fahrten und Tage summiert.</string>
-    <string name="vh_soh_provisional">" Vorläufig: %1$s kWh nutzbar."</string>
+    <string name="vh_soh_progress">Beim Fahren: %1$s %% von 15 %%</string>
+    <string name="vh_soh_provisional">" Vorläufig: %1$s kWh."</string>
     <string name="vh_soh_model">Neue Batterie</string>
-    <string name="vh_soh_disclaimer">Schätzung von MG4Dash, keine offizielle Messung. Funktion noch im Test.</string>
+    <string name="vh_soh_disclaimer">Schätzung von MG4Dash, nicht offiziell. In Test.</string>
     <string name="st_home">STARTBILDSCHIRM</string>
     <string name="st_home_desc">„SAIC-Startbildschirm ersetzen“ deaktiviert nur den originalen Startbildschirm (sein Dienst läuft weiter). Der Wartungsmodus aktiviert ihn wieder, z. B. vor einem Werkstatttermin.</string>
     <string name="st_replace">SAIC-Startbildschirm ersetzen</string>

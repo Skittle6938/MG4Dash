@@ -170,10 +170,10 @@
     <string name="vh_charge">Charging</string>
     <string name="vh_soh">Battery health (estimated)</string>
     <string name="vh_soh_detail">%1$d %% over 30 days, %2$d %% since the first measurement (%3$d measurement(s), compared with a new %4$d kWh battery).</string>
-    <string name="vh_soh_progress">Measuring while driving: %1$s %% of the 15 %% drop needed, added up over trips and days.</string>
-    <string name="vh_soh_provisional">" Provisional: %1$s kWh usable."</string>
+    <string name="vh_soh_progress">While driving: %1$s %% of 15 %%</string>
+    <string name="vh_soh_provisional">" Provisional: %1$s kWh."</string>
     <string name="vh_soh_model">New battery</string>
-    <string name="vh_soh_disclaimer">Estimate made by MG4Dash, not an official measurement. Still being tested.</string>
+    <string name="vh_soh_disclaimer">MG4Dash estimate, not official. Being tested.</string>
     <string name="st_home">HOME SCREEN</string>
     <string name="st_home_desc">\"Replace SAIC home\" disables only the original home screen (its service keeps running). Maintenance mode re-enables it, e.g. before a dealer service.</string>
     <string name="st_replace">Replace SAIC home</string>
