@@ -169,10 +169,8 @@
     <string name="vh_outside">Temperatura exterior</string>
     <string name="vh_charge">Carga</string>
     <string name="vh_soh">Salud de la batería (estimada)</string>
-    <string name="vh_soh_detail">%1$d %% en 30 días, %2$d %% desde la primera medición (%3$d medición(es), frente a una batería nueva de %4$d kWh).</string>
-    <string name="vh_soh_progress">Conduciendo: %1$s %% de 15 %%</string>
-    <string name="vh_soh_provisional">" Provisional: %1$s kWh."</string>
-    <string name="vh_soh_model">Batería nueva</string>
+    <string name="vh_soh_detail">Estimada sobre unos %1$s recorridos.</string>
+    <string name="vh_soh_progress">Midiendo: %1$s %% de 15 %%, %2$s por ahora.</string>
     <string name="vh_soh_disclaimer">Estimación de MG4Dash, no oficial. En prueba.</string>
     <string name="st_home">PANTALLA DE INICIO</string>
     <string name="st_home_desc">«Sustituir inicio SAIC» desactiva solo la pantalla de inicio original (su servicio sigue activo). El modo mantenimiento la reactiva, por ejemplo antes de una revisión.</string>
@@ -181,6 +179,7 @@
     <string name="st_adb">Recuperación ADB si MG4Dash ya no arranca: adb shell cmd package compile -m speed -f app.mg4dash</string>
     <string name="st_capacity">Capacidad útil de la batería: %1$s kWh</string>
     <string name="st_capacity_desc">Para la estimación de kWh/100 (MG4 Standard 51 kWh: unos 49 kWh útiles).</string>
+    <string name="st_battery_model">Modelo de batería (referencia de la salud estimada, página Vehículo):</string>
     <string name="st_city">Ciudad de respaldo: %1$s (si el coche no da la posición)</string>
     <string name="st_change_city">Cambiar ciudad</string>
     <string name="st_startup">ARRANQUE</string>

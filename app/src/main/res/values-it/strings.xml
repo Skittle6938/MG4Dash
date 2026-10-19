@@ -169,10 +169,8 @@
     <string name="vh_outside">Temperatura esterna</string>
     <string name="vh_charge">Ricarica</string>
     <string name="vh_soh">Salute batteria (stimata)</string>
-    <string name="vh_soh_detail">%1$d %% su 30 giorni, %2$d %% dalla prima misura (%3$d misura/e, rispetto a una batteria nuova da %4$d kWh).</string>
-    <string name="vh_soh_progress">In guida: %1$s %% di 15 %%</string>
-    <string name="vh_soh_provisional">" Provvisoria: %1$s kWh."</string>
-    <string name="vh_soh_model">Batteria nuova</string>
+    <string name="vh_soh_detail">Stimata su circa %1$s percorsi.</string>
+    <string name="vh_soh_progress">In misura: %1$s %% di 15 %%, finora %2$s.</string>
     <string name="vh_soh_disclaimer">Stima MG4Dash, non ufficiale. In prova.</string>
     <string name="st_home">SCHERMATA HOME</string>
     <string name="st_home_desc">«Sostituisci home SAIC» disattiva solo la schermata home originale (il suo servizio resta attivo). La modalità manutenzione la riattiva, ad esempio prima di un tagliando.</string>
@@ -181,6 +179,7 @@
     <string name="st_adb">Ripristino ADB se MG4Dash non si avvia più: adb shell cmd package compile -m speed -f app.mg4dash</string>
     <string name="st_capacity">Capacità utile della batteria: %1$s kWh</string>
     <string name="st_capacity_desc">Per la stima kWh/100 (MG4 Standard 51 kWh: circa 49 kWh utili).</string>
+    <string name="st_battery_model">Modello di batteria (riferimento della salute stimata, pagina Veicolo):</string>
     <string name="st_city">Città di riserva: %1$s (se l\'auto non fornisce la posizione)</string>
     <string name="st_change_city">Cambia città</string>
     <string name="st_startup">AVVIO</string>

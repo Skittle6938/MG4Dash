@@ -104,15 +104,6 @@ class VehicleActivity : PageActivity() {
         addInfo(state, R.string.vh_soh)
         sohDetail = kit.text("", 16f, R.color.text_sub).apply { maxLines = 2 }
         state.addView(sohDetail, kit.lp(-1, -2))
-        val mRow = kit.row()
-        mRow.addView(kit.text(getString(R.string.vh_soh_model), 17f, R.color.text_sub), kit.lp(-2, -2, r = 12))
-        val models = app.mg4dash.energy.BatteryCapacity.MODELS.map { it.first }
-        val (chips, pick) = kit.segmented(models.map { "$it kWh" }) { i ->
-            prefs.batteryModel = models[i]; renderSoh()
-        }
-        sohModel = pick
-        mRow.addView(chips, kit.lp(0, -2, 1f))
-        state.addView(mRow, kit.lp(-1, -2, t = 6))
         state.addView(kit.text(getString(R.string.vh_soh_disclaimer), 15f, R.color.accent_heat).apply { maxLines = 1 }, kit.lp(-1, -2, t = 6))
         renderSoh()
 
@@ -121,22 +112,20 @@ class VehicleActivity : PageActivity() {
         body.addView(state, kit.lp(0, -1, 1f, l = 6))
     }
 
-    private val prefs by lazy { app.mg4dash.system.Prefs(this) }
     private lateinit var sohDetail: TextView
-    private lateinit var sohModel: (Int?) -> Unit
 
+    /** Santé au dixième et km couverts par la mesure (le modèle de batterie se choisit dans les réglages). */
     private fun renderSoh() {
         val bc = app.mg4dash.energy.BatteryCapacity
-        sohModel(bc.MODELS.indexOfFirst { it.first == prefs.batteryModel }.takeIf { it >= 0 })
+        val units = app.mg4dash.system.Units
         val h = bc.health(this)
         if (h != null) {
-            set(R.string.vh_soh, "${h.first} %")
-            sohDetail.text = getString(R.string.vh_soh_detail, h.first, h.second, bc.samples(this).size, prefs.batteryModel)
+            set(R.string.vh_soh, String.format(Locale.getDefault(), "%.1f %%", h.percent))
+            sohDetail.text = if (h.km >= 1f) getString(R.string.vh_soh_detail, units.distText(this, h.km)) else ""
         } else {
             set(R.string.vh_soh, "—")
-            val (drop, prov) = bc.progress(this)
-            sohDetail.text = getString(R.string.vh_soh_progress, String.format(Locale.getDefault(), "%.1f", drop)) +
-                (prov?.let { getString(R.string.vh_soh_provisional, String.format(Locale.getDefault(), "%.1f", it)) } ?: "")
+            val p = bc.progress(this)
+            sohDetail.text = getString(R.string.vh_soh_progress, String.format(Locale.getDefault(), "%.1f", p.drop), units.distText(this, p.km))
         }
     }
 

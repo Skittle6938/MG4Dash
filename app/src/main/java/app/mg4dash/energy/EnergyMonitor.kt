@@ -121,6 +121,7 @@ object EnergyMonitor {
             var saveTick = 0
             var sohSoc: Float? = null      // % à la seconde précédente, null hors observation
             var sohPrecise = false
+            var sohKm: Int? = null         // compteur à la seconde précédente
             val learned = HashMap<String, Float>()
             fun get(k: String, def: Float) = learned.getOrPut(k) { sp.getFloat(k, def) }
             fun put(k: String, v: Float) { learned[k] = v }
@@ -163,7 +164,7 @@ object EnergyMonitor {
                 val i = CarProps.getFloat(CarProps.BMS_PACK_CRNT)
                 if (v == null || i == null || v < 100f || v > 900f || dt > 5000 ||
                     VehicleState.isPlugged(s.chargeStatus)) {   // en charge ou V2L : hors conso
-                    sohSoc = null; continue
+                    sohSoc = null; sohKm = null; continue
                 }
                 val p = v * i
                 val h = dt / 3_600_000f
@@ -175,9 +176,13 @@ object EnergyMonitor {
                 if (prev == null || cur == null || kotlin.math.abs(prev - cur) > 2f) {
                     sohPrecise = precise != null
                     sohSoc = precise ?: soc?.toFloat()
+                    sohKm = km
                 } else {
-                    BatteryCapacity.accumulate(context, p * h / 1000f, prev - cur)
+                    val prevKm = sohKm
+                    val dKm = if (km != null && prevKm != null) (km - prevKm).coerceIn(0, 2) else 0
+                    BatteryCapacity.accumulate(context, p * h / 1000f, prev - cur, dKm.toFloat())
                     sohSoc = cur
+                    if (km != null) sohKm = km
                 }
                 // Anciens firmwares (SWI68, #19) : pas de vitesse véhicule, la récupération restait à 0 kWh ;
                 // repli sur la vitesse GPS récente.

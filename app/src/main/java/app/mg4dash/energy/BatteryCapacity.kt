@@ -35,7 +35,8 @@ object BatteryCapacity {
     /** Modèles : capacité brute (affichée) → capacité utile d'origine (kWh). */
     val MODELS = listOf(51 to 49.0f, 64 to 61.7f, 77 to 74.4f)
 
-    data class Sample(val at: Long, val kwh: Float, val drop: Int)
+    /** Une mesure : date, capacité (kWh), baisse du % et km parcourus pendant la mesure (0 avant la 1.1.5). */
+    data class Sample(val at: Long, val kwh: Float, val drop: Int, val km: Float = 0f)
 
     /** Capacité annoncée par la voiture, en kWh, ou null. */
     fun fromCar(): Float? {
@@ -48,12 +49,12 @@ object BatteryCapacity {
 
     fun samples(context: Context): List<Sample> = try {
         val arr = JSONArray(Prefs(context).raw.getString("cap_samples", "[]"))
-        (0 until arr.length()).map { arr.getJSONObject(it).let { o -> Sample(o.getLong("t"), o.getDouble("k").toFloat(), o.getInt("d")) } }
+        (0 until arr.length()).map { arr.getJSONObject(it).let { o -> Sample(o.getLong("t"), o.getDouble("k").toFloat(), o.getInt("d"), o.optDouble("m", 0.0).toFloat()) } }
     } catch (_: Exception) { emptyList() }
 
     private fun save(context: Context, list: List<Sample>) {
         val arr = JSONArray()
-        list.takeLast(MAX_SAMPLES).forEach { arr.put(JSONObject().put("t", it.at).put("k", it.kwh.toDouble()).put("d", it.drop)) }
+        list.takeLast(MAX_SAMPLES).forEach { arr.put(JSONObject().put("t", it.at).put("k", it.kwh.toDouble()).put("d", it.drop).put("m", it.km.toDouble())) }
         Prefs(context).raw.edit().putString("cap_samples", arr.toString()).apply()
     }
 
@@ -75,12 +76,13 @@ object BatteryCapacity {
     // enregistrées par [flush] (toutes les 30 s par EnergyMonitor).
     private var accKwh = 0f
     private var accDrop = 0f
+    private var accKm = 0f
     private var loaded = false
 
     private fun load(context: Context) {
         if (loaded) return
         val sp = Prefs(context).raw
-        accKwh = sp.getFloat("soh_kwh", 0f); accDrop = sp.getFloat("soh_drop", 0f)
+        accKwh = sp.getFloat("soh_kwh", 0f); accDrop = sp.getFloat("soh_drop", 0f); accKm = sp.getFloat("soh_km", 0f)
         // Anciennes clés (mesure d'une recharge à l'autre) : plus utilisées
         if (sp.contains("cap_current")) sp.edit().remove("cap_current").remove("cap_current_drop").apply()
         loaded = true
@@ -89,36 +91,38 @@ object BatteryCapacity {
     @Synchronized
     fun flush(context: Context) {
         if (!loaded) return
-        Prefs(context).raw.edit().putFloat("soh_kwh", accKwh).putFloat("soh_drop", accDrop).apply()
+        Prefs(context).raw.edit().putFloat("soh_kwh", accKwh).putFloat("soh_drop", accDrop).putFloat("soh_km", accKm).apply()
     }
 
     /**
      * Une seconde observée : [kwh] = énergie sortie de la batterie (négative en récupération),
-     * [drop] = baisse du % sur la même seconde (négative si le % remonte).
+     * [drop] = baisse du % sur la même seconde (négative si le % remonte), [km] = distance parcourue.
      */
     @Synchronized
-    fun accumulate(context: Context, kwh: Float, drop: Float) {
+    fun accumulate(context: Context, kwh: Float, drop: Float, km: Float) {
         load(context)
-        accKwh += kwh; accDrop += drop
+        accKwh += kwh; accDrop += drop; accKm += km
         if (accDrop < MIN_DROP) return
         val est = valid(accKwh, accDrop)
         if (est != null) {
-            save(context, samples(context) + Sample(System.currentTimeMillis(), est, Math.round(accDrop)))
+            save(context, samples(context) + Sample(System.currentTimeMillis(), est, Math.round(accDrop), accKm))
             Log.i(TAG, "mesure ${"%.1f".format(est)} kWh sur ${"%.1f".format(accDrop)} % ajoutée")
         } else {
             Log.i(TAG, "mesure écartée : ${"%.2f".format(accKwh)} kWh pour ${"%.1f".format(accDrop)} %")
         }
-        accKwh = 0f; accDrop = 0f
+        accKwh = 0f; accDrop = 0f; accKm = 0f
         flush(context)
         if (est != null) apply(context)
     }
 
-    /** Mesure en cours : baisse cumulée (%) et capacité provisoire (kWh, à partir de 5 %). */
+    /** Mesure en cours : baisse cumulée (%), capacité provisoire (kWh, à partir de 5 %) et km parcourus. */
+    data class Progress(val drop: Float, val provisional: Float?, val km: Float)
+
     @Synchronized
-    fun progress(context: Context): Pair<Float, Float?> {
+    fun progress(context: Context): Progress {
         load(context)
         val prov = if (accDrop >= 5f && accKwh > 0f) (accKwh / accDrop * 100f).takeIf { it in 30f..100f } else null
-        return accDrop.coerceAtLeast(0f) to prov
+        return Progress(accDrop.coerceAtLeast(0f), prov, accKm.coerceAtLeast(0f))
     }
 
     private fun valid(netKwh: Float, socDrop: Float): Float? {
@@ -132,14 +136,14 @@ object BatteryCapacity {
         return MODELS.firstOrNull { it.first == gross }?.second ?: 49.0f
     }
 
-    /** Santé (%) sur 30 jours et depuis le début des mesures, ou null sans mesure terminée. */
-    fun health(context: Context): Pair<Int, Int>? {
+    /** Santé (%, au dixième) sur les mesures des 30 derniers jours (sinon toutes), et km couverts par ces mesures. */
+    data class Health(val percent: Float, val km: Float, val count: Int)
+
+    fun health(context: Context): Health? {
         val all = samples(context).takeIf { it.isNotEmpty() } ?: return null
-        val nom = nominal(context)
         val recent = all.filter { System.currentTimeMillis() - it.at < MONTH_MS }.ifEmpty { all }
         val m = weighted(recent) ?: return null
-        val total = weighted(all) ?: m
-        return Math.round(m / nom * 100f).coerceAtMost(100) to Math.round(total / nom * 100f).coerceAtMost(100)
+        return Health((m / nominal(context) * 100f).coerceAtMost(100f), recent.sumOf { it.km.toDouble() }.toFloat(), recent.size)
     }
 
     /** Remet la capacité utilisée sur la meilleure source, sauf réglage manuel. */

@@ -109,7 +109,7 @@ class SettingsActivity : AppCompatActivity() {
                 prefs.batteryKwhManual -> getString(R.string.st_cap_manual)
                 car != null -> getString(R.string.st_cap_car, String.format(Locale.getDefault(), "%.1f", car))
                 est != null -> getString(R.string.st_cap_est, String.format(Locale.getDefault(), "%.1f", est.first), est.second)
-                else -> app.mg4dash.energy.BatteryCapacity.progress(this).second
+                else -> app.mg4dash.energy.BatteryCapacity.progress(this).provisional
                     ?.let { getString(R.string.st_cap_est_current, String.format(Locale.getDefault(), "%.1f", it)) }
                     ?: getString(R.string.st_cap_none)
             }
@@ -121,6 +121,10 @@ class SettingsActivity : AppCompatActivity() {
             button(getString(R.string.st_cap_auto)) { prefs.batteryKwhManual = false; app.mg4dash.energy.BatteryCapacity.apply(this); showCap() },
         )
         text(energy, getString(R.string.st_capacity_desc), 16f, R.color.text_title)
+        // Modèle de batterie : référence de la santé estimée (affichée sur la page Véhicule)
+        text(energy, getString(R.string.st_battery_model), 18f, R.color.text_value)
+        val models = app.mg4dash.energy.BatteryCapacity.MODELS.map { it.first }
+        row(energy, *choiceButtons(models.map { "$it kWh" }, { models.indexOf(prefs.batteryModel) }) { prefs.batteryModel = models[it] })
 
         // ════ Colonne droite : système, connexions, diagnostic ════
 

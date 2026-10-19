@@ -169,10 +169,8 @@
     <string name="vh_outside">Außentemperatur</string>
     <string name="vh_charge">Laden</string>
     <string name="vh_soh">Batteriezustand (geschätzt)</string>
-    <string name="vh_soh_detail">%1$d %% über 30 Tage, %2$d %% seit der ersten Messung (%3$d Messung(en), verglichen mit einer neuen %4$d-kWh-Batterie).</string>
-    <string name="vh_soh_progress">Beim Fahren: %1$s %% von 15 %%</string>
-    <string name="vh_soh_provisional">" Vorläufig: %1$s kWh."</string>
-    <string name="vh_soh_model">Neue Batterie</string>
+    <string name="vh_soh_detail">Geschätzt über etwa %1$s Fahrt.</string>
+    <string name="vh_soh_progress">Messung: %1$s %% von 15 %%, bisher %2$s.</string>
     <string name="vh_soh_disclaimer">Schätzung von MG4Dash, nicht offiziell. In Test.</string>
     <string name="st_home">STARTBILDSCHIRM</string>
     <string name="st_home_desc">„SAIC-Startbildschirm ersetzen“ deaktiviert nur den originalen Startbildschirm (sein Dienst läuft weiter). Der Wartungsmodus aktiviert ihn wieder, z. B. vor einem Werkstatttermin.</string>
@@ -181,6 +179,7 @@
     <string name="st_adb">ADB-Notfall, falls MG4Dash nicht mehr startet: adb shell cmd package compile -m speed -f app.mg4dash</string>
     <string name="st_capacity">Nutzbare Batteriekapazität: %1$s kWh</string>
     <string name="st_capacity_desc">Für die kWh/100-Schätzung (MG4 Standard 51 kWh: ca. 49 kWh nutzbar).</string>
+    <string name="st_battery_model">Batteriemodell (Bezug für den geschätzten Zustand auf der Fahrzeugseite):</string>
     <string name="st_city">Ersatzstadt: %1$s (falls das Auto keine Position liefert)</string>
     <string name="st_change_city">Stadt ändern</string>
     <string name="st_startup">START</string>

@@ -102,7 +102,7 @@ Drive mode (including Eco, Snow and Custom where the car has them), regeneration
 Recent calls, contacts with a search field and a keypad, from the phone connected over Bluetooth. Calls go through the hands-free (HFP) account, like the stock phone app, whose in-call screen is kept.
 
 ### Battery health (estimated)
-Shown on the Vehicle page. While driving, MG4Dash measures the energy actually taken from the battery (regeneration deducted) and divides it by the drop in battery % over the same time. Only what MG4Dash sees with the screen on counts, so the drop adds up over several trips and days, without waiting for a charge; from a 15 % drop, that gives one dated measurement of the usable capacity. The average, weighted by the % drop, is shown over the last 30 days and since the first measurement, against the usable capacity of a new battery of your model (51, 64 or 77 kWh, chosen on the Vehicle page). This is an estimate made by MG4Dash, not an official measurement, and the feature is still being tested.
+Shown on the Vehicle page. While driving, MG4Dash measures the energy actually taken from the battery (regeneration deducted) and divides it by the drop in battery % over the same time. Only what MG4Dash sees with the screen on counts, so the drop adds up over several trips and days, without waiting for a charge; from a 15 % drop, that gives one dated measurement of the usable capacity. The average of the last 30 days, weighted by the % drop, is shown to one decimal with the distance it covers, against the usable capacity of a new battery of your model (51, 64 or 77 kWh, chosen in Settings › Energy). This is an estimate made by MG4Dash, not an official measurement, and the feature is still being tested.
 
 The car does not share the battery or motor temperature with the head unit, so MG4Dash cannot show them.
 
@@ -114,7 +114,7 @@ Grouped by category in one scrolling page. Each on/off option is a single button
 |---|---|
 | Home layout | Full, Simple or Map; vertical bar on the left; full screen (hides the SAIC side bar and banner); units (like the car, km · kWh/100 km, miles · mi/kWh); heated seats and steering wheel buttons (auto, yes, no); tyre pressure unit (auto, bar, psi, kPa); default map zoom; map colours; map layout stack back to the battery when plugged in |
 | Theme | background, button colour, light / dark / auto (follows the car's lights) |
-| Energy | usable battery capacity (read from the car, measured, or set by hand) |
+| Energy | usable battery capacity (read from the car, measured, or set by hand), battery model for the health estimate |
 | Home screen | replace the SAIC home, maintenance mode, briefly open the SAIC launcher at startup |
 | Update | check and install, include beta versions; Radio Dash update (SWI69 only) |
 | Weather | fallback city, or use my position |

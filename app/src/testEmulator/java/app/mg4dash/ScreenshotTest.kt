@@ -148,7 +148,7 @@ class ScreenshotTest {
     @Test fun vehicleSoh() {
         val now = System.currentTimeMillis()
         org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE).edit()
-            .putString("cap_samples", "[{\"t\":${now - 86400000L * 40},\"k\":48.6,\"d\":40},{\"t\":${now - 86400000L * 10},\"k\":47.9,\"d\":55},{\"t\":${now - 86400000L * 2},\"k\":48.2,\"d\":30}]")
+            .putString("cap_samples", "[{\"t\":${now - 86400000L * 40},\"k\":48.6,\"d\":40,\"m\":260},{\"t\":${now - 86400000L * 10},\"k\":47.9,\"d\":55,\"m\":350},{\"t\":${now - 86400000L * 2},\"k\":48.2,\"d\":30,\"m\":190}]")
             .putBoolean("battery_kwh_manual", false).apply()
         app.mg4dash.energy.BatteryCapacity.apply(org.robolectric.RuntimeEnvironment.getApplication())
         shoot(app.mg4dash.pages.VehicleActivity::class.java, "vehicle_soh.png")
