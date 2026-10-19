@@ -360,28 +360,30 @@ class SettingsActivity : AppCompatActivity() {
             bar.configureFor(prefs.batteryModel, prefs.xpower)
         }
         lateinit var pick: Button
-        fun label() { pick.text = "${names[prefs.powerFx.coerceIn(0, names.size - 1)]}   ▾" }
-        pick = button("") {
-            val popup = android.widget.ListPopupWindow(this)
-            popup.anchorView = pick
-            popup.setBackgroundDrawable(getDrawable(R.drawable.bg_panel))
-            popup.setAdapter(object : android.widget.ArrayAdapter<String>(this, 0, names) {
-                override fun getView(position: Int, convertView: View?, parent: android.view.ViewGroup): View =
-                    TextView(context).apply {
-                        text = names[position]; setTextSize(TypedValue.COMPLEX_UNIT_SP, 20f)
-                        setPadding(dp(24), dp(16), dp(24), dp(16))
-                        setTextColor(color(if (position == prefs.powerFx) R.color.accent_action else R.color.text_value))
-                    }
-            })
-            popup.isModal = true
-            popup.setOnItemClickListener { _, _, i, _ ->
-                prefs.powerFx = i; label(); popup.dismiss()
+        // Liste déroulante dans la page même : une fenêtre surgissante ferait réapparaître les barres système
+        val list = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; visibility = View.GONE }
+        fun label() { pick.text = "${names[prefs.powerFx.coerceIn(0, names.size - 1)]}   ${if (list.visibility == View.VISIBLE) "▴" else "▾"}" }
+        pick = button("") { list.visibility = if (list.visibility == View.VISIBLE) View.GONE else View.VISIBLE; label() }
+            .apply { setBackgroundResource(R.drawable.bg_chip); setTextColor(color(R.color.accent_action)) }
+        names.forEachIndexed { i, n ->
+            list.addView(button(n) {
+                prefs.powerFx = i; list.visibility = View.GONE; label()
+                for (k in 0 until list.childCount) (list.getChildAt(k) as Button).apply {
+                    isSelected = k == i; setTextColor(color(if (k == i) R.color.accent_action else R.color.text_value))
+                }
                 if (i != app.mg4dash.ui.PowerFx.NONE) preview.play(i)
-            }
-            popup.show()
-        }.apply { setBackgroundResource(R.drawable.bg_chip); setTextColor(color(R.color.accent_action)) }
+            }.apply {
+                setBackgroundResource(R.drawable.bg_chip); gravity = Gravity.CENTER_VERTICAL or Gravity.START
+                isSelected = i == prefs.powerFx; setTextColor(color(if (i == prefs.powerFx) R.color.accent_action else R.color.text_value))
+            }, LinearLayout.LayoutParams(-1, dp(56)).apply { topMargin = dp(6) })
+        }
         label()
         row(parent, pick, button(getString(R.string.fx_preview)) { preview.play(prefs.powerFx) }.apply { setBackgroundResource(R.drawable.bg_chip) })
+        // Sous le bouton de choix seulement (moitié gauche de la ligne)
+        val half = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
+        half.addView(list, LinearLayout.LayoutParams(0, -2, 1f))
+        half.addView(View(this), LinearLayout.LayoutParams(0, 1, 1f).apply { leftMargin = dp(10) })
+        parent.addView(half, LinearLayout.LayoutParams(-1, -2))
         text(parent, getString(R.string.st_power_fx_desc), 16f, R.color.text_title)
         parent.addView(preview, LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(10) })
     }
