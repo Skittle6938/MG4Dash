@@ -427,6 +427,8 @@
     <string name="dm_run_line">Run %1$d · %2$s → %3$s</string>
     <string name="dm_lock_delay">Lock the doors after</string>
     <string name="dm_message_wait">The driver will be back soon. The climate will start at %1$s.</string>
+    <string name="dm_screen_off">Screen off once locked</string>
+    <string name="dm_screen_off_hint">To sleep inside or stay discreet · a tap shows it 10 s</string>
     <string name="aa_title">ANDROID AUTO</string>
     <string name="aa_ready">Phone connected · Tap to open</string>
     <string name="aa_waiting">Connect your phone via USB</string>

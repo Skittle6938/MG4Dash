@@ -130,8 +130,21 @@ object ClimateHoldPanel {
             dur = (dur + d * 5).coerceIn(5, 60); prefs.climateHoldRunMin = dur; v.text = mins(dur) }
         val gapRow = stepper(kit, a.getString(R.string.dm_gap), mins(gap)) { d, v ->
             gap = (gap + d * 5).coerceIn(5, 240); prefs.climateHoldGapMin = gap; v.text = mins(gap) }
-        val note = kit.text("", 19f, R.color.text_title).apply { maxLines = 5; setLineSpacing(0f, 1.15f) }
-        listOf(lockRow, durRow, runsRow, gapRow).forEach { right.addView(it, kit.lp(-1, -2, b = 8)) }
+        val note = kit.text("", 18f, R.color.text_title).apply { maxLines = 4; setLineSpacing(0f, 1.1f) }
+        // Écran éteint une fois verrouillé : un seul bouton OUI / NON, comme les options des réglages
+        val offRow = kit.row()
+        offRow.addView(kit.column().apply {
+            addView(kit.text(a.getString(R.string.dm_screen_off), 22f, R.color.text_sub))
+            addView(kit.text(a.getString(R.string.dm_screen_off_hint), 17f, R.color.text_title).apply { maxLines = 2 }, kit.lp(-1, -2, t = 2))
+        }, kit.lp(0, -2, 1f))
+        lateinit var offBtn: TextView
+        fun paintOff() {
+            offBtn.text = a.getString(if (prefs.climateHoldScreenOff) R.string.yes else R.string.no); offBtn.isSelected = prefs.climateHoldScreenOff
+        }
+        offBtn = kit.toggleTile("") { prefs.climateHoldScreenOff = !prefs.climateHoldScreenOff; paintOff() }.apply { textSize = 20f }
+        paintOff()
+        offRow.addView(offBtn, kit.lp(kit.dp(130), kit.dp(52)))
+        listOf(lockRow, durRow, runsRow, gapRow, offRow).forEach { right.addView(it, kit.lp(-1, -2, b = 8)) }
         right.addView(note, kit.lp(-1, -2, t = 4))
 
         fun paintAll() {

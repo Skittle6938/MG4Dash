@@ -97,6 +97,10 @@ class Prefs(context: Context) {
     var climateHoldStartMin: Int
         get() = sp.getInt("climhold_start_min", 18 * 60)
         set(v) = sp.edit().putInt("climhold_start_min", v).apply()
+    /** Clim maintenue : écran éteint une fois les portes verrouillées (dormir dans la voiture, discrétion). */
+    var climateHoldScreenOff: Boolean
+        get() = sp.getBoolean("climhold_screen_off", false)
+        set(v) = sp.edit().putBoolean("climhold_screen_off", v).apply()
     var climateHoldRuns: Int
         get() = sp.getInt("climhold_runs", 1)
         set(v) = sp.edit().putInt("climhold_runs", v).apply()
