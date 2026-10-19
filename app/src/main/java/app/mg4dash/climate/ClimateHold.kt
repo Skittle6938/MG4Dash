@@ -16,24 +16,38 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 /**
- * Clim maintenue (suite de l'issue #26) : la voiture reste allumée, la clim tourne
- * avec ses réglages actuels et un grand écran montre la température intérieure aux passants.
- * La pré-climatisation programmée a été abandonnée : voiture éteinte, l'autoradio ne peut ni la
- * rallumer ni lancer la clim (essais du 2026-10-19).
- * Fin : durée maximale atteinte ou batterie sous 20 % (clim arrêtée et voiture éteinte), voiture qui
- * roule, ou arrêt par le conducteur (la voiture et la clim restent alors comme elles sont).
+ * Clim maintenue (suite de l'issue #26) : la voiture reste allumée pendant l'absence du conducteur,
+ * les portes se verrouillent après un compte à rebours, et la clim tourne avec ses réglages actuels :
+ * - tout de suite, jusqu'à une durée maximale (illimitée par défaut) ;
+ * - ou à une heure choisie, en un ou plusieurs cycles (durée, pause), la voiture attendant allumée et
+ *   clim coupée (environ 0,2 kW d'après l'auteur de l'issue).
+ * Une voiture éteinte ne peut pas être rallumée par l'autoradio (essais du 2026-10-19) : elle n'est
+ * éteinte qu'à la fin (durée atteinte, dernier cycle fini ou batterie sous 20 %). Le conducteur qui
+ * revient et déverrouille, ou la voiture qui roule, arrête le mode en laissant tout en l'état.
  */
 object ClimateHold {
-    private const val TAG = "MG4L.ClimateHold"
+    private const val TAG = "MG4L.ClimHold"
     const val MIN_SOC = 20
-    /** Durées maximales proposées, en minutes ; 0 = illimitée (seul le seuil de batterie arrête le mode). */
+    /** Durées maximales proposées en mode « tout de suite », en minutes ; 0 = illimitée. */
     val DURATIONS = intArrayOf(0, 15, 30, 60, 120, 240, 480)
 
-    enum class Phase { IDLE, ARMED, ON, DONE, BATTERY }
+    enum class Phase { IDLE, ARMED, WAITING, ON, DONE, BATTERY }
 
-    /** Échéances en temps écoulé depuis le démarrage : l'horloge de l'autoradio peut sauter au réveil. */
-    data class Status(val phase: Phase = Phase.IDLE, val startAt: Long = 0L, val endAt: Long = 0L, val lockAt: Long = 0L) {
+    /**
+     * Échéances en temps écoulé depuis le démarrage de l'autoradio ([runs] : [début, fin] de chaque cycle,
+     * vide en mode « tout de suite ») ; [clock] : les mêmes cycles en heure murale, pour l'affichage.
+     */
+    data class Status(
+        val phase: Phase = Phase.IDLE,
+        val startAt: Long = 0L,
+        val endAt: Long = 0L,
+        val lockAt: Long = 0L,
+        val runs: List<LongArray> = emptyList(),
+        val clock: List<Pair<Long, Long>> = emptyList(),
+        val run: Int = 0,
+    ) {
         val finished get() = phase == Phase.DONE || phase == Phase.BATTERY
+        val scheduled get() = runs.isNotEmpty()
     }
 
     private val _status = MutableStateFlow(Status())
@@ -43,19 +57,36 @@ object ClimateHold {
     private var job: Job? = null
     private var wake: PowerManager.WakeLock? = null
 
-    /**
-     * Démarre : clim en marche tout de suite, compte à rebours de [lockSec] secondes à l'écran (le
-     * conducteur sort avec la clé), puis verrouillage des portes. La durée maximale part du démarrage.
-     */
+    /** Tout de suite : clim en marche, verrouillage après [lockSec] s, fin après [maxMin] min (0 = jamais). */
     fun start(context: Context, maxMin: Int, lockSec: Int) {
-        stop("nouveau départ")
         val now = SystemClock.elapsedRealtime()
-        _status.value = Status(Phase.ARMED, now, if (maxMin > 0) now + maxMin * 60_000L else 0L, now + lockSec * 1000L)
-        Log.i(TAG, "clim maintenue : ${if (maxMin > 0) "$maxMin min" else "sans limite"}, verrouillage dans $lockSec s")
+        begin(context, Status(Phase.ARMED, now, if (maxMin > 0) now + maxMin * 60_000L else 0L, now + lockSec * 1000L))
+        CarBridge.setHvac(true)
+        Log.i(TAG, "tout de suite : ${if (maxMin > 0) "$maxMin min" else "sans limite"}, verrouillage dans $lockSec s")
+    }
+
+    /**
+     * À une heure : premier cycle à [firstWall] (heure murale), [runs] cycles de [durMin] min séparés
+     * de [gapMin] min ; clim coupée pendant l'attente.
+     */
+    fun schedule(context: Context, firstWall: Long, runs: Int, durMin: Int, gapMin: Int, lockSec: Int) {
+        val now = SystemClock.elapsedRealtime(); val wall = System.currentTimeMillis()
+        val first = now + (firstWall - wall).coerceAtLeast(0L)
+        val list = (0 until runs).map { i ->
+            val s = first + i * (durMin + gapMin) * 60_000L
+            longArrayOf(s, s + durMin * 60_000L)
+        }
+        begin(context, Status(Phase.ARMED, now, 0L, now + lockSec * 1000L, list, list.map { (it[0] - now + wall) to (it[1] - now + wall) }))
+        CarBridge.setHvac(false)
+        Log.i(TAG, "programmé : $runs × $durMin min (pause $gapMin min), verrouillage dans $lockSec s")
+    }
+
+    private fun begin(context: Context, st: Status) {
+        stop("nouveau départ")
+        _status.value = st
         val app = context.applicationContext
         wake = (app.getSystemService(Context.POWER_SERVICE) as PowerManager)
             .newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "mg4dash:climhold").apply { setReferenceCounted(false); acquire(24 * 3600_000L) }
-        CarBridge.setHvac(true)
         job = scope.launch { loop() }
         show(app)
     }
@@ -79,26 +110,42 @@ object ClimateHold {
             val st = _status.value
             val car = CarBridge.state.value
             val now = SystemClock.elapsedRealtime()
-            if (st.phase == Phase.ARMED && now >= st.lockAt) {
-                CarBridge.lockDoors()
-                Log.i(TAG, "portes verrouillées")
-                _status.value = st.copy(phase = Phase.ON)
+            if (st.phase == Phase.ARMED) {
+                if (now >= st.lockAt) {
+                    CarBridge.lockDoors()
+                    Log.i(TAG, "portes verrouillées")
+                    _status.value = st.copy(phase = if (st.scheduled) Phase.WAITING else Phase.ON)
+                }
                 continue
             }
-            // Retour du conducteur : portes déverrouillées après le verrouillage, on rend la main (clim laissée)
-            if (st.phase == Phase.ON && now > st.lockAt + 15_000) {
+            // Retour du conducteur : portes déverrouillées après le verrouillage, on rend la main
+            if (now > st.lockAt + 15_000) {
                 unlockedReads = if (CarBridge.doorsLocked() == false) unlockedReads + 1 else 0
                 if (unlockedReads >= 2) { stop("portes déverrouillées : retour du conducteur"); return }
             }
             if ((car.speedKmh ?: 0f) > 3f) { stop("la voiture roule"); return }
             val soc = car.batteryPercent
-            when {
-                soc != null && soc < MIN_SOC -> { Log.w(TAG, "batterie à $soc %"); end(Phase.BATTERY); return }
-                st.endAt > 0 && SystemClock.elapsedRealtime() >= st.endAt -> { end(Phase.DONE); return }
+            if (soc != null && soc < MIN_SOC) { Log.w(TAG, "batterie à $soc %"); end(Phase.BATTERY); return }
+            when (st.phase) {
+                Phase.WAITING -> if (now >= st.runs[st.run][0]) {
+                    Log.i(TAG, "cycle ${st.run + 1} : clim en marche")
+                    CarBridge.setHvac(true); offReads = 0
+                    _status.value = st.copy(phase = Phase.ON)
+                }
+                Phase.ON -> {
+                    if (st.scheduled && now >= st.runs[st.run][1]) {
+                        Log.i(TAG, "cycle ${st.run + 1} terminé")
+                        if (st.run + 1 < st.runs.size) { CarBridge.setHvac(false); _status.value = st.copy(phase = Phase.WAITING, run = st.run + 1) }
+                        else { end(Phase.DONE); return }
+                        continue
+                    }
+                    if (!st.scheduled && st.endAt > 0 && now >= st.endAt) { end(Phase.DONE); return }
+                    // La clim doit tourner : relancée si elle s'arrête (voiture qui coupe, appui sur le bouton…)
+                    offReads = if (car.hvacOn == false) offReads + 1 else 0
+                    if (offReads >= 30) { Log.w(TAG, "clim arrêtée : relance"); CarBridge.setHvac(true); offReads = 0 }
+                }
+                else -> return
             }
-            // La clim doit tourner : relancée si elle s'arrête (voiture qui coupe, appui sur le bouton…)
-            offReads = if (car.hvacOn == false) offReads + 1 else 0
-            if (offReads >= 30) { Log.w(TAG, "clim arrêtée : relance"); CarBridge.setHvac(true); offReads = 0 }
         }
     }
 

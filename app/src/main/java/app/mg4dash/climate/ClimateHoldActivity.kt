@@ -28,6 +28,8 @@ class ClimateHoldActivity : AppCompatActivity() {
     private lateinit var time: TextView
     private lateinit var timeLabel: TextView
     private lateinit var battery: TextView
+    private lateinit var runs: TextView
+    private lateinit var message: TextView
     private lateinit var main: android.view.View
     private lateinit var armed: android.view.View
     private lateinit var countdown: TextView
@@ -61,7 +63,11 @@ class ClimateHoldActivity : AppCompatActivity() {
         right.addView(time, kit.lp(-2, -2, t = 4))
         timeLabel = kit.text("", 30f, R.color.text_sub)
         right.addView(timeLabel, kit.lp(-2, -2))
-        right.addView(kit.text(getString(R.string.dm_message), 32f).apply { maxLines = 3; setLineSpacing(0f, 1.15f) }, kit.lp(-1, -2, t = 24))
+        // Cycles programmés (heures murales), celui en cours repéré par une flèche
+        runs = kit.text("", 26f, R.color.text_sub).apply { maxLines = 6; setLineSpacing(0f, 1.1f) }
+        right.addView(runs, kit.lp(-2, -2, t = 10))
+        message = kit.text(getString(R.string.dm_message), 32f).apply { maxLines = 3; setLineSpacing(0f, 1.15f) }
+        right.addView(message, kit.lp(-1, -2, t = 24))
         val bottom = kit.row()
         battery = kit.text("", 34f)
         bottom.addView(battery, kit.lp(0, -2, 1f))
@@ -134,10 +140,20 @@ class ClimateHoldActivity : AppCompatActivity() {
         main.visibility = if (counting) android.view.View.GONE else android.view.View.VISIBLE
         if (counting) countdown.text = ((st.lockAt - now).coerceAtLeast(0) / 1000 + 1).toString()
         when (st.phase) {
+            ClimateHold.Phase.WAITING -> {
+                val next = st.clock.getOrNull(st.run)?.first
+                state.text = getString(R.string.dm_clim_at, next?.let { hhmm(it) } ?: "")
+                state.setTextColor(kit.color(R.color.text_value))
+                time.text = left((st.runs.getOrNull(st.run)?.get(0) ?: now) - now)
+                timeLabel.text = getString(R.string.dm_until_start)
+                message.text = getString(R.string.dm_message_wait, next?.let { hhmm(it) } ?: "")
+            }
             ClimateHold.Phase.ON -> {
+                message.text = getString(R.string.dm_message)
                 state.text = getString(if (on) R.string.dm_clim_on else R.string.dm_clim_off)
                 state.setTextColor(kit.color(if (on) R.color.accent_cold else R.color.accent_heat))
-                if (st.endAt > 0) { time.text = left(st.endAt - now); timeLabel.text = getString(R.string.dm_left) }
+                if (st.scheduled) { time.text = left(st.runs[st.run][1] - now); timeLabel.text = getString(R.string.dm_left) }
+                else if (st.endAt > 0) { time.text = left(st.endAt - now); timeLabel.text = getString(R.string.dm_left) }
                 else { time.text = left(now - st.startAt); timeLabel.text = getString(R.string.dm_since) }
                 timeLabel.text = timeLabel.text.toString() + (car.driverTemp?.let { " · " + getString(R.string.dm_set, String.format(Locale.getDefault(), "%.1f°", it)) } ?: "")
             }
@@ -148,10 +164,17 @@ class ClimateHoldActivity : AppCompatActivity() {
             }
             else -> {}
         }
+        runs.visibility = if (st.scheduled) android.view.View.VISIBLE else android.view.View.GONE
+        if (st.scheduled) runs.text = st.clock.mapIndexed { i, (a, b) ->
+            val mark = when { st.finished || i < st.run -> "✓ "; i == st.run && st.phase == ClimateHold.Phase.ON -> "▶ "; else -> "    " }
+            mark + getString(R.string.dm_run_line, i + 1, hhmm(a), hhmm(b))
+        }.joinToString("\n")
         battery.text = car.batteryPercent?.let { getString(R.string.dm_battery, "$it %") } ?: ""
     }
 
     companion object {
+        fun hhmm(wall: Long): String = java.text.SimpleDateFormat("HH:mm", Locale.getDefault()).format(java.util.Date(wall))
+
         /** Durée : « 12:34 », ou « 1 h 05 » au-delà d'une heure. */
         fun left(ms: Long): String {
             val s = (ms.coerceAtLeast(0) + 999) / 1000

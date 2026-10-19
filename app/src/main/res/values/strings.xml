@@ -393,7 +393,6 @@
     <string name="dm_title">KEEP CLIMATE ON</string>
     <string name="dm_max">Maximum duration</string>
     <string name="dm_unlimited">Unlimited</string>
-    <string name="dm_note" formatted="false">The climate starts now with its current settings, then the doors lock after the delay. The mode ends below 20 % of battery or after the maximum duration (climate stopped and car switched off), when the doors are unlocked, or if the car moves.</string>
     <string name="dm_close">Close</string>
     <string name="dm_message">The driver will be back soon. The climate is kept on.</string>
     <string name="dm_inside">INSIDE</string>
@@ -408,12 +407,26 @@
     <string name="dm_state_done">FINISHED · CAR SWITCHED OFF</string>
     <string name="dm_state_battery" formatted="false">STOPPED: BATTERY BELOW 20 %</string>
     <string name="dm_warning">Never leave a child or an animal alone in the car: the climate can stop at any time (battery, fault, car switching off).</string>
-    <string name="dm_lock_delay">Lock the doors after</string>
     <string name="dm_start">Start</string>
     <string name="dm_cancel">Cancel</string>
     <string name="dm_lock_in">The doors lock in</string>
     <string name="dm_take_key">TAKE THE KEY WITH YOU!</string>
     <string name="dm_lights">Set the light switch to side lights rather than AUTO.</string>
+    <string name="dm_now">Climate now</string>
+    <string name="dm_at_time">Climate at a set time</string>
+    <string name="dm_first_start">First start at</string>
+    <string name="dm_in">in %1$s</string>
+    <string name="dm_max_hint">Then the climate stops and the car switches off.</string>
+    <string name="dm_runs">Number of runs</string>
+    <string name="dm_duration">Duration of each run</string>
+    <string name="dm_gap">Pause between runs</string>
+    <string name="dm_note_now" formatted="false">The climate starts now with its current settings, then the doors lock after the delay. Stops below 20 % battery, when the doors are unlocked or if the car moves.</string>
+    <string name="dm_note_at" formatted="false">The car stays on (climate off, about 0.2 kW) and locked until the first run, then runs the climate with its current settings. It switches off after the last run, below 20 % battery, and stops when the doors are unlocked.</string>
+    <string name="dm_clim_at">CLIMATE AT %1$s</string>
+    <string name="dm_until_start">before the climate starts</string>
+    <string name="dm_run_line">Run %1$d · %2$s → %3$s</string>
+    <string name="dm_lock_delay">Lock the doors after</string>
+    <string name="dm_message_wait">The driver will be back soon. The climate will start at %1$s.</string>
     <string name="aa_title">ANDROID AUTO</string>
     <string name="aa_ready">Phone connected · Tap to open</string>
     <string name="aa_waiting">Connect your phone via USB</string>

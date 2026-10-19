@@ -393,7 +393,6 @@
     <string name="dm_title">KLIMA BLEIBT AN</string>
     <string name="dm_max">Maximale Dauer</string>
     <string name="dm_unlimited">Unbegrenzt</string>
-    <string name="dm_note" formatted="false">Die Klimaanlage startet sofort mit ihren aktuellen Einstellungen, dann verriegeln die Türen nach der Wartezeit. Der Modus endet unter 20 % Akku oder nach der maximalen Dauer (Klima aus, Auto ausgeschaltet), wenn die Türen entriegelt werden oder wenn das Auto fährt.</string>
     <string name="dm_close">Schließen</string>
     <string name="dm_message">Der Fahrer ist gleich zurück. Die Klimaanlage bleibt an.</string>
     <string name="dm_inside">INNEN</string>
@@ -408,12 +407,26 @@
     <string name="dm_state_done">BEENDET · AUTO AUSGESCHALTET</string>
     <string name="dm_state_battery" formatted="false">GESTOPPT: AKKU UNTER 20 %</string>
     <string name="dm_warning">Lassen Sie niemals ein Kind oder ein Tier allein im Auto: die Klimaanlage kann jederzeit ausgehen (Akku, Störung, Auto schaltet ab).</string>
-    <string name="dm_lock_delay">Türen verriegeln nach</string>
     <string name="dm_start">Starten</string>
     <string name="dm_cancel">Abbrechen</string>
     <string name="dm_lock_in">Die Türen verriegeln in</string>
     <string name="dm_take_key">NEHMEN SIE DEN SCHLÜSSEL MIT!</string>
     <string name="dm_lights">Stellen Sie den Lichtschalter auf Standlicht statt AUTO.</string>
+    <string name="dm_now">Klima sofort</string>
+    <string name="dm_at_time">Klima zu einer festen Uhrzeit</string>
+    <string name="dm_first_start">Erster Start um</string>
+    <string name="dm_in">in %1$s</string>
+    <string name="dm_max_hint">Danach stoppt die Klimaanlage und das Auto schaltet ab.</string>
+    <string name="dm_runs">Anzahl der Zyklen</string>
+    <string name="dm_duration">Dauer jedes Zyklus</string>
+    <string name="dm_gap">Pause zwischen den Zyklen</string>
+    <string name="dm_note_now" formatted="false">Die Klimaanlage startet sofort mit ihren aktuellen Einstellungen, dann verriegeln die Türen nach der Wartezeit. Stopp unter 20 % Akku, beim Entriegeln oder wenn das Auto fährt.</string>
+    <string name="dm_note_at" formatted="false">Das Auto bleibt eingeschaltet (Klima aus, etwa 0,2 kW) und verriegelt bis zum ersten Zyklus und startet dann die Klimaanlage mit ihren aktuellen Einstellungen. Es schaltet nach dem letzten Zyklus oder unter 20 % Akku ab; Entriegeln beendet alles.</string>
+    <string name="dm_clim_at">KLIMA UM %1$s</string>
+    <string name="dm_until_start">bis zum Start der Klimaanlage</string>
+    <string name="dm_run_line">Zyklus %1$d · %2$s → %3$s</string>
+    <string name="dm_lock_delay">Türen verriegeln nach</string>
+    <string name="dm_message_wait">Der Fahrer ist gleich zurück. Die Klimaanlage startet um %1$s.</string>
     <string name="aa_title">ANDROID AUTO</string>
     <string name="aa_ready">Telefon verbunden · Zum Öffnen tippen</string>
     <string name="aa_waiting">Telefon per USB verbinden</string>

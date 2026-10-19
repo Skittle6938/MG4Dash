@@ -270,6 +270,10 @@ class ScreenshotTest {
         app.mg4dash.climate.ClimateHoldPanel.show(home)
         shadowOf(Looper.getMainLooper()).idleFor(200, TimeUnit.MILLISECONDS)
         save(home.window.decorView, "climhold_menu.png")
+        sp.edit().putBoolean("climhold_scheduled", true).putInt("climhold_runs", 3).commit()
+        app.mg4dash.climate.ClimateHoldPanel.show(home)
+        shadowOf(Looper.getMainLooper()).idleFor(200, TimeUnit.MILLISECONDS)
+        save(home.window.decorView, "climhold_menu_at.png")
         app.mg4dash.climate.ClimateHold.start(home, 0, 20)
         val armed = Robolectric.buildActivity(app.mg4dash.climate.ClimateHoldActivity::class.java).setup().get()
         repeat(3) { Thread.sleep(200); shadowOf(Looper.getMainLooper()).idleFor(1000, TimeUnit.MILLISECONDS) }
@@ -278,6 +282,10 @@ class ScreenshotTest {
         val screen = Robolectric.buildActivity(app.mg4dash.climate.ClimateHoldActivity::class.java).setup().get()
         repeat(6) { Thread.sleep(300); shadowOf(Looper.getMainLooper()).idleFor(1000, TimeUnit.MILLISECONDS) }
         save(screen.window.decorView, "climhold_screen.png")
+        app.mg4dash.climate.ClimateHold.schedule(home, System.currentTimeMillis() + 42 * 60_000L, 3, 15, 30, 0)
+        val waiting = Robolectric.buildActivity(app.mg4dash.climate.ClimateHoldActivity::class.java).setup().get()
+        repeat(6) { Thread.sleep(300); shadowOf(Looper.getMainLooper()).idleFor(1000, TimeUnit.MILLISECONDS) }
+        save(waiting.window.decorView, "climhold_waiting.png")
         app.mg4dash.climate.ClimateHold.stop("fin du test")
     }
 
