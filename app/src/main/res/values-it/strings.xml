@@ -368,7 +368,6 @@
     <string name="st_mode_auto_short">Auto</string>
     <string name="st_map_zoom">Zoom predefinito della mappa</string>
     <string name="st_map_theme">Colori della mappa</string>
-    <string name="st_map_text">Dimensione del testo della mappa (nomi delle vie; tutta la mappa viene ingrandita)</string>
     <string name="st_map_theme_app">Come l\'app</string>
     <string name="st_use_location">Usa la mia posizione</string>
     <string name="st_no_location">Posizione non ancora disponibile</string>

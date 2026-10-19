@@ -368,7 +368,6 @@
     <string name="st_mode_auto_short">Auto</string>
     <string name="st_map_zoom">Standaardzoom kaart</string>
     <string name="st_map_theme">Kaartkleuren</string>
-    <string name="st_map_text">Tekstgrootte van de kaart (straatnamen; de hele kaart wordt vergroot)</string>
     <string name="st_map_theme_app">Zoals de app</string>
     <string name="st_use_location">Mijn positie gebruiken</string>
     <string name="st_no_location">Positie nog niet beschikbaar</string>

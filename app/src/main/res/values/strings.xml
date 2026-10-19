@@ -368,7 +368,6 @@
     <string name="st_mode_auto_short">Auto</string>
     <string name="st_map_zoom">Default map zoom</string>
     <string name="st_map_theme">Map colours</string>
-    <string name="st_map_text">Map text size (street names; the whole map is enlarged)</string>
     <string name="st_map_theme_app">Like the app</string>
     <string name="st_use_location">Use my position</string>
     <string name="st_no_location">Position not available yet</string>
