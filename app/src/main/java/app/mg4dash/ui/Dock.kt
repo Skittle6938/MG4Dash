@@ -251,6 +251,9 @@ object Dock {
                     fun tint() {
                         val escOff = app.mg4dash.car.CarBridge.escActive() == false
                         icon.setColorFilter(color(when { escOff -> R.color.accent_danger; selected -> R.color.accent_action; else -> R.color.text_sub }))
+                        // ESC coupé : la voiture passe en dérive, en rouge
+                        val res = if (escOff) R.drawable.ic_car_drift else R.drawable.ic_car
+                        if (icon.tag != res) { icon.setImageResource(res); icon.tag = res }
                     }
                     tint()
                     // Toucher : page Véhicule ; double toucher : portes verrouillées / déverrouillées (utile depuis

@@ -302,6 +302,18 @@ class ScreenshotTest {
         File(dir, "climate_icons_preview.png").outputStream().use { bmp.compress(Bitmap.CompressFormat.PNG, 100, it) }
     }
 
+    /** Icône Véhicule de la barre : normale et en dérive (ESC coupé), en rouge. */
+    @Test fun carDriftIcon() {
+        val ctx = org.robolectric.RuntimeEnvironment.getApplication()
+        val bmp = Bitmap.createBitmap(260, 120, Bitmap.Config.ARGB_8888); bmp.eraseColor(0xFF0B0F17.toInt())
+        val c = Canvas(bmp)
+        listOf(R.drawable.ic_car to 0xFFA0AEC0.toInt(), R.drawable.ic_car_drift to 0xFFFF5252.toInt()).forEachIndexed { i, (res, col) ->
+            val dr = androidx.core.content.ContextCompat.getDrawable(ctx, res)!!.mutate()
+            dr.setTint(col); dr.setBounds(20 + i * 130, 10, 120 + i * 130, 110); dr.draw(c)
+        }
+        File(File("build/screenshots").apply { mkdirs() }, "car_drift_icon.png").outputStream().use { bmp.compress(Bitmap.CompressFormat.PNG, 100, it) }
+    }
+
     /** Animation pleine puissance : images successives de l'aperçu des réglages, une planche par style. */
     @Test fun powerFx() {
         val sp = org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE)
