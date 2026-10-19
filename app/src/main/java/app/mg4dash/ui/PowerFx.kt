@@ -47,6 +47,15 @@ class PowerFx(private val context: Context) : Drawable() {
     var onBadge: ((Boolean) -> Unit)? = null
     /** Arrondi des bords : celui des cartes, 0 quand l'animation couvre tout l'écran. */
     var corner = 20 * context.resources.displayMetrics.density
+    /** Vue secouée pendant l'arrivée de la fusée (le contenu de l'écran ; l'animation, elle, reste stable). */
+    var shake: View? = null
+
+    private fun shakeBy(amp: Float) {
+        val v = shake ?: return
+        if (amp <= 0f) { if (v.translationX != 0f || v.translationY != 0f) { v.translationX = 0f; v.translationY = 0f }; return }
+        v.translationX = (rnd.nextFloat() * 2f - 1f) * amp
+        v.translationY = (rnd.nextFloat() * 2f - 1f) * amp * 0.7f
+    }
 
     private val d = context.resources.displayMetrics.density
     private val sp = context.resources.displayMetrics.scaledDensity
@@ -128,6 +137,7 @@ class PowerFx(private val context: Context) : Drawable() {
     }
 
     fun stop() {
+        shakeBy(0f)
         if (active) { active = false; onBadge?.invoke(false) }
         clearParticles(); invalidateSelf()
     }
@@ -208,6 +218,8 @@ class PowerFx(private val context: Context) : Drawable() {
             if (t >= 1f) { fly = false; badgeAt = now }
         } else rocketX += (target - rocketX) * (1f - exp(-dt * 7f))
         val moving = fly || target - rocketX > 1.5f * d
+        // L'écran tremble pendant que la fusée arrive (fort au départ), un peu à chaque nouveau record
+        shakeBy(when { fly -> (6f - 4f * t) * d; moving -> 1.5f * d; else -> 0f })
         val x = rocketX
         val y = barY + sin(now / 320.0).toFloat() * (if (moving) 0.5f else 1.5f) * d
         val boost = if (moving) 1f else 0.25f + 0.1f * sin(now / 90.0).toFloat()
