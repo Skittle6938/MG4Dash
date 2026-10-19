@@ -149,7 +149,11 @@ object EnergyMonitor {
                 // précédent) couvre aussi une recharge suivie % par % : MG4Dash peut tourner en veille
                 // pendant la charge (constaté le 2026-10-18, compteurs non remis à zéro).
                 if (soc != null) {
-                    if (lowSoc >= 0 && soc >= lowSoc + RECHARGE_PCT || chargeKm < 0 && km != null) {
+                    // Filet : % au-dessus du % de départ de la période → recharge forcément passée (période
+                    // restée bloquée avant la 1.1.4, quand la recharge vue % par % n'était pas détectée)
+                    val soc0 = sp.getInt("em_c_soc0", -1)
+                    if (lowSoc >= 0 && soc >= lowSoc + RECHARGE_PCT || soc0 >= 0 && soc >= soc0 + RECHARGE_PCT ||
+                        chargeKm < 0 && km != null) {
                         Log.i(TAG, "nouvelle période depuis recharge ($lowSoc → $soc %)")
                         _sinceCharge.value = Totals()
                         chargeKm = km ?: -1
