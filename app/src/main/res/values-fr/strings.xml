@@ -388,15 +388,15 @@
     <string name="fx_peak">Pic %1$s kW · %2$s ch</string>
     <string name="st_xpower">MG4 XPower (320 kW)</string>
     <string name="st_xpower_desc">Reconnue d\'elle-même dès que plus de 350 ch sont mesurés : la voiture ne donne pas sa version. Règle l\'échelle de puissance et le seuil de la fonction pied au plancher.</string>
-    <string name="st_dogmode">Mode chien (appui long sur le bouton marche de la clim)</string>
-    <string name="st_dogmode_desc">Garde la voiture allumée avec la clim en marche pendant votre absence, avec un grand écran qui montre la température intérieure aux passants.</string>
-    <string name="dm_title">MODE CHIEN</string>
+    <string name="st_climhold">Clim maintenue (appui long sur le bouton marche de la clim)</string>
+    <string name="st_climhold_desc">Garde la voiture allumée avec la clim en marche pendant votre absence, avec un grand écran qui montre la température intérieure. Ne laissez jamais un enfant ou un animal seul dans la voiture.</string>
+    <string name="dm_title">CLIM MAINTENUE</string>
     <string name="dm_max">Durée maximale</string>
     <string name="dm_unlimited">Illimitée</string>
     <string name="dm_note" formatted="false">La voiture reste allumée et la clim garde ses réglages actuels. Le mode s\'arrête sous 20 % de batterie ou au bout de la durée maximale (clim arrêtée et voiture éteinte), ou si la voiture roule.</string>
     <string name="dm_close">Fermer</string>
     <string name="dm_activate">Activer</string>
-    <string name="dm_message">Mon conducteur revient bientôt. Pas d\'inquiétude : la clim est en marche et je vais bien.</string>
+    <string name="dm_message">Le conducteur revient bientôt. La clim reste en marche.</string>
     <string name="dm_inside">INTÉRIEUR</string>
     <string name="dm_outside">Extérieur %1$s</string>
     <string name="dm_clim_on">CLIM EN MARCHE</string>
@@ -408,6 +408,7 @@
     <string name="dm_hold_stop">Maintenir pour arrêter</string>
     <string name="dm_state_done">TERMINÉ · VOITURE ÉTEINTE</string>
     <string name="dm_state_battery" formatted="false">ARRÊTÉ : BATTERIE SOUS 20 %</string>
+    <string name="dm_warning">Ne laissez jamais un enfant ou un animal seul dans la voiture : la clim peut s\'arrêter à tout moment (batterie, panne, voiture qui s\'éteint).</string>
     <string name="aa_title">ANDROID AUTO</string>
     <string name="aa_ready">Téléphone connecté · Appuyer pour ouvrir</string>
     <string name="aa_waiting">Branchez votre téléphone en USB</string>

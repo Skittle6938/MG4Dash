@@ -260,21 +260,21 @@ class ScreenshotTest {
         shoot(MainActivity::class.java, "home_shortcuts_fr.png")
     }
 
-    /** Mode chien : fenêtre sur l'accueil, puis son écran (lisible de dehors). */
+    /** Clim maintenue : fenêtre sur l'accueil, puis son écran (lisible de dehors). */
     @Test @Config(qualifiers = "fr-w1920dp-h720dp-land-mdpi")
-    fun dogMode() {
+    fun climateHold() {
         val sp = org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE)
-        sp.edit().putInt("theme_mode", 1).putBoolean("dogmode_enabled", true).putInt("dogmode_max_min", 0).commit()
+        sp.edit().putInt("theme_mode", 1).putBoolean("climhold_enabled", true).putInt("climhold_max_min", 0).commit()
         val home = Robolectric.buildActivity(MainActivity::class.java).setup().get()
         repeat(5) { shadowOf(Looper.getMainLooper()).idleFor(200, TimeUnit.MILLISECONDS) }
-        app.mg4dash.climate.DogModePanel.show(home)
+        app.mg4dash.climate.ClimateHoldPanel.show(home)
         shadowOf(Looper.getMainLooper()).idleFor(200, TimeUnit.MILLISECONDS)
-        save(home.window.decorView, "dogmode_menu.png")
-        app.mg4dash.climate.DogMode.start(home, 0)
-        val screen = Robolectric.buildActivity(app.mg4dash.climate.DogModeActivity::class.java).setup().get()
+        save(home.window.decorView, "climhold_menu.png")
+        app.mg4dash.climate.ClimateHold.start(home, 0)
+        val screen = Robolectric.buildActivity(app.mg4dash.climate.ClimateHoldActivity::class.java).setup().get()
         repeat(6) { Thread.sleep(300); shadowOf(Looper.getMainLooper()).idleFor(1000, TimeUnit.MILLISECONDS) }
-        save(screen.window.decorView, "dogmode_screen.png")
-        app.mg4dash.climate.DogMode.stop("fin du test")
+        save(screen.window.decorView, "climhold_screen.png")
+        app.mg4dash.climate.ClimateHold.stop("fin du test")
     }
 
     @Test @Config(qualifiers = "fr-w1920dp-h720dp-land-mdpi")
