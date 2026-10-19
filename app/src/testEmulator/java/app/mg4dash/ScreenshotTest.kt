@@ -270,7 +270,11 @@ class ScreenshotTest {
         app.mg4dash.climate.ClimateHoldPanel.show(home)
         shadowOf(Looper.getMainLooper()).idleFor(200, TimeUnit.MILLISECONDS)
         save(home.window.decorView, "climhold_menu.png")
-        app.mg4dash.climate.ClimateHold.start(home, 0)
+        app.mg4dash.climate.ClimateHold.start(home, 0, 20)
+        val armed = Robolectric.buildActivity(app.mg4dash.climate.ClimateHoldActivity::class.java).setup().get()
+        repeat(3) { Thread.sleep(200); shadowOf(Looper.getMainLooper()).idleFor(1000, TimeUnit.MILLISECONDS) }
+        save(armed.window.decorView, "climhold_countdown.png")
+        app.mg4dash.climate.ClimateHold.start(home, 0, 0)
         val screen = Robolectric.buildActivity(app.mg4dash.climate.ClimateHoldActivity::class.java).setup().get()
         repeat(6) { Thread.sleep(300); shadowOf(Looper.getMainLooper()).idleFor(1000, TimeUnit.MILLISECONDS) }
         save(screen.window.decorView, "climhold_screen.png")

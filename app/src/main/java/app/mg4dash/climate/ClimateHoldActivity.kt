@@ -28,6 +28,9 @@ class ClimateHoldActivity : AppCompatActivity() {
     private lateinit var time: TextView
     private lateinit var timeLabel: TextView
     private lateinit var battery: TextView
+    private lateinit var main: android.view.View
+    private lateinit var armed: android.view.View
+    private lateinit var countdown: TextView
     private val handler = Handler(Looper.getMainLooper())
     private var cabin: Float? = null
     private var cabinAt = 0L
@@ -69,7 +72,27 @@ class ClimateHoldActivity : AppCompatActivity() {
         }, kit.lp(kit.dp(330), kit.dp(72)))
         right.addView(bottom, kit.lp(-1, -2, t = 24))
         root.addView(right, kit.lp(0, -1, 1.25f, l = 40))
-        setContentView(root)
+        main = root
+        // Compte à rebours avant le verrouillage : le conducteur sort, en gros les deux rappels utiles
+        val arm = kit.column().apply {
+            gravity = Gravity.CENTER
+            setBackgroundResource(R.drawable.bg_root)
+            setPadding(kit.dp(Kit.FOG_SAFE_DP + 24), kit.dp(20), kit.dp(40), kit.dp(20))
+        }
+        arm.addView(kit.text(getString(R.string.dm_lock_in), 40f, R.color.text_sub).apply { gravity = Gravity.CENTER })
+        countdown = kit.text("", 200f, R.color.accent_heat, light = true).apply { gravity = Gravity.CENTER; fontFeatureSettings = "tnum" }
+        arm.addView(countdown, kit.lp(-2, -2))
+        arm.addView(kit.text(getString(R.string.dm_take_key), 62f, R.color.accent_danger).apply {
+            gravity = Gravity.CENTER; typeface = android.graphics.Typeface.create("sans-serif-medium", android.graphics.Typeface.NORMAL)
+        }, kit.lp(-2, -2, t = 4))
+        arm.addView(kit.text(getString(R.string.dm_lights), 36f).apply { gravity = Gravity.CENTER; maxLines = 2 }, kit.lp(-1, -2, t = 14))
+        arm.addView(kit.toggleTile(getString(R.string.dm_cancel)) { ClimateHold.stop("annulé pendant le compte à rebours"); finish() }
+            .apply { textSize = 24f }, kit.lp(kit.dp(330), kit.dp(72), t = 22))
+        armed = arm
+        val frame = android.widget.FrameLayout(this)
+        frame.addView(root, android.widget.FrameLayout.LayoutParams(-1, -1))
+        frame.addView(arm, android.widget.FrameLayout.LayoutParams(-1, -1))
+        setContentView(frame)
         Fullscreen.apply(this)
     }
 
@@ -106,6 +129,10 @@ class ClimateHoldActivity : AppCompatActivity() {
         }))
         outside.text = car.outsideTemp?.let { getString(R.string.dm_outside, String.format(Locale.getDefault(), "%.0f°", it)) } ?: ""
         val on = car.hvacOn == true
+        val counting = st.phase == ClimateHold.Phase.ARMED
+        armed.visibility = if (counting) android.view.View.VISIBLE else android.view.View.GONE
+        main.visibility = if (counting) android.view.View.GONE else android.view.View.VISIBLE
+        if (counting) countdown.text = ((st.lockAt - now).coerceAtLeast(0) / 1000 + 1).toString()
         when (st.phase) {
             ClimateHold.Phase.ON -> {
                 state.text = getString(if (on) R.string.dm_clim_on else R.string.dm_clim_off)

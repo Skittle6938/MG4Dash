@@ -393,9 +393,8 @@
     <string name="dm_title">CLIMA MANTENIDO</string>
     <string name="dm_max">Duración máxima</string>
     <string name="dm_unlimited">Ilimitada</string>
-    <string name="dm_note" formatted="false">El coche sigue encendido y el clima mantiene sus ajustes actuales. El modo termina por debajo del 20 % de batería o al cumplirse la duración máxima (clima parado y coche apagado), o si el coche se mueve.</string>
+    <string name="dm_note" formatted="false">El clima arranca ya con sus ajustes actuales y las puertas se cierran tras el retardo. El modo termina por debajo del 20 % de batería o al cumplirse la duración máxima (clima parado y coche apagado), al abrir las puertas, o si el coche se mueve.</string>
     <string name="dm_close">Cerrar</string>
-    <string name="dm_activate">Activar</string>
     <string name="dm_message">El conductor vuelve pronto. El clima sigue encendido.</string>
     <string name="dm_inside">INTERIOR</string>
     <string name="dm_outside">Exterior %1$s</string>
@@ -409,6 +408,12 @@
     <string name="dm_state_done">TERMINADO · COCHE APAGADO</string>
     <string name="dm_state_battery" formatted="false">DETENIDO: BATERÍA BAJO 20 %</string>
     <string name="dm_warning">No deje nunca a un niño o un animal solo en el coche: el clima puede detenerse en cualquier momento (batería, avería, coche que se apaga).</string>
+    <string name="dm_lock_delay">Cerrar las puertas tras</string>
+    <string name="dm_start">Iniciar</string>
+    <string name="dm_cancel">Cancelar</string>
+    <string name="dm_lock_in">Las puertas se cierran en</string>
+    <string name="dm_take_key">¡LLÉVESE LA LLAVE!</string>
+    <string name="dm_lights">Ponga el mando de luces en posición en lugar de AUTO.</string>
     <string name="aa_title">ANDROID AUTO</string>
     <string name="aa_ready">Teléfono conectado · Pulse para abrir</string>
     <string name="aa_waiting">Conecte su teléfono por USB</string>

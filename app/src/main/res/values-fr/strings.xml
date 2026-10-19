@@ -393,9 +393,8 @@
     <string name="dm_title">CLIM MAINTENUE</string>
     <string name="dm_max">Durée maximale</string>
     <string name="dm_unlimited">Illimitée</string>
-    <string name="dm_note" formatted="false">La voiture reste allumée et la clim garde ses réglages actuels. Le mode s\'arrête sous 20 % de batterie ou au bout de la durée maximale (clim arrêtée et voiture éteinte), ou si la voiture roule.</string>
+    <string name="dm_note" formatted="false">La clim démarre tout de suite avec ses réglages actuels, puis les portes se verrouillent après le délai. Le mode s\'arrête sous 20 % de batterie ou au bout de la durée maximale (clim arrêtée et voiture éteinte), quand les portes sont déverrouillées, ou si la voiture roule.</string>
     <string name="dm_close">Fermer</string>
-    <string name="dm_activate">Activer</string>
     <string name="dm_message">Le conducteur revient bientôt. La clim reste en marche.</string>
     <string name="dm_inside">INTÉRIEUR</string>
     <string name="dm_outside">Extérieur %1$s</string>
@@ -409,6 +408,12 @@
     <string name="dm_state_done">TERMINÉ · VOITURE ÉTEINTE</string>
     <string name="dm_state_battery" formatted="false">ARRÊTÉ : BATTERIE SOUS 20 %</string>
     <string name="dm_warning">Ne laissez jamais un enfant ou un animal seul dans la voiture : la clim peut s\'arrêter à tout moment (batterie, panne, voiture qui s\'éteint).</string>
+    <string name="dm_lock_delay">Verrouiller les portes après</string>
+    <string name="dm_start">Démarrer</string>
+    <string name="dm_cancel">Annuler</string>
+    <string name="dm_lock_in">Verrouillage des portes dans</string>
+    <string name="dm_take_key">PRENEZ LA CLÉ AVEC VOUS !</string>
+    <string name="dm_lights">Mettez le commodo des feux sur veilleuses plutôt qu\'en AUTO.</string>
     <string name="aa_title">ANDROID AUTO</string>
     <string name="aa_ready">Téléphone connecté · Appuyer pour ouvrir</string>
     <string name="aa_waiting">Branchez votre téléphone en USB</string>

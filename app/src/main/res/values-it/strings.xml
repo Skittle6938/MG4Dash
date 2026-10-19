@@ -393,9 +393,8 @@
     <string name="dm_title">CLIMA MANTENUTO</string>
     <string name="dm_max">Durata massima</string>
     <string name="dm_unlimited">Illimitata</string>
-    <string name="dm_note" formatted="false">L\'auto resta accesa e il clima mantiene le impostazioni attuali. La modalità termina sotto il 20 % di batteria o dopo la durata massima (clima fermo e auto spenta), oppure se l\'auto si muove.</string>
+    <string name="dm_note" formatted="false">Il clima parte subito con le impostazioni attuali, poi le porte si chiudono dopo il ritardo. La modalità termina sotto il 20 % di batteria o dopo la durata massima (clima fermo e auto spenta), quando le porte vengono sbloccate, oppure se l\'auto si muove.</string>
     <string name="dm_close">Chiudi</string>
-    <string name="dm_activate">Attiva</string>
     <string name="dm_message">Il conducente torna presto. Il clima resta acceso.</string>
     <string name="dm_inside">INTERNO</string>
     <string name="dm_outside">Esterno %1$s</string>
@@ -409,6 +408,12 @@
     <string name="dm_state_done">FINITO · AUTO SPENTA</string>
     <string name="dm_state_battery" formatted="false">FERMATO: BATTERIA SOTTO 20 %</string>
     <string name="dm_warning">Non lasciare mai un bambino o un animale da solo in auto: il clima può fermarsi in qualsiasi momento (batteria, guasto, auto che si spegne).</string>
+    <string name="dm_lock_delay">Chiudere le porte dopo</string>
+    <string name="dm_start">Avvia</string>
+    <string name="dm_cancel">Annulla</string>
+    <string name="dm_lock_in">Le porte si chiudono tra</string>
+    <string name="dm_take_key">PORTA CON TE LA CHIAVE!</string>
+    <string name="dm_lights">Metti il comando luci sulle luci di posizione invece che su AUTO.</string>
     <string name="aa_title">ANDROID AUTO</string>
     <string name="aa_ready">Telefono connesso · Tocca per aprire</string>
     <string name="aa_waiting">Collega il telefono via USB</string>

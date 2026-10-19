@@ -86,6 +86,10 @@ class Prefs(context: Context) {
         get() = sp.getBoolean("climhold_enabled", false)
         set(v) = sp.edit().putBoolean("climhold_enabled", v).apply()
     /** Durée maximale de la clim maintenue en minutes ; 0 = illimitée (seul le seuil de batterie l'arrête). */
+    /** Délai avant le verrouillage des portes en clim maintenue, en secondes (le temps de sortir avec la clé). */
+    var climateHoldLockSec: Int
+        get() = sp.getInt("climhold_lock_sec", 20)
+        set(v) = sp.edit().putInt("climhold_lock_sec", v).apply()
     var climateHoldMaxMin: Int
         get() = sp.getInt("climhold_max_min", 0)
         set(v) = sp.edit().putInt("climhold_max_min", v).apply()

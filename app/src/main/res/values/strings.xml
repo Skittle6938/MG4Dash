@@ -393,9 +393,8 @@
     <string name="dm_title">KEEP CLIMATE ON</string>
     <string name="dm_max">Maximum duration</string>
     <string name="dm_unlimited">Unlimited</string>
-    <string name="dm_note" formatted="false">The car stays on and the climate keeps its current settings. The mode ends below 20 % of battery or after the maximum duration (climate stopped and car switched off), or if the car moves.</string>
+    <string name="dm_note" formatted="false">The climate starts now with its current settings, then the doors lock after the delay. The mode ends below 20 % of battery or after the maximum duration (climate stopped and car switched off), when the doors are unlocked, or if the car moves.</string>
     <string name="dm_close">Close</string>
-    <string name="dm_activate">Activate</string>
     <string name="dm_message">The driver will be back soon. The climate is kept on.</string>
     <string name="dm_inside">INSIDE</string>
     <string name="dm_outside">Outside %1$s</string>
@@ -409,6 +408,12 @@
     <string name="dm_state_done">FINISHED · CAR SWITCHED OFF</string>
     <string name="dm_state_battery" formatted="false">STOPPED: BATTERY BELOW 20 %</string>
     <string name="dm_warning">Never leave a child or an animal alone in the car: the climate can stop at any time (battery, fault, car switching off).</string>
+    <string name="dm_lock_delay">Lock the doors after</string>
+    <string name="dm_start">Start</string>
+    <string name="dm_cancel">Cancel</string>
+    <string name="dm_lock_in">The doors lock in</string>
+    <string name="dm_take_key">TAKE THE KEY WITH YOU!</string>
+    <string name="dm_lights">Set the light switch to side lights rather than AUTO.</string>
     <string name="aa_title">ANDROID AUTO</string>
     <string name="aa_ready">Phone connected · Tap to open</string>
     <string name="aa_waiting">Connect your phone via USB</string>
