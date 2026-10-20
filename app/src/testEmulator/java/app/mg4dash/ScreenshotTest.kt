@@ -38,6 +38,12 @@ class ScreenshotTest {
         shoot(MainActivity::class.java, "home_bottom_bar.png")
     }
 
+    @Test fun settingsBottomBar() {
+        org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE)
+            .edit().putBoolean("vertical_dock", false).commit()
+        shoot(SettingsActivity::class.java, "settings_bottom_bar.png")
+    }
+
     @Test fun home() = shoot(MainActivity::class.java, "home.png")
     @Test fun climate() = shoot(ClimateActivity::class.java, "climate.png")
     @Test fun vehicle() = shoot(app.mg4dash.pages.VehicleActivity::class.java, "vehicle.png")

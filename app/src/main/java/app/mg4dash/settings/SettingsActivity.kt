@@ -49,12 +49,13 @@ class SettingsActivity : AppCompatActivity() {
         app.mg4dash.ui.Themes.apply(this)
         // Une seule zone qui défile : deux colonnes de catégories, sous un bandeau fixe
         // (titre, journal, fermer) qui laisse la place au bouton antibrouillards.
-        val root = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; setPadding(dp(24), dp(12), dp(24), 0) }
+        val root = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; setPadding(dp(16), dp(12), dp(16), dp(12)) }
+        val vertical = app.mg4dash.ui.Dock.vertical(this)
         val top = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL }
         top.addView(TextView(this).apply {
             text = getString(R.string.st_title, BuildConfig.VERSION_NAME); setTextColor(color(R.color.text_value))
             setTextSize(TypedValue.COMPLEX_UNIT_SP, 22f); typeface = Typeface.create("sans-serif-medium", Typeface.NORMAL)
-        }, LinearLayout.LayoutParams(0, -2, 1f).apply { leftMargin = dp(app.mg4dash.ui.Kit.FOG_SAFE_DP - 8) })
+        }, LinearLayout.LayoutParams(0, -2, 1f).apply { leftMargin = if (vertical) dp(12) else dp(app.mg4dash.ui.Kit.FOG_SAFE_DP - 8) })
         top.addView(button(getString(R.string.st_close), R.color.accent_action) { finish() }, LinearLayout.LayoutParams(dp(200), dp(56)))
         root.addView(top, LinearLayout.LayoutParams(-1, -2).apply { bottomMargin = dp(12) })
         val cols = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
@@ -63,6 +64,10 @@ class SettingsActivity : AppCompatActivity() {
         cols.addView(left, LinearLayout.LayoutParams(0, -2, 1f).apply { rightMargin = dp(8) })
         cols.addView(right, LinearLayout.LayoutParams(0, -2, 1f).apply { leftMargin = dp(8) })
         root.addView(ScrollView(this).apply { isVerticalScrollBarEnabled = true; addView(cols) }, LinearLayout.LayoutParams(-1, 0, 1f))
+        // Même dock (ou barre verticale) que les autres pages
+        val dock = LinearLayout(this)
+        root.addView(dock, LinearLayout.LayoutParams(-1, dp(84)).apply { topMargin = dp(12) })
+        app.mg4dash.ui.Dock.mount(this, root, dock, app.mg4dash.ui.Dock.Page.SETTINGS)
         setContentView(root)
 
         // ════ Colonne gauche : ce qu'on voit à l'écran ════
@@ -82,7 +87,7 @@ class SettingsActivity : AppCompatActivity() {
         text(style, getString(R.string.st_map_theme), 18f, R.color.text_value)
         row(style, *styleButtons(listOf(R.string.st_mode_auto, R.string.st_mode_light, R.string.st_mode_dark), { prefs.mapTheme }) { prefs.mapTheme = it })
         toggle(style, R.string.st_map_offline_switch, R.string.st_map_offline_switch_desc, { prefs.mapOfflineSwitch }) { prefs.mapOfflineSwitch = it }
-        toggle(style, R.string.st_map_vdock, null, { prefs.verticalDock }) { prefs.verticalDock = it; app.mg4dash.ui.Themes.publish(this) }
+        toggle(style, R.string.st_map_vdock, null, { prefs.verticalDock }) { prefs.verticalDock = it; app.mg4dash.ui.Themes.publish(this); recreate() }
         toggle(style, R.string.st_fullscreen, null, { prefs.fullscreen }) { prefs.fullscreen = it; Fullscreen.apply(this) }
         toggle(style, R.string.st_stack_auto, null, { prefs.stackAuto }) { prefs.stackAuto = it }
         toggle(style, R.string.st_climhold, R.string.st_climhold_desc, { prefs.climateHoldEnabled }) { prefs.climateHoldEnabled = it }
