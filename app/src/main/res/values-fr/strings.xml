@@ -424,12 +424,10 @@
     <string name="dm_run_line">Cycle %1$d · %2$s → %3$s</string>
     <string name="dm_lock_delay">Verrouiller les portes après</string>
     <string name="dm_message_wait">Le conducteur revient bientôt. La clim se mettra en marche à %1$s.</string>
-    <string name="dm_screen_off">Écran éteint</string>
+    <string name="dm_screen_off">Écran éteint une fois verrouillé</string>
     <string name="dm_screen_off_hint">Dormir dedans, discrétion · un toucher l\'affiche 10 s</string>
     <string name="dm_outside_title">EXTÉRIEUR</string>
     <string name="dm_cabin_set">Clim réglée à %1$s</string>
-    <string name="dm_off_locked">Une fois verrouillé</string>
-    <string name="dm_off_end">À l\'extinction</string>
     <string name="soc_trip_start">%1$s au départ</string>
     <string name="aa_title">ANDROID AUTO</string>
     <string name="aa_ready">Téléphone connecté · Appuyer pour ouvrir</string>

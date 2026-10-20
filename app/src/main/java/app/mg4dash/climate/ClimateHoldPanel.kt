@@ -137,17 +137,14 @@ object ClimateHoldPanel {
             addView(kit.text(a.getString(R.string.dm_screen_off), 22f, R.color.text_sub))
             addView(kit.text(a.getString(R.string.dm_screen_off_hint), 17f, R.color.text_title).apply { maxLines = 2 }, kit.lp(-1, -2, t = 2))
         }, kit.lp(0, -2, 1f))
-        // Deux interrupteurs : une fois verrouillé, et à l'extinction de la voiture en fin de mode
-        fun switchTile(label: Int, get: () -> Boolean, set: (Boolean) -> Unit): TextView {
-            lateinit var t: TextView
-            fun paint() { t.text = a.getString(label) + " · " + a.getString(if (get()) R.string.yes else R.string.no); t.isSelected = get() }
-            t = kit.toggleTile("") { set(!get()); paint() }.apply { textSize = 17f }
-            paint(); return t
+        // Un seul interrupteur : à la fin, la voiture éteinte coupe d'elle-même l'écran au bout d'un moment
+        lateinit var offBtn: TextView
+        fun paintOff() {
+            offBtn.text = a.getString(if (prefs.climateHoldScreenOff) R.string.yes else R.string.no); offBtn.isSelected = prefs.climateHoldScreenOff
         }
-        val switches = kit.column()
-        switches.addView(switchTile(R.string.dm_off_locked, { prefs.climateHoldScreenOff }) { prefs.climateHoldScreenOff = it }, kit.lp(kit.dp(230), kit.dp(44)))
-        switches.addView(switchTile(R.string.dm_off_end, { prefs.climateHoldScreenOffEnd }) { prefs.climateHoldScreenOffEnd = it }, kit.lp(kit.dp(230), kit.dp(44), t = 6))
-        offRow.addView(switches)
+        offBtn = kit.toggleTile("") { prefs.climateHoldScreenOff = !prefs.climateHoldScreenOff; paintOff() }.apply { textSize = 20f }
+        paintOff()
+        offRow.addView(offBtn, kit.lp(kit.dp(130), kit.dp(52)))
         listOf(lockRow, durRow, runsRow, gapRow, offRow).forEach { right.addView(it, kit.lp(-1, -2, b = 8)) }
         right.addView(note, kit.lp(-1, -2, t = 4))
 

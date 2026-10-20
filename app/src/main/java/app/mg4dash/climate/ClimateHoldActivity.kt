@@ -160,12 +160,13 @@ class ClimateHoldActivity : AppCompatActivity() {
         val on = car.hvacOn == true
         val counting = st.phase == ClimateHold.Phase.ARMED
         val locked = st.phase == ClimateHold.Phase.WAITING || st.phase == ClimateHold.Phase.ON
-        // Écran éteint une fois verrouillé, ou quand le mode éteint la voiture à la fin (options)
+        // Écran éteint une fois verrouillé (option : dormir dedans, discrétion). À la fin, la voiture
+        // éteinte coupe l'écran d'elle-même au bout d'un moment : on laisse l'écran tel quel.
         val prefs = app.mg4dash.system.Prefs(this)
-        if ((locked && prefs.climateHoldScreenOff) || (st.finished && prefs.climateHoldScreenOffEnd)) {
+        if (locked && prefs.climateHoldScreenOff) {
             if (wakeUntil == 0L) wakeUntil = now + 3000   // le temps de voir le verrouillage
             if (now >= wakeUntil) display(false)
-        } else display(true)
+        } else if (!st.finished) display(true)
         armed.visibility = if (counting) android.view.View.VISIBLE else android.view.View.GONE
         main.visibility = if (counting) android.view.View.GONE else android.view.View.VISIBLE
         if (counting) countdown.text = ((st.lockAt - now).coerceAtLeast(0) / 1000 + 1).toString()

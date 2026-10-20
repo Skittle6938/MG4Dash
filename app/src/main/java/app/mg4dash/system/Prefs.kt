@@ -101,10 +101,6 @@ class Prefs(context: Context) {
     var climateHoldScreenOff: Boolean
         get() = sp.getBoolean("climhold_screen_off", false)
         set(v) = sp.edit().putBoolean("climhold_screen_off", v).apply()
-    /** Clim maintenue : écran éteint quand le mode éteint la voiture (fin, batterie faible). */
-    var climateHoldScreenOffEnd: Boolean
-        get() = sp.getBoolean("climhold_screen_off_end", false)
-        set(v) = sp.edit().putBoolean("climhold_screen_off_end", v).apply()
     var climateHoldRuns: Int
         get() = sp.getInt("climhold_runs", 1)
         set(v) = sp.edit().putInt("climhold_runs", v).apply()
