@@ -422,10 +422,8 @@ dm_until_start|before the climate starts|avant la mise en marche de la clim|bis 
 dm_run_line|Run %1$d · %2$s → %3$s|Cycle %1$d · %2$s → %3$s|Zyklus %1$d · %2$s → %3$s|Ciclo %1$d · %2$s → %3$s|Ciclo %1$d · %2$s → %3$s|Cyclus %1$d · %2$s → %3$s
 dm_lock_delay|Lock the doors after|Verrouiller les portes après|Türen verriegeln nach|Cerrar las puertas tras|Chiudere le porte dopo|Deuren vergrendelen na
 dm_message_wait|The driver will be back soon. The climate will start at %1$s.|Le conducteur revient bientôt. La clim se mettra en marche à %1$s.|Der Fahrer ist gleich zurück. Die Klimaanlage startet um %1$s.|El conductor vuelve pronto. El clima se encenderá a las %1$s.|Il conducente torna presto. Il clima partirà alle %1$s.|De bestuurder is zo terug. De airco start om %1$s.
-dm_screen_off|Screen off|Écran éteint|Bildschirm aus|Pantalla apagada|Schermo spento|Scherm uit
+dm_screen_off|Screen off once locked|Écran éteint une fois verrouillé|Bildschirm aus nach dem Verriegeln|Pantalla apagada al cerrar|Schermo spento dopo la chiusura|Scherm uit na vergrendelen
 dm_screen_off_hint|To sleep inside or stay discreet · a tap shows it 10 s|Dormir dedans, discrétion · un toucher l'affiche 10 s|Zum Schlafen oder diskret · Tippen zeigt es 10 s|Para dormir o ser discreto · un toque lo muestra 10 s|Per dormire o restare discreti · un tocco lo mostra 10 s|Om te slapen of discreet · een tik toont het 10 s
 dm_outside_title|OUTSIDE|EXTÉRIEUR|AUSSEN|EXTERIOR|ESTERNO|BUITEN
 dm_cabin_set|Climate set to %1$s|Clim réglée à %1$s|Klima auf %1$s eingestellt|Clima ajustado a %1$s|Clima impostato a %1$s|Airco ingesteld op %1$s
-dm_off_locked|Once locked|Une fois verrouillé|Nach dem Verriegeln|Al cerrar|Dopo la chiusura|Na vergrendelen
-dm_off_end|At car switch-off|À l'extinction|Beim Ausschalten|Al apagar el coche|Allo spegnimento|Bij uitschakelen
 soc_trip_start|%1$s at start|%1$s au départ|%1$s beim Start|%1$s al salir|%1$s alla partenza|%1$s bij vertrek

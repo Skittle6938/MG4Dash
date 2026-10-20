@@ -424,12 +424,10 @@
     <string name="dm_run_line">Zyklus %1$d · %2$s → %3$s</string>
     <string name="dm_lock_delay">Türen verriegeln nach</string>
     <string name="dm_message_wait">Der Fahrer ist gleich zurück. Die Klimaanlage startet um %1$s.</string>
-    <string name="dm_screen_off">Bildschirm aus</string>
+    <string name="dm_screen_off">Bildschirm aus nach dem Verriegeln</string>
     <string name="dm_screen_off_hint">Zum Schlafen oder diskret · Tippen zeigt es 10 s</string>
     <string name="dm_outside_title">AUSSEN</string>
     <string name="dm_cabin_set">Klima auf %1$s eingestellt</string>
-    <string name="dm_off_locked">Nach dem Verriegeln</string>
-    <string name="dm_off_end">Beim Ausschalten</string>
     <string name="soc_trip_start">%1$s beim Start</string>
     <string name="aa_title">ANDROID AUTO</string>
     <string name="aa_ready">Telefon verbunden · Zum Öffnen tippen</string>

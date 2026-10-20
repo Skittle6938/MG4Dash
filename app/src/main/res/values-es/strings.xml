@@ -424,12 +424,10 @@
     <string name="dm_run_line">Ciclo %1$d · %2$s → %3$s</string>
     <string name="dm_lock_delay">Cerrar las puertas tras</string>
     <string name="dm_message_wait">El conductor vuelve pronto. El clima se encenderá a las %1$s.</string>
-    <string name="dm_screen_off">Pantalla apagada</string>
+    <string name="dm_screen_off">Pantalla apagada al cerrar</string>
     <string name="dm_screen_off_hint">Para dormir o ser discreto · un toque lo muestra 10 s</string>
     <string name="dm_outside_title">EXTERIOR</string>
     <string name="dm_cabin_set">Clima ajustado a %1$s</string>
-    <string name="dm_off_locked">Al cerrar</string>
-    <string name="dm_off_end">Al apagar el coche</string>
     <string name="soc_trip_start">%1$s al salir</string>
     <string name="aa_title">ANDROID AUTO</string>
     <string name="aa_ready">Teléfono conectado · Pulse para abrir</string>
