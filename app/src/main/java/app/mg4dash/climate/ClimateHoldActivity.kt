@@ -57,8 +57,6 @@ class ClimateHoldActivity : AppCompatActivity() {
     private lateinit var armed: android.view.View
     private lateinit var countdown: TextView
     private val handler = Handler(Looper.getMainLooper())
-    private var cabin: Float? = null
-    private var cabinAt = 0L
 
     override fun onCreate(savedInstanceState: Bundle?) {
         Themes.apply(this)
@@ -72,10 +70,11 @@ class ClimateHoldActivity : AppCompatActivity() {
         }
         // Gauche : la température intérieure, en énorme
         val left = kit.column().apply { gravity = Gravity.CENTER }
-        left.addView(kit.text(getString(R.string.dm_inside), 34f, R.color.text_title).apply { letterSpacing = 0.15f })
+        // La voiture ne donne pas la température de l'habitacle (essais du 2026-10-20) : l'extérieur, en grand
+        left.addView(kit.text(getString(R.string.dm_outside_title), 34f, R.color.text_title).apply { letterSpacing = 0.15f })
         inside = kit.text("—", 230f, light = true).apply { gravity = Gravity.CENTER; fontFeatureSettings = "tnum" }
         left.addView(inside, kit.lp(-2, -2))
-        outside = kit.text("", 38f, R.color.text_sub)
+        outside = kit.text("", 30f, R.color.text_sub).apply { gravity = Gravity.CENTER; maxLines = 2 }
         left.addView(outside, kit.lp(-2, -2, t = 4))
         root.addView(left, kit.lp(0, -1, 1f))
         // Droite : état de la clim, temps, message aux passants, batterie, arrêt
@@ -148,9 +147,7 @@ class ClimateHoldActivity : AppCompatActivity() {
     private fun render(st: ClimateHold.Status) {
         val car = CarBridge.state.value
         val now = SystemClock.elapsedRealtime()
-        // Température intérieure relue toutes les 10 s (lecture directe de la voiture)
-        if (now - cabinAt > 10_000) { cabinAt = now; Thread { cabin = CarBridge.cabinTemp() }.start() }
-        val t = if (st.thermo && st.cabin != null) st.cabin else cabin
+        val t = car.outsideTemp
         inside.text = t?.let { String.format(Locale.getDefault(), "%.0f°", it) } ?: "—"
         inside.setTextColor(kit.color(when {
             t == null -> R.color.text_sub
@@ -159,11 +156,13 @@ class ClimateHoldActivity : AppCompatActivity() {
             t <= 32f -> R.color.accent_heat
             else -> R.color.accent_danger
         }))
-        outside.text = car.outsideTemp?.let { getString(R.string.dm_outside, String.format(Locale.getDefault(), "%.0f°", it)) } ?: ""
+        outside.text = car.driverTemp?.let { getString(R.string.dm_cabin_set, String.format(Locale.getDefault(), "%.1f°", it)) } ?: ""
         val on = car.hvacOn == true
         val counting = st.phase == ClimateHold.Phase.ARMED
         val locked = st.phase == ClimateHold.Phase.WAITING || st.phase == ClimateHold.Phase.ON
-        if (locked && app.mg4dash.system.Prefs(this).climateHoldScreenOff) {
+        // Écran éteint une fois verrouillé, ou quand le mode éteint la voiture à la fin (options)
+        val prefs = app.mg4dash.system.Prefs(this)
+        if ((locked && prefs.climateHoldScreenOff) || (st.finished && prefs.climateHoldScreenOffEnd)) {
             if (wakeUntil == 0L) wakeUntil = now + 3000   // le temps de voir le verrouillage
             if (now >= wakeUntil) display(false)
         } else display(true)
@@ -179,23 +178,13 @@ class ClimateHoldActivity : AppCompatActivity() {
                 timeLabel.text = getString(R.string.dm_until_start)
                 message.text = getString(R.string.dm_message_wait, next?.let { hhmm(it) } ?: "")
             }
-            ClimateHold.Phase.ON -> if (st.thermo) {
-                // Anti-surchauffe : surveillance, clim seulement au-dessus du seuil
-                state.text = getString(if (on) R.string.dm_clim_on else R.string.dm_watch)
-                state.setTextColor(kit.color(if (on) R.color.accent_cold else R.color.text_value))
-                if (st.endAt > 0) { time.text = left(st.endAt - now); timeLabel.text = getString(R.string.dm_left) }
-                else { time.text = left(now - st.startAt); timeLabel.text = getString(R.string.dm_since) }
-                val max = String.format(Locale.getDefault(), "%.0f°", st.maxTemp)
-                timeLabel.text = timeLabel.text.toString() + " · " + getString(R.string.dm_thermo_rule, max, String.format(Locale.getDefault(), "%.0f°", st.maxTemp - st.hyst))
-                message.text = getString(R.string.dm_message_thermo, max)
-            } else {
+            ClimateHold.Phase.ON -> {
                 message.text = getString(R.string.dm_message)
                 state.text = getString(if (on) R.string.dm_clim_on else R.string.dm_clim_off)
                 state.setTextColor(kit.color(if (on) R.color.accent_cold else R.color.accent_heat))
                 if (st.scheduled) { time.text = left(st.runs[st.run][1] - now); timeLabel.text = getString(R.string.dm_left) }
                 else if (st.endAt > 0) { time.text = left(st.endAt - now); timeLabel.text = getString(R.string.dm_left) }
                 else { time.text = left(now - st.startAt); timeLabel.text = getString(R.string.dm_since) }
-                timeLabel.text = timeLabel.text.toString() + (car.driverTemp?.let { " · " + getString(R.string.dm_set, String.format(Locale.getDefault(), "%.1f°", it)) } ?: "")
             }
             ClimateHold.Phase.DONE, ClimateHold.Phase.BATTERY -> {
                 state.text = getString(if (st.phase == ClimateHold.Phase.DONE) R.string.dm_state_done else R.string.dm_state_battery)

@@ -395,13 +395,10 @@
     <string name="dm_unlimited">Illimitata</string>
     <string name="dm_close">Chiudi</string>
     <string name="dm_message">Il conducente torna presto. Il clima resta acceso.</string>
-    <string name="dm_inside">INTERNO</string>
-    <string name="dm_outside">Esterno %1$s</string>
     <string name="dm_clim_on">CLIMA ACCESO</string>
     <string name="dm_clim_off">CLIMA SPENTO</string>
     <string name="dm_left">rimanente</string>
     <string name="dm_since">dall\'attivazione</string>
-    <string name="dm_set">impostato a %1$s</string>
     <string name="dm_battery">Batteria %1$s</string>
     <string name="dm_hold_stop">Tieni premuto per fermare</string>
     <string name="dm_state_done">FINITO · AUTO SPENTA</string>
@@ -411,7 +408,7 @@
     <string name="dm_cancel">Annulla</string>
     <string name="dm_lock_in">Le porte si chiudono tra</string>
     <string name="dm_take_key">PORTA CON TE LA CHIAVE!</string>
-    <string name="dm_lights">Metti il comando luci sulle luci di posizione invece che su AUTO.</string>
+    <string name="dm_lights">Metti il comando luci su OFF: restano accese solo le luci diurne.</string>
     <string name="dm_now">Clima subito</string>
     <string name="dm_at_time">Clima a un orario preciso</string>
     <string name="dm_first_start">Avvio alle</string>
@@ -427,16 +424,12 @@
     <string name="dm_run_line">Ciclo %1$d · %2$s → %3$s</string>
     <string name="dm_lock_delay">Chiudere le porte dopo</string>
     <string name="dm_message_wait">Il conducente torna presto. Il clima partirà alle %1$s.</string>
-    <string name="dm_screen_off">Schermo spento dopo la chiusura</string>
+    <string name="dm_screen_off">Schermo spento</string>
     <string name="dm_screen_off_hint">Per dormire o restare discreti · un tocco lo mostra 10 s</string>
-    <string name="dm_thermo">Anti-surriscaldamento</string>
-    <string name="dm_max_temp">Temperatura interna massima</string>
-    <string name="dm_thermo_rule">clima sopra %1$s, spento sotto %2$s</string>
-    <string name="dm_hyst">Scarto di ritorno</string>
-    <string name="dm_min_switch">Tempo minimo tra due commutazioni</string>
-    <string name="dm_note_thermo" formatted="false">L\'auto resta accesa e chiusa con il clima spento; il clima parte solo se l\'abitacolo supera il massimo, con le impostazioni attuali, e si ferma sotto il massimo meno lo scarto. Si ferma sotto il 20 % di batteria o allo sblocco.</string>
-    <string name="dm_watch">SORVEGLIANZA</string>
-    <string name="dm_message_thermo">Il conducente torna presto. Il clima si accende se l\'abitacolo supera %1$s.</string>
+    <string name="dm_outside_title">ESTERNO</string>
+    <string name="dm_cabin_set">Clima impostato a %1$s</string>
+    <string name="dm_off_locked">Dopo la chiusura</string>
+    <string name="dm_off_end">Allo spegnimento</string>
     <string name="aa_title">ANDROID AUTO</string>
     <string name="aa_ready">Telefono connesso · Tocca per aprire</string>
     <string name="aa_waiting">Collega il telefono via USB</string>

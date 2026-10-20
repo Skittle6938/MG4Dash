@@ -110,28 +110,6 @@ object CarBridge {
     /** Met la clim en marche ou l'arrête si elle n'est pas déjà dans cet état. */
     fun setHvac(on: Boolean) { if (_state.value.hvacOn != on) togglePower() }
 
-    /**
-     * Température dans l'habitacle : HVAC_TEMPERATURE_CURRENT (AOSP), sinon la température « ambiante »
-     * SAIC, si elles donnent une valeur plausible. null si la voiture n'en fournit pas.
-     */
-    fun cabinTemp(): Float? {
-        if (BuildConfig.MOCK) return 27.5f
-        for (id in intArrayOf(358614274, 358622506)) {
-            val v = CarProps.readAny(id).toFloatOrNull() ?: continue
-            if (v > -30f && v < 70f && v != 0f) return v
-        }
-        return null
-    }
-
-    /**
-     * Relevés de température candidats pour l'habitacle (essai, page Clim) : HVAC_TEMPERATURE_CURRENT
-     * (AOSP, « habitacle »), HVAC_AMBIENT_TEMPERATURE (SAIC), HVAC_TEMPERATURE_OUTCAR et
-     * ENV_OUTSIDE_TEMPERATURE (extérieur). MG4Control et le client carapi n'exposent que l'extérieur.
-     */
-    fun tempSensors(): List<Pair<String, Float?>> = listOf(
-        "CUR" to 358614274, "AMB" to 358622506, "OUT" to 358622481, "ENV" to 291505923,
-    ).map { (k, id) -> k to (if (BuildConfig.MOCK) null else CarProps.readAny(id).toFloatOrNull()) }
-
     /** Portes verrouillées ? (SystemUI d'origine : 0 = ouvertes, 1 à 4 = verrouillées). */
     fun doorsLocked(): Boolean? = CarProps.readIntArea(VEHICLE_LOCK, 0x1000000)?.let { it in 1..4 }
 

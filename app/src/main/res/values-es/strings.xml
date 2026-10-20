@@ -395,13 +395,10 @@
     <string name="dm_unlimited">Ilimitada</string>
     <string name="dm_close">Cerrar</string>
     <string name="dm_message">El conductor vuelve pronto. El clima sigue encendido.</string>
-    <string name="dm_inside">INTERIOR</string>
-    <string name="dm_outside">Exterior %1$s</string>
     <string name="dm_clim_on">CLIMA ENCENDIDO</string>
     <string name="dm_clim_off">CLIMA APAGADO</string>
     <string name="dm_left">restante</string>
     <string name="dm_since">desde la activación</string>
-    <string name="dm_set">ajustado a %1$s</string>
     <string name="dm_battery">Batería %1$s</string>
     <string name="dm_hold_stop">Mantener para detener</string>
     <string name="dm_state_done">TERMINADO · COCHE APAGADO</string>
@@ -411,7 +408,7 @@
     <string name="dm_cancel">Cancelar</string>
     <string name="dm_lock_in">Las puertas se cierran en</string>
     <string name="dm_take_key">¡LLÉVESE LA LLAVE!</string>
-    <string name="dm_lights">Ponga el mando de luces en posición en lugar de AUTO.</string>
+    <string name="dm_lights">Ponga el mando de luces en OFF: solo quedan encendidas las luces diurnas.</string>
     <string name="dm_now">Clima ahora</string>
     <string name="dm_at_time">Clima a una hora fija</string>
     <string name="dm_first_start">Arranque a las</string>
@@ -427,16 +424,12 @@
     <string name="dm_run_line">Ciclo %1$d · %2$s → %3$s</string>
     <string name="dm_lock_delay">Cerrar las puertas tras</string>
     <string name="dm_message_wait">El conductor vuelve pronto. El clima se encenderá a las %1$s.</string>
-    <string name="dm_screen_off">Pantalla apagada al cerrar</string>
+    <string name="dm_screen_off">Pantalla apagada</string>
     <string name="dm_screen_off_hint">Para dormir o ser discreto · un toque lo muestra 10 s</string>
-    <string name="dm_thermo">Anti-sobrecalentamiento</string>
-    <string name="dm_max_temp">Temperatura interior máxima</string>
-    <string name="dm_thermo_rule">clima por encima de %1$s, apagado por debajo de %2$s</string>
-    <string name="dm_hyst">Margen de retorno</string>
-    <string name="dm_min_switch">Tiempo mínimo entre cambios</string>
-    <string name="dm_note_thermo" formatted="false">El coche sigue encendido y cerrado con el clima apagado; el clima solo arranca si el habitáculo supera el máximo, con sus ajustes actuales, y se detiene por debajo del máximo menos el margen. Se detiene por debajo del 20 % de batería o al abrir.</string>
-    <string name="dm_watch">VIGILANCIA</string>
-    <string name="dm_message_thermo">El conductor vuelve pronto. El clima se enciende si el interior supera %1$s.</string>
+    <string name="dm_outside_title">EXTERIOR</string>
+    <string name="dm_cabin_set">Clima ajustado a %1$s</string>
+    <string name="dm_off_locked">Al cerrar</string>
+    <string name="dm_off_end">Al apagar el coche</string>
     <string name="aa_title">ANDROID AUTO</string>
     <string name="aa_ready">Teléfono conectado · Pulse para abrir</string>
     <string name="aa_waiting">Conecte su teléfono por USB</string>

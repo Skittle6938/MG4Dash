@@ -51,9 +51,8 @@ object ClimateHoldPanel {
         val close = { content.removeView(shade) }
 
         // ── Quand : tout de suite / à une heure précise ──
-        // 0 = tout de suite, 1 = à une heure précise, 2 = anti-surchauffe
-        var mode = prefs.climateHoldMode
-        val (modeRow, paintMode) = kit.segmented(listOf(a.getString(R.string.dm_now), a.getString(R.string.dm_at_time), a.getString(R.string.dm_thermo))) {}
+        var scheduled = prefs.climateHoldScheduled
+        val (modeRow, paintMode) = kit.segmented(listOf(a.getString(R.string.dm_now), a.getString(R.string.dm_at_time))) {}
         panel.addView(modeRow, kit.lp(-1, -2, t = 12))
 
         val body = kit.row().apply { gravity = Gravity.TOP }
@@ -119,22 +118,6 @@ object ClimateHoldPanel {
         timeBox.addView(quick, kit.lp(-1, -2, t = 10))
         paintTime()
 
-        // Température maxi (anti-surchauffe) : la clim ne se met en marche qu'au-dessus
-        var maxTemp = prefs.climateHoldMaxTemp
-        val thermoBox = kit.column().apply { gravity = Gravity.CENTER_HORIZONTAL }
-        thermoBox.addView(kit.text(a.getString(R.string.dm_max_temp), 24f, R.color.text_sub).apply { gravity = Gravity.CENTER }, kit.lp(-1, -2))
-        val tempValue = kit.text("", 86f, R.color.accent_heat, light = true).apply { gravity = Gravity.CENTER; fontFeatureSettings = "tnum" }
-        val thermoHint = kit.text("", 20f, R.color.accent_cold).apply { gravity = Gravity.CENTER; maxLines = 2 }
-        var hyst = prefs.climateHoldHyst; var minSwitch = prefs.climateHoldMinSwitch
-        fun paintTemp() {
-            tempValue.text = "$maxTemp°"
-            thermoHint.text = a.getString(R.string.dm_thermo_rule, "$maxTemp°", "${maxTemp - hyst}°")
-            prefs.climateHoldMaxTemp = maxTemp
-        }
-        thermoBox.addView(wheel(kit, tempValue, vertical = true) { d -> maxTemp = (maxTemp + d).coerceIn(18, 45); paintTemp() }, kit.lp(-2, -2, t = 2))
-        thermoBox.addView(thermoHint, kit.lp(-1, -2, t = 4))
-        paintTemp()
-
         // Réglages fins à droite
         var lockSec = prefs.climateHoldLockSec
         var runs = prefs.climateHoldRuns; var dur = prefs.climateHoldRunMin; var gap = prefs.climateHoldGapMin
@@ -147,13 +130,6 @@ object ClimateHoldPanel {
             dur = (dur + d * 5).coerceIn(5, 60); prefs.climateHoldRunMin = dur; v.text = mins(dur) }
         val gapRow = stepper(kit, a.getString(R.string.dm_gap), mins(gap)) { d, v ->
             gap = (gap + d * 5).coerceIn(5, 240); prefs.climateHoldGapMin = gap; v.text = mins(gap) }
-        val hystRow = stepper(kit, a.getString(R.string.dm_hyst), "$hyst°") { d, v ->
-            hyst = (hyst + d).coerceIn(1, 8); prefs.climateHoldHyst = hyst; v.text = "$hyst°"; paintTemp() }
-        val switchRow = stepper(kit, a.getString(R.string.dm_min_switch), "$minSwitch min") { d, v ->
-            minSwitch = (minSwitch + d).coerceIn(1, 30); prefs.climateHoldMinSwitch = minSwitch; v.text = "$minSwitch min" }
-        val maxRow = stepper(kit, a.getString(R.string.dm_max), fmtMax(ClimateHold.DURATIONS[idx])) { d, v ->
-            idx = (idx + d).coerceIn(0, ClimateHold.DURATIONS.size - 1)
-            prefs.climateHoldMaxMin = ClimateHold.DURATIONS[idx]; v.text = fmtMax(ClimateHold.DURATIONS[idx]); maxValue.text = v.text }
         val note = kit.text("", 18f, R.color.text_title).apply { maxLines = 4; setLineSpacing(0f, 1.1f) }
         // Écran éteint une fois verrouillé : un seul bouton OUI / NON, comme les options des réglages
         val offRow = kit.row()
@@ -161,26 +137,29 @@ object ClimateHoldPanel {
             addView(kit.text(a.getString(R.string.dm_screen_off), 22f, R.color.text_sub))
             addView(kit.text(a.getString(R.string.dm_screen_off_hint), 17f, R.color.text_title).apply { maxLines = 2 }, kit.lp(-1, -2, t = 2))
         }, kit.lp(0, -2, 1f))
-        lateinit var offBtn: TextView
-        fun paintOff() {
-            offBtn.text = a.getString(if (prefs.climateHoldScreenOff) R.string.yes else R.string.no); offBtn.isSelected = prefs.climateHoldScreenOff
+        // Deux interrupteurs : une fois verrouillé, et à l'extinction de la voiture en fin de mode
+        fun switchTile(label: Int, get: () -> Boolean, set: (Boolean) -> Unit): TextView {
+            lateinit var t: TextView
+            fun paint() { t.text = a.getString(label) + " · " + a.getString(if (get()) R.string.yes else R.string.no); t.isSelected = get() }
+            t = kit.toggleTile("") { set(!get()); paint() }.apply { textSize = 17f }
+            paint(); return t
         }
-        offBtn = kit.toggleTile("") { prefs.climateHoldScreenOff = !prefs.climateHoldScreenOff; paintOff() }.apply { textSize = 20f }
-        paintOff()
-        offRow.addView(offBtn, kit.lp(kit.dp(130), kit.dp(52)))
-        listOf(lockRow, durRow, runsRow, gapRow, hystRow, switchRow, maxRow, offRow).forEach { right.addView(it, kit.lp(-1, -2, b = 8)) }
+        val switches = kit.column()
+        switches.addView(switchTile(R.string.dm_off_locked, { prefs.climateHoldScreenOff }) { prefs.climateHoldScreenOff = it }, kit.lp(kit.dp(230), kit.dp(44)))
+        switches.addView(switchTile(R.string.dm_off_end, { prefs.climateHoldScreenOffEnd }) { prefs.climateHoldScreenOffEnd = it }, kit.lp(kit.dp(230), kit.dp(44), t = 6))
+        offRow.addView(switches)
+        listOf(lockRow, durRow, runsRow, gapRow, offRow).forEach { right.addView(it, kit.lp(-1, -2, b = 8)) }
         right.addView(note, kit.lp(-1, -2, t = 4))
 
         fun paintAll() {
-            paintMode(mode)
-            left.removeAllViews(); left.addView(when (mode) { 1 -> timeBox; 2 -> thermoBox; else -> maxBox }, kit.lp(-1, -2))
-            listOf(durRow, runsRow, gapRow).forEach { it.visibility = if (mode == 1) View.VISIBLE else View.GONE }
-            listOf(hystRow, switchRow, maxRow).forEach { it.visibility = if (mode == 2) View.VISIBLE else View.GONE }
-            note.text = a.getString(when (mode) { 1 -> R.string.dm_note_at; 2 -> R.string.dm_note_thermo; else -> R.string.dm_note_now })
+            paintMode(if (scheduled) 1 else 0)
+            left.removeAllViews(); left.addView(if (scheduled) timeBox else maxBox, kit.lp(-1, -2))
+            listOf(durRow, runsRow, gapRow).forEach { it.visibility = if (scheduled) View.VISIBLE else View.GONE }
+            note.text = a.getString(if (scheduled) R.string.dm_note_at else R.string.dm_note_now)
         }
         // Le sélecteur rappelle onPick : on rebranche les puces une fois la vue construite
         for (i in 0 until modeRow.childCount) modeRow.getChildAt(i).setOnClickListener {
-            mode = i; prefs.climateHoldMode = mode; paintAll()
+            scheduled = i == 1; prefs.climateHoldScheduled = scheduled; paintAll()
         }
         paintAll()
 
@@ -191,8 +170,7 @@ object ClimateHoldPanel {
         buttons.addView(kit.toggleTile(a.getString(R.string.dm_close)) { close() }.apply { textSize = 22f }, kit.lp(0, kit.dp(62), 1f))
         buttons.addView(kit.toggleTile(a.getString(R.string.dm_start)) {
             close()
-            if (mode == 2) ClimateHold.thermostat(a, maxTemp, hyst, minSwitch, ClimateHold.DURATIONS[idx], lockSec)
-            else if (mode == 1) {
+            if (scheduled) {
                 // Heure murale du premier cycle : aujourd'hui, ou demain si l'heure est passée
                 val c = Calendar.getInstance(); c.set(Calendar.SECOND, 0); c.set(Calendar.MILLISECOND, 0)
                 c.add(Calendar.MINUTE, minutesUntil())
