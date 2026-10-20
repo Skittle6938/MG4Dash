@@ -74,16 +74,23 @@ object Updater {
 
     /**
      * true si [remote] est plus récente que la version installée (comparaison numérique 0.8.2 < 0.8.10).
-     * À numéros égaux, la version finale l'emporte sur la bêta (1.1.0-beta < 1.1.0).
+     * À numéros égaux, la version finale l'emporte sur la bêta (1.4.1-beta3 < 1.4.1), et les bêtas
+     * se suivent par leur numéro (1.4.1-beta0 < 1.4.1-beta1 ; « -beta » sans numéro compte pour 0).
      */
     fun isNewer(remote: String, local: String = BuildConfig.VERSION_NAME): Boolean {
-        fun parts(v: String) = v.split('.', '-').map { it.toIntOrNull() ?: 0 }
-        val a = parts(remote); val b = parts(local)
+        fun core(v: String) = v.substringBefore('-').split('.').map { it.toIntOrNull() ?: 0 }
+        fun pre(v: String): Int? = if (!v.contains('-')) null else v.substringAfter('-').filter { it.isDigit() }.toIntOrNull() ?: 0
+        val a = core(remote); val b = core(local)
         for (i in 0 until maxOf(a.size, b.size)) {
             val x = a.getOrElse(i) { 0 }; val y = b.getOrElse(i) { 0 }
             if (x != y) return x > y
         }
-        return !remote.contains('-') && local.contains('-')
+        val pa = pre(remote); val pb = pre(local)
+        return when {
+            pa == null -> pb != null      // finale contre bêta : plus récente
+            pb == null -> false           // bêta contre finale : plus ancienne
+            else -> pa > pb
+        }
     }
 
     /** Télécharge l'APK ; [progress] reçoit 0..100. Réseau : hors du fil principal. */

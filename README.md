@@ -4,7 +4,7 @@ Full-screen launcher for the MG4 and its 1920 × 720 screen, developed on the SW
 
 Languages: English (default), French, German, Spanish, Italian and Dutch, following the car's system language. Units: km and kWh/100 km or miles and mi/kWh (following the car or set by hand), tyre pressure in bar, psi or kPa.
 
-Current version: **1.1.0**, latest beta **1.3.7** ([releases](https://github.com/Skittle6938/MG4Dash/releases)).
+Current version: **1.4.0** ([releases](https://github.com/Skittle6938/MG4Dash/releases)).
 
 > Screenshots are rendered on a PC with simulated data; the map excerpt is a fixed view of Paris (OpenStreetMap).
 
@@ -141,7 +141,7 @@ Grouped by category in one scrolling page. Each on/off option is a single button
 | Home Assistant | address, token, connection test |
 | Diagnostics | compatibility test, built-in log, energy data recorder |
 
-**Update**: Settings › Update › Check downloads the latest MG4Dash release from GitHub and installs it (internet connection needed); turn on *Include beta versions* to also get the betas. When a new official (non-beta) release is out, MG4Dash also offers it in a popup at startup: *Update*, *Later*, or *Don't notify me again for this release*.
+**Update**: Settings › Update › Check downloads the latest MG4Dash release from GitHub and installs it (internet connection needed); turn on *Include beta versions* to also get the betas, numbered after the next release (1.4.1-beta0, 1.4.1-beta1…). When a new official (non-beta) release is out, MG4Dash also offers it in a popup at startup: *Update*, *Later*, or *Don't notify me again for this release*.
 
 **Radio Dash**: on SWI69 with the matching radio app, Settings › Update also installs the latest [Radio Dash](https://github.com/Skittle6938/MG4-Radio-Dash) release (restart the head unit afterwards by holding Home about 20 s).
 
