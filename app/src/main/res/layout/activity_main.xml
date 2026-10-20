@@ -278,12 +278,13 @@
                             android:textSize="30sp"
                             tools:text="284 km" />
 
-                        <TextView
-                            style="@style/Sub"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/range_label"
-                            android:textSize="19sp" />
+                        <ImageView
+                            android:layout_width="96dp"
+                            android:layout_height="24dp"
+                            android:layout_marginTop="4dp"
+                            android:contentDescription="@string/range_label"
+                            android:src="@drawable/ic_range_plug"
+                            android:tint="?attr/mgTextSub" />
                     </LinearLayout>
 
                     <LinearLayout
