@@ -393,13 +393,10 @@ dm_max|Maximum duration|Durée maximale|Maximale Dauer|Duración máxima|Durata 
 dm_unlimited|Unlimited|Illimitée|Unbegrenzt|Ilimitada|Illimitata|Onbeperkt
 dm_close|Close|Fermer|Schließen|Cerrar|Chiudi|Sluiten
 dm_message|The driver will be back soon. The climate is kept on.|Le conducteur revient bientôt. La clim reste en marche.|Der Fahrer ist gleich zurück. Die Klimaanlage bleibt an.|El conductor vuelve pronto. El clima sigue encendido.|Il conducente torna presto. Il clima resta acceso.|De bestuurder is zo terug. De airco blijft aan.
-dm_inside|INSIDE|INTÉRIEUR|INNEN|INTERIOR|INTERNO|BINNEN
-dm_outside|Outside %1$s|Extérieur %1$s|Außen %1$s|Exterior %1$s|Esterno %1$s|Buiten %1$s
 dm_clim_on|CLIMATE ON|CLIM EN MARCHE|KLIMA AN|CLIMA ENCENDIDO|CLIMA ACCESO|AIRCO AAN
 dm_clim_off|CLIMATE OFF|CLIM ARRÊTÉE|KLIMA AUS|CLIMA APAGADO|CLIMA SPENTO|AIRCO UIT
 dm_left|left|restant|verbleibend|restante|rimanente|resterend
 dm_since|since activation|depuis l'activation|seit der Aktivierung|desde la activación|dall'attivazione|sinds activering
-dm_set|set to %1$s|réglée à %1$s|eingestellt auf %1$s|ajustado a %1$s|impostato a %1$s|ingesteld op %1$s
 dm_battery|Battery %1$s|Batterie %1$s|Akku %1$s|Batería %1$s|Batteria %1$s|Batterij %1$s
 dm_hold_stop|Hold to stop|Maintenir pour arrêter|Zum Stoppen halten|Mantener para detener|Tieni premuto per fermare|Ingedrukt houden om te stoppen
 dm_state_done|FINISHED · CAR SWITCHED OFF|TERMINÉ · VOITURE ÉTEINTE|BEENDET · AUTO AUSGESCHALTET|TERMINADO · COCHE APAGADO|FINITO · AUTO SPENTA|KLAAR · AUTO UITGESCHAKELD
@@ -409,7 +406,7 @@ dm_start|Start|Démarrer|Starten|Iniciar|Avvia|Starten
 dm_cancel|Cancel|Annuler|Abbrechen|Cancelar|Annulla|Annuleren
 dm_lock_in|The doors lock in|Verrouillage des portes dans|Die Türen verriegeln in|Las puertas se cierran en|Le porte si chiudono tra|De deuren vergrendelen over
 dm_take_key|TAKE THE KEY WITH YOU!|PRENEZ LA CLÉ AVEC VOUS !|NEHMEN SIE DEN SCHLÜSSEL MIT!|¡LLÉVESE LA LLAVE!|PORTA CON TE LA CHIAVE!|NEEM DE SLEUTEL MEE!
-dm_lights|Set the light switch to side lights rather than AUTO.|Mettez le commodo des feux sur veilleuses plutôt qu'en AUTO.|Stellen Sie den Lichtschalter auf Standlicht statt AUTO.|Ponga el mando de luces en posición en lugar de AUTO.|Metti il comando luci sulle luci di posizione invece che su AUTO.|Zet de lichtschakelaar op stadslicht in plaats van AUTO.
+dm_lights|Set the light switch to OFF: only the daytime running lights stay on.|Mettez le commodo des feux sur OFF : seuls les feux de jour restent allumés.|Stellen Sie den Lichtschalter auf OFF: nur das Tagfahrlicht bleibt an.|Ponga el mando de luces en OFF: solo quedan encendidas las luces diurnas.|Metti il comando luci su OFF: restano accese solo le luci diurne.|Zet de lichtschakelaar op OFF: alleen de dagrijverlichting blijft aan.
 dm_now|Climate now|Clim tout de suite|Klima sofort|Clima ahora|Clima subito|Airco nu
 dm_at_time|Climate at a set time|Clim à une heure précise|Klima zu einer festen Uhrzeit|Clima a una hora fija|Clima a un orario preciso|Airco op een vast tijdstip
 dm_first_start|First start at|Mise en marche à|Erster Start um|Arranque a las|Avvio alle|Start om
@@ -425,13 +422,9 @@ dm_until_start|before the climate starts|avant la mise en marche de la clim|bis 
 dm_run_line|Run %1$d · %2$s → %3$s|Cycle %1$d · %2$s → %3$s|Zyklus %1$d · %2$s → %3$s|Ciclo %1$d · %2$s → %3$s|Ciclo %1$d · %2$s → %3$s|Cyclus %1$d · %2$s → %3$s
 dm_lock_delay|Lock the doors after|Verrouiller les portes après|Türen verriegeln nach|Cerrar las puertas tras|Chiudere le porte dopo|Deuren vergrendelen na
 dm_message_wait|The driver will be back soon. The climate will start at %1$s.|Le conducteur revient bientôt. La clim se mettra en marche à %1$s.|Der Fahrer ist gleich zurück. Die Klimaanlage startet um %1$s.|El conductor vuelve pronto. El clima se encenderá a las %1$s.|Il conducente torna presto. Il clima partirà alle %1$s.|De bestuurder is zo terug. De airco start om %1$s.
-dm_screen_off|Screen off once locked|Écran éteint une fois verrouillé|Bildschirm aus nach dem Verriegeln|Pantalla apagada al cerrar|Schermo spento dopo la chiusura|Scherm uit na vergrendelen
+dm_screen_off|Screen off|Écran éteint|Bildschirm aus|Pantalla apagada|Schermo spento|Scherm uit
 dm_screen_off_hint|To sleep inside or stay discreet · a tap shows it 10 s|Dormir dedans, discrétion · un toucher l'affiche 10 s|Zum Schlafen oder diskret · Tippen zeigt es 10 s|Para dormir o ser discreto · un toque lo muestra 10 s|Per dormire o restare discreti · un tocco lo mostra 10 s|Om te slapen of discreet · een tik toont het 10 s
-dm_thermo|Anti-overheating|Anti-surchauffe|Überhitzungsschutz|Anti-sobrecalentamiento|Anti-surriscaldamento|Anti-oververhitting
-dm_max_temp|Maximum cabin temperature|Température intérieure maxi|Maximale Innentemperatur|Temperatura interior máxima|Temperatura interna massima|Maximale binnentemperatuur
-dm_thermo_rule|climate above %1$s, off below %2$s|clim au-dessus de %1$s, arrêt sous %2$s|Klima über %1$s, aus unter %2$s|clima por encima de %1$s, apagado por debajo de %2$s|clima sopra %1$s, spento sotto %2$s|airco boven %1$s, uit onder %2$s
-dm_hyst|Return gap|Écart de retour|Rückkehrabstand|Margen de retorno|Scarto di ritorno|Terugkeermarge
-dm_min_switch|Minimum time between switches|Temps mini entre deux bascules|Mindestzeit zwischen Umschaltungen|Tiempo mínimo entre cambios|Tempo minimo tra due commutazioni|Minimale tijd tussen omschakelingen
-dm_note_thermo|The car stays on and locked with the climate off; the climate only starts when the cabin goes above the maximum, with its current settings, and stops below the maximum minus the gap. Stops below 20 % battery or when the doors are unlocked.|La voiture reste allumée et verrouillée, clim coupée ; la clim ne démarre que si l'habitacle dépasse le maximum, avec ses réglages actuels, et s'arrête sous le maximum moins l'écart. Arrêt sous 20 % de batterie ou au déverrouillage des portes.|Das Auto bleibt eingeschaltet und verriegelt, Klima aus; die Klimaanlage startet erst über dem Maximum mit ihren aktuellen Einstellungen und stoppt unter Maximum minus Abstand. Stopp unter 20 % Akku oder beim Entriegeln.|El coche sigue encendido y cerrado con el clima apagado; el clima solo arranca si el habitáculo supera el máximo, con sus ajustes actuales, y se detiene por debajo del máximo menos el margen. Se detiene por debajo del 20 % de batería o al abrir.|L'auto resta accesa e chiusa con il clima spento; il clima parte solo se l'abitacolo supera il massimo, con le impostazioni attuali, e si ferma sotto il massimo meno lo scarto. Si ferma sotto il 20 % di batteria o allo sblocco.|De auto blijft aan en vergrendeld met de airco uit; de airco start pas als het interieur boven het maximum komt, met de huidige instellingen, en stopt onder het maximum min de marge. Stopt onder 20 % batterij of bij ontgrendelen.
-dm_watch|MONITORING|SURVEILLANCE|ÜBERWACHUNG|VIGILANCIA|SORVEGLIANZA|BEWAKING
-dm_message_thermo|The driver will be back soon. The climate starts if the cabin goes above %1$s.|Le conducteur revient bientôt. La clim se met en marche si l'habitacle dépasse %1$s.|Der Fahrer ist gleich zurück. Die Klimaanlage startet, wenn es innen über %1$s wird.|El conductor vuelve pronto. El clima se enciende si el interior supera %1$s.|Il conducente torna presto. Il clima si accende se l'abitacolo supera %1$s.|De bestuurder is zo terug. De airco start als het binnen warmer wordt dan %1$s.
+dm_outside_title|OUTSIDE|EXTÉRIEUR|AUSSEN|EXTERIOR|ESTERNO|BUITEN
+dm_cabin_set|Climate set to %1$s|Clim réglée à %1$s|Klima auf %1$s eingestellt|Clima ajustado a %1$s|Clima impostato a %1$s|Airco ingesteld op %1$s
+dm_off_locked|Once locked|Une fois verrouillé|Nach dem Verriegeln|Al cerrar|Dopo la chiusura|Na vergrendelen
+dm_off_end|At car switch-off|À l'extinction|Beim Ausschalten|Al apagar el coche|Allo spegnimento|Bij uitschakelen

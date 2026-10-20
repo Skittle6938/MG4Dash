@@ -45,13 +45,6 @@ object ClimateHold {
         val runs: List<LongArray> = emptyList(),
         val clock: List<Pair<Long, Long>> = emptyList(),
         val run: Int = 0,
-        /** Anti-surchauffe : clim seulement au-dessus de [maxTemp], arrêt sous [maxTemp] − [hyst]. */
-        val thermo: Boolean = false,
-        val maxTemp: Float = 0f,
-        val hyst: Float = 0f,
-        val minSwitchMs: Long = 0L,
-        /** Dernière température intérieure lue (affichage), null si la voiture n'en donne pas. */
-        val cabin: Float? = null,
     ) {
         val finished get() = phase == Phase.DONE || phase == Phase.BATTERY
         val scheduled get() = runs.isNotEmpty()
@@ -88,18 +81,6 @@ object ClimateHold {
         Log.i(TAG, "programmé : $runs × $durMin min (pause $gapMin min), verrouillage dans $lockSec s")
     }
 
-    /**
-     * Anti-surchauffe : la voiture reste allumée et verrouillée, la clim ne se met en marche qu'au-dessus
-     * de [maxTemp] et s'arrête sous [maxTemp] − [hyst], jamais deux bascules à moins de [minSwitchMin] min.
-     */
-    fun thermostat(context: Context, maxTemp: Int, hyst: Int, minSwitchMin: Int, maxMin: Int, lockSec: Int) {
-        val now = SystemClock.elapsedRealtime()
-        begin(context, Status(Phase.ARMED, now, if (maxMin > 0) now + maxMin * 60_000L else 0L, now + lockSec * 1000L,
-            thermo = true, maxTemp = maxTemp.toFloat(), hyst = hyst.toFloat(), minSwitchMs = minSwitchMin * 60_000L))
-        CarBridge.setHvac(false)
-        Log.i(TAG, "anti-surchauffe : max $maxTemp °C, écart $hyst °C, $minSwitchMin min entre bascules, verrouillage dans $lockSec s")
-    }
-
     private fun begin(context: Context, st: Status) {
         stop("nouveau départ")
         _status.value = st
@@ -124,8 +105,6 @@ object ClimateHold {
     private suspend fun loop() {
         var offReads = 0
         var unlockedReads = 0
-        var lastSwitch = 0L      // anti-surchauffe : dernière mise en marche ou arrêt de la clim
-        var lastRead = 0L; var noTempSince = 0L
         while (true) {
             delay(1000)
             val st = _status.value
@@ -154,25 +133,6 @@ object ClimateHold {
                     _status.value = st.copy(phase = Phase.ON)
                 }
                 Phase.ON -> {
-                    if (st.thermo) {
-                        if (st.endAt > 0 && now >= st.endAt) { end(Phase.DONE); return }
-                        if (now - lastRead < 10_000) continue
-                        lastRead = now
-                        val t = CarBridge.cabinTemp()
-                        _status.value = _status.value.copy(cabin = t)
-                        val on = car.hvacOn == true
-                        val canSwitch = lastSwitch == 0L || now - lastSwitch >= st.minSwitchMs
-                        if (t == null) {
-                            // Sans température intérieure, on ne peut pas surveiller : clim en marche par sécurité
-                            if (noTempSince == 0L) noTempSince = now
-                            if (!on && now - noTempSince > 60_000) { Log.w(TAG, "température intérieure absente : clim en marche"); CarBridge.setHvac(true); lastSwitch = now }
-                            continue
-                        }
-                        noTempSince = 0L
-                        if (!on && t > st.maxTemp && canSwitch) { Log.i(TAG, "$t °C > ${st.maxTemp} : clim en marche"); CarBridge.setHvac(true); lastSwitch = now }
-                        else if (on && t <= st.maxTemp - st.hyst && canSwitch) { Log.i(TAG, "$t °C ≤ ${st.maxTemp - st.hyst} : clim arrêtée"); CarBridge.setHvac(false); lastSwitch = now }
-                        continue
-                    }
                     if (st.scheduled && now >= st.runs[st.run][1]) {
                         Log.i(TAG, "cycle ${st.run + 1} terminé")
                         if (st.run + 1 < st.runs.size) { CarBridge.setHvac(false); _status.value = st.copy(phase = Phase.WAITING, run = st.run + 1) }

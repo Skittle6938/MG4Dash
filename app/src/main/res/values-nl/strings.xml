@@ -395,13 +395,10 @@
     <string name="dm_unlimited">Onbeperkt</string>
     <string name="dm_close">Sluiten</string>
     <string name="dm_message">De bestuurder is zo terug. De airco blijft aan.</string>
-    <string name="dm_inside">BINNEN</string>
-    <string name="dm_outside">Buiten %1$s</string>
     <string name="dm_clim_on">AIRCO AAN</string>
     <string name="dm_clim_off">AIRCO UIT</string>
     <string name="dm_left">resterend</string>
     <string name="dm_since">sinds activering</string>
-    <string name="dm_set">ingesteld op %1$s</string>
     <string name="dm_battery">Batterij %1$s</string>
     <string name="dm_hold_stop">Ingedrukt houden om te stoppen</string>
     <string name="dm_state_done">KLAAR · AUTO UITGESCHAKELD</string>
@@ -411,7 +408,7 @@
     <string name="dm_cancel">Annuleren</string>
     <string name="dm_lock_in">De deuren vergrendelen over</string>
     <string name="dm_take_key">NEEM DE SLEUTEL MEE!</string>
-    <string name="dm_lights">Zet de lichtschakelaar op stadslicht in plaats van AUTO.</string>
+    <string name="dm_lights">Zet de lichtschakelaar op OFF: alleen de dagrijverlichting blijft aan.</string>
     <string name="dm_now">Airco nu</string>
     <string name="dm_at_time">Airco op een vast tijdstip</string>
     <string name="dm_first_start">Start om</string>
@@ -427,16 +424,12 @@
     <string name="dm_run_line">Cyclus %1$d · %2$s → %3$s</string>
     <string name="dm_lock_delay">Deuren vergrendelen na</string>
     <string name="dm_message_wait">De bestuurder is zo terug. De airco start om %1$s.</string>
-    <string name="dm_screen_off">Scherm uit na vergrendelen</string>
+    <string name="dm_screen_off">Scherm uit</string>
     <string name="dm_screen_off_hint">Om te slapen of discreet · een tik toont het 10 s</string>
-    <string name="dm_thermo">Anti-oververhitting</string>
-    <string name="dm_max_temp">Maximale binnentemperatuur</string>
-    <string name="dm_thermo_rule">airco boven %1$s, uit onder %2$s</string>
-    <string name="dm_hyst">Terugkeermarge</string>
-    <string name="dm_min_switch">Minimale tijd tussen omschakelingen</string>
-    <string name="dm_note_thermo" formatted="false">De auto blijft aan en vergrendeld met de airco uit; de airco start pas als het interieur boven het maximum komt, met de huidige instellingen, en stopt onder het maximum min de marge. Stopt onder 20 % batterij of bij ontgrendelen.</string>
-    <string name="dm_watch">BEWAKING</string>
-    <string name="dm_message_thermo">De bestuurder is zo terug. De airco start als het binnen warmer wordt dan %1$s.</string>
+    <string name="dm_outside_title">BUITEN</string>
+    <string name="dm_cabin_set">Airco ingesteld op %1$s</string>
+    <string name="dm_off_locked">Na vergrendelen</string>
+    <string name="dm_off_end">Bij uitschakelen</string>
     <string name="aa_title">ANDROID AUTO</string>
     <string name="aa_ready">Telefoon verbonden · Tik om te openen</string>
     <string name="aa_waiting">Sluit je telefoon aan via USB</string>
