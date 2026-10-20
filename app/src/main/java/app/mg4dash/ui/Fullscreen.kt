@@ -14,7 +14,12 @@ object Fullscreen {
     @Suppress("DEPRECATION")
     fun apply(activity: Activity) {
         val decor = activity.window.decorView
-        decor.systemUiVisibility = if (Prefs(activity).fullscreen) {
+        val full = Prefs(activity).fullscreen
+        // Anciens firmwares : la SystemUI SAIC laisse ses barres sur les pages qui ne sont pas l'accueil
+        // (issue #28) ; le drapeau plein écran de la fenêtre, comme les lecteurs vidéo, en plus du mode immersif
+        if (full) activity.window.addFlags(android.view.WindowManager.LayoutParams.FLAG_FULLSCREEN)
+        else activity.window.clearFlags(android.view.WindowManager.LayoutParams.FLAG_FULLSCREEN)
+        decor.systemUiVisibility = if (full) {
             View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY or
                 View.SYSTEM_UI_FLAG_LAYOUT_STABLE or
                 View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION or

@@ -43,7 +43,9 @@ object Apps {
     private val ALIASES = mapOf(
         "com.saicmotor.vehiclesetting" to listOf("vehiclesetting", "vehicle.setting", "carsetting", "vehicle"),
         "com.mg4.control" to listOf("mg4control", "mg4.control", "mg4"),
-        "com.saicmotor.saicev" to listOf("saicev", "hmi.ev", "energy", "charging"),
+        "com.saicmotor.saicev" to listOf("saicev", "hmi.ev", "hmi.chargesettings", "chargesettings", "energy", "charging"),
+        // Anciens firmwares (SWI68/165/133) : clim d'origine dans com.saicmotor.hmi.hvac (issue #30)
+        "com.saicmotor.hvac" to listOf("hmi.hvac", "hvac", "climate", "aircondition"),
         "com.saicmotor.settings" to listOf("hmi.settings", "systemsetting", "settings"),
     )
 
