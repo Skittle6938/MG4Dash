@@ -53,6 +53,9 @@ object EnergyMonitor {
     val sinceCharge: StateFlow<Totals> = _sinceCharge
     private val _sinceStart = MutableStateFlow(Totals())
     val sinceStart: StateFlow<Totals> = _sinceStart
+    /** % de batterie au départ du trajet en cours (repère de la barre d'autonomie, issue #29). */
+    private val _tripStartSoc = MutableStateFlow<Int?>(null)
+    val tripStartSoc: StateFlow<Int?> = _tripStartSoc
     private val _lastYear = MutableStateFlow(Totals())
     /** Les 12 derniers mois (mois en cours compris). */
     val lastYear: StateFlow<Totals> = _lastYear
@@ -149,6 +152,10 @@ object EnergyMonitor {
                 if (dt > SLEEP_GAP_MS || startKm < 0) {
                     if (km != null) startKm = km
                     _sinceStart.value = Totals()
+                    _tripStartSoc.value = soc
+                }
+                if (_tripStartSoc.value == null && soc != null) {
+                    _tripStartSoc.value = soc
                 }
                 // Recharge : le % remonte d'au moins RECHARGE_PCT points au-dessus du plus bas de la
                 // période → nouvelle période « depuis la recharge ». Comparer au plus bas (et non au %
