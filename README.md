@@ -4,7 +4,7 @@ Full-screen launcher for the MG4 and its 1920 × 720 screen, developed on the SW
 
 Languages: English (default), French, German, Spanish, Italian and Dutch, following the car's system language. Units: km and kWh/100 km or miles and mi/kWh (following the car or set by hand), tyre pressure in bar, psi or kPa.
 
-Current version: **1.1.0**, latest beta **1.3.6** ([releases](https://github.com/Skittle6938/MG4Dash/releases)).
+Current version: **1.1.0**, latest beta **1.3.7** ([releases](https://github.com/Skittle6938/MG4Dash/releases)).
 
 > Screenshots are rendered on a PC with simulated data; the map excerpt is a fixed view of Paris (OpenStreetMap).
 
