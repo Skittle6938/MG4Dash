@@ -23,6 +23,9 @@ class ClimateActivity : PageActivity() {
     private val handler = Handler(Looper.getMainLooper())
     private lateinit var power: ImageButton
     private lateinit var outside: TextView
+    /** Essai : relevés des capteurs de température candidats, pour trouver celui de l'habitacle. */
+    private lateinit var sensors: TextView
+    private var sensorsAt = 0L
     private lateinit var temp: TextView
     private lateinit var tempGauge: SegmentedGauge
     private lateinit var fanValue: TextView
@@ -40,6 +43,8 @@ class ClimateActivity : PageActivity() {
 
     override fun buildBody() {
         // En-tête : température extérieure + marche/arrêt
+        sensors = kit.text("", 15f, R.color.text_title)
+        header.addView(sensors, kit.lp(-2, -2, r = 20))
         outside = kit.text("", 18f, R.color.text_sub)
         header.addView(outside, kit.lp(-2, -2, r = 20))
         power = kit.roundButton(R.drawable.ic_power, 56) { CarBridge.togglePower() }
@@ -154,6 +159,14 @@ class ClimateActivity : PageActivity() {
         controls.forEach { it.isEnabled = known }
         power.isSelected = on
         power.setColorFilter(kit.color(if (on) R.color.accent_action else R.color.text_sub))
+        if (System.currentTimeMillis() - sensorsAt > 5000) {
+            sensorsAt = System.currentTimeMillis()
+            Thread {
+                val txt = "Capteurs · " + CarBridge.tempSensors().joinToString("  ") { (k, v) ->
+                    k + " " + (v?.let { String.format(java.util.Locale.getDefault(), "%.1f°", it) } ?: "—") }
+                runOnUiThread { sensors.text = txt }
+            }.start()
+        }
         outside.text = s.outsideTemp?.let { getString(R.string.cl_outside, Math.round(it)) } ?: ""
         temp.text = VehicleState.tempLabel(s.driverTemp)
         temp.setTextColor(kit.color(if (on) R.color.text_value else R.color.text_disabled))

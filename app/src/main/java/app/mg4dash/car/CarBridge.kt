@@ -123,6 +123,15 @@ object CarBridge {
         return null
     }
 
+    /**
+     * Relevés de température candidats pour l'habitacle (essai, page Clim) : HVAC_TEMPERATURE_CURRENT
+     * (AOSP, « habitacle »), HVAC_AMBIENT_TEMPERATURE (SAIC), HVAC_TEMPERATURE_OUTCAR et
+     * ENV_OUTSIDE_TEMPERATURE (extérieur). MG4Control et le client carapi n'exposent que l'extérieur.
+     */
+    fun tempSensors(): List<Pair<String, Float?>> = listOf(
+        "CUR" to 358614274, "AMB" to 358622506, "OUT" to 358622481, "ENV" to 291505923,
+    ).map { (k, id) -> k to (if (BuildConfig.MOCK) null else CarProps.readAny(id).toFloatOrNull()) }
+
     /** Portes verrouillées ? (SystemUI d'origine : 0 = ouvertes, 1 à 4 = verrouillées). */
     fun doorsLocked(): Boolean? = CarProps.readIntArea(VEHICLE_LOCK, 0x1000000)?.let { it in 1..4 }
 
