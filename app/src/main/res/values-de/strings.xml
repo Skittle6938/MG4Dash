@@ -390,7 +390,9 @@
     <string name="st_xpower">MG4 XPower (320 kW)</string>
     <string name="st_xpower_desc">Wird automatisch erkannt, sobald mehr als 350 PS gemessen werden: das Auto meldet seine Version nicht. Legt die Leistungsskala und die Schwelle der Vollgas-Spezialfunktion fest.</string>
     <string name="st_climhold">Klima bleibt an (langes Drücken auf die Klima-Ein-Taste)</string>
-    <string name="st_climhold_desc">Lässt das Auto mit laufender Klimaanlage eingeschaltet, während Sie weg sind, mit einem großen Bildschirm, der die Innentemperatur zeigt. Lassen Sie niemals ein Kind oder ein Tier allein im Auto.</string>
+    <string name="st_climhold_desc">Lässt das Auto mit laufender Klimaanlage eingeschaltet, während Sie weg sind, mit einem großen Bildschirm, der den Status zeigt. Lassen Sie niemals ein Kind oder ein Tier allein im Auto.</string>
+    <string name="st_climhold_mirrors">Klima bleibt an: Spiegel beim Verriegeln einklappen (zu testen)</string>
+    <string name="st_climhold_mirrors_desc">Nur elektrisch einklappbare Spiegel. Sie klappen beim Entriegeln oder Losfahren wieder aus.</string>
     <string name="dm_title">KLIMA BLEIBT AN</string>
     <string name="dm_max">Maximale Dauer</string>
     <string name="dm_unlimited">Unbegrenzt</string>
