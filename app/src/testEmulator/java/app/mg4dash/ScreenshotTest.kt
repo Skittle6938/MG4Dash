@@ -26,6 +26,18 @@ import java.util.concurrent.TimeUnit
 @Config(sdk = [28], qualifiers = "w1920dp-h720dp-land-mdpi")
 class ScreenshotTest {
 
+    /** Barre verticale à gauche, comme sur une nouvelle installation ; un test la remet en bas. */
+    @org.junit.Before fun verticalBarByDefault() {
+        org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE)
+            .edit().putBoolean("vertical_dock", true).commit()
+    }
+
+    @Test fun homeBottomBar() {
+        org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE)
+            .edit().putBoolean("vertical_dock", false).commit()
+        shoot(MainActivity::class.java, "home_bottom_bar.png")
+    }
+
     @Test fun home() = shoot(MainActivity::class.java, "home.png")
     @Test fun climate() = shoot(ClimateActivity::class.java, "climate.png")
     @Test fun vehicle() = shoot(app.mg4dash.pages.VehicleActivity::class.java, "vehicle.png")
@@ -262,30 +274,34 @@ class ScreenshotTest {
 
     /** Clim maintenue : fenêtre sur l'accueil, puis son écran (lisible de dehors). */
     @Test @Config(qualifiers = "fr-w1920dp-h720dp-land-mdpi")
-    fun climateHold() {
+    fun climateHold() = climateHoldShots("")
+
+    @Test fun climateHoldEn() = climateHoldShots("_en")
+
+    private fun climateHoldShots(sfx: String) {
         val sp = org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE)
         sp.edit().putInt("theme_mode", 1).putBoolean("climhold_enabled", true).putInt("climhold_max_min", 0).commit()
         val home = Robolectric.buildActivity(MainActivity::class.java).setup().get()
         repeat(5) { shadowOf(Looper.getMainLooper()).idleFor(200, TimeUnit.MILLISECONDS) }
         app.mg4dash.climate.ClimateHoldPanel.show(home)
         shadowOf(Looper.getMainLooper()).idleFor(200, TimeUnit.MILLISECONDS)
-        save(home.window.decorView, "climhold_menu.png")
+        save(home.window.decorView, "climhold_menu$sfx.png")
         sp.edit().putBoolean("climhold_scheduled", true).putInt("climhold_runs", 3).commit()
         app.mg4dash.climate.ClimateHoldPanel.show(home)
         shadowOf(Looper.getMainLooper()).idleFor(200, TimeUnit.MILLISECONDS)
-        save(home.window.decorView, "climhold_menu_at.png")
+        save(home.window.decorView, "climhold_menu_at$sfx.png")
         app.mg4dash.climate.ClimateHold.start(home, 0, 20)
         val armed = Robolectric.buildActivity(app.mg4dash.climate.ClimateHoldActivity::class.java).setup().get()
         repeat(3) { Thread.sleep(200); shadowOf(Looper.getMainLooper()).idleFor(1000, TimeUnit.MILLISECONDS) }
-        save(armed.window.decorView, "climhold_countdown.png")
+        save(armed.window.decorView, "climhold_countdown$sfx.png")
         app.mg4dash.climate.ClimateHold.start(home, 0, 0)
         val screen = Robolectric.buildActivity(app.mg4dash.climate.ClimateHoldActivity::class.java).setup().get()
         repeat(6) { Thread.sleep(300); shadowOf(Looper.getMainLooper()).idleFor(1000, TimeUnit.MILLISECONDS) }
-        save(screen.window.decorView, "climhold_screen.png")
+        save(screen.window.decorView, "climhold_screen$sfx.png")
         app.mg4dash.climate.ClimateHold.schedule(home, System.currentTimeMillis() + 42 * 60_000L, 3, 15, 30, 0)
         val waiting = Robolectric.buildActivity(app.mg4dash.climate.ClimateHoldActivity::class.java).setup().get()
         repeat(6) { Thread.sleep(300); shadowOf(Looper.getMainLooper()).idleFor(1000, TimeUnit.MILLISECONDS) }
-        save(waiting.window.decorView, "climhold_waiting.png")
+        save(waiting.window.decorView, "climhold_waiting$sfx.png")
         app.mg4dash.climate.ClimateHold.stop("fin du test")
     }
 
