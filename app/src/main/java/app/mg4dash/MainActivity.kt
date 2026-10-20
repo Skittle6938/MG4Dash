@@ -221,7 +221,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun flipWeather(dir: Int) {
         prefs.weatherPage = Math.floorMod(prefs.weatherPage + dir, 2)
-        renderWeather(WeatherRepo.weather.value, CarBridge.state.value)
+        renderWeather(WeatherRepo.shown.value, CarBridge.state.value)
     }
 
     private fun setupWeatherClock() {
@@ -657,7 +657,7 @@ class MainActivity : AppCompatActivity() {
 
     /** 0 = carte, 1 = raccourcis, 2 = consommation. */
     private fun effectiveWidget(): Int = prefs.homeWidget.let {
-        if (it == 0 && offline() && !mapCard.hasCachedTiles(LocationRepo.location.value)) 2 else it
+        if (it == 0 && prefs.mapOfflineSwitch && offline() && !mapCard.hasCachedTiles(LocationRepo.location.value)) 2 else it
     }
 
     /** Vues masquées par la carte en plein écran, avec leur visibilité d'avant (null : carte en widget). */
@@ -962,7 +962,7 @@ class MainActivity : AppCompatActivity() {
                 launch { CarBridge.state.collect { s -> renderClimate(s); renderEnergy(s, ConsumptionEstimator.average.value); stackAuto(s) } }
                 launch { ConsumptionEstimator.average.collect { renderEnergy(CarBridge.state.value, it) } }
                 launch { MediaHub.now.collect { renderMedia(it) } }
-                launch { WeatherRepo.weather.collect { renderWeather(it, CarBridge.state.value) } }
+                launch { WeatherRepo.shown.collect { renderWeather(it, CarBridge.state.value) } }
                 launch { LocationRepo.location.collect { renderLocation(it, CarBridge.state.value) } }
                 // Guidage DiAuto : bandeau sur la carte (pas sur les raccourcis)
                 launch { app.mg4dash.map.NavRepo.nav.collect { n -> navBanner?.show(n?.takeIf { effectiveWidget() == 0 }) } }
@@ -984,7 +984,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun renderWeatherFallbackOnly() {
-        if (WeatherRepo.weather.value == null) renderWeather(null, CarBridge.state.value)
+        if (WeatherRepo.shown.value == null) renderWeather(null, CarBridge.state.value)
     }
 
     // ── Démarrage : laisser le launcher SAIC enregistrer son interface ───────

@@ -57,7 +57,8 @@ class MapCard(private val context: Context, holder: ViewGroup) {
                 maxZoomLevel = 19.0
                 controller.setZoom(zoomLevel)
                 // Carte sombre en thème sombre ; tuiles d'origine en thème clair
-                if (darkMap()) overlayManager.tilesOverlay.setColorFilter(darkFilter())
+                dark = darkMap(); darkCheckedAt = System.currentTimeMillis()
+                if (dark == true) overlayManager.tilesOverlay.setColorFilter(darkFilter())
                 overlayManager.tilesOverlay.loadingBackgroundColor = app.mg4dash.ui.Themes.color(context, R.color.bg_top)
                 overlayManager.tilesOverlay.loadingLineColor = app.mg4dash.ui.Themes.color(context, R.color.panel_border)
             }
@@ -87,11 +88,24 @@ class MapCard(private val context: Context, holder: ViewGroup) {
         }
     }
 
-    /** Thème de la carte : comme l'appli, ou clair / sombre forcé (#15). */
+    /** Thème de la carte (#15) : auto (jour / nuit de la voiture, quel que soit le thème de l'appli), clair ou sombre. */
     private fun darkMap(): Boolean = when (app.mg4dash.system.Prefs(context).mapTheme) {
         1 -> false
         2 -> true
-        else -> !app.mg4dash.ui.Themes.isLight(context)
+        else -> app.mg4dash.ui.Themes.isNight(context)
+    }
+    private var dark: Boolean? = null
+    private var darkCheckedAt = 0L
+
+    /** En auto, la carte suit le passage jour / nuit sans attendre que l'écran soit reconstruit. */
+    private fun refreshDark(m: MapView) {
+        val now = System.currentTimeMillis()
+        if (now - darkCheckedAt < 30_000L) return
+        darkCheckedAt = now
+        val d = darkMap()
+        if (d == dark) return
+        dark = d
+        m.overlayManager.tilesOverlay.setColorFilter(if (d) darkFilter() else null)
     }
 
     /** Inversion des couleurs + désaturation : rendu « nuit » lisible, sans clé ni style payant. */
@@ -170,6 +184,7 @@ class MapCard(private val context: Context, holder: ViewGroup) {
 
     fun update(location: Location) {
         val m = map ?: return
+        refreshDark(m)
         val p = GeoPoint(location.latitude, location.longitude)
         marker?.position = p
         if (location.hasBearing()) marker?.rotation = -location.bearing

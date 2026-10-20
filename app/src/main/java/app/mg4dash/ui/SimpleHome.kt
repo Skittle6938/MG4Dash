@@ -94,7 +94,7 @@ class SimpleHome(private val a: AppCompatActivity) {
             a.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 launch { CarBridge.state.collect { renderClimate(it); renderBattery(it) } }
                 launch { MediaHub.now.collect { renderMedia(it) } }
-                launch { WeatherRepo.weather.collect { renderWeather(it, CarBridge.state.value) } }
+                launch { WeatherRepo.shown.collect { renderWeather(it, CarBridge.state.value) } }
             }
         }
     }

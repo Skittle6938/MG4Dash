@@ -15,6 +15,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import org.json.JSONObject
 import java.net.HttpURLConnection
@@ -63,6 +64,14 @@ object WeatherRepo {
     private val _weather = MutableStateFlow<Weather?>(null)
     val weather: StateFlow<Weather?> = _weather
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    /** Dernière requête en échec (toucher, 5 km parcourus ou rafraîchissement des 30 min). */
+    private val _failed = MutableStateFlow(false)
+    /**
+     * Météo à afficher : null (affichage hors ligne : heure et température extérieure) dès qu'une
+     * requête échoue (issue #18), sans la minute de tolérance de la carte.
+     */
+    val shown: StateFlow<Weather?> = kotlinx.coroutines.flow.combine(_weather, _failed) { w, f -> if (f) null else w }
+        .stateIn(scope, kotlinx.coroutines.flow.SharingStarted.Eagerly, null)
 
     fun start(context: Context) {
         val app = context.applicationContext
@@ -85,6 +94,7 @@ object WeatherRepo {
                     Log.w(TAG, "échec : ${e.javaClass.simpleName} ${e.message}"); false
                 }
                 lastFailed = !ok
+                _failed.value = !ok
                 failingSince = if (ok) 0L else failingSince.takeIf { it != 0L } ?: System.currentTimeMillis()
                 // Échec (pas de réseau) : on réessaie vite. Réussi mais sans position ou sans nom de
                 // ville : on réessaie aussi, plus calmement, au lieu d'attendre 30 min.
@@ -181,9 +191,11 @@ object WeatherRepo {
 
     fun refreshNow(context: Context) {
         scope.launch {
-            try { refresh(context.applicationContext) } catch (e: Exception) {
-                Log.w(TAG, "échec : ${e.javaClass.simpleName} ${e.message}")
+            val ok = try { refresh(context.applicationContext) } catch (e: Exception) {
+                Log.w(TAG, "échec : ${e.javaClass.simpleName} ${e.message}"); false
             }
+            _failed.value = !ok
+            if (!ok) { lastFailed = true; failingSince = failingSince.takeIf { it != 0L } ?: System.currentTimeMillis(); wake.trySend(Unit) }
         }
     }
 

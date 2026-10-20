@@ -368,7 +368,8 @@
     <string name="st_mode_auto_short">Auto</string>
     <string name="st_map_zoom">Zoom del mapa por defecto</string>
     <string name="st_map_theme">Colores del mapa</string>
-    <string name="st_map_theme_app">Como la app</string>
+    <string name="st_map_offline_switch">Cambiar al widget de energía sin conexión</string>
+    <string name="st_map_offline_switch_desc">Sin conexión de datos, salvo si el mapa alrededor del coche está en la caché sin conexión</string>
     <string name="st_use_location">Usar mi posición</string>
     <string name="st_no_location">Posición aún no disponible</string>
     <string name="st_heated">Asientos y volante calefactados</string>
