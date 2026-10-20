@@ -873,7 +873,10 @@ class MainActivity : AppCompatActivity() {
         }
         val plugged = VehicleState.isCharging(CarBridge.state.value.chargeStatus)
         // XPower : la voiture ne donne pas sa version ; deux mesures de suite au-delà de 350 ch la trahissent
-        xpowerHits = if (!plugged && kw != null && kw >= app.mg4dash.ui.PowerBar.XPOWER_DETECT_KW) xpowerHits + 1 else 0
+        // Seulement en roulant et hors recharge : une mesure aberrante à l'arrêt ou en charge (anciens
+        // firmwares, issue #28) ne doit pas faire passer la voiture pour une XPower
+        val rolling = (CarBridge.state.value.speedKmh ?: 0f) > 5f && !VehicleState.isPlugged(CarBridge.state.value.chargeStatus)
+        xpowerHits = if (rolling && !plugged && kw != null && kw >= app.mg4dash.ui.PowerBar.XPOWER_DETECT_KW && kw < 400f) xpowerHits + 1 else 0
         if (xpowerHits >= 2 && !prefs.xpower) {
             prefs.xpower = true
             android.util.Log.i("MG4L.Power", "MG4 XPower reconnue (${kw} kW) : max 320 kW, animation à 80 %")
