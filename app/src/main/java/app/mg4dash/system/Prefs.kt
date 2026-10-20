@@ -105,6 +105,10 @@ class Prefs(context: Context) {
     var climateHoldScreenOff: Boolean
         get() = sp.getBoolean("climhold_screen_off", false)
         set(v) = sp.edit().putBoolean("climhold_screen_off", v).apply()
+    /** Clim maintenue : replier les rétros électriques au verrouillage (à tester, issue #28). */
+    var climateHoldFoldMirrors: Boolean
+        get() = sp.getBoolean("climhold_fold_mirrors", false)
+        set(v) = sp.edit().putBoolean("climhold_fold_mirrors", v).apply()
     var climateHoldRuns: Int
         get() = sp.getInt("climhold_runs", 1)
         set(v) = sp.edit().putInt("climhold_runs", v).apply()

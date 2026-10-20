@@ -390,7 +390,9 @@
     <string name="st_xpower">MG4 XPower (320 kW)</string>
     <string name="st_xpower_desc">Recognised by itself as soon as more than 350 hp is measured: the car does not report its version. Sets the power scale and the threshold of the full-throttle special.</string>
     <string name="st_climhold">Keep climate on (long press on the climate power button)</string>
-    <string name="st_climhold_desc">Keeps the car on with the climate running while you are away, with a large screen showing the cabin temperature. Never leave a child or an animal alone in the car.</string>
+    <string name="st_climhold_desc">Keeps the car on with the climate running while you are away, with a large screen showing its status. Never leave a child or an animal alone in the car.</string>
+    <string name="st_climhold_mirrors">Keep climate on: fold the mirrors when locking (to test)</string>
+    <string name="st_climhold_mirrors_desc">Electrically folding mirrors only. They unfold when you unlock the doors or drive off.</string>
     <string name="dm_title">KEEP CLIMATE ON</string>
     <string name="dm_max">Maximum duration</string>
     <string name="dm_unlimited">Unlimited</string>
