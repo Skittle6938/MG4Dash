@@ -29,7 +29,7 @@ import java.util.Locale
  * Appui long sur Accueil : liste des applis ; sur Paramètres : réglages du launcher.
  */
 object Dock {
-    enum class Page { HOME, VEHICLE, CLIMATE, ENERGY, PHONE }
+    enum class Page { HOME, VEHICLE, CLIMATE, ENERGY, PHONE, SETTINGS }
 
     private data class Item(val icon: Int, val label: Int, val page: Page?, val accent: Boolean = false)
 
@@ -40,7 +40,7 @@ object Dock {
         Item(R.drawable.ic_bolt, R.string.dock_energy, Page.ENERGY),
         Item(R.drawable.ic_phone, R.string.dock_phone, Page.PHONE),
         Item(R.drawable.ic_navigation, R.string.dock_aa, null, accent = true),
-        Item(R.drawable.ic_settings, R.string.dock_settings, null),
+        Item(R.drawable.ic_settings, R.string.dock_settings, Page.SETTINGS),
     )
 
     fun build(activity: Activity, dock: LinearLayout, current: Page, simple: Boolean = false) {
@@ -334,7 +334,14 @@ object Dock {
                 return
             }
             // Toucher : réglages MG4Dash ; appui long : réglages de la voiture
-            R.string.dock_settings -> { activity.startActivity(Intent(activity, SettingsActivity::class.java)); return }
+            R.string.dock_settings -> {
+                if (current == Page.SETTINGS) return
+                activity.startActivity(Intent(activity, SettingsActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION))
+                if (current != Page.HOME) activity.finish()
+                @Suppress("DEPRECATION")
+                activity.overridePendingTransition(0, 0)
+                return
+            }
         }
         val page = item.page ?: return
         if (page == current) return
@@ -344,6 +351,7 @@ object Dock {
             Page.CLIMATE -> ClimateActivity::class.java
             Page.ENERGY -> EnergyActivity::class.java
             Page.PHONE -> app.mg4dash.pages.PhoneActivity::class.java
+            Page.SETTINGS -> SettingsActivity::class.java
         }
         // L'accueil (singleTask) referme les pages au-dessus de lui ; entre deux pages, on
         // remplace la page courante pour ne pas empiler l'historique.
