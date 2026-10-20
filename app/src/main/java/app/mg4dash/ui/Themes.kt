@@ -55,10 +55,10 @@ object Themes {
     /** Signature du thème courant : sert à savoir si un écran doit se redessiner. */
     fun signature(context: Context): Int = Prefs(context).let { it.themeBackground * 10 + it.themeAccent + (if (isLight(context)) 100 else 0) + (if (it.verticalDock) 1000 else 0) }
 
-    /** À appeler dans onCreate, avant setContentView. */
-    fun apply(activity: Activity) {
+    /** À appeler dans onCreate, avant setContentView ; [dark] force le thème sombre. */
+    fun apply(activity: Activity, dark: Boolean = false) {
         val p = Prefs(activity)
-        val light = isLight(activity)
+        val light = !dark && isLight(activity)
         val bgs = if (light) BACKGROUNDS_LIGHT else BACKGROUNDS
         val accs = if (light) ACCENTS_LIGHT else ACCENTS
         activity.theme.applyStyle(bgs.getOrElse(p.themeBackground) { bgs[0] }, true)

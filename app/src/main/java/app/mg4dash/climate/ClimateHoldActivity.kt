@@ -33,6 +33,17 @@ class ClimateHoldActivity : AppCompatActivity() {
     private lateinit var blank: android.view.View
     private var displayOff = false
     private var wakeUntil = 0L
+    private var brightUntil = 0L
+    private var dimmed = false
+
+    /** Luminosité au minimum une fois verrouillé (préserve l'écran), normale le temps d'un toucher. */
+    private fun dim(on: Boolean) {
+        if (on == dimmed) return
+        dimmed = on
+        window.attributes = window.attributes.apply {
+            screenBrightness = if (on) 0.01f else WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_NONE
+        }
+    }
 
     /** Écran coupé (rétroéclairage, comme le double toucher sur Énergie) ou rallumé. */
     private fun display(on: Boolean) {
@@ -44,6 +55,7 @@ class ClimateHoldActivity : AppCompatActivity() {
 
     /** Écran éteint : le premier toucher le rallume 10 s, sans actionner ce qu'il y a dessous. */
     override fun dispatchTouchEvent(ev: android.view.MotionEvent): Boolean {
+        if (ev.actionMasked == android.view.MotionEvent.ACTION_DOWN) { brightUntil = SystemClock.elapsedRealtime() + 10_000; dim(false) }
         if (displayOff) {
             if (ev.actionMasked == android.view.MotionEvent.ACTION_DOWN) { display(true); wakeUntil = SystemClock.elapsedRealtime() + 10_000 }
             return true
@@ -59,7 +71,8 @@ class ClimateHoldActivity : AppCompatActivity() {
     private val handler = Handler(Looper.getMainLooper())
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        Themes.apply(this)
+        // Toujours sombre, même en mode jour : moins de lumière dans l'habitacle, l'écran s'use moins
+        Themes.apply(this, dark = true)
         super.onCreate(savedInstanceState)
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON or WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or
             WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON)
@@ -167,6 +180,9 @@ class ClimateHoldActivity : AppCompatActivity() {
             if (wakeUntil == 0L) wakeUntil = now + 3000   // le temps de voir le verrouillage
             if (now >= wakeUntil) display(false)
         } else if (!st.finished) display(true)
+        // Écran allumé une fois verrouillé : luminosité au minimum (un toucher la remonte 10 s)
+        if (locked && brightUntil == 0L) brightUntil = now + 3000
+        dim((locked || st.finished) && now >= brightUntil)
         armed.visibility = if (counting) android.view.View.VISIBLE else android.view.View.GONE
         main.visibility = if (counting) android.view.View.GONE else android.view.View.VISIBLE
         if (counting) countdown.text = ((st.lockAt - now).coerceAtLeast(0) / 1000 + 1).toString()
