@@ -50,7 +50,7 @@ class SimpleHome(private val a: AppCompatActivity) {
     private lateinit var range: TextView
     private lateinit var chargeState: TextView
     private lateinit var chargeAction: TextView
-    private lateinit var gauge: SegmentedGauge
+    private lateinit var gauge: SocBar
 
     private lateinit var mediaSource: TextView
     private lateinit var mediaTitle: TextView
@@ -225,8 +225,8 @@ class SimpleHome(private val a: AppCompatActivity) {
         p.addView(battery, kit.lp(-1, 0, 1f))
         range = big("— km", 44f).apply { gravity = Gravity.CENTER }
         p.addView(range, kit.lp(-1, -2, t = 6))
-        gauge = SegmentedGauge(a).apply { segments = 20 }
-        p.addView(gauge, kit.lp(-1, kit.dp(16), t = 14))
+        gauge = SocBar(a).apply { currentBubble = false }   // le grand % est juste au-dessus
+        p.addView(gauge, kit.lp(-1, kit.dp(28), t = 2))
         chargeState = kit.text("", 22f, R.color.accent_energy).apply { gravity = Gravity.CENTER }
         p.addView(chargeState, kit.lp(-1, -2, t = 10))
         chargeAction = kit.toggleTile(a.getString(R.string.charge_btn)) { onChargeAction() }.apply { textSize = 24f }
@@ -395,15 +395,10 @@ class SimpleHome(private val a: AppCompatActivity) {
     private fun renderBattery(s: VehicleState) {
         val pct = s.batteryPercent
         battery.text = VehicleState.socLabel(s) ?: "— %"
-        val c = when {
-            pct == null -> R.color.text_disabled
-            pct <= 15 -> R.color.accent_danger
-            pct <= 30 -> R.color.accent_heat
-            else -> R.color.accent_energy
-        }
         battery.setTextColor(kit.color(R.color.text_value))
-        gauge.onColor = kit.color(c)
-        gauge.value = pct?.let { (it + 4) / 5 } ?: 0
+        gauge.soc = pct?.toFloat() ?: 0f
+        gauge.tripStart = app.mg4dash.energy.EnergyMonitor.tripStartSoc.value?.toFloat()
+        gauge.charging = VehicleState.isCharging(s.chargeStatus)
         range.text = s.rangeKm?.let { app.mg4dash.system.Units.distText(a, it.toFloat()) } ?: "— ${app.mg4dash.system.Units.distUnit(a)}"
         val remain = s.chargeRemainMin
         val discharge = VehicleState.isDischargeMode(s.chargeStatus)

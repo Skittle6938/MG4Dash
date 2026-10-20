@@ -430,6 +430,7 @@
     <string name="dm_cabin_set">Clima ajustado a %1$s</string>
     <string name="dm_off_locked">Al cerrar</string>
     <string name="dm_off_end">Al apagar el coche</string>
+    <string name="soc_trip_start">%1$s al salir</string>
     <string name="aa_title">ANDROID AUTO</string>
     <string name="aa_ready">Teléfono conectado · Pulse para abrir</string>
     <string name="aa_waiting">Conecte su teléfono por USB</string>

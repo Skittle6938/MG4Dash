@@ -430,6 +430,7 @@
     <string name="dm_cabin_set">Airco ingesteld op %1$s</string>
     <string name="dm_off_locked">Na vergrendelen</string>
     <string name="dm_off_end">Bij uitschakelen</string>
+    <string name="soc_trip_start">%1$s bij vertrek</string>
     <string name="aa_title">ANDROID AUTO</string>
     <string name="aa_ready">Telefoon verbonden · Tik om te openen</string>
     <string name="aa_waiting">Sluit je telefoon aan via USB</string>

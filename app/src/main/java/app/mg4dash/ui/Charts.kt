@@ -26,19 +26,32 @@ class StackedBar @JvmOverloads constructor(context: Context, attrs: AttributeSet
     private val gap = resources.displayMetrics.density * 3f
     private val off = app.mg4dash.ui.Themes.color(context, R.color.gauge_off)
 
+    private val clip = Path()
+
+    /**
+     * Style de la barre de puissance (issue #29) : rail fin arrondi centré dans la vue, une part en
+     * dégradé par poste, séparées d'une fente fine.
+     */
     override fun onDraw(canvas: Canvas) {
+        val d = resources.displayMetrics.density
+        val barH = minOf(14 * d, height.toFloat())
+        val top = (height - barH) / 2f
+        rect.set(0f, top, width.toFloat(), top + barH)
+        paint.shader = null; paint.color = off
+        canvas.drawRoundRect(rect, barH / 2, barH / 2, paint)
         val total = parts.sumOf { it.value.toDouble() }.toFloat()
-        rect.set(0f, 0f, width.toFloat(), height.toFloat())
-        if (total <= 0f) { paint.color = off; canvas.drawRoundRect(rect, r, r, paint); return }
+        if (total <= 0f) return
+        canvas.save()
+        clip.reset(); clip.addRoundRect(rect, barH / 2, barH / 2, Path.Direction.CW); canvas.clipPath(clip)
         var x = 0f
         val visible = parts.filter { it.value > 0f }
-        visible.forEachIndexed { i, p ->
+        visible.forEach { p ->
             val w = (width - gap * (visible.size - 1)) * p.value / total
-            rect.set(x, 0f, x + w, height.toFloat())
-            paint.color = p.color
-            canvas.drawRoundRect(rect, r, r, paint)
+            paint.shader = LinearGradient(x, 0f, x + w, 0f, intArrayOf((p.color and 0x00FFFFFF) or (150 shl 24), p.color), null, Shader.TileMode.CLAMP)
+            canvas.drawRect(x, top, x + w, top + barH, paint)
             x += w + gap
         }
+        canvas.restore(); paint.shader = null
     }
 }
 

@@ -82,7 +82,6 @@ class MainActivity : AppCompatActivity() {
         b = ActivityMainBinding.inflate(layoutInflater)
         setContentView(b.root)
         b.fanGauge.segments = VehicleState.FAN_MAX
-        b.batteryGauge.segments = 20
         b.kersGauge.segments = 4
         b.kersGauge.onColor = color(R.color.accent_energy)
         // Toucher une case = niveau de régénération ; appui long = conduite à une pédale
@@ -480,14 +479,10 @@ class MainActivity : AppCompatActivity() {
     private fun renderEnergy(s: VehicleState, avg: Float?) {
         val pct = s.batteryPercent
         b.battery.text = VehicleState.socLabel(s) ?: "— %"
-        val battColor = when {
-            pct == null -> R.color.text_disabled
-            pct <= 15 -> R.color.accent_danger
-            pct <= 30 -> R.color.accent_heat
-            else -> R.color.accent_energy
-        }
-        b.batteryGauge.onColor = color(battColor)
-        b.batteryGauge.value = pct?.let { (it + 4) / 5 } ?: 0
+        b.batteryGauge.currentBubble = false   // le grand % est juste au-dessus
+        b.batteryGauge.soc = pct?.toFloat() ?: 0f
+        b.batteryGauge.tripStart = app.mg4dash.energy.EnergyMonitor.tripStartSoc.value?.toFloat()
+        b.batteryGauge.charging = VehicleState.isCharging(s.chargeStatus)
         b.range.text = s.rangeKm?.let { app.mg4dash.system.Units.distText(this, it.toFloat()) } ?: "— ${app.mg4dash.system.Units.distUnit(this)}"
         b.consumption.text = avg?.let { app.mg4dash.system.Units.consText(this, it) } ?: "—"
         b.consAvgLabel.text = getString(if (app.mg4dash.system.Units.miles(this)) R.string.cons_avg_mi else R.string.cons_avg)

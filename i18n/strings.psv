@@ -428,3 +428,4 @@ dm_outside_title|OUTSIDE|EXTÉRIEUR|AUSSEN|EXTERIOR|ESTERNO|BUITEN
 dm_cabin_set|Climate set to %1$s|Clim réglée à %1$s|Klima auf %1$s eingestellt|Clima ajustado a %1$s|Clima impostato a %1$s|Airco ingesteld op %1$s
 dm_off_locked|Once locked|Une fois verrouillé|Nach dem Verriegeln|Al cerrar|Dopo la chiusura|Na vergrendelen
 dm_off_end|At car switch-off|À l'extinction|Beim Ausschalten|Al apagar el coche|Allo spegnimento|Bij uitschakelen
+soc_trip_start|%1$s at start|%1$s au départ|%1$s beim Start|%1$s al salir|%1$s alla partenza|%1$s bij vertrek

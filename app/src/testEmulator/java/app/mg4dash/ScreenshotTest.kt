@@ -398,6 +398,67 @@ class ScreenshotTest {
         }
     }
 
+    /** Maquette issue #29 : barres autonomie et énergie dans le style de la barre de puissance. */
+    @Test @Config(qualifiers = "fr-w1920dp-h720dp-land-mdpi")
+    fun barsMockup() { barsSheet(1, "bars_mockup_dark.png"); }
+    @Test @Config(qualifiers = "fr-w1920dp-h720dp-land-mdpi")
+    fun barsMockupLight() { barsSheet(2, "bars_mockup_light.png"); }
+
+    private fun barsSheet(mode: Int, name: String) {
+        val sp = org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE)
+        sp.edit().putInt("theme_mode", mode).commit()
+        val act = Robolectric.buildActivity(app.mg4dash.pages.ClimateActivity::class.java).setup().get()
+        val kit = app.mg4dash.ui.Kit(act)
+        val root = kit.column().apply { setBackgroundResource(R.drawable.bg_root); setPadding(kit.dp(20), kit.dp(16), kit.dp(20), kit.dp(16)) }
+        fun card(title: String, body: android.view.View.(android.widget.LinearLayout) -> Unit): android.widget.LinearLayout =
+            kit.panel(title).apply { body(this) }
+        fun battery(soc: Float, start: Float?, km: Int, charging: Boolean, label: String) = card(label) { p ->
+            val r = kit.row()
+            r.addView(kit.text(String.format(java.util.Locale.FRANCE, "%.1f %%", soc), 52f, light = true))
+            r.addView(kit.column().apply {
+                addView(kit.text("$km km", 28f)); addView(kit.text("autonomie", 18f, R.color.text_sub))
+            }, kit.lp(-2, -2, l = 16))
+            p.addView(r)
+            p.addView(app.mg4dash.ui.SocBar(act).apply { this.soc = soc; tripStart = start; this.charging = charging }, kit.lp(-1, kit.dp(96), t = 4))
+        }
+        fun energy() = card("ÉNERGIE DU TRAJET") { p ->
+            p.addView(app.mg4dash.ui.StackedBar(act).apply {
+                parts = listOf(app.mg4dash.ui.StackedBar.Part(5.2f, kit.color(R.color.accent_energy)),
+                    app.mg4dash.ui.StackedBar.Part(0.9f, kit.color(R.color.accent_cold)), app.mg4dash.ui.StackedBar.Part(0.4f, kit.color(R.color.accent_heat)))
+            }, kit.lp(-1, kit.dp(40), t = 30))
+            val r = kit.row()
+            listOf(Triple("80 %", "CONDUITE", R.color.accent_energy), Triple("14 %", "CLIM", R.color.accent_cold), Triple("6 %", "ACCESSOIRES", R.color.accent_heat)).forEach { (v, t, c) ->
+                r.addView(kit.column().apply {
+                    gravity = android.view.Gravity.CENTER
+                    addView(kit.text(v, 38f, c)); addView(kit.text(t, 16f, R.color.text_title).apply { letterSpacing = 0.1f })
+                }, kit.lp(0, -2, 1f))
+            }
+            p.addView(r, kit.lp(-1, -2, t = 12))
+        }
+        fun power() = card("PUISSANCE EN DIRECT") { p ->
+            p.addView(app.mg4dash.ui.PowerBar(act).apply { configureFor(51, false); kw = 72f }, kit.lp(-1, kit.dp(40), t = 30))
+            val r = kit.row()
+            r.addView(kit.column().apply { gravity = android.view.Gravity.CENTER; addView(kit.text("72,0 kW", 38f)); addView(kit.text("CONSOMMÉE", 16f, R.color.text_title).apply { letterSpacing = 0.1f }) }, kit.lp(0, -2, 1f))
+            r.addView(kit.column().apply { gravity = android.view.Gravity.CENTER; addView(kit.text("17,9 kWh/100", 38f)); addView(kit.text("MOYENNE TRAJET", 16f, R.color.text_title).apply { letterSpacing = 0.1f }) }, kit.lp(0, -2, 1f))
+            p.addView(r, kit.lp(-1, -2, t = 12))
+        }
+        val row1 = kit.row().apply { gravity = android.view.Gravity.TOP }
+        row1.addView(battery(82.1f, 90f, 297, false, "BATTERIE · EN ROUTE"), kit.lp(0, kit.dp(310), 1f))
+        row1.addView(energy(), kit.lp(0, kit.dp(310), 1f, l = 12))
+        row1.addView(power(), kit.lp(0, kit.dp(310), 1f, l = 12))
+        val row2 = kit.row().apply { gravity = android.view.Gravity.TOP }
+        row2.addView(battery(24f, 41f, 86, false, "BATTERIE · BASSE"), kit.lp(0, kit.dp(300), 1f))
+        row2.addView(battery(63f, null, 228, true, "BATTERIE · EN CHARGE"), kit.lp(0, kit.dp(300), 1f, l = 12))
+        row2.addView(battery(9f, 18f, 31, false, "BATTERIE · TRÈS BASSE"), kit.lp(0, kit.dp(300), 1f, l = 12))
+        root.addView(row1, kit.lp(-1, -2)); root.addView(row2, kit.lp(-1, -2, t = 12))
+        val w = 1920; val h = 690
+        root.measure(View.MeasureSpec.makeMeasureSpec(w, View.MeasureSpec.EXACTLY), View.MeasureSpec.makeMeasureSpec(h, View.MeasureSpec.EXACTLY))
+        root.layout(0, 0, w, h)
+        val bmp = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
+        root.draw(Canvas(bmp))
+        File(File("build/screenshots").apply { mkdirs() }, name).outputStream().use { bmp.compress(Bitmap.CompressFormat.PNG, 100, it) }
+    }
+
     private fun <T : Activity> shoot(cls: Class<T>, name: String) {
         // Captures en mode sombre, sauf si le test a choisi un autre mode
         val sp = org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE)
