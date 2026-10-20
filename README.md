@@ -16,11 +16,15 @@ Shown with the vertical bar on the left, the default on a fresh install (the bot
 - **Media card**: swipe up / down to switch to the next available source (radio, Bluetooth, USB, Android Auto / CarPlay when connected); playback starts by itself. DAB+ stations show their slideshow image, or the station image cached by the radio.
 - **Weather**: swipe it, or tap its dots, to switch between hourly and daily forecasts, with coloured icons (and a moon on clear nights). The forecast follows the car's position (refreshed every 5 km, city name every 2 km); a fallback city can be set, or taken from the current position, in Settings › Weather. As soon as an update fails (no data connection), it shows the time and the outside temperature, and retries until the connection and the position are back.
 - **Climate card**: the fan goes from off to maximum; long press fan minus jumps to the lowest speed. Long press the temperature to calibrate the displayed set point (−5° to +5°, display only, the car keeps its own value).
-- **Heated seats and steering wheel**: on equipped cars, a row of buttons sits above the temperature, each seat showing its level (0 to 3 heat arrows). Settings › Heated seats and steering wheel: Auto (detected), Yes or No.
+- **Heated seats and steering wheel**: on equipped cars, a row of buttons above the temperature (see [below](#heated-seats-and-steering-wheel)).
 - **Media source menu**: tap the source name on the media card to pick radio, Bluetooth, USB or Android Auto / CarPlay.
 - **KERS gauge**: tap a segment to set the regeneration level (low, medium, high, adaptive); long press toggles one-pedal driving.
 
 Long press the Android Auto button in the dock to make it open Android Auto, CarPlay or the app of your choice.
+
+### Heated seats and steering wheel
+![Heated seats and steering wheel](docs/screenshots/home_heated_seats.png?v=15)
+On equipped cars, a row of three buttons sits above the climate temperature: driver seat, steering wheel and passenger seat. Tap a seat to step through its levels (off, then 1 to 3 heat arrows, lit while on), tap the steering wheel to turn it on or off. The same row appears on the Simple layout. Settings › Heated seats and steering wheel: Auto (detected), Yes or No.
 
 ### Bottom-right widget
 Swipe or tap it to switch between three pages, all readable at a glance while driving:
@@ -44,7 +48,7 @@ The consumption page has a period menu: since the last charge, current trip, las
 | | |
 |---|---|
 | ![Map layout, consumption](docs/screenshots/home_map_layout_consumption.png?v=15) | ![Map layout, shortcuts](docs/screenshots/home_map_layout_shortcuts.png?v=15) |
-| ![Consumption over 12 months](docs/screenshots/home_map_layout_consumption_year.png?v=15) | ![Heated seats row](docs/screenshots/home_heated_seats.png?v=15) |
+| ![Consumption over 12 months](docs/screenshots/home_map_layout_consumption_year.png?v=15) | |
 
 ### Vertical bar
 ![Vertical bar](docs/screenshots/home_map_layout_vertical.png?v=15)
