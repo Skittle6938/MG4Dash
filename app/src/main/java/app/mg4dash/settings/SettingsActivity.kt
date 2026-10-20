@@ -80,7 +80,8 @@ class SettingsActivity : AppCompatActivity() {
         text(style, getString(R.string.st_map_zoom), 18f, R.color.text_value)
         row(style, *choiceButtons(listOf("14", "15", "16", "17", "18"), { prefs.mapZoom - 14 }) { prefs.mapZoom = 14 + it })
         text(style, getString(R.string.st_map_theme), 18f, R.color.text_value)
-        row(style, *styleButtons(listOf(R.string.st_map_theme_app, R.string.st_mode_light, R.string.st_mode_dark), { prefs.mapTheme }) { prefs.mapTheme = it })
+        row(style, *styleButtons(listOf(R.string.st_mode_auto, R.string.st_mode_light, R.string.st_mode_dark), { prefs.mapTheme }) { prefs.mapTheme = it })
+        toggle(style, R.string.st_map_offline_switch, R.string.st_map_offline_switch_desc, { prefs.mapOfflineSwitch }) { prefs.mapOfflineSwitch = it }
         toggle(style, R.string.st_map_vdock, null, { prefs.verticalDock }) { prefs.verticalDock = it; app.mg4dash.ui.Themes.publish(this) }
         toggle(style, R.string.st_fullscreen, null, { prefs.fullscreen }) { prefs.fullscreen = it; Fullscreen.apply(this) }
         toggle(style, R.string.st_stack_auto, null, { prefs.stackAuto }) { prefs.stackAuto = it }

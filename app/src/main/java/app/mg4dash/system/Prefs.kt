@@ -46,6 +46,10 @@ class Prefs(context: Context) {
     var mapTheme: Int
         get() = sp.getInt("map_theme", 0)
         set(v) = sp.edit().putInt("map_theme", v).apply()
+    /** Sans connexion (et sans tuiles en cache), la carte cède la place au widget énergie (#15). */
+    var mapOfflineSwitch: Boolean
+        get() = sp.getBoolean("map_offline_switch", true)
+        set(v) = sp.edit().putBoolean("map_offline_switch", v).apply()
 
     /** Sièges / volant chauffants : 0 = auto (batterie 64 / 77 kWh), 1 = afficher, 2 = masquer. */
     var heatedSeats: Int

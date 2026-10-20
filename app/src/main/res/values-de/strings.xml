@@ -368,7 +368,8 @@
     <string name="st_mode_auto_short">Auto</string>
     <string name="st_map_zoom">Standard-Kartenzoom</string>
     <string name="st_map_theme">Kartenfarben</string>
-    <string name="st_map_theme_app">Wie die App</string>
+    <string name="st_map_offline_switch">Ohne Verbindung zum Energie-Widget wechseln</string>
+    <string name="st_map_offline_switch_desc">Ohne Datenverbindung, außer die Karte um das Auto ist im Offline-Cache</string>
     <string name="st_use_location">Meine Position verwenden</string>
     <string name="st_no_location">Position noch nicht verfügbar</string>
     <string name="st_heated">Sitz- und Lenkradheizung</string>
