@@ -70,7 +70,8 @@ object AcCycle {
 
     /** Boutons A/C : toucher = bascule (ou fin du cycle), appui long = cycle. */
     fun attach(view: View) {
-        view.setOnClickListener { if (_active.value) stop() else CarBridge.toggleAc() }
+        // Le clignotement s'arrête tout de suite (l'état A/C ne change pas forcément, #34)
+        view.setOnClickListener { if (_active.value) { stop(); paint(view) } else CarBridge.toggleAc() }
         view.setOnLongClickListener { start(view.context); paint(view); true }
     }
 
