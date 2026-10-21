@@ -42,6 +42,7 @@ class LauncherApp : Application() {
         MediaHub.start(this)
         app.mg4dash.map.LocationRepo.start(this)
         app.mg4dash.map.NavRepo.start(this)
+        if (!BuildConfig.MOCK) app.mg4dash.system.StarKey.start(this)
         WeatherRepo.start(this)
         app.mg4dash.ui.Themes.publish(this)
         // Thème auto pour Radio Dash : l'accueil ne republie le thème que lorsqu'il est affiché ; quand
