@@ -387,7 +387,7 @@ class SimpleHome(private val a: AppCompatActivity) {
         recircAuto.visibility = if (s.recirc == 2) View.VISIBLE else View.GONE
         listOf<View>(power, chipAc, chipAuto, chipEco, chipScreen, chipFace, chipFeet, chipRecirc).forEach { it.isEnabled = known }
         val auto = on && s.autoOn == true
-        fanValue.text = when { !on -> a.getString(R.string.off); auto -> "AUTO"; else -> s.fanSpeed?.toString() ?: "—" }
+        fanValue.text = when { !on -> "0"; auto -> "AUTO"; else -> s.fanSpeed?.toString() ?: "—" }
         fanValue.setTextColor(kit.color(if (auto) R.color.accent_cold else if (on) R.color.text_value else R.color.text_disabled))
         climateCard.alpha = if (known) 1f else 0.6f
     }
