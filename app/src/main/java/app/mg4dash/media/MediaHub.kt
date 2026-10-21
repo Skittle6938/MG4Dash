@@ -442,7 +442,7 @@ object MediaHub {
             artist = artist,
             album = album,
             art = bmp ?: _now.value.art.takeIf { lastArtKey == "$title|$artist" },
-            playing = isPlaying(c),
+            playing = shownPlaying(c),
             durationMs = md?.getLong(MediaMetadata.METADATA_KEY_DURATION) ?: 0,
             positionMs = st?.position ?: 0,
             androidAuto = androidAutoAvailable(),
@@ -542,6 +542,28 @@ object MediaHub {
         } ?: pkg
     }
 
+    /**
+     * Lecture / pause demandée : affichée tout de suite. Le Bluetooth ne met à jour son état
+     * qu'avec plusieurs secondes de retard (#36) ; l'état réel reprend la main dès qu'il concorde,
+     * ou au bout de 4 s.
+     */
+    private var forcedPlay: Pair<String, Boolean>? = null
+    private var forcedUntil = 0L
+
+    private fun force(pkg: String, playing: Boolean) {
+        forcedPlay = pkg to playing
+        forcedUntil = android.os.SystemClock.uptimeMillis() + 4000
+        publish()
+        main.postDelayed({ publish() }, 4100)
+    }
+
+    private fun shownPlaying(c: MediaController): Boolean {
+        val real = isPlaying(c)
+        val f = forcedPlay ?: return real
+        if (f.first != c.packageName || android.os.SystemClock.uptimeMillis() >= forcedUntil || f.second == real) { forcedPlay = null; return real }
+        return f.second
+    }
+
     fun playPause() {
         if (BuildConfig.MOCK) { _now.value = _now.value.copy(playing = !_now.value.playing); return }
         if (radioShown) { val playing = SaicRadio.last?.playing == true; radioCommand { if (playing) SaicRadio.pause() else SaicRadio.play() }; return }
@@ -561,6 +583,7 @@ object MediaHub {
         // Android Auto (RemoteUI) ne réagit qu'aux touches média, pas aux commandes play()/pause()
         if (isAndroidAuto(c.packageName)) { aaControl(c, if (playing) AA_PAUSE else AA_PLAY, if (playing) KeyEvent.KEYCODE_MEDIA_PAUSE else KeyEvent.KEYCODE_MEDIA_PLAY); return }
         if (playing) c.transportControls.pause() else c.transportControls.play()
+        force(c.packageName, !playing)
     }
 
     fun next() {

@@ -145,7 +145,20 @@ object Shortcuts {
         c.packageManager.getActivityInfo(cn, 0).loadLabel(c.packageManager).toString()
     } catch (_: Exception) { cn.packageName.substringAfterLast('.') }
 
+    /** Caméra 360 : le launcher d'origine ne lance pas l'activité, il démarre le service AVM (#33). */
+    private val AVM_SERVICES = mapOf(
+        "com.saicmotor.avm" to "com.saicmotor.avm.service.SaicMotorAvmService",
+        "com.saicmotor.hmi.aroundview" to "com.saicmotor.hmi.aroundview.AvmService",
+    )
+
     fun launch(activity: Activity, cn: ComponentName) {
+        AVM_SERVICES[cn.packageName]?.let { svc ->
+            try {
+                activity.startService(Intent("com.saicmotor.avm.START_ENTER").setComponent(ComponentName(cn.packageName, svc)))
+                Log.i(TAG, "caméra 360 : service $svc démarré")
+                return
+            } catch (e: Exception) { Log.w(TAG, "caméra 360 : service $svc : ${e.message}") }
+        }
         try {
             activity.startActivity(Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER).setComponent(cn)
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED))
