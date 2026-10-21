@@ -1,6 +1,6 @@
 # MG4Dash
 
-Full-screen launcher for the MG4 and its 1920 × 720 screen, developed on the SWI69 firmware (A9 family), with beta support for the other firmwares: a "dark glass" look, three home layouts, and Climate, Energy, Vehicle and Phone pages linked by a shared dock or a vertical bar.
+Full-screen launcher for the MG4 and its 1920 × 720 screen, for every head unit firmware (SWI69, SWI131/132/173, SWI68, SWI133, SWI165; see [Compatibility](#compatibility-beta)): three home layouts, Climate, Energy, Vehicle and Phone pages linked by a vertical bar or a bottom dock, dark, light or automatic mode following the car's lights, and five background and button colour themes.
 
 Languages: English (default), French, German, Spanish, Italian and Dutch, following the car's system language. Units: km and kWh/100 km or miles and mi/kWh (following the car or set by hand), tyre pressure in bar, psi or kPa.
 
@@ -152,10 +152,10 @@ MG4Dash detects the head unit firmware at startup (`ro.build.mt2712.version`) an
 | Firmware | Car access | Status |
 |---|---|---|
 | SWI69 | `caradapter` service (climate, EV, settings, general) | tested by the author (daily use) |
-| SWI131, SWI132 | same as SWI69 | beta, not tested yet |
+| SWI131, SWI132, SWI173 | same as SWI69 | beta; SWI173 reported in [#33](https://github.com/Skittle6938/MG4Dash/issues/33) / [#35](https://github.com/Skittle6938/MG4Dash/issues/35) |
 | SWI68 | climate, charging, V2L, radio and driving assistance through the stock launcher's SDK (`AirConditionManager`, `VehicleChargingManager`, `VehicleControlManager` in `com.saicmotor.hmi.launcher`); battery, range, charge state, drive mode, KERS, speed and charge control through `CarPropertyManager` | beta, tested by users ([#19](https://github.com/Skittle6938/MG4Dash/issues/19)): radio, Eco / Snow modes, start / stop charging and cable lock confirmed |
 | SWI133 | same as SWI68, with battery, range and charge state read from the car properties (no EV service) | beta, user reports in [#13](https://github.com/Skittle6938/MG4Dash/issues/13) |
-| SWI165 | same as SWI68 | beta, user reports in [#20](https://github.com/Skittle6938/MG4Dash/issues/20) and [#21](https://github.com/Skittle6938/MG4Dash/issues/21) |
+| SWI165 | same as SWI68 | beta, tested by users ([#28](https://github.com/Skittle6938/MG4Dash/issues/28), [#37](https://github.com/Skittle6938/MG4Dash/issues/37)): climate, charging and charge limit, cable lock, Keep climate on confirmed |
 
 All MG4 firmwares share the 1920 × 720 screen and the AOSP platform key, so the same APK installs on every one of them.
 
