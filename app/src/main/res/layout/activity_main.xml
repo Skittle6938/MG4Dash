@@ -142,7 +142,7 @@
                         android:layout_marginRight="12dp"
                         android:layout_weight="1" />
 
-                    <!-- Jauge centrée entre − et + (#34) : 20 + 28 + 12 à gauche, 12 + 48 à droite -->
+                    <!-- Jauge centrée entre − et + (#34) : 20 + 28 + 12 à gauche, 12 + 48 à droite ; chiffre collé à la jauge -->
                     <TextView
                         android:id="@+id/fanValue"
                         android:layout_width="48dp"
@@ -150,7 +150,7 @@
                         android:autoSizeMaxTextSize="23sp"
                         android:autoSizeMinTextSize="12sp"
                         android:autoSizeTextType="uniform"
-                        android:gravity="center"
+                        android:gravity="left|center_vertical"
                         android:maxLines="1"
                         android:textColor="?attr/mgTextValue"
                         android:textSize="23sp"

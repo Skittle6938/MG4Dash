@@ -166,7 +166,7 @@ class ClimateActivity : PageActivity() {
             else -> (Math.round(t) - 16).coerceIn(1, 17)
         }
         val autoOn = on && s.autoOn == true
-        fanValue.text = when { !on -> getString(R.string.off); autoOn -> "AUTO"; else -> s.fanSpeed?.toString() ?: "—" }
+        fanValue.text = when { !on -> "0"; autoOn -> "AUTO"; else -> s.fanSpeed?.toString() ?: "—" }
         fanValue.setTextColor(kit.color(when { !on -> R.color.text_disabled; autoOn -> R.color.accent_cold; else -> R.color.text_value }))
         fanGauge.onColor = kit.color(if (autoOn) R.color.text_disabled else R.color.accent_cold)
         fanGauge.value = if (on && !autoOn) s.fanSpeed ?: 0 else 0

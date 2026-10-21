@@ -389,11 +389,13 @@ class MainActivity : AppCompatActivity() {
         // Ventilation : sous la vitesse 1, la clim s'arrête ; appui long − = minimum, appui long + = maximum
         b.fanDown.setOnClickListener {
             val s = CarBridge.state.value
-            if (s.hvacOn == true && s.autoOn != true && (s.fanSpeed ?: 0) <= VehicleState.FAN_MIN) CarBridge.togglePower()
+            // Clim arrêtée : − ne fait rien (baisser la vitesse la rallumait, #34)
+            if (s.hvacOn != true) return@setOnClickListener
+            if (s.autoOn != true && (s.fanSpeed ?: 0) <= VehicleState.FAN_MIN) CarBridge.togglePower()
             else CarBridge.stepFan(-1)
         }
         b.fanUp.setOnClickListener { CarBridge.stepFan(1) }
-        b.fanDown.setOnLongClickListener { CarBridge.stepFan(VehicleState.FAN_MIN - (CarBridge.state.value.fanSpeed ?: VehicleState.FAN_MIN)); true }
+        b.fanDown.setOnLongClickListener { if (CarBridge.state.value.hvacOn == true) CarBridge.stepFan(VehicleState.FAN_MIN - (CarBridge.state.value.fanSpeed ?: VehicleState.FAN_MIN)); true }
         b.fanUp.setOnLongClickListener {
             val cur = CarBridge.state.value.fanSpeed ?: VehicleState.FAN_MIN
             CarBridge.stepFan(VehicleState.FAN_MAX - cur); true
@@ -445,7 +447,7 @@ class MainActivity : AppCompatActivity() {
         b.fanGauge.value = if (on && !auto) (s.fanSpeed ?: 0) else 0
         spinFan(on && (auto || (s.fanSpeed ?: 0) > 0))
         b.fanValue.text = when {
-            !on -> getString(R.string.off)
+            !on -> "0"   // comme la jauge vide (#34)
             auto -> "AUTO"
             else -> s.fanSpeed?.toString() ?: "—"
         }
