@@ -47,6 +47,10 @@ class Prefs(context: Context) {
         get() = sp.getInt("map_theme", 0)
         set(v) = sp.edit().putInt("map_theme", v).apply()
     /** Sans connexion (et sans tuiles en cache), la carte cède la place au widget énergie (#15). */
+    /** Boutons zoom +, zoom − et plein écran masqués, affichés quelques secondes au toucher de la carte (#15). */
+    var mapAutoHide: Boolean
+        get() = sp.getBoolean("map_auto_hide", false)
+        set(v) = sp.edit().putBoolean("map_auto_hide", v).apply()
     var mapOfflineSwitch: Boolean
         get() = sp.getBoolean("map_offline_switch", true)
         set(v) = sp.edit().putBoolean("map_offline_switch", v).apply()

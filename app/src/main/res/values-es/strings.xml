@@ -368,6 +368,8 @@
     <string name="st_mode_auto_short">Auto</string>
     <string name="st_map_zoom">Zoom del mapa por defecto</string>
     <string name="st_map_theme">Colores del mapa</string>
+    <string name="st_map_auto_hide">Ocultar los botones de zoom y pantalla completa del mapa</string>
+    <string name="st_map_auto_hide_desc">Aparecen unos segundos al tocar el mapa; el botón de rumbo se queda</string>
     <string name="st_map_offline_switch">Cambiar al widget de energía sin conexión</string>
     <string name="st_map_offline_switch_desc">Sin conexión de datos, salvo si el mapa alrededor del coche está en la caché sin conexión</string>
     <string name="st_use_location">Usar mi posición</string>
