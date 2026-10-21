@@ -34,6 +34,14 @@ class Prefs(context: Context) {
         get() = sp.getInt("pressure_unit", 0)
         set(v) = sp.edit().putInt("pressure_unit", v).apply()
 
+    /** A/C intermittent (#34) : durées de marche et d'arrêt du compresseur, en secondes. */
+    var acCycleOnSec: Int
+        get() = sp.getInt("ac_cycle_on", 300)
+        set(v) = sp.edit().putInt("ac_cycle_on", v.coerceIn(30, 1800)).apply()
+    var acCycleOffSec: Int
+        get() = sp.getInt("ac_cycle_off", 300)
+        set(v) = sp.edit().putInt("ac_cycle_off", v.coerceIn(30, 1800)).apply()
+
     /** Calibration de la consigne affichée, en degrés (−5 à +5) : affichage seulement, la voiture reçoit sa valeur. */
     var tempOffset: Int
         get() = sp.getInt("temp_offset", 0).coerceIn(-5, 5)

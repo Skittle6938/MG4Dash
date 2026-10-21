@@ -180,6 +180,29 @@ object LegacyCar {
         return singleton()
     }
 
+    // ── Réglages de conduite : VehicleSettingManager du même SDK (SWI68/165, comme MG4Control, #37) ──
+    // Direction et pédale du mode Personnalisé (méthodes « …Level », échelles 1/2/3 et 1/0/2) et
+    // Range+ (« LongerEndurance »). Les propriétés VHAL lues directement donnaient des valeurs sans sens.
+    private const val SETTING_CLASS = "com.saicmotor.sdk.vehiclesettings.manager.VehicleSettingManager"
+    @Volatile private var setting: Any? = null
+    @Volatile private var settingInit = false
+
+    private fun vsInt(name: String): Int? {
+        if (setting == null && !settingInit) { val ctx = appContext ?: return null; settingInit = true; setting = sdkManager(ctx, SETTING_CLASS) { setting = it } }
+        val c = setting ?: return null
+        return try { c.javaClass.getMethod(name).invoke(c) as? Int } catch (_: Exception) { null }
+    }
+
+    /** Direction et pédale seulement en mode Personnalisé (7), comme l'écran d'origine ; sinon masquées. */
+    fun readDriving(s: VehicleState): VehicleState {
+        val custom = s.driveMode == 7
+        return s.copy(
+            steeringMode = if (custom) vsInt("getSteeringLevel")?.takeIf { it in 1..3 } else null,
+            brakePedalMode = if (custom) vsInt("getBrakePedalLevel")?.takeIf { it in 0..2 } else null,
+            enduranceMode = vsInt("getLongerEndurance")?.takeIf { it in 0..1 },
+        )
+    }
+
     // ── ESC : VehicleControlManager du même SDK (SWI68/165, méthodes relevées par MG4Control) ──
     // Lecture 1 = actif, 0 ou 2 = coupé ; l'écriture est une bascule (1), comme l'interrupteur d'origine.
     private const val CONTROL_CLASS = "com.saicmotor.sdk.vehiclesettings.manager.VehicleControlManager"

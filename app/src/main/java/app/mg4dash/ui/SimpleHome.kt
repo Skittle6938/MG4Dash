@@ -169,6 +169,7 @@ class SimpleHome(private val a: AppCompatActivity) {
             setOnLongClickListener { if (app.mg4dash.system.Prefs(context).climateHoldEnabled) { app.mg4dash.climate.ClimateHoldPanel.show(context as android.app.Activity); true } else false }
         }
         chipAc = kit.toggleTile(a.getString(R.string.chip_ac)) { CarBridge.toggleAc() }
+        app.mg4dash.climate.AcCycle.attach(chipAc)
         chipAuto = kit.toggleTile(a.getString(R.string.chip_auto)) { CarBridge.toggleAuto() }
         chipEco = kit.toggleTile("ECO") { CarBridge.toggleEco() }
         listOf<View>(power, chipAc, chipAuto, chipEco).forEachIndexed { i, v -> r1.addView(v, kit.lp(0, kit.dp(48), 1f, l = if (i > 0) 8 else 0)) }
@@ -376,6 +377,7 @@ class SimpleHome(private val a: AppCompatActivity) {
         outside.text = s.outsideTemp?.let { a.getString(R.string.cl_outside, Math.round(it)) } ?: ""
         power.isSelected = on
         chipAc.isSelected = s.acOn == true
+        app.mg4dash.climate.AcCycle.paint(chipAc)
         chipAuto.isSelected = s.autoOn == true
         chipEco.isSelected = s.ecoOn == true
         val parts = VehicleState.flowParts(s.fanDirection)

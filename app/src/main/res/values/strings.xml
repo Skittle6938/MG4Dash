@@ -432,6 +432,11 @@
     <string name="dm_outside_title">OUTSIDE</string>
     <string name="dm_cabin_set">Climate set to %1$s</string>
     <string name="soc_trip_start">%1$s at start</string>
+    <string name="ac_cycle_title">Intermittent A/C (long press on A/C)</string>
+    <string name="ac_cycle_on">Compressor on</string>
+    <string name="ac_cycle_off">Compressor off</string>
+    <string name="ac_cycle_started">Intermittent A/C on, tap A/C to stop</string>
+    <string name="ac_cycle_need_on">Turn the climate on first</string>
     <string name="aa_title">ANDROID AUTO</string>
     <string name="aa_ready">Phone connected · Tap to open</string>
     <string name="aa_waiting">Connect your phone via USB</string>

@@ -432,6 +432,11 @@
     <string name="dm_outside_title">BUITEN</string>
     <string name="dm_cabin_set">Airco ingesteld op %1$s</string>
     <string name="soc_trip_start">%1$s bij vertrek</string>
+    <string name="ac_cycle_title">A/C met tussenpozen (lang op A/C drukken)</string>
+    <string name="ac_cycle_on">Compressor aan</string>
+    <string name="ac_cycle_off">Compressor uit</string>
+    <string name="ac_cycle_started">A/C met tussenpozen aan, tik op A/C om te stoppen</string>
+    <string name="ac_cycle_need_on">Zet eerst de airco aan</string>
     <string name="aa_title">ANDROID AUTO</string>
     <string name="aa_ready">Telefoon verbonden · Tik om te openen</string>
     <string name="aa_waiting">Sluit je telefoon aan via USB</string>

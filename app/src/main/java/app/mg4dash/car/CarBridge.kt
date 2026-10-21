@@ -333,6 +333,7 @@ object CarBridge {
         }
         if (e == null || v == null || g == null) refreshFromProps()
         if (e == null && Firmware.family != Firmware.Family.A9) _state.value = LegacyCar.readCharging(_state.value)
+        if (v == null && Firmware.family == Firmware.Family.LEGACY) _state.value = LegacyCar.readDriving(_state.value)
     }
 
     /**
@@ -375,11 +376,8 @@ object CarBridge {
             lasMode = fresh(i(0x2140a104)?.takeIf { it in 1..5 }, s.lasMode),
             fcwState = fresh(i(0x2140a108)?.takeIf { it in 1..2 }, s.fcwState),
             overSpeedSound = fresh(i(0x2140a16c)?.takeIf { it in 0..1 }, s.overSpeedSound),
-            // Direction, pédale de frein, Range+ et bip de limite de vitesse sans service réglages
-            // (SWI165, #37) : mêmes propriétés que lit le service réglages SAIC
-            steeringMode = fresh(i(0x2140a18d)?.takeIf { it in 1..3 }, s.steeringMode),
-            brakePedalMode = fresh(i(0x2140a18e)?.takeIf { it in 0..2 }, s.brakePedalMode),
-            enduranceMode = fresh(i(0x2140a195)?.takeIf { it in 0..1 }, s.enduranceMode),
+            // Bip de limite de vitesse sans service réglages (SWI165, #37). Direction, pédale de frein
+            // et Range+ n'existent pas sur ces voitures (valeurs sans sens) : lignes masquées.
             speedLimitSound = fresh((i(0x2140a1ba) ?: i(0x2140a1b4))?.takeIf { it in 0..3 }, s.speedLimitSound),
             // Vitesse sans service général (SWI68, #19) : PERF_VEHICLE_SPEED, comme MG4Control sur
             // tous les firmwares ; déjà en km/h chez SAIC malgré la spec AOSP, négative en marche arrière.
