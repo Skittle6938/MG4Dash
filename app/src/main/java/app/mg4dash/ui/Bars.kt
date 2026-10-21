@@ -48,19 +48,20 @@ class SocBar @JvmOverloads constructor(context: Context, attrs: AttributeSet? = 
     private val s = BarStyle(this)
 
     /** Bulle au-dessus ([below] = false, pointe en bas) ou sous la barre ([below] = true, pointe en haut). */
-    private fun bubble(c: Canvas, cx: Float, anchor: Float, label: String, sizeSp: Float, fill: Int, textColor: Int, stroke: Int?, below: Boolean = false) {
+    private fun bubble(c: Canvas, cx: Float, anchor: Float, label: String, sizeSp: Float, fill: Int, textColor: Int, stroke: Int?, below: Boolean = false, gap: Float = 6f) {
         s.text.textSize = sizeSp * s.sp; s.text.textAlign = Paint.Align.CENTER
         s.text.typeface = android.graphics.Typeface.create("sans-serif-medium", android.graphics.Typeface.NORMAL)
-        val w = s.text.measureText(label) + 16 * s.d; val h = s.text.textSize + 10 * s.d
+        val w = s.text.measureText(label) + 16 * s.d; val h = s.text.textSize + 8 * s.d
         val left = (cx - w / 2f).coerceIn(0f, width - w)
-        if (below) s.rect.set(left, anchor + 6 * s.d, left + w, anchor + 6 * s.d + h)
-        else s.rect.set(left, anchor - h - 6 * s.d, left + w, anchor - 6 * s.d)
+        if (below) s.rect.set(left, anchor + gap * s.d, left + w, anchor + gap * s.d + h)
+        else s.rect.set(left, anchor - h - gap * s.d, left + w, anchor - gap * s.d)
         s.paint.shader = null; s.paint.color = fill
         c.drawRoundRect(s.rect, 8 * s.d, 8 * s.d, s.paint)
         // Pointe vers la barre
         s.path.reset()
-        if (below) { s.path.moveTo(cx - 6 * s.d, anchor + 6.5f * s.d); s.path.lineTo(cx + 6 * s.d, anchor + 6.5f * s.d); s.path.lineTo(cx, anchor) }
-        else { s.path.moveTo(cx - 6 * s.d, anchor - 6.5f * s.d); s.path.lineTo(cx + 6 * s.d, anchor - 6.5f * s.d); s.path.lineTo(cx, anchor) }
+        val tip = (gap + 0.5f) * s.d; val half = minOf(6f, gap) * s.d
+        if (below) { s.path.moveTo(cx - half, anchor + tip); s.path.lineTo(cx + half, anchor + tip); s.path.lineTo(cx, anchor) }
+        else { s.path.moveTo(cx - half, anchor - tip); s.path.lineTo(cx + half, anchor - tip); s.path.lineTo(cx, anchor) }
         s.path.close()
         c.drawPath(s.path, s.paint)
         if (stroke != null) {
@@ -101,8 +102,10 @@ class SocBar @JvmOverloads constructor(context: Context, attrs: AttributeSet? = 
         if (start != null && start > soc + 0.5f) {
             s.paint.color = s.tick
             c.drawRect(x(start) - d, top - 3 * d, x(start) + d, bottom + 3 * d, s.paint)
-            // Bulle seulement si elle tient dans la hauteur de la vue (accueil épuré : trait seul)
-            if (h - bottom >= 30 * d) bubble(c, x(start), bottom + 3 * d, context.getString(R.string.soc_trip_start, "${Math.round(start)} %"), 13f, s.panel, s.title, null, below = true)
+            // Bulle du % de départ, seul (#29) ; plus serrée quand la vue est basse (accueil complet)
+            val label = "${Math.round(start)} %"
+            if (h - bottom >= 30 * d) bubble(c, x(start), bottom + 3 * d, label, 13f, s.panel, s.title, null, below = true)
+            else if (h - bottom >= 21 * d) bubble(c, x(start), bottom + 2 * d, label, 11f, s.panel, s.title, null, below = true, gap = 3f)
         }
         // Pastille au bout, avec un halo, et bulle du % actuel
         val cy = (top + bottom) / 2f

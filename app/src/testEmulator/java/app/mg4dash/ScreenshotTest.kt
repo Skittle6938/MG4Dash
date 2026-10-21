@@ -136,6 +136,17 @@ class ScreenshotTest {
         shoot(MainActivity::class.java, "home_map_layout.png")
     }
 
+    @Test fun homeTripStart() = tripStart(0, "home_trip_start.png")
+    @Test fun homeSimpleTripStart() = tripStart(1, "home_simple_trip_start.png")
+
+    private fun tripStart(style: Int, name: String) {
+        org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE).edit().putInt("home_style", style).apply()
+        val f = app.mg4dash.energy.EnergyMonitor::class.java.getDeclaredField("_tripStartSoc").apply { isAccessible = true }
+        @Suppress("UNCHECKED_CAST")
+        (f.get(app.mg4dash.energy.EnergyMonitor) as kotlinx.coroutines.flow.MutableStateFlow<Int?>).value = 92
+        shoot(MainActivity::class.java, name)
+    }
+
     @Test fun homeMapAutoHide() {
         org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE).edit().putBoolean("map_auto_hide", true).apply()
         shoot(MainActivity::class.java, "home_map_auto_hide.png")

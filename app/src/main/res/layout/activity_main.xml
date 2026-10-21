@@ -130,7 +130,7 @@
                         android:id="@+id/fanIcon"
                         android:layout_width="28dp"
                         android:layout_height="28dp"
-                        android:layout_marginLeft="14dp"
+                        android:layout_marginLeft="20dp"
                         android:src="@drawable/ic_fan"
                         android:tint="@color/accent_cold" />
 
@@ -142,11 +142,14 @@
                         android:layout_marginRight="12dp"
                         android:layout_weight="1" />
 
+                    <!-- Jauge centrée entre − et + (#34) : 20 + 28 + 12 à gauche, 12 + 48 à droite -->
                     <TextView
                         android:id="@+id/fanValue"
-                        android:layout_width="64dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginRight="10dp"
+                        android:layout_width="48dp"
+                        android:layout_height="30dp"
+                        android:autoSizeMaxTextSize="23sp"
+                        android:autoSizeMinTextSize="12sp"
+                        android:autoSizeTextType="uniform"
                         android:gravity="center"
                         android:maxLines="1"
                         android:textColor="?attr/mgTextValue"
