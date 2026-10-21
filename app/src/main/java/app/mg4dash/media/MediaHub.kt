@@ -68,6 +68,7 @@ object MediaHub {
         }
         val msm = context.getSystemService(Context.MEDIA_SESSION_SERVICE) as MediaSessionManager
         manager = msm
+        watchAudio(context)
         try {
             msm.addOnActiveSessionsChangedListener({ reevaluate() }, null, main)
         } catch (e: SecurityException) {
@@ -555,6 +556,32 @@ object MediaHub {
         forcedUntil = android.os.SystemClock.uptimeMillis() + 4000
         publish()
         main.postDelayed({ publish() }, 4100)
+    }
+
+    /**
+     * Lecture / pause venue d'ailleurs (bouton du volant, téléphone) : la sortie audio d'Android le
+     * sait tout de suite, la session Bluetooth 2 à 3 s plus tard (#36). Au changement, l'icône suit
+     * aussitôt, et l'état de la session reprend la main dès qu'il concorde.
+     */
+    private var audioPlaying: Boolean? = null
+
+    private fun watchAudio(context: Context) {
+        val am = context.getSystemService(Context.AUDIO_SERVICE) as android.media.AudioManager
+        fun media(list: List<android.media.AudioPlaybackConfiguration>) =
+            list.any { it.audioAttributes.usage == android.media.AudioAttributes.USAGE_MEDIA }
+        audioPlaying = try { media(am.activePlaybackConfigurations) } catch (_: Exception) { null }
+        try {
+            am.registerAudioPlaybackCallback(object : android.media.AudioManager.AudioPlaybackCallback() {
+                override fun onPlaybackConfigChanged(configs: MutableList<android.media.AudioPlaybackConfiguration>) {
+                    val now = media(configs)
+                    if (now == audioPlaying) return
+                    audioPlaying = now
+                    val c = current ?: return
+                    if (radioShown || isAndroidAuto(c.packageName)) return
+                    if (isPlaying(c) != now) force(c.packageName, now)
+                }
+            }, main)
+        } catch (e: Exception) { Log.w(TAG, "sortie audio : ${e.message}") }
     }
 
     private fun shownPlaying(c: MediaController): Boolean {
