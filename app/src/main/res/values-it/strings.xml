@@ -393,8 +393,6 @@
     <string name="st_xpower_desc">Riconosciuta da sola appena si misurano più di 350 CV: l\'auto non indica la sua versione. Imposta la scala di potenza e la soglia della funzione speciale a tavoletta.</string>
     <string name="st_climhold">Clima mantenuto (pressione lunga sul tasto di accensione del clima)</string>
     <string name="st_climhold_desc">Tiene l\'auto accesa con il clima in funzione mentre sei via, con un grande schermo che ne mostra lo stato. Non lasciare mai un bambino o un animale da solo in auto.</string>
-    <string name="st_climhold_mirrors">Clima mantenuto: ripiegare gli specchietti alla chiusura (da provare)</string>
-    <string name="st_climhold_mirrors_desc">Solo specchietti a ripiegamento elettrico. Si riaprono allo sblocco delle porte o alla partenza.</string>
     <string name="dm_title">CLIMA MANTENUTO</string>
     <string name="dm_max">Durata massima</string>
     <string name="dm_unlimited">Illimitata</string>

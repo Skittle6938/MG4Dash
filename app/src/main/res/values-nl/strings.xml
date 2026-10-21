@@ -393,8 +393,6 @@
     <string name="st_xpower_desc">Wordt vanzelf herkend zodra meer dan 350 pk wordt gemeten: de auto meldt zijn versie niet. Bepaalt de vermogensschaal en de drempel van de speciale functie plankgas.</string>
     <string name="st_climhold">Airco blijft aan (lang drukken op de aan-knop van de airco)</string>
     <string name="st_climhold_desc">Houdt de auto aan met draaiende airco terwijl je weg bent, met een groot scherm dat de status toont. Laat nooit een kind of een dier alleen in de auto.</string>
-    <string name="st_climhold_mirrors">Airco blijft aan: spiegels inklappen bij vergrendelen (te testen)</string>
-    <string name="st_climhold_mirrors_desc">Alleen elektrisch inklapbare spiegels. Ze klappen weer uit bij ontgrendelen of wegrijden.</string>
     <string name="dm_title">AIRCO BLIJFT AAN</string>
     <string name="dm_max">Maximale duur</string>
     <string name="dm_unlimited">Onbeperkt</string>

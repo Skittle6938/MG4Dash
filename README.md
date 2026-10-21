@@ -101,7 +101,7 @@ A camp mode, off by default (Settings › Home layout › *Keep climate on*), th
 
 - After a countdown (20 s by default) **MG4Dash locks the doors itself**: get out and take the key with you. Do not lock with the key fob, which switches the whole car off, head unit included, and ends the mode.
 - A large status screen stays readable from outside: outside temperature, climate state, time left, runs and battery. It is always dark, its brightness drops to the minimum once locked (a tap brings it back for 10 s), and an option turns it fully off for sleeping or discretion.
-- The mode ends after the last run, at the end of the set time or below 20 % battery (climate off, car switched off), and stops as soon as the doors are unlocked or the car drives off. An option folds electric mirrors when locking (to test).
+- The mode ends after the last run, at the end of the set time or below 20 % battery (climate off, car switched off), and stops as soon as the doors are unlocked or the car drives off.
 - The lights follow the light stalk: leave it on Auto.
 - **Never leave a child or an animal alone in the car**: the climate can stop at any time (battery, fault, car switching off).
 
@@ -132,7 +132,7 @@ Grouped by category in one scrolling page. Each on/off option is a single button
 
 | Section | Options |
 |---|---|
-| Home layout | Full, Simple or Map; vertical bar on the left; full screen (hides the SAIC side bar and banner); units (like the car, km · kWh/100 km, miles · mi/kWh); heated seats and steering wheel buttons (auto, yes, no); tyre pressure unit (auto, bar, psi, kPa); default map zoom; map colours (auto, light, dark); switch to the energy widget when offline; map layout stack back to the battery when plugged in; Keep climate on, fold the mirrors when locking |
+| Home layout | Full, Simple or Map; vertical bar on the left; full screen (hides the SAIC side bar and banner); units (like the car, km · kWh/100 km, miles · mi/kWh); heated seats and steering wheel buttons (auto, yes, no); tyre pressure unit (auto, bar, psi, kPa); default map zoom; map colours (auto, light, dark); switch to the energy widget when offline; map layout stack back to the battery when plugged in; Keep climate on |
 | Theme | background, button colour, light / dark / auto (follows the car's lights) |
 | Energy | usable battery capacity (read from the car, measured, or set by hand), battery model for the health estimate, MG4 XPower, full-throttle special |
 | Home screen | replace the SAIC home, maintenance mode, briefly open the SAIC launcher at startup |
