@@ -33,6 +33,8 @@ object StarKey {
                 val code = i.getIntExtra("android.intent.extra.hardkey.keycode", -1)
                 val down = i.getBooleanExtra("android.intent.extra.hardkey.down", false)
                 val long = i.getBooleanExtra("android.intent.extra.hardkey.longpress", false)
+                // Diagnostic (#33) : chaque bouton du volant reçu, visible dans le journal des réglages
+                Log.i(TAG, "bouton volant : code $code ${if (down) "appuyé" else "relâché"}${if (long) " (long)" else ""}")
                 if (code != KEY_LEFT_STAR || down || long) return
                 val fn = try { android.provider.Settings.System.getInt(app.contentResolver, STAR_FUNCTION, -1) } catch (_: Exception) { -1 }
                 Log.i(TAG, "« * » gauche relâché, fonction $fn")
@@ -40,7 +42,8 @@ object StarKey {
                 openAvm(app)
             }
         }
-        try { app.registerReceiver(receiver, IntentFilter(ACTION)) } catch (e: Exception) { Log.w(TAG, "écoute impossible : ${e.message}") }
+        try { app.registerReceiver(receiver, IntentFilter(ACTION)); Log.i(TAG, "écoute des boutons du volant") }
+        catch (e: Exception) { Log.w(TAG, "écoute impossible : ${e.message}") }
     }
 
     /** Démarre le service de la caméra 360 installée (START_ENTER, comme le launcher SAIC). */
