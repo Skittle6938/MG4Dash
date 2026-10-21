@@ -279,6 +279,7 @@
                             tools:text="284 km" />
 
                         <ImageView
+                            android:id="@+id/rangePlug"
                             android:layout_width="96dp"
                             android:layout_height="24dp"
                             android:layout_marginTop="4dp"
@@ -445,6 +446,7 @@
                 </LinearLayout>
 
                 <LinearLayout
+                    android:id="@+id/mapButtons"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="right|center_vertical"

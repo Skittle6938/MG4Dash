@@ -116,10 +116,13 @@ object CarBridge {
         if (BuildConfig.MOCK) return true
         val v = if (fold) 1 else 0
         val ok = CarProps.setInt(MIRROR_FOLD_SAIC, v, if (fold) "rétros : replier" else "rétros : déplier")
-        Log.i("CarBridge", "rétros : relu ${CarProps.readAny(MIRROR_FOLD_SAIC)}")
-        return ok
+        // Repli seul inopérant chez un testeur (#28) : la propriété Android standard MIRROR_FOLD en plus
+        val std = CarProps.setInt(MIRROR_FOLD_STD, v, if (fold) "rétros (std) : replier" else "rétros (std) : déplier")
+        Log.i("CarBridge", "rétros : relu ${CarProps.readAny(MIRROR_FOLD_SAIC)} / std ${CarProps.readAny(MIRROR_FOLD_STD)}")
+        return ok || std
     }
     private const val MIRROR_FOLD_SAIC = 557897475
+    private const val MIRROR_FOLD_STD = 287312709
 
     /** Met la clim en marche ou l'arrête si elle n'est pas déjà dans cet état. */
     fun setHvac(on: Boolean) { if (_state.value.hvacOn != on) togglePower() }

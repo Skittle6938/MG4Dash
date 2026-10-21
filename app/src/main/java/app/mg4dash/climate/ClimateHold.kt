@@ -121,6 +121,8 @@ object ClimateHold {
                     CarBridge.lockDoors()
                     Log.i(TAG, "portes verrouillées")
                     if (foldMirrors) { mirrorsFolded = true; CarBridge.foldMirrors(true) }
+                    // À une heure précise : clim coupée jusqu'au premier cycle (#26)
+                    if (st.scheduled) CarBridge.setHvac(false)
                     _status.value = st.copy(phase = if (st.scheduled) Phase.WAITING else Phase.ON)
                 }
                 continue

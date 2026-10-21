@@ -136,6 +136,11 @@ class ScreenshotTest {
         shoot(MainActivity::class.java, "home_map_layout.png")
     }
 
+    @Test fun homeMapAutoHide() {
+        org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE).edit().putBoolean("map_auto_hide", true).apply()
+        shoot(MainActivity::class.java, "home_map_auto_hide.png")
+    }
+
     @Test fun homeMapLayoutWifi() {
         org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE).edit()
             .putInt("home_style", 2).putInt("dock_slot", 1).putInt("stack_page", 2).apply()

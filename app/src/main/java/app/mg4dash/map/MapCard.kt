@@ -30,6 +30,8 @@ class MapCard(private val context: Context, holder: ViewGroup) {
     private var preview: android.view.View? = null
     private var follow = true
     private var lastTouch = 0L
+    /** Toucher sur la carte (fait réapparaître les boutons masqués, #15). */
+    var onTouch: (() -> Unit)? = null
     /** Niveau de zoom voulu : le suivi l'utilise, sinon chaque position annulait le zoom en cours. */
     private var zoomLevel = app.mg4dash.system.Prefs(context).mapZoom.coerceIn(14, 18).toDouble()
     /** Carte orientée selon le cap de la voiture (sinon nord en haut) ; 2e appui sur « recentrer ». */
@@ -74,7 +76,7 @@ class MapCard(private val context: Context, holder: ViewGroup) {
             var downX = 0f; var downY = 0f
             m.setOnTouchListener { _, ev ->
                 when (ev.actionMasked) {
-                    MotionEvent.ACTION_DOWN -> { downX = ev.x; downY = ev.y }
+                    MotionEvent.ACTION_DOWN -> { downX = ev.x; downY = ev.y; onTouch?.invoke() }
                     MotionEvent.ACTION_MOVE -> if (Math.hypot((ev.x - downX).toDouble(), (ev.y - downY).toDouble()) > 24) {
                         follow = false; lastTouch = System.currentTimeMillis()
                     }
@@ -191,7 +193,7 @@ class MapCard(private val context: Context, holder: ViewGroup) {
         if (!follow && System.currentTimeMillis() - lastTouch > RESUME_FOLLOW_MS) follow = true
         if (follow && headingUp && location.hasBearing() && location.speed > 1f) m.mapOrientation = -location.bearing
         // Cap en haut : la voiture descend vers le bas du widget pour montrer plus de route devant (issue #6)
-        m.setMapCenterOffset(0, if (headingUp && follow) (m.height * 0.3f).toInt() else 0)
+        m.setMapCenterOffset(0, if (headingUp && follow) (m.height * 0.38f).toInt() else 0)
         if (follow) m.controller.animateTo(p, zoomLevel, 800L)
         m.invalidate()
     }

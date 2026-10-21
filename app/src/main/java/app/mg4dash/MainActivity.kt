@@ -443,6 +443,7 @@ class MainActivity : AppCompatActivity() {
         val auto = on && s.autoOn == true
         b.fanGauge.onColor = color(if (auto) R.color.text_disabled else R.color.accent_cold)
         b.fanGauge.value = if (on && !auto) (s.fanSpeed ?: 0) else 0
+        spinFan(on && (auto || (s.fanSpeed ?: 0) > 0))
         b.fanValue.text = when {
             !on -> getString(R.string.off)
             auto -> "AUTO"
@@ -483,6 +484,7 @@ class MainActivity : AppCompatActivity() {
         b.batteryGauge.soc = pct?.toFloat() ?: 0f
         b.batteryGauge.tripStart = app.mg4dash.energy.EnergyMonitor.tripStartSoc.value?.toFloat()
         b.batteryGauge.charging = VehicleState.isCharging(s.chargeStatus)
+        blinkPlug(s.batteryPercent)
         b.range.text = s.rangeKm?.let { app.mg4dash.system.Units.distText(this, it.toFloat()) } ?: "— ${app.mg4dash.system.Units.distUnit(this)}"
         b.consumption.text = avg?.let { app.mg4dash.system.Units.consText(this, it) } ?: "—"
         b.consAvgLabel.text = getString(if (app.mg4dash.system.Units.miles(this)) R.string.cons_avg_mi else R.string.cons_avg)
@@ -626,6 +628,8 @@ class MainActivity : AppCompatActivity() {
         b.mapFullscreen.setOnClickListener { setMapFullscreen(hiddenForMap == null) }
         b.mapCenter.setOnClickListener { mapCard.recenter(LocationRepo.location.value); tintMapCenter() }
         tintMapCenter()
+        mapCard.onTouch = { showMapButtons() }
+        applyMapButtons()
         // Carte → Consommation → Raccourcis → Carte (issue #6 : la consommation dans le widget carte)
         b.widgetToggle.setOnClickListener {
             prefs.homeWidget = when (effectiveWidget()) { 0 -> 2; 2 -> 1; else -> 0 }
@@ -637,6 +641,56 @@ class MainActivity : AppCompatActivity() {
     // ── Carte ou raccourcis ──────────────────────────────────────────────────
 
     private var shortcutsPage = 0
+
+    /** Ventilateur en marche : l'icône tourne lentement, quelle que soit la vitesse (#34). */
+    private var fanSpin: android.animation.ObjectAnimator? = null
+    private fun spinFan(on: Boolean) {
+        if (on == (fanSpin != null)) return
+        if (on) fanSpin = android.animation.ObjectAnimator.ofFloat(b.fanIcon, View.ROTATION, 0f, 360f).apply {
+            duration = 3000; repeatCount = android.animation.ValueAnimator.INFINITE
+            interpolator = android.view.animation.LinearInterpolator(); start()
+        } else { fanSpin?.cancel(); fanSpin = null; b.fanIcon.rotation = 0f }
+    }
+
+    /** Icône prise sous l'autonomie : clignote doucement sous 30 %, plus vite sous 15 % (#29). */
+    private var plugBlink: android.animation.ObjectAnimator? = null
+    private var plugBlinkMs = 0L
+    private fun blinkPlug(soc: Int?) {
+        val ms = when { soc == null -> 0L; soc < 15 -> 500L; soc < 30 -> 1400L; else -> 0L }
+        if (ms == plugBlinkMs) return
+        plugBlinkMs = ms
+        plugBlink?.cancel(); plugBlink = null; b.rangePlug.alpha = 1f
+        if (ms > 0) plugBlink = android.animation.ObjectAnimator.ofFloat(b.rangePlug, View.ALPHA, 1f, 0.15f).apply {
+            duration = ms; repeatCount = android.animation.ValueAnimator.INFINITE; repeatMode = android.animation.ValueAnimator.REVERSE
+            interpolator = android.view.animation.AccelerateDecelerateInterpolator(); start()
+        }
+    }
+
+    /** Fin de l'affichage des boutons masqués de la carte (uptime), après un toucher. */
+    private var mapButtonsUntil = 0L
+    private val hideMapButtons = Runnable { applyMapButtons() }
+
+    private fun showMapButtons() {
+        if (!prefs.mapAutoHide) return
+        mapButtonsUntil = android.os.SystemClock.uptimeMillis() + 6000
+        applyMapButtons()
+        b.mapButtons.removeCallbacks(hideMapButtons)
+        b.mapButtons.postDelayed(hideMapButtons, 6100)
+    }
+
+    /**
+     * Option (#15) : zoom +, zoom − et plein écran masqués ; le bouton cap reste, en haut sous la
+     * bascule de widget. Un toucher sur la carte les montre 6 s.
+     */
+    private fun applyMapButtons() {
+        val hide = prefs.mapAutoHide && android.os.SystemClock.uptimeMillis() >= mapButtonsUntil
+        listOf(b.mapZoomIn, b.mapZoomOut, b.mapFullscreen).forEach { it.visibility = if (hide) View.GONE else View.VISIBLE }
+        (b.mapButtons.layoutParams as android.widget.FrameLayout.LayoutParams).let {
+            it.gravity = if (hide) Gravity.TOP or Gravity.RIGHT else Gravity.RIGHT or Gravity.CENTER_VERTICAL
+            it.topMargin = if (hide) dp(14 + 56) else 0
+            b.mapButtons.layoutParams = it
+        }
+    }
 
     /** Bouton « recentrer » vert quand la carte suit le cap de la voiture, couleur des boutons en nord en haut. */
     private fun tintMapCenter() {
