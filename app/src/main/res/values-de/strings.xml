@@ -153,7 +153,7 @@
     <string name="vh_one_pedal">One-Pedal-Fahren</string>
     <string name="vh_steering">Lenkung</string>
     <string name="vh_brake">Bremspedal</string>
-    <string name="vh_endurance">Reichweite+</string>
+    <string name="vh_endurance">Energiesparmodus</string>
     <string name="vh_adas">FAHRASSISTENZ</string>
     <string name="vh_lane">Spurhalteassistent</string>
     <string name="vh_aeb">Notbremsung</string>

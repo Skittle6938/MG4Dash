@@ -153,7 +153,7 @@
     <string name="vh_one_pedal">Conducción con un pedal</string>
     <string name="vh_steering">Dirección</string>
     <string name="vh_brake">Pedal de freno</string>
-    <string name="vh_endurance">Autonomía+</string>
+    <string name="vh_endurance">Ahorro de energía</string>
     <string name="vh_adas">ASISTENCIA A LA CONDUCCIÓN</string>
     <string name="vh_lane">Mantenimiento de carril</string>
     <string name="vh_aeb">Frenado de emergencia</string>
