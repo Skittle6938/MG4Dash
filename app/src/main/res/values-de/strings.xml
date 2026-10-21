@@ -432,6 +432,11 @@
     <string name="dm_outside_title">AUSSEN</string>
     <string name="dm_cabin_set">Klima auf %1$s eingestellt</string>
     <string name="soc_trip_start">%1$s beim Start</string>
+    <string name="ac_cycle_title">A/C im Intervall (lang auf A/C drücken)</string>
+    <string name="ac_cycle_on">Kompressor an</string>
+    <string name="ac_cycle_off">Kompressor aus</string>
+    <string name="ac_cycle_started">A/C im Intervall an, A/C tippen zum Beenden</string>
+    <string name="ac_cycle_need_on">Zuerst die Klimaanlage einschalten</string>
     <string name="aa_title">ANDROID AUTO</string>
     <string name="aa_ready">Telefon verbunden · Zum Öffnen tippen</string>
     <string name="aa_waiting">Telefon per USB verbinden</string>

@@ -97,6 +97,7 @@ class ClimateActivity : PageActivity() {
         val mPanel = kit.panel(getString(R.string.cl_modes))
         auto = kit.toggleTile("AUTO") { CarBridge.toggleAuto() }
         ac = kit.toggleTile("A/C") { CarBridge.toggleAc() }
+        app.mg4dash.climate.AcCycle.attach(ac)
         eco = kit.toggleTile("ECO") { CarBridge.toggleEco() }
         recirc = kit.toggleTile(getString(R.string.cl_recirc)) { CarBridge.toggleRecirc() }
         defFront = kit.toggleTile(getString(R.string.cl_def_front), heat = true) { CarBridge.toggleDefrostFront() }
@@ -176,6 +177,7 @@ class ClimateActivity : PageActivity() {
         screen.isSelected = parts?.get(2) == true
         auto.isSelected = s.autoOn == true
         ac.isSelected = s.acOn == true
+        app.mg4dash.climate.AcCycle.paint(ac)
         eco.isSelected = s.ecoOn == true
         recirc.isSelected = s.recirc == 2   // surligné en mode auto, comme sur l'accueil
         recirc.text = when (s.recirc) { 0 -> getString(R.string.cl_air_recirc); 1 -> getString(R.string.cl_air_outside); 2 -> getString(R.string.cl_air_auto); else -> getString(R.string.cl_recirc) }

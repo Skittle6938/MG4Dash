@@ -158,14 +158,21 @@ class VehicleActivity : PageActivity() {
 
     private fun set(label: Int, v: String) { values[label]?.text = v }
 
+    /** Réglage que la voiture ne fournit pas (anciens firmwares, #37) : ligne masquée. */
+    private fun setOpt(label: Int, raw: Int?, v: String) {
+        val tv = values[label] ?: return
+        tv.text = v
+        (tv.parent as? android.view.View)?.visibility = if (raw == null) android.view.View.GONE else android.view.View.VISIBLE
+    }
+
     override fun render(s: VehicleState) {
         mode.text = VehicleState.driveModeLabel(s.driveMode)
         regenGauge.value = if (s.onePedal == 1) 4 else VehicleState.regenGauge(s.regenLevel)
         regen.text = VehicleState.regenLabel(s.regenLevel, s.onePedal)
         set(R.string.vh_one_pedal, VehicleState.onOff(s.onePedal))
-        set(R.string.vh_steering, VehicleState.steeringLabel(s.steeringMode))
-        set(R.string.vh_brake, VehicleState.pedalLabel(s.brakePedalMode))
-        set(R.string.vh_endurance, VehicleState.onOff(s.enduranceMode))
+        setOpt(R.string.vh_steering, s.steeringMode, VehicleState.steeringLabel(s.steeringMode))
+        setOpt(R.string.vh_brake, s.brakePedalMode, VehicleState.pedalLabel(s.brakePedalMode))
+        setOpt(R.string.vh_endurance, s.enduranceMode, VehicleState.onOff(s.enduranceMode))
         set(R.string.vh_lane, VehicleState.lasLabel(s.lasMode))
         set(R.string.vh_aeb, VehicleState.aebLabel(s.fcwState, s.fcwBrakeMode))
         set(R.string.vh_overspeed, VehicleState.onOff(s.overSpeedSound))

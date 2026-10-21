@@ -432,6 +432,11 @@
     <string name="dm_outside_title">ESTERNO</string>
     <string name="dm_cabin_set">Clima impostato a %1$s</string>
     <string name="soc_trip_start">%1$s alla partenza</string>
+    <string name="ac_cycle_title">A/C intermittente (pressione lunga su A/C)</string>
+    <string name="ac_cycle_on">Compressore acceso</string>
+    <string name="ac_cycle_off">Compressore spento</string>
+    <string name="ac_cycle_started">A/C intermittente attivato, tocca A/C per fermarlo</string>
+    <string name="ac_cycle_need_on">Accendi prima il clima</string>
     <string name="aa_title">ANDROID AUTO</string>
     <string name="aa_ready">Telefono connesso · Tocca per aprire</string>
     <string name="aa_waiting">Collega il telefono via USB</string>

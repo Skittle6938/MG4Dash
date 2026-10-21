@@ -432,6 +432,11 @@
     <string name="dm_outside_title">EXTÉRIEUR</string>
     <string name="dm_cabin_set">Clim réglée à %1$s</string>
     <string name="soc_trip_start">%1$s au départ</string>
+    <string name="ac_cycle_title">A/C intermittent (appui long sur A/C)</string>
+    <string name="ac_cycle_on">Compresseur en marche</string>
+    <string name="ac_cycle_off">Compresseur arrêté</string>
+    <string name="ac_cycle_started">A/C intermittent activé, touchez A/C pour l\'arrêter</string>
+    <string name="ac_cycle_need_on">Allumez d\'abord la clim</string>
     <string name="aa_title">ANDROID AUTO</string>
     <string name="aa_ready">Téléphone connecté · Appuyer pour ouvrir</string>
     <string name="aa_waiting">Branchez votre téléphone en USB</string>

@@ -104,8 +104,10 @@ class SocBar @JvmOverloads constructor(context: Context, attrs: AttributeSet? = 
             c.drawRect(x(start) - d, top - 3 * d, x(start) + d, bottom + 3 * d, s.paint)
             // Bulle du % de départ, seul (#29) ; plus serrée quand la vue est basse (accueil complet)
             val label = "${Math.round(start)} %"
-            if (h - bottom >= 30 * d) bubble(c, x(start), bottom + 3 * d, label, 13f, s.panel, s.title, null, below = true)
-            else if (h - bottom >= 21 * d) bubble(c, x(start), bottom + 2 * d, label, 11f, s.panel, s.title, null, below = true, gap = 3f)
+            // Deux fois plus grande (#29) : 22 sp, réduite seulement si la place manque
+            val room = (h - bottom) / d
+            if (room >= 36) bubble(c, x(start), bottom + 3 * d, label, 22f, s.panel, s.title, null, below = true)
+            else if (room >= 21) bubble(c, x(start), bottom + 2 * d, label, 11f, s.panel, s.title, null, below = true, gap = 3f)
         }
         // Pastille au bout, avec un halo, et bulle du % actuel
         val cy = (top + bottom) / 2f
@@ -116,7 +118,7 @@ class SocBar @JvmOverloads constructor(context: Context, attrs: AttributeSet? = 
         s.text.typeface = null; s.text.color = s.tick; s.text.textSize = 12 * s.sp
         val ty = bottom + 15 * d
         if (ty > h) return
-        if (start == null || x(start) > x0 + 90 * d) { s.text.textAlign = Paint.Align.LEFT; c.drawText("0", x0, ty, s.text) }
+        // Pas de « 0 » à gauche : le début de la barre suffit (#29)
         if (start == null || x(start) < x1 - 140 * d) { s.text.textAlign = Paint.Align.RIGHT; c.drawText("100 %", x1, ty, s.text) }
     }
 }

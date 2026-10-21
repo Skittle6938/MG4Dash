@@ -401,7 +401,7 @@ class MainActivity : AppCompatActivity() {
             CarBridge.stepFan(VehicleState.FAN_MAX - cur); true
         }
         b.chipAuto.setOnClickListener { CarBridge.toggleAuto() }
-        b.chipAc.setOnClickListener { CarBridge.toggleAc() }
+        app.mg4dash.climate.AcCycle.attach(b.chipAc)
         b.chipEco.setOnClickListener { CarBridge.toggleEco() }
         b.chipRecirc.setOnClickListener { CarBridge.toggleRecirc() }
         // Direction de l'air : pare-brise, visage et pieds se combinent (au moins une sortie reste active)
@@ -455,6 +455,7 @@ class MainActivity : AppCompatActivity() {
         b.fanValue.setTextSize(TypedValue.COMPLEX_UNIT_SP, if (auto || !on) 16f else 20f)
         b.chipAuto.isSelected = s.autoOn == true
         b.chipAc.isSelected = s.acOn == true
+        app.mg4dash.climate.AcCycle.paint(b.chipAc)
         // Recyclage : 0 = recyclé, 1 = extérieur, 2 = auto (la voiture choisit ; état réel lu à part s'il existe)
         val autoRecirc = s.recirc == 2
         val inner = if (autoRecirc) actualRecirc else s.recirc == 0

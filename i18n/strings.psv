@@ -430,3 +430,9 @@ dm_screen_off_hint|To sleep inside or stay discreet · a tap shows it 10 s|Dormi
 dm_outside_title|OUTSIDE|EXTÉRIEUR|AUSSEN|EXTERIOR|ESTERNO|BUITEN
 dm_cabin_set|Climate set to %1$s|Clim réglée à %1$s|Klima auf %1$s eingestellt|Clima ajustado a %1$s|Clima impostato a %1$s|Airco ingesteld op %1$s
 soc_trip_start|%1$s at start|%1$s au départ|%1$s beim Start|%1$s al salir|%1$s alla partenza|%1$s bij vertrek
+
+ac_cycle_title|Intermittent A/C (long press on A/C)|A/C intermittent (appui long sur A/C)|A/C im Intervall (lang auf A/C drücken)|A/C intermitente (pulsación larga en A/C)|A/C intermittente (pressione lunga su A/C)|A/C met tussenpozen (lang op A/C drukken)
+ac_cycle_on|Compressor on|Compresseur en marche|Kompressor an|Compresor encendido|Compressore acceso|Compressor aan
+ac_cycle_off|Compressor off|Compresseur arrêté|Kompressor aus|Compresor apagado|Compressore spento|Compressor uit
+ac_cycle_started|Intermittent A/C on, tap A/C to stop|A/C intermittent activé, touchez A/C pour l'arrêter|A/C im Intervall an, A/C tippen zum Beenden|A/C intermitente activado, toque A/C para detenerlo|A/C intermittente attivato, tocca A/C per fermarlo|A/C met tussenpozen aan, tik op A/C om te stoppen
+ac_cycle_need_on|Turn the climate on first|Allumez d'abord la clim|Zuerst die Klimaanlage einschalten|Encienda primero el clima|Accendi prima il clima|Zet eerst de airco aan
