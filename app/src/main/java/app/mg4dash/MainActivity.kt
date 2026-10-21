@@ -75,12 +75,14 @@ class MainActivity : AppCompatActivity() {
             val sh = SimpleHome(this)
             simple = sh
             setContentView(sh.root)
+            app.mg4dash.ui.FadeOutline.applyTo(sh.root)
             sh.start()
             warmUpStockLauncherIfNeeded()
             return
         }
         b = ActivityMainBinding.inflate(layoutInflater)
         setContentView(b.root)
+        app.mg4dash.ui.FadeOutline.applyTo(b.root)
         b.fanGauge.segments = VehicleState.FAN_MAX
         b.kersGauge.segments = 4
         b.kersGauge.onColor = color(R.color.accent_energy)
