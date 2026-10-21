@@ -393,8 +393,6 @@
     <string name="st_xpower_desc">Se reconoce sola en cuanto se miden más de 350 CV: el coche no indica su versión. Ajusta la escala de potencia y el umbral de la función especial a fondo.</string>
     <string name="st_climhold">Clima mantenido (pulsación larga en el botón de encendido del clima)</string>
     <string name="st_climhold_desc">Mantiene el coche encendido con el clima en marcha mientras no está, con una gran pantalla que muestra su estado. No deje nunca a un niño o un animal solo en el coche.</string>
-    <string name="st_climhold_mirrors">Clima mantenido: plegar los retrovisores al bloquear (a probar)</string>
-    <string name="st_climhold_mirrors_desc">Solo retrovisores de plegado eléctrico. Se despliegan al desbloquear las puertas o al arrancar.</string>
     <string name="dm_title">CLIMA MANTENIDO</string>
     <string name="dm_max">Duración máxima</string>
     <string name="dm_unlimited">Ilimitada</string>

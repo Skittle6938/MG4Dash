@@ -14,7 +14,7 @@ import android.content.Context
  * incrémentale d'Android), par exemple « SWI69-… ».
  *
  * Deux familles d'accès à la voiture (relevées par MG4Control) :
- *  - **A9** (SWI69, SWI131, SWI132) : service `com.saicmotor.caradapter`, un binder par domaine
+ *  - **A9** (SWI69, SWI131, SWI132, SWI173) : service `com.saicmotor.caradapter`, un binder par domaine
  *    (clim, EV, réglages, général). C'est la voie d'origine de MG4Dash, testée sur SWI69.
  *  - **Ancien SDK** (SWI68, SWI165, SWI133) : les gestionnaires SAIC (clim : AirConditionManager)
  *    sont chargés depuis le launcher d'origine `com.saicmotor.hmi.launcher`.
@@ -24,7 +24,7 @@ import android.content.Context
  * dit ce qui répond.
  */
 object Firmware {
-    enum class Gen { SWI69, SWI131, SWI132, SWI68, SWI165, SWI133, UNKNOWN }
+    enum class Gen { SWI69, SWI131, SWI132, SWI173, SWI68, SWI165, SWI133, UNKNOWN }
     enum class Family { A9, LEGACY, UNKNOWN }
 
     @Volatile private var cached: Gen? = null
@@ -39,6 +39,7 @@ object Firmware {
         raw = v
         val g = when {
             v == null -> Gen.UNKNOWN
+            v.startsWith("SWI173") -> Gen.SWI173
             v.startsWith("SWI165") -> Gen.SWI165
             v.startsWith("SWI133") -> Gen.SWI133
             v.startsWith("SWI132") -> Gen.SWI132   // avant SWI131 / SWI13x
@@ -52,7 +53,7 @@ object Firmware {
     }
 
     val family: Family get() = when (gen) {
-        Gen.SWI69, Gen.SWI131, Gen.SWI132 -> Family.A9
+        Gen.SWI69, Gen.SWI131, Gen.SWI132, Gen.SWI173 -> Family.A9
         Gen.SWI68, Gen.SWI165, Gen.SWI133 -> Family.LEGACY
         Gen.UNKNOWN -> Family.UNKNOWN
     }

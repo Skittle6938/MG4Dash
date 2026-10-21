@@ -92,7 +92,6 @@ class SettingsActivity : AppCompatActivity() {
         toggle(style, R.string.st_fullscreen, null, { prefs.fullscreen }) { prefs.fullscreen = it; Fullscreen.apply(this) }
         toggle(style, R.string.st_stack_auto, null, { prefs.stackAuto }) { prefs.stackAuto = it }
         toggle(style, R.string.st_climhold, R.string.st_climhold_desc, { prefs.climateHoldEnabled }) { prefs.climateHoldEnabled = it }
-        toggle(style, R.string.st_climhold_mirrors, R.string.st_climhold_mirrors_desc, { prefs.climateHoldFoldMirrors }) { prefs.climateHoldFoldMirrors = it }
 
         // ── Thème : fond et couleur des boutons ──
         val theme = panel(left, getString(R.string.st_theme))

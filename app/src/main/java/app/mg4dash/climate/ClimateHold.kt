@@ -81,13 +81,8 @@ object ClimateHold {
         Log.i(TAG, "programmé : $runs × $durMin min (pause $gapMin min), verrouillage dans $lockSec s")
     }
 
-    /** Rétros repliés au verrouillage (option à tester) : dépliés si le conducteur revient ou si on roule. */
-    @Volatile private var foldMirrors = false
-    @Volatile private var mirrorsFolded = false
-
     private fun begin(context: Context, st: Status) {
         stop("nouveau départ")
-        foldMirrors = app.mg4dash.system.Prefs(context).climateHoldFoldMirrors
         _status.value = st
         val app = context.applicationContext
         wake = (app.getSystemService(Context.POWER_SERVICE) as PowerManager)
@@ -101,7 +96,6 @@ object ClimateHold {
         if (job == null && _status.value.phase == Phase.IDLE) return
         Log.i(TAG, "arrêt : $reason")
         job?.cancel(); job = null
-        if (mirrorsFolded) { mirrorsFolded = false; CarBridge.foldMirrors(false) }
         _status.value = Status()
         release()
     }
@@ -120,7 +114,6 @@ object ClimateHold {
                 if (now >= st.lockAt) {
                     CarBridge.lockDoors()
                     Log.i(TAG, "portes verrouillées")
-                    if (foldMirrors) { mirrorsFolded = true; CarBridge.foldMirrors(true) }
                     // À une heure précise : clim coupée jusqu'au premier cycle (#26)
                     if (st.scheduled) CarBridge.setHvac(false)
                     _status.value = st.copy(phase = if (st.scheduled) Phase.WAITING else Phase.ON)

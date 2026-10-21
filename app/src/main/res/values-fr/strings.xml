@@ -393,8 +393,6 @@
     <string name="st_xpower_desc">Reconnue d\'elle-même dès que plus de 350 ch sont mesurés : la voiture ne donne pas sa version. Règle l\'échelle de puissance et le seuil de la fonction pied au plancher.</string>
     <string name="st_climhold">Clim maintenue (appui long sur le bouton marche de la clim)</string>
     <string name="st_climhold_desc">Garde la voiture allumée avec la clim en marche pendant votre absence, avec un grand écran qui montre son état. Ne laissez jamais un enfant ou un animal seul dans la voiture.</string>
-    <string name="st_climhold_mirrors">Clim maintenue : replier les rétros au verrouillage (à tester)</string>
-    <string name="st_climhold_mirrors_desc">Rétros à repli électrique uniquement. Ils se déplient au déverrouillage des portes ou au départ.</string>
     <string name="dm_title">CLIM MAINTENUE</string>
     <string name="dm_max">Durée maximale</string>
     <string name="dm_unlimited">Illimitée</string>
