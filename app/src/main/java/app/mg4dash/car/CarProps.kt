@@ -151,6 +151,27 @@ object CarProps {
 
     private val areaCache =java.util.concurrent.ConcurrentHashMap<Int, Int>()
 
+    /** Propriété en octets (type 0x0070…), ou null ; zones essayées : globale puis 0x1000000. */
+    fun readBytes(id: Int): ByteArray? {
+        if (BuildConfig.MOCK) return null
+        val m = cpm ?: return null
+        for (area in intArrayOf(0, 0x1000000)) {
+            try {
+                val pv = m.javaClass.getMethod("getProperty", Class::class.java, Int::class.javaPrimitiveType, Int::class.javaPrimitiveType)
+                    .invoke(m, ByteArray::class.java, id, area) ?: continue
+                (pv.javaClass.getMethod("getValue").invoke(pv) as? ByteArray)?.let { return it }
+            } catch (_: Throwable) { }
+        }
+        return null
+    }
+
+    /**
+     * Côté conduite (calibration CAL_DRIVE_HDL_TYPE, lue comme le fait le service CarPlay d'allgo) :
+     * 0x00 = conduite à gauche, 0x01 = conduite à droite ; null si la voiture ne la fournit pas.
+     */
+    fun rightHandDrive(): Boolean? = readBytes(CAL_DRIVE_HDL_TYPE)?.firstOrNull()?.toInt()?.let { when (it) { 0 -> false; 1 -> true; else -> null } }
+    const val CAL_DRIVE_HDL_TYPE = 561005086   // 0x2170421e (YFVehicleProperty)
+
     fun readAny(id: Int): String {
         if (BuildConfig.MOCK) return mock[id]?.toString() ?: ""
         val m = cpm ?: return ""

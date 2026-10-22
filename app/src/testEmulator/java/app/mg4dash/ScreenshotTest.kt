@@ -180,6 +180,19 @@ class ScreenshotTest {
         shoot(MainActivity::class.java, "home_map_energy_card_power.png")
     }
 
+    /** Conduite à droite : barre verticale à droite, pleine hauteur. */
+    @Test fun homeRightHand() {
+        org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE).edit()
+            .putInt("theme_mode", 1).putBoolean("force_rhd", true).commit()
+        shoot(MainActivity::class.java, "home_right_hand.png")
+    }
+
+    @Test fun homeMapRightHand() {
+        org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE).edit()
+            .putInt("theme_mode", 1).putInt("home_style", 2).putBoolean("force_rhd", true).commit()
+        shoot(MainActivity::class.java, "home_map_right_hand.png")
+    }
+
     @Test fun homeMapAutoHide() {
         org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE).edit().putBoolean("map_auto_hide", true).apply()
         shoot(MainActivity::class.java, "home_map_auto_hide.png")

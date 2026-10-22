@@ -141,6 +141,15 @@ object Dock {
     fun vertical(context: android.content.Context): Boolean = Prefs(context).verticalDock
 
     /**
+     * Conduite à droite : barre verticale à droite, sur toute la hauteur (le bouton antibrouillards
+     * reste à gauche, géré par la voiture). Activé quand la lecture de CAL_DRIVE_HDL_TYPE aura été
+     * confirmée sur une voiture à droite ; « force_rhd » sert aux captures.
+     */
+    private const val RHD_ENABLED = false
+    fun rightSide(context: android.content.Context): Boolean =
+        Prefs(context).raw.getBoolean("force_rhd", false) || (RHD_ENABLED && app.mg4dash.car.CarProps.rightHandDrive() == true)
+
+    /**
      * Pose le dock d'un écran : en bas (dock horizontal) ou, si l'option est choisie, en barre
      * verticale à gauche. [root] est la colonne de l'écran, [dock] son dernier enfant.
      * En vertical, tous les autres enfants passent dans une colonne à droite de la barre.
@@ -152,10 +161,14 @@ object Dock {
         root.removeAllViews()
         root.orientation = LinearLayout.HORIZONTAL
         val bar = LinearLayout(activity)
-        root.addView(bar, LinearLayout.LayoutParams(kit.dp(64), LinearLayout.LayoutParams.MATCH_PARENT))
+        val right = rightSide(activity)
         val content = LinearLayout(activity).apply { orientation = LinearLayout.VERTICAL }
         children.forEach { content.addView(it) }   // chaque enfant garde ses paramètres (poids, marges)
-        root.addView(content, LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.MATCH_PARENT, 1f).apply { leftMargin = kit.dp(12) })
+        if (!right) root.addView(bar, LinearLayout.LayoutParams(kit.dp(64), LinearLayout.LayoutParams.MATCH_PARENT))
+        root.addView(content, LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.MATCH_PARENT, 1f).apply {
+            if (right) rightMargin = kit.dp(12) else leftMargin = kit.dp(12)
+        })
+        if (right) root.addView(bar, LinearLayout.LayoutParams(kit.dp(64), LinearLayout.LayoutParams.MATCH_PARENT))
         buildVertical(activity, bar, current)
     }
 
@@ -174,8 +187,9 @@ object Dock {
         bar.setBackgroundResource(R.drawable.bg_panel)
         bar.elevation = kit.dp(6).toFloat()
         bar.setPadding(kit.dp(4), kit.dp(4), kit.dp(4), kit.dp(6))
-        // Place du bouton antibrouillards (superposé par MG, on ne peut pas le dessiner nous-mêmes)
-        bar.addView(android.view.View(activity), LinearLayout.LayoutParams(-1, kit.dp(62)))
+        // Place du bouton antibrouillards (superposé par MG, on ne peut pas le dessiner nous-mêmes) ;
+        // à droite (conduite à droite), il reste à gauche : la barre prend toute la hauteur
+        if (!rightSide(activity)) bar.addView(android.view.View(activity), LinearLayout.LayoutParams(-1, kit.dp(62)))
         val order = listOf(
             ITEMS.first { it.label == R.string.dock_settings },
             ITEMS.first { it.label == R.string.dock_aa },

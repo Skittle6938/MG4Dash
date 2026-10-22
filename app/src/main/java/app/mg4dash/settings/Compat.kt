@@ -55,6 +55,7 @@ object Compat {
             fun hv(id: Int) = CarProps.readIntArea(id, 0x75)?.toString() ?: "—"
             val (seatCfg, wheelCfg) = CarBridge.heatingConfig()
             appendLine("Heating: config seat=${seatCfg ?: "—"} wheel=${wheelCfg ?: "—"}; props seatL=${hv(0x15402513)} seatR=${hv(0x15402514)} wheel=${hv(0x1540253a)}")
+            appendLine("Drive side: ${CarProps.readBytes(CarProps.CAL_DRIVE_HDL_TYPE)?.joinToString("") { String.format("%02x", it) } ?: "—"} (${when (CarProps.rightHandDrive()) { true -> "right-hand"; false -> "left-hand"; null -> "?" }})")
             appendLine("Controls: esp=${i(0x11403805)} tcs=${i(0x1140381f)} chrgCtrl=${i(0x2140f412)} lockCtrl=${i(0x2140f413)} doorCtrl=${i(0x2140f455)} plugAC=${i(0x2140f43e)} plugDC=${i(0x2140f43f)} onePedal=${i(0x2140a193)} ldw=${i(0x2140a104)} fcw=${i(0x2140a108)} slif=${i(0x2140a16c)}")
             appendLine("Old SDK: " + sdkClasses(a))
             appendLine("Media: " + listOf("com.saicmotor.service.media", "com.saicmotor.service.radio", "com.saicmotor.media", "com.saicmotor.radio",
