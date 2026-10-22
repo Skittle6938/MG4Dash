@@ -442,6 +442,9 @@
     <string name="st_energy_card_power_desc">Leistungsbalken, kW, V · A und Durchschnitt statt Fahrmodus und KERS; die Lade- / V2L-Zeile erscheint bei eingestecktem Kabel, die Leistungsseite verlässt das untere Widget.</string>
     <string name="st_shortcuts_page">Verknüpfungsseite in der Kartenkarte</string>
     <string name="st_shortcuts_page_desc">Aus: Die Taste oben rechts auf der Karte wechselt nur zwischen Karte und Verbrauch</string>
+    <string name="st_panel_outline">Rahmen der Startbildschirm-Kacheln</string>
+    <string name="st_panel_fade">Ausgeblendet (Kombiinstrument-Stil)</string>
+    <string name="st_panel_full">Vollständig</string>
     <string name="aa_title">ANDROID AUTO</string>
     <string name="aa_ready">Telefon verbunden · Zum Öffnen tippen</string>
     <string name="aa_waiting">Telefon per USB verbinden</string>

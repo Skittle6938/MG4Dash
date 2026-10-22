@@ -100,6 +100,10 @@ class SettingsActivity : AppCompatActivity() {
         row(theme, *styleButtons(listOf(R.string.st_mode_auto, R.string.st_mode_dark, R.string.st_mode_light), { prefs.themeMode }) {
             if (prefs.themeMode != it) { prefs.themeMode = it; onThemeChanged() }
         })
+        text(theme, getString(R.string.st_panel_outline), 18f, R.color.text_value)
+        row(theme, *styleButtons(listOf(R.string.st_panel_fade, R.string.st_panel_full), { if (prefs.panelFade) 0 else 1 }) {
+            prefs.panelFade = it == 0
+        })
         text(theme, getString(R.string.st_theme_bg), 18f, R.color.text_value)
         swatches(theme, app.mg4dash.ui.Themes.BACKGROUND_SWATCHES, prefs.themeBackground) { prefs.themeBackground = it; onThemeChanged() }
         text(theme, getString(R.string.st_theme_accent), 18f, R.color.text_value)

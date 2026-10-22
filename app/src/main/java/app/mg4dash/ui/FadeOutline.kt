@@ -17,7 +17,7 @@ import app.mg4dash.R
  * Panneaux de l'accueil dans le style du tableau de bord MG (issue #38) : pas de fond plein, un
  * contour fin, clair en haut, qui s'estompe vers le bas. La barre verticale garde son fond.
  */
-class FadeOutline(private val d: Float, color: Int) : Drawable() {
+class FadeOutline(private val d: Float, color: Int, private val fade: Boolean = true) : Drawable() {
     private val rgb = color and 0x00FFFFFF
     private val p = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.STROKE; strokeWidth = 1.5f * d }
     private val rect = RectF()
@@ -25,7 +25,9 @@ class FadeOutline(private val d: Float, color: Int) : Drawable() {
     override fun draw(c: Canvas) {
         val b = bounds
         p.shader = LinearGradient(0f, b.top.toFloat(), 0f, b.bottom.toFloat(),
-            intArrayOf(rgb or (0x8C shl 24), rgb or (0x40 shl 24), rgb), floatArrayOf(0f, 0.55f, 1f), Shader.TileMode.CLAMP)
+            // Contour complet (#40) : même teinte tout autour, sans s'effacer en bas
+            if (fade) intArrayOf(rgb or (0x8C shl 24), rgb or (0x40 shl 24), rgb) else intArrayOf(rgb or (0x70 shl 24), rgb or (0x70 shl 24), rgb or (0x70 shl 24)),
+            floatArrayOf(0f, 0.55f, 1f), Shader.TileMode.CLAMP)
         val h = p.strokeWidth
         rect.set(b.left + h, b.top + h, b.right - h, b.bottom - h)
         c.drawRoundRect(rect, RADIUS * d, RADIUS * d, p)
@@ -47,9 +49,10 @@ class FadeOutline(private val d: Float, color: Int) : Drawable() {
             root.post {
                 val d = root.resources.displayMetrics.density
                 val color = Themes.color(root.context, R.color.text_sub)
+                val fade = app.mg4dash.system.Prefs(root.context).panelFade
                 fun walk(v: View) {
                     if (v.elevation >= 5.5f * d && v.background != null && v.width > 120 * d) {
-                        v.background = FadeOutline(d, color); v.elevation = 0f
+                        v.background = FadeOutline(d, color, fade); v.elevation = 0f
                     }
                     if (v is ViewGroup) for (i in 0 until v.childCount) walk(v.getChildAt(i))
                 }
@@ -59,7 +62,7 @@ class FadeOutline(private val d: Float, color: Int) : Drawable() {
                         override fun getOutline(v: View, o: android.graphics.Outline) { o.setRoundRect(0, 0, v.width, v.height, RADIUS * d) }
                     }
                     m.clipToOutline = true
-                    m.foreground = FadeOutline(d, color)
+                    m.foreground = FadeOutline(d, color, fade)
                 }
             }
         }

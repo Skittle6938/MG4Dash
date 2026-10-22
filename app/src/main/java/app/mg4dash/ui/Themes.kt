@@ -53,7 +53,7 @@ object Themes {
     private const val GLOBAL_KEY = "mg4dash_theme"
 
     /** Signature du thème courant : sert à savoir si un écran doit se redessiner. */
-    fun signature(context: Context): Int = Prefs(context).let { it.themeBackground * 10 + it.themeAccent + (if (isLight(context)) 100 else 0) + (if (it.verticalDock) 1000 else 0) }
+    fun signature(context: Context): Int = Prefs(context).let { it.themeBackground * 10 + it.themeAccent + (if (isLight(context)) 100 else 0) + (if (it.verticalDock) 1000 else 0) + (if (it.panelFade) 0 else 10000) }
 
     /** À appeler dans onCreate, avant setContentView ; [dark] force le thème sombre. */
     fun apply(activity: Activity, dark: Boolean = false) {
