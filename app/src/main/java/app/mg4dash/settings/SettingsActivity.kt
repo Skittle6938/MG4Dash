@@ -69,6 +69,7 @@ class SettingsActivity : AppCompatActivity() {
         root.addView(dock, LinearLayout.LayoutParams(-1, dp(84)).apply { topMargin = dp(12) })
         app.mg4dash.ui.Dock.mount(this, root, dock, app.mg4dash.ui.Dock.Page.SETTINGS)
         setContentView(root)
+        app.mg4dash.ui.FadeOutline.applyTo(root)
 
         // ════ Colonne gauche : ce qu'on voit à l'écran ════
 
@@ -102,7 +103,7 @@ class SettingsActivity : AppCompatActivity() {
         })
         text(theme, getString(R.string.st_panel_outline), 18f, R.color.text_value)
         row(theme, *styleButtons(listOf(R.string.st_panel_fade, R.string.st_panel_full), { if (prefs.panelFade) 0 else 1 }) {
-            prefs.panelFade = it == 0
+            if (prefs.panelFade != (it == 0)) { prefs.panelFade = it == 0; recreate() }
         })
         text(theme, getString(R.string.st_theme_bg), 18f, R.color.text_value)
         swatches(theme, app.mg4dash.ui.Themes.BACKGROUND_SWATCHES, prefs.themeBackground) { prefs.themeBackground = it; onThemeChanged() }
@@ -504,6 +505,7 @@ class SettingsActivity : AppCompatActivity() {
         val p = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             setBackgroundResource(R.drawable.bg_panel)
+            elevation = dp(6).toFloat()   // repéré comme panneau pour le style de contour (#40)
             setPadding(dp(20), dp(16), dp(20), dp(16))
         }
         p.addView(TextView(this).apply {
