@@ -689,13 +689,10 @@ object MediaHub {
     /** Commande envoyée au service Android Auto ; à défaut, touche média vers sa session. */
     private fun aaControl(c: MediaController, code: Int, fallbackKey: Int) {
         if (carPlay) {
-            // Retour sur CarPlay depuis une autre source : on rouvre CarPlay, qui reprend la main
-            if (code == AA_PLAY && sourcePkg != AA_MBS) {
-                appContext?.let { app.mg4dash.system.Apps.open(it, app.mg4dash.system.Apps.CARPLAY, "CarPlay") }
-                main.postDelayed({ systemMediaKey(KeyEvent.KEYCODE_MEDIA_PLAY) }, 1500)
-                return
-            }
-            systemMediaKey(fallbackKey); return
+            // CarPlay ne dit pas s'il joue : lecture et pause passent par la touche bascule (85), que
+            // son service accepte comme le volant (#36). On n'ouvre plus CarPlay à la bascule de source.
+            val key = if (code == AA_PLAY || code == AA_PAUSE) KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE else fallbackKey
+            systemMediaKey(key); return
         }
         val b = aaService
         if (b == null) { bindAndroidAuto(); mediaKey(c, fallbackKey); return }
