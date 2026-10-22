@@ -30,6 +30,7 @@ object StarKey {
     private const val KEY_RIGHT_STAR = 286
     private const val KEY_RIGHT_STAR_ALT = 18
     private const val FUNCTION_AVM = 3
+    private const val FUNCTION_AVM_SWI173 = 6
 
     private val AVM = listOf(
         "com.saicmotor.avm" to "com.saicmotor.avm.service.SaicMotorAvmService",
@@ -69,7 +70,9 @@ object StarKey {
                 }
                 val fn = try { android.provider.Settings.System.getInt(app.contentResolver, setting, -1) } catch (_: Exception) { -1 }
                 Log.i(TAG, "« * » ($code) relâché, $setting = $fn")
-                if (fn != FUNCTION_AVM || Prefs(app).valetMode) return
+                // Valeur « caméra 360 » : 3 sur le launcher SWI69, 6 sur SWI173 (relevé dans le journal, #33)
+                val avm = if (Firmware.gen == Firmware.Gen.SWI173) FUNCTION_AVM_SWI173 else FUNCTION_AVM
+                if (fn != avm || Prefs(app).valetMode) return
                 openAvm(app)
             }
         }
