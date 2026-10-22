@@ -149,6 +149,11 @@ class MainActivity : AppCompatActivity() {
         b.secondaryDots.visibility = View.GONE
         center.addView(box, lp(40f, 0)); center.addView(b.mediaCard, lp(60f, gap))
         right.addView(b.mapCard, lp(100f, 0))
+        // Bas des cartes Clim et Média aligné sur la barre verticale et la carte (#38) : le contour
+        // s'estompe vers le bas, ce sont leurs boutons qui marquent le bord
+        val dd = resources.displayMetrics.density
+        // (seulement avec le contour estompé ; avec le contour complet, le cadre garde sa marge)
+        if (prefs.panelFade) listOf(b.climateCard, b.mediaCard).forEach { it.setPadding(it.paddingLeft, it.paddingTop, it.paddingRight, (2 * dd).toInt()) }
         // Le bouton antibrouillards de MG se superpose en haut à gauche : la marge passe du titre
         // Climatisation (qui descend) au titre Météo (qui monte).
         val fogSafe = (64 * resources.displayMetrics.density).toInt()
@@ -962,8 +967,9 @@ class MainActivity : AppCompatActivity() {
         b.range.setTextSize(TypedValue.COMPLEX_UNIT_SP, 26f)
         // Chiffres posés près de la barre (#29), prise pleine avec éclair, repères plus lisibles
         (b.battery.parent as LinearLayout).gravity = Gravity.BOTTOM
+        // Prise pleine avec éclair, réduite pour que km + prise fassent la hauteur du % (#29)
         b.rangePlug.setImageResource(R.drawable.ic_range_plug_bolt)
-        b.rangePlug.layoutParams = b.rangePlug.layoutParams.apply { height = (28 * d).toInt() }
+        b.rangePlug.layoutParams = (b.rangePlug.layoutParams as LinearLayout.LayoutParams).apply { width = (75 * d).toInt(); height = (22 * d).toInt(); topMargin = (2 * d).toInt() }
         b.batteryGauge.smallSp = 16f; b.batteryGauge.tickSp = 15f
         (b.batteryGauge.layoutParams as LinearLayout.LayoutParams).apply { height = (62 * d).toInt(); bottomMargin = (-2 * d).toInt() }
         val card = b.energyCard
