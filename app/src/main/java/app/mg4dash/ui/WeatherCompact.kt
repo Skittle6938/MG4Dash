@@ -97,6 +97,9 @@ class WeatherCompact(context: Context, private val onPage: () -> Unit) : LinearL
         sub.text = listOfNotNull(
             if (w.todayMin != null && w.todayMax != null) "${w.todayMin}~${w.todayMax}°" else null,
             WeatherRepo.label(w.code),
+            // Vent et risque de pluie du jour (#34)
+            "${Math.round(app.mg4dash.system.Units.dist(context, w.windKmh.toFloat()))} ${app.mg4dash.system.Units.speedUnit(context)}",
+            w.rainPct?.let { context.getString(R.string.weather_rain, it) },
         ).joinToString("  ·  ")
         forecast.visibility = VISIBLE; dots.visibility = VISIBLE
         dots.text = (0..1).joinToString(" ") { if (it == page) "●" else "○" }

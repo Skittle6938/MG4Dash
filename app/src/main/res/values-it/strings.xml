@@ -440,6 +440,8 @@
     <string name="weather_rain">Pioggia %1$d %%</string>
     <string name="st_energy_card_power">Potenza in tempo reale nella scheda energia</string>
     <string name="st_energy_card_power_desc">Barra di potenza, kW, V · A e media al posto della modalità di guida e del KERS; la riga ricarica / V2L compare con il cavo collegato e la pagina Potenza lascia il widget in basso.</string>
+    <string name="st_shortcuts_page">Pagina di scorciatoie nella scheda mappa</string>
+    <string name="st_shortcuts_page_desc">Disattivata: il pulsante in alto a destra della mappa passa solo tra mappa e consumi</string>
     <string name="aa_title">ANDROID AUTO</string>
     <string name="aa_ready">Telefono connesso · Tocca per aprire</string>
     <string name="aa_waiting">Collega il telefono via USB</string>

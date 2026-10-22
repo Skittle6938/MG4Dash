@@ -1,0 +1,8 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android" android:width="96dp" android:height="28dp" android:viewportWidth="96" android:viewportHeight="28">
+    <!-- Prise pleine avec éclair (issue #29), dessinée pour MG4Dash -->
+    <path android:fillColor="#FFFFFFFF" android:pathData="M1,7h8v4h-8a2,2 0 0,1 0,-4z M1,17h8v4h-8a2,2 0 0,1 0,-4z"/>
+    <path android:fillColor="#FFFFFFFF" android:fillType="evenOdd"
+        android:pathData="M9,1h9a13,13 0 0,1 0,26h-9z M18.5,5l-6,10h4.5l-2.5,8l7.5,-11h-4.8l3.3,-7z"/>
+    <path android:fillColor="#FFFFFFFF" android:pathData="M30,9.5h3a1.5,1.5 0 0,1 1.5,1.5v6a1.5,1.5 0 0,1 -1.5,1.5h-3z"/>
+    <path android:strokeColor="#FFFFFFFF" android:strokeWidth="4" android:strokeLineCap="round" android:pathData="M34,14H93"/>
+</vector>

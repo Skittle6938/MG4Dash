@@ -531,7 +531,12 @@ class MainActivity : AppCompatActivity() {
         // automatiquement en « V2L » quand un adaptateur de décharge est branché.
         b.chargeAction.isEnabled = VehicleState.isPlugged(s.chargeStatus)
         // Carte « puissance » : la ligne charge / V2L n'apparaît que câble branché (#29)
-        if (cardPower) (b.chargeState.parent as View).visibility = if (VehicleState.isPlugged(s.chargeStatus)) View.VISIBLE else View.GONE
+        if (cardPower) {
+            val plugged = VehicleState.isPlugged(s.chargeStatus)
+            (b.chargeState.parent as View).visibility = if (plugged) View.VISIBLE else View.GONE
+            // Câble branché : la ligne de charge prend la place, la prise sous les km s'efface
+            b.rangePlug.visibility = if (plugged) View.GONE else View.VISIBLE
+        }
         b.chargeAction.visibility = if (CarBridge.chargeControl) View.VISIBLE else View.GONE
         b.chargeAction.setBackgroundResource(if (discharge) R.drawable.bg_chip_heat else R.drawable.bg_chip)
         b.chargeAction.setTextColor(androidx.core.content.ContextCompat.getColorStateList(this, if (discharge) R.color.chip_text_heat else R.color.chip_text))
@@ -564,6 +569,7 @@ class MainActivity : AppCompatActivity() {
         listOf(b.srcRadio, b.srcMedia, b.srcAa).forEach { it.visibility = View.GONE }
         app.mg4dash.ui.SourceMenu.attach(this, b.mediaSource)
         b.mediaInfo.setOnClickListener {
+            if (MediaHub.openCarPlayNowPlaying()) return@setOnClickListener
             val owner = MediaHub.ownerComponent()
             if (owner != null) Apps.open(this, owner, "Media") else Apps.open(this, Apps.RADIO, "Radio")
         }
@@ -659,7 +665,8 @@ class MainActivity : AppCompatActivity() {
         applyMapButtons()
         // Carte → Consommation → Raccourcis → Carte (issue #6 : la consommation dans le widget carte)
         b.widgetToggle.setOnClickListener {
-            prefs.homeWidget = when (effectiveWidget()) { 0 -> 2; 2 -> 1; else -> 0 }
+            // Page raccourcis retirable de la rotation (#38) : carte → conso → carte
+            prefs.homeWidget = when (effectiveWidget()) { 0 -> 2; 2 -> if (prefs.shortcutsPage) 1 else 0; else -> 0 }
             applyHomeWidget()
         }
         applyHomeWidget()
@@ -737,7 +744,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     /** 0 = carte, 1 = raccourcis, 2 = consommation. */
-    private fun effectiveWidget(): Int = prefs.homeWidget.let {
+    private fun effectiveWidget(): Int = prefs.homeWidget.let { if (it == 1 && !prefs.shortcutsPage) 0 else it }.let {
         if (it == 0 && prefs.mapOfflineSwitch && offline() && !mapCard.hasCachedTiles(LocationRepo.location.value)) 2 else it
     }
 
@@ -952,15 +959,21 @@ class MainActivity : AppCompatActivity() {
         // Plus de place verticale : chiffres un peu plus petits, barre batterie plus basse
         b.battery.setTextSize(TypedValue.COMPLEX_UNIT_SP, 50f)
         b.range.setTextSize(TypedValue.COMPLEX_UNIT_SP, 26f)
-        (b.batteryGauge.layoutParams as LinearLayout.LayoutParams).apply { height = (48 * d).toInt(); bottomMargin = (-10 * d).toInt() }
+        // Chiffres posés près de la barre (#29), prise pleine avec éclair, repères plus lisibles
+        (b.battery.parent as LinearLayout).gravity = Gravity.BOTTOM
+        b.rangePlug.setImageResource(R.drawable.ic_range_plug_bolt)
+        b.rangePlug.layoutParams = b.rangePlug.layoutParams.apply { height = (28 * d).toInt() }
+        b.batteryGauge.smallSp = 16f; b.batteryGauge.tickSp = 15f
+        (b.batteryGauge.layoutParams as LinearLayout.LayoutParams).apply { height = (62 * d).toInt(); bottomMargin = (-2 * d).toInt() }
         val card = b.energyCard
         val at = card.indexOfChild(b.batteryGauge) + 1
         powerBar = app.mg4dash.ui.PowerBar(this).apply {
             configureFor(prefs.batteryModel, prefs.xpower)
             maxDrawKw = maxOf(maxDrawKw, prefs.raw.getFloat("power_scale_kw", 0f))
             onScale = { prefs.raw.edit().putFloat("power_scale_kw", it).apply() }
+            labelSp = 15f
         }
-        card.addView(powerBar, at, LinearLayout.LayoutParams(-1, (38 * d).toInt()).apply { topMargin = (4 * d).toInt() })
+        card.addView(powerBar, at, LinearLayout.LayoutParams(-1, (42 * d).toInt()).apply { topMargin = (4 * d).toInt() })
         val row = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL }
         fun tv(sp: Float, colorRes: Int, g: Int) = TextView(this).apply {
             setTextColor(color(colorRes)); setTextSize(TypedValue.COMPLEX_UNIT_SP, sp); gravity = g; maxLines = 1; fontFeatureSettings = "tnum"

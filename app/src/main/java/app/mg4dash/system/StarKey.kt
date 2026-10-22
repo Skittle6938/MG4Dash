@@ -24,6 +24,11 @@ object StarKey {
     private const val JOY_OK = 301
     /** Settings.System : fonction du « * » gauche ; 3 = caméra de recul / 360 (CarHardKey SAIC). */
     private const val STAR_FUNCTION = "star_key_function"
+    /** Même chose pour le « * » droit. */
+    private const val RIGHT_STAR_FUNCTION = "right_star_key_function"
+    private const val KEY_LEFT_STAR_ALT = 17
+    private const val KEY_RIGHT_STAR = 286
+    private const val KEY_RIGHT_STAR_ALT = 18
     private const val FUNCTION_AVM = 3
 
     private val AVM = listOf(
@@ -52,9 +57,18 @@ object StarKey {
                     }
                     return
                 }
-                if (code != KEY_LEFT_STAR || down || long) return
-                val fn = try { android.provider.Settings.System.getInt(app.contentResolver, STAR_FUNCTION, -1) } catch (_: Exception) { -1 }
-                Log.i(TAG, "« * » gauche relâché, fonction $fn")
+                if (down || long) return
+                // Codes des « * » selon le firmware : 5 (gauche) sur le launcher SWI69 ; 17 (gauche) et
+                // 286 ou 18 (droit) ailleurs, relevés sur SWI173 (#33) comme dans MG4Control
+                val a9 = Firmware.gen in setOf(Firmware.Gen.SWI69, Firmware.Gen.SWI131, Firmware.Gen.SWI132)
+                val setting = when {
+                    code == KEY_LEFT_STAR && a9 -> STAR_FUNCTION
+                    code == KEY_LEFT_STAR_ALT && !a9 -> STAR_FUNCTION
+                    (code == KEY_RIGHT_STAR || code == KEY_RIGHT_STAR_ALT) && !a9 -> RIGHT_STAR_FUNCTION
+                    else -> return
+                }
+                val fn = try { android.provider.Settings.System.getInt(app.contentResolver, setting, -1) } catch (_: Exception) { -1 }
+                Log.i(TAG, "« * » ($code) relâché, $setting = $fn")
                 if (fn != FUNCTION_AVM || Prefs(app).valetMode) return
                 openAvm(app)
             }

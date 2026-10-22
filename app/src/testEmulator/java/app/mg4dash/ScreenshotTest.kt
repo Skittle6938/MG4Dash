@@ -151,7 +151,27 @@ class ScreenshotTest {
     @Test fun homeEnergyCardPower() {
         org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE).edit()
             .putInt("theme_mode", 1).putBoolean("energy_card_power", true).commit()
+        val f = app.mg4dash.energy.EnergyMonitor::class.java.getDeclaredField("_tripStartSoc").apply { isAccessible = true }
+        @Suppress("UNCHECKED_CAST")
+        (f.get(app.mg4dash.energy.EnergyMonitor) as kotlinx.coroutines.flow.MutableStateFlow<Int?>).value = 92
         shoot(MainActivity::class.java, "home_energy_card_power.png")
+    }
+
+    /** Même carte, câble débranché (en roulant) : prise avec éclair sous les km. */
+    @Test fun homeEnergyCardPowerDriving() {
+        org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE).edit()
+            .putInt("theme_mode", 1).putBoolean("energy_card_power", true).commit()
+        val f = app.mg4dash.energy.EnergyMonitor::class.java.getDeclaredField("_tripStartSoc").apply { isAccessible = true }
+        @Suppress("UNCHECKED_CAST")
+        (f.get(app.mg4dash.energy.EnergyMonitor) as kotlinx.coroutines.flow.MutableStateFlow<Int?>).value = 92
+        val act = Robolectric.buildActivity(MainActivity::class.java).setup().get()
+        repeat(3) { shadowOf(Looper.getMainLooper()).idleFor(200, TimeUnit.MILLISECONDS) }
+        val sf = app.mg4dash.car.CarBridge::class.java.getDeclaredField("_state").apply { isAccessible = true }
+        @Suppress("UNCHECKED_CAST")
+        val flow = sf.get(app.mg4dash.car.CarBridge) as kotlinx.coroutines.flow.MutableStateFlow<app.mg4dash.car.VehicleState>
+        flow.value = flow.value.copy(chargeStatus = 0)
+        repeat(5) { shadowOf(Looper.getMainLooper()).idleFor(200, TimeUnit.MILLISECONDS) }
+        save(act.window.decorView, "home_energy_card_power_driving.png")
     }
 
     @Test fun homeMapEnergyCardPower() {

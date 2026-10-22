@@ -115,6 +115,8 @@ class LineChart @JvmOverloads constructor(context: Context, attrs: AttributeSet?
  * secondes puis redescend doucement ; la valeur s'anime.
  */
 class PowerBar @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) : View(context, attrs) {
+    /** Taille des graduations (sp) ; plus grande dans la carte énergie « puissance » (#29). */
+    var labelSp = 12f
     var kw: Float = 0f
         set(v) {
             field = v
@@ -258,7 +260,7 @@ class PowerBar @JvmOverloads constructor(context: Context, attrs: AttributeSet? 
         paint.color = tick
         canvas.drawRect(zero - d, top - 4 * d, zero + d, bottom + 4 * d, paint)
         if (labels) {
-            text.color = tick; text.textSize = 12 * resources.displayMetrics.scaledDensity
+            text.color = tick; text.textSize = labelSp * resources.displayMetrics.scaledDensity
             val ty = h - 1 * d
             text.textAlign = Paint.Align.LEFT; canvas.drawText("−${maxRegenKw.toInt()}", x0, ty, text)
             text.textAlign = Paint.Align.CENTER; canvas.drawText("0", zero, ty, text)

@@ -59,6 +59,10 @@ class Prefs(context: Context) {
     var mapAutoHide: Boolean
         get() = sp.getBoolean("map_auto_hide", false)
         set(v) = sp.edit().putBoolean("map_auto_hide", v).apply()
+    /** Page de raccourcis dans la rotation du widget carte (#38) ; décochée : carte ↔ consommation. */
+    var shortcutsPage: Boolean
+        get() = sp.getBoolean("shortcuts_page", true)
+        set(v) = sp.edit().putBoolean("shortcuts_page", v).apply()
     var mapOfflineSwitch: Boolean
         get() = sp.getBoolean("map_offline_switch", true)
         set(v) = sp.edit().putBoolean("map_offline_switch", v).apply()
