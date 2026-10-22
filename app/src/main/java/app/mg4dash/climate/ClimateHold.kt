@@ -132,6 +132,8 @@ object ClimateHold {
                 Phase.WAITING -> if (now >= st.runs[st.run][0]) {
                     Log.i(TAG, "cycle ${st.run + 1} : clim en marche")
                     CarBridge.setHvac(true); offReads = 0
+                    // Compresseur aussi à chaque cycle (#26), une fois la clim allumée
+                    scope.launch { delay(2500); if (CarBridge.state.value.acOn != true) CarBridge.toggleAc() }
                     _status.value = st.copy(phase = Phase.ON)
                 }
                 Phase.ON -> {

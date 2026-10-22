@@ -68,7 +68,6 @@ object MediaHub {
         }
         val msm = context.getSystemService(Context.MEDIA_SESSION_SERVICE) as MediaSessionManager
         manager = msm
-        watchAudio(context)
         try {
             msm.addOnActiveSessionsChangedListener({ reevaluate() }, null, main)
         } catch (e: SecurityException) {
@@ -140,6 +139,9 @@ object MediaHub {
     }
 
     fun selectAndroidAuto() = select(AA_MBS)
+
+    /** Lecteur commandé par MG4Dash (Bluetooth, USB, DiAuto…), hors radio et Android Auto / CarPlay. */
+    fun ownPlayerShown(): Boolean = !radioShown && current?.let { !isAndroidAuto(it.packageName) } == true
 
     fun isAndroidAuto(pkg: String?) = pkg == AA_MBS || pkg?.startsWith("com.allgo.app.androidauto") == true
 
@@ -233,8 +235,8 @@ object MediaHub {
                         } catch (_: Throwable) { -1 }
                         val src = when {
                             pkg == "com.saicmotor.media" && type == 5 -> "com.android.bluetooth"
-                            pkg == "com.allgo.app.androidauto" -> AA_MBS
-                            pkg == "com.allgo.carplay.service" -> AA_MBS
+                            pkg == "com.allgo.app.androidauto" -> AA_MBS.also { carPlay = false }
+                            pkg == "com.allgo.carplay.service" -> AA_MBS.also { carPlay = true }
                             pkg == SaicRadio.HMI_PKG || pkg == "com.saicmotor.service.radio" -> RADIO
                             else -> pkg
                         }
@@ -558,32 +560,6 @@ object MediaHub {
         main.postDelayed({ publish() }, 4100)
     }
 
-    /**
-     * Lecture / pause venue d'ailleurs (bouton du volant, téléphone) : la sortie audio d'Android le
-     * sait tout de suite, la session Bluetooth 2 à 3 s plus tard (#36). Au changement, l'icône suit
-     * aussitôt, et l'état de la session reprend la main dès qu'il concorde.
-     */
-    private var audioPlaying: Boolean? = null
-
-    private fun watchAudio(context: Context) {
-        val am = context.getSystemService(Context.AUDIO_SERVICE) as android.media.AudioManager
-        fun media(list: List<android.media.AudioPlaybackConfiguration>) =
-            list.any { it.audioAttributes.usage == android.media.AudioAttributes.USAGE_MEDIA }
-        audioPlaying = try { media(am.activePlaybackConfigurations) } catch (_: Exception) { null }
-        try {
-            am.registerAudioPlaybackCallback(object : android.media.AudioManager.AudioPlaybackCallback() {
-                override fun onPlaybackConfigChanged(configs: MutableList<android.media.AudioPlaybackConfiguration>) {
-                    val now = media(configs)
-                    if (now == audioPlaying) return
-                    audioPlaying = now
-                    val c = current ?: return
-                    if (radioShown || isAndroidAuto(c.packageName)) return
-                    if (isPlaying(c) != now) force(c.packageName, now)
-                }
-            }, main)
-        } catch (e: Exception) { Log.w(TAG, "sortie audio : ${e.message}") }
-    }
-
     private fun shownPlaying(c: MediaController): Boolean {
         val real = isPlaying(c)
         val f = forcedPlay ?: return real
@@ -648,8 +624,32 @@ object MediaHub {
         } catch (e: Exception) { Log.w(TAG, "service Android Auto : ${e.message}") }
     }
 
+    /**
+     * CarPlay passe par le même lecteur RemoteUI qu'Android Auto, mais pas par le service Android
+     * Auto : ses commandes tactiles restaient sans effet (#36, à tester). Les touches média du
+     * système, celles du volant, vont à la session active.
+     */
+    @Volatile private var carPlay = false
+
+    private fun systemMediaKey(code: Int) {
+        val am = appContext?.getSystemService(Context.AUDIO_SERVICE) as? android.media.AudioManager ?: return
+        val t = android.os.SystemClock.uptimeMillis()
+        am.dispatchMediaKeyEvent(KeyEvent(t, t, KeyEvent.ACTION_DOWN, code, 0))
+        am.dispatchMediaKeyEvent(KeyEvent(t, t, KeyEvent.ACTION_UP, code, 0))
+        Log.i(TAG, "CarPlay : touche média système $code")
+    }
+
     /** Commande envoyée au service Android Auto ; à défaut, touche média vers sa session. */
     private fun aaControl(c: MediaController, code: Int, fallbackKey: Int) {
+        if (carPlay) {
+            // Retour sur CarPlay depuis une autre source : on rouvre CarPlay, qui reprend la main
+            if (code == AA_PLAY && sourcePkg != AA_MBS) {
+                appContext?.let { app.mg4dash.system.Apps.open(it, app.mg4dash.system.Apps.CARPLAY, "CarPlay") }
+                main.postDelayed({ systemMediaKey(KeyEvent.KEYCODE_MEDIA_PLAY) }, 1500)
+                return
+            }
+            systemMediaKey(fallbackKey); return
+        }
         val b = aaService
         if (b == null) { bindAndroidAuto(); mediaKey(c, fallbackKey); return }
         val data = android.os.Parcel.obtain(); val reply = android.os.Parcel.obtain()
@@ -679,7 +679,7 @@ object MediaHub {
 
     /** Appli d'origine d'une source ; le Bluetooth (sans appli à lui) est lu par l'appli Média SAIC. */
     private fun ownerOf(pkg: String): ComponentName? = when (pkg) {
-        AA_MBS -> app.mg4dash.system.Apps.ANDROID_AUTO
+        AA_MBS -> if (carPlay) app.mg4dash.system.Apps.CARPLAY else app.mg4dash.system.Apps.ANDROID_AUTO
         "com.android.bluetooth" -> app.mg4dash.system.Apps.MEDIA
         RADIO -> appContext?.packageManager?.let { pm -> (pm.getLaunchIntentForPackage(pkg) ?: pm.getLaunchIntentForPackage(SaicRadio.HMI_PKG))?.component }
         else -> appContext?.packageManager?.getLaunchIntentForPackage(pkg)?.component
