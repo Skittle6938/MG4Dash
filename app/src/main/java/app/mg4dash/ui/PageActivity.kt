@@ -66,6 +66,8 @@ abstract class PageActivity : AppCompatActivity() {
         builtVertical = Dock.vertical(this)
         setContentView(root)
         buildBody()
+        // Même contour de panneaux que l'accueil, estompé ou complet selon le réglage (#40)
+        FadeOutline.applyTo(root)
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) { CarBridge.state.collect { render(it) } }
         }
