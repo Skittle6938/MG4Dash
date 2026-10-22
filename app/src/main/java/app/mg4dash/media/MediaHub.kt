@@ -535,6 +535,7 @@ object MediaHub {
         pkg == "com.android.bluetooth" -> "BLUETOOTH"
         pkg == "com.saicmotor.radio" -> "RADIO"
         pkg == "com.saicmotor.media" -> "USB"
+        pkg == AA_MBS && carPlay -> "CARPLAY"
         pkg.startsWith("com.allgo.app.androidauto") || pkg == AA_MBS -> "ANDROID AUTO"
         pkg.startsWith("com.allgo.carplay") -> "CARPLAY"
         else -> appContext?.let { ctx ->
@@ -631,12 +632,58 @@ object MediaHub {
      */
     @Volatile private var carPlay = false
 
+    /**
+     * Service CarPlay d'allgo (ICarPlayService, relevé dans AllgoCarplay_EH32) :
+     * dispatchKeyEvent(code, 2 = appui + relâchement) sur 85 / 87 / 88 / 126 / 127 (transaction 4),
+     * launchApp(4 = « À l'écoute ») (transaction 13). Les touches média du système ne lui parvenaient pas.
+     */
+    private const val CP_DESCRIPTOR = "com.allgo.carplay.service.ICarPlayService"
+    @Volatile private var cpService: android.os.IBinder? = null
+    private val cpConnection = object : android.content.ServiceConnection {
+        override fun onServiceConnected(name: ComponentName?, service: android.os.IBinder?) { cpService = service; Log.i(TAG, "service CarPlay connecté") }
+        override fun onServiceDisconnected(name: ComponentName?) { cpService = null }
+    }
+
+    private fun bindCarPlay() {
+        val ctx = appContext ?: return
+        try {
+            val ok = ctx.bindService(Intent().setComponent(ComponentName("com.allgo.carplay.service", "com.allgo.carplay.service.CarPlayService")),
+                cpConnection, android.content.Context.BIND_AUTO_CREATE)
+            Log.i(TAG, "liaison au service CarPlay : $ok")
+        } catch (e: Exception) { Log.w(TAG, "service CarPlay : ${e.message}") }
+    }
+
+    private fun cpCall(tx: Int, vararg args: Int): Boolean {
+        val b = cpService ?: run { bindCarPlay(); return false }
+        val data = android.os.Parcel.obtain(); val reply = android.os.Parcel.obtain()
+        return try {
+            data.writeInterfaceToken(CP_DESCRIPTOR)
+            args.forEach { data.writeInt(it) }
+            b.transact(tx, data, reply, 0)
+            reply.readException()
+            Log.i(TAG, "CarPlay transaction $tx ${args.joinToString()} → ${reply.readInt()}")
+            true
+        } catch (e: Exception) { Log.w(TAG, "CarPlay transaction $tx : ${e.message}"); false }
+        finally { data.recycle(); reply.recycle() }
+    }
+
+    /** Touche média vers CarPlay ; à défaut de service, touche média du système. */
     private fun systemMediaKey(code: Int) {
+        if (cpCall(4, code, 2)) return
         val am = appContext?.getSystemService(Context.AUDIO_SERVICE) as? android.media.AudioManager ?: return
         val t = android.os.SystemClock.uptimeMillis()
         am.dispatchMediaKeyEvent(KeyEvent(t, t, KeyEvent.ACTION_DOWN, code, 0))
         am.dispatchMediaKeyEvent(KeyEvent(t, t, KeyEvent.ACTION_UP, code, 0))
         Log.i(TAG, "CarPlay : touche média système $code")
+    }
+
+    /** Toucher sur la carte média en CarPlay : CarPlay au premier plan, sur l'écran « À l'écoute ». */
+    fun openCarPlayNowPlaying(): Boolean {
+        if (!carPlay || radioShown) return false
+        val ctx = appContext ?: return false
+        app.mg4dash.system.Apps.open(ctx, app.mg4dash.system.Apps.CARPLAY, "CarPlay")
+        main.postDelayed({ cpCall(13, 4) }, 600)
+        return true
     }
 
     /** Commande envoyée au service Android Auto ; à défaut, touche média vers sa session. */

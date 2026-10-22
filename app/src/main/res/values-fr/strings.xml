@@ -440,6 +440,8 @@
     <string name="weather_rain">Pluie %1$d %%</string>
     <string name="st_energy_card_power">Puissance en direct dans la carte énergie</string>
     <string name="st_energy_card_power_desc">Barre de puissance, kW, V · A et moyenne au lieu du mode de conduite et du KERS ; la ligne charge / V2L apparaît câble branché, et la page Puissance quitte le widget du bas.</string>
+    <string name="st_shortcuts_page">Page de raccourcis dans la carte</string>
+    <string name="st_shortcuts_page_desc">Désactivée : le bouton en haut à droite de la carte passe seulement de la carte à la consommation</string>
     <string name="aa_title">ANDROID AUTO</string>
     <string name="aa_ready">Téléphone connecté · Appuyer pour ouvrir</string>
     <string name="aa_waiting">Branchez votre téléphone en USB</string>

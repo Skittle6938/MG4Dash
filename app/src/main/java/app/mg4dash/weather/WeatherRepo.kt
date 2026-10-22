@@ -59,6 +59,8 @@ object WeatherRepo {
         val updatedAt: Long,
         val todayMin: Int? = null,
         val todayMax: Int? = null,
+        /** Risque de pluie du jour, en % (#34). */
+        val rainPct: Int? = null,
     )
 
     private val _weather = MutableStateFlow<Weather?>(null)
@@ -81,7 +83,7 @@ object WeatherRepo {
                 "Paris", 14, 12, 2, 18, 72,
                 listOf(Hour("14h", 2, 14), Hour("15h", 3, 15), Hour("16h", 61, 13), Hour("17h", 61, 12), Hour("18h", 3, 11)),
                 listOf(Day("Mer", 3, 8, 15), Day("Jeu", 0, 7, 17), Day("Ven", 61, 9, 13)),
-                System.currentTimeMillis(), todayMin = 9, todayMax = 17,
+                System.currentTimeMillis(), todayMin = 9, todayMax = 17, rainPct = 20,
             )
             return
         }
@@ -220,7 +222,7 @@ object WeatherRepo {
             Locale.US,
             "https://api.open-meteo.com/v1/forecast?latitude=%.4f&longitude=%.4f" +
                 "&current=temperature_2m,apparent_temperature,relative_humidity_2m,weather_code,wind_speed_10m,is_day" +
-                "&hourly=temperature_2m,weather_code,is_day&daily=weather_code,temperature_2m_max,temperature_2m_min" +
+                "&hourly=temperature_2m,weather_code,is_day&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max" +
                 "&forecast_days=4&timezone=auto",
             lat, lon,
         )
@@ -300,6 +302,7 @@ object WeatherRepo {
             feelsC = Math.round(cur.getDouble("apparent_temperature")).toInt(),
             code = night(cur.getInt("weather_code"), cur.optInt("is_day", 1)),
             windKmh = Math.round(cur.getDouble("wind_speed_10m")).toInt(),
+            rainPct = daily.optJSONArray("precipitation_probability_max")?.takeIf { !it.isNull(0) }?.optInt(0),
             humidity = cur.getInt("relative_humidity_2m"),
             hours = hours,
             days = days,

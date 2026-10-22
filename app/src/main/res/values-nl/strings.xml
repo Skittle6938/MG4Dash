@@ -440,6 +440,8 @@
     <string name="weather_rain">Regen %1$d %%</string>
     <string name="st_energy_card_power">Live vermogen in de energiekaart</string>
     <string name="st_energy_card_power_desc">Vermogensbalk, kW, V · A en gemiddelde in plaats van rijmodus en KERS; de laad- / V2L-regel verschijnt met kabel aangesloten en de pagina Vermogen verlaat de onderste widget.</string>
+    <string name="st_shortcuts_page">Snelkoppelingenpagina in de kaartkaart</string>
+    <string name="st_shortcuts_page_desc">Uit: de knop rechtsboven op de kaart wisselt alleen tussen kaart en verbruik</string>
     <string name="aa_title">ANDROID AUTO</string>
     <string name="aa_ready">Telefoon verbonden · Tik om te openen</string>
     <string name="aa_waiting">Sluit je telefoon aan via USB</string>
