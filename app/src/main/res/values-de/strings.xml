@@ -437,6 +437,9 @@
     <string name="ac_cycle_off">Kompressor aus</string>
     <string name="ac_cycle_started">A/C im Intervall an, A/C tippen zum Beenden</string>
     <string name="ac_cycle_need_on">Zuerst die Klimaanlage einschalten</string>
+    <string name="weather_rain">Regen %1$d %%</string>
+    <string name="st_energy_card_power">Live-Leistung in der Energiekarte</string>
+    <string name="st_energy_card_power_desc">Leistungsbalken, kW, V · A und Durchschnitt statt Fahrmodus und KERS; die Lade- / V2L-Zeile erscheint bei eingestecktem Kabel, die Leistungsseite verlässt das untere Widget.</string>
     <string name="aa_title">ANDROID AUTO</string>
     <string name="aa_ready">Telefon verbunden · Zum Öffnen tippen</string>
     <string name="aa_waiting">Telefon per USB verbinden</string>

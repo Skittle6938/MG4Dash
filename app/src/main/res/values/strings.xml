@@ -437,6 +437,9 @@
     <string name="ac_cycle_off">Compressor off</string>
     <string name="ac_cycle_started">Intermittent A/C on, tap A/C to stop</string>
     <string name="ac_cycle_need_on">Turn the climate on first</string>
+    <string name="weather_rain">Rain %1$d %%</string>
+    <string name="st_energy_card_power">Live power in the energy card</string>
+    <string name="st_energy_card_power_desc">Power bar, kW, V · A and average instead of the drive mode and KERS; the charge / V2L line shows when plugged in, and the Live power page leaves the bottom widget.</string>
     <string name="aa_title">ANDROID AUTO</string>
     <string name="aa_ready">Phone connected · Tap to open</string>
     <string name="aa_waiting">Connect your phone via USB</string>
