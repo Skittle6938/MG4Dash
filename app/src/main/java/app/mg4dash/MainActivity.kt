@@ -661,12 +661,16 @@ class MainActivity : AppCompatActivity() {
             renderSecondary()
             lifecycleScope.launch { updatePower() }
         }
-        b.mapZoomIn.setOnClickListener { mapCard.zoom(1) }
-        b.mapZoomOut.setOnClickListener { mapCard.zoom(-1) }
-        b.mapFullscreen.setOnClickListener { setMapFullscreen(hiddenForMap == null) }
-        b.mapCenter.setOnClickListener { mapCard.recenter(LocationRepo.location.value); tintMapCenter() }
+        // Boutons masqués (#15) : chaque appui relance les 6 s d'affichage
+        b.mapZoomIn.setOnClickListener { extendMapButtons(); mapCard.zoom(1) }
+        b.mapZoomOut.setOnClickListener { extendMapButtons(); mapCard.zoom(-1) }
+        b.mapFullscreen.setOnClickListener { extendMapButtons(); setMapFullscreen(hiddenForMap == null) }
+        b.mapCenter.setOnClickListener { extendMapButtons(); mapCard.recenter(LocationRepo.location.value); tintMapCenter() }
         tintMapCenter()
         mapCard.onTouch = { showMapButtons() }
+        // Appui long sur la carte (ou sur son bouton en haut à droite) : une autre appli à sa place (#41)
+        mapCard.onLongPress = { pickMapApp() }
+        b.widgetToggle.setOnLongClickListener { pickMapApp(); true }
         applyMapButtons()
         // Carte → Consommation → Raccourcis → Carte (issue #6 : la consommation dans le widget carte)
         b.widgetToggle.setOnClickListener {
@@ -708,6 +712,9 @@ class MainActivity : AppCompatActivity() {
     /** Fin de l'affichage des boutons masqués de la carte (uptime), après un toucher. */
     private var mapButtonsUntil = 0L
     private val hideMapButtons = Runnable { applyMapButtons() }
+
+    /** Appui sur un bouton de la carte pendant qu'ils sont affichés : on repart pour 6 s. */
+    private fun extendMapButtons() { if (android.os.SystemClock.uptimeMillis() < mapButtonsUntil) showMapButtons() }
 
     private fun showMapButtons() {
         if (!prefs.mapAutoHide) return
@@ -809,6 +816,38 @@ class MainActivity : AppCompatActivity() {
         b.widgetToggle.setImageResource(when (mode) { 0 -> R.drawable.ic_bolt; 2 -> if (prefs.shortcutsPage) R.drawable.ic_apps else R.drawable.ic_map; else -> R.drawable.ic_map })
         navBanner?.show(app.mg4dash.map.NavRepo.nav.value?.takeIf { mode == 0 })
         if (shortcuts) renderShortcuts()
+        applyMapApp(mode == 0)
+    }
+
+    /** Appli intégrée au widget carte (#41, essai) et son composant. */
+    private var mapAppView: android.view.ViewGroup? = null
+    private var mapAppCn: android.content.ComponentName? = null
+
+    private fun pickMapApp() {
+        app.mg4dash.shortcuts.Shortcuts.pickApp(this, getString(R.string.map_app_pick), getString(R.string.map_app_osm)) { cn ->
+            prefs.mapApp = cn?.flattenToString()
+            applyHomeWidget()
+        }
+    }
+
+    private fun applyMapApp(show: Boolean) {
+        val cn = prefs.mapApp?.let { android.content.ComponentName.unflattenFromString(it) }
+        if (cn != mapAppCn) {
+            mapAppView?.let { b.mapCard.removeView(it) }
+            mapAppView = null; mapAppCn = null
+        }
+        if (cn == null) return
+        if (mapAppView == null) {
+            val v = app.mg4dash.ui.EmbeddedApp.create(this, cn)
+            if (v == null) {
+                android.widget.Toast.makeText(this, R.string.map_app_unavailable, android.widget.Toast.LENGTH_LONG).show()
+                prefs.mapApp = null; return
+            }
+            // Par-dessus la carte et ses boutons, sous le bouton de bascule
+            b.mapCard.addView(v, b.mapCard.indexOfChild(b.widgetToggle), android.widget.FrameLayout.LayoutParams(-1, -1))
+            mapAppView = v; mapAppCn = cn
+        }
+        mapAppView?.visibility = if (show) View.VISIBLE else View.GONE
     }
 
     private fun renderShortcuts() {
@@ -968,8 +1007,11 @@ class MainActivity : AppCompatActivity() {
         // Chiffres posés près de la barre (#29), prise pleine avec éclair, repères plus lisibles
         (b.battery.parent as LinearLayout).gravity = Gravity.BOTTOM
         // Prise pleine avec éclair, réduite pour que km + prise fassent la hauteur du % (#29)
-        b.rangePlug.setImageResource(R.drawable.ic_range_plug_bolt)
-        b.rangePlug.layoutParams = (b.rangePlug.layoutParams as LinearLayout.LayoutParams).apply { width = (75 * d).toInt(); height = (22 * d).toInt(); topMargin = (2 * d).toInt() }
+        // Câble long et épais, sous toute la largeur des km ; même écart avec la barre que le % (#29)
+        b.rangePlug.setImageResource(R.drawable.ic_range_plug_bolt_long)
+        b.rangePlug.layoutParams = (b.rangePlug.layoutParams as LinearLayout.LayoutParams).apply {
+            width = (110 * d).toInt(); height = (20 * d).toInt(); topMargin = (2 * d).toInt(); bottomMargin = (9 * d).toInt()
+        }
         b.batteryGauge.smallSp = 16f; b.batteryGauge.tickSp = 15f
         (b.batteryGauge.layoutParams as LinearLayout.LayoutParams).apply { height = (62 * d).toInt(); bottomMargin = (-2 * d).toInt() }
         val card = b.energyCard

@@ -445,6 +445,9 @@
     <string name="st_panel_outline">Rahmen der Startbildschirm-Kacheln</string>
     <string name="st_panel_fade">Ausgeblendet (Kombiinstrument-Stil)</string>
     <string name="st_panel_full">Vollständig</string>
+    <string name="map_app_pick">App im Kartenfeld (Test)</string>
+    <string name="map_app_osm">OpenStreetMap-Karte (Standard)</string>
+    <string name="map_app_unavailable">Diese Firmware kann keine andere App im Kartenfeld anzeigen</string>
     <string name="aa_title">ANDROID AUTO</string>
     <string name="aa_ready">Telefon verbunden · Zum Öffnen tippen</string>
     <string name="aa_waiting">Telefon per USB verbinden</string>

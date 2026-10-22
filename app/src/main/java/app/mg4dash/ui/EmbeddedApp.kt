@@ -1,0 +1,52 @@
+package app.mg4dash.ui
+
+import android.app.Activity
+import android.content.ComponentName
+import android.content.Context
+import android.content.Intent
+import android.view.View
+import android.view.ViewGroup
+import app.mg4dash.system.Log
+
+/**
+ * Une autre appli (Waze, ABRP…) affichée dans le widget carte (#41, essai). Android 9 a un
+ * composant caché, android.app.ActivityView (celui du launcher voiture d'AOSP) : il lance l'appli
+ * dans un écran virtuel intégré à la vue et lui transmet les touchers. Réservé aux applis système,
+ * ce qu'est MG4Dash ; appelé par réflexion, null s'il manque sur ce firmware.
+ */
+object EmbeddedApp {
+    private const val TAG = "AppCarte"
+
+    fun create(activity: Activity, cn: ComponentName): ViewGroup? = try {
+        val cls = Class.forName("android.app.ActivityView")
+        val view = cls.getConstructor(Context::class.java).newInstance(activity) as ViewGroup
+        val start = cls.getMethod("startActivity", Intent::class.java)
+        val intent = Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER).setComponent(cn)
+            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        // L'écran virtuel n'existe qu'une fois la surface créée : on réessaie jusqu'à ce qu'il soit prêt
+        fun tryStart(n: Int) {
+            view.postDelayed({
+                if (!view.isAttachedToWindow) return@postDelayed
+                try {
+                    start.invoke(view, intent)
+                    Log.i(TAG, "${cn.flattenToShortString()} lancée dans le widget carte")
+                } catch (e: java.lang.reflect.InvocationTargetException) {
+                    if (n < 20) tryStart(n + 1) else Log.w(TAG, "lancement impossible : ${e.cause?.message}")
+                }
+            }, 300)
+        }
+        view.addOnAttachStateChangeListener(object : View.OnAttachStateChangeListener {
+            override fun onViewAttachedToWindow(v: View) = tryStart(0)
+            override fun onViewDetachedFromWindow(v: View) = release(v)
+        })
+        Log.i(TAG, "ActivityView disponible")
+        view
+    } catch (e: Throwable) {
+        Log.w(TAG, "ActivityView indisponible : ${e.javaClass.simpleName} ${e.message}")
+        null
+    }
+
+    fun release(v: View) {
+        try { v.javaClass.getMethod("release").invoke(v) } catch (_: Throwable) {}
+    }
+}

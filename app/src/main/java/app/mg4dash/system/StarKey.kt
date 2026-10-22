@@ -73,20 +73,29 @@ object StarKey {
                 // Valeur « caméra 360 » : 3 sur le launcher SWI69, 6 sur SWI173 (relevé dans le journal, #33)
                 val avm = if (Firmware.gen == Firmware.Gen.SWI173) FUNCTION_AVM_SWI173 else FUNCTION_AVM
                 if (fn != avm || Prefs(app).valetMode) return
-                openAvm(app)
+                toggleAvm(app)
             }
         }
         try { app.registerReceiver(receiver, IntentFilter(ACTION)); Log.i(TAG, "écoute des boutons du volant") }
         catch (e: Exception) { Log.w(TAG, "écoute impossible : ${e.message}") }
     }
 
-    /** Démarre le service de la caméra 360 installée (START_ENTER, comme le launcher SAIC). */
-    fun openAvm(context: Context): Boolean {
+    /**
+     * « * » réglé sur la caméra 360 : l'ouvre, ou la referme si elle est déjà à l'écran (#33),
+     * comme le launcher SAIC (START_ENTER / STOP vers le service de la caméra installée).
+     */
+    fun toggleAvm(context: Context): Boolean {
         for ((pkg, svc) in AVM) {
             if (!Firmware.installed(context, pkg)) continue
+            @Suppress("DEPRECATION")
+            val shown = try {
+                (context.getSystemService(Context.ACTIVITY_SERVICE) as android.app.ActivityManager)
+                    .getRunningTasks(1).firstOrNull()?.topActivity?.packageName == pkg
+            } catch (_: Exception) { false }
+            val action = if (shown) "com.saicmotor.avm.STOP" else "com.saicmotor.avm.START_ENTER"
             return try {
-                context.startService(Intent("com.saicmotor.avm.START_ENTER").setComponent(ComponentName(pkg, svc)))
-                Log.i(TAG, "caméra 360 : $svc démarré"); true
+                context.startService(Intent(action).setComponent(ComponentName(pkg, svc)))
+                Log.i(TAG, "caméra 360 : $action → $svc"); true
             } catch (e: Exception) { Log.w(TAG, "caméra 360 : $svc : ${e.message}"); false }
         }
         return false

@@ -63,6 +63,10 @@ class Prefs(context: Context) {
     var shortcutsPage: Boolean
         get() = sp.getBoolean("shortcuts_page", true)
         set(v) = sp.edit().putBoolean("shortcuts_page", v).apply()
+    /** Appli affichée dans le widget carte à la place de la carte (#41, essai) ; null = carte OSM. */
+    var mapApp: String?
+        get() = sp.getString("map_app", null)
+        set(v) = sp.edit().putString("map_app", v).apply()
     var mapOfflineSwitch: Boolean
         get() = sp.getBoolean("map_offline_switch", true)
         set(v) = sp.edit().putBoolean("map_offline_switch", v).apply()

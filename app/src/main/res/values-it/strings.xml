@@ -445,6 +445,9 @@
     <string name="st_panel_outline">Contorno dei pannelli della home</string>
     <string name="st_panel_fade">Sfumato (stile cruscotto)</string>
     <string name="st_panel_full">Completo</string>
+    <string name="map_app_pick">App nella scheda mappa (prova)</string>
+    <string name="map_app_osm">Mappa OpenStreetMap (predefinita)</string>
+    <string name="map_app_unavailable">Questo firmware non può mostrare un\'altra app nella scheda mappa</string>
     <string name="aa_title">ANDROID AUTO</string>
     <string name="aa_ready">Telefono connesso · Tocca per aprire</string>
     <string name="aa_waiting">Collega il telefono via USB</string>
