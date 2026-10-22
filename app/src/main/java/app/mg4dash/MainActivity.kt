@@ -800,7 +800,8 @@ class MainActivity : AppCompatActivity() {
             else v.visibility = if (shortcuts || consumption) View.INVISIBLE else View.VISIBLE
         }
         if (mode == 0) renderLocation(LocationRepo.location.value, CarBridge.state.value)
-        b.widgetToggle.setImageResource(when (mode) { 0 -> R.drawable.ic_bolt; 2 -> R.drawable.ic_apps; else -> R.drawable.ic_map })
+        // L'icône annonce la page suivante ; sans page de raccourcis (#38), la conso ramène à la carte
+        b.widgetToggle.setImageResource(when (mode) { 0 -> R.drawable.ic_bolt; 2 -> if (prefs.shortcutsPage) R.drawable.ic_apps else R.drawable.ic_map; else -> R.drawable.ic_map })
         navBanner?.show(app.mg4dash.map.NavRepo.nav.value?.takeIf { mode == 0 })
         if (shortcuts) renderShortcuts()
     }
