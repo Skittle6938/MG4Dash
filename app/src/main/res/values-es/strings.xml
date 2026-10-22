@@ -437,6 +437,9 @@
     <string name="ac_cycle_off">Compresor apagado</string>
     <string name="ac_cycle_started">A/C intermitente activado, toque A/C para detenerlo</string>
     <string name="ac_cycle_need_on">Encienda primero el clima</string>
+    <string name="weather_rain">Lluvia %1$d %%</string>
+    <string name="st_energy_card_power">Potencia en directo en la tarjeta de energía</string>
+    <string name="st_energy_card_power_desc">Barra de potencia, kW, V · A y media en lugar del modo de conducción y el KERS; la línea de carga / V2L aparece con el cable enchufado y la página Potencia sale del widget inferior.</string>
     <string name="aa_title">ANDROID AUTO</string>
     <string name="aa_ready">Teléfono conectado · Pulse para abrir</string>
     <string name="aa_waiting">Conecte su teléfono por USB</string>

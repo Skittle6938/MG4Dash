@@ -140,6 +140,14 @@ class Prefs(context: Context) {
         get() = sp.getInt("power_fx", 4)
         set(v) = sp.edit().putInt("power_fx", v).apply()
 
+    /**
+     * Carte énergie « puissance » (#29) : barre de puissance en direct dans la carte énergie, sans
+     * mode de conduite ni KERS ; la page Puissance quitte alors le widget défilant.
+     */
+    var energyCardPower: Boolean
+        get() = sp.getBoolean("energy_card_power", false)
+        set(v) = sp.edit().putBoolean("energy_card_power", v).apply()
+
     /** Widget secondaire de la colonne droite : 0 = trajet, 1 = statut, 2 = météo compacte. */
     var secondaryWidget: Int
         get() = sp.getInt("secondary_widget", 0)

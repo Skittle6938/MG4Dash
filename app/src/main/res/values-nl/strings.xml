@@ -437,6 +437,9 @@
     <string name="ac_cycle_off">Compressor uit</string>
     <string name="ac_cycle_started">A/C met tussenpozen aan, tik op A/C om te stoppen</string>
     <string name="ac_cycle_need_on">Zet eerst de airco aan</string>
+    <string name="weather_rain">Regen %1$d %%</string>
+    <string name="st_energy_card_power">Live vermogen in de energiekaart</string>
+    <string name="st_energy_card_power_desc">Vermogensbalk, kW, V · A en gemiddelde in plaats van rijmodus en KERS; de laad- / V2L-regel verschijnt met kabel aangesloten en de pagina Vermogen verlaat de onderste widget.</string>
     <string name="aa_title">ANDROID AUTO</string>
     <string name="aa_ready">Telefoon verbonden · Tik om te openen</string>
     <string name="aa_waiting">Sluit je telefoon aan via USB</string>

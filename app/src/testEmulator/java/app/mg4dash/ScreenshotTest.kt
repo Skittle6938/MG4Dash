@@ -147,6 +147,19 @@ class ScreenshotTest {
         shoot(MainActivity::class.java, name)
     }
 
+    /** Carte énergie « puissance » (#29), styles Complet et Carte. */
+    @Test fun homeEnergyCardPower() {
+        org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE).edit()
+            .putInt("theme_mode", 1).putBoolean("energy_card_power", true).commit()
+        shoot(MainActivity::class.java, "home_energy_card_power.png")
+    }
+
+    @Test fun homeMapEnergyCardPower() {
+        org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE).edit()
+            .putInt("theme_mode", 1).putInt("home_style", 2).putInt("stack_page", 0).putBoolean("energy_card_power", true).commit()
+        shoot(MainActivity::class.java, "home_map_energy_card_power.png")
+    }
+
     @Test fun homeMapAutoHide() {
         org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE).edit().putBoolean("map_auto_hide", true).apply()
         shoot(MainActivity::class.java, "home_map_auto_hide.png")

@@ -134,6 +134,7 @@ class SettingsActivity : AppCompatActivity() {
         val models = app.mg4dash.energy.BatteryCapacity.MODELS.map { it.first }
         row(energy, *choiceButtons(models.map { "$it kWh" }, { models.indexOf(prefs.batteryModel) }) { prefs.batteryModel = models[it] })
         toggle(energy, R.string.st_xpower, R.string.st_xpower_desc, { prefs.xpower }) { prefs.xpower = it }
+        toggle(energy, R.string.st_energy_card_power, R.string.st_energy_card_power_desc, { prefs.energyCardPower }) { prefs.energyCardPower = it }
         powerFxSetting(energy)
 
         // ════ Colonne droite : système, connexions, diagnostic ════

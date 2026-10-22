@@ -437,6 +437,9 @@
     <string name="ac_cycle_off">Compresseur arrêté</string>
     <string name="ac_cycle_started">A/C intermittent activé, touchez A/C pour l\'arrêter</string>
     <string name="ac_cycle_need_on">Allumez d\'abord la clim</string>
+    <string name="weather_rain">Pluie %1$d %%</string>
+    <string name="st_energy_card_power">Puissance en direct dans la carte énergie</string>
+    <string name="st_energy_card_power_desc">Barre de puissance, kW, V · A et moyenne au lieu du mode de conduite et du KERS ; la ligne charge / V2L apparaît câble branché, et la page Puissance quitte le widget du bas.</string>
     <string name="aa_title">ANDROID AUTO</string>
     <string name="aa_ready">Téléphone connecté · Appuyer pour ouvrir</string>
     <string name="aa_waiting">Branchez votre téléphone en USB</string>
