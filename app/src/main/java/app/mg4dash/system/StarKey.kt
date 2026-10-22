@@ -5,6 +5,7 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import app.mg4dash.media.MediaHub
 
 /**
  * Bouton « * » du volant réglé sur la caméra 360 (issue #33). Le service du launcher SAIC reçoit
@@ -17,6 +18,10 @@ object StarKey {
     private const val TAG = "StarKey"
     private const val ACTION = "com.saic.keyevent.hardkey.report"
     private const val KEY_LEFT_STAR = 5
+    /** Joystick droit (codes relevés sur SWI173, #33, et dans MG4Control) : 299 gauche, 300 droite, 301 OK. */
+    private const val JOY_LEFT = 299
+    private const val JOY_RIGHT = 300
+    private const val JOY_OK = 301
     /** Settings.System : fonction du « * » gauche ; 3 = caméra de recul / 360 (CarHardKey SAIC). */
     private const val STAR_FUNCTION = "star_key_function"
     private const val FUNCTION_AVM = 3
@@ -35,6 +40,18 @@ object StarKey {
                 val long = i.getBooleanExtra("android.intent.extra.hardkey.longpress", false)
                 // Diagnostic (#33) : chaque bouton du volant reçu, visible dans le journal des réglages
                 Log.i(TAG, "bouton volant : code $code ${if (down) "appuyé" else "relâché"}${if (long) " (long)" else ""}")
+                // SWI173 (#33) : le joystick droit n'agit pas sur la musique Bluetooth / DiAuto quand
+                // MG4Dash est l'accueil ; gauche = précédent, droite = suivant, OK = lecture / pause.
+                // Limité à SWI173 : ailleurs le joystick change déjà piste ou volume tout seul.
+                if (Firmware.gen == Firmware.Gen.SWI173 && !down && !long && code in JOY_LEFT..JOY_OK &&
+                    MediaHub.ownPlayerShown()) {
+                    when (code) {
+                        JOY_LEFT -> MediaHub.previous()
+                        JOY_RIGHT -> MediaHub.next()
+                        JOY_OK -> MediaHub.playPause()
+                    }
+                    return
+                }
                 if (code != KEY_LEFT_STAR || down || long) return
                 val fn = try { android.provider.Settings.System.getInt(app.contentResolver, STAR_FUNCTION, -1) } catch (_: Exception) { -1 }
                 Log.i(TAG, "« * » gauche relâché, fonction $fn")
