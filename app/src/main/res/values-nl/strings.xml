@@ -445,6 +445,9 @@
     <string name="st_panel_outline">Rand van de startpanelen</string>
     <string name="st_panel_fade">Vervagend (dashboardstijl)</string>
     <string name="st_panel_full">Volledig</string>
+    <string name="map_app_pick">App in de kaartkaart (test)</string>
+    <string name="map_app_osm">OpenStreetMap-kaart (standaard)</string>
+    <string name="map_app_unavailable">Deze firmware kan geen andere app in de kaartkaart tonen</string>
     <string name="aa_title">ANDROID AUTO</string>
     <string name="aa_ready">Telefoon verbonden · Tik om te openen</string>
     <string name="aa_waiting">Sluit je telefoon aan via USB</string>

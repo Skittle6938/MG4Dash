@@ -32,6 +32,8 @@ class MapCard(private val context: Context, holder: ViewGroup) {
     private var lastTouch = 0L
     /** Toucher sur la carte (fait réapparaître les boutons masqués, #15). */
     var onTouch: (() -> Unit)? = null
+    /** Appui long sur la carte : choisir une appli à afficher à sa place (#41). */
+    var onLongPress: (() -> Unit)? = null
     /** Niveau de zoom voulu : le suivi l'utilise, sinon chaque position annulait le zoom en cours. */
     private var zoomLevel = app.mg4dash.system.Prefs(context).mapZoom.coerceIn(14, 18).toDouble()
     /** Carte orientée selon le cap de la voiture (sinon nord en haut) ; 2e appui sur « recentrer ». */
@@ -74,7 +76,11 @@ class MapCard(private val context: Context, holder: ViewGroup) {
             // Le suivi ne s'arrête que sur un vrai déplacement au doigt (les événements de défilement
             // de l'animation coupaient le suivi en roulant), et reprend tout seul après 20 s.
             var downX = 0f; var downY = 0f
+            val longPress = android.view.GestureDetector(context, object : android.view.GestureDetector.SimpleOnGestureListener() {
+                override fun onLongPress(e: MotionEvent) { onLongPress?.invoke() }
+            })
             m.setOnTouchListener { _, ev ->
+                longPress.onTouchEvent(ev)
                 when (ev.actionMasked) {
                     MotionEvent.ACTION_DOWN -> { downX = ev.x; downY = ev.y; onTouch?.invoke() }
                     MotionEvent.ACTION_MOVE -> if (Math.hypot((ev.x - downX).toDouble(), (ev.y - downY).toDouble()) > 24) {
