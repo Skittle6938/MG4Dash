@@ -72,38 +72,15 @@ object EmbeddedApp {
         } catch (e: Throwable) { Log.w(TAG, "policy_control : ${e.message}") }
     }
 
-    private fun resize(v: View) = resizeTo(v, v.width, v.height)
-
-    private fun resizeTo(v: View, w: Int, h: Int) {
-        if (w <= 0 || h <= 0) return
+    private fun resize(v: View) {
+        if (v.width <= 0 || v.height <= 0) return
         try {
             val f = v.javaClass.getDeclaredField("mVirtualDisplay").apply { isAccessible = true }
             val vd = f.get(v) as? android.hardware.display.VirtualDisplay ?: return
             val dpi = v.resources.displayMetrics.densityDpi
-            vd.resize(w, h, dpi)
-            Log.i(TAG, "écran virtuel redimensionné : ${w}×${h}")
+            vd.resize(v.width, v.height, dpi)
+            Log.i(TAG, "écran virtuel redimensionné : ${v.width}×${v.height}")
         } catch (e: Throwable) { Log.w(TAG, "redimensionnement : ${e.message}") }
-    }
-
-    /**
-     * Relance (ou ramène au premier plan) l'appli dans son écran virtuel : si elle s'est fermée
-     * (retour arrière, plantage, mise à jour), le widget restait noir. Sans effet si elle tourne.
-     */
-    fun restart(v: View, cn: ComponentName) {
-        // Seulement si l'appli n'a plus aucune tâche : la relancer alors qu'elle tourne la faisait
-        // passer en plein écran sur l'écran principal
-        val alive = try {
-            @Suppress("DEPRECATION")
-            (v.context.getSystemService(Context.ACTIVITY_SERVICE) as android.app.ActivityManager).getRunningTasks(50)
-                .any { it.baseActivity?.packageName == cn.packageName || it.topActivity?.packageName == cn.packageName }
-        } catch (_: Throwable) { true }
-        if (alive) return
-        Log.i(TAG, "${cn.packageName} fermée : relance dans le widget carte")
-        try {
-            val intent = Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER).setComponent(cn)
-                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            v.javaClass.getMethod("startActivity", Intent::class.java).invoke(v, intent)
-        } catch (e: Throwable) { Log.w(TAG, "relance : ${e.cause?.message ?: e.message}") }
     }
 
     fun release(v: View) {
