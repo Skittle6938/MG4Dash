@@ -97,12 +97,27 @@ object Themes {
      * puis elle s'efface en fondu sur le nouvel écran.
      */
     fun recreateSmooth(activity: Activity) {
-        val shot = try {
-            val v = activity.window.decorView
-            if (v.width > 0 && v.height > 0) android.graphics.Bitmap.createBitmap(v.width, v.height, android.graphics.Bitmap.Config.ARGB_8888)
-                .also { v.draw(android.graphics.Canvas(it)) } else null
-        } catch (_: Throwable) { null }
-        if (shot != null) try {
+        if (recreating) return
+        recreating = true
+        val v = activity.window.decorView
+        if (v.width <= 0 || v.height <= 0) { recreating = false; activity.recreate(); return }
+        // Copie des pixels réellement affichés (PixelCopy) : un dessin logiciel de l'écran sortait
+        // noir sur la voiture (rendu matériel), d'où la seconde de noir avant le fondu
+        val shot = android.graphics.Bitmap.createBitmap(v.width, v.height, android.graphics.Bitmap.Config.ARGB_8888)
+        try {
+            android.view.PixelCopy.request(activity.window, shot, { result ->
+                if (result == android.view.PixelCopy.SUCCESS) overlayThenRecreate(activity, shot)
+                else { android.util.Log.w("MG4L.Theme", "capture : $result"); recreating = false; activity.recreate() }
+            }, android.os.Handler(android.os.Looper.getMainLooper()))
+        } catch (e: Throwable) { android.util.Log.w("MG4L.Theme", "capture : ${e.message}"); recreating = false; activity.recreate() }
+    }
+
+    @Volatile private var recreating = false
+
+    /** Fenêtre de l'ancienne image posée, puis recréation une fois qu'elle est dessinée. */
+    private fun overlayThenRecreate(activity: Activity, shot: android.graphics.Bitmap) {
+        if (activity.isFinishing || activity.isDestroyed) { recreating = false; return }
+        try {
             val app = activity.applicationContext
             val wm = app.getSystemService(Context.WINDOW_SERVICE) as android.view.WindowManager
             fadeWindow?.let { old -> try { wm.removeView(old) } catch (_: Throwable) {} }
@@ -119,7 +134,7 @@ object Themes {
             fadeWindow = img
             // Fondu image par image (sans animateur : l'échelle des animations peut être à 0 sur la voiture),
             // après un court délai pour laisser le nouvel écran se dessiner dessous
-            val t0 = android.os.SystemClock.uptimeMillis() + 400
+            val t0 = android.os.SystemClock.uptimeMillis() + 700
             img.post(object : Runnable {
                 override fun run() {
                     val k = (android.os.SystemClock.uptimeMillis() - t0).toFloat() / FADE_MS
@@ -128,7 +143,17 @@ object Themes {
                     img.postDelayed(this, 16)
                 }
             })
+            // Recréation seulement quand l'ancienne image est à l'écran, au-dessus de tout
+            img.viewTreeObserver.addOnPreDrawListener(object : android.view.ViewTreeObserver.OnPreDrawListener {
+                override fun onPreDraw(): Boolean {
+                    img.viewTreeObserver.removeOnPreDrawListener(this)
+                    img.postDelayed({ recreating = false; if (!activity.isFinishing && !activity.isDestroyed) activity.recreate() }, 50)
+                    return true
+                }
+            })
+            return
         } catch (e: Throwable) { android.util.Log.w("MG4L.Theme", "fondu : ${e.message}") }
+        recreating = false
         activity.recreate()
     }
 

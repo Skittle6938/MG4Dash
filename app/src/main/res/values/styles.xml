@@ -6,6 +6,9 @@
         <item name="android:statusBarColor">?attr/mgBgTop</item>
         <item name="android:navigationBarColor">?attr/mgBgTop</item>
         <item name="android:windowAnimationStyle">@null</item>
+        <!-- Fenêtres de dialogue aux couleurs du thème MG4Dash en cours (et non au style de la voiture) -->
+        <item name="android:alertDialogTheme">@style/MG4Dialog</item>
+        <item name="alertDialogTheme">@style/MG4Dialog</item>
         <item name="colorAccent">?attr/mgAction</item>
         <item name="android:fontFamily">sans-serif</item>
         <item name="android:textColor">?attr/mgTextValue</item>
@@ -31,6 +34,37 @@
         <item name="mgActionBorder">#FF4F91FF</item>
         <item name="mgActionTint">#262979FF</item>
         <item name="mgSelectTint">#2600D2FF</item>
+    </style>
+
+    <style name="MG4Dialog" parent="android:Theme.Material.Dialog.Alert">
+        <item name="android:windowBackground">@drawable/bg_dialog</item>
+        <item name="android:colorBackground">?attr/mgBgBottom</item>
+        <item name="android:textColorPrimary">?attr/mgTextValue</item>
+        <item name="android:textColorSecondary">?attr/mgTextSub</item>
+        <item name="android:textColor">?attr/mgTextValue</item>
+        <item name="android:textColorAlertDialogListItem">?attr/mgTextValue</item>
+        <item name="android:textColorHint">?attr/mgTextTitle</item>
+        <item name="android:colorAccent">?attr/mgSelect</item>
+        <item name="android:colorControlNormal">?attr/mgTextSub</item>
+        <item name="android:colorControlActivated">?attr/mgSelect</item>
+        <item name="android:fontFamily">sans-serif</item>
+        <item name="android:backgroundDimAmount">0.6</item>
+        <item name="android:buttonBarButtonStyle">@style/MG4DialogButton</item>
+        <item name="android:windowTitleStyle">@style/MG4DialogTitle</item>
+    </style>
+
+    <style name="MG4DialogButton" parent="android:Widget.Material.Button.Borderless.Colored">
+        <item name="android:textColor">?attr/mgSelect</item>
+        <item name="android:textSize">19sp</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:minHeight">56dp</item>
+        <item name="android:paddingStart">20dp</item>
+        <item name="android:paddingEnd">20dp</item>
+    </style>
+
+    <style name="MG4DialogTitle" parent="android:TextAppearance.Material.DialogWindowTitle">
+        <item name="android:textColor">?attr/mgTextValue</item>
+        <item name="android:textSize">22sp</item>
     </style>
 
     <style name="CardTitle">

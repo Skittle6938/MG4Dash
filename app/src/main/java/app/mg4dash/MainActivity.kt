@@ -847,7 +847,7 @@ class MainActivity : AppCompatActivity() {
         if (mapAppView == null) {
             val v = app.mg4dash.ui.EmbeddedApp.create(this, cn)
             if (v == null) {
-                android.widget.Toast.makeText(this, R.string.map_app_unavailable, android.widget.Toast.LENGTH_LONG).show()
+                app.mg4dash.ui.Toasts.show(this, R.string.map_app_unavailable, long = true)
                 prefs.mapApp = null; return
             }
             // Par-dessus la carte et ses boutons, sous le bouton de bascule

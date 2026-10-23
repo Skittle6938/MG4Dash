@@ -81,17 +81,17 @@ class PhoneActivity : PageActivity() {
         fun placeCall(ctx: Context, number: String) {
             val n = number.trim()
             if (n.isEmpty()) return
-            if (BuildConfig.MOCK) { Toast.makeText(ctx, "☎ $n", Toast.LENGTH_SHORT).show(); return }
+            if (BuildConfig.MOCK) { app.mg4dash.ui.Toasts.show(ctx, "☎ $n"); return }
             try {
                 val tm = ctx.getSystemService(Context.TELECOM_SERVICE) as TelecomManager
                 val hfp = tm.callCapablePhoneAccounts.firstOrNull { it.componentName.flattenToShortString().contains("HfpClientConnectionService") }
-                if (hfp == null) { Toast.makeText(ctx, R.string.ph_no_phone, Toast.LENGTH_LONG).show(); return }
+                if (hfp == null) { app.mg4dash.ui.Toasts.show(ctx, R.string.ph_no_phone, long = true); return }
                 val extras = Bundle().apply { putParcelable(TelecomManager.EXTRA_PHONE_ACCOUNT_HANDLE, hfp) }
                 tm.placeCall(Uri.fromParts("tel", n, null), extras)
                 Log.i("Téléphone", "appel lancé")
             } catch (e: Exception) {
                 Log.w("Téléphone", "appel : ${e.message}")
-                Toast.makeText(ctx, R.string.ph_call_failed, Toast.LENGTH_LONG).show()
+                app.mg4dash.ui.Toasts.show(ctx, R.string.ph_call_failed, long = true)
             }
         }
 
@@ -147,7 +147,7 @@ class PhoneActivity : PageActivity() {
                             }
                         }
                     }
-                    if (manual) Toast.makeText(ctx, if (started > 0) R.string.ph_sync_started else R.string.ph_no_phone, Toast.LENGTH_SHORT).show()
+                    if (manual) app.mg4dash.ui.Toasts.show(ctx, if (started > 0) R.string.ph_sync_started else R.string.ph_no_phone)
                     adapter.closeProfileProxy(profile, proxy)
                 }
                 override fun onServiceDisconnected(profile: Int) {}

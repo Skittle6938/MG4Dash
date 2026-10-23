@@ -33,11 +33,11 @@ object AcCycle {
     fun start(context: Context) {
         if (_active.value) return
         if (CarBridge.state.value.hvacOn != true) {
-            Toast.makeText(context, R.string.ac_cycle_need_on, Toast.LENGTH_SHORT).show(); return
+            app.mg4dash.ui.Toasts.show(context, R.string.ac_cycle_need_on); return
         }
         val prefs = Prefs(context.applicationContext)
         _active.value = true
-        Toast.makeText(context, R.string.ac_cycle_started, Toast.LENGTH_SHORT).show()
+        app.mg4dash.ui.Toasts.show(context, R.string.ac_cycle_started)
         Log.i(TAG, "démarré : ${prefs.acCycleOnSec} s marche / ${prefs.acCycleOffSec} s arrêt")
         job = scope.launch {
             var on = true

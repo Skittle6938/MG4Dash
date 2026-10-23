@@ -70,7 +70,7 @@ object PhoneFavorites {
             var book = PhoneActivity.contacts(activity)
             if (book.isEmpty()) book = remembered(prefs)
             if (book.isEmpty()) {
-                main.post { Toast.makeText(activity, R.string.ph_sync_started, Toast.LENGTH_LONG).show() }
+                main.post { app.mg4dash.ui.Toasts.show(activity, R.string.ph_sync_started, long = true) }
                 for (n in 0 until 15) {
                     Thread.sleep(1000)
                     book = PhoneActivity.contacts(activity)
@@ -80,7 +80,7 @@ object PhoneFavorites {
             remember(prefs, book)
             main.post {
                 if (activity.isFinishing) return@post
-                if (book.isEmpty()) { Toast.makeText(activity, R.string.ph_no_contacts, Toast.LENGTH_LONG).show(); return@post }
+                if (book.isEmpty()) { app.mg4dash.ui.Toasts.show(activity, R.string.ph_no_contacts, long = true); return@post }
                 val labels = book.map { "${it.name}  ·  ${it.number}" }
                 Shortcuts.searchList(activity, activity.getString(R.string.ph_contacts), labels) { w -> onPick(book[w]) }
             }

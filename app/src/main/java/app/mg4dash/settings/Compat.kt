@@ -141,7 +141,7 @@ object Compat {
             .setPositiveButton(R.string.st_close, null)
             .setNeutralButton(R.string.st_compat_open) { _, _ ->
                 try { a.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url))) } catch (_: Exception) {
-                    android.widget.Toast.makeText(a, R.string.st_compat_no_browser, android.widget.Toast.LENGTH_LONG).show()
+                    app.mg4dash.ui.Toasts.show(a, R.string.st_compat_no_browser, long = true)
                 }
             }
             .show()

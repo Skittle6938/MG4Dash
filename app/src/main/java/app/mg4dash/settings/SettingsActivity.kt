@@ -250,7 +250,7 @@ class SettingsActivity : AppCompatActivity() {
             // Ville de repli = position actuelle (#7) ; nom de ville déjà trouvé par la météo s'il existe
             val loc = app.mg4dash.map.LocationRepo.location.value
             if (loc == null) {
-                android.widget.Toast.makeText(this, R.string.st_no_location, android.widget.Toast.LENGTH_LONG).show()
+                app.mg4dash.ui.Toasts.show(this, R.string.st_no_location, long = true)
             } else {
                 prefs.weatherLat = loc.latitude.toFloat(); prefs.weatherLon = loc.longitude.toFloat()
                 prefs.weatherCity = WeatherRepo.weather.value?.place?.takeIf { it.isNotBlank() } ?: getString(R.string.weather_here)
@@ -276,7 +276,7 @@ class SettingsActivity : AppCompatActivity() {
             },
             button(getString(R.string.st_ha_test), R.color.accent_action) {
                 app.mg4dash.shortcuts.Shortcuts.testHa(this) { ok ->
-                    android.widget.Toast.makeText(this, if (ok) R.string.st_ha_ok else R.string.ha_error, android.widget.Toast.LENGTH_LONG).show()
+                    app.mg4dash.ui.Toasts.show(this, if (ok) R.string.st_ha_ok else R.string.ha_error, long = true)
                 }
             },
         )
@@ -473,7 +473,7 @@ class SettingsActivity : AppCompatActivity() {
     }
 
     private fun toastState(ok: Boolean) {
-        android.widget.Toast.makeText(this, getString(if (ok) R.string.st_home_changed else R.string.st_failed), android.widget.Toast.LENGTH_SHORT).show()
+        app.mg4dash.ui.Toasts.show(this, getString(if (ok) R.string.st_home_changed else R.string.st_failed))
     }
 
     private fun refreshHome() {

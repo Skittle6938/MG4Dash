@@ -126,6 +126,23 @@ class ScreenshotTest {
         }
     }
 
+    /** Fenêtres de dialogue au style MG4Dash (calibration de la température), sombre et clair. */
+    @Test fun dialogDark() = dialogShot(1, "dialog_dark.png")
+    @Test fun dialogLight() = dialogShot(2, "dialog_light.png")
+    private fun dialogShot(mode: Int, name: String) {
+        org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE).edit().putInt("theme_mode", mode).commit()
+        val act = Robolectric.buildActivity(ClimateActivity::class.java).setup().get()
+        app.mg4dash.ui.TempCalibration.show(act) {}
+        repeat(3) { shadowOf(Looper.getMainLooper()).idleFor(200, TimeUnit.MILLISECONDS) }
+        val dlg = org.robolectric.shadows.ShadowDialog.getLatestDialog()
+        val dv = dlg.window!!.decorView
+        dv.measure(View.MeasureSpec.makeMeasureSpec(900, View.MeasureSpec.EXACTLY), View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED))
+        dv.layout(0, 0, 900, dv.measuredHeight)
+        val bmp = Bitmap.createBitmap(900, dv.measuredHeight, Bitmap.Config.ARGB_8888); bmp.eraseColor(0xFF777777.toInt()); dv.draw(Canvas(bmp))
+        val dir = File("build/screenshots").apply { mkdirs() }
+        File(dir, name).outputStream().use { bmp.compress(Bitmap.CompressFormat.PNG, 100, it) }
+    }
+
     @Test fun settingsBottomBar() {
         org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE)
             .edit().putBoolean("vertical_dock", false).commit()
