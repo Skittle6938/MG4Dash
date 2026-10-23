@@ -153,6 +153,9 @@ class ScreenshotTest {
         repeat(3) { shadowOf(Looper.getMainLooper()).idleFor(200, TimeUnit.MILLISECONDS) }
         val card = act.findViewById<android.widget.FrameLayout>(R.id.mapCard)
         val toggle = act.findViewById<View>(R.id.widgetToggle)
+        // Comme une vraie appli intégrée : boutons et vitesse de la carte cachés, la carte reste dessous
+        listOf(R.id.mapButtons).forEach { act.findViewById<View>(it)?.visibility = View.GONE }
+        (act.findViewById<View>(R.id.mapSpeed)?.parent as? View)?.visibility = View.GONE
         card.addView(make(act), card.indexOfChild(toggle), android.widget.FrameLayout.LayoutParams(-1, -1))
         repeat(2) { shadowOf(Looper.getMainLooper()).idleFor(200, TimeUnit.MILLISECONDS) }
         save(act.window.decorView, name)

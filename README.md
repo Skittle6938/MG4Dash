@@ -69,7 +69,7 @@ Card titles are left out on every layout for a calmer screen; the media card kee
 ### Another app in the map card
 | | |
 |---|---|
-| ![EV route planner in the map card](docs/screenshots/home_map_app_planner.png?v=15) | ![Navigation app in the map card](docs/screenshots/home_map_app_guidance.png?v=15) |
+| ![EV route planner in the map card](docs/screenshots/home_map_app_planner.png?v=16) | ![Navigation app in the map card](docs/screenshots/home_map_app_guidance.png?v=16) |
 
 Long press the map (or its top right button) to show another installed app inside the map card instead of the OpenStreetMap map, for example an EV route planner such as ABRP or a navigation app such as Waze. The app runs live in the card and can be touched, and a full screen button (below the top right one) enlarges it like the map. Pick "OpenStreetMap map" in the same list to go back. *Illustrations: the apps shown here are drawn for the example.*
 
