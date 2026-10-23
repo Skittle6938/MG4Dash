@@ -41,19 +41,19 @@ class ScreenshotTest {
     /** Ecran plus bas (barres SAIC visibles, #43) : barre en bas. */
     @Test @Config(qualifiers = "w1790dp-h640dp-land-mdpi") fun homeBottomBarShort() {
         org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE)
-            .edit().putBoolean("vertical_dock", false).putInt("theme_mode", 1).commit()
+            .edit().putBoolean("vertical_dock", false).putInt("theme_mode", 1).putBoolean("fullscreen", false).commit()
         shoot(MainActivity::class.java, "home_bottom_bar_short.png")
     }
 
     @Test @Config(qualifiers = "w1790dp-h640dp-land-mdpi") fun energyBottomBarShort() {
         org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE)
-            .edit().putBoolean("vertical_dock", false).putInt("theme_mode", 1).commit()
+            .edit().putBoolean("vertical_dock", false).putInt("theme_mode", 1).putBoolean("fullscreen", false).commit()
         shoot(app.mg4dash.pages.EnergyActivity::class.java, "energy_bottom_bar_short.png")
     }
 
     @Test @Config(qualifiers = "w1790dp-h640dp-land-mdpi") fun homeVerticalShort() {
         org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE)
-            .edit().putInt("theme_mode", 1).commit()
+            .edit().putInt("theme_mode", 1).putBoolean("fullscreen", false).commit()
         shoot(MainActivity::class.java, "home_vertical_short.png")
     }
 
