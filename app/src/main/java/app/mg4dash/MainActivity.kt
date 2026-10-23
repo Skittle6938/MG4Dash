@@ -798,6 +798,7 @@ class MainActivity : AppCompatActivity() {
             hiddenForMap = null
         }
         b.mapFullscreen.setImageResource(if (on) R.drawable.ic_fullscreen_exit else R.drawable.ic_fullscreen)
+        mapAppFull?.setImageResource(if (on) R.drawable.ic_fullscreen_exit else R.drawable.ic_fullscreen)
     }
 
     private fun applyHomeWidget() {
@@ -837,11 +838,15 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    /** Bouton plein écran de l'appli intégrée à la carte. */
+    private var mapAppFull: android.widget.ImageButton? = null
+
     private fun applyMapApp(show: Boolean) {
         val cn = prefs.mapApp?.let { android.content.ComponentName.unflattenFromString(it) }
         if (cn != mapAppCn) {
             mapAppView?.let { b.mapCard.removeView(it) }
-            mapAppView = null; mapAppCn = null
+            mapAppFull?.let { b.mapCard.removeView(it) }
+            mapAppView = null; mapAppCn = null; mapAppFull = null
         }
         app.mg4dash.ui.EmbeddedApp.immersive(this, cn?.packageName)
         if (cn == null) return
@@ -854,8 +859,23 @@ class MainActivity : AppCompatActivity() {
             // Par-dessus la carte et ses boutons, sous le bouton de bascule
             b.mapCard.addView(v, b.mapCard.indexOfChild(b.widgetToggle), android.widget.FrameLayout.LayoutParams(-1, -1))
             mapAppView = v; mapAppCn = cn
+            // Bouton plein écran, comme pour la carte OpenStreetMap, sous le bouton de bascule
+            val d = resources.displayMetrics.density
+            val full = android.widget.ImageButton(this).apply {
+                setBackgroundResource(R.drawable.bg_button); scaleType = android.widget.ImageView.ScaleType.FIT_CENTER
+                val pad = (14 * d).toInt(); setPadding(pad, pad, pad, pad)
+                setColorFilter(color(R.color.text_value)); contentDescription = getString(R.string.cd_map_fullscreen)
+                setImageResource(if (hiddenForMap != null) R.drawable.ic_fullscreen_exit else R.drawable.ic_fullscreen)
+                setOnClickListener { setMapFullscreen(hiddenForMap == null) }
+            }
+            val size = resources.getDimensionPixelSize(R.dimen.touch_min)
+            b.mapCard.addView(full, android.widget.FrameLayout.LayoutParams(size, size, Gravity.TOP or Gravity.END).apply {
+                topMargin = (14 * d).toInt() + size + (10 * d).toInt(); rightMargin = (14 * d).toInt()
+            })
+            mapAppFull = full
         }
         mapAppView?.visibility = if (show) View.VISIBLE else View.GONE
+        mapAppFull?.visibility = if (show) View.VISIBLE else View.GONE
     }
 
     private fun renderShortcuts() {
