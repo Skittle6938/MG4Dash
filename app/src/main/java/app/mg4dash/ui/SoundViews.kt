@@ -31,35 +31,74 @@ class SoundFieldView(context: Context) : View(context) {
     private val car = RectF()
     private var lastTap = 0L
 
+    /** Ton de la voiture : gris clair transparent (couleur du texte, atténuée). */
+    private fun tone(alpha: Int) = (c(R.color.text_value) and 0x00FFFFFF) or (alpha shl 24)
+
     override fun onDraw(cv: Canvas) {
         val w = width.toFloat(); val h = height.toFloat()
-        // Voiture : proportions d'une MG4 vue de dessus, avant en haut
-        val ch = h - 56 * d; val cw = ch * 0.46f
+        // MG4 vue de dessus, avant en haut : 4,29 × 1,84 m, roues aux quatre coins, porte-à-faux courts
+        val ch = h - 56 * d; val cw = ch * 0.43f
         car.set((w - cw) / 2, 28 * d, (w + cw) / 2, 28 * d + ch)
-        val r = cw * 0.32f
-        fill.color = c(R.color.panel_raised); cv.drawRoundRect(car, r, r, fill)
-        body.color = c(R.color.panel_border); cv.drawRoundRect(car, r, r, body)
-        // Pare-brise et lunette
-        val glass = Paint(fill).apply { color = c(R.color.button_idle) }
-        cv.drawRoundRect(RectF(car.left + cw * 0.12f, car.top + ch * 0.22f, car.right - cw * 0.12f, car.top + ch * 0.36f), 10 * d, 10 * d, glass)
-        cv.drawRoundRect(RectF(car.left + cw * 0.16f, car.bottom - ch * 0.18f, car.right - cw * 0.16f, car.bottom - ch * 0.09f), 8 * d, 8 * d, glass)
-        // Sièges
-        val seat = Paint(fill).apply { color = c(R.color.button_idle) }
-        val sw = cw * 0.3f; val sh = ch * 0.12f
-        for ((cx, cy) in listOf(0.3f to 0.45f, 0.7f to 0.45f, 0.3f to 0.63f, 0.7f to 0.63f)) {
-            val x = car.left + cw * cx; val y = car.top + ch * cy
-            cv.drawRoundRect(RectF(x - sw / 2, y - sh / 2, x + sw / 2, y + sh / 2), 8 * d, 8 * d, seat)
+        val l = car.left; val t = car.top; val cx = car.centerX()
+        fun X(f: Float) = l + cw * f
+        fun Y(f: Float) = t + ch * f
+        // Rétroviseurs
+        fill.color = tone(90)
+        cv.drawRoundRect(RectF(X(-0.13f), Y(0.3f), X(0.03f), Y(0.345f)), 8 * d, 8 * d, fill)
+        cv.drawRoundRect(RectF(X(0.97f), Y(0.3f), X(1.13f), Y(0.345f)), 8 * d, 8 * d, fill)
+        // Caisse : nez arrondi et plongeant, flancs galbés, arrière court et droit
+        val shell = Path().apply {
+            moveTo(cx, Y(0f))
+            cubicTo(X(0.82f), Y(0f), X(0.97f), Y(0.02f), X(0.985f), Y(0.1f))
+            cubicTo(X(1.02f), Y(0.3f), X(1.0f), Y(0.7f), X(0.98f), Y(0.93f))
+            cubicTo(X(0.97f), Y(0.99f), X(0.8f), Y(1f), cx, Y(1f))
+            cubicTo(X(0.2f), Y(1f), X(0.03f), Y(0.99f), X(0.02f), Y(0.93f))
+            cubicTo(X(0f), Y(0.7f), X(-0.02f), Y(0.3f), X(0.015f), Y(0.1f))
+            cubicTo(X(0.03f), Y(0.02f), X(0.18f), Y(0f), cx, Y(0f))
+            close()
         }
+        // Pneus : seule la partie qui dépasse de la caisse est dessinée
+        cv.save(); cv.clipOutPath(shell)
+        fill.color = tone(90)
+        for (fy in listOf(0.12f, 0.77f)) for (fx in listOf(-0.05f, 0.87f))
+            cv.drawRoundRect(RectF(X(fx), Y(fy), X(fx + 0.18f), Y(fy + 0.12f)), 6 * d, 6 * d, fill)
+        cv.restore()
+        fill.color = tone(40); cv.drawPath(shell, fill)
+        body.color = tone(120); cv.drawPath(shell, body)
+        // Capot (nervures) et bandeau lumineux avant, comme la MG4
+        line.color = tone(70)
+        cv.drawLine(X(0.3f), Y(0.05f), X(0.33f), Y(0.22f), line); cv.drawLine(X(0.7f), Y(0.05f), X(0.67f), Y(0.22f), line)
+        fill.color = tone(160)
+        cv.drawRoundRect(RectF(X(0.1f), Y(0.012f), X(0.32f), Y(0.026f)), 4 * d, 4 * d, fill)
+        cv.drawRoundRect(RectF(X(0.68f), Y(0.012f), X(0.9f), Y(0.026f)), 4 * d, 4 * d, fill)
+        // Pare-brise, toit vitré et lunette (un seul vitrage sombre, montants fins)
+        val glass = Path().apply {
+            moveTo(X(0.16f), Y(0.27f)); cubicTo(X(0.35f), Y(0.235f), X(0.65f), Y(0.235f), X(0.84f), Y(0.27f))
+            lineTo(X(0.86f), Y(0.36f)); lineTo(X(0.87f), Y(0.78f))
+            cubicTo(X(0.7f), Y(0.82f), X(0.3f), Y(0.82f), X(0.13f), Y(0.78f))
+            lineTo(X(0.14f), Y(0.36f)); close()
+        }
+        fill.color = tone(55); cv.drawPath(glass, fill)
+        line.color = tone(110)
+        cv.drawLine(X(0.14f), Y(0.36f), X(0.86f), Y(0.36f), line)   // haut du pare-brise
+        cv.drawLine(X(0.135f), Y(0.7f), X(0.865f), Y(0.7f), line)   // haut de la lunette
+        // Sièges vus à travers le toit
+        fill.color = tone(45)
+        for ((sx, sy) in listOf(0.3f to 0.42f, 0.7f to 0.42f, 0.3f to 0.58f, 0.7f to 0.58f))
+            cv.drawRoundRect(RectF(X(sx - 0.14f), Y(sy - 0.045f), X(sx + 0.14f), Y(sy + 0.045f)), 8 * d, 8 * d, fill)
+        // Bandeau de feux arrière sur toute la largeur
+        fill.color = tone(160)
+        cv.drawRoundRect(RectF(X(0.08f), Y(0.975f), X(0.92f), Y(0.988f)), 4 * d, 4 * d, fill)
         // Haut-parleurs (portes avant et arrière)
-        val spk = Paint(fill).apply { color = c(R.color.text_title) }
-        for ((sx, sy) in listOf(0f to 0.4f, 1f to 0.4f, 0f to 0.66f, 1f to 0.66f))
-            cv.drawCircle(car.left + cw * sx, car.top + ch * sy, 6 * d, spk)
+        fill.color = c(R.color.text_title)
+        for ((sx, sy) in listOf(0.01f to 0.4f, 0.99f to 0.4f, 0.01f to 0.62f, 0.99f to 0.62f))
+            cv.drawCircle(X(sx), Y(sy), 5.5f * d, fill)
         // Repères et libellés
         text.color = c(R.color.text_title)
         cv.drawText(context.getString(R.string.snd_front), w / 2, 18 * d, text)
         cv.drawText(context.getString(R.string.snd_rear), w / 2, h - 8 * d, text)
-        cv.drawText(context.getString(R.string.snd_left), car.left - 34 * d, h / 2 + 5 * d, text)
-        cv.drawText(context.getString(R.string.snd_right), car.right + 34 * d, h / 2 + 5 * d, text)
+        cv.drawText(context.getString(R.string.snd_left), car.left - 56 * d, h / 2 + 5 * d, text)
+        cv.drawText(context.getString(R.string.snd_right), car.right + 56 * d, h / 2 + 5 * d, text)
         // Point de son
         val px = car.left + cw * (0.5f + balance / (2f * RANGE) * 0.9f)
         val py = car.top + ch * (0.54f - fader / (2f * RANGE) * 0.8f)
@@ -102,6 +141,9 @@ class EqualizerView(context: Context) : View(context) {
 
     fun set(vs: IntArray) { vs.copyInto(values); invalidate() }
 
+    /** Spectre de la musique en cours (0…1 par barre, des graves aux aigus), dessiné derrière ; null = rien. */
+    var spectrum: FloatArray? = null; set(v) { field = v; invalidate() }
+
     private val d = resources.displayMetrics.density
     private val sd = resources.displayMetrics.scaledDensity
     private fun c(res: Int) = Themes.color(context, res)
@@ -121,6 +163,17 @@ class EqualizerView(context: Context) : View(context) {
         // Repères 0 et ±RANGE
         grid.color = c(R.color.panel_border)
         for (v in listOf(-RANGE, 0, RANGE)) cv.drawLine(0f, y(v), width.toFloat(), y(v), grid)
+        // Spectre en direct, en transparence derrière les curseurs
+        spectrum?.let { sp ->
+            val n = sp.size; val bw = width.toFloat() / n
+            fill.color = Themes.select(context)
+            for (k in 0 until n) {
+                val v = sp[k].coerceIn(0f, 1f); if (v <= 0.01f) continue
+                fill.alpha = 30 + (v * 45).toInt()
+                cv.drawRoundRect(RectF(k * bw + bw * 0.18f, bottom - v * (bottom - top), (k + 1) * bw - bw * 0.18f, bottom), 3 * d, 3 * d, fill)
+            }
+            fill.alpha = 255
+        }
         // Courbe lissée et zone sous la courbe
         val p = Path().apply {
             moveTo(0f, y(values[0]))

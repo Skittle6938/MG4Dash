@@ -13,6 +13,26 @@ class LauncherApp : Application() {
     override fun onCreate() {
         super.onCreate()
         Tr.app = this
+        // Démarrage de la voiture avant le déverrouillage (écran BootSplash) : le stockage des réglages
+        // n'est pas encore lisible ; tout le reste démarre au déverrouillage, dans le même processus.
+        val um = getSystemService(USER_SERVICE) as android.os.UserManager
+        if (!um.isUserUnlocked) {
+            registerReceiver(object : android.content.BroadcastReceiver() {
+                override fun onReceive(c: android.content.Context?, i: android.content.Intent?) {
+                    try { unregisterReceiver(this) } catch (_: Throwable) {}
+                    startAll()
+                }
+            }, android.content.IntentFilter(android.content.Intent.ACTION_USER_UNLOCKED))
+            return
+        }
+        startAll()
+    }
+
+    @Volatile private var started = false
+
+    private fun startAll() {
+        if (started) return
+        started = true
         installCrashGuard()
         Log.i("App", "démarrage ${BuildConfig.VERSION_NAME} (${BuildConfig.FLAVOR})")
         // Première installation : style Complet, plein écran et barre verticale à gauche par défaut.
@@ -45,6 +65,10 @@ class LauncherApp : Application() {
         if (!BuildConfig.MOCK) app.mg4dash.system.StarKey.start(this)
         WeatherRepo.start(this)
         app.mg4dash.ui.Themes.publish(this)
+        startThemeWatch()
+    }
+
+    private fun startThemeWatch() {
         // Thème auto pour Radio Dash : l'accueil ne republie le thème que lorsqu'il est affiché ; quand
         // la radio est au premier plan, les feux qui s'allument n'étaient donc jamais transmis.
         val h = android.os.Handler(android.os.Looper.getMainLooper())

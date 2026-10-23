@@ -97,6 +97,27 @@ class ScreenshotTest {
     @Test @Config(qualifiers = "fr-w1920dp-h720dp-land-mdpi") fun soundFr() = shoot(app.mg4dash.pages.SoundActivity::class.java, "sound_fr.png")
     @Test @Config(qualifiers = "fr-w1920dp-h720dp-land-mdpi") fun vehicleFr() = shoot(app.mg4dash.pages.VehicleActivity::class.java, "vehicle_fr.png")
 
+    /** Animation de démarrage : images brutes (640 × 240, 20 i/s) pour en faire un GIF, et une image fixe. */
+    @Test fun splashFrames() {
+        val ctx = org.robolectric.RuntimeEnvironment.getApplication()
+        val v = app.mg4dash.ui.SplashView(ctx).apply { version = "1.4.1" }
+        v.measure(View.MeasureSpec.makeMeasureSpec(1920, View.MeasureSpec.EXACTLY), View.MeasureSpec.makeMeasureSpec(720, View.MeasureSpec.EXACTLY))
+        v.layout(0, 0, 1920, 720)
+        val dir = File("build/screenshots").apply { mkdirs() }
+        val fps = 20; val frames = (app.mg4dash.ui.SplashView.CYCLE * fps).toInt()
+        java.io.DataOutputStream(File(dir, "splash.rgb").outputStream().buffered()).use { out ->
+            out.writeInt(640); out.writeInt(240); out.writeInt(frames); out.writeInt(100 / fps)
+            for (f in 0 until frames) {
+                v.time = f / fps.toFloat()
+                val bmp = Bitmap.createBitmap(1920, 720, Bitmap.Config.ARGB_8888); v.draw(Canvas(bmp))
+                if (f == 50) File(dir, "splash.png").outputStream().use { bmp.compress(Bitmap.CompressFormat.PNG, 100, it) }
+                val small = Bitmap.createScaledBitmap(bmp, 640, 240, true)
+                val px = IntArray(640 * 240); small.getPixels(px, 0, 640, 0, 0, 640, 240)
+                px.forEach { out.writeInt(it) }
+            }
+        }
+    }
+
     @Test fun settingsBottomBar() {
         org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE)
             .edit().putBoolean("vertical_dock", false).commit()
