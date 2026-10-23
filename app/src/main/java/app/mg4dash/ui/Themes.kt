@@ -35,7 +35,26 @@ object Themes {
         else -> !isNight(context)
     }
 
+    /**
+     * Jour / nuit stabilisé : le changement n'est retenu que si les feux restent dans le nouvel état
+     * au moins [HOLD_MS] (un pont ou un court tunnel ne fait plus basculer l'écran).
+     */
     fun isNight(context: Context): Boolean {
+        val raw = rawNight(context)
+        val now = android.os.SystemClock.elapsedRealtime()
+        val stable = stableNight ?: raw.also { stableNight = it }
+        if (raw == stable) { pendingSince = 0L; return stable }
+        if (pendingSince == 0L) { pendingSince = now; return stable }
+        if (now - pendingSince < HOLD_MS) return stable
+        stableNight = raw; pendingSince = 0L
+        return raw
+    }
+
+    private const val HOLD_MS = 5_000L
+    @Volatile private var stableNight: Boolean? = null
+    @Volatile private var pendingSince = 0L
+
+    private fun rawNight(context: Context): Boolean {
         val ui = context.resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK
         if (ui == android.content.res.Configuration.UI_MODE_NIGHT_YES) return true
         // Relevé sur la voiture : feux allumés → VEH_SIDE_LGHT = 3 et PMS_SYSTEM_DAY_NIGHT_MODE = 3 (zone 0x1000000)
@@ -64,6 +83,34 @@ object Themes {
         activity.theme.applyStyle(bgs.getOrElse(p.themeBackground) { bgs[0] }, true)
         activity.theme.applyStyle(accs.getOrElse(p.themeAccent) { accs[0] }, true)
         fitHeight(activity)
+        fadeFromPrevious(activity)
+    }
+
+    /** Image de l'écran avant un changement de thème, fondue sur le nouvel écran. */
+    private var fadeShot: android.graphics.Bitmap? = null
+    private const val FADE_MS = 2_000L
+
+    /** Change de thème (jour / nuit…) en fondu : capture de l'écran actuel, puis recréation. */
+    fun recreateSmooth(activity: Activity) {
+        try {
+            val v = activity.window.decorView
+            if (v.width > 0 && v.height > 0) {
+                val b = android.graphics.Bitmap.createBitmap(v.width, v.height, android.graphics.Bitmap.Config.ARGB_8888)
+                v.draw(android.graphics.Canvas(b)); fadeShot = b
+            }
+        } catch (_: Throwable) { fadeShot = null }
+        activity.recreate()
+    }
+
+    private fun fadeFromPrevious(activity: Activity) {
+        val shot = fadeShot ?: return
+        fadeShot = null
+        val root = activity.window.decorView as? android.view.ViewGroup ?: return
+        val img = android.widget.ImageView(activity).apply { setImageBitmap(shot); scaleType = android.widget.ImageView.ScaleType.FIT_XY }
+        root.post {
+            root.addView(img, android.view.ViewGroup.LayoutParams(-1, -1))
+            img.animate().alpha(0f).setDuration(FADE_MS).withEndAction { root.removeView(img); shot.recycle() }.start()
+        }
     }
 
     /**

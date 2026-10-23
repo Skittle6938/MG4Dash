@@ -286,7 +286,7 @@ class MainActivity : AppCompatActivity() {
         // Style d'accueil changé dans les paramètres : on reconstruit l'écran
         if ((prefs.homeStyle == 1) != simpleMode || (prefs.homeStyle == 2) != mapLayout || Dock.vertical(this) != builtVertical || prefs.hideTitles != builtHideTitles ||
             CarBridge.heatingShown(this) != builtHeating || (!simpleMode && cardPower != builtCardPower) ||
-            app.mg4dash.ui.Themes.signature(this) != themeSig) { recreate(); return }
+            app.mg4dash.ui.Themes.signature(this) != themeSig) { app.mg4dash.ui.Themes.recreateSmooth(this); return }
         app.mg4dash.ui.UpdatePrompt.maybeShow(this)
         if (simpleMode) { simple?.onResume(); Fullscreen.apply(this); return }
         mapCard.onResume()
@@ -297,7 +297,7 @@ class MainActivity : AppCompatActivity() {
     override fun onConfigurationChanged(newConfig: android.content.res.Configuration) {
         super.onConfigurationChanged(newConfig)
         // Passage jour / nuit de la voiture (mode auto) : on redessine avec l'autre thème
-        if (app.mg4dash.ui.Themes.signature(this) != themeSig) { app.mg4dash.ui.Themes.publish(this); recreate() }
+        if (app.mg4dash.ui.Themes.signature(this) != themeSig) { app.mg4dash.ui.Themes.publish(this); app.mg4dash.ui.Themes.recreateSmooth(this) }
     }
 
     override fun onWindowFocusChanged(hasFocus: Boolean) {
@@ -1235,7 +1235,7 @@ class MainActivity : AppCompatActivity() {
                 launch { while (true) { updatePower(); delay(1_000) } }
                 launch {
                     while (true) {
-                        if (app.mg4dash.ui.Themes.signature(this@MainActivity) != themeSig) { app.mg4dash.ui.Themes.publish(this@MainActivity); recreate(); return@launch }
+                        if (app.mg4dash.ui.Themes.signature(this@MainActivity) != themeSig) { app.mg4dash.ui.Themes.publish(this@MainActivity); app.mg4dash.ui.Themes.recreateSmooth(this@MainActivity); return@launch }
                         renderSecondary()
                         renderWeatherFallbackOnly()
                         if (effectiveWidget() != lastWidgetMode || effectiveWidget() == 2) { lastWidgetMode = effectiveWidget(); applyHomeWidget() }
