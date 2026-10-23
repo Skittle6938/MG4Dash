@@ -69,11 +69,15 @@ object WeatherRepo {
     /** Dernière requête en échec (toucher, 5 km parcourus ou rafraîchissement des 30 min). */
     private val _failed = MutableStateFlow(false)
     /**
-     * Météo à afficher : null (affichage hors ligne : heure et température extérieure) dès qu'une
-     * requête échoue (issue #18), sans la minute de tolérance de la carte.
+     * Météo à afficher. Une requête en échec garde les dernières prévisions tant qu'elles ont moins
+     * de [STALE_MS] ; au-delà (ou sans prévisions), affichage hors ligne : heure et température
+     * extérieure (issue #18). Réévalué toutes les 5 min, même sans nouvelle requête.
      */
-    val shown: StateFlow<Weather?> = kotlinx.coroutines.flow.combine(_weather, _failed) { w, f -> if (f) null else w }
-        .stateIn(scope, kotlinx.coroutines.flow.SharingStarted.Eagerly, null)
+    val shown: StateFlow<Weather?> = kotlinx.coroutines.flow.combine(_weather, _failed,
+        kotlinx.coroutines.flow.flow { while (true) { emit(Unit); kotlinx.coroutines.delay(300_000) } }) { w, f, _ ->
+        if (w != null && (!f || System.currentTimeMillis() - w.updatedAt < STALE_MS)) w else null
+    }.stateIn(scope, kotlinx.coroutines.flow.SharingStarted.Eagerly, null)
+    private const val STALE_MS = 3 * 3_600_000L
 
     fun start(context: Context) {
         val app = context.applicationContext

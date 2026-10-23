@@ -104,18 +104,30 @@ object Themes {
 
     /** Le fondu est posé quand le nouvel écran est affiché (onResume), contenu déjà en place. */
     private fun fadeFromPrevious(activity: Activity) {
-        if (fadeShot == null || fadeHooked) return
-        fadeHooked = true
+        if (fadeShot == null || fadeHooked === activity.application) return
+        fadeHooked = activity.application
         activity.application.registerActivityLifecycleCallbacks(object : android.app.Application.ActivityLifecycleCallbacks {
-            override fun onActivityResumed(a: Activity) {
+            override fun onActivityResumed(a: Activity) {}
+            // Posé dès la fin de onCreate (contenu en place) : la toute première image du nouvel
+            // écran est déjà l'ancienne, sans le court passage au noir d'avant le fondu
+            override fun onActivityCreated(a: Activity, b: android.os.Bundle?) {
                 val shot = fadeShot ?: return
                 fadeShot = null
                 val root = a.window.decorView as? android.view.ViewGroup ?: return
                 val img = android.widget.ImageView(a).apply { setImageBitmap(shot); scaleType = android.widget.ImageView.ScaleType.FIT_XY; elevation = 1000f }
                 root.addView(img, android.view.ViewGroup.LayoutParams(-1, -1))
-                img.animate().alpha(0f).setStartDelay(150).setDuration(FADE_MS).withEndAction { root.removeView(img); shot.recycle() }.start()
+                // Fondu image par image, sans animateur : sur la voiture, l'échelle des animations
+                // d'Android peut être à 0 et le fondu passait alors instantanément
+                val t0 = android.os.SystemClock.uptimeMillis() + 150
+                img.post(object : Runnable {
+                    override fun run() {
+                        val k = (android.os.SystemClock.uptimeMillis() - t0).toFloat() / FADE_MS
+                        if (k >= 1f) { root.removeView(img); shot.recycle(); return }
+                        img.alpha = 1f - k.coerceAtLeast(0f).let { it * it * (3 - 2 * it) }
+                        img.postDelayed(this, 16)
+                    }
+                })
             }
-            override fun onActivityCreated(a: Activity, b: android.os.Bundle?) {}
             override fun onActivityStarted(a: Activity) {}
             override fun onActivityPaused(a: Activity) {}
             override fun onActivityStopped(a: Activity) {}
@@ -123,7 +135,7 @@ object Themes {
             override fun onActivityDestroyed(a: Activity) {}
         })
     }
-    private var fadeHooked = false
+    private var fadeHooked: android.app.Application? = null
 
     /**
      * Écran moins haut que la dalle (barres SAIC affichées hors plein écran, #43) : tout est

@@ -8,3 +8,4 @@ dist/
 *.idsig
 .idea/
 *.iml
+.kotlin/
