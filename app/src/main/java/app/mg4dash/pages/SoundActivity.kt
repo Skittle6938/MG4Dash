@@ -96,7 +96,7 @@ class SoundActivity : PageActivity() {
             for (id in presetIds) (if (id == USER) a.userEq else a.eqBand(id))?.let { raw -> curves[id] = IntArray(5) { raw[it] - EQ_CENTER } }
             Log.i(TAG, "lu : balance $b, fader $f (décalage $fieldOffset), préréglage $preset, loudness $loud, courbe ${curves[preset]?.joinToString()}")
             runOnUiThread {
-                field.balance = b - fieldOffset; field.fader = f - fieldOffset
+                field.balance = b - fieldOffset; field.fader = fieldOffset - f   // fader du service : grand = arrière
                 showField(field.balance, field.fader)
                 show(if (preset in presetIds) preset else USER, false)
                 loudness.isSelected = loud
@@ -123,7 +123,7 @@ class SoundActivity : PageActivity() {
         if (first) io.execute {
             val (pb, pf) = pendingField ?: return@execute
             pendingField = null
-            call("balance $pb fader $pf") { it.setSoundField(pb + fieldOffset, pf + fieldOffset) }
+            call("balance $pb fader $pf") { it.setSoundField(pb + fieldOffset, fieldOffset - pf) }
         }
     }
 
