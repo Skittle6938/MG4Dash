@@ -160,15 +160,18 @@ object Dock {
         val children = (0 until root.childCount).map { root.getChildAt(it) }.filter { it !== dock }
         root.removeAllViews()
         root.orientation = LinearLayout.HORIZONTAL
+        root.clipToPadding = false   // la barre déborde un peu sur la marge de l'écran (#38)
         val bar = LinearLayout(activity)
         val right = rightSide(activity)
         val content = LinearLayout(activity).apply { orientation = LinearLayout.VERTICAL }
         children.forEach { content.addView(it) }   // chaque enfant garde ses paramètres (poids, marges)
-        if (!right) root.addView(bar, LinearLayout.LayoutParams(kit.dp(64), LinearLayout.LayoutParams.MATCH_PARENT))
+        // 72 dp, débordant de 4 dp sur la marge de l'écran : centrée sous le bouton antibrouillards
+        // de MG (x 20 → 76 dp, y ≈ 14 → 70 dp), avec 8 dp à gauche, à droite et au-dessus (#38)
+        if (!right) root.addView(bar, LinearLayout.LayoutParams(kit.dp(BAR_DP), LinearLayout.LayoutParams.MATCH_PARENT).apply { leftMargin = -kit.dp(4); topMargin = -kit.dp(6) })
         root.addView(content, LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.MATCH_PARENT, 1f).apply {
             if (right) rightMargin = kit.dp(12) else leftMargin = kit.dp(12)
         })
-        if (right) root.addView(bar, LinearLayout.LayoutParams(kit.dp(64), LinearLayout.LayoutParams.MATCH_PARENT))
+        if (right) root.addView(bar, LinearLayout.LayoutParams(kit.dp(BAR_DP), LinearLayout.LayoutParams.MATCH_PARENT).apply { rightMargin = -kit.dp(4) })
         buildVertical(activity, bar, current)
     }
 
@@ -179,6 +182,8 @@ object Dock {
      * Réglages : toucher = réglages du launcher, appui long = réglages de la voiture,
      * double toucher = Wi-Fi.
      */
+    private const val BAR_DP = 72
+
     fun buildVertical(activity: Activity, bar: LinearLayout, current: Page) {
         val kit = Kit(activity)
         fun color(r: Int) = app.mg4dash.ui.Themes.color(activity, r)
@@ -189,7 +194,7 @@ object Dock {
         bar.setPadding(kit.dp(4), kit.dp(4), kit.dp(4), kit.dp(6))
         // Place du bouton antibrouillards (superposé par MG, on ne peut pas le dessiner nous-mêmes) ;
         // à droite (conduite à droite), il reste à gauche : la barre prend toute la hauteur
-        if (!rightSide(activity)) bar.addView(android.view.View(activity), LinearLayout.LayoutParams(-1, kit.dp(62)))
+        if (!rightSide(activity)) bar.addView(android.view.View(activity), LinearLayout.LayoutParams(-1, kit.dp(68)))
         val order = listOf(
             ITEMS.first { it.label == R.string.dock_settings },
             ITEMS.first { it.label == R.string.dock_aa },

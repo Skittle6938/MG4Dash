@@ -68,6 +68,25 @@ class ScreenshotTest {
     @Test @Config(qualifiers = "tr-w1920dp-h720dp-land-mdpi") fun energyTurkish() = shoot(app.mg4dash.pages.EnergyActivity::class.java, "energy_tr.png")
     @Test @Config(qualifiers = "tr-w1920dp-h720dp-land-mdpi") fun climateTurkish() = shoot(ClimateActivity::class.java, "climate_tr.png")
 
+    /** Simulation du bouton antibrouillards de MG (56 dp à x = 20 dp, #38) posé sur la barre. */
+    @Test fun homeFogSim() {
+        org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE)
+            .edit().putInt("theme_mode", 1).commit()
+        val act = Robolectric.buildActivity(MainActivity::class.java).setup().get()
+        repeat(5) { shadowOf(Looper.getMainLooper()).idleFor(200, TimeUnit.MILLISECONDS) }
+        val root = act.window.decorView
+        root.measure(View.MeasureSpec.makeMeasureSpec(1920, View.MeasureSpec.EXACTLY), View.MeasureSpec.makeMeasureSpec(720, View.MeasureSpec.EXACTLY))
+        root.layout(0, 0, 1920, 720)
+        val bmp = Bitmap.createBitmap(1920, 720, Bitmap.Config.ARGB_8888)
+        val c = Canvas(bmp); root.draw(c)
+        val p = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG).apply { color = 0xFFB8BCC4.toInt() }
+        c.drawCircle(48f, 14f + 28f, 28f, p)
+        p.color = 0xFF30343C.toInt(); p.textSize = 22f; p.textAlign = android.graphics.Paint.Align.CENTER
+        c.drawText("FOG", 48f, 50f, p)
+        val dir = File("build/screenshots").apply { mkdirs() }
+        File(dir, "home_fog_sim.png").outputStream().use { bmp.compress(Bitmap.CompressFormat.PNG, 100, it) }
+    }
+
     @Test fun settingsBottomBar() {
         org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE)
             .edit().putBoolean("vertical_dock", false).commit()

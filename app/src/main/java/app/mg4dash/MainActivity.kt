@@ -1043,7 +1043,7 @@ class MainActivity : AppCompatActivity() {
                 imageTintList = android.content.res.ColorStateList.valueOf(color(R.color.text_value))
                 scaleType = android.widget.ImageView.ScaleType.FIT_END
             }
-            line.addView(pin, LinearLayout.LayoutParams((28 * d).toInt(), (35 * d).toInt()).apply { rightMargin = (10 * d).toInt(); bottomMargin = (7 * d).toInt() })
+            line.addView(pin, LinearLayout.LayoutParams((28 * d).toInt(), (35 * d).toInt()).apply { rightMargin = (10 * d).toInt(); bottomMargin = (11 * d).toInt() })
             line.addView(b.range, LinearLayout.LayoutParams(-2, -2))
             col.addView(line, i, LinearLayout.LayoutParams(-2, -2))
             b.rangePlug.visibility = View.GONE
@@ -1078,7 +1078,7 @@ class MainActivity : AppCompatActivity() {
         if (!mapLayout && !Dock.vertical(this)) {
             b.battery.setTextSize(TypedValue.COMPLEX_UNIT_SP, 34f)
             b.range.setTextSize(TypedValue.COMPLEX_UNIT_SP, 34f)
-            rangePin?.layoutParams = (rangePin?.layoutParams as LinearLayout.LayoutParams).apply { width = (22 * d).toInt(); height = (27 * d).toInt(); bottomMargin = (5 * d).toInt() }
+            rangePin?.layoutParams = (rangePin?.layoutParams as LinearLayout.LayoutParams).apply { width = (22 * d).toInt(); height = (27 * d).toInt(); bottomMargin = (8 * d).toInt() }
             b.rangePlug.layoutParams = (b.rangePlug.layoutParams as LinearLayout.LayoutParams).apply { height = (16 * d).toInt(); bottomMargin = (6 * d).toInt() }
             b.batteryGauge.layoutParams = (b.batteryGauge.layoutParams as LinearLayout.LayoutParams).apply { height = (50 * d).toInt() }
             powerBar?.layoutParams = (powerBar?.layoutParams as LinearLayout.LayoutParams).apply { height = (36 * d).toInt(); topMargin = 0 }
