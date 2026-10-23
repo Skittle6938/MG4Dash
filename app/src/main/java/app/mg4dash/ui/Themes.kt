@@ -102,16 +102,28 @@ object Themes {
         activity.recreate()
     }
 
+    /** Le fondu est posé quand le nouvel écran est affiché (onResume), contenu déjà en place. */
     private fun fadeFromPrevious(activity: Activity) {
-        val shot = fadeShot ?: return
-        fadeShot = null
-        val root = activity.window.decorView as? android.view.ViewGroup ?: return
-        val img = android.widget.ImageView(activity).apply { setImageBitmap(shot); scaleType = android.widget.ImageView.ScaleType.FIT_XY }
-        root.post {
-            root.addView(img, android.view.ViewGroup.LayoutParams(-1, -1))
-            img.animate().alpha(0f).setDuration(FADE_MS).withEndAction { root.removeView(img); shot.recycle() }.start()
-        }
+        if (fadeShot == null || fadeHooked) return
+        fadeHooked = true
+        activity.application.registerActivityLifecycleCallbacks(object : android.app.Application.ActivityLifecycleCallbacks {
+            override fun onActivityResumed(a: Activity) {
+                val shot = fadeShot ?: return
+                fadeShot = null
+                val root = a.window.decorView as? android.view.ViewGroup ?: return
+                val img = android.widget.ImageView(a).apply { setImageBitmap(shot); scaleType = android.widget.ImageView.ScaleType.FIT_XY; elevation = 1000f }
+                root.addView(img, android.view.ViewGroup.LayoutParams(-1, -1))
+                img.animate().alpha(0f).setStartDelay(150).setDuration(FADE_MS).withEndAction { root.removeView(img); shot.recycle() }.start()
+            }
+            override fun onActivityCreated(a: Activity, b: android.os.Bundle?) {}
+            override fun onActivityStarted(a: Activity) {}
+            override fun onActivityPaused(a: Activity) {}
+            override fun onActivityStopped(a: Activity) {}
+            override fun onActivitySaveInstanceState(a: Activity, b: android.os.Bundle) {}
+            override fun onActivityDestroyed(a: Activity) {}
+        })
     }
+    private var fadeHooked = false
 
     /**
      * Écran moins haut que la dalle (barres SAIC affichées hors plein écran, #43) : tout est
