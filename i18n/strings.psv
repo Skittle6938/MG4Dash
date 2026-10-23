@@ -447,3 +447,22 @@ st_panel_full|Full|Complet|Vollständig|Completo|Completo|Volledig|Tam
 map_app_pick|App in the map card (test)|Appli dans le widget carte (essai)|App im Kartenfeld (Test)|App en la tarjeta del mapa (prueba)|App nella scheda mappa (prova)|App in de kaartkaart (test)|Harita kartında uygulama (test)
 map_app_osm|OpenStreetMap map (default)|Carte OpenStreetMap (par défaut)|OpenStreetMap-Karte (Standard)|Mapa OpenStreetMap (predeterminado)|Mappa OpenStreetMap (predefinita)|OpenStreetMap-kaart (standaard)|OpenStreetMap haritası (varsayılan)
 map_app_unavailable|This firmware can't show another app in the map card|Ce firmware ne permet pas d'afficher une autre appli dans la carte|Diese Firmware kann keine andere App im Kartenfeld anzeigen|Este firmware no puede mostrar otra app en la tarjeta del mapa|Questo firmware non può mostrare un'altra app nella scheda mappa|Deze firmware kan geen andere app in de kaartkaart tonen|Bu yazılım harita kartında başka bir uygulama gösteremiyor
+title_sound|SOUND|SON|KLANG|SONIDO|AUDIO|GELUID|SES
+vh_sound|Sound  ›|Son  ›|Klang  ›|Sonido  ›|Audio  ›|Geluid  ›|Ses  ›
+snd_field|SOUND DISTRIBUTION|RÉPARTITION DU SON|KLANGVERTEILUNG|DISTRIBUCIÓN DEL SONIDO|DISTRIBUZIONE DEL SUONO|GELUIDSVERDELING|SES DAĞILIMI
+snd_front|FRONT|AVANT|VORNE|DELANTE|AVANTI|VOOR|ÖN
+snd_rear|REAR|ARRIÈRE|HINTEN|DETRÁS|DIETRO|ACHTER|ARKA
+snd_left|LEFT|GAUCHE|LINKS|IZQ.|SINISTRA|LINKS|SOL
+snd_right|RIGHT|DROITE|RECHTS|DCHA.|DESTRA|RECHTS|SAĞ
+snd_center|Centre|Centrer|Zentrieren|Centrar|Centra|Centreren|Ortala
+snd_centered|Centred · drag the dot or double tap to centre|Centré · glissez le point ou touchez deux fois pour recentrer|Zentriert · Punkt ziehen oder zweimal tippen zum Zentrieren|Centrado · arrastre el punto o toque dos veces para centrar|Centrato · trascina il punto o tocca due volte per centrare|Gecentreerd · sleep de punt of tik twee keer om te centreren|Ortada · noktayı sürükleyin veya ortalamak için iki kez dokunun
+snd_eq|EQUALISER|ÉGALISEUR|EQUALIZER|ECUALIZADOR|EQUALIZZATORE|EQUALIZER|EKOLAYZER
+snd_user|User|Perso|Benutzer|Usuario|Utente|Eigen|Kişisel
+snd_classic|Classic|Classique|Klassik|Clásica|Classica|Klassiek|Klasik
+snd_jazz|Jazz|Jazz|Jazz|Jazz|Jazz|Jazz|Caz
+snd_pop|Pop|Pop|Pop|Pop|Pop|Pop|Pop
+snd_rock|Rock|Rock|Rock|Rock|Rock|Rock|Rock
+snd_vocal|Vocal|Voix|Stimme|Voz|Voce|Stem|Vokal
+snd_loudness|Loudness|Loudness|Loudness|Loudness|Loudness|Loudness|Loudness
+snd_loudness_hint|Loudness boosts bass and treble at low volume|Le Loudness renforce graves et aigus à faible volume|Loudness verstärkt Bässe und Höhen bei geringer Lautstärke|Loudness refuerza graves y agudos a bajo volumen|Loudness rinforza bassi e alti a basso volume|Loudness versterkt lage en hoge tonen bij laag volume|Loudness, düşük seste bas ve tizleri güçlendirir
+snd_reset|Flat|À plat|Linear|Plano|Piatto|Vlak|Düz

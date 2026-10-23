@@ -87,6 +87,16 @@ class ScreenshotTest {
         File(dir, "home_fog_sim.png").outputStream().use { bmp.compress(Bitmap.CompressFormat.PNG, 100, it) }
     }
 
+    /** Page Son (maquette) : répartition et égaliseur. */
+    @Test fun sound() = shoot(app.mg4dash.pages.SoundActivity::class.java, "sound.png")
+    @Test fun soundLight() {
+        org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE)
+            .edit().putInt("theme_mode", 2).commit()
+        shoot(app.mg4dash.pages.SoundActivity::class.java, "sound_light.png")
+    }
+    @Test @Config(qualifiers = "fr-w1920dp-h720dp-land-mdpi") fun soundFr() = shoot(app.mg4dash.pages.SoundActivity::class.java, "sound_fr.png")
+    @Test @Config(qualifiers = "fr-w1920dp-h720dp-land-mdpi") fun vehicleFr() = shoot(app.mg4dash.pages.VehicleActivity::class.java, "vehicle_fr.png")
+
     @Test fun settingsBottomBar() {
         org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE)
             .edit().putBoolean("vertical_dock", false).commit()

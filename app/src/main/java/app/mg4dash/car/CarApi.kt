@@ -37,6 +37,7 @@ open class RemoteService(private val binder: IBinder, private val descriptor: St
     protected fun voidInt(code: Int, value: Int) = call(code, { it.writeInt(value) }) { }
     protected fun voidFloat(code: Int, value: Float) = call(code, { it.writeFloat(value) }) { }
     protected fun binderInt(code: Int, value: Int): IBinder? = call(code, { it.writeInt(value) }) { it.readStrongBinder() }
+    protected fun <T> raw(code: Int, write: (Parcel) -> Unit, read: (Parcel) -> T): T = call(code, write, read)
 }
 
 /** CarAdapterService : distribue un binder par domaine (queryClient). */
@@ -111,6 +112,28 @@ class VehicleSettingService(b: IBinder) : RemoteService(b, "com.saicmotor.carapi
 class ConfigService(b: IBinder) : RemoteService(b, "com.saicmotor.carapi.config.ICarConfigService") {
     val seatHeatingConfig get() = int(23)
     val steeringWheelHeatConfig get() = int(52)
+}
+
+/**
+ * Son (queryClient 10), mêmes appels que les réglages de son de l'appli Média d'origine.
+ * Égaliseur : 5 bandes (80 Hz, 500 Hz, 1 kHz, 5 kHz, 16 kHz) de 0 à 14 (7 = neutre) ;
+ * préréglages 2 Classique, 3 Pop, 4 Voix, 5 Jazz, 6 Rock, 7 Utilisateur.
+ */
+class AudioService(b: IBinder) : RemoteService(b, "com.saicmotor.carapi.audio.ICarAudioService") {
+    val loudness get() = bool(16)
+    val equalizerPreset get() = int(23)
+    val balance get() = int(31)
+    val fader get() = int(32)
+
+    fun setLoudness(on: Boolean) = raw(15, { it.writeInt(if (on) 1 else 0) }) { it.readInt() != 0 }
+    fun setEqualizerPreset(v: Int) = raw(22, { it.writeInt(v) }) { it.readInt() != 0 }
+    fun setSoundField(balance: Int, fader: Int) = raw(30, { it.writeInt(balance); it.writeInt(fader) }) { it.readInt() != 0 }
+    /** Courbe d'un préréglage (7 = utilisateur), 5 valeurs ; null si le service ne répond pas. */
+    fun eqBand(preset: Int): IntArray? = raw(21, { it.writeInt(preset) }) { readEq(it) }
+    val userEq: IntArray? get() = raw(20, {}) { readEq(it) }
+    fun setUserEq(v: IntArray) = raw(19, { p -> p.writeInt(1); v.forEach { p.writeInt(it) } }) { it.readInt() != 0 }
+
+    private fun readEq(p: Parcel): IntArray? = if (p.readInt() == 0) null else IntArray(5) { p.readInt() }
 }
 
 /** Informations générales (queryClient 1). */
