@@ -271,6 +271,7 @@ class SimpleHome(private val a: AppCompatActivity) {
             scaleType = ImageView.ScaleType.FIT_CENTER; setColorFilter(kit.color(R.color.on_action))
             val pad = kit.dp(22); setPadding(pad, pad, pad, pad)
             setOnClickListener { MediaHub.playPause() }
+            setOnLongClickListener { a.startActivity(android.content.Intent(a, app.mg4dash.pages.SoundActivity::class.java)); true }
         }
         controls.addView(mediaPlay, kit.lp(kit.dp(96), kit.dp(96), l = 24, r = 24))
         controls.addView(kit.roundButton(R.drawable.ic_next, 76) { MediaHub.next() })

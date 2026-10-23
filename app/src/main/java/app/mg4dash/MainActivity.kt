@@ -571,6 +571,8 @@ class MainActivity : AppCompatActivity() {
 
     private fun wireMedia() {
         b.mediaPlay.setOnClickListener { MediaHub.playPause() }
+        // Appui long sur lecture / pause : réglages du son (page Son)
+        b.mediaPlay.setOnLongClickListener { startActivity(android.content.Intent(this, app.mg4dash.pages.SoundActivity::class.java)); true }
         b.mediaNext.setOnClickListener { MediaHub.next() }
         b.mediaPrev.setOnClickListener { MediaHub.previous() }
         // Les puces basculent la source affichée ; l'appli ne s'ouvre qu'en touchant la pochette / les infos.
