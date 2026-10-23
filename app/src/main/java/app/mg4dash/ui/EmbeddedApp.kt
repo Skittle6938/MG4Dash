@@ -35,6 +35,11 @@ object EmbeddedApp {
                 }
             }, 300)
         }
+        // Taille changée (plein écran) : l'écran virtuel de l'appli suit la nouvelle taille, sinon
+        // l'appli garde l'ancienne largeur et le reste du widget reste noir
+        view.addOnLayoutChangeListener { v, l, t, r, b, ol, ot, or, ob ->
+            if (r - l != or - ol || b - t != ob - ot) v.post { resize(v) }
+        }
         view.addOnAttachStateChangeListener(object : View.OnAttachStateChangeListener {
             override fun onViewAttachedToWindow(v: View) = tryStart(0)
             override fun onViewDetachedFromWindow(v: View) = release(v)
@@ -63,6 +68,17 @@ object EmbeddedApp {
                 Log.i(TAG, "policy_control → ${want ?: "(vide)"}")
             }
         } catch (e: Throwable) { Log.w(TAG, "policy_control : ${e.message}") }
+    }
+
+    private fun resize(v: View) {
+        if (v.width <= 0 || v.height <= 0) return
+        try {
+            val f = v.javaClass.getDeclaredField("mVirtualDisplay").apply { isAccessible = true }
+            val vd = f.get(v) as? android.hardware.display.VirtualDisplay ?: return
+            val dpi = v.resources.displayMetrics.densityDpi
+            vd.resize(v.width, v.height, dpi)
+            Log.i(TAG, "écran virtuel redimensionné : ${v.width}×${v.height}")
+        } catch (e: Throwable) { Log.w(TAG, "redimensionnement : ${e.message}") }
     }
 
     fun release(v: View) {
