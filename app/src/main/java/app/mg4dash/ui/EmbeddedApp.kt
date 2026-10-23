@@ -81,6 +81,18 @@ object EmbeddedApp {
         } catch (e: Throwable) { Log.w(TAG, "redimensionnement : ${e.message}") }
     }
 
+    /**
+     * Relance (ou ramène au premier plan) l'appli dans son écran virtuel : si elle s'est fermée
+     * (retour arrière, plantage, mise à jour), le widget restait noir. Sans effet si elle tourne.
+     */
+    fun restart(v: View, cn: ComponentName) {
+        try {
+            val intent = Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER).setComponent(cn)
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            v.javaClass.getMethod("startActivity", Intent::class.java).invoke(v, intent)
+        } catch (e: Throwable) { Log.w(TAG, "relance : ${e.cause?.message ?: e.message}") }
+    }
+
     fun release(v: View) {
         try { v.javaClass.getMethod("release").invoke(v) } catch (_: Throwable) {}
     }

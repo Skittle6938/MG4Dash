@@ -290,6 +290,8 @@ class MainActivity : AppCompatActivity() {
         app.mg4dash.ui.UpdatePrompt.maybeShow(this)
         if (simpleMode) { simple?.onResume(); Fullscreen.apply(this); return }
         mapCard.onResume()
+        // Retour sur l'accueil : l'appli de la carte est ramenée (ou relancée si elle s'est fermée)
+        mapAppView?.let { v -> val cn = mapAppCn; if (cn != null && v.visibility == View.VISIBLE) v.postDelayed({ if (v.isAttachedToWindow) app.mg4dash.ui.EmbeddedApp.restart(v, cn) }, 600) }
         if (prefs.homeWidget == 1) renderShortcuts()
         Fullscreen.apply(this)
     }
@@ -874,8 +876,11 @@ class MainActivity : AppCompatActivity() {
             })
             mapAppFull = full
         }
+        val wasHidden = mapAppView?.visibility != View.VISIBLE
         mapAppView?.visibility = if (show) View.VISIBLE else View.GONE
         mapAppFull?.visibility = if (show) View.VISIBLE else View.GONE
+        // De nouveau affichée : on ramène l'appli (relancée si elle s'est fermée entre-temps)
+        if (show && wasHidden) mapAppView?.let { v -> v.postDelayed({ if (v.isAttachedToWindow) app.mg4dash.ui.EmbeddedApp.restart(v, cn) }, 600) }
     }
 
     private fun renderShortcuts() {
