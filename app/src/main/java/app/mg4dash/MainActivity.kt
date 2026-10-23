@@ -851,6 +851,29 @@ class MainActivity : AppCompatActivity() {
         } catch (e: Throwable) { android.util.Log.w("MG4L.AppCarte", "reprise : ${e.message}") }
     }
 
+    /**
+     * Appli dans la carte : les boutons de bascule et de plein écran s'effacent après 5 s pour ne pas
+     * cacher l'appli ; un toucher n'importe où sur la carte les fait revenir.
+     */
+    private val fadeMapAppButtons = Runnable {
+        listOfNotNull(b.widgetToggle, mapAppFull).forEach { v -> v.animate().alpha(0f).setDuration(400).withEndAction { v.visibility = View.INVISIBLE }.start() }
+    }
+
+    private fun showMapAppButtons() {
+        if (mapAppView?.visibility != View.VISIBLE) return
+        listOfNotNull(b.widgetToggle, mapAppFull).forEach { v -> v.animate().cancel(); v.alpha = 1f; v.visibility = View.VISIBLE }
+        b.widgetToggle.removeCallbacks(fadeMapAppButtons)
+        b.widgetToggle.postDelayed(fadeMapAppButtons, 5000)
+    }
+
+    override fun dispatchTouchEvent(ev: android.view.MotionEvent): Boolean {
+        if (ev.actionMasked == android.view.MotionEvent.ACTION_DOWN && mapAppView?.visibility == View.VISIBLE) {
+            val r = android.graphics.Rect(); b.mapCard.getGlobalVisibleRect(r)
+            if (r.contains(ev.rawX.toInt(), ev.rawY.toInt())) showMapAppButtons()
+        }
+        return super.dispatchTouchEvent(ev)
+    }
+
     /** Bouton plein écran de l'appli intégrée à la carte. */
     private var mapAppFull: android.widget.ImageButton? = null
 
@@ -903,6 +926,7 @@ class MainActivity : AppCompatActivity() {
         }
         mapAppView?.visibility = if (show) View.VISIBLE else View.GONE
         mapAppFull?.visibility = if (show) View.VISIBLE else View.GONE
+        if (show) showMapAppButtons() else { b.widgetToggle.removeCallbacks(fadeMapAppButtons); b.widgetToggle.alpha = 1f; b.widgetToggle.visibility = View.VISIBLE }
     }
 
     private fun renderShortcuts() {
