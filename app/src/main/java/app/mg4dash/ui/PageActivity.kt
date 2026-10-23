@@ -25,7 +25,7 @@ abstract class PageActivity : AppCompatActivity() {
     /** Mode auto : bascule jour / nuit (feux) pendant que la page est ouverte. */
     private val themeWatch = object : Runnable {
         override fun run() {
-            if (Themes.signature(this@PageActivity) != themeSig) { Themes.publish(this@PageActivity); recreate(); return }
+            if (Themes.signature(this@PageActivity) != themeSig) { Themes.publish(this@PageActivity); Themes.recreateSmooth(this@PageActivity); return }
             body.postDelayed(this, 5000)
         }
     }
@@ -75,7 +75,7 @@ abstract class PageActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        if (Themes.signature(this) != themeSig || Dock.vertical(this) != builtVertical) { recreate(); return }
+        if (Themes.signature(this) != themeSig || Dock.vertical(this) != builtVertical) { Themes.recreateSmooth(this); return }
         CarBridge.setForeground(true)
         body.postDelayed(themeWatch, 5000)
         Fullscreen.apply(this)
