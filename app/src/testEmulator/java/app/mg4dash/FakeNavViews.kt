@@ -38,6 +38,14 @@ abstract class FakeAppView(context: Context) : View(context) {
         p.style = Paint.Style.FILL
     }
 
+    /** Trait d'itinéraire avec liseré blanc, comme dans les applis de navigation. */
+    protected fun routeLine(c: Canvas, path: Path, color: Int, widthDp: Float) {
+        p.style = Paint.Style.STROKE; p.strokeJoin = Paint.Join.ROUND; p.strokeCap = Paint.Cap.ROUND
+        p.color = Color.WHITE; p.strokeWidth = (widthDp + 4) * d; c.drawPath(path, p)
+        p.color = color; p.strokeWidth = widthDp * d; c.drawPath(path, p)
+        p.style = Paint.Style.FILL
+    }
+
     protected fun text(c: Canvas, s: String, x: Float, y: Float, sp: Float, color: Int, bold: Boolean = false, align: Paint.Align = Paint.Align.LEFT) {
         p.textSize = sp * resources.displayMetrics.scaledDensity; p.color = color; p.textAlign = align
         p.typeface = Typeface.create(if (bold) "sans-serif-medium" else "sans-serif", Typeface.NORMAL)
@@ -49,11 +57,14 @@ abstract class FakeAppView(context: Context) : View(context) {
 class FakePlannerView(context: Context) : FakeAppView(context) {
     override fun onDraw(c: Canvas) {
         val w = width.toFloat(); val h = height.toFloat()
-        streets(c, dark = true)
-        // Itinéraire
-        val route = Path().apply { moveTo(w * 0.12f, h * 0.88f); cubicTo(w * 0.3f, h * 0.7f, w * 0.25f, h * 0.45f, w * 0.5f, h * 0.42f); cubicTo(w * 0.75f, h * 0.38f, w * 0.7f, h * 0.2f, w * 0.86f, h * 0.12f) }
-        p.style = Paint.Style.STROKE; p.strokeWidth = 7 * d; p.color = 0xFF2E7DFF.toInt(); c.drawPath(route, p)
-        p.style = Paint.Style.FILL
+        // Carte OpenStreetMap dessous, assombrie comme un planificateur en thème sombre
+        p.style = Paint.Style.FILL; p.color = 0x8C0B0F17.toInt(); c.drawRect(0f, 0f, w, h, p)
+        // Itinéraire le long des grands axes (lignes brisées, coins arrondis)
+        val route = Path().apply {
+            moveTo(w * 0.12f, h * 0.88f); lineTo(w * 0.2f, h * 0.7f); lineTo(w * 0.33f, h * 0.62f); lineTo(w * 0.42f, h * 0.47f)
+            lineTo(w * 0.5f, h * 0.42f); lineTo(w * 0.62f, h * 0.36f); lineTo(w * 0.7f, h * 0.22f); lineTo(w * 0.86f, h * 0.12f)
+        }
+        routeLine(c, route, 0xFF2E7DFF.toInt(), 8f)
         fun stop(x: Float, y: Float, col: Int, label: String, sub: String, left: Boolean = false) {
             p.color = Color.WHITE; c.drawCircle(x, y, 13 * d, p); p.color = col; c.drawCircle(x, y, 9 * d, p)
             val r = if (left) RectF(x - 150 * d, y - 4 * d, x - 16 * d, y + 44 * d) else RectF(x + 16 * d, y - 26 * d, x + 150 * d, y + 22 * d)
@@ -78,13 +89,19 @@ class FakePlannerView(context: Context) : FakeAppView(context) {
 class FakeGuidanceView(context: Context) : FakeAppView(context) {
     override fun onDraw(c: Canvas) {
         val w = width.toFloat(); val h = height.toFloat()
-        streets(c, dark = false)
-        val route = Path().apply { moveTo(w * 0.5f, h); lineTo(w * 0.52f, h * 0.62f); lineTo(w * 0.2f, h * 0.55f) }
-        p.style = Paint.Style.STROKE; p.strokeWidth = 9 * d; p.strokeJoin = Paint.Join.ROUND; p.color = 0xFF2F80ED.toInt(); c.drawPath(route, p)
+        // Carte OpenStreetMap dessous ; itinéraire, puis bandeaux de l'appli
+        val route = Path().apply { moveTo(w * 0.5f, h); lineTo(w * 0.5f, h * 0.33f); lineTo(w * 0.3f, h * 0.27f); lineTo(w * 0.1f, h * 0.24f) }
+        routeLine(c, route, 0xFF2F80ED.toInt(), 10f)
+        // Limitation de vitesse
+        p.style = Paint.Style.FILL; p.color = Color.WHITE; c.drawCircle(w - 42 * d, h - 100 * d, 26 * d, p)
+        p.style = Paint.Style.STROKE; p.strokeWidth = 5 * d; p.color = 0xFFE53935.toInt(); c.drawCircle(w - 42 * d, h - 100 * d, 23 * d, p)
         p.style = Paint.Style.FILL
+        text(c, "50", w - 42 * d, h - 92 * d, 20f, 0xFF1D2433.toInt(), bold = true, align = Paint.Align.CENTER)
         // Position de la voiture
-        val car = Path().apply { moveTo(w * 0.505f, h * 0.76f); lineTo(w * 0.525f, h * 0.83f); lineTo(w * 0.505f, h * 0.815f); lineTo(w * 0.485f, h * 0.83f); close() }
-        p.color = Color.WHITE; c.drawCircle(w * 0.505f, h * 0.8f, 16 * d, p); p.color = 0xFFE53935.toInt(); c.drawPath(car, p)
+        // (posée sur le repère de position de la carte, au centre)
+        val cx = w * 0.5f; val cy = h * 0.5f
+        val car = Path().apply { moveTo(cx, cy - 14 * d); lineTo(cx + 11 * d, cy + 12 * d); lineTo(cx, cy + 6 * d); lineTo(cx - 11 * d, cy + 12 * d); close() }
+        p.color = Color.WHITE; c.drawCircle(cx, cy, 22 * d, p); p.color = 0xFFE53935.toInt(); c.drawPath(car, p)
         // Bandeau de direction
         val top = RectF(10 * d, 10 * d, w - 70 * d, 90 * d)
         p.color = 0xFF2F80ED.toInt(); c.drawRoundRect(top, 14 * d, 14 * d, p)
@@ -94,7 +111,7 @@ class FakeGuidanceView(context: Context) : FakeAppView(context) {
         val head = Path().apply { moveTo(top.left + 14 * d, top.top + 32 * d); lineTo(top.left + 26 * d, top.top + 22 * d); lineTo(top.left + 26 * d, top.top + 42 * d); close() }
         c.drawPath(head, p)
         text(c, "150 m", top.left + 64 * d, top.top + 34 * d, 20f, Color.WHITE, bold = true)
-        text(c, "Linden Street", top.left + 64 * d, top.top + 62 * d, 17f, Color.WHITE)
+        text(c, "Allée Thomy Thierry", top.left + 64 * d, top.top + 62 * d, 17f, Color.WHITE)
         // Bandeau du bas : arrivée, durée, distance
         val bar = RectF(0f, h - 64 * d, w, h)
         p.color = Color.WHITE; c.drawRect(bar, p)
