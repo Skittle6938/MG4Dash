@@ -46,6 +46,25 @@ object EmbeddedApp {
         null
     }
 
+    /**
+     * Plein écran : en touchant l'appli intégrée, c'est sa fenêtre qui prend la main, et comme elle
+     * ne demande pas le mode immersif, les barres SAIC réapparaissaient. Le réglage système
+     * « policy_control » force le mode immersif pour cette appli (et MG4Dash) ; retiré sans appli.
+     */
+    fun immersive(context: Context, pkg: String?) {
+        val want = if (pkg != null && app.mg4dash.system.Prefs(context).fullscreen) "immersive.full=${context.packageName},$pkg" else null
+        try {
+            val cr = context.contentResolver
+            val cur = android.provider.Settings.Global.getString(cr, "policy_control")
+            // On ne touche qu'à une valeur posée par nous (ou vide)
+            if (cur != null && cur.isNotEmpty() && !cur.startsWith("immersive.full=${context.packageName},")) return
+            if (cur != want) {
+                android.provider.Settings.Global.putString(cr, "policy_control", want)
+                Log.i(TAG, "policy_control → ${want ?: "(vide)"}")
+            }
+        } catch (e: Throwable) { Log.w(TAG, "policy_control : ${e.message}") }
+    }
+
     fun release(v: View) {
         try { v.javaClass.getMethod("release").invoke(v) } catch (_: Throwable) {}
     }

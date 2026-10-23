@@ -843,6 +843,7 @@ class MainActivity : AppCompatActivity() {
             mapAppView?.let { b.mapCard.removeView(it) }
             mapAppView = null; mapAppCn = null
         }
+        app.mg4dash.ui.EmbeddedApp.immersive(this, cn?.packageName)
         if (cn == null) return
         if (mapAppView == null) {
             val v = app.mg4dash.ui.EmbeddedApp.create(this, cn)
