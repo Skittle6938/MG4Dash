@@ -56,6 +56,9 @@ class StackedBar @JvmOverloads constructor(context: Context, attrs: AttributeSet
 }
 
 /** Courbe de consommation (kWh/100 km) avec aire dégradée et ligne de moyenne. */
+/** Courbe lissée (#44) : chaque point = moyenne de lui-même et des 2 précédents. */
+fun List<Float>.smooth3(): List<Float> = indices.map { i -> subList(maxOf(0, i - 2), i + 1).average().toFloat() }
+
 class LineChart @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) : View(context, attrs) {
     var values: List<Float> = emptyList()
         set(v) { field = v; invalidate() }

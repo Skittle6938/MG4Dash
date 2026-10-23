@@ -2,7 +2,7 @@
 
 Full-screen launcher for the MG4 and its 1920 × 720 screen, for every head unit firmware (SWI69, SWI131/132/173, SWI68, SWI133, SWI165; see [Compatibility](#compatibility-beta)): three home layouts, Climate, Energy, Vehicle and Phone pages linked by a vertical bar or a bottom dock, dark, light or automatic mode following the car's lights, and five background and button colour themes.
 
-Languages: English (default), French, German, Spanish, Italian and Dutch, following the car's system language. Units: km and kWh/100 km or miles and mi/kWh (following the car or set by hand), tyre pressure in bar, psi or kPa.
+Languages: English (default), French, German, Spanish, Italian, Dutch and Turkish, following the car's system language. Units: km and kWh/100 km or miles and mi/kWh (following the car or set by hand), tyre pressure in bar, psi or kPa.
 
 Current version: **1.4.0** ([releases](https://github.com/Skittle6938/MG4Dash/releases)).
 

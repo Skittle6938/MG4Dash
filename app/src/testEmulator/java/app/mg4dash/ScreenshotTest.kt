@@ -38,6 +38,36 @@ class ScreenshotTest {
         shoot(MainActivity::class.java, "home_bottom_bar.png")
     }
 
+    /** Ecran plus bas (barres SAIC visibles, #43) : barre en bas. */
+    @Test @Config(qualifiers = "w1790dp-h640dp-land-mdpi") fun homeBottomBarShort() {
+        org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE)
+            .edit().putBoolean("vertical_dock", false).putInt("theme_mode", 1).commit()
+        shoot(MainActivity::class.java, "home_bottom_bar_short.png")
+    }
+
+    @Test @Config(qualifiers = "w1790dp-h640dp-land-mdpi") fun energyBottomBarShort() {
+        org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE)
+            .edit().putBoolean("vertical_dock", false).putInt("theme_mode", 1).commit()
+        shoot(app.mg4dash.pages.EnergyActivity::class.java, "energy_bottom_bar_short.png")
+    }
+
+    @Test @Config(qualifiers = "w1790dp-h640dp-land-mdpi") fun homeVerticalShort() {
+        org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE)
+            .edit().putInt("theme_mode", 1).commit()
+        shoot(MainActivity::class.java, "home_vertical_short.png")
+    }
+
+    @Test fun homeBottomBarPower() {
+        org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE)
+            .edit().putBoolean("vertical_dock", false).putInt("theme_mode", 1).putBoolean("energy_card_power", true).commit()
+        shoot(MainActivity::class.java, "home_bottom_bar_power.png")
+    }
+
+    /** Turc (#42). */
+    @Test @Config(qualifiers = "tr-w1920dp-h720dp-land-mdpi") fun homeTurkish() = shoot(MainActivity::class.java, "home_tr.png")
+    @Test @Config(qualifiers = "tr-w1920dp-h720dp-land-mdpi") fun energyTurkish() = shoot(app.mg4dash.pages.EnergyActivity::class.java, "energy_tr.png")
+    @Test @Config(qualifiers = "tr-w1920dp-h720dp-land-mdpi") fun climateTurkish() = shoot(ClimateActivity::class.java, "climate_tr.png")
+
     @Test fun settingsBottomBar() {
         org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE)
             .edit().putBoolean("vertical_dock", false).commit()
@@ -553,7 +583,8 @@ class ScreenshotTest {
     }
 
     private fun save(root: View, name: String) {
-        val w = 1920; val h = 720
+        val cfg = root.resources.configuration
+        val w = cfg.screenWidthDp.takeIf { it in 1000..1920 } ?: 1920; val h = cfg.screenHeightDp.takeIf { it in 400..720 } ?: 720
         root.measure(View.MeasureSpec.makeMeasureSpec(w, View.MeasureSpec.EXACTLY), View.MeasureSpec.makeMeasureSpec(h, View.MeasureSpec.EXACTLY))
         root.layout(0, 0, w, h)
         val bmp = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)

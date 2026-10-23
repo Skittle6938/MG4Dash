@@ -56,6 +56,8 @@ object EnergyMonitor {
     /** % de batterie au départ du trajet en cours (repère de la barre d'autonomie, issue #29). */
     private val _tripStartSoc = MutableStateFlow<Int?>(null)
     val tripStartSoc: StateFlow<Int?> = _tripStartSoc
+    /** Numéro du trajet, augmenté à chaque nouveau démarrage (remise à zéro des V min / A max, #29). */
+    @Volatile var tripSeq = 0; private set
     private val _lastYear = MutableStateFlow(Totals())
     /** Les 12 derniers mois (mois en cours compris). */
     val lastYear: StateFlow<Totals> = _lastYear
@@ -153,6 +155,7 @@ object EnergyMonitor {
                     if (km != null) startKm = km
                     _sinceStart.value = Totals()
                     _tripStartSoc.value = soc
+                    tripSeq++
                 }
                 if (_tripStartSoc.value == null && soc != null) {
                     _tripStartSoc.value = soc

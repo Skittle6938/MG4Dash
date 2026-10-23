@@ -63,7 +63,24 @@ object Themes {
         val accs = if (light) ACCENTS_LIGHT else ACCENTS
         activity.theme.applyStyle(bgs.getOrElse(p.themeBackground) { bgs[0] }, true)
         activity.theme.applyStyle(accs.getOrElse(p.themeAccent) { accs[0] }, true)
+        fitHeight(activity)
     }
+
+    /**
+     * Écran moins haut que la dalle (barres SAIC affichées hors plein écran, #43) : tout est
+     * réduit d'autant, pour que les pages dessinées pour 720 dp de haut tiennent sans être coupées.
+     */
+    private fun fitHeight(activity: Activity) {
+        val h = activity.resources.configuration.screenHeightDp
+        val sys = android.content.res.Resources.getSystem().displayMetrics
+        val scale = if (h in 400 until FULL_HEIGHT_DP - 8) h / FULL_HEIGHT_DP.toFloat() else 1f
+        val m = activity.resources.displayMetrics
+        m.density = sys.density * scale
+        m.scaledDensity = sys.scaledDensity * scale
+        m.densityDpi = (sys.densityDpi * scale).toInt()
+    }
+
+    private const val FULL_HEIGHT_DP = 720
 
     /** Publie le thème pour Radio Dash (uid système requis ; sans effet sinon). */
     fun publish(context: Context) {
