@@ -34,6 +34,12 @@ class VehicleActivity : PageActivity() {
     private val values = mutableMapOf<Int, TextView>()
 
     override fun buildBody() {
+        // Page Son (égaliseur, répartition) : notre propre écran
+        header.addView(kit.text(getString(R.string.vh_sound), 19f, R.color.text_sub).apply {
+            setPadding(kit.dp(16), kit.dp(12), kit.dp(16), kit.dp(12))
+            setBackgroundResource(R.drawable.bg_button)
+            setOnClickListener { startActivity(android.content.Intent(this@VehicleActivity, SoundActivity::class.java)) }
+        }, kit.lp(-2, -2, r = 12))
         header.addView(kit.text(getString(R.string.vh_saic), 19f, R.color.text_sub).apply {
             setPadding(kit.dp(16), kit.dp(12), kit.dp(16), kit.dp(12))
             setBackgroundResource(R.drawable.bg_button)

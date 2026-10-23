@@ -36,6 +36,7 @@ object CarBridge {
     private const val CODE_EV = 4
     private const val CODE_HVAC = 7
     private const val CODE_VS = 8
+    private const val CODE_AUDIO = 10
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private val _state = MutableStateFlow(VehicleState())
@@ -161,6 +162,14 @@ object CarBridge {
             adapter = null; hvac = null; ev = null; vs = null; general = null
             _state.value = _state.value.copy(connected = false)
         }
+    }
+
+    private var audioService: AudioService? = null
+
+    /** Service son (page Son) ; demandé au premier usage. Appeler hors du fil principal. */
+    fun audio(): AudioService? {
+        if (audioService?.alive != true) audioService = query(CODE_AUDIO)?.let { AudioService(it) }
+        return audioService
     }
 
     private fun query(code: Int): IBinder? = try {
