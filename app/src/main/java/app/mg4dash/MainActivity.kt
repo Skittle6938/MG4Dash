@@ -851,7 +851,12 @@ class MainActivity : AppCompatActivity() {
         app.mg4dash.ui.EmbeddedApp.immersive(this, cn?.packageName)
         if (cn == null) return
         if (mapAppView == null) {
-            val v = app.mg4dash.ui.EmbeddedApp.create(this, cn)
+            // Ramenée à la taille de la carte seulement quelques secondes après le lancement effectif
+            // (au démarrage de la voiture, l'écran virtuel met parfois plus de 10 s à être prêt)
+            var created: View? = null
+            val v = app.mg4dash.ui.EmbeddedApp.create(this, cn) {
+                created?.let { av -> av.postDelayed({ if (av.isAttachedToWindow) av.layoutParams = android.widget.FrameLayout.LayoutParams(-1, -1) }, 5000) }
+            }
             if (v == null) {
                 app.mg4dash.ui.Toasts.show(this, R.string.map_app_unavailable, long = true)
                 prefs.mapApp = null; return
@@ -862,7 +867,7 @@ class MainActivity : AppCompatActivity() {
             // de la carte, l'appli restait ensuite coupée à droite en plein écran
             val screenW = resources.displayMetrics.widthPixels
             b.mapCard.addView(v, b.mapCard.indexOfChild(b.widgetToggle), android.widget.FrameLayout.LayoutParams(screenW, -1))
-            v.postDelayed({ if (v.isAttachedToWindow) v.layoutParams = android.widget.FrameLayout.LayoutParams(-1, -1) }, 6000)
+            created = v
             mapAppView = v; mapAppCn = cn
             // Bouton plein écran, comme pour la carte OpenStreetMap, sous le bouton de bascule
             val d = resources.displayMetrics.density

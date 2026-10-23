@@ -17,7 +17,7 @@ import app.mg4dash.system.Log
 object EmbeddedApp {
     private const val TAG = "AppCarte"
 
-    fun create(activity: Activity, cn: ComponentName): ViewGroup? = try {
+    fun create(activity: Activity, cn: ComponentName, onStarted: (() -> Unit)? = null): ViewGroup? = try {
         val cls = Class.forName("android.app.ActivityView")
         val view = cls.getConstructor(Context::class.java).newInstance(activity) as ViewGroup
         val start = cls.getMethod("startActivity", Intent::class.java)
@@ -29,7 +29,8 @@ object EmbeddedApp {
                 if (!view.isAttachedToWindow) return@postDelayed
                 try {
                     start.invoke(view, intent)
-                    Log.i(TAG, "${cn.flattenToShortString()} lancée dans le widget carte")
+                    Log.i(TAG, "${cn.flattenToShortString()} lancée dans le widget carte (${view.width}×${view.height})")
+                    onStarted?.invoke()
                 } catch (e: java.lang.reflect.InvocationTargetException) {
                     // Pas de limite : l'écran virtuel n'existe que quand l'accueil est affiché (sinon le widget restait noir)
                     if (n == 20) Log.w(TAG, "en attente de l'écran virtuel : ${e.cause?.message}")
