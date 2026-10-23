@@ -117,11 +117,6 @@ class SocBar @JvmOverloads constructor(context: Context, attrs: AttributeSet? = 
         s.paint.color = col; s.paint.alpha = 70; c.drawCircle(end, cy, barH * 0.95f, s.paint)
         s.paint.alpha = 255; s.paint.color = 0xFFFFFFFF.toInt(); c.drawCircle(end, cy, barH * 0.42f, s.paint)
         if (currentBubble) bubble(c, end, top - 3 * d, "${Math.round(soc)} %", 15f, col, 0xFF0B0F17.toInt(), null)
-        // Graduations aux deux bouts, à hauteur de la barre
-        s.text.typeface = null; s.text.color = s.tick; s.text.textSize = tickSp * s.sp
-        val ty = bottom + (tickSp + 3) * d
-        if (ty > h) return
-        // Pas de « 0 » à gauche : le début de la barre suffit (#29)
-        if (start == null || x(start) < x1 - 140 * d) { s.text.textAlign = Paint.Align.RIGHT; c.drawText("100 %", x1, ty, s.text) }
+        // Ni « 0 » ni « 100 % » aux bouts : les extrémités de la barre suffisent (#29)
     }
 }
