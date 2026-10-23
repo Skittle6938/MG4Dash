@@ -56,6 +56,12 @@ object Compat {
             val (seatCfg, wheelCfg) = CarBridge.heatingConfig()
             appendLine("Heating: config seat=${seatCfg ?: "—"} wheel=${wheelCfg ?: "—"}; props seatL=${hv(0x15402513)} seatR=${hv(0x15402514)} wheel=${hv(0x1540253a)}")
             appendLine("Drive side: ${CarProps.readBytes(CarProps.CAL_DRIVE_HDL_TYPE)?.joinToString("") { String.format("%02x", it) } ?: "—"} (${when (CarProps.rightHandDrive()) { true -> "right-hand"; false -> "left-hand"; null -> "?" }})")
+            // Essuie-glaces et capteur de pluie (lecture seule) : équipement et état actuel
+            fun ints(vararg p: Pair<String, Int>) = p.joinToString(" · ") { (n, id) -> "$n ${CarProps.getInt(id) ?: "—"}" }
+            fun hex(id: Int) = CarProps.readBytes(id)?.joinToString("") { String.format("%02x", it) } ?: "—"
+            appendLine("Wipers config: front ${hex(561005115)} · assy ${hex(561005187)}")
+            appendLine("Wipers: " + ints("rain" to 289421397, "sw" to 289421399, "swAv" to 289421400, "poten" to 289421401,
+                "potenAv" to 289421402, "swSts" to 557897511, "mode" to 557897519, "sens" to 557897518, "flick" to 557897517, "icmMode" to 557847978))
             appendLine("Controls: esp=${i(0x11403805)} tcs=${i(0x1140381f)} chrgCtrl=${i(0x2140f412)} lockCtrl=${i(0x2140f413)} doorCtrl=${i(0x2140f455)} plugAC=${i(0x2140f43e)} plugDC=${i(0x2140f43f)} onePedal=${i(0x2140a193)} ldw=${i(0x2140a104)} fcw=${i(0x2140a108)} slif=${i(0x2140a16c)}")
             appendLine("Old SDK: " + sdkClasses(a))
             appendLine("Media: " + listOf("com.saicmotor.service.media", "com.saicmotor.service.radio", "com.saicmotor.media", "com.saicmotor.radio",
