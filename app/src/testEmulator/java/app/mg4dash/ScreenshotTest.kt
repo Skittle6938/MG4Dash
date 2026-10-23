@@ -143,6 +143,21 @@ class ScreenshotTest {
         File(dir, name).outputStream().use { bmp.compress(Bitmap.CompressFormat.PNG, 100, it) }
     }
 
+    /** Capture README : une appli tierce dans la carte (dessin de démonstration, style Carte). */
+    @Test fun homeMapAppPlanner() = mapApp({ FakePlannerView(it) }, "home_map_app_planner.png")
+    @Test fun homeMapAppGuidance() = mapApp({ FakeGuidanceView(it) }, "home_map_app_guidance.png")
+    private fun mapApp(make: (android.content.Context) -> View, name: String) {
+        org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE).edit()
+            .putInt("theme_mode", 1).putInt("home_style", 2).putInt("stack_page", 0).putBoolean("energy_card_power", true).commit()
+        val act = Robolectric.buildActivity(MainActivity::class.java).setup().get()
+        repeat(3) { shadowOf(Looper.getMainLooper()).idleFor(200, TimeUnit.MILLISECONDS) }
+        val card = act.findViewById<android.widget.FrameLayout>(R.id.mapCard)
+        val toggle = act.findViewById<View>(R.id.widgetToggle)
+        card.addView(make(act), card.indexOfChild(toggle), android.widget.FrameLayout.LayoutParams(-1, -1))
+        repeat(2) { shadowOf(Looper.getMainLooper()).idleFor(200, TimeUnit.MILLISECONDS) }
+        save(act.window.decorView, name)
+    }
+
     @Test fun settingsBottomBar() {
         org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE)
             .edit().putBoolean("vertical_dock", false).commit()
