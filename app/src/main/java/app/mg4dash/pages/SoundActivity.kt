@@ -155,11 +155,60 @@ class SoundActivity : PageActivity() {
         io.shutdown()
     }
 
+    // ── Spectre en direct (Visualizer sur la sortie audio générale, session 0) ──
+    private var visualizer: android.media.audiofx.Visualizer? = null
+    private val bars = FloatArray(BARS)
+
+    override fun onResume() {
+        super.onResume()
+        if (BuildConfig.MOCK) { eq.spectrum = FloatArray(BARS) { k -> (0.75f - 0.5f * k / BARS + 0.2f * kotlin.math.sin(k * 0.9f)).coerceIn(0.05f, 1f) }; return }
+        try {
+            val v = android.media.audiofx.Visualizer(0)
+            v.captureSize = android.media.audiofx.Visualizer.getCaptureSizeRange()[1]
+            val rate = android.media.audiofx.Visualizer.getMaxCaptureRate()
+            v.setDataCaptureListener(object : android.media.audiofx.Visualizer.OnDataCaptureListener {
+                override fun onWaveFormDataCapture(vis: android.media.audiofx.Visualizer?, w: ByteArray?, sr: Int) {}
+                override fun onFftDataCapture(vis: android.media.audiofx.Visualizer?, fft: ByteArray?, samplingRate: Int) {
+                    if (fft != null) onFft(fft, samplingRate / 1000f)
+                }
+            }, rate, false, true)
+            v.enabled = true
+            visualizer = v
+            Log.i(TAG, "spectre : Visualizer actif (${v.captureSize} points, ${rate / 1000} Hz)")
+        } catch (e: Throwable) { Log.w(TAG, "spectre indisponible : ${e.message}") }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        try { visualizer?.enabled = false; visualizer?.release() } catch (_: Throwable) {}
+        visualizer = null
+    }
+
+    /** FFT → BARS barres réparties en échelle log de 60 Hz à 16 kHz, montée rapide et retombée douce. */
+    private fun onFft(fft: ByteArray, sampleHz: Float) {
+        val n = fft.size / 2; if (n < 2 || sampleHz <= 0f) return
+        val binHz = sampleHz / 2f / n
+        for (k in 0 until BARS) {
+            val f0 = 60f * Math.pow(16000.0 / 60.0, k / BARS.toDouble()).toFloat()
+            val f1 = 60f * Math.pow(16000.0 / 60.0, (k + 1) / BARS.toDouble()).toFloat()
+            val i0 = (f0 / binHz).toInt().coerceIn(1, n - 1); val i1 = (f1 / binHz).toInt().coerceIn(i0, n - 1)
+            var m = 0f
+            for (i in i0..i1) { val re = fft[2 * i].toFloat(); val im = fft[2 * i + 1].toFloat(); m = maxOf(m, kotlin.math.hypot(re, im)) }
+            // dB ramené à 0…1 (≈ 50 dB de dynamique)
+            val db = if (m > 0f) 20f * kotlin.math.log10(m) else 0f
+            val target = ((db - 5f) / 40f).coerceIn(0f, 1f)
+            bars[k] = if (target > bars[k]) target else bars[k] * 0.85f + target * 0.15f
+        }
+        val copy = bars.copyOf()
+        runOnUiThread { if (!isFinishing) eq.spectrum = copy }
+    }
+
     override fun render(s: VehicleState) {}
 
     companion object {
         private const val TAG = "MG4L.Sound"
         private const val USER = 7
         private const val EQ_CENTER = 7
+        private const val BARS = 40
     }
 }
