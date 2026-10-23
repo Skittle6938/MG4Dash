@@ -124,6 +124,21 @@ class MainActivity : AppCompatActivity() {
         wireCards()
         observe()
         warmUpStockLauncherIfNeeded()
+        // Carte (ou appli de la carte) en plein écran avant une reconstruction (thème jour / nuit…) :
+        // elle y reste ; seuls Home et le bouton agrandir / réduire la ramènent au widget
+        if (savedInstanceState?.getBoolean(KEY_MAP_FULL) == true || mapFullOnRecreate) b.mapCard.post { setMapFullscreen(true) }
+        mapFullOnRecreate = false
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putBoolean(KEY_MAP_FULL, hiddenForMap != null)
+        if (isChangingConfigurations && hiddenForMap != null) mapFullOnRecreate = true
+    }
+
+    override fun onDestroy() {
+        if (isChangingConfigurations && hiddenForMap != null) mapFullOnRecreate = true
+        super.onDestroy()
     }
 
     /**
@@ -309,7 +324,9 @@ class MainActivity : AppCompatActivity() {
     override fun onPause() {
         super.onPause()
         CarBridge.setForeground(false)
-        if (!simpleMode) { mapCard.onPause(); setMapFullscreen(false) }   // une page ouverte depuis la barre
+        // (le plein écran de la carte n'est plus quitté ici : la barre le fait en ouvrant une page, et
+        // une reconstruction (thème) ou l'appli de la carte qui prend la main ne doivent pas le quitter)
+        if (!simpleMode) mapCard.onPause()
         handler.removeCallbacksAndMessages(null)
     }
 
@@ -1359,4 +1376,9 @@ class MainActivity : AppCompatActivity() {
 
     private fun color(res: Int) = app.mg4dash.ui.Themes.color(this, res)
     private fun dp(v: Int) = (v * resources.displayMetrics.density).toInt()
+    private companion object {
+        const val KEY_MAP_FULL = "map_full"
+        /** Plein écran de la carte à rétablir après une recréation (en plus de l'état sauvegardé). */
+        var mapFullOnRecreate = false
+    }
 }
