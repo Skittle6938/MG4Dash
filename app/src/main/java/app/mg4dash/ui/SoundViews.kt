@@ -31,79 +31,57 @@ class SoundFieldView(context: Context) : View(context) {
     private val car = RectF()
     private var lastTap = 0L
 
-    /** Ton de la voiture : gris clair transparent (couleur du texte, atténuée). */
-    private fun tone(alpha: Int) = (c(R.color.text_value) and 0x00FFFFFF) or (alpha shl 24)
+    /** Photo de la MG4 vue de dessus (celle de WinClose), passée en gris clair transparent. */
+    private val photo: android.graphics.Bitmap? = try {
+        android.graphics.BitmapFactory.decodeResource(resources, R.drawable.mg4_top)
+    } catch (_: Throwable) { null }
+    private val photoPaint = Paint(Paint.ANTI_ALIAS_FLAG or Paint.FILTER_BITMAP_FLAG)
+    private var photoTone = 0
+    /** Caisse (sans les rétroviseurs) : zone où l'on place le point de son. */
+    private val shell = RectF()
 
     override fun onDraw(cv: Canvas) {
         val w = width.toFloat(); val h = height.toFloat()
-        // MG4 vue de dessus, avant en haut : 4,29 × 1,84 m, roues aux quatre coins, porte-à-faux courts
-        val ch = h - 56 * d; val cw = ch * 0.43f
-        car.set((w - cw) / 2, 28 * d, (w + cw) / 2, 28 * d + ch)
-        val l = car.left; val t = car.top; val cx = car.centerX()
-        fun X(f: Float) = l + cw * f
-        fun Y(f: Float) = t + ch * f
-        // Rétroviseurs
-        fill.color = tone(90)
-        cv.drawRoundRect(RectF(X(-0.13f), Y(0.3f), X(0.03f), Y(0.345f)), 8 * d, 8 * d, fill)
-        cv.drawRoundRect(RectF(X(0.97f), Y(0.3f), X(1.13f), Y(0.345f)), 8 * d, 8 * d, fill)
-        // Caisse : nez arrondi et plongeant, flancs galbés, arrière court et droit
-        val shell = Path().apply {
-            moveTo(cx, Y(0f))
-            cubicTo(X(0.82f), Y(0f), X(0.97f), Y(0.02f), X(0.985f), Y(0.1f))
-            cubicTo(X(1.02f), Y(0.3f), X(1.0f), Y(0.7f), X(0.98f), Y(0.93f))
-            cubicTo(X(0.97f), Y(0.99f), X(0.8f), Y(1f), cx, Y(1f))
-            cubicTo(X(0.2f), Y(1f), X(0.03f), Y(0.99f), X(0.02f), Y(0.93f))
-            cubicTo(X(0f), Y(0.7f), X(-0.02f), Y(0.3f), X(0.015f), Y(0.1f))
-            cubicTo(X(0.03f), Y(0.02f), X(0.18f), Y(0f), cx, Y(0f))
-            close()
+        // Photo à l'échelle de la hauteur disponible, avant en haut
+        // (la photo a une marge transparente : on la laisse déborder un peu sur les libellés avant / arrière)
+        val ch = h - 16 * d
+        val ratio = photo?.let { it.width.toFloat() / it.height } ?: 0.63f
+        val cw = ch * ratio
+        car.set((w - cw) / 2, 8 * d, (w + cw) / 2, 8 * d + ch)
+        shell.set(car.left + cw * 0.2f, car.top + ch * 0.07f, car.left + cw * 0.81f, car.top + ch * 0.93f)
+        photo?.let { bmp ->
+            // Gris clair (sombre en thème clair) : luminance de la photo ramenée vers la couleur du texte
+            val tone = c(R.color.text_value)
+            if (photoPaint.colorFilter == null || photoTone != tone) {
+                photoTone = tone
+                val r = android.graphics.Color.red(tone) / 255f; val g = android.graphics.Color.green(tone) / 255f; val b = android.graphics.Color.blue(tone) / 255f
+                val dark = (r + g + b) < 1.5f
+                // Gris : luminance, éclaircie (thème sombre) ou assombrie (thème clair), puis transparence
+                val k = if (dark) 0.75f else 0.9f; val off = if (dark) 60f else 90f
+                val m = android.graphics.ColorMatrix(floatArrayOf(
+                    0.299f * k, 0.587f * k, 0.114f * k, 0f, off,
+                    0.299f * k, 0.587f * k, 0.114f * k, 0f, off,
+                    0.299f * k, 0.587f * k, 0.114f * k, 0f, off,
+                    0f, 0f, 0f, 0.6f, 0f))
+                photoPaint.colorFilter = android.graphics.ColorMatrixColorFilter(m)
+            }
+            cv.drawBitmap(bmp, null, car, photoPaint)
         }
-        // Pneus : seule la partie qui dépasse de la caisse est dessinée
-        cv.save(); cv.clipOutPath(shell)
-        fill.color = tone(90)
-        for (fy in listOf(0.12f, 0.77f)) for (fx in listOf(-0.05f, 0.87f))
-            cv.drawRoundRect(RectF(X(fx), Y(fy), X(fx + 0.18f), Y(fy + 0.12f)), 6 * d, 6 * d, fill)
-        cv.restore()
-        fill.color = tone(40); cv.drawPath(shell, fill)
-        body.color = tone(120); cv.drawPath(shell, body)
-        // Capot (nervures) et bandeau lumineux avant, comme la MG4
-        line.color = tone(70)
-        cv.drawLine(X(0.3f), Y(0.05f), X(0.33f), Y(0.22f), line); cv.drawLine(X(0.7f), Y(0.05f), X(0.67f), Y(0.22f), line)
-        fill.color = tone(160)
-        cv.drawRoundRect(RectF(X(0.1f), Y(0.012f), X(0.32f), Y(0.026f)), 4 * d, 4 * d, fill)
-        cv.drawRoundRect(RectF(X(0.68f), Y(0.012f), X(0.9f), Y(0.026f)), 4 * d, 4 * d, fill)
-        // Pare-brise, toit vitré et lunette (un seul vitrage sombre, montants fins)
-        val glass = Path().apply {
-            moveTo(X(0.16f), Y(0.27f)); cubicTo(X(0.35f), Y(0.235f), X(0.65f), Y(0.235f), X(0.84f), Y(0.27f))
-            lineTo(X(0.86f), Y(0.36f)); lineTo(X(0.87f), Y(0.78f))
-            cubicTo(X(0.7f), Y(0.82f), X(0.3f), Y(0.82f), X(0.13f), Y(0.78f))
-            lineTo(X(0.14f), Y(0.36f)); close()
-        }
-        fill.color = tone(55); cv.drawPath(glass, fill)
-        line.color = tone(110)
-        cv.drawLine(X(0.14f), Y(0.36f), X(0.86f), Y(0.36f), line)   // haut du pare-brise
-        cv.drawLine(X(0.135f), Y(0.7f), X(0.865f), Y(0.7f), line)   // haut de la lunette
-        // Sièges vus à travers le toit
-        fill.color = tone(45)
-        for ((sx, sy) in listOf(0.3f to 0.42f, 0.7f to 0.42f, 0.3f to 0.58f, 0.7f to 0.58f))
-            cv.drawRoundRect(RectF(X(sx - 0.14f), Y(sy - 0.045f), X(sx + 0.14f), Y(sy + 0.045f)), 8 * d, 8 * d, fill)
-        // Bandeau de feux arrière sur toute la largeur
-        fill.color = tone(160)
-        cv.drawRoundRect(RectF(X(0.08f), Y(0.975f), X(0.92f), Y(0.988f)), 4 * d, 4 * d, fill)
         // Haut-parleurs (portes avant et arrière)
         fill.color = c(R.color.text_title)
-        for ((sx, sy) in listOf(0.01f to 0.4f, 0.99f to 0.4f, 0.01f to 0.62f, 0.99f to 0.62f))
-            cv.drawCircle(X(sx), Y(sy), 5.5f * d, fill)
+        for ((sx, sy) in listOf(0f to 0.4f, 1f to 0.4f, 0f to 0.64f, 1f to 0.64f))
+            cv.drawCircle(shell.left + shell.width() * sx, car.top + ch * sy, 5.5f * d, fill)
         // Repères et libellés
         text.color = c(R.color.text_title)
         cv.drawText(context.getString(R.string.snd_front), w / 2, 18 * d, text)
         cv.drawText(context.getString(R.string.snd_rear), w / 2, h - 8 * d, text)
-        cv.drawText(context.getString(R.string.snd_left), car.left - 56 * d, h / 2 + 5 * d, text)
-        cv.drawText(context.getString(R.string.snd_right), car.right + 56 * d, h / 2 + 5 * d, text)
+        cv.drawText(context.getString(R.string.snd_left), car.left - 40 * d, h / 2 + 5 * d, text)
+        cv.drawText(context.getString(R.string.snd_right), car.right + 40 * d, h / 2 + 5 * d, text)
         // Point de son
-        val px = car.left + cw * (0.5f + balance / (2f * RANGE) * 0.9f)
-        val py = car.top + ch * (0.54f - fader / (2f * RANGE) * 0.8f)
+        val px = shell.left + shell.width() * (0.5f + balance / (2f * RANGE) * 0.9f)
+        val py = shell.top + shell.height() * (0.5f - fader / (2f * RANGE) * 0.85f)
         line.color = Themes.select(context); line.alpha = 120
-        cv.drawLine(car.left, py, car.right, py, line); cv.drawLine(px, car.top, px, car.bottom, line)
+        cv.drawLine(shell.left, py, shell.right, py, line); cv.drawLine(px, shell.top, px, shell.bottom, line)
         fill.color = Themes.select(context); fill.alpha = 60; cv.drawCircle(px, py, 26 * d, fill)
         fill.alpha = 255; cv.drawCircle(px, py, 13 * d, fill)
         fill.color = c(R.color.panel); cv.drawCircle(px, py, 5 * d, fill)
@@ -118,8 +96,8 @@ class SoundFieldView(context: Context) : View(context) {
             parent?.requestDisallowInterceptTouchEvent(true)
         }
         if (e.action == MotionEvent.ACTION_DOWN || e.action == MotionEvent.ACTION_MOVE) {
-            val b = (((e.x - car.left) / car.width() - 0.5f) / 0.9f * 2f * RANGE).roundToInt()
-            val f = ((0.54f - (e.y - car.top) / car.height()) / 0.8f * 2f * RANGE).roundToInt()
+            val b = (((e.x - shell.left) / shell.width() - 0.5f) / 0.9f * 2f * RANGE).roundToInt()
+            val f = ((0.5f - (e.y - shell.top) / shell.height()) / 0.85f * 2f * RANGE).roundToInt()
             if (b.coerceIn(-RANGE, RANGE) != balance || f.coerceIn(-RANGE, RANGE) != fader) {
                 balance = b; fader = f; onChange?.invoke(balance, fader)
             }
