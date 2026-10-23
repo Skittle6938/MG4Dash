@@ -838,6 +838,19 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    /** Si l'appli de la carte est passée devant l'accueil (sur l'écran principal), on remet l'accueil devant. */
+    private fun reclaimFromApp(pkg: String) {
+        try {
+            val am = getSystemService(ACTIVITY_SERVICE) as android.app.ActivityManager
+            @Suppress("DEPRECATION")
+            val top = am.getRunningTasks(1).firstOrNull() ?: return
+            if (top.topActivity?.packageName == pkg && top.id != taskId) {
+                am.moveTaskToFront(taskId, 0)
+                android.util.Log.i("MG4L.AppCarte", "$pkg passée devant l'accueil : accueil remis au premier plan")
+            }
+        } catch (e: Throwable) { android.util.Log.w("MG4L.AppCarte", "reprise : ${e.message}") }
+    }
+
     /** Bouton plein écran de l'appli intégrée à la carte. */
     private var mapAppFull: android.widget.ImageButton? = null
 
@@ -869,6 +882,10 @@ class MainActivity : AppCompatActivity() {
             b.mapCard.addView(v, b.mapCard.indexOfChild(b.widgetToggle), android.widget.FrameLayout.LayoutParams(screenW, -1))
             created = v
             mapAppView = v; mapAppCn = cn
+            // Accueil reconstruit (thème jour / nuit…) : l'ancien écran virtuel disparaît et Android
+            // remet l'appli au premier plan, en plein écran. On reprend la main : la nouvelle carte
+            // peut alors la récupérer.
+            for (delay in longArrayOf(800, 1800, 3000, 4500)) v.postDelayed({ reclaimFromApp(cn.packageName) }, delay)
             // Bouton plein écran, comme pour la carte OpenStreetMap, sous le bouton de bascule
             val d = resources.displayMetrics.density
             val full = android.widget.ImageButton(this).apply {
