@@ -40,13 +40,19 @@ object Themes {
      * au moins [HOLD_MS] (un pont ou un court tunnel ne fait plus basculer l'écran).
      */
     fun isNight(context: Context): Boolean {
+        // Au démarrage, tant que la voiture ne répond pas encore, on garde le dernier état connu :
+        // sinon l'accueil se construisait en clair puis basculait en sombre quelques secondes plus
+        // tard (et l'appli du widget carte, chassée par la reconstruction, passait en plein écran)
+        val sp = context.getSharedPreferences("mg4launcher", Context.MODE_PRIVATE)
+        if (!app.mg4dash.car.CarProps.ready && !app.mg4dash.BuildConfig.MOCK) return stableNight ?: sp.getBoolean("last_night", false)
         val raw = rawNight(context)
         val now = android.os.SystemClock.elapsedRealtime()
-        val stable = stableNight ?: raw.also { stableNight = it }
+        val stable = stableNight ?: sp.getBoolean("last_night", raw).also { stableNight = it }
         if (raw == stable) { pendingSince = 0L; return stable }
         if (pendingSince == 0L) { pendingSince = now; return stable }
         if (now - pendingSince < HOLD_MS) return stable
         stableNight = raw; pendingSince = 0L
+        sp.edit().putBoolean("last_night", raw).apply()
         return raw
     }
 
