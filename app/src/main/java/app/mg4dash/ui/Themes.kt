@@ -73,7 +73,11 @@ object Themes {
     private fun fitHeight(activity: Activity) {
         val h = activity.resources.configuration.screenHeightDp
         val sys = android.content.res.Resources.getSystem().displayMetrics
-        val scale = if (h in 400 until FULL_HEIGHT_DP - 8) h / FULL_HEIGHT_DP.toFloat() else 1f
+        // Plein écran (réglage par défaut) : la dalle entière est à nous, même si la configuration
+        // annonce une hauteur réduite par les barres SAIC masquées ; réduire décalait tout,
+        // dont la barre verticale sous le bouton antibrouillards (#38)
+        val full = Prefs(activity).fullscreen
+        val scale = if (!full && h in 400 until FULL_HEIGHT_DP - 8) h / FULL_HEIGHT_DP.toFloat() else 1f
         val m = activity.resources.displayMetrics
         m.density = sys.density * scale
         m.scaledDensity = sys.scaledDensity * scale
