@@ -124,6 +124,10 @@ Charging (start / stop, charge limit on firmwares where the car applies it, AC c
 ![Vehicle](docs/screenshots/vehicle.png?v=15)
 Drive mode (including Eco, Snow and Custom where the car has them), regeneration (tap the gauge to change it; level 6 is one-pedal driving), driver assistance, tyre pressures and temperatures, and vehicle status, with a shortcut to MG4 Control.
 
+### Sound
+![Sound](docs/screenshots/sound.png?v=16)
+Vehicle › *Sound*, or a long press on the play / pause button of the home screen. Drag the dot on the MG4 seen from above to set the balance (left / right) and the fader (front / rear), double tap or *Centre* to bring it back to the middle. The 5-band equaliser (80 Hz to 16 kHz) uses the car's presets (Classic, Jazz, Pop, Rock, Vocal) or your own curve (*User*, by moving a slider), with a *Loudness* switch and a *Flat* reset. A live spectrum of what is playing is shown faintly behind the sliders (Bluetooth, USB and apps; the radio may stay flat if its sound does not go through Android). The settings are the car's own, the same as in the stock sound menu.
+
 ### Phone
 ![Phone](docs/screenshots/phone.png?v=15)
 Recent calls, contacts with a search field and a keypad, from the phone connected over Bluetooth. Calls go through the hands-free (HFP) account, like the stock phone app, whose in-call screen is kept.
