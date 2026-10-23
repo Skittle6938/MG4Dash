@@ -86,6 +86,15 @@ object EmbeddedApp {
      * (retour arrière, plantage, mise à jour), le widget restait noir. Sans effet si elle tourne.
      */
     fun restart(v: View, cn: ComponentName) {
+        // Seulement si l'appli n'a plus aucune tâche : la relancer alors qu'elle tourne la faisait
+        // passer en plein écran sur l'écran principal
+        val alive = try {
+            @Suppress("DEPRECATION")
+            (v.context.getSystemService(Context.ACTIVITY_SERVICE) as android.app.ActivityManager).getRunningTasks(50)
+                .any { it.baseActivity?.packageName == cn.packageName || it.topActivity?.packageName == cn.packageName }
+        } catch (_: Throwable) { true }
+        if (alive) return
+        Log.i(TAG, "${cn.packageName} fermée : relance dans le widget carte")
         try {
             val intent = Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER).setComponent(cn)
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
