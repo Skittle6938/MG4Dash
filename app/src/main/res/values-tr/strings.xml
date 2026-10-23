@@ -472,6 +472,8 @@
     <string name="st_tab_car">Araç</string>
     <string name="st_tab_net">Bağlantılar</string>
     <string name="st_tab_system">Sistem</string>
+    <string name="st_theme_smooth">Yumuşak açık / koyu geçişi</string>
+    <string name="st_theme_smooth_desc">Farların 5 sn sabit kalmasını bekler (köprü altında geçiş yok) ve 2 sn\'de geçiş yapar. Kapalı: farlar değişir değişmez geçer.</string>
     <string name="aa_title">ANDROID AUTO</string>
     <string name="aa_ready">Telefon bağlı · Açmak için dokunun</string>
     <string name="aa_waiting">Telefonunuzu USB ile bağlayın</string>

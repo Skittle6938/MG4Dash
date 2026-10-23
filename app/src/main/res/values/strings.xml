@@ -472,6 +472,8 @@
     <string name="st_tab_car">Vehicle</string>
     <string name="st_tab_net">Connections</string>
     <string name="st_tab_system">System</string>
+    <string name="st_theme_smooth">Smooth light / dark switch</string>
+    <string name="st_theme_smooth_desc">Waits 5 s of stable lights (no switch under bridges) and fades over 2 s. Off: switches as soon as the lights change.</string>
     <string name="aa_title">ANDROID AUTO</string>
     <string name="aa_ready">Phone connected · Tap to open</string>
     <string name="aa_waiting">Connect your phone via USB</string>

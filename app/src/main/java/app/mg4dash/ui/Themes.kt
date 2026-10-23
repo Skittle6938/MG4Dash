@@ -46,6 +46,11 @@ object Themes {
         val sp = context.getSharedPreferences("mg4launcher", Context.MODE_PRIVATE)
         if (!app.mg4dash.car.CarProps.ready && !app.mg4dash.BuildConfig.MOCK) return stableNight ?: sp.getBoolean("last_night", false)
         val raw = rawNight(context)
+        // Réglage « transition immédiate » : pas d'attente, l'état des feux est suivi tout de suite
+        if (!sp.getBoolean("theme_smooth", true)) {
+            if (stableNight != raw) { stableNight = raw; sp.edit().putBoolean("last_night", raw).apply() }
+            pendingSince = 0L; return raw
+        }
         val now = android.os.SystemClock.elapsedRealtime()
         val stable = stableNight ?: sp.getBoolean("last_night", raw).also { stableNight = it }
         if (raw == stable) { pendingSince = 0L; return stable }
@@ -103,6 +108,7 @@ object Themes {
      * puis elle s'efface en fondu sur le nouvel écran.
      */
     fun recreateSmooth(activity: Activity) {
+        if (!Prefs(activity).themeSmooth) { activity.recreate(); return }
         if (recreating) return
         recreating = true
         val v = activity.window.decorView
