@@ -290,8 +290,6 @@ class MainActivity : AppCompatActivity() {
         app.mg4dash.ui.UpdatePrompt.maybeShow(this)
         if (simpleMode) { simple?.onResume(); Fullscreen.apply(this); return }
         mapCard.onResume()
-        // Retour sur l'accueil : l'appli de la carte est ramenée (ou relancée si elle s'est fermée)
-        mapAppView?.let { v -> val cn = mapAppCn; if (cn != null && v.visibility == View.VISIBLE) v.postDelayed({ if (v.isAttachedToWindow) app.mg4dash.ui.EmbeddedApp.restart(v, cn) }, 600) }
         if (prefs.homeWidget == 1) renderShortcuts()
         Fullscreen.apply(this)
     }
@@ -859,7 +857,12 @@ class MainActivity : AppCompatActivity() {
                 prefs.mapApp = null; return
             }
             // Par-dessus la carte et ses boutons, sous le bouton de bascule
-            b.mapCard.addView(v, b.mapCard.indexOfChild(b.widgetToggle), android.widget.FrameLayout.LayoutParams(-1, -1))
+            // Créée d'abord à la largeur de l'écran (puis ramenée à la carte) : Android fixe la taille de
+            // la surface de l'appli d'après celle de son écran virtuel à la création ; créée à la taille
+            // de la carte, l'appli restait ensuite coupée à droite en plein écran
+            val screenW = resources.displayMetrics.widthPixels
+            b.mapCard.addView(v, b.mapCard.indexOfChild(b.widgetToggle), android.widget.FrameLayout.LayoutParams(screenW, -1))
+            v.postDelayed({ if (v.isAttachedToWindow) v.layoutParams = android.widget.FrameLayout.LayoutParams(-1, -1) }, 6000)
             mapAppView = v; mapAppCn = cn
             // Bouton plein écran, comme pour la carte OpenStreetMap, sous le bouton de bascule
             val d = resources.displayMetrics.density
@@ -876,11 +879,8 @@ class MainActivity : AppCompatActivity() {
             })
             mapAppFull = full
         }
-        val wasHidden = mapAppView?.visibility != View.VISIBLE
         mapAppView?.visibility = if (show) View.VISIBLE else View.GONE
         mapAppFull?.visibility = if (show) View.VISIBLE else View.GONE
-        // De nouveau affichée : on ramène l'appli (relancée si elle s'est fermée entre-temps)
-        if (show && wasHidden) mapAppView?.let { v -> v.postDelayed({ if (v.isAttachedToWindow) app.mg4dash.ui.EmbeddedApp.restart(v, cn) }, 600) }
     }
 
     private fun renderShortcuts() {
