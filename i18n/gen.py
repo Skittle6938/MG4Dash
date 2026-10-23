@@ -4,13 +4,13 @@ rows = [l.rstrip('\n').split('|') for l in open('i18n/strings.psv', encoding='ut
 hdr = rows[0][1:]
 rows = rows[1:]
 extra = {
-    'aa_title': ['ANDROID AUTO'] * 6,
+    'aa_title': ['ANDROID AUTO'] * 7,
     'aa_ready': ['Phone connected · Tap to open', 'Téléphone connecté · Appuyer pour ouvrir', 'Telefon verbunden · Zum Öffnen tippen',
-                 'Teléfono conectado · Pulse para abrir', 'Telefono connesso · Tocca per aprire', 'Telefoon verbonden · Tik om te openen'],
+                 'Teléfono conectado · Pulse para abrir', 'Telefono connesso · Tocca per aprire', 'Telefoon verbonden · Tik om te openen', 'Telefon bağlı · Açmak için dokunun'],
     'aa_waiting': ['Connect your phone via USB', 'Branchez votre téléphone en USB', 'Telefon per USB verbinden',
-                   'Conecte su teléfono por USB', 'Collega il telefono via USB', 'Sluit je telefoon aan via USB'],
-    'unit_kwh100': ['kWh/100'] * 6,
-    'no_data': ['—'] * 6,
+                   'Conecte su teléfono por USB', 'Collega il telefono via USB', 'Sluit je telefoon aan via USB', 'Telefonunuzu USB ile bağlayın'],
+    'unit_kwh100': ['kWh/100'] * 7,
+    'no_data': ['—'] * 7,
 }
 BS = chr(92)
 

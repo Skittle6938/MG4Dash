@@ -90,7 +90,7 @@ class ConsumptionCard(context: Context) : LinearLayout(context) {
                 String.format(Locale.getDefault(), "%.1f", m.average())) else context.getString(R.string.en_months_wait)
         } else {
             val h = history.map { app.mg4dash.system.Units.cons(context, it) }
-            chart.values = h
+            chart.values = h.smooth3()
             note.text = if (h.size >= 2) context.getString(R.string.en_history_note, Math.round(app.mg4dash.system.Units.dist(context, h.size.toFloat())),
                 String.format(Locale.getDefault(), "%.1f", h.average()), app.mg4dash.system.Units.distUnit(context)) else ""
         }

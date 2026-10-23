@@ -1,449 +1,449 @@
-key|en|fr|de|es|it|nl
-app_name|MG4Dash|MG4Dash|MG4Dash|MG4Dash|MG4Dash|MG4Dash
-title_climate|CLIMATE|CLIMATISATION|KLIMA|CLIMATIZACIÓN|CLIMATIZZAZIONE|KLIMAAT
-title_energy|ENERGY|ÉNERGIE|ENERGIE|ENERGÍA|ENERGIA|ENERGIE
-title_weather|WEATHER|MÉTÉO|WETTER|TIEMPO|METEO|WEER
-title_media|MEDIA|MÉDIA|MEDIEN|MULTIMEDIA|MULTIMEDIA|MEDIA
-title_vehicle|VEHICLE|VÉHICULE|FAHRZEUG|VEHÍCULO|VEICOLO|VOERTUIG
-title_position|POSITION|POSITION|POSITION|POSICIÓN|POSIZIONE|POSITIE
-dock_home|Home|Accueil|Start|Inicio|Home|Start
-dock_vehicle|Vehicle|Véhicule|Fahrzeug|Vehículo|Veicolo|Voertuig
-dock_climate|Climate|Clim|Klima|Clima|Clima|Klimaat
-dock_energy|Energy|Énergie|Energie|Energía|Energia|Energie
-dock_aa|Android Auto|Android Auto|Android Auto|Android Auto|Android Auto|Android Auto
-dock_settings|Settings|Paramètres|Einstellungen|Ajustes|Impostazioni|Instellingen
-chip_auto|AUTO|AUTO|AUTO|AUTO|AUTO|AUTO
-chip_ac|A/C|A/C|A/C|A/C|A/C|A/C
-chip_recirc|RECIRC.|RECYCL.|UMLUFT|RECIRC.|RICIRC.|RECIRC.
-chip_air_ext|FRESH AIR|AIR EXT.|FRISCHLUFT|AIRE EXT.|ARIA EST.|BUITENLUCHT
-chip_air_auto|AIR AUTO|AIR AUTO|LUFT AUTO|AIRE AUTO|ARIA AUTO|LUCHT AUTO
-chip_front|FRONT DEF.|DÉG. AV|FRONT|DESEMP. DEL.|SBRIN. ANT.|VOORRUIT
-chip_rear|REAR DEF.|DÉG. AR|HECK|DESEMP. TRAS.|SBRIN. POST.|ACHTERRUIT
-off|OFF|OFF|AUS|OFF|OFF|UIT
-no_media|Nothing playing|Aucune lecture en cours|Keine Wiedergabe|Nada en reproducción|Nessuna riproduzione|Niets wordt afgespeeld
-media_hint|Tap RADIO or USB / BT|Touchez RADIO ou USB / BT|RADIO oder USB / BT antippen|Pulse RADIO o USB / BT|Tocca RADIO o USB / BT|Tik op RADIO of USB / BT
-src_radio|RADIO|RADIO|RADIO|RADIO|RADIO|RADIO
-src_media|USB / BT|USB / BT|USB / BT|USB / BT|USB / BT|USB / BT
-map_unavailable|Map unavailable|Carte indisponible|Karte nicht verfügbar|Mapa no disponible|Mappa non disponibile|Kaart niet beschikbaar
-map_searching|Locating…|Recherche de la position…|Position wird gesucht…|Buscando posición…|Ricerca posizione…|Positie zoeken…
-heading|Heading %1$s|Cap %1$s|Richtung %1$s|Rumbo %1$s|Direzione %1$s|Koers %1$s
-altitude|alt. %1$d m|alt. %1$d m|Höhe %1$d m|alt. %1$d m|alt. %1$d m|hoogte %1$d m
-outside_short|Out. %1$d°|Ext. %1$d°|Außen %1$d°|Ext. %1$d°|Est. %1$d°|Buiten %1$d°
-range_label|range|autonomie|Reichweite|autonomía|autonomia|bereik
-cons_avg|kWh/100 avg.|kWh/100 moy.|kWh/100 Ø|kWh/100 med.|kWh/100 media|kWh/100 gem.
-mode|MODE|MODE|MODUS|MODO|MODALITÀ|MODUS
-kers|KERS|KERS|KERS|KERS|KERS|KERS
-charge_btn|CHARGE|CHARGER|LADEN|CARGAR|RICARICA|LADEN
-stop_btn|STOP|ARRÊTER|STOPP|DETENER|STOP|STOP
-v2l_start|START V2L|LANCER V2L|V2L STARTEN|INICIAR V2L|AVVIA V2L|V2L STARTEN
-v2l_stop|STOP V2L|ARRÊTER V2L|V2L STOPPEN|DETENER V2L|FERMA V2L|V2L STOPPEN
-charging_eta|Charging · %1$d h %2$02d|En charge · %1$d h %2$02d|Lädt · %1$d h %2$02d|Cargando · %1$d h %2$02d|In carica · %1$d h %2$02d|Laden · %1$d u %2$02d
-weather_pending|Forecast pending|Prévisions en attente|Vorhersage folgt|Previsión pendiente|Previsioni in attesa|Voorspelling volgt
-weather_outside_vehicle|Vehicle outside temperature|Température extérieure du véhicule|Außentemperatur des Fahrzeugs|Temperatura exterior del vehículo|Temperatura esterna del veicolo|Buitentemperatuur van het voertuig
-weather_details|Feels like %1$d° · Wind %2$d %4$s · %3$d %%|Ressenti %1$d° · Vent %2$d %4$s · %3$d %%|Gefühlt %1$d° · Wind %2$d %4$s · %3$d %%|Sensación %1$d° · Viento %2$d %4$s · %3$d %%|Percepita %1$d° · Vento %2$d %4$s · %3$d %%|Gevoel %1$d° · Wind %2$d %4$s · %3$d %%
-weather_here|Current position|Position actuelle|Aktuelle Position|Posición actual|Posizione attuale|Huidige positie
-wx_sunny|Sunny|Ensoleillé|Sonnig|Soleado|Soleggiato|Zonnig
-wx_mostly_clear|Mostly clear|Plutôt dégagé|Überwiegend klar|Mayormente despejado|Prevalentemente sereno|Overwegend helder
-wx_partly|Partly cloudy|Partiellement nuageux|Teilweise bewölkt|Parcialmente nublado|Parzialmente nuvoloso|Gedeeltelijk bewolkt
-wx_overcast|Overcast|Couvert|Bedeckt|Cubierto|Coperto|Bewolkt
-wx_fog|Fog|Brouillard|Nebel|Niebla|Nebbia|Mist
-wx_drizzle|Drizzle|Bruine|Nieselregen|Llovizna|Pioviggine|Motregen
-wx_rain|Rain|Pluie|Regen|Lluvia|Pioggia|Regen
-wx_snow|Snow|Neige|Schnee|Nieve|Neve|Sneeuw
-wx_storm|Thunderstorm|Orage|Gewitter|Tormenta|Temporale|Onweer
-chart_empty|Collecting history (1 point per km)|Historique en cours de collecte (1 point par km)|Verlauf wird erfasst (1 Punkt pro km)|Recopilando historial (1 punto por km)|Raccolta dello storico (1 punto per km)|Geschiedenis wordt verzameld (1 punt per km)
-app_unavailable|%1$s unavailable|%1$s indisponible|%1$s nicht verfügbar|%1$s no disponible|%1$s non disponibile|%1$s niet beschikbaar
-cs_0|Cable unplugged|Câble débranché|Kabel nicht eingesteckt|Cable desconectado|Cavo scollegato|Kabel losgekoppeld
-cs_1|Slow charging|Charge lente|Langsames Laden|Carga lenta|Ricarica lenta|Langzaam laden
-cs_2|Charging complete|Charge terminée|Laden abgeschlossen|Carga completa|Ricarica completata|Laden voltooid
-cs_3|Trickle charging|Charge d'entretien|Erhaltungsladung|Carga de mantenimiento|Ricarica di mantenimento|Druppelladen
-cs_4|Charging failed|Échec de la charge|Ladefehler|Error de carga|Errore di ricarica|Laden mislukt
-cs_5|Connecting…|Connexion…|Verbindung…|Conectando…|Connessione…|Verbinden…
-cs_6|Connected, not recognised|Connecté, non reconnu|Verbunden, nicht erkannt|Conectado, no reconocido|Connesso, non riconosciuto|Verbonden, niet herkend
-cs_7|Connected, not charging|Connecté, ne charge pas|Verbunden, lädt nicht|Conectado, sin cargar|Connesso, non in carica|Verbonden, laadt niet
-cs_8|Charging stopped|Charge arrêtée|Laden gestoppt|Carga detenida|Ricarica interrotta|Laden gestopt
-cs_9|Charging scheduled|Charge programmée|Laden geplant|Carga programada|Ricarica programmata|Laden gepland
-cs_10|Fast charging|Charge rapide|Schnellladen|Carga rápida|Ricarica rapida|Snelladen
-cs_11|V2L adapter connected|V2L : adaptateur branché|V2L-Adapter angeschlossen|Adaptador V2L conectado|Adattatore V2L collegato|V2L-adapter aangesloten
-cs_12|Charging|Charge en cours|Lädt|Cargando|In carica|Laden
-cs_13|V2L: discharging|V2L : décharge en cours|V2L: Entladung läuft|V2L: descargando|V2L: scarica in corso|V2L: ontladen
-cs_14|V2L: discharge stopped|V2L : décharge arrêtée|V2L: Entladung gestoppt|V2L: descarga detenida|V2L: scarica interrotta|V2L: ontladen gestopt
-cs_15|V2L: discharge complete|V2L : décharge terminée|V2L: Entladung beendet|V2L: descarga completa|V2L: scarica completata|V2L: ontladen voltooid
-cs_other|State %1$d|État %1$d|Status %1$d|Estado %1$d|Stato %1$d|Status %1$d
-dm_eco|Eco|Éco|Eco|Eco|Eco|Eco
-dm_normal|Normal|Normal|Normal|Normal|Normale|Normaal
-dm_sport|Sport|Sport|Sport|Sport|Sport|Sport
-dm_snow|Snow|Neige|Schnee|Nieve|Neve|Sneeuw
-dm_custom|Custom|Perso|Individuell|Personal.|Personal.|Eigen
-mode_n|Mode %1$d|Mode %1$d|Modus %1$d|Modo %1$d|Modalità %1$d|Modus %1$d
-rg_one_pedal|One pedal|1 pédale|One Pedal|Un pedal|Un pedale|Eén pedaal
-rg_low|Low|Faible|Gering|Bajo|Basso|Laag
-rg_medium|Medium|Moyen|Mittel|Medio|Medio|Gemiddeld
-rg_high|High|Fort|Stark|Alto|Alto|Hoog
-rg_adaptive|Adaptive|Adaptatif|Adaptiv|Adaptativo|Adattivo|Adaptief
-level_n|Level %1$d|Niveau %1$d|Stufe %1$d|Nivel %1$d|Livello %1$d|Niveau %1$d
-rc_inner|Recirculated|Recyclé|Umluft|Recirculado|Ricircolo|Recirculatie
-rc_outer|Outside|Extérieur|Frischluft|Exterior|Esterna|Buiten
-rc_auto|Auto|Auto|Auto|Auto|Auto|Auto
-cf_comfort|Comfort|Confort|Komfort|Confort|Comfort|Comfort
-st_off|Off|Arrêt|Aus|Apagado|Spento|Uit
-st_on|On|Marche|Ein|Encendido|Acceso|Aan
-alert|Alert|Alerte|Warnung|Alerta|Avviso|Waarschuwing
-assist|Assist|Assistance|Assistent|Asistencia|Assistenza|Assistentie
-emergency|Emergency|Urgence|Notfall|Emergencia|Emergenza|Noodgeval
-aeb_alert_brake|Alert + braking|Alerte + freinage|Warnung + Bremsen|Alerta + frenado|Avviso + frenata|Waarschuwing + remmen
-active|Active|Actif|Aktiv|Activo|Attivo|Actief
-value_n|Value %1$d|Valeur %1$d|Wert %1$d|Valor %1$d|Valore %1$d|Waarde %1$d
-cl_driver_temp|DRIVER TEMPERATURE|TEMPÉRATURE CONDUCTEUR|FAHRERTEMPERATUR|TEMPERATURA CONDUCTOR|TEMPERATURA CONDUCENTE|TEMPERATUUR BESTUURDER
-cl_fan|FAN|VENTILATION|GEBLÄSE|VENTILACIÓN|VENTILAZIONE|VENTILATIE
-cl_airflow|AIR DIRECTION|DIRECTION DE L'AIR|LUFTVERTEILUNG|DIRECCIÓN DEL AIRE|DIREZIONE ARIA|LUCHTRICHTING
-cl_face|FACE|VISAGE|GESICHT|CARA|VISO|GEZICHT
-cl_feet|FEET|PIEDS|FÜSSE|PIES|PIEDI|VOETEN
-cl_windshield|WINDSCREEN|PARE-BRISE|SCHEIBE|PARABRISAS|PARABREZZA|VOORRUIT
-cl_modes|MODES|MODES|MODI|MODOS|MODALITÀ|MODI
-cl_eco|ECO|ECO|ECO|ECO|ECO|ECO
-cl_recirc|RECIRCULATION|RECYCLAGE|UMLUFT|RECIRCULACIÓN|RICIRCOLO|RECIRCULATIE
-cl_air_recirc|RECIRCULATED AIR|AIR RECYCLÉ|UMLUFT|AIRE RECIRCULADO|ARIA RICIRCOLATA|RECIRCULATIELUCHT
-cl_air_outside|FRESH AIR|AIR EXTÉRIEUR|FRISCHLUFT|AIRE EXTERIOR|ARIA ESTERNA|BUITENLUCHT
-cl_air_auto|AIR AUTO|AIR AUTO|LUFT AUTO|AIRE AUTO|ARIA AUTO|LUCHT AUTO
-cl_def_front|FRONT DEFROST|DÉGIVRAGE AV|FRONTSCHEIBE|DESEMPAÑADO DEL.|SBRINAMENTO ANT.|ONTWASEMEN VOOR
-cl_def_rear|REAR DEFROST|DÉGIVRAGE AR|HECKSCHEIBE|DESEMPAÑADO TRAS.|SBRINAMENTO POST.|ONTWASEMEN ACHTER
-cl_stock|Stock climate screen  ›|Écran clim d'origine  ›|Original-Klimaanzeige  ›|Pantalla de clima original  ›|Schermata clima originale  ›|Origineel klimaatscherm  ›
-cl_outside|Outside %1$d°|Extérieur %1$d°|Außen %1$d°|Exterior %1$d°|Esterno %1$d°|Buiten %1$d°
-en_stock|Stock Energy app  ›|Appli Énergie d'origine  ›|Original-Energie-App  ›|App de energía original  ›|App Energia originale  ›|Originele energie-app  ›
-en_charging|CHARGING|RECHARGE|LADEN|CARGA|RICARICA|LADEN
-en_limit|CHARGE LIMIT|LIMITE DE CHARGE|LADELIMIT|LÍMITE DE CARGA|LIMITE DI RICARICA|LAADLIMIET
-en_ac_current|AC CHARGING CURRENT|COURANT DE CHARGE AC|AC-LADESTROM|CORRIENTE DE CARGA AC|CORRENTE DI RICARICA AC|AC-LAADSTROOM
-en_max|Max|Max|Max|Máx|Max|Max
-en_scheduled|SCHEDULED CHARGING|CHARGE PROGRAMMÉE|GEPLANTES LADEN|CARGA PROGRAMADA|RICARICA PROGRAMMATA|GEPLAND LADEN
-en_schedule|SCHEDULE|PROGRAMMATION|ZEITPLAN|PROGRAMACIÓN|PROGRAMMAZIONE|PLANNING
-en_finish|FINISH TO THE LIMIT|FINIR JUSQU'À LA LIMITE|BIS ZUM LIMIT LADEN|TERMINAR HASTA EL LÍMITE|COMPLETA FINO AL LIMITE|TOT LIMIET AFMAKEN
-en_start|Start|Début|Beginn|Inicio|Inizio|Begin
-en_end|End|Fin|Ende|Fin|Fine|Einde
-en_limit_word|limit|limite|Limit|límite|limite|limiet
-en_v2l|V2L · EXTERNAL SOCKET|V2L · PRISE EXTÉRIEURE|V2L · EXTERNE STECKDOSE|V2L · TOMA EXTERIOR|V2L · PRESA ESTERNA|V2L · EXTERN STOPCONTACT
-en_v2l_stop_at|Stop discharging at|Arrêt de la décharge à|Entladung stoppen bei|Detener descarga al|Interrompi scarica al|Ontladen stoppen bij
-en_v2l_start|START V2L|LANCER LE V2L|V2L STARTEN|INICIAR V2L|AVVIA V2L|V2L STARTEN
-en_v2l_stopbtn|STOP V2L|ARRÊTER LE V2L|V2L STOPPEN|DETENER V2L|FERMA V2L|V2L STOPPEN
-en_consumption|CONSUMPTION|CONSOMMATION|VERBRAUCH|CONSUMO|CONSUMO|VERBRUIK
-en_since_charge|Since last charge|Depuis la recharge|Seit dem Laden|Desde la recarga|Dalla ricarica|Sinds laden
-en_since_start|Since start|Depuis le démarrage|Seit dem Start|Desde el arranque|Dall'avvio|Sinds start
-en_recent|RECENT CONSUMPTION (%1$s)|CONSO RÉCENTE (%1$s)|AKTUELLER VERBRAUCH (%1$s)|CONSUMO RECIENTE (%1$s)|CONSUMO RECENTE (%1$s)|RECENT VERBRUIK (%1$s)
-en_power|Power %1$s kW|Puissance %1$s kW|Leistung %1$s kW|Potencia %1$s kW|Potenza %1$s kW|Vermogen %1$s kW
-en_ends_in|ends in %1$d h %2$02d|fin dans %1$d h %2$02d|fertig in %1$d h %2$02d|termina en %1$d h %2$02d|termina tra %1$d h %2$02d|klaar over %1$d u %2$02d
-en_no_limit|No limit: charges to 100 %%.|Pas de limite : charge jusqu'à 100 %%.|Kein Limit: lädt bis 100 %%.|Sin límite: carga hasta el 100 %%.|Nessun limite: ricarica fino al 100 %%.|Geen limiet: laadt tot 100 %%.
-en_car_only|Limit sent to the car only|Limite transmise à la voiture uniquement|Limit nur an das Fahrzeug übermittelt|Límite enviado solo al coche|Limite inviato solo all'auto|Limiet alleen naar de auto gestuurd
-en_drive|Driving|Conduite|Fahren|Conducción|Guida|Rijden
-en_climate|Climate control|Climatisation|Klimaanlage|Climatización|Climatizzazione|Klimaatregeling
-en_accessories|Accessories|Accessoires|Zubehör|Accesorios|Accessori|Accessoires
-en_regen|+ %1$s kWh recovered by braking|+ %1$s kWh récupérés au freinage|+ %1$s kWh durch Bremsen zurückgewonnen|+ %1$s kWh recuperados al frenar|+ %1$s kWh recuperati in frenata|+ %1$s kWh teruggewonnen bij remmen
-en_remaining| · %1$d h %2$d min left| · %1$d h %2$d min restantes| · noch %1$d h %2$d min| · quedan %1$d h %2$d min| · %1$d h %2$d min rimanenti| · nog %1$d u %2$d min
-en_plug_v2l|Plug a V2L adapter into the charging socket|Branchez un adaptateur V2L sur la prise de charge|V2L-Adapter an der Ladebuchse anschließen|Conecte un adaptador V2L a la toma de carga|Collega un adattatore V2L alla presa di ricarica|Sluit een V2L-adapter aan op de laadaansluiting
-en_unplugged|CABLE UNPLUGGED|CÂBLE DÉBRANCHÉ|KABEL GETRENNT|CABLE DESCONECTADO|CAVO SCOLLEGATO|KABEL LOS
-en_stop_charge|STOP CHARGING|ARRÊTER LA CHARGE|LADEN STOPPEN|DETENER CARGA|FERMA RICARICA|LADEN STOPPEN
-en_charge_now|CHARGE NOW|CHARGER MAINTENANT|JETZT LADEN|CARGAR AHORA|RICARICA ORA|NU LADEN
-en_history_note|last %1$d %3$s · average %2$s (dashed)|%1$d derniers %3$s · moyenne %2$s (pointillés)|letzte %1$d %3$s · Durchschnitt %2$s (gestrichelt)|últimos %1$d %3$s · media %2$s (discontinua)|ultimi %1$d %3$s · media %2$s (tratteggiata)|laatste %1$d %3$s · gemiddelde %2$s (gestippeld)
-vh_saic|SAIC settings  ›|Réglages SAIC  ›|SAIC-Einstellungen  ›|Ajustes SAIC  ›|Impostazioni SAIC  ›|SAIC-instellingen  ›
-vh_mg4control|Open MG4 Control  ›|Ouvrir MG4 Control  ›|MG4 Control öffnen  ›|Abrir MG4 Control  ›|Apri MG4 Control  ›|MG4 Control openen  ›
-vh_driving|DRIVING|CONDUITE|FAHREN|CONDUCCIÓN|GUIDA|RIJDEN
-vh_drive_mode|Drive mode|Mode de conduite|Fahrmodus|Modo de conducción|Modalità di guida|Rijmodus
-vh_regen|Energy recovery (KERS)|Récupération d'énergie (KERS)|Energierückgewinnung (KERS)|Recuperación de energía (KERS)|Recupero di energia (KERS)|Energieterugwinning (KERS)
-vh_one_pedal|One-pedal driving|Conduite à une pédale|One-Pedal-Fahren|Conducción con un pedal|Guida con un pedale|Rijden met één pedaal
-vh_steering|Steering|Direction|Lenkung|Dirección|Sterzo|Stuurinrichting
-vh_brake|Brake pedal|Pédale de frein|Bremspedal|Pedal de freno|Pedale del freno|Rempedaal
-vh_endurance|Energy saving|Économie d'énergie|Energiesparmodus|Ahorro de energía|Risparmio energetico|Energiebesparing
-vh_adas|DRIVER ASSISTANCE|AIDES À LA CONDUITE|FAHRASSISTENZ|ASISTENCIA A LA CONDUCCIÓN|ASSISTENZA ALLA GUIDA|RIJHULPSYSTEMEN
-vh_lane|Lane keeping|Maintien de voie|Spurhalteassistent|Mantenimiento de carril|Mantenimento corsia|Rijstrookassistent
-vh_aeb|Emergency braking|Freinage d'urgence|Notbremsung|Frenado de emergencia|Frenata di emergenza|Noodremming
-vh_overspeed|Overspeed alert|Alerte de survitesse|Geschwindigkeitswarnung|Alerta de exceso de velocidad|Avviso di eccesso di velocità|Snelheidswaarschuwing
-vh_limit_beep|Speed limit beep|Bip limite de vitesse|Tempolimit-Signal|Aviso de límite de velocidad|Segnale limite di velocità|Pieptoon snelheidslimiet
-vh_use_mg4control|Use MG4 Control to change these settings.|Pour modifier ces réglages, utilisez MG4 Control.|Diese Einstellungen in MG4 Control ändern.|Use MG4 Control para cambiar estos ajustes.|Usa MG4 Control per modificare queste impostazioni.|Gebruik MG4 Control om deze instellingen te wijzigen.
-vh_state|VEHICLE STATUS|ÉTAT DU VÉHICULE|FAHRZEUGSTATUS|ESTADO DEL VEHÍCULO|STATO DEL VEICOLO|VOERTUIGSTATUS
-vh_battery|Battery|Batterie|Batterie|Batería|Batteria|Batterij
-vh_range|Range|Autonomie|Reichweite|Autonomía|Autonomia|Bereik
-vh_avg_cons|Average consumption|Conso moyenne|Durchschnittsverbrauch|Consumo medio|Consumo medio|Gemiddeld verbruik
-vh_odometer|Odometer|Odomètre|Kilometerstand|Odómetro|Contachilometri|Kilometerstand
-vh_speed|Speed|Vitesse|Geschwindigkeit|Velocidad|Velocità|Snelheid
-vh_outside|Outside temperature|Température extérieure|Außentemperatur|Temperatura exterior|Temperatura esterna|Buitentemperatuur
-vh_charge|Charging|Charge|Laden|Carga|Ricarica|Laden
-vh_soh|Battery health (estimated)|Santé batterie (estimée)|Batteriezustand (geschätzt)|Salud de la batería (estimada)|Salute batteria (stimata)|Batterijgezondheid (geschat)
-vh_soh_detail|Estimated over about %1$s driven.|Estimée sur environ %1$s parcourus.|Geschätzt über etwa %1$s Fahrt.|Estimada sobre unos %1$s recorridos.|Stimata su circa %1$s percorsi.|Geschat over ongeveer %1$s gereden.
-vh_soh_progress|Measuring: %1$s %% of 15 %%, %2$s so far.|Mesure en cours : %1$s %% sur 15 %%, %2$s pour l'instant.|Messung: %1$s %% von 15 %%, bisher %2$s.|Midiendo: %1$s %% de 15 %%, %2$s por ahora.|In misura: %1$s %% di 15 %%, finora %2$s.|Meting: %1$s %% van 15 %%, tot nu toe %2$s.
-vh_soh_disclaimer|MG4Dash estimate, not official. Being tested.|Estimation MG4Dash, pas officielle. En test.|Schätzung von MG4Dash, nicht offiziell. In Test.|Estimación de MG4Dash, no oficial. En prueba.|Stima MG4Dash, non ufficiale. In prova.|Schatting van MG4Dash, niet officieel. In test.
-st_home|HOME SCREEN|ÉCRAN D'ACCUEIL|STARTBILDSCHIRM|PANTALLA DE INICIO|SCHERMATA HOME|STARTSCHERM
-st_home_desc|"Replace SAIC home" disables only the original home screen (its service keeps running). Maintenance mode re-enables it, e.g. before a dealer service.|« Remplacer l'accueil SAIC » désactive uniquement l'écran d'accueil d'origine (son service reste actif). Le mode Entretien le réactive, par exemple avant une révision en concession.|„SAIC-Startbildschirm ersetzen“ deaktiviert nur den originalen Startbildschirm (sein Dienst läuft weiter). Der Wartungsmodus aktiviert ihn wieder, z. B. vor einem Werkstatttermin.|«Sustituir inicio SAIC» desactiva solo la pantalla de inicio original (su servicio sigue activo). El modo mantenimiento la reactiva, por ejemplo antes de una revisión.|«Sostituisci home SAIC» disattiva solo la schermata home originale (il suo servizio resta attivo). La modalità manutenzione la riattiva, ad esempio prima di un tagliando.|"SAIC-start vervangen" schakelt alleen het originele startscherm uit (de dienst blijft actief). De onderhoudsmodus zet het weer aan, bijvoorbeeld voor een onderhoudsbeurt.
-st_replace|Replace SAIC home|Remplacer l'accueil SAIC|SAIC-Startbildschirm ersetzen|Sustituir inicio SAIC|Sostituisci home SAIC|SAIC-start vervangen
-st_valet|Maintenance mode|Mode Entretien|Wartungsmodus|Modo mantenimiento|Modalità manutenzione|Onderhoudsmodus
-st_adb|ADB recovery if MG4Dash no longer starts: adb shell cmd package compile -m speed -f app.mg4dash|Secours ADB si MG4Dash ne démarre plus : adb shell cmd package compile -m speed -f app.mg4dash|ADB-Notfall, falls MG4Dash nicht mehr startet: adb shell cmd package compile -m speed -f app.mg4dash|Recuperación ADB si MG4Dash ya no arranca: adb shell cmd package compile -m speed -f app.mg4dash|Ripristino ADB se MG4Dash non si avvia più: adb shell cmd package compile -m speed -f app.mg4dash|ADB-herstel als MG4Dash niet meer start: adb shell cmd package compile -m speed -f app.mg4dash
-st_capacity|Usable battery capacity: %1$s kWh|Capacité utile de la batterie : %1$s kWh|Nutzbare Batteriekapazität: %1$s kWh|Capacidad útil de la batería: %1$s kWh|Capacità utile della batteria: %1$s kWh|Bruikbare batterijcapaciteit: %1$s kWh
-st_capacity_desc|Used for the kWh/100 estimate (MG4 Standard 51 kWh: about 49 kWh usable).|Sert à l'estimation kWh/100 (MG4 Standard 51 kWh : environ 49 kWh utiles).|Für die kWh/100-Schätzung (MG4 Standard 51 kWh: ca. 49 kWh nutzbar).|Para la estimación de kWh/100 (MG4 Standard 51 kWh: unos 49 kWh útiles).|Per la stima kWh/100 (MG4 Standard 51 kWh: circa 49 kWh utili).|Voor de kWh/100-schatting (MG4 Standard 51 kWh: ongeveer 49 kWh bruikbaar).
-st_battery_model|Battery model (reference for the estimated health on the Vehicle page):|Modèle de batterie (référence de la santé estimée, page Véhicule) :|Batteriemodell (Bezug für den geschätzten Zustand auf der Fahrzeugseite):|Modelo de batería (referencia de la salud estimada, página Vehículo):|Modello di batteria (riferimento della salute stimata, pagina Veicolo):|Batterijmodel (referentie voor de geschatte gezondheid op de voertuigpagina):
-st_city|Fallback city: %1$s (if the car provides no position)|Ville de repli : %1$s (si la voiture ne fournit pas de position)|Ersatzstadt: %1$s (falls das Auto keine Position liefert)|Ciudad de respaldo: %1$s (si el coche no da la posición)|Città di riserva: %1$s (se l'auto non fornisce la posizione)|Reservestad: %1$s (als de auto geen positie geeft)
-st_change_city|Change city|Changer de ville|Stadt ändern|Cambiar ciudad|Cambia città|Stad wijzigen
-st_startup|STARTUP|DÉMARRAGE|START|ARRANQUE|AVVIO|OPSTARTEN
-st_warm|Briefly open the SAIC launcher at startup: %1$s|Ouverture brève du launcher SAIC au démarrage : %1$s|SAIC-Launcher beim Start kurz öffnen: %1$s|Abrir brevemente el launcher SAIC al arrancar: %1$s|Apri brevemente il launcher SAIC all'avvio: %1$s|SAIC-launcher kort openen bij opstarten: %1$s
-st_warm_desc|Lets the SAIC service (audio sources, camera, system bar commands) register its interface.|Permet au service SAIC (sources audio, caméra, commandes de la barre système) d'enregistrer son interface.|Damit der SAIC-Dienst (Audioquellen, Kamera, Systemleisten-Befehle) seine Oberfläche registriert.|Permite al servicio SAIC (fuentes de audio, cámara, comandos de la barra del sistema) registrar su interfaz.|Permette al servizio SAIC (sorgenti audio, telecamera, comandi della barra di sistema) di registrare la sua interfaccia.|Laat de SAIC-dienst (audiobronnen, camera, systeembalkopdrachten) zijn interface registreren.
-st_toggle|Toggle|Basculer|Umschalten|Cambiar|Cambia|Wisselen
-st_display|DISPLAY|AFFICHAGE|ANZEIGE|PANTALLA|DISPLAY|WEERGAVE
-st_fullscreen|Full screen (hides the SAIC side bar and banner): %1$s|Plein écran (masque la barre latérale et le bandeau SAIC) : %1$s|Vollbild (blendet SAIC-Seitenleiste und Banner aus): %1$s|Pantalla completa (oculta la barra lateral y el banner SAIC): %1$s|Schermo intero (nasconde la barra laterale e il banner SAIC): %1$s|Volledig scherm (verbergt de SAIC-zijbalk en -banner): %1$s
-st_fullscreen_desc|Swipe from the left or top edge to bring the SAIC bars back.|Un glissement depuis le bord gauche ou le haut de l'écran fait réapparaître les barres SAIC.|Vom linken oder oberen Rand wischen, um die SAIC-Leisten einzublenden.|Deslice desde el borde izquierdo o superior para mostrar las barras SAIC.|Scorri dal bordo sinistro o superiore per mostrare le barre SAIC.|Veeg vanaf de linker- of bovenrand om de SAIC-balken terug te halen.
-yes|YES|OUI|JA|SÍ|SÌ|JA
-no|NO|NON|NEIN|NO|NO|NEE
-st_log|LOG|JOURNAL|PROTOKOLL|REGISTRO|REGISTRO|LOGBOEK
-st_refresh|Refresh|Actualiser|Aktualisieren|Actualizar|Aggiorna|Vernieuwen
-st_close|Close|Fermer|Schließen|Cerrar|Chiudi|Sluiten
-st_title|Settings · MG4Dash %1$s|Réglages · MG4Dash %1$s|Einstellungen · MG4Dash %1$s|Ajustes · MG4Dash %1$s|Impostazioni · MG4Dash %1$s|Instellingen · MG4Dash %1$s
-st_replace_msg|The SAIC home screen will be disabled and MG4Dash will become the home screen. Maintenance mode restores it at any time. Continue?|L'écran d'accueil SAIC sera désactivé et MG4Dash deviendra l'accueil. Le mode Entretien le rétablit à tout moment. Continuer ?|Der SAIC-Startbildschirm wird deaktiviert und MG4Dash wird zum Startbildschirm. Der Wartungsmodus stellt ihn jederzeit wieder her. Fortfahren?|La pantalla de inicio SAIC se desactivará y MG4Dash será la pantalla de inicio. El modo mantenimiento la restaura en cualquier momento. ¿Continuar?|La schermata home SAIC verrà disattivata e MG4Dash diventerà la home. La modalità manutenzione la ripristina in qualsiasi momento. Continuare?|Het SAIC-startscherm wordt uitgeschakeld en MG4Dash wordt het startscherm. De onderhoudsmodus herstelt het op elk moment. Doorgaan?
-st_replace_btn|Replace|Remplacer|Ersetzen|Sustituir|Sostituisci|Vervangen
-cancel|Cancel|Annuler|Abbrechen|Cancelar|Annulla|Annuleren
-temp_cal_title|Temperature calibration|Calibration de la température|Temperaturkalibrierung|Calibración de la temperatura|Calibrazione della temperatura|Temperatuurkalibratie
-temp_cal_preview|Displayed: %1$s|Affiché : %1$s|Angezeigt: %1$s|Mostrado: %1$s|Visualizzato: %1$s|Weergegeven: %1$s
-temp_cal_reset|Reset|Remettre à 0|Zurücksetzen|Restablecer|Azzera|Herstellen
-st_valet_msg|The original SAIC launcher will become the default home screen again. Continue?|Le launcher SAIC d'origine va redevenir l'écran d'accueil par défaut. Continuer ?|Der originale SAIC-Launcher wird wieder Standard-Startbildschirm. Fortfahren?|El launcher SAIC original volverá a ser la pantalla de inicio predeterminada. ¿Continuar?|Il launcher SAIC originale tornerà la schermata home predefinita. Continuare?|De originele SAIC-launcher wordt weer het standaard startscherm. Doorgaan?
-activate|Activate|Activer|Aktivieren|Activar|Attiva|Activeren
-st_home_changed|Home screen changed|Accueil modifié|Startbildschirm geändert|Inicio cambiado|Home modificata|Startscherm gewijzigd
-st_failed|Failed (see the log)|Échec (voir le journal)|Fehlgeschlagen (siehe Protokoll)|Error (ver el registro)|Errore (vedi registro)|Mislukt (zie logboek)
-st_current_home|Current home screen: %1$s|Accueil actuel : %1$s|Aktueller Startbildschirm: %1$s|Inicio actual: %1$s|Home attuale: %1$s|Huidig startscherm: %1$s
-st_home_stock|original SAIC launcher|launcher SAIC d'origine|originaler SAIC-Launcher|launcher SAIC original|launcher SAIC originale|originele SAIC-launcher
-st_home_none|no default (choice requested)|aucun par défaut (choix demandé)|kein Standard (Auswahl erforderlich)|ninguno por defecto (se pide elegir)|nessuno predefinito (scelta richiesta)|geen standaard (keuze gevraagd)
-cd_temp_down|Lower temperature|Baisser la température|Temperatur senken|Bajar temperatura|Abbassa temperatura|Temperatuur omlaag
-cd_temp_up|Raise temperature|Monter la température|Temperatur erhöhen|Subir temperatura|Alza temperatura|Temperatuur omhoog
-cd_power|Climate on / off|Marche / arrêt clim|Klima ein / aus|Clima encendido / apagado|Clima on / off|Klimaat aan / uit
-cd_fan_down|Less fan|Moins de ventilation|Weniger Gebläse|Menos ventilación|Meno ventilazione|Minder ventilatie
-cd_fan_up|More fan|Plus de ventilation|Mehr Gebläse|Más ventilación|Più ventilazione|Meer ventilatie
-cd_play|Play / pause|Lecture / pause|Wiedergabe / Pause|Reproducir / pausa|Riproduci / pausa|Afspelen / pauze
-cd_prev|Previous|Précédent|Zurück|Anterior|Precedente|Vorige
-cd_next|Next|Suivant|Weiter|Siguiente|Successivo|Volgende
-cd_recenter|Recenter|Recentrer|Zentrieren|Recentrar|Ricentra|Centreren
-cd_zoom_in|Zoom in|Zoom avant|Vergrößern|Acercar|Ingrandisci|Inzoomen
-cd_zoom_out|Zoom out|Zoom arrière|Verkleinern|Alejar|Riduci|Uitzoomen
-cd_map_fullscreen|Full screen map|Carte en plein écran|Karte im Vollbild|Mapa a pantalla completa|Mappa a schermo intero|Kaart schermvullend
-cardinals|N,NE,E,SE,S,SW,W,NW|N,NE,E,SE,S,SO,O,NO|N,NO,O,SO,S,SW,W,NW|N,NE,E,SE,S,SO,O,NO|N,NE,E,SE,S,SO,O,NO|N,NO,O,ZO,Z,ZW,W,NW
-cd_widget_toggle|Map or shortcuts|Carte ou raccourcis|Karte oder Verknüpfungen|Mapa o accesos directos|Mappa o scorciatoie|Kaart of snelkoppelingen
-title_shortcuts|SHORTCUTS|RACCOURCIS|VERKNÜPFUNGEN|ACCESOS DIRECTOS|SCORCIATOIE|SNELKOPPELINGEN
-sc_edit|Shortcut|Raccourci|Verknüpfung|Acceso directo|Scorciatoia|Snelkoppeling
-sc_app|Application|Application|App|Aplicación|App|App
-sc_ha|Home Assistant action|Action Home Assistant|Home-Assistant-Aktion|Acción de Home Assistant|Azione Home Assistant|Home Assistant-actie
-sc_clear|Remove|Supprimer|Entfernen|Quitar|Rimuovi|Verwijderen
-ha_not_configured|Set up Home Assistant in MG4Dash settings first (long press on Settings).|Configurez d'abord Home Assistant dans les paramètres de MG4Dash (appui long sur Paramètres).|Richten Sie Home Assistant zuerst in den MG4Dash-Einstellungen ein (lange auf Einstellungen drücken).|Configure primero Home Assistant en los ajustes de MG4Dash (pulsación larga en Ajustes).|Configura prima Home Assistant nelle impostazioni di MG4Dash (pressione lunga su Impostazioni).|Stel eerst Home Assistant in bij de MG4Dash-instellingen (lang drukken op Instellingen).
-ha_error|Home Assistant unreachable: check the address, the token and the connection.|Home Assistant injoignable : vérifiez l'adresse, le jeton et la connexion.|Home Assistant nicht erreichbar: Adresse, Token und Verbindung prüfen.|Home Assistant no accesible: compruebe la dirección, el token y la conexión.|Home Assistant non raggiungibile: verifica indirizzo, token e connessione.|Home Assistant onbereikbaar: controleer adres, token en verbinding.
-ha_sent|%1$s: sent|%1$s : envoyé|%1$s: gesendet|%1$s: enviado|%1$s: inviato|%1$s: verzonden
-ha_error_action|%1$s: failed|%1$s : échec|%1$s: fehlgeschlagen|%1$s: error|%1$s: errore|%1$s: mislukt
-dock_aa_pick|Button shortcut|Raccourci du bouton|Tastenbelegung|Acceso del botón|Scorciatoia del pulsante|Snelkoppeling van de knop
-dock_aa_stock|Android Auto (original)|Android Auto (d'origine)|Android Auto (original)|Android Auto (original)|Android Auto (originale)|Android Auto (origineel)
-st_ha_url|Address: %1$s|Adresse : %1$s|Adresse: %1$s|Dirección: %1$s|Indirizzo: %1$s|Adres: %1$s
-st_ha_no_token|Token: not set|Jeton : non défini|Token: nicht festgelegt|Token: no definido|Token: non impostato|Token: niet ingesteld
-st_ha_token_set|Token: set|Jeton : défini|Token: festgelegt|Token: definido|Token: impostato|Token: ingesteld
-st_ha_desc|Create a long-lived access token in your Home Assistant profile. Shortcuts can then run scripts, automations, scenes, buttons and covers (gate, garage door). Use the button at the top right of the map to show the shortcuts.|Créez un jeton d'accès longue durée dans votre profil Home Assistant. Les raccourcis pourront alors lancer scripts, automatisations, scènes, boutons et ouvrants (portail, porte de garage). Le bouton en haut à droite de la carte affiche les raccourcis.|Erstellen Sie in Ihrem Home-Assistant-Profil ein langlebiges Zugriffstoken. Verknüpfungen können dann Skripte, Automationen, Szenen, Tasten und Abdeckungen (Tor, Garagentor) auslösen. Die Taste oben rechts auf der Karte zeigt die Verknüpfungen.|Cree un token de acceso de larga duración en su perfil de Home Assistant. Los accesos podrán ejecutar scripts, automatizaciones, escenas, botones y cubiertas (portón, puerta de garaje). El botón arriba a la derecha del mapa muestra los accesos.|Crea un token di accesso di lunga durata nel tuo profilo Home Assistant. Le scorciatoie potranno avviare script, automazioni, scene, pulsanti e coperture (cancello, porta del garage). Il pulsante in alto a destra della mappa mostra le scorciatoie.|Maak een langlevend toegangstoken aan in je Home Assistant-profiel. Snelkoppelingen kunnen dan scripts, automatiseringen, scènes, knoppen en afdekkingen (poort, garagedeur) starten. De knop rechtsboven op de kaart toont de snelkoppelingen.
-st_ha_set_url|Address|Adresse|Adresse|Dirección|Indirizzo|Adres
-st_ha_set_token|Token|Jeton|Token|Token|Token|Token
-st_ha_test|Test|Tester|Testen|Probar|Prova|Testen
-st_ha_ok|Home Assistant connected|Home Assistant connecté|Home Assistant verbunden|Home Assistant conectado|Home Assistant connesso|Home Assistant verbonden
-st_diag|DIAGNOSTICS|DIAGNOSTIC|DIAGNOSE|DIAGNÓSTICO|DIAGNOSTICA|DIAGNOSE
-st_energy_log|Energy data recorder: %1$s|Enregistreur de données énergie : %1$s|Energiedaten-Rekorder: %1$s|Registro de datos de energía: %1$s|Registratore dati energia: %1$s|Energiegegevensrecorder: %1$s
-st_energy_log_desc|Every 5 s, writes battery power, consumption counters and equipment states to Android/data/app.mg4dash/files/energy_log.csv (read only, nothing is sent to the car).|Toutes les 5 s, note la puissance batterie, les compteurs de consommation et l'état des équipements dans Android/data/app.mg4dash/files/energy_log.csv (lecture seule, rien n'est envoyé à la voiture).|Schreibt alle 5 s Batterieleistung, Verbrauchszähler und Gerätezustände in Android/data/app.mg4dash/files/energy_log.csv (nur lesen, nichts wird an das Auto gesendet).|Cada 5 s anota la potencia de la batería, los contadores de consumo y el estado de los equipos en Android/data/app.mg4dash/files/energy_log.csv (solo lectura, no se envía nada al coche).|Ogni 5 s registra potenza della batteria, contatori di consumo e stato degli equipaggiamenti in Android/data/app.mg4dash/files/energy_log.csv (sola lettura, nulla viene inviato all'auto).|Schrijft elke 5 s batterijvermogen, verbruikstellers en de status van voorzieningen naar Android/data/app.mg4dash/files/energy_log.csv (alleen lezen, er wordt niets naar de auto gestuurd).
-sc_search|Search…|Rechercher…|Suchen…|Buscar…|Cerca…|Zoeken…
-dock_phone|Phone|Téléphone|Telefon|Teléfono|Telefono|Telefoon
-title_phone|PHONE|TÉLÉPHONE|TELEFON|TELÉFONO|TELEFONO|TELEFOON
-ph_stock|Stock phone app  ›|Appli téléphone d'origine  ›|Original-Telefon-App  ›|App de teléfono original  ›|App telefono originale  ›|Originele telefoonapp  ›
-ph_recent|RECENT CALLS|APPELS RÉCENTS|LETZTE ANRUFE|LLAMADAS RECIENTES|CHIAMATE RECENTI|RECENTE OPROEPEN
-ph_contacts|CONTACTS|CONTACTS|KONTAKTE|CONTACTOS|CONTATTI|CONTACTEN
-ph_keypad|KEYPAD|CLAVIER|TASTATUR|TECLADO|TASTIERINO|TOETSENBORD
-ph_call|Call|Appeler|Anrufen|Llamar|Chiama|Bellen
-ph_no_phone|No phone connected over Bluetooth.|Aucun téléphone connecté en Bluetooth.|Kein Telefon über Bluetooth verbunden.|Ningún teléfono conectado por Bluetooth.|Nessun telefono connesso via Bluetooth.|Geen telefoon verbonden via Bluetooth.
-ph_not_connected|Not connected|Non connecté|Nicht verbunden|No conectado|Non connesso|Niet verbonden
-ph_no_calls|No recent calls (allow call history access on the phone).|Aucun appel récent (autorisez l'accès à l'historique sur le téléphone).|Keine letzten Anrufe (Zugriff auf die Anrufliste am Telefon erlauben).|Sin llamadas recientes (permita el acceso al historial en el teléfono).|Nessuna chiamata recente (consenti l'accesso alla cronologia sul telefono).|Geen recente oproepen (sta toegang tot de oproepgeschiedenis toe op de telefoon).
-ph_no_contacts|No contacts (allow contact sharing on the phone).|Aucun contact (autorisez le partage des contacts sur le téléphone).|Keine Kontakte (Kontaktfreigabe am Telefon erlauben).|Sin contactos (permita compartir contactos en el teléfono).|Nessun contatto (consenti la condivisione dei contatti sul telefono).|Geen contacten (sta het delen van contacten toe op de telefoon).
-ph_call_failed|Call failed|Échec de l'appel|Anruf fehlgeschlagen|Error en la llamada|Chiamata non riuscita|Oproep mislukt
-title_battery|BATTERY|BATTERIE|BATTERIE|BATERÍA|BATTERIA|ACCU
-st_style|HOME LAYOUT|STYLE D'ACCUEIL|STARTSEITENSTIL|ESTILO DE INICIO|STILE DELLA HOME|STIJL STARTSCHERM
-st_style_now|Current layout: %1$s|Style actuel : %1$s|Aktueller Stil: %1$s|Estilo actual: %1$s|Stile attuale: %1$s|Huidige stijl: %1$s
-st_style_full|Full|Complet|Vollständig|Completo|Completa|Volledig
-st_style_simple|Simple|Épuré|Schlicht|Sencillo|Semplice|Eenvoudig
-st_style_desc|Simple: three large panels (climate, battery, media), two shortcuts and today's weather. The change applies when you go back to the home screen.|Épuré : trois grands volets (climatisation, batterie, multimédia), deux raccourcis et la météo du jour. Le changement s'applique au retour sur l'accueil.|Schlicht: drei große Felder (Klima, Batterie, Medien), zwei Verknüpfungen und das heutige Wetter. Die Änderung gilt beim Zurückkehren zur Startseite.|Sencillo: tres paneles grandes (clima, batería, multimedia), dos accesos y el tiempo de hoy. El cambio se aplica al volver al inicio.|Semplice: tre grandi riquadri (clima, batteria, multimedia), due scorciatoie e il meteo di oggi. La modifica vale al ritorno alla home.|Eenvoudig: drie grote vlakken (klimaat, accu, media), twee snelkoppelingen en het weer van vandaag. De wijziging geldt zodra je terugkeert naar het startscherm.
-en_heating|BATTERY HEATING|RÉCHAUFFAGE BATTERIE|BATTERIEHEIZUNG|CALEFACCIÓN BATERÍA|RISCALDAMENTO BATTERIA|ACCUVERWARMING
-st_theme|THEME|THÈME|DESIGN|TEMA|TEMA|THEMA
-st_theme_bg|Background|Fond|Hintergrund|Fondo|Sfondo|Achtergrond
-st_theme_accent|Button colour|Couleur des boutons|Tastenfarbe|Color de los botones|Colore dei pulsanti|Knopkleur
-st_theme_desc|Battery green, heating orange, cooling cyan and alert red keep their meaning whatever the theme. Radio Dash follows the theme the next time the radio opens.|Le vert de la batterie, l'orange du chauffage, le cyan du froid et le rouge des alertes gardent leur sens quel que soit le thème. Radio Dash suit le thème à la prochaine ouverture de la radio.|Batteriegrün, Heizungsorange, Kühlungscyan und Warnrot behalten ihre Bedeutung unabhängig vom Design. Radio Dash übernimmt das Design beim nächsten Öffnen des Radios.|El verde de la batería, el naranja de la calefacción, el cian del frío y el rojo de las alertas mantienen su significado con cualquier tema. Radio Dash sigue el tema la próxima vez que se abra la radio.|Il verde della batteria, l'arancione del riscaldamento, il ciano del freddo e il rosso degli avvisi mantengono il loro significato con qualsiasi tema. Radio Dash segue il tema alla prossima apertura della radio.|Accugroen, verwarmingsoranje, koelingscyaan en waarschuwingsrood behouden hun betekenis bij elk thema. Radio Dash volgt het thema bij de volgende keer dat de radio opent.
-st_update|UPDATE|MISE À JOUR|AKTUALISIERUNG|ACTUALIZACIÓN|AGGIORNAMENTO|UPDATE
-st_update_installed|Installed version: %1$s|Version installée : %1$s|Installierte Version: %1$s|Versión instalada: %1$s|Versione installata: %1$s|Geïnstalleerde versie: %1$s
-st_update_desc|Checks the latest MG4Dash release on GitHub and installs it (internet connection needed). The screen restarts at the end of the installation.|Vérifie la dernière version de MG4Dash sur GitHub et l'installe (connexion internet nécessaire). L'écran redémarre à la fin de l'installation.|Prüft die neueste MG4Dash-Version auf GitHub und installiert sie (Internetverbindung nötig). Der Bildschirm startet am Ende der Installation neu.|Comprueba la última versión de MG4Dash en GitHub y la instala (se necesita conexión a internet). La pantalla se reinicia al final de la instalación.|Controlla l'ultima versione di MG4Dash su GitHub e la installa (serve una connessione internet). Lo schermo si riavvia al termine dell'installazione.|Controleert de nieuwste MG4Dash-versie op GitHub en installeert die (internetverbinding nodig). Het scherm herstart aan het einde van de installatie.
-st_update_check|Check|Vérifier|Prüfen|Comprobar|Controlla|Controleren
-st_update_checking|Checking…|Vérification…|Wird geprüft…|Comprobando…|Controllo…|Controleren…
-st_update_error|Could not reach GitHub or download the update.|Impossible de joindre GitHub ou de télécharger la mise à jour.|GitHub nicht erreichbar oder Download fehlgeschlagen.|No se pudo contactar con GitHub ni descargar la actualización.|Impossibile raggiungere GitHub o scaricare l'aggiornamento.|GitHub onbereikbaar of downloaden mislukt.
-st_update_available|Version %2$s available (installed: %1$s)|Version %2$s disponible (installée : %1$s)|Version %2$s verfügbar (installiert: %1$s)|Versión %2$s disponible (instalada: %1$s)|Versione %2$s disponibile (installata: %1$s)|Versie %2$s beschikbaar (geïnstalleerd: %1$s)
-st_update_uptodate|Up to date (%1$s)|À jour (%1$s)|Aktuell (%1$s)|Actualizado (%1$s)|Aggiornato (%1$s)|Up-to-date (%1$s)
-st_update_install|Install|Installer|Installieren|Instalar|Installa|Installeren
-st_update_confirm|Download and install MG4Dash %1$s? The screen will restart.|Télécharger et installer MG4Dash %1$s ? L'écran va redémarrer.|MG4Dash %1$s herunterladen und installieren? Der Bildschirm startet neu.|¿Descargar e instalar MG4Dash %1$s? La pantalla se reiniciará.|Scaricare e installare MG4Dash %1$s? Lo schermo si riavvierà.|MG4Dash %1$s downloaden en installeren? Het scherm herstart.
-st_update_downloading|Downloading… %1$d %%|Téléchargement… %1$d %%|Download… %1$d %%|Descargando… %1$d %%|Download… %1$d %%|Downloaden… %1$d %%
-st_update_installing|Installing… the screen will restart|Installation… l'écran va redémarrer|Installation… der Bildschirm startet neu|Instalando… la pantalla se reiniciará|Installazione… lo schermo si riavvierà|Installeren… het scherm herstart
-ph_sync|Sync|Synchroniser|Synchronisieren|Sincronizar|Sincronizza|Synchroniseren
-ph_sync_started|Sync started: contacts and calls will appear in a few moments.|Synchronisation lancée : contacts et appels vont apparaître dans quelques instants.|Synchronisierung gestartet: Kontakte und Anrufe erscheinen gleich.|Sincronización iniciada: los contactos y las llamadas aparecerán en unos instantes.|Sincronizzazione avviata: contatti e chiamate appariranno tra poco.|Synchronisatie gestart: contacten en oproepen verschijnen zo.
-src_aa|AA|AA|AA|AA|AA|AA
-st_theme_mode|Light or dark|Clair ou sombre|Hell oder dunkel|Claro u oscuro|Chiaro o scuro|Licht of donker
-st_mode_auto|Auto (day / night)|Auto (jour / nuit)|Auto (Tag / Nacht)|Auto (día / noche)|Auto (giorno / notte)|Auto (dag / nacht)
-st_mode_dark|Dark|Sombre|Dunkel|Oscuro|Scuro|Donker
-st_mode_light|Light|Clair|Hell|Claro|Chiaro|Licht
-sw_energy|TRIP ENERGY|ÉNERGIE DU TRAJET|FAHRTENERGIE|ENERGÍA DEL TRAYECTO|ENERGIA DEL VIAGGIO|RITENERGIE
-sw_drive|DRIVING|CONDUITE|FAHREN|CONDUCCIÓN|GUIDA|RIJDEN
-sw_clim|CLIMATE|CLIM|KLIMA|CLIMA|CLIMA|KLIMAAT
-sw_acc|ACCESSORIES|ACCESSOIRES|ZUBEHÖR|ACCESORIOS|ACCESSORI|ACCESSOIRES
-sw_power|LIVE POWER|PUISSANCE EN DIRECT|LEISTUNG LIVE|POTENCIA EN DIRECTO|POTENZA IN TEMPO REALE|LIVE VERMOGEN
-sw_drawn|DRAWN|CONSOMMÉE|VERBRAUCH|CONSUMIDA|CONSUMATA|VERBRUIKT
-sw_recovering|RECOVERED|RÉCUPÉRÉE|ZURÜCKGEWONNEN|RECUPERADA|RECUPERATA|TERUGGEWONNEN
-sw_charging|CHARGING|EN CHARGE|LADEN|CARGANDO|IN RICARICA|LADEN
-sw_trip_avg|TRIP AVERAGE|MOYENNE TRAJET|FAHRT-SCHNITT|MEDIA TRAYECTO|MEDIA VIAGGIO|RITGEMIDDELDE
-sw_phone|PHONE|TÉLÉPHONE|TELEFON|TELÉFONO|TELEFONO|TELEFOON
-sw_fav_pick|Choose a contact|Choisir un contact|Kontakt auswählen|Elegir un contacto|Scegli un contatto|Contact kiezen
-st_compat|COMPATIBILITY (BETA)|COMPATIBILITÉ (BÊTA)|KOMPATIBILITÄT (BETA)|COMPATIBILIDAD (BETA)|COMPATIBILITÀ (BETA)|COMPATIBILITEIT (BÈTA)
-st_compat_fw|Firmware: %1$s (%2$s)|Firmware : %1$s (%2$s)|Firmware: %1$s (%2$s)|Firmware: %1$s (%2$s)|Firmware: %1$s (%2$s)|Firmware: %1$s (%2$s)
-st_compat_tested|MG4Dash was developed and tested on this firmware.|MG4Dash a été mis au point et testé sur ce firmware.|MG4Dash wurde auf dieser Firmware entwickelt und getestet.|MG4Dash se desarrolló y probó en este firmware.|MG4Dash è stato sviluppato e testato su questo firmware.|MG4Dash is op deze firmware ontwikkeld en getest.
-st_compat_beta|Not tested on this firmware yet: some features may be missing. Run the test and send the report to help support it.|Pas encore testé sur ce firmware : certaines fonctions peuvent manquer. Lancez le test et envoyez le rapport pour aider à le prendre en charge.|Auf dieser Firmware noch nicht getestet: einige Funktionen können fehlen. Starten Sie den Test und senden Sie den Bericht.|Aún no probado en este firmware: pueden faltar funciones. Ejecute la prueba y envíe el informe.|Non ancora testato su questo firmware: alcune funzioni potrebbero mancare. Esegui il test e invia il rapporto.|Nog niet getest op deze firmware: sommige functies kunnen ontbreken. Voer de test uit en stuur het rapport.
-st_compat_run|Run the test|Lancer le test|Test starten|Ejecutar la prueba|Esegui il test|Test uitvoeren
-st_compat_report|Compatibility report|Rapport de compatibilité|Kompatibilitätsbericht|Informe de compatibilidad|Rapporto di compatibilità|Compatibiliteitsrapport
-st_compat_scan|Scan with your phone to open a pre-filled GitHub issue. Nothing is sent automatically, and the report contains no personal data.|Scannez avec votre téléphone pour ouvrir une issue GitHub pré-remplie. Rien n'est envoyé automatiquement et le rapport ne contient aucune donnée personnelle.|Mit dem Telefon scannen, um ein vorausgefülltes GitHub-Issue zu öffnen. Nichts wird automatisch gesendet, der Bericht enthält keine persönlichen Daten.|Escanee con su teléfono para abrir un issue de GitHub rellenado. No se envía nada automáticamente y el informe no contiene datos personales.|Scansiona con il telefono per aprire una issue GitHub precompilata. Nulla viene inviato automaticamente e il rapporto non contiene dati personali.|Scan met je telefoon om een vooraf ingevulde GitHub-issue te openen. Er wordt niets automatisch verzonden en het rapport bevat geen persoonlijke gegevens.
-st_compat_open|Open in browser|Ouvrir dans le navigateur|Im Browser öffnen|Abrir en el navegador|Apri nel browser|Openen in browser
-st_compat_no_browser|No browser on this head unit: scan the QR code with your phone.|Pas de navigateur sur cet autoradio : scannez le QR code avec votre téléphone.|Kein Browser auf diesem Gerät: QR-Code mit dem Telefon scannen.|No hay navegador en esta unidad: escanee el código QR con su teléfono.|Nessun browser su questa unità: scansiona il codice QR con il telefono.|Geen browser op dit toestel: scan de QR-code met je telefoon.
-st_update_beta|Include beta versions (MG4Dash and Radio Dash): %1$s|Inclure les versions bêta (MG4Dash et Radio Dash) : %1$s|Beta-Versionen einbeziehen (MG4Dash und Radio Dash): %1$s|Incluir versiones beta (MG4Dash y Radio Dash): %1$s|Includi versioni beta (MG4Dash e Radio Dash): %1$s|Bètaversies meenemen (MG4Dash en Radio Dash): %1$s
-upd_title|NEW VERSION AVAILABLE|NOUVELLE VERSION DISPONIBLE|NEUE VERSION VERFÜGBAR|NUEVA VERSIÓN DISPONIBLE|NUOVA VERSIONE DISPONIBILE|NIEUWE VERSIE BESCHIKBAAR
-upd_skip|Don't notify me again for this release|Ne plus notifier cette release|Für diese Version nicht mehr melden|No volver a avisar de esta versión|Non avvisare più per questa versione|Niet meer melden voor deze versie
-upd_later|Later|Plus tard|Später|Más tarde|Più tardi|Later
-upd_now|Update|Mettre à jour|Aktualisieren|Actualizar|Aggiorna|Bijwerken
-dock_cp|CarPlay|CarPlay|CarPlay|CarPlay|CarPlay|CarPlay
-dock_cp_stock|CarPlay (original)|CarPlay (d'origine)|CarPlay (original)|CarPlay (original)|CarPlay (originale)|CarPlay (origineel)
-dock_other_app|Another app…|Autre application…|Andere App…|Otra aplicación…|Altra app…|Andere app…
-st_style_map|Map|Carte|Karte|Mapa|Mappa|Kaart
-st_stack_auto|Map layout stack goes back to the battery when plugged in: %1$s|Style Carte : la pile revient sur la batterie quand la voiture est branchée : %1$s|Stil Karte: Stapel zeigt beim Anstecken die Batterie: %1$s|Estilo Mapa: la pila vuelve a la batería al enchufar: %1$s|Stile Mappa: la pila torna alla batteria quando è collegata: %1$s|Stijl Kaart: stapel toont de batterij bij aansluiten: %1$s
-st_stack_desc|Map: weather and climate on the left, a stack (energy, trip energy, power, phone: swipe or tap) above the media in the centre, the map over the whole right column.|Carte : météo et clim à gauche, une pile (énergie, trajet, puissance, téléphone : balayez ou touchez) au-dessus de la musique au centre, la carte sur toute la colonne de droite.|Karte: Wetter und Klima links, ein Stapel (Energie, Fahrt, Leistung, Telefon: wischen oder tippen) über den Medien in der Mitte, die Karte über die ganze rechte Spalte.|Mapa: tiempo y clima a la izquierda, una pila (energía, trayecto, potencia, teléfono: deslice o toque) sobre la música en el centro, el mapa en toda la columna derecha.|Mappa: meteo e clima a sinistra, una pila (energia, viaggio, potenza, telefono: scorri o tocca) sopra la musica al centro, la mappa su tutta la colonna destra.|Kaart: weer en klimaat links, een stapel (energie, rit, vermogen, telefoon: veeg of tik) boven de media in het midden, de kaart over de hele rechterkolom.
-dock_slot_pick|Dock left slot|Case de gauche du dock|Linkes Dock-Feld|Casilla izquierda del dock|Casella sinistra del dock|Linkervak van het dock
-dock_slot_clock|Clock|Horloge|Uhr|Reloj|Orologio|Klok
-dock_slot_wifi|Wi-Fi settings|Réglages Wi-Fi|WLAN-Einstellungen|Ajustes Wi-Fi|Impostazioni Wi-Fi|Wifi-instellingen
-dock_slot_wifi_short|Wi-Fi|Wi-Fi|WLAN|Wi-Fi|Wi-Fi|Wifi
-st_cap_car|Read from the car: %1$s kWh.|Lue sur la voiture : %1$s kWh.|Vom Fahrzeug gelesen: %1$s kWh.|Leída del coche: %1$s kWh.|Letta dall'auto: %1$s kWh.|Uitgelezen uit de auto: %1$s kWh.
-st_cap_none|The car does not report it: MG4Dash will measure it while driving, after a 15 %% drop (added up over several trips).|La voiture ne la fournit pas : MG4Dash la mesurera en roulant, après 15 %% de baisse (cumulée sur plusieurs trajets).|Das Fahrzeug liefert sie nicht: MG4Dash misst sie beim Fahren, nach 15 %% Abnahme (über mehrere Fahrten summiert).|El coche no la indica: MG4Dash la medirá conduciendo, tras un 15 %% de descenso (sumado en varios trayectos).|L'auto non la fornisce: MG4Dash la misurerà guidando, dopo un calo del 15 %% (sommato su più viaggi).|De auto geeft hem niet: MG4Dash meet hem tijdens het rijden, na 15 %% daling (opgeteld over meerdere ritten).
-st_cap_manual|Set by hand (Auto: back to the car's or the measured value).|Réglée à la main (Auto : revenir à la valeur de la voiture ou mesurée).|Manuell eingestellt (Auto: zurück zum Fahrzeug- oder Messwert).|Ajustada a mano (Auto: volver al valor del coche o medido).|Impostata a mano (Auto: torna al valore dell'auto o misurato).|Handmatig ingesteld (Auto: terug naar de waarde van de auto of de meting).
-st_cap_auto|Auto|Auto|Auto|Auto|Auto|Auto
-st_cap_est|Measured by MG4Dash: %1$s kWh (%2$d charge-to-charge measurement(s), smoothed over 30 days).|Mesurée par MG4Dash : %1$s kWh (%2$d mesure(s) entre deux recharges, lissées sur 30 jours).|Von MG4Dash gemessen: %1$s kWh (%2$d Messung(en) zwischen zwei Ladungen, über 30 Tage geglättet).|Medida por MG4Dash: %1$s kWh (%2$d medición(es) entre cargas, suavizadas en 30 días).|Misurata da MG4Dash: %1$s kWh (%2$d misura/e tra due ricariche, livellate su 30 giorni).|Gemeten door MG4Dash: %1$s kWh (%2$d meting(en) tussen twee laadbeurten, afgevlakt over 30 dagen).
-st_cap_est_current|Being measured by MG4Dash: %1$s kWh (provisional).|En cours de mesure par MG4Dash : %1$s kWh (provisoire).|Wird von MG4Dash gemessen: %1$s kWh (vorläufig).|En medición por MG4Dash: %1$s kWh (provisional).|In misurazione da MG4Dash: %1$s kWh (provvisoria).|Wordt gemeten door MG4Dash: %1$s kWh (voorlopig).
-sw_batt_temp|Battery %1$d °C|Batterie %1$d °C|Batterie %1$d °C|Batería %1$d °C|Batteria %1$d °C|Batterij %1$d °C
-st_map_vdock|Vertical bar on the left (all screens and Radio Dash): %1$s|Barre verticale à gauche (tous les écrans et Radio Dash) : %1$s|Senkrechte Leiste links (alle Bildschirme und Radio Dash): %1$s|Barra vertical a la izquierda (todas las pantallas y Radio Dash): %1$s|Barra verticale a sinistra (tutte le schermate e Radio Dash): %1$s|Verticale balk links (alle schermen en Radio Dash): %1$s
-st_map_titles|Hide widget titles (all layouts): %1$s|Masquer les titres des widgets (tous les styles) : %1$s|Widget-Titel ausblenden (alle Layouts): %1$s|Ocultar los títulos de los widgets (todos los estilos): %1$s|Nascondi i titoli dei widget (tutti gli stili): %1$s|Widgettitels verbergen (alle stijlen): %1$s
-st_map_vdock_btn|Vertical bar|Barre verticale|Senkrechte Leiste|Barra vertical|Barra verticale|Verticale balk
-st_map_titles_btn|Titles|Titres|Titel|Títulos|Titoli|Titels
-vh_tires|TIRES|PNEUS|REIFEN|NEUMÁTICOS|PNEUMATICI|BANDEN
-vh_tire_fl|Front left|Avant gauche|Vorne links|Delantero izq.|Anteriore sx|Linksvoor
-vh_tire_fr|Front right|Avant droit|Vorne rechts|Delantero der.|Anteriore dx|Rechtsvoor
-vh_tire_rl|Rear left|Arrière gauche|Hinten links|Trasero izq.|Posteriore sx|Linksachter
-vh_tire_rr|Rear right|Arrière droit|Hinten rechts|Trasero der.|Posteriore dx|Rechtsachter
-vh_tire_check|Check|À vérifier|Prüfen|Revisar|Controllare|Controleren
-en_ac_input|AC input %1$d V · %2$s A|Entrée AC %1$d V · %2$s A|AC-Eingang %1$d V · %2$s A|Entrada CA %1$d V · %2$s A|Ingresso CA %1$d V · %2$s A|AC-ingang %1$d V · %2$s A
-en_stop_reason|charge stopped: %1$s|charge arrêtée : %1$s|Laden gestoppt: %1$s|carga detenida: %1$s|ricarica interrotta: %1$s|laden gestopt: %1$s
-sr_fault|fault|défaut|Störung|avería|guasto|storing
-sr_overtemp|over-temperature|surchauffe|Übertemperatur|sobretemperatura|surriscaldamento|oververhitting
-sr_plug|plug not properly connected|prise mal branchée|Stecker nicht richtig verbunden|conector mal conectado|presa non collegata bene|stekker niet goed aangesloten
-sr_voltage|voltage mismatch|tension incompatible|Spannung passt nicht|tensión incompatible|tensione incompatibile|spanning past niet
-sr_other|other cause|autre cause|andere Ursache|otra causa|altra causa|andere oorzaak
-en_regen_km|+ %1$s %2$s of range recovered since the last charge|+ %1$s %2$s d'autonomie récupérés depuis la recharge|+ %1$s %2$s Reichweite seit dem Laden zurückgewonnen|+ %1$s %2$s de autonomía recuperados desde la carga|+ %1$s %2$s di autonomia recuperati dalla ricarica|+ %1$s %2$s bereik teruggewonnen sinds het laden
-st_rd_state|Radio Dash: %1$s|Radio Dash : %1$s|Radio Dash: %1$s|Radio Dash: %1$s|Radio Dash: %1$s|Radio Dash: %1$s
-st_rd_none|not installed|non installée|nicht installiert|no instalada|non installata|niet geïnstalleerd
-st_rd_unknown|installed (version unknown)|installée (version inconnue)|installiert (Version unbekannt)|instalada (versión desconocida)|installata (versione sconosciuta)|geïnstalleerd (versie onbekend)
-st_rd_desc|Installs the latest Radio Dash release from GitHub (only on this firmware). The new radio applies after restarting the head unit (hold Home about 20 s).|Installe la dernière version de Radio Dash depuis GitHub (uniquement sur ce firmware). La nouvelle radio s'applique après un redémarrage de l'écran central (appui long sur Home environ 20 s).|Installiert die neueste Radio-Dash-Version von GitHub (nur auf dieser Firmware). Das neue Radio gilt nach einem Neustart des Bildschirms (Home etwa 20 s halten).|Instala la última versión de Radio Dash desde GitHub (solo en este firmware). La nueva radio se aplica tras reiniciar la pantalla (mantener Home unos 20 s).|Installa l'ultima versione di Radio Dash da GitHub (solo su questo firmware). La nuova radio si applica dopo il riavvio dello schermo (tenere premuto Home circa 20 s).|Installeert de nieuwste Radio Dash-versie van GitHub (alleen op deze firmware). De nieuwe radio werkt na een herstart van het scherm (Home ongeveer 20 s ingedrukt houden).
-st_rd_check|Update Radio Dash|Mettre à jour Radio Dash|Radio Dash aktualisieren|Actualizar Radio Dash|Aggiorna Radio Dash|Radio Dash bijwerken
-st_rd_available|Radio Dash %1$s available|Radio Dash %1$s disponible|Radio Dash %1$s verfügbar|Radio Dash %1$s disponible|Radio Dash %1$s disponibile|Radio Dash %1$s beschikbaar
-st_rd_uptodate|Radio Dash up to date (%1$s)|Radio Dash à jour (%1$s)|Radio Dash aktuell (%1$s)|Radio Dash actualizada (%1$s)|Radio Dash aggiornata (%1$s)|Radio Dash up-to-date (%1$s)
-st_rd_installing|Installing Radio Dash…|Installation de Radio Dash…|Radio Dash wird installiert…|Instalando Radio Dash…|Installazione di Radio Dash…|Radio Dash installeren…
-st_rd_done|Radio Dash is installed. Restart the head unit (hold Home about 20 s) to use it.|Radio Dash est installée. Redémarre l'écran central (appui long sur Home environ 20 s) pour l'utiliser.|Radio Dash ist installiert. Bildschirm neu starten (Home etwa 20 s halten), um es zu nutzen.|Radio Dash está instalada. Reinicia la pantalla (mantén Home unos 20 s) para usarla.|Radio Dash è installata. Riavvia lo schermo (tieni premuto Home circa 20 s) per usarla.|Radio Dash is geïnstalleerd. Herstart het scherm (Home ongeveer 20 s ingedrukt houden) om het te gebruiken.
-en_trip|Current trip|Trajet en cours|Aktuelle Fahrt|Trayecto actual|Viaggio in corso|Huidige rit
-en_last_year|Last 12 months|12 derniers mois|Letzte 12 Monate|Últimos 12 meses|Ultimi 12 mesi|Laatste 12 maanden
-en_months_note|%1$d months, one point per month · average %2$s (dashed)|%1$d mois, un point par mois · moyenne %2$s (pointillés)|%1$d Monate, ein Punkt pro Monat · Durchschnitt %2$s (gestrichelt)|%1$d meses, un punto por mes · media %2$s (discontinua)|%1$d mesi, un punto al mese · media %2$s (tratteggiata)|%1$d maanden, één punt per maand · gemiddelde %2$s (gestippeld)
-en_months_wait|The curve fills month by month (at least 20 km per month).|La courbe se remplit mois après mois (au moins 20 km par mois).|Die Kurve füllt sich Monat für Monat (mindestens 20 km pro Monat).|La curva se llena mes a mes (al menos 20 km al mes).|La curva si riempie mese dopo mese (almeno 20 km al mese).|De curve vult zich maand na maand (minstens 20 km per maand).
-cons_avg_mi|mi/kWh avg.|mi/kWh moy.|mi/kWh Ø|mi/kWh med.|mi/kWh media|mi/kWh gem.
-st_units|Units|Unités|Einheiten|Unidades|Unità|Eenheden
-st_units_car|Like the car|Comme la voiture|Wie das Auto|Como el coche|Come l'auto|Zoals de auto
-wx_clear|Clear|Dégagé|Klar|Despejado|Sereno|Helder
-st_pressure|Tyre pressure|Pression des pneus|Reifendruck|Presión de neumáticos|Pressione pneumatici|Bandenspanning
-st_mode_auto_short|Auto|Auto|Auto|Auto|Auto|Auto
-st_map_zoom|Default map zoom|Zoom de la carte par défaut|Standard-Kartenzoom|Zoom del mapa por defecto|Zoom predefinito della mappa|Standaardzoom kaart
-st_map_theme|Map colours|Couleurs de la carte|Kartenfarben|Colores del mapa|Colori della mappa|Kaartkleuren
-st_map_auto_hide|Hide the map zoom and full screen buttons|Masquer les boutons zoom et plein écran de la carte|Zoom- und Vollbildtasten der Karte ausblenden|Ocultar los botones de zoom y pantalla completa del mapa|Nascondi i pulsanti zoom e schermo intero della mappa|Zoom- en volledig-schermknoppen van de kaart verbergen
-st_map_auto_hide_desc|They show for a few seconds when you touch the map; the heading button stays|Ils apparaissent quelques secondes au toucher de la carte ; le bouton de cap reste|Sie erscheinen beim Berühren der Karte für einige Sekunden; die Richtungstaste bleibt|Aparecen unos segundos al tocar el mapa; el botón de rumbo se queda|Compaiono per qualche secondo toccando la mappa; il pulsante della direzione resta|Ze verschijnen een paar seconden als je de kaart aanraakt; de koersknop blijft
-st_map_offline_switch|Switch to the energy widget when offline|Passer au widget énergie hors ligne|Ohne Verbindung zum Energie-Widget wechseln|Cambiar al widget de energía sin conexión|Passa al widget energia offline|Naar de energiewidget wisselen zonder verbinding
-st_map_offline_switch_desc|Without data connection, unless the map around the car is in the offline cache|Sans connexion data, sauf si la carte autour de la voiture est dans le cache hors ligne|Ohne Datenverbindung, außer die Karte um das Auto ist im Offline-Cache|Sin conexión de datos, salvo si el mapa alrededor del coche está en la caché sin conexión|Senza connessione dati, salvo se la mappa intorno all'auto è nella cache offline|Zonder dataverbinding, tenzij de kaart rond de auto in de offline cache staat
-st_use_location|Use my position|Utiliser ma position|Meine Position verwenden|Usar mi posición|Usa la mia posizione|Mijn positie gebruiken
-st_no_location|Position not available yet|Position pas encore disponible|Position noch nicht verfügbar|Posición aún no disponible|Posizione non ancora disponibile|Positie nog niet beschikbaar
-st_heated|Heated seats and steering wheel|Sièges et volant chauffants|Sitz- und Lenkradheizung|Asientos y volante calefactados|Sedili e volante riscaldati|Stoel- en stuurverwarming
-doors_locked|Doors locked|Portes verrouillées|Türen verriegelt|Puertas bloqueadas|Porte bloccate|Deuren vergrendeld
-doors_unlocked|Doors unlocked|Portes déverrouillées|Türen entriegelt|Puertas desbloqueadas|Porte sbloccate|Deuren ontgrendeld
-doors_unknown|Door lock not available|Verrouillage indisponible|Verriegelung nicht verfügbar|Bloqueo no disponible|Blocco non disponibile|Vergrendeling niet beschikbaar
-en_gun_unlock|UNLOCK CABLE|DÉVERROUILLER LE PISTOLET|KABEL ENTRIEGELN|DESBLOQUEAR CABLE|SBLOCCA CAVO|KABEL ONTGRENDELEN
-en_gun_lock|LOCK CABLE|VERROUILLER LE PISTOLET|KABEL VERRIEGELN|BLOQUEAR CABLE|BLOCCA CAVO|KABEL VERGRENDELEN
-power_off_driving|Not while driving|Pas en roulant|Nicht während der Fahrt|No mientras conduces|Non durante la guida|Niet tijdens het rijden
-st_power_fx|Full-throttle special (Live power widget):|Fonction spéciale pied au plancher (widget Puissance en direct) :|Vollgas-Spezialfunktion (Widget Leistung live):|Función especial a fondo (widget Potencia en directo):|Funzione speciale a tavoletta (widget Potenza in tempo reale):|Speciale functie plankgas (widget Live vermogen):
-st_power_fx_desc|Floor it (above 80 % of the car's maximum power) and see what happens… then the peak reached (kW and hp) stays on screen for 10 seconds.|Mettez le pied au plancher (au-delà de 80 % de la puissance maximale de la voiture) et vous verrez bien… puis le pic atteint (kW et ch) reste affiché 10 secondes.|Voll aufs Pedal (über 80 % der Höchstleistung des Autos) und lassen Sie sich überraschen… danach bleibt die erreichte Spitze (kW und PS) 10 Sekunden lang sichtbar.|Pise a fondo (por encima del 80 % de la potencia máxima del coche) y ya verá… luego el pico alcanzado (kW y CV) se muestra durante 10 segundos.|Pedale a tavoletta (oltre l'80 % della potenza massima dell'auto) e vedrai… poi il picco raggiunto (kW e CV) resta visibile per 10 secondi.|Plankgas (boven 80 % van het maximale vermogen van de auto) en je zult het zien… daarna blijft de bereikte piek (kW en pk) 10 seconden in beeld.
-fx_none|None|Aucune|Keine|Ninguna|Nessuna|Geen
-fx_random|Random|Aléatoire|Zufällig|Aleatoria|Casuale|Willekeurig
-fx_rocket|Rocket|Fusée|Rakete|Cohete|Razzo|Raket
-fx_lightning|Lightning|Éclair|Blitz|Rayo|Fulmine|Bliksem
-fx_flames|Flames|Flammes|Flammen|Llamas|Fiamme|Vlammen
-fx_peak|Peak %1$s kW · %2$s hp|Pic %1$s kW · %2$s ch|Spitze %1$s kW · %2$s PS|Pico %1$s kW · %2$s CV|Picco %1$s kW · %2$s CV|Piek %1$s kW · %2$s pk
-st_xpower|MG4 XPower (320 kW)|MG4 XPower (320 kW)|MG4 XPower (320 kW)|MG4 XPower (320 kW)|MG4 XPower (320 kW)|MG4 XPower (320 kW)
-st_xpower_desc|Recognised by itself as soon as more than 350 hp is measured: the car does not report its version. Sets the power scale and the threshold of the full-throttle special.|Reconnue d'elle-même dès que plus de 350 ch sont mesurés : la voiture ne donne pas sa version. Règle l'échelle de puissance et le seuil de la fonction pied au plancher.|Wird automatisch erkannt, sobald mehr als 350 PS gemessen werden: das Auto meldet seine Version nicht. Legt die Leistungsskala und die Schwelle der Vollgas-Spezialfunktion fest.|Se reconoce sola en cuanto se miden más de 350 CV: el coche no indica su versión. Ajusta la escala de potencia y el umbral de la función especial a fondo.|Riconosciuta da sola appena si misurano più di 350 CV: l'auto non indica la sua versione. Imposta la scala di potenza e la soglia della funzione speciale a tavoletta.|Wordt vanzelf herkend zodra meer dan 350 pk wordt gemeten: de auto meldt zijn versie niet. Bepaalt de vermogensschaal en de drempel van de speciale functie plankgas.
-st_climhold|Keep climate on (long press on the climate power button)|Clim maintenue (appui long sur le bouton marche de la clim)|Klima bleibt an (langes Drücken auf die Klima-Ein-Taste)|Clima mantenido (pulsación larga en el botón de encendido del clima)|Clima mantenuto (pressione lunga sul tasto di accensione del clima)|Airco blijft aan (lang drukken op de aan-knop van de airco)
-st_climhold_desc|Keeps the car on with the climate running while you are away, with a large screen showing its status. Never leave a child or an animal alone in the car.|Garde la voiture allumée avec la clim en marche pendant votre absence, avec un grand écran qui montre son état. Ne laissez jamais un enfant ou un animal seul dans la voiture.|Lässt das Auto mit laufender Klimaanlage eingeschaltet, während Sie weg sind, mit einem großen Bildschirm, der den Status zeigt. Lassen Sie niemals ein Kind oder ein Tier allein im Auto.|Mantiene el coche encendido con el clima en marcha mientras no está, con una gran pantalla que muestra su estado. No deje nunca a un niño o un animal solo en el coche.|Tiene l'auto accesa con il clima in funzione mentre sei via, con un grande schermo che ne mostra lo stato. Non lasciare mai un bambino o un animale da solo in auto.|Houdt de auto aan met draaiende airco terwijl je weg bent, met een groot scherm dat de status toont. Laat nooit een kind of een dier alleen in de auto.
-dm_title|KEEP CLIMATE ON|CLIM MAINTENUE|KLIMA BLEIBT AN|CLIMA MANTENIDO|CLIMA MANTENUTO|AIRCO BLIJFT AAN
-dm_max|Maximum duration|Durée maximale|Maximale Dauer|Duración máxima|Durata massima|Maximale duur
-dm_unlimited|Unlimited|Illimitée|Unbegrenzt|Ilimitada|Illimitata|Onbeperkt
-dm_close|Close|Fermer|Schließen|Cerrar|Chiudi|Sluiten
-dm_message|The driver will be back soon. The climate is kept on.|Le conducteur revient bientôt. La clim reste en marche.|Der Fahrer ist gleich zurück. Die Klimaanlage bleibt an.|El conductor vuelve pronto. El clima sigue encendido.|Il conducente torna presto. Il clima resta acceso.|De bestuurder is zo terug. De airco blijft aan.
-dm_clim_on|CLIMATE ON|CLIM EN MARCHE|KLIMA AN|CLIMA ENCENDIDO|CLIMA ACCESO|AIRCO AAN
-dm_clim_off|CLIMATE OFF|CLIM ARRÊTÉE|KLIMA AUS|CLIMA APAGADO|CLIMA SPENTO|AIRCO UIT
-dm_left|left|restant|verbleibend|restante|rimanente|resterend
-dm_since|since activation|depuis l'activation|seit der Aktivierung|desde la activación|dall'attivazione|sinds activering
-dm_battery|Battery %1$s|Batterie %1$s|Akku %1$s|Batería %1$s|Batteria %1$s|Batterij %1$s
-dm_hold_stop|Hold to stop|Maintenir pour arrêter|Zum Stoppen halten|Mantener para detener|Tieni premuto per fermare|Ingedrukt houden om te stoppen
-dm_state_done|FINISHED · CAR SWITCHED OFF|TERMINÉ · VOITURE ÉTEINTE|BEENDET · AUTO AUSGESCHALTET|TERMINADO · COCHE APAGADO|FINITO · AUTO SPENTA|KLAAR · AUTO UITGESCHAKELD
-dm_state_battery|STOPPED: BATTERY BELOW 20 %|ARRÊTÉ : BATTERIE SOUS 20 %|GESTOPPT: AKKU UNTER 20 %|DETENIDO: BATERÍA BAJO 20 %|FERMATO: BATTERIA SOTTO 20 %|GESTOPT: BATTERIJ ONDER 20 %
-dm_warning|Never leave a child or an animal alone in the car: the climate can stop at any time (battery, fault, car switching off).|Ne laissez jamais un enfant ou un animal seul dans la voiture : la clim peut s'arrêter à tout moment (batterie, panne, voiture qui s'éteint).|Lassen Sie niemals ein Kind oder ein Tier allein im Auto: die Klimaanlage kann jederzeit ausgehen (Akku, Störung, Auto schaltet ab).|No deje nunca a un niño o un animal solo en el coche: el clima puede detenerse en cualquier momento (batería, avería, coche que se apaga).|Non lasciare mai un bambino o un animale da solo in auto: il clima può fermarsi in qualsiasi momento (batteria, guasto, auto che si spegne).|Laat nooit een kind of een dier alleen in de auto: de airco kan op elk moment stoppen (batterij, storing, auto die uitschakelt).
-dm_start|Start|Démarrer|Starten|Iniciar|Avvia|Starten
-dm_cancel|Cancel|Annuler|Abbrechen|Cancelar|Annulla|Annuleren
-dm_lock_in|The doors lock in|Verrouillage des portes dans|Die Türen verriegeln in|Las puertas se cierran en|Le porte si chiudono tra|De deuren vergrendelen over
-dm_take_key|TAKE THE KEY WITH YOU!|PRENEZ LA CLÉ AVEC VOUS !|NEHMEN SIE DEN SCHLÜSSEL MIT!|¡LLÉVESE LA LLAVE!|PORTA CON TE LA CHIAVE!|NEEM DE SLEUTEL MEE!
-dm_lights|Set the light switch to OFF: only the daytime running lights stay on.|Mettez le commodo des feux sur OFF : seuls les feux de jour restent allumés.|Stellen Sie den Lichtschalter auf OFF: nur das Tagfahrlicht bleibt an.|Ponga el mando de luces en OFF: solo quedan encendidas las luces diurnas.|Metti il comando luci su OFF: restano accese solo le luci diurne.|Zet de lichtschakelaar op OFF: alleen de dagrijverlichting blijft aan.
-dm_now|Climate now|Clim tout de suite|Klima sofort|Clima ahora|Clima subito|Airco nu
-dm_at_time|Climate at a set time|Clim à une heure précise|Klima zu einer festen Uhrzeit|Clima a una hora fija|Clima a un orario preciso|Airco op een vast tijdstip
-dm_first_start|First start at|Mise en marche à|Erster Start um|Arranque a las|Avvio alle|Start om
-dm_in|in %1$s|dans %1$s|in %1$s|en %1$s|tra %1$s|over %1$s
-dm_max_hint|Then the climate stops and the car switches off.|Ensuite la clim s'arrête et la voiture s'éteint.|Danach stoppt die Klimaanlage und das Auto schaltet ab.|Después el clima se detiene y el coche se apaga.|Poi il clima si ferma e l'auto si spegne.|Daarna stopt de airco en schakelt de auto uit.
-dm_runs|Number of runs|Nombre de cycles|Anzahl der Zyklen|Número de ciclos|Numero di cicli|Aantal cycli
-dm_duration|Duration of each run|Durée de chaque cycle|Dauer jedes Zyklus|Duración de cada ciclo|Durata di ogni ciclo|Duur van elke cyclus
-dm_gap|Pause between runs|Pause entre les cycles|Pause zwischen den Zyklen|Pausa entre ciclos|Pausa tra i cicli|Pauze tussen cycli
-dm_note_now|The climate starts now with its current settings, then the doors lock after the delay. Stops below 20 % battery, when the doors are unlocked or if the car moves.|La clim démarre tout de suite avec ses réglages actuels, puis les portes se verrouillent après le délai. Arrêt sous 20 % de batterie, au déverrouillage des portes ou si la voiture roule.|Die Klimaanlage startet sofort mit ihren aktuellen Einstellungen, dann verriegeln die Türen nach der Wartezeit. Stopp unter 20 % Akku, beim Entriegeln oder wenn das Auto fährt.|El clima arranca ya con sus ajustes actuales y las puertas se cierran tras el retardo. Se detiene por debajo del 20 % de batería, al abrir las puertas o si el coche se mueve.|Il clima parte subito con le impostazioni attuali, poi le porte si chiudono dopo il ritardo. Si ferma sotto il 20 % di batteria, allo sblocco delle porte o se l'auto si muove.|De airco start meteen met de huidige instellingen, daarna vergrendelen de deuren na de wachttijd. Stopt onder 20 % batterij, bij ontgrendelen of als de auto rijdt.
-dm_note_at|The car stays on (climate off, about 0.2 kW) and locked until the first run, then runs the climate with its current settings. It switches off after the last run, below 20 % battery, and stops when the doors are unlocked.|La voiture reste allumée (clim coupée, environ 0,2 kW) et verrouillée jusqu'au premier cycle, puis lance la clim avec ses réglages actuels. Elle s'éteint après le dernier cycle ou sous 20 % de batterie, et tout s'arrête au déverrouillage des portes.|Das Auto bleibt eingeschaltet (Klima aus, etwa 0,2 kW) und verriegelt bis zum ersten Zyklus und startet dann die Klimaanlage mit ihren aktuellen Einstellungen. Es schaltet nach dem letzten Zyklus oder unter 20 % Akku ab; Entriegeln beendet alles.|El coche sigue encendido (clima apagado, unos 0,2 kW) y cerrado hasta el primer ciclo, y luego enciende el clima con sus ajustes actuales. Se apaga tras el último ciclo o por debajo del 20 % de batería; al abrir las puertas todo se detiene.|L'auto resta accesa (clima spento, circa 0,2 kW) e chiusa fino al primo ciclo, poi avvia il clima con le impostazioni attuali. Si spegne dopo l'ultimo ciclo o sotto il 20 % di batteria; sbloccando le porte tutto si ferma.|De auto blijft aan (airco uit, ongeveer 0,2 kW) en vergrendeld tot de eerste cyclus, en start dan de airco met de huidige instellingen. Hij schakelt uit na de laatste cyclus of onder 20 % batterij; ontgrendelen stopt alles.
-dm_clim_at|CLIMATE AT %1$s|CLIM À %1$s|KLIMA UM %1$s|CLIMA A LAS %1$s|CLIMA ALLE %1$s|AIRCO OM %1$s
-dm_until_start|before the climate starts|avant la mise en marche de la clim|bis zum Start der Klimaanlage|antes de que arranque el clima|prima dell'avvio del clima|tot de airco start
-dm_run_line|Run %1$d · %2$s → %3$s|Cycle %1$d · %2$s → %3$s|Zyklus %1$d · %2$s → %3$s|Ciclo %1$d · %2$s → %3$s|Ciclo %1$d · %2$s → %3$s|Cyclus %1$d · %2$s → %3$s
-dm_lock_delay|Lock the doors after|Verrouiller les portes après|Türen verriegeln nach|Cerrar las puertas tras|Chiudere le porte dopo|Deuren vergrendelen na
-dm_message_wait|The driver will be back soon. The climate will start at %1$s.|Le conducteur revient bientôt. La clim se mettra en marche à %1$s.|Der Fahrer ist gleich zurück. Die Klimaanlage startet um %1$s.|El conductor vuelve pronto. El clima se encenderá a las %1$s.|Il conducente torna presto. Il clima partirà alle %1$s.|De bestuurder is zo terug. De airco start om %1$s.
-dm_screen_off|Screen off once locked|Écran éteint une fois verrouillé|Bildschirm aus nach dem Verriegeln|Pantalla apagada al cerrar|Schermo spento dopo la chiusura|Scherm uit na vergrendelen
-dm_screen_off_hint|To sleep inside or stay discreet · a tap shows it 10 s|Dormir dedans, discrétion · un toucher l'affiche 10 s|Zum Schlafen oder diskret · Tippen zeigt es 10 s|Para dormir o ser discreto · un toque lo muestra 10 s|Per dormire o restare discreti · un tocco lo mostra 10 s|Om te slapen of discreet · een tik toont het 10 s
-dm_outside_title|OUTSIDE|EXTÉRIEUR|AUSSEN|EXTERIOR|ESTERNO|BUITEN
-dm_cabin_set|Climate set to %1$s|Clim réglée à %1$s|Klima auf %1$s eingestellt|Clima ajustado a %1$s|Clima impostato a %1$s|Airco ingesteld op %1$s
-soc_trip_start|%1$s at start|%1$s au départ|%1$s beim Start|%1$s al salir|%1$s alla partenza|%1$s bij vertrek
+key|en|fr|de|es|it|nl|tr
+app_name|MG4Dash|MG4Dash|MG4Dash|MG4Dash|MG4Dash|MG4Dash|MG4Dash
+title_climate|CLIMATE|CLIMATISATION|KLIMA|CLIMATIZACIÓN|CLIMATIZZAZIONE|KLIMAAT|KLİMA
+title_energy|ENERGY|ÉNERGIE|ENERGIE|ENERGÍA|ENERGIA|ENERGIE|ENERJİ
+title_weather|WEATHER|MÉTÉO|WETTER|TIEMPO|METEO|WEER|HAVA DURUMU
+title_media|MEDIA|MÉDIA|MEDIEN|MULTIMEDIA|MULTIMEDIA|MEDIA|MEDYA
+title_vehicle|VEHICLE|VÉHICULE|FAHRZEUG|VEHÍCULO|VEICOLO|VOERTUIG|ARAÇ
+title_position|POSITION|POSITION|POSITION|POSICIÓN|POSIZIONE|POSITIE|KONUM
+dock_home|Home|Accueil|Start|Inicio|Home|Start|Ana ekran
+dock_vehicle|Vehicle|Véhicule|Fahrzeug|Vehículo|Veicolo|Voertuig|Araç
+dock_climate|Climate|Clim|Klima|Clima|Clima|Klimaat|Klima
+dock_energy|Energy|Énergie|Energie|Energía|Energia|Energie|Enerji
+dock_aa|Android Auto|Android Auto|Android Auto|Android Auto|Android Auto|Android Auto|Android Auto
+dock_settings|Settings|Paramètres|Einstellungen|Ajustes|Impostazioni|Instellingen|Ayarlar
+chip_auto|AUTO|AUTO|AUTO|AUTO|AUTO|AUTO|OTO
+chip_ac|A/C|A/C|A/C|A/C|A/C|A/C|A/C
+chip_recirc|RECIRC.|RECYCL.|UMLUFT|RECIRC.|RICIRC.|RECIRC.|İÇ HAVA
+chip_air_ext|FRESH AIR|AIR EXT.|FRISCHLUFT|AIRE EXT.|ARIA EST.|BUITENLUCHT|DIŞ HAVA
+chip_air_auto|AIR AUTO|AIR AUTO|LUFT AUTO|AIRE AUTO|ARIA AUTO|LUCHT AUTO|HAVA OTO
+chip_front|FRONT DEF.|DÉG. AV|FRONT|DESEMP. DEL.|SBRIN. ANT.|VOORRUIT|ÖN BUĞU
+chip_rear|REAR DEF.|DÉG. AR|HECK|DESEMP. TRAS.|SBRIN. POST.|ACHTERRUIT|ARKA BUĞU
+off|OFF|OFF|AUS|OFF|OFF|UIT|KAPALI
+no_media|Nothing playing|Aucune lecture en cours|Keine Wiedergabe|Nada en reproducción|Nessuna riproduzione|Niets wordt afgespeeld|Çalan bir şey yok
+media_hint|Tap RADIO or USB / BT|Touchez RADIO ou USB / BT|RADIO oder USB / BT antippen|Pulse RADIO o USB / BT|Tocca RADIO o USB / BT|Tik op RADIO of USB / BT|RADYO veya USB / BT'ye dokunun
+src_radio|RADIO|RADIO|RADIO|RADIO|RADIO|RADIO|RADYO
+src_media|USB / BT|USB / BT|USB / BT|USB / BT|USB / BT|USB / BT|USB / BT
+map_unavailable|Map unavailable|Carte indisponible|Karte nicht verfügbar|Mapa no disponible|Mappa non disponibile|Kaart niet beschikbaar|Harita kullanılamıyor
+map_searching|Locating…|Recherche de la position…|Position wird gesucht…|Buscando posición…|Ricerca posizione…|Positie zoeken…|Konum bulunuyor…
+heading|Heading %1$s|Cap %1$s|Richtung %1$s|Rumbo %1$s|Direzione %1$s|Koers %1$s|Yön %1$s
+altitude|alt. %1$d m|alt. %1$d m|Höhe %1$d m|alt. %1$d m|alt. %1$d m|hoogte %1$d m|rakım %1$d m
+outside_short|Out. %1$d°|Ext. %1$d°|Außen %1$d°|Ext. %1$d°|Est. %1$d°|Buiten %1$d°|Dış %1$d°
+range_label|range|autonomie|Reichweite|autonomía|autonomia|bereik|menzil
+cons_avg|kWh/100 avg.|kWh/100 moy.|kWh/100 Ø|kWh/100 med.|kWh/100 media|kWh/100 gem.|kWh/100 ort.
+mode|MODE|MODE|MODUS|MODO|MODALITÀ|MODUS|MOD
+kers|KERS|KERS|KERS|KERS|KERS|KERS|KERS
+charge_btn|CHARGE|CHARGER|LADEN|CARGAR|RICARICA|LADEN|ŞARJ
+stop_btn|STOP|ARRÊTER|STOPP|DETENER|STOP|STOP|DURDUR
+v2l_start|START V2L|LANCER V2L|V2L STARTEN|INICIAR V2L|AVVIA V2L|V2L STARTEN|V2L BAŞLAT
+v2l_stop|STOP V2L|ARRÊTER V2L|V2L STOPPEN|DETENER V2L|FERMA V2L|V2L STOPPEN|V2L DURDUR
+charging_eta|Charging · %1$d h %2$02d|En charge · %1$d h %2$02d|Lädt · %1$d h %2$02d|Cargando · %1$d h %2$02d|In carica · %1$d h %2$02d|Laden · %1$d u %2$02d|Şarj · %1$d sa %2$02d
+weather_pending|Forecast pending|Prévisions en attente|Vorhersage folgt|Previsión pendiente|Previsioni in attesa|Voorspelling volgt|Tahmin bekleniyor
+weather_outside_vehicle|Vehicle outside temperature|Température extérieure du véhicule|Außentemperatur des Fahrzeugs|Temperatura exterior del vehículo|Temperatura esterna del veicolo|Buitentemperatuur van het voertuig|Araç dış sıcaklığı
+weather_details|Feels like %1$d° · Wind %2$d %4$s · %3$d %%|Ressenti %1$d° · Vent %2$d %4$s · %3$d %%|Gefühlt %1$d° · Wind %2$d %4$s · %3$d %%|Sensación %1$d° · Viento %2$d %4$s · %3$d %%|Percepita %1$d° · Vento %2$d %4$s · %3$d %%|Gevoel %1$d° · Wind %2$d %4$s · %3$d %%|Hissedilen %1$d° · Rüzgâr %2$d %4$s · %3$d %%
+weather_here|Current position|Position actuelle|Aktuelle Position|Posición actual|Posizione attuale|Huidige positie|Mevcut konum
+wx_sunny|Sunny|Ensoleillé|Sonnig|Soleado|Soleggiato|Zonnig|Güneşli
+wx_mostly_clear|Mostly clear|Plutôt dégagé|Überwiegend klar|Mayormente despejado|Prevalentemente sereno|Overwegend helder|Çoğunlukla açık
+wx_partly|Partly cloudy|Partiellement nuageux|Teilweise bewölkt|Parcialmente nublado|Parzialmente nuvoloso|Gedeeltelijk bewolkt|Parçalı bulutlu
+wx_overcast|Overcast|Couvert|Bedeckt|Cubierto|Coperto|Bewolkt|Kapalı
+wx_fog|Fog|Brouillard|Nebel|Niebla|Nebbia|Mist|Sis
+wx_drizzle|Drizzle|Bruine|Nieselregen|Llovizna|Pioviggine|Motregen|Çisenti
+wx_rain|Rain|Pluie|Regen|Lluvia|Pioggia|Regen|Yağmur
+wx_snow|Snow|Neige|Schnee|Nieve|Neve|Sneeuw|Kar
+wx_storm|Thunderstorm|Orage|Gewitter|Tormenta|Temporale|Onweer|Gök gürültülü fırtına
+chart_empty|Collecting history (1 point per km)|Historique en cours de collecte (1 point par km)|Verlauf wird erfasst (1 Punkt pro km)|Recopilando historial (1 punto por km)|Raccolta dello storico (1 punto per km)|Geschiedenis wordt verzameld (1 punt per km)|Geçmiş toplanıyor (km başına 1 nokta)
+app_unavailable|%1$s unavailable|%1$s indisponible|%1$s nicht verfügbar|%1$s no disponible|%1$s non disponibile|%1$s niet beschikbaar|%1$s kullanılamıyor
+cs_0|Cable unplugged|Câble débranché|Kabel nicht eingesteckt|Cable desconectado|Cavo scollegato|Kabel losgekoppeld|Kablo takılı değil
+cs_1|Slow charging|Charge lente|Langsames Laden|Carga lenta|Ricarica lenta|Langzaam laden|Yavaş şarj
+cs_2|Charging complete|Charge terminée|Laden abgeschlossen|Carga completa|Ricarica completata|Laden voltooid|Şarj tamamlandı
+cs_3|Trickle charging|Charge d'entretien|Erhaltungsladung|Carga de mantenimiento|Ricarica di mantenimento|Druppelladen|Damla şarj
+cs_4|Charging failed|Échec de la charge|Ladefehler|Error de carga|Errore di ricarica|Laden mislukt|Şarj başarısız
+cs_5|Connecting…|Connexion…|Verbindung…|Conectando…|Connessione…|Verbinden…|Bağlanıyor…
+cs_6|Connected, not recognised|Connecté, non reconnu|Verbunden, nicht erkannt|Conectado, no reconocido|Connesso, non riconosciuto|Verbonden, niet herkend|Bağlı, tanınmadı
+cs_7|Connected, not charging|Connecté, ne charge pas|Verbunden, lädt nicht|Conectado, sin cargar|Connesso, non in carica|Verbonden, laadt niet|Bağlı, şarj olmuyor
+cs_8|Charging stopped|Charge arrêtée|Laden gestoppt|Carga detenida|Ricarica interrotta|Laden gestopt|Şarj durduruldu
+cs_9|Charging scheduled|Charge programmée|Laden geplant|Carga programada|Ricarica programmata|Laden gepland|Şarj planlandı
+cs_10|Fast charging|Charge rapide|Schnellladen|Carga rápida|Ricarica rapida|Snelladen|Hızlı şarj
+cs_11|V2L adapter connected|V2L : adaptateur branché|V2L-Adapter angeschlossen|Adaptador V2L conectado|Adattatore V2L collegato|V2L-adapter aangesloten|V2L adaptörü bağlı
+cs_12|Charging|Charge en cours|Lädt|Cargando|In carica|Laden|Şarj oluyor
+cs_13|V2L: discharging|V2L : décharge en cours|V2L: Entladung läuft|V2L: descargando|V2L: scarica in corso|V2L: ontladen|V2L: deşarj ediliyor
+cs_14|V2L: discharge stopped|V2L : décharge arrêtée|V2L: Entladung gestoppt|V2L: descarga detenida|V2L: scarica interrotta|V2L: ontladen gestopt|V2L: deşarj durduruldu
+cs_15|V2L: discharge complete|V2L : décharge terminée|V2L: Entladung beendet|V2L: descarga completa|V2L: scarica completata|V2L: ontladen voltooid|V2L: deşarj tamamlandı
+cs_other|State %1$d|État %1$d|Status %1$d|Estado %1$d|Stato %1$d|Status %1$d|Durum %1$d
+dm_eco|Eco|Éco|Eco|Eco|Eco|Eco|Eco
+dm_normal|Normal|Normal|Normal|Normal|Normale|Normaal|Normal
+dm_sport|Sport|Sport|Sport|Sport|Sport|Sport|Sport
+dm_snow|Snow|Neige|Schnee|Nieve|Neve|Sneeuw|Kar
+dm_custom|Custom|Perso|Individuell|Personal.|Personal.|Eigen|Özel
+mode_n|Mode %1$d|Mode %1$d|Modus %1$d|Modo %1$d|Modalità %1$d|Modus %1$d|Mod %1$d
+rg_one_pedal|One pedal|1 pédale|One Pedal|Un pedal|Un pedale|Eén pedaal|Tek pedal
+rg_low|Low|Faible|Gering|Bajo|Basso|Laag|Düşük
+rg_medium|Medium|Moyen|Mittel|Medio|Medio|Gemiddeld|Orta
+rg_high|High|Fort|Stark|Alto|Alto|Hoog|Yüksek
+rg_adaptive|Adaptive|Adaptatif|Adaptiv|Adaptativo|Adattivo|Adaptief|Uyarlanabilir
+level_n|Level %1$d|Niveau %1$d|Stufe %1$d|Nivel %1$d|Livello %1$d|Niveau %1$d|Seviye %1$d
+rc_inner|Recirculated|Recyclé|Umluft|Recirculado|Ricircolo|Recirculatie|İç hava
+rc_outer|Outside|Extérieur|Frischluft|Exterior|Esterna|Buiten|Dış hava
+rc_auto|Auto|Auto|Auto|Auto|Auto|Auto|Oto
+cf_comfort|Comfort|Confort|Komfort|Confort|Comfort|Comfort|Konfor
+st_off|Off|Arrêt|Aus|Apagado|Spento|Uit|Kapalı
+st_on|On|Marche|Ein|Encendido|Acceso|Aan|Açık
+alert|Alert|Alerte|Warnung|Alerta|Avviso|Waarschuwing|Uyarı
+assist|Assist|Assistance|Assistent|Asistencia|Assistenza|Assistentie|Destek
+emergency|Emergency|Urgence|Notfall|Emergencia|Emergenza|Noodgeval|Acil
+aeb_alert_brake|Alert + braking|Alerte + freinage|Warnung + Bremsen|Alerta + frenado|Avviso + frenata|Waarschuwing + remmen|Uyarı + fren
+active|Active|Actif|Aktiv|Activo|Attivo|Actief|Etkin
+value_n|Value %1$d|Valeur %1$d|Wert %1$d|Valor %1$d|Valore %1$d|Waarde %1$d|Değer %1$d
+cl_driver_temp|DRIVER TEMPERATURE|TEMPÉRATURE CONDUCTEUR|FAHRERTEMPERATUR|TEMPERATURA CONDUCTOR|TEMPERATURA CONDUCENTE|TEMPERATUUR BESTUURDER|SÜRÜCÜ SICAKLIĞI
+cl_fan|FAN|VENTILATION|GEBLÄSE|VENTILACIÓN|VENTILAZIONE|VENTILATIE|FAN
+cl_airflow|AIR DIRECTION|DIRECTION DE L'AIR|LUFTVERTEILUNG|DIRECCIÓN DEL AIRE|DIREZIONE ARIA|LUCHTRICHTING|HAVA YÖNÜ
+cl_face|FACE|VISAGE|GESICHT|CARA|VISO|GEZICHT|YÜZ
+cl_feet|FEET|PIEDS|FÜSSE|PIES|PIEDI|VOETEN|AYAK
+cl_windshield|WINDSCREEN|PARE-BRISE|SCHEIBE|PARABRISAS|PARABREZZA|VOORRUIT|ÖN CAM
+cl_modes|MODES|MODES|MODI|MODOS|MODALITÀ|MODI|MODLAR
+cl_eco|ECO|ECO|ECO|ECO|ECO|ECO|ECO
+cl_recirc|RECIRCULATION|RECYCLAGE|UMLUFT|RECIRCULACIÓN|RICIRCOLO|RECIRCULATIE|İÇ HAVA DOLAŞIMI
+cl_air_recirc|RECIRCULATED AIR|AIR RECYCLÉ|UMLUFT|AIRE RECIRCULADO|ARIA RICIRCOLATA|RECIRCULATIELUCHT|İÇ HAVA
+cl_air_outside|FRESH AIR|AIR EXTÉRIEUR|FRISCHLUFT|AIRE EXTERIOR|ARIA ESTERNA|BUITENLUCHT|DIŞ HAVA
+cl_air_auto|AIR AUTO|AIR AUTO|LUFT AUTO|AIRE AUTO|ARIA AUTO|LUCHT AUTO|HAVA OTO
+cl_def_front|FRONT DEFROST|DÉGIVRAGE AV|FRONTSCHEIBE|DESEMPAÑADO DEL.|SBRINAMENTO ANT.|ONTWASEMEN VOOR|ÖN BUĞU ÇÖZME
+cl_def_rear|REAR DEFROST|DÉGIVRAGE AR|HECKSCHEIBE|DESEMPAÑADO TRAS.|SBRINAMENTO POST.|ONTWASEMEN ACHTER|ARKA BUĞU ÇÖZME
+cl_stock|Stock climate screen  ›|Écran clim d'origine  ›|Original-Klimaanzeige  ›|Pantalla de clima original  ›|Schermata clima originale  ›|Origineel klimaatscherm  ›|Orijinal klima ekranı  ›
+cl_outside|Outside %1$d°|Extérieur %1$d°|Außen %1$d°|Exterior %1$d°|Esterno %1$d°|Buiten %1$d°|Dış %1$d°
+en_stock|Stock Energy app  ›|Appli Énergie d'origine  ›|Original-Energie-App  ›|App de energía original  ›|App Energia originale  ›|Originele energie-app  ›|Orijinal Enerji uygulaması  ›
+en_charging|CHARGING|RECHARGE|LADEN|CARGA|RICARICA|LADEN|ŞARJ
+en_limit|CHARGE LIMIT|LIMITE DE CHARGE|LADELIMIT|LÍMITE DE CARGA|LIMITE DI RICARICA|LAADLIMIET|ŞARJ SINIRI
+en_ac_current|AC CHARGING CURRENT|COURANT DE CHARGE AC|AC-LADESTROM|CORRIENTE DE CARGA AC|CORRENTE DI RICARICA AC|AC-LAADSTROOM|AC ŞARJ AKIMI
+en_max|Max|Max|Max|Máx|Max|Max|Maks
+en_scheduled|SCHEDULED CHARGING|CHARGE PROGRAMMÉE|GEPLANTES LADEN|CARGA PROGRAMADA|RICARICA PROGRAMMATA|GEPLAND LADEN|PLANLI ŞARJ
+en_schedule|SCHEDULE|PROGRAMMATION|ZEITPLAN|PROGRAMACIÓN|PROGRAMMAZIONE|PLANNING|PLAN
+en_finish|FINISH TO THE LIMIT|FINIR JUSQU'À LA LIMITE|BIS ZUM LIMIT LADEN|TERMINAR HASTA EL LÍMITE|COMPLETA FINO AL LIMITE|TOT LIMIET AFMAKEN|SINIRA KADAR TAMAMLA
+en_start|Start|Début|Beginn|Inicio|Inizio|Begin|Başlangıç
+en_end|End|Fin|Ende|Fin|Fine|Einde|Bitiş
+en_limit_word|limit|limite|Limit|límite|limite|limiet|sınır
+en_v2l|V2L · EXTERNAL SOCKET|V2L · PRISE EXTÉRIEURE|V2L · EXTERNE STECKDOSE|V2L · TOMA EXTERIOR|V2L · PRESA ESTERNA|V2L · EXTERN STOPCONTACT|V2L · HARİCİ PRİZ
+en_v2l_stop_at|Stop discharging at|Arrêt de la décharge à|Entladung stoppen bei|Detener descarga al|Interrompi scarica al|Ontladen stoppen bij|Deşarjı durdur:
+en_v2l_start|START V2L|LANCER LE V2L|V2L STARTEN|INICIAR V2L|AVVIA V2L|V2L STARTEN|V2L BAŞLAT
+en_v2l_stopbtn|STOP V2L|ARRÊTER LE V2L|V2L STOPPEN|DETENER V2L|FERMA V2L|V2L STOPPEN|V2L DURDUR
+en_consumption|CONSUMPTION|CONSOMMATION|VERBRAUCH|CONSUMO|CONSUMO|VERBRUIK|TÜKETİM
+en_since_charge|Since last charge|Depuis la recharge|Seit dem Laden|Desde la recarga|Dalla ricarica|Sinds laden|Son şarjdan beri
+en_since_start|Since start|Depuis le démarrage|Seit dem Start|Desde el arranque|Dall'avvio|Sinds start|Çalıştırmadan beri
+en_recent|RECENT CONSUMPTION (%1$s)|CONSO RÉCENTE (%1$s)|AKTUELLER VERBRAUCH (%1$s)|CONSUMO RECIENTE (%1$s)|CONSUMO RECENTE (%1$s)|RECENT VERBRUIK (%1$s)|SON TÜKETİM (%1$s)
+en_power|Power %1$s kW|Puissance %1$s kW|Leistung %1$s kW|Potencia %1$s kW|Potenza %1$s kW|Vermogen %1$s kW|Güç %1$s kW
+en_ends_in|ends in %1$d h %2$02d|fin dans %1$d h %2$02d|fertig in %1$d h %2$02d|termina en %1$d h %2$02d|termina tra %1$d h %2$02d|klaar over %1$d u %2$02d|%1$d sa %2$02d içinde biter
+en_no_limit|No limit: charges to 100 %%.|Pas de limite : charge jusqu'à 100 %%.|Kein Limit: lädt bis 100 %%.|Sin límite: carga hasta el 100 %%.|Nessun limite: ricarica fino al 100 %%.|Geen limiet: laadt tot 100 %%.|Sınır yok: %%100'e kadar şarj eder.
+en_car_only|Limit sent to the car only|Limite transmise à la voiture uniquement|Limit nur an das Fahrzeug übermittelt|Límite enviado solo al coche|Limite inviato solo all'auto|Limiet alleen naar de auto gestuurd|Sınır yalnızca araca gönderildi
+en_drive|Driving|Conduite|Fahren|Conducción|Guida|Rijden|Sürüş
+en_climate|Climate control|Climatisation|Klimaanlage|Climatización|Climatizzazione|Klimaatregeling|Klima
+en_accessories|Accessories|Accessoires|Zubehör|Accesorios|Accessori|Accessoires|Aksesuarlar
+en_regen|+ %1$s kWh recovered by braking|+ %1$s kWh récupérés au freinage|+ %1$s kWh durch Bremsen zurückgewonnen|+ %1$s kWh recuperados al frenar|+ %1$s kWh recuperati in frenata|+ %1$s kWh teruggewonnen bij remmen|+ %1$s kWh frenle geri kazanıldı
+en_remaining| · %1$d h %2$d min left| · %1$d h %2$d min restantes| · noch %1$d h %2$d min| · quedan %1$d h %2$d min| · %1$d h %2$d min rimanenti| · nog %1$d u %2$d min| · %1$d sa %2$d dk kaldı
+en_plug_v2l|Plug a V2L adapter into the charging socket|Branchez un adaptateur V2L sur la prise de charge|V2L-Adapter an der Ladebuchse anschließen|Conecte un adaptador V2L a la toma de carga|Collega un adattatore V2L alla presa di ricarica|Sluit een V2L-adapter aan op de laadaansluiting|Şarj soketine bir V2L adaptörü takın
+en_unplugged|CABLE UNPLUGGED|CÂBLE DÉBRANCHÉ|KABEL GETRENNT|CABLE DESCONECTADO|CAVO SCOLLEGATO|KABEL LOS|KABLO TAKILI DEĞİL
+en_stop_charge|STOP CHARGING|ARRÊTER LA CHARGE|LADEN STOPPEN|DETENER CARGA|FERMA RICARICA|LADEN STOPPEN|ŞARJI DURDUR
+en_charge_now|CHARGE NOW|CHARGER MAINTENANT|JETZT LADEN|CARGAR AHORA|RICARICA ORA|NU LADEN|ŞİMDİ ŞARJ ET
+en_history_note|last %1$d %3$s · average %2$s (dashed)|%1$d derniers %3$s · moyenne %2$s (pointillés)|letzte %1$d %3$s · Durchschnitt %2$s (gestrichelt)|últimos %1$d %3$s · media %2$s (discontinua)|ultimi %1$d %3$s · media %2$s (tratteggiata)|laatste %1$d %3$s · gemiddelde %2$s (gestippeld)|son %1$d %3$s · ortalama %2$s (kesikli)
+vh_saic|SAIC settings  ›|Réglages SAIC  ›|SAIC-Einstellungen  ›|Ajustes SAIC  ›|Impostazioni SAIC  ›|SAIC-instellingen  ›|SAIC ayarları  ›
+vh_mg4control|Open MG4 Control  ›|Ouvrir MG4 Control  ›|MG4 Control öffnen  ›|Abrir MG4 Control  ›|Apri MG4 Control  ›|MG4 Control openen  ›|MG4 Control'ü aç  ›
+vh_driving|DRIVING|CONDUITE|FAHREN|CONDUCCIÓN|GUIDA|RIJDEN|SÜRÜŞ
+vh_drive_mode|Drive mode|Mode de conduite|Fahrmodus|Modo de conducción|Modalità di guida|Rijmodus|Sürüş modu
+vh_regen|Energy recovery (KERS)|Récupération d'énergie (KERS)|Energierückgewinnung (KERS)|Recuperación de energía (KERS)|Recupero di energia (KERS)|Energieterugwinning (KERS)|Enerji geri kazanımı (KERS)
+vh_one_pedal|One-pedal driving|Conduite à une pédale|One-Pedal-Fahren|Conducción con un pedal|Guida con un pedale|Rijden met één pedaal|Tek pedal sürüş
+vh_steering|Steering|Direction|Lenkung|Dirección|Sterzo|Stuurinrichting|Direksiyon
+vh_brake|Brake pedal|Pédale de frein|Bremspedal|Pedal de freno|Pedale del freno|Rempedaal|Fren pedalı
+vh_endurance|Energy saving|Économie d'énergie|Energiesparmodus|Ahorro de energía|Risparmio energetico|Energiebesparing|Enerji tasarrufu
+vh_adas|DRIVER ASSISTANCE|AIDES À LA CONDUITE|FAHRASSISTENZ|ASISTENCIA A LA CONDUCCIÓN|ASSISTENZA ALLA GUIDA|RIJHULPSYSTEMEN|SÜRÜŞ DESTEĞİ
+vh_lane|Lane keeping|Maintien de voie|Spurhalteassistent|Mantenimiento de carril|Mantenimento corsia|Rijstrookassistent|Şerit takip
+vh_aeb|Emergency braking|Freinage d'urgence|Notbremsung|Frenado de emergencia|Frenata di emergenza|Noodremming|Acil fren
+vh_overspeed|Overspeed alert|Alerte de survitesse|Geschwindigkeitswarnung|Alerta de exceso de velocidad|Avviso di eccesso di velocità|Snelheidswaarschuwing|Hız aşımı uyarısı
+vh_limit_beep|Speed limit beep|Bip limite de vitesse|Tempolimit-Signal|Aviso de límite de velocidad|Segnale limite di velocità|Pieptoon snelheidslimiet|Hız sınırı sesli uyarısı
+vh_use_mg4control|Use MG4 Control to change these settings.|Pour modifier ces réglages, utilisez MG4 Control.|Diese Einstellungen in MG4 Control ändern.|Use MG4 Control para cambiar estos ajustes.|Usa MG4 Control per modificare queste impostazioni.|Gebruik MG4 Control om deze instellingen te wijzigen.|Bu ayarları değiştirmek için MG4 Control'ü kullanın.
+vh_state|VEHICLE STATUS|ÉTAT DU VÉHICULE|FAHRZEUGSTATUS|ESTADO DEL VEHÍCULO|STATO DEL VEICOLO|VOERTUIGSTATUS|ARAÇ DURUMU
+vh_battery|Battery|Batterie|Batterie|Batería|Batteria|Batterij|Batarya
+vh_range|Range|Autonomie|Reichweite|Autonomía|Autonomia|Bereik|Menzil
+vh_avg_cons|Average consumption|Conso moyenne|Durchschnittsverbrauch|Consumo medio|Consumo medio|Gemiddeld verbruik|Ortalama tüketim
+vh_odometer|Odometer|Odomètre|Kilometerstand|Odómetro|Contachilometri|Kilometerstand|Kilometre sayacı
+vh_speed|Speed|Vitesse|Geschwindigkeit|Velocidad|Velocità|Snelheid|Hız
+vh_outside|Outside temperature|Température extérieure|Außentemperatur|Temperatura exterior|Temperatura esterna|Buitentemperatuur|Dış sıcaklık
+vh_charge|Charging|Charge|Laden|Carga|Ricarica|Laden|Şarj
+vh_soh|Battery health (estimated)|Santé batterie (estimée)|Batteriezustand (geschätzt)|Salud de la batería (estimada)|Salute batteria (stimata)|Batterijgezondheid (geschat)|Batarya sağlığı (tahmini)
+vh_soh_detail|Estimated over about %1$s driven.|Estimée sur environ %1$s parcourus.|Geschätzt über etwa %1$s Fahrt.|Estimada sobre unos %1$s recorridos.|Stimata su circa %1$s percorsi.|Geschat over ongeveer %1$s gereden.|Yaklaşık %1$s sürüşte tahmin edildi.
+vh_soh_progress|Measuring: %1$s %% of 15 %%, %2$s so far.|Mesure en cours : %1$s %% sur 15 %%, %2$s pour l'instant.|Messung: %1$s %% von 15 %%, bisher %2$s.|Midiendo: %1$s %% de 15 %%, %2$s por ahora.|In misura: %1$s %% di 15 %%, finora %2$s.|Meting: %1$s %% van 15 %%, tot nu toe %2$s.|Ölçülüyor: %%15'in %%%1$s kadarı, şimdiye kadar %2$s.
+vh_soh_disclaimer|MG4Dash estimate, not official. Being tested.|Estimation MG4Dash, pas officielle. En test.|Schätzung von MG4Dash, nicht offiziell. In Test.|Estimación de MG4Dash, no oficial. En prueba.|Stima MG4Dash, non ufficiale. In prova.|Schatting van MG4Dash, niet officieel. In test.|MG4Dash tahmini, resmi değil. Test aşamasında.
+st_home|HOME SCREEN|ÉCRAN D'ACCUEIL|STARTBILDSCHIRM|PANTALLA DE INICIO|SCHERMATA HOME|STARTSCHERM|ANA EKRAN
+st_home_desc|"Replace SAIC home" disables only the original home screen (its service keeps running). Maintenance mode re-enables it, e.g. before a dealer service.|« Remplacer l'accueil SAIC » désactive uniquement l'écran d'accueil d'origine (son service reste actif). Le mode Entretien le réactive, par exemple avant une révision en concession.|„SAIC-Startbildschirm ersetzen“ deaktiviert nur den originalen Startbildschirm (sein Dienst läuft weiter). Der Wartungsmodus aktiviert ihn wieder, z. B. vor einem Werkstatttermin.|«Sustituir inicio SAIC» desactiva solo la pantalla de inicio original (su servicio sigue activo). El modo mantenimiento la reactiva, por ejemplo antes de una revisión.|«Sostituisci home SAIC» disattiva solo la schermata home originale (il suo servizio resta attivo). La modalità manutenzione la riattiva, ad esempio prima di un tagliando.|"SAIC-start vervangen" schakelt alleen het originele startscherm uit (de dienst blijft actief). De onderhoudsmodus zet het weer aan, bijvoorbeeld voor een onderhoudsbeurt.|"SAIC ana ekranını değiştir" yalnızca orijinal ana ekranı devre dışı bırakır (servisi çalışmaya devam eder). Bakım modu onu yeniden etkinleştirir, örneğin bayi servisinden önce.
+st_replace|Replace SAIC home|Remplacer l'accueil SAIC|SAIC-Startbildschirm ersetzen|Sustituir inicio SAIC|Sostituisci home SAIC|SAIC-start vervangen|SAIC ana ekranını değiştir
+st_valet|Maintenance mode|Mode Entretien|Wartungsmodus|Modo mantenimiento|Modalità manutenzione|Onderhoudsmodus|Bakım modu
+st_adb|ADB recovery if MG4Dash no longer starts: adb shell cmd package compile -m speed -f app.mg4dash|Secours ADB si MG4Dash ne démarre plus : adb shell cmd package compile -m speed -f app.mg4dash|ADB-Notfall, falls MG4Dash nicht mehr startet: adb shell cmd package compile -m speed -f app.mg4dash|Recuperación ADB si MG4Dash ya no arranca: adb shell cmd package compile -m speed -f app.mg4dash|Ripristino ADB se MG4Dash non si avvia più: adb shell cmd package compile -m speed -f app.mg4dash|ADB-herstel als MG4Dash niet meer start: adb shell cmd package compile -m speed -f app.mg4dash|MG4Dash artık açılmıyorsa ADB ile kurtarma: adb shell cmd package compile -m speed -f app.mg4dash
+st_capacity|Usable battery capacity: %1$s kWh|Capacité utile de la batterie : %1$s kWh|Nutzbare Batteriekapazität: %1$s kWh|Capacidad útil de la batería: %1$s kWh|Capacità utile della batteria: %1$s kWh|Bruikbare batterijcapaciteit: %1$s kWh|Kullanılabilir batarya kapasitesi: %1$s kWh
+st_capacity_desc|Used for the kWh/100 estimate (MG4 Standard 51 kWh: about 49 kWh usable).|Sert à l'estimation kWh/100 (MG4 Standard 51 kWh : environ 49 kWh utiles).|Für die kWh/100-Schätzung (MG4 Standard 51 kWh: ca. 49 kWh nutzbar).|Para la estimación de kWh/100 (MG4 Standard 51 kWh: unos 49 kWh útiles).|Per la stima kWh/100 (MG4 Standard 51 kWh: circa 49 kWh utili).|Voor de kWh/100-schatting (MG4 Standard 51 kWh: ongeveer 49 kWh bruikbaar).|kWh/100 tahmini için kullanılır (MG4 Standard 51 kWh: yaklaşık 49 kWh kullanılabilir).
+st_battery_model|Battery model (reference for the estimated health on the Vehicle page):|Modèle de batterie (référence de la santé estimée, page Véhicule) :|Batteriemodell (Bezug für den geschätzten Zustand auf der Fahrzeugseite):|Modelo de batería (referencia de la salud estimada, página Vehículo):|Modello di batteria (riferimento della salute stimata, pagina Veicolo):|Batterijmodel (referentie voor de geschatte gezondheid op de voertuigpagina):|Batarya modeli (Araç sayfasındaki tahmini sağlık için referans):
+st_city|Fallback city: %1$s (if the car provides no position)|Ville de repli : %1$s (si la voiture ne fournit pas de position)|Ersatzstadt: %1$s (falls das Auto keine Position liefert)|Ciudad de respaldo: %1$s (si el coche no da la posición)|Città di riserva: %1$s (se l'auto non fornisce la posizione)|Reservestad: %1$s (als de auto geen positie geeft)|Yedek şehir: %1$s (araç konum vermezse)
+st_change_city|Change city|Changer de ville|Stadt ändern|Cambiar ciudad|Cambia città|Stad wijzigen|Şehri değiştir
+st_startup|STARTUP|DÉMARRAGE|START|ARRANQUE|AVVIO|OPSTARTEN|BAŞLANGIÇ
+st_warm|Briefly open the SAIC launcher at startup: %1$s|Ouverture brève du launcher SAIC au démarrage : %1$s|SAIC-Launcher beim Start kurz öffnen: %1$s|Abrir brevemente el launcher SAIC al arrancar: %1$s|Apri brevemente il launcher SAIC all'avvio: %1$s|SAIC-launcher kort openen bij opstarten: %1$s|Başlangıçta SAIC başlatıcısını kısa süre aç: %1$s
+st_warm_desc|Lets the SAIC service (audio sources, camera, system bar commands) register its interface.|Permet au service SAIC (sources audio, caméra, commandes de la barre système) d'enregistrer son interface.|Damit der SAIC-Dienst (Audioquellen, Kamera, Systemleisten-Befehle) seine Oberfläche registriert.|Permite al servicio SAIC (fuentes de audio, cámara, comandos de la barra del sistema) registrar su interfaz.|Permette al servizio SAIC (sorgenti audio, telecamera, comandi della barra di sistema) di registrare la sua interfaccia.|Laat de SAIC-dienst (audiobronnen, camera, systeembalkopdrachten) zijn interface registreren.|SAIC servisinin (ses kaynakları, kamera, sistem çubuğu komutları) arayüzünü kaydetmesini sağlar.
+st_toggle|Toggle|Basculer|Umschalten|Cambiar|Cambia|Wisselen|Değiştir
+st_display|DISPLAY|AFFICHAGE|ANZEIGE|PANTALLA|DISPLAY|WEERGAVE|EKRAN
+st_fullscreen|Full screen (hides the SAIC side bar and banner): %1$s|Plein écran (masque la barre latérale et le bandeau SAIC) : %1$s|Vollbild (blendet SAIC-Seitenleiste und Banner aus): %1$s|Pantalla completa (oculta la barra lateral y el banner SAIC): %1$s|Schermo intero (nasconde la barra laterale e il banner SAIC): %1$s|Volledig scherm (verbergt de SAIC-zijbalk en -banner): %1$s|Tam ekran (SAIC yan çubuğunu ve şeridini gizler): %1$s
+st_fullscreen_desc|Swipe from the left or top edge to bring the SAIC bars back.|Un glissement depuis le bord gauche ou le haut de l'écran fait réapparaître les barres SAIC.|Vom linken oder oberen Rand wischen, um die SAIC-Leisten einzublenden.|Deslice desde el borde izquierdo o superior para mostrar las barras SAIC.|Scorri dal bordo sinistro o superiore per mostrare le barre SAIC.|Veeg vanaf de linker- of bovenrand om de SAIC-balken terug te halen.|SAIC çubuklarını geri getirmek için sol veya üst kenardan kaydırın.
+yes|YES|OUI|JA|SÍ|SÌ|JA|EVET
+no|NO|NON|NEIN|NO|NO|NEE|HAYIR
+st_log|LOG|JOURNAL|PROTOKOLL|REGISTRO|REGISTRO|LOGBOEK|GÜNLÜK
+st_refresh|Refresh|Actualiser|Aktualisieren|Actualizar|Aggiorna|Vernieuwen|Yenile
+st_close|Close|Fermer|Schließen|Cerrar|Chiudi|Sluiten|Kapat
+st_title|Settings · MG4Dash %1$s|Réglages · MG4Dash %1$s|Einstellungen · MG4Dash %1$s|Ajustes · MG4Dash %1$s|Impostazioni · MG4Dash %1$s|Instellingen · MG4Dash %1$s|Ayarlar · MG4Dash %1$s
+st_replace_msg|The SAIC home screen will be disabled and MG4Dash will become the home screen. Maintenance mode restores it at any time. Continue?|L'écran d'accueil SAIC sera désactivé et MG4Dash deviendra l'accueil. Le mode Entretien le rétablit à tout moment. Continuer ?|Der SAIC-Startbildschirm wird deaktiviert und MG4Dash wird zum Startbildschirm. Der Wartungsmodus stellt ihn jederzeit wieder her. Fortfahren?|La pantalla de inicio SAIC se desactivará y MG4Dash será la pantalla de inicio. El modo mantenimiento la restaura en cualquier momento. ¿Continuar?|La schermata home SAIC verrà disattivata e MG4Dash diventerà la home. La modalità manutenzione la ripristina in qualsiasi momento. Continuare?|Het SAIC-startscherm wordt uitgeschakeld en MG4Dash wordt het startscherm. De onderhoudsmodus herstelt het op elk moment. Doorgaan?|SAIC ana ekranı devre dışı bırakılacak ve MG4Dash ana ekran olacak. Bakım modu onu istediğiniz zaman geri getirir. Devam edilsin mi?
+st_replace_btn|Replace|Remplacer|Ersetzen|Sustituir|Sostituisci|Vervangen|Değiştir
+cancel|Cancel|Annuler|Abbrechen|Cancelar|Annulla|Annuleren|İptal
+temp_cal_title|Temperature calibration|Calibration de la température|Temperaturkalibrierung|Calibración de la temperatura|Calibrazione della temperatura|Temperatuurkalibratie|Sıcaklık kalibrasyonu
+temp_cal_preview|Displayed: %1$s|Affiché : %1$s|Angezeigt: %1$s|Mostrado: %1$s|Visualizzato: %1$s|Weergegeven: %1$s|Gösterilen: %1$s
+temp_cal_reset|Reset|Remettre à 0|Zurücksetzen|Restablecer|Azzera|Herstellen|Sıfırla
+st_valet_msg|The original SAIC launcher will become the default home screen again. Continue?|Le launcher SAIC d'origine va redevenir l'écran d'accueil par défaut. Continuer ?|Der originale SAIC-Launcher wird wieder Standard-Startbildschirm. Fortfahren?|El launcher SAIC original volverá a ser la pantalla de inicio predeterminada. ¿Continuar?|Il launcher SAIC originale tornerà la schermata home predefinita. Continuare?|De originele SAIC-launcher wordt weer het standaard startscherm. Doorgaan?|Orijinal SAIC başlatıcısı yeniden varsayılan ana ekran olacak. Devam edilsin mi?
+activate|Activate|Activer|Aktivieren|Activar|Attiva|Activeren|Etkinleştir
+st_home_changed|Home screen changed|Accueil modifié|Startbildschirm geändert|Inicio cambiado|Home modificata|Startscherm gewijzigd|Ana ekran değişti
+st_failed|Failed (see the log)|Échec (voir le journal)|Fehlgeschlagen (siehe Protokoll)|Error (ver el registro)|Errore (vedi registro)|Mislukt (zie logboek)|Başarısız (günlüğe bakın)
+st_current_home|Current home screen: %1$s|Accueil actuel : %1$s|Aktueller Startbildschirm: %1$s|Inicio actual: %1$s|Home attuale: %1$s|Huidig startscherm: %1$s|Mevcut ana ekran: %1$s
+st_home_stock|original SAIC launcher|launcher SAIC d'origine|originaler SAIC-Launcher|launcher SAIC original|launcher SAIC originale|originele SAIC-launcher|orijinal SAIC başlatıcısı
+st_home_none|no default (choice requested)|aucun par défaut (choix demandé)|kein Standard (Auswahl erforderlich)|ninguno por defecto (se pide elegir)|nessuno predefinito (scelta richiesta)|geen standaard (keuze gevraagd)|varsayılan yok (seçim istenecek)
+cd_temp_down|Lower temperature|Baisser la température|Temperatur senken|Bajar temperatura|Abbassa temperatura|Temperatuur omlaag|Sıcaklığı düşür
+cd_temp_up|Raise temperature|Monter la température|Temperatur erhöhen|Subir temperatura|Alza temperatura|Temperatuur omhoog|Sıcaklığı yükselt
+cd_power|Climate on / off|Marche / arrêt clim|Klima ein / aus|Clima encendido / apagado|Clima on / off|Klimaat aan / uit|Klima açık / kapalı
+cd_fan_down|Less fan|Moins de ventilation|Weniger Gebläse|Menos ventilación|Meno ventilazione|Minder ventilatie|Fanı azalt
+cd_fan_up|More fan|Plus de ventilation|Mehr Gebläse|Más ventilación|Più ventilazione|Meer ventilatie|Fanı artır
+cd_play|Play / pause|Lecture / pause|Wiedergabe / Pause|Reproducir / pausa|Riproduci / pausa|Afspelen / pauze|Oynat / duraklat
+cd_prev|Previous|Précédent|Zurück|Anterior|Precedente|Vorige|Önceki
+cd_next|Next|Suivant|Weiter|Siguiente|Successivo|Volgende|Sonraki
+cd_recenter|Recenter|Recentrer|Zentrieren|Recentrar|Ricentra|Centreren|Ortala
+cd_zoom_in|Zoom in|Zoom avant|Vergrößern|Acercar|Ingrandisci|Inzoomen|Yakınlaştır
+cd_zoom_out|Zoom out|Zoom arrière|Verkleinern|Alejar|Riduci|Uitzoomen|Uzaklaştır
+cd_map_fullscreen|Full screen map|Carte en plein écran|Karte im Vollbild|Mapa a pantalla completa|Mappa a schermo intero|Kaart schermvullend|Tam ekran harita
+cardinals|N,NE,E,SE,S,SW,W,NW|N,NE,E,SE,S,SO,O,NO|N,NO,O,SO,S,SW,W,NW|N,NE,E,SE,S,SO,O,NO|N,NE,E,SE,S,SO,O,NO|N,NO,O,ZO,Z,ZW,W,NW|K,KD,D,GD,G,GB,B,KB
+cd_widget_toggle|Map or shortcuts|Carte ou raccourcis|Karte oder Verknüpfungen|Mapa o accesos directos|Mappa o scorciatoie|Kaart of snelkoppelingen|Harita veya kısayollar
+title_shortcuts|SHORTCUTS|RACCOURCIS|VERKNÜPFUNGEN|ACCESOS DIRECTOS|SCORCIATOIE|SNELKOPPELINGEN|KISAYOLLAR
+sc_edit|Shortcut|Raccourci|Verknüpfung|Acceso directo|Scorciatoia|Snelkoppeling|Kısayol
+sc_app|Application|Application|App|Aplicación|App|App|Uygulama
+sc_ha|Home Assistant action|Action Home Assistant|Home-Assistant-Aktion|Acción de Home Assistant|Azione Home Assistant|Home Assistant-actie|Home Assistant eylemi
+sc_clear|Remove|Supprimer|Entfernen|Quitar|Rimuovi|Verwijderen|Kaldır
+ha_not_configured|Set up Home Assistant in MG4Dash settings first (long press on Settings).|Configurez d'abord Home Assistant dans les paramètres de MG4Dash (appui long sur Paramètres).|Richten Sie Home Assistant zuerst in den MG4Dash-Einstellungen ein (lange auf Einstellungen drücken).|Configure primero Home Assistant en los ajustes de MG4Dash (pulsación larga en Ajustes).|Configura prima Home Assistant nelle impostazioni di MG4Dash (pressione lunga su Impostazioni).|Stel eerst Home Assistant in bij de MG4Dash-instellingen (lang drukken op Instellingen).|Önce MG4Dash ayarlarında Home Assistant'ı yapılandırın (Ayarlar'a uzun basın).
+ha_error|Home Assistant unreachable: check the address, the token and the connection.|Home Assistant injoignable : vérifiez l'adresse, le jeton et la connexion.|Home Assistant nicht erreichbar: Adresse, Token und Verbindung prüfen.|Home Assistant no accesible: compruebe la dirección, el token y la conexión.|Home Assistant non raggiungibile: verifica indirizzo, token e connessione.|Home Assistant onbereikbaar: controleer adres, token en verbinding.|Home Assistant'a ulaşılamıyor: adresi, tokenı ve bağlantıyı kontrol edin.
+ha_sent|%1$s: sent|%1$s : envoyé|%1$s: gesendet|%1$s: enviado|%1$s: inviato|%1$s: verzonden|%1$s: gönderildi
+ha_error_action|%1$s: failed|%1$s : échec|%1$s: fehlgeschlagen|%1$s: error|%1$s: errore|%1$s: mislukt|%1$s: başarısız
+dock_aa_pick|Button shortcut|Raccourci du bouton|Tastenbelegung|Acceso del botón|Scorciatoia del pulsante|Snelkoppeling van de knop|Düğme kısayolu
+dock_aa_stock|Android Auto (original)|Android Auto (d'origine)|Android Auto (original)|Android Auto (original)|Android Auto (originale)|Android Auto (origineel)|Android Auto (orijinal)
+st_ha_url|Address: %1$s|Adresse : %1$s|Adresse: %1$s|Dirección: %1$s|Indirizzo: %1$s|Adres: %1$s|Adres: %1$s
+st_ha_no_token|Token: not set|Jeton : non défini|Token: nicht festgelegt|Token: no definido|Token: non impostato|Token: niet ingesteld|Token: ayarlanmadı
+st_ha_token_set|Token: set|Jeton : défini|Token: festgelegt|Token: definido|Token: impostato|Token: ingesteld|Token: ayarlandı
+st_ha_desc|Create a long-lived access token in your Home Assistant profile. Shortcuts can then run scripts, automations, scenes, buttons and covers (gate, garage door). Use the button at the top right of the map to show the shortcuts.|Créez un jeton d'accès longue durée dans votre profil Home Assistant. Les raccourcis pourront alors lancer scripts, automatisations, scènes, boutons et ouvrants (portail, porte de garage). Le bouton en haut à droite de la carte affiche les raccourcis.|Erstellen Sie in Ihrem Home-Assistant-Profil ein langlebiges Zugriffstoken. Verknüpfungen können dann Skripte, Automationen, Szenen, Tasten und Abdeckungen (Tor, Garagentor) auslösen. Die Taste oben rechts auf der Karte zeigt die Verknüpfungen.|Cree un token de acceso de larga duración en su perfil de Home Assistant. Los accesos podrán ejecutar scripts, automatizaciones, escenas, botones y cubiertas (portón, puerta de garaje). El botón arriba a la derecha del mapa muestra los accesos.|Crea un token di accesso di lunga durata nel tuo profilo Home Assistant. Le scorciatoie potranno avviare script, automazioni, scene, pulsanti e coperture (cancello, porta del garage). Il pulsante in alto a destra della mappa mostra le scorciatoie.|Maak een langlevend toegangstoken aan in je Home Assistant-profiel. Snelkoppelingen kunnen dan scripts, automatiseringen, scènes, knoppen en afdekkingen (poort, garagedeur) starten. De knop rechtsboven op de kaart toont de snelkoppelingen.|Home Assistant profilinizde uzun ömürlü bir erişim tokenı oluşturun. Kısayollar daha sonra komut dosyalarını, otomasyonları, sahneleri, düğmeleri ve kapakları (bahçe kapısı, garaj kapısı) çalıştırabilir. Kısayolları göstermek için haritanın sağ üstündeki düğmeyi kullanın.
+st_ha_set_url|Address|Adresse|Adresse|Dirección|Indirizzo|Adres|Adres
+st_ha_set_token|Token|Jeton|Token|Token|Token|Token|Token
+st_ha_test|Test|Tester|Testen|Probar|Prova|Testen|Test et
+st_ha_ok|Home Assistant connected|Home Assistant connecté|Home Assistant verbunden|Home Assistant conectado|Home Assistant connesso|Home Assistant verbonden|Home Assistant bağlandı
+st_diag|DIAGNOSTICS|DIAGNOSTIC|DIAGNOSE|DIAGNÓSTICO|DIAGNOSTICA|DIAGNOSE|TANILAMA
+st_energy_log|Energy data recorder: %1$s|Enregistreur de données énergie : %1$s|Energiedaten-Rekorder: %1$s|Registro de datos de energía: %1$s|Registratore dati energia: %1$s|Energiegegevensrecorder: %1$s|Enerji veri kaydedici: %1$s
+st_energy_log_desc|Every 5 s, writes battery power, consumption counters and equipment states to Android/data/app.mg4dash/files/energy_log.csv (read only, nothing is sent to the car).|Toutes les 5 s, note la puissance batterie, les compteurs de consommation et l'état des équipements dans Android/data/app.mg4dash/files/energy_log.csv (lecture seule, rien n'est envoyé à la voiture).|Schreibt alle 5 s Batterieleistung, Verbrauchszähler und Gerätezustände in Android/data/app.mg4dash/files/energy_log.csv (nur lesen, nichts wird an das Auto gesendet).|Cada 5 s anota la potencia de la batería, los contadores de consumo y el estado de los equipos en Android/data/app.mg4dash/files/energy_log.csv (solo lectura, no se envía nada al coche).|Ogni 5 s registra potenza della batteria, contatori di consumo e stato degli equipaggiamenti in Android/data/app.mg4dash/files/energy_log.csv (sola lettura, nulla viene inviato all'auto).|Schrijft elke 5 s batterijvermogen, verbruikstellers en de status van voorzieningen naar Android/data/app.mg4dash/files/energy_log.csv (alleen lezen, er wordt niets naar de auto gestuurd).|Her 5 sn'de batarya gücünü, tüketim sayaçlarını ve ekipman durumlarını Android/data/app.mg4dash/files/energy_log.csv dosyasına yazar (yalnızca okuma, araca hiçbir şey gönderilmez).
+sc_search|Search…|Rechercher…|Suchen…|Buscar…|Cerca…|Zoeken…|Ara…
+dock_phone|Phone|Téléphone|Telefon|Teléfono|Telefono|Telefoon|Telefon
+title_phone|PHONE|TÉLÉPHONE|TELEFON|TELÉFONO|TELEFONO|TELEFOON|TELEFON
+ph_stock|Stock phone app  ›|Appli téléphone d'origine  ›|Original-Telefon-App  ›|App de teléfono original  ›|App telefono originale  ›|Originele telefoonapp  ›|Orijinal telefon uygulaması  ›
+ph_recent|RECENT CALLS|APPELS RÉCENTS|LETZTE ANRUFE|LLAMADAS RECIENTES|CHIAMATE RECENTI|RECENTE OPROEPEN|SON ARAMALAR
+ph_contacts|CONTACTS|CONTACTS|KONTAKTE|CONTACTOS|CONTATTI|CONTACTEN|KİŞİLER
+ph_keypad|KEYPAD|CLAVIER|TASTATUR|TECLADO|TASTIERINO|TOETSENBORD|TUŞ TAKIMI
+ph_call|Call|Appeler|Anrufen|Llamar|Chiama|Bellen|Ara
+ph_no_phone|No phone connected over Bluetooth.|Aucun téléphone connecté en Bluetooth.|Kein Telefon über Bluetooth verbunden.|Ningún teléfono conectado por Bluetooth.|Nessun telefono connesso via Bluetooth.|Geen telefoon verbonden via Bluetooth.|Bluetooth ile bağlı telefon yok.
+ph_not_connected|Not connected|Non connecté|Nicht verbunden|No conectado|Non connesso|Niet verbonden|Bağlı değil
+ph_no_calls|No recent calls (allow call history access on the phone).|Aucun appel récent (autorisez l'accès à l'historique sur le téléphone).|Keine letzten Anrufe (Zugriff auf die Anrufliste am Telefon erlauben).|Sin llamadas recientes (permita el acceso al historial en el teléfono).|Nessuna chiamata recente (consenti l'accesso alla cronologia sul telefono).|Geen recente oproepen (sta toegang tot de oproepgeschiedenis toe op de telefoon).|Son arama yok (telefonda arama geçmişi erişimine izin verin).
+ph_no_contacts|No contacts (allow contact sharing on the phone).|Aucun contact (autorisez le partage des contacts sur le téléphone).|Keine Kontakte (Kontaktfreigabe am Telefon erlauben).|Sin contactos (permita compartir contactos en el teléfono).|Nessun contatto (consenti la condivisione dei contatti sul telefono).|Geen contacten (sta het delen van contacten toe op de telefoon).|Kişi yok (telefonda kişi paylaşımına izin verin).
+ph_call_failed|Call failed|Échec de l'appel|Anruf fehlgeschlagen|Error en la llamada|Chiamata non riuscita|Oproep mislukt|Arama başarısız
+title_battery|BATTERY|BATTERIE|BATTERIE|BATERÍA|BATTERIA|ACCU|BATARYA
+st_style|HOME LAYOUT|STYLE D'ACCUEIL|STARTSEITENSTIL|ESTILO DE INICIO|STILE DELLA HOME|STIJL STARTSCHERM|ANA EKRAN DÜZENİ
+st_style_now|Current layout: %1$s|Style actuel : %1$s|Aktueller Stil: %1$s|Estilo actual: %1$s|Stile attuale: %1$s|Huidige stijl: %1$s|Mevcut düzen: %1$s
+st_style_full|Full|Complet|Vollständig|Completo|Completa|Volledig|Tam
+st_style_simple|Simple|Épuré|Schlicht|Sencillo|Semplice|Eenvoudig|Basit
+st_style_desc|Simple: three large panels (climate, battery, media), two shortcuts and today's weather. The change applies when you go back to the home screen.|Épuré : trois grands volets (climatisation, batterie, multimédia), deux raccourcis et la météo du jour. Le changement s'applique au retour sur l'accueil.|Schlicht: drei große Felder (Klima, Batterie, Medien), zwei Verknüpfungen und das heutige Wetter. Die Änderung gilt beim Zurückkehren zur Startseite.|Sencillo: tres paneles grandes (clima, batería, multimedia), dos accesos y el tiempo de hoy. El cambio se aplica al volver al inicio.|Semplice: tre grandi riquadri (clima, batteria, multimedia), due scorciatoie e il meteo di oggi. La modifica vale al ritorno alla home.|Eenvoudig: drie grote vlakken (klimaat, accu, media), twee snelkoppelingen en het weer van vandaag. De wijziging geldt zodra je terugkeert naar het startscherm.|Basit: üç büyük panel (klima, batarya, medya), iki kısayol ve bugünün hava durumu. Değişiklik ana ekrana döndüğünüzde uygulanır.
+en_heating|BATTERY HEATING|RÉCHAUFFAGE BATTERIE|BATTERIEHEIZUNG|CALEFACCIÓN BATERÍA|RISCALDAMENTO BATTERIA|ACCUVERWARMING|BATARYA ISITMA
+st_theme|THEME|THÈME|DESIGN|TEMA|TEMA|THEMA|TEMA
+st_theme_bg|Background|Fond|Hintergrund|Fondo|Sfondo|Achtergrond|Arka plan
+st_theme_accent|Button colour|Couleur des boutons|Tastenfarbe|Color de los botones|Colore dei pulsanti|Knopkleur|Düğme rengi
+st_theme_desc|Battery green, heating orange, cooling cyan and alert red keep their meaning whatever the theme. Radio Dash follows the theme the next time the radio opens.|Le vert de la batterie, l'orange du chauffage, le cyan du froid et le rouge des alertes gardent leur sens quel que soit le thème. Radio Dash suit le thème à la prochaine ouverture de la radio.|Batteriegrün, Heizungsorange, Kühlungscyan und Warnrot behalten ihre Bedeutung unabhängig vom Design. Radio Dash übernimmt das Design beim nächsten Öffnen des Radios.|El verde de la batería, el naranja de la calefacción, el cian del frío y el rojo de las alertas mantienen su significado con cualquier tema. Radio Dash sigue el tema la próxima vez que se abra la radio.|Il verde della batteria, l'arancione del riscaldamento, il ciano del freddo e il rosso degli avvisi mantengono il loro significato con qualsiasi tema. Radio Dash segue il tema alla prossima apertura della radio.|Accugroen, verwarmingsoranje, koelingscyaan en waarschuwingsrood behouden hun betekenis bij elk thema. Radio Dash volgt het thema bij de volgende keer dat de radio opent.|Batarya yeşili, ısıtma turuncusu, soğutma camgöbeği ve uyarı kırmızısı tema ne olursa olsun anlamlarını korur. Radio Dash, radyo bir sonraki açılışında temaya uyar.
+st_update|UPDATE|MISE À JOUR|AKTUALISIERUNG|ACTUALIZACIÓN|AGGIORNAMENTO|UPDATE|GÜNCELLEME
+st_update_installed|Installed version: %1$s|Version installée : %1$s|Installierte Version: %1$s|Versión instalada: %1$s|Versione installata: %1$s|Geïnstalleerde versie: %1$s|Yüklü sürüm: %1$s
+st_update_desc|Checks the latest MG4Dash release on GitHub and installs it (internet connection needed). The screen restarts at the end of the installation.|Vérifie la dernière version de MG4Dash sur GitHub et l'installe (connexion internet nécessaire). L'écran redémarre à la fin de l'installation.|Prüft die neueste MG4Dash-Version auf GitHub und installiert sie (Internetverbindung nötig). Der Bildschirm startet am Ende der Installation neu.|Comprueba la última versión de MG4Dash en GitHub y la instala (se necesita conexión a internet). La pantalla se reinicia al final de la instalación.|Controlla l'ultima versione di MG4Dash su GitHub e la installa (serve una connessione internet). Lo schermo si riavvia al termine dell'installazione.|Controleert de nieuwste MG4Dash-versie op GitHub en installeert die (internetverbinding nodig). Het scherm herstart aan het einde van de installatie.|GitHub'daki en son MG4Dash sürümünü kontrol eder ve yükler (internet bağlantısı gerekir). Kurulum sonunda ekran yeniden başlar.
+st_update_check|Check|Vérifier|Prüfen|Comprobar|Controlla|Controleren|Kontrol et
+st_update_checking|Checking…|Vérification…|Wird geprüft…|Comprobando…|Controllo…|Controleren…|Kontrol ediliyor…
+st_update_error|Could not reach GitHub or download the update.|Impossible de joindre GitHub ou de télécharger la mise à jour.|GitHub nicht erreichbar oder Download fehlgeschlagen.|No se pudo contactar con GitHub ni descargar la actualización.|Impossibile raggiungere GitHub o scaricare l'aggiornamento.|GitHub onbereikbaar of downloaden mislukt.|GitHub'a ulaşılamadı veya güncelleme indirilemedi.
+st_update_available|Version %2$s available (installed: %1$s)|Version %2$s disponible (installée : %1$s)|Version %2$s verfügbar (installiert: %1$s)|Versión %2$s disponible (instalada: %1$s)|Versione %2$s disponibile (installata: %1$s)|Versie %2$s beschikbaar (geïnstalleerd: %1$s)|%2$s sürümü mevcut (yüklü: %1$s)
+st_update_uptodate|Up to date (%1$s)|À jour (%1$s)|Aktuell (%1$s)|Actualizado (%1$s)|Aggiornato (%1$s)|Up-to-date (%1$s)|Güncel (%1$s)
+st_update_install|Install|Installer|Installieren|Instalar|Installa|Installeren|Yükle
+st_update_confirm|Download and install MG4Dash %1$s? The screen will restart.|Télécharger et installer MG4Dash %1$s ? L'écran va redémarrer.|MG4Dash %1$s herunterladen und installieren? Der Bildschirm startet neu.|¿Descargar e instalar MG4Dash %1$s? La pantalla se reiniciará.|Scaricare e installare MG4Dash %1$s? Lo schermo si riavvierà.|MG4Dash %1$s downloaden en installeren? Het scherm herstart.|MG4Dash %1$s indirilip yüklensin mi? Ekran yeniden başlayacak.
+st_update_downloading|Downloading… %1$d %%|Téléchargement… %1$d %%|Download… %1$d %%|Descargando… %1$d %%|Download… %1$d %%|Downloaden… %1$d %%|İndiriliyor… %%%1$d
+st_update_installing|Installing… the screen will restart|Installation… l'écran va redémarrer|Installation… der Bildschirm startet neu|Instalando… la pantalla se reiniciará|Installazione… lo schermo si riavvierà|Installeren… het scherm herstart|Yükleniyor… ekran yeniden başlayacak
+ph_sync|Sync|Synchroniser|Synchronisieren|Sincronizar|Sincronizza|Synchroniseren|Eşitle
+ph_sync_started|Sync started: contacts and calls will appear in a few moments.|Synchronisation lancée : contacts et appels vont apparaître dans quelques instants.|Synchronisierung gestartet: Kontakte und Anrufe erscheinen gleich.|Sincronización iniciada: los contactos y las llamadas aparecerán en unos instantes.|Sincronizzazione avviata: contatti e chiamate appariranno tra poco.|Synchronisatie gestart: contacten en oproepen verschijnen zo.|Eşitleme başladı: kişiler ve aramalar birkaç dakika içinde görünecek.
+src_aa|AA|AA|AA|AA|AA|AA|AA
+st_theme_mode|Light or dark|Clair ou sombre|Hell oder dunkel|Claro u oscuro|Chiaro o scuro|Licht of donker|Açık veya koyu
+st_mode_auto|Auto (day / night)|Auto (jour / nuit)|Auto (Tag / Nacht)|Auto (día / noche)|Auto (giorno / notte)|Auto (dag / nacht)|Oto (gündüz / gece)
+st_mode_dark|Dark|Sombre|Dunkel|Oscuro|Scuro|Donker|Koyu
+st_mode_light|Light|Clair|Hell|Claro|Chiaro|Licht|Açık
+sw_energy|TRIP ENERGY|ÉNERGIE DU TRAJET|FAHRTENERGIE|ENERGÍA DEL TRAYECTO|ENERGIA DEL VIAGGIO|RITENERGIE|YOLCULUK ENERJİSİ
+sw_drive|DRIVING|CONDUITE|FAHREN|CONDUCCIÓN|GUIDA|RIJDEN|SÜRÜŞ
+sw_clim|CLIMATE|CLIM|KLIMA|CLIMA|CLIMA|KLIMAAT|KLİMA
+sw_acc|ACCESSORIES|ACCESSOIRES|ZUBEHÖR|ACCESORIOS|ACCESSORI|ACCESSOIRES|AKSESUARLAR
+sw_power|LIVE POWER|PUISSANCE EN DIRECT|LEISTUNG LIVE|POTENCIA EN DIRECTO|POTENZA IN TEMPO REALE|LIVE VERMOGEN|ANLIK GÜÇ
+sw_drawn|DRAWN|CONSOMMÉE|VERBRAUCH|CONSUMIDA|CONSUMATA|VERBRUIKT|ÇEKİLEN
+sw_recovering|RECOVERED|RÉCUPÉRÉE|ZURÜCKGEWONNEN|RECUPERADA|RECUPERATA|TERUGGEWONNEN|GERİ KAZANILAN
+sw_charging|CHARGING|EN CHARGE|LADEN|CARGANDO|IN RICARICA|LADEN|ŞARJ
+sw_trip_avg|TRIP AVERAGE|MOYENNE TRAJET|FAHRT-SCHNITT|MEDIA TRAYECTO|MEDIA VIAGGIO|RITGEMIDDELDE|YOLCULUK ORTALAMASI
+sw_phone|PHONE|TÉLÉPHONE|TELEFON|TELÉFONO|TELEFONO|TELEFOON|TELEFON
+sw_fav_pick|Choose a contact|Choisir un contact|Kontakt auswählen|Elegir un contacto|Scegli un contatto|Contact kiezen|Bir kişi seçin
+st_compat|COMPATIBILITY (BETA)|COMPATIBILITÉ (BÊTA)|KOMPATIBILITÄT (BETA)|COMPATIBILIDAD (BETA)|COMPATIBILITÀ (BETA)|COMPATIBILITEIT (BÈTA)|UYUMLULUK (BETA)
+st_compat_fw|Firmware: %1$s (%2$s)|Firmware : %1$s (%2$s)|Firmware: %1$s (%2$s)|Firmware: %1$s (%2$s)|Firmware: %1$s (%2$s)|Firmware: %1$s (%2$s)|Yazılım: %1$s (%2$s)
+st_compat_tested|MG4Dash was developed and tested on this firmware.|MG4Dash a été mis au point et testé sur ce firmware.|MG4Dash wurde auf dieser Firmware entwickelt und getestet.|MG4Dash se desarrolló y probó en este firmware.|MG4Dash è stato sviluppato e testato su questo firmware.|MG4Dash is op deze firmware ontwikkeld en getest.|MG4Dash bu yazılım üzerinde geliştirildi ve test edildi.
+st_compat_beta|Not tested on this firmware yet: some features may be missing. Run the test and send the report to help support it.|Pas encore testé sur ce firmware : certaines fonctions peuvent manquer. Lancez le test et envoyez le rapport pour aider à le prendre en charge.|Auf dieser Firmware noch nicht getestet: einige Funktionen können fehlen. Starten Sie den Test und senden Sie den Bericht.|Aún no probado en este firmware: pueden faltar funciones. Ejecute la prueba y envíe el informe.|Non ancora testato su questo firmware: alcune funzioni potrebbero mancare. Esegui il test e invia il rapporto.|Nog niet getest op deze firmware: sommige functies kunnen ontbreken. Voer de test uit en stuur het rapport.|Bu yazılımda henüz test edilmedi: bazı özellikler eksik olabilir. Desteklenmesine yardımcı olmak için testi çalıştırıp raporu gönderin.
+st_compat_run|Run the test|Lancer le test|Test starten|Ejecutar la prueba|Esegui il test|Test uitvoeren|Testi çalıştır
+st_compat_report|Compatibility report|Rapport de compatibilité|Kompatibilitätsbericht|Informe de compatibilidad|Rapporto di compatibilità|Compatibiliteitsrapport|Uyumluluk raporu
+st_compat_scan|Scan with your phone to open a pre-filled GitHub issue. Nothing is sent automatically, and the report contains no personal data.|Scannez avec votre téléphone pour ouvrir une issue GitHub pré-remplie. Rien n'est envoyé automatiquement et le rapport ne contient aucune donnée personnelle.|Mit dem Telefon scannen, um ein vorausgefülltes GitHub-Issue zu öffnen. Nichts wird automatisch gesendet, der Bericht enthält keine persönlichen Daten.|Escanee con su teléfono para abrir un issue de GitHub rellenado. No se envía nada automáticamente y el informe no contiene datos personales.|Scansiona con il telefono per aprire una issue GitHub precompilata. Nulla viene inviato automaticamente e il rapporto non contiene dati personali.|Scan met je telefoon om een vooraf ingevulde GitHub-issue te openen. Er wordt niets automatisch verzonden en het rapport bevat geen persoonlijke gegevens.|Önceden doldurulmuş bir GitHub kaydı açmak için telefonunuzla tarayın. Hiçbir şey otomatik gönderilmez ve rapor kişisel veri içermez.
+st_compat_open|Open in browser|Ouvrir dans le navigateur|Im Browser öffnen|Abrir en el navegador|Apri nel browser|Openen in browser|Tarayıcıda aç
+st_compat_no_browser|No browser on this head unit: scan the QR code with your phone.|Pas de navigateur sur cet autoradio : scannez le QR code avec votre téléphone.|Kein Browser auf diesem Gerät: QR-Code mit dem Telefon scannen.|No hay navegador en esta unidad: escanee el código QR con su teléfono.|Nessun browser su questa unità: scansiona il codice QR con il telefono.|Geen browser op dit toestel: scan de QR-code met je telefoon.|Bu multimedya ünitesinde tarayıcı yok: QR kodu telefonunuzla tarayın.
+st_update_beta|Include beta versions (MG4Dash and Radio Dash): %1$s|Inclure les versions bêta (MG4Dash et Radio Dash) : %1$s|Beta-Versionen einbeziehen (MG4Dash und Radio Dash): %1$s|Incluir versiones beta (MG4Dash y Radio Dash): %1$s|Includi versioni beta (MG4Dash e Radio Dash): %1$s|Bètaversies meenemen (MG4Dash en Radio Dash): %1$s|Beta sürümlerini dahil et (MG4Dash ve Radio Dash): %1$s
+upd_title|NEW VERSION AVAILABLE|NOUVELLE VERSION DISPONIBLE|NEUE VERSION VERFÜGBAR|NUEVA VERSIÓN DISPONIBLE|NUOVA VERSIONE DISPONIBILE|NIEUWE VERSIE BESCHIKBAAR|YENİ SÜRÜM MEVCUT
+upd_skip|Don't notify me again for this release|Ne plus notifier cette release|Für diese Version nicht mehr melden|No volver a avisar de esta versión|Non avvisare più per questa versione|Niet meer melden voor deze versie|Bu sürüm için bir daha bildirme
+upd_later|Later|Plus tard|Später|Más tarde|Più tardi|Later|Daha sonra
+upd_now|Update|Mettre à jour|Aktualisieren|Actualizar|Aggiorna|Bijwerken|Güncelle
+dock_cp|CarPlay|CarPlay|CarPlay|CarPlay|CarPlay|CarPlay|CarPlay
+dock_cp_stock|CarPlay (original)|CarPlay (d'origine)|CarPlay (original)|CarPlay (original)|CarPlay (originale)|CarPlay (origineel)|CarPlay (orijinal)
+dock_other_app|Another app…|Autre application…|Andere App…|Otra aplicación…|Altra app…|Andere app…|Başka bir uygulama…
+st_style_map|Map|Carte|Karte|Mapa|Mappa|Kaart|Harita
+st_stack_auto|Map layout stack goes back to the battery when plugged in: %1$s|Style Carte : la pile revient sur la batterie quand la voiture est branchée : %1$s|Stil Karte: Stapel zeigt beim Anstecken die Batterie: %1$s|Estilo Mapa: la pila vuelve a la batería al enchufar: %1$s|Stile Mappa: la pila torna alla batteria quando è collegata: %1$s|Stijl Kaart: stapel toont de batterij bij aansluiten: %1$s|Harita düzeninde yığın şarja takıldığında bataryaya döner: %1$s
+st_stack_desc|Map: weather and climate on the left, a stack (energy, trip energy, power, phone: swipe or tap) above the media in the centre, the map over the whole right column.|Carte : météo et clim à gauche, une pile (énergie, trajet, puissance, téléphone : balayez ou touchez) au-dessus de la musique au centre, la carte sur toute la colonne de droite.|Karte: Wetter und Klima links, ein Stapel (Energie, Fahrt, Leistung, Telefon: wischen oder tippen) über den Medien in der Mitte, die Karte über die ganze rechte Spalte.|Mapa: tiempo y clima a la izquierda, una pila (energía, trayecto, potencia, teléfono: deslice o toque) sobre la música en el centro, el mapa en toda la columna derecha.|Mappa: meteo e clima a sinistra, una pila (energia, viaggio, potenza, telefono: scorri o tocca) sopra la musica al centro, la mappa su tutta la colonna destra.|Kaart: weer en klimaat links, een stapel (energie, rit, vermogen, telefoon: veeg of tik) boven de media in het midden, de kaart over de hele rechterkolom.|Harita: solda hava durumu ve klima, ortada medyanın üstünde bir yığın (enerji, yolculuk enerjisi, güç, telefon: kaydırın veya dokunun), haritanın tamamı sağ sütunda.
+dock_slot_pick|Dock left slot|Case de gauche du dock|Linkes Dock-Feld|Casilla izquierda del dock|Casella sinistra del dock|Linkervak van het dock|Çubuğun sol yuvası
+dock_slot_clock|Clock|Horloge|Uhr|Reloj|Orologio|Klok|Saat
+dock_slot_wifi|Wi-Fi settings|Réglages Wi-Fi|WLAN-Einstellungen|Ajustes Wi-Fi|Impostazioni Wi-Fi|Wifi-instellingen|Wi-Fi ayarları
+dock_slot_wifi_short|Wi-Fi|Wi-Fi|WLAN|Wi-Fi|Wi-Fi|Wifi|Wi-Fi
+st_cap_car|Read from the car: %1$s kWh.|Lue sur la voiture : %1$s kWh.|Vom Fahrzeug gelesen: %1$s kWh.|Leída del coche: %1$s kWh.|Letta dall'auto: %1$s kWh.|Uitgelezen uit de auto: %1$s kWh.|Araçtan okundu: %1$s kWh.
+st_cap_none|The car does not report it: MG4Dash will measure it while driving, after a 15 %% drop (added up over several trips).|La voiture ne la fournit pas : MG4Dash la mesurera en roulant, après 15 %% de baisse (cumulée sur plusieurs trajets).|Das Fahrzeug liefert sie nicht: MG4Dash misst sie beim Fahren, nach 15 %% Abnahme (über mehrere Fahrten summiert).|El coche no la indica: MG4Dash la medirá conduciendo, tras un 15 %% de descenso (sumado en varios trayectos).|L'auto non la fornisce: MG4Dash la misurerà guidando, dopo un calo del 15 %% (sommato su più viaggi).|De auto geeft hem niet: MG4Dash meet hem tijdens het rijden, na 15 %% daling (opgeteld over meerdere ritten).|Araç bunu bildirmiyor: MG4Dash sürüş sırasında %%15'lik bir düşüşten sonra ölçecek (birkaç yolculuk boyunca toplanır).
+st_cap_manual|Set by hand (Auto: back to the car's or the measured value).|Réglée à la main (Auto : revenir à la valeur de la voiture ou mesurée).|Manuell eingestellt (Auto: zurück zum Fahrzeug- oder Messwert).|Ajustada a mano (Auto: volver al valor del coche o medido).|Impostata a mano (Auto: torna al valore dell'auto o misurato).|Handmatig ingesteld (Auto: terug naar de waarde van de auto of de meting).|Elle ayarlandı (Oto: araç veya ölçülen değere döner).
+st_cap_auto|Auto|Auto|Auto|Auto|Auto|Auto|Oto
+st_cap_est|Measured by MG4Dash: %1$s kWh (%2$d charge-to-charge measurement(s), smoothed over 30 days).|Mesurée par MG4Dash : %1$s kWh (%2$d mesure(s) entre deux recharges, lissées sur 30 jours).|Von MG4Dash gemessen: %1$s kWh (%2$d Messung(en) zwischen zwei Ladungen, über 30 Tage geglättet).|Medida por MG4Dash: %1$s kWh (%2$d medición(es) entre cargas, suavizadas en 30 días).|Misurata da MG4Dash: %1$s kWh (%2$d misura/e tra due ricariche, livellate su 30 giorni).|Gemeten door MG4Dash: %1$s kWh (%2$d meting(en) tussen twee laadbeurten, afgevlakt over 30 dagen).|MG4Dash tarafından ölçüldü: %1$s kWh (%2$d şarjdan şarja ölçüm, 30 gün boyunca yumuşatıldı).
+st_cap_est_current|Being measured by MG4Dash: %1$s kWh (provisional).|En cours de mesure par MG4Dash : %1$s kWh (provisoire).|Wird von MG4Dash gemessen: %1$s kWh (vorläufig).|En medición por MG4Dash: %1$s kWh (provisional).|In misurazione da MG4Dash: %1$s kWh (provvisoria).|Wordt gemeten door MG4Dash: %1$s kWh (voorlopig).|MG4Dash tarafından ölçülüyor: %1$s kWh (geçici).
+sw_batt_temp|Battery %1$d °C|Batterie %1$d °C|Batterie %1$d °C|Batería %1$d °C|Batteria %1$d °C|Batterij %1$d °C|Batarya %1$d °C
+st_map_vdock|Vertical bar on the left (all screens and Radio Dash): %1$s|Barre verticale à gauche (tous les écrans et Radio Dash) : %1$s|Senkrechte Leiste links (alle Bildschirme und Radio Dash): %1$s|Barra vertical a la izquierda (todas las pantallas y Radio Dash): %1$s|Barra verticale a sinistra (tutte le schermate e Radio Dash): %1$s|Verticale balk links (alle schermen en Radio Dash): %1$s|Solda dikey çubuk (tüm ekranlar ve Radio Dash): %1$s
+st_map_titles|Hide widget titles (all layouts): %1$s|Masquer les titres des widgets (tous les styles) : %1$s|Widget-Titel ausblenden (alle Layouts): %1$s|Ocultar los títulos de los widgets (todos los estilos): %1$s|Nascondi i titoli dei widget (tutti gli stili): %1$s|Widgettitels verbergen (alle stijlen): %1$s|Pencere öğesi başlıklarını gizle (tüm düzenler): %1$s
+st_map_vdock_btn|Vertical bar|Barre verticale|Senkrechte Leiste|Barra vertical|Barra verticale|Verticale balk|Dikey çubuk
+st_map_titles_btn|Titles|Titres|Titel|Títulos|Titoli|Titels|Başlıklar
+vh_tires|TIRES|PNEUS|REIFEN|NEUMÁTICOS|PNEUMATICI|BANDEN|LASTİKLER
+vh_tire_fl|Front left|Avant gauche|Vorne links|Delantero izq.|Anteriore sx|Linksvoor|Ön sol
+vh_tire_fr|Front right|Avant droit|Vorne rechts|Delantero der.|Anteriore dx|Rechtsvoor|Ön sağ
+vh_tire_rl|Rear left|Arrière gauche|Hinten links|Trasero izq.|Posteriore sx|Linksachter|Arka sol
+vh_tire_rr|Rear right|Arrière droit|Hinten rechts|Trasero der.|Posteriore dx|Rechtsachter|Arka sağ
+vh_tire_check|Check|À vérifier|Prüfen|Revisar|Controllare|Controleren|Kontrol edin
+en_ac_input|AC input %1$d V · %2$s A|Entrée AC %1$d V · %2$s A|AC-Eingang %1$d V · %2$s A|Entrada CA %1$d V · %2$s A|Ingresso CA %1$d V · %2$s A|AC-ingang %1$d V · %2$s A|AC giriş %1$d V · %2$s A
+en_stop_reason|charge stopped: %1$s|charge arrêtée : %1$s|Laden gestoppt: %1$s|carga detenida: %1$s|ricarica interrotta: %1$s|laden gestopt: %1$s|şarj durdu: %1$s
+sr_fault|fault|défaut|Störung|avería|guasto|storing|arıza
+sr_overtemp|over-temperature|surchauffe|Übertemperatur|sobretemperatura|surriscaldamento|oververhitting|aşırı sıcaklık
+sr_plug|plug not properly connected|prise mal branchée|Stecker nicht richtig verbunden|conector mal conectado|presa non collegata bene|stekker niet goed aangesloten|fiş düzgün takılmamış
+sr_voltage|voltage mismatch|tension incompatible|Spannung passt nicht|tensión incompatible|tensione incompatibile|spanning past niet|voltaj uyumsuzluğu
+sr_other|other cause|autre cause|andere Ursache|otra causa|altra causa|andere oorzaak|başka bir neden
+en_regen_km|+ %1$s %2$s of range recovered since the last charge|+ %1$s %2$s d'autonomie récupérés depuis la recharge|+ %1$s %2$s Reichweite seit dem Laden zurückgewonnen|+ %1$s %2$s de autonomía recuperados desde la carga|+ %1$s %2$s di autonomia recuperati dalla ricarica|+ %1$s %2$s bereik teruggewonnen sinds het laden|son şarjdan beri + %1$s %2$s menzil geri kazanıldı
+st_rd_state|Radio Dash: %1$s|Radio Dash : %1$s|Radio Dash: %1$s|Radio Dash: %1$s|Radio Dash: %1$s|Radio Dash: %1$s|Radio Dash: %1$s
+st_rd_none|not installed|non installée|nicht installiert|no instalada|non installata|niet geïnstalleerd|yüklü değil
+st_rd_unknown|installed (version unknown)|installée (version inconnue)|installiert (Version unbekannt)|instalada (versión desconocida)|installata (versione sconosciuta)|geïnstalleerd (versie onbekend)|yüklü (sürüm bilinmiyor)
+st_rd_desc|Installs the latest Radio Dash release from GitHub (only on this firmware). The new radio applies after restarting the head unit (hold Home about 20 s).|Installe la dernière version de Radio Dash depuis GitHub (uniquement sur ce firmware). La nouvelle radio s'applique après un redémarrage de l'écran central (appui long sur Home environ 20 s).|Installiert die neueste Radio-Dash-Version von GitHub (nur auf dieser Firmware). Das neue Radio gilt nach einem Neustart des Bildschirms (Home etwa 20 s halten).|Instala la última versión de Radio Dash desde GitHub (solo en este firmware). La nueva radio se aplica tras reiniciar la pantalla (mantener Home unos 20 s).|Installa l'ultima versione di Radio Dash da GitHub (solo su questo firmware). La nuova radio si applica dopo il riavvio dello schermo (tenere premuto Home circa 20 s).|Installeert de nieuwste Radio Dash-versie van GitHub (alleen op deze firmware). De nieuwe radio werkt na een herstart van het scherm (Home ongeveer 20 s ingedrukt houden).|GitHub'dan en son Radio Dash sürümünü yükler (yalnızca bu yazılımda). Yeni radyo, multimedya ünitesi yeniden başlatıldıktan sonra devreye girer (Home'a yaklaşık 20 sn basılı tutun).
+st_rd_check|Update Radio Dash|Mettre à jour Radio Dash|Radio Dash aktualisieren|Actualizar Radio Dash|Aggiorna Radio Dash|Radio Dash bijwerken|Radio Dash'i güncelle
+st_rd_available|Radio Dash %1$s available|Radio Dash %1$s disponible|Radio Dash %1$s verfügbar|Radio Dash %1$s disponible|Radio Dash %1$s disponibile|Radio Dash %1$s beschikbaar|Radio Dash %1$s mevcut
+st_rd_uptodate|Radio Dash up to date (%1$s)|Radio Dash à jour (%1$s)|Radio Dash aktuell (%1$s)|Radio Dash actualizada (%1$s)|Radio Dash aggiornata (%1$s)|Radio Dash up-to-date (%1$s)|Radio Dash güncel (%1$s)
+st_rd_installing|Installing Radio Dash…|Installation de Radio Dash…|Radio Dash wird installiert…|Instalando Radio Dash…|Installazione di Radio Dash…|Radio Dash installeren…|Radio Dash yükleniyor…
+st_rd_done|Radio Dash is installed. Restart the head unit (hold Home about 20 s) to use it.|Radio Dash est installée. Redémarre l'écran central (appui long sur Home environ 20 s) pour l'utiliser.|Radio Dash ist installiert. Bildschirm neu starten (Home etwa 20 s halten), um es zu nutzen.|Radio Dash está instalada. Reinicia la pantalla (mantén Home unos 20 s) para usarla.|Radio Dash è installata. Riavvia lo schermo (tieni premuto Home circa 20 s) per usarla.|Radio Dash is geïnstalleerd. Herstart het scherm (Home ongeveer 20 s ingedrukt houden) om het te gebruiken.|Radio Dash yüklendi. Kullanmak için multimedya ünitesini yeniden başlatın (Home'a yaklaşık 20 sn basılı tutun).
+en_trip|Current trip|Trajet en cours|Aktuelle Fahrt|Trayecto actual|Viaggio in corso|Huidige rit|Mevcut yolculuk
+en_last_year|Last 12 months|12 derniers mois|Letzte 12 Monate|Últimos 12 meses|Ultimi 12 mesi|Laatste 12 maanden|Son 12 ay
+en_months_note|%1$d months, one point per month · average %2$s (dashed)|%1$d mois, un point par mois · moyenne %2$s (pointillés)|%1$d Monate, ein Punkt pro Monat · Durchschnitt %2$s (gestrichelt)|%1$d meses, un punto por mes · media %2$s (discontinua)|%1$d mesi, un punto al mese · media %2$s (tratteggiata)|%1$d maanden, één punt per maand · gemiddelde %2$s (gestippeld)|%1$d ay, ay başına bir nokta · ortalama %2$s (kesikli)
+en_months_wait|The curve fills month by month (at least 20 km per month).|La courbe se remplit mois après mois (au moins 20 km par mois).|Die Kurve füllt sich Monat für Monat (mindestens 20 km pro Monat).|La curva se llena mes a mes (al menos 20 km al mes).|La curva si riempie mese dopo mese (almeno 20 km al mese).|De curve vult zich maand na maand (minstens 20 km per maand).|Eğri ay ay dolar (ayda en az 20 km).
+cons_avg_mi|mi/kWh avg.|mi/kWh moy.|mi/kWh Ø|mi/kWh med.|mi/kWh media|mi/kWh gem.|mi/kWh ort.
+st_units|Units|Unités|Einheiten|Unidades|Unità|Eenheden|Birimler
+st_units_car|Like the car|Comme la voiture|Wie das Auto|Como el coche|Come l'auto|Zoals de auto|Araçtaki gibi
+wx_clear|Clear|Dégagé|Klar|Despejado|Sereno|Helder|Açık
+st_pressure|Tyre pressure|Pression des pneus|Reifendruck|Presión de neumáticos|Pressione pneumatici|Bandenspanning|Lastik basıncı
+st_mode_auto_short|Auto|Auto|Auto|Auto|Auto|Auto|Oto
+st_map_zoom|Default map zoom|Zoom de la carte par défaut|Standard-Kartenzoom|Zoom del mapa por defecto|Zoom predefinito della mappa|Standaardzoom kaart|Varsayılan harita yakınlaştırması
+st_map_theme|Map colours|Couleurs de la carte|Kartenfarben|Colores del mapa|Colori della mappa|Kaartkleuren|Harita renkleri
+st_map_auto_hide|Hide the map zoom and full screen buttons|Masquer les boutons zoom et plein écran de la carte|Zoom- und Vollbildtasten der Karte ausblenden|Ocultar los botones de zoom y pantalla completa del mapa|Nascondi i pulsanti zoom e schermo intero della mappa|Zoom- en volledig-schermknoppen van de kaart verbergen|Harita yakınlaştırma ve tam ekran düğmelerini gizle
+st_map_auto_hide_desc|They show for a few seconds when you touch the map; the heading button stays|Ils apparaissent quelques secondes au toucher de la carte ; le bouton de cap reste|Sie erscheinen beim Berühren der Karte für einige Sekunden; die Richtungstaste bleibt|Aparecen unos segundos al tocar el mapa; el botón de rumbo se queda|Compaiono per qualche secondo toccando la mappa; il pulsante della direzione resta|Ze verschijnen een paar seconden als je de kaart aanraakt; de koersknop blijft|Haritaya dokunduğunuzda birkaç saniye görünürler; yön düğmesi kalır
+st_map_offline_switch|Switch to the energy widget when offline|Passer au widget énergie hors ligne|Ohne Verbindung zum Energie-Widget wechseln|Cambiar al widget de energía sin conexión|Passa al widget energia offline|Naar de energiewidget wisselen zonder verbinding|Çevrimdışıyken enerji pencere öğesine geç
+st_map_offline_switch_desc|Without data connection, unless the map around the car is in the offline cache|Sans connexion data, sauf si la carte autour de la voiture est dans le cache hors ligne|Ohne Datenverbindung, außer die Karte um das Auto ist im Offline-Cache|Sin conexión de datos, salvo si el mapa alrededor del coche está en la caché sin conexión|Senza connessione dati, salvo se la mappa intorno all'auto è nella cache offline|Zonder dataverbinding, tenzij de kaart rond de auto in de offline cache staat|Veri bağlantısı yokken, aracın etrafındaki harita çevrimdışı önbellekte değilse
+st_use_location|Use my position|Utiliser ma position|Meine Position verwenden|Usar mi posición|Usa la mia posizione|Mijn positie gebruiken|Konumumu kullan
+st_no_location|Position not available yet|Position pas encore disponible|Position noch nicht verfügbar|Posición aún no disponible|Posizione non ancora disponibile|Positie nog niet beschikbaar|Konum henüz mevcut değil
+st_heated|Heated seats and steering wheel|Sièges et volant chauffants|Sitz- und Lenkradheizung|Asientos y volante calefactados|Sedili e volante riscaldati|Stoel- en stuurverwarming|Isıtmalı koltuklar ve direksiyon
+doors_locked|Doors locked|Portes verrouillées|Türen verriegelt|Puertas bloqueadas|Porte bloccate|Deuren vergrendeld|Kapılar kilitli
+doors_unlocked|Doors unlocked|Portes déverrouillées|Türen entriegelt|Puertas desbloqueadas|Porte sbloccate|Deuren ontgrendeld|Kapılar açık
+doors_unknown|Door lock not available|Verrouillage indisponible|Verriegelung nicht verfügbar|Bloqueo no disponible|Blocco non disponibile|Vergrendeling niet beschikbaar|Kapı kilidi kullanılamıyor
+en_gun_unlock|UNLOCK CABLE|DÉVERROUILLER LE PISTOLET|KABEL ENTRIEGELN|DESBLOQUEAR CABLE|SBLOCCA CAVO|KABEL ONTGRENDELEN|KABLO KİLİDİNİ AÇ
+en_gun_lock|LOCK CABLE|VERROUILLER LE PISTOLET|KABEL VERRIEGELN|BLOQUEAR CABLE|BLOCCA CAVO|KABEL VERGRENDELEN|KABLOYU KİLİTLE
+power_off_driving|Not while driving|Pas en roulant|Nicht während der Fahrt|No mientras conduces|Non durante la guida|Niet tijdens het rijden|Sürüş sırasında olmaz
+st_power_fx|Full-throttle special (Live power widget):|Fonction spéciale pied au plancher (widget Puissance en direct) :|Vollgas-Spezialfunktion (Widget Leistung live):|Función especial a fondo (widget Potencia en directo):|Funzione speciale a tavoletta (widget Potenza in tempo reale):|Speciale functie plankgas (widget Live vermogen):|Tam gaz sürprizi (Anlık güç pencere öğesi):
+st_power_fx_desc|Floor it (above 80 % of the car's maximum power) and see what happens… then the peak reached (kW and hp) stays on screen for 10 seconds.|Mettez le pied au plancher (au-delà de 80 % de la puissance maximale de la voiture) et vous verrez bien… puis le pic atteint (kW et ch) reste affiché 10 secondes.|Voll aufs Pedal (über 80 % der Höchstleistung des Autos) und lassen Sie sich überraschen… danach bleibt die erreichte Spitze (kW und PS) 10 Sekunden lang sichtbar.|Pise a fondo (por encima del 80 % de la potencia máxima del coche) y ya verá… luego el pico alcanzado (kW y CV) se muestra durante 10 segundos.|Pedale a tavoletta (oltre l'80 % della potenza massima dell'auto) e vedrai… poi il picco raggiunto (kW e CV) resta visibile per 10 secondi.|Plankgas (boven 80 % van het maximale vermogen van de auto) en je zult het zien… daarna blijft de bereikte piek (kW en pk) 10 seconden in beeld.|Gaza sonuna kadar basın (aracın maksimum gücünün %80'inin üzerinde) ve ne olacağını görün… ardından ulaşılan tepe değer (kW ve bg) 10 saniye ekranda kalır.
+fx_none|None|Aucune|Keine|Ninguna|Nessuna|Geen|Yok
+fx_random|Random|Aléatoire|Zufällig|Aleatoria|Casuale|Willekeurig|Rastgele
+fx_rocket|Rocket|Fusée|Rakete|Cohete|Razzo|Raket|Roket
+fx_lightning|Lightning|Éclair|Blitz|Rayo|Fulmine|Bliksem|Şimşek
+fx_flames|Flames|Flammes|Flammen|Llamas|Fiamme|Vlammen|Alevler
+fx_peak|Peak %1$s kW · %2$s hp|Pic %1$s kW · %2$s ch|Spitze %1$s kW · %2$s PS|Pico %1$s kW · %2$s CV|Picco %1$s kW · %2$s CV|Piek %1$s kW · %2$s pk|Tepe %1$s kW · %2$s bg
+st_xpower|MG4 XPower (320 kW)|MG4 XPower (320 kW)|MG4 XPower (320 kW)|MG4 XPower (320 kW)|MG4 XPower (320 kW)|MG4 XPower (320 kW)|MG4 XPower (320 kW)
+st_xpower_desc|Recognised by itself as soon as more than 350 hp is measured: the car does not report its version. Sets the power scale and the threshold of the full-throttle special.|Reconnue d'elle-même dès que plus de 350 ch sont mesurés : la voiture ne donne pas sa version. Règle l'échelle de puissance et le seuil de la fonction pied au plancher.|Wird automatisch erkannt, sobald mehr als 350 PS gemessen werden: das Auto meldet seine Version nicht. Legt die Leistungsskala und die Schwelle der Vollgas-Spezialfunktion fest.|Se reconoce sola en cuanto se miden más de 350 CV: el coche no indica su versión. Ajusta la escala de potencia y el umbral de la función especial a fondo.|Riconosciuta da sola appena si misurano più di 350 CV: l'auto non indica la sua versione. Imposta la scala di potenza e la soglia della funzione speciale a tavoletta.|Wordt vanzelf herkend zodra meer dan 350 pk wordt gemeten: de auto meldt zijn versie niet. Bepaalt de vermogensschaal en de drempel van de speciale functie plankgas.|350 bg'den fazlası ölçülür ölçülmez kendiliğinden tanınır: araç sürümünü bildirmez. Güç ölçeğini ve tam gaz sürprizinin eşiğini ayarlar.
+st_climhold|Keep climate on (long press on the climate power button)|Clim maintenue (appui long sur le bouton marche de la clim)|Klima bleibt an (langes Drücken auf die Klima-Ein-Taste)|Clima mantenido (pulsación larga en el botón de encendido del clima)|Clima mantenuto (pressione lunga sul tasto di accensione del clima)|Airco blijft aan (lang drukken op de aan-knop van de airco)|Klimayı açık tut (klima açma düğmesine uzun basın)
+st_climhold_desc|Keeps the car on with the climate running while you are away, with a large screen showing its status. Never leave a child or an animal alone in the car.|Garde la voiture allumée avec la clim en marche pendant votre absence, avec un grand écran qui montre son état. Ne laissez jamais un enfant ou un animal seul dans la voiture.|Lässt das Auto mit laufender Klimaanlage eingeschaltet, während Sie weg sind, mit einem großen Bildschirm, der den Status zeigt. Lassen Sie niemals ein Kind oder ein Tier allein im Auto.|Mantiene el coche encendido con el clima en marcha mientras no está, con una gran pantalla que muestra su estado. No deje nunca a un niño o un animal solo en el coche.|Tiene l'auto accesa con il clima in funzione mentre sei via, con un grande schermo che ne mostra lo stato. Non lasciare mai un bambino o un animale da solo in auto.|Houdt de auto aan met draaiende airco terwijl je weg bent, met een groot scherm dat de status toont. Laat nooit een kind of een dier alleen in de auto.|Siz yokken aracı klima çalışır halde açık tutar, durumunu gösteren büyük bir ekranla. Bir çocuğu veya hayvanı asla araçta yalnız bırakmayın.
+dm_title|KEEP CLIMATE ON|CLIM MAINTENUE|KLIMA BLEIBT AN|CLIMA MANTENIDO|CLIMA MANTENUTO|AIRCO BLIJFT AAN|KLİMAYI AÇIK TUT
+dm_max|Maximum duration|Durée maximale|Maximale Dauer|Duración máxima|Durata massima|Maximale duur|Maksimum süre
+dm_unlimited|Unlimited|Illimitée|Unbegrenzt|Ilimitada|Illimitata|Onbeperkt|Sınırsız
+dm_close|Close|Fermer|Schließen|Cerrar|Chiudi|Sluiten|Kapat
+dm_message|The driver will be back soon. The climate is kept on.|Le conducteur revient bientôt. La clim reste en marche.|Der Fahrer ist gleich zurück. Die Klimaanlage bleibt an.|El conductor vuelve pronto. El clima sigue encendido.|Il conducente torna presto. Il clima resta acceso.|De bestuurder is zo terug. De airco blijft aan.|Sürücü birazdan dönecek. Klima açık tutuluyor.
+dm_clim_on|CLIMATE ON|CLIM EN MARCHE|KLIMA AN|CLIMA ENCENDIDO|CLIMA ACCESO|AIRCO AAN|KLİMA AÇIK
+dm_clim_off|CLIMATE OFF|CLIM ARRÊTÉE|KLIMA AUS|CLIMA APAGADO|CLIMA SPENTO|AIRCO UIT|KLİMA KAPALI
+dm_left|left|restant|verbleibend|restante|rimanente|resterend|kaldı
+dm_since|since activation|depuis l'activation|seit der Aktivierung|desde la activación|dall'attivazione|sinds activering|etkinleştirmeden beri
+dm_battery|Battery %1$s|Batterie %1$s|Akku %1$s|Batería %1$s|Batteria %1$s|Batterij %1$s|Batarya %1$s
+dm_hold_stop|Hold to stop|Maintenir pour arrêter|Zum Stoppen halten|Mantener para detener|Tieni premuto per fermare|Ingedrukt houden om te stoppen|Durdurmak için basılı tutun
+dm_state_done|FINISHED · CAR SWITCHED OFF|TERMINÉ · VOITURE ÉTEINTE|BEENDET · AUTO AUSGESCHALTET|TERMINADO · COCHE APAGADO|FINITO · AUTO SPENTA|KLAAR · AUTO UITGESCHAKELD|BİTTİ · ARAÇ KAPATILDI
+dm_state_battery|STOPPED: BATTERY BELOW 20 %|ARRÊTÉ : BATTERIE SOUS 20 %|GESTOPPT: AKKU UNTER 20 %|DETENIDO: BATERÍA BAJO 20 %|FERMATO: BATTERIA SOTTO 20 %|GESTOPT: BATTERIJ ONDER 20 %|DURDU: BATARYA %20'NİN ALTINDA
+dm_warning|Never leave a child or an animal alone in the car: the climate can stop at any time (battery, fault, car switching off).|Ne laissez jamais un enfant ou un animal seul dans la voiture : la clim peut s'arrêter à tout moment (batterie, panne, voiture qui s'éteint).|Lassen Sie niemals ein Kind oder ein Tier allein im Auto: die Klimaanlage kann jederzeit ausgehen (Akku, Störung, Auto schaltet ab).|No deje nunca a un niño o un animal solo en el coche: el clima puede detenerse en cualquier momento (batería, avería, coche que se apaga).|Non lasciare mai un bambino o un animale da solo in auto: il clima può fermarsi in qualsiasi momento (batteria, guasto, auto che si spegne).|Laat nooit een kind of een dier alleen in de auto: de airco kan op elk moment stoppen (batterij, storing, auto die uitschakelt).|Bir çocuğu veya hayvanı asla araçta yalnız bırakmayın: klima her an durabilir (batarya, arıza, aracın kapanması).
+dm_start|Start|Démarrer|Starten|Iniciar|Avvia|Starten|Başlat
+dm_cancel|Cancel|Annuler|Abbrechen|Cancelar|Annulla|Annuleren|İptal
+dm_lock_in|The doors lock in|Verrouillage des portes dans|Die Türen verriegeln in|Las puertas se cierran en|Le porte si chiudono tra|De deuren vergrendelen over|Kapıların kilitlenmesine
+dm_take_key|TAKE THE KEY WITH YOU!|PRENEZ LA CLÉ AVEC VOUS !|NEHMEN SIE DEN SCHLÜSSEL MIT!|¡LLÉVESE LA LLAVE!|PORTA CON TE LA CHIAVE!|NEEM DE SLEUTEL MEE!|ANAHTARI YANINIZA ALIN!
+dm_lights|Set the light switch to OFF: only the daytime running lights stay on.|Mettez le commodo des feux sur OFF : seuls les feux de jour restent allumés.|Stellen Sie den Lichtschalter auf OFF: nur das Tagfahrlicht bleibt an.|Ponga el mando de luces en OFF: solo quedan encendidas las luces diurnas.|Metti il comando luci su OFF: restano accese solo le luci diurne.|Zet de lichtschakelaar op OFF: alleen de dagrijverlichting blijft aan.|Far anahtarını KAPALI konuma getirin: yalnızca gündüz farları yanık kalır.
+dm_now|Climate now|Clim tout de suite|Klima sofort|Clima ahora|Clima subito|Airco nu|Klima şimdi
+dm_at_time|Climate at a set time|Clim à une heure précise|Klima zu einer festen Uhrzeit|Clima a una hora fija|Clima a un orario preciso|Airco op een vast tijdstip|Belirli saatte klima
+dm_first_start|First start at|Mise en marche à|Erster Start um|Arranque a las|Avvio alle|Start om|İlk başlatma
+dm_in|in %1$s|dans %1$s|in %1$s|en %1$s|tra %1$s|over %1$s|%1$s sonra
+dm_max_hint|Then the climate stops and the car switches off.|Ensuite la clim s'arrête et la voiture s'éteint.|Danach stoppt die Klimaanlage und das Auto schaltet ab.|Después el clima se detiene y el coche se apaga.|Poi il clima si ferma e l'auto si spegne.|Daarna stopt de airco en schakelt de auto uit.|Ardından klima durur ve araç kapanır.
+dm_runs|Number of runs|Nombre de cycles|Anzahl der Zyklen|Número de ciclos|Numero di cicli|Aantal cycli|Çalışma sayısı
+dm_duration|Duration of each run|Durée de chaque cycle|Dauer jedes Zyklus|Duración de cada ciclo|Durata di ogni ciclo|Duur van elke cyclus|Her çalışmanın süresi
+dm_gap|Pause between runs|Pause entre les cycles|Pause zwischen den Zyklen|Pausa entre ciclos|Pausa tra i cicli|Pauze tussen cycli|Çalışmalar arası duraklama
+dm_note_now|The climate starts now with its current settings, then the doors lock after the delay. Stops below 20 % battery, when the doors are unlocked or if the car moves.|La clim démarre tout de suite avec ses réglages actuels, puis les portes se verrouillent après le délai. Arrêt sous 20 % de batterie, au déverrouillage des portes ou si la voiture roule.|Die Klimaanlage startet sofort mit ihren aktuellen Einstellungen, dann verriegeln die Türen nach der Wartezeit. Stopp unter 20 % Akku, beim Entriegeln oder wenn das Auto fährt.|El clima arranca ya con sus ajustes actuales y las puertas se cierran tras el retardo. Se detiene por debajo del 20 % de batería, al abrir las puertas o si el coche se mueve.|Il clima parte subito con le impostazioni attuali, poi le porte si chiudono dopo il ritardo. Si ferma sotto il 20 % di batteria, allo sblocco delle porte o se l'auto si muove.|De airco start meteen met de huidige instellingen, daarna vergrendelen de deuren na de wachttijd. Stopt onder 20 % batterij, bij ontgrendelen of als de auto rijdt.|Klima mevcut ayarlarıyla hemen başlar, ardından süre dolunca kapılar kilitlenir. Batarya %20'nin altına düşünce, kapılar açılınca veya araç hareket ederse durur.
+dm_note_at|The car stays on (climate off, about 0.2 kW) and locked until the first run, then runs the climate with its current settings. It switches off after the last run, below 20 % battery, and stops when the doors are unlocked.|La voiture reste allumée (clim coupée, environ 0,2 kW) et verrouillée jusqu'au premier cycle, puis lance la clim avec ses réglages actuels. Elle s'éteint après le dernier cycle ou sous 20 % de batterie, et tout s'arrête au déverrouillage des portes.|Das Auto bleibt eingeschaltet (Klima aus, etwa 0,2 kW) und verriegelt bis zum ersten Zyklus und startet dann die Klimaanlage mit ihren aktuellen Einstellungen. Es schaltet nach dem letzten Zyklus oder unter 20 % Akku ab; Entriegeln beendet alles.|El coche sigue encendido (clima apagado, unos 0,2 kW) y cerrado hasta el primer ciclo, y luego enciende el clima con sus ajustes actuales. Se apaga tras el último ciclo o por debajo del 20 % de batería; al abrir las puertas todo se detiene.|L'auto resta accesa (clima spento, circa 0,2 kW) e chiusa fino al primo ciclo, poi avvia il clima con le impostazioni attuali. Si spegne dopo l'ultimo ciclo o sotto il 20 % di batteria; sbloccando le porte tutto si ferma.|De auto blijft aan (airco uit, ongeveer 0,2 kW) en vergrendeld tot de eerste cyclus, en start dan de airco met de huidige instellingen. Hij schakelt uit na de laatste cyclus of onder 20 % batterij; ontgrendelen stopt alles.|Araç ilk çalışmaya kadar açık (klima kapalı, yaklaşık 0,2 kW) ve kilitli kalır, ardından klimayı mevcut ayarlarıyla çalıştırır. Son çalışmadan sonra, batarya %20'nin altına düşünce kapanır ve kapılar açılınca durur.
+dm_clim_at|CLIMATE AT %1$s|CLIM À %1$s|KLIMA UM %1$s|CLIMA A LAS %1$s|CLIMA ALLE %1$s|AIRCO OM %1$s|KLİMA %1$s'DE
+dm_until_start|before the climate starts|avant la mise en marche de la clim|bis zum Start der Klimaanlage|antes de que arranque el clima|prima dell'avvio del clima|tot de airco start|klima başlamadan önce
+dm_run_line|Run %1$d · %2$s → %3$s|Cycle %1$d · %2$s → %3$s|Zyklus %1$d · %2$s → %3$s|Ciclo %1$d · %2$s → %3$s|Ciclo %1$d · %2$s → %3$s|Cyclus %1$d · %2$s → %3$s|Çalışma %1$d · %2$s → %3$s
+dm_lock_delay|Lock the doors after|Verrouiller les portes après|Türen verriegeln nach|Cerrar las puertas tras|Chiudere le porte dopo|Deuren vergrendelen na|Kapıları şu süreden sonra kilitle
+dm_message_wait|The driver will be back soon. The climate will start at %1$s.|Le conducteur revient bientôt. La clim se mettra en marche à %1$s.|Der Fahrer ist gleich zurück. Die Klimaanlage startet um %1$s.|El conductor vuelve pronto. El clima se encenderá a las %1$s.|Il conducente torna presto. Il clima partirà alle %1$s.|De bestuurder is zo terug. De airco start om %1$s.|Sürücü birazdan dönecek. Klima %1$s'de başlayacak.
+dm_screen_off|Screen off once locked|Écran éteint une fois verrouillé|Bildschirm aus nach dem Verriegeln|Pantalla apagada al cerrar|Schermo spento dopo la chiusura|Scherm uit na vergrendelen|Kilitlendikten sonra ekranı kapat
+dm_screen_off_hint|To sleep inside or stay discreet · a tap shows it 10 s|Dormir dedans, discrétion · un toucher l'affiche 10 s|Zum Schlafen oder diskret · Tippen zeigt es 10 s|Para dormir o ser discreto · un toque lo muestra 10 s|Per dormire o restare discreti · un tocco lo mostra 10 s|Om te slapen of discreet · een tik toont het 10 s|İçeride uyumak veya dikkat çekmemek için · bir dokunuş 10 sn gösterir
+dm_outside_title|OUTSIDE|EXTÉRIEUR|AUSSEN|EXTERIOR|ESTERNO|BUITEN|DIŞARISI
+dm_cabin_set|Climate set to %1$s|Clim réglée à %1$s|Klima auf %1$s eingestellt|Clima ajustado a %1$s|Clima impostato a %1$s|Airco ingesteld op %1$s|Klima %1$s olarak ayarlandı
+soc_trip_start|%1$s at start|%1$s au départ|%1$s beim Start|%1$s al salir|%1$s alla partenza|%1$s bij vertrek|başlangıçta %1$s
 
-ac_cycle_title|Intermittent A/C (long press on A/C)|A/C intermittent (appui long sur A/C)|A/C im Intervall (lang auf A/C drücken)|A/C intermitente (pulsación larga en A/C)|A/C intermittente (pressione lunga su A/C)|A/C met tussenpozen (lang op A/C drukken)
-ac_cycle_on|Compressor on|Compresseur en marche|Kompressor an|Compresor encendido|Compressore acceso|Compressor aan
-ac_cycle_off|Compressor off|Compresseur arrêté|Kompressor aus|Compresor apagado|Compressore spento|Compressor uit
-ac_cycle_started|Intermittent A/C on, tap A/C to stop|A/C intermittent activé, touchez A/C pour l'arrêter|A/C im Intervall an, A/C tippen zum Beenden|A/C intermitente activado, toque A/C para detenerlo|A/C intermittente attivato, tocca A/C per fermarlo|A/C met tussenpozen aan, tik op A/C om te stoppen
-ac_cycle_need_on|Turn the climate on first|Allumez d'abord la clim|Zuerst die Klimaanlage einschalten|Encienda primero el clima|Accendi prima il clima|Zet eerst de airco aan
-weather_rain|Rain %1$d %%|Pluie %1$d %%|Regen %1$d %%|Lluvia %1$d %%|Pioggia %1$d %%|Regen %1$d %%
-st_energy_card_power|Live power in the energy card|Puissance en direct dans la carte énergie|Live-Leistung in der Energiekarte|Potencia en directo en la tarjeta de energía|Potenza in tempo reale nella scheda energia|Live vermogen in de energiekaart
-st_energy_card_power_desc|Power bar, kW, V · A and average instead of the drive mode and KERS; the charge / V2L line shows when plugged in, and the Live power page leaves the bottom widget.|Barre de puissance, kW, V · A et moyenne au lieu du mode de conduite et du KERS ; la ligne charge / V2L apparaît câble branché, et la page Puissance quitte le widget du bas.|Leistungsbalken, kW, V · A und Durchschnitt statt Fahrmodus und KERS; die Lade- / V2L-Zeile erscheint bei eingestecktem Kabel, die Leistungsseite verlässt das untere Widget.|Barra de potencia, kW, V · A y media en lugar del modo de conducción y el KERS; la línea de carga / V2L aparece con el cable enchufado y la página Potencia sale del widget inferior.|Barra di potenza, kW, V · A e media al posto della modalità di guida e del KERS; la riga ricarica / V2L compare con il cavo collegato e la pagina Potenza lascia il widget in basso.|Vermogensbalk, kW, V · A en gemiddelde in plaats van rijmodus en KERS; de laad- / V2L-regel verschijnt met kabel aangesloten en de pagina Vermogen verlaat de onderste widget.
-st_shortcuts_page|Shortcuts page in the map card|Page de raccourcis dans la carte|Verknüpfungsseite in der Kartenkarte|Página de accesos directos en la tarjeta del mapa|Pagina di scorciatoie nella scheda mappa|Snelkoppelingenpagina in de kaartkaart
-st_shortcuts_page_desc|Off: the button at the top right of the map only switches between the map and consumption|Désactivée : le bouton en haut à droite de la carte passe seulement de la carte à la consommation|Aus: Die Taste oben rechts auf der Karte wechselt nur zwischen Karte und Verbrauch|Desactivada: el botón arriba a la derecha del mapa solo cambia entre el mapa y el consumo|Disattivata: il pulsante in alto a destra della mappa passa solo tra mappa e consumi|Uit: de knop rechtsboven op de kaart wisselt alleen tussen kaart en verbruik
-st_panel_outline|Home panel outline|Contour des panneaux de l'accueil|Rahmen der Startbildschirm-Kacheln|Contorno de los paneles de inicio|Contorno dei pannelli della home|Rand van de startpanelen
-st_panel_fade|Fading (dashboard style)|Estompé (style tableau de bord)|Ausgeblendet (Kombiinstrument-Stil)|Difuminado (estilo cuadro)|Sfumato (stile cruscotto)|Vervagend (dashboardstijl)
-st_panel_full|Full|Complet|Vollständig|Completo|Completo|Volledig
-map_app_pick|App in the map card (test)|Appli dans le widget carte (essai)|App im Kartenfeld (Test)|App en la tarjeta del mapa (prueba)|App nella scheda mappa (prova)|App in de kaartkaart (test)
-map_app_osm|OpenStreetMap map (default)|Carte OpenStreetMap (par défaut)|OpenStreetMap-Karte (Standard)|Mapa OpenStreetMap (predeterminado)|Mappa OpenStreetMap (predefinita)|OpenStreetMap-kaart (standaard)
-map_app_unavailable|This firmware can't show another app in the map card|Ce firmware ne permet pas d'afficher une autre appli dans la carte|Diese Firmware kann keine andere App im Kartenfeld anzeigen|Este firmware no puede mostrar otra app en la tarjeta del mapa|Questo firmware non può mostrare un'altra app nella scheda mappa|Deze firmware kan geen andere app in de kaartkaart tonen
+ac_cycle_title|Intermittent A/C (long press on A/C)|A/C intermittent (appui long sur A/C)|A/C im Intervall (lang auf A/C drücken)|A/C intermitente (pulsación larga en A/C)|A/C intermittente (pressione lunga su A/C)|A/C met tussenpozen (lang op A/C drukken)|Aralıklı A/C (A/C'ye uzun basın)
+ac_cycle_on|Compressor on|Compresseur en marche|Kompressor an|Compresor encendido|Compressore acceso|Compressor aan|Kompresör açık
+ac_cycle_off|Compressor off|Compresseur arrêté|Kompressor aus|Compresor apagado|Compressore spento|Compressor uit|Kompresör kapalı
+ac_cycle_started|Intermittent A/C on, tap A/C to stop|A/C intermittent activé, touchez A/C pour l'arrêter|A/C im Intervall an, A/C tippen zum Beenden|A/C intermitente activado, toque A/C para detenerlo|A/C intermittente attivato, tocca A/C per fermarlo|A/C met tussenpozen aan, tik op A/C om te stoppen|Aralıklı A/C açık, durdurmak için A/C'ye dokunun
+ac_cycle_need_on|Turn the climate on first|Allumez d'abord la clim|Zuerst die Klimaanlage einschalten|Encienda primero el clima|Accendi prima il clima|Zet eerst de airco aan|Önce klimayı açın
+weather_rain|Rain %1$d %%|Pluie %1$d %%|Regen %1$d %%|Lluvia %1$d %%|Pioggia %1$d %%|Regen %1$d %%|Yağmur %%%1$d
+st_energy_card_power|Live power in the energy card|Puissance en direct dans la carte énergie|Live-Leistung in der Energiekarte|Potencia en directo en la tarjeta de energía|Potenza in tempo reale nella scheda energia|Live vermogen in de energiekaart|Enerji kartında anlık güç
+st_energy_card_power_desc|Power bar, kW, V · A and average instead of the drive mode and KERS; the charge / V2L line shows when plugged in, and the Live power page leaves the bottom widget.|Barre de puissance, kW, V · A et moyenne au lieu du mode de conduite et du KERS ; la ligne charge / V2L apparaît câble branché, et la page Puissance quitte le widget du bas.|Leistungsbalken, kW, V · A und Durchschnitt statt Fahrmodus und KERS; die Lade- / V2L-Zeile erscheint bei eingestecktem Kabel, die Leistungsseite verlässt das untere Widget.|Barra de potencia, kW, V · A y media en lugar del modo de conducción y el KERS; la línea de carga / V2L aparece con el cable enchufado y la página Potencia sale del widget inferior.|Barra di potenza, kW, V · A e media al posto della modalità di guida e del KERS; la riga ricarica / V2L compare con il cavo collegato e la pagina Potenza lascia il widget in basso.|Vermogensbalk, kW, V · A en gemiddelde in plaats van rijmodus en KERS; de laad- / V2L-regel verschijnt met kabel aangesloten en de pagina Vermogen verlaat de onderste widget.|Sürüş modu ve KERS yerine güç çubuğu, kW, V · A ve ortalama; şarj / V2L satırı fiş takılıyken görünür ve Anlık güç sayfası alttaki pencere öğesinden çıkar.
+st_shortcuts_page|Shortcuts page in the map card|Page de raccourcis dans la carte|Verknüpfungsseite in der Kartenkarte|Página de accesos directos en la tarjeta del mapa|Pagina di scorciatoie nella scheda mappa|Snelkoppelingenpagina in de kaartkaart|Harita kartında kısayollar sayfası
+st_shortcuts_page_desc|Off: the button at the top right of the map only switches between the map and consumption|Désactivée : le bouton en haut à droite de la carte passe seulement de la carte à la consommation|Aus: Die Taste oben rechts auf der Karte wechselt nur zwischen Karte und Verbrauch|Desactivada: el botón arriba a la derecha del mapa solo cambia entre el mapa y el consumo|Disattivata: il pulsante in alto a destra della mappa passa solo tra mappa e consumi|Uit: de knop rechtsboven op de kaart wisselt alleen tussen kaart en verbruik|Kapalı: haritanın sağ üstündeki düğme yalnızca harita ile tüketim arasında geçiş yapar
+st_panel_outline|Home panel outline|Contour des panneaux de l'accueil|Rahmen der Startbildschirm-Kacheln|Contorno de los paneles de inicio|Contorno dei pannelli della home|Rand van de startpanelen|Ana ekran panel çerçevesi
+st_panel_fade|Fading (dashboard style)|Estompé (style tableau de bord)|Ausgeblendet (Kombiinstrument-Stil)|Difuminado (estilo cuadro)|Sfumato (stile cruscotto)|Vervagend (dashboardstijl)|Solan (gösterge paneli tarzı)
+st_panel_full|Full|Complet|Vollständig|Completo|Completo|Volledig|Tam
+map_app_pick|App in the map card (test)|Appli dans le widget carte (essai)|App im Kartenfeld (Test)|App en la tarjeta del mapa (prueba)|App nella scheda mappa (prova)|App in de kaartkaart (test)|Harita kartında uygulama (test)
+map_app_osm|OpenStreetMap map (default)|Carte OpenStreetMap (par défaut)|OpenStreetMap-Karte (Standard)|Mapa OpenStreetMap (predeterminado)|Mappa OpenStreetMap (predefinita)|OpenStreetMap-kaart (standaard)|OpenStreetMap haritası (varsayılan)
+map_app_unavailable|This firmware can't show another app in the map card|Ce firmware ne permet pas d'afficher une autre appli dans la carte|Diese Firmware kann keine andere App im Kartenfeld anzeigen|Este firmware no puede mostrar otra app en la tarjeta del mapa|Questo firmware non può mostrare un'altra app nella scheda mappa|Deze firmware kan geen andere app in de kaartkaart tonen|Bu yazılım harita kartında başka bir uygulama gösteremiyor

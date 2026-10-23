@@ -92,6 +92,7 @@ class MainActivity : AppCompatActivity() {
         if (prefs.homeStyle == 2) applyMapLayout()
         builtCardPower = cardPower
         if (cardPower) buildPowerEnergyCard()
+        else if (!mapLayout && !simpleMode && !Dock.vertical(this)) compactEnergyCard()
         // Balayage vertical (issue #6) : carte musique = source suivante / précédente ;
         // widget du bas (style Complet) = page suivante / précédente
         app.mg4dash.ui.SwipeBox.wrap(b.mediaCard, vertical = true, horizontal = false) { MediaHub.cycleSource(it) }
@@ -516,6 +517,8 @@ class MainActivity : AppCompatActivity() {
         b.batteryGauge.charging = VehicleState.isCharging(s.chargeStatus)
         blinkPlug(s.batteryPercent)
         b.range.text = s.rangeKm?.let { app.mg4dash.system.Units.distText(this, it.toFloat()) } ?: "— ${app.mg4dash.system.Units.distUnit(this)}"
+        // Carte puissance (#29) : unités deux fois plus petites que les chiffres
+        if (cardPower) { b.battery.text = halfUnit(b.battery.text); b.range.text = halfUnit(b.range.text) }
         b.consumption.text = avg?.let { app.mg4dash.system.Units.consText(this, it) } ?: "—"
         b.consAvgLabel.text = getString(if (app.mg4dash.system.Units.miles(this)) R.string.cons_avg_mi else R.string.cons_avg)
         b.driveMode.text = VehicleState.driveModeLabel(s.driveMode)
@@ -540,7 +543,8 @@ class MainActivity : AppCompatActivity() {
             val plugged = VehicleState.isPlugged(s.chargeStatus)
             (b.chargeState.parent as View).visibility = if (plugged) View.VISIBLE else View.GONE
             // Câble branché : la ligne de charge prend la place, la prise sous les km s'efface
-            b.rangePlug.visibility = if (plugged) View.GONE else View.VISIBLE
+            b.rangePlug.visibility = if (plugged || rangePin != null) View.GONE else View.VISIBLE
+            rangePin?.visibility = if (plugged) View.GONE else View.VISIBLE
         }
         b.chargeAction.visibility = if (CarBridge.chargeControl) View.VISIBLE else View.GONE
         b.chargeAction.setBackgroundResource(if (discharge) R.drawable.bg_chip_heat else R.drawable.bg_chip)
@@ -702,8 +706,9 @@ class MainActivity : AppCompatActivity() {
         val ms = when { soc == null -> 0L; soc < 15 -> 500L; soc < 30 -> 1400L; else -> 0L }
         if (ms == plugBlinkMs) return
         plugBlinkMs = ms
-        plugBlink?.cancel(); plugBlink = null; b.rangePlug.alpha = 1f
-        if (ms > 0) plugBlink = android.animation.ObjectAnimator.ofFloat(b.rangePlug, View.ALPHA, 1f, 0.15f).apply {
+        val plug: View = rangePin ?: b.rangePlug
+        plugBlink?.cancel(); plugBlink = null; plug.alpha = 1f
+        if (ms > 0) plugBlink = android.animation.ObjectAnimator.ofFloat(plug, View.ALPHA, 1f, 0.15f).apply {
             duration = ms; repeatCount = android.animation.ValueAnimator.INFINITE; repeatMode = android.animation.ValueAnimator.REVERSE
             interpolator = android.view.animation.AccelerateDecelerateInterpolator(); start()
         }
@@ -995,6 +1000,20 @@ class MainActivity : AppCompatActivity() {
      * puis kW à gauche, tension · courant au centre, kWh/100 à droite. Elle prend la place de la
      * page Puissance du widget défilant, animation pleine puissance comprise.
      */
+    /** Barre en bas (style Complet) : la carte énergie est moins haute, chiffres réduits (#43). */
+    private fun compactEnergyCard() {
+        val d = resources.displayMetrics.density
+        b.battery.setTextSize(TypedValue.COMPLEX_UNIT_SP, 46f)
+        b.range.setTextSize(TypedValue.COMPLEX_UNIT_SP, 25f)
+        b.consumption.setTextSize(TypedValue.COMPLEX_UNIT_SP, 25f)
+        b.consAvgLabel.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
+        b.rangePlug.layoutParams = b.rangePlug.layoutParams.apply { height = (18 * d).toInt() }
+        b.batteryGauge.layoutParams = b.batteryGauge.layoutParams.apply { height = (52 * d).toInt() }
+    }
+
+    /** Carte puissance (#29) : épingle avec éclair à gauche des km, à la place de la prise. */
+    private var rangePin: android.widget.ImageView? = null
+
     private fun buildPowerEnergyCard() {
         val d = resources.displayMetrics.density
         (b.driveMode.parent as View).visibility = View.GONE
@@ -1002,8 +1021,9 @@ class MainActivity : AppCompatActivity() {
         (b.range.parent as LinearLayout).gravity = Gravity.END
         (b.chargeState.parent as View).visibility = View.GONE
         // Plus de place verticale : chiffres un peu plus petits, barre batterie plus basse
-        b.battery.setTextSize(TypedValue.COMPLEX_UNIT_SP, 50f)
-        b.range.setTextSize(TypedValue.COMPLEX_UNIT_SP, 26f)
+        // % et km à la même taille, unités à moitié, épingle à la hauteur des chiffres (#29)
+        b.battery.setTextSize(TypedValue.COMPLEX_UNIT_SP, 44f)
+        b.range.setTextSize(TypedValue.COMPLEX_UNIT_SP, 44f); b.range.typeface = b.battery.typeface
         // Chiffres posés près de la barre (#29), prise pleine avec éclair, repères plus lisibles
         (b.battery.parent as LinearLayout).gravity = Gravity.BOTTOM
         // Prise pleine avec éclair, réduite pour que km + prise fassent la hauteur du % (#29)
@@ -1013,6 +1033,22 @@ class MainActivity : AppCompatActivity() {
             width = (110 * d).toInt(); height = (20 * d).toInt(); topMargin = (2 * d).toInt(); bottomMargin = (9 * d).toInt()
         }
         b.batteryGauge.smallSp = 16f; b.batteryGauge.tickSp = 15f
+        run {
+            val col = b.range.parent as LinearLayout
+            val i = col.indexOfChild(b.range)
+            col.removeView(b.range)
+            val line = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.BOTTOM }
+            val pin = android.widget.ImageView(this).apply {
+                setImageResource(R.drawable.ic_range_pin)
+                imageTintList = android.content.res.ColorStateList.valueOf(color(R.color.text_value))
+                scaleType = android.widget.ImageView.ScaleType.FIT_END
+            }
+            line.addView(pin, LinearLayout.LayoutParams((28 * d).toInt(), (35 * d).toInt()).apply { rightMargin = (10 * d).toInt(); bottomMargin = (7 * d).toInt() })
+            line.addView(b.range, LinearLayout.LayoutParams(-2, -2))
+            col.addView(line, i, LinearLayout.LayoutParams(-2, -2))
+            b.rangePlug.visibility = View.GONE
+            rangePin = pin
+        }
         (b.batteryGauge.layoutParams as LinearLayout.LayoutParams).apply { height = (62 * d).toInt(); bottomMargin = (-2 * d).toInt() }
         val card = b.energyCard
         val at = card.indexOfChild(b.batteryGauge) + 1
@@ -1028,7 +1064,7 @@ class MainActivity : AppCompatActivity() {
             setTextColor(color(colorRes)); setTextSize(TypedValue.COMPLEX_UNIT_SP, sp); gravity = g; maxLines = 1; fontFeatureSettings = "tnum"
         }
         powerValue = tv(26f, R.color.text_value, Gravity.START)
-        powerExtra = tv(18f, R.color.text_sub, Gravity.CENTER)
+        powerExtra = tv(15f, R.color.text_sub, Gravity.CENTER).apply { maxLines = 2; setLineSpacing(0f, 0.95f) }
         powerAvg = tv(26f, R.color.text_value, Gravity.END)
         powerLabel = null
         row.addView(powerValue, LinearLayout.LayoutParams(-2, -2))
@@ -1038,7 +1074,30 @@ class MainActivity : AppCompatActivity() {
         powerFx = app.mg4dash.ui.PowerFx(this).also { fx ->
             fx.onBadge = { on -> powerExtra?.animate()?.alpha(if (on) 0f else 1f)?.setDuration(250)?.start() }
         }
+        // Barre en bas (style Complet) : carte moins haute, tout est resserré (#43)
+        if (!mapLayout && !Dock.vertical(this)) {
+            b.battery.setTextSize(TypedValue.COMPLEX_UNIT_SP, 34f)
+            b.range.setTextSize(TypedValue.COMPLEX_UNIT_SP, 34f)
+            rangePin?.layoutParams = (rangePin?.layoutParams as LinearLayout.LayoutParams).apply { width = (22 * d).toInt(); height = (27 * d).toInt(); bottomMargin = (5 * d).toInt() }
+            b.rangePlug.layoutParams = (b.rangePlug.layoutParams as LinearLayout.LayoutParams).apply { height = (16 * d).toInt(); bottomMargin = (6 * d).toInt() }
+            b.batteryGauge.layoutParams = (b.batteryGauge.layoutParams as LinearLayout.LayoutParams).apply { height = (50 * d).toInt() }
+            powerBar?.layoutParams = (powerBar?.layoutParams as LinearLayout.LayoutParams).apply { height = (36 * d).toInt(); topMargin = 0 }
+            (row.layoutParams as LinearLayout.LayoutParams).topMargin = (2 * d).toInt()
+            b.chargeAction.layoutParams = b.chargeAction.layoutParams.apply { height = (36 * d).toInt() }
+            powerValue?.setTextSize(TypedValue.COMPLEX_UNIT_SP, 22f); powerAvg?.setTextSize(TypedValue.COMPLEX_UNIT_SP, 22f)
+        }
     }
+
+    /** Unité (après le dernier espace) à demi-taille : « 79.7 % », « 347 km ». */
+    private fun halfUnit(t: CharSequence): CharSequence {
+        val i = t.lastIndexOf(' ').takeIf { it > 0 } ?: return t
+        return android.text.SpannableString(t).apply { setSpan(android.text.style.RelativeSizeSpan(0.5f), i, t.length, 0) }
+    }
+
+    /** Tension la plus basse et courant le plus fort du trajet (#29), remis à zéro à chaque démarrage. */
+    private var minVolts: Float? = if (BuildConfig.MOCK) 325f else null
+    private var maxAmps: Float? = if (BuildConfig.MOCK) 150.6f else null
+    private var minMaxTrip = -1
 
     /** Puissance batterie (tension × courant) : positive = tirée, négative = récupérée. */
     private suspend fun updatePower() {
@@ -1090,7 +1149,30 @@ class MainActivity : AppCompatActivity() {
         }
         val avg = app.mg4dash.energy.EnergyMonitor.sinceStart.value.per100
         powerAvg?.text = avg?.let { "${app.mg4dash.system.Units.consText(this, it)} ${if (app.mg4dash.system.Units.miles(this)) "mi/kWh" else "kWh/100"}" } ?: "—"
-        powerExtra?.let { tv ->
+        if (cardPower) powerExtra?.let { tv ->
+            val trip = app.mg4dash.energy.EnergyMonitor.tripSeq
+            if (trip != minMaxTrip) { if (minMaxTrip >= 0) { minVolts = null; maxAmps = null }; minMaxTrip = trip }
+            volts?.let { v -> minVolts = minOf(minVolts ?: v, v) }
+            amps?.let { a -> if (a > 0f) maxAmps = maxOf(maxAmps ?: a, a) }
+            // Deux lignes : tension · tension mini, courant · courant maxi (mini et maxi estompés)
+            val dim = color(R.color.text_disabled)
+            fun line(now: String?, extreme: String?): CharSequence = android.text.SpannableStringBuilder().apply {
+                append(now ?: "—")
+                extreme?.let { val st = length; append("  ·  $it"); setSpan(android.text.style.ForegroundColorSpan(dim), st, length, 0) }
+            }
+            val ampsTxt = amps?.let { a ->
+                val txt = String.format(Locale.getDefault(), "%.1f A", kotlin.math.abs(a))
+                if (a < -0.5f) android.text.SpannableString(txt).apply {
+                    setSpan(android.text.style.ForegroundColorSpan(color(R.color.accent_energy)), 0, txt.length, 0)
+                } else txt
+            }
+            tv.text = android.text.SpannableStringBuilder()
+                .append(line(volts?.let { String.format(Locale.getDefault(), "%.0f V", it) }, minVolts?.let { String.format(Locale.getDefault(), "%.0f V min", it) }))
+                .append("\n")
+                .append(ampsTxt ?: "—").append(maxAmps?.let { m ->
+                    android.text.SpannableString(String.format(Locale.getDefault(), "  ·  %.1f A max", m)).apply { setSpan(android.text.style.ForegroundColorSpan(dim), 0, length, 0) }
+                } ?: "")
+        } else powerExtra?.let { tv ->
             val parts = mutableListOf<CharSequence>()
             volts?.let { parts.add(String.format(Locale.getDefault(), "%.0f V", it)) }
             amps?.let { a ->

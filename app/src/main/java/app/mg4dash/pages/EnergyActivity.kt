@@ -15,6 +15,7 @@ import app.mg4dash.energy.ChargeGuard
 import app.mg4dash.system.Apps
 import app.mg4dash.system.Prefs
 import app.mg4dash.ui.LineChart
+import app.mg4dash.ui.smooth3
 import app.mg4dash.ui.PageActivity
 import app.mg4dash.ui.SegmentedGauge
 import app.mg4dash.ui.StackedBar
@@ -331,7 +332,7 @@ class EnergyActivity : PageActivity() {
             return
         }
         val v = values.map { app.mg4dash.system.Units.cons(this, it) }
-        chart.values = v
+        chart.values = v.smooth3()
         chartNote.text = if (v.size >= 2)
             getString(R.string.en_history_note, Math.round(app.mg4dash.system.Units.dist(this, v.size.toFloat())), String.format(Locale.getDefault(), "%.1f", v.average()), app.mg4dash.system.Units.distUnit(this)) else ""
     }

@@ -16,6 +16,8 @@ import app.mg4dash.media.MediaHub
  */
 object StarKey {
     private const val TAG = "StarKey"
+    /** Au-delà, on considère que la caméra a été refermée autrement (bouton à l'écran, en roulant). */
+    private const val AVM_OPEN_MS = 3 * 60_000L
     private const val ACTION = "com.saic.keyevent.hardkey.report"
     private const val KEY_LEFT_STAR = 5
     /** Joystick droit (codes relevés sur SWI173, #33, et dans MG4Control) : 299 gauche, 300 droite, 301 OK. */
@@ -84,18 +86,25 @@ object StarKey {
      * « * » réglé sur la caméra 360 : l'ouvre, ou la referme si elle est déjà à l'écran (#33),
      * comme le launcher SAIC (START_ENTER / STOP vers le service de la caméra installée).
      */
+    /** Heure de la dernière ouverture par « * » (0 = fermée) : sur certains firmwares la caméra
+     *  s'affiche par-dessus sans devenir la tâche du haut (#33), on se souvient donc de l'état. */
+    @Volatile private var avmStartedAt = 0L
+
     fun toggleAvm(context: Context): Boolean {
         for ((pkg, svc) in AVM) {
             if (!Firmware.installed(context, pkg)) continue
             @Suppress("DEPRECATION")
-            val shown = try {
+            val top = try {
                 (context.getSystemService(Context.ACTIVITY_SERVICE) as android.app.ActivityManager)
-                    .getRunningTasks(1).firstOrNull()?.topActivity?.packageName == pkg
-            } catch (_: Exception) { false }
+                    .getRunningTasks(1).firstOrNull()?.topActivity?.packageName
+            } catch (_: Exception) { null }
+            val recent = avmStartedAt != 0L && android.os.SystemClock.elapsedRealtime() - avmStartedAt < AVM_OPEN_MS
+            val shown = top == pkg || recent
             val action = if (shown) "com.saicmotor.avm.STOP" else "com.saicmotor.avm.START_ENTER"
+            avmStartedAt = if (shown) 0L else android.os.SystemClock.elapsedRealtime()
             return try {
                 context.startService(Intent(action).setComponent(ComponentName(pkg, svc)))
-                Log.i(TAG, "caméra 360 : $action → $svc"); true
+                Log.i(TAG, "caméra 360 : $action → $svc (tâche du haut : $top)"); true
             } catch (e: Exception) { Log.w(TAG, "caméra 360 : $svc : ${e.message}"); false }
         }
         return false
