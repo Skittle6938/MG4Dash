@@ -1,29 +1,35 @@
 # MG4Dash
 
-Full-screen launcher for the MG4 and its 1920 × 720 screen, for every head unit firmware (SWI69, SWI131/132/173, SWI68, SWI133, SWI165; see [Compatibility](#compatibility-beta)): three home layouts, Climate, Energy, Vehicle and Phone pages linked by a vertical bar or a bottom dock, dark, light or automatic mode following the car's lights, and five background and button colour themes.
+Full-screen launcher for the MG4 and its 1920 × 720 screen, for every head unit firmware (SWI69, SWI131/132/173, SWI68, SWI133, SWI165; see [Compatibility](#compatibility-beta)): three home layouts, Climate, Energy, Vehicle, Sound and Phone pages linked by a vertical bar or a bottom dock, dark, light or automatic mode following the car's lights, and five background and button colour themes.
 
 Languages: English (default), French, German, Spanish, Italian, Dutch and Turkish, following the car's system language. Units: km and kWh/100 km or miles and mi/kWh (following the car or set by hand), tyre pressure in bar, psi or kPa.
 
-Current version: **1.4.0** ([releases](https://github.com/Skittle6938/MG4Dash/releases)).
+Current version: **1.5.0** ([releases](https://github.com/Skittle6938/MG4Dash/releases)).
 
 > Screenshots are rendered on a PC with simulated data; the map excerpt is a fixed view of Paris (OpenStreetMap).
 
 ### Home
-![Home](docs/screenshots/home.png?v=15)
+![Home](docs/screenshots/home.png?v=17)
 Shown with the vertical bar on the left, the default on a fresh install (the bottom dock is still available, see [Vertical bar](#vertical-bar)). Climate (temperature, fan, then two rows of buttons: power, A/C, AUTO, ECO, air directions, recirculation), energy (battery % to the tenth, range with a plug icon, estimated consumption, drive mode, KERS, Charge / Start V2L button), the map, Open-Meteo weather, a media card that follows the car's active audio source (DAB/FM radio, Bluetooth, USB, Android Auto) and a bottom-right widget with three pages (see below).
 
 - **Range bar**: in the style of the live power bar, one colour following the level (green, orange below 30 %, red below 15 %); the % at the start of the trip is marked on the bar, with the part used during the trip in a lighter shade.
 - **Media card**: swipe up / down to switch to the next available source (radio, Bluetooth, USB, Android Auto / CarPlay when connected); playback starts by itself. DAB+ stations show their slideshow image, or the station image cached by the radio.
-- **Weather**: swipe it, or tap its dots, to switch between hourly and daily forecasts, with coloured icons (and a moon on clear nights). The forecast follows the car's position (refreshed every 5 km, city name every 2 km); a fallback city can be set, or taken from the current position, in Settings › Weather. As soon as an update fails (no data connection), it shows the time and the outside temperature, and retries until the connection and the position are back.
-- **Climate card**: the fan goes from off to maximum; long press fan minus jumps to the lowest speed. Long press the temperature to calibrate the displayed set point (−5° to +5°, display only, the car keeps its own value).
+- **Weather**: swipe it, or tap its dots, to switch between hourly and daily forecasts, with coloured icons (and a moon on clear nights). The forecast follows the car's position (refreshed every 5 km, city name every 2 km); a fallback city can be set, or taken from the current position, in Settings › Weather. When an update fails (no data connection), the last forecast stays on screen for up to 3 hours; after that it shows the time and the outside temperature, and retries until the connection and the position are back.
+- **Climate card**: the fan goes from off to maximum; long press fan minus jumps to the lowest speed. Long press A/C for **intermittent A/C** (the compressor runs in cycles; tap A/C to stop). Long press the temperature to calibrate the displayed set point (−5° to +5°, display only, the car keeps its own value).
 - **Heated seats and steering wheel**: on equipped cars, a row of buttons above the temperature (see [below](#heated-seats-and-steering-wheel)).
 - **Media source menu**: tap the source name on the media card to pick radio, Bluetooth, USB or Android Auto / CarPlay.
 - **KERS gauge**: tap a segment to set the regeneration level (low, medium, high, adaptive); long press toggles one-pedal driving.
+- **Play / pause**: long press opens the [Sound](#sound) page.
+- **Steering wheel * button**: while MG4Dash is the home screen, it opens the 360 camera, and closes it on a second press (where the car sets the * button to the camera).
+
+**Live power in the energy card** (Settings › Home): the energy card shows the power bar, kW, the battery voltage with its trip minimum, the current with its trip maximum and the average consumption, instead of the drive mode and KERS. The charge / V2L line comes back when plugged in, and the Live power page then leaves the bottom-right widget.
+
+![Live power in the energy card](docs/screenshots/home_energy_card_power.png?v=17)
 
 Long press the Android Auto button in the dock to make it open Android Auto, CarPlay or the app of your choice.
 
 ### Heated seats and steering wheel
-![Heated seats and steering wheel](docs/screenshots/home_heated_seats.png?v=15)
+![Heated seats and steering wheel](docs/screenshots/home_heated_seats.png?v=17)
 On equipped cars, a row of three buttons sits above the climate temperature: driver seat, steering wheel and passenger seat. Tap a seat to step through its levels (off, then 1 to 3 heat arrows, lit while on), tap the steering wheel to turn it on or off. The same row appears on the Simple layout. Settings › Heated seats and steering wheel: Auto (detected), Yes or No.
 
 ### Bottom-right widget
@@ -34,11 +40,11 @@ Swipe or tap it to switch between three pages, all readable at a glance while dr
 
 | | |
 |---|---|
-| ![Live power](docs/screenshots/home_widget_power.png?v=15) | ![Phone favourites](docs/screenshots/home_widget_phone.png?v=15) |
-| ![Full-throttle special](docs/screenshots/boost_rocket_on.png?v=15) | |
+| ![Live power](docs/screenshots/home_widget_power.png?v=17) | ![Phone favourites](docs/screenshots/home_widget_phone.png?v=17) |
+| ![Full-throttle special](docs/screenshots/boost_rocket_on.png?v=17) | |
 
 ### Map home layout
-![Map layout](docs/screenshots/home_map_layout.png?v=15)
+![Map layout](docs/screenshots/home_map_layout.png?v=17)
 A third layout (Settings › Home layout › Map), suggested in [issue #6](https://github.com/Skittle6938/MG4Dash/issues/6): weather with the date and time, climate on the left, a stack (energy, trip energy, live power, phone) above the media in the centre, and the map over the whole right column. Swipe the stack to change page; with the automatic option, it jumps back to the battery once when the car is plugged in. Speed, heading and altitude sit at the top left of the map; in heading-up mode the car is placed in the lower part to show more of the road ahead.
 
 The map widget also has a **consumption** page and **3 rows of shortcuts** (button at its top right). Without data connection the map stays on screen as long as the area around the car is in the tile cache, and only then switches to consumption (this switch can be turned off in the settings). Default zoom (14 to 18) and map colours (Auto, following the car's day / night whatever the app theme, Light or Dark) are set in the launcher settings.
@@ -47,11 +53,11 @@ The consumption page has a period menu: since the last charge, current trip, las
 
 | | |
 |---|---|
-| ![Map layout, consumption](docs/screenshots/home_map_layout_consumption.png?v=15) | ![Map layout, shortcuts](docs/screenshots/home_map_layout_shortcuts.png?v=15) |
-| ![Consumption over 12 months](docs/screenshots/home_map_layout_consumption_year.png?v=15) | |
+| ![Map layout, consumption](docs/screenshots/home_map_layout_consumption.png?v=17) | ![Map layout, shortcuts](docs/screenshots/home_map_layout_shortcuts.png?v=17) |
+| ![Consumption over 12 months](docs/screenshots/home_map_layout_consumption_year.png?v=17) | |
 
 ### Vertical bar
-![Vertical bar](docs/screenshots/home_map_layout_vertical.png?v=15)
+![Vertical bar](docs/screenshots/home_map_layout_vertical.png?v=17)
 Settings › Home layout › *Vertical bar on the left* (on by default on a fresh install): an icon bar on the left, with the space at the top for the MG fog light button. It applies at once to every home layout, every page and to Radio Dash. Turn it off to get the dock at the bottom instead (below, left).
 
 - **Settings**: tap for the launcher settings, long press for the car settings, double tap for Wi-Fi.
@@ -62,48 +68,48 @@ Settings › Home layout › *Vertical bar on the left* (on by default on a fres
 
 | | |
 |---|---|
-| ![Bottom dock](docs/screenshots/home_bottom_bar.png?v=15) | ![Vertical bar, energy page](docs/screenshots/energy_vertical.png?v=15) |
+| ![Bottom dock](docs/screenshots/home_bottom_bar.png?v=17) | ![Vertical bar, energy page](docs/screenshots/energy_vertical.png?v=17) |
 
 Card titles are left out on every layout for a calmer screen; the media card keeps its source name, which opens the source menu.
 
 ### Another app in the map card
 | | |
 |---|---|
-| ![EV route planner in the map card](docs/screenshots/home_map_app_planner.png?v=16) | ![Navigation app in the map card](docs/screenshots/home_map_app_guidance.png?v=16) |
+| ![EV route planner in the map card](docs/screenshots/home_map_app_planner.png?v=17) | ![Navigation app in the map card](docs/screenshots/home_map_app_guidance.png?v=17) |
 
-Long press the map (or its top right button) to show another installed app inside the map card instead of the OpenStreetMap map, for example an EV route planner such as ABRP or a navigation app such as Waze. The app runs live in the card and can be touched, and a full screen button (below the top right one) enlarges it like the map. Pick "OpenStreetMap map" in the same list to go back. *Illustrations: the apps shown here are drawn for the example.*
+Long press the map (or its top right button) to show another installed app inside the map card instead of the OpenStreetMap map, for example an EV route planner such as ABRP or a navigation app such as Waze. The app runs live in the card and can be touched, and a full screen button (below the top right one) enlarges it like the map. Over an app, the map card buttons fade out after 5 s so they do not hide it, and come back on a touch; full screen stays on through day / night changes until you press Home or the button again. Pick "OpenStreetMap map" in the same list to go back. *Illustrations: the apps shown here are drawn for the example.*
 
 ### Turn-by-turn on the map
-![Navigation banner](docs/screenshots/home_map_layout_nav.png?v=15)
+![Navigation banner](docs/screenshots/home_map_layout_nav.png?v=17)
 With [DiAuto](https://github.com/merthankaraman/DiAuto-MG4) (or another Headunit Revived-based Android Auto app that broadcasts `com.andrerinas.headunitrevived.NAVIGATION_UPDATE`), the next manoeuvre is shown over the home map: arrow, distance, street, time and distance left, arrival time. The stock Android Auto app does not receive this information from the phone, so it only works with these apps.
 
 ### Simple home layout
-![Simple home](docs/screenshots/home_simple.png?v=15)
+![Simple home](docs/screenshots/home_simple.png?v=17)
 An alternative, calmer home screen for those who want fewer buttons and bigger text: three large panels (climate, battery, media), two configurable shortcuts and today's weather, with the vertical bar, or a reduced bottom dock (Home, Phone, Android Auto, Settings). Choose it in the launcher settings, under "Home layout"; tap a panel to open the matching page.
 
 ### Shortcuts and Home Assistant
-![Shortcuts](docs/screenshots/home_shortcuts.png?v=15)
+![Shortcuts](docs/screenshots/home_shortcuts.png?v=17)
 The button at the top right of the map swaps it for pages of shortcuts: apps or Home Assistant actions (scripts, automations, scenes, buttons, gate, garage door…). Tap an empty slot, or long press any slot, to change it. The Home Assistant address and token are set in the launcher settings.
 
 ### Themes
-![Charcoal background, orange buttons](docs/screenshots/home_theme_charcoal_orange.png?v=15)
+![Charcoal background, orange buttons](docs/screenshots/home_theme_charcoal_orange.png?v=17)
 Background (night blue, black, charcoal, dark green, dark burgundy) and button colour (blue, grey, red, green, orange) are chosen separately in the launcher settings and apply to every page. Battery green, heating orange, cooling cyan and alert red keep their meaning. Radio Dash follows the same theme.
 
-Light mode: dark, light or auto in the same settings. In auto, every page (and Radio Dash, even while it stays on screen) switches to dark when the car's lights come on, and back to light when they go off.
+Light mode: dark, light or auto in the same settings. In auto, every page (and Radio Dash, even while it stays on screen) switches to dark when the car's lights come on, and back to light when they go off. By default the switch waits for 5 s of stable lights (no flicker under a bridge or in a short tunnel) and fades over 2 s; turn off *Smooth light / dark switch* in Settings › Look to switch at once, as soon as the lights change. The outline of the home panels can fade downwards (dashboard style, default) or be complete.
 
-![Light mode, home](docs/screenshots/home_light.png?v=15)
+![Light mode, home](docs/screenshots/home_light.png?v=17)
 
 | | |
 |---|---|
-| ![Climate, light](docs/screenshots/climate_light.png?v=15) | ![Energy, light](docs/screenshots/energy_light.png?v=15) |
-| ![Simple home, light](docs/screenshots/home_simple_light.png?v=15) | ![Settings, light](docs/screenshots/settings_light.png?v=15) |
+| ![Climate, light](docs/screenshots/climate_light.png?v=17) | ![Energy, light](docs/screenshots/energy_light.png?v=17) |
+| ![Simple home, light](docs/screenshots/home_simple_light.png?v=17) | ![Settings, light](docs/screenshots/settings_light.png?v=17) |
 
 ### Climate
-![Climate](docs/screenshots/climate.png?v=15)
+![Climate](docs/screenshots/climate.png?v=17)
 Temperature in 1° steps (LO → HI), fan speed, combinable air direction, AUTO, A/C, ECO, recirculation and front / rear defrost.
 
 ### Keep climate on
-![Keep climate on, at a set time](docs/screenshots/climhold_menu_at_en.png?v=15)
+![Keep climate on, at a set time](docs/screenshots/climhold_menu_at_en.png?v=17)
 A camp mode, off by default (Settings › Home layout › *Keep climate on*), then a long press on MG4Dash's climate power button (home screen or Climate page). It keeps the car on with the climate running while you are away or sleeping in the car: **now** (for a set time or without limit), or **at a set time** in one or more runs with a pause between them.
 
 - After a countdown (20 s by default) **MG4Dash locks the doors itself**: get out and take the key with you. Do not lock with the key fob, which switches the whole car off, head unit included, and ends the mode.
@@ -114,22 +120,26 @@ A camp mode, off by default (Settings › Home layout › *Keep climate on*), th
 
 | | |
 |---|---|
-| ![Countdown before locking](docs/screenshots/climhold_countdown_en.png?v=15) | ![Status screen](docs/screenshots/climhold_screen_en.png?v=15) |
+| ![Countdown before locking](docs/screenshots/climhold_countdown_en.png?v=17) | ![Status screen](docs/screenshots/climhold_screen_en.png?v=17) |
 
 ### Energy
-![Energy](docs/screenshots/energy.png?v=15)
+![Energy](docs/screenshots/energy.png?v=17)
 Charging (start / stop, charge limit on firmwares where the car applies it, AC current, time left, AC input voltage and current, reason when the car stops charging, charging cable lock), scheduled charging, V2L (adapter state, stop threshold, start / stop), battery heating while driving (same switch as the stock Energy app) and consumption (since the last charge, current trip, last 1,000 km or last 12 months: driving, climate, accessories, energy and range recovered by braking, consumption curve).
 
 ### Vehicle
-![Vehicle](docs/screenshots/vehicle.png?v=15)
+![Vehicle](docs/screenshots/vehicle.png?v=17)
 Drive mode (including Eco, Snow and Custom where the car has them), regeneration (tap the gauge to change it; level 6 is one-pedal driving), driver assistance, tyre pressures and temperatures, and vehicle status, with a shortcut to MG4 Control.
 
 ### Sound
-![Sound](docs/screenshots/sound.png?v=16)
+![Sound](docs/screenshots/sound.png?v=17)
 Vehicle › *Sound*, or a long press on the play / pause button of the home screen. Drag the dot on the MG4 seen from above to set the balance (left / right) and the fader (front / rear), double tap or *Centre* to bring it back to the middle. The 5-band equaliser (80 Hz to 16 kHz) uses the car's presets (Classic, Jazz, Pop, Rock, Vocal) or your own curve (*User*, by moving a slider), with a *Loudness* switch and a *Flat* reset. A live spectrum of what is playing is shown faintly behind the sliders (Bluetooth, USB and apps; the radio may stay flat if its sound does not go through Android). The settings are the car's own, the same as in the stock sound menu.
 
+### Startup
+![Startup animation](docs/screenshots/splash.png?v=17)
+While the head unit starts, a short MG4Dash animation replaces Android's "Phone is starting" screen, and the home screen opens as soon as the system is ready.
+
 ### Phone
-![Phone](docs/screenshots/phone.png?v=15)
+![Phone](docs/screenshots/phone.png?v=17)
 Recent calls, contacts with a search field and a keypad, from the phone connected over Bluetooth. Calls go through the hands-free (HFP) account, like the stock phone app, whose in-call screen is kept.
 
 ### Battery health (estimated)
@@ -138,19 +148,16 @@ Shown on the Vehicle page. While driving, MG4Dash measures the energy actually t
 The car does not share the battery or motor temperature with the head unit, so MG4Dash cannot show them.
 
 ### Launcher settings
-![Settings](docs/screenshots/settings.png?v=15)
-Grouped by category in one scrolling page. Each on/off option is a single button that lights up when it is on.
+![Settings](docs/screenshots/settings.png?v=17)
+Five tabs along the top (Home, Look, Vehicle, Connections, System); the last tab used opens next time. Each on/off option is a single button that lights up when it is on. Dialogs and messages follow the MG4Dash theme, light or dark.
 
-| Section | Options |
+| Tab | Options |
 |---|---|
-| Home layout | Full, Simple or Map; vertical bar on the left; full screen (hides the SAIC side bar and banner); units (like the car, km · kWh/100 km, miles · mi/kWh); heated seats and steering wheel buttons (auto, yes, no); tyre pressure unit (auto, bar, psi, kPa); default map zoom; map colours (auto, light, dark); switch to the energy widget when offline; map layout stack back to the battery when plugged in; Keep climate on |
-| Theme | background, button colour, light / dark / auto (follows the car's lights) |
-| Energy | usable battery capacity (read from the car, measured, or set by hand), battery model for the health estimate, MG4 XPower, full-throttle special |
-| Home screen | replace the SAIC home, maintenance mode, briefly open the SAIC launcher at startup |
-| Update | check and install, include beta versions; Radio Dash update (SWI69 only) |
-| Weather | fallback city, or use my position |
-| Home Assistant | address, token, connection test |
-| Diagnostics | compatibility test, built-in log, energy data recorder |
+| Home | Full, Simple or Map; vertical bar on the left; full screen (hides the SAIC side bar and banner); live power in the energy card; map layout stack back to the battery when plugged in; default map zoom; map colours (auto, light, dark); hide the map buttons; shortcuts page in the map card; switch to the energy widget when offline |
+| Look | light / dark / auto (follows the car's lights), smooth light / dark switch, panel outline (fading or complete), background, button colour; full-throttle special |
+| Vehicle | units (like the car, km · kWh/100 km, miles · mi/kWh); tyre pressure unit (auto, bar, psi, kPa); heated seats and steering wheel buttons (auto, yes, no); Keep climate on; usable battery capacity (read from the car, measured, or set by hand), battery model for the health estimate, MG4 XPower |
+| Connections | weather (fallback city, or use my position); Home Assistant (address, token, connection test) |
+| System | replace the SAIC home, maintenance mode, briefly open the SAIC launcher at startup; update (check and install, include beta versions; Radio Dash update on SWI69); diagnostics (compatibility test, built-in log, energy data recorder) |
 
 **Update**: Settings › Update › Check downloads the latest MG4Dash release from GitHub and installs it (internet connection needed); turn on *Include beta versions* to also get the betas, numbered after the next release (1.4.1-beta0, 1.4.1-beta1…). When a new official (non-beta) release is out, MG4Dash also offers it in a popup at startup: *Update*, *Later*, or *Don't notify me again for this release*.
 
@@ -246,10 +253,13 @@ The SAIC launcher package (`com.saicmotor.launcher`) is never disabled: its serv
 - Long press "Android Auto" in the dock: Android Auto, CarPlay or another app
 - Tap or swipe the bottom-right widget (or the map layout stack): next page; long press a phone favourite to change it
 - Swipe the media card up / down: next audio source; tap its source name: source menu
-- Long press the set temperature: temperature calibration; long press fan minus: lowest fan speed
+- Long press the set temperature: temperature calibration; long press fan minus: lowest fan speed; long press A/C: intermittent A/C
+- Long press play / pause: Sound page
+- Steering wheel * button: 360 camera on / off
 - Swipe the weather card: hourly ↔ daily forecast
 - Tap a segment of the KERS gauge: regeneration level; long press: one-pedal driving
 - Button at the top right of the map: map → consumption → shortcuts; long press a shortcut to edit it
+- Long press the map: show another app in the map card
 - Map "recenter" button: resume following the car; press again to switch between north up and car heading up (green)
 
 ## Credits
