@@ -182,6 +182,11 @@ class Prefs(context: Context) {
         set(v) = sp.edit().putBoolean("fullscreen", v).apply()
 
     /** Widget central haut : 0 = carte OpenStreetMap, 1 = raccourcis. */
+    /** Passage jour / nuit : true = attente de 5 s et fondu (défaut), false = immédiat. */
+    var themeSmooth: Boolean
+        get() = sp.getBoolean("theme_smooth", true)
+        set(v) = sp.edit().putBoolean("theme_smooth", v).apply()
+
     var homeWidget: Int
         get() = sp.getInt("home_widget", 0)
         set(v) = sp.edit().putInt("home_widget", v).apply()

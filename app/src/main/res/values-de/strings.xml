@@ -472,6 +472,8 @@
     <string name="st_tab_car">Fahrzeug</string>
     <string name="st_tab_net">Verbindungen</string>
     <string name="st_tab_system">System</string>
+    <string name="st_theme_smooth">Sanfter Hell / Dunkel-Wechsel</string>
+    <string name="st_theme_smooth_desc">Wartet 5 s mit stabilem Licht (kein Wechsel unter Brücken) und blendet über 2 s über. Aus: wechselt sofort, wenn sich das Licht ändert.</string>
     <string name="aa_title">ANDROID AUTO</string>
     <string name="aa_ready">Telefon verbunden · Zum Öffnen tippen</string>
     <string name="aa_waiting">Telefon per USB verbinden</string>

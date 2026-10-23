@@ -472,6 +472,8 @@
     <string name="st_tab_car">Veicolo</string>
     <string name="st_tab_net">Connessioni</string>
     <string name="st_tab_system">Sistema</string>
+    <string name="st_theme_smooth">Transizione morbida chiaro / scuro</string>
+    <string name="st_theme_smooth_desc">Attende 5 s di luci stabili (nessun cambio sotto i ponti) e sfuma in 2 s. Disattivato: cambia appena cambiano le luci.</string>
     <string name="aa_title">ANDROID AUTO</string>
     <string name="aa_ready">Telefono connesso · Tocca per aprire</string>
     <string name="aa_waiting">Collega il telefono via USB</string>

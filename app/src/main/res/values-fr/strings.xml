@@ -472,6 +472,8 @@
     <string name="st_tab_car">Véhicule</string>
     <string name="st_tab_net">Connexions</string>
     <string name="st_tab_system">Système</string>
+    <string name="st_theme_smooth">Transition douce clair / sombre</string>
+    <string name="st_theme_smooth_desc">Attend 5 s de feux stables (pas de bascule sous les ponts) et passe en fondu sur 2 s. Désactivé : bascule dès que les feux changent.</string>
     <string name="aa_title">ANDROID AUTO</string>
     <string name="aa_ready">Téléphone connecté · Appuyer pour ouvrir</string>
     <string name="aa_waiting">Branchez votre téléphone en USB</string>
