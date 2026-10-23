@@ -467,6 +467,11 @@
     <string name="snd_loudness">Loudness</string>
     <string name="snd_loudness_hint">Le Loudness renforce graves et aigus à faible volume</string>
     <string name="snd_reset">À plat</string>
+    <string name="st_tab_home">Accueil</string>
+    <string name="st_tab_look">Apparence</string>
+    <string name="st_tab_car">Véhicule</string>
+    <string name="st_tab_net">Connexions</string>
+    <string name="st_tab_system">Système</string>
     <string name="aa_title">ANDROID AUTO</string>
     <string name="aa_ready">Téléphone connecté · Appuyer pour ouvrir</string>
     <string name="aa_waiting">Branchez votre téléphone en USB</string>

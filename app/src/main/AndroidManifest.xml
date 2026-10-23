@@ -20,6 +20,8 @@
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <!-- Page Son : spectre de la musique en cours (Visualizer sur la sortie audio) -->
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <!-- Fondu jour / nuit : image de l'ancien écran gardée au-dessus pendant la reconstruction -->
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
 
     <application

@@ -466,3 +466,8 @@ snd_vocal|Vocal|Voix|Stimme|Voz|Voce|Stem|Vokal
 snd_loudness|Loudness|Loudness|Loudness|Loudness|Loudness|Loudness|Loudness
 snd_loudness_hint|Loudness boosts bass and treble at low volume|Le Loudness renforce graves et aigus à faible volume|Loudness verstärkt Bässe und Höhen bei geringer Lautstärke|Loudness refuerza graves y agudos a bajo volumen|Loudness rinforza bassi e alti a basso volume|Loudness versterkt lage en hoge tonen bij laag volume|Loudness, düşük seste bas ve tizleri güçlendirir
 snd_reset|Flat|À plat|Linear|Plano|Piatto|Vlak|Düz
+st_tab_home|Home|Accueil|Startseite|Inicio|Home|Start|Ana ekran
+st_tab_look|Look|Apparence|Aussehen|Aspecto|Aspetto|Weergave|Görünüm
+st_tab_car|Vehicle|Véhicule|Fahrzeug|Vehículo|Veicolo|Voertuig|Araç
+st_tab_net|Connections|Connexions|Verbindungen|Conexiones|Connessioni|Verbindingen|Bağlantılar
+st_tab_system|System|Système|System|Sistema|Sistema|Systeem|Sistem

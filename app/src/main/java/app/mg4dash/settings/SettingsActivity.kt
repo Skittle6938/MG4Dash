@@ -47,6 +47,7 @@ class SettingsActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         prefs = Prefs(this)
         app.mg4dash.ui.Themes.apply(this)
+        themeSig = app.mg4dash.ui.Themes.signature(this)
         // Une seule zone qui défile : deux colonnes de catégories, sous un bandeau fixe
         // (titre, journal, fermer) qui laisse la place au bouton antibrouillards.
         val root = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; setPadding(dp(16), dp(12), dp(16), dp(12)) }
@@ -56,14 +57,38 @@ class SettingsActivity : AppCompatActivity() {
             text = getString(R.string.st_title, BuildConfig.VERSION_NAME); setTextColor(color(R.color.text_value))
             setTextSize(TypedValue.COMPLEX_UNIT_SP, 22f); typeface = Typeface.create("sans-serif-medium", Typeface.NORMAL)
         }, LinearLayout.LayoutParams(0, -2, 1f).apply { leftMargin = if (vertical) dp(12) else dp(app.mg4dash.ui.Kit.FOG_SAFE_DP - 8) })
-        top.addView(button(getString(R.string.st_close), R.color.accent_action) { finish() }, LinearLayout.LayoutParams(dp(200), dp(56)))
+        // Onglets (thèmes de réglages) dans le bandeau, à côté du titre
+        val tabBar = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL }
+        top.addView(tabBar, LinearLayout.LayoutParams(-2, dp(52)).apply { rightMargin = dp(16) })
+        top.addView(button(getString(R.string.st_close), R.color.accent_action) { finish() }, LinearLayout.LayoutParams(dp(160), dp(52)))
         root.addView(top, LinearLayout.LayoutParams(-1, -2).apply { bottomMargin = dp(12) })
-        val cols = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
-        val left = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
-        val right = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
-        cols.addView(left, LinearLayout.LayoutParams(0, -2, 1f).apply { rightMargin = dp(8) })
-        cols.addView(right, LinearLayout.LayoutParams(0, -2, 1f).apply { leftMargin = dp(8) })
-        root.addView(ScrollView(this).apply { isVerticalScrollBarEnabled = true; addView(cols) }, LinearLayout.LayoutParams(-1, 0, 1f))
+        val pages = android.widget.FrameLayout(this)
+        root.addView(pages, LinearLayout.LayoutParams(-1, 0, 1f))
+        val tabViews = mutableListOf<View>(); val tabChips = mutableListOf<TextView>()
+        fun showTab(i: Int) {
+            tabViews.forEachIndexed { k, v -> v.visibility = if (k == i) View.VISIBLE else View.GONE }
+            tabChips.forEachIndexed { k, c -> c.isSelected = k == i }
+            prefs.raw.edit().putInt("settings_tab", i).apply()
+        }
+        /** Un onglet : deux colonnes de panneaux dans une zone qui défile. */
+        fun tab(label: Int): Pair<LinearLayout, LinearLayout> {
+            val i = tabViews.size
+            val cols = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
+            val l = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
+            val r = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
+            cols.addView(l, LinearLayout.LayoutParams(0, -2, 1f).apply { rightMargin = dp(8) })
+            cols.addView(r, LinearLayout.LayoutParams(0, -2, 1f).apply { leftMargin = dp(8) })
+            val sv = ScrollView(this).apply { isVerticalScrollBarEnabled = true; addView(cols) }
+            pages.addView(sv, android.widget.FrameLayout.LayoutParams(-1, -1)); tabViews += sv
+            val chip = app.mg4dash.ui.Kit(this).toggleTile(getString(label)) { showTab(i) }.apply { textSize = 17f; setPadding(dp(22), 0, dp(22), 0) }
+            tabBar.addView(chip, LinearLayout.LayoutParams(-2, -1).apply { if (i > 0) leftMargin = dp(8) }); tabChips += chip
+            return l to r
+        }
+        val (homeL, homeR) = tab(R.string.st_tab_home)
+        val (lookL, lookR) = tab(R.string.st_tab_look)
+        val (carL, carR) = tab(R.string.st_tab_car)
+        val (netL, netR) = tab(R.string.st_tab_net)
+        val (sysL, sysR) = tab(R.string.st_tab_system)
         // Même dock (ou barre verticale) que les autres pages
         val dock = LinearLayout(this)
         root.addView(dock, LinearLayout.LayoutParams(-1, dp(84)).apply { topMargin = dp(12) })
@@ -71,32 +96,35 @@ class SettingsActivity : AppCompatActivity() {
         setContentView(root)
         app.mg4dash.ui.FadeOutline.applyTo(root)
 
-        // ════ Colonne gauche : ce qu'on voit à l'écran ════
-
-        // ── Accueil : style et options d'affichage ──
-        val style = panel(left, getString(R.string.st_style))
+        // ════ Onglet Accueil : disposition et carte ════
+        val style = panel(homeL, getString(R.string.st_style))
         text(style, getString(R.string.st_style_desc), 16f, R.color.text_title)
         row(style, *styleButtons(listOf(R.string.st_style_full, R.string.st_style_simple, R.string.st_style_map), { prefs.homeStyle }) { prefs.homeStyle = it })
-        text(style, getString(R.string.st_units), 18f, R.color.text_value)
-        row(style, *choiceButtons(listOf(getString(R.string.st_units_car), "km · kWh/100 km", "miles · mi/kWh"), { prefs.units }) { prefs.units = it })
-        text(style, getString(R.string.st_heated), 18f, R.color.text_value)
-        row(style, *choiceButtons(listOf(getString(R.string.st_mode_auto_short), getString(R.string.yes), getString(R.string.no)), { prefs.heatedSeats }) { prefs.heatedSeats = it })
-        text(style, getString(R.string.st_pressure), 18f, R.color.text_value)
-        row(style, *choiceButtons(listOf(getString(R.string.st_mode_auto_short), "bar", "psi", "kPa"), { prefs.pressureUnit }) { prefs.pressureUnit = it })
-        text(style, getString(R.string.st_map_zoom), 18f, R.color.text_value)
-        row(style, *choiceButtons(listOf("14", "15", "16", "17", "18"), { prefs.mapZoom - 14 }) { prefs.mapZoom = 14 + it })
-        text(style, getString(R.string.st_map_theme), 18f, R.color.text_value)
-        row(style, *styleButtons(listOf(R.string.st_mode_auto, R.string.st_mode_light, R.string.st_mode_dark), { prefs.mapTheme }) { prefs.mapTheme = it })
-        toggle(style, R.string.st_map_auto_hide, R.string.st_map_auto_hide_desc, { prefs.mapAutoHide }) { prefs.mapAutoHide = it }
-        toggle(style, R.string.st_shortcuts_page, R.string.st_shortcuts_page_desc, { prefs.shortcutsPage }) { prefs.shortcutsPage = it }
-        toggle(style, R.string.st_map_offline_switch, R.string.st_map_offline_switch_desc, { prefs.mapOfflineSwitch }) { prefs.mapOfflineSwitch = it }
         toggle(style, R.string.st_map_vdock, null, { prefs.verticalDock }) { prefs.verticalDock = it; app.mg4dash.ui.Themes.publish(this); recreate() }
         toggle(style, R.string.st_fullscreen, null, { prefs.fullscreen }) { prefs.fullscreen = it; Fullscreen.apply(this) }
+        toggle(style, R.string.st_energy_card_power, R.string.st_energy_card_power_desc, { prefs.energyCardPower }) { prefs.energyCardPower = it }
         toggle(style, R.string.st_stack_auto, null, { prefs.stackAuto }) { prefs.stackAuto = it }
-        toggle(style, R.string.st_climhold, R.string.st_climhold_desc, { prefs.climateHoldEnabled }) { prefs.climateHoldEnabled = it }
+        val map = panel(homeR, getString(R.string.st_style_map).uppercase())
+        text(map, getString(R.string.st_map_zoom), 18f, R.color.text_value)
+        row(map, *choiceButtons(listOf("14", "15", "16", "17", "18"), { prefs.mapZoom - 14 }) { prefs.mapZoom = 14 + it })
+        text(map, getString(R.string.st_map_theme), 18f, R.color.text_value)
+        row(map, *styleButtons(listOf(R.string.st_mode_auto, R.string.st_mode_light, R.string.st_mode_dark), { prefs.mapTheme }) { prefs.mapTheme = it })
+        toggle(map, R.string.st_map_auto_hide, R.string.st_map_auto_hide_desc, { prefs.mapAutoHide }) { prefs.mapAutoHide = it }
+        toggle(map, R.string.st_shortcuts_page, R.string.st_shortcuts_page_desc, { prefs.shortcutsPage }) { prefs.shortcutsPage = it }
+        toggle(map, R.string.st_map_offline_switch, R.string.st_map_offline_switch_desc, { prefs.mapOfflineSwitch }) { prefs.mapOfflineSwitch = it }
 
-        // ── Thème : fond et couleur des boutons ──
-        val theme = panel(left, getString(R.string.st_theme))
+        // ════ Onglet Véhicule : unités, équipements, climatisation ════
+        val units = panel(carL, getString(R.string.st_tab_car).uppercase())
+        text(units, getString(R.string.st_units), 18f, R.color.text_value)
+        row(units, *choiceButtons(listOf(getString(R.string.st_units_car), "km · kWh/100 km", "miles · mi/kWh"), { prefs.units }) { prefs.units = it })
+        text(units, getString(R.string.st_pressure), 18f, R.color.text_value)
+        row(units, *choiceButtons(listOf(getString(R.string.st_mode_auto_short), "bar", "psi", "kPa"), { prefs.pressureUnit }) { prefs.pressureUnit = it })
+        text(units, getString(R.string.st_heated), 18f, R.color.text_value)
+        row(units, *choiceButtons(listOf(getString(R.string.st_mode_auto_short), getString(R.string.yes), getString(R.string.no)), { prefs.heatedSeats }) { prefs.heatedSeats = it })
+        toggle(units, R.string.st_climhold, R.string.st_climhold_desc, { prefs.climateHoldEnabled }) { prefs.climateHoldEnabled = it }
+
+        // ════ Onglet Apparence : thème et effets ════
+        val theme = panel(lookL, getString(R.string.st_theme))
         text(theme, getString(R.string.st_theme_mode), 18f, R.color.text_value)
         row(theme, *styleButtons(listOf(R.string.st_mode_auto, R.string.st_mode_dark, R.string.st_mode_light), { prefs.themeMode }) {
             if (prefs.themeMode != it) { prefs.themeMode = it; onThemeChanged() }
@@ -112,7 +140,7 @@ class SettingsActivity : AppCompatActivity() {
         text(theme, getString(R.string.st_theme_desc), 16f, R.color.text_title)
 
         // ── Énergie ──
-        val energy = panel(left, getString(R.string.title_energy))
+        val energy = panel(carR, getString(R.string.title_energy))
         val cap = text(energy, "", 18f, R.color.text_value)
         val capSrc = text(energy, "", 16f, R.color.text_title)
         fun showCap() {
@@ -140,13 +168,12 @@ class SettingsActivity : AppCompatActivity() {
         val models = app.mg4dash.energy.BatteryCapacity.MODELS.map { it.first }
         row(energy, *choiceButtons(models.map { "$it kWh" }, { models.indexOf(prefs.batteryModel) }) { prefs.batteryModel = models[it] })
         toggle(energy, R.string.st_xpower, R.string.st_xpower_desc, { prefs.xpower }) { prefs.xpower = it }
-        toggle(energy, R.string.st_energy_card_power, R.string.st_energy_card_power_desc, { prefs.energyCardPower }) { prefs.energyCardPower = it }
-        powerFxSetting(energy)
+        powerFxSetting(panel(lookR, getString(R.string.sw_power)))
 
         // ════ Colonne droite : système, connexions, diagnostic ════
 
         // ── Écran d'accueil de la voiture et démarrage ──
-        val valet = panel(right, getString(R.string.st_home))
+        val valet = panel(sysL, getString(R.string.st_home))
         homeState = text(valet, "", 19f, R.color.text_sub)
         text(valet, getString(R.string.st_home_desc), 16f, R.color.text_title)
         row(valet,
@@ -157,7 +184,7 @@ class SettingsActivity : AppCompatActivity() {
         text(valet, getString(R.string.st_adb), 14f, R.color.text_title)
 
         // ── Mise à jour depuis GitHub ──
-        val upd = panel(right, getString(R.string.st_update))
+        val upd = panel(sysR, getString(R.string.st_update))
         val updState = text(upd, getString(R.string.st_update_installed, BuildConfig.VERSION_NAME), 18f, R.color.text_value)
         text(upd, getString(R.string.st_update_desc), 16f, R.color.text_title)
         fun install(r: app.mg4dash.system.Updater.Release) {
@@ -210,7 +237,7 @@ class SettingsActivity : AppCompatActivity() {
         radioDashUpdate(upd)
 
         // ── Météo ──
-        val weather = panel(right, getString(R.string.title_weather))
+        val weather = panel(netL, getString(R.string.title_weather))
         val city = text(weather, "", 18f, R.color.text_value)
         fun showCity() { city.text = getString(R.string.st_city, prefs.weatherCity) }
         showCity()
@@ -232,7 +259,7 @@ class SettingsActivity : AppCompatActivity() {
         })
 
         // ── Home Assistant ──
-        val ha = panel(right, "HOME ASSISTANT")
+        val ha = panel(netR, "HOME ASSISTANT")
         val haState = text(ha, "", 18f, R.color.text_value)
         fun showHa() {
             haState.text = getString(R.string.st_ha_url, prefs.haUrl.ifBlank { "—" }) + "\n" +
@@ -255,7 +282,7 @@ class SettingsActivity : AppCompatActivity() {
         )
 
         // ── Diagnostic : compatibilité, journal, enregistreur ──
-        val diag = panel(right, getString(R.string.st_diag))
+        val diag = panel(sysL, getString(R.string.st_diag))
         text(diag, getString(R.string.st_compat_fw, app.mg4dash.system.Firmware.version, app.mg4dash.system.Firmware.gen.name), 18f, R.color.text_value)
             .apply { setOnLongClickListener { sprChrgTest(); true } }   // test caché, réservé aux essais
         text(diag, getString(if (app.mg4dash.system.Firmware.tested) R.string.st_compat_tested else R.string.st_compat_beta), 16f, R.color.text_title)
@@ -266,11 +293,28 @@ class SettingsActivity : AppCompatActivity() {
         toggle(diag, R.string.st_energy_log, R.string.st_energy_log_desc, { prefs.energyLog }) { prefs.energyLog = it }
 
         refreshHome()
+        showTab(prefs.raw.getInt("settings_tab", 0).coerceIn(0, tabViews.size - 1))
+    }
+
+    /** Mode auto : bascule jour / nuit aussi pendant que les réglages sont ouverts. */
+    private var themeSig = 0
+    private val themeHandler = android.os.Handler(android.os.Looper.getMainLooper())
+    private val themeWatch = object : Runnable {
+        override fun run() {
+            if (app.mg4dash.ui.Themes.signature(this@SettingsActivity) != themeSig) { app.mg4dash.ui.Themes.publish(this@SettingsActivity); app.mg4dash.ui.Themes.recreateSmooth(this@SettingsActivity); return }
+            themeHandler.postDelayed(this, 5000)
+        }
     }
 
     override fun onResume() {
         super.onResume()
         Fullscreen.apply(this)
+        themeHandler.postDelayed(themeWatch, 5000)
+    }
+
+    override fun onPause() {
+        super.onPause()
+        themeHandler.removeCallbacks(themeWatch)
     }
 
     /**
