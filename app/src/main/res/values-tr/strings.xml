@@ -467,6 +467,11 @@
     <string name="snd_loudness">Loudness</string>
     <string name="snd_loudness_hint">Loudness, düşük seste bas ve tizleri güçlendirir</string>
     <string name="snd_reset">Düz</string>
+    <string name="st_tab_home">Ana ekran</string>
+    <string name="st_tab_look">Görünüm</string>
+    <string name="st_tab_car">Araç</string>
+    <string name="st_tab_net">Bağlantılar</string>
+    <string name="st_tab_system">Sistem</string>
     <string name="aa_title">ANDROID AUTO</string>
     <string name="aa_ready">Telefon bağlı · Açmak için dokunun</string>
     <string name="aa_waiting">Telefonunuzu USB ile bağlayın</string>

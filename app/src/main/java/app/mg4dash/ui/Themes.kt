@@ -86,56 +86,54 @@ object Themes {
         fadeFromPrevious(activity)
     }
 
-    /** Image de l'écran avant un changement de thème, fondue sur le nouvel écran. */
-    private var fadeShot: android.graphics.Bitmap? = null
     private const val FADE_MS = 2_000L
+    /** Fenêtre posée au-dessus de tout pendant la recréation (garde l'ancienne image, sans noir). */
+    private var fadeWindow: android.widget.ImageView? = null
 
-    /** Change de thème (jour / nuit…) en fondu : capture de l'écran actuel, puis recréation. */
+    /**
+     * Change de thème (jour / nuit…) en fondu. L'image de l'écran actuel est posée dans une petite
+     * fenêtre système au-dessus de tout, qui survit à la recréation de l'activité : pendant que
+     * l'écran se reconstruit (court passage au noir d'Android), on voit toujours l'ancienne image,
+     * puis elle s'efface en fondu sur le nouvel écran.
+     */
     fun recreateSmooth(activity: Activity) {
-        try {
+        val shot = try {
             val v = activity.window.decorView
-            if (v.width > 0 && v.height > 0) {
-                val b = android.graphics.Bitmap.createBitmap(v.width, v.height, android.graphics.Bitmap.Config.ARGB_8888)
-                v.draw(android.graphics.Canvas(b)); fadeShot = b
-            }
-        } catch (_: Throwable) { fadeShot = null }
+            if (v.width > 0 && v.height > 0) android.graphics.Bitmap.createBitmap(v.width, v.height, android.graphics.Bitmap.Config.ARGB_8888)
+                .also { v.draw(android.graphics.Canvas(it)) } else null
+        } catch (_: Throwable) { null }
+        if (shot != null) try {
+            val app = activity.applicationContext
+            val wm = app.getSystemService(Context.WINDOW_SERVICE) as android.view.WindowManager
+            fadeWindow?.let { old -> try { wm.removeView(old) } catch (_: Throwable) {} }
+            val img = android.widget.ImageView(app).apply { setImageBitmap(shot); scaleType = android.widget.ImageView.ScaleType.FIT_XY }
+            val lp = android.view.WindowManager.LayoutParams(
+                android.view.WindowManager.LayoutParams.MATCH_PARENT, android.view.WindowManager.LayoutParams.MATCH_PARENT,
+                android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+                android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE or
+                    android.view.WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or android.view.WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS or
+                    android.view.WindowManager.LayoutParams.FLAG_FULLSCREEN,
+                android.graphics.PixelFormat.TRANSLUCENT,
+            ).apply { gravity = android.view.Gravity.TOP or android.view.Gravity.START; x = 0; y = 0; windowAnimations = 0 }
+            wm.addView(img, lp)
+            fadeWindow = img
+            // Fondu image par image (sans animateur : l'échelle des animations peut être à 0 sur la voiture),
+            // après un court délai pour laisser le nouvel écran se dessiner dessous
+            val t0 = android.os.SystemClock.uptimeMillis() + 400
+            img.post(object : Runnable {
+                override fun run() {
+                    val k = (android.os.SystemClock.uptimeMillis() - t0).toFloat() / FADE_MS
+                    if (k >= 1f) { try { wm.removeView(img) } catch (_: Throwable) {}; if (fadeWindow === img) fadeWindow = null; shot.recycle(); return }
+                    img.alpha = 1f - k.coerceAtLeast(0f).let { it * it * (3 - 2 * it) }
+                    img.postDelayed(this, 16)
+                }
+            })
+        } catch (e: Throwable) { android.util.Log.w("MG4L.Theme", "fondu : ${e.message}") }
         activity.recreate()
     }
 
-    /** Le fondu est posé quand le nouvel écran est affiché (onResume), contenu déjà en place. */
-    private fun fadeFromPrevious(activity: Activity) {
-        if (fadeShot == null || fadeHooked === activity.application) return
-        fadeHooked = activity.application
-        activity.application.registerActivityLifecycleCallbacks(object : android.app.Application.ActivityLifecycleCallbacks {
-            override fun onActivityResumed(a: Activity) {}
-            // Posé dès la fin de onCreate (contenu en place) : la toute première image du nouvel
-            // écran est déjà l'ancienne, sans le court passage au noir d'avant le fondu
-            override fun onActivityCreated(a: Activity, b: android.os.Bundle?) {
-                val shot = fadeShot ?: return
-                fadeShot = null
-                val root = a.window.decorView as? android.view.ViewGroup ?: return
-                val img = android.widget.ImageView(a).apply { setImageBitmap(shot); scaleType = android.widget.ImageView.ScaleType.FIT_XY; elevation = 1000f }
-                root.addView(img, android.view.ViewGroup.LayoutParams(-1, -1))
-                // Fondu image par image, sans animateur : sur la voiture, l'échelle des animations
-                // d'Android peut être à 0 et le fondu passait alors instantanément
-                val t0 = android.os.SystemClock.uptimeMillis() + 150
-                img.post(object : Runnable {
-                    override fun run() {
-                        val k = (android.os.SystemClock.uptimeMillis() - t0).toFloat() / FADE_MS
-                        if (k >= 1f) { root.removeView(img); shot.recycle(); return }
-                        img.alpha = 1f - k.coerceAtLeast(0f).let { it * it * (3 - 2 * it) }
-                        img.postDelayed(this, 16)
-                    }
-                })
-            }
-            override fun onActivityStarted(a: Activity) {}
-            override fun onActivityPaused(a: Activity) {}
-            override fun onActivityStopped(a: Activity) {}
-            override fun onActivitySaveInstanceState(a: Activity, b: android.os.Bundle) {}
-            override fun onActivityDestroyed(a: Activity) {}
-        })
-    }
-    private var fadeHooked: android.app.Application? = null
+    @Suppress("UNUSED_PARAMETER")
+    private fun fadeFromPrevious(activity: Activity) {}
 
     /**
      * Écran moins haut que la dalle (barres SAIC affichées hors plein écran, #43) : tout est

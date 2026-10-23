@@ -118,6 +118,14 @@ class ScreenshotTest {
         }
     }
 
+    /** Réglages en onglets (maquette) : un rendu par onglet, en français. */
+    @Test @Config(qualifiers = "fr-w1920dp-h720dp-land-mdpi") fun settingsTabs() {
+        for (t in 0..4) {
+            org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE).edit().putInt("settings_tab", t).commit()
+            shoot(SettingsActivity::class.java, "settings_tab$t.png")
+        }
+    }
+
     @Test fun settingsBottomBar() {
         org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE)
             .edit().putBoolean("vertical_dock", false).commit()
