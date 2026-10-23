@@ -1,5 +1,6 @@
 package app.mg4dash.shortcuts
 
+import app.mg4dash.ui.Toasts as ToastsUi
 import android.app.Activity
 import android.app.AlertDialog
 import android.content.ComponentName
@@ -164,7 +165,7 @@ object Shortcuts {
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED))
         } catch (e: Exception) {
             Log.w(TAG, "ouverture ${cn.flattenToShortString()} : ${e.message}")
-            Toast.makeText(activity, activity.getString(R.string.app_unavailable, appLabel(activity, cn)), Toast.LENGTH_SHORT).show()
+            app.mg4dash.ui.Toasts.show(activity, activity.getString(R.string.app_unavailable, appLabel(activity, cn)))
         }
     }
 
@@ -236,7 +237,7 @@ object Shortcuts {
     private fun pickHa(activity: Activity, onPick: (String, String) -> Unit) {
         val prefs = Prefs(activity)
         if (prefs.haUrl.isBlank() || prefs.haToken.isBlank()) {
-            Toast.makeText(activity, R.string.ha_not_configured, Toast.LENGTH_LONG).show(); return
+            app.mg4dash.ui.Toasts.show(activity, R.string.ha_not_configured, long = true); return
         }
         thread {
             val result = try {
@@ -250,7 +251,7 @@ object Shortcuts {
             }
             main.post {
                 if (activity.isFinishing) return@post
-                if (result == null) { Toast.makeText(activity, R.string.ha_error, Toast.LENGTH_LONG).show(); return@post }
+                if (result == null) { app.mg4dash.ui.Toasts.show(activity, R.string.ha_error, long = true); return@post }
                 val labels = result.map { (id, name) -> if (name.isNotBlank()) "$name  ·  $id" else id }
                 searchList(activity, activity.getString(R.string.sc_ha), labels) { w ->
                     result[w].let { (id, name) -> onPick(id, name.ifBlank { id.substringAfter('.') }) }
@@ -321,7 +322,7 @@ object Shortcuts {
                 Log.w(TAG, "action ${slot.entityId} : ${e.message}"); false
             }
             main.post {
-                Toast.makeText(app, app.getString(if (ok) R.string.ha_sent else R.string.ha_error_action, slot.label), Toast.LENGTH_SHORT).show()
+                ToastsUi.show(app, app.getString(if (ok) R.string.ha_sent else R.string.ha_error_action, slot.label))
             }
         }
     }

@@ -108,7 +108,7 @@ class ClimateHoldActivity : AppCompatActivity() {
         bottom.addView(battery, kit.lp(0, -2, 1f))
         bottom.addView(kit.toggleTile(getString(R.string.dm_hold_stop)) {}.apply {
             textSize = 24f
-            setOnClickListener { android.widget.Toast.makeText(this@ClimateHoldActivity, R.string.dm_hold_stop, android.widget.Toast.LENGTH_SHORT).show() }
+            setOnClickListener { app.mg4dash.ui.Toasts.show(this@ClimateHoldActivity, R.string.dm_hold_stop) }
             setOnLongClickListener { ClimateHold.stop("bouton de l'écran"); finish(); true }
         }, kit.lp(kit.dp(330), kit.dp(72)))
         right.addView(bottom, kit.lp(-1, -2, t = 24))

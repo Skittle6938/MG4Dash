@@ -259,7 +259,7 @@ object Dock {
                         // Appui long : éteindre la voiture (#12), sans confirmation, mais jamais en roulant
                         override fun onLongPress(e: android.view.MotionEvent) {
                             if (!app.mg4dash.car.CarBridge.powerOffCar())
-                                android.widget.Toast.makeText(activity, R.string.power_off_driving, android.widget.Toast.LENGTH_SHORT).show()
+                                app.mg4dash.ui.Toasts.show(activity, R.string.power_off_driving)
                         }
                         override fun onDown(e: android.view.MotionEvent) = true
                     })
@@ -281,9 +281,9 @@ object Dock {
                         override fun onSingleTapConfirmed(e: android.view.MotionEvent): Boolean { open(activity, item, current); return true }
                         override fun onDoubleTap(e: android.view.MotionEvent): Boolean {
                             val nowLocked = app.mg4dash.car.CarBridge.toggleDoors()
-                            android.widget.Toast.makeText(activity, when (nowLocked) {
+                            app.mg4dash.ui.Toasts.show(activity, when (nowLocked) {
                                 true -> R.string.doors_locked; false -> R.string.doors_unlocked; null -> R.string.doors_unknown
-                            }, android.widget.Toast.LENGTH_SHORT).show()
+                            })
                             return true
                         }
                         override fun onLongPress(e: android.view.MotionEvent) {
