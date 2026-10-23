@@ -1066,7 +1066,11 @@ class MainActivity : AppCompatActivity() {
             setTextColor(color(colorRes)); setTextSize(TypedValue.COMPLEX_UNIT_SP, sp); gravity = g; maxLines = 1; fontFeatureSettings = "tnum"
         }
         powerValue = tv(26f, R.color.text_value, Gravity.START)
-        powerExtra = tv(15f, R.color.text_sub, Gravity.CENTER).apply { maxLines = 2; setLineSpacing(0f, 0.95f) }
+        // V · A sur une ligne, 50 % plus grands qu'avant (#29), réduits seulement si la place manque
+        powerExtra = tv(22f, R.color.text_value, Gravity.CENTER).apply {
+            maxLines = 1
+            setAutoSizeTextTypeUniformWithConfiguration(12, 22, 1, TypedValue.COMPLEX_UNIT_SP)
+        }
         powerAvg = tv(26f, R.color.text_value, Gravity.END)
         powerLabel = null
         row.addView(powerValue, LinearLayout.LayoutParams(-2, -2))
@@ -1129,7 +1133,7 @@ class MainActivity : AppCompatActivity() {
             if (builtMode != 1) return
         }
         val regen = kw != null && kw < -0.05f && !plugged
-        powerValue?.text = kw?.let { String.format(Locale.getDefault(), "%.1f kW", kotlin.math.abs(it)) } ?: "—"
+        powerValue?.text = kw?.let { String.format(Locale.getDefault(), "%.1f kW", kotlin.math.abs(it)) } ?.let { if (cardPower) halfUnit(it) else it } ?: "—"
         powerValue?.setTextColor(color(if (regen) R.color.accent_energy else R.color.text_value))
         powerLabel?.text = getString(when { plugged -> R.string.sw_charging; regen -> R.string.sw_recovering; else -> R.string.sw_drawn })
         powerBar?.kw = if (plugged) 0f else kw ?: 0f
@@ -1150,14 +1154,14 @@ class MainActivity : AppCompatActivity() {
             fx.update(if (plugged) 0f else kw ?: 0f, bar.peakKw * 0.8f, bar.peakKw)
         }
         val avg = app.mg4dash.energy.EnergyMonitor.sinceStart.value.per100
-        powerAvg?.text = avg?.let { "${app.mg4dash.system.Units.consText(this, it)} ${if (app.mg4dash.system.Units.miles(this)) "mi/kWh" else "kWh/100"}" } ?: "—"
+        powerAvg?.text = avg?.let { "${app.mg4dash.system.Units.consText(this, it)} ${if (app.mg4dash.system.Units.miles(this)) "mi/kWh" else "kWh/100"}" }?.let { if (cardPower) halfUnit(it) else it } ?: "—"
         if (cardPower) powerExtra?.let { tv ->
             val trip = app.mg4dash.energy.EnergyMonitor.tripSeq
             if (trip != minMaxTrip) { if (minMaxTrip >= 0) { minVolts = null; maxAmps = null }; minMaxTrip = trip }
             volts?.let { v -> minVolts = minOf(minVolts ?: v, v) }
             amps?.let { a -> if (a > 0f) maxAmps = maxOf(maxAmps ?: a, a) }
-            // Deux lignes : tension · tension mini, courant · courant maxi (mini et maxi estompés)
-            val dim = color(R.color.text_disabled)
+            // Une ligne : tension · tension mini | courant · courant maxi (mini et maxi légèrement estompés, #29)
+            val dim = color(R.color.text_sub)
             fun line(now: String?, extreme: String?): CharSequence = android.text.SpannableStringBuilder().apply {
                 append(now ?: "—")
                 extreme?.let { val st = length; append("  ·  $it"); setSpan(android.text.style.ForegroundColorSpan(dim), st, length, 0) }
@@ -1170,7 +1174,7 @@ class MainActivity : AppCompatActivity() {
             }
             tv.text = android.text.SpannableStringBuilder()
                 .append(line(volts?.let { String.format(Locale.getDefault(), "%.0f V", it) }, minVolts?.let { String.format(Locale.getDefault(), "%.0f V min", it) }))
-                .append("\n")
+                .append(android.text.SpannableString("   |   ").apply { setSpan(android.text.style.ForegroundColorSpan(color(R.color.text_disabled)), 0, length, 0) })
                 .append(ampsTxt ?: "—").append(maxAmps?.let { m ->
                     android.text.SpannableString(String.format(Locale.getDefault(), "  ·  %.1f A max", m)).apply { setSpan(android.text.style.ForegroundColorSpan(dim), 0, length, 0) }
                 } ?: "")

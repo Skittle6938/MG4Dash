@@ -72,6 +72,7 @@ object UpdatePrompt {
         fun button(label: Int, colorRes: Int, onClick: () -> Unit) = Button(activity).apply {
             setText(label); isAllCaps = false; setTextColor(kit.color(colorRes)); setTextSize(TypedValue.COMPLEX_UNIT_SP, 19f)
             setBackgroundResource(R.drawable.bg_button); minHeight = kit.dp(56); setPadding(kit.dp(20), 0, kit.dp(20), 0)
+            stateListAnimator = null; elevation = 0f   // pas de relief ni d'ombre (style Material), comme les autres boutons
             setOnClickListener { onClick() }
         }
         val buttons = kit.row()

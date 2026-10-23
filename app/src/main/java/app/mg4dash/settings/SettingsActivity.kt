@@ -570,6 +570,7 @@ class SettingsActivity : AppCompatActivity() {
         Button(this).apply {
             text = label; isAllCaps = false; setTextColor(color(accentRes)); setTextSize(TypedValue.COMPLEX_UNIT_SP, 19f)
             setBackgroundResource(R.drawable.bg_button); minHeight = dp(56); setPadding(dp(20), 0, dp(20), 0)
+            stateListAnimator = null; elevation = 0f   // pas de relief ni d'ombre (style Material), comme les autres boutons
             setOnClickListener { onClick() }
         }
 
@@ -588,9 +589,12 @@ class SettingsActivity : AppCompatActivity() {
             val on = get()
             btn.text = getString(if (on) R.string.yes else R.string.no)
             btn.isSelected = on
-            btn.setTextColor(color(if (on) R.color.accent_action else R.color.text_title))
         }
-        btn = button("") { set(!get()); paint() }.apply { setBackgroundResource(R.drawable.bg_chip) }
+        btn = button("") { set(!get()); paint() }.apply {
+            setBackgroundResource(R.drawable.bg_chip)
+            setTextColor(androidx.core.content.ContextCompat.getColorStateList(this@SettingsActivity, R.color.chip_text))
+            typeface = Typeface.create("sans-serif-medium", Typeface.NORMAL); letterSpacing = 0.04f
+        }
         paint()
         line.addView(btn, LinearLayout.LayoutParams(dp(130), dp(56)))
         parent.addView(line, LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(12) })
@@ -601,9 +605,13 @@ class SettingsActivity : AppCompatActivity() {
         lateinit var buttons: List<Button>
         fun paint() = buttons.forEachIndexed { i, btn ->
             btn.isSelected = i == current()
-            btn.setTextColor(color(if (i == current()) R.color.accent_action else R.color.text_value))
         }
-        buttons = labels.mapIndexed { i, l -> button(l) { onPick(i); paint() }.apply { setBackgroundResource(R.drawable.bg_chip) } }
+        // Même style que les onglets (puces) : texte de la couleur de sélection quand choisi
+        buttons = labels.mapIndexed { i, l -> button(l) { onPick(i); paint() }.apply {
+            setBackgroundResource(R.drawable.bg_chip)
+            setTextColor(androidx.core.content.ContextCompat.getColorStateList(this@SettingsActivity, R.color.chip_text))
+            typeface = Typeface.create("sans-serif-medium", Typeface.NORMAL); letterSpacing = 0.04f
+        } }
         paint()
         return buttons.toTypedArray()
     }
