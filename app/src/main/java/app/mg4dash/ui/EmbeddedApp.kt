@@ -31,9 +31,11 @@ object EmbeddedApp {
                     start.invoke(view, intent)
                     Log.i(TAG, "${cn.flattenToShortString()} lancée dans le widget carte")
                 } catch (e: java.lang.reflect.InvocationTargetException) {
-                    if (n < 20) tryStart(n + 1) else Log.w(TAG, "lancement impossible : ${e.cause?.message}")
+                    // Pas de limite : l'écran virtuel n'existe que quand l'accueil est affiché (sinon le widget restait noir)
+                    if (n == 20) Log.w(TAG, "en attente de l'écran virtuel : ${e.cause?.message}")
+                    tryStart(n + 1)
                 }
-            }, 300)
+            }, if (n < 20) 300L else 1000L)
         }
         // Taille changée (plein écran) : l'écran virtuel de l'appli suit la nouvelle taille, sinon
         // l'appli garde l'ancienne largeur et le reste du widget reste noir
@@ -70,14 +72,16 @@ object EmbeddedApp {
         } catch (e: Throwable) { Log.w(TAG, "policy_control : ${e.message}") }
     }
 
-    private fun resize(v: View) {
-        if (v.width <= 0 || v.height <= 0) return
+    private fun resize(v: View) = resizeTo(v, v.width, v.height)
+
+    private fun resizeTo(v: View, w: Int, h: Int) {
+        if (w <= 0 || h <= 0) return
         try {
             val f = v.javaClass.getDeclaredField("mVirtualDisplay").apply { isAccessible = true }
             val vd = f.get(v) as? android.hardware.display.VirtualDisplay ?: return
             val dpi = v.resources.displayMetrics.densityDpi
-            vd.resize(v.width, v.height, dpi)
-            Log.i(TAG, "écran virtuel redimensionné : ${v.width}×${v.height}")
+            vd.resize(w, h, dpi)
+            Log.i(TAG, "écran virtuel redimensionné : ${w}×${h}")
         } catch (e: Throwable) { Log.w(TAG, "redimensionnement : ${e.message}") }
     }
 
