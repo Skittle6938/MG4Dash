@@ -1166,6 +1166,7 @@ class MainActivity : AppCompatActivity() {
         // V / A en option (#29) : sans eux, kW et conso moyenne prennent la place et grossissent
         val va = prefs.powerVa
         if (!va) { powerExtra?.visibility = View.INVISIBLE; powerValue?.setTextSize(TypedValue.COMPLEX_UNIT_SP, 30f); powerAvg?.setTextSize(TypedValue.COMPLEX_UNIT_SP, 30f) }
+        else row.addOnLayoutChangeListener { v, l, _, r, _, ol, _, or_, _ -> if (r - l != or_ - ol && r > l) v.post { fixVaSize(r - l) } }
         powerFx = app.mg4dash.ui.PowerFx(this).also { fx ->
             fx.onBadge = { on -> if (va) powerExtra?.animate()?.alpha(if (on) 0f else 1f)?.setDuration(250)?.start() }
         }
@@ -1181,6 +1182,27 @@ class MainActivity : AppCompatActivity() {
             val sz = if (va) 22f else 28f
             powerValue?.setTextSize(TypedValue.COMPLEX_UNIT_SP, sz); powerAvg?.setTextSize(TypedValue.COMPLEX_UNIT_SP, sz)
         }
+    }
+
+    /**
+     * Ligne V / A à taille fixe (#29) : kW et conso moyenne prennent la largeur de leurs valeurs les plus
+     * longues, et le V / A la taille qui fait tenir sa ligne la plus longue dans ce qui reste. Elle ne
+     * rétrécit plus quand les chiffres changent.
+     */
+    private fun fixVaSize(rowW: Int) {
+        val pv = powerValue ?: return; val pa = powerAvg ?: return; val ex = powerExtra ?: return
+        val unit = android.graphics.Paint(pv.paint).apply { textSize = (powerBar?.labelSp ?: 15f) * resources.displayMetrics.scaledDensity }
+        val wv = (pv.paint.measureText("188.8") + unit.measureText(" kW")).toInt() + 2
+        val wa = (pa.paint.measureText("88.8") + unit.measureText(" kWh/100")).toInt() + 2
+        (pv.layoutParams as LinearLayout.LayoutParams).width = wv
+        (pa.layoutParams as LinearLayout.LayoutParams).width = wa
+        ex.setAutoSizeTextTypeWithDefaults(TextView.AUTO_SIZE_TEXT_TYPE_NONE)
+        val room = rowW - wv - wa - (12 * resources.displayMetrics.density)
+        val probe = android.graphics.Paint(ex.paint).apply { textSize = 22f * resources.displayMetrics.scaledDensity }
+        val worst = probe.measureText("888 V  ·  888 min   |   888.8 A  ·  888.8 max")
+        val sp = (22f * minOf(1f, room / worst)).coerceAtLeast(12f)
+        ex.setTextSize(TypedValue.COMPLEX_UNIT_SP, sp)
+        pv.requestLayout()
     }
 
     /** Unités kW et kWh/100 à la taille des graduations de la barre de puissance (#29). */

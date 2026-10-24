@@ -478,8 +478,8 @@
     <string name="st_hide_saic_climate_desc">Quando MG4Dash accende il clima, il launcher originale apre la sua schermata clima: MG4Dash torna davanti.</string>
     <string name="en_trips_note">%1$d viaggi, un punto per viaggio · media %2$s (tratteggiata)</string>
     <string name="en_trips_wait">La curva si riempie viaggio dopo viaggio (almeno 2 km per viaggio).</string>
-    <string name="en_curve_note">Un punto per km (uno al minuto da fermo) · media %1$s (tratteggiata)</string>
-    <string name="en_curve_wait">La curva si riempie guidando, un punto per km.</string>
+    <string name="en_curve_note">Un punto ogni 0,5 km (uno al minuto da fermo) · media %1$s (tratteggiata)</string>
+    <string name="en_curve_wait">La curva si riempie guidando, un punto ogni 0,5 km.</string>
     <string name="projection_no_phone">Nessun telefono collegato ad Android Auto o CarPlay</string>
     <string name="st_power_va">Tensione e corrente sotto la barra di potenza</string>
     <string name="st_power_va_desc">Attuali, minimo e massimo del viaggio. Disattivato: potenza e consumo medio più grandi.</string>

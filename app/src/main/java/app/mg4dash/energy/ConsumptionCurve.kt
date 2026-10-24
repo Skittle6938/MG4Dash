@@ -15,14 +15,16 @@ import kotlinx.coroutines.launch
 /**
  * Courbes de consommation (#44), à partir de l'énergie mesurée par [EnergyMonitor] (tension × courant,
  * récupération déduite) plutôt que de la conso instantanée de la voiture, trop bruitée :
- *  - trajet en cours : un point par km (kWh nets du km × 100), et à l'arrêt voiture allumée un point
- *    par minute, compté comme 1 km ; vidée à chaque démarrage ;
+ *  - trajet en cours : un point tous les 0,5 km (kWh nets × 100 / km), et à l'arrêt voiture allumée un
+ *    point par minute, compté comme 0,5 km ; vidée à chaque démarrage ;
  *  - depuis la recharge : les points de tous les trajets depuis la dernière recharge ;
  *  - 12 derniers mois : un point par trajet (sa moyenne), à partir de 2 km.
  */
 object ConsumptionCurve {
     private const val TAG = "ConsCurve"
-    private const val MAX_POINTS = 600
+    private const val MAX_POINTS = 1000
+    /** Un point tous les 0,5 km (#44), distance tirée de la vitesse ; à l'arrêt une minute compte pour autant. */
+    private const val STEP_KM = 0.5f
     private const val YEAR_MS = 365L * 24 * 3600 * 1000
 
     data class Curves(
@@ -66,6 +68,8 @@ object ConsumptionCurve {
             var stillSince = android.os.SystemClock.elapsedRealtime()
             var lastStart = EnergyMonitor.Totals()
             var lastChargeOut = EnergyMonitor.sinceCharge.value.outKwh
+            var lastTick = android.os.SystemClock.elapsedRealtime()
+            var dist = 0f   // km parcourus depuis le dernier point (vitesse intégrée)
             while (true) {
                 delay(1000)
                 val start = EnergyMonitor.sinceStart.value
@@ -80,7 +84,7 @@ object ConsumptionCurve {
                         Log.i(TAG, "trajet fini : ${lastStart.km} km, ${"%.1f".format(java.util.Locale.US, avg)} kWh/100")
                     }
                     seq = EnergyMonitor.tripSeq
-                    trip = emptyList(); lastKm = start.km; lastNet = start.netKwh; stillSince = tick
+                    trip = emptyList(); lastKm = start.km; lastNet = start.netKwh; stillSince = tick; dist = 0f
                     changed = true
                 }
                 // Recharge : les kWh depuis la recharge repartent de zéro
@@ -91,14 +95,21 @@ object ConsumptionCurve {
 
                 val net = start.netKwh
                 val plugged = app.mg4dash.car.VehicleState.isPlugged(CarBridge.state.value.chargeStatus)
+                val speed = CarBridge.state.value.speedKmh
+                val dt = (tick - lastTick).coerceIn(0L, 5000L)
+                lastTick = tick
+                if (speed != null && speed > 0f) dist += speed * dt / 3_600_000f
                 val point: Float? = when {
-                    plugged -> { lastNet = net; stillSince = tick; null }
-                    start.km > lastKm && lastKm >= 0 -> {
+                    plugged -> { lastNet = net; stillSince = tick; dist = 0f; null }
+                    speed != null && dist >= STEP_KM -> ((net - lastNet) / dist * 100f).also { dist = 0f; stillSince = tick }
+                    // Sans vitesse (anciens firmwares) : un point par km du compteur
+                    speed == null && start.km > lastKm && lastKm >= 0 -> {
                         val d = (start.km - lastKm).coerceAtMost(5)
                         ((net - lastNet) / d * 100f).also { stillSince = tick }
                     }
-                    // À l'arrêt (voiture allumée, énergie qui sort) : un point par minute, compté comme 1 km
-                    (CarBridge.state.value.speedKmh ?: 0f) < 1f && tick - stillSince >= 60_000 && net - lastNet > 0.001f -> ((net - lastNet) * 100f).also { stillSince = tick }
+                    // À l'arrêt (voiture allumée, énergie qui sort) : un point par minute, compté comme 0,5 km
+                    (speed ?: 0f) < 1f && tick - stillSince >= 60_000 && net - lastNet > 0.001f ->
+                        ((net - lastNet) / STEP_KM * 100f).also { stillSince = tick; dist = 0f }
                     else -> null
                 }
                 if (start.km != lastKm && start.km >= 0) lastKm = start.km

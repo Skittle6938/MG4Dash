@@ -478,8 +478,8 @@
     <string name="st_hide_saic_climate_desc">Als MG4Dash de klimaatregeling aanzet, opent de originele launcher zijn klimaatscherm: MG4Dash komt er weer voor.</string>
     <string name="en_trips_note">%1$d ritten, één punt per rit · gemiddelde %2$s (gestippeld)</string>
     <string name="en_trips_wait">De curve vult zich rit na rit (minstens 2 km per rit).</string>
-    <string name="en_curve_note">Eén punt per km (één per minuut stilstaand) · gemiddelde %1$s (gestippeld)</string>
-    <string name="en_curve_wait">De curve vult zich tijdens het rijden, één punt per km.</string>
+    <string name="en_curve_note">Eén punt per 0,5 km (één per minuut stilstaand) · gemiddelde %1$s (gestippeld)</string>
+    <string name="en_curve_wait">De curve vult zich tijdens het rijden, één punt per 0,5 km.</string>
     <string name="projection_no_phone">Geen telefoon verbonden voor Android Auto of CarPlay</string>
     <string name="st_power_va">Spanning en stroom onder de vermogensbalk</string>
     <string name="st_power_va_desc">Huidig, laagste en hoogste van de rit. Uit: vermogen en gemiddeld verbruik groter.</string>

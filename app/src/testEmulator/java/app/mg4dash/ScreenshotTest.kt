@@ -283,7 +283,7 @@ class ScreenshotTest {
     /** Même carte, câble débranché (en roulant) : prise avec éclair sous les km. */
     @Test fun homeEnergyCardPowerDriving() {
         org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE).edit()
-            .putInt("theme_mode", 1).putBoolean("energy_card_power", true).commit()
+            .putInt("theme_mode", 1).putBoolean("energy_card_power", true).putBoolean("power_va", true).commit()
         val f = app.mg4dash.energy.EnergyMonitor::class.java.getDeclaredField("_tripStartSoc").apply { isAccessible = true }
         @Suppress("UNCHECKED_CAST")
         (f.get(app.mg4dash.energy.EnergyMonitor) as kotlinx.coroutines.flow.MutableStateFlow<Int?>).value = 92
