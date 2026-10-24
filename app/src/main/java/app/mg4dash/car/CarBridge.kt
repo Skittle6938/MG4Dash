@@ -313,7 +313,9 @@ object CarBridge {
         val v = vs
         val g = general
         _state.value = s.copy(
-            connected = adapter != null,
+            // Anciens firmwares (SWI68…) : pas de CarAdapter, la clim passe par LegacyCar. Remettre
+            // « connecté » à faux ici grisait la carte clim de l'accueil un instant à chaque relecture (#47)
+            connected = adapter != null || LegacyCar.ready,
             batteryPercent = e?.let { safe { it.chargePercentChange } }?.takeIf { it in 0..100 } ?: s.batteryPercent,
             rangeKm = e?.let { safe { it.currentRange } }?.takeIf { it in 0..2000 } ?: s.rangeKm,
             chargeStatus = e?.let { safe { it.chargeStatus } } ?: s.chargeStatus,
