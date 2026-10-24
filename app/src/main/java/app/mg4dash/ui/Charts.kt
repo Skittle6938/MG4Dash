@@ -102,8 +102,28 @@ class LineChart @JvmOverloads constructor(context: Context, attrs: AttributeSet?
         fill.shader = LinearGradient(0f, top, 0f, bottom, 0x5500E676, 0x0000E676, Shader.TileMode.CLAMP)
         canvas.drawPath(area, fill)
         canvas.drawPath(path, line)
+        // Moyenne : tracée comme un chemin (drawLine ignore les pointillés en rendu matériel, #44),
+        // avec une étiquette de sa valeur au bout à droite
         val avg = values.average().toFloat()
-        canvas.drawLine(left, y(avg), right, y(avg), avgPaint)
+        val ay = y(avg)
+        canvas.drawPath(Path().apply { moveTo(left, ay); lineTo(right, ay) }, avgPaint)
+        val txt = String.format(Locale.getDefault(), "%.1f", avg)
+        val tw = avgText.measureText(txt)
+        val padH = 7 * d; val h = avgText.textSize + 6 * d
+        val bx1 = right - 2 * d; val bx0 = bx1 - tw - 2 * padH
+        // Au-dessus de la ligne, ou dessous si elle touche le haut du graphique
+        val above = ay - h - 4 * d >= top
+        val by0 = if (above) ay - h - 4 * d else ay + 4 * d
+        bubble.set(bx0, by0, bx1, by0 + h)
+        canvas.drawRoundRect(bubble, h / 2, h / 2, avgFill)
+        canvas.drawText(txt, (bx0 + bx1) / 2, by0 + h / 2 - (avgText.descent() + avgText.ascent()) / 2, avgText)
+    }
+
+    private val bubble = android.graphics.RectF()
+    private val avgFill = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = app.mg4dash.ui.Themes.color(context, R.color.accent_heat) }
+    private val avgText = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = 0xFF0B0F17.toInt(); textSize = 15f * d; textAlign = Paint.Align.CENTER
+        typeface = android.graphics.Typeface.create("sans-serif-medium", android.graphics.Typeface.NORMAL)
     }
 }
 

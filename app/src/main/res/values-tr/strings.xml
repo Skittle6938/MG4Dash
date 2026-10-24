@@ -478,8 +478,8 @@
     <string name="st_hide_saic_climate_desc">MG4Dash klimayı açtığında orijinal başlatıcı kendi klima ekranını açar: MG4Dash tekrar öne gelir.</string>
     <string name="en_trips_note">%1$d yolculuk, yolculuk başına bir nokta · ortalama %2$s (kesikli)</string>
     <string name="en_trips_wait">Eğri yolculuk yolculuk dolar (yolculuk başına en az 2 km).</string>
-    <string name="en_curve_note">Km başına bir nokta (dururken dakikada bir) · ortalama %1$s (kesikli)</string>
-    <string name="en_curve_wait">Eğri sürüş sırasında dolar, km başına bir nokta.</string>
+    <string name="en_curve_note">Her 0,5 km\'de bir nokta (dururken dakikada bir) · ortalama %1$s (kesikli)</string>
+    <string name="en_curve_wait">Eğri sürüş sırasında dolar, her 0,5 km\'de bir nokta.</string>
     <string name="projection_no_phone">Android Auto veya CarPlay için bağlı telefon yok</string>
     <string name="st_power_va">Güç çubuğunun altında gerilim ve akım</string>
     <string name="st_power_va_desc">Anlık, yolculuğun en düşük ve en yüksek değerleri. Kapalı: güç ve ortalama tüketim daha büyük.</string>
