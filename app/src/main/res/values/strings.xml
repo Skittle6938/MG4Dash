@@ -486,6 +486,7 @@
     <string name="st_media_style">Player on the home screen</string>
     <string name="st_media_immersive">Immersive</string>
     <string name="st_media_classic">Classic</string>
+    <string name="fx_pumpkin">Halloween pumpkin</string>
     <string name="aa_title">ANDROID AUTO</string>
     <string name="aa_ready">Phone connected · Tap to open</string>
     <string name="aa_waiting">Connect your phone via USB</string>

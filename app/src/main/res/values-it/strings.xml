@@ -486,6 +486,7 @@
     <string name="st_media_style">Lettore della schermata home</string>
     <string name="st_media_immersive">Immersivo</string>
     <string name="st_media_classic">Classico</string>
+    <string name="fx_pumpkin">Zucca di Halloween</string>
     <string name="aa_title">ANDROID AUTO</string>
     <string name="aa_ready">Telefono connesso · Tocca per aprire</string>
     <string name="aa_waiting">Collega il telefono via USB</string>

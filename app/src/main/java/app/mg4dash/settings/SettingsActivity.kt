@@ -421,8 +421,9 @@ class SettingsActivity : AppCompatActivity() {
         text(parent, getString(R.string.st_power_fx), 18f, R.color.text_value)
         // Pas d'aperçu : la surprise est pour la route. Ordre affiché : aléatoire d'abord (par défaut).
         val fx = app.mg4dash.ui.PowerFx
-        val choices = listOf(fx.RANDOM to R.string.fx_random, fx.ROCKET to R.string.fx_rocket, fx.LIGHTNING to R.string.fx_lightning,
-            fx.FLAMES to R.string.fx_flames, fx.NONE to R.string.fx_none).map { it.first to getString(it.second) }
+        val choices = (listOf(fx.RANDOM to R.string.fx_random, fx.ROCKET to R.string.fx_rocket, fx.LIGHTNING to R.string.fx_lightning,
+            fx.FLAMES to R.string.fx_flames) + (if (fx.halloween()) listOf(fx.PUMPKIN to R.string.fx_pumpkin) else emptyList()) +
+            listOf(fx.NONE to R.string.fx_none)).map { it.first to getString(it.second) }
         lateinit var pick: Button
         // Liste déroulante dans la page même : une fenêtre surgissante ferait réapparaître les barres système
         val list = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; visibility = View.GONE }
