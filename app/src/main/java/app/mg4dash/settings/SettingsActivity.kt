@@ -308,7 +308,7 @@ class SettingsActivity : AppCompatActivity() {
     private val themeHandler = android.os.Handler(android.os.Looper.getMainLooper())
     private val themeWatch = object : Runnable {
         override fun run() {
-            if (app.mg4dash.ui.Themes.signature(this@SettingsActivity) != themeSig) { app.mg4dash.ui.Themes.publish(this@SettingsActivity); app.mg4dash.ui.Themes.recreateSmooth(this@SettingsActivity); return }
+            if (app.mg4dash.ui.Themes.signature(this@SettingsActivity) != themeSig && !app.mg4dash.ui.Themes.popupOpen(this@SettingsActivity)) { app.mg4dash.ui.Themes.publish(this@SettingsActivity); app.mg4dash.ui.Themes.recreateSmooth(this@SettingsActivity); return }
             themeHandler.postDelayed(this, 5000)
         }
     }

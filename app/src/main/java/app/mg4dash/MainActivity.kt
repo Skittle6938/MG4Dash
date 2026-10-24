@@ -1371,7 +1371,7 @@ class MainActivity : AppCompatActivity() {
                 launch { while (true) { updatePower(); delay(1_000) } }
                 launch {
                     while (true) {
-                        if (app.mg4dash.ui.Themes.signature(this@MainActivity) != themeSig) { app.mg4dash.ui.Themes.publish(this@MainActivity); app.mg4dash.ui.Themes.recreateSmooth(this@MainActivity); return@launch }
+                        if (app.mg4dash.ui.Themes.signature(this@MainActivity) != themeSig && !app.mg4dash.ui.Themes.popupOpen(this@MainActivity)) { app.mg4dash.ui.Themes.publish(this@MainActivity); app.mg4dash.ui.Themes.recreateSmooth(this@MainActivity); return@launch }
                         renderSecondary()
                         renderWeatherFallbackOnly()
                         if (effectiveWidget() != lastWidgetMode || effectiveWidget() == 2) { lastWidgetMode = effectiveWidget(); applyHomeWidget() }
