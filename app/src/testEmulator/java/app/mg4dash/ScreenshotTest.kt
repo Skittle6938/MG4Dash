@@ -126,6 +126,20 @@ class ScreenshotTest {
         }
     }
 
+    /** Onglets des réglages en anglais, pour le README. */
+    @Test fun settingsTabsEn() {
+        for (t in 0..4) {
+            org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE).edit().putInt("settings_tab", t).commit()
+            shoot(SettingsActivity::class.java, "settings_en_tab$t.png")
+        }
+    }
+
+    /** Lecteur « Classique » (réglage Lecteur de l'accueil). */
+    @Test fun homeClassicPlayer() {
+        org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE).edit().putInt("media_style", 1).commit()
+        shoot(MainActivity::class.java, "home_classic_player.png")
+    }
+
     /** Fenêtres de dialogue au style MG4Dash (calibration de la température), sombre et clair. */
     @Test fun dialogDark() = dialogShot(1, "dialog_dark.png")
     @Test fun dialogLight() = dialogShot(2, "dialog_light.png")
