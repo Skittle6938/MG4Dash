@@ -72,7 +72,7 @@ class LineChart @JvmOverloads constructor(context: Context, attrs: AttributeSet?
     private val grid = Paint().apply { color = app.mg4dash.ui.Themes.color(context, R.color.panel_border); strokeWidth = 1f }
     private val avgPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         style = Paint.Style.STROKE; strokeWidth = 1.5f * d
-        color = app.mg4dash.ui.Themes.color(context, R.color.accent_heat)
+        color = app.mg4dash.ui.Themes.color(context, R.color.accent_action)   // couleur des boutons du thème
         pathEffect = android.graphics.DashPathEffect(floatArrayOf(6 * d, 6 * d), 0f)
     }
     private val label = Paint(Paint.ANTI_ALIAS_FLAG).apply {
@@ -120,9 +120,9 @@ class LineChart @JvmOverloads constructor(context: Context, attrs: AttributeSet?
     }
 
     private val bubble = android.graphics.RectF()
-    private val avgFill = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = app.mg4dash.ui.Themes.color(context, R.color.accent_heat) }
+    private val avgFill = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = app.mg4dash.ui.Themes.color(context, R.color.accent_action) }
     private val avgText = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = 0xFF0B0F17.toInt(); textSize = 15f * d; textAlign = Paint.Align.CENTER
+        color = app.mg4dash.ui.Themes.color(context, R.color.on_action); textSize = 15f * d; textAlign = Paint.Align.CENTER
         typeface = android.graphics.Typeface.create("sans-serif-medium", android.graphics.Typeface.NORMAL)
     }
 }
