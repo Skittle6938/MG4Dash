@@ -5,6 +5,7 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.os.Looper
 import android.view.View
+import android.view.ViewGroup
 import app.mg4dash.pages.ClimateActivity
 import app.mg4dash.settings.SettingsActivity
 import org.junit.Test
@@ -138,6 +139,27 @@ class ScreenshotTest {
     @Test fun homeClassicPlayer() {
         org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE).edit().putInt("media_style", 1).commit()
         shoot(MainActivity::class.java, "home_classic_player.png")
+    }
+
+    /** Popup de mise à jour : toujours là après la reconstruction de l'accueil (passage clair / sombre). */
+    @Test fun updatePromptSurvivesRecreate() {
+        val f = app.mg4dash.ui.UpdatePrompt::class.java.getDeclaredField("pending").apply { isAccessible = true }
+        f.set(app.mg4dash.ui.UpdatePrompt, app.mg4dash.system.Updater.Release("9.9.9", "", 0, "Notes"))
+        val ctl = Robolectric.buildActivity(MainActivity::class.java).setup()
+        repeat(3) { shadowOf(Looper.getMainLooper()).idleFor(200, TimeUnit.MILLISECONDS) }
+        fun shown(a: Activity) = a.findViewById<ViewGroup>(android.R.id.content).let { root ->
+            (0 until root.childCount).any { i -> (root.getChildAt(i) as? ViewGroup)?.let { hasText(it, "9.9.9") } == true } }
+        org.junit.Assert.assertTrue(shown(ctl.get()))
+        ctl.recreate()
+        repeat(3) { shadowOf(Looper.getMainLooper()).idleFor(200, TimeUnit.MILLISECONDS) }
+        org.junit.Assert.assertTrue(shown(ctl.get()))
+        save(ctl.get().window.decorView, "update_prompt_recreated.png")
+        f.set(app.mg4dash.ui.UpdatePrompt, null)
+    }
+    private fun hasText(v: View, t: String): Boolean = when (v) {
+        is android.widget.TextView -> v.text.contains(t)
+        is ViewGroup -> (0 until v.childCount).any { hasText(v.getChildAt(it), t) }
+        else -> false
     }
 
     /** Radio FM sans image : rien que le texte (RDS plus grand) et les boutons, sombre et clair. */
