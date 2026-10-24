@@ -182,6 +182,11 @@ class Prefs(context: Context) {
         set(v) = sp.edit().putBoolean("fullscreen", v).apply()
 
     /** Widget central haut : 0 = carte OpenStreetMap, 1 = raccourcis. */
+    /** Ancien SDK : remettre MG4Dash devant quand le launcher SAIC ouvre son écran clim (#48). */
+    var hideSaicClimate: Boolean
+        get() = sp.getBoolean("hide_saic_climate", true)
+        set(v) = sp.edit().putBoolean("hide_saic_climate", v).apply()
+
     /** Passage jour / nuit : true = attente de 5 s et fondu (défaut), false = immédiat. */
     var themeSmooth: Boolean
         get() = sp.getBoolean("theme_smooth", true)

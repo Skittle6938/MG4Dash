@@ -34,19 +34,30 @@ object HomeSwitcher {
 
     fun init(context: Context) {
         val sp = Prefs(context).raw
-        sp.getString("stock_home", null)?.let { ComponentName.unflattenFromString(it) }?.let { STOCK = it; return }
+        val saved = sp.getString("stock_home", null)?.let { ComponentName.unflattenFromString(it) }
+        if (saved != null && !isWizard(saved)) { STOCK = saved; return }
+        // Versions ≤ 1.5.0 pouvaient retenir l'assistant de premier démarrage (SWI165, #50) : on
+        // cherche le vrai accueil. L'assistant reste tel quel (le réactiver pourrait le relancer)
+        val wizardWasReplaced = saved != null && try {
+            context.packageManager.getComponentEnabledSetting(saved) == PackageManager.COMPONENT_ENABLED_STATE_DISABLED
+        } catch (_: Exception) { false }
         val found = try {
             val intent = Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_HOME)
             context.packageManager.queryIntentActivities(intent, PackageManager.MATCH_DISABLED_COMPONENTS)
                 .map { ComponentName(it.activityInfo.packageName, it.activityInfo.name) }
-                .filter { it.packageName.startsWith("com.saicmotor") }
-                .sortedBy { if (it == DEFAULT_STOCK) 0 else 1 }
+                .filter { it.packageName.startsWith("com.saicmotor") && !isWizard(it) }
+                .sortedBy { when { it == DEFAULT_STOCK -> 0; it.packageName == "com.saicmotor.hmi.launcher" -> 1; else -> 2 } }
                 .firstOrNull()
         } catch (_: Exception) { null }
         STOCK = found ?: DEFAULT_STOCK
         if (found != null) sp.edit().putString("stock_home", found.flattenToString()).apply()
         Log.i(TAG, "accueil SAIC : ${STOCK.flattenToShortString()}")
+        // L'utilisateur avait demandé à remplacer l'accueil : on le fait sur le bon composant
+        if (wizardWasReplaced && found != null) replaceStock(context)
     }
+
+    /** L'assistant de premier démarrage (com.saicmotor.hmi.setupwizard) déclare aussi HOME : ce n'est pas l'accueil. */
+    private fun isWizard(c: ComponentName) = c.packageName.contains("setupwizard")
 
     fun ours(context: Context) = ComponentName(context.packageName, "app.mg4dash.MainActivity")
 

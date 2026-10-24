@@ -149,8 +149,15 @@ class ClimateActivity : PageActivity() {
         directionFor(parts)?.let { CarBridge.setFanDirection(it) }   // au moins une sortie reste active
     }
 
+    private var lastKnownAt = 0L
+
     override fun render(s: VehicleState) {
         val known = s.connected && s.hvacOn != null
+        // Ancien SDK : une lecture vide de temps en temps grisait toute la page un instant (#47) ;
+        // on garde l'affichage précédent tant que la dernière lecture valide a moins de 10 s
+        val now = android.os.SystemClock.elapsedRealtime()
+        if (known) lastKnownAt = now
+        else if (lastKnownAt != 0L && now - lastKnownAt < 10_000) { android.util.Log.i("MG4L.Clim", "lecture clim vide ignorée"); return }
         val on = s.hvacOn == true
         controls.forEach { it.isEnabled = known }
         power.isSelected = on

@@ -474,6 +474,8 @@
     <string name="st_tab_system">Systeem</string>
     <string name="st_theme_smooth">Zachte overgang licht / donker</string>
     <string name="st_theme_smooth_desc">Wacht 5 s op stabiele verlichting (geen wissel onder bruggen) en vervaagt in 2 s. Uit: wisselt zodra de verlichting verandert.</string>
+    <string name="st_hide_saic_climate">MG4Dash voor het SAIC-klimaatscherm houden</string>
+    <string name="st_hide_saic_climate_desc">Als MG4Dash de klimaatregeling aanzet, opent de originele launcher zijn klimaatscherm: MG4Dash komt er weer voor.</string>
     <string name="aa_title">ANDROID AUTO</string>
     <string name="aa_ready">Telefoon verbonden · Tik om te openen</string>
     <string name="aa_waiting">Sluit je telefoon aan via USB</string>

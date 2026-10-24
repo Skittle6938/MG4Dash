@@ -145,7 +145,7 @@ object Dock {
      * reste à gauche, géré par la voiture). Activé quand la lecture de CAL_DRIVE_HDL_TYPE aura été
      * confirmée sur une voiture à droite ; « force_rhd » sert aux captures.
      */
-    private const val RHD_ENABLED = false
+    private const val RHD_ENABLED = true
     fun rightSide(context: android.content.Context): Boolean =
         Prefs(context).raw.getBoolean("force_rhd", false) || (RHD_ENABLED && app.mg4dash.car.CarProps.rightHandDrive() == true)
 
