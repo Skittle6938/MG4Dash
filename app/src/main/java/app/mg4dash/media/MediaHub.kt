@@ -706,15 +706,26 @@ object MediaHub {
      */
     private fun selectProjectionSource() {
         val ctx = appContext ?: return
-        Thread {
-            if (!app.mg4dash.system.Projection.mediaKey(ctx, app.mg4dash.system.Projection.KEY_SELECT_SOURCE))
-                systemMediaKey(KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE)
-        }.start()
+        // Ni AllGo ni le système audio SAIC n'ont de commande « donner la source à CarPlay » : CarPlay
+        // ne redemande l'audio que s'il récupère le focus audio. On met d'abord la radio en pause pour
+        // qu'elle le libère (#36, essai), puis la touche lecture de la projection comme le launcher d'origine.
+        val radioPlaying = sourcePkg == RADIO
+        if (radioPlaying) {
+            Log.i(TAG, "CarPlay: pausing the radio first")
+            if (legacyRadio) radioCommand { SaicRadio.pause() }
+            else browserControllers[RADIO]?.transportControls?.pause()
+        }
+        main.postDelayed({
+            Thread {
+                if (!app.mg4dash.system.Projection.mediaKey(ctx, app.mg4dash.system.Projection.KEY_SELECT_SOURCE))
+                    systemMediaKey(KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE)
+            }.start()
+        }, if (radioPlaying) 600L else 0L)
         // Journal de #36 : la voiture ne rend l'audio à CarPlay que quand CarPlay s'ouvre à l'écran ;
         // on note si la touche a suffi (pas d'ouverture forcée : refusée, l'écran CarPlay clignotait)
         main.postDelayed({
             Log.i(TAG, "CarPlay audio after source key: ${if (sourcePkg == AA_MBS) "taken" else "still on $sourcePkg"}")
-        }, 2000)
+        }, 2600)
     }
 
     /** Touche média vers CarPlay ; à défaut de service, touche média du système. */
