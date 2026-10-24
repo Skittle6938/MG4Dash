@@ -111,30 +111,26 @@ class MediaStyle private constructor(
     }
 
     /** Fondu posé sur le bord gauche de l'image (calée à droite) : la couleur du bord s'y prolonge sans cassure. */
+    /**
+     * Image plus large que la carte (16:9 recadrée) : elle la remplit. Sinon elle est calée à droite et
+     * la couleur moyenne de son bord gauche la prolonge, avec un fondu posé sur ce bord.
+     */
     private fun placeFade() {
-        // Image avec prolongement ligne par ligne : plus besoin de fondu
-        if (frame.background is android.graphics.drawable.BitmapDrawable) {
-            fade.visibility = View.GONE
-            // Image plus large que la carte (16:9 recadrée) : elle la remplit ; sinon calée à droite
-            val d = picture.drawable
-            if (d != null && frame.width > 0 && frame.height > 0) {
-                val wide = d.intrinsicWidth * frame.height >= d.intrinsicHeight * frame.width
-                val st = if (wide) ImageView.ScaleType.CENTER_CROP else ImageView.ScaleType.FIT_END
-                if (picture.scaleType != st) picture.scaleType = st
-            }
-            return
-        }
         val w = frame.width; val h = frame.height
-        val art = lastArt
-        if (w == 0 || h == 0 || art == null || art.height == 0) { fade.visibility = View.GONE; return }
-        val imgW = minOf(w, h * art.width / art.height)
+        val d = picture.drawable
+        if (w == 0 || h == 0 || lastArt == null || d == null || d.intrinsicHeight <= 0) { fade.visibility = View.GONE; return }
+        val wide = d.intrinsicWidth.toLong() * h >= d.intrinsicHeight.toLong() * w
+        val st = if (wide) ImageView.ScaleType.CENTER_CROP else ImageView.ScaleType.FIT_END
+        if (picture.scaleType != st) picture.scaleType = st
+        if (wide) { fade.visibility = View.GONE; return }
+        val imgW = h * d.intrinsicWidth / d.intrinsicHeight
         val lp = fade.layoutParams as FrameLayout.LayoutParams
         val fw = imgW * 2 / 5
         if (lp.leftMargin != w - imgW || lp.width != fw) {
             lp.leftMargin = w - imgW; lp.width = fw
             frame.post { fade.layoutParams = lp }
         }
-        fade.visibility = if (imgW < w) View.VISIBLE else View.GONE
+        fade.visibility = View.VISIBLE
     }
 
     /** Nouvelle pochette : image, prolongement et couleur vive recalculés (une fois par image). */
@@ -157,15 +153,6 @@ class MediaStyle private constructor(
             picture.setImageBitmap(img)
             edge = edgeColor(img)
             accent = vividColor(img) ?: Themes.color(a, R.color.accent_action)
-            // Prolongement à gauche ligne par ligne (moyenne des 3 pixels du bord) : pas de cassure,
-            // même quand le bord de l'image n'est pas uni
-            frame.background = android.graphics.drawable.BitmapDrawable(a.resources, edgeStrip(img)).apply { isFilterBitmap = true }
-            fade.visibility = View.GONE
-            lastArt = art
-            placeFade()
-            progress?.progressTintList = ColorStateList.valueOf(accent)
-            play.background = GradientDrawable().apply { cornerRadius = dp(38).toFloat(); setColor(accent) }
-            return
         }
         frame.setBackgroundColor(edge)
         fade.background = GradientDrawable(GradientDrawable.Orientation.LEFT_RIGHT, intArrayOf(edge, edge and 0x00FFFFFF))
@@ -212,18 +199,6 @@ class MediaStyle private constructor(
             var bottom = 0; while (bottom < max && dark(h - 1 - bottom)) bottom++
             if (top + bottom < h / 20) return b
             return Bitmap.createBitmap(b, 0, top, w, h - top - bottom)
-        }
-
-        /** Colonne d'un pixel de large : pour chaque ligne, la moyenne des 3 pixels les plus à gauche. */
-        fun edgeStrip(b: Bitmap): Bitmap {
-            val out = Bitmap.createBitmap(1, b.height, Bitmap.Config.ARGB_8888)
-            val k = minOf(3, b.width)
-            for (y in 0 until b.height) {
-                var r = 0; var g = 0; var bl = 0
-                for (x in 0 until k) { val c = b.getPixel(x, y); r += Color.red(c); g += Color.green(c); bl += Color.blue(c) }
-                out.setPixel(0, y, Color.rgb(r / k, g / k, bl / k))
-            }
-            return out
         }
 
         /** Couleur moyenne de la bande gauche de l'image (prolongement quand elle n'a pas le format de la carte). */
