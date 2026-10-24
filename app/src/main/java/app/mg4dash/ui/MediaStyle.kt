@@ -23,7 +23,9 @@ import app.mg4dash.databinding.ActivityMainBinding
  *  - Classique : pochette carrée à gauche, boutons en pavés à la largeur de la colonne (rien ne
  *    dépasse, ils étaient coupés à droite quand la pochette prenait toute la hauteur).
  */
-class MediaStyle private constructor(private val a: Activity, private val b: ActivityMainBinding) {
+class MediaStyle private constructor(
+    private val a: Activity, private val play: ImageView, private val progress: android.widget.ProgressBar?,
+) {
     private val d = a.resources.displayMetrics.density
     private fun dp(v: Int) = (v * d).toInt()
     private lateinit var frame: FrameLayout
@@ -34,20 +36,21 @@ class MediaStyle private constructor(private val a: Activity, private val b: Act
 
     private fun detach(v: View) = v.apply { (parent as? ViewGroup)?.removeView(this) }
 
-    private fun buildImmersive() {
-        val card = b.mediaCard
-        val info = b.mediaInfo
-        val head = card.getChildAt(0)
-        val title = detach(b.mediaTitle) as TextView
-        val artist = detach(b.mediaArtist) as TextView
-        detach(b.mediaAlbum)
-        val progress = detach(b.mediaProgress)
-        listOf(b.mediaPrev, b.mediaPlay, b.mediaNext).forEach { detach(it) }
+    /**
+     * [card] : le panneau ; [head] : sa ligne de titre (source ▾) ; [info] : la zone cliquable qui
+     * reçoit le lecteur (elle ouvre l'appli de la source). Les vues passées sont déplacées, pas recréées.
+     */
+    private fun buildImmersive(card: LinearLayout, head: View, info: LinearLayout, title: TextView, artist: TextView,
+                               prev: ImageView, next: ImageView) {
+        listOf(title, artist, prev, play, next).forEach { detach(it) }
+        progress?.let { detach(it) }
         info.removeAllViews()
-        card.removeView(head)
-        // La carte entière devient le lecteur : la zone cliquable (ouvre l'appli) la couvre
+        detach(head)
+        // Le panneau entier devient le lecteur : la zone cliquable (ouvre l'appli) le couvre
         card.setPadding(0, 0, 0, 0)
-        (info.layoutParams as LinearLayout.LayoutParams).topMargin = 0
+        for (i in 0 until card.childCount) if (card.getChildAt(i) !== info) card.getChildAt(i).visibility = View.GONE
+        (info.layoutParams as LinearLayout.LayoutParams).apply { topMargin = 0; height = 0; weight = 1f }
+        info.orientation = LinearLayout.HORIZONTAL
         frame = RoundedFrame(a)
         picture = ImageView(a).apply { scaleType = ImageView.ScaleType.FIT_END }
         frame.addView(picture, FrameLayout.LayoutParams(-1, -1))
@@ -65,15 +68,19 @@ class MediaStyle private constructor(private val a: Activity, private val b: Act
         artist.setTextColor(0xFFE6E6E6.toInt()); artist.textSize = 22f; artist.maxLines = 1; artist.setShadowLayer(8f, 0f, 2f, 0x99000000.toInt())
         over.addView(title, LinearLayout.LayoutParams(-1, -2))
         over.addView(artist, LinearLayout.LayoutParams(-1, -2))
-        over.addView(progress, LinearLayout.LayoutParams(-1, dp(6)).apply { topMargin = dp(12) })
-        (progress as android.widget.ProgressBar).progressBackgroundTintList = ColorStateList.valueOf(0x55FFFFFF)
+        progress?.let {
+            over.addView(it, LinearLayout.LayoutParams(-1, dp(6)).apply { topMargin = dp(12) })
+            it.progressBackgroundTintList = ColorStateList.valueOf(0x55FFFFFF)
+        }
         val row = LinearLayout(a).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL }
-        b.mediaPlay.setPadding(dp(24), dp(20), dp(24), dp(20))
-        b.mediaPlay.imageTintList = ColorStateList.valueOf(0xFF1A1A1A.toInt())
-        row.addView(b.mediaPlay, LinearLayout.LayoutParams(dp(160), dp(76)))
+        play.setPadding(dp(24), dp(20), dp(24), dp(20))
+        play.clearColorFilter()
+        play.imageTintList = ColorStateList.valueOf(0xFF1A1A1A.toInt())
+        row.addView(play, LinearLayout.LayoutParams(dp(160), dp(76)))
         row.addView(View(a), LinearLayout.LayoutParams(0, 1, 1f))
-        listOf(b.mediaPrev, b.mediaNext).forEach { v ->
+        listOf(prev, next).forEach { v ->
             v.background = null
+            v.clearColorFilter()
             v.imageTintList = ColorStateList.valueOf(Color.WHITE)
             v.scaleType = ImageView.ScaleType.FIT_CENTER
             v.setPadding(dp(18), dp(18), dp(18), dp(18))
@@ -85,7 +92,7 @@ class MediaStyle private constructor(private val a: Activity, private val b: Act
         update(null)
     }
 
-    private fun buildClassic() {
+    private fun buildClassic(b: ActivityMainBinding) {
         val texts = b.mediaInfo.getChildAt(1) as? LinearLayout ?: return
         val old = b.mediaPlay.parent as? LinearLayout ?: return
         texts.removeView(old)
@@ -140,16 +147,26 @@ class MediaStyle private constructor(private val a: Activity, private val b: Act
         frame.setBackgroundColor(edge)
         fade.background = GradientDrawable(GradientDrawable.Orientation.LEFT_RIGHT, intArrayOf(edge, edge and 0x00FFFFFF))
         placeFade()
-        b.mediaPlay.background = GradientDrawable().apply { cornerRadius = dp(38).toFloat(); setColor(accent) }
-        b.mediaProgress.progressTintList = ColorStateList.valueOf(accent)
+        play.background = GradientDrawable().apply { cornerRadius = dp(38).toFloat(); setColor(accent) }
+        progress?.progressTintList = ColorStateList.valueOf(accent)
     }
 
     companion object {
         /** 0 = Immersif (défaut), 1 = Classique. */
-        fun apply(a: Activity, b: ActivityMainBinding, style: Int): MediaStyle? = MediaStyle(a, b).apply {
-            try { if (style == 0) buildImmersive() else buildClassic() }
-            catch (e: Exception) { android.util.Log.w("MG4L.Media", "présentation du lecteur : ${e.message}") }
+        fun apply(a: Activity, b: ActivityMainBinding, style: Int): MediaStyle? = MediaStyle(a, b.mediaPlay, b.mediaProgress).apply {
+            try {
+                if (style == 0) {
+                    b.mediaAlbum.visibility = View.GONE
+                    buildImmersive(b.mediaCard, b.mediaCard.getChildAt(0), b.mediaInfo, b.mediaTitle, b.mediaArtist, b.mediaPrev, b.mediaNext)
+                } else buildClassic(b)
+            } catch (e: Exception) { android.util.Log.w("MG4L.Media", "présentation du lecteur : ${e.message}") }
         }.takeIf { style == 0 }
+
+        /** Mode épuré : même lecteur Immersif, sans barre de progression. */
+        fun immersive(a: Activity, card: LinearLayout, head: View, info: LinearLayout, title: TextView, artist: TextView,
+                      prev: ImageView, play: ImageView, next: ImageView): MediaStyle? = try {
+            MediaStyle(a, play, null).apply { buildImmersive(card, head, info, title, artist, prev, next) }
+        } catch (e: Exception) { android.util.Log.w("MG4L.Media", "lecteur épuré : ${e.message}"); null }
 
         /** Couleur moyenne de la bande gauche de l'image (prolongement quand elle n'a pas le format de la carte). */
         fun edgeColor(b: Bitmap): Int {

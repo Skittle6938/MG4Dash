@@ -236,6 +236,8 @@ class SimpleHome(private val a: AppCompatActivity) {
         return p
     }
 
+    private var mediaStyle: MediaStyle? = null
+
     private fun buildMedia(): LinearLayout {
         val p = kit.panel()
         // Source active en haut à gauche (« Radio ▾ ») : un toucher ouvre la liste des sources
@@ -265,7 +267,8 @@ class SimpleHome(private val a: AppCompatActivity) {
         p.addView(info, kit.lp(-1, 0, 1f, t = 8))
 
         val controls = kit.row().apply { gravity = Gravity.CENTER }
-        controls.addView(kit.roundButton(R.drawable.ic_prev, 76) { MediaHub.previous() })
+        val prev = kit.roundButton(R.drawable.ic_prev, 76) { MediaHub.previous() }
+        controls.addView(prev)
         mediaPlay = ImageButton(a).apply {
             setBackgroundResource(R.drawable.bg_play); setImageResource(R.drawable.ic_play)
             scaleType = ImageView.ScaleType.FIT_CENTER; setColorFilter(kit.color(R.color.on_action))
@@ -274,8 +277,11 @@ class SimpleHome(private val a: AppCompatActivity) {
             setOnLongClickListener { a.startActivity(android.content.Intent(a, app.mg4dash.pages.SoundActivity::class.java)); true }
         }
         controls.addView(mediaPlay, kit.lp(kit.dp(96), kit.dp(96), l = 24, r = 24))
-        controls.addView(kit.roundButton(R.drawable.ic_next, 76) { MediaHub.next() })
+        val next = kit.roundButton(R.drawable.ic_next, 76) { MediaHub.next() }
+        controls.addView(next)
         p.addView(controls, kit.lp(-1, -2, t = 8))
+        // Réglage « Lecteur de l'accueil » : Immersif comme sur l'accueil complet
+        if (prefs.mediaStyle == 0) mediaStyle = MediaStyle.immersive(a, p, head, info, mediaTitle, mediaArtist, prev, mediaPlay, next)
         return p
     }
 
@@ -445,6 +451,7 @@ class SimpleHome(private val a: AppCompatActivity) {
             mediaArtist.text = listOf(m.artist, m.album).filter { it.isNotBlank() }.joinToString(" · ")
         }
         mediaArt.setImageBitmap(m.art)
+        mediaStyle?.update(m.art)
         mediaPlay.setImageResource(if (m.playing) R.drawable.ic_pause else R.drawable.ic_play)
         mediaPlay.isEnabled = m.available
     }
