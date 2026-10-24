@@ -103,6 +103,9 @@ class SettingsActivity : AppCompatActivity() {
         toggle(style, R.string.st_map_vdock, null, { prefs.verticalDock }) { prefs.verticalDock = it; app.mg4dash.ui.Themes.publish(this); recreate() }
         toggle(style, R.string.st_fullscreen, null, { prefs.fullscreen }) { prefs.fullscreen = it; Fullscreen.apply(this) }
         toggle(style, R.string.st_energy_card_power, R.string.st_energy_card_power_desc, { prefs.energyCardPower }) { prefs.energyCardPower = it }
+        toggle(style, R.string.st_power_va, R.string.st_power_va_desc, { prefs.powerVa }) { prefs.powerVa = it }
+        text(style, getString(R.string.st_media_style), 18f, R.color.text_value)
+        row(style, *styleButtons(listOf(R.string.st_media_immersive, R.string.st_media_classic), { prefs.mediaStyle }) { prefs.mediaStyle = it })
         toggle(style, R.string.st_stack_auto, null, { prefs.stackAuto }) { prefs.stackAuto = it }
         val map = panel(homeR, getString(R.string.st_style_map).uppercase())
         text(map, getString(R.string.st_map_zoom), 18f, R.color.text_value)

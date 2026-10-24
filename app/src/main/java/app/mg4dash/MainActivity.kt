@@ -121,6 +121,7 @@ class MainActivity : AppCompatActivity() {
         setupWeatherClock()
         wireClimate()
         wireMedia()
+        mediaStyle = app.mg4dash.ui.MediaStyle.apply(this, b, prefs.mediaStyle)
         wireCards()
         observe()
         warmUpStockLauncherIfNeeded()
@@ -585,6 +586,8 @@ class MainActivity : AppCompatActivity() {
 
     // ── Média ────────────────────────────────────────────────────────────────
 
+    private var mediaStyle: app.mg4dash.ui.MediaStyle? = null
+
     private fun wireMedia() {
         b.mediaPlay.setOnClickListener { MediaHub.playPause() }
         // Appui long sur lecture / pause : réglages du son (page Son)
@@ -615,6 +618,7 @@ class MainActivity : AppCompatActivity() {
             b.mediaAlbum.text = m.album
         }
         b.mediaArt.setImageBitmap(m.art)
+        mediaStyle?.update(m.art)
         b.mediaArtPlaceholder.visibility = if (m.art == null) View.VISIBLE else View.INVISIBLE
         b.mediaPlay.setImageResource(if (m.playing) R.drawable.ic_pause else R.drawable.ic_play)
         b.mediaProgress.visibility = if (m.durationMs > 0) View.VISIBLE else View.INVISIBLE
@@ -1149,8 +1153,11 @@ class MainActivity : AppCompatActivity() {
         row.addView(powerExtra, LinearLayout.LayoutParams(0, -2, 1f))
         row.addView(powerAvg, LinearLayout.LayoutParams(-2, -2))
         card.addView(row, at + 1, LinearLayout.LayoutParams(-1, -2).apply { topMargin = (6 * d).toInt() })
+        // V / A en option (#29) : sans eux, kW et conso moyenne prennent la place et grossissent
+        val va = prefs.powerVa
+        if (!va) { powerExtra?.visibility = View.INVISIBLE; powerValue?.setTextSize(TypedValue.COMPLEX_UNIT_SP, 30f); powerAvg?.setTextSize(TypedValue.COMPLEX_UNIT_SP, 30f) }
         powerFx = app.mg4dash.ui.PowerFx(this).also { fx ->
-            fx.onBadge = { on -> powerExtra?.animate()?.alpha(if (on) 0f else 1f)?.setDuration(250)?.start() }
+            fx.onBadge = { on -> if (va) powerExtra?.animate()?.alpha(if (on) 0f else 1f)?.setDuration(250)?.start() }
         }
         // Barre en bas (style Complet) : carte moins haute, tout est resserré (#43)
         if (!mapLayout && !Dock.vertical(this)) {
@@ -1161,7 +1168,8 @@ class MainActivity : AppCompatActivity() {
             powerBar?.layoutParams = (powerBar?.layoutParams as LinearLayout.LayoutParams).apply { height = (36 * d).toInt(); topMargin = 0 }
             (row.layoutParams as LinearLayout.LayoutParams).topMargin = (2 * d).toInt()
             b.chargeAction.layoutParams = b.chargeAction.layoutParams.apply { height = (36 * d).toInt() }
-            powerValue?.setTextSize(TypedValue.COMPLEX_UNIT_SP, 22f); powerAvg?.setTextSize(TypedValue.COMPLEX_UNIT_SP, 22f)
+            val sz = if (va) 22f else 28f
+            powerValue?.setTextSize(TypedValue.COMPLEX_UNIT_SP, sz); powerAvg?.setTextSize(TypedValue.COMPLEX_UNIT_SP, sz)
         }
     }
 

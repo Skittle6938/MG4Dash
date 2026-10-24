@@ -1,0 +1,182 @@
+package app.mg4dash.ui
+
+import android.app.Activity
+import android.content.res.ColorStateList
+import android.graphics.Bitmap
+import android.graphics.Color
+import android.graphics.drawable.GradientDrawable
+import android.view.Gravity
+import android.view.View
+import android.view.ViewGroup
+import android.widget.FrameLayout
+import android.widget.ImageView
+import android.widget.LinearLayout
+import android.widget.TextView
+import app.mg4dash.R
+import app.mg4dash.databinding.ActivityMainBinding
+
+/**
+ * Présentation de la carte média de l'accueil (réglage « Lecteur ») :
+ *  - Immersif (par défaut) : comme le lecteur d'Android Auto, la pochette nette couvre la carte,
+ *    prolongée par la couleur de son bord quand elle n'a pas le format de la carte ; titre et artiste
+ *    par-dessus, bouton lecture en pilule et barre de progression à la couleur vive de l'image ;
+ *  - Classique : pochette carrée à gauche, boutons en pavés à la largeur de la colonne (rien ne
+ *    dépasse, ils étaient coupés à droite quand la pochette prenait toute la hauteur).
+ */
+class MediaStyle private constructor(private val a: Activity, private val b: ActivityMainBinding) {
+    private val d = a.resources.displayMetrics.density
+    private fun dp(v: Int) = (v * d).toInt()
+    private lateinit var frame: FrameLayout
+    private lateinit var picture: ImageView
+    private lateinit var fade: View
+    private var lastArt: Bitmap? = null
+    private var accent = 0
+
+    private fun detach(v: View) = v.apply { (parent as? ViewGroup)?.removeView(this) }
+
+    private fun buildImmersive() {
+        val card = b.mediaCard
+        val info = b.mediaInfo
+        val head = card.getChildAt(0)
+        val title = detach(b.mediaTitle) as TextView
+        val artist = detach(b.mediaArtist) as TextView
+        detach(b.mediaAlbum)
+        val progress = detach(b.mediaProgress)
+        listOf(b.mediaPrev, b.mediaPlay, b.mediaNext).forEach { detach(it) }
+        info.removeAllViews()
+        card.removeView(head)
+        // La carte entière devient le lecteur : la zone cliquable (ouvre l'appli) la couvre
+        card.setPadding(0, 0, 0, 0)
+        (info.layoutParams as LinearLayout.LayoutParams).topMargin = 0
+        frame = RoundedFrame(a)
+        picture = ImageView(a).apply { scaleType = ImageView.ScaleType.FIT_END }
+        frame.addView(picture, FrameLayout.LayoutParams(-1, -1))
+        fade = View(a)
+        frame.addView(fade, FrameLayout.LayoutParams(0, -1).apply { gravity = Gravity.START })
+        frame.addOnLayoutChangeListener { _, _, _, _, _, _, _, _, _ -> placeFade() }
+        frame.addView(View(a).apply {
+            background = GradientDrawable(GradientDrawable.Orientation.TOP_BOTTOM, intArrayOf(0x22000000, 0x44000000, 0xC0000000.toInt()))
+        }, FrameLayout.LayoutParams(-1, -1))
+        val over = LinearLayout(a).apply { orientation = LinearLayout.VERTICAL; setPadding(dp(24), dp(14), dp(24), dp(16)) }
+        (head as? LinearLayout)?.let { (it.getChildAt(0) as? TextView)?.setTextColor(Color.WHITE) }
+        over.addView(head, LinearLayout.LayoutParams(-1, -2))
+        over.addView(View(a), LinearLayout.LayoutParams(1, 0, 1f))
+        title.setTextColor(Color.WHITE); title.textSize = 30f; title.maxLines = 1; title.setShadowLayer(8f, 0f, 2f, 0x99000000.toInt())
+        artist.setTextColor(0xFFE6E6E6.toInt()); artist.textSize = 22f; artist.maxLines = 1; artist.setShadowLayer(8f, 0f, 2f, 0x99000000.toInt())
+        over.addView(title, LinearLayout.LayoutParams(-1, -2))
+        over.addView(artist, LinearLayout.LayoutParams(-1, -2))
+        over.addView(progress, LinearLayout.LayoutParams(-1, dp(6)).apply { topMargin = dp(12) })
+        (progress as android.widget.ProgressBar).progressBackgroundTintList = ColorStateList.valueOf(0x55FFFFFF)
+        val row = LinearLayout(a).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL }
+        b.mediaPlay.setPadding(dp(24), dp(20), dp(24), dp(20))
+        b.mediaPlay.imageTintList = ColorStateList.valueOf(0xFF1A1A1A.toInt())
+        row.addView(b.mediaPlay, LinearLayout.LayoutParams(dp(160), dp(76)))
+        row.addView(View(a), LinearLayout.LayoutParams(0, 1, 1f))
+        listOf(b.mediaPrev, b.mediaNext).forEach { v ->
+            v.background = null
+            v.imageTintList = ColorStateList.valueOf(Color.WHITE)
+            v.scaleType = ImageView.ScaleType.FIT_CENTER
+            v.setPadding(dp(18), dp(18), dp(18), dp(18))
+            row.addView(v, LinearLayout.LayoutParams(dp(80), dp(80)).apply { leftMargin = dp(20) })
+        }
+        over.addView(row, LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(10) })
+        frame.addView(over, FrameLayout.LayoutParams(-1, -1))
+        info.addView(frame, LinearLayout.LayoutParams(0, -1, 1f))
+        update(null)
+    }
+
+    private fun buildClassic() {
+        val texts = b.mediaInfo.getChildAt(1) as? LinearLayout ?: return
+        val old = b.mediaPlay.parent as? LinearLayout ?: return
+        texts.removeView(old)
+        val row = LinearLayout(a).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL }
+        val light = Themes.isLight(a)
+        fun pad(v: View, w: Float, h: Int, bg: Int, r: Int) {
+            detach(v)
+            v.background = GradientDrawable().apply { cornerRadius = dp(r).toFloat(); setColor(bg) }
+            row.addView(v, LinearLayout.LayoutParams(0, dp(h), w).apply { leftMargin = dp(5); rightMargin = dp(5) })
+        }
+        val soft = if (light) 0x14000000 else 0x22FFFFFF
+        pad(b.mediaPrev, 1f, 70, soft, 18)
+        pad(b.mediaPlay, 1.25f, 82, Themes.color(a, R.color.accent_action), 22)
+        pad(b.mediaNext, 1f, 70, soft, 18)
+        texts.addView(row, LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(10) })
+    }
+
+    /** Fondu posé sur le bord gauche de l'image (calée à droite) : la couleur du bord s'y prolonge sans cassure. */
+    private fun placeFade() {
+        val w = frame.width; val h = frame.height
+        val art = lastArt
+        if (w == 0 || h == 0 || art == null || art.height == 0) { fade.visibility = View.GONE; return }
+        val imgW = minOf(w, h * art.width / art.height)
+        val lp = fade.layoutParams as FrameLayout.LayoutParams
+        val fw = imgW * 2 / 5
+        if (lp.leftMargin != w - imgW || lp.width != fw) {
+            lp.leftMargin = w - imgW; lp.width = fw
+            frame.post { fade.layoutParams = lp }
+        }
+        fade.visibility = if (imgW < w) View.VISIBLE else View.GONE
+    }
+
+    /** Nouvelle pochette : image, prolongement et couleur vive recalculés (une fois par image). */
+    fun update(art: Bitmap?) {
+        if (!::frame.isInitialized) return
+        if (art != null && art === lastArt) return
+        lastArt = art
+        val edge: Int
+        if (art == null) {
+            picture.setImageResource(R.drawable.ic_music)
+            picture.scaleType = ImageView.ScaleType.CENTER
+            picture.imageTintList = ColorStateList.valueOf(0x40FFFFFF)
+            edge = 0xFF2A3140.toInt()
+            accent = Themes.color(a, R.color.accent_action)
+        } else {
+            picture.imageTintList = null
+            picture.scaleType = ImageView.ScaleType.FIT_END
+            picture.setImageBitmap(art)
+            edge = edgeColor(art)
+            accent = vividColor(art) ?: Themes.color(a, R.color.accent_action)
+        }
+        frame.setBackgroundColor(edge)
+        fade.background = GradientDrawable(GradientDrawable.Orientation.LEFT_RIGHT, intArrayOf(edge, edge and 0x00FFFFFF))
+        placeFade()
+        b.mediaPlay.background = GradientDrawable().apply { cornerRadius = dp(38).toFloat(); setColor(accent) }
+        b.mediaProgress.progressTintList = ColorStateList.valueOf(accent)
+    }
+
+    companion object {
+        /** 0 = Immersif (défaut), 1 = Classique. */
+        fun apply(a: Activity, b: ActivityMainBinding, style: Int): MediaStyle? = MediaStyle(a, b).apply {
+            try { if (style == 0) buildImmersive() else buildClassic() }
+            catch (e: Exception) { android.util.Log.w("MG4L.Media", "présentation du lecteur : ${e.message}") }
+        }.takeIf { style == 0 }
+
+        /** Couleur moyenne de la bande gauche de l'image (prolongement quand elle n'a pas le format de la carte). */
+        fun edgeColor(b: Bitmap): Int {
+            var r = 0L; var g = 0L; var bl = 0L; var n = 0L
+            val w = maxOf(1, b.width / 12)
+            for (x in 0 until w step 2) for (y in 0 until b.height step 3) {
+                val c = b.getPixel(x, y); r += Color.red(c); g += Color.green(c); bl += Color.blue(c); n++
+            }
+            if (n == 0L) return 0xFF2A3140.toInt()
+            return Color.rgb((r / n).toInt(), (g / n).toInt(), (bl / n).toInt())
+        }
+
+        /** Couleur vive dominante : la teinte (par tranches de 30°) qui pèse le plus en saturation × luminosité. */
+        fun vividColor(b: Bitmap): Int? {
+            val w = FloatArray(12); val hsv = FloatArray(3)
+            val sum = Array(12) { FloatArray(3) }
+            val step = maxOf(1, b.width / 80)
+            for (x in 0 until b.width step step) for (y in 0 until b.height step step) {
+                Color.colorToHSV(b.getPixel(x, y), hsv)
+                if (hsv[1] < 0.35f || hsv[2] < 0.45f) continue
+                val k = (hsv[0] / 30f).toInt() % 12; val wt = hsv[1] * hsv[2]
+                w[k] += wt; sum[k][0] += hsv[0] * wt; sum[k][1] += hsv[1] * wt; sum[k][2] += hsv[2] * wt
+            }
+            val k = w.indices.maxByOrNull { w[it] } ?: return null
+            if (w[k] == 0f) return null
+            // Assez saturée et claire pour ressortir sur l'image assombrie
+            return Color.HSVToColor(floatArrayOf(sum[k][0] / w[k], maxOf(0.65f, sum[k][1] / w[k]), maxOf(0.85f, sum[k][2] / w[k])))
+        }
+    }
+}

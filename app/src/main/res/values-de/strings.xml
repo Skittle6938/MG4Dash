@@ -439,7 +439,7 @@
     <string name="ac_cycle_need_on">Zuerst die Klimaanlage einschalten</string>
     <string name="weather_rain">Regen %1$d %%</string>
     <string name="st_energy_card_power">Live-Leistung in der Energiekarte</string>
-    <string name="st_energy_card_power_desc">Leistungsbalken, kW, V · A und Durchschnitt statt Fahrmodus und KERS; die Lade- / V2L-Zeile erscheint bei eingestecktem Kabel, die Leistungsseite verlässt das untere Widget.</string>
+    <string name="st_energy_card_power_desc">Leistungsbalken, kW und Durchschnitt statt Fahrmodus und KERS; die Lade- / V2L-Zeile erscheint bei eingestecktem Kabel, die Leistungsseite verlässt das untere Widget.</string>
     <string name="st_shortcuts_page">Verknüpfungsseite in der Kartenkarte</string>
     <string name="st_shortcuts_page_desc">Aus: Die Taste oben rechts auf der Karte wechselt nur zwischen Karte und Verbrauch</string>
     <string name="st_panel_outline">Rahmen der Startbildschirm-Kacheln</string>
@@ -481,6 +481,11 @@
     <string name="en_curve_note">Ein Punkt pro km (einer pro Minute im Stand) · Durchschnitt %1$s (gestrichelt)</string>
     <string name="en_curve_wait">Die Kurve füllt sich während der Fahrt, ein Punkt pro km.</string>
     <string name="projection_no_phone">Kein Telefon für Android Auto oder CarPlay verbunden</string>
+    <string name="st_power_va">Spannung und Strom unter der Leistungsleiste</string>
+    <string name="st_power_va_desc">Aktuell, Minimum und Maximum der Fahrt. Aus: Leistung und Durchschnittsverbrauch größer.</string>
+    <string name="st_media_style">Player auf dem Startbildschirm</string>
+    <string name="st_media_immersive">Immersiv</string>
+    <string name="st_media_classic">Klassisch</string>
     <string name="aa_title">ANDROID AUTO</string>
     <string name="aa_ready">Telefon verbunden · Zum Öffnen tippen</string>
     <string name="aa_waiting">Telefon per USB verbinden</string>
