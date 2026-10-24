@@ -25,7 +25,10 @@ class ConsumptionCard(context: Context) : LinearLayout(context) {
     private val bar = StackedBar(context)
     private val legend = LinearLayout(context).apply { orientation = VERTICAL }
     private val regen = tv(17f, R.color.accent_energy)
-    private val chart = LineChart(context)
+    private val chart = LineChart(context).apply {
+        // Appui long sur la courbe : l'effacer (#44)
+        setOnLongClickListener { v -> (context as? android.app.Activity)?.let { confirmClear(it, v, prefs.consumptionPeriod.coerceIn(0, 2)) }; true }
+    }
     private val note = tv(15f, R.color.text_sub)
 
     private val prefs = app.mg4dash.system.Prefs(context)
@@ -36,10 +39,7 @@ class ConsumptionCard(context: Context) : LinearLayout(context) {
             isClickable = true
             setOnClickListener { v ->
                 (context as? android.app.Activity)?.let { a ->
-                    // 4e choix : effacer la courbe de la période affichée (#44)
-                    SourceMenu.choose(a, v, periodLabels + context.getString(R.string.en_clear_curve), prefs.consumptionPeriod) {
-                        if (it < 3) { prefs.consumptionPeriod = it; show() } else confirmClear(a, prefs.consumptionPeriod.coerceIn(0, 2))
-                    }
+                    SourceMenu.choose(a, v, periodLabels, prefs.consumptionPeriod) { prefs.consumptionPeriod = it; show() }
                 }
             }
         }
@@ -90,13 +90,11 @@ class ConsumptionCard(context: Context) : LinearLayout(context) {
 
     companion object {
         /** Demande confirmation puis efface la courbe de [period] (0 recharge, 1 trajet, 2 12 mois). */
-        fun confirmClear(a: android.app.Activity, period: Int) {
+        fun confirmClear(a: android.app.Activity, anchor: android.view.View, period: Int) {
             val name = a.getString(listOf(R.string.en_since_charge, R.string.en_trip, R.string.en_last_year)[period])
-            android.app.AlertDialog.Builder(a)
-                .setMessage(a.getString(R.string.en_clear_confirm, name))
-                .setPositiveButton(R.string.en_clear_curve) { _, _ -> app.mg4dash.energy.ConsumptionCurve.clear(period) }
-                .setNegativeButton(R.string.cancel, null)
-                .show()
+            SourceMenu.confirm(a, anchor, a.getString(R.string.en_clear_confirm, name), a.getString(R.string.en_clear_curve)) {
+                app.mg4dash.energy.ConsumptionCurve.clear(period)
+            }
         }
 
         /**

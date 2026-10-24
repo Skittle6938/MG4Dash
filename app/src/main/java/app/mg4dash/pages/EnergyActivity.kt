@@ -189,7 +189,7 @@ class EnergyActivity : PageActivity() {
         c3.addView(kit.title(getString(R.string.en_recent, app.mg4dash.system.Units.consUnit(this))), kit.lp(-1, -2, t = 18))
         chart = LineChart(this).apply {
             // Appui long sur la courbe : l'effacer (#44)
-            setOnLongClickListener { app.mg4dash.ui.ConsumptionCard.confirmClear(this@EnergyActivity, period); true }
+            setOnLongClickListener { app.mg4dash.ui.ConsumptionCard.confirmClear(this@EnergyActivity, this, period); true }
         }
         c3.addView(chart, kit.lp(-1, 0, 1f, t = 8))
         chartNote = kit.text("", 15f, R.color.text_title)
