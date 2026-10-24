@@ -78,7 +78,14 @@ class ClimateActivity : PageActivity() {
         fPanel.addView(fanValue, kit.lp(-1, 0, 1f))
         fanGauge = SegmentedGauge(this).apply { segments = VehicleState.FAN_MAX }
         val fRow = kit.row()
-        val fDown = kit.roundButton(R.drawable.ic_minus, 72) { CarBridge.stepFan(-1) }
+        // Comme sur l'accueil : − au premier cran éteint la clim, et ne fait rien clim éteinte (#34)
+        val fDown = kit.roundButton(R.drawable.ic_minus, 72) {
+            val s = CarBridge.state.value
+            if (s.hvacOn == true) {
+                if (s.autoOn != true && (s.fanSpeed ?: 0) <= VehicleState.FAN_MIN) CarBridge.togglePower()
+                else CarBridge.stepFan(-1)
+            }
+        }
         val fUp = kit.roundButton(R.drawable.ic_plus, 72) { CarBridge.stepFan(1) }
         fRow.addView(fDown)
         fRow.addView(fanGauge, kit.lp(0, kit.dp(26), 1f, l = 16, r = 16))
