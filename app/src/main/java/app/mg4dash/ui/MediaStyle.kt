@@ -32,6 +32,7 @@ class MediaStyle private constructor(
     private lateinit var picture: ImageView
     private lateinit var fade: View
     private var lastArt: Bitmap? = null
+    private var headTitle: TextView? = null
     private var accent = 0
 
     private fun detach(v: View) = v.apply { (parent as? ViewGroup)?.removeView(this) }
@@ -61,7 +62,8 @@ class MediaStyle private constructor(
             background = GradientDrawable(GradientDrawable.Orientation.TOP_BOTTOM, intArrayOf(0x22000000, 0x44000000, 0xC0000000.toInt()))
         }, FrameLayout.LayoutParams(-1, -1))
         val over = LinearLayout(a).apply { orientation = LinearLayout.VERTICAL; setPadding(dp(24), dp(14), dp(24), dp(16)) }
-        (head as? LinearLayout)?.let { (it.getChildAt(0) as? TextView)?.setTextColor(Color.WHITE) }
+        headTitle = (head as? LinearLayout)?.getChildAt(0) as? TextView
+        headTitle?.setTextColor(Color.WHITE)
         over.addView(head, LinearLayout.LayoutParams(-1, -2))
         over.addView(View(a), LinearLayout.LayoutParams(1, 0, 1f))
         title.setTextColor(Color.WHITE); title.textSize = 30f; title.maxLines = 1; title.setShadowLayer(8f, 0f, 2f, 0x99000000.toInt())
@@ -134,16 +136,22 @@ class MediaStyle private constructor(
     }
 
     /** Nouvelle pochette : image, prolongement et couleur vive recalculés (une fois par image). */
-    fun update(art: Bitmap?) {
+    fun update(source: Bitmap?) {
         if (!::frame.isInitialized) return
+        // Image toute noire (station sans pochette) : traitée comme une absence d'image
+        val art = source?.takeIf { !isBlank(it) }
         if (art != null && art === lastArt) return
         lastArt = art
         val edge: Int
+        val light = Themes.isLight(a)
+        // Sans image : fond blanc ou noir selon le thème, note de musique discrète ; le titre de la source
+        // passe en sombre sur le blanc (le bas reste assombri pour le titre et l'artiste)
+        headTitle?.setTextColor(if (art == null && light) Themes.color(a, R.color.text_value) else Color.WHITE)
         if (art == null) {
             picture.setImageResource(R.drawable.ic_music)
             picture.scaleType = ImageView.ScaleType.CENTER
-            picture.imageTintList = ColorStateList.valueOf(0x40FFFFFF)
-            edge = 0xFF2A3140.toInt()
+            picture.imageTintList = ColorStateList.valueOf(if (light) 0x33000000 else 0x33FFFFFF)
+            edge = if (light) 0xFFF2F4F8.toInt() else 0xFF0B0E14.toInt()
             accent = Themes.color(a, R.color.accent_action)
         } else {
             // Bandes noires en haut et en bas retirées : l'image s'affiche plus large
@@ -199,6 +207,17 @@ class MediaStyle private constructor(
             var bottom = 0; while (bottom < max && dark(h - 1 - bottom)) bottom++
             if (top + bottom < h / 20) return b
             return Bitmap.createBitmap(b, 0, top, w, h - top - bottom)
+        }
+
+        /** Image presque uniformément noire. */
+        fun isBlank(b: Bitmap): Boolean {
+            val step = maxOf(1, b.width / 24)
+            var bright = 0; var n = 0
+            for (x in 0 until b.width step step) for (y in 0 until b.height step step) {
+                val c = b.getPixel(x, y); n++
+                if (Color.red(c) > 24 || Color.green(c) > 24 || Color.blue(c) > 24) bright++
+            }
+            return n > 0 && bright * 50 < n   // moins de 2 % de pixels non noirs
         }
 
         /** Couleur moyenne de la bande gauche de l'image (prolongement quand elle n'a pas le format de la carte). */
