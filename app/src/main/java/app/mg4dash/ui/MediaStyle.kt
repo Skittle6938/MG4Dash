@@ -114,26 +114,35 @@ class MediaStyle private constructor(
 
     /** Fondu posé sur le bord gauche de l'image (calée à droite) : la couleur du bord s'y prolonge sans cassure. */
     /**
-     * Image plus large que la carte (16:9 recadrée) : elle la remplit. Sinon elle est calée à droite et
-     * la couleur moyenne de son bord gauche la prolonge, avec un fondu posé sur ce bord.
+     * Image calée à droite à la hauteur de la carte, jamais rognée sur les côtés : ses bandes noires du
+     * haut et du bas ne sont retirées que tant que l'image agrandie tient dans la largeur de la carte
+     * (sa forme change selon la disposition). La couleur moyenne de son bord gauche la prolonge, avec
+     * un fondu posé sur ce bord.
      */
     private fun placeFade() {
         val w = frame.width; val h = frame.height
-        val d = picture.drawable
-        if (w == 0 || h == 0 || lastArt == null || d == null || d.intrinsicHeight <= 0) { fade.visibility = View.GONE; return }
-        val wide = d.intrinsicWidth.toLong() * h >= d.intrinsicHeight.toLong() * w
-        val st = if (wide) ImageView.ScaleType.CENTER_CROP else ImageView.ScaleType.FIT_END
-        if (picture.scaleType != st) picture.scaleType = st
-        if (wide) { fade.visibility = View.GONE; return }
-        val imgW = h * d.intrinsicWidth / d.intrinsicHeight
+        val art = lastArt
+        if (w == 0 || h == 0 || art == null) { fade.visibility = View.GONE; return }
+        if (shownFor != w * 10000 + h) {
+            shownFor = w * 10000 + h
+            val img = cropBars(art, w, h)
+            picture.setImageBitmap(img)
+            val edge = edgeColor(img)
+            frame.setBackgroundColor(edge)
+            fade.background = GradientDrawable(GradientDrawable.Orientation.LEFT_RIGHT, intArrayOf(edge, edge and 0x00FFFFFF))
+        }
+        val d = picture.drawable ?: return
+        if (picture.scaleType != ImageView.ScaleType.FIT_END) picture.scaleType = ImageView.ScaleType.FIT_END
+        val imgW = minOf(w, (h.toLong() * d.intrinsicWidth / d.intrinsicHeight.coerceAtLeast(1)).toInt())
         val lp = fade.layoutParams as FrameLayout.LayoutParams
         val fw = imgW * 2 / 5
         if (lp.leftMargin != w - imgW || lp.width != fw) {
             lp.leftMargin = w - imgW; lp.width = fw
             frame.post { fade.layoutParams = lp }
         }
-        fade.visibility = View.VISIBLE
+        fade.visibility = if (imgW < w) View.VISIBLE else View.GONE
     }
+    private var shownFor = 0
 
     /** Nouvelle pochette : image, prolongement et couleur vive recalculés (une fois par image). */
     fun update(source: Bitmap?) {
@@ -154,16 +163,15 @@ class MediaStyle private constructor(
             edge = if (light) 0xFFF2F4F8.toInt() else 0xFF0B0E14.toInt()
             accent = Themes.color(a, R.color.accent_action)
         } else {
-            // Bandes noires en haut et en bas retirées : l'image s'affiche plus large
-            val img = cropBars(art)
             picture.imageTintList = null
             picture.scaleType = ImageView.ScaleType.FIT_END
-            picture.setImageBitmap(img)
-            edge = edgeColor(img)
-            accent = vividColor(img) ?: Themes.color(a, R.color.accent_action)
+            edge = edgeColor(art)
+            accent = vividColor(art) ?: Themes.color(a, R.color.accent_action)
         }
         frame.setBackgroundColor(edge)
         fade.background = GradientDrawable(GradientDrawable.Orientation.LEFT_RIGHT, intArrayOf(edge, edge and 0x00FFFFFF))
+        // Image recadrée à la taille de la carte (placeFade, aussi rappelé à chaque mise en page)
+        shownFor = 0
         placeFade()
         play.background = GradientDrawable().apply { cornerRadius = dp(38).toFloat(); setColor(accent) }
         progress?.progressTintList = ColorStateList.valueOf(accent)
@@ -190,7 +198,7 @@ class MediaStyle private constructor(
          * Image sans ses bandes noires (ou presque noires) en haut et en bas, comme sur les pochettes
          * de radio au format 16:9 mises dans un carré. Au plus 35 % retirés de chaque côté.
          */
-        fun cropBars(b: Bitmap): Bitmap {
+        fun cropBars(b: Bitmap, frameW: Int, frameH: Int): Bitmap {
             val h = b.height; val w = b.width
             if (h < 20 || w < 20) return b
             val step = maxOf(1, w / 60)
@@ -206,7 +214,13 @@ class MediaStyle private constructor(
             var top = 0; while (top < max && dark(top)) top++
             var bottom = 0; while (bottom < max && dark(h - 1 - bottom)) bottom++
             if (top + bottom < h / 20) return b
-            return Bitmap.createBitmap(b, 0, top, w, h - top - bottom)
+            // Pas plus que ce qui garde l'image agrandie dans la largeur du cadre (jamais rognée sur les côtés)
+            val minH = ((w.toLong() * frameH + frameW - 1) / frameW).toInt()
+            val newH = maxOf(h - top - bottom, minH)
+            if (newH >= h) return b
+            val cut = h - newH
+            val cutTop = minOf(top, Math.round(cut * top / (top + bottom).toFloat()))
+            return Bitmap.createBitmap(b, 0, cutTop, w, newH)
         }
 
         /** Image presque uniformément noire. */
