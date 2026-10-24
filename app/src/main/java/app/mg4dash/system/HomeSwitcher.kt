@@ -51,7 +51,7 @@ object HomeSwitcher {
         } catch (_: Exception) { null }
         STOCK = found ?: DEFAULT_STOCK
         if (found != null) sp.edit().putString("stock_home", found.flattenToString()).apply()
-        Log.i(TAG, "accueil SAIC : ${STOCK.flattenToShortString()}")
+        Log.i(TAG, "SAIC home: ${STOCK.flattenToShortString()}")
         // L'utilisateur avait demandé à remplacer l'accueil : on le fait sur le bon composant
         if (wizardWasReplaced && found != null) replaceStock(context)
     }
@@ -81,10 +81,10 @@ object HomeSwitcher {
                 STOCK, PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP,
             )
             val now = currentHome(context)
-            Log.i(TAG, "accueil SAIC désactivé ; HOME résolu : ${now?.flattenToShortString()}")
+            Log.i(TAG, "SAIC home disabled; HOME resolves to: ${now?.flattenToShortString()}")
             true
         } catch (e: SecurityException) {
-            Log.e(TAG, "désactivation de l'accueil SAIC refusée (uid système requis)", e)
+            Log.e(TAG, "disabling SAIC home refused (system uid required)", e)
             false
         }
     }
@@ -99,16 +99,16 @@ object HomeSwitcher {
             setPreferred(context, STOCK)
             true
         } catch (e: SecurityException) {
-            Log.e(TAG, "réactivation de l'accueil SAIC refusée", e)
+            Log.e(TAG, "re-enabling SAIC home refused", e)
             false
         }
-        Log.i(TAG, "accueil SAIC réactivé → $ok")
+        Log.i(TAG, "SAIC home re-enabled → $ok")
         if (ok) {
             try {
                 context.startActivity(Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_HOME)
                     .setComponent(STOCK).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
             } catch (e: Exception) {
-                Log.w(TAG, "ouverture launcher SAIC : ${e.message}")
+                Log.w(TAG, "opening SAIC launcher: ${e.message}")
             }
         }
         return ok
@@ -127,7 +127,7 @@ object HomeSwitcher {
             }
             pm.addPreferredActivity(filter, IntentFilter.MATCH_CATEGORY_EMPTY, candidates.toTypedArray(), target)
         } catch (e: SecurityException) {
-            Log.w(TAG, "préférence HOME refusée : ${e.message}")
+            Log.w(TAG, "HOME preference refused: ${e.message}")
         }
     }
 }

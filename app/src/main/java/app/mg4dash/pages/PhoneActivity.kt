@@ -63,7 +63,7 @@ class PhoneActivity : PageActivity() {
                     out
                 } ?: emptyList()
             } catch (e: Exception) {
-                Log.w("Téléphone", "journal d'appels : ${e.message}"); emptyList()
+                Log.w("Phone", "call log: ${e.message}"); emptyList()
             }
         }
 
@@ -88,9 +88,9 @@ class PhoneActivity : PageActivity() {
                 if (hfp == null) { app.mg4dash.ui.Toasts.show(ctx, R.string.ph_no_phone, long = true); return }
                 val extras = Bundle().apply { putParcelable(TelecomManager.EXTRA_PHONE_ACCOUNT_HANDLE, hfp) }
                 tm.placeCall(Uri.fromParts("tel", n, null), extras)
-                Log.i("Téléphone", "appel lancé")
+                Log.i("Phone", "call started")
             } catch (e: Exception) {
-                Log.w("Téléphone", "appel : ${e.message}")
+                Log.w("Phone", "call: ${e.message}")
                 app.mg4dash.ui.Toasts.show(ctx, R.string.ph_call_failed, long = true)
             }
         }
@@ -126,7 +126,7 @@ class PhoneActivity : PageActivity() {
                     out
                 } ?: emptyList()
             } catch (e: Exception) {
-                Log.w("Téléphone", "contacts : ${e.message}"); emptyList()
+                Log.w("Phone", "contacts: ${e.message}"); emptyList()
             }
         }
 
@@ -141,9 +141,9 @@ class PhoneActivity : PageActivity() {
                         for (m in listOf("downloadPhoneBook", "downloadCallLog")) {
                             try {
                                 val res = proxy.javaClass.getMethod(m, android.bluetooth.BluetoothDevice::class.java).invoke(proxy, d)
-                                Log.i("Téléphone", "$m → $res"); started++
+                                Log.i("Phone", "$m → $res"); started++
                             } catch (e: Throwable) {
-                                Log.w("Téléphone", "$m indisponible : ${(e.cause ?: e).message}")
+                                Log.w("Phone", "$m unavailable: ${(e.cause ?: e).message}")
                             }
                         }
                     }
@@ -152,7 +152,7 @@ class PhoneActivity : PageActivity() {
                 }
                 override fun onServiceDisconnected(profile: Int) {}
             }, 17 /* BluetoothProfile.PBAP_CLIENT */)
-            if (!ok) Log.w("Téléphone", "profil PBAP indisponible")
+            if (!ok) Log.w("Phone", "PBAP profile unavailable")
         }
 
         private fun mockContacts() = listOf(

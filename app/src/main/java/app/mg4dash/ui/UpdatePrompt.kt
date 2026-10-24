@@ -30,7 +30,7 @@ import kotlinx.coroutines.withContext
  * bandeau SAIC ne réapparaissent.
  */
 object UpdatePrompt {
-    private const val TAG = "MàJ"
+    private const val TAG = "Update"
     private var checked = false
 
     fun maybeShow(activity: Activity) {
@@ -39,7 +39,7 @@ object UpdatePrompt {
         val owner = activity as? LifecycleOwner ?: return
         owner.lifecycleScope.launch {
             val r = withContext(Dispatchers.IO) {
-                try { Updater.latestStable() } catch (e: Exception) { Log.w(TAG, "vérification au démarrage : ${e.message}"); null }
+                try { Updater.latestStable() } catch (e: Exception) { Log.w(TAG, "startup check: ${e.message}"); null }
             } ?: return@launch
             if (!Updater.isNewer(r.version) || Prefs(activity).updateSkipped == r.version) return@launch
             if (activity.isFinishing || activity.isDestroyed) return@launch
@@ -93,7 +93,7 @@ object UpdatePrompt {
                     state.text = activity.getString(R.string.st_update_installing)
                     withContext(Dispatchers.IO) { Updater.install(activity, apk) }
                 } catch (e: Exception) {
-                    Log.w(TAG, "échec : ${e.message}")
+                    Log.w(TAG, "failed: ${e.message}")
                     state.text = activity.getString(R.string.st_update_error)
                     skip.isEnabled = true; later.isEnabled = true; now.isEnabled = true
                 }
@@ -106,6 +106,6 @@ object UpdatePrompt {
         val h = if (notes.isEmpty()) -2 else minOf(kit.dp(560), (activity.resources.displayMetrics.heightPixels * 0.85f).toInt())
         scrim.addView(panel, FrameLayout.LayoutParams(kit.dp(900), h, Gravity.CENTER))
         root.addView(scrim, FrameLayout.LayoutParams(-1, -1))
-        Log.i(TAG, "release ${r.version} proposée au démarrage")
+        Log.i(TAG, "release ${r.version} offered at startup")
     }
 }

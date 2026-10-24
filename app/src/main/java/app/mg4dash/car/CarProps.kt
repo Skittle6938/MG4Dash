@@ -72,9 +72,9 @@ object CarProps {
             val c = carClass.getMethod("createCar", Context::class.java, ServiceConnection::class.java).invoke(null, ctx, conn)
             car = c
             carClass.getMethod("connect").invoke(c)
-            Log.i(TAG, "connexion au service véhicule demandée")
+            Log.i(TAG, "vehicle service connection requested")
         } catch (e: Throwable) {
-            Log.w(TAG, "android.car indisponible : ${e.javaClass.simpleName} ${e.message}")
+            Log.w(TAG, "android.car unavailable: ${e.javaClass.simpleName} ${e.message}")
         }
     }
 
@@ -82,9 +82,9 @@ object CarProps {
         try {
             val svc = carClass.getField("PROPERTY_SERVICE").get(null) as String
             cpm = carClass.getMethod("getCarManager", String::class.java).invoke(car, svc)
-            Log.i(TAG, "CarPropertyManager prêt")
+            Log.i(TAG, "CarPropertyManager ready")
         } catch (e: Throwable) {
-            Log.w(TAG, "CarPropertyManager indisponible : ${e.message}")
+            Log.w(TAG, "CarPropertyManager unavailable: ${e.message}")
         }
     }
 
@@ -99,14 +99,14 @@ object CarProps {
         try {
             @Suppress("UNCHECKED_CAST")
             val list = m.javaClass.getMethod("getPropertyList").invoke(m) as List<Any>
-            Log.i("Props", "${list.size} propriétés")
+            Log.i("Props", "${list.size} properties")
             list.forEach { cfg ->
                 val id = cfg.javaClass.getMethod("getPropertyId").invoke(cfg) as Int
                 val areas = (cfg.javaClass.getMethod("getAreaIds").invoke(cfg) as? IntArray)?.joinToString(",") { "0x" + Integer.toHexString(it) } ?: ""
                 Log.i("Props", "0x${Integer.toHexString(id)} areas=[$areas] = ${readAny(id)}")
             }
         } catch (e: Throwable) {
-            Log.w("Props", "liste impossible : ${(e.cause ?: e).message}")
+            Log.w("Props", "list failed: ${(e.cause ?: e).message}")
         }
     }
 
@@ -193,14 +193,14 @@ object CarProps {
     /** Écriture entière sur une zone précise (ex. 0x1000000 pour l'ESC, comme le menu MG). */
     fun setIntArea(id: Int, area: Int, value: Int, label: String): Boolean {
         if (BuildConfig.MOCK) { mock[id] = value; return true }
-        val m = cpm ?: run { Log.w(TAG, "SET $label ignoré : service non prêt"); return false }
+        val m = cpm ?: run { Log.w(TAG, "SET $label ignored: service not ready"); return false }
         return try {
             m.javaClass.getMethod("setIntProperty", Int::class.javaPrimitiveType, Int::class.javaPrimitiveType, Int::class.javaPrimitiveType)
                 .invoke(m, id, area, value)
-            Log.i(TAG, "SET $label = $value (0x${Integer.toHexString(id)}, zone 0x${Integer.toHexString(area)})")
+            Log.i(TAG, "SET $label = $value (0x${Integer.toHexString(id)}, area 0x${Integer.toHexString(area)})")
             true
         } catch (e: Throwable) {
-            Log.w(TAG, "SET $label échec : ${(e.cause ?: e).message}")
+            Log.w(TAG, "SET $label failed: ${(e.cause ?: e).message}")
             false
         }
     }
@@ -208,14 +208,14 @@ object CarProps {
     /** Écriture entière ; relue ensuite par l'appelant pour confirmer. */
     fun setInt(id: Int, value: Int, label: String): Boolean {
         if (BuildConfig.MOCK) { mock[id] = value; return true }
-        val m = cpm ?: run { Log.w(TAG, "SET $label ignoré : service non prêt"); return false }
+        val m = cpm ?: run { Log.w(TAG, "SET $label ignored: service not ready"); return false }
         return try {
             m.javaClass.getMethod("setIntProperty", Int::class.javaPrimitiveType, Int::class.javaPrimitiveType, Int::class.javaPrimitiveType)
                 .invoke(m, id, 0, value)
             Log.i(TAG, "SET $label = $value (0x${Integer.toHexString(id)})")
             true
         } catch (e: Throwable) {
-            Log.w(TAG, "SET $label échec : ${(e.cause ?: e).message}")
+            Log.w(TAG, "SET $label failed: ${(e.cause ?: e).message}")
             false
         }
     }

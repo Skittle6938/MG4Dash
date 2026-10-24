@@ -28,7 +28,7 @@ object Apps {
             .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED)
         return try {
             context.startActivity(intent)
-            Log.i(TAG, "ouverture $label (${component.flattenToShortString()})")
+            Log.i(TAG, "opening $label (${component.flattenToShortString()})")
             true
         } catch (e: ActivityNotFoundException) {
             fallback(context, component.packageName, label)
@@ -67,10 +67,10 @@ object Apps {
         val launch = context.packageManager.getLaunchIntentForPackage(pkg) ?: searchLauncher(context, pkg)
         return if (launch != null) {
             context.startActivity(launch.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
-            Log.i(TAG, "ouverture $label via intent de lancement")
+            Log.i(TAG, "opening $label via launch intent")
             true
         } else {
-            Log.w(TAG, "$label introuvable ($pkg)")
+            Log.w(TAG, "$label not found ($pkg)")
             app.mg4dash.ui.Toasts.show(context, context.getString(app.mg4dash.R.string.app_unavailable, label))
             false
         }

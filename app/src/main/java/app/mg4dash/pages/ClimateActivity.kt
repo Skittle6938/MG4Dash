@@ -164,7 +164,7 @@ class ClimateActivity : PageActivity() {
         // on garde l'affichage précédent tant que la dernière lecture valide a moins de 10 s
         val now = android.os.SystemClock.elapsedRealtime()
         if (known) lastKnownAt = now
-        else if (lastKnownAt != 0L && now - lastKnownAt < 10_000) { android.util.Log.i("MG4L.Clim", "lecture clim vide ignorée"); return }
+        else if (lastKnownAt != 0L && now - lastKnownAt < 10_000) { app.mg4dash.system.Log.i("Clim", "empty climate reading ignored"); return }
         val on = s.hvacOn == true
         controls.forEach { it.isEnabled = known }
         power.isSelected = on

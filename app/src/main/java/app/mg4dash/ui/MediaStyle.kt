@@ -224,14 +224,14 @@ class MediaStyle private constructor(
                     b.mediaAlbum.visibility = View.GONE
                     buildImmersive(b.mediaCard, b.mediaCard.getChildAt(0), b.mediaInfo, b.mediaTitle, b.mediaArtist, b.mediaPrev, b.mediaNext)
                 } else buildClassic(b)
-            } catch (e: Exception) { android.util.Log.w("MG4L.Media", "présentation du lecteur : ${e.message}") }
+            } catch (e: Exception) { app.mg4dash.system.Log.w("Media", "player style: ${e.message}") }
         }.takeIf { style == 0 }
 
         /** Mode épuré : même lecteur Immersif, sans barre de progression. */
         fun immersive(a: Activity, card: LinearLayout, head: View, info: LinearLayout, title: TextView, artist: TextView,
                       prev: ImageView, play: ImageView, next: ImageView): MediaStyle? = try {
             MediaStyle(a, play, null).apply { buildImmersive(card, head, info, title, artist, prev, next) }
-        } catch (e: Exception) { android.util.Log.w("MG4L.Media", "lecteur épuré : ${e.message}"); null }
+        } catch (e: Exception) { app.mg4dash.system.Log.w("Media", "simple player: ${e.message}"); null }
 
         /**
          * Image sans ses bandes noires (ou presque noires) en haut et en bas, comme sur les pochettes

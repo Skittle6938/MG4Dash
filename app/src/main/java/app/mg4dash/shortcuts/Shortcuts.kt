@@ -37,7 +37,7 @@ object Shortcuts {
     const val COLS = 4
     const val ROWS = 2
     const val PAGES = 1
-    private const val TAG = "Raccourcis"
+    private const val TAG = "Shortcuts"
     private val main = Handler(Looper.getMainLooper())
 
     sealed class Slot {
@@ -156,15 +156,15 @@ object Shortcuts {
         AVM_SERVICES[cn.packageName]?.let { svc ->
             try {
                 activity.startService(Intent("com.saicmotor.avm.START_ENTER").setComponent(ComponentName(cn.packageName, svc)))
-                Log.i(TAG, "caméra 360 : service $svc démarré")
+                Log.i(TAG, "360 camera: service $svc started")
                 return
-            } catch (e: Exception) { Log.w(TAG, "caméra 360 : service $svc : ${e.message}") }
+            } catch (e: Exception) { Log.w(TAG, "360 camera: service $svc: ${e.message}") }
         }
         try {
             activity.startActivity(Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER).setComponent(cn)
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED))
         } catch (e: Exception) {
-            Log.w(TAG, "ouverture ${cn.flattenToShortString()} : ${e.message}")
+            Log.w(TAG, "opening ${cn.flattenToShortString()}: ${e.message}")
             app.mg4dash.ui.Toasts.show(activity, activity.getString(R.string.app_unavailable, appLabel(activity, cn)))
         }
     }
@@ -247,7 +247,7 @@ object Shortcuts {
                     .filter { it.first.substringBefore('.') in HA_DOMAINS }
                     .sortedWith(compareBy({ HA_DOMAINS.indexOf(it.first.substringBefore('.')) }, { it.second.lowercase() }))
             } catch (e: Exception) {
-                Log.w(TAG, "Home Assistant : ${e.message}"); null
+                Log.w(TAG, "Home Assistant: ${e.message}"); null
             }
             main.post {
                 if (activity.isFinishing) return@post
@@ -319,7 +319,7 @@ object Shortcuts {
                 request(prefs, "POST", "/api/services/" + service(slot.entityId), JSONObject().put("entity_id", slot.entityId).toString())
                 true
             } catch (e: Exception) {
-                Log.w(TAG, "action ${slot.entityId} : ${e.message}"); false
+                Log.w(TAG, "action ${slot.entityId}: ${e.message}"); false
             }
             main.post {
                 ToastsUi.show(app, app.getString(if (ok) R.string.ha_sent else R.string.ha_error_action, slot.label))
@@ -331,7 +331,7 @@ object Shortcuts {
     fun testHa(context: Context, onResult: (Boolean) -> Unit) {
         val prefs = Prefs(context)
         thread {
-            val ok = try { request(prefs, "GET", "/api/", null); true } catch (e: Exception) { Log.w(TAG, "test : ${e.message}"); false }
+            val ok = try { request(prefs, "GET", "/api/", null); true } catch (e: Exception) { Log.w(TAG, "test: ${e.message}"); false }
             main.post { onResult(ok) }
         }
     }

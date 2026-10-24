@@ -15,7 +15,7 @@ import java.io.File
  * Android vérifie la signature. La nouvelle radio ne s'applique qu'après un redémarrage de l'écran central.
  */
 object RadioDashUpdater {
-    private const val TAG = "MàJ Radio Dash"
+    private const val TAG = "RadioDashUpdate"
     const val PKG = "com.saicmotor.radio"
     private const val API = "https://api.github.com/repos/Skittle6938/MG4-Radio-Dash/releases?per_page=10"
     /** Version de l'appli radio d'origine sur laquelle Radio Dash est construite (et qu'elle garde). */
@@ -52,7 +52,7 @@ object RadioDashUpdater {
             try {
                 val f = javaClass.getField("installFlags")
                 f.setInt(this, f.getInt(this) or 0x00000010)   // INSTALL_INTERNAL, comme « pm install -f »
-            } catch (e: Exception) { Log.w(TAG, "drapeau INSTALL_INTERNAL : ${e.message}") }
+            } catch (e: Exception) { Log.w(TAG, "INSTALL_INTERNAL flag: ${e.message}") }
         }
         val id = pi.createSession(params)
         pi.openSession(id).use { s ->
@@ -60,7 +60,7 @@ object RadioDashUpdater {
                 s.openWrite("base.apk", 0, apk.length()).use { o -> input.copyTo(o); s.fsync(o) }
             }
             val sender = PendingIntent.getBroadcast(context, id, Intent(context, Result::class.java), PendingIntent.FLAG_UPDATE_CURRENT)
-            Log.i(TAG, "installation de Radio Dash $version lancée (session $id)")
+            Log.i(TAG, "Radio Dash $version install started (session $id)")
             s.commit(sender.intentSender)
         }
     }
@@ -70,7 +70,7 @@ object RadioDashUpdater {
         override fun onReceive(context: Context, intent: Intent) {
             val status = intent.getIntExtra(PackageInstaller.EXTRA_STATUS, -999)
             val msg = intent.getStringExtra(PackageInstaller.EXTRA_STATUS_MESSAGE)
-            Log.i(TAG, "résultat de l'installation : $status $msg")
+            Log.i(TAG, "install result: $status $msg")
             val sp = Prefs(context).raw
             val ok = status == PackageInstaller.STATUS_SUCCESS
             if (ok) sp.edit().putString("radio_dash_version", sp.getString("radio_dash_pending", null)).apply()

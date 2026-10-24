@@ -80,7 +80,7 @@ class EnergyActivity : PageActivity() {
         heating = kit.toggleTile(getString(R.string.en_heating), heat = true) {
             // Écriture 1 = activer, 2 = désactiver (comme l'appli SAIC) ; la lecture rend 0 quand c'est activé
             val on = heating.isSelected
-            CarProps.setInt(CarProps.DRVNG_PTC_HEAT, if (on) 2 else 1, "réchauffage batterie")
+            CarProps.setInt(CarProps.DRVNG_PTC_HEAT, if (on) 2 else 1, "battery heating")
             heating.postDelayed({ refreshProps() }, 1500)
         }.apply { textSize = 18f; setPadding(kit.dp(20), 0, kit.dp(20), 0) }
         header.addView(heating, header.childCount - 1, kit.lp(-2, kit.dp(52), r = 12))   // avant le lien SAIC
@@ -125,7 +125,7 @@ class EnergyActivity : PageActivity() {
         }
         c1.addView(kit.title(getString(R.string.en_ac_current)), kit.lp(-1, -2, t = 14))
         val (cRow, cSet) = kit.segmented(listOf("6 A", "8 A", "16 A", getString(R.string.en_max))) { i ->
-            CarProps.setInt(CarProps.ALTNG_CHRG_CRNT, i + 1, "courant AC"); refreshProps()
+            CarProps.setInt(CarProps.ALTNG_CHRG_CRNT, i + 1, "AC current"); refreshProps()
         }
         setCurrent = cSet
         c1.addView(cRow, kit.lp(-1, -2, t = 8))
@@ -135,10 +135,10 @@ class EnergyActivity : PageActivity() {
         val tRow = kit.row()
         schedule = kit.toggleTile(getString(R.string.en_schedule)) {
             val on = reser == 1 || reser == 3
-            CarProps.setInt(CarProps.RESER_CTRL, if (on) 2 else 1, "programmation"); refreshProps()
+            CarProps.setInt(CarProps.RESER_CTRL, if (on) 2 else 1, "schedule"); refreshProps()
         }
         finish = kit.toggleTile(getString(R.string.en_finish)) {
-            CarProps.setInt(CarProps.RESER_CTRL, if (reser == 3) 1 else 3, "continuer après l'heure de fin"); refreshProps()
+            CarProps.setInt(CarProps.RESER_CTRL, if (reser == 3) 1 else 3, "continue after end time"); refreshProps()
         }.apply { textSize = 17f }
         tRow.addView(schedule, kit.lp(0, kit.dp(60), 1f))
         tRow.addView(finish, kit.lp(0, kit.dp(60), 1f, l = 10))
@@ -156,7 +156,7 @@ class EnergyActivity : PageActivity() {
         c2.addView(kit.text(getString(R.string.en_v2l_stop_at), 17f, R.color.text_title), kit.lp(-1, -2, t = 12))
         val v2ls = listOf(20, 30, 40, 50, 60, 70, 80)
         val (vRow, vSet) = kit.segmented(v2ls.map { "$it" }) { i ->
-            CarProps.setInt(CarProps.V2X_SP_SOC, CarProps.v2lCode(v2ls[i]), "seuil V2L ${v2ls[i]} %"); refreshProps()
+            CarProps.setInt(CarProps.V2X_SP_SOC, CarProps.v2lCode(v2ls[i]), "V2L threshold ${v2ls[i]} %"); refreshProps()
         }
         setV2l = vSet
         c2.addView(vRow, kit.lp(-1, -2, t = 8))
@@ -384,13 +384,13 @@ class EnergyActivity : PageActivity() {
         if (total == other) return    // l'appli SAIC refuse début = fin
         if (start) {
             stH = nh; stM = nm
-            CarProps.setInt(CarProps.RESER_ST_HOUR, nh, "début programmation (h)")
-            CarProps.setInt(CarProps.RESER_ST_MIN, nm, "début programmation (min)")
+            CarProps.setInt(CarProps.RESER_ST_HOUR, nh, "schedule start (h)")
+            CarProps.setInt(CarProps.RESER_ST_MIN, nm, "schedule start (min)")
             startTime.text = hhmm(nh, nm)
         } else {
             spH = nh; spM = nm
-            CarProps.setInt(CarProps.RESER_SP_HOUR, nh, "fin programmation (h)")
-            CarProps.setInt(CarProps.RESER_SP_MIN, nm, "fin programmation (min)")
+            CarProps.setInt(CarProps.RESER_SP_HOUR, nh, "schedule end (h)")
+            CarProps.setInt(CarProps.RESER_SP_MIN, nm, "schedule end (min)")
             endTime.text = hhmm(nh, nm)
         }
     }

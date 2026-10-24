@@ -46,9 +46,9 @@ object LegacyCar {
         initDone = true
         val launcher = listOf(Firmware.LEGACY_LAUNCHER, "com.saicmotor.launcher").firstNotNullOfOrNull { pkg ->
             try { ctx.createPackageContext(pkg, Context.CONTEXT_INCLUDE_CODE or Context.CONTEXT_IGNORE_SECURITY) } catch (_: Exception) { null }
-        } ?: run { Log.w(TAG, "launcher SAIC (ancien SDK) introuvable"); return }
+        } ?: run { Log.w(TAG, "SAIC launcher (old SDK) not found"); return }
         val cls = try { launcher.classLoader.loadClass(AIRCON_CLASS) } catch (e: Exception) {
-            Log.w(TAG, "AirConditionManager absent : ${e.message}"); return
+            Log.w(TAG, "AirConditionManager missing: ${e.message}"); return
         }
         fun singleton(): Any? = try { cls.getMethod("getInstance").invoke(null) } catch (_: Exception) { null }
         val initM = cls.methods.firstOrNull { it.name == "init" && it.parameterCount == 2 && Context::class.java.isAssignableFrom(it.parameterTypes[0]) }
@@ -56,11 +56,11 @@ object LegacyCar {
             val lt = initM.parameterTypes[1]
             val listener = if (lt.isInterface) try {
                 java.lang.reflect.Proxy.newProxyInstance(lt.classLoader, arrayOf(lt)) { _, m, _ ->
-                    if (m.name == "onServiceConnected") { ac = singleton(); Log.i(TAG, "AirConditionManager connecté") }
+                    if (m.name == "onServiceConnected") { ac = singleton(); Log.i(TAG, "AirConditionManager connected") }
                     null
                 }
             } catch (_: Exception) { null } else null
-            try { initM.invoke(null, ctx, listener) } catch (e: Exception) { Log.w(TAG, "AirConditionManager.init : ${e.message}") }
+            try { initM.invoke(null, ctx, listener) } catch (e: Exception) { Log.w(TAG, "AirConditionManager.init: ${e.message}") }
         }
         if (ac == null) ac = singleton()
     }
@@ -78,13 +78,13 @@ object LegacyCar {
     private fun set(name: String, v: Int): Boolean {
         val a = ac ?: return false
         return try { a.javaClass.getMethod(name, Int::class.javaPrimitiveType).invoke(a, v); true }
-        catch (e: Exception) { Log.w(TAG, "$name($v) : ${(e.cause ?: e).message}"); false }
+        catch (e: Exception) { Log.w(TAG, "$name($v): ${(e.cause ?: e).message}"); false }
     }
 
     private fun call(name: String): Boolean {
         val a = ac ?: return false
         return try { a.javaClass.getMethod(name).invoke(a); true }
-        catch (e: Exception) { Log.w(TAG, "$name() : ${(e.cause ?: e).message}"); false }
+        catch (e: Exception) { Log.w(TAG, "$name(): ${(e.cause ?: e).message}"); false }
     }
 
     private fun prop(id: Int): Int? = CarProps.readIntArea(id, AREA_HVAC)?.takeIf { it >= 0 }
@@ -171,11 +171,11 @@ object LegacyCar {
             val lt = initM.parameterTypes[1]
             val listener = if (lt.isInterface) try {
                 java.lang.reflect.Proxy.newProxyInstance(lt.classLoader, arrayOf(lt)) { _, m, _ ->
-                    if (m.name == "onServiceConnected") { onConnected(singleton()); Log.i(TAG, "${className.substringAfterLast('.')} connecté") }
+                    if (m.name == "onServiceConnected") { onConnected(singleton()); Log.i(TAG, "${className.substringAfterLast('.')} connected") }
                     null
                 }
             } catch (_: Exception) { null } else null
-            try { initM.invoke(null, ctx, listener) } catch (e: Exception) { Log.w(TAG, "${className.substringAfterLast('.')}.init : ${e.message}") }
+            try { initM.invoke(null, ctx, listener) } catch (e: Exception) { Log.w(TAG, "${className.substringAfterLast('.')}.init: ${e.message}") }
         }
         return singleton()
     }
@@ -228,7 +228,7 @@ object LegacyCar {
         connectControl()
         val c = control ?: return false
         return try { c.javaClass.getMethod("setEspSwitch", Int::class.javaPrimitiveType).invoke(c, 1); true }
-        catch (e: Exception) { Log.w(TAG, "setEspSwitch : ${(e.cause ?: e).message}"); false }
+        catch (e: Exception) { Log.w(TAG, "setEspSwitch: ${(e.cause ?: e).message}"); false }
     }
 
     private fun chInt(name: String): Int? {
@@ -239,7 +239,7 @@ object LegacyCar {
     private fun chSet(name: String, v: Int): Boolean {
         val c = charging ?: return false
         return try { c.javaClass.getMethod(name, Int::class.javaPrimitiveType).invoke(c, v); true }
-        catch (e: Exception) { Log.w(TAG, "$name($v) : ${(e.cause ?: e).message}"); false }
+        catch (e: Exception) { Log.w(TAG, "$name($v): ${(e.cause ?: e).message}"); false }
     }
 
     /** État de charge et commandes en cours ; inchangé si le service ne répond pas. */

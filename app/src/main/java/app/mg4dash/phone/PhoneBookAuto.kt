@@ -38,12 +38,12 @@ object PhoneBookAuto {
                     val now = System.currentTimeMillis()
                     if (phone && now - lastTry > RETRY_MS && PhoneActivity.contacts(app).isEmpty()) {
                         lastTry = now
-                        Log.i("Téléphone", "répertoire vide, téléphone connecté : synchronisation en arrière-plan")
+                        Log.i("Phone", "empty phone book, phone connected: background sync")
                         PhoneActivity.sync(app, manual = false)
                     }
                     if (!phone) lastTry = 0L   // prochain téléphone connecté : essai tout de suite
                 } catch (e: Exception) {
-                    Log.w("Téléphone", "répertoire en arrière-plan : ${e.message}")
+                    Log.w("Phone", "background phone book: ${e.message}")
                 }
                 delay(CHECK_MS)
             }

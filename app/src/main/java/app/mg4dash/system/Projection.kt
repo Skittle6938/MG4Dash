@@ -6,7 +6,7 @@ import android.content.Intent
 import android.content.ServiceConnection
 import android.os.IBinder
 import android.os.Parcel
-import android.util.Log
+import app.mg4dash.system.Log
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
@@ -19,7 +19,7 @@ import java.util.concurrent.TimeUnit
  * (1 CarPlay, 2 Android Auto). Voie documentée par MG4Control (SliDeeN, branche beta, 2026-10-23).
  */
 object Projection {
-    private const val TAG = "MG4L.Projection"
+    private const val TAG = "Projection"
     private const val DESCRIPTOR = "com.allgo.rui.IRemoteUIService"
     private const val TX_ACTIVE_DEVICE = 15
     private val SERVICE = ComponentName("com.allgo.rui", "com.allgo.rui.RemoteUIService")
@@ -54,10 +54,10 @@ object Projection {
             when (val type = reply.readInt()) {
                 1 -> Session.Read(Apps.CARPLAY)
                 2 -> Session.Read(Apps.ANDROID_AUTO)
-                else -> { Log.i(TAG, "type de projection inconnu : $type"); Session.Unknown }
+                else -> { Log.i(TAG, "unknown projection type: $type"); Session.Unknown }
             }
         } catch (e: Exception) {
-            Log.w(TAG, "appareil actif illisible : ${e.message}"); Session.Unknown
+            Log.w(TAG, "active device unreadable: ${e.message}"); Session.Unknown
         } finally { reply.recycle(); data.recycle() }
     }
 
@@ -75,9 +75,9 @@ object Projection {
             data.writeInt(code)
             b.transact(TX_MEDIA_KEY, data, reply, 0)
             reply.readException()
-            Log.i(TAG, "touche média projection $code → ${reply.readInt()}")
+            Log.i(TAG, "projection media key $code → ${reply.readInt()}")
             true
-        } catch (e: Exception) { Log.w(TAG, "touche média projection $code : ${e.message}"); false }
+        } catch (e: Exception) { Log.w(TAG, "projection media key $code: ${e.message}"); false }
         finally { reply.recycle(); data.recycle() }
     }
 
@@ -91,7 +91,7 @@ object Projection {
         val l = CountDownLatch(1); latch = l
         val ok = try {
             context.applicationContext.bindService(Intent().setComponent(SERVICE), connection, Context.BIND_AUTO_CREATE)
-        } catch (e: Exception) { Log.w(TAG, "liaison AllGo refusée : ${e.message}"); false }
+        } catch (e: Exception) { Log.w(TAG, "AllGo binding refused: ${e.message}"); false }
         if (!ok) return null
         l.await(2000, TimeUnit.MILLISECONDS)
         return binder

@@ -126,8 +126,8 @@ object EnergyMonitor {
             var startKm = -1
             // Plus bas % de la période en cours (avant la 1.1.4 : dernier % vu, « em_last_soc »)
             var lowSoc = sp.getInt("em_c_low", sp.getInt("em_last_soc", -1))
-            Log.i(TAG, "depuis recharge : départ ${sp.getInt("em_c_soc0", -1)} % à $chargeKm km, plus bas $lowSoc %, " +
-                "${"%.2f".format(java.util.Locale.US, _sinceCharge.value.netKwh)} kWh nets")
+            Log.i(TAG, "since charge: start ${sp.getInt("em_c_soc0", -1)} % at $chargeKm km, lowest $lowSoc %, " +
+                "${"%.2f".format(java.util.Locale.US, _sinceCharge.value.netKwh)} kWh net")
             var saveTick = 0
             var sohSoc: Float? = null      // % à la seconde précédente, null hors observation
             var sohPrecise = false
@@ -174,8 +174,8 @@ object EnergyMonitor {
                     val bogus = c.km >= 10 && c.netKwh / c.km * 100f > 60f
                     if (lowSoc >= 0 && soc >= lowSoc + RECHARGE_PCT || soc0 >= 0 && soc >= soc0 + RECHARGE_PCT ||
                         chargeKm < 0 && km != null || bogus) {
-                        Log.i(TAG, if (bogus) "période depuis recharge incohérente (${"%.1f".format(java.util.Locale.US, c.netKwh)} kWh nets " +
-                            "pour ${c.km} km) : remise à zéro" else "nouvelle période depuis recharge ($lowSoc → $soc %)")
+                        Log.i(TAG, if (bogus) "inconsistent since-charge period (${"%.1f".format(java.util.Locale.US, c.netKwh)} kWh net " +
+                            "for ${c.km} km): reset" else "new since-charge period ($lowSoc → $soc %)")
                         _sinceCharge.value = Totals()
                         chargeKm = km ?: -1
                         lowSoc = soc

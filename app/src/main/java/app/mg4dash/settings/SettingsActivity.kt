@@ -205,7 +205,7 @@ class SettingsActivity : AppCompatActivity() {
                     updState.text = getString(R.string.st_update_installing)
                     withContext(Dispatchers.IO) { app.mg4dash.system.Updater.install(this@SettingsActivity, apk) }
                 } catch (e: Exception) {
-                    Log.w("MàJ", "échec : ${e.message}")
+                    Log.w("Update", "failed: ${e.message}")
                     updState.text = getString(R.string.st_update_error)
                 }
             }
@@ -214,7 +214,7 @@ class SettingsActivity : AppCompatActivity() {
             updState.text = getString(R.string.st_update_checking)
             lifecycleScope.launch {
                 var failed = false
-                val r = withContext(Dispatchers.IO) { try { app.mg4dash.system.Updater.latest(prefs.updateBeta) } catch (e: Exception) { Log.w("MàJ", "${e.message}"); failed = true; null } }
+                val r = withContext(Dispatchers.IO) { try { app.mg4dash.system.Updater.latest(prefs.updateBeta) } catch (e: Exception) { Log.w("Update", "${e.message}"); failed = true; null } }
                 val newer = r?.takeIf { app.mg4dash.system.Updater.isNewer(it.version) }
                 updState.text = when {
                     failed -> getString(R.string.st_update_error)
@@ -346,7 +346,7 @@ class SettingsActivity : AppCompatActivity() {
                 val s = app.mg4dash.car.CarBridge.state.value
                 view.text = vals.joinToString("\n") { "${it.first} = ${it.second ?: "illisible"}" } +
                     "\nCharge : ${app.mg4dash.car.VehicleState.chargeStatusLabel(s.chargeStatus)}"
-                Log.i("SPR", "lecture : " + vals.joinToString { "${it.first}=${it.second}" })
+                Log.i("SPR", "read: " + vals.joinToString { "${it.first}=${it.second}" })
             }
         }
         fun write(name: String, id: Int, value: Int) {
@@ -383,7 +383,7 @@ class SettingsActivity : AppCompatActivity() {
         row(parent, button(getString(R.string.st_rd_check), R.color.accent_action) {
             state.text = getString(R.string.st_update_checking)
             lifecycleScope.launch {
-                val r = withContext(Dispatchers.IO) { try { R2.latest(prefs.updateBeta) } catch (e: Exception) { Log.w("MàJ", "Radio Dash : ${e.message}"); null } }
+                val r = withContext(Dispatchers.IO) { try { R2.latest(prefs.updateBeta) } catch (e: Exception) { Log.w("Update", "Radio Dash: ${e.message}"); null } }
                 if (r == null) { state.text = getString(R.string.st_update_error); return@launch }
                 val cur = R2.installedVersion(this@SettingsActivity)
                 if (cur != null && !app.mg4dash.system.Updater.isNewer(r.version, cur)) { state.text = getString(R.string.st_rd_uptodate, cur); return@launch }
@@ -406,7 +406,7 @@ class SettingsActivity : AppCompatActivity() {
                                 } }
                                 withContext(Dispatchers.IO) { R2.install(this@SettingsActivity, apk, r.version) }
                             } catch (e: Exception) {
-                                Log.w("MàJ", "Radio Dash : ${e.message}")
+                                Log.w("Update", "Radio Dash: ${e.message}")
                                 state.text = getString(R.string.st_update_error)
                             }
                         }
@@ -460,7 +460,7 @@ class SettingsActivity : AppCompatActivity() {
             .setMessage(R.string.st_replace_msg)
             .setPositiveButton(R.string.st_replace_btn) { _, _ ->
                 val ok = HomeSwitcher.replaceStock(this)
-                Log.i("Valet", "remplacement de l'accueil SAIC → $ok")
+                Log.i("Valet", "replacing SAIC home → $ok")
                 refreshHome(); toastState(ok)
             }
             .setNegativeButton(R.string.cancel, null)
@@ -473,7 +473,7 @@ class SettingsActivity : AppCompatActivity() {
             .setMessage(R.string.st_valet_msg)
             .setPositiveButton(R.string.activate) { _, _ ->
                 val ok = HomeSwitcher.switchToStock(this)
-                Log.i("Valet", "mode Entretien → $ok")
+                Log.i("Valet", "Maintenance mode → $ok")
                 refreshHome(); toastState(ok)
             }
             .setNegativeButton(R.string.cancel, null)

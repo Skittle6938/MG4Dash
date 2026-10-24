@@ -9,7 +9,7 @@ import app.mg4dash.system.Log
 class BootReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         if (intent.action == Intent.ACTION_BOOT_COMPLETED) {
-            Log.i("Boot", "BOOT_COMPLETED reçu")
+            Log.i("Boot", "BOOT_COMPLETED received")
         }
     }
 }

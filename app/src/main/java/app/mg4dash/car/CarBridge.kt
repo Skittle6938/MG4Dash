@@ -63,7 +63,7 @@ object CarBridge {
         // SAIC du launcher d'origine. Firmware inconnu : on tente les deux.
         if (Firmware.family != Firmware.Family.LEGACY) bind()
         if (Firmware.family != Firmware.Family.A9) LegacyCar.init(context)
-        Log.i(TAG, "firmware ${Firmware.version} (${Firmware.gen}, famille ${Firmware.family})")
+        Log.i(TAG, "firmware ${Firmware.version} (${Firmware.gen}, family ${Firmware.family})")
         scope.launch { pollLoop() }
     }
 
@@ -84,8 +84,8 @@ object CarBridge {
         if (BuildConfig.MOCK) return
         scope.launch {
             val e = ev
-            if (e != null) try { e.elecClckCtrl(target); Log.i(TAG, "pistolet ← $target (service EV)") } catch (ex: Exception) { Log.w(TAG, "pistolet : ${ex.message}") }
-            else CarProps.setIntArea(ELEC_CLCK_CTRL, 0x1000000, target, "pistolet")
+            if (e != null) try { e.elecClckCtrl(target); Log.i(TAG, "charge gun ← $target (EV service)") } catch (ex: Exception) { Log.w(TAG, "charge gun: ${ex.message}") }
+            else CarProps.setIntArea(ELEC_CLCK_CTRL, 0x1000000, target, "charge gun")
         }
     }
 
@@ -95,9 +95,9 @@ object CarBridge {
     fun powerOffCar(): Boolean {
         // Jamais en roulant : vitesse inconnue ou au-dessus de 1 km/h = refus
         val v = state.value.speedKmh
-        if (v == null || v > 1f) { Log.w(TAG, "extinction refusée, vitesse $v"); return false }
+        if (v == null || v > 1f) { Log.w(TAG, "power off refused, speed $v"); return false }
         if (BuildConfig.MOCK) return true
-        CarProps.setIntArea(POWER_MODE, 0, 2, "extinction de la voiture")
+        CarProps.setIntArea(POWER_MODE, 0, 2, "car power off")
         return true
     }
 
@@ -105,7 +105,7 @@ object CarBridge {
     fun lockDoors(): Boolean {
         if (doorsLocked() == true) return true
         if (BuildConfig.MOCK) return true
-        return CarProps.setIntArea(VEHICLE_LOCK, 0x1000000, 1, "portes : verrouiller")
+        return CarProps.setIntArea(VEHICLE_LOCK, 0x1000000, 1, "doors: lock")
     }
 
     /** Met la clim en marche ou l'arrête si elle n'est pas déjà dans cet état. */
@@ -118,7 +118,7 @@ object CarBridge {
     fun toggleDoors(): Boolean? {
         val locked = doorsLocked() ?: return null
         if (BuildConfig.MOCK) return !locked
-        CarProps.setIntArea(VEHICLE_LOCK, 0x1000000, if (locked) 2 else 1, if (locked) "portes : déverrouiller" else "portes : verrouiller")
+        CarProps.setIntArea(VEHICLE_LOCK, 0x1000000, if (locked) 2 else 1, if (locked) "portes : déverrouiller" else "doors: lock")
         return !locked
     }
 
@@ -146,19 +146,19 @@ object CarBridge {
             bound = ctx.bindService(intent, conn, Context.BIND_AUTO_CREATE)
             Log.i(TAG, "bindService CarAdapter → $bound")
         } catch (e: Exception) {
-            Log.w(TAG, "bindService CarAdapter impossible : ${e.message}")
+            Log.w(TAG, "bindService CarAdapter failed: ${e.message}")
         }
     }
 
     private val conn = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, binder: IBinder?) {
             adapter = binder?.let { AdapterService(it) }
-            Log.i(TAG, "CarAdapter connecté")
+            Log.i(TAG, "CarAdapter connected")
             scope.launch { resolveClients() }
         }
 
         override fun onServiceDisconnected(name: ComponentName?) {
-            Log.w(TAG, "CarAdapter déconnecté")
+            Log.w(TAG, "CarAdapter disconnected")
             adapter = null; hvac = null; ev = null; vs = null; general = null
             _state.value = _state.value.copy(connected = false)
         }
@@ -175,7 +175,7 @@ object CarBridge {
     private fun query(code: Int): IBinder? = try {
         adapter?.queryClient(code)
     } catch (e: Exception) {
-        Log.w(TAG, "queryClient($code) : ${e.message}"); null
+        Log.w(TAG, "queryClient($code): ${e.message}"); null
     }
 
     private fun resolveClients() {
@@ -202,7 +202,7 @@ object CarBridge {
                 refreshHeating()
                 if (tick % 3 == 0L) refreshEnergy()
             } catch (e: Exception) {
-                Log.w(TAG, "poll : ${e.message}")
+                Log.w(TAG, "poll: ${e.message}")
             }
             tick++
             delay(if (fastPoll) 1000L else 5000L)
@@ -262,7 +262,7 @@ object CarBridge {
         heatHoldUntil = System.currentTimeMillis() + 2_500
         if (BuildConfig.MOCK) return
         scope.launch {
-            CarProps.setIntArea(if (left) SEAT_HEAT_L else SEAT_HEAT_R, HEAT_AREA, 1, "siège chauffant ${if (left) "G" else "D"}")
+            CarProps.setIntArea(if (left) SEAT_HEAT_L else SEAT_HEAT_R, HEAT_AREA, 1, "heated seat ${if (left) "L" else "R"}")
             delay(2_600); refreshHeating()
         }
     }
@@ -274,7 +274,7 @@ object CarBridge {
         heatHoldUntil = System.currentTimeMillis() + 2_500
         if (BuildConfig.MOCK) return
         scope.launch {
-            CarProps.setIntArea(WHEEL_HEAT, HEAT_AREA, 1, "volant chauffant")
+            CarProps.setIntArea(WHEEL_HEAT, HEAT_AREA, 1, "heated wheel")
             delay(2_600); refreshHeating()
         }
     }
@@ -406,8 +406,8 @@ object CarBridge {
     private fun legacy(label: String, action: () -> Boolean) {
         scope.launch {
             val front = ourFrontTask()
-            val ok = try { action() } catch (e: Exception) { Log.w(TAG, "SET $label : ${e.message}"); false }
-            Log.i(TAG, "SET $label (ancien SDK) → $ok")
+            val ok = try { action() } catch (e: Exception) { Log.w(TAG, "SET $label: ${e.message}"); false }
+            Log.i(TAG, "SET $label (old SDK) → $ok")
             delay(300); refreshHvac(); keepFront(front)
             delay(700); refreshHvac(); keepFront(front)
             delay(1000); keepFront(front)
@@ -436,9 +436,9 @@ object CarBridge {
             val pkg = top.topActivity?.packageName ?: return
             if (top.id != task && pkg.startsWith("com.saicmotor")) {
                 am.moveTaskToFront(task, 0)
-                Log.i(TAG, "écran clim SAIC ${top.topActivity?.flattenToShortString()} passé devant : MG4Dash remis devant")
+                Log.i(TAG, "SAIC climate screen ${top.topActivity?.flattenToShortString()} came in front: MG4Dash brought back")
             }
-        } catch (e: Throwable) { Log.w(TAG, "clim SAIC : ${e.message}") }
+        } catch (e: Throwable) { Log.w(TAG, "SAIC climate: ${e.message}") }
     }
 
     private val useLegacy: Boolean get() = !BuildConfig.MOCK && hvac == null && LegacyCar.ready
@@ -446,12 +446,12 @@ object CarBridge {
     private fun command(label: String, action: (HvacService) -> Unit) {
         if (BuildConfig.MOCK) { MockCar.command(label, _state); return }
         scope.launch {
-            val h = hvac ?: run { Log.w(TAG, "$label ignoré : clim non connectée"); return@launch }
+            val h = hvac ?: run { Log.w(TAG, "$label ignored: climate not connected"); return@launch }
             try {
                 action(h)
                 Log.i(TAG, "SET $label → ok")
             } catch (e: Exception) {
-                Log.w(TAG, "SET $label → échec : ${e.message}")
+                Log.w(TAG, "SET $label → failed: ${e.message}")
             }
             delay(300); refreshHvac()
             delay(700); refreshHvac()
@@ -472,16 +472,16 @@ object CarBridge {
                         "startV2L" -> LegacyCar.dischargeCtrl(1)
                         else -> LegacyCar.dischargeCtrl(2)
                     }
-                    Log.i(TAG, "EV $label (ancien SDK) → $ok")
+                    Log.i(TAG, "EV $label (old SDK) → $ok")
                     delay(1500); refreshEnergy(); delay(3000); refreshEnergy()
                 } else if (label == "startCharge" || label == "stopCharge") {
                     // Secours sans service EV ni SDK : la propriété CHRG_CTRL (même effet, testé sur SWI69)
                     CarProps.setIntArea(CHRG_CTRL, 0x1000000, if (label == "startCharge") 1 else 2, label)
                     delay(1500); refreshEnergy(); delay(3000); refreshEnergy()
-                } else Log.w(TAG, "$label ignoré : service EV non connecté")
+                } else Log.w(TAG, "$label ignored: EV service not connected")
                 return@launch
             }
-            try { action(e); Log.i(TAG, "EV $label → envoyé") } catch (ex: Exception) { Log.w(TAG, "EV $label → échec : ${ex.message}") }
+            try { action(e); Log.i(TAG, "EV $label → sent") } catch (ex: Exception) { Log.w(TAG, "EV $label → failed: ${ex.message}") }
             delay(1500); refreshEnergy()
             delay(3000); refreshEnergy()
         }
@@ -501,9 +501,9 @@ object CarBridge {
     /** Allume ou éteint l'écran central par le service véhicule ; false si le service ne répond pas. */
     fun setDisplay(on: Boolean): Boolean {
         if (BuildConfig.MOCK) return true
-        val g = general ?: run { Log.w(TAG, "écran : service général absent"); return false }
-        return try { g.setDisplayState(on); Log.i(TAG, "écran ${if (on) "allumé" else "éteint"}"); true }
-        catch (e: Exception) { Log.w(TAG, "écran : ${e.message}"); false }
+        val g = general ?: run { Log.w(TAG, "screen: general service missing"); return false }
+        return try { g.setDisplayState(on); Log.i(TAG, "screen ${if (on) "on" else "off"}"); true }
+        catch (e: Exception) { Log.w(TAG, "screen: ${e.message}"); false }
     }
 
     /**
@@ -524,10 +524,10 @@ object CarBridge {
         if (BuildConfig.MOCK) { mockEsc = !mockEsc; return }
         // Ancien SDK sans la propriété : VehicleControlManager (SWI68/165)
         if (CarProps.readIntArea(VEHICLE_ESP, 0x1000000) == null && Firmware.family == Firmware.Family.LEGACY) {
-            Log.i(TAG, "ESC (ancien SDK) : ${LegacyCar.toggleEsc()}"); return
+            Log.i(TAG, "ESC (old SDK): ${LegacyCar.toggleEsc()}"); return
         }
-        val ok = CarProps.setIntArea(VEHICLE_ESP, 0x1000000, 1, "ESC (appui)")
-        Log.i(TAG, "ESC : commande envoyée → $ok, état avant : ${escActive()}")
+        val ok = CarProps.setIntArea(VEHICLE_ESP, 0x1000000, 1, "ESC (press)")
+        Log.i(TAG, "ESC: command sent → $ok, state before: ${escActive()}")
     }
     private const val VEHICLE_ESP = 289421317       // 0x11403805 : commande ESC (setDrivingEpsMode du menu MG)
     private const val TCS_OPNG_MD = 289421343       // 0x1140381f : 1 = ESC actif, 0 = coupé (repli)
@@ -541,12 +541,12 @@ object CarBridge {
             val v = vs
             try {
                 if (_state.value.onePedal == 1) {
-                    if (v != null) v.setSignalPedalState(0) else CarProps.setInt(0x2140a193, 0, "une pédale")
+                    if (v != null) v.setSignalPedalState(0) else CarProps.setInt(0x2140a193, 0, "one pedal")
                     delay(300)
                 }
-                if (v != null) { v.setRegenerativeLevel(level); Log.i(TAG, "SET régénération = $level") }
-                else CarProps.setInt(0x2140a191, level, "régénération")
-            } catch (e: Exception) { Log.w(TAG, "SET régénération : ${e.message}") }
+                if (v != null) { v.setRegenerativeLevel(level); Log.i(TAG, "SET regen = $level") }
+                else CarProps.setInt(0x2140a191, level, "regen")
+            } catch (e: Exception) { Log.w(TAG, "SET regen: ${e.message}") }
             delay(500); refreshEnergy()
             delay(1500); refreshEnergy()
         }
@@ -559,9 +559,9 @@ object CarBridge {
         scope.launch {
             try {
                 val v = vs
-                if (v != null) { v.setSignalPedalState(target); Log.i(TAG, "SET une pédale = $target") }
-                else CarProps.setInt(0x2140a193, target, "une pédale")
-            } catch (e: Exception) { Log.w(TAG, "SET une pédale : ${e.message}") }
+                if (v != null) { v.setSignalPedalState(target); Log.i(TAG, "SET one pedal = $target") }
+                else CarProps.setInt(0x2140a193, target, "one pedal")
+            } catch (e: Exception) { Log.w(TAG, "SET one pedal: ${e.message}") }
             delay(500); refreshEnergy()
             delay(1500); refreshEnergy()
         }
@@ -592,14 +592,14 @@ object CarBridge {
         if (BuildConfig.MOCK) { MockCar.command(label, _state); return }
         scope.launch {
             cycleLock.withLock {
-                val h = hvac ?: run { Log.w(TAG, "$label ignoré : clim non connectée"); return@launch }
+                val h = hvac ?: run { Log.w(TAG, "$label ignored: climate not connected"); return@launch }
                 var steps = 0
                 while (true) {
                     val cur = safe { read(h) }
-                    if (cur == target) { Log.i(TAG, "SET $label=$target atteint ($steps cran(s))"); break }
-                    if (cur == null) { Log.w(TAG, "SET $label=$target : état illisible"); break }
-                    if (steps >= maxSteps) { Log.w(TAG, "SET $label=$target NON atteint (lu $cur)"); break }
-                    try { advance(h) } catch (e: Exception) { Log.w(TAG, "SET $label : ${e.message}"); break }
+                    if (cur == target) { Log.i(TAG, "SET $label=$target reached ($steps step(s))"); break }
+                    if (cur == null) { Log.w(TAG, "SET $label=$target: state unreadable"); break }
+                    if (steps >= maxSteps) { Log.w(TAG, "SET $label=$target NOT reached (read $cur)"); break }
+                    try { advance(h) } catch (e: Exception) { Log.w(TAG, "SET $label: ${e.message}"); break }
                     steps++
                     delay(400)
                 }

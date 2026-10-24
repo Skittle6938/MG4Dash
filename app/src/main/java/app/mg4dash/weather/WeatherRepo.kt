@@ -27,7 +27,7 @@ import java.util.Locale
  * Position : dernière localisation connue du système, sinon la ville réglée dans les paramètres.
  */
 object WeatherRepo {
-    private const val TAG = "Météo"
+    private const val TAG = "Weather"
     private const val REFRESH_MS = 30 * 60 * 1000L
     private const val RETRY_MS = 2 * 60 * 1000L
     /** Distance parcourue depuis la dernière météo qui déclenche une nouvelle requête (issue #18). */
@@ -97,7 +97,7 @@ object WeatherRepo {
             var fails = 0
             while (true) {
                 val ok = try { refresh(app) } catch (e: Exception) {
-                    Log.w(TAG, "échec : ${e.javaClass.simpleName} ${e.message}"); false
+                    Log.w(TAG, "failed: ${e.javaClass.simpleName} ${e.message}"); false
                 }
                 lastFailed = !ok
                 _failed.value = !ok
@@ -109,7 +109,7 @@ object WeatherRepo {
                     usedFallback || missingCity -> { fails = 0; RETRY_MS }
                     else -> { fails = 0; REFRESH_MS }
                 }
-                if (!ok || usedFallback || missingCity) Log.i(TAG, "nouvel essai dans ${wait / 1000} s (réseau ${if (ok) "ok" else "absent"}, position ${if (usedFallback) "absente" else "ok"}, ville ${if (missingCity) "absente" else "ok"})")
+                if (!ok || usedFallback || missingCity) Log.i(TAG, "retry in ${wait / 1000} s (network ${if (ok) "ok" else "missing"}, location ${if (usedFallback) "missing" else "ok"}, city ${if (missingCity) "missing" else "ok"})")
                 // Le retour du réseau (ou une position) réveille la boucle sans attendre la fin du délai
                 kotlinx.coroutines.withTimeoutOrNull(wait) { wake.receive() }
             }
@@ -134,12 +134,12 @@ object WeatherRepo {
             cm.registerDefaultNetworkCallback(object : android.net.ConnectivityManager.NetworkCallback() {
                 override fun onAvailable(network: android.net.Network) {
                     if (lastFailed || usedFallback || missingCity || _weather.value == null) {
-                        Log.i(TAG, "réseau disponible : nouvel essai")
+                        Log.i(TAG, "network available: retrying")
                         wake.trySend(Unit)
                     }
                 }
             })
-        } catch (e: Exception) { Log.w(TAG, "suivi du réseau impossible : ${e.message}") }
+        } catch (e: Exception) { Log.w(TAG, "network tracking failed: ${e.message}") }
     }
 
     @Volatile private var usedFallback = false
@@ -161,7 +161,7 @@ object WeatherRepo {
         android.location.Location.distanceBetween(from.first, from.second, cur.latitude, cur.longitude, dist)
         if (dist[0] >= MOVE_M) {
             busy = true
-            Log.i(TAG, "${Math.round(dist[0] / 1000)} km parcourus : nouvelle météo")
+            Log.i(TAG, "${Math.round(dist[0] / 1000)} km driven: new weather")
             wake.trySend(Unit)
         }
     }
@@ -180,7 +180,7 @@ object WeatherRepo {
         scope.launch {
             try {
                 val name = cityName(context.applicationContext, lat, lon) ?: return@launch
-                _weather.value?.let { if (it.place != name) { _weather.value = it.copy(place = name); Log.i(TAG, "ville : $name") } }
+                _weather.value?.let { if (it.place != name) { _weather.value = it.copy(place = name); Log.i(TAG, "city: $name") } }
             } finally { cityBusy = false }
         }
     }
@@ -198,7 +198,7 @@ object WeatherRepo {
     fun refreshNow(context: Context) {
         scope.launch {
             val ok = try { refresh(context.applicationContext) } catch (e: Exception) {
-                Log.w(TAG, "échec : ${e.javaClass.simpleName} ${e.message}"); false
+                Log.w(TAG, "failed: ${e.javaClass.simpleName} ${e.message}"); false
             }
             _failed.value = !ok
             if (!ok) { lastFailed = true; failingSince = failingSince.takeIf { it != 0L } ?: System.currentTimeMillis(); wake.trySend(Unit) }
@@ -213,7 +213,7 @@ object WeatherRepo {
     }
 
     private fun doRefresh(context: Context): Boolean {
-        Log.i(TAG, "requête Open-Meteo (internet : ${StatusMonitor.hasInternet(context)})")
+        Log.i(TAG, "Open-Meteo request (internet: ${StatusMonitor.hasInternet(context)})")
         val prefs = Prefs(context)
         val loc = app.mg4dash.map.LocationRepo.location.value?.let { it.latitude to it.longitude } ?: lastLocation(context)
         usedFallback = loc == null
@@ -238,7 +238,7 @@ object WeatherRepo {
             conn.inputStream.bufferedReader().use { it.readText() }
         } finally { conn.disconnect() }
         _weather.value = parse(JSONObject(body), place)
-        Log.i(TAG, "mise à jour : ${_weather.value?.tempC}° à $place")
+        Log.i(TAG, "updated: ${_weather.value?.tempC}° in $place")
         fetchedAt = loc
         return true
     }
@@ -269,7 +269,7 @@ object WeatherRepo {
             cityAt = lat to lon
             name
         } catch (e: Exception) {
-            Log.w(TAG, "ville : ${e.message}"); cached
+            Log.w(TAG, "city: ${e.message}"); cached
         }
     }
 

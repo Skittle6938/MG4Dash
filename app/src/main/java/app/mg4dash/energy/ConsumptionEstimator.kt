@@ -23,7 +23,7 @@ import kotlinx.coroutines.launch
  * de batterie consommés, sinon elle serait trop bruitée.
  */
 object ConsumptionEstimator {
-    private const val TAG = "Conso"
+    private const val TAG = "Consumption"
     private const val MIN_KM = 5
     private const val MIN_SOC_DROP = 2
 
@@ -62,7 +62,7 @@ object ConsumptionEstimator {
                 val lowSoc = sp.getInt("ref_low", sp.getInt("last_soc", -1))
                 if (refKm < 0 || refSoc < 0 || km < refKm || (lowSoc >= 0 && soc >= lowSoc + EnergyMonitor.RECHARGE_PCT) ||
                     soc >= refSoc + EnergyMonitor.RECHARGE_PCT) {
-                    Log.i(TAG, "nouvelle référence : $km km, $soc %")
+                    Log.i(TAG, "new reference: $km km, $soc %")
                     refKm = km; refSoc = soc
                     sp.edit().putInt("ref_km", km).putInt("ref_soc", soc).putInt("ref_low", soc).apply()
                 } else if (lowSoc < 0 || soc < lowSoc) {
@@ -75,8 +75,8 @@ object ConsumptionEstimator {
                 val shown = _average.value != null
                 if (shown != lastShown) {
                     lastShown = shown
-                    Log.i(TAG, "moyenne ${_average.value ?: "—"} : $km km (réf $refKm), $soc % (réf $refSoc, plus bas $lowSoc), " +
-                        "capacité $capacity kWh ; mesure depuis recharge ${sc.km} km, ${"%.2f".format(java.util.Locale.US, sc.netKwh)} kWh nets")
+                    Log.i(TAG, "average ${_average.value ?: "—"}: $km km (ref $refKm), $soc % (ref $refSoc, lowest $lowSoc), " +
+                        "capacity $capacity kWh; since charge ${sc.km} km, ${"%.2f".format(java.util.Locale.US, sc.netKwh)} kWh net")
                 }
 
                 // Trajet en cours

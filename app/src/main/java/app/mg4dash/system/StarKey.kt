@@ -47,7 +47,7 @@ object StarKey {
                 val down = i.getBooleanExtra("android.intent.extra.hardkey.down", false)
                 val long = i.getBooleanExtra("android.intent.extra.hardkey.longpress", false)
                 // Diagnostic (#33) : chaque bouton du volant reçu, visible dans le journal des réglages
-                Log.i(TAG, "bouton volant : code $code ${if (down) "appuyé" else "relâché"}${if (long) " (long)" else ""}")
+                Log.i(TAG, "steering wheel button: code $code ${if (down) "pressed" else "released"}${if (long) " (long)" else ""}")
                 // SWI173 (#33) : le joystick droit n'agit pas sur la musique Bluetooth / DiAuto quand
                 // MG4Dash est l'accueil ; gauche = précédent, droite = suivant, OK = lecture / pause.
                 // Limité à SWI173 : ailleurs le joystick change déjà piste ou volume tout seul.
@@ -71,15 +71,15 @@ object StarKey {
                     else -> return
                 }
                 val fn = try { android.provider.Settings.System.getInt(app.contentResolver, setting, -1) } catch (_: Exception) { -1 }
-                Log.i(TAG, "« * » ($code) relâché, $setting = $fn")
+                Log.i(TAG, "\"*\" ($code) released, $setting = $fn")
                 // Valeur « caméra 360 » : 3 sur le launcher SWI69, 6 sur SWI173 (relevé dans le journal, #33)
                 val avm = if (Firmware.gen == Firmware.Gen.SWI173) FUNCTION_AVM_SWI173 else FUNCTION_AVM
                 if (fn != avm || Prefs(app).valetMode) return
                 toggleAvm(app)
             }
         }
-        try { app.registerReceiver(receiver, IntentFilter(ACTION)); Log.i(TAG, "écoute des boutons du volant") }
-        catch (e: Exception) { Log.w(TAG, "écoute impossible : ${e.message}") }
+        try { app.registerReceiver(receiver, IntentFilter(ACTION)); Log.i(TAG, "listening to steering wheel buttons") }
+        catch (e: Exception) { Log.w(TAG, "listening failed: ${e.message}") }
     }
 
     /**
@@ -104,8 +104,8 @@ object StarKey {
             avmStartedAt = if (shown) 0L else android.os.SystemClock.elapsedRealtime()
             return try {
                 context.startService(Intent(action).setComponent(ComponentName(pkg, svc)))
-                Log.i(TAG, "caméra 360 : $action → $svc (tâche du haut : $top)"); true
-            } catch (e: Exception) { Log.w(TAG, "caméra 360 : $svc : ${e.message}"); false }
+                Log.i(TAG, "360 camera: $action → $svc (top task: $top)"); true
+            } catch (e: Exception) { Log.w(TAG, "360 camera: $svc: ${e.message}"); false }
         }
         return false
     }

@@ -38,7 +38,7 @@ object AcCycle {
         val prefs = Prefs(context.applicationContext)
         _active.value = true
         app.mg4dash.ui.Toasts.show(context, R.string.ac_cycle_started)
-        Log.i(TAG, "démarré : ${prefs.acCycleOnSec} s marche / ${prefs.acCycleOffSec} s arrêt")
+        Log.i(TAG, "started: ${prefs.acCycleOnSec} s on / ${prefs.acCycleOffSec} s off")
         job = scope.launch {
             var on = true
             while (true) {
@@ -61,7 +61,7 @@ object AcCycle {
     }
 
     private fun finish(reason: String) {
-        Log.i(TAG, "arrêt : $reason")
+        Log.i(TAG, "stop: $reason")
         job?.cancel(); job = null
         _active.value = false
     }
