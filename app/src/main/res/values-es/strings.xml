@@ -439,7 +439,7 @@
     <string name="ac_cycle_need_on">Encienda primero el clima</string>
     <string name="weather_rain">Lluvia %1$d %%</string>
     <string name="st_energy_card_power">Potencia en directo en la tarjeta de energía</string>
-    <string name="st_energy_card_power_desc">Barra de potencia, kW, V · A y media en lugar del modo de conducción y el KERS; la línea de carga / V2L aparece con el cable enchufado y la página Potencia sale del widget inferior.</string>
+    <string name="st_energy_card_power_desc">Barra de potencia, kW y media en lugar del modo de conducción y el KERS; la línea de carga / V2L aparece con el cable enchufado y la página Potencia sale del widget inferior.</string>
     <string name="st_shortcuts_page">Página de accesos directos en la tarjeta del mapa</string>
     <string name="st_shortcuts_page_desc">Desactivada: el botón arriba a la derecha del mapa solo cambia entre el mapa y el consumo</string>
     <string name="st_panel_outline">Contorno de los paneles de inicio</string>
@@ -481,6 +481,11 @@
     <string name="en_curve_note">Un punto por km (uno por minuto parado) · media %1$s (discontinua)</string>
     <string name="en_curve_wait">La curva se llena al conducir, un punto por km.</string>
     <string name="projection_no_phone">Ningún teléfono conectado a Android Auto o CarPlay</string>
+    <string name="st_power_va">Tensión y corriente bajo la barra de potencia</string>
+    <string name="st_power_va_desc">Actuales, mínimo y máximo del trayecto. Desactivado: potencia y consumo medio más grandes.</string>
+    <string name="st_media_style">Reproductor de la pantalla de inicio</string>
+    <string name="st_media_immersive">Inmersivo</string>
+    <string name="st_media_classic">Clásico</string>
     <string name="aa_title">ANDROID AUTO</string>
     <string name="aa_ready">Teléfono conectado · Pulse para abrir</string>
     <string name="aa_waiting">Conecte su teléfono por USB</string>

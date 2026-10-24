@@ -439,7 +439,7 @@
     <string name="ac_cycle_need_on">Zet eerst de airco aan</string>
     <string name="weather_rain">Regen %1$d %%</string>
     <string name="st_energy_card_power">Live vermogen in de energiekaart</string>
-    <string name="st_energy_card_power_desc">Vermogensbalk, kW, V · A en gemiddelde in plaats van rijmodus en KERS; de laad- / V2L-regel verschijnt met kabel aangesloten en de pagina Vermogen verlaat de onderste widget.</string>
+    <string name="st_energy_card_power_desc">Vermogensbalk, kW en gemiddelde in plaats van rijmodus en KERS; de laad- / V2L-regel verschijnt met kabel aangesloten en de pagina Vermogen verlaat de onderste widget.</string>
     <string name="st_shortcuts_page">Snelkoppelingenpagina in de kaartkaart</string>
     <string name="st_shortcuts_page_desc">Uit: de knop rechtsboven op de kaart wisselt alleen tussen kaart en verbruik</string>
     <string name="st_panel_outline">Rand van de startpanelen</string>
@@ -481,6 +481,11 @@
     <string name="en_curve_note">Eén punt per km (één per minuut stilstaand) · gemiddelde %1$s (gestippeld)</string>
     <string name="en_curve_wait">De curve vult zich tijdens het rijden, één punt per km.</string>
     <string name="projection_no_phone">Geen telefoon verbonden voor Android Auto of CarPlay</string>
+    <string name="st_power_va">Spanning en stroom onder de vermogensbalk</string>
+    <string name="st_power_va_desc">Huidig, laagste en hoogste van de rit. Uit: vermogen en gemiddeld verbruik groter.</string>
+    <string name="st_media_style">Speler op het startscherm</string>
+    <string name="st_media_immersive">Immersief</string>
+    <string name="st_media_classic">Klassiek</string>
     <string name="aa_title">ANDROID AUTO</string>
     <string name="aa_ready">Telefoon verbonden · Tik om te openen</string>
     <string name="aa_waiting">Sluit je telefoon aan via USB</string>

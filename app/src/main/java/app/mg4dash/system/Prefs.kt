@@ -152,6 +152,16 @@ class Prefs(context: Context) {
      * Carte énergie « puissance » (#29) : barre de puissance en direct dans la carte énergie, sans
      * mode de conduite ni KERS ; la page Puissance quitte alors le widget défilant.
      */
+    /** Présentation du lecteur de l'accueil : 0 = Immersif (défaut), 1 = Classique. */
+    var mediaStyle: Int
+        get() = sp.getInt("media_style", 0)
+        set(v) = sp.edit().putInt("media_style", v).apply()
+
+    /** Carte puissance : tension et courant (actuels, mini / maxi) sous la barre ; désactivé par défaut. */
+    var powerVa: Boolean
+        get() = sp.getBoolean("power_va", false)
+        set(v) = sp.edit().putBoolean("power_va", v).apply()
+
     var energyCardPower: Boolean
         get() = sp.getBoolean("energy_card_power", false)
         set(v) = sp.edit().putBoolean("energy_card_power", v).apply()
