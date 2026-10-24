@@ -487,6 +487,10 @@
     <string name="st_media_immersive">Sürükleyici</string>
     <string name="st_media_classic">Klasik</string>
     <string name="fx_pumpkin">Cadılar Bayramı balkabağı</string>
+    <string name="en_clear_curve">Eğriyi temizle</string>
+    <string name="en_clear_confirm">\"%1$s\" eğrisi temizlensin mi?</string>
+    <string name="st_cc_stopped">Tüketim eğrisi: dururken de</string>
+    <string name="st_cc_stopped_desc">Araç dururken dakikada bir nokta (klima, aksesuarlar). Kapalı: yalnızca sürüş sayılır. Silmek için Enerji sayfasındaki eğriye uzun basın.</string>
     <string name="aa_title">ANDROID AUTO</string>
     <string name="aa_ready">Telefon bağlı · Açmak için dokunun</string>
     <string name="aa_waiting">Telefonunuzu USB ile bağlayın</string>

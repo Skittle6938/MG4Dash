@@ -36,7 +36,10 @@ class ConsumptionCard(context: Context) : LinearLayout(context) {
             isClickable = true
             setOnClickListener { v ->
                 (context as? android.app.Activity)?.let { a ->
-                    SourceMenu.choose(a, v, periodLabels, prefs.consumptionPeriod) { prefs.consumptionPeriod = it; show() }
+                    // 4e choix : effacer la courbe de la période affichée (#44)
+                    SourceMenu.choose(a, v, periodLabels + context.getString(R.string.en_clear_curve), prefs.consumptionPeriod) {
+                        if (it < 3) { prefs.consumptionPeriod = it; show() } else confirmClear(a, prefs.consumptionPeriod.coerceIn(0, 2))
+                    }
                 }
             }
         }
@@ -86,6 +89,16 @@ class ConsumptionCard(context: Context) : LinearLayout(context) {
     }
 
     companion object {
+        /** Demande confirmation puis efface la courbe de [period] (0 recharge, 1 trajet, 2 12 mois). */
+        fun confirmClear(a: android.app.Activity, period: Int) {
+            val name = a.getString(listOf(R.string.en_since_charge, R.string.en_trip, R.string.en_last_year)[period])
+            android.app.AlertDialog.Builder(a)
+                .setMessage(a.getString(R.string.en_clear_confirm, name))
+                .setPositiveButton(R.string.en_clear_curve) { _, _ -> app.mg4dash.energy.ConsumptionCurve.clear(period) }
+                .setNegativeButton(R.string.cancel, null)
+                .show()
+        }
+
         /**
          * Courbe et légende de la période (#44) : un point par km du trajet ou depuis la recharge
          * (moyenne glissante sur 3 points), ou un point par trajet sur 12 mois.

@@ -37,6 +37,10 @@ object ConsumptionCurve {
         fun of(period: Int) = when (period) { 1 -> trip; 2 -> trips; else -> charge }
     }
 
+    /** Effacement demandé depuis l'écran : 0 = depuis la recharge, 1 = trajet, 2 = 12 mois ; -1 = rien. */
+    @Volatile private var clearRequest = -1
+    fun clear(period: Int) { clearRequest = period }
+
     private val _curves = MutableStateFlow(Curves())
     val curves: StateFlow<Curves> = _curves
 
@@ -58,7 +62,11 @@ object ConsumptionCurve {
         }.toMutableList()
         var trip = parse(sp.getString("cc_trip", "")).takeLast(MAX_POINTS)
         var charge = parse(sp.getString("cc_charge", "")).takeLast(MAX_POINTS)
-        fun publish() { _curves.value = Curves(trip, charge, trips.map { it.second }) }
+        // 12 mois : les trajets finis, plus le trajet en cours dès 2 km (#44)
+        fun publish() {
+            val now = EnergyMonitor.sinceStart.value.per100
+            _curves.value = Curves(trip, charge, trips.map { it.second } + listOfNotNull(now))
+        }
         publish()
 
         scope.launch {
@@ -93,6 +101,13 @@ object ConsumptionCurve {
                 lastChargeOut = chargeOut
                 lastStart = start
 
+                // Effacement demandé (#44)
+                when (clearRequest) {
+                    0 -> charge = emptyList()
+                    1 -> trip = emptyList()
+                    2 -> trips.clear()
+                }
+                if (clearRequest >= 0) { clearRequest = -1; changed = true }
                 val net = start.netKwh
                 val plugged = app.mg4dash.car.VehicleState.isPlugged(CarBridge.state.value.chargeStatus)
                 val speed = CarBridge.state.value.speedKmh
@@ -108,6 +123,10 @@ object ConsumptionCurve {
                         ((net - lastNet) / d * 100f).also { stillSince = tick }
                     }
                     // À l'arrêt (voiture allumée, énergie qui sort) : un point par minute, compté comme 0,5 km
+                    // (réglage : rien à l'arrêt, la courbe ne reflète alors que la conduite, #44)
+                    (speed ?: 0f) < 1f && tick - stillSince >= 60_000 && net - lastNet > 0.001f && !sp.getBoolean("cc_stopped", true) -> {
+                        lastNet = net; stillSince = tick; null
+                    }
                     (speed ?: 0f) < 1f && tick - stillSince >= 60_000 && net - lastNet > 0.001f ->
                         ((net - lastNet) / STEP_KM * 100f).also { stillSince = tick; dist = 0f }
                     else -> null

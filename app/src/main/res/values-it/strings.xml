@@ -487,6 +487,10 @@
     <string name="st_media_immersive">Immersivo</string>
     <string name="st_media_classic">Classico</string>
     <string name="fx_pumpkin">Zucca di Halloween</string>
+    <string name="en_clear_curve">Cancella la curva</string>
+    <string name="en_clear_confirm">Cancellare la curva «%1$s»?</string>
+    <string name="st_cc_stopped">Curva dei consumi: anche da fermo</string>
+    <string name="st_cc_stopped_desc">Un punto al minuto ad auto ferma (clima, accessori). Disattivato: conta solo la guida. Pressione lunga sulla curva della pagina Energia per cancellarla.</string>
     <string name="aa_title">ANDROID AUTO</string>
     <string name="aa_ready">Telefono connesso · Tocca per aprire</string>
     <string name="aa_waiting">Collega il telefono via USB</string>

@@ -174,6 +174,7 @@ class SettingsActivity : AppCompatActivity() {
         val models = app.mg4dash.energy.BatteryCapacity.MODELS.map { it.first }
         row(energy, *choiceButtons(models.map { "$it kWh" }, { models.indexOf(prefs.batteryModel) }) { prefs.batteryModel = models[it] })
         toggle(energy, R.string.st_xpower, R.string.st_xpower_desc, { prefs.xpower }) { prefs.xpower = it }
+        toggle(energy, R.string.st_cc_stopped, R.string.st_cc_stopped_desc, { prefs.raw.getBoolean("cc_stopped", true) }) { prefs.raw.edit().putBoolean("cc_stopped", it).apply() }
         powerFxSetting(panel(lookR, getString(R.string.sw_power)))
 
         // ════ Colonne droite : système, connexions, diagnostic ════

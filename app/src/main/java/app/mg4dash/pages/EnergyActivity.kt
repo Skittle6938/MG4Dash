@@ -187,7 +187,10 @@ class EnergyActivity : PageActivity() {
         regenKm = kit.text("", 18f, R.color.accent_energy)
         c3.addView(regenKm, kit.lp(-1, -2, t = 2))
         c3.addView(kit.title(getString(R.string.en_recent, app.mg4dash.system.Units.consUnit(this))), kit.lp(-1, -2, t = 18))
-        chart = LineChart(this)
+        chart = LineChart(this).apply {
+            // Appui long sur la courbe : l'effacer (#44)
+            setOnLongClickListener { app.mg4dash.ui.ConsumptionCard.confirmClear(this@EnergyActivity, period); true }
+        }
         c3.addView(chart, kit.lp(-1, 0, 1f, t = 8))
         chartNote = kit.text("", 15f, R.color.text_title)
         c3.addView(chartNote, kit.lp(-1, -2, t = 4))
