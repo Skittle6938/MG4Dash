@@ -480,6 +480,7 @@
     <string name="en_trips_wait">The curve fills trip by trip (at least 2 km per trip).</string>
     <string name="en_curve_note">One point per km (one per minute when stopped) · average %1$s (dashed)</string>
     <string name="en_curve_wait">The curve fills as you drive, one point per km.</string>
+    <string name="projection_no_phone">No phone connected for Android Auto or CarPlay</string>
     <string name="aa_title">ANDROID AUTO</string>
     <string name="aa_ready">Phone connected · Tap to open</string>
     <string name="aa_waiting">Connect your phone via USB</string>
