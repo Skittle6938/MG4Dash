@@ -107,6 +107,35 @@ object Themes {
      * l'écran se reconstruit (court passage au noir d'Android), on voit toujours l'ancienne image,
      * puis elle s'efface en fondu sur le nouvel écran.
      */
+    /** Menus et confirmations posés par l'appli (fenêtres flottantes), suivis sans les retenir. */
+    private val popups = java.util.WeakHashMap<android.widget.PopupWindow, Boolean>()
+    fun track(p: android.widget.PopupWindow) { popups[p] = true }
+    private var lastOpen = false
+
+    /**
+     * Une fenêtre est ouverte par-dessus l'écran (boîte de dialogue, qui prend le focus, ou menu /
+     * confirmation de l'appli) : le changement de thème automatique attend qu'elle soit fermée,
+     * sinon la recréation de l'écran la faisait disparaître.
+     */
+    fun popupOpen(activity: Activity): Boolean {
+        if (popups.keys.any { it.isShowing }) return true
+        // Boîtes de dialogue (type APPLICATION) et fenêtres rattachées (sous-fenêtres 1000-1999) de l'appli
+        return try {
+            val g = Class.forName("android.view.WindowManagerGlobal")
+            val inst = g.getMethod("getInstance").invoke(null)
+            @Suppress("UNCHECKED_CAST")
+            val views = g.getDeclaredField("mViews").apply { isAccessible = true }.get(inst) as List<android.view.View>
+            @Suppress("UNCHECKED_CAST")
+            val params = g.getDeclaredField("mParams").apply { isAccessible = true }.get(inst) as List<android.view.WindowManager.LayoutParams>
+            val open = views.indices.any { i ->
+                val t = params.getOrNull(i)?.type ?: return@any false
+                views[i].isShown && (t == android.view.WindowManager.LayoutParams.TYPE_APPLICATION || t in 1000..1999)
+            }
+            if (open != lastOpen) { lastOpen = open; app.mg4dash.system.Log.i("Theme", if (open) "theme change on hold: popup open" else "popup closed (${views.size} windows)") }
+            open
+        } catch (e: Throwable) { app.mg4dash.system.Log.w("Theme", "window list: ${e.message}"); !activity.hasWindowFocus() }
+    }
+
     fun recreateSmooth(activity: Activity) {
         if (!Prefs(activity).themeSmooth) { activity.recreate(); return }
         if (recreating) return
