@@ -35,6 +35,20 @@ import kotlin.math.sin
 class PowerFx(private val context: Context) : Drawable() {
     companion object {
         const val NONE = 0; const val ROCKET = 1; const val LIGHTNING = 2; const val FLAMES = 3
+        /** Citrouille d'Halloween : seulement pendant [halloween]. */
+        const val PUMPKIN = 5
+        /** Période d'Halloween : du 25 octobre au 2 novembre inclus. */
+        fun halloween(): Boolean {
+            val c = java.util.Calendar.getInstance()
+            val m = c.get(java.util.Calendar.MONTH); val day = c.get(java.util.Calendar.DAY_OF_MONTH)
+            return (m == java.util.Calendar.OCTOBER && day >= 25) || (m == java.util.Calendar.NOVEMBER && day <= 2)
+        }
+        /** Style joué pour un réglage : au hasard parmi les animations (la citrouille en plus à Halloween). */
+        fun pick(setting: Int): Int = when {
+            setting == RANDOM -> (listOf(ROCKET, LIGHTNING, FLAMES) + (if (halloween()) listOf(PUMPKIN, PUMPKIN) else emptyList())).random()
+            setting == PUMPKIN && !halloween() -> ROCKET
+            else -> setting
+        }
         /** Choix des réglages seulement : une des trois animations, tirée à chaque déclenchement. */
         const val RANDOM = 4
         const val HOLD_MS = 10_000L
@@ -168,6 +182,7 @@ class PowerFx(private val context: Context) : Drawable() {
             ROCKET -> drawRocketScene(canvas, now, dt)
             LIGHTNING -> drawLightningScene(canvas, now, dt)
             FLAMES -> drawFlameScene(canvas, now, dt)
+            PUMPKIN -> drawPumpkinScene(canvas, now, dt)
         }
         if (layer >= 0) canvas.restoreToCount(layer)
         canvas.restore()
@@ -315,6 +330,128 @@ class PowerFx(private val context: Context) : Drawable() {
         stroke.color = 0xFF5A6475.toInt(); stroke.strokeWidth = 1.5f * d; c.drawCircle(x + L * 0.45f, y, h * 0.48f, stroke)
         // Aileron central (vu de profil)
         paint.color = cDanger; c.drawRect(x - L * 0.02f, y - h * 0.18f, x + L * 0.22f, y + h * 0.18f, paint)
+    }
+
+    // ── Citrouille d'Halloween (25 octobre → 2 novembre) : elle fonce à travers l'écran, fait un clin d'œil
+    //    au milieu, laisse des flammes et fait fuir des chauves-souris ──
+
+    private class Bat(var x: Float, var y: Float, val vx: Float, val vy: Float, var age: Float)
+    private val bats = ArrayList<Bat>()
+    private var batClock = 0f
+    private val PUMPKIN_MS = 3200f
+
+    private fun drawPumpkinScene(c: Canvas, now: Long, dt: Float) {
+        sizeText()
+        val text = peakText()
+        val (bw, bh) = badgeSize(text, 0f)
+        if (launchAt == 0L) launchAt = now
+        val u = (now - launchAt) / PUMPKIN_MS
+        val flying = u < 1f
+        val w = bounds.width().toFloat(); val h = bounds.height().toFloat()
+        val size = h * 0.32f
+        val t = (now - launchAt) / 1000f
+        val s = u.coerceAtMost(1f) + 0.8f * sin(2 * Math.PI * u.coerceAtMost(1f)).toFloat() / (2 * Math.PI).toFloat()
+        val speed = 1f + 0.8f * cos(2 * Math.PI * u).toFloat()
+        val x = bounds.left - w * 0.2f + s * w * 1.4f
+        val y = bounds.top + h * 0.56f - kotlin.math.abs(sin(t * 6.0)).toFloat() * 30 * d
+        if (flying) {
+            // Flammes derrière (le « moteur » à fond), qui partent vers l'arrière et s'éteignent
+            var n = 80f * dt
+            while (n > 0f) {
+                if (n >= 1f || rnd.nextFloat() < n) puffs.add(Puff(x - size * 0.55f, y + (rnd.nextFloat() - 0.5f) * size * 0.5f,
+                    -260 * d, -40 * d, (14 + rnd.nextFloat() * 9) * d, 0f, 0.9f, true))
+                n -= 1f
+            }
+            // Chauves-souris qui s'enfuient
+            batClock += dt
+            if (batClock > 0.25f) { batClock = 0f; bats.add(Bat(x - 30 * d, y - 20 * d, -(80 + rnd.nextFloat() * 140) * d, -(140 + rnd.nextFloat() * 120) * d, 0f)) }
+            shakeBy(1.5f * d)
+        } else { if (fly) { fly = false; badgeAt = now }; shakeBy(0f) }
+        stepPuffs(dt)
+        paint.shader = null
+        for (p in puffs) {
+            val k = p.age / p.life
+            paint.color = if (k < 0.35f) 0xFFFFD25A.toInt() else 0xFFFF8A1E.toInt()
+            paint.alpha = (220 * (1 - k)).toInt()
+            c.drawCircle(p.x, p.y, p.r * (1 - 0.5f * k), paint)
+        }
+        val bi = bats.iterator()
+        while (bi.hasNext()) {
+            val b = bi.next()
+            b.age += dt; b.x += b.vx * dt; b.y += b.vy * dt
+            if (b.age > 1.4f) { bi.remove(); continue }
+            drawBat(c, b.x, b.y, 22 * d, ((now / 80) % 2).toInt() == 0, ((1 - b.age / 1.4f) * 255).toInt())
+        }
+        // Lignes de vitesse quand elle file
+        if (flying && speed > 1f) {
+            stroke.color = 0xFFFFFFFF.toInt(); stroke.alpha = 110; stroke.strokeWidth = 3 * d
+            for (i in 0..4) {
+                val yy = y - size * 0.55f + i * size * 0.27f
+                c.drawLine(x - size * 0.6f - 160 * d * speed, yy, x - size * 0.6f - 20 * d, yy, stroke)
+            }
+        }
+        // Badge du pic une fois la citrouille passée
+        val gx = badgeArea.centerX() - bw / 2f
+        val appear = if (fly) 0f else ((now - badgeAt) / 250f).coerceIn(0f, 1f)
+        if (appear > 0f) {
+            val l = c.saveLayerAlpha(gx - 4 * d, badgeArea.centerY() - bh, gx + bw + 4 * d, badgeArea.centerY() + bh, (appear * 255).toInt())
+            drawBadge(c, gx, badgeArea.centerY(), bw, bh, cHeat, text, gx + bh * 0.45f)
+            c.restoreToCount(l)
+        }
+        if (flying) {
+            val wink = kotlin.math.abs(u - 0.5f) < 0.06f
+            c.save()
+            if (speed > 1.2f && !wink) c.rotate(-t * 260f, x, y)
+            drawPumpkin(c, x, y, size, wink, 0.5f + 0.5f * sin(t * 9.0).toFloat(), 1f - 0.08f * sin(t * 12.0).toFloat())
+            c.restore()
+        }
+    }
+
+    /** Citrouille-lanterne de face : côtes orange, tige, yeux et sourire lumineux ; [wink] ferme l'œil droit. */
+    private fun drawPumpkin(c: Canvas, cx: Float, cy: Float, size: Float, wink: Boolean, glow: Float, squash: Float) {
+        val rw = size * 0.62f; val rh = size * 0.52f * squash
+        // Halo de bougie
+        paint.shader = RadialGradient(cx, cy, size * 0.95f, intArrayOf(0x66FF9A1E, 0x00FF9A1E), null, Shader.TileMode.CLAMP)
+        c.drawCircle(cx, cy, size * 0.95f, paint); paint.shader = null
+        for ((off, col) in listOf(-0.45f to 0xFFD66012.toInt(), 0.45f to 0xFFD66012.toInt(), -0.2f to 0xFFF07818.toInt(),
+                0.2f to 0xFFF07818.toInt(), 0f to 0xFFFC8A1E.toInt())) {
+            val ww = rw * (if (off != 0f) 0.62f else 0.55f)
+            paint.color = col; paint.alpha = 255
+            r.set(cx + off * rw - ww, cy - rh, cx + off * rw + ww, cy + rh); c.drawOval(r, paint)
+        }
+        paint.color = 0xFF466E28.toInt()
+        path.reset(); path.moveTo(cx - 0.08f * size, cy - rh + 4); path.lineTo(cx + 0.1f * size, cy - rh + 4)
+        path.lineTo(cx + 0.16f * size, cy - rh - 0.22f * size); path.lineTo(cx - 0.02f * size, cy - rh - 0.2f * size); path.close()
+        c.drawPath(path, paint)
+        val g = android.graphics.Color.rgb(255, 214 + (30 * glow).toInt().coerceIn(0, 41), 80)
+        paint.color = g
+        val ey = cy - rh * 0.18f
+        path.reset()
+        path.moveTo(cx - 0.36f * size, ey + 0.1f * size); path.lineTo(cx - 0.12f * size, ey + 0.1f * size); path.lineTo(cx - 0.24f * size, ey - 0.14f * size); path.close()
+        if (!wink) { path.moveTo(cx + 0.12f * size, ey + 0.1f * size); path.lineTo(cx + 0.36f * size, ey + 0.1f * size); path.lineTo(cx + 0.24f * size, ey - 0.14f * size); path.close() }
+        c.drawPath(path, paint)
+        if (wink) { stroke.color = g; stroke.alpha = 255; stroke.strokeWidth = 0.04f * size; c.drawLine(cx + 0.12f * size, ey + 0.02f * size, cx + 0.36f * size, ey + 0.02f * size, stroke) }
+        // Sourire en zigzag
+        val my = cy + rh * 0.32f
+        path.reset(); path.moveTo(cx - 0.42f * size, my - 0.06f * size)
+        for (i in 0 until 7) path.lineTo(cx - 0.42f * size + (i + 0.5f) * 0.12f * size, my + (if (i % 2 == 0) 0.06f else -0.02f) * size)
+        path.lineTo(cx + 0.42f * size, my - 0.06f * size); path.lineTo(cx + 0.3f * size, my + 0.16f * size)
+        path.lineTo(cx, my + 0.22f * size); path.lineTo(cx - 0.3f * size, my + 0.16f * size); path.close()
+        c.drawPath(path, paint)
+    }
+
+    private fun drawBat(c: Canvas, cx: Float, cy: Float, s: Float, flap: Boolean, alpha: Int) {
+        paint.shader = null; paint.color = 0xFF1E1828.toInt(); paint.alpha = alpha
+        val up = if (flap) -0.5f else 0.35f
+        path.reset()
+        for (sg in intArrayOf(-1, 1)) {
+            path.moveTo(cx, cy); path.lineTo(cx + sg * s * 1.15f, cy + up * s); path.lineTo(cx + sg * s * 0.8f, cy + 0.2f * s)
+            path.lineTo(cx + sg * s * 0.5f, cy + 0.05f * s); path.close()
+        }
+        c.drawPath(path, paint)
+        r.set(cx - s * 0.22f, cy - s * 0.25f, cx + s * 0.22f, cy + s * 0.3f); c.drawOval(r, paint)
+        paint.color = 0xFFFFDC5A.toInt(); paint.alpha = alpha
+        c.drawCircle(cx - 0.08f * s, cy - 0.06f * s, 0.045f * s, paint); c.drawCircle(cx + 0.08f * s, cy - 0.06f * s, 0.045f * s, paint)
     }
 
     // ── Éclair : il traverse toute la carte en passant par le pic sur la barre, flash, puis grésille ──
@@ -498,7 +635,7 @@ class PowerFx(private val context: Context) : Drawable() {
     }
 
     private fun clearParticles() {
-        puffs.clear(); flames.clear(); crackles.clear(); bolt.clear(); fly = true; heat = 0f; launchAt = 0L
+        puffs.clear(); flames.clear(); crackles.clear(); bolt.clear(); bats.clear(); fly = true; heat = 0f; launchAt = 0L
     }
 
     private fun strike(now: Long) {

@@ -590,7 +590,7 @@ class ScreenshotTest {
         val sp = org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE)
         sp.edit().putInt("theme_mode", 1).commit()
         val act = Robolectric.buildActivity(SettingsActivity::class.java).setup().get()
-        val names = mapOf(1 to "rocket", 2 to "lightning", 3 to "flames")
+        val names = mapOf(1 to "rocket", 2 to "lightning", 3 to "flames", 5 to "pumpkin")
         val times = longArrayOf(150, 300, 500, 900, 1300, 2500, 2800, 3200, 4200)
         for ((style, name) in names) {
             val root = android.widget.FrameLayout(act)

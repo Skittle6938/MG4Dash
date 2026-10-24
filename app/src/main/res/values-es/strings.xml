@@ -486,6 +486,7 @@
     <string name="st_media_style">Reproductor de la pantalla de inicio</string>
     <string name="st_media_immersive">Inmersivo</string>
     <string name="st_media_classic">Clásico</string>
+    <string name="fx_pumpkin">Calabaza de Halloween</string>
     <string name="aa_title">ANDROID AUTO</string>
     <string name="aa_ready">Teléfono conectado · Pulse para abrir</string>
     <string name="aa_waiting">Conecte su teléfono por USB</string>

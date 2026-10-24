@@ -486,6 +486,7 @@
     <string name="st_media_style">Player auf dem Startbildschirm</string>
     <string name="st_media_immersive">Immersiv</string>
     <string name="st_media_classic">Klassisch</string>
+    <string name="fx_pumpkin">Halloween-Kürbis</string>
     <string name="aa_title">ANDROID AUTO</string>
     <string name="aa_ready">Telefon verbunden · Zum Öffnen tippen</string>
     <string name="aa_waiting">Telefon per USB verbinden</string>
