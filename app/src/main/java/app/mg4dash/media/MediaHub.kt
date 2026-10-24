@@ -710,24 +710,11 @@ object MediaHub {
             if (!app.mg4dash.system.Projection.mediaKey(ctx, app.mg4dash.system.Projection.KEY_SELECT_SOURCE))
                 systemMediaKey(KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE)
         }.start()
-        // Journal de #36 : la voiture ne rend l'audio à CarPlay que quand CarPlay s'ouvre à l'écran
-        // (« source audio : com.allgo.carplay.service »), ni la touche ci-dessus ni lecture n'y suffisent.
-        // Si rien n'a changé au bout de 1,5 s, on ouvre CarPlay un instant puis on revient à l'accueil.
+        // Journal de #36 : la voiture ne rend l'audio à CarPlay que quand CarPlay s'ouvre à l'écran ;
+        // on note si la touche a suffi (pas d'ouverture forcée : refusée, l'écran CarPlay clignotait)
         main.postDelayed({
-            if (sourcePkg == AA_MBS) return@postDelayed
-            Log.i(TAG, "CarPlay did not get the audio: opening CarPlay briefly")
-            app.mg4dash.system.Apps.open(ctx, app.mg4dash.system.Apps.CARPLAY, "CarPlay")
-            val since = android.os.SystemClock.uptimeMillis()
-            fun back() {
-                if (sourcePkg != AA_MBS && android.os.SystemClock.uptimeMillis() - since < 4000) { main.postDelayed({ back() }, 250); return }
-                Log.i(TAG, "CarPlay audio ${if (sourcePkg == AA_MBS) "taken" else "still missing"}: back to home")
-                try {
-                    ctx.startActivity(Intent(ctx, app.mg4dash.MainActivity::class.java)
-                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_REORDER_TO_FRONT))
-                } catch (e: Exception) { Log.w(TAG, "back to home: ${e.message}") }
-            }
-            main.postDelayed({ back() }, 800)
-        }, 1500)
+            Log.i(TAG, "CarPlay audio after source key: ${if (sourcePkg == AA_MBS) "taken" else "still on $sourcePkg"}")
+        }, 2000)
     }
 
     /** Touche média vers CarPlay ; à défaut de service, touche média du système. */
