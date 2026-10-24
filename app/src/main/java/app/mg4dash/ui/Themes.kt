@@ -83,7 +83,7 @@ object Themes {
     private const val GLOBAL_KEY = "mg4dash_theme"
 
     /** Signature du thème courant : sert à savoir si un écran doit se redessiner. */
-    fun signature(context: Context): Int = Prefs(context).let { it.themeBackground * 10 + it.themeAccent + (if (isLight(context)) 100 else 0) + (if (it.verticalDock) 1000 else 0) + (if (it.panelFade) 0 else 10000) }
+    fun signature(context: Context): Int = Prefs(context).let { it.themeBackground * 10 + it.themeAccent + (if (isLight(context)) 100 else 0) + (if (it.verticalDock) 1000 else 0) + (if (it.panelFade) 0 else 10000) + it.mediaStyle * 100000 }
 
     /** À appeler dans onCreate, avant setContentView ; [dark] force le thème sombre. */
     fun apply(activity: Activity, dark: Boolean = false) {
@@ -196,7 +196,7 @@ object Themes {
     fun publish(context: Context) {
         val p = Prefs(context)
         try {
-            Settings.Global.putString(context.contentResolver, GLOBAL_KEY, "${p.themeBackground},${p.themeAccent},${if (isLight(context)) 1 else 0},${if (p.verticalDock) 1 else 0}")
+            Settings.Global.putString(context.contentResolver, GLOBAL_KEY, "${p.themeBackground},${p.themeAccent},${if (isLight(context)) 1 else 0},${if (p.verticalDock) 1 else 0},${p.mediaStyle}")
         } catch (e: Exception) {
             Log.w("Thème", "publication pour Radio Dash impossible : ${e.message}")
         }
