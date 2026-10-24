@@ -474,6 +474,8 @@
     <string name="st_tab_system">Sistema</string>
     <string name="st_theme_smooth">Transizione morbida chiaro / scuro</string>
     <string name="st_theme_smooth_desc">Attende 5 s di luci stabili (nessun cambio sotto i ponti) e sfuma in 2 s. Disattivato: cambia appena cambiano le luci.</string>
+    <string name="st_hide_saic_climate">Tenere MG4Dash davanti alla schermata clima SAIC</string>
+    <string name="st_hide_saic_climate_desc">Quando MG4Dash accende il clima, il launcher originale apre la sua schermata clima: MG4Dash torna davanti.</string>
     <string name="aa_title">ANDROID AUTO</string>
     <string name="aa_ready">Telefono connesso · Tocca per aprire</string>
     <string name="aa_waiting">Collega il telefono via USB</string>

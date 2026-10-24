@@ -474,6 +474,8 @@
     <string name="st_tab_system">System</string>
     <string name="st_theme_smooth">Sanfter Hell / Dunkel-Wechsel</string>
     <string name="st_theme_smooth_desc">Wartet 5 s mit stabilem Licht (kein Wechsel unter Brücken) und blendet über 2 s über. Aus: wechselt sofort, wenn sich das Licht ändert.</string>
+    <string name="st_hide_saic_climate">MG4Dash vor dem SAIC-Klimabildschirm halten</string>
+    <string name="st_hide_saic_climate_desc">Wenn MG4Dash die Klimaanlage einschaltet, öffnet der Original-Launcher seinen Klimabildschirm: MG4Dash kommt wieder nach vorne.</string>
     <string name="aa_title">ANDROID AUTO</string>
     <string name="aa_ready">Telefon verbunden · Zum Öffnen tippen</string>
     <string name="aa_waiting">Telefon per USB verbinden</string>

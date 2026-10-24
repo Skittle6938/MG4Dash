@@ -122,6 +122,8 @@ class SettingsActivity : AppCompatActivity() {
         text(units, getString(R.string.st_heated), 18f, R.color.text_value)
         row(units, *choiceButtons(listOf(getString(R.string.st_mode_auto_short), getString(R.string.yes), getString(R.string.no)), { prefs.heatedSeats }) { prefs.heatedSeats = it })
         toggle(units, R.string.st_climhold, R.string.st_climhold_desc, { prefs.climateHoldEnabled }) { prefs.climateHoldEnabled = it }
+        if (app.mg4dash.system.Firmware.family == app.mg4dash.system.Firmware.Family.LEGACY)
+            toggle(units, R.string.st_hide_saic_climate, R.string.st_hide_saic_climate_desc, { prefs.hideSaicClimate }) { prefs.hideSaicClimate = it }
 
         // ════ Onglet Apparence : thème et effets ════
         val theme = panel(lookL, getString(R.string.st_theme))

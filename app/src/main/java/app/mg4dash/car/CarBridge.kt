@@ -403,11 +403,40 @@ object CarBridge {
     /** Commande clim des firmwares ancien SDK (bloquante, donc hors du fil principal). */
     private fun legacy(label: String, action: () -> Boolean) {
         scope.launch {
+            val front = ourFrontTask()
             val ok = try { action() } catch (e: Exception) { Log.w(TAG, "SET $label : ${e.message}"); false }
             Log.i(TAG, "SET $label (ancien SDK) → $ok")
-            delay(300); refreshHvac()
-            delay(700); refreshHvac()
+            delay(300); refreshHvac(); keepFront(front)
+            delay(700); refreshHvac(); keepFront(front)
+            delay(1000); keepFront(front)
         }
+    }
+
+    /** Tâche MG4Dash au premier plan avant une commande, ou null. */
+    private fun ourFrontTask(): Int? = try {
+        val ctx = appContext
+        val am = ctx?.getSystemService(Context.ACTIVITY_SERVICE) as? android.app.ActivityManager
+        @Suppress("DEPRECATION")
+        am?.getRunningTasks(1)?.firstOrNull()?.takeIf { it.topActivity?.packageName == ctx.packageName }?.id
+    } catch (_: Throwable) { null }
+
+    /**
+     * Ancien SDK : allumer la clim fait ouvrir l'écran clim du launcher SAIC par-dessus MG4Dash
+     * (#48). Si une page MG4Dash était devant, on la remet devant (réglage, actif par défaut).
+     */
+    private fun keepFront(task: Int?) {
+        val ctx = appContext ?: return
+        if (task == null || !app.mg4dash.system.Prefs(ctx).hideSaicClimate) return
+        try {
+            val am = ctx.getSystemService(Context.ACTIVITY_SERVICE) as android.app.ActivityManager
+            @Suppress("DEPRECATION")
+            val top = am.getRunningTasks(1).firstOrNull() ?: return
+            val pkg = top.topActivity?.packageName ?: return
+            if (top.id != task && pkg.startsWith("com.saicmotor")) {
+                am.moveTaskToFront(task, 0)
+                Log.i(TAG, "écran clim SAIC ${top.topActivity?.flattenToShortString()} passé devant : MG4Dash remis devant")
+            }
+        } catch (e: Throwable) { Log.w(TAG, "clim SAIC : ${e.message}") }
     }
 
     private val useLegacy: Boolean get() = !BuildConfig.MOCK && hvac == null && LegacyCar.ready
