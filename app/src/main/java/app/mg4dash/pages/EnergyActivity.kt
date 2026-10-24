@@ -170,7 +170,7 @@ class EnergyActivity : PageActivity() {
         // ── Colonne 3 : consommation ──
         val c3 = kit.panel(getString(R.string.en_consumption))
         val (pRow, pSet) = kit.segmented(listOf(getString(R.string.en_since_charge), getString(R.string.en_trip), getString(R.string.en_last_year))) { i ->
-            period = i; prefs.consumptionPeriod = i; setPeriod(i); refreshProps(); renderHistory(ChargeGuard.history.value)
+            period = i; prefs.consumptionPeriod = i; setPeriod(i); refreshProps(); renderHistory()
         }
         setPeriod = pSet
         period = prefs.consumptionPeriod.coerceIn(0, 2)
@@ -198,7 +198,7 @@ class EnergyActivity : PageActivity() {
 
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-                launch { ChargeGuard.history.collect { renderHistory(it) } }
+                launch { app.mg4dash.energy.ConsumptionCurve.curves.collect { renderHistory() } }
                 while (true) { refreshProps(); delay(2_000) }
             }
         }
@@ -323,18 +323,10 @@ class EnergyActivity : PageActivity() {
         regen.text = if (rgn > 0f) getString(R.string.en_regen, String.format(Locale.getDefault(), "%.1f", rgn)) else ""
     }
 
-    private fun renderHistory(values: List<Float>) {
-        if (period == 2) {
-            val m = EnergyMonitor.monthlyPer100().map { app.mg4dash.system.Units.cons(this, it) }
-            chart.values = m
-            chartNote.text = if (m.size >= 2) getString(R.string.en_months_note, m.size, String.format(Locale.getDefault(), "%.1f", m.average()))
-                else getString(R.string.en_months_wait)
-            return
-        }
-        val v = values.map { app.mg4dash.system.Units.cons(this, it) }
-        chart.values = v.smooth3()
-        chartNote.text = if (v.size >= 2)
-            getString(R.string.en_history_note, Math.round(app.mg4dash.system.Units.dist(this, v.size.toFloat())), String.format(Locale.getDefault(), "%.1f", v.average()), app.mg4dash.system.Units.distUnit(this)) else ""
+    private fun renderHistory() {
+        val (values, note) = app.mg4dash.ui.ConsumptionCard.curve(this, period)
+        chart.values = values
+        chartNote.text = note
     }
 
     override fun render(s: VehicleState) {

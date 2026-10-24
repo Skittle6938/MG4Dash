@@ -30,14 +30,13 @@ class ConsumptionCard(context: Context) : LinearLayout(context) {
 
     private val prefs = app.mg4dash.system.Prefs(context)
     private val periodLabels = listOf(R.string.en_since_charge, R.string.en_trip, R.string.en_last_year).map { context.getString(it) }
-    private var lastHistory: List<Float> = emptyList()
     private val periodTv: TextView =
         tv(19f, R.color.text_value).apply {
             setPadding(0, (6 * d).toInt(), (24 * d).toInt(), (6 * d).toInt())
             isClickable = true
             setOnClickListener { v ->
                 (context as? android.app.Activity)?.let { a ->
-                    SourceMenu.choose(a, v, periodLabels, prefs.consumptionPeriod) { prefs.consumptionPeriod = it; show(lastHistory) }
+                    SourceMenu.choose(a, v, periodLabels, prefs.consumptionPeriod) { prefs.consumptionPeriod = it; show() }
                 }
             }
         }
@@ -60,8 +59,7 @@ class ConsumptionCard(context: Context) : LinearLayout(context) {
         addView(note)
     }
 
-    fun show(history: List<Float>) {
-        lastHistory = history
+    fun show() {
         val period = prefs.consumptionPeriod.coerceIn(0, 2)
         periodTv.text = periodLabels[period] + "  ▾"
         val t = EnergyMonitor.totals(period)
@@ -82,17 +80,22 @@ class ConsumptionCard(context: Context) : LinearLayout(context) {
                 legend.addView(r, LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT).apply { topMargin = (3 * d).toInt() })
             }
         regen.text = if (t.regenKwh > 0f) context.getString(R.string.en_regen, String.format(Locale.getDefault(), "%.1f", t.regenKwh)) else ""
-        // 12 derniers mois : une valeur par mois, pour voir l'effet des saisons
-        if (period == 2) {
-            val m = EnergyMonitor.monthlyPer100().map { app.mg4dash.system.Units.cons(context, it) }
-            chart.values = m
-            note.text = if (m.size >= 2) context.getString(R.string.en_months_note, m.size,
-                String.format(Locale.getDefault(), "%.1f", m.average())) else context.getString(R.string.en_months_wait)
-        } else {
-            val h = history.map { app.mg4dash.system.Units.cons(context, it) }
-            chart.values = h.smooth3()
-            note.text = if (h.size >= 2) context.getString(R.string.en_history_note, Math.round(app.mg4dash.system.Units.dist(context, h.size.toFloat())),
-                String.format(Locale.getDefault(), "%.1f", h.average()), app.mg4dash.system.Units.distUnit(context)) else ""
+        val (values, n) = curve(context, period)
+        chart.values = values
+        note.text = n
+    }
+
+    companion object {
+        /**
+         * Courbe et légende de la période (#44) : un point par km du trajet ou depuis la recharge
+         * (moyenne glissante sur 3 points), ou un point par trajet sur 12 mois.
+         */
+        fun curve(c: android.content.Context, period: Int): Pair<List<Float>, String> {
+            val raw = app.mg4dash.energy.ConsumptionCurve.curves.value.of(period)
+            val v = raw.map { app.mg4dash.system.Units.cons(c, it) }
+            val avg = String.format(Locale.getDefault(), "%.1f", v.average())
+            return if (period == 2) v to (if (v.size >= 2) c.getString(R.string.en_trips_note, v.size, avg) else c.getString(R.string.en_trips_wait))
+            else v.smooth3() to (if (v.size >= 2) c.getString(R.string.en_curve_note, avg) else c.getString(R.string.en_curve_wait))
         }
     }
 }

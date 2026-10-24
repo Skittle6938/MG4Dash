@@ -40,10 +40,16 @@ object Compat {
         fun pkg(p: String) = if (Firmware.installed(a, p)) "yes" else "no"
         fun i(id: Int) = CarProps.readIntArea(id, 0x1000000)?.toString() ?: "—"
         fun f(id: Int) = CarProps.readFloatArea(id, 0x1000000)?.let { String.format(java.util.Locale.US, "%.1f", it) } ?: "—"
+        // Taille de l'appli = écran moins la barre SAIC (1920 − 142 = 1778) : on note aussi l'écran entier
+        fun realSize(c: android.content.Context): String = try {
+            val m = android.util.DisplayMetrics()
+            (c.getSystemService(android.content.Context.WINDOW_SERVICE) as android.view.WindowManager).defaultDisplay.getRealMetrics(m)
+            "${m.widthPixels}x${m.heightPixels}"
+        } catch (_: Exception) { "?" }
         return buildString {
             appendLine("MG4Dash ${BuildConfig.VERSION_NAME}")
             appendLine("Firmware: ${Firmware.version} (${Firmware.gen}, ${Firmware.family})")
-            appendLine("Android ${Build.VERSION.RELEASE} (SDK ${Build.VERSION.SDK_INT}), ${Build.MODEL}, ${dm.widthPixels}x${dm.heightPixels} @${dm.densityDpi}")
+            appendLine("Android ${Build.VERSION.RELEASE} (SDK ${Build.VERSION.SDK_INT}), ${Build.MODEL}, ${dm.widthPixels}x${dm.heightPixels} @${dm.densityDpi} (screen ${realSize(a)})")
             appendLine("Packages: caradapter=${pkg("com.saicmotor.caradapter")} launcher=${pkg("com.saicmotor.launcher")} hmi.launcher=${pkg(Firmware.LEGACY_LAUNCHER)} adapterservice=${pkg("com.saicmotor.adapterservice")} radio=${pkg("com.saicmotor.radio")} androidauto=${pkg("com.allgo.app.androidauto")}")
             appendLine("Stock home: ${HomeSwitcher.STOCK.flattenToShortString()}")
             appendLine("Services: " + CarBridge.probe().joinToString(", ") { "${it.first}=${it.second}" })
