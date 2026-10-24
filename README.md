@@ -4,7 +4,7 @@ Full-screen launcher for the MG4 and its 1920 × 720 screen, for every head unit
 
 Languages: English (default), French, German, Spanish, Italian, Dutch and Turkish, following the car's system language. Units: km and kWh/100 km or miles and mi/kWh (following the car or set by hand), tyre pressure in bar, psi or kPa.
 
-Current version: **1.5.0** ([releases](https://github.com/Skittle6938/MG4Dash/releases)). Betas (1.5.1-beta…) can be installed from the app, see [Updates](#updates).
+Current version: **1.6.0** ([releases](https://github.com/Skittle6938/MG4Dash/releases)). Betas (1.6.1-beta…) can be installed from the app, see [Updates](#updates).
 
 > Screenshots are rendered on a PC with simulated data and the **default settings** unless stated otherwise; the map excerpt is a fixed view of Paris (OpenStreetMap).
 
@@ -168,7 +168,7 @@ Five tabs along the top; the last one used opens next time. Each on / off option
 
 ## Updates
 
-Settings › System › *Check* downloads the latest MG4Dash release from GitHub and installs it (internet connection needed). Turn on *Include beta versions* to also get the betas, numbered after the next release (1.5.1-beta0, 1.5.1-beta1…). When a new official release is out, MG4Dash also offers it at startup: *Update*, *Later* or *Don't notify me again for this release*.
+Settings › System › *Check* downloads the latest MG4Dash release from GitHub and installs it (internet connection needed). Turn on *Include beta versions* to also get the betas, numbered after the next release (1.6.1-beta0, 1.6.1-beta1…). When a new official release is out, MG4Dash also offers it at startup: *Update*, *Later* or *Don't notify me again for this release*.
 
 **Radio Dash**: on SWI69 with the matching radio app, the same page installs the latest [Radio Dash](https://github.com/Skittle6938/MG4-Radio-Dash) (the radio redesigned in the MG4Dash style); restart the head unit afterwards by holding Home about 20 s.
 
