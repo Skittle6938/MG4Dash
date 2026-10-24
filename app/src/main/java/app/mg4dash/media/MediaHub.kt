@@ -192,6 +192,7 @@ object MediaHub {
         pinnedPkg = next
         main.post { reevaluate() }
         if (next == AA_MBS) {
+            if (carPlay) { selectProjectionSource(); return }
             browserControllers[AA_MBS]?.let { aaControl(it, AA_PLAY, KeyEvent.KEYCODE_MEDIA_PLAY) }
             return
         }
@@ -584,6 +585,12 @@ object MediaHub {
             }, 1500)
             return
         }
+        // CarPlay après la radio : l'iPhone n'a plus l'audio principal, la touche lecture restait sans
+        // effet tant qu'on ne relançait pas la musique sur le téléphone (#36). On repasse d'abord sur
+        // la source CarPlay comme le launcher d'origine, qui rend l'audio au téléphone.
+        if (carPlay && !playing && isAndroidAuto(c.packageName) && effectiveSource().let { it != null && it != c.packageName }) {
+            selectProjectionSource(); return
+        }
         // Android Auto (RemoteUI) ne réagit qu'aux touches média, pas aux commandes play()/pause()
         if (isAndroidAuto(c.packageName)) { aaControl(c, if (playing) AA_PAUSE else AA_PLAY, if (playing) KeyEvent.KEYCODE_MEDIA_PAUSE else KeyEvent.KEYCODE_MEDIA_PLAY); return }
         if (playing) c.transportControls.pause() else c.transportControls.play()
@@ -665,6 +672,19 @@ object MediaHub {
             true
         } catch (e: Exception) { Log.w(TAG, "CarPlay transaction $tx : ${e.message}"); false }
         finally { data.recycle(); reply.recycle() }
+    }
+
+    /**
+     * Passage sur la source CarPlay comme le launcher d'origine (onSwitchCarPlayAASourceOnly) :
+     * touche 1 au service RemoteUI d'AllGo, qui rend l'audio principal à l'iPhone et relance la
+     * lecture (#36). À défaut de service, la touche lecture / pause de CarPlay comme avant.
+     */
+    private fun selectProjectionSource() {
+        val ctx = appContext ?: return
+        Thread {
+            if (!app.mg4dash.system.Projection.mediaKey(ctx, app.mg4dash.system.Projection.KEY_SELECT_SOURCE))
+                systemMediaKey(KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE)
+        }.start()
     }
 
     /** Touche média vers CarPlay ; à défaut de service, touche média du système. */

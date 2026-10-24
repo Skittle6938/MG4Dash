@@ -61,6 +61,30 @@ object Projection {
         } finally { reply.recycle(); data.recycle() }
     }
 
+    /**
+     * Touche média vers la projection, comme le launcher d'origine (CPAAModel.mediaControlCPAA) :
+     * `IRemoteUIService.sendMediaPlayControlKey` (transaction 18). En passant sur la source
+     * CarPlay / Android Auto, le launcher envoie 1 : AllGo rend alors l'audio principal au téléphone,
+     * que la radio avait pris (#36). Bloquant : hors du fil principal.
+     */
+    fun mediaKey(context: Context, code: Int): Boolean {
+        val b = bind(context) ?: return false
+        val data = Parcel.obtain(); val reply = Parcel.obtain()
+        return try {
+            data.writeInterfaceToken(DESCRIPTOR)
+            data.writeInt(code)
+            b.transact(TX_MEDIA_KEY, data, reply, 0)
+            reply.readException()
+            Log.i(TAG, "touche média projection $code → ${reply.readInt()}")
+            true
+        } catch (e: Exception) { Log.w(TAG, "touche média projection $code : ${e.message}"); false }
+        finally { reply.recycle(); data.recycle() }
+    }
+
+    /** Code du launcher d'origine pour « passer sur la source projection ». */
+    const val KEY_SELECT_SOURCE = 1
+    private const val TX_MEDIA_KEY = 18
+
     @Synchronized
     private fun bind(context: Context): IBinder? {
         binder?.takeIf { it.isBinderAlive }?.let { return it }
