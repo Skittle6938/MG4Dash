@@ -487,6 +487,10 @@
     <string name="st_media_immersive">Immersief</string>
     <string name="st_media_classic">Klassiek</string>
     <string name="fx_pumpkin">Halloweenpompoen</string>
+    <string name="en_clear_curve">Curve wissen</string>
+    <string name="en_clear_confirm">De curve „%1$s” wissen?</string>
+    <string name="st_cc_stopped">Verbruikscurve: ook stilstaand</string>
+    <string name="st_cc_stopped_desc">Eén punt per minuut als de auto stilstaat (klimaat, accessoires). Uit: alleen rijden telt. Lang drukken op de curve van de Energie-pagina om hem te wissen.</string>
     <string name="aa_title">ANDROID AUTO</string>
     <string name="aa_ready">Telefoon verbonden · Tik om te openen</string>
     <string name="aa_waiting">Sluit je telefoon aan via USB</string>

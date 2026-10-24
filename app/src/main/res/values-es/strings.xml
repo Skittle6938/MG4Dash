@@ -487,6 +487,10 @@
     <string name="st_media_immersive">Inmersivo</string>
     <string name="st_media_classic">Clásico</string>
     <string name="fx_pumpkin">Calabaza de Halloween</string>
+    <string name="en_clear_curve">Borrar la curva</string>
+    <string name="en_clear_confirm">¿Borrar la curva «%1$s»?</string>
+    <string name="st_cc_stopped">Curva de consumo: también parado</string>
+    <string name="st_cc_stopped_desc">Un punto por minuto con el coche parado (clima, accesorios). Desactivado: solo cuenta la conducción. Pulsación larga en la curva de la página Energía para borrarla.</string>
     <string name="aa_title">ANDROID AUTO</string>
     <string name="aa_ready">Teléfono conectado · Pulse para abrir</string>
     <string name="aa_waiting">Conecte su teléfono por USB</string>

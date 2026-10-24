@@ -487,6 +487,10 @@
     <string name="st_media_immersive">Immersif</string>
     <string name="st_media_classic">Classique</string>
     <string name="fx_pumpkin">Citrouille d\'Halloween</string>
+    <string name="en_clear_curve">Effacer la courbe</string>
+    <string name="en_clear_confirm">Effacer la courbe « %1$s » ?</string>
+    <string name="st_cc_stopped">Courbe de conso : aussi à l\'arrêt</string>
+    <string name="st_cc_stopped_desc">Un point par minute voiture arrêtée (clim, accessoires). Désactivé : seule la conduite compte. Appui long sur la courbe de la page Énergie pour l\'effacer.</string>
     <string name="aa_title">ANDROID AUTO</string>
     <string name="aa_ready">Téléphone connecté · Appuyer pour ouvrir</string>
     <string name="aa_waiting">Branchez votre téléphone en USB</string>
