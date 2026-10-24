@@ -89,7 +89,7 @@ object ConsumptionCurve {
                         val now = System.currentTimeMillis()
                         trips.add(now to avg)
                         trips.removeAll { now - it.first > YEAR_MS }
-                        Log.i(TAG, "trajet fini : ${lastStart.km} km, ${"%.1f".format(java.util.Locale.US, avg)} kWh/100")
+                        Log.i(TAG, "trip ended: ${lastStart.km} km, ${"%.1f".format(java.util.Locale.US, avg)} kWh/100")
                     }
                     seq = EnergyMonitor.tripSeq
                     trip = emptyList(); lastKm = start.km; lastNet = start.netKwh; stillSince = tick; dist = 0f

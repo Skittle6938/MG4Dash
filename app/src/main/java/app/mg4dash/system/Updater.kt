@@ -20,7 +20,7 @@ import java.net.URL
  * est relancé ([Relaunch]).
  */
 object Updater {
-    private const val TAG = "MàJ"
+    private const val TAG = "Update"
     private const val API = "https://api.github.com/repos/Skittle6938/MG4Dash/releases?per_page=10"
     /** Dernière release non bêta (GitHub ignore les pré-versions et les brouillons). */
     private const val API_STABLE = "https://api.github.com/repos/Skittle6938/MG4Dash/releases/latest"
@@ -124,7 +124,7 @@ object Updater {
                 }
             }
         } finally { c.disconnect() }
-        Log.i(TAG, "téléchargé ${r.version} (${out.length()} octets)")
+        Log.i(TAG, "downloaded ${r.version} (${out.length()} bytes)")
         return out
     }
 
@@ -140,7 +140,7 @@ object Updater {
                 // INSTALL_INTERNAL (0x10) ; INSTALL_DONT_KILL_APP (0x1000) : on garde la main pour recompiler
                 // proprement avant de redémarrer (voir Result)
                 f.setInt(this, f.getInt(this) or 0x00000010 or 0x00001000)
-            } catch (e: Exception) { Log.w(TAG, "drapeau INSTALL_INTERNAL : ${e.message}") }
+            } catch (e: Exception) { Log.w(TAG, "INSTALL_INTERNAL flag: ${e.message}") }
         }
         val id = pi.createSession(params)
         pi.openSession(id).use { s ->
@@ -149,7 +149,7 @@ object Updater {
             }
             val intent = Intent(context, Result::class.java)
             val sender = PendingIntent.getBroadcast(context, id, intent, PendingIntent.FLAG_UPDATE_CURRENT)
-            Log.i(TAG, "installation lancée (session $id)")
+            Log.i(TAG, "install started (session $id)")
             s.commit(sender.intentSender)
         }
     }
@@ -159,7 +159,7 @@ object Updater {
         override fun onReceive(context: Context, intent: Intent) {
             val status = intent.getIntExtra(PackageInstaller.EXTRA_STATUS, -999)
             val msg = intent.getStringExtra(PackageInstaller.EXTRA_STATUS_MESSAGE)
-            Log.i(TAG, "résultat de l'installation : $status $msg")
+            Log.i(TAG, "install result: $status $msg")
             if (status != PackageInstaller.STATUS_SUCCESS) return
             // Après une installation, la compilation faite par la voiture était parfois inutilisable
             // (ClassNotFoundException au démarrage) ; une recompilation « speed » la remplace.
@@ -174,9 +174,9 @@ object Updater {
             val pm = Class.forName("android.app.ActivityThread").getMethod("getPackageManager").invoke(null)
             val m = pm.javaClass.methods.first { it.name == "performDexOptMode" && it.parameterTypes.size == 6 }
             val ok = m.invoke(pm, context.packageName, false, "speed", true, true, null)
-            Log.i(TAG, "recompilation : $ok")
+            Log.i(TAG, "recompile: $ok")
         } catch (e: Throwable) {
-            Log.w(TAG, "recompilation impossible : ${(e.cause ?: e).message}")
+            Log.w(TAG, "recompile failed: ${(e.cause ?: e).message}")
         }
     }
 
@@ -193,7 +193,7 @@ object Updater {
     class Relaunch : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             if (intent.action != Intent.ACTION_MY_PACKAGE_REPLACED) return
-            Log.i(TAG, "mise à jour installée : ${BuildConfig.VERSION_NAME}")
+            Log.i(TAG, "update installed: ${BuildConfig.VERSION_NAME}")
             context.startActivity(Intent(context, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
         }
     }

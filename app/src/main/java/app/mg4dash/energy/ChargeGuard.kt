@@ -17,6 +17,6 @@ object ChargeGuard {
     fun setLimit(context: Context, percent: Int) {
         val p = percent.coerceIn(40, 100)
         Prefs(context).chargeLimit = p
-        CarProps.setInt(CarProps.CHRG_TRGT_SOC, CarProps.targetSocCode(p), "limite de charge $p %")
+        CarProps.setInt(CarProps.CHRG_TRGT_SOC, CarProps.targetSocCode(p), "charge limit $p %")
     }
 }

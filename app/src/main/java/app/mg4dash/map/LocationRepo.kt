@@ -18,7 +18,7 @@ import kotlinx.coroutines.flow.StateFlow
  * le 2026-10-13), avec vitesse et cap ; repli sur « gps ».
  */
 object LocationRepo {
-    private const val TAG = "Position"
+    private const val TAG = "Location"
     private val _location = MutableStateFlow<Location?>(null)
     val location: StateFlow<Location?> = _location
 
@@ -57,9 +57,9 @@ object LocationRepo {
                 try {
                     lm.requestLocationUpdates(p, 1000L, 0f, listener, Looper.getMainLooper())
                     subscribed += p
-                    Log.i(TAG, "suivi de position via « $p »")
+                    Log.i(TAG, "location updates via \"$p\"")
                 } catch (e: Exception) {
-                    Log.w(TAG, "« $p » indisponible : ${e.message}")
+                    Log.w(TAG, "\"$p\" unavailable: ${e.message}")
                 }
             }
     }
@@ -76,7 +76,7 @@ object LocationRepo {
             appContext?.let { app.mg4dash.weather.WeatherRepo.onLocation(it) }
             if (System.currentTimeMillis() - lastLog > 60_000) {
                 lastLog = System.currentTimeMillis()
-                Log.i(TAG, "position reçue (${location.provider}, ${Math.round(location.speed * 3.6f)} km/h)")
+                Log.i(TAG, "location received (${location.provider}, ${Math.round(location.speed * 3.6f)} km/h)")
             }
         }
         @Deprecated("API 28")

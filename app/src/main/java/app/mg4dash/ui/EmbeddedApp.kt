@@ -15,7 +15,7 @@ import app.mg4dash.system.Log
  * ce qu'est MG4Dash ; appelé par réflexion, null s'il manque sur ce firmware.
  */
 object EmbeddedApp {
-    private const val TAG = "AppCarte"
+    private const val TAG = "MapApp"
 
     fun create(activity: Activity, cn: ComponentName, onStarted: (() -> Unit)? = null): ViewGroup? = try {
         val cls = Class.forName("android.app.ActivityView")
@@ -29,11 +29,11 @@ object EmbeddedApp {
                 if (!view.isAttachedToWindow) return@postDelayed
                 try {
                     start.invoke(view, intent)
-                    Log.i(TAG, "${cn.flattenToShortString()} lancée dans le widget carte (${view.width}×${view.height})")
+                    Log.i(TAG, "${cn.flattenToShortString()} started in the map widget (${view.width}×${view.height})")
                     onStarted?.invoke()
                 } catch (e: java.lang.reflect.InvocationTargetException) {
                     // Pas de limite : l'écran virtuel n'existe que quand l'accueil est affiché (sinon le widget restait noir)
-                    if (n == 20) Log.w(TAG, "en attente de l'écran virtuel : ${e.cause?.message}")
+                    if (n == 20) Log.w(TAG, "waiting for the virtual display: ${e.cause?.message}")
                     tryStart(n + 1)
                 }
             }, if (n < 20) 300L else 1000L)
@@ -47,10 +47,10 @@ object EmbeddedApp {
             override fun onViewAttachedToWindow(v: View) = tryStart(0)
             override fun onViewDetachedFromWindow(v: View) = release(v)
         })
-        Log.i(TAG, "ActivityView disponible")
+        Log.i(TAG, "ActivityView available")
         view
     } catch (e: Throwable) {
-        Log.w(TAG, "ActivityView indisponible : ${e.javaClass.simpleName} ${e.message}")
+        Log.w(TAG, "ActivityView unavailable: ${e.javaClass.simpleName} ${e.message}")
         null
     }
 
@@ -68,9 +68,9 @@ object EmbeddedApp {
             if (cur != null && cur.isNotEmpty() && !cur.startsWith("immersive.full=${context.packageName},")) return
             if (cur != want) {
                 android.provider.Settings.Global.putString(cr, "policy_control", want)
-                Log.i(TAG, "policy_control → ${want ?: "(vide)"}")
+                Log.i(TAG, "policy_control → ${want ?: "(empty)"}")
             }
-        } catch (e: Throwable) { Log.w(TAG, "policy_control : ${e.message}") }
+        } catch (e: Throwable) { Log.w(TAG, "policy_control: ${e.message}") }
     }
 
     private fun resize(v: View) {
@@ -80,8 +80,8 @@ object EmbeddedApp {
             val vd = f.get(v) as? android.hardware.display.VirtualDisplay ?: return
             val dpi = v.resources.displayMetrics.densityDpi
             vd.resize(v.width, v.height, dpi)
-            Log.i(TAG, "écran virtuel redimensionné : ${v.width}×${v.height}")
-        } catch (e: Throwable) { Log.w(TAG, "redimensionnement : ${e.message}") }
+            Log.i(TAG, "virtual display resized: ${v.width}×${v.height}")
+        } catch (e: Throwable) { Log.w(TAG, "resize: ${e.message}") }
     }
 
     fun release(v: View) {

@@ -26,7 +26,7 @@ import org.json.JSONObject
  * fermée sans l'énergie correspondante, et ne se terminait pas si la recharge était vue % par %.
  */
 object BatteryCapacity {
-    private const val TAG = "Capacité"
+    private const val TAG = "Capacity"
     private const val PROP_EV_BATTERY_CAPACITY = 0x11600106
     const val MIN_DROP = 15f
     private const val MONTH_MS = 30L * 24 * 3600_000L
@@ -106,9 +106,9 @@ object BatteryCapacity {
         val est = valid(accKwh, accDrop)
         if (est != null) {
             save(context, samples(context) + Sample(System.currentTimeMillis(), est, Math.round(accDrop), accKm))
-            Log.i(TAG, "mesure ${"%.1f".format(est)} kWh sur ${"%.1f".format(accDrop)} % ajoutée")
+            Log.i(TAG, "sample ${"%.1f".format(est)} kWh over ${"%.1f".format(accDrop)} % added")
         } else {
-            Log.i(TAG, "mesure écartée : ${"%.2f".format(accKwh)} kWh pour ${"%.1f".format(accDrop)} %")
+            Log.i(TAG, "sample rejected: ${"%.2f".format(accKwh)} kWh for ${"%.1f".format(accDrop)} %")
         }
         accKwh = 0f; accDrop = 0f; accKm = 0f
         flush(context)
@@ -153,7 +153,7 @@ object BatteryCapacity {
         val v = fromCar() ?: estimate(context)?.first ?: return
         if (Math.abs(v - prefs.batteryKwh) >= 0.1f) {
             prefs.batteryKwh = Math.round(v * 10f) / 10f
-            Log.i(TAG, "capacité utilisée : ${prefs.batteryKwh} kWh")
+            Log.i(TAG, "capacity used: ${prefs.batteryKwh} kWh")
         }
     }
 }

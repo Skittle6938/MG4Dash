@@ -1,6 +1,6 @@
 package app.mg4dash.pages
 
-import android.util.Log
+import app.mg4dash.system.Log
 import android.view.Gravity
 import app.mg4dash.BuildConfig
 import app.mg4dash.R
@@ -86,7 +86,7 @@ class SoundActivity : PageActivity() {
     /** Lecture des réglages actuels de la voiture. */
     private fun load() = io.execute {
         val a = CarBridge.audio().also { audio = it }
-        if (a == null) { Log.w(TAG, "service son indisponible"); return@execute }
+        if (a == null) { Log.w(TAG, "sound service unavailable"); return@execute }
         try {
             val b = a.balance; val f = a.fader
             // Valeurs relevées : centre 7 (0…14) comme l'égaliseur, ou 0 (−7…+7) sur d'autres versions
@@ -94,14 +94,14 @@ class SoundActivity : PageActivity() {
             val preset = a.equalizerPreset
             val loud = a.loudness
             for (id in presetIds) (if (id == USER) a.userEq else a.eqBand(id))?.let { raw -> curves[id] = IntArray(5) { raw[it] - EQ_CENTER } }
-            Log.i(TAG, "lu : balance $b, fader $f (décalage $fieldOffset), préréglage $preset, loudness $loud, courbe ${curves[preset]?.joinToString()}")
+            Log.i(TAG, "read: balance $b, fader $f (offset $fieldOffset), preset $preset, loudness $loud, curve ${curves[preset]?.joinToString()}")
             runOnUiThread {
                 field.balance = b - fieldOffset; field.fader = fieldOffset - f   // fader du service : grand = arrière
                 showField(field.balance, field.fader)
                 show(if (preset in presetIds) preset else USER, false)
                 loudness.isSelected = loud
             }
-        } catch (e: Exception) { Log.w(TAG, "lecture : ${e.message}") }
+        } catch (e: Exception) { Log.w(TAG, "read: ${e.message}") }
     }
 
     private fun choosePreset(id: Int) {
@@ -140,8 +140,8 @@ class SoundActivity : PageActivity() {
 
     /** Appel au service son, sur le fil `io` ; journalisé pour les retours de test. */
     private fun call(what: String, block: (AudioService) -> Any?) {
-        val a = audio ?: CarBridge.audio().also { audio = it } ?: run { Log.w(TAG, "$what : service son indisponible"); return }
-        try { Log.i(TAG, "$what → ${block(a)}") } catch (e: Exception) { Log.w(TAG, "$what : ${e.message}") }
+        val a = audio ?: CarBridge.audio().also { audio = it } ?: run { Log.w(TAG, "$what: sound service unavailable"); return }
+        try { Log.i(TAG, "$what → ${block(a)}") } catch (e: Exception) { Log.w(TAG, "$what: ${e.message}") }
     }
 
     private fun showField(b: Int, f: Int) {
@@ -174,8 +174,8 @@ class SoundActivity : PageActivity() {
             }, rate, false, true)
             v.enabled = true
             visualizer = v
-            Log.i(TAG, "spectre : Visualizer actif (${v.captureSize} points, ${rate / 1000} Hz)")
-        } catch (e: Throwable) { Log.w(TAG, "spectre indisponible : ${e.message}") }
+            Log.i(TAG, "spectrum: Visualizer on (${v.captureSize} points, ${rate / 1000} Hz)")
+        } catch (e: Throwable) { Log.w(TAG, "spectrum unavailable: ${e.message}") }
     }
 
     override fun onPause() {
@@ -206,7 +206,7 @@ class SoundActivity : PageActivity() {
     override fun render(s: VehicleState) {}
 
     companion object {
-        private const val TAG = "MG4L.Sound"
+        private const val TAG = "Sound"
         private const val USER = 7
         private const val EQ_CENTER = 7
         private const val BARS = 40

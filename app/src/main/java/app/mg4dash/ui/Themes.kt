@@ -119,9 +119,9 @@ object Themes {
         try {
             android.view.PixelCopy.request(activity.window, shot, { result ->
                 if (result == android.view.PixelCopy.SUCCESS) overlayThenRecreate(activity, shot)
-                else { android.util.Log.w("MG4L.Theme", "capture : $result"); recreating = false; activity.recreate() }
+                else { app.mg4dash.system.Log.w("Theme", "capture: $result"); recreating = false; activity.recreate() }
             }, android.os.Handler(android.os.Looper.getMainLooper()))
-        } catch (e: Throwable) { android.util.Log.w("MG4L.Theme", "capture : ${e.message}"); recreating = false; activity.recreate() }
+        } catch (e: Throwable) { app.mg4dash.system.Log.w("Theme", "capture: ${e.message}"); recreating = false; activity.recreate() }
     }
 
     @Volatile private var recreating = false
@@ -164,7 +164,7 @@ object Themes {
                 }
             })
             return
-        } catch (e: Throwable) { android.util.Log.w("MG4L.Theme", "fondu : ${e.message}") }
+        } catch (e: Throwable) { app.mg4dash.system.Log.w("Theme", "fade: ${e.message}") }
         recreating = false
         activity.recreate()
     }
@@ -198,7 +198,7 @@ object Themes {
         try {
             Settings.Global.putString(context.contentResolver, GLOBAL_KEY, "${p.themeBackground},${p.themeAccent},${if (isLight(context)) 1 else 0},${if (p.verticalDock) 1 else 0},${p.mediaStyle}")
         } catch (e: Exception) {
-            Log.w("Thème", "publication pour Radio Dash impossible : ${e.message}")
+            Log.w("Theme", "publishing for Radio Dash failed: ${e.message}")
         }
     }
 

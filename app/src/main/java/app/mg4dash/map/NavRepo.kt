@@ -21,7 +21,7 @@ import kotlinx.coroutines.flow.StateFlow
  * est considéré comme terminé.
  */
 object NavRepo {
-    private const val TAG = "Guidage"
+    private const val TAG = "Guidance"
     const val ACTION = "com.andrerinas.headunitrevived.NAVIGATION_UPDATE"
     private const val TIMEOUT_MS = 8_000L
 
@@ -52,13 +52,13 @@ object NavRepo {
     private val _nav = MutableStateFlow<Nav?>(null)
     val nav: StateFlow<Nav?> = _nav
     private val main = Handler(Looper.getMainLooper())
-    private val expire = Runnable { if (_nav.value != null) { _nav.value = null; Log.i(TAG, "fin du guidage") } }
+    private val expire = Runnable { if (_nav.value != null) { _nav.value = null; Log.i(TAG, "guidance ended") } }
 
     fun start(context: Context) {
         if (BuildConfig.MOCK) return
         try {
             context.applicationContext.registerReceiver(receiver, IntentFilter(ACTION))
-        } catch (e: Exception) { Log.w(TAG, "écoute du guidage impossible : ${e.message}") }
+        } catch (e: Exception) { Log.w(TAG, "guidance listener failed: ${e.message}") }
     }
 
     /** Pour les captures d'écran du PC. */
@@ -76,7 +76,7 @@ object NavRepo {
                 totalMeters = int("total_distance_meters"), totalSeconds = (x.get("total_time_seconds") as? Number)?.toLong(),
                 arrival = str("estimated_arrival"),
             )
-            if (_nav.value == null) Log.i(TAG, "guidage reçu (manœuvre ${n.eventType})")
+            if (_nav.value == null) Log.i(TAG, "guidance received (manoeuvre ${n.eventType})")
             _nav.value = n
             main.removeCallbacks(expire)
             main.postDelayed(expire, TIMEOUT_MS)

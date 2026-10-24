@@ -78,7 +78,7 @@ object EnergyLogger {
         val prefs = Prefs(context)
         val dir = context.getExternalFilesDir(null) ?: context.filesDir
         val file = File(dir, "energy_log.csv")
-        Log.i(TAG, "fichier : Android/data/<appli>/files/${file.name} (actif : ${prefs.energyLog})")
+        Log.i(TAG, "file: Android/data/<app>/files/${file.name} (enabled: ${prefs.energyLog})")
 
         // Intégration de la puissance, chaque seconde
         scope.launch {
@@ -108,7 +108,7 @@ object EnergyLogger {
                     if (!file.exists()) file.writeText(header() + "\n")
                     file.appendText(row(fmt.format(Date())) + "\n")
                 } catch (e: Exception) {
-                    Log.w(TAG, "écriture : ${e.message}")
+                    Log.w(TAG, "write: ${e.message}")
                 }
             }
         }

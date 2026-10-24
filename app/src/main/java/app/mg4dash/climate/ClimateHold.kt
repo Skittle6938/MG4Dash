@@ -4,7 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.PowerManager
 import android.os.SystemClock
-import android.util.Log
+import app.mg4dash.system.Log
 import app.mg4dash.car.CarBridge
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -26,7 +26,7 @@ import kotlinx.coroutines.launch
  * revient et déverrouille, ou la voiture qui roule, arrête le mode en laissant tout en l'état.
  */
 object ClimateHold {
-    private const val TAG = "MG4L.ClimHold"
+    private const val TAG = "ClimHold"
     const val MIN_SOC = 20
     /** Durées maximales proposées en mode « tout de suite », en minutes ; 0 = illimitée. */
     val DURATIONS = intArrayOf(0, 15, 30, 60, 120, 240, 480)
@@ -62,7 +62,7 @@ object ClimateHold {
         val now = SystemClock.elapsedRealtime()
         begin(context, Status(Phase.ARMED, now, if (maxMin > 0) now + maxMin * 60_000L else 0L, now + lockSec * 1000L))
         CarBridge.setHvac(true)
-        Log.i(TAG, "tout de suite : ${if (maxMin > 0) "$maxMin min" else "sans limite"}, verrouillage dans $lockSec s")
+        Log.i(TAG, "now: ${if (maxMin > 0) "$maxMin min" else "no limit"}, locking in $lockSec s")
     }
 
     /**
@@ -78,7 +78,7 @@ object ClimateHold {
         }
         begin(context, Status(Phase.ARMED, now, 0L, now + lockSec * 1000L, list, list.map { (it[0] - now + wall) to (it[1] - now + wall) }))
         CarBridge.setHvac(false)
-        Log.i(TAG, "programmé : $runs × $durMin min (pause $gapMin min), verrouillage dans $lockSec s")
+        Log.i(TAG, "scheduled: $runs × $durMin min (pause $gapMin min), locking in $lockSec s")
     }
 
     private fun begin(context: Context, st: Status) {
@@ -94,7 +94,7 @@ object ClimateHold {
     /** Arrêt par le conducteur : la voiture et la clim restent dans l'état où elles sont. */
     fun stop(reason: String) {
         if (job == null && _status.value.phase == Phase.IDLE) return
-        Log.i(TAG, "arrêt : $reason")
+        Log.i(TAG, "stop: $reason")
         job?.cancel(); job = null
         _status.value = Status()
         release()
@@ -113,7 +113,7 @@ object ClimateHold {
             if (st.phase == Phase.ARMED) {
                 if (now >= st.lockAt) {
                     CarBridge.lockDoors()
-                    Log.i(TAG, "portes verrouillées")
+                    Log.i(TAG, "doors locked")
                     // À une heure précise : clim coupée jusqu'au premier cycle (#26)
                     if (st.scheduled) CarBridge.setHvac(false)
                     _status.value = st.copy(phase = if (st.scheduled) Phase.WAITING else Phase.ON)
@@ -127,10 +127,10 @@ object ClimateHold {
             }
             if ((car.speedKmh ?: 0f) > 3f) { stop("la voiture roule"); return }
             val soc = car.batteryPercent
-            if (soc != null && soc < MIN_SOC) { Log.w(TAG, "batterie à $soc %"); end(Phase.BATTERY); return }
+            if (soc != null && soc < MIN_SOC) { Log.w(TAG, "battery at $soc %"); end(Phase.BATTERY); return }
             when (st.phase) {
                 Phase.WAITING -> if (now >= st.runs[st.run][0]) {
-                    Log.i(TAG, "cycle ${st.run + 1} : clim en marche")
+                    Log.i(TAG, "cycle ${st.run + 1}: climate on")
                     CarBridge.setHvac(true); offReads = 0
                     // Compresseur aussi à chaque cycle (#26), une fois la clim allumée
                     scope.launch { delay(2500); if (CarBridge.state.value.acOn != true) CarBridge.toggleAc() }
@@ -138,7 +138,7 @@ object ClimateHold {
                 }
                 Phase.ON -> {
                     if (st.scheduled && now >= st.runs[st.run][1]) {
-                        Log.i(TAG, "cycle ${st.run + 1} terminé")
+                        Log.i(TAG, "cycle ${st.run + 1} done")
                         if (st.run + 1 < st.runs.size) { CarBridge.setHvac(false); _status.value = st.copy(phase = Phase.WAITING, run = st.run + 1) }
                         else { end(Phase.DONE); return }
                         continue
@@ -146,7 +146,7 @@ object ClimateHold {
                     if (!st.scheduled && st.endAt > 0 && now >= st.endAt) { end(Phase.DONE); return }
                     // La clim doit tourner : relancée si elle s'arrête (voiture qui coupe, appui sur le bouton…)
                     offReads = if (car.hvacOn == false) offReads + 1 else 0
-                    if (offReads >= 30) { Log.w(TAG, "clim arrêtée : relance"); CarBridge.setHvac(true); offReads = 0 }
+                    if (offReads >= 30) { Log.w(TAG, "climate stopped: restarting"); CarBridge.setHvac(true); offReads = 0 }
                 }
                 else -> return
             }
@@ -159,7 +159,7 @@ object ClimateHold {
         delay(3000)
         CarBridge.powerOffCar()
         _status.value = _status.value.copy(phase = phase)
-        Log.i(TAG, "fin : $phase, voiture éteinte")
+        Log.i(TAG, "end: $phase, car off")
         delay(5 * 60_000L)
         if (_status.value.phase == phase) { _status.value = Status(); release() }
         job = null
@@ -168,6 +168,6 @@ object ClimateHold {
     fun show(context: Context) {
         try {
             context.startActivity(Intent(context, ClimateHoldActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP))
-        } catch (t: Throwable) { Log.w(TAG, "écran de la clim maintenue : $t") }
+        } catch (t: Throwable) { Log.w(TAG, "keep-climate screen: $t") }
     }
 }

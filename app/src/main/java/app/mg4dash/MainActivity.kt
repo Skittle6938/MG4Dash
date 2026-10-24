@@ -878,9 +878,9 @@ class MainActivity : AppCompatActivity() {
             val top = am.getRunningTasks(1).firstOrNull() ?: return
             if (top.topActivity?.packageName == pkg && top.id != taskId) {
                 am.moveTaskToFront(taskId, 0)
-                android.util.Log.i("MG4L.AppCarte", "$pkg passée devant l'accueil : accueil remis au premier plan")
+                app.mg4dash.system.Log.i("MapApp", "$pkg came in front of home: home brought back to front")
             }
-        } catch (e: Throwable) { android.util.Log.w("MG4L.AppCarte", "reprise : ${e.message}") }
+        } catch (e: Throwable) { app.mg4dash.system.Log.w("MapApp", "reclaim: ${e.message}") }
     }
 
     /**
@@ -916,7 +916,7 @@ class MainActivity : AppCompatActivity() {
     private fun applyMapApp(show: Boolean) {
         var cn = prefs.mapApp?.let { android.content.ComponentName.unflattenFromString(it) }
         if (cn != null && !mapAppInstalled(cn)) {
-            android.util.Log.i("MG4L.AppCarte", "${cn.packageName} désinstallée : retour à la carte")
+            app.mg4dash.system.Log.i("MapApp", "${cn.packageName} uninstalled: back to the map")
             app.mg4dash.ui.Toasts.show(this, R.string.map_app_unavailable, long = true)
             prefs.mapApp = null; cn = null
         }
@@ -1000,7 +1000,7 @@ class MainActivity : AppCompatActivity() {
     private fun startBoost() {
         if (fxBoost) return
         fxBoost = true
-        android.util.Log.i("MG4L.Power", "pleine puissance : widget Puissance affiché le temps de l'animation")
+        app.mg4dash.system.Log.i("Power", "full power: Power widget shown during the animation")
         if (mapLayout) { fxPrevStack = prefs.stackPage; showStackPage(2) } else renderSecondary()
     }
 
@@ -1252,7 +1252,7 @@ class MainActivity : AppCompatActivity() {
         xpowerHits = if (rolling && !plugged && kw != null && kw >= app.mg4dash.ui.PowerBar.XPOWER_DETECT_KW && kw < 400f) xpowerHits + 1 else 0
         if (xpowerHits >= 2 && !prefs.xpower) {
             prefs.xpower = true
-            android.util.Log.i("MG4L.Power", "MG4 XPower reconnue (${kw} kW) : max 320 kW, animation à 80 %")
+            app.mg4dash.system.Log.i("Power", "MG4 XPower detected (${kw} kW): max 320 kW, animation at 80 %")
             powerBar?.let { val keep = it.maxDrawKw; it.configureFor(prefs.batteryModel, true); it.maxDrawKw = maxOf(keep, it.maxDrawKw) }
         }
         if (builtMode != 1 && !cardPower) {
@@ -1403,7 +1403,7 @@ class MainActivity : AppCompatActivity() {
         val sp = prefs.raw
         if (bootCount >= 0 && sp.getInt("warmup_boot", -2) == bootCount) return
         sp.edit().putInt("warmup_boot", bootCount).apply()
-        Log.i("Boot", "ouverture brève du launcher SAIC (démarrage n°$bootCount)")
+        Log.i("Boot", "briefly opening the SAIC launcher (boot #$bootCount)")
         try {
             startActivity(Intent(Intent.ACTION_MAIN).setComponent(HomeSwitcher.STOCK).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
             // Handler distinct : celui de l'activité est vidé dans onPause, qui survient justement ici.
@@ -1411,7 +1411,7 @@ class MainActivity : AppCompatActivity() {
                 startActivity(Intent(this, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_REORDER_TO_FRONT))
             }, 1500)
         } catch (e: Exception) {
-            Log.w("Boot", "launcher SAIC non ouvert : ${e.message}")
+            Log.w("Boot", "SAIC launcher not opened: ${e.message}")
         }
     }
 

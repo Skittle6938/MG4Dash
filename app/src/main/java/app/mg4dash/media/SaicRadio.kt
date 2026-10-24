@@ -43,16 +43,16 @@ object SaicRadio {
     val ready: Boolean get() = binder?.isBinderAlive == true
 
     private val conn = object : ServiceConnection {
-        override fun onServiceConnected(name: ComponentName?, service: IBinder?) { binder = service; Log.i(TAG, "service radio connecté") }
-        override fun onServiceDisconnected(name: ComponentName?) { binder = null; Log.w(TAG, "service radio déconnecté") }
+        override fun onServiceConnected(name: ComponentName?, service: IBinder?) { binder = service; Log.i(TAG, "radio service connected") }
+        override fun onServiceDisconnected(name: ComponentName?) { binder = null; Log.w(TAG, "radio service disconnected") }
     }
 
     fun connect(context: Context) {
         if (bound && binder != null) return
         bound = try {
             context.applicationContext.bindService(Intent(ACTION).setPackage(PKG), conn, Context.BIND_AUTO_CREATE)
-        } catch (e: Exception) { Log.w(TAG, "liaison au service radio : ${e.message}"); false }
-        Log.i(TAG, "liaison au service radio : $bound")
+        } catch (e: Exception) { Log.w(TAG, "binding radio service: ${e.message}"); false }
+        Log.i(TAG, "binding radio service: $bound")
     }
 
     private fun <T> call(code: Int, read: (Parcel) -> T): T? {
@@ -64,7 +64,7 @@ object SaicRadio {
             reply.readException()
             read(reply)
         } catch (e: Exception) {
-            Log.w(TAG, "transaction $code : ${e.message}"); null
+            Log.w(TAG, "transaction $code: ${e.message}"); null
         } finally { data.recycle(); reply.recycle() }
     }
 

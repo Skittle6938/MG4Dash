@@ -34,7 +34,7 @@ class LauncherApp : Application() {
         if (started) return
         started = true
         installCrashGuard()
-        Log.i("App", "démarrage ${BuildConfig.VERSION_NAME} (${BuildConfig.FLAVOR})")
+        Log.i("App", "start ${BuildConfig.VERSION_NAME} (${BuildConfig.FLAVOR})")
         // Première installation : style Complet, plein écran et barre verticale à gauche par défaut.
         // Les installations existantes gardent leurs réglages (le fichier de préférences n'est pas vide).
         if (!BuildConfig.MOCK) {
@@ -45,7 +45,7 @@ class LauncherApp : Application() {
                     if (fresh) putInt("home_style", 0).putBoolean("fullscreen", true).putBoolean("vertical_dock", true)
                     putBoolean("defaults_v1", true)
                 }.apply()
-                if (fresh) Log.i("App", "première installation : style Complet, plein écran, barre verticale")
+                if (fresh) Log.i("App", "first install: Full layout, full screen, vertical bar")
             }
         }
         app.mg4dash.car.VehicleState.tempOffset = app.mg4dash.system.Prefs(this).tempOffset
@@ -102,7 +102,7 @@ class LauncherApp : Application() {
                     .split(',').mapNotNull { it.toLongOrNull() }
                     .filter { now - it < CRASH_WINDOW_MS } + now
                 sp.edit().putString("times", recent.joinToString(",")).commit()
-                Log.e("Crash", "plantage n°${recent.size} dans la fenêtre", error)
+                Log.e("Crash", "crash #${recent.size} in the window", error)
                 if (recent.size >= CRASH_LIMIT) {
                     sp.edit().putString("times", "").putBoolean("fell_back", true).commit()
                     HomeSwitcher.switchToStock(this)

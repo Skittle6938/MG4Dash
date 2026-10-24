@@ -71,7 +71,7 @@ object MediaHub {
         try {
             msm.addOnActiveSessionsChangedListener({ reevaluate() }, null, main)
         } catch (e: SecurityException) {
-            Log.w(TAG, "MEDIA_CONTENT_CONTROL refusé (uid système requis) : ${e.message}")
+            Log.w(TAG, "MEDIA_CONTENT_CONTROL denied (system uid required): ${e.message}")
         }
         // Constaté sur la voiture : les sessions SAIC (radio, Bluetooth) restent « inactives »
         // même en lecture, donc absentes de getActiveSessions(). Comme le launcher d'origine,
@@ -119,7 +119,7 @@ object MediaHub {
         if (sourcePkg != AA_MBS || !aaUnconfirmed) return sourcePkg
         val aaPlaying = candidates.any { isAndroidAuto(it.packageName) && it.playbackState?.state == PlaybackState.STATE_PLAYING }
         if (!aaPlaying) return sourceBeforeAa
-        Log.i(TAG, "Android Auto joue un média : la source Android Auto est confirmée")
+        Log.i(TAG, "Android Auto is playing media: Android Auto source confirmed")
         aaUnconfirmed = false; sourceBeforeAa = null; pinnedPkg = null
         return sourcePkg
     }
@@ -181,19 +181,28 @@ object MediaHub {
         val cur = currentSource()
         val i = available.indexOf(cur)
         val next = available.getOrNull(Math.floorMod((if (i < 0) 0 else i) + dir, available.size)) ?: return
-        Log.i(TAG, "balayage : source $cur → $next (disponibles : $available)")
+        Log.i(TAG, "swipe: source $cur → $next (available: $available)")
         switchTo(next)
     }
 
     /** Bascule la voiture sur cette source et lance la lecture (balayage ou menu des sources). */
     fun switchTo(next: String) {
         if (BuildConfig.MOCK) return
-        Log.i(TAG, "source choisie : $next")
+        Log.i(TAG, "source picked: $next")
         pinnedPkg = next
         main.post { reevaluate() }
         if (next == AA_MBS) {
             if (carPlay) { selectProjectionSource(); return }
-            browserControllers[AA_MBS]?.let { aaControl(it, AA_PLAY, KeyEvent.KEYCODE_MEDIA_PLAY) }
+            // CarPlay pas encore vu depuis le démarrage : on demande à AllGo quel téléphone est en projection
+            val ctx = appContext
+            io.launch {
+                val s = ctx?.let { app.mg4dash.system.Projection.session(it) }
+                main.post {
+                    if (s is app.mg4dash.system.Projection.Session.Read && s.target == app.mg4dash.system.Apps.CARPLAY) {
+                        carPlay = true; selectProjectionSource()
+                    } else browserControllers[AA_MBS]?.let { aaControl(it, AA_PLAY, KeyEvent.KEYCODE_MEDIA_PLAY) }
+                }
+            }
             return
         }
         activateSource(next)
@@ -221,8 +230,8 @@ object MediaHub {
         try {
             val last = am.javaClass.getMethod("getLastSource").invoke(am) as Int
             sourcePkg = sourceFromCarType(last)
-            Log.i(TAG, "source audio au démarrage : $last → $sourcePkg")
-        } catch (e: Throwable) { Log.w(TAG, "getLastSource indisponible : ${e.message}") }
+            Log.i(TAG, "audio source at startup: $last → $sourcePkg")
+        } catch (e: Throwable) { Log.w(TAG, "getLastSource unavailable: ${e.message}") }
         try {
             val reg = am.javaClass.methods.first { it.name == "registerAudioSourceChange" }
             val cbType = reg.parameterTypes[0]
@@ -241,7 +250,7 @@ object MediaHub {
                             pkg == SaicRadio.HMI_PKG || pkg == "com.saicmotor.service.radio" -> RADIO
                             else -> pkg
                         }
-                        Log.i(TAG, "source audio : $pkg ($type) → $src")
+                        Log.i(TAG, "audio source: $pkg ($type) → $src")
                         main.post {
                             if (src == AA_MBS) {
                                 // Le choix manuel reste tant qu'Android Auto ne joue pas (guidage seul)
@@ -259,8 +268,8 @@ object MediaHub {
             }
             val extra = reg.parameterTypes.drop(1).map { null }
             reg.invoke(am, cb, *extra.toTypedArray())
-            Log.i(TAG, "suivi de la source audio actif")
-        } catch (e: Throwable) { Log.w(TAG, "registerAudioSourceChange indisponible : ${e.message}") }
+            Log.i(TAG, "audio source tracking on")
+        } catch (e: Throwable) { Log.w(TAG, "registerAudioSourceChange unavailable: ${e.message}") }
     }
 
     /** Logo de station fictif pour les captures d'écran (comme une image diffusée en DAB+). */
@@ -306,7 +315,7 @@ object MediaHub {
      */
     private fun reconnectBrowser(pkg: String, why: String) {
         val component = BROWSERS.firstOrNull { it.packageName == pkg } ?: return
-        Log.i(TAG, "reconnexion au lecteur $pkg ($why)")
+        Log.i(TAG, "reconnecting to player $pkg ($why)")
         browserControllers.remove(pkg)
         emptySince.remove(pkg)
         browsers.remove(pkg)?.let { try { it.disconnect() } catch (_: Exception) { } }
@@ -333,7 +342,7 @@ object MediaHub {
             override fun onConnected() {
                 val b = browser ?: return
                 browserControllers[component.packageName] = MediaController(ctx, b.sessionToken)
-                Log.i(TAG, "navigateur média connecté : ${component.packageName}")
+                Log.i(TAG, "media browser connected: ${component.packageName}")
                 reevaluate()
             }
             override fun onConnectionSuspended() {
@@ -341,12 +350,12 @@ object MediaHub {
                 main.postDelayed({ connectBrowser(component) }, 5_000)
             }
             override fun onConnectionFailed() {
-                Log.w(TAG, "navigateur média indisponible : ${component.flattenToShortString()}")
+                Log.w(TAG, "media browser unavailable: ${component.flattenToShortString()}")
                 main.postDelayed({ connectBrowser(component) }, 30_000)
             }
         }, null)
         browsers[component.packageName] = browser
-        try { browser.connect() } catch (e: Exception) { Log.w(TAG, "connexion ${component.packageName} : ${e.message}") }
+        try { browser.connect() } catch (e: Exception) { Log.w(TAG, "connecting ${component.packageName}: ${e.message}") }
     }
 
     /**
@@ -370,7 +379,7 @@ object MediaHub {
             null -> source == RADIO || (source == null && playing == null && SaicRadio.last?.playing == true)
             else -> false
         }
-        if (showRadio != radioShown) Log.i(TAG, "lecteur affiché : ${if (showRadio) "radio (service SAIC)" else "session média"}")
+        if (showRadio != radioShown) Log.i(TAG, "player shown: ${if (showRadio) "radio (SAIC service)" else "media session"}")
         radioShown = showRadio
         if (showRadio) { current = null; publish(); return }
         // Un lecteur peut avoir deux contrôleurs (session active, navigateur média) : on préfère celui
@@ -390,7 +399,7 @@ object MediaHub {
             ?: BROWSERS.firstNotNullOfOrNull { browserControllers[it.packageName] }
         if (chosen?.sessionToken != current?.sessionToken) {
             current = chosen
-            Log.i(TAG, "lecteur affiché : ${chosen?.packageName ?: "aucun"}")
+            Log.i(TAG, "player shown: ${chosen?.packageName ?: "aucun"}")
         }
         publish()
     }
@@ -494,7 +503,7 @@ object MediaHub {
         else java.io.File("/data/data/com.saicmotor.radio/files/dab_$id.jpg").takeIf { it.canRead() }
             ?.let { android.graphics.BitmapFactory.decodeFile(it.path) }
     } catch (e: Exception) {
-        Log.w(TAG, "image DAB en cache : ${e.message}"); null
+        Log.w(TAG, "cached DAB image: ${e.message}"); null
     }
 
     /** Pochette Bluetooth AVRCP : /storage/emulated/0/bluetooth/<MAC>/AVRCP_BIP_IMG_*.JPEG */
@@ -507,7 +516,7 @@ object MediaHub {
             else -> File(uri.path ?: decoded).takeIf { it.canRead() }?.let { BitmapFactory.decodeFile(it.path) }
         }
     } catch (e: Exception) {
-        Log.w(TAG, "pochette illisible : ${e.message}"); null
+        Log.w(TAG, "album art unreadable: ${e.message}"); null
     }
 
     /** Radio de l'ancien SDK (SWI68…) : service SAIC au lieu d'un MediaBrowserService. */
@@ -534,7 +543,7 @@ object MediaHub {
             val ok = action()
             kotlinx.coroutines.delay(400); SaicRadio.refresh()
             main.post { reevaluate() }
-            if (!ok) Log.w(TAG, "commande radio refusée")
+            if (!ok) Log.w(TAG, "radio command refused")
         }
     }
 
@@ -608,7 +617,7 @@ object MediaHub {
         if (!playing && c.packageName != RADIO) main.postDelayed({
             val now = current?.takeIf { it.packageName == c.packageName } ?: return@postDelayed
             if (isPlaying(now) || !activateSource(c.packageName)) return@postDelayed
-            Log.i(TAG, "lecture sans effet sur ${c.packageName} : source redemandée")
+            Log.i(TAG, "play had no effect on ${c.packageName}: source requested again")
             main.postDelayed({ current?.takeIf { it.packageName == c.packageName && !isPlaying(it) }?.transportControls?.play() }, 1500)
         }, 2000)
     }
@@ -635,7 +644,7 @@ object MediaHub {
     private const val AA_TX_MEDIA_CONTROL = 25   // IBinder.FIRST_CALL_TRANSACTION + 24
     @Volatile private var aaService: android.os.IBinder? = null
     private val aaConnection = object : android.content.ServiceConnection {
-        override fun onServiceConnected(name: ComponentName?, service: android.os.IBinder?) { aaService = service; Log.i(TAG, "service Android Auto connecté") }
+        override fun onServiceConnected(name: ComponentName?, service: android.os.IBinder?) { aaService = service; Log.i(TAG, "Android Auto service connected") }
         override fun onServiceDisconnected(name: ComponentName?) { aaService = null }
     }
 
@@ -644,8 +653,8 @@ object MediaHub {
         try {
             val ok = ctx.bindService(Intent().setComponent(ComponentName("com.allgo.app.androidauto", "com.allgo.app.androidauto.AndroidAutoMainService")),
                 aaConnection, android.content.Context.BIND_AUTO_CREATE)
-            Log.i(TAG, "liaison au service Android Auto : $ok")
-        } catch (e: Exception) { Log.w(TAG, "service Android Auto : ${e.message}") }
+            Log.i(TAG, "binding Android Auto service: $ok")
+        } catch (e: Exception) { Log.w(TAG, "Android Auto service: ${e.message}") }
     }
 
     /**
@@ -663,7 +672,7 @@ object MediaHub {
     private const val CP_DESCRIPTOR = "com.allgo.carplay.service.ICarPlayService"
     @Volatile private var cpService: android.os.IBinder? = null
     private val cpConnection = object : android.content.ServiceConnection {
-        override fun onServiceConnected(name: ComponentName?, service: android.os.IBinder?) { cpService = service; Log.i(TAG, "service CarPlay connecté") }
+        override fun onServiceConnected(name: ComponentName?, service: android.os.IBinder?) { cpService = service; Log.i(TAG, "CarPlay service connected") }
         override fun onServiceDisconnected(name: ComponentName?) { cpService = null }
     }
 
@@ -672,8 +681,8 @@ object MediaHub {
         try {
             val ok = ctx.bindService(Intent().setComponent(ComponentName("com.allgo.carplay.service", "com.allgo.carplay.service.CarPlayService")),
                 cpConnection, android.content.Context.BIND_AUTO_CREATE)
-            Log.i(TAG, "liaison au service CarPlay : $ok")
-        } catch (e: Exception) { Log.w(TAG, "service CarPlay : ${e.message}") }
+            Log.i(TAG, "binding CarPlay service: $ok")
+        } catch (e: Exception) { Log.w(TAG, "CarPlay service: ${e.message}") }
     }
 
     private fun cpCall(tx: Int, vararg args: Int): Boolean {
@@ -686,7 +695,7 @@ object MediaHub {
             reply.readException()
             Log.i(TAG, "CarPlay transaction $tx ${args.joinToString()} → ${reply.readInt()}")
             true
-        } catch (e: Exception) { Log.w(TAG, "CarPlay transaction $tx : ${e.message}"); false }
+        } catch (e: Exception) { Log.w(TAG, "CarPlay transaction $tx: ${e.message}"); false }
         finally { data.recycle(); reply.recycle() }
     }
 
@@ -701,6 +710,24 @@ object MediaHub {
             if (!app.mg4dash.system.Projection.mediaKey(ctx, app.mg4dash.system.Projection.KEY_SELECT_SOURCE))
                 systemMediaKey(KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE)
         }.start()
+        // Journal de #36 : la voiture ne rend l'audio à CarPlay que quand CarPlay s'ouvre à l'écran
+        // (« source audio : com.allgo.carplay.service »), ni la touche ci-dessus ni lecture n'y suffisent.
+        // Si rien n'a changé au bout de 1,5 s, on ouvre CarPlay un instant puis on revient à l'accueil.
+        main.postDelayed({
+            if (sourcePkg == AA_MBS) return@postDelayed
+            Log.i(TAG, "CarPlay did not get the audio: opening CarPlay briefly")
+            app.mg4dash.system.Apps.open(ctx, app.mg4dash.system.Apps.CARPLAY, "CarPlay")
+            val since = android.os.SystemClock.uptimeMillis()
+            fun back() {
+                if (sourcePkg != AA_MBS && android.os.SystemClock.uptimeMillis() - since < 4000) { main.postDelayed({ back() }, 250); return }
+                Log.i(TAG, "CarPlay audio ${if (sourcePkg == AA_MBS) "taken" else "still missing"}: back to home")
+                try {
+                    ctx.startActivity(Intent(ctx, app.mg4dash.MainActivity::class.java)
+                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_REORDER_TO_FRONT))
+                } catch (e: Exception) { Log.w(TAG, "back to home: ${e.message}") }
+            }
+            main.postDelayed({ back() }, 800)
+        }, 1500)
     }
 
     /** Touche média vers CarPlay ; à défaut de service, touche média du système. */
@@ -710,7 +737,7 @@ object MediaHub {
         val t = android.os.SystemClock.uptimeMillis()
         am.dispatchMediaKeyEvent(KeyEvent(t, t, KeyEvent.ACTION_DOWN, code, 0))
         am.dispatchMediaKeyEvent(KeyEvent(t, t, KeyEvent.ACTION_UP, code, 0))
-        Log.i(TAG, "CarPlay : touche média système $code")
+        Log.i(TAG, "CarPlay: system media key $code")
     }
 
     /** Toucher sur la carte média en CarPlay : CarPlay au premier plan, sur l'écran « À l'écoute ». */
@@ -738,9 +765,9 @@ object MediaHub {
             data.writeInt(code)
             b.transact(AA_TX_MEDIA_CONTROL, data, reply, 0)
             reply.readException()
-            Log.i(TAG, "commande Android Auto $code → ${reply.readInt()}")
+            Log.i(TAG, "Android Auto command $code → ${reply.readInt()}")
         } catch (e: Exception) {
-            Log.w(TAG, "commande Android Auto $code : ${e.message}")
+            Log.w(TAG, "Android Auto command $code: ${e.message}")
             mediaKey(c, fallbackKey)
         } finally { data.recycle(); reply.recycle() }
     }
@@ -750,7 +777,7 @@ object MediaHub {
         val t = android.os.SystemClock.uptimeMillis()
         val ok = c.dispatchMediaButtonEvent(KeyEvent(t, t, KeyEvent.ACTION_DOWN, code, 0)) and
             c.dispatchMediaButtonEvent(KeyEvent(t, t, KeyEvent.ACTION_UP, code, 0))
-        Log.i(TAG, "touche média $code → ${c.packageName} : $ok")
+        Log.i(TAG, "media key $code → ${c.packageName}: $ok")
     }
 
     /** Composant à ouvrir quand on touche la carte média. */
@@ -777,7 +804,7 @@ object MediaHub {
         // SWI68 (issue #19) : la commande 0x8001 ne change pas la source et la radio continuait
         // par-dessus le Bluetooth ; on met d'abord en pause la radio de l'ancien SDK.
         if (legacyRadio && SaicRadio.ready && SaicRadio.last?.playing == true) {
-            Log.i(TAG, "ancien SDK : radio en pause avant la bascule vers $pkg")
+            Log.i(TAG, "old SDK: radio paused before switching to $pkg")
             radioCommand { SaicRadio.pause() }
         }
         val (target, type) = when (pkg) {
@@ -790,10 +817,10 @@ object MediaHub {
             .setEvent(0x8001).setTargetType(type).setTargetPackage("com.saicmotor.launcher")
         return try {
             ctx.startService(android.content.Intent().setComponent(target).setPackage(target.packageName).putExtra("command", cmd))
-            Log.i(TAG, "bascule de la source audio : $cmd → ${target.flattenToShortString()}")
+            Log.i(TAG, "audio source switch: $cmd → ${target.flattenToShortString()}")
             true
         } catch (e: Exception) {
-            Log.w(TAG, "bascule de la source audio impossible : ${e.message}"); false
+            Log.w(TAG, "audio source switch failed: ${e.message}"); false
         }
     }
 }
