@@ -21,6 +21,8 @@ import android.view.View
 import app.mg4dash.R
 import java.util.Locale
 import kotlin.math.PI
+import kotlin.math.atan2
+import kotlin.math.cos
 import kotlin.math.exp
 import kotlin.math.sin
 
@@ -197,53 +199,56 @@ class PowerFx(private val context: Context) : Drawable() {
         return Pair(textPaint.measureText(text) + icon + h * 0.9f, h)
     }
 
-    // ── Fusée : elle traverse la carte en écrivant le pic, puis se pose au bout en flottant ──
+    // ── Fusée : une grande fusée traverse tout l'écran en 3 s, ralentit au milieu, puis le pic s'affiche ──
 
     private class Puff(var x: Float, var y: Float, var vx: Float, var vy: Float, var r: Float, var age: Float, val life: Float, val spark: Boolean)
     private val puffs = ArrayList<Puff>()
+    private var launchAt = 0L
+    private val CROSS_MS = 3000f
+
+    /** Avancement 0..1 de la traversée : rapide au début et à la fin, lent au milieu (vitesse 1 + 0,75·cos). */
+    private fun crossing(u: Float) = u + 0.75f * sin(2 * Math.PI * u).toFloat() / (2 * Math.PI).toFloat()
+
+    private fun crossPos(s: Float, out: FloatArray) {
+        val w = bounds.width().toFloat(); val h = bounds.height().toFloat()
+        out[0] = bounds.left - w * 0.3f + s * w * 1.6f
+        out[1] = bounds.top + h * 0.62f - sin(Math.PI * s).toFloat() * h * 0.28f   // léger arc vers le haut
+    }
+    private val pa = FloatArray(2); private val pb = FloatArray(2)
 
     private fun drawRocketScene(c: Canvas, now: Long, dt: Float) {
         sizeText()
         val text = peakText()
         val (bw, bh) = badgeSize(text, 0f)
-        val L = bh * 1.6f
-        // La fusée file le long de la barre depuis le bord gauche de l'écran et pose son nez sur le curseur
-        // du pic ; un nouveau record la fait avancer jusqu'au nouveau pic.
-        val target = barX(record) - L
-        val t = ((now - eventAt) / 650f).coerceIn(0f, 1f)
-        if (fly) {
-            val ease = 1f - (1f - t) * (1f - t) * (1f - t)
-            val startX = bounds.left - L * 1.3f
-            rocketX = startX + (target - startX) * ease
-            if (t >= 1f) { fly = false; badgeAt = now }
-        } else rocketX += (target - rocketX) * (1f - exp(-dt * 7f))
-        val moving = fly || target - rocketX > 1.5f * d
-        // L'écran tremble pendant que la fusée arrive (fort au départ), un peu à chaque nouveau record
-        shakeBy(when { fly -> (6f - 4f * t) * d; moving -> 1.5f * d; else -> 0f })
-        val x = rocketX
-        val y = barY + sin(now / 320.0).toFloat() * (if (moving) 0.5f else 1.5f) * d
-        val boost = if (moving) 1f else 0.25f + 0.1f * sin(now / 90.0).toFloat()
-        // Fumée et étincelles derrière la tuyère
-        val rate = if (moving) 110f else 12f
-        var n = rate * dt
-        while (n > 0f) {
-            if (n >= 1f || rnd.nextFloat() < n) {
-                val spark = rnd.nextFloat() < 0.35f
-                puffs.add(Puff(x - L * 0.05f, y + (rnd.nextFloat() - 0.5f) * L * 0.18f,
-                    -(30 + rnd.nextFloat() * 70) * d * (if (spark) 1.6f else 1f), (rnd.nextFloat() - 0.6f) * 22 * d,
-                    (if (spark) 1.5f else 4f + rnd.nextFloat() * 4f) * d, 0f, if (spark) 0.35f else 0.8f + rnd.nextFloat() * 0.5f, spark))
+        if (launchAt == 0L) launchAt = now
+        val u = (now - launchAt) / CROSS_MS
+        val flying = u < 1f
+        val L = bounds.height() * 0.62f
+        var ang = 0f; var nx = 0f; var ny = 0f
+        if (flying) {
+            val sv = crossing(u)
+            crossPos(sv, pa); crossPos((sv + 0.01f).coerceAtMost(1.05f), pb)
+            ang = Math.toDegrees(atan2((pb[1] - pa[1]).toDouble(), (pb[0] - pa[0]).toDouble())).toFloat()
+            // Centre de la fusée sur la trajectoire ; la tuyère est à L/2 derrière
+            val rad = Math.toRadians(ang.toDouble())
+            nx = pa[0] - (L * 0.5f * cos(rad)).toFloat(); ny = pa[1] - (L * 0.5f * sin(rad)).toFloat()
+            // Fumée laissée sur place, qui gonfle et s'efface en 1,3 s (le texte dessous se relit vite)
+            var n = 70f * dt
+            while (n > 0f) {
+                if (n >= 1f || rnd.nextFloat() < n) puffs.add(Puff(nx + (rnd.nextFloat() - 0.5f) * 30 * d, ny + (rnd.nextFloat() - 0.5f) * 26 * d,
+                    0f, -12 * d, (14 + rnd.nextFloat() * 10) * d, 0f, 1.3f, false))
+                n -= 1f
             }
-            n -= 1f
-        }
+            shakeBy(2f * d)
+        } else { if (fly) { fly = false; badgeAt = now }; shakeBy(0f) }
         stepPuffs(dt)
+        paint.shader = null
         for (p in puffs) {
             val k = p.age / p.life
-            paint.shader = null
-            if (p.spark) { paint.color = if (k < 0.5f) 0xFFFFE082.toInt() else cHeat; paint.alpha = ((1 - k) * 255).toInt() }
-            else { paint.color = cSub; paint.alpha = ((1 - k) * 90).toInt() }
-            c.drawCircle(p.x, p.y, p.r * (if (p.spark) 1f else 1f + k * 1.8f), paint)
+            paint.color = 0xFFE1E3EA.toInt(); paint.alpha = (150 * (1 - k) * (1 - k)).toInt()
+            c.drawCircle(p.x, p.y, p.r + k * 46 * d, paint)
         }
-        // Badge du pic sous les chiffres : apparaît quand la fusée arrive
+        // Badge du pic sous les chiffres : apparaît une fois la fusée passée
         val gx = badgeArea.centerX() - bw / 2f
         val appear = if (fly) 0f else ((now - badgeAt) / 250f).coerceIn(0f, 1f)
         if (appear > 0f) {
@@ -251,9 +256,12 @@ class PowerFx(private val context: Context) : Drawable() {
             drawBadge(c, gx, badgeArea.centerY(), bw, bh, cAction, text, gx + bh * 0.45f)
             c.restoreToCount(l)
         }
-        drawRocket(c, x, y, L, boost, now)
+        if (flying) {
+            c.save(); c.rotate(ang, nx, ny)
+            drawRocket(c, nx, ny, L, 0f, now, girth = 0.15f)
+            c.restore()
+        }
     }
-    private var rocketX = 0f
     private var badgeAt = 0L
     private var fly = true
 
@@ -264,12 +272,12 @@ class PowerFx(private val context: Context) : Drawable() {
             p.age += dt; p.x += p.vx * dt; p.y += p.vy * dt; p.vy -= 8 * d * dt
             if (p.age >= p.life) it.remove()
         }
-        while (puffs.size > 160) puffs.removeAt(0)
+        while (puffs.size > 200) puffs.removeAt(0)
     }
 
     /** Fusée couchée vers la droite : [x] = tuyère, [y] = axe. */
-    private fun drawRocket(c: Canvas, x: Float, y: Float, L: Float, boost: Float, now: Long) {
-        val h = L * 0.21f
+    private fun drawRocket(c: Canvas, x: Float, y: Float, L: Float, boost: Float, now: Long, girth: Float = 0.21f) {
+        val h = L * girth
         // Flammes : trois couches qui vacillent
         val flick = 0.85f + rnd.nextFloat() * 0.3f
         val fl = L * (0.35f + 0.55f * boost) * flick
@@ -284,8 +292,8 @@ class PowerFx(private val context: Context) : Drawable() {
             paint.shader = null; paint.color = layers[i]; paint.alpha = 230
             c.drawPath(path, paint)
         }
-        // Ailerons (couleur du thème)
-        paint.color = cAction; paint.alpha = 255
+        // Ailerons rouges, comme le nez
+        paint.color = cDanger; paint.alpha = 255
         path.reset()
         path.moveTo(x + L * 0.30f, y - h); path.lineTo(x - L * 0.04f, y - h * 2.0f); path.lineTo(x + L * 0.04f, y - h * 0.6f); path.close()
         path.moveTo(x + L * 0.30f, y + h); path.lineTo(x - L * 0.04f, y + h * 2.0f); path.lineTo(x + L * 0.04f, y + h * 0.6f); path.close()
@@ -306,7 +314,7 @@ class PowerFx(private val context: Context) : Drawable() {
         paint.color = 0xAAFFFFFF.toInt(); c.drawCircle(x + L * 0.43f, y - h * 0.15f, h * 0.16f, paint)
         stroke.color = 0xFF5A6475.toInt(); stroke.strokeWidth = 1.5f * d; c.drawCircle(x + L * 0.45f, y, h * 0.48f, stroke)
         // Aileron central (vu de profil)
-        paint.color = cAction; c.drawRect(x - L * 0.02f, y - h * 0.18f, x + L * 0.22f, y + h * 0.18f, paint)
+        paint.color = cDanger; c.drawRect(x - L * 0.02f, y - h * 0.18f, x + L * 0.22f, y + h * 0.18f, paint)
     }
 
     // ── Éclair : il traverse toute la carte en passant par le pic sur la barre, flash, puis grésille ──
@@ -490,7 +498,7 @@ class PowerFx(private val context: Context) : Drawable() {
     }
 
     private fun clearParticles() {
-        puffs.clear(); flames.clear(); crackles.clear(); bolt.clear(); fly = true; heat = 0f
+        puffs.clear(); flames.clear(); crackles.clear(); bolt.clear(); fly = true; heat = 0f; launchAt = 0L
     }
 
     private fun strike(now: Long) {
