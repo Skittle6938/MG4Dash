@@ -140,6 +140,21 @@ class ScreenshotTest {
         shoot(MainActivity::class.java, "home_classic_player.png")
     }
 
+    /** Radio FM sans image : rien que le texte (RDS plus grand) et les boutons, sombre et clair. */
+    @Test fun homeFmDark() = fmShot(1, "home_fm_dark.png", "NRJ", "FM 100.30")
+    @Test fun homeFmLight() = fmShot(2, "home_fm_light.png", "FM 98.20", "")
+    private fun fmShot(mode: Int, name: String, title: String, sub: String) {
+        org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE).edit().putInt("theme_mode", mode).commit()
+        val activity = Robolectric.buildActivity(MainActivity::class.java).setup().get()
+        repeat(3) { shadowOf(Looper.getMainLooper()).idleFor(200, TimeUnit.MILLISECONDS) }
+        val f = app.mg4dash.media.MediaHub::class.java.getDeclaredField("_now").apply { isAccessible = true }
+        @Suppress("UNCHECKED_CAST")
+        (f.get(app.mg4dash.media.MediaHub) as kotlinx.coroutines.flow.MutableStateFlow<app.mg4dash.media.MediaHub.NowPlaying>).value =
+            app.mg4dash.media.MediaHub.NowPlaying(true, "com.saicmotor.radio", "RADIO FM", title, sub, "", null, true)
+        repeat(3) { shadowOf(Looper.getMainLooper()).idleFor(200, TimeUnit.MILLISECONDS) }
+        save(activity.window.decorView, name)
+    }
+
     /** Fenêtres de dialogue au style MG4Dash (calibration de la température), sombre et clair. */
     @Test fun dialogDark() = dialogShot(1, "dialog_dark.png")
     @Test fun dialogLight() = dialogShot(2, "dialog_light.png")

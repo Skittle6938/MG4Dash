@@ -451,7 +451,7 @@ class SimpleHome(private val a: AppCompatActivity) {
             mediaArtist.text = listOf(m.artist, m.album).filter { it.isNotBlank() }.joinToString(" · ")
         }
         mediaArt.setImageBitmap(m.art)
-        mediaStyle?.update(m.art)
+        mediaStyle?.update(m.art, m.packageName == "com.saicmotor.radio")
         mediaPlay.setImageResource(if (m.playing) R.drawable.ic_pause else R.drawable.ic_play)
         mediaPlay.isEnabled = m.available
     }

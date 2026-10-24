@@ -293,6 +293,7 @@ object MediaHub {
         ComponentName("com.allgo.remoteui.mediabrowserservice", "com.allgo.remoteui.mediabrowserservice.RemoteUIMediaBrowserService"),
     )
     private const val RADIO = "com.saicmotor.radio"
+    private val ANALOG = Regex("^(FM|AM) [0-9.,]+$")
     private val browserControllers = mutableMapOf<String, MediaController>()
     private val browsers = mutableMapOf<String, MediaBrowser>()
     private val watched = mutableSetOf<MediaSession.Token>()
@@ -430,10 +431,16 @@ object MediaHub {
         if (c == null) { _now.value = NowPlaying(); return }
         val md = c.metadata
         val st = c.playbackState
-        val title = md?.getString(MediaMetadata.METADATA_KEY_TITLE)
+        val rawTitle = md?.getString(MediaMetadata.METADATA_KEY_TITLE)
             ?: md?.getString(MediaMetadata.METADATA_KEY_DISPLAY_TITLE) ?: ""
-        val artist = md?.getString(MediaMetadata.METADATA_KEY_ARTIST)
+        val rawArtist = md?.getString(MediaMetadata.METADATA_KEY_ARTIST)
             ?: md?.getString(MediaMetadata.METADATA_KEY_DISPLAY_SUBTITLE) ?: ""
+        // Radio FM / AM : la voiture met la fréquence en titre (« FM 98.20 ») et le nom RDS en artiste ;
+        // le nom passe en titre (en grand) et la fréquence en dessous, plus petite
+        val analog = c.packageName == RADIO && ANALOG.matches(rawTitle.trim())
+        val swap = analog && rawArtist.isNotBlank()
+        val title = if (swap) rawArtist.trim() else rawTitle
+        val artist = if (swap) rawTitle.trim() else rawArtist
         val album = md?.getString(MediaMetadata.METADATA_KEY_ALBUM) ?: ""
         val bmp = md?.getBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART)
             ?: md?.getBitmap(MediaMetadata.METADATA_KEY_ART)
@@ -457,7 +464,7 @@ object MediaHub {
         val key = "$title|$artist"
         // Radio DAB sans image : la radio efface la pochette à chaque changement de station et ne
         // l'envoie qu'à l'arrivée du slideshow. Comme Radio Dash, on prend l'image en cache de la station.
-        if (bmp == null && artUri == null && c.packageName == "com.saicmotor.radio" && title.isNotBlank() && key != lastArtKey) {
+        if (bmp == null && artUri == null && c.packageName == "com.saicmotor.radio" && !analog && title.isNotBlank() && key != lastArtKey) {
             lastArtKey = key
             io.launch { cachedDabArt(title)?.let { a -> if (_now.value.title == title && _now.value.packageName == "com.saicmotor.radio") _now.value = _now.value.copy(art = a) } }
         } else if (bmp == null && artUri != null && key != lastArtKey) {
@@ -595,6 +602,15 @@ object MediaHub {
         if (isAndroidAuto(c.packageName)) { aaControl(c, if (playing) AA_PAUSE else AA_PLAY, if (playing) KeyEvent.KEYCODE_MEDIA_PAUSE else KeyEvent.KEYCODE_MEDIA_PLAY); return }
         if (playing) c.transportControls.pause() else c.transportControls.play()
         force(c.packageName, !playing)
+        // Après un redémarrage, la voiture annonce le Bluetooth (ou l'USB) comme source mais ne l'a pas
+        // réactivée : le « lecture » reste sans effet tant qu'on ne change pas de source (#36). Si rien
+        // ne joue au bout de 2 s, on redemande la source à la voiture, puis la lecture.
+        if (!playing && c.packageName != RADIO) main.postDelayed({
+            val now = current?.takeIf { it.packageName == c.packageName } ?: return@postDelayed
+            if (isPlaying(now) || !activateSource(c.packageName)) return@postDelayed
+            Log.i(TAG, "lecture sans effet sur ${c.packageName} : source redemandée")
+            main.postDelayed({ current?.takeIf { it.packageName == c.packageName && !isPlaying(it) }?.transportControls?.play() }, 1500)
+        }, 2000)
     }
 
     fun next() {

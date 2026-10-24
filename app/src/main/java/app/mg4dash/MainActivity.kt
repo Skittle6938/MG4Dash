@@ -628,7 +628,7 @@ class MainActivity : AppCompatActivity() {
             b.mediaAlbum.text = m.album
         }
         b.mediaArt.setImageBitmap(m.art)
-        mediaStyle?.update(m.art)
+        mediaStyle?.update(m.art, m.packageName == "com.saicmotor.radio")
         b.mediaArtPlaceholder.visibility = if (m.art == null) View.VISIBLE else View.INVISIBLE
         b.mediaPlay.setImageResource(if (m.playing) R.drawable.ic_pause else R.drawable.ic_play)
         b.mediaProgress.visibility = if (m.durationMs > 0) View.VISIBLE else View.INVISIBLE
