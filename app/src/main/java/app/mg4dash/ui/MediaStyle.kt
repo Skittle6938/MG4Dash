@@ -34,6 +34,10 @@ class MediaStyle private constructor(
     private var lastArt: Bitmap? = null
     private var headTitle: TextView? = null
     private var accent = 0
+    private lateinit var shade: View
+    private lateinit var texts: List<TextView>
+    private lateinit var skips: List<ImageView>
+    private var plain: Boolean? = null
 
     private fun detach(v: View) = v.apply { (parent as? ViewGroup)?.removeView(this) }
 
@@ -58,16 +62,17 @@ class MediaStyle private constructor(
         fade = View(a)
         frame.addView(fade, FrameLayout.LayoutParams(0, -1).apply { gravity = Gravity.START })
         frame.addOnLayoutChangeListener { _, _, _, _, _, _, _, _, _ -> placeFade() }
-        frame.addView(View(a).apply {
+        shade = View(a).apply {
             background = GradientDrawable(GradientDrawable.Orientation.TOP_BOTTOM, intArrayOf(0x22000000, 0x44000000, 0xC0000000.toInt()))
-        }, FrameLayout.LayoutParams(-1, -1))
+        }
+        frame.addView(shade, FrameLayout.LayoutParams(-1, -1))
+        texts = listOf(title, artist)
+        skips = listOf(prev, next)
         val over = LinearLayout(a).apply { orientation = LinearLayout.VERTICAL; setPadding(dp(24), dp(14), dp(24), dp(16)) }
         headTitle = (head as? LinearLayout)?.getChildAt(0) as? TextView
         headTitle?.setTextColor(Color.WHITE)
         over.addView(head, LinearLayout.LayoutParams(-1, -2))
         over.addView(View(a), LinearLayout.LayoutParams(1, 0, 1f))
-        title.setTextColor(Color.WHITE); title.textSize = 30f; title.maxLines = 1; title.setShadowLayer(8f, 0f, 2f, 0x99000000.toInt())
-        artist.setTextColor(0xFFE6E6E6.toInt()); artist.textSize = 22f; artist.maxLines = 1; artist.setShadowLayer(8f, 0f, 2f, 0x99000000.toInt())
         over.addView(title, LinearLayout.LayoutParams(-1, -2))
         over.addView(artist, LinearLayout.LayoutParams(-1, -2))
         progress?.let {
@@ -83,7 +88,6 @@ class MediaStyle private constructor(
         listOf(prev, next).forEach { v ->
             v.background = null
             v.clearColorFilter()
-            v.imageTintList = ColorStateList.valueOf(Color.WHITE)
             v.scaleType = ImageView.ScaleType.FIT_CENTER
             v.setPadding(dp(18), dp(18), dp(18), dp(18))
             row.addView(v, LinearLayout.LayoutParams(dp(80), dp(80)).apply { leftMargin = dp(20) })
@@ -144,12 +148,47 @@ class MediaStyle private constructor(
     }
     private var shownFor = 0
 
-    /** Nouvelle pochette : image, prolongement et couleur vive recalculés (une fois par image). */
-    fun update(source: Bitmap?) {
+    /**
+     * Texte et boutons sur la pochette (blancs, ombrés) ou, en [bare], directement sur le panneau de la
+     * carte, aux couleurs du thème, avec un texte plus grand (radio sans image).
+     */
+    private fun styleTexts(bare: Boolean) {
+        if (plain == bare) return
+        plain = bare
+        val (title, artist) = texts
+        val main = if (bare) Themes.color(a, R.color.text_value) else Color.WHITE
+        val sub = if (bare) Themes.color(a, R.color.text_sub) else 0xFFE6E6E6.toInt()
+        val shadow = if (bare) 0 else 0x99000000.toInt()
+        title.setTextColor(main); title.textSize = if (bare) 48f else 30f; title.maxLines = 1; title.setShadowLayer(8f, 0f, 2f, shadow)
+        artist.setTextColor(sub); artist.textSize = if (bare) 26f else 22f; artist.maxLines = if (bare) 2 else 1; artist.setShadowLayer(8f, 0f, 2f, shadow)
+        headTitle?.setTextColor(if (bare) Themes.color(a, R.color.text_title) else Color.WHITE)
+        skips.forEach { it.imageTintList = ColorStateList.valueOf(main) }
+        shade.visibility = if (bare) View.GONE else View.VISIBLE
+        progress?.progressBackgroundTintList = ColorStateList.valueOf(if (bare) Themes.color(a, R.color.gauge_off) else 0x55FFFFFF)
+    }
+
+    /**
+     * Nouvelle pochette : image, prolongement et couleur vive recalculés (une fois par image).
+     * [radio] : source radio ; sans image (FM, station sans logo), rien que le texte et les boutons.
+     */
+    fun update(source: Bitmap?, radio: Boolean = false) {
         if (!::frame.isInitialized) return
         // Image toute noire (station sans pochette) : traitée comme une absence d'image
         val art = source?.takeIf { !isBlank(it) }
-        if (art != null && art === lastArt) return
+        if (art == null && radio) {
+            styleTexts(true)
+            lastArt = null; shownFor = 0
+            picture.setImageDrawable(null)
+            frame.setBackgroundColor(Color.TRANSPARENT)
+            fade.visibility = View.GONE
+            accent = Themes.color(a, R.color.accent_action)
+            play.background = GradientDrawable().apply { cornerRadius = dp(38).toFloat(); setColor(accent) }
+            progress?.progressTintList = ColorStateList.valueOf(accent)
+            return
+        }
+        val wasBare = plain == true
+        styleTexts(false)
+        if (art != null && art === lastArt && !wasBare) return
         lastArt = art
         val edge: Int
         val light = Themes.isLight(a)
