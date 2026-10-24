@@ -826,7 +826,7 @@ class MainActivity : AppCompatActivity() {
             b.mapCard.addView(it, b.mapCard.indexOfChild(b.widgetToggle), android.widget.FrameLayout.LayoutParams(-1, -1))
         }
         cc.visibility = if (consumption) View.VISIBLE else View.GONE
-        if (consumption) cc.show(app.mg4dash.energy.ChargeGuard.history.value)
+        if (consumption) cc.show()
         val shortcuts = mode == 1
         // La carte et ses commandes disparaissent derrière les raccourcis (et inversement).
         for (i in 0 until b.mapCard.childCount) {
@@ -1315,6 +1315,7 @@ class MainActivity : AppCompatActivity() {
                 launch { WeatherRepo.shown.collect { renderWeather(it, CarBridge.state.value) } }
                 launch { LocationRepo.location.collect { renderLocation(it, CarBridge.state.value) } }
                 // Guidage DiAuto : bandeau sur la carte (pas sur les raccourcis)
+                launch { app.mg4dash.energy.ConsumptionCurve.curves.collect { consumptionCard?.takeIf { it.visibility == View.VISIBLE }?.show() } }
                 launch { app.mg4dash.map.NavRepo.nav.collect { n -> navBanner?.show(n?.takeIf { effectiveWidget() == 0 }) } }
                 launch { while (true) { updatePower(); delay(1_000) } }
                 launch {

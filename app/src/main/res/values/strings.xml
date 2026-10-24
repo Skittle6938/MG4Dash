@@ -476,6 +476,10 @@
     <string name="st_theme_smooth_desc">Waits 5 s of stable lights (no switch under bridges) and fades over 2 s. Off: switches as soon as the lights change.</string>
     <string name="st_hide_saic_climate">Keep MG4Dash in front of the SAIC climate screen</string>
     <string name="st_hide_saic_climate_desc">When MG4Dash turns the climate on, the stock launcher opens its climate screen: MG4Dash comes back in front of it.</string>
+    <string name="en_trips_note">%1$d trips, one point per trip · average %2$s (dashed)</string>
+    <string name="en_trips_wait">The curve fills trip by trip (at least 2 km per trip).</string>
+    <string name="en_curve_note">One point per km (one per minute when stopped) · average %1$s (dashed)</string>
+    <string name="en_curve_wait">The curve fills as you drive, one point per km.</string>
     <string name="aa_title">ANDROID AUTO</string>
     <string name="aa_ready">Phone connected · Tap to open</string>
     <string name="aa_waiting">Connect your phone via USB</string>
