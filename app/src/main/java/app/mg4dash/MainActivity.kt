@@ -303,6 +303,8 @@ class MainActivity : AppCompatActivity() {
         if ((prefs.homeStyle == 1) != simpleMode || (prefs.homeStyle == 2) != mapLayout || Dock.vertical(this) != builtVertical || prefs.hideTitles != builtHideTitles ||
             CarBridge.heatingShown(this) != builtHeating || (!simpleMode && cardPower != builtCardPower) ||
             app.mg4dash.ui.Themes.signature(this) != themeSig) { app.mg4dash.ui.Themes.recreateSmooth(this); return }
+        // Appli de la carte désinstallée entre-temps (#54) : on revient à la carte OpenStreetMap
+        mapAppCn?.let { if (!mapAppInstalled(it)) applyHomeWidget() }
         app.mg4dash.ui.UpdatePrompt.maybeShow(this)
         if (simpleMode) { simple?.onResume(); Fullscreen.apply(this); return }
         mapCard.onResume()
@@ -907,8 +909,17 @@ class MainActivity : AppCompatActivity() {
     /** Bouton plein écran de l'appli intégrée à la carte. */
     private var mapAppFull: android.widget.ImageButton? = null
 
+    /** Appli de la carte encore installée ? (désinstallée, la carte restait noire et sans appui long, #54) */
+    private fun mapAppInstalled(cn: android.content.ComponentName): Boolean =
+        try { packageManager.getActivityInfo(cn, 0); true } catch (_: Exception) { false }
+
     private fun applyMapApp(show: Boolean) {
-        val cn = prefs.mapApp?.let { android.content.ComponentName.unflattenFromString(it) }
+        var cn = prefs.mapApp?.let { android.content.ComponentName.unflattenFromString(it) }
+        if (cn != null && !mapAppInstalled(cn)) {
+            android.util.Log.i("MG4L.AppCarte", "${cn.packageName} désinstallée : retour à la carte")
+            app.mg4dash.ui.Toasts.show(this, R.string.map_app_unavailable, long = true)
+            prefs.mapApp = null; cn = null
+        }
         if (cn != mapAppCn) {
             mapAppView?.let { b.mapCard.removeView(it) }
             mapAppFull?.let { b.mapCard.removeView(it) }
