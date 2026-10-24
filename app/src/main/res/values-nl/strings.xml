@@ -480,6 +480,7 @@
     <string name="en_trips_wait">De curve vult zich rit na rit (minstens 2 km per rit).</string>
     <string name="en_curve_note">Eén punt per km (één per minuut stilstaand) · gemiddelde %1$s (gestippeld)</string>
     <string name="en_curve_wait">De curve vult zich tijdens het rijden, één punt per km.</string>
+    <string name="projection_no_phone">Geen telefoon verbonden voor Android Auto of CarPlay</string>
     <string name="aa_title">ANDROID AUTO</string>
     <string name="aa_ready">Telefoon verbonden · Tik om te openen</string>
     <string name="aa_waiting">Sluit je telefoon aan via USB</string>

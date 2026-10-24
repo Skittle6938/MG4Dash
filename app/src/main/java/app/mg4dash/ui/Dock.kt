@@ -347,9 +347,23 @@ object Dock {
         when (item.label) {
             R.string.dock_aa -> {
                 val custom = customAa(activity)
-                if (custom == Apps.CARPLAY) Apps.open(activity, Apps.CARPLAY, activity.getString(R.string.dock_cp))
-                else if (custom != null) Shortcuts.launch(activity, custom)
-                else Apps.open(activity, Apps.ANDROID_AUTO, activity.getString(R.string.dock_aa))
+                if (custom != null && custom != Apps.CARPLAY) { Shortcuts.launch(activity, custom); return }
+                // Android Auto / CarPlay d'origine : sans téléphone connecté, l'écran reste noir (#41).
+                // On ouvre la projection du téléphone en session, ou on prévient qu'il n'y en a pas.
+                val fallback = custom ?: Apps.ANDROID_AUTO
+                Thread {
+                    val s = app.mg4dash.system.Projection.session(activity)
+                    activity.runOnUiThread {
+                        when {
+                            s is app.mg4dash.system.Projection.Session.Read && s.target == null ->
+                                app.mg4dash.ui.Toasts.show(activity, R.string.projection_no_phone)
+                            else -> {
+                                val target = (s as? app.mg4dash.system.Projection.Session.Read)?.target ?: fallback
+                                Apps.open(activity, target, activity.getString(if (target == Apps.CARPLAY) R.string.dock_cp else R.string.dock_aa))
+                            }
+                        }
+                    }
+                }.start()
                 return
             }
             // Toucher : réglages MG4Dash ; appui long : réglages de la voiture

@@ -480,6 +480,7 @@
     <string name="en_trips_wait">La curva se llena trayecto a trayecto (al menos 2 km por trayecto).</string>
     <string name="en_curve_note">Un punto por km (uno por minuto parado) · media %1$s (discontinua)</string>
     <string name="en_curve_wait">La curva se llena al conducir, un punto por km.</string>
+    <string name="projection_no_phone">Ningún teléfono conectado a Android Auto o CarPlay</string>
     <string name="aa_title">ANDROID AUTO</string>
     <string name="aa_ready">Teléfono conectado · Pulse para abrir</string>
     <string name="aa_waiting">Conecte su teléfono por USB</string>

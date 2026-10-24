@@ -480,6 +480,7 @@
     <string name="en_trips_wait">Eğri yolculuk yolculuk dolar (yolculuk başına en az 2 km).</string>
     <string name="en_curve_note">Km başına bir nokta (dururken dakikada bir) · ortalama %1$s (kesikli)</string>
     <string name="en_curve_wait">Eğri sürüş sırasında dolar, km başına bir nokta.</string>
+    <string name="projection_no_phone">Android Auto veya CarPlay için bağlı telefon yok</string>
     <string name="aa_title">ANDROID AUTO</string>
     <string name="aa_ready">Telefon bağlı · Açmak için dokunun</string>
     <string name="aa_waiting">Telefonunuzu USB ile bağlayın</string>
