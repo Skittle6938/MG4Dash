@@ -112,6 +112,18 @@ class MediaStyle private constructor(
 
     /** Fondu posé sur le bord gauche de l'image (calée à droite) : la couleur du bord s'y prolonge sans cassure. */
     private fun placeFade() {
+        // Image avec prolongement ligne par ligne : plus besoin de fondu
+        if (frame.background is android.graphics.drawable.BitmapDrawable) {
+            fade.visibility = View.GONE
+            // Image plus large que la carte (16:9 recadrée) : elle la remplit ; sinon calée à droite
+            val d = picture.drawable
+            if (d != null && frame.width > 0 && frame.height > 0) {
+                val wide = d.intrinsicWidth * frame.height >= d.intrinsicHeight * frame.width
+                val st = if (wide) ImageView.ScaleType.CENTER_CROP else ImageView.ScaleType.FIT_END
+                if (picture.scaleType != st) picture.scaleType = st
+            }
+            return
+        }
         val w = frame.width; val h = frame.height
         val art = lastArt
         if (w == 0 || h == 0 || art == null || art.height == 0) { fade.visibility = View.GONE; return }
@@ -138,11 +150,22 @@ class MediaStyle private constructor(
             edge = 0xFF2A3140.toInt()
             accent = Themes.color(a, R.color.accent_action)
         } else {
+            // Bandes noires en haut et en bas retirées : l'image s'affiche plus large
+            val img = cropBars(art)
             picture.imageTintList = null
             picture.scaleType = ImageView.ScaleType.FIT_END
-            picture.setImageBitmap(art)
-            edge = edgeColor(art)
-            accent = vividColor(art) ?: Themes.color(a, R.color.accent_action)
+            picture.setImageBitmap(img)
+            edge = edgeColor(img)
+            accent = vividColor(img) ?: Themes.color(a, R.color.accent_action)
+            // Prolongement à gauche ligne par ligne (moyenne des 3 pixels du bord) : pas de cassure,
+            // même quand le bord de l'image n'est pas uni
+            frame.background = android.graphics.drawable.BitmapDrawable(a.resources, edgeStrip(img)).apply { isFilterBitmap = true }
+            fade.visibility = View.GONE
+            lastArt = art
+            placeFade()
+            progress?.progressTintList = ColorStateList.valueOf(accent)
+            play.background = GradientDrawable().apply { cornerRadius = dp(38).toFloat(); setColor(accent) }
+            return
         }
         frame.setBackgroundColor(edge)
         fade.background = GradientDrawable(GradientDrawable.Orientation.LEFT_RIGHT, intArrayOf(edge, edge and 0x00FFFFFF))
@@ -167,6 +190,41 @@ class MediaStyle private constructor(
                       prev: ImageView, play: ImageView, next: ImageView): MediaStyle? = try {
             MediaStyle(a, play, null).apply { buildImmersive(card, head, info, title, artist, prev, next) }
         } catch (e: Exception) { android.util.Log.w("MG4L.Media", "lecteur épuré : ${e.message}"); null }
+
+        /**
+         * Image sans ses bandes noires (ou presque noires) en haut et en bas, comme sur les pochettes
+         * de radio au format 16:9 mises dans un carré. Au plus 35 % retirés de chaque côté.
+         */
+        fun cropBars(b: Bitmap): Bitmap {
+            val h = b.height; val w = b.width
+            if (h < 20 || w < 20) return b
+            val step = maxOf(1, w / 60)
+            fun dark(y: Int): Boolean {
+                var n = 0; var bright = 0
+                for (x in 0 until w step step) {
+                    val c = b.getPixel(x, y); n++
+                    if (Color.red(c) > 28 || Color.green(c) > 28 || Color.blue(c) > 28) bright++
+                }
+                return bright * 20 <= n   // au plus 5 % de pixels clairs
+            }
+            val max = h * 35 / 100
+            var top = 0; while (top < max && dark(top)) top++
+            var bottom = 0; while (bottom < max && dark(h - 1 - bottom)) bottom++
+            if (top + bottom < h / 20) return b
+            return Bitmap.createBitmap(b, 0, top, w, h - top - bottom)
+        }
+
+        /** Colonne d'un pixel de large : pour chaque ligne, la moyenne des 3 pixels les plus à gauche. */
+        fun edgeStrip(b: Bitmap): Bitmap {
+            val out = Bitmap.createBitmap(1, b.height, Bitmap.Config.ARGB_8888)
+            val k = minOf(3, b.width)
+            for (y in 0 until b.height) {
+                var r = 0; var g = 0; var bl = 0
+                for (x in 0 until k) { val c = b.getPixel(x, y); r += Color.red(c); g += Color.green(c); bl += Color.blue(c) }
+                out.setPixel(0, y, Color.rgb(r / k, g / k, bl / k))
+            }
+            return out
+        }
 
         /** Couleur moyenne de la bande gauche de l'image (prolongement quand elle n'a pas le format de la carte). */
         fun edgeColor(b: Bitmap): Int {
