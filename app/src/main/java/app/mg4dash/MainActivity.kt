@@ -526,6 +526,9 @@ class MainActivity : AppCompatActivity() {
 
     // ── Énergie ──────────────────────────────────────────────────────────────
 
+    /** Hauteur de la barre de batterie de la carte puissance, débranché (repère de départ compris). */
+    private var gaugeHeight = 0
+
     private fun renderEnergy(s: VehicleState, avg: Float?) {
         val pct = s.batteryPercent
         b.battery.text = VehicleState.socLabel(s) ?: "— %"
@@ -562,6 +565,13 @@ class MainActivity : AppCompatActivity() {
             (b.chargeState.parent as View).visibility = if (plugged) View.VISIBLE else View.GONE
             // Câble branché : la ligne de charge prend la place, la prise sous les km s'efface
             b.rangePlug.visibility = View.GONE
+            // ... et le repère de départ du trajet aussi : la barre remonte sous les chiffres, les km
+            // restent alignés avec le % sans que le bouton de charge les pousse (#29)
+            if (plugged) b.batteryGauge.tripStart = null
+            val lp = b.batteryGauge.layoutParams as LinearLayout.LayoutParams
+            if (gaugeHeight == 0) gaugeHeight = lp.height
+            val want = if (plugged) (26 * resources.displayMetrics.density).toInt() else gaugeHeight
+            if (lp.height != want) { lp.height = want; b.batteryGauge.layoutParams = lp }
         }
         b.chargeAction.visibility = if (CarBridge.chargeControl) View.VISIBLE else View.GONE
         b.chargeAction.setBackgroundResource(if (discharge) R.drawable.bg_chip_heat else R.drawable.bg_chip)
