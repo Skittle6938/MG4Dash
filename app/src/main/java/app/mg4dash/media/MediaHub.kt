@@ -185,6 +185,9 @@ object MediaHub {
         }
         fun stable(pkg: String) = (seenSince[pkg]?.let { now - it >= 5_000 } == true) && !(pkg == AA_MBS && carPlay)
         trackPlayback(p, now)
+        // Type 70 (Android Auto) tenu par une autre appli (DiAuto) alors qu'AllGo n'a aucun téléphone : la
+        // source réelle est le lecteur de cette appli, et non un Android Auto « disparu » à remplacer
+        if (sourcePkg == AA_MBS && projectionLive == false && otherAppShown()) sourcePkg = current?.packageName
         val cur = sourcePkg ?: return
         if (now - autoSwitchAt < 10_000 || now - startedAt < 5_000) return
         // Source de la voiture disparue (téléphone débranché…) depuis 1 s : quel que soit le réglage, on
