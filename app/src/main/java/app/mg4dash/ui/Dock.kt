@@ -338,8 +338,15 @@ object Dock {
             .show()
     }
 
-    private fun customAa(activity: Activity): android.content.ComponentName? =
-        Prefs(activity).dockAaTarget?.let { android.content.ComponentName.unflattenFromString(it) }
+    private fun customAa(activity: Activity): android.content.ComponentName? {
+        val p = Prefs(activity)
+        val cn = p.dockAaTarget?.let { android.content.ComponentName.unflattenFromString(it) } ?: return null
+        // DiAuto renommé MG4 AA (nouveau paquet) : le bouton suit l'appli si l'ancienne n'est plus là
+        if (cn.packageName == "com.drivehub.diauto.mg4" && activity.packageManager.getLaunchIntentForPackage(cn.packageName) == null) {
+            activity.packageManager.getLaunchIntentForPackage("app.mg4aa")?.component?.let { p.dockAaTarget = it.flattenToString(); return it }
+        }
+        return cn
+    }
 
     private fun open(activity: Activity, item: Item, current: Page) {
         // Carte en plein écran (issue #4) : tout bouton de la barre la ramène à sa taille de widget

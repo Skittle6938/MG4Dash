@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
 /**
- * Guidage de l'appli Android Auto « DiAuto » (com.drivehub.diauto.mg4, basée sur Headunit Revived).
+ * Guidage de l'appli Android Auto « MG4 AA » (app.mg4aa, ex-DiAuto, basée sur Headunit Revived).
  *
  * Contrairement à l'Android Auto d'origine de la voiture, elle reçoit du téléphone la prochaine
  * manœuvre et la diffuse environ chaque seconde (action NAVIGATION_UPDATE, extras relevés dans
