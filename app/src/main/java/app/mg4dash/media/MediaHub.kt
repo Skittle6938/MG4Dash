@@ -205,6 +205,9 @@ object MediaHub {
             if (stable(want)) { startDone = true; autoSwitch(want, "startup source") }
             return
         }
+        // Une appli a pris la source (Android Auto, CarPlay, DiAuto qui lance sa musique…) : c'est voulu, on
+        // ne la lui reprend pas pour revenir à la radio (DiAuto coupé net au démarrage de sa musique)
+        if (cur !in listOf(RADIO, "com.android.bluetooth", "com.saicmotor.media")) return
         val target = order.firstOrNull { stable(it) } ?: return
         if (target == cur) return
         // Source actuelle jamais choisie (historique vide, première utilisation) : on ne la quitte que si elle disparaît
