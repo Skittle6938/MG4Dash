@@ -54,10 +54,9 @@ object StarKey {
                 // Musique d'une autre appli (SimpMusic…) : la voiture n'envoie pas suivant / précédent à
                 // cette appli ; on les passe au lecteur affiché (DiAuto lit lui-même les boutons)
                 // (gauche = précédent, droite = suivant, comme pour les autres sources)
-                if (!down && !long && (code == JOY_LEFT || code == JOY_RIGHT) && MediaHub.otherAppShown() &&
-                    !MediaHub.shownHandlesWheelKeys()) {
-                    if (code == JOY_RIGHT) MediaHub.next() else MediaHub.previous()
-                    return
+                if (code == JOY_LEFT || code == JOY_RIGHT) {
+                    if (down && !long) MediaHub.wheelPressed()
+                    else if (!down && !long && MediaHub.wheelReleased(code == JOY_RIGHT)) return
                 }
                 if (Firmware.gen == Firmware.Gen.SWI173 && !down && !long && code in JOY_LEFT..JOY_OK &&
                     MediaHub.ownPlayerShown() && !MediaHub.shownHandlesWheelKeys()) {

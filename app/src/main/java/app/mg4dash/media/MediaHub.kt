@@ -317,8 +317,34 @@ object MediaHub {
      * Appli affichée qui lit elle-même les boutons du volant (DiAuto MG4+ et son ancien nom) :
      * MG4Dash ne les lui renvoie pas, sinon chaque appui sauterait deux morceaux.
      */
-    fun shownHandlesWheelKeys(): Boolean =
-        current?.packageName.let { it == "com.drivehub.diauto.mg4" || it == "app.mg4aa" }
+    fun shownHandlesWheelKeys(): Boolean = handlesWheelKeys(current?.packageName)
+
+    private fun handlesWheelKeys(pkg: String?) = pkg == "com.drivehub.diauto.mg4" || pkg == "app.mg4aa"
+
+    // Gauche / droite du volant sur le lecteur d'une autre appli : le launcher d'origine ne connaît pas
+    // ces applis et envoie le bouton à la dernière source voiture (souvent la radio), qui reprend le son.
+    // On note l'appli à l'appui pour la remettre aussitôt (voir watchAudioSource).
+    @Volatile private var wheelFrom: String? = null
+    @Volatile private var wheelAt = 0L
+
+    fun wheelPressed() {
+        if (!otherAppShown()) return
+        wheelFrom = current?.packageName
+        wheelAt = android.os.SystemClock.uptimeMillis()
+    }
+
+    /**
+     * Bouton relâché : suivant / précédent à l'appli notée à l'appui (la radio a pu être affichée entre
+     * les deux), sauf si elle lit elle-même les boutons (DiAuto). false = pas d'autre appli en cours.
+     */
+    fun wheelReleased(forward: Boolean): Boolean {
+        val pkg = wheelFrom?.takeIf { android.os.SystemClock.uptimeMillis() - wheelAt < 2_000 }
+            ?: current?.packageName?.takeIf { otherAppShown() } ?: return false
+        if (handlesWheelKeys(pkg)) return true
+        val c = browserControllers[pkg] ?: lastCandidates.firstOrNull { it.packageName == pkg } ?: return true
+        if (forward) c.transportControls.skipToNext() else c.transportControls.skipToPrevious()
+        return true
+    }
 
     fun isAndroidAuto(pkg: String?) = pkg == AA_MBS || pkg?.startsWith("com.allgo.app.androidauto") == true
 
@@ -377,6 +403,7 @@ object MediaHub {
     fun switchTo(next: String) {
         if (BuildConfig.MOCK) return
         Log.i(TAG, "source picked: $next")
+        wheelFrom = null // choix de l'utilisateur : pas de retour automatique à l'appli
         // On quitte le lecteur d'une autre appli (DiAuto, SimpMusic…) : la voiture n'a pas de source à lui
         // retirer et certaines applis continuent malgré la perte du focus, d'où deux musiques en même temps
         current?.takeIf { otherAppShown() && it.packageName != next }?.let {
@@ -458,6 +485,15 @@ object MediaHub {
                             // Changement fait sur la voiture (bouton source, appli d'origine) : c'est aussi un choix
                             // de l'utilisateur, sauf s'il suit une bascule automatique ou la perte de l'ancienne source
                             val prev = sourcePkg
+                            // Radio reprise par le launcher d'origine juste après gauche / droite du volant : retour à l'appli
+                            val back = wheelFrom?.takeIf { src == RADIO && android.os.SystemClock.uptimeMillis() - wheelAt < 2_000 }
+                            if (back != null) {
+                                wheelFrom = null
+                                Log.i(TAG, "steering wheel key sent to the radio by the stock launcher: back to $back")
+                                sourcePkg = src
+                                switchTo(back)
+                                return@post
+                            }
                             // Seulement les sources de la voiture : une appli qui prend la main un instant (annonce de
                             // guidage DiAuto…) n'est pas un choix de source
                             if (src != null && src in listOf(RADIO, "com.android.bluetooth", "com.saicmotor.media") && src != prev && android.os.SystemClock.uptimeMillis() - autoSwitchAt > 8_000 &&
