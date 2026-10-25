@@ -662,6 +662,9 @@ object CarBridge {
         val cur = _state.value.fanSpeed ?: return
         // Clim arrêtée : baisser la ventilation la rallumait (#34), seul + la démarre
         if (delta < 0 && _state.value.hvacOn != true) return
+        // Clim arrêtée, « + » : on la rallume comme le bouton marche, la voiture reprend son dernier niveau
+        // de ventilation au lieu de partir de 1 (#34)
+        if (delta == 1 && _state.value.hvacOn != true) { togglePower(); return }
         val target = (cur + delta).coerceIn(VehicleState.FAN_MIN, VehicleState.FAN_MAX)
         if (target == cur) return
         _state.value = _state.value.copy(fanSpeed = target)
