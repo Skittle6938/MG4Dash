@@ -480,6 +480,16 @@ object MediaHub {
                             else -> pkg
                         }
                         Log.i(TAG, "audio source: $pkg ($type) → $src")
+                        // Radio reprise par le launcher d'origine juste après gauche / droite du volant : retour à
+                        // l'appli. Traité ici, sans attendre le fil principal (souvent occupé à ce moment-là)
+                        val back = wheelFrom?.takeIf { src == RADIO && android.os.SystemClock.uptimeMillis() - wheelAt < 2_000 }
+                        if (back != null) {
+                            wheelFrom = null
+                            Log.i(TAG, "steering wheel key sent to the radio by the stock launcher: back to $back")
+                            sourcePkg = src
+                            undoRadioSkip(wheelForward) { switchTo(back) }
+                            return@newProxyInstance null
+                        }
                         main.post {
                             if (src == AA_MBS) {
                                 // Le choix manuel reste tant qu'Android Auto ne joue pas (guidage seul)
@@ -488,15 +498,6 @@ object MediaHub {
                             // Changement fait sur la voiture (bouton source, appli d'origine) : c'est aussi un choix
                             // de l'utilisateur, sauf s'il suit une bascule automatique ou la perte de l'ancienne source
                             val prev = sourcePkg
-                            // Radio reprise par le launcher d'origine juste après gauche / droite du volant : retour à l'appli
-                            val back = wheelFrom?.takeIf { src == RADIO && android.os.SystemClock.uptimeMillis() - wheelAt < 2_000 }
-                            if (back != null) {
-                                wheelFrom = null
-                                Log.i(TAG, "steering wheel key sent to the radio by the stock launcher: back to $back")
-                                sourcePkg = src
-                                undoRadioSkip(wheelForward) { switchTo(back) }
-                                return@post
-                            }
                             // Seulement les sources de la voiture : une appli qui prend la main un instant (annonce de
                             // guidage DiAuto…) n'est pas un choix de source
                             if (src != null && src in listOf(RADIO, "com.android.bluetooth", "com.saicmotor.media") && src != prev && android.os.SystemClock.uptimeMillis() - autoSwitchAt > 8_000 &&
@@ -828,7 +829,7 @@ object MediaHub {
         Log.i(TAG, "radio station change undone (${if (forward) "previous" else "next"})")
         if (rc != null) { if (forward) rc.transportControls.skipToPrevious() else rc.transportControls.skipToNext() }
         else io.launch { if (forward) SaicRadio.previous() else SaicRadio.next() }
-        main.postDelayed(then, 500)
+        main.postDelayed(then, 200)
     }
 
     /** Pause de la radio : par sa session, sinon par son service. */
