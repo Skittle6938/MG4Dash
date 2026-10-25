@@ -367,6 +367,12 @@ object MediaHub {
     fun switchTo(next: String) {
         if (BuildConfig.MOCK) return
         Log.i(TAG, "source picked: $next")
+        // On quitte le lecteur d'une autre appli (DiAuto, SimpMusic…) : la voiture n'a pas de source à lui
+        // retirer et certaines applis continuent malgré la perte du focus, d'où deux musiques en même temps
+        current?.takeIf { otherAppShown() && it.packageName != next }?.let {
+            Log.i(TAG, "pausing ${it.packageName} (leaving it)")
+            it.transportControls.pause()
+        }
         remember(next); autoTarget = null
         pinnedPkg = next
         main.post { reevaluate() }
