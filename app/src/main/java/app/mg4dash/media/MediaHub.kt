@@ -324,8 +324,19 @@ object MediaHub {
                 AA_MBS -> androidAutoAvailable()
                 else -> true
             }
-        }
+        } + otherPlayers()
     }
+
+    /**
+     * Autres applis qui ont un lecteur actif (DiAuto, Spotify installé sur l'autoradio…) : proposées au
+     * balayage et dans le menu des sources (#36 / DiAuto : impossible de revenir dessus après la radio).
+     */
+    private fun otherPlayers(): List<String> = lastCandidates.filter { c ->
+        val pkg = c.packageName
+        pkg != appContext?.packageName && !pkg.startsWith("com.saicmotor.") && pkg != "com.android.bluetooth" &&
+            !pkg.startsWith("com.allgo.") && !gone(pkg) &&
+            ((c.playbackState?.state ?: PlaybackState.STATE_NONE) != PlaybackState.STATE_NONE || c.metadata != null)
+    }.map { it.packageName }.distinct()
 
     /** Source affichée, Android Auto ramené à son lecteur. */
     fun currentSource(): String? = if (radioShown) RADIO else current?.packageName?.let { if (isAndroidAuto(it)) AA_MBS else it }
@@ -362,10 +373,12 @@ object MediaHub {
             }
             return
         }
-        activateSource(next)
+        // Autre appli (DiAuto…) : pas de commande de source voiture, on lance directement son lecteur
+        val carSource = activateSource(next)
         main.postDelayed({
-            browserControllers[next]?.takeIf { !isPlaying(it) }?.transportControls?.play()
-        }, 1500)
+            (browserControllers[next] ?: lastCandidates.firstOrNull { it.packageName == next })
+                ?.takeIf { !isPlaying(it) }?.transportControls?.play()
+        }, if (carSource) 1500 else 0)
     }
 
     fun selectUsbBt() {
