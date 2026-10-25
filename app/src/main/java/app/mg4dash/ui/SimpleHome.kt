@@ -282,8 +282,8 @@ class SimpleHome(private val a: AppCompatActivity) {
         val next = kit.roundButton(R.drawable.ic_next, 76) { MediaHub.next() }
         controls.addView(next)
         p.addView(controls, kit.lp(-1, -2, t = 8))
-        // Réglage « Lecteur de l'accueil » : Immersif comme sur l'accueil complet
-        if (prefs.mediaStyle == 0) mediaStyle = MediaStyle.immersive(a, p, head, info, mediaTitle, mediaArtist, prev, mediaPlay, next)
+        // Lecteur Immersif comme sur l'accueil complet
+        mediaStyle = MediaStyle.immersive(a, p, head, info, mediaTitle, mediaArtist, prev, mediaPlay, next)
         return p
     }
 

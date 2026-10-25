@@ -152,7 +152,6 @@ class Prefs(context: Context) {
      * Carte énergie « puissance » (#29) : barre de puissance en direct dans la carte énergie, sans
      * mode de conduite ni KERS ; la page Puissance quitte alors le widget défilant.
      */
-    /** Présentation du lecteur de l'accueil : 0 = Immersif (défaut), 1 = Classique. */
     /** Source audio au démarrage : 0 automatique (défaut), 1 comme la voiture, 2 radio, 3 Bluetooth, 4 USB, 5 CarPlay / Android Auto. */
     var startSource: Int
         get() = sp.getInt("start_source", 0)
@@ -172,10 +171,6 @@ class Prefs(context: Context) {
     var sourceHistory: List<String>
         get() = sp.getString("source_history", "").orEmpty().split(',').filter { it.isNotBlank() }
         set(v) = sp.edit().putString("source_history", v.joinToString(",")).apply()
-
-    var mediaStyle: Int
-        get() = sp.getInt("media_style", 0)
-        set(v) = sp.edit().putInt("media_style", v).apply()
 
     /** Carte puissance : tension et courant (actuels, mini / maxi) sous la barre ; désactivé par défaut. */
     var powerVa: Boolean

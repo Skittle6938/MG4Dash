@@ -36,12 +36,7 @@ The default home screen (*Full* layout, vertical bar on the left). From left to 
 
 The media card follows the car's active audio source (DAB / FM radio, Bluetooth, USB, Android Auto, CarPlay). Swipe it up / down for the next source, left / right for the next / previous track (like the steering wheel buttons), tap the source name (« Radio DAB ▾ ») for the source menu, tap the picture to open the source's app, long press play / pause for the [Sound](#sound) page.
 
-Two presentations, in Settings › Home › *Player on the home screen*; they apply to the Full, Map and Simple layouts:
-
-| **Immersive** (default) | **Classic** |
-|---|---|
-| ![Immersive player](docs/screenshots/home.png?v=19) | ![Classic player](docs/screenshots/home_classic_player.png?v=19) |
-| Like the Android Auto player: the album art or station image covers the card (black bars above and below are cropped as long as the image still fits the card's width, and its left edge colour extends it with a fade), title and artist over it, play button and progress bar in the image's main colour. Without an image, a white or black background following the theme. | The square picture on the left, title, artist and album on the right, and large previous / play / next buttons that always fit the column. |
+The player (Full, Map and Simple layouts) works like the Android Auto player: the album art or station image covers the card (black bars above and below are cropped as long as the image still fits the card's width, and its left edge colour extends it with a fade), title and artist over it, play button and progress bar in the image's main colour. Without an image, a white or black background following the theme.
 
 ## Energy card
 
@@ -160,7 +155,7 @@ Five tabs along the top; the last one used opens next time. Each on / off option
 
 | Tab | Options |
 |---|---|
-| Home | home layout (Full, Simple, Map), vertical bar, full screen (hides the SAIC side bar and banner), live power in the energy card, voltage and current under the power bar, player (Immersive, Classic), map stack back to the battery when plugged in, map zoom and colours, hide the map buttons, shortcuts page, switch to the energy widget when offline |
+| Home | home layout (Full, Simple, Map), vertical bar, full screen (hides the SAIC side bar and banner), live power in the energy card, voltage and current under the power bar, map stack back to the battery when plugged in, map zoom and colours, hide the map buttons, shortcuts page, switch to the energy widget when offline |
 | Look | light / dark / auto, smooth light / dark switch, panel outline, background, button colour, full-throttle special |
 | Vehicle | units, tyre pressure unit, heated seats and steering wheel, Keep climate on, keep MG4Dash in front of the SAIC climate screen (old firmwares), usable battery capacity, battery model, MG4 XPower |
 | Connections | weather (fallback city or current position), Home Assistant (address, token, test) |
@@ -201,7 +196,7 @@ Features a firmware does not expose are hidden instead of failing (for example t
   - `car/CarApi.kt`: binder clients written for MG4Dash (descriptors and transaction numbers observed on the car)
   - `energy/ConsumptionEstimator.kt`: kWh/100 estimated from battery % and kilometres
   - `energy/EnergyMonitor.kt`, `energy/ConsumptionCurve.kt`: energy measured from battery voltage × current, split into driving / climate / accessories, and the consumption curves
-  - `ui/MediaStyle.kt`: Immersive and Classic media players
+  - `ui/MediaStyle.kt`: media player presentation
   - `system/Projection.kt`: Android Auto / CarPlay session read from the AllGo remote UI service
   - `energy/EnergyLogger.kt`: read-only CSV recorder of battery power, consumption counters and equipment states
   - `media/MediaHub.kt`: active player, chosen from the car's audio source like the stock launcher
