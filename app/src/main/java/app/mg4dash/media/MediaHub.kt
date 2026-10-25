@@ -333,6 +333,8 @@ object MediaHub {
         wheelFrom = current?.packageName
         wheelAt = android.os.SystemClock.uptimeMillis()
         wheelForward = forward
+        // La carte reste sur l'appli pendant le bref passage par la radio
+        pinnedPkg = wheelFrom
     }
 
     /**
