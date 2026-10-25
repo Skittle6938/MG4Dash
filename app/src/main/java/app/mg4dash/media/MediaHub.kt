@@ -141,6 +141,16 @@ object MediaHub {
      * proposée et menait à un écran noir (#36).
      */
     @Volatile private var projectionLive: Boolean? = null
+    /** Téléphone connecté en audio Bluetooth (A2DP) ; false : son lecteur n'est plus proposé (#36). */
+    @Volatile private var btLive: Boolean? = null
+
+    private fun btConnected(): Boolean? = try {
+        android.bluetooth.BluetoothAdapter.getDefaultAdapter()?.getProfileConnectionState(11) == android.bluetooth.BluetoothProfile.STATE_CONNECTED
+    } catch (_: Exception) { null }
+
+    /** Lecteur à écarter : projection ou Bluetooth sans téléphone connecté. */
+    private fun gone(pkg: String?): Boolean =
+        (projectionLive == false && isAndroidAuto(pkg)) || (btLive == false && pkg == "com.android.bluetooth")
 
     private fun watchProjection(ctx: Context) {
         io.launch {
@@ -153,7 +163,14 @@ object MediaHub {
                     projectionLive = live
                     main.post { reevaluate() }
                 }
-                kotlinx.coroutines.delay(5_000)
+                // Bluetooth coupé pendant la lecture : la carte restait sur le Bluetooth jusqu'au balayage (#36)
+                val bt = btConnected()
+                if (bt != btLive) {
+                    Log.i(TAG, "bluetooth audio: ${if (bt == null) "unknown" else if (bt) "phone connected" else "no phone"}")
+                    btLive = bt
+                    main.post { reevaluate() }
+                }
+                kotlinx.coroutines.delay(if (btLive == true || projectionLive == true) 2_000 else 5_000)
             }
         }
     }
@@ -393,7 +410,7 @@ object MediaHub {
     private fun reevaluate() {
         val active = try { manager?.getActiveSessions(null).orEmpty() } catch (_: SecurityException) { emptyList() }
         // Plus de téléphone en projection : le lecteur CarPlay / Android Auto n'est plus proposé (#36)
-        val candidates = (active + browserControllers.values).filter { projectionLive != false || !isAndroidAuto(it.packageName) }
+        val candidates = (active + browserControllers.values).filter { !gone(it.packageName) }
         lastCandidates = candidates
         candidates.forEach { c ->
             if (watched.add(c.sessionToken)) c.registerCallback(callback, main)
@@ -413,7 +430,7 @@ object MediaHub {
         // Un lecteur peut avoir deux contrôleurs (session active, navigateur média) : on préfère celui
         // qui a un titre, puis celui qui a un état, puis le navigateur.
         fun bestFor(pkg: String): MediaController? {
-            if (projectionLive == false && isAndroidAuto(pkg)) return null
+            if (gone(pkg)) return null
             val all = candidates.filter { it.packageName == pkg }
             return all.firstOrNull { it.metadata != null } ?: all.firstOrNull { it.playbackState != null }
                 ?: browserControllers[pkg] ?: all.firstOrNull()
