@@ -496,6 +496,10 @@
     <string name="st_src_auto">Automatica</string>
     <string name="st_src_car">Come l\'auto</string>
     <string name="st_start_source_desc">Automatica: riprende l\'ultima sorgente scelta ancora disponibile e ci torna appena ricompare (telefono ricollegato, chiavetta USB…).</string>
+    <string name="st_start_playback">Riproduzione all\'avvio</string>
+    <string name="st_play_resume">Come allo spegnimento</string>
+    <string name="st_play_pause">Sempre in pausa</string>
+    <string name="st_play_play">Sempre in riproduzione</string>
     <string name="aa_title">ANDROID AUTO</string>
     <string name="aa_ready">Telefono connesso · Tocca per aprire</string>
     <string name="aa_waiting">Collega il telefono via USB</string>

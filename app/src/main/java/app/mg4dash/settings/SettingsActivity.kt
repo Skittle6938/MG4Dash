@@ -110,23 +110,11 @@ class SettingsActivity : AppCompatActivity() {
         // Source audio : menu déroulant (même style que les menus de la carte)
         val src = panel(homeR, getString(R.string.st_audio_source).uppercase())
         val srcLabels = listOf(getString(R.string.st_src_auto), getString(R.string.st_src_car), "Radio", "Bluetooth", "USB", "CarPlay / Android Auto")
-        val srcRow = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = android.view.Gravity.CENTER_VERTICAL }
-        srcRow.addView(TextView(this).apply {
-            text = getString(R.string.st_start_source); setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f)
-            setTextColor(app.mg4dash.ui.Themes.color(this@SettingsActivity, R.color.text_value))
-        }, LinearLayout.LayoutParams(0, -2, 1f))
-        val dp = resources.displayMetrics.density
-        val srcDrop = TextView(this).apply {
-            text = srcLabels[prefs.startSource.coerceIn(0, 5)] + "   ▾"; setTextSize(TypedValue.COMPLEX_UNIT_SP, 19f); gravity = android.view.Gravity.CENTER
-            setBackgroundResource(R.drawable.bg_chip); isSelected = true
-            setTextColor(androidx.core.content.ContextCompat.getColorStateList(this@SettingsActivity, R.color.chip_text))
-        }
-        srcDrop.setOnClickListener { v ->
-            app.mg4dash.ui.SourceMenu.choose(this, v, srcLabels, prefs.startSource) { prefs.startSource = it; srcDrop.text = srcLabels[it] + "   ▾" }
-        }
-        srcRow.addView(srcDrop, LinearLayout.LayoutParams((340 * dp).toInt(), (56 * dp).toInt()))
-        src.addView(srcRow, LinearLayout.LayoutParams(-1, -2).apply { topMargin = (8 * dp).toInt() })
+        dropdown(src, getString(R.string.st_start_source), srcLabels, { prefs.startSource }) { prefs.startSource = it }
         text(src, getString(R.string.st_start_source_desc), 16f, R.color.text_title)
+        // Lecture au démarrage (remplace la reprise automatique de Radio Dash)
+        dropdown(src, getString(R.string.st_start_playback),
+            listOf(getString(R.string.st_play_resume), getString(R.string.st_play_pause), getString(R.string.st_play_play)), { prefs.startPlayback }) { prefs.startPlayback = it }
         val map = panel(homeR, getString(R.string.st_style_map).uppercase())
         text(map, getString(R.string.st_map_zoom), 18f, R.color.text_value)
         row(map, *choiceButtons(listOf("14", "15", "16", "17", "18"), { prefs.mapZoom - 14 }) { prefs.mapZoom = 14 + it })
@@ -629,6 +617,24 @@ class SettingsActivity : AppCompatActivity() {
     }
 
     /** Boutons à choix unique : celui qui est actif est en couleur, et la couleur suit tout de suite le choix. */
+    /** Ligne « libellé — menu déroulant » (même menu que les sources de la carte). */
+    private fun dropdown(parent: LinearLayout, label: String, labels: List<String>, current: () -> Int, onPick: (Int) -> Unit) {
+        val dp = resources.displayMetrics.density
+        val row = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = android.view.Gravity.CENTER_VERTICAL }
+        row.addView(TextView(this).apply {
+            text = label; setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f)
+            setTextColor(app.mg4dash.ui.Themes.color(this@SettingsActivity, R.color.text_value))
+        }, LinearLayout.LayoutParams(0, -2, 1f))
+        val drop = TextView(this).apply {
+            text = labels[current().coerceIn(0, labels.lastIndex)] + "   ▾"; setTextSize(TypedValue.COMPLEX_UNIT_SP, 19f); gravity = android.view.Gravity.CENTER
+            setBackgroundResource(R.drawable.bg_chip); isSelected = true
+            setTextColor(androidx.core.content.ContextCompat.getColorStateList(this@SettingsActivity, R.color.chip_text))
+        }
+        drop.setOnClickListener { v -> app.mg4dash.ui.SourceMenu.choose(this, v, labels, current()) { onPick(it); drop.text = labels[it] + "   ▾" } }
+        row.addView(drop, LinearLayout.LayoutParams((340 * dp).toInt(), (56 * dp).toInt()))
+        parent.addView(row, LinearLayout.LayoutParams(-1, -2).apply { topMargin = (8 * dp).toInt() })
+    }
+
     private fun choiceButtons(labels: List<String>, current: () -> Int, onPick: (Int) -> Unit): Array<Button> {
         lateinit var buttons: List<Button>
         fun paint() = buttons.forEachIndexed { i, btn ->

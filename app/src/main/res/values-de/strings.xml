@@ -496,6 +496,10 @@
     <string name="st_src_auto">Automatisch</string>
     <string name="st_src_car">Wie das Auto</string>
     <string name="st_start_source_desc">Automatisch: nimmt die zuletzt gewählte, noch verfügbare Quelle und kehrt zu ihr zurück, sobald sie wieder da ist (Telefon verbunden, USB-Stick…).</string>
+    <string name="st_start_playback">Wiedergabe beim Start</string>
+    <string name="st_play_resume">Wie beim Ausschalten</string>
+    <string name="st_play_pause">Immer pausiert</string>
+    <string name="st_play_play">Immer abspielen</string>
     <string name="aa_title">ANDROID AUTO</string>
     <string name="aa_ready">Telefon verbunden · Zum Öffnen tippen</string>
     <string name="aa_waiting">Telefon per USB verbinden</string>
