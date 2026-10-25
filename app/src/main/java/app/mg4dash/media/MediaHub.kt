@@ -416,7 +416,9 @@ object MediaHub {
                             // Changement fait sur la voiture (bouton source, appli d'origine) : c'est aussi un choix
                             // de l'utilisateur, sauf s'il suit une bascule automatique ou la perte de l'ancienne source
                             val prev = sourcePkg
-                            if (src != null && src != AA_MBS && src != prev && android.os.SystemClock.uptimeMillis() - autoSwitchAt > 8_000 &&
+                            // Seulement les sources de la voiture : une appli qui prend la main un instant (annonce de
+                            // guidage DiAuto…) n'est pas un choix de source
+                            if (src in listOf(RADIO, "com.android.bluetooth", "com.saicmotor.media") && src != prev && android.os.SystemClock.uptimeMillis() - autoSwitchAt > 8_000 &&
                                 (prev == null || prev in availableSources())) { remember(src); autoTarget = null }
                             sourcePkg = src; reevaluate()
                         }
