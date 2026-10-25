@@ -21,6 +21,9 @@ object StarKey {
     private const val ACTION = "com.saic.keyevent.hardkey.report"
     private const val KEY_LEFT_STAR = 5
     /** Joystick droit (codes relevés sur SWI173, #33, et dans MG4Control) : 299 gauche, 300 droite, 301 OK. */
+    /** Haut / bas du pavé gauche du volant (KEYCODE_SWC_UP / DOWN d'AllGo) : piste suivante / précédente. */
+    private const val SWC_UP = 297
+    private const val SWC_DOWN = 298
     private const val JOY_LEFT = 299
     private const val JOY_RIGHT = 300
     private const val JOY_OK = 301
@@ -51,6 +54,12 @@ object StarKey {
                 // SWI173 (#33) : le joystick droit n'agit pas sur la musique Bluetooth / DiAuto quand
                 // MG4Dash est l'accueil ; gauche = précédent, droite = suivant, OK = lecture / pause.
                 // Limité à SWI173 : ailleurs le joystick change déjà piste ou volume tout seul.
+                // Musique d'une autre appli (DiAuto…) : la voiture envoie suivant / précédent à Android Auto
+                // d'AllGo, qui ne joue pas ; on les passe au lecteur affiché
+                if (!down && !long && (code == SWC_UP || code == SWC_DOWN) && MediaHub.otherAppShown()) {
+                    if (code == SWC_UP) MediaHub.next() else MediaHub.previous()
+                    return
+                }
                 if (Firmware.gen == Firmware.Gen.SWI173 && !down && !long && code in JOY_LEFT..JOY_OK &&
                     MediaHub.ownPlayerShown()) {
                     when (code) {
