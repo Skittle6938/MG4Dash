@@ -491,6 +491,11 @@
     <string name="en_clear_confirm">¿Borrar la curva «%1$s»?</string>
     <string name="st_cc_stopped">Curva de consumo: también parado</string>
     <string name="st_cc_stopped_desc">Un punto cada 2 minutos con el coche parado (clima, accesorios). Desactivado: solo cuenta la conducción. Pulsación larga en la curva para borrarla.</string>
+    <string name="st_audio_source">Fuente de audio</string>
+    <string name="st_start_source">Fuente al arrancar</string>
+    <string name="st_src_auto">Automática</string>
+    <string name="st_src_car">Como el coche</string>
+    <string name="st_start_source_desc">Automática: retoma la última fuente elegida aún disponible y vuelve a ella en cuanto reaparece (teléfono reconectado, memoria USB…).</string>
     <string name="aa_title">ANDROID AUTO</string>
     <string name="aa_ready">Teléfono conectado · Pulse para abrir</string>
     <string name="aa_waiting">Conecte su teléfono por USB</string>

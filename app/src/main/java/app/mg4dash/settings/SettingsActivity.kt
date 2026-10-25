@@ -107,6 +107,26 @@ class SettingsActivity : AppCompatActivity() {
         text(style, getString(R.string.st_media_style), 18f, R.color.text_value)
         row(style, *styleButtons(listOf(R.string.st_media_immersive, R.string.st_media_classic), { prefs.mediaStyle }) { prefs.mediaStyle = it })
         toggle(style, R.string.st_stack_auto, null, { prefs.stackAuto }) { prefs.stackAuto = it }
+        // Source audio : menu déroulant (même style que les menus de la carte)
+        val src = panel(homeR, getString(R.string.st_audio_source).uppercase())
+        val srcLabels = listOf(getString(R.string.st_src_auto), getString(R.string.st_src_car), "Radio", "Bluetooth", "USB", "CarPlay / Android Auto")
+        val srcRow = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = android.view.Gravity.CENTER_VERTICAL }
+        srcRow.addView(TextView(this).apply {
+            text = getString(R.string.st_start_source); setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f)
+            setTextColor(app.mg4dash.ui.Themes.color(this@SettingsActivity, R.color.text_value))
+        }, LinearLayout.LayoutParams(0, -2, 1f))
+        val dp = resources.displayMetrics.density
+        val srcDrop = TextView(this).apply {
+            text = srcLabels[prefs.startSource.coerceIn(0, 5)] + "   ▾"; setTextSize(TypedValue.COMPLEX_UNIT_SP, 19f); gravity = android.view.Gravity.CENTER
+            setBackgroundResource(R.drawable.bg_chip); isSelected = true
+            setTextColor(androidx.core.content.ContextCompat.getColorStateList(this@SettingsActivity, R.color.chip_text))
+        }
+        srcDrop.setOnClickListener { v ->
+            app.mg4dash.ui.SourceMenu.choose(this, v, srcLabels, prefs.startSource) { prefs.startSource = it; srcDrop.text = srcLabels[it] + "   ▾" }
+        }
+        srcRow.addView(srcDrop, LinearLayout.LayoutParams((340 * dp).toInt(), (56 * dp).toInt()))
+        src.addView(srcRow, LinearLayout.LayoutParams(-1, -2).apply { topMargin = (8 * dp).toInt() })
+        text(src, getString(R.string.st_start_source_desc), 16f, R.color.text_title)
         val map = panel(homeR, getString(R.string.st_style_map).uppercase())
         text(map, getString(R.string.st_map_zoom), 18f, R.color.text_value)
         row(map, *choiceButtons(listOf("14", "15", "16", "17", "18"), { prefs.mapZoom - 14 }) { prefs.mapZoom = 14 + it })

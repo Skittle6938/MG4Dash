@@ -491,6 +491,11 @@
     <string name="en_clear_confirm">De curve „%1$s” wissen?</string>
     <string name="st_cc_stopped">Verbruikscurve: ook stilstaand</string>
     <string name="st_cc_stopped_desc">Eén punt per 2 minuten als de auto stilstaat (klimaat, accessoires). Uit: alleen rijden telt. Lang drukken op de curve om hem te wissen.</string>
+    <string name="st_audio_source">Audiobron</string>
+    <string name="st_start_source">Bron bij het starten</string>
+    <string name="st_src_auto">Automatisch</string>
+    <string name="st_src_car">Zoals de auto</string>
+    <string name="st_start_source_desc">Automatisch: neemt de laatst gekozen bron die nog beschikbaar is en keert ernaar terug zodra die terug is (telefoon opnieuw verbonden, USB-stick…).</string>
     <string name="aa_title">ANDROID AUTO</string>
     <string name="aa_ready">Telefoon verbonden · Tik om te openen</string>
     <string name="aa_waiting">Sluit je telefoon aan via USB</string>

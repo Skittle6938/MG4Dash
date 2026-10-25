@@ -491,6 +491,11 @@
     <string name="en_clear_confirm">Effacer la courbe « %1$s » ?</string>
     <string name="st_cc_stopped">Courbe de conso : aussi à l\'arrêt</string>
     <string name="st_cc_stopped_desc">Un point toutes les 2 minutes voiture arrêtée (clim, accessoires). Désactivé : seule la conduite compte. Appui long sur la courbe pour l\'effacer.</string>
+    <string name="st_audio_source">Source audio</string>
+    <string name="st_start_source">Source au démarrage</string>
+    <string name="st_src_auto">Automatique</string>
+    <string name="st_src_car">Comme la voiture</string>
+    <string name="st_start_source_desc">Automatique : reprend la dernière source choisie encore disponible, et y revient dès qu\'elle réapparaît (téléphone reconnecté, clé USB…).</string>
     <string name="aa_title">ANDROID AUTO</string>
     <string name="aa_ready">Téléphone connecté · Appuyer pour ouvrir</string>
     <string name="aa_waiting">Branchez votre téléphone en USB</string>
