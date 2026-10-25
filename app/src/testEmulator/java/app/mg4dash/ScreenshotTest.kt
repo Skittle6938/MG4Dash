@@ -578,7 +578,7 @@ class ScreenshotTest {
         root.measure(View.MeasureSpec.makeMeasureSpec(w, View.MeasureSpec.EXACTLY), View.MeasureSpec.makeMeasureSpec(h, View.MeasureSpec.EXACTLY))
         root.layout(0, 0, w, h)
         val bmp = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
-        root.draw(Canvas(bmp))
+        root.draw(Canvas(bmp)); roundClipped(root, bmp)
         val dir = File("build/screenshots").apply { mkdirs() }
         File(dir, "climate_icons_preview.png").outputStream().use { bmp.compress(Bitmap.CompressFormat.PNG, 100, it) }
     }
@@ -642,7 +642,7 @@ class ScreenshotTest {
                 while (t < at) { shadowOf(Looper.getMainLooper()).idleFor(16, TimeUnit.MILLISECONDS); t += 16; lay(); root.draw(Canvas(Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888))) }
                 val bmp = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
                 bmp.eraseColor(0xFF0B0F17.toInt())
-                root.draw(Canvas(bmp))
+                root.draw(Canvas(bmp)); roundClipped(root, bmp)
                 c.drawBitmap(bmp, 0f, (i * h).toFloat(), null)
             }
             val dir = File("build/screenshots").apply { mkdirs() }
@@ -707,7 +707,7 @@ class ScreenshotTest {
         root.measure(View.MeasureSpec.makeMeasureSpec(w, View.MeasureSpec.EXACTLY), View.MeasureSpec.makeMeasureSpec(h, View.MeasureSpec.EXACTLY))
         root.layout(0, 0, w, h)
         val bmp = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
-        root.draw(Canvas(bmp))
+        root.draw(Canvas(bmp)); roundClipped(root, bmp)
         File(File("build/screenshots").apply { mkdirs() }, name).outputStream().use { bmp.compress(Bitmap.CompressFormat.PNG, 100, it) }
     }
 
@@ -792,13 +792,52 @@ class ScreenshotTest {
         c.drawPath(android.graphics.Path().apply { moveTo(0f, n); lineTo(0f, n * 0.74f); lineTo(n * 0.22f, n * 0.58f); lineTo(n * 0.38f, n * 0.72f); lineTo(n * 0.58f, n * 0.52f); lineTo(n * 0.8f, n * 0.7f); lineTo(n, n * 0.6f); lineTo(n, n); close() }, p)
     }
 
+    /**
+     * Robolectric ne rogne pas les vues à leur contour (clipToOutline) : la carte et le lecteur
+     * sortaient à angles droits. On repeint les coins hors de l'arrondi avec la couleur prise juste
+     * à côté de la vue, comme sur la voiture.
+     */
+    private fun roundClipped(root: View, bmp: Bitmap) {
+        val outline = android.graphics.Outline()
+        val paint = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG)
+        val canvas = Canvas(bmp)
+        fun pixel(x: Int, y: Int) = bmp.getPixel(x.coerceIn(0, bmp.width - 1), y.coerceIn(0, bmp.height - 1))
+        fun walk(v: View, ox: Int, oy: Int) {
+            if (v.visibility != View.VISIBLE) return
+            val x = ox + v.left; val y = oy + v.top
+            if (v.clipToOutline && v.width > 0 && v.height > 0) {
+                outline.setEmpty()
+                v.outlineProvider?.getOutline(v, outline)
+                val r = outline.radius
+                if (r > 0f) {
+                    val l = x.toFloat(); val t = y.toFloat(); val rr = (x + v.width).toFloat(); val b = (y + v.height).toFloat()
+                    // Coin, point d'échantillonnage juste à l'extérieur de la vue
+                    listOf(
+                        Triple(android.graphics.RectF(l, t, l + r, t + r), android.graphics.PointF(l + r, t + r), pixel(x - 3, y + r.toInt())),
+                        Triple(android.graphics.RectF(rr - r, t, rr, t + r), android.graphics.PointF(rr - r, t + r), pixel(x + v.width + 2, y + r.toInt())),
+                        Triple(android.graphics.RectF(l, b - r, l + r, b), android.graphics.PointF(l + r, b - r), pixel(x - 3, y + v.height - r.toInt())),
+                        Triple(android.graphics.RectF(rr - r, b - r, rr, b), android.graphics.PointF(rr - r, b - r), pixel(x + v.width + 2, y + v.height - r.toInt())),
+                    ).forEach { (square, centre, color) ->
+                        val corner = android.graphics.Path().apply { addRect(square, android.graphics.Path.Direction.CW) }
+                        val round = android.graphics.Path().apply { addCircle(centre.x, centre.y, r, android.graphics.Path.Direction.CW) }
+                        corner.op(round, android.graphics.Path.Op.DIFFERENCE)
+                        paint.color = color
+                        canvas.drawPath(corner, paint)
+                    }
+                }
+            }
+            if (v is ViewGroup) for (i in 0 until v.childCount) walk(v.getChildAt(i), x - v.scrollX, y - v.scrollY)
+        }
+        walk(root, -root.left, -root.top)
+    }
+
     private fun save(root: View, name: String) {
         val cfg = root.resources.configuration
         val w = cfg.screenWidthDp.takeIf { it in 1000..1920 } ?: 1920; val h = cfg.screenHeightDp.takeIf { it in 400..720 } ?: 720
         root.measure(View.MeasureSpec.makeMeasureSpec(w, View.MeasureSpec.EXACTLY), View.MeasureSpec.makeMeasureSpec(h, View.MeasureSpec.EXACTLY))
         root.layout(0, 0, w, h)
         val bmp = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
-        root.draw(Canvas(bmp))
+        root.draw(Canvas(bmp)); roundClipped(root, bmp)
         val dir = File("build/screenshots").apply { mkdirs() }
         File(dir, name).outputStream().use { bmp.compress(Bitmap.CompressFormat.PNG, 100, it) }
     }
