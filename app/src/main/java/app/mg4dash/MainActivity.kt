@@ -831,6 +831,18 @@ class MainActivity : AppCompatActivity() {
         }
         b.mapFullscreen.setImageResource(if (on) R.drawable.ic_fullscreen_exit else R.drawable.ic_fullscreen)
         mapAppFull?.setImageResource(if (on) R.drawable.ic_fullscreen_exit else R.drawable.ic_fullscreen)
+        // Appli qui fixe sa taille au lancement (CarPlay sans fil MG4CPlay / DiPlay : la vidéo restait à
+        // la taille de la carte en plein écran, #52) : on la relance à la nouvelle taille
+        if (mapAppCn?.let { relaunchOnResize(it.packageName) } == true) b.mapCard.post { rebuildMapApp() }
+    }
+
+    private fun relaunchOnResize(pkg: String) = pkg.startsWith("com.shihab.diplay")
+
+    private fun rebuildMapApp() {
+        mapAppView?.let { app.mg4dash.ui.EmbeddedApp.release(it); b.mapCard.removeView(it) }
+        mapAppFull?.let { b.mapCard.removeView(it) }
+        mapAppView = null; mapAppCn = null; mapAppFull = null
+        applyMapApp(effectiveWidget() == 0)
     }
 
     private fun applyHomeWidget() {
@@ -931,8 +943,9 @@ class MainActivity : AppCompatActivity() {
             // Ramenée à la taille de la carte seulement quelques secondes après le lancement effectif
             // (au démarrage de la voiture, l'écran virtuel met parfois plus de 10 s à être prêt)
             var created: View? = null
+            val relaunches = relaunchOnResize(cn.packageName)
             val v = app.mg4dash.ui.EmbeddedApp.create(this, cn) {
-                created?.let { av -> av.postDelayed({ if (av.isAttachedToWindow) av.layoutParams = android.widget.FrameLayout.LayoutParams(-1, -1) }, 5000) }
+                if (!relaunches) created?.let { av -> av.postDelayed({ if (av.isAttachedToWindow) av.layoutParams = android.widget.FrameLayout.LayoutParams(-1, -1) }, 5000) }
             }
             if (v == null) {
                 app.mg4dash.ui.Toasts.show(this, R.string.map_app_unavailable, long = true)
@@ -943,7 +956,7 @@ class MainActivity : AppCompatActivity() {
             // la surface de l'appli d'après celle de son écran virtuel à la création ; créée à la taille
             // de la carte, l'appli restait ensuite coupée à droite en plein écran
             val screenW = resources.displayMetrics.widthPixels
-            b.mapCard.addView(v, b.mapCard.indexOfChild(b.widgetToggle), android.widget.FrameLayout.LayoutParams(screenW, -1))
+            b.mapCard.addView(v, b.mapCard.indexOfChild(b.widgetToggle), android.widget.FrameLayout.LayoutParams(if (relaunches) -1 else screenW, -1))
             created = v
             mapAppView = v; mapAppCn = cn
             // Accueil reconstruit (thème jour / nuit…) : l'ancien écran virtuel disparaît et Android
