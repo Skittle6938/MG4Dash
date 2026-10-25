@@ -59,6 +59,8 @@ object MediaHub {
     private var manager: MediaSessionManager? = null
     private var current: MediaController? = null
     private var lastArtKey: String? = null
+    /** Tentatives de lecture de la pochette du morceau en cours (0 : rien en attente). */
+    @Volatile private var artTries = 0
 
     fun start(context: Context) {
         appContext = context.applicationContext
@@ -503,9 +505,17 @@ object MediaHub {
         if (bmp == null && artUri == null && c.packageName == "com.saicmotor.radio" && !analog && title.isNotBlank() && key != lastArtKey) {
             lastArtKey = key
             io.launch { cachedDabArt(title)?.let { a -> if (_now.value.title == title && _now.value.packageName == "com.saicmotor.radio") _now.value = _now.value.copy(art = a) } }
-        } else if (bmp == null && artUri != null && key != lastArtKey) {
-            lastArtKey = key
-            io.launch { loadArt(artUri)?.let { a -> if (_now.value.title == title) _now.value = _now.value.copy(art = a) } }
+        } else if (bmp == null && artUri != null && (key != lastArtKey || (np.art == null && artTries in 1 until 10))) {
+            // Bluetooth au démarrage : la pochette n'est pas encore lisible (la liaison image du téléphone
+            // arrive après le titre) et on ne réessayait qu'au morceau suivant. On réessaie toutes les 3 s.
+            if (key != lastArtKey) artTries = 0
+            lastArtKey = key; artTries++
+            val tries = artTries
+            io.launch {
+                val a = loadArt(artUri)
+                if (a != null) { artTries = 0; if (_now.value.title == title) _now.value = _now.value.copy(art = a) }
+                else if (tries < 10) { Log.i(TAG, "album art not ready ($tries/10), retrying"); main.postDelayed({ if (lastArtKey == key && _now.value.art == null) publish() }, 3_000) }
+            }
         } else if (bmp != null) {
             lastArtKey = key
         }
