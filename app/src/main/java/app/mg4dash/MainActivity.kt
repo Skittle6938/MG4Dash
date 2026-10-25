@@ -95,7 +95,9 @@ class MainActivity : AppCompatActivity() {
         else if (!mapLayout && !simpleMode && !Dock.vertical(this)) compactEnergyCard()
         // Balayage vertical (issue #6) : carte musique = source suivante / précédente ;
         // widget du bas (style Complet) = page suivante / précédente
+        // Haut / bas : source ; gauche / droite : morceau suivant / précédent, comme les boutons
         app.mg4dash.ui.SwipeBox.wrap(b.mediaCard, vertical = true, horizontal = false) { MediaHub.cycleSource(it) }
+            .onHorizontal = { if (it > 0) MediaHub.next() else MediaHub.previous() }
         if (!mapLayout) {
             // Météo (style Complet) : balayer ou toucher les points = prévisions par heure / par jour
             weatherDots = TextView(this).apply {
