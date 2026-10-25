@@ -1304,21 +1304,25 @@ class MainActivity : AppCompatActivity() {
             amps?.let { a -> if (a > 0f) maxAmps = maxOf(maxAmps ?: a, a) }
             // Une ligne : tension · tension mini | courant · courant maxi (mini et maxi légèrement estompés, #29)
             val dim = color(R.color.text_sub)
-            fun line(now: String?, extreme: String?): CharSequence = android.text.SpannableStringBuilder().apply {
+            fun line(now: CharSequence?, extreme: String?): CharSequence = android.text.SpannableStringBuilder().apply {
                 append(now ?: "—")
-                extreme?.let { val st = length; append("  ·  $it"); setSpan(android.text.style.ForegroundColorSpan(dim), st, length, 0) }
+                extreme?.let { val st = length; append(" $it"); setSpan(android.text.style.ForegroundColorSpan(dim), st, length, 0)
+                    setSpan(android.text.style.RelativeSizeSpan(0.7f), st + it.lastIndexOf(' ') + 2, length, 0) }
+            }
+            // Unités V et A à demi-taille, comme kW et kWh/100 (#29)
+            fun half(t: String): android.text.SpannableString = android.text.SpannableString(t).apply {
+                setSpan(android.text.style.RelativeSizeSpan(0.7f), t.lastIndexOf(' ') + 1, t.length, 0)
             }
             val ampsTxt = amps?.let { a ->
-                val txt = String.format(Locale.getDefault(), "%.1f A", kotlin.math.abs(a))
-                if (a < -0.5f) android.text.SpannableString(txt).apply {
-                    setSpan(android.text.style.ForegroundColorSpan(color(R.color.accent_energy)), 0, txt.length, 0)
-                } else txt
+                half(String.format(Locale.getDefault(), "%.1f A", kotlin.math.abs(a))).apply {
+                    if (a < -0.5f) setSpan(android.text.style.ForegroundColorSpan(color(R.color.accent_energy)), 0, length, 0)
+                }
             }
             tv.text = android.text.SpannableStringBuilder()
-                .append(line(volts?.let { String.format(Locale.getDefault(), "%.0f V", it) }, minVolts?.let { String.format(Locale.getDefault(), "%.0f min", it) }))
+                .append(line(volts?.let { half(String.format(Locale.getDefault(), "%.0f V", it)) }, minVolts?.let { String.format(Locale.getDefault(), "%.0f min", it) }))
                 .append(android.text.SpannableString("   |   ").apply { setSpan(android.text.style.ForegroundColorSpan(color(R.color.text_disabled)), 0, length, 0) })
                 .append(ampsTxt ?: "—").append(maxAmps?.let { m ->
-                    android.text.SpannableString(String.format(Locale.getDefault(), "  ·  %.1f max", m)).apply { setSpan(android.text.style.ForegroundColorSpan(dim), 0, length, 0) }
+                    android.text.SpannableString(String.format(Locale.getDefault(), " %.1f max", m)).apply { setSpan(android.text.style.ForegroundColorSpan(dim), 0, length, 0); setSpan(android.text.style.RelativeSizeSpan(0.7f), length - 3, length, 0) }
                 } ?: "")
         } else powerExtra?.let { tv ->
             val parts = mutableListOf<CharSequence>()
