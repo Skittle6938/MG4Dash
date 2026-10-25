@@ -24,6 +24,8 @@ object StarKey {
     private const val JOY_LEFT = 299
     private const val JOY_RIGHT = 300
     private const val JOY_OK = 301
+    /** Volume : haut / bas du joystick (297 / 298) et touches volume Android (24 / 25). */
+    private val VOLUME_KEYS = setOf(297, 298, 24, 25)
     /** Settings.System : fonction du « * » gauche ; 3 = caméra de recul / 360 (CarHardKey SAIC). */
     private const val STAR_FUNCTION = "star_key_function"
     /** Même chose pour le « * » droit. */
@@ -58,6 +60,9 @@ object StarKey {
                     if (down && !long) MediaHub.wheelPressed(code == JOY_RIGHT)
                     else if (!down && !long && MediaHub.wheelReleased(code == JOY_RIGHT)) return
                 }
+                // Volume (haut / bas du volant) : le launcher d'origine relance la radio en pause, MG4Dash
+                // revient aussitôt à l'appli qui jouait
+                if (down && code in VOLUME_KEYS) MediaHub.wheelPressed(null)
                 if (Firmware.gen == Firmware.Gen.SWI173 && !down && !long && code in JOY_LEFT..JOY_OK &&
                     MediaHub.ownPlayerShown() && !MediaHub.shownHandlesWheelKeys()) {
                     when (code) {

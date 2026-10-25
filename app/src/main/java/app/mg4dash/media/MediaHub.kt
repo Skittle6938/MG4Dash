@@ -321,14 +321,16 @@ object MediaHub {
 
     private fun handlesWheelKeys(pkg: String?) = pkg == "com.drivehub.diauto.mg4" || pkg == "app.mg4aa"
 
-    // Gauche / droite du volant sur le lecteur d'une autre appli : le launcher d'origine ne connaît pas
-    // ces applis et envoie le bouton à la dernière source voiture (souvent la radio), qui reprend le son.
-    // On note l'appli à l'appui pour la remettre aussitôt (voir watchAudioSource).
+    // Boutons du volant sur le lecteur d'une autre appli : le launcher d'origine ne connaît pas ces applis
+    // et agit sur la dernière source voiture (souvent la radio), qui reprend le son : gauche / droite lui
+    // font changer de station, haut / bas (volume) la relancent si elle est en pause. On note l'appli à
+    // l'appui pour la remettre aussitôt (voir watchAudioSource).
     @Volatile private var wheelFrom: String? = null
     @Volatile private var wheelAt = 0L
-    @Volatile private var wheelForward = true
+    /** true / false : suivant / précédent (station à rétablir) ; null : volume (rien à rétablir). */
+    @Volatile private var wheelForward: Boolean? = null
 
-    fun wheelPressed(forward: Boolean) {
+    fun wheelPressed(forward: Boolean?) {
         if (!otherAppShown()) return
         wheelFrom = current?.packageName
         wheelAt = android.os.SystemClock.uptimeMillis()
@@ -489,7 +491,8 @@ object MediaHub {
                             wheelFrom = null
                             Log.i(TAG, "steering wheel key sent to the radio by the stock launcher: back to $back")
                             sourcePkg = src
-                            undoRadioSkip(wheelForward) { switchTo(back) }
+                            val fwd = wheelForward
+                            if (fwd != null) undoRadioSkip(fwd) { switchTo(back) } else main.post { switchTo(back) }
                             return@newProxyInstance null
                         }
                         main.post {
