@@ -476,7 +476,12 @@ object MediaHub {
                         val type = try {
                             (attrs?.javaClass?.getMethod("getBundle")?.invoke(attrs) as? android.os.Bundle)?.getInt("key_car_source_type", -1) ?: -1
                         } catch (_: Throwable) { -1 }
+                        // DiAuto se présente à la voiture comme l'Android Auto d'AllGo (le launcher d'origine ne lui
+                        // envoie alors plus les boutons du volant) : sans téléphone sur AllGo, c'est le lecteur DiAuto
+                        val diAuto = if (pkg == "com.allgo.app.androidauto" && projectionLive != true)
+                            lastCandidates.firstOrNull { handlesWheelKeys(it.packageName) }?.packageName else null
                         val src = when {
+                            diAuto != null -> diAuto
                             pkg == "com.saicmotor.media" && type == 5 -> "com.android.bluetooth"
                             pkg == "com.allgo.app.androidauto" -> AA_MBS.also { carPlay = false }
                             pkg == "com.allgo.carplay.service" -> AA_MBS.also { carPlay = true }
