@@ -167,14 +167,16 @@ object MediaHub {
     private val goneSince = mutableMapOf<String, Long>()
 
     /**
-     * Toutes les 2 s. Automatique : la première source de l'historique disponible depuis 5 s devient la
-     * source, si la source actuelle est moins bien placée ou absente depuis 10 s. Source fixe : une seule
-     * bascule au démarrage. CarPlay n'est jamais une cible : AllGo ne lui rend pas l'audio sur commande.
+     * Toutes les 2 s. Dans tous les modes, une source de la voiture disparue depuis 3 s est remplacée
+     * (automatique : par la première de l'historique ; sinon par la radio ou la source fixe). Automatique :
+     * la première source de l'historique disponible depuis 5 s devient la source si l'actuelle est moins bien
+     * placée. Source fixe : une seule bascule au démarrage. CarPlay n'est jamais une cible : AllGo ne lui
+     * rend pas l'audio sur commande.
      */
     private fun autoSource() {
         val p = prefs() ?: return
+        if (BuildConfig.MOCK) return
         val mode = p.startSource
-        if (mode == 1 || BuildConfig.MOCK) return
         val now = android.os.SystemClock.uptimeMillis()
         val avail = availableSources()
         for (pkg in listOf(RADIO, "com.android.bluetooth", "com.saicmotor.media", AA_MBS)) {
@@ -184,21 +186,29 @@ object MediaHub {
         fun stable(pkg: String) = (seenSince[pkg]?.let { now - it >= 5_000 } == true) && !(pkg == AA_MBS && carPlay)
         val cur = sourcePkg ?: return
         if (now - autoSwitchAt < 10_000 || now - startedAt < 5_000) return
+        // Source de la voiture disparue (téléphone débranché…) depuis 3 s : quel que soit le réglage, on
+        // bascule, sinon la voiture restait sur une source muette et les boutons du volant n'agissaient
+        // plus (#36). 3 s suffisent : la disparition vient de l'état de connexion, pas d'un clignotement.
+        val curGone = goneSince[cur]?.let { now - it >= 3_000 } == true
+        val order = when (mode) {
+            0 -> (p.sourceHistory + RADIO).distinct()
+            1 -> listOf(RADIO)
+            else -> listOf(listOf(RADIO, "com.android.bluetooth", "com.saicmotor.media", AA_MBS)[mode - 2], RADIO).distinct()
+        }
+        if (curGone) { order.firstOrNull { it != cur && it in avail && !(it == AA_MBS && carPlay) }?.let { autoSwitch(it, "$cur gone") }; return }
+        if (mode == 1) return
         if (mode >= 2) {
             if (startDone) return
-            val want = listOf(RADIO, "com.android.bluetooth", "com.saicmotor.media", AA_MBS)[mode - 2]
-            if (now - startedAt > 30_000) { startDone = true; return }
-            if (want == cur) { startDone = true; return }
+            val want = order.first()
+            if (now - startedAt > 30_000 || want == cur) { startDone = true; return }
             if (stable(want)) { startDone = true; autoSwitch(want, "startup source") }
             return
         }
-        val order = (p.sourceHistory + RADIO).distinct()
         val target = order.firstOrNull { stable(it) } ?: return
         if (target == cur) return
         // Source actuelle jamais choisie (historique vide, première utilisation) : on ne la quitte que si elle disparaît
         val curRank = order.indexOf(cur).let { if (it < 0) -1 else it }
-        val curGone = goneSince[cur]?.let { now - it >= 10_000 } == true
-        if (order.indexOf(target) < curRank || curGone) autoSwitch(target, if (curGone) "$cur gone" else "$target back")
+        if (order.indexOf(target) < curRank) autoSwitch(target, "$target back")
     }
 
     private var autoTarget: String? = null

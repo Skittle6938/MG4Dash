@@ -390,9 +390,9 @@ class SimpleHome(private val a: AppCompatActivity) {
         chipAuto.isSelected = s.autoOn == true
         chipEco.isSelected = s.ecoOn == true
         val parts = VehicleState.flowParts(s.fanDirection)
-        chipFace.isSelected = parts?.get(0) == true
-        chipFeet.isSelected = parts?.get(1) == true
-        chipScreen.isSelected = parts?.get(2) == true
+        chipFace.isSelected = on && parts?.get(0) == true
+        chipFeet.isSelected = on && parts?.get(1) == true
+        chipScreen.isSelected = on && parts?.get(2) == true
         chipRecirc.isSelected = s.recirc == 2
         (chipRecirc.getChildAt(0) as ImageView).setImageResource(if (s.recirc == 0) R.drawable.ic_air_recirc else R.drawable.ic_air_outside)
         recircAuto.visibility = if (s.recirc == 2) View.VISIBLE else View.GONE
