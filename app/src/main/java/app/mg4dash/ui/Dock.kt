@@ -341,9 +341,11 @@ object Dock {
     private fun customAa(activity: Activity): android.content.ComponentName? {
         val p = Prefs(activity)
         val cn = p.dockAaTarget?.let { android.content.ComponentName.unflattenFromString(it) } ?: return null
-        // DiAuto renommé MG4 AA (nouveau paquet) : le bouton suit l'appli si l'ancienne n'est plus là
-        if (cn.packageName == "com.drivehub.diauto.mg4" && activity.packageManager.getLaunchIntentForPackage(cn.packageName) == null) {
-            activity.packageManager.getLaunchIntentForPackage("app.mg4aa")?.component?.let { p.dockAaTarget = it.flattenToString(); return it }
+        // DiAuto (com.drivehub.diauto.mg4) a un temps porté un autre nom (app.mg4aa) : le bouton suit celui des
+        // deux qui est installé si l'autre a été désinstallé
+        val twin = mapOf("com.drivehub.diauto.mg4" to "app.mg4aa", "app.mg4aa" to "com.drivehub.diauto.mg4")[cn.packageName]
+        if (twin != null && activity.packageManager.getLaunchIntentForPackage(cn.packageName) == null) {
+            activity.packageManager.getLaunchIntentForPackage(twin)?.component?.let { p.dockAaTarget = it.flattenToString(); return it }
         }
         return cn
     }
