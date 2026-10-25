@@ -69,7 +69,7 @@ Swipe or tap it to switch between its pages:
 ## Map card
 
 - **Map**: follows the car, north up or heading up (tap the recenter button again), default zoom 14 to 18 and colours (auto, light, dark) in Settings › Home. The zoom and full screen buttons hide after a few seconds. Without data connection the map stays as long as the area is in the tile cache, then the card switches to consumption (can be turned off).
-- **Consumption**: the button at the top right switches map → consumption → shortcuts. Period menu: since the last charge, current trip (one point every 0.5 km, one per minute when stopped, from the energy measured by MG4Dash) or last 12 months (one point per trip). The dashed line is the average, with its value.
+- **Consumption**: the button at the top right switches map → consumption → shortcuts. Period menu: since the last charge, current trip (one point per km, one every 2 minutes when stopped, from the energy measured by MG4Dash) or last 12 months (one point per trip). The dashed line is the average, with its value.
 - **Shortcuts**: 3 rows of apps or Home Assistant actions (scripts, automations, scenes, gate, garage door…). Tap an empty slot or long press a slot to change it; the Home Assistant address and token are set in Settings › Connections. The shortcuts page can be turned off.
 - **Full screen**: the button below the zoom enlarges the map over the whole screen; any bar button brings it back.
 

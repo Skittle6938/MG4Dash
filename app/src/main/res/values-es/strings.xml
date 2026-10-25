@@ -478,8 +478,8 @@
     <string name="st_hide_saic_climate_desc">Cuando MG4Dash enciende el clima, el launcher original abre su pantalla de clima: MG4Dash vuelve delante.</string>
     <string name="en_trips_note">%1$d trayectos, un punto por trayecto · media %2$s (discontinua)</string>
     <string name="en_trips_wait">La curva se llena trayecto a trayecto (al menos 2 km por trayecto).</string>
-    <string name="en_curve_note">Un punto cada 0,5 km (uno por minuto parado) · media %1$s (discontinua)</string>
-    <string name="en_curve_wait">La curva se llena al conducir, un punto cada 0,5 km.</string>
+    <string name="en_curve_note">Un punto por km (uno cada 2 minutos parado) · media %1$s (discontinua)</string>
+    <string name="en_curve_wait">La curva se llena al conducir, un punto por km.</string>
     <string name="projection_no_phone">Ningún teléfono conectado a Android Auto o CarPlay</string>
     <string name="st_power_va">Tensión y corriente bajo la barra de potencia</string>
     <string name="st_power_va_desc">Actuales, mínimo y máximo del trayecto. Desactivado: potencia y consumo medio más grandes.</string>
@@ -490,7 +490,7 @@
     <string name="en_clear_curve">Borrar la curva</string>
     <string name="en_clear_confirm">¿Borrar la curva «%1$s»?</string>
     <string name="st_cc_stopped">Curva de consumo: también parado</string>
-    <string name="st_cc_stopped_desc">Un punto por minuto con el coche parado (clima, accesorios). Desactivado: solo cuenta la conducción. Pulsación larga en la curva de la página Energía para borrarla.</string>
+    <string name="st_cc_stopped_desc">Un punto cada 2 minutos con el coche parado (clima, accesorios). Desactivado: solo cuenta la conducción. Pulsación larga en la curva para borrarla.</string>
     <string name="aa_title">ANDROID AUTO</string>
     <string name="aa_ready">Teléfono conectado · Pulse para abrir</string>
     <string name="aa_waiting">Conecte su teléfono por USB</string>

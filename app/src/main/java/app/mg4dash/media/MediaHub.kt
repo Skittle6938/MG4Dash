@@ -88,6 +88,7 @@ object MediaHub {
             }, 1_000)
         }
         bindAndroidAuto()
+        watchProjection(context.applicationContext)
         watchAudioSource(context)
         reevaluate()
         // Filet de sécurité : relecture régulière du lecteur (titre, pochette, état), au cas où un
@@ -132,7 +133,31 @@ object MediaHub {
     }
 
     /** Android Auto connecté : son lecteur existe et a un état ou un titre. */
+    /**
+     * Téléphone en projection selon AllGo (relu toutes les 5 s) : false = aucun ; null = inconnu.
+     * Débranché, le lecteur RemoteUI gardait son dernier titre : la source CarPlay / Android Auto restait
+     * proposée et menait à un écran noir (#36).
+     */
+    @Volatile private var projectionLive: Boolean? = null
+
+    private fun watchProjection(ctx: Context) {
+        io.launch {
+            while (true) {
+                val s = app.mg4dash.system.Projection.session(ctx)
+                val live = (s as? app.mg4dash.system.Projection.Session.Read)?.let { it.target != null }
+                if (s is app.mg4dash.system.Projection.Session.Read && s.target != null) carPlay = s.target == app.mg4dash.system.Apps.CARPLAY
+                if (live != projectionLive) {
+                    Log.i(TAG, "projection: ${if (live == null) "unknown" else if (live) "phone connected" else "no phone"}")
+                    projectionLive = live
+                    main.post { reevaluate() }
+                }
+                kotlinx.coroutines.delay(5_000)
+            }
+        }
+    }
+
     fun androidAutoAvailable(): Boolean {
+        if (projectionLive == false) return false
         val c = browserControllers[AA_MBS] ?: return false
         val st = c.playbackState?.state ?: PlaybackState.STATE_NONE
         return st != PlaybackState.STATE_NONE || c.metadata != null || sourcePkg == AA_MBS
@@ -365,7 +390,8 @@ object MediaHub {
      */
     private fun reevaluate() {
         val active = try { manager?.getActiveSessions(null).orEmpty() } catch (_: SecurityException) { emptyList() }
-        val candidates = active + browserControllers.values
+        // Plus de téléphone en projection : le lecteur CarPlay / Android Auto n'est plus proposé (#36)
+        val candidates = (active + browserControllers.values).filter { projectionLive != false || !isAndroidAuto(it.packageName) }
         lastCandidates = candidates
         candidates.forEach { c ->
             if (watched.add(c.sessionToken)) c.registerCallback(callback, main)
@@ -385,6 +411,7 @@ object MediaHub {
         // Un lecteur peut avoir deux contrôleurs (session active, navigateur média) : on préfère celui
         // qui a un titre, puis celui qui a un état, puis le navigateur.
         fun bestFor(pkg: String): MediaController? {
+            if (projectionLive == false && isAndroidAuto(pkg)) return null
             val all = candidates.filter { it.packageName == pkg }
             return all.firstOrNull { it.metadata != null } ?: all.firstOrNull { it.playbackState != null }
                 ?: browserControllers[pkg] ?: all.firstOrNull()
@@ -399,7 +426,7 @@ object MediaHub {
             ?: BROWSERS.firstNotNullOfOrNull { browserControllers[it.packageName] }
         if (chosen?.sessionToken != current?.sessionToken) {
             current = chosen
-            Log.i(TAG, "player shown: ${chosen?.packageName ?: "aucun"}")
+            Log.i(TAG, "player shown: ${chosen?.packageName ?: "none"}")
         }
         publish()
     }
@@ -706,26 +733,17 @@ object MediaHub {
      */
     private fun selectProjectionSource() {
         val ctx = appContext ?: return
-        // Ni AllGo ni le système audio SAIC n'ont de commande « donner la source à CarPlay » : CarPlay
-        // ne redemande l'audio que s'il récupère le focus audio. On met d'abord la radio en pause pour
-        // qu'elle le libère (#36, essai), puis la touche lecture de la projection comme le launcher d'origine.
-        val radioPlaying = sourcePkg == RADIO
-        if (radioPlaying) {
-            Log.i(TAG, "CarPlay: pausing the radio first")
-            if (legacyRadio) radioCommand { SaicRadio.pause() }
-            else browserControllers[RADIO]?.transportControls?.pause()
-        }
-        main.postDelayed({
-            Thread {
-                if (!app.mg4dash.system.Projection.mediaKey(ctx, app.mg4dash.system.Projection.KEY_SELECT_SOURCE))
-                    systemMediaKey(KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE)
-            }.start()
-        }, if (radioPlaying) 600L else 0L)
+        // Touche lecture de la projection, comme le launcher d'origine. Après la radio, CarPlay ne reprend
+        // pas l'audio tout seul, ni ici ni avec le launcher d'origine (#36) : limite d'AllGo.
+        Thread {
+            if (!app.mg4dash.system.Projection.mediaKey(ctx, app.mg4dash.system.Projection.KEY_SELECT_SOURCE))
+                systemMediaKey(KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE)
+        }.start()
         // Journal de #36 : la voiture ne rend l'audio à CarPlay que quand CarPlay s'ouvre à l'écran ;
         // on note si la touche a suffi (pas d'ouverture forcée : refusée, l'écran CarPlay clignotait)
         main.postDelayed({
             Log.i(TAG, "CarPlay audio after source key: ${if (sourcePkg == AA_MBS) "taken" else "still on $sourcePkg"}")
-        }, 2600)
+        }, 2000)
     }
 
     /** Touche média vers CarPlay ; à défaut de service, touche média du système. */
