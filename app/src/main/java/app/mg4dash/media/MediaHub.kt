@@ -313,6 +313,13 @@ object MediaHub {
         it != RADIO && it != "com.android.bluetooth" && it != "com.saicmotor.media" && !isAndroidAuto(it) && !it.startsWith("com.allgo.")
     } == true
 
+    /**
+     * Appli affichée qui lit elle-même les boutons du volant (DiAuto MG4+ et son ancien nom) :
+     * MG4Dash ne les lui renvoie pas, sinon chaque appui sauterait deux morceaux.
+     */
+    fun shownHandlesWheelKeys(): Boolean =
+        current?.packageName.let { it == "com.drivehub.diauto.mg4" || it == "app.mg4aa" }
+
     fun isAndroidAuto(pkg: String?) = pkg == AA_MBS || pkg?.startsWith("com.allgo.app.androidauto") == true
 
     /** Puce USB / BT : bascule entre le Bluetooth et l'USB, en partant de ce qui est affiché. */
