@@ -568,6 +568,7 @@ object MediaHub {
             if (watched.add(c.sessionToken)) c.registerCallback(callback, main)
         }
         val playing = candidates.firstOrNull { it.playbackState?.state == PlaybackState.STATE_PLAYING }
+        pauseOthersOnStart(candidates)
         val source = effectiveSource(candidates)
         // Radio de l'ancien SDK : aucun contrôleur, on l'affiche d'après la source de la voiture, le
         // choix sur la carte, ou parce qu'elle joue alors qu'aucun autre lecteur ne joue.
@@ -603,6 +604,30 @@ object MediaHub {
     }
 
     @Volatile private var lastCandidates: List<MediaController> = emptyList()
+
+    /** Lecteurs d'applis qui jouaient au dernier passage. */
+    private val appsPlaying = mutableSetOf<String>()
+
+    /**
+     * Une appli se met à jouer (lancée depuis son écran, ou choisie comme source) : les autres applis qui
+     * jouaient encore sont mises en pause. La voiture n'a pas de source pour elles et certaines ignorent la
+     * perte du focus audio, d'où DiAuto et SimpMusic qui jouaient ensemble.
+     */
+    private fun pauseOthersOnStart(candidates: List<MediaController>) {
+        fun isApp(pkg: String) = pkg != RADIO && pkg != "com.android.bluetooth" && pkg != "com.saicmotor.media" &&
+            !isAndroidAuto(pkg) && !pkg.startsWith("com.allgo.") && pkg != appContext?.packageName
+        val now = candidates.filter { isApp(it.packageName) && it.playbackState?.state == PlaybackState.STATE_PLAYING }
+        val nowPkgs = now.map { it.packageName }.toSet()
+        val started = nowPkgs - appsPlaying
+        if (started.size == 1 && nowPkgs.size > 1) {
+            val keep = started.first()
+            now.filter { it.packageName != keep }.distinctBy { it.packageName }.forEach {
+                Log.i(TAG, "pausing ${it.packageName} ($keep started)")
+                it.transportControls.pause()
+            }
+        }
+        appsPlaying.clear(); appsPlaying.addAll(nowPkgs)
+    }
 
     /**
      * Un même lecteur peut avoir deux contrôleurs (session active et navigateur média) : sur la
