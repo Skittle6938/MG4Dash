@@ -16,12 +16,10 @@ import app.mg4dash.R
 import app.mg4dash.databinding.ActivityMainBinding
 
 /**
- * Présentation de la carte média de l'accueil (réglage « Lecteur ») :
- *  - Immersif (par défaut) : comme le lecteur d'Android Auto, la pochette nette couvre la carte,
- *    prolongée par la couleur de son bord quand elle n'a pas le format de la carte ; titre et artiste
- *    par-dessus, bouton lecture en pilule et barre de progression à la couleur vive de l'image ;
- *  - Classique : pochette carrée à gauche, boutons en pavés à la largeur de la colonne (rien ne
- *    dépasse, ils étaient coupés à droite quand la pochette prenait toute la hauteur).
+ * Présentation de la carte média de l'accueil, comme le lecteur d'Android Auto : la pochette nette
+ * couvre la carte, prolongée par la couleur de son bord quand elle n'a pas le format de la carte ;
+ * titre et artiste par-dessus, bouton lecture en pilule et barre de progression à la couleur vive
+ * de l'image. (La présentation « Classique » a été retirée.)
  */
 class MediaStyle private constructor(
     private val a: Activity, private val play: ImageView, private val progress: android.widget.ProgressBar?,
@@ -96,24 +94,6 @@ class MediaStyle private constructor(
         frame.addView(over, FrameLayout.LayoutParams(-1, -1))
         info.addView(frame, LinearLayout.LayoutParams(0, -1, 1f))
         update(null)
-    }
-
-    private fun buildClassic(b: ActivityMainBinding) {
-        val texts = b.mediaInfo.getChildAt(1) as? LinearLayout ?: return
-        val old = b.mediaPlay.parent as? LinearLayout ?: return
-        texts.removeView(old)
-        val row = LinearLayout(a).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL }
-        val light = Themes.isLight(a)
-        fun pad(v: View, w: Float, h: Int, bg: Int, r: Int) {
-            detach(v)
-            v.background = GradientDrawable().apply { cornerRadius = dp(r).toFloat(); setColor(bg) }
-            row.addView(v, LinearLayout.LayoutParams(0, dp(h), w).apply { leftMargin = dp(5); rightMargin = dp(5) })
-        }
-        val soft = if (light) 0x14000000 else 0x22FFFFFF
-        pad(b.mediaPrev, 1f, 70, soft, 18)
-        pad(b.mediaPlay, 1.25f, 82, Themes.color(a, R.color.accent_action), 22)
-        pad(b.mediaNext, 1f, 70, soft, 18)
-        texts.addView(row, LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(10) })
     }
 
     /** Fondu posé sur le bord gauche de l'image (calée à droite) : la couleur du bord s'y prolonge sans cassure. */
@@ -217,15 +197,12 @@ class MediaStyle private constructor(
     }
 
     companion object {
-        /** 0 = Immersif (défaut), 1 = Classique. */
-        fun apply(a: Activity, b: ActivityMainBinding, style: Int): MediaStyle? = MediaStyle(a, b.mediaPlay, b.mediaProgress).apply {
-            try {
-                if (style == 0) {
-                    b.mediaAlbum.visibility = View.GONE
-                    buildImmersive(b.mediaCard, b.mediaCard.getChildAt(0), b.mediaInfo, b.mediaTitle, b.mediaArtist, b.mediaPrev, b.mediaNext)
-                } else buildClassic(b)
-            } catch (e: Exception) { app.mg4dash.system.Log.w("Media", "player style: ${e.message}") }
-        }.takeIf { style == 0 }
+        fun apply(a: Activity, b: ActivityMainBinding): MediaStyle? = try {
+            MediaStyle(a, b.mediaPlay, b.mediaProgress).apply {
+                b.mediaAlbum.visibility = View.GONE
+                buildImmersive(b.mediaCard, b.mediaCard.getChildAt(0), b.mediaInfo, b.mediaTitle, b.mediaArtist, b.mediaPrev, b.mediaNext)
+            }
+        } catch (e: Exception) { app.mg4dash.system.Log.w("Media", "player style: ${e.message}"); null }
 
         /** Mode épuré : même lecteur Immersif, sans barre de progression. */
         fun immersive(a: Activity, card: LinearLayout, head: View, info: LinearLayout, title: TextView, artist: TextView,

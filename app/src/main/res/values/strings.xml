@@ -483,9 +483,6 @@
     <string name="projection_no_phone">No phone connected for Android Auto or CarPlay</string>
     <string name="st_power_va">Voltage and current under the power bar</string>
     <string name="st_power_va_desc">Current, lowest and highest of the trip. Off: power and average consumption shown bigger.</string>
-    <string name="st_media_style">Player on the home screen</string>
-    <string name="st_media_immersive">Immersive</string>
-    <string name="st_media_classic">Classic</string>
     <string name="fx_pumpkin">Halloween pumpkin</string>
     <string name="en_clear_curve">Clear the curve</string>
     <string name="en_clear_confirm">Clear the \"%1$s\" curve?</string>

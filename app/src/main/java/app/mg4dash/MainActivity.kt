@@ -123,7 +123,7 @@ class MainActivity : AppCompatActivity() {
         setupWeatherClock()
         wireClimate()
         wireMedia()
-        mediaStyle = app.mg4dash.ui.MediaStyle.apply(this, b, prefs.mediaStyle)
+        mediaStyle = app.mg4dash.ui.MediaStyle.apply(this, b)
         wireCards()
         observe()
         warmUpStockLauncherIfNeeded()
