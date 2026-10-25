@@ -135,12 +135,6 @@ class ScreenshotTest {
         }
     }
 
-    /** Lecteur « Classique » (réglage Lecteur de l'accueil). */
-    @Test fun homeClassicPlayer() {
-        org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE).edit().putInt("media_style", 1).commit()
-        shoot(MainActivity::class.java, "home_classic_player.png")
-    }
-
     /** Popup de mise à jour : toujours là après la reconstruction de l'accueil (passage clair / sombre). */
     @Test fun updatePromptSurvivesRecreate() {
         val f = app.mg4dash.ui.UpdatePrompt::class.java.getDeclaredField("pending").apply { isAccessible = true }
@@ -218,7 +212,7 @@ class ScreenshotTest {
         shoot(SettingsActivity::class.java, "settings_bottom_bar.png")
     }
 
-    @Test fun home() = shoot(MainActivity::class.java, "home.png")
+    @Test fun home() = shoot(MainActivity::class.java, "home.png", bluetooth("Midnight Boulevard", "Velvet Avenue", "Neon Skyline", neonSkyline()))
     @Test fun climate() = shoot(ClimateActivity::class.java, "climate.png")
     @Test fun vehicle() = shoot(app.mg4dash.pages.VehicleActivity::class.java, "vehicle.png")
     @Test fun energy() = shoot(app.mg4dash.pages.EnergyActivity::class.java, "energy.png")
@@ -226,7 +220,7 @@ class ScreenshotTest {
     @Test fun homeLight() {
         val ctx = org.robolectric.RuntimeEnvironment.getApplication()
         ctx.getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE).edit().putInt("theme_mode", 2).apply()
-        shoot(MainActivity::class.java, "home_light.png")
+        shoot(MainActivity::class.java, "home_light.png", androidAuto("Salt & Sunlight", "Coastline Club", "Golden Hours", goldenHours()))
     }
 
     @Test fun climateLight() {
@@ -264,7 +258,7 @@ class ScreenshotTest {
         val ctx = org.robolectric.RuntimeEnvironment.getApplication()
         ctx.getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE).edit()
             .putInt("theme_bg", 2).putInt("theme_accent", 4).apply()
-        shoot(MainActivity::class.java, "home_theme_charcoal_orange.png")
+        shoot(MainActivity::class.java, "home_theme_charcoal_orange.png", bluetooth("Polar Drift", "Aurora Drive", "Northern Lights", northernLights()))
     }
 
     @Test fun energyThemed() {
@@ -288,7 +282,7 @@ class ScreenshotTest {
             .putString("sc_100", "ha|cover.gate|Gate")
             .putString("sc_101", "ha|cover.garage_door|Garage")
             .apply()
-        shoot(MainActivity::class.java, "home_simple.png")
+        shoot(MainActivity::class.java, "home_simple.png", androidAuto("Polar Drift", "Aurora Drive", "Northern Lights", northernLights()))
     }
 
     @Test fun phone() = shoot(app.mg4dash.pages.PhoneActivity::class.java, "phone.png")
@@ -358,7 +352,7 @@ class ScreenshotTest {
     @Test fun homeRightHand() {
         org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE).edit()
             .putInt("theme_mode", 1).putBoolean("force_rhd", true).commit()
-        shoot(MainActivity::class.java, "home_right_hand.png")
+        shoot(MainActivity::class.java, "home_right_hand.png", androidAuto("Midnight Boulevard", "Velvet Avenue", "Neon Skyline", neonSkyline()))
     }
 
     @Test fun homeMapRightHand() {
@@ -447,7 +441,7 @@ class ScreenshotTest {
     @Test fun homeHeatedSeats() {
         org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE).edit()
             .putInt("heated_seats", 1).putBoolean("vertical_dock", true).apply()
-        shoot(MainActivity::class.java, "home_heated_seats.png")
+        shoot(MainActivity::class.java, "home_heated_seats.png", bluetooth("Salt & Sunlight", "Coastline Club", "Golden Hours", goldenHours()))
     }
 
     @Test fun homeSimpleHeatedSeats() {
@@ -717,13 +711,85 @@ class ScreenshotTest {
         File(File("build/screenshots").apply { mkdirs() }, name).outputStream().use { bmp.compress(Bitmap.CompressFormat.PNG, 100, it) }
     }
 
-    private fun <T : Activity> shoot(cls: Class<T>, name: String) {
+    private fun <T : Activity> shoot(cls: Class<T>, name: String, media: app.mg4dash.media.MediaHub.NowPlaying? = null) {
         // Captures en mode sombre, sauf si le test a choisi un autre mode
         val sp = org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE)
         if (!sp.contains("theme_mode")) sp.edit().putInt("theme_mode", 1).commit()
         val activity = Robolectric.buildActivity(cls).setup().get()
         repeat(5) { shadowOf(Looper.getMainLooper()).idleFor(200, TimeUnit.MILLISECONDS) }
+        if (media != null) {
+            val f = app.mg4dash.media.MediaHub::class.java.getDeclaredField("_now").apply { isAccessible = true }
+            @Suppress("UNCHECKED_CAST")
+            (f.get(app.mg4dash.media.MediaHub) as kotlinx.coroutines.flow.MutableStateFlow<app.mg4dash.media.MediaHub.NowPlaying>).value = media
+            repeat(3) { shadowOf(Looper.getMainLooper()).idleFor(200, TimeUnit.MILLISECONDS) }
+        }
         save(activity.window.decorView, name)
+    }
+
+    // ── Musique d'exemple pour les captures du README : albums et artistes fictifs, pochettes dessinées ──
+
+    private fun bluetooth(title: String, artist: String, album: String, art: Bitmap) = app.mg4dash.media.MediaHub.NowPlaying(
+        true, "com.android.bluetooth", "BLUETOOTH", title, artist, album, art, true, durationMs = 214_000, positionMs = 83_000)
+
+    private fun androidAuto(title: String, artist: String, album: String, art: Bitmap) = app.mg4dash.media.MediaHub.NowPlaying(
+        true, "com.allgo.remoteui.mediabrowserservice", "ANDROID AUTO", title, artist, album, art, true,
+        durationMs = 247_000, positionMs = 141_000, androidAuto = true)
+
+    private fun cover(draw: (Canvas, android.graphics.Paint, Float) -> Unit): Bitmap {
+        val size = 480f
+        val bmp = Bitmap.createBitmap(size.toInt(), size.toInt(), Bitmap.Config.ARGB_8888)
+        draw(Canvas(bmp), android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG), size)
+        return bmp
+    }
+
+    /** « Neon Skyline » : soleil rayé sur un ciel violet et une grille rose. */
+    private fun neonSkyline() = cover { c, p, n ->
+        p.shader = android.graphics.LinearGradient(0f, 0f, 0f, n * 0.62f, intArrayOf(0xFF1A0B3D.toInt(), 0xFF6B1E7A.toInt(), 0xFFF0567A.toInt()), null, android.graphics.Shader.TileMode.CLAMP)
+        c.drawRect(0f, 0f, n, n * 0.62f, p)
+        p.shader = android.graphics.LinearGradient(0f, n * 0.2f, 0f, n * 0.62f, 0xFFFFD25A.toInt(), 0xFFFF4F8B.toInt(), android.graphics.Shader.TileMode.CLAMP)
+        c.drawCircle(n / 2, n * 0.42f, n * 0.24f, p)
+        p.shader = null; p.color = 0xFF2A0F4A.toInt()
+        for (i in 0 until 5) c.drawRect(0f, n * (0.44f + i * 0.04f), n, n * (0.44f + i * 0.04f) + 3f + i * 2f, p)
+        p.color = 0xFF14082E.toInt(); c.drawRect(0f, n * 0.62f, n, n, p)
+        p.color = 0xFFFF3EA5.toInt(); p.strokeWidth = 3f
+        for (i in 0..8) { val y = n * 0.62f + (n * 0.38f) * (i * i) / 64f; c.drawLine(0f, y, n, y, p) }
+        for (i in -8..8) c.drawLine(n / 2 + i * n * 0.04f, n * 0.62f, n / 2 + i * n * 0.22f, n, p)
+    }
+
+    /** « Golden Hours » : soleil couchant sur une mer turquoise, un palmier. */
+    private fun goldenHours() = cover { c, p, n ->
+        p.shader = android.graphics.LinearGradient(0f, 0f, 0f, n * 0.6f, intArrayOf(0xFFFFB347.toInt(), 0xFFFF7E5F.toInt(), 0xFFE0567A.toInt()), null, android.graphics.Shader.TileMode.CLAMP)
+        c.drawRect(0f, 0f, n, n * 0.6f, p)
+        p.shader = null; p.color = 0xFFFFF1C1.toInt(); c.drawCircle(n * 0.62f, n * 0.5f, n * 0.17f, p)
+        p.shader = android.graphics.LinearGradient(0f, n * 0.6f, 0f, n, 0xFF1F9EA8.toInt(), 0xFF0B4F6C.toInt(), android.graphics.Shader.TileMode.CLAMP)
+        c.drawRect(0f, n * 0.6f, n, n, p)
+        p.shader = null; p.color = 0x66FFF1C1
+        for (i in 0 until 7) { val w = n * (0.30f - i * 0.035f); val y = n * (0.64f + i * 0.045f); c.drawRect(n * 0.62f - w / 2, y, n * 0.62f + w / 2, y + 5f, p) }
+        p.color = 0xFF3B1F2B.toInt()
+        c.drawPath(android.graphics.Path().apply { moveTo(n * 0.16f, n); quadTo(n * 0.2f, n * 0.62f, n * 0.27f, n * 0.36f); lineTo(n * 0.29f, n * 0.37f); quadTo(n * 0.23f, n * 0.63f, n * 0.2f, n); close() }, p)
+        for (a in listOf(-160f, -125f, -60f, -25f, 15f)) {
+            val r = Math.toRadians(a.toDouble())
+            val ex = n * 0.28f + (Math.cos(r) * n * 0.2f).toFloat(); val ey = n * 0.36f + (Math.sin(r) * n * 0.1f).toFloat() + n * 0.05f
+            c.drawPath(android.graphics.Path().apply { moveTo(n * 0.28f, n * 0.36f); quadTo((n * 0.28f + ex) / 2, ey - n * 0.09f, ex, ey); quadTo((n * 0.28f + ex) / 2, ey - n * 0.05f, n * 0.28f, n * 0.37f); close() }, p)
+        }
+    }
+
+    /** « Northern Lights » : aurore verte sur des montagnes et un ciel étoilé. */
+    private fun northernLights() = cover { c, p, n ->
+        p.shader = android.graphics.LinearGradient(0f, 0f, 0f, n, 0xFF050B24.toInt(), 0xFF0E2A4A.toInt(), android.graphics.Shader.TileMode.CLAMP)
+        c.drawRect(0f, 0f, n, n, p)
+        p.shader = null; p.color = 0xCCFFFFFF.toInt()
+        val rnd = java.util.Random(7)
+        repeat(60) { c.drawCircle(rnd.nextFloat() * n, rnd.nextFloat() * n * 0.6f, 1f + rnd.nextFloat() * 1.8f, p) }
+        listOf(0x9938F2A0.toInt() to 0.30f, 0x7722D3C5.toInt() to 0.40f, 0x55A46BFF.toInt() to 0.22f).forEach { (col, y) ->
+            p.shader = android.graphics.LinearGradient(0f, n * (y - 0.12f), 0f, n * (y + 0.12f), intArrayOf(0x00000000, col, 0x00000000), null, android.graphics.Shader.TileMode.CLAMP)
+            c.drawPath(android.graphics.Path().apply {
+                moveTo(0f, n * (y + 0.1f)); cubicTo(n * 0.3f, n * (y - 0.2f), n * 0.6f, n * (y + 0.25f), n, n * (y - 0.05f))
+                lineTo(n, n * (y + 0.12f)); cubicTo(n * 0.6f, n * (y + 0.35f), n * 0.3f, n * (y - 0.05f), 0f, n * (y + 0.22f)); close()
+            }, p)
+        }
+        p.shader = null; p.color = 0xFF07101F.toInt()
+        c.drawPath(android.graphics.Path().apply { moveTo(0f, n); lineTo(0f, n * 0.74f); lineTo(n * 0.22f, n * 0.58f); lineTo(n * 0.38f, n * 0.72f); lineTo(n * 0.58f, n * 0.52f); lineTo(n * 0.8f, n * 0.7f); lineTo(n, n * 0.6f); lineTo(n, n); close() }, p)
     }
 
     private fun save(root: View, name: String) {
