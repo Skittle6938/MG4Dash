@@ -52,10 +52,10 @@ object StarKey {
                 // MG4Dash est l'accueil ; gauche = précédent, droite = suivant, OK = lecture / pause.
                 // Limité à SWI173 : ailleurs le joystick change déjà piste ou volume tout seul.
                 // Musique d'une autre appli (SimpMusic…) : la voiture n'envoie pas suivant / précédent à
-                // cette appli ; on les passe au lecteur affiché (DiAuto lit lui-même les boutons)
+                // cette appli ; on les passe au lecteur affiché (DiAuto ne lit que lecture / pause)
                 // (gauche = précédent, droite = suivant, comme pour les autres sources)
                 if (code == JOY_LEFT || code == JOY_RIGHT) {
-                    if (down && !long) MediaHub.wheelPressed()
+                    if (down && !long) MediaHub.wheelPressed(code == JOY_RIGHT)
                     else if (!down && !long && MediaHub.wheelReleased(code == JOY_RIGHT)) return
                 }
                 if (Firmware.gen == Firmware.Gen.SWI173 && !down && !long && code in JOY_LEFT..JOY_OK &&
