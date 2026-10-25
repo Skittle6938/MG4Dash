@@ -76,6 +76,7 @@ class SimpleHome(private val a: AppCompatActivity) {
         top.addView(media, kit.lp(0, -1, 1f, l = 6))
         // Balayage vertical sur la carte musique : source suivante / précédente (comme les autres accueils)
         SwipeBox.wrap(media, vertical = true, horizontal = false) { MediaHub.cycleSource(it) }
+            .onHorizontal = { if (it > 0) MediaHub.next() else MediaHub.previous() }
         root.addView(top, kit.lp(-1, 0, 62f))
 
         val band = kit.row().apply { isBaselineAligned = false }

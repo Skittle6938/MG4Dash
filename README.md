@@ -34,7 +34,7 @@ The default home screen (*Full* layout, vertical bar on the left). From left to 
 
 ## Media player
 
-The media card follows the car's active audio source (DAB / FM radio, Bluetooth, USB, Android Auto, CarPlay). Swipe it up / down for the next source, tap the source name (« Radio DAB ▾ ») for the source menu, tap the picture to open the source's app, long press play / pause for the [Sound](#sound) page.
+The media card follows the car's active audio source (DAB / FM radio, Bluetooth, USB, Android Auto, CarPlay). Swipe it up / down for the next source, left / right for the next / previous track (like the steering wheel buttons), tap the source name (« Radio DAB ▾ ») for the source menu, tap the picture to open the source's app, long press play / pause for the [Sound](#sound) page.
 
 Two presentations, in Settings › Home › *Player on the home screen*; they apply to the Full, Map and Simple layouts:
 
@@ -264,7 +264,7 @@ The SAIC launcher package (`com.saicmotor.launcher`) is never disabled: its serv
 - Vertical bar: double tap Energy turns the screen off, long press Energy switches the car off (never while moving); double tap Vehicle locks / unlocks the doors, long press Vehicle turns ESC off / on
 - Long press "Android Auto" in the dock: Android Auto, CarPlay or another app
 - Tap or swipe the bottom-right widget (or the map layout stack): next page; long press a phone favourite to change it
-- Swipe the media card up / down: next audio source; tap its source name: source menu
+- Swipe the media card up / down: next audio source; left / right: next / previous track; tap its source name: source menu
 - Long press the set temperature: temperature calibration; long press fan minus: lowest fan speed; long press A/C: intermittent A/C
 - Long press play / pause: Sound page
 - Steering wheel * button: 360 camera on / off
