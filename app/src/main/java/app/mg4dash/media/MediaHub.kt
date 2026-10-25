@@ -130,6 +130,7 @@ object MediaHub {
     /** Affiche la source donnée sans ouvrir son appli. */
     fun select(pkg: String) {
         if (BuildConfig.MOCK) return
+        remember(pkg); autoTarget = null
         pinnedPkg = pkg
         main.post { reevaluate() }
     }
@@ -147,6 +148,76 @@ object MediaHub {
     private fun btConnected(): Boolean? = try {
         android.bluetooth.BluetoothAdapter.getDefaultAdapter()?.getProfileConnectionState(11) == android.bluetooth.BluetoothProfile.STATE_CONNECTED
     } catch (_: Exception) { null }
+
+    // ── Source automatique (réglage « Source au démarrage ») ──
+    private fun prefs() = appContext?.let { app.mg4dash.system.Prefs(it) }
+
+    /** Choix de l'utilisateur : en tête de l'historique (la radio reste le dernier recours). */
+    private fun remember(pkg: String) {
+        val p = prefs() ?: return
+        val h = listOf(pkg) + p.sourceHistory.filter { it != pkg }
+        if (h != p.sourceHistory) { p.sourceHistory = h.take(6); Log.i(TAG, "source history: ${h.take(6)}") }
+    }
+
+    @Volatile private var autoSwitchAt = 0L
+    private val startedAt = android.os.SystemClock.uptimeMillis()
+    private var startDone = false
+    /** Depuis quand chaque source est disponible / absente (évite de suivre un Bluetooth qui clignote). */
+    private val seenSince = mutableMapOf<String, Long>()
+    private val goneSince = mutableMapOf<String, Long>()
+
+    /**
+     * Toutes les 2 s. Automatique : la première source de l'historique disponible depuis 5 s devient la
+     * source, si la source actuelle est moins bien placée ou absente depuis 10 s. Source fixe : une seule
+     * bascule au démarrage. CarPlay n'est jamais une cible : AllGo ne lui rend pas l'audio sur commande.
+     */
+    private fun autoSource() {
+        val p = prefs() ?: return
+        val mode = p.startSource
+        if (mode == 1 || BuildConfig.MOCK) return
+        val now = android.os.SystemClock.uptimeMillis()
+        val avail = availableSources()
+        for (pkg in listOf(RADIO, "com.android.bluetooth", "com.saicmotor.media", AA_MBS)) {
+            if (pkg in avail) { seenSince.getOrPut(pkg) { now }; goneSince.remove(pkg) }
+            else { goneSince.getOrPut(pkg) { now }; seenSince.remove(pkg) }
+        }
+        fun stable(pkg: String) = (seenSince[pkg]?.let { now - it >= 5_000 } == true) && !(pkg == AA_MBS && carPlay)
+        val cur = sourcePkg ?: return
+        if (now - autoSwitchAt < 10_000 || now - startedAt < 5_000) return
+        if (mode >= 2) {
+            if (startDone) return
+            val want = listOf(RADIO, "com.android.bluetooth", "com.saicmotor.media", AA_MBS)[mode - 2]
+            if (now - startedAt > 30_000) { startDone = true; return }
+            if (want == cur) { startDone = true; return }
+            if (stable(want)) { startDone = true; autoSwitch(want, "startup source") }
+            return
+        }
+        val order = (p.sourceHistory + RADIO).distinct()
+        val target = order.firstOrNull { stable(it) } ?: return
+        if (target == cur) return
+        // Source actuelle jamais choisie (historique vide, première utilisation) : on ne la quitte que si elle disparaît
+        val curRank = order.indexOf(cur).let { if (it < 0) -1 else it }
+        val curGone = goneSince[cur]?.let { now - it >= 10_000 } == true
+        if (order.indexOf(target) < curRank || curGone) autoSwitch(target, if (curGone) "$cur gone" else "$target back")
+    }
+
+    private var autoTarget: String? = null
+    private var autoTries = 0
+
+    private fun autoSwitch(pkg: String, why: String) {
+        val now = android.os.SystemClock.uptimeMillis()
+        // La voiture refuse la bascule (source muette…) : 3 essais au plus, puis on attend 2 min
+        if (pkg == autoTarget && autoTries >= 3 && now - autoSwitchAt < 120_000) return
+        if (pkg != autoTarget || now - autoSwitchAt >= 120_000) { autoTarget = pkg; autoTries = 0 }
+        autoTries++
+        autoSwitchAt = now
+        Log.i(TAG, "automatic source: $pkg ($why)")
+        pinnedPkg = pkg
+        main.post { reevaluate() }
+        if (pkg == AA_MBS) { browserControllers[AA_MBS]?.let { aaControl(it, AA_PLAY, KeyEvent.KEYCODE_MEDIA_PLAY) }; return }
+        activateSource(pkg)
+        main.postDelayed({ browserControllers[pkg]?.takeIf { !isPlaying(it) }?.transportControls?.play() }, 1500)
+    }
 
     /** Lecteur à écarter : projection ou Bluetooth sans téléphone connecté. */
     private fun gone(pkg: String?): Boolean =
@@ -170,7 +241,8 @@ object MediaHub {
                     btLive = bt
                     main.post { reevaluate() }
                 }
-                kotlinx.coroutines.delay(if (btLive == true || projectionLive == true) 2_000 else 5_000)
+                main.post { autoSource() }
+                kotlinx.coroutines.delay(2_000)
             }
         }
     }
@@ -233,6 +305,7 @@ object MediaHub {
     fun switchTo(next: String) {
         if (BuildConfig.MOCK) return
         Log.i(TAG, "source picked: $next")
+        remember(next); autoTarget = null
         pinnedPkg = next
         main.post { reevaluate() }
         if (next == AA_MBS) {
@@ -300,6 +373,11 @@ object MediaHub {
                                 // Le choix manuel reste tant qu'Android Auto ne joue pas (guidage seul)
                                 if (sourcePkg != AA_MBS) { aaUnconfirmed = true; sourceBeforeAa = sourcePkg }
                             } else { aaUnconfirmed = false; sourceBeforeAa = null; pinnedPkg = null }
+                            // Changement fait sur la voiture (bouton source, appli d'origine) : c'est aussi un choix
+                            // de l'utilisateur, sauf s'il suit une bascule automatique ou la perte de l'ancienne source
+                            val prev = sourcePkg
+                            if (src != null && src != AA_MBS && src != prev && android.os.SystemClock.uptimeMillis() - autoSwitchAt > 8_000 &&
+                                (prev == null || prev in availableSources())) { remember(src); autoTarget = null }
                             sourcePkg = src; reevaluate()
                         }
                         null

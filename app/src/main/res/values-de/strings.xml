@@ -491,6 +491,11 @@
     <string name="en_clear_confirm">Kurve „%1$s“ löschen?</string>
     <string name="st_cc_stopped">Verbrauchskurve: auch im Stand</string>
     <string name="st_cc_stopped_desc">Ein Punkt alle 2 Minuten im Stand (Klima, Zubehör). Aus: nur das Fahren zählt. Lange auf die Kurve drücken, um sie zu löschen.</string>
+    <string name="st_audio_source">Audioquelle</string>
+    <string name="st_start_source">Quelle beim Start</string>
+    <string name="st_src_auto">Automatisch</string>
+    <string name="st_src_car">Wie das Auto</string>
+    <string name="st_start_source_desc">Automatisch: nimmt die zuletzt gewählte, noch verfügbare Quelle und kehrt zu ihr zurück, sobald sie wieder da ist (Telefon verbunden, USB-Stick…).</string>
     <string name="aa_title">ANDROID AUTO</string>
     <string name="aa_ready">Telefon verbunden · Zum Öffnen tippen</string>
     <string name="aa_waiting">Telefon per USB verbinden</string>
