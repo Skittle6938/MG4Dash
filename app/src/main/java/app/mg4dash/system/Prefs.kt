@@ -158,6 +158,16 @@ class Prefs(context: Context) {
         get() = sp.getInt("start_source", 0)
         set(v) = sp.edit().putInt("start_source", v).apply()
 
+    /** Lecture au démarrage de la voiture : 0 comme à l'arrêt (défaut), 1 toujours en pause, 2 toujours en lecture. */
+    var startPlayback: Int
+        get() = sp.getInt("start_playback", 0)
+        set(v) = sp.edit().putInt("start_playback", v).apply()
+
+    /** La musique jouait-elle à l'arrêt de la voiture (pour « comme à l'arrêt ») ? */
+    var lastPlaying: Boolean
+        get() = sp.getBoolean("last_playing", true)
+        set(v) = sp.edit().putBoolean("last_playing", v).apply()
+
     /** Sources choisies par l'utilisateur, la plus récente d'abord (mode automatique). */
     var sourceHistory: List<String>
         get() = sp.getString("source_history", "").orEmpty().split(',').filter { it.isNotBlank() }

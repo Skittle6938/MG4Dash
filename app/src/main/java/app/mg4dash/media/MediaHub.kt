@@ -184,6 +184,7 @@ object MediaHub {
             else { goneSince.getOrPut(pkg) { now }; seenSince.remove(pkg) }
         }
         fun stable(pkg: String) = (seenSince[pkg]?.let { now - it >= 5_000 } == true) && !(pkg == AA_MBS && carPlay)
+        trackPlayback(p, now)
         val cur = sourcePkg ?: return
         if (now - autoSwitchAt < 10_000 || now - startedAt < 5_000) return
         // Source de la voiture disparue (téléphone débranché…) depuis 3 s : quel que soit le réglage, on
@@ -209,6 +210,35 @@ object MediaHub {
         // Source actuelle jamais choisie (historique vide, première utilisation) : on ne la quitte que si elle disparaît
         val curRank = order.indexOf(cur).let { if (it < 0) -1 else it }
         if (order.indexOf(target) < curRank) autoSwitch(target, "$target back")
+    }
+
+    // ── Lecture au démarrage (réglage, remplace la reprise automatique de Radio Dash) ──
+    /** Démarrage de la voiture : MG4Dash lancé dans les 5 minutes qui suivent l'allumage de l'autoradio. */
+    private val carStart = android.os.SystemClock.elapsedRealtime() < 5 * 60_000
+    private var playbackApplied = false
+    private var pausedSince = 0L
+
+    /**
+     * Retient si la musique joue (une pause n'est retenue qu'après 30 s : à l'arrêt, la voiture met tout en
+     * pause juste avant de s'éteindre, ce qui ne doit pas compter), puis applique le réglage une fois, au
+     * démarrage, après la source de démarrage (8 s), sur la source affichée.
+     */
+    private fun trackPlayback(p: app.mg4dash.system.Prefs, now: Long) {
+        val playing = _now.value.playing && _now.value.available
+        if (playbackApplied || !carStart) {
+            if (playing) { pausedSince = 0L; if (!p.lastPlaying) p.lastPlaying = true }
+            else if (_now.value.available) {
+                if (pausedSince == 0L) pausedSince = now
+                else if (now - pausedSince >= 30_000 && p.lastPlaying) { p.lastPlaying = false; Log.i(TAG, "playback state remembered: paused") }
+            }
+        }
+        if (playbackApplied) return
+        if (!carStart || now - startedAt > 40_000) { playbackApplied = true; return }
+        if (now - startedAt < 8_000 || now - autoSwitchAt < 4_000 || !_now.value.available) return
+        val want = when (p.startPlayback) { 1 -> false; 2 -> true; else -> p.lastPlaying }
+        playbackApplied = true
+        Log.i(TAG, "startup playback: ${if (want) "play" else "pause"} (setting ${p.startPlayback}, was playing ${p.lastPlaying})")
+        if (want != playing) playPauseRaw()
     }
 
     private var autoTarget: String? = null
@@ -729,6 +759,12 @@ object MediaHub {
 
     fun playPause() {
         if (BuildConfig.MOCK) { _now.value = _now.value.copy(playing = !_now.value.playing); return }
+        // Choix explicite de l'utilisateur : retenu tel quel pour la lecture au démarrage
+        prefs()?.lastPlaying = !_now.value.playing; pausedSince = 0L
+        playPauseRaw()
+    }
+
+    private fun playPauseRaw() {
         if (radioShown) { val playing = SaicRadio.last?.playing == true; radioCommand { if (playing) SaicRadio.pause() else SaicRadio.play() }; return }
         val c = current ?: return
         val playing = isPlaying(c)

@@ -496,6 +496,10 @@
     <string name="st_src_auto">Otomatik</string>
     <string name="st_src_car">Araçtaki gibi</string>
     <string name="st_start_source_desc">Otomatik: hâlâ kullanılabilen son seçilen kaynağa geçer ve yeniden göründüğünde ona döner (telefon yeniden bağlandı, USB bellek…).</string>
+    <string name="st_start_playback">Başlangıçta oynatma</string>
+    <string name="st_play_resume">Araç kapatıldığındaki gibi</string>
+    <string name="st_play_pause">Her zaman duraklatılmış</string>
+    <string name="st_play_play">Her zaman oynat</string>
     <string name="aa_title">ANDROID AUTO</string>
     <string name="aa_ready">Telefon bağlı · Açmak için dokunun</string>
     <string name="aa_waiting">Telefonunuzu USB ile bağlayın</string>

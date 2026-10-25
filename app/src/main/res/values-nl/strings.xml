@@ -496,6 +496,10 @@
     <string name="st_src_auto">Automatisch</string>
     <string name="st_src_car">Zoals de auto</string>
     <string name="st_start_source_desc">Automatisch: neemt de laatst gekozen bron die nog beschikbaar is en keert ernaar terug zodra die terug is (telefoon opnieuw verbonden, USB-stick…).</string>
+    <string name="st_start_playback">Afspelen bij het starten</string>
+    <string name="st_play_resume">Zoals bij het uitzetten</string>
+    <string name="st_play_pause">Altijd gepauzeerd</string>
+    <string name="st_play_play">Altijd afspelen</string>
     <string name="aa_title">ANDROID AUTO</string>
     <string name="aa_ready">Telefoon verbonden · Tik om te openen</string>
     <string name="aa_waiting">Sluit je telefoon aan via USB</string>
