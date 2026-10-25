@@ -17,7 +17,9 @@ class SwipeBox(
     private val horizontal: Boolean = true,
     val onSwipe: (Int) -> Unit,
 ) : FrameLayout(context) {
-    private var downX = 0f; private var downY = 0f; private var dir = 0
+    /** Balayage horizontal traité à part (ex. morceau précédent / suivant), sinon [onSwipe]. */
+    var onHorizontal: ((Int) -> Unit)? = null
+    private var downX = 0f; private var downY = 0f; private var dir = 0; private var axisH = false
     private val slop = 60 * resources.displayMetrics.density / 2
 
     override fun onInterceptTouchEvent(ev: MotionEvent): Boolean {
@@ -25,15 +27,19 @@ class SwipeBox(
             MotionEvent.ACTION_DOWN -> { downX = ev.x; downY = ev.y; dir = 0 }
             MotionEvent.ACTION_MOVE -> {
                 val dx = ev.x - downX; val dy = ev.y - downY
-                if (horizontal && Math.abs(dx) > slop && Math.abs(dx) > 2 * Math.abs(dy)) dir = if (dx < 0) 1 else -1
-                else if (vertical && Math.abs(dy) > slop && Math.abs(dy) > 2 * Math.abs(dx)) dir = if (dy < 0) 1 else -1
+                if ((horizontal || onHorizontal != null) && Math.abs(dx) > slop && Math.abs(dx) > 2 * Math.abs(dy)) { dir = if (dx < 0) 1 else -1; axisH = true }
+                else if (vertical && Math.abs(dy) > slop && Math.abs(dy) > 2 * Math.abs(dx)) { dir = if (dy < 0) 1 else -1; axisH = false }
             }
         }
         return dir != 0
     }
 
     override fun onTouchEvent(ev: MotionEvent): Boolean {
-        if (ev.actionMasked == MotionEvent.ACTION_UP && dir != 0) { onSwipe(dir); dir = 0 }
+        if (ev.actionMasked == MotionEvent.ACTION_UP && dir != 0) {
+            val h = onHorizontal
+            if (axisH && h != null) h(dir) else onSwipe(dir)
+            dir = 0
+        }
         return true
     }
 
