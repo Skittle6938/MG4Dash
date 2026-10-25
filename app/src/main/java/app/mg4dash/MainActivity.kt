@@ -513,9 +513,10 @@ class MainActivity : AppCompatActivity() {
         // Direction de l'air ; en mode AUTO, c'est la voiture qui la choisit
         b.chipEco.isSelected = s.ecoOn == true
         val parts = VehicleState.flowParts(s.fanDirection)
-        b.chipFace.isSelected = parts?.get(0) == true
-        b.chipFeet.isSelected = parts?.get(1) == true
-        b.chipScreen.isSelected = parts?.get(2) == true
+        // Clim éteinte : la voiture garde la dernière direction, mais rien ne souffle (#34)
+        b.chipFace.isSelected = on && parts?.get(0) == true
+        b.chipFeet.isSelected = on && parts?.get(1) == true
+        b.chipScreen.isSelected = on && parts?.get(2) == true
         listOf(b.tempDown, b.tempUp, b.fanDown, b.fanUp, b.chipAuto, b.chipAc, b.chipEco, b.chipRecirc,
             b.chipFace, b.chipFeet, b.chipScreen, b.climPower)
             .forEach { it.isEnabled = known }
