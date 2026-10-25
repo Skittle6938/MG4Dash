@@ -173,7 +173,6 @@ class SimpleHome(private val a: AppCompatActivity) {
         chipAuto = kit.toggleTile(a.getString(R.string.chip_auto)) { CarBridge.toggleAuto() }
         chipEco = kit.toggleTile("ECO") { CarBridge.toggleEco() }
         listOf<View>(power, chipAc, chipAuto, chipEco).forEachIndexed { i, v -> r1.addView(v, kit.lp(0, kit.dp(48), 1f, l = if (i > 0) 8 else 0)) }
-        climateCard.addView(r1, kit.lp(-1, -2, t = 10))
         val r2 = kit.row()
         chipScreen = iconChip(R.drawable.ic_flow_screen) { toggleFlow(2) }
         chipFace = iconChip(R.drawable.ic_flow_face) { toggleFlow(0) }
@@ -184,7 +183,9 @@ class SimpleHome(private val a: AppCompatActivity) {
         }
         chipRecirc.addView(recircAuto, android.widget.FrameLayout.LayoutParams(-2, -2, Gravity.TOP or Gravity.END).apply { rightMargin = kit.dp(8) })
         listOf<View>(chipScreen, chipFace, chipFeet, chipRecirc).forEachIndexed { i, v -> r2.addView(v, kit.lp(0, kit.dp(48), 1f, l = if (i > 0) 8 else 0)) }
-        climateCard.addView(r2, kit.lp(-1, -2, t = 8))
+        // Sorties d'air en haut, marche / A/C / AUTO / ECO en dessous (#34)
+        climateCard.addView(r2, kit.lp(-1, -2, t = 10))
+        climateCard.addView(r1, kit.lp(-1, -2, t = 8))
 
         temp.setOnClickListener { a.startActivity(Intent(a, ClimateActivity::class.java)) }
         temp.setOnLongClickListener { TempCalibration.show(a) { renderClimate(CarBridge.state.value) }; true }
