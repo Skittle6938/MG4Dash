@@ -167,7 +167,7 @@ object MediaHub {
     private val goneSince = mutableMapOf<String, Long>()
 
     /**
-     * Toutes les 2 s. Dans tous les modes, une source de la voiture disparue depuis 3 s est remplacée
+     * Toutes les secondes. Dans tous les modes, une source de la voiture disparue depuis 1 s est remplacée
      * (automatique : par la première de l'historique ; sinon par la radio ou la source fixe). Automatique :
      * la première source de l'historique disponible depuis 5 s devient la source si l'actuelle est moins bien
      * placée. Source fixe : une seule bascule au démarrage. CarPlay n'est jamais une cible : AllGo ne lui
@@ -187,10 +187,10 @@ object MediaHub {
         trackPlayback(p, now)
         val cur = sourcePkg ?: return
         if (now - autoSwitchAt < 10_000 || now - startedAt < 5_000) return
-        // Source de la voiture disparue (téléphone débranché…) depuis 3 s : quel que soit le réglage, on
+        // Source de la voiture disparue (téléphone débranché…) depuis 1 s : quel que soit le réglage, on
         // bascule, sinon la voiture restait sur une source muette et les boutons du volant n'agissaient
-        // plus (#36). 3 s suffisent : la disparition vient de l'état de connexion, pas d'un clignotement.
-        val curGone = goneSince[cur]?.let { now - it >= 3_000 } == true
+        // plus (#36). 1 s suffit (demandé par Marc) : la disparition vient de l'état de connexion, pas d'un clignotement.
+        val curGone = goneSince[cur]?.let { now - it >= 1_000 } == true
         val order = when (mode) {
             0 -> (p.sourceHistory + RADIO).distinct()
             1 -> listOf(RADIO)
@@ -285,7 +285,7 @@ object MediaHub {
                     main.post { reevaluate() }
                 }
                 main.post { autoSource() }
-                kotlinx.coroutines.delay(2_000)
+                kotlinx.coroutines.delay(1_000)
             }
         }
     }
