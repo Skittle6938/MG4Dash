@@ -314,8 +314,8 @@ object MediaHub {
     } == true
 
     /**
-     * Appli affichée qui lit elle-même les boutons du volant (DiAuto MG4+ et son ancien nom) :
-     * MG4Dash ne les lui renvoie pas, sinon chaque appui sauterait deux morceaux.
+     * Appli affichée qui lit elle-même le bouton lecture / pause du volant (DiAuto MG4+ et son ancien
+     * nom) : MG4Dash ne le lui renvoie pas, sinon il se mettrait en pause puis relancerait aussitôt.
      */
     fun shownHandlesWheelKeys(): Boolean = handlesWheelKeys(current?.packageName)
 
@@ -326,21 +326,22 @@ object MediaHub {
     // On note l'appli à l'appui pour la remettre aussitôt (voir watchAudioSource).
     @Volatile private var wheelFrom: String? = null
     @Volatile private var wheelAt = 0L
+    @Volatile private var wheelForward = true
 
-    fun wheelPressed() {
+    fun wheelPressed(forward: Boolean) {
         if (!otherAppShown()) return
         wheelFrom = current?.packageName
         wheelAt = android.os.SystemClock.uptimeMillis()
+        wheelForward = forward
     }
 
     /**
      * Bouton relâché : suivant / précédent à l'appli notée à l'appui (la radio a pu être affichée entre
-     * les deux), sauf si elle lit elle-même les boutons (DiAuto). false = pas d'autre appli en cours.
+     * les deux). DiAuto ne lit que lecture / pause du volant, pas gauche / droite. false = pas d'autre appli.
      */
     fun wheelReleased(forward: Boolean): Boolean {
         val pkg = wheelFrom?.takeIf { android.os.SystemClock.uptimeMillis() - wheelAt < 2_000 }
             ?: current?.packageName?.takeIf { otherAppShown() } ?: return false
-        if (handlesWheelKeys(pkg)) return true
         val c = browserControllers[pkg] ?: lastCandidates.firstOrNull { it.packageName == pkg } ?: return true
         if (forward) c.transportControls.skipToNext() else c.transportControls.skipToPrevious()
         return true
@@ -429,6 +430,8 @@ object MediaHub {
         }
         // Autre appli (DiAuto…) : pas de commande de source voiture, on lance directement son lecteur
         val carSource = activateSource(next)
+        // La radio ne perd pas toujours le son au profit de l'appli (DiAuto ne le demande pas) : pause
+        if (!carSource && (radioShown || sourcePkg == RADIO)) pauseRadio()
         main.postDelayed({
             // Autre appli : « lecture » envoyé même si elle se croit déjà en lecture. DiAuto reste en lecture
             // côté téléphone quand la radio lui prend la source ; c'est ce « lecture » qui la lui fait reprendre
@@ -491,7 +494,7 @@ object MediaHub {
                                 wheelFrom = null
                                 Log.i(TAG, "steering wheel key sent to the radio by the stock launcher: back to $back")
                                 sourcePkg = src
-                                switchTo(back)
+                                undoRadioSkip(wheelForward) { switchTo(back) }
                                 return@post
                             }
                             // Seulement les sources de la voiture : une appli qui prend la main un instant (annonce de
@@ -815,6 +818,26 @@ object MediaHub {
     }
 
     /** Commande radio hors du fil principal, puis relecture de la station. */
+    /**
+     * La radio a changé de station sur un bouton du volant destiné à une autre appli : commande inverse
+     * par sa session (le même chemin que le launcher d'origine), puis retour à l'appli une fois la
+     * radio retombée sur sa station ([then] la met en pause en quittant la radio).
+     */
+    private fun undoRadioSkip(forward: Boolean, then: () -> Unit) {
+        val rc = browserControllers[RADIO] ?: lastCandidates.firstOrNull { it.packageName == RADIO }
+        Log.i(TAG, "radio station change undone (${if (forward) "previous" else "next"})")
+        if (rc != null) { if (forward) rc.transportControls.skipToPrevious() else rc.transportControls.skipToNext() }
+        else io.launch { if (forward) SaicRadio.previous() else SaicRadio.next() }
+        main.postDelayed(then, 500)
+    }
+
+    /** Pause de la radio : par sa session, sinon par son service. */
+    private fun pauseRadio() {
+        val rc = browserControllers[RADIO] ?: lastCandidates.firstOrNull { it.packageName == RADIO }
+        Log.i(TAG, "pausing the radio")
+        if (rc != null) rc.transportControls.pause() else radioCommand { SaicRadio.pause() }
+    }
+
     private fun radioCommand(action: () -> Boolean) {
         io.launch {
             val ok = action()
