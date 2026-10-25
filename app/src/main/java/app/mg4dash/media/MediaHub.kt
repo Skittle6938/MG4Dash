@@ -768,7 +768,9 @@ object MediaHub {
 
     /** Toucher sur la carte média en CarPlay : CarPlay au premier plan, sur l'écran « À l'écoute ». */
     fun openCarPlayNowPlaying(): Boolean {
-        if (!carPlay || radioShown) return false
+        // Seulement quand la carte montre CarPlay : sur la radio ou le Bluetooth, le dernier CarPlay
+        // connecté était ouvert, et menait à un écran noir une fois l'iPhone débranché (#36)
+        if (!carPlay || radioShown || projectionLive == false || current?.let { isAndroidAuto(it.packageName) } != true) return false
         val ctx = appContext ?: return false
         app.mg4dash.system.Apps.open(ctx, app.mg4dash.system.Apps.CARPLAY, "CarPlay")
         main.postDelayed({ cpCall(13, 4) }, 600)
