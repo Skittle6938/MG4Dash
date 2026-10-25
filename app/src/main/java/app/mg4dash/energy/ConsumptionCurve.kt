@@ -15,16 +15,17 @@ import kotlinx.coroutines.launch
 /**
  * Courbes de consommation (#44), à partir de l'énergie mesurée par [EnergyMonitor] (tension × courant,
  * récupération déduite) plutôt que de la conso instantanée de la voiture, trop bruitée :
- *  - trajet en cours : un point tous les 0,5 km (kWh nets × 100 / km), et à l'arrêt voiture allumée un
- *    point par minute, compté comme 0,5 km ; vidée à chaque démarrage ;
+ *  - trajet en cours : un point par km (kWh nets × 100 / km), et à l'arrêt voiture allumée un
+ *    point toutes les 2 minutes, compté comme 1 km ; vidée à chaque démarrage ;
  *  - depuis la recharge : les points de tous les trajets depuis la dernière recharge ;
  *  - 12 derniers mois : un point par trajet (sa moyenne), à partir de 2 km.
  */
 object ConsumptionCurve {
     private const val TAG = "ConsCurve"
     private const val MAX_POINTS = 1000
-    /** Un point tous les 0,5 km (#44), distance tirée de la vitesse ; à l'arrêt une minute compte pour autant. */
-    private const val STEP_KM = 0.5f
+    /** Un point par km (#44), distance tirée de la vitesse ; à l'arrêt, deux minutes comptent pour autant. */
+    private const val STEP_KM = 1f
+    private const val STILL_MS = 120_000L
     private const val YEAR_MS = 365L * 24 * 3600 * 1000
 
     data class Curves(
@@ -122,12 +123,12 @@ object ConsumptionCurve {
                         val d = (start.km - lastKm).coerceAtMost(5)
                         ((net - lastNet) / d * 100f).also { stillSince = tick }
                     }
-                    // À l'arrêt (voiture allumée, énergie qui sort) : un point par minute, compté comme 0,5 km
+                    // À l'arrêt (voiture allumée, énergie qui sort) : un point toutes les 2 minutes, compté comme 1 km
                     // (réglage : rien à l'arrêt, la courbe ne reflète alors que la conduite, #44)
-                    (speed ?: 0f) < 1f && tick - stillSince >= 60_000 && net - lastNet > 0.001f && !sp.getBoolean("cc_stopped", true) -> {
+                    (speed ?: 0f) < 1f && tick - stillSince >= STILL_MS && net - lastNet > 0.001f && !sp.getBoolean("cc_stopped", true) -> {
                         lastNet = net; stillSince = tick; null
                     }
-                    (speed ?: 0f) < 1f && tick - stillSince >= 60_000 && net - lastNet > 0.001f ->
+                    (speed ?: 0f) < 1f && tick - stillSince >= STILL_MS && net - lastNet > 0.001f ->
                         ((net - lastNet) / STEP_KM * 100f).also { stillSince = tick; dist = 0f }
                     else -> null
                 }
