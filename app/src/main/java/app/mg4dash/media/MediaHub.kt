@@ -302,6 +302,14 @@ object MediaHub {
     /** Lecteur commandé par MG4Dash (Bluetooth, USB, DiAuto…), hors radio et Android Auto / CarPlay. */
     fun ownPlayerShown(): Boolean = !radioShown && current?.let { !isAndroidAuto(it.packageName) } == true
 
+    /**
+     * Lecteur d'une autre appli affiché (DiAuto…) : la voiture n'a pas de source pour elle, et les
+     * boutons du volant partent vers Android Auto d'AllGo ; MG4Dash les lui renvoie.
+     */
+    fun otherAppShown(): Boolean = !radioShown && current?.packageName?.let {
+        it != RADIO && it != "com.android.bluetooth" && it != "com.saicmotor.media" && !isAndroidAuto(it) && !it.startsWith("com.allgo.")
+    } == true
+
     fun isAndroidAuto(pkg: String?) = pkg == AA_MBS || pkg?.startsWith("com.allgo.app.androidauto") == true
 
     /** Puce USB / BT : bascule entre le Bluetooth et l'USB, en partant de ce qui est affiché. */
