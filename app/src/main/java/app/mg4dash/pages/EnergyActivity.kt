@@ -300,7 +300,9 @@ class EnergyActivity : PageActivity() {
 
     private fun renderLimit(carLimit: Int? = null) {
         if (!::setLimit.isInitialized) return
-        val wanted = prefs.chargeLimit
+        // La limite réglée dans la voiture (appli d'origine, iSMART) fait foi : avant, on affichait la
+        // dernière valeur choisie dans MG4Dash (100 % par défaut) même si la voiture était à 80 % (#50)
+        val wanted = carLimit?.takeIf { it in 50..100 }?.also { if (it != prefs.chargeLimit) prefs.chargeLimit = it } ?: prefs.chargeLimit
         setLimit(listOf(50, 60, 70, 80, 90, 100).indexOf(wanted).takeIf { it >= 0 })
         limitNote.text = if (wanted >= 100) getString(R.string.en_no_limit)
             else getString(R.string.en_car_only) + (carLimit?.let { " ($it %)." } ?: ".")
