@@ -379,8 +379,10 @@ object MediaHub {
         // Autre appli (DiAuto…) : pas de commande de source voiture, on lance directement son lecteur
         val carSource = activateSource(next)
         main.postDelayed({
+            // Autre appli : « lecture » envoyé même si elle se croit déjà en lecture. DiAuto reste en lecture
+            // côté téléphone quand la radio lui prend la source ; c'est ce « lecture » qui la lui fait reprendre
             (browserControllers[next] ?: lastCandidates.firstOrNull { it.packageName == next })
-                ?.takeIf { !isPlaying(it) }?.transportControls?.play()
+                ?.takeIf { !carSource || !isPlaying(it) }?.transportControls?.play()
         }, if (carSource) 1500 else 0)
     }
 
