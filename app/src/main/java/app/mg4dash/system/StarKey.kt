@@ -51,15 +51,16 @@ object StarKey {
                 // SWI173 (#33) : le joystick droit n'agit pas sur la musique Bluetooth / DiAuto quand
                 // MG4Dash est l'accueil ; gauche = précédent, droite = suivant, OK = lecture / pause.
                 // Limité à SWI173 : ailleurs le joystick change déjà piste ou volume tout seul.
-                // Musique d'une autre appli (DiAuto…) : la voiture envoie suivant / précédent à Android Auto
-                // d'AllGo, qui ne joue pas ; on les passe au lecteur affiché
+                // Musique d'une autre appli (SimpMusic…) : la voiture n'envoie pas suivant / précédent à
+                // cette appli ; on les passe au lecteur affiché (DiAuto lit lui-même les boutons)
                 // (gauche = précédent, droite = suivant, comme pour les autres sources)
-                if (!down && !long && (code == JOY_LEFT || code == JOY_RIGHT) && MediaHub.otherAppShown()) {
+                if (!down && !long && (code == JOY_LEFT || code == JOY_RIGHT) && MediaHub.otherAppShown() &&
+                    !MediaHub.shownHandlesWheelKeys()) {
                     if (code == JOY_RIGHT) MediaHub.next() else MediaHub.previous()
                     return
                 }
                 if (Firmware.gen == Firmware.Gen.SWI173 && !down && !long && code in JOY_LEFT..JOY_OK &&
-                    MediaHub.ownPlayerShown()) {
+                    MediaHub.ownPlayerShown() && !MediaHub.shownHandlesWheelKeys()) {
                     when (code) {
                         JOY_LEFT -> MediaHub.previous()
                         JOY_RIGHT -> MediaHub.next()
