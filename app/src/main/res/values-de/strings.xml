@@ -485,6 +485,7 @@
     <string name="st_power_va">Spannung und Strom unter der Leistungsleiste</string>
     <string name="st_power_va_desc">Aktuell, Minimum und Maximum der Fahrt. Aus: Leistung und Durchschnittsverbrauch größer.</string>
     <string name="fx_pumpkin">Halloween-Kürbis</string>
+    <string name="fx_spider">Halloween-Vogelspinne</string>
     <string name="en_clear_curve">Kurve löschen</string>
     <string name="en_clear_confirm">Kurve „%1$s“ löschen?</string>
     <string name="st_cc_stopped">Verbrauchskurve: auch im Stand</string>

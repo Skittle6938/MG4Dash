@@ -485,6 +485,7 @@
     <string name="st_power_va">Tension et courant sous la barre de puissance</string>
     <string name="st_power_va_desc">Actuels, mini et maxi du trajet. Désactivé : puissance et conso moyenne en plus grand.</string>
     <string name="fx_pumpkin">Citrouille d\'Halloween</string>
+    <string name="fx_spider">Mygale d\'Halloween</string>
     <string name="en_clear_curve">Effacer la courbe</string>
     <string name="en_clear_confirm">Effacer la courbe « %1$s » ?</string>
     <string name="st_cc_stopped">Courbe de conso : aussi à l\'arrêt</string>

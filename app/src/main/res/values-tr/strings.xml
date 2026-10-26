@@ -485,6 +485,7 @@
     <string name="st_power_va">Güç çubuğunun altında gerilim ve akım</string>
     <string name="st_power_va_desc">Anlık, yolculuğun en düşük ve en yüksek değerleri. Kapalı: güç ve ortalama tüketim daha büyük.</string>
     <string name="fx_pumpkin">Cadılar Bayramı balkabağı</string>
+    <string name="fx_spider">Cadılar Bayramı tarantulası</string>
     <string name="en_clear_curve">Eğriyi temizle</string>
     <string name="en_clear_confirm">\"%1$s\" eğrisi temizlensin mi?</string>
     <string name="st_cc_stopped">Tüketim eğrisi: dururken de</string>
