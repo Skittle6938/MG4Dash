@@ -475,7 +475,7 @@
     <string name="st_theme_smooth">Transition douce clair / sombre</string>
     <string name="st_theme_smooth_desc">Attend 5 s de feux stables (pas de bascule sous les ponts) et passe en fondu sur 2 s. Désactivé : bascule dès que les feux changent.</string>
     <string name="st_hide_saic_climate">Garder MG4Dash devant l\'écran clim SAIC</string>
-    <string name="st_hide_saic_climate_desc">Quand MG4Dash allume la clim, le launcher d\'origine ouvre son écran clim : MG4Dash repasse devant.</string>
+    <string name="st_hide_saic_climate_desc">Quand la clim s\'allume (depuis MG4Dash ou avec le bouton sous l\'écran), le launcher d\'origine ouvre son écran clim : MG4Dash repasse devant.</string>
     <string name="en_trips_note">%1$d trajets, un point par trajet · moyenne %2$s (pointillés)</string>
     <string name="en_trips_wait">La courbe se remplit trajet après trajet (au moins 2 km par trajet).</string>
     <string name="en_curve_note">Un point par km (un toutes les 2 minutes à l\'arrêt) · moyenne %1$s (pointillés)</string>

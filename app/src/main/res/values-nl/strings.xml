@@ -475,7 +475,7 @@
     <string name="st_theme_smooth">Zachte overgang licht / donker</string>
     <string name="st_theme_smooth_desc">Wacht 5 s op stabiele verlichting (geen wissel onder bruggen) en vervaagt in 2 s. Uit: wisselt zodra de verlichting verandert.</string>
     <string name="st_hide_saic_climate">MG4Dash voor het SAIC-klimaatscherm houden</string>
-    <string name="st_hide_saic_climate_desc">Als MG4Dash de klimaatregeling aanzet, opent de originele launcher zijn klimaatscherm: MG4Dash komt er weer voor.</string>
+    <string name="st_hide_saic_climate_desc">Als de klimaatregeling wordt aangezet (in MG4Dash of met de knop onder het scherm), opent de originele launcher zijn klimaatscherm: MG4Dash komt er weer voor.</string>
     <string name="en_trips_note">%1$d ritten, één punt per rit · gemiddelde %2$s (gestippeld)</string>
     <string name="en_trips_wait">De curve vult zich rit na rit (minstens 2 km per rit).</string>
     <string name="en_curve_note">Eén punt per km (één per 2 minuten stilstaand) · gemiddelde %1$s (gestippeld)</string>
