@@ -29,6 +29,7 @@ object ConnectionToggle {
         val app = context.applicationContext
         val pkg = target(app)
         val off = !isOff(app, pkg)
+        if (off) MediaHub.connectionCutStarted()
         if (off && MediaHub.playingNow()) MediaHub.resumeOnBluetooth()
         Thread {
             if (off && projection(pkg)) endSession(app)
