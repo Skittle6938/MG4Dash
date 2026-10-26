@@ -1,5 +1,6 @@
 package app.mg4dash.system
 
+import app.mg4dash.car.CarProps
 import android.content.BroadcastReceiver
 import android.content.ComponentName
 import android.content.Context
@@ -26,6 +27,7 @@ object StarKey {
     private const val JOY_OK = 301
     /** Volume : haut / bas du joystick (297 / 298) et touches volume Android (24 / 25). */
     private val VOLUME_KEYS = setOf(297, 298, 24, 25)
+    private const val SWC_CLIMATE = 2
     /** Settings.System : fonction du « * » gauche ; 3 = caméra de recul / 360 (CarHardKey SAIC). */
     private const val STAR_FUNCTION = "star_key_function"
     /** Même chose pour le « * » droit. */
@@ -56,6 +58,13 @@ object StarKey {
                 // Musique d'une autre appli (SimpMusic…) : la voiture n'envoie pas suivant / précédent à
                 // cette appli ; on les passe au lecteur affiché (DiAuto ne lit que lecture / pause)
                 // (gauche = précédent, droite = suivant, comme pour les autres sources)
+                // Fenêtre de clim rapide ouverte depuis le volant : les boutons règlent la clim, MG4Dash
+                // ne les passe pas au lecteur (relevé dans SystemUI : fonction du volant = 2 « clim »)
+                if ((code in JOY_LEFT..JOY_OK || code in VOLUME_KEYS) &&
+                    CarProps.getInt(CarProps.SWC_FUNCTION) == SWC_CLIMATE) {
+                    if (down) Log.i(TAG, "steering wheel in climate mode: button left to the climate window")
+                    return
+                }
                 if (code == JOY_LEFT || code == JOY_RIGHT) {
                     if (down && !long) MediaHub.wheelPressed(code == JOY_RIGHT)
                     else if (!down && !long && MediaHub.wheelReleased(code == JOY_RIGHT)) return
