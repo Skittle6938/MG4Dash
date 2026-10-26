@@ -39,6 +39,13 @@ object Apps {
 
     fun openPackage(context: Context, pkg: String, label: String = pkg): Boolean = fallback(context, pkg, label)
 
+    /** L'appli existe sur ce firmware (activité connue, lanceur du paquet ou nom voisin) : sinon on cache son bouton. */
+    fun available(context: Context, component: ComponentName): Boolean {
+        val pm = context.packageManager
+        return pm.resolveActivity(Intent(Intent.ACTION_MAIN).setComponent(component), 0) != null ||
+            pm.getLaunchIntentForPackage(component.packageName) != null || searchLauncher(context, component.packageName) != null
+    }
+
     /** Autres noms connus selon le firmware : mots-clés cherchés dans les paquets lanceurs (issue #13). */
     private val ALIASES = mapOf(
         "com.saicmotor.vehiclesetting" to listOf("vehiclesetting", "vehicle.setting", "carsetting", "vehicle"),
