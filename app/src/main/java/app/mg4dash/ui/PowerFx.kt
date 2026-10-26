@@ -61,6 +61,8 @@ class PowerFx(private val context: Context) : Drawable() {
     }
 
     var style = ROCKET
+    /** Badge du pic autorisé : seulement quand le conducteur affiche lui-même le widget Puissance. */
+    var badgeAllowed = true
         set(v) { if (v != field) { field = v; if (active) stop() } }
     /** Appelé quand le badge du pic apparaît (true) ou disparaît (false) : l'hôte masque son texte dessous. */
     var onBadge: ((Boolean) -> Unit)? = null
@@ -150,10 +152,14 @@ class PowerFx(private val context: Context) : Drawable() {
         } else {
             heatTarget = 0.15f
             // Fin aussi sans image dessinée (écran éteint, appli en arrière-plan)
-            if (active && now - lastAbove > HOLD_MS + FADE_MS) { stop(); return }
+            if (active && now > endAt() + FADE_MS) { stop(); return }
         }
         invalidateSelf()
     }
+
+    /** Fin de l'animation : 10 s après le dernier passage au seuil ; la mygale, elle, va au bout et le pic reste 3,5 s après. */
+    private fun endAt(): Long = maxOf(lastAbove + HOLD_MS,
+        if (style == SPIDER && launchAt > 0L) launchAt + (SPIDER_IN_MS + SPIDER_STAY_MS).toLong() + 3500L else 0L)
 
     fun stop() {
         shakeBy(0f)
@@ -169,9 +175,9 @@ class PowerFx(private val context: Context) : Drawable() {
         val now = SystemClock.uptimeMillis()
         val dt = if (lastFrame == 0L) 0.016f else ((now - lastFrame) / 1000f).coerceIn(0f, 0.05f)
         lastFrame = now
-        val since = now - lastAbove
-        if (since > HOLD_MS + FADE_MS) { stop(); return }
-        val alpha = if (since > HOLD_MS) 1f - (since - HOLD_MS).toFloat() / FADE_MS else 1f
+        val end = endAt()
+        if (now > end + FADE_MS) { stop(); return }
+        val alpha = if (now > end) 1f - (now - end).toFloat() / FADE_MS else 1f
         shown += (record - shown) * (1f - exp(-dt * 5f))
         if (record - shown < 0.05f) shown = record
         heat += (heatTarget - heat) * (1f - exp(-dt * (if (heatTarget > heat) 6f else 0.6f)))
@@ -478,6 +484,16 @@ class PowerFx(private val context: Context) : Drawable() {
                 cracks.add(pts.toFloatArray())
             }
         }
+        // Badge du pic derrière l'araignée, seulement avec le widget Puissance
+        if (badgeAllowed) {
+            val gx = badgeArea.centerX() - bw / 2f
+            val appear = ((now - badgeAt - 600) / 250f).coerceIn(0f, 1f)
+            if (appear > 0f) {
+                val l = c.saveLayerAlpha(gx - 4 * d, badgeArea.centerY() - bh, gx + bw + 4 * d, badgeArea.centerY() + bh, (appear * 255).toInt())
+                drawBadge(c, gx, badgeArea.centerY(), bw, bh, cHeat, text, gx + bh * 0.45f)
+                c.restoreToCount(l)
+            }
+        }
         // Secousse de l'impact, qui s'amortit
         shakeBy(if (since < 500f) 11 * d * (1f - since / 500f) else 0f)
         val fade = ((SPIDER_STAY_MS - since) / 700f).coerceIn(0f, 1f)
@@ -532,14 +548,6 @@ class PowerFx(private val context: Context) : Drawable() {
             val twitch = sin(since / 70.0).toFloat() * 0.35f * (1f - (since / 4000f).coerceAtMost(1f))
             drawSpider(c, ix, iy + slide, full, wiggle = twitch, squash = 1f, alpha = a, ms = ms)
             if (since < 180f) { paint.color = 0xFFFFFFFF.toInt(); paint.alpha = (150 * (1f - since / 180f)).toInt(); c.drawRect(bounds, paint) }
-        }
-        // Badge du pic peu après l'impact
-        val gx = badgeArea.centerX() - bw / 2f
-        val appear = ((now - badgeAt - 600) / 250f).coerceIn(0f, 1f)
-        if (appear > 0f) {
-            val l = c.saveLayerAlpha(gx - 4 * d, badgeArea.centerY() - bh, gx + bw + 4 * d, badgeArea.centerY() + bh, (appear * 255).toInt())
-            drawBadge(c, gx, badgeArea.centerY(), bw, bh, cHeat, text, gx + bh * 0.45f)
-            c.restoreToCount(l)
         }
     }
 
