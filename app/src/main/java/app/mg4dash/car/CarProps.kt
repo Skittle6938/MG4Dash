@@ -33,6 +33,8 @@ object CarProps {
     const val REGEN_RNG_AFT_CHRG = 559980964     // autonomie récupérée au freinage depuis la recharge (km)
     const val BMS_PACK_VOL = 560002054           // tension batterie (V, float)
     const val BMS_PACK_CRNT = 560002055          // courant batterie (A, float)
+    /** Fonction des boutons du volant (combiné, 0x21407b14) : 2 = clim (fenêtre de clim rapide ouverte). */
+    const val SWC_FUNCTION = 557873940
     const val ELEC_CSUMP_PERKM = 560002077       // conso récente (kWh/100 km, float)
     const val CONS_TOTAL_AFT_CHRG = 559980987    // énergie depuis la recharge (float)
     const val CONS_TOTAL_AFT_ST = 559980988      // énergie depuis le démarrage
