@@ -66,6 +66,7 @@ object CarBridge {
         Log.i(TAG, "firmware ${Firmware.version} (${Firmware.gen}, family ${Firmware.family})")
         scope.launch { pollLoop() }
         watchSaicClimate(context.applicationContext)
+        watchClimateWindow()
     }
 
     /** Démarrage / arrêt de la charge et du V2L disponibles (service EV de la voie A9). */
@@ -405,6 +406,7 @@ object CarBridge {
 
     /** Commande clim des firmwares ancien SDK (bloquante, donc hors du fil principal). */
     private fun legacy(label: String, action: () -> Boolean) {
+        ownCommandAt = android.os.SystemClock.elapsedRealtime()
         scope.launch {
             val front = ourFrontTask()
             val ok = try { action() } catch (e: Exception) { Log.w(TAG, "SET $label: ${e.message}"); false }
@@ -448,6 +450,39 @@ object CarBridge {
      * 3 s, on remet MG4Dash devant (même réglage que #48). Pas quand MG4Dash a lui-même ouvert une appli.
      */
     private var lastTopSeen: String? = null
+    /** Dernière commande clim envoyée par MG4Dash (elapsedRealtime). */
+    @Volatile private var ownCommandAt = 0L
+
+    /**
+     * Diagnostic (#62) : clim allumée par la voiture (bouton sous l'écran), pas par MG4Dash. Sur certains
+     * anciens firmwares la page clim SAIC est une fenêtre posée par-dessus MG4Dash, sans changer l'appli au
+     * premier plan : on note la fenêtre qui a le focus et les fenêtres du haut, lues dans l'état du système.
+     */
+    private fun watchClimateWindow() {
+        if (Firmware.family == Firmware.Family.A9) return
+        scope.launch {
+            var prev: Boolean? = null
+            _state.collect { s ->
+                val on = s.hvacOn
+                if (prev == false && on == true && android.os.SystemClock.elapsedRealtime() - ownCommandAt > 4_000) {
+                    delay(900)
+                    logWindows()
+                }
+                if (on != null) prev = on
+            }
+        }
+    }
+
+    private fun logWindows() {
+        try {
+            val p = Runtime.getRuntime().exec(arrayOf("dumpsys", "window", "windows"))
+            val lines = p.inputStream.bufferedReader().readLines()
+            p.waitFor()
+            val focus = lines.firstOrNull { it.contains("mCurrentFocus") }?.trim()
+            val top = lines.filter { it.trim().startsWith("Window #") }.take(6).map { it.trim().substringAfter("Window{").substringBefore("}").split(" ").last() }
+            Log.i(TAG, "climate window: ${focus ?: "focus unknown"}; top windows: ${top.joinToString(", ")}")
+        } catch (e: Throwable) { Log.w(TAG, "climate window: ${e.message}") }
+    }
 
     private fun watchSaicClimate(ctx: Context) {
         if (Firmware.family == Firmware.Family.A9) return
@@ -484,6 +519,7 @@ object CarBridge {
 
     private fun command(label: String, action: (HvacService) -> Unit) {
         if (BuildConfig.MOCK) { MockCar.command(label, _state); return }
+        ownCommandAt = android.os.SystemClock.elapsedRealtime()
         scope.launch {
             val h = hvac ?: run { Log.w(TAG, "$label ignored: climate not connected"); return@launch }
             try {
@@ -629,6 +665,7 @@ object CarBridge {
         advance: (HvacService) -> Unit,
     ) {
         if (BuildConfig.MOCK) { MockCar.command(label, _state); return }
+        ownCommandAt = android.os.SystemClock.elapsedRealtime()
         scope.launch {
             cycleLock.withLock {
                 val h = hvac ?: run { Log.w(TAG, "$label ignored: climate not connected"); return@launch }
