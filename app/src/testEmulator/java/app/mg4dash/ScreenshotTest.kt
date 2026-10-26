@@ -515,6 +515,18 @@ class ScreenshotTest {
         save(org.robolectric.shadows.ShadowDialog.getLatestDialog().window!!.decorView, "phone_fav_count_dialog.png")
     }
 
+    /** Tuto des gestes : quelques étapes, en français. */
+    @Test @Config(qualifiers = "fr-w1920dp-h720dp-land-mdpi") fun tutorialSteps() {
+        org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE).edit().putInt("theme_mode", 1).commit()
+        val activity = Robolectric.buildActivity(MainActivity::class.java).setup().get()
+        repeat(3) { shadowOf(Looper.getMainLooper()).idleFor(200, TimeUnit.MILLISECONDS) }
+        for (step in 0 until 9) {
+            app.mg4dash.ui.Tutorial.show(activity, step)
+            repeat(2) { shadowOf(Looper.getMainLooper()).idleFor(200, TimeUnit.MILLISECONDS) }
+            save(activity.window.decorView, "tutorial_$step.png")
+        }
+    }
+
     @Test fun homeWidgetPhone() {
         org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE).edit().putInt("secondary_widget", 2)
             .putString("fav_phone_0", "Claire Martin\u001F+33612345678").putString("fav_phone_1", "Garage MG\u001F+33123456789").apply()
