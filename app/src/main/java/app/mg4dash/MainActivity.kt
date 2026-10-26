@@ -1249,6 +1249,9 @@ class MainActivity : AppCompatActivity() {
     private var minVolts: Float? = if (BuildConfig.MOCK) 325f else null
     private var maxAmps: Float? = if (BuildConfig.MOCK) 150.6f else null
     private var minMaxTrip = -1
+    /** Courant de charge le plus fort depuis le branchement (#29), affiché à la place du maxi tiré en recharge. */
+    private var maxChargeAmps: Float? = null
+    private var wasCharging = false
 
     /** Puissance batterie (tension × courant) : positive = tirée, négative = récupérée. */
     private suspend fun updatePower() {
@@ -1305,6 +1308,10 @@ class MainActivity : AppCompatActivity() {
             if (trip != minMaxTrip) { if (minMaxTrip >= 0) { minVolts = null; maxAmps = null }; minMaxTrip = trip }
             volts?.let { v -> minVolts = minOf(minVolts ?: v, v) }
             amps?.let { a -> if (a > 0f) maxAmps = maxOf(maxAmps ?: a, a) }
+            if (plugged && !wasCharging) maxChargeAmps = null
+            wasCharging = plugged
+            amps?.let { a -> if (plugged && a < 0f) maxChargeAmps = maxOf(maxChargeAmps ?: -a, -a) }
+            val shownMax = if (plugged) maxChargeAmps else maxAmps
             // Une ligne : tension · tension mini | courant · courant maxi (mini et maxi légèrement estompés, #29)
             val dim = color(R.color.text_sub)
             fun line(now: CharSequence?, extreme: String?): CharSequence = android.text.SpannableStringBuilder().apply {
@@ -1324,7 +1331,7 @@ class MainActivity : AppCompatActivity() {
             tv.text = android.text.SpannableStringBuilder()
                 .append(line(volts?.let { half(String.format(Locale.getDefault(), "%.0f V", it)) }, minVolts?.let { String.format(Locale.getDefault(), "%.0f min", it) }))
                 .append(android.text.SpannableString("   |   ").apply { setSpan(android.text.style.ForegroundColorSpan(color(R.color.text_disabled)), 0, length, 0) })
-                .append(ampsTxt ?: "—").append(maxAmps?.let { m ->
+                .append(ampsTxt ?: "—").append(shownMax?.let { m ->
                     android.text.SpannableString(String.format(Locale.getDefault(), " %.1f max", m)).apply { setSpan(android.text.style.ForegroundColorSpan(dim), 0, length, 0); setSpan(android.text.style.RelativeSizeSpan(0.7f), length - 3, length, 0) }
                 } ?: "")
         } else powerExtra?.let { tv ->
