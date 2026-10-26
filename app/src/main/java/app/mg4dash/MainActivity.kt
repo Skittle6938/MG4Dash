@@ -1352,10 +1352,21 @@ class MainActivity : AppCompatActivity() {
         stackTitle(b.secondaryTitle, getString(R.string.sw_phone))
         val g = b.secondaryGrid
         g.removeAllViews()
-        g.orientation = LinearLayout.HORIZONTAL
+        // 2 ou 3 raccourcis sur une ligne, 4, 6 ou 8 sur deux lignes ; icône et nom réduits sur deux lignes
+        val n = app.mg4dash.shortcuts.PhoneFavorites.count(prefs)
+        val cols = app.mg4dash.shortcuts.PhoneFavorites.columns(n)
+        val twoRows = n > 3
+        g.orientation = if (twoRows) LinearLayout.VERTICAL else LinearLayout.HORIZONTAL
         val d = resources.displayMetrics.density
         val refresh = { builtMode = -1; renderSecondary() }
-        for (i in 0 until app.mg4dash.shortcuts.PhoneFavorites.COUNT) {
+        var line: LinearLayout? = null
+        for (i in 0 until n) {
+            val target = if (!twoRows) g else {
+                if (i % cols == 0) line = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }.also {
+                    g.addView(it, LinearLayout.LayoutParams(-1, 0, 1f))
+                }
+                line!!
+            }
             val fav = app.mg4dash.shortcuts.PhoneFavorites.get(prefs, i)
             val cell = LinearLayout(this).apply {
                 orientation = LinearLayout.VERTICAL; gravity = Gravity.CENTER
@@ -1368,16 +1379,19 @@ class MainActivity : AppCompatActivity() {
                 }
                 setOnLongClickListener { app.mg4dash.shortcuts.PhoneFavorites.edit(this@MainActivity, i, refresh); true }
             }
+            val icon = when { !twoRows && n == 2 -> 64; !twoRows -> 56; cols <= 2 -> 40; else -> 34 }
+            val textSp = when { !twoRows -> 24f; cols <= 2 -> 21f; cols == 3 -> 19f; else -> 17f }
+            if (twoRows) cell.setPadding((6 * d).toInt(), (4 * d).toInt(), (6 * d).toInt(), (4 * d).toInt())
             cell.addView(ImageView(this).apply {
                 setImageResource(if (fav == null) R.drawable.ic_plus else R.drawable.ic_phone)
                 setColorFilter(color(if (fav == null) R.color.text_title else R.color.accent_energy))
-            }, LinearLayout.LayoutParams((56 * d).toInt(), (56 * d).toInt()))
+            }, LinearLayout.LayoutParams((icon * d).toInt(), (icon * d).toInt()))
             if (fav != null) cell.addView(TextView(this).apply {
                 text = fav.name; maxLines = 1; ellipsize = android.text.TextUtils.TruncateAt.END; gravity = Gravity.CENTER
-                setTextColor(color(R.color.text_value)); setTextSize(TypedValue.COMPLEX_UNIT_SP, 24f)
-            }, LinearLayout.LayoutParams(-1, -2).apply { topMargin = (8 * d).toInt() })
-            g.addView(cell, LinearLayout.LayoutParams(0, -1, 1f).apply {
-                marginStart = (4 * d).toInt(); marginEnd = (4 * d).toInt(); topMargin = (6 * d).toInt()
+                setTextColor(color(R.color.text_value)); setTextSize(TypedValue.COMPLEX_UNIT_SP, textSp)
+            }, LinearLayout.LayoutParams(-1, -2).apply { topMargin = ((if (twoRows) 4 else 8) * d).toInt() })
+            target.addView(cell, LinearLayout.LayoutParams(0, -1, 1f).apply {
+                marginStart = (4 * d).toInt(); marginEnd = (4 * d).toInt(); topMargin = ((if (twoRows) 4 else 6) * d).toInt()
             })
         }
     }
