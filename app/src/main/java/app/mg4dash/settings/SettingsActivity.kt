@@ -303,6 +303,12 @@ class SettingsActivity : AppCompatActivity() {
             button(getString(R.string.st_compat_run)) { Thread { app.mg4dash.car.CarProps.dumpAll() }.start(); Compat.show(this) },
             button(getString(R.string.st_log)) { showLogDialog() },
         )
+        row(diag, button(getString(R.string.tu_show)) {
+            startActivity(android.content.Intent(this, app.mg4dash.MainActivity::class.java)
+                .putExtra(app.mg4dash.ui.Tutorial.EXTRA_SHOW, true)
+                .addFlags(android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP or android.content.Intent.FLAG_ACTIVITY_SINGLE_TOP))
+            finish()
+        })
         toggle(diag, R.string.st_energy_log, R.string.st_energy_log_desc, { prefs.energyLog }) { prefs.energyLog = it }
 
         refreshHome()

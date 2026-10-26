@@ -43,6 +43,7 @@ class LauncherApp : Application() {
                 val fresh = sp.all.isEmpty()
                 sp.edit().apply {
                     if (fresh) putInt("home_style", 0).putBoolean("fullscreen", true).putBoolean("vertical_dock", true)
+                        .putBoolean("tutorial_pending", true)   // tuto des gestes au premier accueil
                     putBoolean("defaults_v1", true)
                 }.apply()
                 if (fresh) Log.i("App", "first install: Full layout, full screen, vertical bar")

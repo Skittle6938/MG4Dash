@@ -498,6 +498,39 @@
     <string name="st_play_resume">Araç kapatıldığındaki gibi</string>
     <string name="st_play_pause">Her zaman duraklatılmış</string>
     <string name="st_play_play">Her zaman oynat</string>
+    <string name="tu_welcome_t">MG4Dash\'e hoş geldiniz</string>
+    <string name="tu_welcome_1">Birkaç adımda başlıca hareketlere kısa bir bakış.</string>
+    <string name="tu_layouts_t">Üç ana ekran düzeni</string>
+    <string name="tu_layouts_1">Ayarlar › Ana ekran\'dan seç: Tam, Basit (büyük paneller) veya Harita (büyük harita)</string>
+    <string name="tu_layouts_2">Ayrıca: yan çubuk veya alt çubuk; Görünüm\'de: açık, koyu veya otomatik, renkler</string>
+    <string name="tu_bar_t">Yan çubuk</string>
+    <string name="tu_bar_1">Ayarlar: dokun = MG4Dash, uzun bas = araç, çift dokun = Wi-Fi</string>
+    <string name="tu_bar_2">Enerji: çift dokun = ekran kapalı, uzun bas = aracı kapat (sürüşte asla)</string>
+    <string name="tu_bar_3">Araç: çift dokun = kapıları kilitle / aç, uzun bas = ESC kapalı / açık</string>
+    <string name="tu_bar_4">Ana ekran: uzun bas = tüm uygulamalar</string>
+    <string name="tu_climate_t">Klima</string>
+    <string name="tu_climate_1">A/C\'ye uzun bas: aralıklı A/C (durdurmak için A/C\'ye dokun)</string>
+    <string name="tu_climate_2">Sıcaklığa uzun bas: kalibrasyon; güce uzun bas: araçtan inince klimayı açık tut (kamp)</string>
+    <string name="tu_climate_3">En düşük fanda «−» klimayı kapatır</string>
+    <string name="tu_energy_t">Enerji</string>
+    <string name="tu_energy_1">KERS bölümüne dokun: rejenerasyon seviyesi; uzun bas: tek pedal sürüş</string>
+    <string name="tu_energy_2">CHARGE düğmesi: şarj ve V2L</string>
+    <string name="tu_map_t">Harita</string>
+    <string name="tu_map_1">Sağ üstteki düğme: harita → tüketim → kısayollar</string>
+    <string name="tu_map_2">Haritaya uzun bas: harita kartında başka bir uygulama</string>
+    <string name="tu_media_t">Müzik</string>
+    <string name="tu_media_1">Yukarı / aşağı kaydır: sonraki kaynak; sola / sağa: önceki / sonraki parça</string>
+    <string name="tu_media_2">Kaynak adına dokun: kaynak menüsü; resme dokun: uygulamayı aç</string>
+    <string name="tu_media_3">Oynat / duraklat\'a uzun bas: Ses sayfası</string>
+    <string name="tu_widget_t">Sağ alt widget</string>
+    <string name="tu_widget_1">Dokun veya kaydır: sonraki sayfa (enerji, güç, telefon)</string>
+    <string name="tu_widget_2">Telefon kısayoluna uzun bas: değiştir veya 2 ila 8 kısayol seç</string>
+    <string name="tu_end_t">Bu kadar!</string>
+    <string name="tu_end_1">Bu turu Ayarlar › Sistem\'de tekrar görebilirsiniz.</string>
+    <string name="tu_skip">Atla</string>
+    <string name="tu_next">İleri</string>
+    <string name="tu_done">Bitti</string>
+    <string name="tu_show">Hareket turunu göster</string>
     <string name="aa_title">ANDROID AUTO</string>
     <string name="aa_ready">Telefon bağlı · Açmak için dokunun</string>
     <string name="aa_waiting">Telefonunuzu USB ile bağlayın</string>
