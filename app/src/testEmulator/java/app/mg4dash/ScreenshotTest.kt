@@ -326,6 +326,26 @@ class ScreenshotTest {
     }
 
     /** Même carte, câble débranché (en roulant) : prise avec éclair sous les km. */
+    /** Même carte en recharge (#29) : courant de charge et son maxi depuis le branchement. */
+    @Test fun homeEnergyCardPowerCharging() {
+        org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE).edit()
+            .putInt("theme_mode", 1).putBoolean("energy_card_power", true).putBoolean("power_va", true).commit()
+        val mf = app.mg4dash.car.CarProps::class.java.getDeclaredField("mock").apply { isAccessible = true }
+        @Suppress("UNCHECKED_CAST")
+        val mock = mf.get(app.mg4dash.car.CarProps) as MutableMap<Int, Number>
+        val act = Robolectric.buildActivity(MainActivity::class.java).setup().get()
+        val sf = app.mg4dash.car.CarBridge::class.java.getDeclaredField("_state").apply { isAccessible = true }
+        @Suppress("UNCHECKED_CAST")
+        val flow = sf.get(app.mg4dash.car.CarBridge) as kotlinx.coroutines.flow.MutableStateFlow<app.mg4dash.car.VehicleState>
+        flow.value = flow.value.copy(chargeStatus = 1)
+        mock[app.mg4dash.car.CarProps.BMS_PACK_VOL] = 401.2f
+        for (a in listOf(-98.4f, -117.9f, -112.3f)) {
+            mock[app.mg4dash.car.CarProps.BMS_PACK_CRNT] = a
+            repeat(6) { shadowOf(Looper.getMainLooper()).idleFor(500, TimeUnit.MILLISECONDS) }
+        }
+        save(act.window.decorView, "home_energy_card_power_charging.png")
+    }
+
     @Test fun homeEnergyCardPowerDriving() {
         org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE).edit()
             .putInt("theme_mode", 1).putBoolean("energy_card_power", true).putBoolean("power_va", true).commit()
