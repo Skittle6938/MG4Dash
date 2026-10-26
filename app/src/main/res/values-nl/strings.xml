@@ -485,6 +485,7 @@
     <string name="st_power_va">Spanning en stroom onder de vermogensbalk</string>
     <string name="st_power_va_desc">Huidig, laagste en hoogste van de rit. Uit: vermogen en gemiddeld verbruik groter.</string>
     <string name="fx_pumpkin">Halloweenpompoen</string>
+    <string name="fx_spider">Halloweenvogelspin</string>
     <string name="en_clear_curve">Curve wissen</string>
     <string name="en_clear_confirm">De curve „%1$s” wissen?</string>
     <string name="st_cc_stopped">Verbruikscurve: ook stilstaand</string>
