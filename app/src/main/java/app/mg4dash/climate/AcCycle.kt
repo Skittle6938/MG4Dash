@@ -21,7 +21,8 @@ import kotlinx.coroutines.launch
 /**
  * A/C intermittent (issue #34) : appui long sur A/C, le compresseur alterne marche et arrêt
  * (durées réglées dans la calibration de la température). Un toucher sur A/C arrête le cycle et
- * laisse le compresseur en marche ; il s'arrête aussi si la clim ou la voiture s'éteint.
+ * laisse le compresseur en marche. Clim ou voiture éteinte, le cycle attend et reprend au
+ * rallumage, d'un trajet à l'autre, tant que le conducteur ne l'a pas arrêté (#61).
  */
 object AcCycle {
     private const val TAG = "AcCycle"
@@ -36,28 +37,44 @@ object AcCycle {
             app.mg4dash.ui.Toasts.show(context, R.string.ac_cycle_need_on); return
         }
         val prefs = Prefs(context.applicationContext)
-        _active.value = true
+        prefs.acCycleOn = true
         app.mg4dash.ui.Toasts.show(context, R.string.ac_cycle_started)
-        Log.i(TAG, "started: ${prefs.acCycleOnSec} s on / ${prefs.acCycleOffSec} s off")
+        run(prefs, "started")
+    }
+
+    /** Démarrage de MG4Dash : reprend le cycle laissé actif au trajet précédent (#61). */
+    fun resume(context: Context) {
+        val prefs = Prefs(context.applicationContext)
+        if (prefs.acCycleOn && !_active.value) run(prefs, "resumed from the last trip")
+    }
+
+    private fun run(prefs: Prefs, why: String) {
+        _active.value = true
+        Log.i(TAG, "$why: ${prefs.acCycleOnSec} s on / ${prefs.acCycleOffSec} s off")
         job = scope.launch {
-            var on = true
             while (true) {
-                setAc(on)
-                val until = System.currentTimeMillis() + 1000L * (if (on) prefs.acCycleOnSec else prefs.acCycleOffSec)
-                while (System.currentTimeMillis() < until) {
-                    delay(1000)
-                    if (CarBridge.state.value.hvacOn != true) { finish("clim arrêtée"); return@launch }
+                // Clim éteinte (ou voiture arrêtée) : on attend qu'elle se rallume, le cycle reste actif
+                while (CarBridge.state.value.hvacOn != true) delay(2000)
+                var on = true
+                cycle@ while (true) {
+                    setAc(on)
+                    val until = System.currentTimeMillis() + 1000L * (if (on) prefs.acCycleOnSec else prefs.acCycleOffSec)
+                    while (System.currentTimeMillis() < until) {
+                        delay(1000)
+                        if (CarBridge.state.value.hvacOn != true) { Log.i(TAG, "climate off: waiting for it to come back on"); break@cycle }
+                    }
+                    on = !on
                 }
-                on = !on
             }
         }
     }
 
-    /** Arrêt par le conducteur : le compresseur reste en marche. */
-    fun stop() {
+    /** Arrêt par le conducteur : le compresseur reste en marche, et le cycle ne reprendra plus. */
+    fun stop(context: Context) {
         if (!_active.value) return
+        Prefs(context.applicationContext).acCycleOn = false
         finish("toucher sur A/C")
-        setAc(true)
+        if (CarBridge.state.value.hvacOn == true) setAc(true)
     }
 
     private fun finish(reason: String) {
@@ -71,7 +88,7 @@ object AcCycle {
     /** Boutons A/C : toucher = bascule (ou fin du cycle), appui long = cycle. */
     fun attach(view: View) {
         // Le clignotement s'arrête tout de suite (l'état A/C ne change pas forcément, #34)
-        view.setOnClickListener { if (_active.value) { stop(); paint(view) } else CarBridge.toggleAc() }
+        view.setOnClickListener { if (_active.value) { stop(view.context); paint(view) } else CarBridge.toggleAc() }
         view.setOnLongClickListener { start(view.context); paint(view); true }
     }
 
