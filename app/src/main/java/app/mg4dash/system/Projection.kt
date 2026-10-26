@@ -81,6 +81,36 @@ object Projection {
         finally { reply.recycle(); data.recycle() }
     }
 
+    /**
+     * Arrête la session en cours (`stopRemoteSession`, transaction 3), avec l'appareil renvoyé tel quel par
+     * `getActiveRemoteDevice`. Couper seulement l'appli Android Auto laissait la session ouverte chez AllGo :
+     * les réglages d'origine se croyaient toujours en Android Auto et recoupaient la musique Bluetooth.
+     * Bloquant : hors du fil principal.
+     */
+    fun stopSession(context: Context): Boolean = onActiveDevice(context, "stopped", TX_STOP_SESSION)
+
+    /** Appelle [tx] avec l'appareil renvoyé tel quel par `getActiveRemoteDevice`. */
+    private fun onActiveDevice(context: Context, label: String, tx: Int): Boolean {
+        val b = bind(context) ?: return false
+        val q = Parcel.obtain(); val dev = Parcel.obtain(); val data = Parcel.obtain(); val reply = Parcel.obtain()
+        return try {
+            q.writeInterfaceToken(DESCRIPTOR)
+            b.transact(TX_ACTIVE_DEVICE, q, dev, 0)
+            dev.readException()
+            if (dev.readInt() == 0) { Log.i(TAG, "projection session not $label: no device"); return false }
+            val start = dev.dataPosition()
+            data.writeInterfaceToken(DESCRIPTOR)
+            data.writeInt(1)
+            data.appendFrom(dev, start, dev.dataSize() - start)
+            b.transact(tx, data, reply, 0)
+            reply.readException()
+            Log.i(TAG, "projection session $label: ${reply.readInt()}")
+            true
+        } catch (e: Exception) { Log.w(TAG, "projection session $label: ${e.message}"); false }
+        finally { reply.recycle(); data.recycle(); dev.recycle(); q.recycle() }
+    }
+    private const val TX_STOP_SESSION = 3
+
     /** Code du launcher d'origine pour « passer sur la source projection ». */
     const val KEY_SELECT_SOURCE = 1
     private const val TX_MEDIA_KEY = 18

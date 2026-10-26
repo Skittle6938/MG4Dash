@@ -502,6 +502,13 @@
     <string name="st_play_resume">Araç kapatıldığındaki gibi</string>
     <string name="st_play_pause">Her zaman duraklatılmış</string>
     <string name="st_play_play">Her zaman oynat</string>
+    <string name="st_aa_button">Çubuktaki Android Auto düğmesi</string>
+    <string name="st_aa_button_desc">Telefon bağlantısını kesmek için düğmeye iki kez dokunun (uygulama devre dışı kalır, simge kırmızı olur); geri getirmek için tekrar iki kez dokunun. Uzun basma: uygulamayı seçin.</string>
+    <string name="st_usb_kick">Başlangıçta kablolu telefon (USB düzeltmesi)</string>
+    <string name="st_usb_kick_desc">Telefon araç çalışmadan önce takılıysa Android Auto ancak çıkarılıp takıldıktan sonra başlar. Bu, başlangıçta onu otomatik olarak yeniden algılar.</string>
+    <string name="dock_conn_disabled">%1$s devre dışı: telefon artık bağlanmayacak. Geri getirmek için tekrar uzun basın.</string>
+    <string name="dock_conn_enabled">%1$s geri getirildi</string>
+    <string name="dock_conn_off">%1$s devre dışı: geri getirmek için düğmeye uzun basın.</string>
     <string name="tu_welcome_t">MG4Dash\'e hoş geldiniz</string>
     <string name="tu_welcome_1">Birkaç adımda başlıca hareketlere kısa bir bakış.</string>
     <string name="tu_layouts_t">Üç ana ekran düzeni</string>
@@ -512,6 +519,7 @@
     <string name="tu_bar_2">Enerji: çift dokun = ekran kapalı, uzun bas = aracı kapat (sürüşte asla)</string>
     <string name="tu_bar_3">Araç: çift dokun = kapıları kilitle / aç, uzun bas = ESC kapalı / açık</string>
     <string name="tu_bar_4">Ana ekran: uzun bas = tüm uygulamalar</string>
+    <string name="tu_bar_5">Android Auto: uzun bas = uygulamayı seç (Android Auto, CarPlay veya başka), çift dokun = telefon bağlantısını kes / geri getir</string>
     <string name="tu_climate_t">Klima</string>
     <string name="tu_climate_1">A/C\'ye uzun bas: aralıklı A/C (durdurmak için A/C\'ye dokun)</string>
     <string name="tu_climate_2">Sıcaklığa uzun bas: kalibrasyon; güce uzun bas: araçtan inince klimayı açık tut (kamp)</string>

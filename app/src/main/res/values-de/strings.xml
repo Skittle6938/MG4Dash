@@ -502,6 +502,13 @@
     <string name="st_play_resume">Wie beim Ausschalten</string>
     <string name="st_play_pause">Immer pausiert</string>
     <string name="st_play_play">Immer abspielen</string>
+    <string name="st_aa_button">Android-Auto-Taste der Leiste</string>
+    <string name="st_aa_button_desc">Doppeltippen, um die Telefonverbindung zu trennen (die App wird deaktiviert, das Symbol wird rot); erneut doppeltippen, um sie wiederherzustellen. Lange drücken: App wählen.</string>
+    <string name="st_usb_kick">Kabeltelefon beim Start (USB-Korrektur)</string>
+    <string name="st_usb_kick_desc">War das Telefon vor dem Start des Autos eingesteckt, startet Android Auto erst nach dem Aus- und Einstecken. Dies erkennt es beim Start automatisch neu.</string>
+    <string name="dock_conn_disabled">%1$s deaktiviert: Das Telefon verbindet sich nicht mehr. Erneut lange drücken zum Wiederherstellen.</string>
+    <string name="dock_conn_enabled">%1$s wiederhergestellt</string>
+    <string name="dock_conn_off">%1$s ist deaktiviert: Taste lange drücken zum Wiederherstellen.</string>
     <string name="tu_welcome_t">Willkommen bei MG4Dash</string>
     <string name="tu_welcome_1">Eine kurze Tour durch die wichtigsten Gesten, in wenigen Schritten.</string>
     <string name="tu_layouts_t">Drei Startseiten-Layouts</string>
@@ -512,6 +519,7 @@
     <string name="tu_bar_2">Energie: doppelt tippen = Bildschirm aus, lang drücken = Auto ausschalten (nie während der Fahrt)</string>
     <string name="tu_bar_3">Fahrzeug: doppelt tippen = Türen ver- / entriegeln, lang drücken = ESC aus / an</string>
     <string name="tu_bar_4">Start: lang drücken = alle Apps</string>
+    <string name="tu_bar_5">Android Auto: lang drücken = App wählen (Android Auto, CarPlay oder andere), doppelt tippen = Telefonverbindung trennen / wiederherstellen</string>
     <string name="tu_climate_t">Klima</string>
     <string name="tu_climate_1">A/C lang drücken: A/C im Intervall (A/C tippen zum Beenden)</string>
     <string name="tu_climate_2">Temperatur lang drücken: Kalibrierung; Ein/Aus lang drücken: Klima nach dem Aussteigen anlassen (Camping)</string>
