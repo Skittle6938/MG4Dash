@@ -676,7 +676,7 @@ class ScreenshotTest {
     /** Araignée d'Halloween sur l'accueil : images (640 × 240, 20 i/s) pour un GIF. */
     @Test fun spiderFrames() {
         val sp = org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE)
-        sp.edit().putInt("theme_mode", 1).putInt("secondary_widget", 0).putInt("power_fx", 6).commit()
+        sp.edit().putInt("theme_mode", 1).putInt("secondary_widget", 1).putInt("power_fx", 6).commit()
         val act = Robolectric.buildActivity(MainActivity::class.java).setup().get()
         val looper = shadowOf(Looper.getMainLooper())
         val big = Bitmap.createBitmap(1920, 720, Bitmap.Config.ARGB_8888)
@@ -684,7 +684,7 @@ class ScreenshotTest {
         fun run(ms: Long) { val end = t + ms; while (t < end) { looper.idleFor(25, TimeUnit.MILLISECONDS); Thread.sleep(1); t += 25; act.window.decorView.draw(Canvas(big)) } }
         run(1500)
         val dir = File("build/screenshots").apply { mkdirs() }
-        val fps = 20; val frames = 9 * fps
+        val fps = 20; val frames = 13 * fps
         java.io.DataOutputStream(File(dir, "spider.rgb").outputStream().buffered()).use { out ->
             out.writeInt(640); out.writeInt(240); out.writeInt(frames); out.writeInt(100 / fps)
             app.mg4dash.car.CarProps.setInt(app.mg4dash.car.CarProps.BMS_PACK_CRNT, 330, "test")
