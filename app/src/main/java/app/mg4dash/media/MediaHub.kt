@@ -233,6 +233,33 @@ object MediaHub {
      */
     fun resumeOnBluetooth() { resumeBtUntil = android.os.SystemClock.uptimeMillis() + 15_000 }
 
+    @Volatile private var musicSince = 0L
+    /** DiAuto ou une appli équivalente (Headunit Revived) en session : son écran de projection est ouvert. */
+    @Volatile private var appProjecting = false
+
+    private fun appProjection(ctx: Context): Boolean = try {
+        @Suppress("DEPRECATION")
+        (ctx.getSystemService(Context.ACTIVITY_SERVICE) as android.app.ActivityManager).getRunningTasks(30).any { t ->
+            listOfNotNull(t.baseActivity, t.topActivity).any { it.className.endsWith(".AapProjectionActivity") }
+        }
+    } catch (_: Exception) { false }
+    @Volatile private var cutUntil = 0L
+
+    /** Connexion du téléphone coupée par le bouton : le Bluetooth est proposé avant même le retour de sa musique. */
+    fun connectionCutStarted() { cutUntil = android.os.SystemClock.uptimeMillis() + 15_000 }
+
+    /**
+     * Source Bluetooth proposée : jamais pendant Android Auto / CarPlay (AllGo, DiAuto ou équivalent), et
+     * seulement quand la musique Bluetooth du téléphone est là depuis 5 s (elle va et vient à la connexion).
+     * Juste après une coupure par le bouton, le téléphone encore lié pour les appels suffit.
+     */
+    private fun btSource(): Boolean {
+        if (projectionLive == true || appProjecting) return false
+        val now = android.os.SystemClock.uptimeMillis()
+        if (musicSince != 0L && now - musicSince >= 5_000) return true
+        return now < cutUntil && app.mg4dash.system.BtAudio.phoneConnected()
+    }
+
     /**
      * Connexion d'une appli coupée par le bouton Android Auto (DiAuto…) : si c'était la source écoutée, on
      * passe à la source de remplacement du réglage, comme pour une source de la voiture qui disparaît.
@@ -312,7 +339,7 @@ object MediaHub {
                 }
                 val live = (s as? app.mg4dash.system.Projection.Session.Read)?.let { it.target != null }
                 // Fin de la projection : le téléphone ne rebranche pas la musique Bluetooth de lui-même
-                if (projectionLive != false && live == false) io.launch { kotlinx.coroutines.delay(3_000); app.mg4dash.system.BtAudio.connectMusic(ctx) }
+                if (projectionLive == true && live == false) io.launch { kotlinx.coroutines.delay(3_000); app.mg4dash.system.BtAudio.connectMusic(ctx) }
                 if (s is app.mg4dash.system.Projection.Session.Read && s.target != null) carPlay = s.target == app.mg4dash.system.Apps.CARPLAY
                 if (live != projectionLive) {
                     Log.i(TAG, "projection: ${if (live == null) "unknown" else if (live) "phone connected" else "no phone"}")
@@ -320,7 +347,10 @@ object MediaHub {
                     main.post { reevaluate() }
                 }
                 // Bluetooth coupé pendant la lecture : la carte restait sur le Bluetooth jusqu'au balayage (#36)
+                val proj = appProjection(ctx)
+                if (proj != appProjecting) { Log.i(TAG, "Android Auto app (DiAuto…): ${if (proj) "phone connected" else "no phone"}"); appProjecting = proj; main.post { reevaluate() } }
                 val bt = btConnected()
+                if (bt != true) musicSince = 0L else if (musicSince == 0L) musicSince = android.os.SystemClock.uptimeMillis()
                 if (bt != btLive) {
                     Log.i(TAG, "bluetooth audio: ${if (bt == null) "unknown" else if (bt) "phone connected" else "no phone"}")
                     btLive = bt
@@ -413,9 +443,7 @@ object MediaHub {
         val order = listOf("com.saicmotor.radio", "com.android.bluetooth", "com.saicmotor.media", AA_MBS)
         return order.filter { pkg ->
             when (pkg) {
-                // Téléphone connecté en Bluetooth, sauf si Android Auto / CarPlay le remplace
-                "com.android.bluetooth" -> app.mg4dash.system.BtAudio.musicConnected() ||
-                    (projectionLive != true && app.mg4dash.system.BtAudio.phoneConnected())
+                "com.android.bluetooth" -> btSource()
                 "com.saicmotor.media" -> try {
                     (ctx.getSystemService(Context.STORAGE_SERVICE) as android.os.storage.StorageManager).storageVolumes
                         .any { it.isRemovable && it.state == android.os.Environment.MEDIA_MOUNTED }
