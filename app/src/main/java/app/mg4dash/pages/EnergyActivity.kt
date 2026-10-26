@@ -260,13 +260,20 @@ class EnergyActivity : PageActivity() {
         schedule.isSelected = on
         finish.isSelected = p.reser == 3
         finish.isEnabled = on
-        p.st.first?.let { stH = it }; p.st.second?.let { stM = it }
-        p.sp.first?.let { spH = it }; p.sp.second?.let { spM = it }
-        startTime.text = if (p.st.first != null) hhmm(stH, stM) else "--:--"
-        endTime.text = when {
-            p.reser == 3 -> getString(R.string.en_limit_word)
-            p.sp.first != null -> hhmm(spH, spM)
-            else -> "--:--"
+        // Heure qu'on vient de régler : la relecture de la voiture est ignorée un instant (comme pour la clim),
+        // sinon l'affichage revenait à l'ancienne heure le temps que la voiture prenne la nouvelle
+        val now = android.os.SystemClock.uptimeMillis()
+        if (now >= holdStartUntil) {
+            p.st.first?.let { stH = it }; p.st.second?.let { stM = it }
+            startTime.text = if (p.st.first != null) hhmm(stH, stM) else "--:--"
+        }
+        if (now >= holdEndUntil) {
+            p.sp.first?.let { spH = it }; p.sp.second?.let { spM = it }
+            endTime.text = when {
+                p.reser == 3 -> getString(R.string.en_limit_word)
+                p.sp.first != null -> hhmm(spH, spM)
+                else -> "--:--"
+            }
         }
         val v2lPct = CarProps.v2lPercent(p.v2l)
         setV2l(v2lPct?.let { listOf(20, 30, 40, 50, 60, 70, 80).indexOf(it) })
@@ -397,8 +404,13 @@ class EnergyActivity : PageActivity() {
         setTime(start, h * 60 + m + deltaMin)
     }
 
+    private var holdStartUntil = 0L
+    private var holdEndUntil = 0L
+
     private fun setTime(start: Boolean, minutes: Int) {
         val total = Math.floorMod(minutes, 1440)
+        val until = android.os.SystemClock.uptimeMillis() + 4000
+        if (start) holdStartUntil = until else holdEndUntil = until
         val nh = total / 60; val nm = total % 60
         val other = if (start) spH * 60 + spM else stH * 60 + stM
         if (total == other) return    // l'appli SAIC refuse début = fin
