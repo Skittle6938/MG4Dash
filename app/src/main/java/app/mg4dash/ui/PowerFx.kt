@@ -414,11 +414,31 @@ class PowerFx(private val context: Context) : Drawable() {
     // ── Araignée d'Halloween : une grosse araignée fonce vers le conducteur et s'écrase sur la vitre de
     //    l'écran (plaquée par l'accélération) : impact, vitre fêlée, araignée aplatie qui glisse puis s'efface ──
 
-    private class Goo(val dx: Float, val dy: Float, val r: Float, val drip: Float)
+    /** Coulure de jus : part d'un point de l'éclaboussure, descend par à-coups ; [len] grandit, une goutte peut tomber. */
+    private class Goo(val dx: Float, val dy: Float, val r: Float, val speed: Float, val phase: Float, var len: Float = 0f, var dropY: Float = -1f)
     private val goo = ArrayList<Goo>()
     private val cracks = ArrayList<FloatArray>()
-    private val SPIDER_IN_MS = 950f
-    private val SPIDER_STAY_MS = 3600f
+    private val SPIDER_IN_MS = 1100f
+    private val SPIDER_STAY_MS = 7000f
+    private var splatSound: android.media.SoundPool? = null
+    private var splatId = 0
+
+    /** Bruit d'écrasement et de vitre cassée (son de notification, sans prendre la source audio). */
+    private fun playSplat() {
+        try {
+            val pool = splatSound ?: android.media.SoundPool.Builder().setMaxStreams(1)
+                .setAudioAttributes(android.media.AudioAttributes.Builder()
+                    .setUsage(android.media.AudioAttributes.USAGE_ASSISTANCE_SONIFICATION)
+                    .setContentType(android.media.AudioAttributes.CONTENT_TYPE_SONIFICATION).build())
+                .build().also { p ->
+                    splatSound = p
+                    splatId = p.load(context, R.raw.spider_splat, 1)
+                    p.setOnLoadCompleteListener { sp, id, st -> if (st == 0 && pendingSplat) { pendingSplat = false; sp.play(id, 1f, 1f, 1, 0, 1f) } }
+                }
+            if (pool.play(splatId, 1f, 1f, 1, 0, 1f) == 0) pendingSplat = true
+        } catch (e: Throwable) { app.mg4dash.system.Log.w("PowerFx", "splat sound: ${e.message}") }
+    }
+    private var pendingSplat = false
 
     private fun drawSpiderScene(c: Canvas, now: Long, dt: Float) {
         sizeText()
@@ -427,80 +447,95 @@ class PowerFx(private val context: Context) : Drawable() {
         if (launchAt == 0L) launchAt = now
         val ms = (now - launchAt).toFloat()
         val w = bounds.width().toFloat(); val h = bounds.height().toFloat()
-        val ix = bounds.left + w * 0.56f; val iy = bounds.top + h * 0.46f      // point d'impact
+        val ix = bounds.left + w * 0.56f; val iy = bounds.top + h * 0.42f      // point d'impact
         val full = h * 0.62f                                                  // taille à l'impact
         if (ms < SPIDER_IN_MS) {
-            // Arrivée : petite au loin, elle grossit de plus en plus vite en se rapprochant, pattes qui gigotent
+            // Arrivée : petite au loin, elle zigzague et grossit de plus en plus vite, pattes qui moulinent
             val u = ms / SPIDER_IN_MS
             val k = 0.06f + 0.94f * u * u * u
-            val x = bounds.left + w * 0.72f + (ix - bounds.left - w * 0.72f) * u
-            val y = bounds.top + h * 0.22f + (iy - bounds.top - h * 0.22f) * u
-            drawSpider(c, x, y, full * k, wiggle = sin(ms / 45.0).toFloat(), squash = 0f, alpha = 255)
+            val x = bounds.left + w * 0.72f + (ix - bounds.left - w * 0.72f) * u + sin(ms / 120.0).toFloat() * w * 0.03f * (1 - u)
+            val y = bounds.top + h * 0.2f + (iy - bounds.top - h * 0.2f) * u
+            drawSpider(c, x, y, full * k, wiggle = sin(ms / 35.0).toFloat() * 1.6f, squash = 0f, alpha = 255, ms = ms)
             shakeBy(0f)
             return
         }
         val since = ms - SPIDER_IN_MS
         if (fly) {
             fly = false; badgeAt = now
-            // Éclaboussures et fêlures tirées une fois, à l'impact
+            playSplat()
             goo.clear(); cracks.clear()
-            repeat(34) {
-                val a = rnd.nextFloat() * 2 * Math.PI; val dist = full * (0.15f + rnd.nextFloat() * 0.8f)
-                goo.add(Goo((cos(a) * dist).toFloat(), (sin(a) * dist * 0.8f).toFloat(), (4 + rnd.nextFloat() * 13) * d,
-                    if (rnd.nextFloat() < 0.6f) (25 + rnd.nextFloat() * 90) * d else 0f))
+            repeat(30) {
+                val a = rnd.nextFloat() * 2 * Math.PI; val dist = full * (0.12f + rnd.nextFloat() * 0.7f)
+                goo.add(Goo((cos(a) * dist).toFloat(), (sin(a) * dist * 0.8f).toFloat(), (5 + rnd.nextFloat() * 12) * d,
+                    if (rnd.nextFloat() < 0.75f) (25 + rnd.nextFloat() * 55) * d else 0f, rnd.nextFloat() * 6f))
             }
-            repeat(11) {
+            repeat(13) {
                 val a0 = rnd.nextFloat() * 2 * Math.PI
                 val pts = ArrayList<Float>(); var px = 0f; var py = 0f; var a = a0
                 pts.add(0f); pts.add(0f)
-                val segs = 3 + rnd.nextInt(3); val len = full * (0.5f + rnd.nextFloat() * 0.9f) / segs
+                val segs = 3 + rnd.nextInt(3); val len = full * (0.6f + rnd.nextFloat() * 1.0f) / segs
                 repeat(segs) { a += (rnd.nextFloat() - 0.5f) * 0.6f; px += (cos(a) * len).toFloat(); py += (sin(a) * len).toFloat(); pts.add(px); pts.add(py) }
                 cracks.add(pts.toFloatArray())
             }
         }
         // Secousse de l'impact, qui s'amortit
-        shakeBy(if (since < 450f) 9 * d * (1f - since / 450f) else 0f)
-        val fade = ((SPIDER_STAY_MS - since) / 600f).coerceIn(0f, 1f)
-        val slide = (since / SPIDER_STAY_MS).let { it * it } * h * 0.18f    // l'araignée glisse lentement vers le bas
+        shakeBy(if (since < 500f) 11 * d * (1f - since / 500f) else 0f)
+        val fade = ((SPIDER_STAY_MS - since) / 700f).coerceIn(0f, 1f)
+        val slide = ((since - 2500f).coerceAtLeast(0f) / (SPIDER_STAY_MS - 2500f)).let { it * it } * h * 0.25f   // reste collée, puis glisse
         val a = (255 * fade).toInt()
         if (a > 0) {
-            // Vitre fêlée autour de l'impact
-            stroke.color = 0xFFFFFFFF.toInt(); stroke.alpha = (170 * fade).toInt(); stroke.strokeWidth = 2 * d
+            // Vitre fêlée
+            stroke.color = 0xFFFFFFFF.toInt(); stroke.alpha = (180 * fade).toInt(); stroke.strokeWidth = 2.2f * d
             for (pts in cracks) {
                 path.reset(); path.moveTo(ix + pts[0], iy + pts[1])
                 var i = 2; while (i < pts.size) { path.lineTo(ix + pts[i], iy + pts[i + 1]); i += 2 }
                 c.drawPath(path, stroke)
             }
-            stroke.alpha = (110 * fade).toInt(); c.drawCircle(ix, iy, full * 0.18f, stroke)
-            // Jus qui gicle à l'impact puis coule le long de la vitre : taches, et coulures qui s'allongent
-            // avec une goutte au bout (jaune-vert translucide, plus foncé au centre)
-            paint.shader = null
-            val run = (since / SPIDER_STAY_MS).coerceAtMost(1f)
+            stroke.alpha = (120 * fade).toInt(); c.drawCircle(ix, iy, full * 0.16f, stroke); c.drawCircle(ix, iy, full * 0.3f, stroke)
+            // Jus : taches et coulures qui descendent par à-coups, bien visibles (jaune-vert vif, bord foncé, reflet)
+            val oy = slide * 0.5f
             for (g in goo) {
-                val gx = ix + g.dx; val gy = iy + g.dy + slide * 0.3f
-                paint.color = 0xFFB5A642.toInt(); paint.alpha = (190 * fade).toInt(); c.drawCircle(gx, gy, g.r, paint)
-                paint.color = 0xFF6E7A1F.toInt(); paint.alpha = (150 * fade).toInt(); c.drawCircle(gx, gy, g.r * 0.55f, paint)
-                if (g.drip > 0f) {
-                    val len = g.drip * (0.25f + 2.4f * run)
-                    paint.color = 0xFFB5A642.toInt(); paint.alpha = (170 * fade).toInt()
-                    c.drawRect(gx - g.r * 0.3f, gy, gx + g.r * 0.3f, gy + len, paint)
-                    c.drawCircle(gx, gy + len, g.r * 0.5f, paint)
-                    paint.color = 0xFFFFF7C0.toInt(); paint.alpha = (110 * fade).toInt()
-                    c.drawCircle(gx - g.r * 0.15f, gy + len - g.r * 0.15f, g.r * 0.15f, paint)
+                val gx = ix + g.dx; val gy = iy + g.dy + oy
+                if (g.speed > 0f) {
+                    // Vitesse irrégulière : la coulure hésite puis repart
+                    val v = g.speed * (0.4f + 0.9f * (0.5f + 0.5f * sin(since / 260.0 + g.phase)).toFloat())
+                    g.len += v * dt
+                    if (g.len > h * 0.45f && g.dropY < 0f) g.dropY = gy + g.len
+                }
+                paint.shader = null
+                paint.color = 0xFF5F7D12.toInt(); paint.alpha = (230 * fade).toInt(); c.drawCircle(gx, gy, g.r * 1.15f, paint)
+                paint.color = 0xFFC6E03A.toInt(); paint.alpha = (235 * fade).toInt(); c.drawCircle(gx, gy, g.r, paint)
+                if (g.len > 0f) {
+                    val wdt = g.r * 0.42f
+                    paint.color = 0xFF5F7D12.toInt(); paint.alpha = (220 * fade).toInt()
+                    c.drawRect(gx - wdt * 1.2f, gy, gx + wdt * 1.2f, gy + g.len, paint)
+                    paint.color = 0xFFC6E03A.toInt(); paint.alpha = (235 * fade).toInt()
+                    c.drawRect(gx - wdt, gy, gx + wdt, gy + g.len, paint)
+                    c.drawCircle(gx, gy + g.len, wdt * 1.9f, paint)
+                    paint.color = 0xFFF4FFC4.toInt(); paint.alpha = (200 * fade).toInt()
+                    c.drawCircle(gx - wdt * 0.6f, gy + g.len - wdt * 0.6f, wdt * 0.55f, paint)
+                    c.drawRect(gx - wdt * 0.5f, gy, gx - wdt * 0.15f, gy + g.len - wdt, paint)
+                }
+                if (g.dropY >= 0f) {
+                    // Goutte qui se détache et tombe
+                    g.dropY += 600 * d * dt
+                    paint.color = 0xFFC6E03A.toInt(); paint.alpha = (235 * fade).toInt()
+                    c.drawCircle(gx, g.dropY, g.r * 0.6f, paint)
+                    if (g.dropY > bounds.bottom + 40 * d) { g.dropY = -1f; g.len = h * 0.2f }
                 }
             }
-            // Grande flaque de jus sous le corps écrasé, qui s'étale un peu
-            paint.color = 0xFF8C8A2E.toInt(); paint.alpha = (150 * fade).toInt()
-            r.set(ix - full * 0.32f * (1 + run * 0.2f), iy - full * 0.05f + slide, ix + full * 0.32f * (1 + run * 0.2f), iy + full * 0.5f + slide * 1.2f)
+            // Flaque sous le corps
+            paint.color = 0xFF8FAE22.toInt(); paint.alpha = (190 * fade).toInt()
+            r.set(ix - full * 0.3f, iy - full * 0.05f + slide, ix + full * 0.3f, iy + full * 0.45f + slide * 1.1f)
             c.drawOval(r, paint)
-            // Araignée plaquée, aplatie
-            drawSpider(c, ix, iy + slide, full, wiggle = 0f, squash = 1f, alpha = a)
-            // Flash blanc de l'impact
-            if (since < 160f) { paint.color = 0xFFFFFFFF.toInt(); paint.alpha = (140 * (1f - since / 160f)).toInt(); c.drawRect(bounds, paint) }
+            // Araignée plaquée : les pattes tressautent encore un peu
+            val twitch = sin(since / 70.0).toFloat() * 0.35f * (1f - (since / 4000f).coerceAtMost(1f))
+            drawSpider(c, ix, iy + slide, full, wiggle = twitch, squash = 1f, alpha = a, ms = ms)
+            if (since < 180f) { paint.color = 0xFFFFFFFF.toInt(); paint.alpha = (150 * (1f - since / 180f)).toInt(); c.drawRect(bounds, paint) }
         }
         // Badge du pic peu après l'impact
         val gx = badgeArea.centerX() - bw / 2f
-        val appear = ((now - badgeAt - 500) / 250f).coerceIn(0f, 1f)
+        val appear = ((now - badgeAt - 600) / 250f).coerceIn(0f, 1f)
         if (appear > 0f) {
             val l = c.saveLayerAlpha(gx - 4 * d, badgeArea.centerY() - bh, gx + bw + 4 * d, badgeArea.centerY() + bh, (appear * 255).toInt())
             drawBadge(c, gx, badgeArea.centerY(), bw, bh, cHeat, text, gx + bh * 0.45f)
@@ -513,7 +548,7 @@ class PowerFx(private val context: Context) : Drawable() {
      * poilues à trois segments, baguées de roux, pédipalpes et crochets. [squash] 0 → en vol (pattes
      * repliées qui gigotent), 1 → écrasée contre la vitre (pattes étalées, corps élargi et aplati).
      */
-    private fun drawSpider(c: Canvas, cx: Float, cy: Float, size: Float, wiggle: Float, squash: Float, alpha: Int) {
+    private fun drawSpider(c: Canvas, cx: Float, cy: Float, size: Float, wiggle: Float, squash: Float, alpha: Int, ms: Float = 0f) {
         val s = size / 2f
         val hair = java.util.Random(42)   // poils au même endroit d'une image à l'autre
         paint.style = Paint.Style.FILL
@@ -590,21 +625,43 @@ class PowerFx(private val context: Context) : Drawable() {
         }
         furOval(cx - s * 0.36f * wide, cy - s * 0.02f, cx + s * 0.36f * wide, cy + s * 0.78f * flat, 0xFF1C130E.toInt(), 0xFF5A4030.toInt(), 160)
         furOval(cx - s * 0.27f * wide, cy - s * 0.48f * flat, cx + s * 0.27f * wide, cy + s * 0.04f, 0xFF231811.toInt(), 0xFF6A4E3A.toInt(), 110)
-        // Huit petits yeux groupés sur le dessus, brillants
+        // Visage rigolo : deux gros yeux ronds qui roulent et une bouche en « O » en arrivant ;
+        // écrasée : yeux en spirale, langue tirée
         paint.shader = null
-        for ((ex, ey) in listOf(-0.05f to -0.36f, 0.05f to -0.36f, -0.11f to -0.33f, 0.11f to -0.33f,
-                -0.03f to -0.31f, 0.03f to -0.31f, -0.08f to -0.29f, 0.08f to -0.29f)) {
-            val er = s * (if (kotlin.math.abs(ex) < 0.06f && ey < -0.34f) 0.028f else 0.018f)
-            paint.color = 0xFF050505.toInt(); paint.alpha = alpha; c.drawCircle(cx + ex * s * wide, cy + ey * s * flat, er, paint)
-            if (squash < 0.5f) { paint.color = 0xFFDDE6EE.toInt(); paint.alpha = alpha; c.drawCircle(cx + ex * s * wide - er * 0.3f, cy + ey * s * flat - er * 0.3f, er * 0.3f, paint) }
-        }
-        // Chélicères et crochets noirs brillants
+        val eyeY = cy - s * 0.28f * flat; val eyeR = s * 0.1f
         for (side in listOf(-1f, 1f)) {
-            r.set(cx + side * s * 0.01f - s * 0.08f, cy - s * 0.5f * flat - s * 0.1f, cx + side * s * 0.01f + s * 0.08f, cy - s * 0.42f * flat + s * 0.02f)
-            r.offset(side * s * 0.07f, 0f)
-            paint.color = 0xFF1A120D.toInt(); paint.alpha = alpha; c.drawOval(r, paint)
-            stroke.color = 0xFF0A0A0A.toInt(); stroke.alpha = alpha; stroke.strokeWidth = s * 0.03f
-            c.drawLine(r.centerX(), r.top, r.centerX() - side * s * 0.04f, r.top - s * 0.06f, stroke)
+            val ex = cx + side * s * 0.11f * wide
+            paint.color = 0xFFFFFFFF.toInt(); paint.alpha = alpha; c.drawCircle(ex, eyeY, eyeR, paint)
+            stroke.color = 0xFF1A120D.toInt(); stroke.alpha = alpha; stroke.strokeWidth = s * 0.012f; c.drawCircle(ex, eyeY, eyeR, stroke)
+            if (squash < 0.5f) {
+                val a = ms / 90.0 + side
+                paint.color = 0xFF111111.toInt(); paint.alpha = alpha
+                c.drawCircle(ex + (cos(a) * eyeR * 0.4f).toFloat(), eyeY + (sin(a) * eyeR * 0.4f).toFloat(), eyeR * 0.45f, paint)
+                paint.color = 0xFFFFFFFF.toInt(); c.drawCircle(ex + (cos(a) * eyeR * 0.4f).toFloat() - eyeR * 0.15f, eyeY + (sin(a) * eyeR * 0.4f).toFloat() - eyeR * 0.15f, eyeR * 0.12f, paint)
+            } else {
+                // Spirale « sonnée »
+                stroke.color = 0xFF111111.toInt(); stroke.alpha = alpha; stroke.strokeWidth = s * 0.014f
+                path.reset()
+                var first = true
+                for (k in 0..40) {
+                    val tt = k / 40f; val ang = tt * 4 * Math.PI * side + ms / 200.0
+                    val rr = eyeR * 0.85f * tt
+                    val px = ex + (cos(ang) * rr).toFloat(); val py = eyeY + (sin(ang) * rr).toFloat()
+                    if (first) { path.moveTo(px, py); first = false } else path.lineTo(px, py)
+                }
+                c.drawPath(path, stroke)
+            }
+        }
+        val mouthY = cy - s * 0.13f * flat
+        if (squash < 0.5f) {
+            paint.color = 0xFF3A0D0D.toInt(); paint.alpha = alpha
+            r.set(cx - s * 0.045f, mouthY - s * 0.05f, cx + s * 0.045f, mouthY + s * 0.05f); c.drawOval(r, paint)
+        } else {
+            stroke.color = 0xFF1A120D.toInt(); stroke.alpha = alpha; stroke.strokeWidth = s * 0.015f
+            c.drawLine(cx - s * 0.08f, mouthY, cx + s * 0.08f, mouthY, stroke)
+            paint.color = 0xFFFF6F91.toInt(); paint.alpha = alpha
+            r.set(cx + s * 0.0f, mouthY - s * 0.005f, cx + s * 0.07f, mouthY + s * 0.09f); c.drawRoundRect(r, s * 0.035f, s * 0.035f, paint)
+            stroke.color = 0xFFD94C6E.toInt(); stroke.strokeWidth = s * 0.006f; c.drawLine(cx + s * 0.035f, mouthY, cx + s * 0.035f, mouthY + s * 0.06f, stroke)
         }
     }
 
@@ -836,7 +893,7 @@ class PowerFx(private val context: Context) : Drawable() {
     }
 
     private fun clearParticles() {
-        puffs.clear(); flames.clear(); crackles.clear(); bolt.clear(); bats.clear(); goo.clear(); cracks.clear(); fly = true; heat = 0f; launchAt = 0L
+        puffs.clear(); flames.clear(); crackles.clear(); bolt.clear(); bats.clear(); goo.clear(); cracks.clear(); pendingSplat = false; fly = true; heat = 0f; launchAt = 0L
     }
 
     private fun strike(now: Long) {
