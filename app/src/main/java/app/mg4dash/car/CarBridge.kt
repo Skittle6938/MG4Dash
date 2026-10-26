@@ -447,6 +447,8 @@ object CarBridge {
      * MG4Dash. Chaque seconde on retient si MG4Dash est devant ; si un écran clim SAIC le remplace dans les
      * 3 s, on remet MG4Dash devant (même réglage que #48). Pas quand MG4Dash a lui-même ouvert une appli.
      */
+    private var lastTopSeen: String? = null
+
     private fun watchSaicClimate(ctx: Context) {
         if (Firmware.family == Firmware.Family.A9) return
         scope.launch {
@@ -465,6 +467,8 @@ object CarBridge {
                     @Suppress("DEPRECATION")
                     val top = am.getRunningTasks(1).firstOrNull()?.topActivity ?: continue
                     val name = top.flattenToShortString().lowercase()
+                    // Diagnostic (#62) : ce qui passe devant MG4Dash, pour reconnaître l'écran clim de chaque firmware
+                    if (top.flattenToShortString() != lastTopSeen) { lastTopSeen = top.flattenToShortString(); Log.i(TAG, "front after MG4Dash: $lastTopSeen") }
                     if (top.packageName.startsWith("com.saicmotor") &&
                         listOf("hvac", "aircondition", "climate").any { it in name }) {
                         am.moveTaskToFront(task, 0)
