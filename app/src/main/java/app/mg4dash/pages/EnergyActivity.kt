@@ -75,6 +75,8 @@ class EnergyActivity : PageActivity() {
             setPadding(kit.dp(16), kit.dp(12), kit.dp(16), kit.dp(12))
             setBackgroundResource(R.drawable.bg_button)
             setOnClickListener { Apps.open(this@EnergyActivity, Apps.ENERGY, "SAIC") }
+            // Pas d'appli Énergie d'origine sur certains firmwares (SWI165, #60) : bouton caché
+            if (!Apps.available(this@EnergyActivity, Apps.ENERGY)) visibility = android.view.View.GONE
         })
         // Réchauffage de la batterie en roulant (même réglage que l'appli Énergie SAIC)
         heating = kit.toggleTile(getString(R.string.en_heating), heat = true) {
