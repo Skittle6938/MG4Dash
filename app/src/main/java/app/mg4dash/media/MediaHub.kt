@@ -199,7 +199,7 @@ object MediaHub {
             1 -> listOf(RADIO)
             else -> listOf(listOf(RADIO, "com.android.bluetooth", "com.saicmotor.media", AA_MBS)[mode - 2], RADIO).distinct()
         }
-        if (curGone) { order.firstOrNull { it != cur && it in avail && !(it == AA_MBS && carPlay) }?.let { autoSwitch(it, "$cur gone") }; return }
+        if (curGone) { Log.i(TAG, "$cur gone: mode $mode, order $order, available $avail"); order.firstOrNull { it != cur && it in avail && !(it == AA_MBS && carPlay) }?.let { autoSwitch(it, "$cur gone") }; return }
         if (mode == 1) return
         if (mode >= 2) {
             if (startDone) return
@@ -278,8 +278,14 @@ object MediaHub {
     private fun watchProjection(ctx: Context) {
         io.launch {
             while (true) {
-                val s = app.mg4dash.system.Projection.session(ctx)
+                val s = app.mg4dash.system.Projection.session(ctx).let {
+                    // Connexion coupée par le bouton : AllGo garde la session mais l'appli est désactivée
+                    if (it is app.mg4dash.system.Projection.Session.Read && it.target != null &&
+                        app.mg4dash.system.ConnectionToggle.isOff(ctx, it.target.packageName)) app.mg4dash.system.Projection.Session.Read(null) else it
+                }
                 val live = (s as? app.mg4dash.system.Projection.Session.Read)?.let { it.target != null }
+                // Fin de la projection : le téléphone ne rebranche pas la musique Bluetooth de lui-même
+                if (projectionLive != false && live == false) io.launch { kotlinx.coroutines.delay(3_000); app.mg4dash.system.BtAudio.connectMusic(ctx) }
                 if (s is app.mg4dash.system.Projection.Session.Read && s.target != null) carPlay = s.target == app.mg4dash.system.Apps.CARPLAY
                 if (live != projectionLive) {
                     Log.i(TAG, "projection: ${if (live == null) "unknown" else if (live) "phone connected" else "no phone"}")
@@ -372,9 +378,9 @@ object MediaHub {
         val order = listOf("com.saicmotor.radio", "com.android.bluetooth", "com.saicmotor.media", AA_MBS)
         return order.filter { pkg ->
             when (pkg) {
-                "com.android.bluetooth" -> try {
-                    android.bluetooth.BluetoothAdapter.getDefaultAdapter()?.getProfileConnectionState(11) == android.bluetooth.BluetoothProfile.STATE_CONNECTED
-                } catch (_: Exception) { false }
+                // Téléphone connecté en Bluetooth, sauf si Android Auto / CarPlay le remplace
+                "com.android.bluetooth" -> app.mg4dash.system.BtAudio.musicConnected() ||
+                    (projectionLive != true && app.mg4dash.system.BtAudio.phoneConnected())
                 "com.saicmotor.media" -> try {
                     (ctx.getSystemService(Context.STORAGE_SERVICE) as android.os.storage.StorageManager).storageVolumes
                         .any { it.isRemovable && it.state == android.os.Environment.MEDIA_MOUNTED }
@@ -438,6 +444,7 @@ object MediaHub {
             }
             return
         }
+        if (next == "com.android.bluetooth") appContext?.let { app.mg4dash.system.BtAudio.connectMusic(it) }
         // Autre appli (DiAuto…) : pas de commande de source voiture, on lance directement son lecteur
         val carSource = activateSource(next)
         // La radio ne perd pas toujours le son au profit de l'appli (DiAuto ne le demande pas) : pause

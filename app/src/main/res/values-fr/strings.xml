@@ -502,6 +502,13 @@
     <string name="st_play_resume">Comme à l\'arrêt de la voiture</string>
     <string name="st_play_pause">Toujours en pause</string>
     <string name="st_play_play">Toujours en lecture</string>
+    <string name="st_aa_button">Bouton Android Auto de la barre</string>
+    <string name="st_aa_button_desc">Double toucher sur le bouton pour couper la connexion du téléphone (l\'appli est désactivée, l\'icône passe en rouge) ; nouveau double toucher pour la rétablir. Appui long : choix de l\'appli.</string>
+    <string name="st_usb_kick">Téléphone branché au démarrage (correctif USB)</string>
+    <string name="st_usb_kick_desc">Si le téléphone était branché avant le démarrage de la voiture, Android Auto ne démarre qu\'après l\'avoir débranché. Ceci le redétecte automatiquement au démarrage.</string>
+    <string name="dock_conn_disabled">%1$s désactivé : le téléphone ne se connectera plus. Nouvel appui long pour le rétablir.</string>
+    <string name="dock_conn_enabled">%1$s rétabli</string>
+    <string name="dock_conn_off">%1$s est désactivé : appui long sur le bouton pour le rétablir.</string>
     <string name="tu_welcome_t">Bienvenue dans MG4Dash</string>
     <string name="tu_welcome_1">Un petit tour des gestes principaux, en quelques étapes.</string>
     <string name="tu_layouts_t">Trois dispositions de l\'accueil</string>
@@ -512,6 +519,7 @@
     <string name="tu_bar_2">Énergie : double toucher = écran éteint, appui long = éteindre la voiture (jamais en roulant)</string>
     <string name="tu_bar_3">Véhicule : double toucher = verrouiller / déverrouiller les portes, appui long = ESP coupé / réactivé</string>
     <string name="tu_bar_4">Accueil : appui long = toutes les applis</string>
+    <string name="tu_bar_5">Android Auto : appui long = choisir l\'appli (Android Auto, CarPlay ou une autre), double toucher = couper / rétablir la connexion du téléphone</string>
     <string name="tu_climate_t">Climatisation</string>
     <string name="tu_climate_1">Appui long sur A/C : A/C intermittent (toucher A/C pour l\'arrêter)</string>
     <string name="tu_climate_2">Appui long sur la température : calibration ; appui long sur marche : garder la clim hors de la voiture (camping)</string>

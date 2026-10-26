@@ -502,6 +502,13 @@
     <string name="st_play_resume">As when the car was switched off</string>
     <string name="st_play_pause">Always paused</string>
     <string name="st_play_play">Always playing</string>
+    <string name="st_aa_button">Android Auto button of the bar</string>
+    <string name="st_aa_button_desc">Double tap the button to cut the phone connection (the app is disabled, the icon turns red); double tap again to restore it. Long press: choose the app.</string>
+    <string name="st_usb_kick">Wired phone at startup (USB fix)</string>
+    <string name="st_usb_kick_desc">If the phone was plugged in before the car started, Android Auto only starts after unplugging it. This re-detects it automatically at startup.</string>
+    <string name="dock_conn_disabled">%1$s disabled: the phone will no longer connect. Long press again to restore it.</string>
+    <string name="dock_conn_enabled">%1$s restored</string>
+    <string name="dock_conn_off">%1$s is disabled: long press the button to restore it.</string>
     <string name="tu_welcome_t">Welcome to MG4Dash</string>
     <string name="tu_welcome_1">A quick tour of the main gestures, in a few steps.</string>
     <string name="tu_layouts_t">Three home layouts</string>
@@ -512,6 +519,7 @@
     <string name="tu_bar_2">Energy: double tap = screen off, long press = switch the car off (never while driving)</string>
     <string name="tu_bar_3">Vehicle: double tap = lock / unlock the doors, long press = ESC off / on</string>
     <string name="tu_bar_4">Home: long press = all apps</string>
+    <string name="tu_bar_5">Android Auto: long press = choose the app (Android Auto, CarPlay or another), double tap = cut / restore the phone connection</string>
     <string name="tu_climate_t">Climate</string>
     <string name="tu_climate_1">Long press A/C: intermittent A/C (tap A/C to stop it)</string>
     <string name="tu_climate_2">Long press the temperature: calibration; long press power: keep the climate on after leaving the car (camping)</string>

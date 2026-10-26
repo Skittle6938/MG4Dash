@@ -502,6 +502,13 @@
     <string name="st_play_resume">Como al apagar el coche</string>
     <string name="st_play_pause">Siempre en pausa</string>
     <string name="st_play_play">Siempre reproduciendo</string>
+    <string name="st_aa_button">Botón Android Auto de la barra</string>
+    <string name="st_aa_button_desc">Toca dos veces el botón para cortar la conexión del teléfono (la app se desactiva, el icono se pone rojo); vuelve a tocar dos veces para restablecerla. Pulsación larga: elegir la app.</string>
+    <string name="st_usb_kick">Teléfono conectado al arrancar (corrección USB)</string>
+    <string name="st_usb_kick_desc">Si el teléfono estaba conectado antes de arrancar el coche, Android Auto solo arranca tras desconectarlo. Esto lo vuelve a detectar automáticamente al arrancar.</string>
+    <string name="dock_conn_disabled">%1$s desactivado: el teléfono ya no se conectará. Mantén pulsado de nuevo para restablecerlo.</string>
+    <string name="dock_conn_enabled">%1$s restablecido</string>
+    <string name="dock_conn_off">%1$s está desactivado: mantén pulsado el botón para restablecerlo.</string>
     <string name="tu_welcome_t">Bienvenido a MG4Dash</string>
     <string name="tu_welcome_1">Un breve recorrido por los gestos principales, en pocos pasos.</string>
     <string name="tu_layouts_t">Tres diseños de inicio</string>
@@ -512,6 +519,7 @@
     <string name="tu_bar_2">Energía: doble toque = pantalla apagada, pulsación larga = apagar el coche (nunca en marcha)</string>
     <string name="tu_bar_3">Vehículo: doble toque = bloquear / desbloquear puertas, pulsación larga = ESC off / on</string>
     <string name="tu_bar_4">Inicio: pulsación larga = todas las apps</string>
+    <string name="tu_bar_5">Android Auto: pulsación larga = elegir la app (Android Auto, CarPlay u otra), doble toque = cortar / restablecer la conexión del teléfono</string>
     <string name="tu_climate_t">Climatización</string>
     <string name="tu_climate_1">Pulsación larga en A/C: A/C intermitente (toca A/C para pararlo)</string>
     <string name="tu_climate_2">Pulsación larga en la temperatura: calibración; en encendido: mantener el clima al salir del coche (camping)</string>
