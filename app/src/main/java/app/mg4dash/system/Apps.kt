@@ -22,7 +22,11 @@ object Apps {
     val MG4_CONTROL = ComponentName("com.mg4.control", "com.mg4.control.MainActivity")
     val BT_PHONE = ComponentName("com.saicmotor.btphone", "com.saicmotor.btphone.view.activity.BTPhoneMainActivity")
 
+    /** Dernière ouverture d'une appli par MG4Dash (elapsedRealtime) : l'écran clim SAIC ouvert exprès reste devant. */
+    @Volatile var openedAt = 0L
+
     fun open(context: Context, component: ComponentName, label: String): Boolean {
+        openedAt = android.os.SystemClock.elapsedRealtime()
         val intent = Intent(Intent.ACTION_MAIN)
             .setComponent(component)
             .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED)
@@ -71,6 +75,7 @@ object Apps {
     }
 
     private fun fallback(context: Context, pkg: String, label: String): Boolean {
+        openedAt = android.os.SystemClock.elapsedRealtime()
         val launch = context.packageManager.getLaunchIntentForPackage(pkg) ?: searchLauncher(context, pkg)
         return if (launch != null) {
             context.startActivity(launch.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))

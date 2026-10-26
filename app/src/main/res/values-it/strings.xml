@@ -475,7 +475,7 @@
     <string name="st_theme_smooth">Transizione morbida chiaro / scuro</string>
     <string name="st_theme_smooth_desc">Attende 5 s di luci stabili (nessun cambio sotto i ponti) e sfuma in 2 s. Disattivato: cambia appena cambiano le luci.</string>
     <string name="st_hide_saic_climate">Tenere MG4Dash davanti alla schermata clima SAIC</string>
-    <string name="st_hide_saic_climate_desc">Quando MG4Dash accende il clima, il launcher originale apre la sua schermata clima: MG4Dash torna davanti.</string>
+    <string name="st_hide_saic_climate_desc">Quando il clima viene acceso (da MG4Dash o con il tasto sotto lo schermo), il launcher originale apre la sua schermata clima: MG4Dash torna davanti.</string>
     <string name="en_trips_note">%1$d viaggi, un punto per viaggio · media %2$s (tratteggiata)</string>
     <string name="en_trips_wait">La curva si riempie viaggio dopo viaggio (almeno 2 km per viaggio).</string>
     <string name="en_curve_note">Un punto per km (uno ogni 2 minuti da fermo) · media %1$s (tratteggiata)</string>
