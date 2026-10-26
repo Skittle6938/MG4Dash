@@ -296,6 +296,7 @@ sw_charging|CHARGING|EN CHARGE|LADEN|CARGANDO|IN RICARICA|LADEN|ŞARJ
 sw_trip_avg|TRIP AVERAGE|MOYENNE TRAJET|FAHRT-SCHNITT|MEDIA TRAYECTO|MEDIA VIAGGIO|RITGEMIDDELDE|YOLCULUK ORTALAMASI
 sw_phone|PHONE|TÉLÉPHONE|TELEFON|TELÉFONO|TELEFONO|TELEFOON|TELEFON
 sw_fav_pick|Choose a contact|Choisir un contact|Kontakt auswählen|Elegir un contacto|Scegli un contatto|Contact kiezen|Bir kişi seçin
+sw_fav_count|Number of shortcuts|Nombre de raccourcis|Anzahl der Verknüpfungen|Número de accesos directos|Numero di scorciatoie|Aantal snelkoppelingen|Kısayol sayısı
 st_compat|COMPATIBILITY (BETA)|COMPATIBILITÉ (BÊTA)|KOMPATIBILITÄT (BETA)|COMPATIBILIDAD (BETA)|COMPATIBILITÀ (BETA)|COMPATIBILITEIT (BÈTA)|UYUMLULUK (BETA)
 st_compat_fw|Firmware: %1$s (%2$s)|Firmware : %1$s (%2$s)|Firmware: %1$s (%2$s)|Firmware: %1$s (%2$s)|Firmware: %1$s (%2$s)|Firmware: %1$s (%2$s)|Yazılım: %1$s (%2$s)
 st_compat_tested|MG4Dash was developed and tested on this firmware.|MG4Dash a été mis au point et testé sur ce firmware.|MG4Dash wurde auf dieser Firmware entwickelt und getestet.|MG4Dash se desarrolló y probó en este firmware.|MG4Dash è stato sviluppato e testato su questo firmware.|MG4Dash is op deze firmware ontwikkeld en getest.|MG4Dash bu yazılım üzerinde geliştirildi ve test edildi.

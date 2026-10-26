@@ -298,6 +298,7 @@
     <string name="sw_trip_avg">FAHRT-SCHNITT</string>
     <string name="sw_phone">TELEFON</string>
     <string name="sw_fav_pick">Kontakt auswählen</string>
+    <string name="sw_fav_count">Anzahl der Verknüpfungen</string>
     <string name="st_compat">KOMPATIBILITÄT (BETA)</string>
     <string name="st_compat_fw">Firmware: %1$s (%2$s)</string>
     <string name="st_compat_tested">MG4Dash wurde auf dieser Firmware entwickelt und getestet.</string>

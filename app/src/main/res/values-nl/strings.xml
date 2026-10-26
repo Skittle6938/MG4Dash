@@ -298,6 +298,7 @@
     <string name="sw_trip_avg">RITGEMIDDELDE</string>
     <string name="sw_phone">TELEFOON</string>
     <string name="sw_fav_pick">Contact kiezen</string>
+    <string name="sw_fav_count">Aantal snelkoppelingen</string>
     <string name="st_compat">COMPATIBILITEIT (BÈTA)</string>
     <string name="st_compat_fw">Firmware: %1$s (%2$s)</string>
     <string name="st_compat_tested">MG4Dash is op deze firmware ontwikkeld en getest.</string>

@@ -493,6 +493,28 @@ class ScreenshotTest {
         shoot(MainActivity::class.java, "home_widget_power.png")
     }
 
+    /** Raccourcis téléphone : 2, 3 (une ligne), 4, 6, 8 (deux lignes), et le choix du nombre. */
+    @Test fun phoneFavs2() = phoneFavs(2)
+    @Test fun phoneFavs4() = phoneFavs(4)
+    @Test fun phoneFavs6() = phoneFavs(6)
+    @Test fun phoneFavs8() = phoneFavs(8)
+    private fun phoneFavs(n: Int) {
+        val names = listOf("Claire Martin", "Garage MG", "Home", "Office", "Paul", "Sophie", "School", "Dr Bernard")
+        val e = org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE).edit()
+            .putInt("secondary_widget", 2).putInt("fav_phone_count", n)
+        names.forEachIndexed { i, name -> if (i != n - 1) e.putString("fav_phone_$i", "$name+3360000000$i") }
+        e.apply()
+        shoot(MainActivity::class.java, "home_widget_phone_$n.png")
+    }
+    @Test fun phoneFavsCount() {
+        org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE).edit()
+            .putInt("theme_mode", 1).putInt("fav_phone_count", 3).commit()
+        val activity = Robolectric.buildActivity(MainActivity::class.java).setup().get()
+        app.mg4dash.shortcuts.PhoneFavorites.chooseCount(activity) {}
+        repeat(3) { shadowOf(Looper.getMainLooper()).idleFor(200, TimeUnit.MILLISECONDS) }
+        save(org.robolectric.shadows.ShadowDialog.getLatestDialog().window!!.decorView, "phone_fav_count_dialog.png")
+    }
+
     @Test fun homeWidgetPhone() {
         org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE).edit().putInt("secondary_widget", 2)
             .putString("fav_phone_0", "Claire Martin\u001F+33612345678").putString("fav_phone_1", "Garage MG\u001F+33123456789").apply()

@@ -298,6 +298,7 @@
     <string name="sw_trip_avg">YOLCULUK ORTALAMASI</string>
     <string name="sw_phone">TELEFON</string>
     <string name="sw_fav_pick">Bir kişi seçin</string>
+    <string name="sw_fav_count">Kısayol sayısı</string>
     <string name="st_compat">UYUMLULUK (BETA)</string>
     <string name="st_compat_fw">Yazılım: %1$s (%2$s)</string>
     <string name="st_compat_tested">MG4Dash bu yazılım üzerinde geliştirildi ve test edildi.</string>

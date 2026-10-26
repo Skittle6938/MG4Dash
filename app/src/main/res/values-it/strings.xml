@@ -298,6 +298,7 @@
     <string name="sw_trip_avg">MEDIA VIAGGIO</string>
     <string name="sw_phone">TELEFONO</string>
     <string name="sw_fav_pick">Scegli un contatto</string>
+    <string name="sw_fav_count">Numero di scorciatoie</string>
     <string name="st_compat">COMPATIBILITÀ (BETA)</string>
     <string name="st_compat_fw">Firmware: %1$s (%2$s)</string>
     <string name="st_compat_tested">MG4Dash è stato sviluppato e testato su questo firmware.</string>

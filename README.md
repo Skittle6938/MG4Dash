@@ -64,7 +64,7 @@ Swipe or tap it to switch between its pages:
 
 - **Trip energy**: one bar and the share of driving, climate control and accessories since start-up (details on the Energy page).
 - **Live power**: kW drawn from or recovered into the battery every second, on a two-way bar from zero with a 10 s peak marker, the trip average, voltage and current. It hides a **full-throttle special**: floor it and a big rocket crosses the whole screen (slowing down in the middle, its smoke fading quickly), or lightning, or flames, then the peak reached shows (Settings › Look › Live power). Around Halloween (25 October to 2 November) a jack-o'-lantern joins them 🎃. This page leaves the widget when *Live power in the energy card* is on.
-- **Phone**: three favourite contacts (tap to call, long press to change).
+- **Phone**: favourite contacts, 3 by default (tap to call, long press to change one or to pick 2, 3, 4, 6 or 8 shortcuts, on one or two rows; contacts already chosen are kept).
 
 | | |
 |---|---|
