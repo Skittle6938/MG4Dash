@@ -145,10 +145,10 @@ class EnergyActivity : PageActivity() {
         tRow.addView(schedule, kit.lp(0, kit.dp(60), 1f))
         tRow.addView(finish, kit.lp(0, kit.dp(60), 1f, l = 10))
         c2.addView(tRow, kit.lp(-1, -2, t = 10))
-        val (sRow, sText) = kit.timeStepper(getString(R.string.en_start)) { d -> shiftTime(true, d) }
+        val (sRow, sText) = kit.timeStepper(getString(R.string.en_start), { pickTime(true) }) { d -> shiftTime(true, d) }
         startTime = sText
         c2.addView(sRow, kit.lp(-1, -2, t = 14))
-        val (eRow2, eText) = kit.timeStepper(getString(R.string.en_end)) { d -> shiftTime(false, d) }
+        val (eRow2, eText) = kit.timeStepper(getString(R.string.en_end), { pickTime(false) }) { d -> shiftTime(false, d) }
         endTime = eText
         c2.addView(eRow2, kit.lp(-1, -2, t = 10))
         c2.addView(kit.divider(), kit.lp(-1, 1, t = 18))
@@ -380,9 +380,25 @@ class EnergyActivity : PageActivity() {
         }
     }
 
+    /** Toucher l'heure : roues heures / minutes, comme « clim à une heure précise ». */
+    private fun pickTime(start: Boolean) {
+        val cur = if (start) stH * 60 + stM else spH * 60 + spM
+        val (view, read) = kit.timeWheels(cur)
+        android.app.AlertDialog.Builder(this)
+            .setTitle(if (start) R.string.en_start else R.string.en_end)
+            .setView(view)
+            .setPositiveButton(android.R.string.ok) { _, _ -> setTime(start, read()) }
+            .setNegativeButton(R.string.cancel, null)
+            .show()
+    }
+
     private fun shiftTime(start: Boolean, deltaMin: Int) {
         val (h, m) = if (start) stH to stM else spH to spM
-        val total = ((h * 60 + m + deltaMin) % 1440 + 1440) % 1440
+        setTime(start, h * 60 + m + deltaMin)
+    }
+
+    private fun setTime(start: Boolean, minutes: Int) {
+        val total = Math.floorMod(minutes, 1440)
         val nh = total / 60; val nm = total % 60
         val other = if (start) spH * 60 + spM else stH * 60 + stM
         if (total == other) return    // l'appli SAIC refuse début = fin
@@ -397,6 +413,13 @@ class EnergyActivity : PageActivity() {
             CarProps.setInt(CarProps.RESER_SP_MIN, nm, "schedule end (min)")
             endTime.text = hhmm(nh, nm)
         }
+        // Comme l'appli Énergie SAIC : 50 ms après les heures, l'état de la charge programmée est réécrit
+        // tel quel ; sans cette confirmation la voiture ne gardait pas la nouvelle heure
+        startTime.postDelayed({
+            val ctrl = CarProps.getInt(CarProps.RESER_CTRL) ?: reser
+            if (ctrl != null) CarProps.setInt(CarProps.RESER_CTRL, ctrl, "schedule confirm")
+            refreshProps()
+        }, 50)
     }
 
     private fun hhmm(h: Int, m: Int) = String.format(Locale.getDefault(), "%02d:%02d", h, m)

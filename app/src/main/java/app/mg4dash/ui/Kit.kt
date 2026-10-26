@@ -34,14 +34,59 @@ class Kit(private val c: Context) {
     }
 
     /** Réglage d'heure « − HH:MM + » par pas de 15 min ; renvoie la rangée et le libellé. */
-    fun timeStepper(label: String, onStep: (Int) -> Unit): Pair<LinearLayout, TextView> {
+    /** Heure réglable : − / + par 30 min, toucher l'heure pour la régler aux roues ([onPick]). */
+    fun timeStepper(label: String, onPick: (() -> Unit)? = null, onStep: (Int) -> Unit): Pair<LinearLayout, TextView> {
         val r = row()
         r.addView(text(label, 19f, R.color.text_sub), lp(0, -2, 1f))
-        r.addView(roundButton(R.drawable.ic_minus, 52) { onStep(-15) })
-        val v = text("--:--", 26f).apply { gravity = Gravity.CENTER }
-        r.addView(v, lp(dp(110), -2))
-        r.addView(roundButton(R.drawable.ic_plus, 52) { onStep(15) })
+        r.addView(roundButton(R.drawable.ic_minus, 52) { onStep(-30) })
+        val v = text("--:--", 26f).apply {
+            gravity = Gravity.CENTER
+            if (onPick != null) { setBackgroundResource(R.drawable.bg_button); setPadding(dp(6), dp(6), dp(6), dp(6)); setOnClickListener { onPick() } }
+        }
+        r.addView(v, lp(dp(120), -2, l = 6, r = 6))
+        r.addView(roundButton(R.drawable.ic_plus, 52) { onStep(30) })
         return r to v
+    }
+
+    /**
+     * Roues heures : minutes (comme « clim à une heure précise ») : flèches ou glisser sur le chiffre,
+     * minutes par [minStep]. Rend la vue et une lecture de l'heure choisie (minutes depuis minuit).
+     */
+    fun timeWheels(initialMin: Int, minStep: Int = 5): Pair<View, () -> Int> {
+        var t = Math.floorMod(initialMin, 1440)
+        val hh = text("", 76f, light = true).apply { gravity = Gravity.CENTER; fontFeatureSettings = "tnum" }
+        val mm = text("", 76f, light = true).apply { gravity = Gravity.CENTER; fontFeatureSettings = "tnum" }
+        fun paint() { hh.text = String.format(java.util.Locale.getDefault(), "%02d", t / 60); mm.text = String.format(java.util.Locale.getDefault(), "%02d", t % 60) }
+        fun wheel(value: TextView, onStep: (Int) -> Unit): View {
+            fun arrow(icon: Int, d: Int) = android.widget.ImageView(c).apply {
+                setImageResource(icon); setColorFilter(color(R.color.text_sub)); scaleType = android.widget.ImageView.ScaleType.FIT_CENTER
+                val p = dp(6); setPadding(p, p, p, p); setBackgroundResource(R.drawable.bg_button); setOnClickListener { onStep(d) }
+            }
+            var lastY = 0f; var acc = 0f; val stepPx = dp(36).toFloat()
+            value.setOnTouchListener { _, e ->
+                when (e.actionMasked) {
+                    android.view.MotionEvent.ACTION_DOWN -> { lastY = e.rawY; acc = 0f }
+                    android.view.MotionEvent.ACTION_MOVE -> {
+                        acc += lastY - e.rawY; lastY = e.rawY
+                        while (acc >= stepPx) { onStep(1); acc -= stepPx }
+                        while (acc <= -stepPx) { onStep(-1); acc += stepPx }
+                    }
+                }
+                true
+            }
+            return column().apply {
+                gravity = Gravity.CENTER_HORIZONTAL
+                addView(arrow(R.drawable.ic_chevron_up, 1), lp(dp(96), dp(42)))
+                addView(value, lp(dp(130), -2))
+                addView(arrow(R.drawable.ic_chevron_down, -1), lp(dp(96), dp(42)))
+            }
+        }
+        val clock = row().apply { gravity = Gravity.CENTER }
+        clock.addView(wheel(hh) { d -> t = Math.floorMod(t + d * 60, 1440); paint() })
+        clock.addView(text(":", 70f, R.color.text_sub, light = true), lp(-2, -2, l = 6, r = 6))
+        clock.addView(wheel(mm) { d -> t = Math.floorMod(t / minStep * minStep + d * minStep, 1440); paint() })
+        paint()
+        return clock to { t }
     }
     fun dp(v: Int) = (v * c.resources.displayMetrics.density).toInt()
     fun color(res: Int) = app.mg4dash.ui.Themes.color(c, res)
