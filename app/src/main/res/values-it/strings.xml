@@ -485,6 +485,7 @@
     <string name="st_power_va">Tensione e corrente sotto la barra di potenza</string>
     <string name="st_power_va_desc">Attuali, minimo e massimo del viaggio. Disattivato: potenza e consumo medio più grandi.</string>
     <string name="fx_pumpkin">Zucca di Halloween</string>
+    <string name="fx_spider">Tarantola di Halloween</string>
     <string name="en_clear_curve">Cancella la curva</string>
     <string name="en_clear_confirm">Cancellare la curva «%1$s»?</string>
     <string name="st_cc_stopped">Curva dei consumi: anche da fermo</string>
