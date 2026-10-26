@@ -241,8 +241,14 @@ object MediaHub {
         if (playbackApplied) return
         if (!carStart || now - startedAt > 40_000) { playbackApplied = true; return }
         if (now - startedAt < 8_000 || now - autoSwitchAt < 4_000 || !_now.value.available) return
-        val want = when (p.startPlayback) { 1 -> false; 2 -> true; else -> p.lastPlaying }
         playbackApplied = true
+        // DiAuto (Android Auto sans fil) : c'est le téléphone qui décide de lancer la musique (réglage
+        // « lancer la musique automatiquement » de son appli Android Auto), MG4Dash n'y touche pas
+        if (handlesWheelKeys(_now.value.packageName) || handlesWheelKeys(sourcePkg) ||
+            (sourcePkg == AA_MBS && projectionLive != true && lastCandidates.any { handlesWheelKeys(it.packageName) })) {
+            Log.i(TAG, "startup playback: left to the phone (DiAuto)"); return
+        }
+        val want = when (p.startPlayback) { 1 -> false; 2 -> true; else -> p.lastPlaying }
         Log.i(TAG, "startup playback: ${if (want) "play" else "pause"} (setting ${p.startPlayback}, was playing ${p.lastPlaying})")
         if (want != playing) playPauseRaw()
     }
