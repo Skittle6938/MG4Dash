@@ -498,6 +498,39 @@
     <string name="st_play_resume">Zoals bij het uitzetten</string>
     <string name="st_play_pause">Altijd gepauzeerd</string>
     <string name="st_play_play">Altijd afspelen</string>
+    <string name="tu_welcome_t">Welkom bij MG4Dash</string>
+    <string name="tu_welcome_1">Een korte rondleiding langs de belangrijkste gebaren, in een paar stappen.</string>
+    <string name="tu_layouts_t">Drie startindelingen</string>
+    <string name="tu_layouts_1">Kies in Instellingen › Start: Volledig, Eenvoudig (grote panelen) of Kaart (grote kaart)</string>
+    <string name="tu_layouts_2">Ook: zijbalk of onderbalk; bij Weergave: licht, donker of automatisch, kleuren</string>
+    <string name="tu_bar_t">Zijbalk</string>
+    <string name="tu_bar_1">Instellingen: tikken = MG4Dash, lang drukken = auto, dubbel tikken = wifi</string>
+    <string name="tu_bar_2">Energie: dubbel tikken = scherm uit, lang drukken = auto uitzetten (nooit tijdens het rijden)</string>
+    <string name="tu_bar_3">Voertuig: dubbel tikken = deuren vergrendelen / ontgrendelen, lang drukken = ESC uit / aan</string>
+    <string name="tu_bar_4">Start: lang drukken = alle apps</string>
+    <string name="tu_climate_t">Klimaat</string>
+    <string name="tu_climate_1">A/C lang drukken: A/C met tussenpozen (tik op A/C om te stoppen)</string>
+    <string name="tu_climate_2">Temperatuur lang drukken: kalibratie; aan/uit lang drukken: klimaat aan na het uitstappen (kamperen)</string>
+    <string name="tu_climate_3">Ventilator „−“ op de laagste stand zet het klimaat uit</string>
+    <string name="tu_energy_t">Energie</string>
+    <string name="tu_energy_1">Tik op een KERS-segment: regeneratieniveau; lang drukken: rijden met één pedaal</string>
+    <string name="tu_energy_2">Knop CHARGE: laden en V2L</string>
+    <string name="tu_map_t">Kaart</string>
+    <string name="tu_map_1">Knop rechtsboven: kaart → verbruik → snelkoppelingen</string>
+    <string name="tu_map_2">Kaart lang drukken: een andere app in de kaartkaart</string>
+    <string name="tu_media_t">Muziek</string>
+    <string name="tu_media_1">Veeg omhoog / omlaag: volgende bron; links / rechts: vorig / volgend nummer</string>
+    <string name="tu_media_2">Tik op de bronnaam: bronmenu; tik op de afbeelding: app openen</string>
+    <string name="tu_media_3">Afspelen / pauze lang drukken: pagina Geluid</string>
+    <string name="tu_widget_t">Widget rechtsonder</string>
+    <string name="tu_widget_1">Tikken of vegen: volgende pagina (energie, vermogen, telefoon)</string>
+    <string name="tu_widget_2">Telefoonsnelkoppeling lang drukken: wijzigen of 2 tot 8 kiezen</string>
+    <string name="tu_end_t">Dat was het!</string>
+    <string name="tu_end_1">Je vindt deze rondleiding terug in Instellingen › Systeem.</string>
+    <string name="tu_skip">Overslaan</string>
+    <string name="tu_next">Volgende</string>
+    <string name="tu_done">Klaar</string>
+    <string name="tu_show">Rondleiding gebaren tonen</string>
     <string name="aa_title">ANDROID AUTO</string>
     <string name="aa_ready">Telefoon verbonden · Tik om te openen</string>
     <string name="aa_waiting">Sluit je telefoon aan via USB</string>

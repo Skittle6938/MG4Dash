@@ -498,6 +498,39 @@
     <string name="st_play_resume">Comme à l\'arrêt de la voiture</string>
     <string name="st_play_pause">Toujours en pause</string>
     <string name="st_play_play">Toujours en lecture</string>
+    <string name="tu_welcome_t">Bienvenue dans MG4Dash</string>
+    <string name="tu_welcome_1">Un petit tour des gestes principaux, en quelques étapes.</string>
+    <string name="tu_layouts_t">Trois dispositions de l\'accueil</string>
+    <string name="tu_layouts_1">À choisir dans Réglages › Accueil : Complet, Épuré (grands panneaux) ou Carte (grande carte)</string>
+    <string name="tu_layouts_2">Aussi : barre latérale ou barre du bas ; dans Apparence : clair, sombre ou auto, couleurs</string>
+    <string name="tu_bar_t">Barre latérale</string>
+    <string name="tu_bar_1">Réglages : toucher = réglages MG4Dash, appui long = réglages voiture, double toucher = Wi-Fi</string>
+    <string name="tu_bar_2">Énergie : double toucher = écran éteint, appui long = éteindre la voiture (jamais en roulant)</string>
+    <string name="tu_bar_3">Véhicule : double toucher = verrouiller / déverrouiller les portes, appui long = ESP coupé / réactivé</string>
+    <string name="tu_bar_4">Accueil : appui long = toutes les applis</string>
+    <string name="tu_climate_t">Climatisation</string>
+    <string name="tu_climate_1">Appui long sur A/C : A/C intermittent (toucher A/C pour l\'arrêter)</string>
+    <string name="tu_climate_2">Appui long sur la température : calibration ; appui long sur marche : garder la clim hors de la voiture (camping)</string>
+    <string name="tu_climate_3">Ventilation « − » au plus bas : la clim s\'éteint</string>
+    <string name="tu_energy_t">Énergie</string>
+    <string name="tu_energy_1">Toucher un segment KERS : niveau de régénération ; appui long : pédale unique</string>
+    <string name="tu_energy_2">Bouton CHARGE : recharge et V2L</string>
+    <string name="tu_map_t">Carte</string>
+    <string name="tu_map_1">Bouton en haut à droite : carte → consommation → raccourcis</string>
+    <string name="tu_map_2">Appui long sur la carte : une autre appli dans la carte</string>
+    <string name="tu_media_t">Musique</string>
+    <string name="tu_media_1">Glisser haut / bas : source suivante ; gauche / droite : morceau précédent / suivant</string>
+    <string name="tu_media_2">Toucher le nom de la source : menu des sources ; toucher l\'image : ouvrir l\'appli</string>
+    <string name="tu_media_3">Appui long sur lecture / pause : page Son</string>
+    <string name="tu_widget_t">Widget en bas à droite</string>
+    <string name="tu_widget_1">Toucher ou glisser : page suivante (énergie, puissance, téléphone)</string>
+    <string name="tu_widget_2">Appui long sur un raccourci téléphone : le changer, ou choisir de 2 à 8 raccourcis</string>
+    <string name="tu_end_t">C\'est tout !</string>
+    <string name="tu_end_1">Vous retrouverez ce tuto dans Réglages › Système.</string>
+    <string name="tu_skip">Passer</string>
+    <string name="tu_next">Suivant</string>
+    <string name="tu_done">Terminer</string>
+    <string name="tu_show">Revoir le tuto des gestes</string>
     <string name="aa_title">ANDROID AUTO</string>
     <string name="aa_ready">Téléphone connecté · Appuyer pour ouvrir</string>
     <string name="aa_waiting">Branchez votre téléphone en USB</string>

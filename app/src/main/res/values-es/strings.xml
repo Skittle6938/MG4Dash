@@ -498,6 +498,39 @@
     <string name="st_play_resume">Como al apagar el coche</string>
     <string name="st_play_pause">Siempre en pausa</string>
     <string name="st_play_play">Siempre reproduciendo</string>
+    <string name="tu_welcome_t">Bienvenido a MG4Dash</string>
+    <string name="tu_welcome_1">Un breve recorrido por los gestos principales, en pocos pasos.</string>
+    <string name="tu_layouts_t">Tres diseños de inicio</string>
+    <string name="tu_layouts_1">Elígelo en Ajustes › Inicio: Completo, Sencillo (paneles grandes) o Mapa (mapa grande)</string>
+    <string name="tu_layouts_2">También: barra lateral o inferior; en Aspecto: claro, oscuro o automático, colores</string>
+    <string name="tu_bar_t">Barra lateral</string>
+    <string name="tu_bar_1">Ajustes: tocar = ajustes de MG4Dash, pulsación larga = ajustes del coche, doble toque = Wi-Fi</string>
+    <string name="tu_bar_2">Energía: doble toque = pantalla apagada, pulsación larga = apagar el coche (nunca en marcha)</string>
+    <string name="tu_bar_3">Vehículo: doble toque = bloquear / desbloquear puertas, pulsación larga = ESC off / on</string>
+    <string name="tu_bar_4">Inicio: pulsación larga = todas las apps</string>
+    <string name="tu_climate_t">Climatización</string>
+    <string name="tu_climate_1">Pulsación larga en A/C: A/C intermitente (toca A/C para pararlo)</string>
+    <string name="tu_climate_2">Pulsación larga en la temperatura: calibración; en encendido: mantener el clima al salir del coche (camping)</string>
+    <string name="tu_climate_3">Ventilador «−» al mínimo apaga el clima</string>
+    <string name="tu_energy_t">Energía</string>
+    <string name="tu_energy_1">Toca un segmento KERS: nivel de regeneración; pulsación larga: conducción con un pedal</string>
+    <string name="tu_energy_2">Botón CHARGE: carga y V2L</string>
+    <string name="tu_map_t">Mapa</string>
+    <string name="tu_map_1">Botón arriba a la derecha: mapa → consumo → accesos directos</string>
+    <string name="tu_map_2">Pulsación larga en el mapa: otra app en la tarjeta del mapa</string>
+    <string name="tu_media_t">Música</string>
+    <string name="tu_media_1">Desliza arriba / abajo: siguiente fuente; izquierda / derecha: pista anterior / siguiente</string>
+    <string name="tu_media_2">Toca el nombre de la fuente: menú de fuentes; toca la imagen: abrir la app</string>
+    <string name="tu_media_3">Pulsación larga en reproducir / pausa: página Sonido</string>
+    <string name="tu_widget_t">Widget inferior derecho</string>
+    <string name="tu_widget_1">Toca o desliza: página siguiente (energía, potencia, teléfono)</string>
+    <string name="tu_widget_2">Pulsación larga en un acceso de teléfono: cambiarlo o elegir de 2 a 8</string>
+    <string name="tu_end_t">¡Eso es todo!</string>
+    <string name="tu_end_1">Puedes volver a ver este recorrido en Ajustes › Sistema.</string>
+    <string name="tu_skip">Omitir</string>
+    <string name="tu_next">Siguiente</string>
+    <string name="tu_done">Listo</string>
+    <string name="tu_show">Ver el recorrido de gestos</string>
     <string name="aa_title">ANDROID AUTO</string>
     <string name="aa_ready">Teléfono conectado · Pulse para abrir</string>
     <string name="aa_waiting">Conecte su teléfono por USB</string>

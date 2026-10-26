@@ -498,6 +498,39 @@
     <string name="st_play_resume">Come allo spegnimento</string>
     <string name="st_play_pause">Sempre in pausa</string>
     <string name="st_play_play">Sempre in riproduzione</string>
+    <string name="tu_welcome_t">Benvenuto in MG4Dash</string>
+    <string name="tu_welcome_1">Un breve giro dei gesti principali, in pochi passi.</string>
+    <string name="tu_layouts_t">Tre layout della home</string>
+    <string name="tu_layouts_1">Sceglilo in Impostazioni › Home: Completa, Semplice (pannelli grandi) o Mappa (mappa grande)</string>
+    <string name="tu_layouts_2">Inoltre: barra laterale o in basso; in Aspetto: chiaro, scuro o automatico, colori</string>
+    <string name="tu_bar_t">Barra laterale</string>
+    <string name="tu_bar_1">Impostazioni: tocca = MG4Dash, pressione lunga = auto, doppio tocco = Wi-Fi</string>
+    <string name="tu_bar_2">Energia: doppio tocco = schermo spento, pressione lunga = spegni l\'auto (mai in marcia)</string>
+    <string name="tu_bar_3">Veicolo: doppio tocco = blocca / sblocca le porte, pressione lunga = ESC off / on</string>
+    <string name="tu_bar_4">Home: pressione lunga = tutte le app</string>
+    <string name="tu_climate_t">Climatizzazione</string>
+    <string name="tu_climate_1">Pressione lunga su A/C: A/C intermittente (tocca A/C per fermarlo)</string>
+    <string name="tu_climate_2">Pressione lunga sulla temperatura: calibrazione; sull\'accensione: clima acceso uscendo dall\'auto (campeggio)</string>
+    <string name="tu_climate_3">Ventola «−» al minimo spegne il clima</string>
+    <string name="tu_energy_t">Energia</string>
+    <string name="tu_energy_1">Tocca un segmento KERS: livello di rigenerazione; pressione lunga: guida a un pedale</string>
+    <string name="tu_energy_2">Pulsante CHARGE: ricarica e V2L</string>
+    <string name="tu_map_t">Mappa</string>
+    <string name="tu_map_1">Pulsante in alto a destra: mappa → consumo → scorciatoie</string>
+    <string name="tu_map_2">Pressione lunga sulla mappa: un\'altra app nella scheda mappa</string>
+    <string name="tu_media_t">Musica</string>
+    <string name="tu_media_1">Scorri su / giù: sorgente successiva; sinistra / destra: brano precedente / successivo</string>
+    <string name="tu_media_2">Tocca il nome della sorgente: menu sorgenti; tocca l\'immagine: apri l\'app</string>
+    <string name="tu_media_3">Pressione lunga su play / pausa: pagina Suono</string>
+    <string name="tu_widget_t">Widget in basso a destra</string>
+    <string name="tu_widget_1">Tocca o scorri: pagina successiva (energia, potenza, telefono)</string>
+    <string name="tu_widget_2">Pressione lunga su una scorciatoia telefono: cambiarla o sceglierne da 2 a 8</string>
+    <string name="tu_end_t">È tutto!</string>
+    <string name="tu_end_1">Puoi rivedere questo tour in Impostazioni › Sistema.</string>
+    <string name="tu_skip">Salta</string>
+    <string name="tu_next">Avanti</string>
+    <string name="tu_done">Fine</string>
+    <string name="tu_show">Rivedi il tour dei gesti</string>
     <string name="aa_title">ANDROID AUTO</string>
     <string name="aa_ready">Telefono connesso · Tocca per aprire</string>
     <string name="aa_waiting">Collega il telefono via USB</string>

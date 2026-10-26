@@ -169,7 +169,7 @@ Five tabs along the top; the last one used opens next time. Each on / off option
 | Look | light / dark / auto, smooth light / dark switch, panel outline, background, button colour, full-throttle special |
 | Vehicle | units, tyre pressure unit, heated seats and steering wheel, Keep climate on, keep MG4Dash in front of the SAIC climate screen (old firmwares), usable battery capacity, battery model, MG4 XPower |
 | Connections | weather (fallback city or current position), Home Assistant (address, token, test) |
-| System | replace the SAIC home, maintenance mode, briefly open the SAIC launcher at startup, updates (include betas, Radio Dash), diagnostics (compatibility test, log, energy data recorder) |
+| System | replace the SAIC home, maintenance mode, briefly open the SAIC launcher at startup, updates (include betas, Radio Dash), diagnostics (compatibility test, log, energy data recorder), gesture tour |
 
 ## Updates
 
@@ -262,6 +262,8 @@ The SAIC launcher package (`com.saicmotor.launcher`) is never disabled: its serv
 - Uninstall: `adb uninstall app.mg4dash`
 
 ## Gestures
+
+A short tour of the main gestures opens after a first install (*Skip* closes it for good); see it again in Settings › System › *Show the gesture tour*.
 
 - "Settings" in the dock or the vertical bar: tap for the launcher settings, long press for the car settings; double tap it in the vertical bar: Wi-Fi
 - Long press "Home" in the dock: list of installed apps

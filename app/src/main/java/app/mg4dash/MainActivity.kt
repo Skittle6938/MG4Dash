@@ -131,6 +131,9 @@ class MainActivity : AppCompatActivity() {
         // elle y reste ; seuls Home et le bouton agrandir / réduire la ramènent au widget
         if (savedInstanceState?.getBoolean(KEY_MAP_FULL) == true || mapFullOnRecreate) b.mapCard.post { setMapFullscreen(true) }
         mapFullOnRecreate = false
+        // Tuto des gestes : une fois après une première installation, ou demandé depuis les réglages
+        if (savedInstanceState == null && intent?.getBooleanExtra(app.mg4dash.ui.Tutorial.EXTRA_SHOW, false) == true) b.root.post { app.mg4dash.ui.Tutorial.show(this) }
+        else if (savedInstanceState == null) app.mg4dash.ui.Tutorial.showIfPending(this)
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -339,6 +342,7 @@ class MainActivity : AppCompatActivity() {
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
         if (!simpleMode) setMapFullscreen(false)
+        if (intent?.getBooleanExtra(app.mg4dash.ui.Tutorial.EXTRA_SHOW, false) == true) b.root.post { app.mg4dash.ui.Tutorial.show(this) }
     }
 
     @Deprecated("Accueil : retour sans effet")
