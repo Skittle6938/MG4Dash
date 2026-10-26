@@ -666,7 +666,7 @@ class MainActivity : AppCompatActivity() {
         b.weatherLabel.text = WeatherRepo.label(w.code)
         b.weatherDetails.text = getString(R.string.weather_details, w.feelsC, Math.round(app.mg4dash.system.Units.dist(this, w.windKmh.toFloat())), w.humidity, app.mg4dash.system.Units.speedUnit(this))
         val page = prefs.weatherPage
-        fillForecast(b.weatherHours, if (page == 0) w.hours.map { Triple(it.label, it.code, "${it.tempC}°") }
+        fillForecast(b.weatherHours, if (page == 0) w.hours.map { Triple(app.mg4dash.system.Clock.hourLabel(this, it.label), it.code, "${it.tempC}°") }
             else w.days.map { Triple(it.label, it.code, "${it.minC}/${it.maxC}°") })
         weatherDots?.apply { visibility = View.VISIBLE; text = (0..1).joinToString(" ") { if (it == page) "●" else "○" } }
     }
