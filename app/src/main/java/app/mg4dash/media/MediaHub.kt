@@ -194,11 +194,7 @@ object MediaHub {
         // bascule, sinon la voiture restait sur une source muette et les boutons du volant n'agissaient
         // plus (#36). 1 s suffit (demandé par Marc) : la disparition vient de l'état de connexion, pas d'un clignotement.
         val curGone = goneSince[cur]?.let { now - it >= 1_000 } == true
-        val order = when (mode) {
-            0 -> (p.sourceHistory + RADIO).distinct()
-            1 -> listOf(RADIO)
-            else -> listOf(listOf(RADIO, "com.android.bluetooth", "com.saicmotor.media", AA_MBS)[mode - 2], RADIO).distinct()
-        }
+        val order = fallbackOrder(mode, p)
         if (curGone) { Log.i(TAG, "$cur gone: mode $mode, order $order, available $avail"); order.firstOrNull { it != cur && it in avail && !(it == AA_MBS && carPlay) }?.let { autoSwitch(it, "$cur gone") }; return }
         if (mode == 1) return
         if (mode >= 2) {
@@ -216,6 +212,37 @@ object MediaHub {
         // Source actuelle jamais choisie (historique vide, première utilisation) : on ne la quitte que si elle disparaît
         val curRank = order.indexOf(cur).let { if (it < 0) -1 else it }
         if (order.indexOf(target) < curRank) autoSwitch(target, "$target back")
+    }
+
+    /** Sources de remplacement selon le réglage : automatique = historique des choix, puis la radio. */
+    private fun fallbackOrder(mode: Int, p: app.mg4dash.system.Prefs) = when (mode) {
+        0 -> (p.sourceHistory + RADIO).distinct()
+        1 -> listOf(RADIO)
+        else -> listOf(listOf(RADIO, "com.android.bluetooth", "com.saicmotor.media", AA_MBS)[mode - 2], RADIO).distinct()
+    }
+
+    private const val BT = "com.android.bluetooth"
+    @Volatile private var resumeBtUntil = 0L
+
+    /** Lecture en cours sur la carte (avant de couper la connexion du téléphone). */
+    fun playingNow(): Boolean = current?.let { isPlaying(it) } == true
+
+    /**
+     * Connexion du téléphone coupée pendant la lecture : la source de remplacement est souvent le Bluetooth,
+     * dont la musique ne revient que quelques secondes plus tard ; « lecture » y est renvoyé à son retour.
+     */
+    fun resumeOnBluetooth() { resumeBtUntil = android.os.SystemClock.uptimeMillis() + 15_000 }
+
+    /**
+     * Connexion d'une appli coupée par le bouton Android Auto (DiAuto…) : si c'était la source écoutée, on
+     * passe à la source de remplacement du réglage, comme pour une source de la voiture qui disparaît.
+     */
+    fun connectionCut(pkg: String) = main.post {
+        val p = prefs() ?: return@post
+        if (sourcePkg != pkg && current?.packageName != pkg) return@post
+        val avail = availableSources()
+        fallbackOrder(p.startSource, p).firstOrNull { it != pkg && it in avail && !(it == AA_MBS && carPlay) }
+            ?.let { autoSwitch(it, "$pkg cut") }
     }
 
     // ── Lecture au démarrage (réglage, remplace la reprise automatique de Radio Dash) ──
@@ -298,6 +325,14 @@ object MediaHub {
                     Log.i(TAG, "bluetooth audio: ${if (bt == null) "unknown" else if (bt) "phone connected" else "no phone"}")
                     btLive = bt
                     main.post { reevaluate() }
+                    // Musique coupée avec la connexion du téléphone : elle reprend sur le Bluetooth revenu
+                    if (bt == true && android.os.SystemClock.uptimeMillis() < resumeBtUntil) {
+                        resumeBtUntil = 0L
+                        main.postDelayed({
+                            if (sourcePkg == BT || pinnedPkg == BT)
+                                browserControllers[BT]?.takeIf { !isPlaying(it) }?.let { Log.i(TAG, "bluetooth back: play"); it.transportControls.play() }
+                        }, 1_500)
+                    }
                 }
                 main.post { autoSource() }
                 kotlinx.coroutines.delay(1_000)

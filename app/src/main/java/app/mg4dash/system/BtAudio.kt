@@ -23,6 +23,14 @@ object BtAudio {
     /** Téléphone connecté en Bluetooth (appels), avec ou sans la musique. */
     fun phoneConnected() = state(HEADSET_CLIENT) || musicConnected()
 
+    /** Adresse du téléphone connecté pour les appels (HFP), ou null. */
+    fun phoneAddress(): String? = try {
+        val a = BluetoothAdapter.getDefaultAdapter()
+        a?.bondedDevices?.firstOrNull { d ->
+            try { d.javaClass.getMethod("isConnected").invoke(d) == true } catch (_: Throwable) { false }
+        }?.address
+    } catch (_: Throwable) { null }
+
     /** Redemande la musique au téléphone connecté pour les appels. */
     fun connectMusic(context: Context) {
         if (musicConnected()) return
