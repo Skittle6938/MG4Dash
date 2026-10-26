@@ -96,7 +96,7 @@ object StarKey {
                 // Valeur « caméra 360 » : 3 sur le launcher SWI69, 6 sur SWI173 (relevé dans le journal, #33)
                 val avm = if (Firmware.gen == Firmware.Gen.SWI173) FUNCTION_AVM_SWI173 else FUNCTION_AVM
                 if (fn != avm || Prefs(app).valetMode) return
-                toggleAvm(app)
+                starAvm(app)
             }
         }
         try { app.registerReceiver(receiver, IntentFilter(ACTION)); Log.i(TAG, "listening to steering wheel buttons") }
@@ -110,6 +110,41 @@ object StarKey {
     /** Heure de la dernière ouverture par « * » (0 = fermée) : sur certains firmwares la caméra
      *  s'affiche par-dessus sans devenir la tâche du haut (#33), on se souvient donc de l'état. */
     @Volatile private var avmStartedAt = 0L
+
+    private val handler = android.os.Handler(android.os.Looper.getMainLooper())
+
+    /** Caméra installée et au premier plan (sur certains firmwares elle ne s'y montre pas, #33). */
+    private fun avmTop(context: Context, pkg: String): Boolean = try {
+        @Suppress("DEPRECATION")
+        (context.getSystemService(Context.ACTIVITY_SERVICE) as android.app.ActivityManager)
+            .getRunningTasks(1).firstOrNull()?.topActivity?.packageName == pkg
+    } catch (_: Exception) { false }
+
+    /**
+     * « * » réglé sur la caméra 360 : priorité au launcher d'origine, qui sait parfois l'ouvrir lui-même
+     * (son écran d'accueil a été créé). On note l'état à l'appui, on attend 0,7 s, et MG4Dash n'agit que si
+     * rien n'a changé ; sinon il ouvrait la caméra puis la refermait aussitôt par-dessus le launcher.
+     */
+    private fun starAvm(context: Context) {
+        val pkg = AVM.firstOrNull { Firmware.installed(context, it.first) }?.first ?: return
+        val recent = avmStartedAt != 0L && android.os.SystemClock.elapsedRealtime() - avmStartedAt < AVM_OPEN_MS
+        val topBefore = avmTop(context, pkg)
+        val wasShown = topBefore || recent
+        handler.postDelayed({
+            val topNow = avmTop(context, pkg)
+            when {
+                !wasShown && topNow -> {
+                    avmStartedAt = android.os.SystemClock.elapsedRealtime()
+                    Log.i(TAG, "360 camera opened by the stock launcher")
+                }
+                wasShown && topBefore && !topNow -> {
+                    avmStartedAt = 0L
+                    Log.i(TAG, "360 camera closed by the stock launcher")
+                }
+                else -> toggleAvm(context)
+            }
+        }, 700)
+    }
 
     fun toggleAvm(context: Context): Boolean {
         for ((pkg, svc) in AVM) {
