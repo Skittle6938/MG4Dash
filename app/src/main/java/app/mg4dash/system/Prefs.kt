@@ -41,6 +41,10 @@ class Prefs(context: Context) {
     var acCycleOffSec: Int
         get() = sp.getInt("ac_cycle_off", 300)
         set(v) = sp.edit().putInt("ac_cycle_off", v.coerceIn(30, 1800)).apply()
+    /** A/C intermittent activé par le conducteur : il reste actif d'un trajet à l'autre jusqu'à ce qu'il l'arrête (#61). */
+    var acCycleOn: Boolean
+        get() = sp.getBoolean("ac_cycle_active", false)
+        set(v) = sp.edit().putBoolean("ac_cycle_active", v).apply()
 
     /** Calibration de la consigne affichée, en degrés (−5 à +5) : affichage seulement, la voiture reçoit sa valeur. */
     var tempOffset: Int
