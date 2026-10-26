@@ -173,7 +173,7 @@
     <string name="vh_soh_progress">Ölçülüyor: %%15\'in %%%1$s kadarı, şimdiye kadar %2$s.</string>
     <string name="vh_soh_disclaimer">MG4Dash tahmini, resmi değil. Test aşamasında.</string>
     <string name="st_home">ANA EKRAN</string>
-    <string name="st_home_desc">\"SAIC ana ekranını değiştir\" yalnızca orijinal ana ekranı devre dışı bırakır (servisi çalışmaya devam eder). Bakım modu onu yeniden etkinleştirir, örneğin bayi servisinden önce.</string>
+    <string name="st_home_desc">“SAIC ana ekranını değiştir” MG4Dash\'i ana ekran yapar. Hiçbir şey kaldırılmaz veya silinmez: orijinal ana ekran yalnızca ana ekran olarak kapatılır, aracın geri kalanı eskisi gibi çalışır (kamera, radyo, ses kaynakları, sistem çubuğu). Bakım modu onu tek dokunuşla yeniden açar, örneğin bayi ziyaretinden önce.</string>
     <string name="st_replace">SAIC ana ekranını değiştir</string>
     <string name="st_valet">Bakım modu</string>
     <string name="st_adb">MG4Dash artık açılmıyorsa ADB ile kurtarma: adb shell cmd package compile -m speed -f app.mg4dash</string>
@@ -195,13 +195,13 @@
     <string name="st_refresh">Yenile</string>
     <string name="st_close">Kapat</string>
     <string name="st_title">Ayarlar · MG4Dash %1$s</string>
-    <string name="st_replace_msg">SAIC ana ekranı devre dışı bırakılacak ve MG4Dash ana ekran olacak. Bakım modu onu istediğiniz zaman geri getirir. Devam edilsin mi?</string>
+    <string name="st_replace_msg">MG4Dash başlangıçta ve Ana ekran düğmesiyle açılacak.\n\nHiçbir şey kaldırılmaz: orijinal SAIC ana ekranı yalnızca ana ekran olarak kapatılır, aracın diğer işlevleri normal şekilde çalışmaya devam eder.\n\nAynı yerdeki Bakım modu ile istediğiniz zaman geri dönebilirsiniz. MG4Dash art arda birkaç kez çökerse orijinal ana ekran kendiliğinden geri gelir.</string>
     <string name="st_replace_btn">Değiştir</string>
     <string name="cancel">İptal</string>
     <string name="temp_cal_title">Sıcaklık kalibrasyonu</string>
     <string name="temp_cal_preview">Gösterilen: %1$s</string>
     <string name="temp_cal_reset">Sıfırla</string>
-    <string name="st_valet_msg">Orijinal SAIC başlatıcısı yeniden varsayılan ana ekran olacak. Devam edilsin mi?</string>
+    <string name="st_valet_msg">Orijinal SAIC ana ekranı yeniden açılacak ve tekrar ana ekran olacak. MG4Dash yüklü kalır: geri dönmek için “SAIC ana ekranını değiştir”. Devam edilsin mi?</string>
     <string name="activate">Etkinleştir</string>
     <string name="st_home_changed">Ana ekran değişti</string>
     <string name="st_failed">Başarısız (günlüğe bakın)</string>
@@ -511,6 +511,10 @@
     <string name="dock_conn_off">%1$s devre dışı: geri getirmek için düğmeye uzun basın.</string>
     <string name="tu_welcome_t">MG4Dash\'e hoş geldiniz</string>
     <string name="tu_welcome_1">Birkaç adımda başlıca hareketlere kısa bir bakış.</string>
+    <string name="tu_home_t">Aracın ana ekranı olarak MG4Dash</string>
+    <string name="tu_home_path">Ayarlar (dişli) › Sistem</string>
+    <string name="tu_home_1">SAIC ana ekranını değiştir: MG4Dash başlangıçta ve Ana ekran düğmesiyle açılır. Hiçbir şey kaldırılmaz: orijinal ana ekran yalnızca ana ekran olarak kapatılır</string>
+    <string name="tu_home_2">İstediğiniz zaman orijinale dönün (bayi ziyareti, bir sorun): Bakım modu, aynı yerde, tek dokunuş</string>
     <string name="tu_layouts_t">Üç ana ekran düzeni</string>
     <string name="tu_layouts_1">Ayarlar › Ana ekran\'dan seç: Tam, Basit (büyük paneller) veya Harita (büyük harita)</string>
     <string name="tu_layouts_2">Ayrıca: yan çubuk veya alt çubuk; Görünüm\'de: açık, koyu veya otomatik, renkler</string>

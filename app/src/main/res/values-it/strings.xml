@@ -173,7 +173,7 @@
     <string name="vh_soh_progress">In misura: %1$s %% di 15 %%, finora %2$s.</string>
     <string name="vh_soh_disclaimer">Stima MG4Dash, non ufficiale. In prova.</string>
     <string name="st_home">SCHERMATA HOME</string>
-    <string name="st_home_desc">«Sostituisci home SAIC» disattiva solo la schermata home originale (il suo servizio resta attivo). La modalità manutenzione la riattiva, ad esempio prima di un tagliando.</string>
+    <string name="st_home_desc">«Sostituisci home SAIC» rende MG4Dash la schermata iniziale. Niente viene disinstallato o eliminato: la home originale è solo disattivata come schermata iniziale e il resto dell\'auto funziona come prima (telecamera, radio, sorgenti audio, barra di sistema). La Modalità manutenzione la riattiva con un tocco, ad esempio prima di un tagliando.</string>
     <string name="st_replace">Sostituisci home SAIC</string>
     <string name="st_valet">Modalità manutenzione</string>
     <string name="st_adb">Ripristino ADB se MG4Dash non si avvia più: adb shell cmd package compile -m speed -f app.mg4dash</string>
@@ -195,13 +195,13 @@
     <string name="st_refresh">Aggiorna</string>
     <string name="st_close">Chiudi</string>
     <string name="st_title">Impostazioni · MG4Dash %1$s</string>
-    <string name="st_replace_msg">La schermata home SAIC verrà disattivata e MG4Dash diventerà la home. La modalità manutenzione la ripristina in qualsiasi momento. Continuare?</string>
+    <string name="st_replace_msg">MG4Dash si aprirà all\'avvio e con il tasto Home.\n\nNon viene disinstallato nulla: la home originale SAIC è semplicemente disattivata come schermata iniziale e le altre funzioni dell\'auto continuano a funzionare normalmente.\n\nPuoi tornare indietro in qualsiasi momento con la Modalità manutenzione, nello stesso punto. Se MG4Dash si bloccasse più volte di seguito, la home originale tornerebbe da sola.</string>
     <string name="st_replace_btn">Sostituisci</string>
     <string name="cancel">Annulla</string>
     <string name="temp_cal_title">Calibrazione della temperatura</string>
     <string name="temp_cal_preview">Visualizzato: %1$s</string>
     <string name="temp_cal_reset">Azzera</string>
-    <string name="st_valet_msg">Il launcher SAIC originale tornerà la schermata home predefinita. Continuare?</string>
+    <string name="st_valet_msg">La home originale SAIC verrà riattivata e tornerà a essere la schermata iniziale. MG4Dash resta installato: «Sostituisci home SAIC» per tornarci. Continuare?</string>
     <string name="activate">Attiva</string>
     <string name="st_home_changed">Home modificata</string>
     <string name="st_failed">Errore (vedi registro)</string>
@@ -511,6 +511,10 @@
     <string name="dock_conn_off">%1$s è disattivato: tieni premuto il pulsante per ripristinarlo.</string>
     <string name="tu_welcome_t">Benvenuto in MG4Dash</string>
     <string name="tu_welcome_1">Un breve giro dei gesti principali, in pochi passi.</string>
+    <string name="tu_home_t">MG4Dash come schermata iniziale dell\'auto</string>
+    <string name="tu_home_path">Impostazioni (ingranaggio) › Sistema</string>
+    <string name="tu_home_1">Sostituisci home SAIC: MG4Dash si apre all\'avvio e con il tasto Home. Niente viene disinstallato: la home originale è solo disattivata come schermata iniziale</string>
+    <string name="tu_home_2">Tornare all\'originale in qualsiasi momento (tagliando, un problema): Modalità manutenzione, nello stesso punto, un tocco</string>
     <string name="tu_layouts_t">Tre layout della home</string>
     <string name="tu_layouts_1">Sceglilo in Impostazioni › Home: Completa, Semplice (pannelli grandi) o Mappa (mappa grande)</string>
     <string name="tu_layouts_2">Inoltre: barra laterale o in basso; in Aspetto: chiaro, scuro o automatico, colori</string>

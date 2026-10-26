@@ -8,7 +8,7 @@ Current version: **1.7.0** ([releases](https://github.com/Skittle6938/MG4Dash/re
 
 > Screenshots are rendered on a PC with simulated data and the **default settings** unless stated otherwise; the map excerpt is a fixed view of Paris (OpenStreetMap).
 
-**Contents**: [Home screen](#home-screen) · [Media player](#media-player) · [Energy card](#energy-card) · [Bottom-right widget](#bottom-right-widget) · [Map card](#map-card) · [Other layouts](#other-home-layouts) · [Themes](#themes-and-day--night) · [Pages](#pages) · [Settings](#settings) · [Updates](#updates) · [Compatibility](#compatibility-beta) · [Install](#install-on-the-car) · [Gestures](#gestures)
+**Contents**: [Home screen](#home-screen) · [Media player](#media-player) · [Energy card](#energy-card) · [Bottom-right widget](#bottom-right-widget) · [Map card](#map-card) · [Other layouts](#other-home-layouts) · [Themes](#themes-and-day--night) · [Pages](#pages) · [Settings](#settings) · [Updates](#updates) · [Compatibility](#compatibility-beta) · [Install](#install-on-the-car) · [Replace / restore the SAIC home](#home-screen-replace-and-go-back) · [Gestures](#gestures)
 
 ## Home screen
 
@@ -255,13 +255,25 @@ adb shell rm /data/local/tmp/x.apk
 ```
 
 1. Try it without changing the home screen: `adb shell am start -n app.mg4dash/.MainActivity`
-2. Make it the home screen: tap "Settings" in the dock > "Replace SAIC home". This only disables the SAIC home activity, whose HOME priority of 2 cannot be beaten otherwise.
+2. Make it the home screen: see [Home screen: replace and go back](#home-screen-replace-and-go-back). This only disables the SAIC home activity, whose HOME priority of 2 cannot be beaten otherwise.
 
 The SAIC launcher package (`com.saicmotor.launcher`) is never disabled: its service handles the camera, audio sources and some SystemUI commands.
 
+## Home screen: replace and go back
+
+![Settings › System › Home screen](docs/screenshots/settings_system.png?v=1)
+
+1. Tap the **gear** (Settings) in the side bar, then the **System** tab.
+2. Under **HOME SCREEN**, tap **Replace SAIC home** and confirm. MG4Dash now opens at startup and with the car's Home button.
+3. **Back to the original** at any time (dealer visit, a problem, before uninstalling): same place, tap **Maintenance mode** and confirm. The SAIC home screen is the home screen again, exactly as before (a phone connection cut with the Android Auto button is restored too). Tap **Replace SAIC home** to come back to MG4Dash.
+
+**Nothing is uninstalled or deleted.** *Replace SAIC home* only switches off the SAIC home screen *as the home screen*: the SAIC launcher app stays installed, and its service keeps running the camera, audio sources and system bar as usual. The rest of the car is not touched. *Maintenance mode* switches the SAIC home screen back on in one tap. And if MG4Dash ever crashed 3 times within 3 minutes, the SAIC home screen would come back by itself.
+
+The gesture tour shows the same two buttons.
+
 ## Going back
 
-- Maintenance mode: tap "Settings" in the dock, then "Maintenance mode".
+- Maintenance mode: see [Home screen: replace and go back](#home-screen-replace-and-go-back).
 - If MG4Dash no longer starts after an update ("ClassNotFoundException" or "oat_file ... Check failed" in logcat), stop it, recompile it while it is stopped, then make it the home screen again:
   `adb shell am force-stop app.mg4dash`, `adb shell cmd package compile -m speed -f app.mg4dash`, `adb shell am force-stop app.mg4dash`, then `adb shell cmd package set-home-activity --user 0 app.mg4dash/.MainActivity`.
   Compiling while MG4Dash runs (it relaunches itself right after an install) corrupts its compiled code: always force-stop first.
