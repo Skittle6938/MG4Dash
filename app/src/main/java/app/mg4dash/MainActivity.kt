@@ -1293,6 +1293,8 @@ class MainActivity : AppCompatActivity() {
         if (bar != null && under != null) powerFx?.let { fx ->
             // Au hasard : nouveau tirage tant que rien ne joue, gardé pendant l'animation
             if (!fx.isActive) fx.style = app.mg4dash.ui.PowerFx.pick(prefs.powerFx)
+            // Badge du pic de la mygale : seulement si le conducteur affiche lui-même le widget Puissance
+            fx.badgeAllowed = cardPower || (if (mapLayout) (if (fxPrevStack >= 0) fxPrevStack else prefs.stackPage) == 2 else prefs.secondaryWidget == 1)
             // Sur tout l'écran : la fusée arrive du bord gauche, l'éclair et les flammes couvrent l'accueil
             val wide = fx.style != app.mg4dash.ui.PowerFx.NONE
             val host: View = if (wide) window.decorView else if (cardPower) b.energyCard else b.secondaryCard
