@@ -444,6 +444,9 @@
     <string name="st_shortcuts_page">Snelkoppelingenpagina in de kaartkaart</string>
     <string name="st_shortcuts_page_desc">Uit: de knop rechtsboven op de kaart wisselt alleen tussen kaart en verbruik</string>
     <string name="st_panel_outline">Rand van de startpanelen</string>
+    <string name="st_clock">Klok</string>
+    <string name="st_clock_24">24 u</string>
+    <string name="st_clock_12">12 u (zonder AM / PM)</string>
     <string name="st_panel_fade">Vervagend (dashboardstijl)</string>
     <string name="st_panel_full">Volledig</string>
     <string name="map_app_pick">App in de kaartkaart (test)</string>

@@ -444,6 +444,9 @@
     <string name="st_shortcuts_page">Shortcuts page in the map card</string>
     <string name="st_shortcuts_page_desc">Off: the button at the top right of the map only switches between the map and consumption</string>
     <string name="st_panel_outline">Home panel outline</string>
+    <string name="st_clock">Clock</string>
+    <string name="st_clock_24">24 h</string>
+    <string name="st_clock_12">12 h (no AM / PM)</string>
     <string name="st_panel_fade">Fading (dashboard style)</string>
     <string name="st_panel_full">Full</string>
     <string name="map_app_pick">App in the map card (test)</string>

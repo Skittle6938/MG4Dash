@@ -219,7 +219,7 @@ class ClimateHoldActivity : AppCompatActivity() {
     }
 
     companion object {
-        fun hhmm(wall: Long): String = java.text.SimpleDateFormat("HH:mm", Locale.getDefault()).format(java.util.Date(wall))
+        fun hhmm(wall: Long): String = app.mg4dash.system.Clock.hm(app.mg4dash.Tr.app, java.util.Date(wall))
 
         /** Durée : « 12:34 », ou « 1 h 05 » au-delà d'une heure. */
         fun left(ms: Long): String {

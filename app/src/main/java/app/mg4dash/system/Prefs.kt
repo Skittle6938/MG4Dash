@@ -282,6 +282,10 @@ class Prefs(context: Context) {
     var themeBackground: Int
         get() = sp.getInt("theme_bg", 0)
         set(v) = sp.edit().putInt("theme_bg", v).commit().let { }
+    /** Horloge en 12 h sans AM / PM ; 24 h par défaut (#18). */
+    var clock12: Boolean
+        get() = sp.getBoolean("clock_12", false)
+        set(v) = sp.edit().putBoolean("clock_12", v).apply()
     /** Contour des panneaux de l'accueil : estompé vers le bas (style tableau de bord, #38) ou complet (#40). */
     var panelFade: Boolean
         get() = sp.getBoolean("panel_fade", true)
