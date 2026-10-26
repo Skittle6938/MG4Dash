@@ -173,7 +173,7 @@
     <string name="vh_soh_progress">Meting: %1$s %% van 15 %%, tot nu toe %2$s.</string>
     <string name="vh_soh_disclaimer">Schatting van MG4Dash, niet officieel. In test.</string>
     <string name="st_home">STARTSCHERM</string>
-    <string name="st_home_desc">\"SAIC-start vervangen\" schakelt alleen het originele startscherm uit (de dienst blijft actief). De onderhoudsmodus zet het weer aan, bijvoorbeeld voor een onderhoudsbeurt.</string>
+    <string name="st_home_desc">„SAIC-start vervangen” maakt MG4Dash het startscherm. Er wordt niets verwijderd of gewist: het originele startscherm wordt alleen uitgeschakeld als startscherm en de rest van de auto werkt zoals voorheen (camera, radio, audiobronnen, systeembalk). De Onderhoudsmodus zet het met één tik weer aan, bijvoorbeeld vóór een dealerbezoek.</string>
     <string name="st_replace">SAIC-start vervangen</string>
     <string name="st_valet">Onderhoudsmodus</string>
     <string name="st_adb">ADB-herstel als MG4Dash niet meer start: adb shell cmd package compile -m speed -f app.mg4dash</string>
@@ -195,13 +195,13 @@
     <string name="st_refresh">Vernieuwen</string>
     <string name="st_close">Sluiten</string>
     <string name="st_title">Instellingen · MG4Dash %1$s</string>
-    <string name="st_replace_msg">Het SAIC-startscherm wordt uitgeschakeld en MG4Dash wordt het startscherm. De onderhoudsmodus herstelt het op elk moment. Doorgaan?</string>
+    <string name="st_replace_msg">MG4Dash opent bij het starten en met de Home-knop.\n\nEr wordt niets verwijderd: het originele SAIC-startscherm wordt alleen uitgeschakeld als startscherm en de andere functies van de auto blijven normaal werken.\n\nU kunt altijd terug met de Onderhoudsmodus, op dezelfde plek. Als MG4Dash een paar keer achter elkaar zou vastlopen, komt het originele startscherm vanzelf terug.</string>
     <string name="st_replace_btn">Vervangen</string>
     <string name="cancel">Annuleren</string>
     <string name="temp_cal_title">Temperatuurkalibratie</string>
     <string name="temp_cal_preview">Weergegeven: %1$s</string>
     <string name="temp_cal_reset">Herstellen</string>
-    <string name="st_valet_msg">De originele SAIC-launcher wordt weer het standaard startscherm. Doorgaan?</string>
+    <string name="st_valet_msg">Het originele SAIC-startscherm wordt weer ingeschakeld en wordt weer het startscherm. MG4Dash blijft geïnstalleerd: „SAIC-start vervangen” om terug te gaan. Doorgaan?</string>
     <string name="activate">Activeren</string>
     <string name="st_home_changed">Startscherm gewijzigd</string>
     <string name="st_failed">Mislukt (zie logboek)</string>
@@ -511,6 +511,10 @@
     <string name="dock_conn_off">%1$s is uitgeschakeld: houd de knop lang ingedrukt om te herstellen.</string>
     <string name="tu_welcome_t">Welkom bij MG4Dash</string>
     <string name="tu_welcome_1">Een korte rondleiding langs de belangrijkste gebaren, in een paar stappen.</string>
+    <string name="tu_home_t">MG4Dash als startscherm van de auto</string>
+    <string name="tu_home_path">Instellingen (tandwiel) › Systeem</string>
+    <string name="tu_home_1">SAIC-start vervangen: MG4Dash opent bij het starten en met de Home-knop. Er wordt niets verwijderd: het originele startscherm wordt alleen uitgeschakeld als startscherm</string>
+    <string name="tu_home_2">Altijd terug naar het origineel (dealerbezoek, een probleem): Onderhoudsmodus, op dezelfde plek, één tik</string>
     <string name="tu_layouts_t">Drie startindelingen</string>
     <string name="tu_layouts_1">Kies in Instellingen › Start: Volledig, Eenvoudig (grote panelen) of Kaart (grote kaart)</string>
     <string name="tu_layouts_2">Ook: zijbalk of onderbalk; bij Weergave: licht, donker of automatisch, kleuren</string>

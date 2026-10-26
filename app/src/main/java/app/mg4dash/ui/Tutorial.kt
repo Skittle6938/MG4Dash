@@ -29,11 +29,14 @@ object Tutorial {
 
     /** Étape : vue à mettre en valeur (null = aucune, bulle au centre), titre et lignes de gestes. */
     /** [swipes] : gestes de glisser montrés en flèches animées sur la carte ('H' gauche / droite, 'V' haut / bas). */
+    /** [homePanel] : le panneau « Écran d'accueil » des réglages reproduit dans la bulle (ses deux boutons). */
     private class Step(val target: Int?, val title: Int, val lines: List<Int>, val images: List<Pair<Int, Int>> = emptyList(),
-                       val swipes: String = "")
+                       val swipes: String = "", val homePanel: Boolean = false)
 
     private val STEPS = listOf(
         Step(null, R.string.tu_welcome_t, listOf(R.string.tu_welcome_1)),
+        // Remplacer l'accueil SAIC, et le mode Entretien pour revenir à l'origine
+        Step(null, R.string.tu_home_t, listOf(R.string.tu_home_1, R.string.tu_home_2), homePanel = true),
         // Les trois dispositions de l'accueil, en miniature
         Step(null, R.string.tu_layouts_t, listOf(R.string.tu_layouts_1, R.string.tu_layouts_2), listOf(
             R.drawable.tu_layout_full to R.string.st_style_full,
@@ -111,6 +114,31 @@ object Tutorial {
             setOnClickListener { onClick() }
         }
 
+        /** Réglages › Système › Écran d'accueil, comme à l'écran : titre du panneau et ses deux boutons. */
+        private fun homePanel(): View {
+            val panel = LinearLayout(context).apply {
+                orientation = LinearLayout.VERTICAL
+                setPadding(dp(20), dp(14), dp(20), dp(18))
+                background = GradientDrawable().apply {
+                    cornerRadius = dp(14).toFloat(); setStroke(dp(1), Themes.color(context, R.color.text_title))
+                }
+            }
+            panel.addView(text(context.getString(R.string.tu_home_path), 20f, Themes.color(context, R.color.text_title)))
+            panel.addView(text(context.getString(R.string.st_home), 21f, Themes.color(context, R.color.text_value), bold = true),
+                LinearLayout.LayoutParams(-2, -2).apply { topMargin = dp(6) })
+            val row = LinearLayout(context).apply { orientation = LinearLayout.HORIZONTAL }
+            listOf(R.string.st_replace to R.color.accent_action, R.string.st_valet to R.color.accent_heat).forEachIndexed { i, (label, color) ->
+                row.addView(TextView(context).apply {
+                    text = context.getString(label); gravity = Gravity.CENTER
+                    setTextSize(TypedValue.COMPLEX_UNIT_SP, 22f); setTextColor(Themes.color(context, color))
+                    setPadding(dp(12), dp(14), dp(12), dp(14))
+                    background = GradientDrawable().apply { cornerRadius = dp(12).toFloat(); setColor(Themes.color(context, R.color.bg_top)) }
+                }, LinearLayout.LayoutParams(0, -2, 1f).apply { if (i > 0) leftMargin = dp(14) })
+            }
+            panel.addView(row, LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(12) })
+            return panel
+        }
+
         private fun render() {
             val step = STEPS[index]
             bubble.removeAllViews()
@@ -137,6 +165,7 @@ object Tutorial {
                 }
                 bubble.addView(row, LinearLayout.LayoutParams(-2, -2).apply { topMargin = dp(16) })
             }
+            if (step.homePanel) bubble.addView(homePanel(), LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(16) })
             step.lines.forEach { l ->
                 bubble.addView(text("•  " + context.getString(l), 25f, Themes.color(context, R.color.text_value)),
                     LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(14) })
