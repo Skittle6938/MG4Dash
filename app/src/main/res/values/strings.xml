@@ -173,7 +173,7 @@
     <string name="vh_soh_progress">Measuring: %1$s %% of 15 %%, %2$s so far.</string>
     <string name="vh_soh_disclaimer">MG4Dash estimate, not official. Being tested.</string>
     <string name="st_home">HOME SCREEN</string>
-    <string name="st_home_desc">\"Replace SAIC home\" disables only the original home screen (its service keeps running). Maintenance mode re-enables it, e.g. before a dealer service.</string>
+    <string name="st_home_desc">“Replace SAIC home” makes MG4Dash the home screen. Nothing is uninstalled or deleted: the original home screen is only switched off as the home screen, and the rest of the car keeps working as before (camera, radio, audio sources, system bar). Maintenance mode switches it back on in one tap, for example before a dealer visit.</string>
     <string name="st_replace">Replace SAIC home</string>
     <string name="st_valet">Maintenance mode</string>
     <string name="st_adb">ADB recovery if MG4Dash no longer starts: adb shell cmd package compile -m speed -f app.mg4dash</string>
@@ -195,13 +195,13 @@
     <string name="st_refresh">Refresh</string>
     <string name="st_close">Close</string>
     <string name="st_title">Settings · MG4Dash %1$s</string>
-    <string name="st_replace_msg">The SAIC home screen will be disabled and MG4Dash will become the home screen. Maintenance mode restores it at any time. Continue?</string>
+    <string name="st_replace_msg">MG4Dash will open at startup and with the Home button.\n\nNothing is uninstalled: the original SAIC home screen is simply switched off as the home screen, and the car\'s other functions keep working normally.\n\nYou can go back at any time with Maintenance mode, in the same place. If MG4Dash ever crashed several times in a row, the original home screen would come back by itself.</string>
     <string name="st_replace_btn">Replace</string>
     <string name="cancel">Cancel</string>
     <string name="temp_cal_title">Temperature calibration</string>
     <string name="temp_cal_preview">Displayed: %1$s</string>
     <string name="temp_cal_reset">Reset</string>
-    <string name="st_valet_msg">The original SAIC launcher will become the default home screen again. Continue?</string>
+    <string name="st_valet_msg">The original SAIC home screen will be switched back on and become the home screen again. MG4Dash stays installed: tap “Replace SAIC home” to come back to it. Continue?</string>
     <string name="activate">Activate</string>
     <string name="st_home_changed">Home screen changed</string>
     <string name="st_failed">Failed (see the log)</string>
@@ -511,6 +511,10 @@
     <string name="dock_conn_off">%1$s is disabled: long press the button to restore it.</string>
     <string name="tu_welcome_t">Welcome to MG4Dash</string>
     <string name="tu_welcome_1">A quick tour of the main gestures, in a few steps.</string>
+    <string name="tu_home_t">MG4Dash as the car\'s home screen</string>
+    <string name="tu_home_path">Settings (gear) › System</string>
+    <string name="tu_home_1">Replace SAIC home: MG4Dash opens at startup and with the Home button. Nothing is uninstalled: the original home screen is only switched off as the home screen</string>
+    <string name="tu_home_2">Back to the original at any time (dealer visit, a problem): Maintenance mode, in the same place, one tap</string>
     <string name="tu_layouts_t">Three home layouts</string>
     <string name="tu_layouts_1">Choose it in Settings › Home: Full, Simple (large panels) or Map (large map)</string>
     <string name="tu_layouts_2">Also there: side bar or bottom bar; in Look: light, dark or automatic, colours</string>

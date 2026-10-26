@@ -19,6 +19,7 @@ def esc(s):
         s = s.replace('%%', '%')
     s = s.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
     s = s.replace(BS, BS + BS).replace("'", BS + "'").replace('"', BS + '"')
+    s = s.replace(BS + BS + 'n', BS + 'n')   # BS+n in the psv: line break
     if s != s.strip():
         s = '"' + s + '"'
     return s

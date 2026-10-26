@@ -173,7 +173,7 @@
     <string name="vh_soh_progress">Mesure en cours : %1$s %% sur 15 %%, %2$s pour l\'instant.</string>
     <string name="vh_soh_disclaimer">Estimation MG4Dash, pas officielle. En test.</string>
     <string name="st_home">ÉCRAN D\'ACCUEIL</string>
-    <string name="st_home_desc">« Remplacer l\'accueil SAIC » désactive uniquement l\'écran d\'accueil d\'origine (son service reste actif). Le mode Entretien le réactive, par exemple avant une révision en concession.</string>
+    <string name="st_home_desc">« Remplacer l\'accueil SAIC » fait de MG4Dash l\'écran d\'accueil. Rien n\'est désinstallé ni supprimé : l\'accueil d\'origine est seulement désactivé en tant qu\'écran d\'accueil, et le reste de la voiture fonctionne comme avant (caméra, radio, sources audio, barre du haut). Le mode Entretien le réactive en un geste, par exemple avant une révision en concession.</string>
     <string name="st_replace">Remplacer l\'accueil SAIC</string>
     <string name="st_valet">Mode Entretien</string>
     <string name="st_adb">Secours ADB si MG4Dash ne démarre plus : adb shell cmd package compile -m speed -f app.mg4dash</string>
@@ -195,13 +195,13 @@
     <string name="st_refresh">Actualiser</string>
     <string name="st_close">Fermer</string>
     <string name="st_title">Réglages · MG4Dash %1$s</string>
-    <string name="st_replace_msg">L\'écran d\'accueil SAIC sera désactivé et MG4Dash deviendra l\'accueil. Le mode Entretien le rétablit à tout moment. Continuer ?</string>
+    <string name="st_replace_msg">MG4Dash s\'ouvrira au démarrage et avec le bouton Accueil.\n\nRien n\'est désinstallé : l\'accueil SAIC d\'origine est simplement désactivé en tant qu\'écran d\'accueil, et les autres fonctions de la voiture continuent de marcher normalement.\n\nVous pouvez revenir en arrière à tout moment avec le mode Entretien, au même endroit. Si MG4Dash plantait plusieurs fois de suite, l\'accueil d\'origine reviendrait de lui-même.</string>
     <string name="st_replace_btn">Remplacer</string>
     <string name="cancel">Annuler</string>
     <string name="temp_cal_title">Calibration de la température</string>
     <string name="temp_cal_preview">Affiché : %1$s</string>
     <string name="temp_cal_reset">Remettre à 0</string>
-    <string name="st_valet_msg">Le launcher SAIC d\'origine va redevenir l\'écran d\'accueil par défaut. Continuer ?</string>
+    <string name="st_valet_msg">L\'accueil SAIC d\'origine va être réactivé et redevenir l\'écran d\'accueil. MG4Dash reste installé : « Remplacer l\'accueil SAIC » pour y revenir. Continuer ?</string>
     <string name="activate">Activer</string>
     <string name="st_home_changed">Accueil modifié</string>
     <string name="st_failed">Échec (voir le journal)</string>
@@ -511,6 +511,10 @@
     <string name="dock_conn_off">%1$s est désactivé : appui long sur le bouton pour le rétablir.</string>
     <string name="tu_welcome_t">Bienvenue dans MG4Dash</string>
     <string name="tu_welcome_1">Un petit tour des gestes principaux, en quelques étapes.</string>
+    <string name="tu_home_t">MG4Dash comme accueil de la voiture</string>
+    <string name="tu_home_path">Réglages (roue dentée) › Système</string>
+    <string name="tu_home_1">Remplacer l\'accueil SAIC : MG4Dash s\'ouvre au démarrage et avec le bouton Accueil. Rien n\'est désinstallé : l\'accueil d\'origine est seulement désactivé en tant qu\'écran d\'accueil</string>
+    <string name="tu_home_2">Revenir à l\'origine à tout moment (révision en concession, problème) : Mode Entretien, au même endroit, en un geste</string>
     <string name="tu_layouts_t">Trois dispositions de l\'accueil</string>
     <string name="tu_layouts_1">À choisir dans Réglages › Accueil : Complet, Épuré (grands panneaux) ou Carte (grande carte)</string>
     <string name="tu_layouts_2">Aussi : barre latérale ou barre du bas ; dans Apparence : clair, sombre ou auto, couleurs</string>

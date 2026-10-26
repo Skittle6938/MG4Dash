@@ -173,7 +173,7 @@
     <string name="vh_soh_progress">Messung: %1$s %% von 15 %%, bisher %2$s.</string>
     <string name="vh_soh_disclaimer">Schätzung von MG4Dash, nicht offiziell. In Test.</string>
     <string name="st_home">STARTBILDSCHIRM</string>
-    <string name="st_home_desc">„SAIC-Startbildschirm ersetzen“ deaktiviert nur den originalen Startbildschirm (sein Dienst läuft weiter). Der Wartungsmodus aktiviert ihn wieder, z. B. vor einem Werkstatttermin.</string>
+    <string name="st_home_desc">„SAIC-Startbildschirm ersetzen“ macht MG4Dash zum Startbildschirm. Nichts wird deinstalliert oder gelöscht: Der Original-Startbildschirm wird nur als Startbildschirm abgeschaltet, alles andere im Auto funktioniert wie bisher (Kamera, Radio, Audioquellen, Systemleiste). Der Wartungsmodus schaltet ihn mit einem Tippen wieder ein, z. B. vor einem Werkstattbesuch.</string>
     <string name="st_replace">SAIC-Startbildschirm ersetzen</string>
     <string name="st_valet">Wartungsmodus</string>
     <string name="st_adb">ADB-Notfall, falls MG4Dash nicht mehr startet: adb shell cmd package compile -m speed -f app.mg4dash</string>
@@ -195,13 +195,13 @@
     <string name="st_refresh">Aktualisieren</string>
     <string name="st_close">Schließen</string>
     <string name="st_title">Einstellungen · MG4Dash %1$s</string>
-    <string name="st_replace_msg">Der SAIC-Startbildschirm wird deaktiviert und MG4Dash wird zum Startbildschirm. Der Wartungsmodus stellt ihn jederzeit wieder her. Fortfahren?</string>
+    <string name="st_replace_msg">MG4Dash öffnet sich beim Start und mit der Home-Taste.\n\nNichts wird deinstalliert: Der Original-Startbildschirm von SAIC wird nur als Startbildschirm abgeschaltet, die anderen Funktionen des Autos arbeiten normal weiter.\n\nMit dem Wartungsmodus, an derselben Stelle, können Sie jederzeit zurück. Sollte MG4Dash mehrmals hintereinander abstürzen, käme der Original-Startbildschirm von selbst zurück.</string>
     <string name="st_replace_btn">Ersetzen</string>
     <string name="cancel">Abbrechen</string>
     <string name="temp_cal_title">Temperaturkalibrierung</string>
     <string name="temp_cal_preview">Angezeigt: %1$s</string>
     <string name="temp_cal_reset">Zurücksetzen</string>
-    <string name="st_valet_msg">Der originale SAIC-Launcher wird wieder Standard-Startbildschirm. Fortfahren?</string>
+    <string name="st_valet_msg">Der Original-Startbildschirm von SAIC wird wieder eingeschaltet und wieder zum Startbildschirm. MG4Dash bleibt installiert: „SAIC-Startbildschirm ersetzen“, um zurückzukehren. Fortfahren?</string>
     <string name="activate">Aktivieren</string>
     <string name="st_home_changed">Startbildschirm geändert</string>
     <string name="st_failed">Fehlgeschlagen (siehe Protokoll)</string>
@@ -511,6 +511,10 @@
     <string name="dock_conn_off">%1$s ist deaktiviert: Taste lange drücken zum Wiederherstellen.</string>
     <string name="tu_welcome_t">Willkommen bei MG4Dash</string>
     <string name="tu_welcome_1">Eine kurze Tour durch die wichtigsten Gesten, in wenigen Schritten.</string>
+    <string name="tu_home_t">MG4Dash als Startbildschirm des Autos</string>
+    <string name="tu_home_path">Einstellungen (Zahnrad) › System</string>
+    <string name="tu_home_1">SAIC-Startbildschirm ersetzen: MG4Dash öffnet sich beim Start und mit der Home-Taste. Nichts wird deinstalliert: Der Original-Startbildschirm wird nur als Startbildschirm abgeschaltet</string>
+    <string name="tu_home_2">Jederzeit zurück zum Original (Werkstattbesuch, Problem): Wartungsmodus, an derselben Stelle, ein Tippen</string>
     <string name="tu_layouts_t">Drei Startseiten-Layouts</string>
     <string name="tu_layouts_1">Auswahl unter Einstellungen › Startseite: Vollständig, Schlicht (große Felder) oder Karte (große Karte)</string>
     <string name="tu_layouts_2">Außerdem: Seitenleiste oder untere Leiste; unter Aussehen: hell, dunkel oder automatisch, Farben</string>
