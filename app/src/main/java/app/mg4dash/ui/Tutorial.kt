@@ -28,7 +28,9 @@ import app.mg4dash.system.Prefs
 object Tutorial {
 
     /** Étape : vue à mettre en valeur (null = aucune, bulle au centre), titre et lignes de gestes. */
-    private class Step(val target: Int?, val title: Int, val lines: List<Int>, val images: List<Pair<Int, Int>> = emptyList())
+    /** [swipes] : gestes de glisser montrés en flèches animées sur la carte ('H' gauche / droite, 'V' haut / bas). */
+    private class Step(val target: Int?, val title: Int, val lines: List<Int>, val images: List<Pair<Int, Int>> = emptyList(),
+                       val swipes: String = "")
 
     private val STEPS = listOf(
         Step(null, R.string.tu_welcome_t, listOf(R.string.tu_welcome_1)),
@@ -42,8 +44,8 @@ object Tutorial {
         Step(R.id.climateCard, R.string.tu_climate_t, listOf(R.string.tu_climate_1, R.string.tu_climate_2, R.string.tu_climate_3)),
         Step(R.id.energyCard, R.string.tu_energy_t, listOf(R.string.tu_energy_1, R.string.tu_energy_2)),
         Step(R.id.mapCard, R.string.tu_map_t, listOf(R.string.tu_map_1, R.string.tu_map_2)),
-        Step(R.id.mediaCard, R.string.tu_media_t, listOf(R.string.tu_media_1, R.string.tu_media_2, R.string.tu_media_3)),
-        Step(R.id.secondaryCard, R.string.tu_widget_t, listOf(R.string.tu_widget_1, R.string.tu_widget_2)),
+        Step(R.id.mediaCard, R.string.tu_media_t, listOf(R.string.tu_media_1, R.string.tu_media_2, R.string.tu_media_3), swipes = "VH"),
+        Step(R.id.secondaryCard, R.string.tu_widget_t, listOf(R.string.tu_widget_1, R.string.tu_widget_2), swipes = "H"),
         Step(null, R.string.tu_end_t, listOf(R.string.tu_end_1)),
     )
 
@@ -199,8 +201,48 @@ object Tutorial {
                 canvas.drawRoundRect(hole, r, r, clear)
                 canvas.drawRoundRect(hole, r, r, ring)
                 drawArrow(canvas)
+                drawSwipes(canvas)
             }
             super.dispatchDraw(canvas)
+        }
+
+        private val swipePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            style = Paint.Style.STROKE; strokeCap = Paint.Cap.ROUND; strokeJoin = Paint.Join.ROUND; color = Color.WHITE
+        }
+        private val dotPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = Color.WHITE }
+
+        /**
+         * Glisser animé sur la carte : un doigt (rond) part du centre et file dans un sens puis dans l'autre,
+         * suivi d'une flèche translucide. Les sens de [Step.swipes] se succèdent (1,6 s chacun).
+         */
+        private fun drawSwipes(canvas: Canvas) {
+            val sw = STEPS[index].swipes
+            if (sw.isEmpty()) return
+            val cycle = 1600L
+            val t = android.os.SystemClock.uptimeMillis()
+            val n = (t / cycle).toInt()
+            val axis = sw[(n / 2) % sw.length]          // chaque sens joué aller puis retour
+            val dir = if (n % 2 == 0) 1f else -1f
+            val u = (t % cycle) / cycle.toFloat()
+            val e = (1 - Math.cos(Math.PI * u.coerceAtMost(0.8f) / 0.8f).toFloat()) / 2f      // départ et arrivée en douceur
+            val alpha = when { u < 0.15f -> u / 0.15f; u > 0.8f -> 1f - (u - 0.8f) / 0.2f; else -> 1f }
+            val cx = hole.centerX(); val cy = hole.centerY()
+            val span = if (axis == 'H') hole.width() * 0.32f else hole.height() * 0.3f
+            val sx = cx - dir * span * (if (axis == 'H') 1f else 0f); val sy = cy - dir * span * (if (axis == 'V') 1f else 0f)
+            val ex = cx + dir * span * (if (axis == 'H') 1f else 0f); val ey = cy + dir * span * (if (axis == 'V') 1f else 0f)
+            val px = sx + (ex - sx) * e; val py = sy + (ey - sy) * e
+            // Traînée en flèche du départ au doigt
+            swipePaint.strokeWidth = 14 * d; swipePaint.alpha = (110 * alpha).toInt()
+            canvas.drawLine(sx, sy, px, py, swipePaint)
+            val ang = Math.atan2((ey - sy).toDouble(), (ex - sx).toDouble())
+            val head = 34 * d
+            swipePaint.strokeWidth = 12 * d; swipePaint.alpha = (150 * alpha).toInt()
+            for (sgn in listOf(-1, 1)) canvas.drawLine(px, py,
+                px - (head * Math.cos(ang + sgn * 0.6)).toFloat(), py - (head * Math.sin(ang + sgn * 0.6)).toFloat(), swipePaint)
+            // Doigt
+            dotPaint.alpha = (90 * alpha).toInt(); canvas.drawCircle(px, py, 30 * d, dotPaint)
+            dotPaint.alpha = (170 * alpha).toInt(); canvas.drawCircle(px, py, 16 * d, dotPaint)
+            postInvalidateOnAnimation()
         }
 
         /** Flèche courbe du bord de la bulle vers la carte mise en valeur. */

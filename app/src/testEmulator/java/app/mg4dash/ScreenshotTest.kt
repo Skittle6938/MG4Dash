@@ -515,6 +515,25 @@ class ScreenshotTest {
         save(org.robolectric.shadows.ShadowDialog.getLatestDialog().window!!.decorView, "phone_fav_count_dialog.png")
     }
 
+    /** Tuto : étape Musique animée (glisser haut / bas puis gauche / droite), images pour un GIF. */
+    @Test @Config(qualifiers = "fr-w1920dp-h720dp-land-mdpi") fun tutorialSwipeFrames() {
+        org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE).edit().putInt("theme_mode", 1).commit()
+        val activity = Robolectric.buildActivity(MainActivity::class.java).setup().get()
+        repeat(3) { shadowOf(Looper.getMainLooper()).idleFor(200, TimeUnit.MILLISECONDS) }
+        app.mg4dash.ui.Tutorial.show(activity, 6)
+        val dir = File("build/screenshots").apply { mkdirs() }
+        val fps = 20; val frames = 132
+        java.io.DataOutputStream(File(dir, "tuto_swipe.rgb").outputStream().buffered()).use { out ->
+            out.writeInt(960); out.writeInt(360); out.writeInt(frames); out.writeInt(100 / fps)
+            for (f in 0 until frames) {
+                shadowOf(Looper.getMainLooper()).idleFor(50, TimeUnit.MILLISECONDS)
+                val big = Bitmap.createBitmap(1920, 720, Bitmap.Config.ARGB_8888); activity.window.decorView.draw(Canvas(big))
+                val small = Bitmap.createScaledBitmap(big, 960, 360, true)
+                val px = IntArray(960 * 360); small.getPixels(px, 0, 960, 0, 0, 960, 360); px.forEach { out.writeInt(it) }
+            }
+        }
+    }
+
     /** Tuto des gestes : quelques étapes, en français. */
     @Test @Config(qualifiers = "fr-w1920dp-h720dp-land-mdpi") fun tutorialSteps() {
         org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE).edit().putInt("theme_mode", 1).commit()
