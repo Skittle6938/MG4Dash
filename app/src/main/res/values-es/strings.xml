@@ -298,6 +298,7 @@
     <string name="sw_trip_avg">MEDIA TRAYECTO</string>
     <string name="sw_phone">TELÉFONO</string>
     <string name="sw_fav_pick">Elegir un contacto</string>
+    <string name="sw_fav_count">Número de accesos directos</string>
     <string name="st_compat">COMPATIBILIDAD (BETA)</string>
     <string name="st_compat_fw">Firmware: %1$s (%2$s)</string>
     <string name="st_compat_tested">MG4Dash se desarrolló y probó en este firmware.</string>

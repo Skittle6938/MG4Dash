@@ -298,6 +298,7 @@
     <string name="sw_trip_avg">MOYENNE TRAJET</string>
     <string name="sw_phone">TÉLÉPHONE</string>
     <string name="sw_fav_pick">Choisir un contact</string>
+    <string name="sw_fav_count">Nombre de raccourcis</string>
     <string name="st_compat">COMPATIBILITÉ (BÊTA)</string>
     <string name="st_compat_fw">Firmware : %1$s (%2$s)</string>
     <string name="st_compat_tested">MG4Dash a été mis au point et testé sur ce firmware.</string>
