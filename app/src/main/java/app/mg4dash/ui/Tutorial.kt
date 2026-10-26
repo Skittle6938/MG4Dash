@@ -40,7 +40,7 @@ object Tutorial {
             R.drawable.tu_layout_simple to R.string.st_style_simple,
             R.drawable.tu_layout_map to R.string.st_style_map,
         )),
-        Step(R.id.dock, R.string.tu_bar_t, listOf(R.string.tu_bar_1, R.string.tu_bar_2, R.string.tu_bar_3, R.string.tu_bar_4)),
+        Step(R.id.dock, R.string.tu_bar_t, listOf(R.string.tu_bar_1, R.string.tu_bar_2, R.string.tu_bar_3, R.string.tu_bar_4, R.string.tu_bar_5)),
         Step(R.id.climateCard, R.string.tu_climate_t, listOf(R.string.tu_climate_1, R.string.tu_climate_2, R.string.tu_climate_3)),
         Step(R.id.energyCard, R.string.tu_energy_t, listOf(R.string.tu_energy_1, R.string.tu_energy_2)),
         Step(R.id.mapCard, R.string.tu_map_t, listOf(R.string.tu_map_1, R.string.tu_map_2)),

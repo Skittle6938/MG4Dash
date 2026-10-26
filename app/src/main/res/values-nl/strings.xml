@@ -502,6 +502,13 @@
     <string name="st_play_resume">Zoals bij het uitzetten</string>
     <string name="st_play_pause">Altijd gepauzeerd</string>
     <string name="st_play_play">Altijd afspelen</string>
+    <string name="st_aa_button">Android Auto-knop van de balk</string>
+    <string name="st_aa_button_desc">Dubbeltik op de knop om de telefoonverbinding te verbreken (de app wordt uitgeschakeld, het pictogram wordt rood); nogmaals dubbeltikken om ze te herstellen. Lang drukken: app kiezen.</string>
+    <string name="st_usb_kick">Bekabelde telefoon bij het starten (USB-correctie)</string>
+    <string name="st_usb_kick_desc">Als de telefoon vóór het starten van de auto was aangesloten, start Android Auto pas na loskoppelen. Dit detecteert hem automatisch opnieuw bij het starten.</string>
+    <string name="dock_conn_disabled">%1$s uitgeschakeld: de telefoon maakt geen verbinding meer. Nogmaals lang drukken om te herstellen.</string>
+    <string name="dock_conn_enabled">%1$s hersteld</string>
+    <string name="dock_conn_off">%1$s is uitgeschakeld: houd de knop lang ingedrukt om te herstellen.</string>
     <string name="tu_welcome_t">Welkom bij MG4Dash</string>
     <string name="tu_welcome_1">Een korte rondleiding langs de belangrijkste gebaren, in een paar stappen.</string>
     <string name="tu_layouts_t">Drie startindelingen</string>
@@ -512,6 +519,7 @@
     <string name="tu_bar_2">Energie: dubbel tikken = scherm uit, lang drukken = auto uitzetten (nooit tijdens het rijden)</string>
     <string name="tu_bar_3">Voertuig: dubbel tikken = deuren vergrendelen / ontgrendelen, lang drukken = ESC uit / aan</string>
     <string name="tu_bar_4">Start: lang drukken = alle apps</string>
+    <string name="tu_bar_5">Android Auto: lang drukken = app kiezen (Android Auto, CarPlay of een andere), dubbeltikken = telefoonverbinding verbreken / herstellen</string>
     <string name="tu_climate_t">Klimaat</string>
     <string name="tu_climate_1">A/C lang drukken: A/C met tussenpozen (tik op A/C om te stoppen)</string>
     <string name="tu_climate_2">Temperatuur lang drukken: kalibratie; aan/uit lang drukken: klimaat aan na het uitstappen (kamperen)</string>

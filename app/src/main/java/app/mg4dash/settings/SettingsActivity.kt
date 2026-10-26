@@ -113,6 +113,24 @@ class SettingsActivity : AppCompatActivity() {
         // Lecture au démarrage (remplace la reprise automatique de Radio Dash)
         dropdown(src, getString(R.string.st_start_playback),
             listOf(getString(R.string.st_play_resume), getString(R.string.st_play_pause), getString(R.string.st_play_play)), { prefs.startPlayback }) { prefs.startPlayback = it }
+        // Bouton Android Auto de la barre : l'appli qu'il ouvre (l'appui long coupe sa connexion)
+        val aaLabels = listOf(getString(R.string.dock_aa_stock), getString(R.string.dock_cp_stock), getString(R.string.dock_other_app))
+        fun aaIndex(): Int = when (val t = prefs.dockAaTarget) { null -> 0; app.mg4dash.system.Apps.CARPLAY.flattenToString() -> 1; else -> 2 }
+        dropdown(src, getString(R.string.st_aa_button), aaLabels, { aaIndex() }) { i ->
+            fun apply(target: String?) {
+                // Changement d'appli : on rétablit d'abord la connexion coupée de l'ancienne
+                app.mg4dash.system.ConnectionToggle.restore(this)
+                prefs.dockAaTarget = target
+                recreate()   // la barre (bouton Android Auto) prend la nouvelle appli
+            }
+            when (i) {
+                0 -> apply(null)
+                1 -> apply(app.mg4dash.system.Apps.CARPLAY.flattenToString())
+                else -> app.mg4dash.shortcuts.Shortcuts.pickApp(this, getString(R.string.dock_aa_pick)) { cn -> if (cn != null) apply(cn.flattenToString()) }
+            }
+        }
+        text(src, getString(R.string.st_aa_button_desc), 16f, R.color.text_title)
+        toggle(src, R.string.st_usb_kick, R.string.st_usb_kick_desc, { prefs.usbKick }) { prefs.usbKick = it }
         val map = panel(homeR, getString(R.string.st_style_map).uppercase())
         text(map, getString(R.string.st_map_zoom), 18f, R.color.text_value)
         row(map, *choiceButtons(listOf("14", "15", "16", "17", "18"), { prefs.mapZoom - 14 }) { prefs.mapZoom = 14 + it })
@@ -487,6 +505,8 @@ class SettingsActivity : AppCompatActivity() {
             .setMessage(R.string.st_valet_msg)
             .setPositiveButton(R.string.activate) { _, _ ->
                 val ok = HomeSwitcher.switchToStock(this)
+                // Connexion du téléphone coupée par un appui long : rétablie pour la concession
+                app.mg4dash.system.ConnectionToggle.restore(this)
                 Log.i("Valet", "Maintenance mode → $ok")
                 refreshHome(); toastState(ok)
             }

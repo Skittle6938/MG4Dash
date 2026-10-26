@@ -161,6 +161,16 @@ class Prefs(context: Context) {
         get() = sp.getInt("start_source", 0)
         set(v) = sp.edit().putInt("start_source", v).apply()
 
+    /** Téléphone branché en USB avant le démarrage : relancé pour qu'Android Auto démarre (repris d'AA Kick). */
+    var usbKick: Boolean
+        get() = sp.getBoolean("usb_kick", true)
+        set(v) = sp.edit().putBoolean("usb_kick", v).apply()
+
+    /** Appli de connexion du téléphone désactivée par MG4Dash (appui long sur le bouton Android Auto). */
+    var connectionOff: String?
+        get() = sp.getString("connection_off", null)
+        set(v) = sp.edit().putString("connection_off", v).apply()
+
     /** Lecture au démarrage de la voiture : 0 comme à l'arrêt (défaut), 1 toujours en pause, 2 toujours en lecture. */
     var startPlayback: Int
         get() = sp.getInt("start_playback", 0)

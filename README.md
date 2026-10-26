@@ -44,6 +44,10 @@ The player (Full, Map and Simple layouts) works like the Android Auto player: th
 
 **Sources**: the source menu only lists the sources available right now: Bluetooth, USB and Android Auto / CarPlay appear when a phone or a USB key is connected, and other apps playing music (for example [DiAuto MG4+](https://github.com/Skittle6938/DiAuto-MG4) or SimpMusic) are offered too. Switching to an app sends it play, leaving it pauses it, and when an app starts playing the other apps are paused. DAB or FM is chosen in the radio app, as on the stock home screen.
 
+**Cut the phone connection**: double tap the Android Auto button (dock or vertical bar) to close the Android Auto / CarPlay session and keep it off; the icon turns red, even after a restart. The phone stays connected over Bluetooth for calls and music, and Bluetooth is offered in the sources (it is only hidden while Android Auto or CarPlay is running). Double tap again: Android Auto comes back by itself, with the phone still plugged in.
+
+**Wired phone at startup** (Settings › Home › Audio source, on by default): if the phone was plugged in before the car started, the stock Android Auto doesn't start until you unplug it and plug it back. MG4Dash re-detects the phone by itself at startup (the USB fix of [AA Kick](https://github.com/Skittle6938/MG4-AndroidAuto-BootFix)). If AA Kick is installed too, turn its *Wired phone fix* off.
+
 **Audio source at startup** (Settings › Home › Audio source): *Automatic* (default) remembers the sources you pick and goes back by itself to the last one still available, as soon as it returns (phone reconnected, USB key plugged in…); a source that disappears is replaced after 1 s. You can also leave it to the car (*Same as the car*) or always start on Radio, Bluetooth, USB or CarPlay / Android Auto. CarPlay is never picked automatically. *Playback at startup*: as when the car was switched off (default), always paused or always playing.
 
 **Steering wheel**: left / right change track on the source shown, apps included. The car does not know the apps (DiAuto, SimpMusic…) and still hands these buttons to its last own source, often the radio, which briefly takes the sound: MG4Dash puts the radio back on its station and returns to the app at once.
@@ -207,7 +211,10 @@ Features a firmware does not expose are hidden instead of failing (for example t
   - `energy/ConsumptionEstimator.kt`: kWh/100 estimated from battery % and kilometres
   - `energy/EnergyMonitor.kt`, `energy/ConsumptionCurve.kt`: energy measured from battery voltage × current, split into driving / climate / accessories, and the consumption curves
   - `ui/MediaStyle.kt`: media player presentation
-  - `system/Projection.kt`: Android Auto / CarPlay session read from the AllGo remote UI service
+  - `system/Projection.kt`: Android Auto / CarPlay session read from (and closed through) the AllGo remote UI service
+  - `system/ConnectionToggle.kt`: phone connection cut / restored from the Android Auto button
+  - `system/BtAudio.kt`: Bluetooth music of the phone asked again when Android Auto stops
+  - `system/UsbKick.kt`: wired phone re-detected at startup (USB fix of AA Kick)
   - `energy/EnergyLogger.kt`: read-only CSV recorder of battery power, consumption counters and equipment states
   - `media/MediaHub.kt`: active player and audio sources (the car's and other apps'), automatic source, steering wheel for apps
   - `map/NavRepo.kt`: turn-by-turn data broadcast by DiAuto / Headunit Revived
@@ -269,7 +276,7 @@ A short tour of the main gestures opens after a first install (*Skip* closes it 
 - Long press "Home" in the dock: list of installed apps
 - Long press the clock in the dock: clock or Wi-Fi settings button
 - Vertical bar: double tap Energy turns the screen off, long press Energy switches the car off (never while moving); double tap Vehicle locks / unlocks the doors, long press Vehicle turns ESC off / on
-- Long press "Android Auto" in the dock: Android Auto, CarPlay or another app
+- Long press "Android Auto" in the dock or the vertical bar: Android Auto, CarPlay or another app; double tap: cut / restore the phone connection (see [Media player](#media-player))
 - Tap or swipe the bottom-right widget (or the map layout stack): next page; long press a phone favourite to change it
 - Swipe the media card up / down: next audio source; left / right: next / previous track; tap its source name: source menu
 - Long press the set temperature: temperature calibration; long press fan minus: lowest fan speed; long press A/C: intermittent A/C

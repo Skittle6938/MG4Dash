@@ -502,6 +502,13 @@
     <string name="st_play_resume">Come allo spegnimento</string>
     <string name="st_play_pause">Sempre in pausa</string>
     <string name="st_play_play">Sempre in riproduzione</string>
+    <string name="st_aa_button">Pulsante Android Auto della barra</string>
+    <string name="st_aa_button_desc">Tocca due volte il pulsante per interrompere la connessione del telefono (l\'app viene disattivata, l\'icona diventa rossa); tocca di nuovo due volte per ripristinarla. Pressione lunga: scegli l\'app.</string>
+    <string name="st_usb_kick">Telefono collegato all\'avvio (correzione USB)</string>
+    <string name="st_usb_kick_desc">Se il telefono era collegato prima dell\'avvio dell\'auto, Android Auto parte solo dopo averlo scollegato. Questo lo rileva di nuovo automaticamente all\'avvio.</string>
+    <string name="dock_conn_disabled">%1$s disattivato: il telefono non si collegherà più. Tieni premuto di nuovo per ripristinarlo.</string>
+    <string name="dock_conn_enabled">%1$s ripristinato</string>
+    <string name="dock_conn_off">%1$s è disattivato: tieni premuto il pulsante per ripristinarlo.</string>
     <string name="tu_welcome_t">Benvenuto in MG4Dash</string>
     <string name="tu_welcome_1">Un breve giro dei gesti principali, in pochi passi.</string>
     <string name="tu_layouts_t">Tre layout della home</string>
@@ -512,6 +519,7 @@
     <string name="tu_bar_2">Energia: doppio tocco = schermo spento, pressione lunga = spegni l\'auto (mai in marcia)</string>
     <string name="tu_bar_3">Veicolo: doppio tocco = blocca / sblocca le porte, pressione lunga = ESC off / on</string>
     <string name="tu_bar_4">Home: pressione lunga = tutte le app</string>
+    <string name="tu_bar_5">Android Auto: pressione lunga = scegli l\'app (Android Auto, CarPlay o un\'altra), doppio tocco = interrompi / ripristina la connessione del telefono</string>
     <string name="tu_climate_t">Climatizzazione</string>
     <string name="tu_climate_1">Pressione lunga su A/C: A/C intermittente (tocca A/C per fermarlo)</string>
     <string name="tu_climate_2">Pressione lunga sulla temperatura: calibrazione; sull\'accensione: clima acceso uscendo dall\'auto (campeggio)</string>

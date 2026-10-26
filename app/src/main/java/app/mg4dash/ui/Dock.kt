@@ -117,6 +117,7 @@ object Dock {
                     setImageResource(item.icon)
                     setColorFilter(color(if (selected || item.accent) R.color.accent_action else R.color.text_sub))
                 }
+                if (item.label == R.string.dock_aa) markOff(activity, this)
             }, LinearLayout.LayoutParams(kit.dp(if (simple) 40 else 30), kit.dp(if (simple) 40 else 30)))
             cell.addView(TextView(activity).apply {
                 if (custom == Apps.CARPLAY) setText(R.string.dock_cp)
@@ -127,7 +128,7 @@ object Dock {
             })
             when (item.label) {
                 R.string.dock_home -> cell.setOnLongClickListener { activity.startActivity(Intent(activity, AppsActivity::class.java)); true }
-                R.string.dock_aa -> cell.setOnLongClickListener { pickAaTarget(activity) { build(activity, dock, current, simple) }; true }
+                R.string.dock_aa -> aaGestures(activity, cell, { open(activity, item, current) }) { build(activity, dock, current, simple) }
                 R.string.dock_settings -> cell.setOnLongClickListener { Apps.open(activity, Apps.SETTINGS, activity.getString(R.string.dock_settings)); true }
             }
             dock.addView(cell, LinearLayout.LayoutParams(0, -1, 1f).apply { if (index >= 0) leftMargin = kit.dp(6) })
@@ -236,6 +237,7 @@ object Dock {
                 R.string.dock_home -> kit.dp(size) / 48f
                 else -> 0f
             }
+            if (item.label == R.string.dock_aa) markOff(activity, icon)
             cell.addView(icon, android.widget.FrameLayout.LayoutParams(kit.dp(size), kit.dp(size), android.view.Gravity.CENTER))
             when (item.label) {
                 R.string.dock_settings -> {
@@ -302,8 +304,8 @@ object Dock {
                 else -> {
                     cell.setOnClickListener { open(activity, item, current) }
                     if (item.label == R.string.dock_home) cell.setOnLongClickListener { activity.startActivity(Intent(activity, AppsActivity::class.java)); true }
-                    // Appui long : Android Auto, CarPlay ou une autre appli, comme dans la barre du bas
-                    if (item.label == R.string.dock_aa) cell.setOnLongClickListener { pickAaTarget(activity) { buildVertical(activity, bar, current) }; true }
+                    // Appui long : choix de l'appli ; double toucher : coupe ou rétablit la connexion du téléphone
+                    if (item.label == R.string.dock_aa) aaGestures(activity, cell, { open(activity, item, current) }) { buildVertical(activity, bar, current) }
                 }
             }
             bar.addView(cell, LinearLayout.LayoutParams(-1, 0, 1f).apply { topMargin = kit.dp(4) })
@@ -319,23 +321,78 @@ object Dock {
         }
     }
 
+    /**
+     * Bouton Android Auto : toucher = ouvrir, appui long = choisir Android Auto, CarPlay ou une autre appli,
+     * double toucher = couper ou rétablir la connexion du téléphone.
+     */
+    private fun aaGestures(activity: Activity, cell: android.view.View, open: () -> Unit, rebuild: () -> Unit) {
+        val gd = android.view.GestureDetector(activity, object : android.view.GestureDetector.SimpleOnGestureListener() {
+            override fun onSingleTapConfirmed(e: android.view.MotionEvent): Boolean { open(); return true }
+            override fun onDoubleTap(e: android.view.MotionEvent): Boolean { toggleConnection(activity, rebuild); return true }
+            override fun onLongPress(e: android.view.MotionEvent) { pickAaTarget(activity, rebuild) }
+            override fun onDown(e: android.view.MotionEvent) = true
+        })
+        cell.setOnClickListener(null)
+        cell.setOnTouchListener { v, ev -> v.isPressed = ev.actionMasked == android.view.MotionEvent.ACTION_DOWN; gd.onTouchEvent(ev) }
+    }
+
     /** Comme le launcher d'origine : le bouton ouvre Android Auto, CarPlay ou n'importe quelle appli. */
     private fun pickAaTarget(activity: Activity, onDone: () -> Unit) {
         val choices = arrayOf(activity.getString(R.string.dock_aa_stock), activity.getString(R.string.dock_cp_stock), activity.getString(R.string.dock_other_app))
+        // Changement d'appli : celle qui avait été coupée est d'abord réactivée
+        fun choose(target: String?) { app.mg4dash.system.ConnectionToggle.restore(activity); Prefs(activity).dockAaTarget = target; onDone() }
         android.app.AlertDialog.Builder(activity)
             .setTitle(R.string.dock_aa_pick)
             .setItems(choices) { _, w ->
                 when (w) {
-                    0 -> { Prefs(activity).dockAaTarget = null; onDone() }
-                    1 -> { Prefs(activity).dockAaTarget = Apps.CARPLAY.flattenToString(); onDone() }
-                    else -> Shortcuts.pickApp(activity, activity.getString(R.string.dock_aa_pick)) { cn ->
-                        if (cn != null) { Prefs(activity).dockAaTarget = cn.flattenToString(); onDone() }
-                    }
+                    0 -> choose(null)
+                    1 -> choose(Apps.CARPLAY.flattenToString())
+                    else -> Shortcuts.pickApp(activity, activity.getString(R.string.dock_aa_pick)) { cn -> if (cn != null) choose(cn.flattenToString()) }
                 }
             }
             .setNegativeButton(R.string.cancel, null)
             .setOnDismissListener { Fullscreen.apply(activity) }
             .show()
+    }
+
+    /** Double toucher : coupe ou rétablit la connexion du téléphone (l'appli du bouton est désactivée). */
+    private fun toggleConnection(activity: Activity, rebuild: () -> Unit) {
+        val name = connectionName(activity)
+        app.mg4dash.system.ConnectionToggle.toggle(activity) { state ->
+            when (state) {
+                true -> Toasts.show(activity, activity.getString(R.string.dock_conn_disabled, name), long = true)
+                false -> Toasts.show(activity, activity.getString(R.string.dock_conn_enabled, name))
+                null -> Toasts.show(activity, activity.getString(R.string.st_failed))
+            }
+            if (!activity.isDestroyed) rebuild()
+        }
+    }
+
+    private fun connectionName(activity: Activity): String = customAa(activity)?.let {
+        if (it.packageName == Apps.CARPLAY.packageName) activity.getString(R.string.dock_cp) else Shortcuts.appLabel(activity, it)
+    } ?: activity.getString(R.string.dock_aa)
+
+    /** Connexion coupée : icône en rouge, barrée. */
+    private fun markOff(activity: Activity, icon: ImageView) {
+        if (!app.mg4dash.system.ConnectionToggle.isOff(activity)) return
+        val red = ContextCompat.getColor(activity, R.color.accent_danger)
+        icon.setColorFilter(red)
+        icon.foreground = StrikeDrawable(red, activity.resources.displayMetrics.density * 3f)
+    }
+
+    /** Trait en diagonale par-dessus une icône. */
+    private class StrikeDrawable(color: Int, width: Float) : android.graphics.drawable.Drawable() {
+        private val p = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG).apply {
+            this.color = color; strokeWidth = width; strokeCap = android.graphics.Paint.Cap.ROUND
+        }
+        override fun draw(c: android.graphics.Canvas) {
+            val b = bounds; val i = b.width() * 0.08f
+            c.drawLine(b.left + i, b.top + i, b.right - i, b.bottom - i, p)
+        }
+        override fun setAlpha(alpha: Int) { p.alpha = alpha }
+        override fun setColorFilter(cf: android.graphics.ColorFilter?) { p.colorFilter = cf }
+        @Suppress("OverridingDeprecatedMember")
+        override fun getOpacity() = android.graphics.PixelFormat.TRANSLUCENT
     }
 
     private fun customAa(activity: Activity): android.content.ComponentName? {
@@ -355,6 +412,10 @@ object Dock {
         (activity as? app.mg4dash.MainActivity)?.exitMapFullscreen()
         when (item.label) {
             R.string.dock_aa -> {
+                // Connexion coupée par un appui long : on le rappelle au lieu d'ouvrir un écran vide
+                if (app.mg4dash.system.ConnectionToggle.isOff(activity)) {
+                    Toasts.show(activity, activity.getString(R.string.dock_conn_off, connectionName(activity)), long = true); return
+                }
                 val custom = customAa(activity)
                 if (custom != null && custom != Apps.CARPLAY) { Shortcuts.launch(activity, custom); return }
                 // Android Auto / CarPlay d'origine : sans téléphone connecté, l'écran reste noir (#41).
