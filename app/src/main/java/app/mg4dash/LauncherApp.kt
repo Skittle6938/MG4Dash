@@ -54,6 +54,7 @@ class LauncherApp : Application() {
         app.mg4dash.phone.PhoneBookAuto.start(this)
         app.mg4dash.car.CarProps.start(this)
         app.mg4dash.energy.EnergyMonitor.start(this)
+        app.mg4dash.climate.AcCycle.resume(this)
         app.mg4dash.energy.ConsumptionCurve.start(this)
         // Capacité de la batterie : valeur de la voiture dès qu'elle répond (CarPropertyManager asynchrone)
         android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({ app.mg4dash.energy.BatteryCapacity.apply(this) }, 15_000)
