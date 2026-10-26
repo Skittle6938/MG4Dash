@@ -69,7 +69,7 @@ class WeatherCompact(context: Context, private val onPage: () -> Unit) : LinearL
 
     private fun tick() {
         val now = Date()
-        time.text = SimpleDateFormat("HH:mm", Locale.getDefault()).format(now)
+        time.text = app.mg4dash.system.Clock.hm(context, now)
         date.text = SimpleDateFormat("EEE d MMM", Locale.getDefault()).format(now).trimEnd('.').replaceFirstChar { it.uppercase() }
         removeCallbacks(ticker)
         postDelayed(ticker, 60_000L - System.currentTimeMillis() % 60_000L)
@@ -110,7 +110,7 @@ class WeatherCompact(context: Context, private val onPage: () -> Unit) : LinearL
         ).joinToString("  ·  ")
         forecast.visibility = VISIBLE; dots.visibility = VISIBLE
         dots.text = (0..1).joinToString(" ") { if (it == page) "●" else "○" }
-        val items = if (page == 0) w.hours.map { Triple(it.label, it.code, "${it.tempC}°") }
+        val items = if (page == 0) w.hours.map { Triple(app.mg4dash.system.Clock.hourLabel(context, it.label), it.code, "${it.tempC}°") }
             else w.days.map { Triple(it.label, it.code, "${it.minC}/${it.maxC}°") }
         forecast.removeAllViews()
         items.forEach { (label, code, value) ->
