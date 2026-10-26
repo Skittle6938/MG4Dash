@@ -65,6 +65,7 @@ object CarBridge {
         if (Firmware.family != Firmware.Family.A9) LegacyCar.init(context)
         Log.i(TAG, "firmware ${Firmware.version} (${Firmware.gen}, family ${Firmware.family})")
         scope.launch { pollLoop() }
+        watchSaicClimate(context.applicationContext)
     }
 
     /** Démarrage / arrêt de la charge et du V2L disponibles (service EV de la voie A9). */
@@ -439,6 +440,40 @@ object CarBridge {
                 Log.i(TAG, "SAIC climate screen ${top.topActivity?.flattenToShortString()} came in front: MG4Dash brought back")
             }
         } catch (e: Throwable) { Log.w(TAG, "SAIC climate: ${e.message}") }
+    }
+
+    /**
+     * Ancien SDK, bouton clim physique sous l'écran (#62) : la voiture ouvre aussi son écran clim par-dessus
+     * MG4Dash. Chaque seconde on retient si MG4Dash est devant ; si un écran clim SAIC le remplace dans les
+     * 3 s, on remet MG4Dash devant (même réglage que #48). Pas quand MG4Dash a lui-même ouvert une appli.
+     */
+    private fun watchSaicClimate(ctx: Context) {
+        if (Firmware.family == Firmware.Family.A9) return
+        scope.launch {
+            var lastFront: Int? = null
+            var lastFrontAt = 0L
+            while (isActive) {
+                delay(1000)
+                if (!app.mg4dash.system.Prefs(ctx).hideSaicClimate) continue
+                val now = android.os.SystemClock.elapsedRealtime()
+                val ours = ourFrontTask()
+                if (ours != null) { lastFront = ours; lastFrontAt = now; continue }
+                val task = lastFront ?: continue
+                if (now - lastFrontAt > 3_000 || now - app.mg4dash.system.Apps.openedAt < 5_000) continue
+                try {
+                    val am = ctx.getSystemService(Context.ACTIVITY_SERVICE) as android.app.ActivityManager
+                    @Suppress("DEPRECATION")
+                    val top = am.getRunningTasks(1).firstOrNull()?.topActivity ?: continue
+                    val name = top.flattenToShortString().lowercase()
+                    if (top.packageName.startsWith("com.saicmotor") &&
+                        listOf("hvac", "aircondition", "climate").any { it in name }) {
+                        am.moveTaskToFront(task, 0)
+                        lastFrontAt = 0L
+                        Log.i(TAG, "SAIC climate screen ${top.flattenToShortString()} opened by the car: MG4Dash brought back")
+                    }
+                } catch (e: Throwable) { Log.w(TAG, "SAIC climate watch: ${e.message}") }
+            }
+        }
     }
 
     private val useLegacy: Boolean get() = !BuildConfig.MOCK && hvac == null && LegacyCar.ready
