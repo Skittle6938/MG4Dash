@@ -444,6 +444,9 @@
     <string name="st_shortcuts_page">Harita kartında kısayollar sayfası</string>
     <string name="st_shortcuts_page_desc">Kapalı: haritanın sağ üstündeki düğme yalnızca harita ile tüketim arasında geçiş yapar</string>
     <string name="st_panel_outline">Ana ekran panel çerçevesi</string>
+    <string name="st_clock">Saat</string>
+    <string name="st_clock_24">24 sa</string>
+    <string name="st_clock_12">12 sa (ÖÖ / ÖS olmadan)</string>
     <string name="st_panel_fade">Solan (gösterge paneli tarzı)</string>
     <string name="st_panel_full">Tam</string>
     <string name="map_app_pick">Harita kartında uygulama (test)</string>

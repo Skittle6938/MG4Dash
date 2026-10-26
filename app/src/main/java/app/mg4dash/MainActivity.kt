@@ -292,7 +292,7 @@ class MainActivity : AppCompatActivity() {
     private fun tickWeatherClock() {
         val c = weatherClock ?: return
         val now = java.util.Date()
-        c.text = java.text.SimpleDateFormat("HH:mm", Locale.getDefault()).format(now) + "  ·  " +
+        c.text = app.mg4dash.system.Clock.hm(this, now) + "  ·  " +
             java.text.SimpleDateFormat("EEE d MMM", Locale.getDefault()).format(now).trimEnd('.')
         c.removeCallbacks(weatherClockTick)
         c.postDelayed(weatherClockTick, 60_000L - System.currentTimeMillis() % 60_000L)

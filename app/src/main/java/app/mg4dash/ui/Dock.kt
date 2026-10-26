@@ -89,7 +89,7 @@ object Dock {
         val tick = object : Runnable {
             override fun run() {
                 val now = Date()
-                clock.text = SimpleDateFormat("HH:mm", Locale.getDefault()).format(now)
+                clock.text = app.mg4dash.system.Clock.hm(activity, now)
                 date.text = SimpleDateFormat("EEE d MMM", Locale.getDefault()).format(now).trimEnd('.')
                 clock.postDelayed(this, 60_000L - System.currentTimeMillis() % 60_000L)
             }

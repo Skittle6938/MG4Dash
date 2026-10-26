@@ -444,6 +444,9 @@
     <string name="st_shortcuts_page">Verknüpfungsseite in der Kartenkarte</string>
     <string name="st_shortcuts_page_desc">Aus: Die Taste oben rechts auf der Karte wechselt nur zwischen Karte und Verbrauch</string>
     <string name="st_panel_outline">Rahmen der Startbildschirm-Kacheln</string>
+    <string name="st_clock">Uhr</string>
+    <string name="st_clock_24">24 h</string>
+    <string name="st_clock_12">12 h (ohne AM / PM)</string>
     <string name="st_panel_fade">Ausgeblendet (Kombiinstrument-Stil)</string>
     <string name="st_panel_full">Vollständig</string>
     <string name="map_app_pick">App im Kartenfeld (Test)</string>

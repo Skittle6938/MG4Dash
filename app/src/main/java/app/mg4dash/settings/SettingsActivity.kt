@@ -141,6 +141,8 @@ class SettingsActivity : AppCompatActivity() {
             if (prefs.themeMode != it) { prefs.themeMode = it; onThemeChanged() }
         })
         toggle(theme, R.string.st_theme_smooth, R.string.st_theme_smooth_desc, { prefs.themeSmooth }) { prefs.themeSmooth = it }
+        text(theme, getString(R.string.st_clock), 18f, R.color.text_value)
+        row(theme, *styleButtons(listOf(R.string.st_clock_24, R.string.st_clock_12), { if (prefs.clock12) 1 else 0 }) { prefs.clock12 = it == 1 })
         text(theme, getString(R.string.st_panel_outline), 18f, R.color.text_value)
         row(theme, *styleButtons(listOf(R.string.st_panel_fade, R.string.st_panel_full), { if (prefs.panelFade) 0 else 1 }) {
             if (prefs.panelFade != (it == 0)) { prefs.panelFade = it == 0; recreate() }
