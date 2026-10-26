@@ -61,6 +61,9 @@ object MediaHub {
     private var lastArtKey: String? = null
     /** Tentatives de lecture de la pochette du morceau en cours (0 : rien en attente). */
     @Volatile private var artTries = 0
+    /** Adresse de la pochette essayée en dernier, et essai en cours ou programmé (un seul à la fois). */
+    @Volatile private var lastArtUri: String? = null
+    @Volatile private var artPending = false
 
     fun start(context: Context) {
         appContext = context.applicationContext
@@ -835,16 +838,22 @@ object MediaHub {
         if (bmp == null && artUri == null && c.packageName == "com.saicmotor.radio" && !analog && title.isNotBlank() && key != lastArtKey) {
             lastArtKey = key
             io.launch { cachedDabArt(title)?.let { a -> if (_now.value.title == title && _now.value.packageName == "com.saicmotor.radio") _now.value = _now.value.copy(art = a) } }
-        } else if (bmp == null && artUri != null && (key != lastArtKey || (np.art == null && artTries in 1 until 10))) {
-            // Bluetooth au démarrage : la pochette n'est pas encore lisible (la liaison image du téléphone
-            // arrive après le titre) et on ne réessayait qu'au morceau suivant. On réessaie toutes les 3 s.
-            if (key != lastArtKey) artTries = 0
-            lastArtKey = key; artTries++
+        } else if (bmp == null && artUri != null && (key != lastArtKey || artUri != lastArtUri || (np.art == null && !artPending))) {
+            // Bluetooth : la pochette n'est pas toujours lisible tout de suite (liaison image du téléphone
+            // établie après le titre, ou adresse qui change en cours de morceau) et on ne réessayait qu'au
+            // morceau suivant. On réessaie tant que le morceau dure : toutes les 3 s, puis toutes les 15 s.
+            if (key != lastArtKey || artUri != lastArtUri) artTries = 0
+            lastArtKey = key; lastArtUri = artUri; artTries++; artPending = true
             val tries = artTries
             io.launch {
                 val a = loadArt(artUri)
-                if (a != null) { artTries = 0; if (_now.value.title == title) _now.value = _now.value.copy(art = a) }
-                else if (tries < 10) { Log.i(TAG, "album art not ready ($tries/10), retrying"); main.postDelayed({ if (lastArtKey == key && _now.value.art == null) publish() }, 3_000) }
+                if (a != null) {
+                    artTries = 0; artPending = false
+                    if (_now.value.title == title) _now.value = _now.value.copy(art = a)
+                } else {
+                    if (tries == 1 || tries % 10 == 0) Log.i(TAG, "album art not ready (try $tries), retrying")
+                    main.postDelayed({ artPending = false; if (lastArtKey == key && _now.value.art == null) publish() }, if (tries < 10) 3_000 else 15_000)
+                }
             }
         } else if (bmp != null) {
             lastArtKey = key
