@@ -684,13 +684,13 @@ class ScreenshotTest {
         fun run(ms: Long) { val end = t + ms; while (t < end) { looper.idleFor(25, TimeUnit.MILLISECONDS); Thread.sleep(1); t += 25; act.window.decorView.draw(Canvas(big)) } }
         run(1500)
         val dir = File("build/screenshots").apply { mkdirs() }
-        val fps = 20; val frames = 6 * fps
+        val fps = 20; val frames = 9 * fps
         java.io.DataOutputStream(File(dir, "spider.rgb").outputStream().buffered()).use { out ->
             out.writeInt(640); out.writeInt(240); out.writeInt(frames); out.writeInt(100 / fps)
             app.mg4dash.car.CarProps.setInt(app.mg4dash.car.CarProps.BMS_PACK_CRNT, 330, "test")
             for (f in 0 until frames) {
                 run(1000L / fps)
-                if (f == 40) app.mg4dash.car.CarProps.setInt(app.mg4dash.car.CarProps.BMS_PACK_CRNT, 20, "test")
+                if (f == 60) app.mg4dash.car.CarProps.setInt(app.mg4dash.car.CarProps.BMS_PACK_CRNT, 20, "test")
                 big.eraseColor(0); act.window.decorView.draw(Canvas(big))
                 if (f == 24) File(dir, "spider_splat.png").outputStream().use { big.compress(Bitmap.CompressFormat.PNG, 100, it) }
                 val small = Bitmap.createScaledBitmap(big, 640, 240, true)
