@@ -99,9 +99,9 @@ object Tutorial {
 
         private fun button(t: Int, filled: Boolean, onClick: () -> Unit) = TextView(context).apply {
             text = context.getString(t); gravity = Gravity.CENTER
-            setTextSize(TypedValue.COMPLEX_UNIT_SP, 20f)
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, 25f)
             setTextColor(if (filled) Color.WHITE else Themes.color(context, R.color.text_title))
-            setPadding(dp(26), dp(14), dp(26), dp(14))
+            setPadding(dp(32), dp(18), dp(32), dp(18))
             background = GradientDrawable().apply {
                 cornerRadius = dp(14).toFloat()
                 if (filled) setColor(accent) else setStroke(dp(1), Themes.color(context, R.color.text_title))
@@ -113,13 +113,13 @@ object Tutorial {
             val step = STEPS[index]
             bubble.removeAllViews()
             // Bulle à largeur fixe (texte), plus large pour les miniatures des dispositions
-            bubble.layoutParams = (bubble.layoutParams as LayoutParams).apply { width = dp(if (step.images.isEmpty()) 560 else 900) }
+            bubble.layoutParams = (bubble.layoutParams as LayoutParams).apply { width = dp(if (step.images.isEmpty()) 760 else 1000) }
             bubble.orientation = LinearLayout.VERTICAL
             bubble.setPadding(dp(28), dp(24), dp(28), dp(20))
             bubble.background = GradientDrawable().apply {
                 cornerRadius = dp(20).toFloat(); setColor(Themes.color(context, R.color.bg_bottom)); setStroke(dp(2), accent)
             }
-            bubble.addView(text(context.getString(step.title), 26f, Themes.color(context, R.color.text_value), bold = true))
+            bubble.addView(text(context.getString(step.title), 34f, Themes.color(context, R.color.text_value), bold = true))
             if (step.images.isNotEmpty()) {
                 val row = LinearLayout(context).apply { orientation = LinearLayout.HORIZONTAL }
                 step.images.forEachIndexed { i, (img, label) ->
@@ -129,20 +129,20 @@ object Tutorial {
                             setImageResource(img); scaleType = android.widget.ImageView.ScaleType.CENTER_CROP
                         }, FrameLayout.LayoutParams(-1, -1))
                     }, LinearLayout.LayoutParams(dp(264), dp(99)))
-                    col.addView(text(context.getString(label), 18f, Themes.color(context, R.color.text_value)),
+                    col.addView(text(context.getString(label), 23f, Themes.color(context, R.color.text_value)),
                         LinearLayout.LayoutParams(-2, -2).apply { topMargin = dp(8) })
                     row.addView(col, LinearLayout.LayoutParams(-2, -2).apply { if (i > 0) leftMargin = dp(16) })
                 }
                 bubble.addView(row, LinearLayout.LayoutParams(-2, -2).apply { topMargin = dp(16) })
             }
             step.lines.forEach { l ->
-                bubble.addView(text("•  " + context.getString(l), 19f, Themes.color(context, R.color.text_value)),
-                    LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(12) })
+                bubble.addView(text("•  " + context.getString(l), 25f, Themes.color(context, R.color.text_value)),
+                    LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(14) })
             }
             val bottom = LinearLayout(context).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL }
             val last = index == STEPS.size - 1
             if (!last) bottom.addView(button(R.string.tu_skip, false) { done(activity) })
-            bottom.addView(text("${index + 1} / ${STEPS.size}", 17f, Themes.color(context, R.color.text_title)).apply { gravity = Gravity.CENTER },
+            bottom.addView(text("${index + 1} / ${STEPS.size}", 22f, Themes.color(context, R.color.text_title)).apply { gravity = Gravity.CENTER },
                 LinearLayout.LayoutParams(0, -2, 1f))
             bottom.addView(button(if (last) R.string.tu_done else R.string.tu_next, true) {
                 if (last) done(activity) else { index++; render() }
