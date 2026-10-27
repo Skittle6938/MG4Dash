@@ -188,6 +188,7 @@ object MediaHub {
         }
         fun stable(pkg: String) = (seenSince[pkg]?.let { now - it >= 5_000 } == true) && !(pkg == AA_MBS && carPlay)
         trackPlayback(p, now)
+        restoreAfterPrompt(now)
         // Type 70 (Android Auto) tenu par une autre appli (DiAuto) alors qu'AllGo n'a aucun téléphone : la
         // source réelle est le lecteur de cette appli, et non un Android Auto « disparu » à remplacer
         if (sourcePkg == AA_MBS && projectionLive == false && otherAppShown()) sourcePkg = current?.packageName
@@ -216,6 +217,49 @@ object MediaHub {
         val curRank = order.indexOf(cur).let { if (it < 0) -1 else it }
         if (order.indexOf(target) < curRank) autoSwitch(target, "$target back")
     }
+
+    private val CAR_SOURCES = listOf(RADIO, "com.android.bluetooth", "com.saicmotor.media")
+    /** Source de la voiture avant qu'une appli (DiAuto) la prenne pour une annonce, et depuis quand. */
+    @Volatile private var promptFrom: String? = null
+    @Volatile private var promptAt = 0L
+    private var promptQuiet = 0
+    private var promptSounding = 0
+
+    /**
+     * Annonce de guidage DiAuto en mode hybride (musique en Bluetooth) : la voiture passe sur la source de
+     * DiAuto et y reste après l'annonce ; l'écran revient sur le Bluetooth mais la musique ne reprend pas
+     * (Marc, 27/10). Une fois DiAuto silencieux 2 s, on rend à la voiture sa source d'avant, comme un
+     * aller-retour manuel, puis « lecture ». Un son DiAuto de plus de 25 s d'affilée est de la musique
+     * (mode musique par Android Auto) : on ne touche alors à rien.
+     */
+    private fun restoreAfterPrompt(now: Long) {
+        val back = promptFrom ?: return
+        val app = sourcePkg
+        if (app == null || !handlesWheelKeys(app) || now - promptAt > 10 * 60_000) { promptFrom = null; return }
+        if (now - promptAt < 2_000) return
+        if (appSounding(app)) {
+            promptQuiet = 0
+            if (++promptSounding > 25) { Log.i(TAG, "$app playing for a while: music, source kept"); promptFrom = null }
+            return
+        }
+        promptSounding = 0
+        if (++promptQuiet < 2) return
+        promptFrom = null
+        Log.i(TAG, "announcement from $app over: car source back to $back")
+        autoSwitch(back, "announcement over")
+    }
+
+    /** L'appli a un lecteur audio en cours (annonce de guidage) : état des lecteurs vu par le système. */
+    private fun appSounding(pkg: String): Boolean = try {
+        val ctx = appContext ?: throw IllegalStateException()
+        val uid = ctx.packageManager.getApplicationInfo(pkg, 0).uid
+        val am = ctx.getSystemService(Context.AUDIO_SERVICE) as android.media.AudioManager
+        am.activePlaybackConfigurations.any { cfg ->
+            val cUid = cfg.javaClass.getMethod("getClientUid").invoke(cfg) as Int
+            val state = cfg.javaClass.getMethod("getPlayerState").invoke(cfg) as Int
+            cUid == uid && state == 2   // PLAYER_STATE_STARTED
+        }
+    } catch (_: Throwable) { false }
 
     /** Sources de remplacement selon le réglage : automatique = historique des choix, puis la radio. */
     private fun fallbackOrder(mode: Int, p: app.mg4dash.system.Prefs) = when (mode) {
@@ -480,6 +524,7 @@ object MediaHub {
         if (BuildConfig.MOCK) return
         Log.i(TAG, "source picked: $next")
         wheelFrom = null // choix de l'utilisateur : pas de retour automatique à l'appli
+        promptFrom = null
         // On quitte le lecteur d'une autre appli (DiAuto, SimpMusic…) : la voiture n'a pas de source à lui
         // retirer et certaines applis continuent malgré la perte du focus, d'où deux musiques en même temps
         current?.takeIf { otherAppShown() && it.packageName != next }?.let {
@@ -580,6 +625,11 @@ object MediaHub {
                             // Changement fait sur la voiture (bouton source, appli d'origine) : c'est aussi un choix
                             // de l'utilisateur, sauf s'il suit une bascule automatique ou la perte de l'ancienne source
                             val prev = sourcePkg
+                            // DiAuto prend la source pour une annonce (mode hybride : musique en Bluetooth) : on retient
+                            // la source de la voiture d'avant pour la lui rendre une fois l'annonce finie
+                            if (src != null && handlesWheelKeys(src) && prev in CAR_SOURCES) {
+                                promptFrom = prev; promptAt = android.os.SystemClock.uptimeMillis(); promptQuiet = 0; promptSounding = 0
+                            } else if (src in CAR_SOURCES) promptFrom = null
                             // Seulement les sources de la voiture : une appli qui prend la main un instant (annonce de
                             // guidage DiAuto…) n'est pas un choix de source
                             if (src != null && src in listOf(RADIO, "com.android.bluetooth", "com.saicmotor.media") && src != prev && android.os.SystemClock.uptimeMillis() - autoSwitchAt > 8_000 &&
