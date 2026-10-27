@@ -51,12 +51,12 @@ class MediaStyle private constructor(
         detach(head)
         // Le panneau entier devient le lecteur : la zone cliquable (ouvre l'appli) le couvre
         card.setPadding(0, 0, 0, 0)
-        // Sans le cadre du panneau : le lecteur arrondi le remplace, ses coins dépassaient parfois sous une image sombre
-        card.background = null; card.elevation = 0f
         for (i in 0 until card.childCount) if (card.getChildAt(i) !== info) card.getChildAt(i).visibility = View.GONE
         (info.layoutParams as LinearLayout.LayoutParams).apply { topMargin = 0; height = 0; weight = 1f }
         info.orientation = LinearLayout.HORIZONTAL
-        frame = RoundedFrame(a)
+        // Le lecteur recouvre tout le panneau, cadre compris ; ses coins un peu moins arrondis (19 dp contre 20)
+        // couvrent aussi ceux du cadre, qui dépassaient sous une image sombre
+        frame = RoundedFrame(a, radiusDp = 19f)
         picture = ImageView(a).apply { scaleType = ImageView.ScaleType.FIT_END }
         frame.addView(picture, FrameLayout.LayoutParams(-1, -1))
         fade = View(a)

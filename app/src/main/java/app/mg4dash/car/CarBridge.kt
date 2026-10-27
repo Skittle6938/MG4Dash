@@ -466,22 +466,35 @@ object CarBridge {
                 val on = s.hvacOn
                 if (prev == false && on == true && android.os.SystemClock.elapsedRealtime() - ownCommandAt > 4_000) {
                     delay(900)
-                    logWindows()
+                    closeClimateWindow()
                 }
                 if (on != null) prev = on
             }
         }
     }
 
-    private fun logWindows() {
+    /** Fenêtre qui a le focus, lue dans l'état du système (null si illisible). */
+    private fun focusedWindow(): String? = try {
+        val p = Runtime.getRuntime().exec(arrayOf("dumpsys", "window", "windows"))
+        val lines = p.inputStream.bufferedReader().readLines()
+        p.waitFor()
+        lines.firstOrNull { it.contains("mCurrentFocus") }?.trim()
+    } catch (e: Throwable) { Log.w(TAG, "climate window: ${e.message}"); null }
+
+    /**
+     * #62 : sur ces firmwares, la page clim SAIC est une fenêtre système « hvac page » posée par-dessus
+     * MG4Dash (journal de lopezjm2001, SWI165). Elle seule reçoit alors un « retour », qui la referme ;
+     * rien n'est envoyé si une autre fenêtre a le focus.
+     */
+    private fun closeClimateWindow() {
+        val focus = focusedWindow()
+        Log.i(TAG, "climate window: ${focus ?: "focus unknown"}")
+        if (focus?.contains("hvac page") != true) return
         try {
-            val p = Runtime.getRuntime().exec(arrayOf("dumpsys", "window", "windows"))
-            val lines = p.inputStream.bufferedReader().readLines()
-            p.waitFor()
-            val focus = lines.firstOrNull { it.contains("mCurrentFocus") }?.trim()
-            val top = lines.filter { it.trim().startsWith("Window #") }.take(6).map { it.trim().substringAfter("Window{").substringBefore("}").split(" ").last() }
-            Log.i(TAG, "climate window: ${focus ?: "focus unknown"}; top windows: ${top.joinToString(", ")}")
-        } catch (e: Throwable) { Log.w(TAG, "climate window: ${e.message}") }
+            Runtime.getRuntime().exec(arrayOf("input", "keyevent", "4")).waitFor()
+            Thread.sleep(600)
+            Log.i(TAG, "climate window closed with back: now ${focusedWindow() ?: "focus unknown"}")
+        } catch (e: Throwable) { Log.w(TAG, "climate window close: ${e.message}") }
     }
 
     private fun watchSaicClimate(ctx: Context) {

@@ -7,11 +7,11 @@ import android.view.View
 import android.view.ViewOutlineProvider
 import android.widget.FrameLayout
 
-/** Conteneur aux coins arrondis (20 dp) qui rogne son contenu : utilisé pour la carte. */
+/** Conteneur aux coins arrondis (20 dp par défaut, comme les panneaux) qui rogne son contenu : utilisé pour la carte. */
 class RoundedFrame @JvmOverloads constructor(
-    context: Context, attrs: AttributeSet? = null,
+    context: Context, attrs: AttributeSet? = null, radiusDp: Float = 20f,
 ) : FrameLayout(context, attrs) {
-    private val radius = resources.displayMetrics.density * 20f
+    private val radius = resources.displayMetrics.density * radiusDp
 
     init {
         outlineProvider = object : ViewOutlineProvider() {
