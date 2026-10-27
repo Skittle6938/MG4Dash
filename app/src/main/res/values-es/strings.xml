@@ -511,6 +511,8 @@
     <string name="st_aa_button_desc">Toca dos veces el botón para cortar la conexión del teléfono (la app se desactiva, el icono se pone rojo); vuelve a tocar dos veces para restablecerla. Pulsación larga: elegir la app.</string>
     <string name="st_usb_kick">Teléfono conectado al arrancar (corrección USB)</string>
     <string name="st_usb_kick_desc">Si el teléfono estaba conectado antes de arrancar el coche, Android Auto solo arranca tras desconectarlo. Esto lo vuelve a detectar automáticamente al arrancar.</string>
+    <string name="st_bt_projection">Fuente Bluetooth con Android Auto / CarPlay conectado</string>
+    <string name="st_bt_projection_desc">Mantiene Bluetooth en las fuentes mientras un teléfono proyecta (Android Auto original, CarPlay, DiAuto), por ejemplo cuando DiAuto reproduce música por Bluetooth. MG4Dash nunca cambia a ella por sí solo durante esas sesiones.</string>
     <string name="dock_conn_disabled">%1$s desactivado: el teléfono ya no se conectará. Mantén pulsado de nuevo para restablecerlo.</string>
     <string name="dock_conn_enabled">%1$s restablecido</string>
     <string name="dock_conn_off">%1$s está desactivado: mantén pulsado el botón para restablecerlo.</string>

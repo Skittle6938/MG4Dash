@@ -511,6 +511,8 @@
     <string name="st_aa_button_desc">Doppeltippen, um die Telefonverbindung zu trennen (die App wird deaktiviert, das Symbol wird rot); erneut doppeltippen, um sie wiederherzustellen. Lange drücken: App wählen.</string>
     <string name="st_usb_kick">Kabeltelefon beim Start (USB-Korrektur)</string>
     <string name="st_usb_kick_desc">War das Telefon vor dem Start des Autos eingesteckt, startet Android Auto erst nach dem Aus- und Einstecken. Dies erkennt es beim Start automatisch neu.</string>
+    <string name="st_bt_projection">Bluetooth-Quelle während Android Auto / CarPlay</string>
+    <string name="st_bt_projection_desc">Behält Bluetooth in den Quellen, während ein Telefon projiziert (Original-Android Auto, CarPlay, DiAuto), z. B. wenn DiAuto Musik über Bluetooth spielt. MG4Dash wechselt in diesen Sitzungen nie von selbst dorthin.</string>
     <string name="dock_conn_disabled">%1$s deaktiviert: Das Telefon verbindet sich nicht mehr. Erneut lange drücken zum Wiederherstellen.</string>
     <string name="dock_conn_enabled">%1$s wiederhergestellt</string>
     <string name="dock_conn_off">%1$s ist deaktiviert: Taste lange drücken zum Wiederherstellen.</string>
