@@ -473,6 +473,27 @@ object CarBridge {
         }
     }
 
+    /**
+     * #62 : qui possède la page clim et si elle reste affichée : paquet, uid, type de fenêtre et
+     * visibilité, lus dans l'état des fenêtres. Sert à savoir si on peut l'empêcher d'apparaître.
+     */
+    private fun logHvacWindow(moment: String) {
+        try {
+            val p = Runtime.getRuntime().exec(arrayOf("dumpsys", "window", "windows"))
+            val lines = p.inputStream.bufferedReader().readLines()
+            p.waitFor()
+            var inHvac = false
+            val keys = listOf("mSession", "package=", "ty=", "mHasSurface", "mViewVisibility", "isOnScreen", "isVisible")
+            val found = mutableListOf<String>()
+            for (l in lines) {
+                val t = l.trim()
+                if (t.startsWith("Window #")) inHvac = t.contains("hvac", ignoreCase = true)
+                else if (inHvac && keys.any { t.contains(it) }) found += t.take(160)
+            }
+            Log.i(TAG, "climate window owner ($moment): ${if (found.isEmpty()) "no hvac window listed" else found.joinToString(" | ")}")
+        } catch (e: Throwable) { Log.w(TAG, "climate window owner: ${e.message}") }
+    }
+
     /** Fenêtre qui a le focus, lue dans l'état du système (null si illisible). */
     private fun focusedWindow(): String? = try {
         val p = Runtime.getRuntime().exec(arrayOf("dumpsys", "window", "windows"))
@@ -490,6 +511,7 @@ object CarBridge {
         val focus = focusedWindow()
         Log.i(TAG, "climate window: ${focus ?: "focus unknown"}")
         if (focus?.contains("hvac page") != true) return
+        logHvacWindow("shown")
         // La page descend en rideau : un « retour » envoyé pendant l'animation est souvent ignoré (journal
         // de lopezjm2001 : refermée une fois sur trois). On le renvoie tant qu'elle a le focus (3 s au plus).
         try {
@@ -499,6 +521,8 @@ object CarBridge {
                 val now = focusedWindow()
                 if (now?.contains("hvac page") != true) {
                     Log.i(TAG, "climate window closed with back (try $attempt): now ${now ?: "focus unknown"}")
+                    Thread.sleep(500)
+                    logHvacWindow("after back")
                     return
                 }
             }
