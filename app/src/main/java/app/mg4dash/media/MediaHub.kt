@@ -611,7 +611,8 @@ object MediaHub {
         1, 2, 3 -> "com.saicmotor.radio"
         5 -> "com.android.bluetooth"
         6, 7, 14 -> "com.saicmotor.media"
-        70 -> AA_MBS
+        // DiAuto installé sous le nom d'AllGo (2.1.0) : la source Android Auto est son lecteur
+        70 -> if (isDiAuto(ALLGO_AA)) ALLGO_AA else AA_MBS
         else -> null
     }
 
