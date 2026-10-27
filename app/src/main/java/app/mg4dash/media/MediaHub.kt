@@ -236,6 +236,9 @@ object MediaHub {
         val back = promptFrom ?: return
         val app = sourcePkg
         if (app == null || !handlesWheelKeys(app) || now - promptAt > 10 * 60_000) { promptFrom = null; return }
+        // Seulement en mode hybride : sinon DiAuto prend la source pour sa propre musique (journal du 27/10 :
+        // retour au Bluetooth à tort pendant que la musique DiAuto démarrait)
+        if (!musicOverBluetooth(app)) { promptFrom = null; return }
         if (now - promptAt < 2_000) return
         if (appSounding(app)) {
             promptQuiet = 0
@@ -249,17 +252,31 @@ object MediaHub {
         autoSwitch(back, "announcement over")
     }
 
-    /** L'appli a un lecteur audio en cours (annonce de guidage) : état des lecteurs vu par le système. */
-    private fun appSounding(pkg: String): Boolean = try {
-        val ctx = appContext ?: throw IllegalStateException()
-        val uid = ctx.packageManager.getApplicationInfo(pkg, 0).uid
-        val am = ctx.getSystemService(Context.AUDIO_SERVICE) as android.media.AudioManager
-        am.activePlaybackConfigurations.any { cfg ->
-            val cUid = cfg.javaClass.getMethod("getClientUid").invoke(cfg) as Int
-            val state = cfg.javaClass.getMethod("getPlayerState").invoke(cfg) as Int
-            cUid == uid && state == 2   // PLAYER_STATE_STARTED
-        }
+    /**
+     * DiAuto réglé en mode hybride (musique par le Bluetooth, Android Auto pour le guidage seul) : lu dans
+     * ses réglages, accessibles car DiAuto tourne sous le même utilisateur système que MG4Dash.
+     */
+    private fun musicOverBluetooth(pkg: String): Boolean = try {
+        java.io.File("/data/user/0/$pkg/shared_prefs/settings.xml").readText()
+            .contains("name=\"music-via-bluetooth-v5\" value=\"true\"")
     } catch (_: Throwable) { false }
+
+    /**
+     * L'appli a un lecteur audio démarré (annonce ou musique), d'après l'état des lecteurs vu par le
+     * système. DiAuto tourne en uid système comme d'autres applis : on compare le processus, pas l'uid.
+     * Illisible : considéré comme en train de jouer (on ne rend jamais la source à l'aveugle).
+     */
+    private fun appSounding(pkg: String): Boolean = try {
+        val ctx = appContext ?: throw IllegalStateException("no context")
+        val am = ctx.getSystemService(Context.ACTIVITY_SERVICE) as android.app.ActivityManager
+        val pids = am.runningAppProcesses.orEmpty().filter { it.processName == pkg || it.processName.startsWith("$pkg:") }.map { it.pid }.toSet()
+        val audio = ctx.getSystemService(Context.AUDIO_SERVICE) as android.media.AudioManager
+        pids.isNotEmpty() && audio.activePlaybackConfigurations.any { cfg ->
+            val pid = cfg.javaClass.getMethod("getClientPid").invoke(cfg) as Int
+            val state = cfg.javaClass.getMethod("getPlayerState").invoke(cfg) as Int
+            pid in pids && state == 2   // PLAYER_STATE_STARTED
+        }
+    } catch (e: Throwable) { Log.w(TAG, "$pkg players unreadable: ${(e.cause ?: e).message}"); true }
 
     /** Sources de remplacement selon le réglage : automatique = historique des choix, puis la radio. */
     private fun fallbackOrder(mode: Int, p: app.mg4dash.system.Prefs) = when (mode) {
@@ -629,6 +646,7 @@ object MediaHub {
                             // la source de la voiture d'avant pour la lui rendre une fois l'annonce finie
                             if (src != null && handlesWheelKeys(src) && prev in CAR_SOURCES) {
                                 promptFrom = prev; promptAt = android.os.SystemClock.uptimeMillis(); promptQuiet = 0; promptSounding = 0
+                                Log.i(TAG, "$src took the car source from $prev (music over Bluetooth: ${musicOverBluetooth(src)})")
                             } else if (src in CAR_SOURCES) promptFrom = null
                             // Seulement les sources de la voiture : une appli qui prend la main un instant (annonce de
                             // guidage DiAuto…) n'est pas un choix de source
