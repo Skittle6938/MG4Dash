@@ -161,6 +161,11 @@ class Prefs(context: Context) {
         get() = sp.getInt("start_source", 0)
         set(v) = sp.edit().putInt("start_source", v).apply()
 
+    /** Source Bluetooth proposée aussi pendant Android Auto, CarPlay ou DiAuto. */
+    var btDuringProjection: Boolean
+        get() = sp.getBoolean("bt_during_projection", true)
+        set(v) = sp.edit().putBoolean("bt_during_projection", v).apply()
+
     /** Téléphone branché en USB avant le démarrage : relancé pour qu'Android Auto démarre (repris d'AA Kick). */
     var usbKick: Boolean
         get() = sp.getBoolean("usb_kick", true)

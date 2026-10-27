@@ -511,6 +511,8 @@
     <string name="st_aa_button_desc">Double tap the button to cut the phone connection (the app is disabled, the icon turns red); double tap again to restore it. Long press: choose the app.</string>
     <string name="st_usb_kick">Wired phone at startup (USB fix)</string>
     <string name="st_usb_kick_desc">If the phone was plugged in before the car started, Android Auto only starts after unplugging it. This re-detects it automatically at startup.</string>
+    <string name="st_bt_projection">Bluetooth source while Android Auto / CarPlay is connected</string>
+    <string name="st_bt_projection_desc">Keeps Bluetooth in the sources while a phone projects (stock Android Auto, CarPlay, DiAuto), e.g. when DiAuto plays music over Bluetooth. MG4Dash never switches to it by itself during those sessions.</string>
     <string name="dock_conn_disabled">%1$s disabled: the phone will no longer connect. Long press again to restore it.</string>
     <string name="dock_conn_enabled">%1$s restored</string>
     <string name="dock_conn_off">%1$s is disabled: long press the button to restore it.</string>
