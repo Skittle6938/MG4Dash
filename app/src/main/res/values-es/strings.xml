@@ -241,6 +241,11 @@
     <string name="st_ha_set_token">Token</string>
     <string name="st_ha_test">Probar</string>
     <string name="st_ha_ok">Home Assistant conectado</string>
+    <string name="st_ha_import">Importar desde USB</string>
+    <string name="st_ha_import_desc">¿Su teclado no permite pegar? Ponga un archivo mg4dash_ha.txt en la raíz de una memoria USB, con la dirección en una línea y el token en otra.</string>
+    <string name="st_ha_import_done">Leído de la memoria USB: %1$s</string>
+    <string name="st_ha_import_none">No hay ningún archivo mg4dash_ha.txt en la raíz de una memoria USB</string>
+    <string name="st_paste">Pegar</string>
     <string name="st_diag">DIAGNÓSTICO</string>
     <string name="st_energy_log">Registro de datos de energía: %1$s</string>
     <string name="st_energy_log_desc">Cada 5 s anota la potencia de la batería, los contadores de consumo y el estado de los equipos en Android/data/app.mg4dash/files/energy_log.csv (solo lectura, no se envía nada al coche).</string>

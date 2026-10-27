@@ -241,6 +241,11 @@
     <string name="st_ha_set_token">Token</string>
     <string name="st_ha_test">Testen</string>
     <string name="st_ha_ok">Home Assistant verbunden</string>
+    <string name="st_ha_import">Von USB-Stick importieren</string>
+    <string name="st_ha_import_desc">Kein Einfügen auf Ihrer Tastatur? Legen Sie eine Datei mg4dash_ha.txt ins Hauptverzeichnis eines USB-Sticks, mit der Adresse in einer Zeile und dem Token in einer anderen.</string>
+    <string name="st_ha_import_done">Vom USB-Stick gelesen: %1$s</string>
+    <string name="st_ha_import_none">Keine Datei mg4dash_ha.txt im Hauptverzeichnis eines USB-Sticks</string>
+    <string name="st_paste">Einfügen</string>
     <string name="st_diag">DIAGNOSE</string>
     <string name="st_energy_log">Energiedaten-Rekorder: %1$s</string>
     <string name="st_energy_log_desc">Schreibt alle 5 s Batterieleistung, Verbrauchszähler und Gerätezustände in Android/data/app.mg4dash/files/energy_log.csv (nur lesen, nichts wird an das Auto gesendet).</string>
