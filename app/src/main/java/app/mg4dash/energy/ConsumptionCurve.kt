@@ -61,6 +61,14 @@ object ConsumptionCurve {
         val trips = (sp.getString("cc_trips", "") ?: "").split(';').mapNotNull { e ->
             val p = e.split(':'); if (p.size == 2) p[0].toLongOrNull()?.let { t -> p[1].toFloatOrNull()?.let { t to it } } else null
         }.toMutableList()
+        // Trajet resté ouvert à l'arrêt précédent : la voiture coupe l'autoradio, MG4Dash ne voyait donc jamais
+        // la fin du trajet et la courbe 12 mois restait vide (#44). Sa dernière moyenne est gardée ici.
+        sp.getString("cc_open", null)?.split(':')?.let { p ->
+            val t = p.getOrNull(0)?.toLongOrNull(); val avg = p.getOrNull(1)?.toFloatOrNull()
+            if (t != null && avg != null) { trips.add(t to avg); Log.i(TAG, "previous trip kept for 12 months: ${"%.1f".format(java.util.Locale.US, avg)} kWh/100") }
+            sp.edit().remove("cc_open").apply()
+        }
+        trips.removeAll { System.currentTimeMillis() - it.first > YEAR_MS }
         var trip = parse(sp.getString("cc_trip", "")).takeLast(MAX_POINTS)
         var charge = parse(sp.getString("cc_charge", "")).takeLast(MAX_POINTS)
         // 12 mois : les trajets finis, plus le trajet en cours dès 2 km (#44)
@@ -92,6 +100,7 @@ object ConsumptionCurve {
                         trips.removeAll { now - it.first > YEAR_MS }
                         Log.i(TAG, "trip ended: ${lastStart.km} km, ${"%.1f".format(java.util.Locale.US, avg)} kWh/100")
                     }
+                    sp.edit().remove("cc_open").apply()
                     seq = EnergyMonitor.tripSeq
                     trip = emptyList(); lastKm = start.km; lastNet = start.netKwh; stillSince = tick; dist = 0f
                     changed = true
@@ -145,6 +154,10 @@ object ConsumptionCurve {
                     publish()
                     sp.edit().putString("cc_trip", join(trip)).putString("cc_charge", join(charge))
                         .putString("cc_trips", trips.joinToString(";") { "${it.first}:${String.format(java.util.Locale.US, "%.1f", it.second)}" })
+                        .apply {
+                            // Moyenne du trajet en cours, reprise au prochain démarrage s'il se termine voiture coupée
+                            start.per100?.let { putString("cc_open", "${System.currentTimeMillis()}:${String.format(java.util.Locale.US, "%.1f", it)}") }
+                        }
                         .apply()
                 }
             }
