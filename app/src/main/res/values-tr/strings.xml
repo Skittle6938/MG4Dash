@@ -511,6 +511,8 @@
     <string name="st_aa_button_desc">Telefon bağlantısını kesmek için düğmeye iki kez dokunun (uygulama devre dışı kalır, simge kırmızı olur); geri getirmek için tekrar iki kez dokunun. Uzun basma: uygulamayı seçin.</string>
     <string name="st_usb_kick">Başlangıçta kablolu telefon (USB düzeltmesi)</string>
     <string name="st_usb_kick_desc">Telefon araç çalışmadan önce takılıysa Android Auto ancak çıkarılıp takıldıktan sonra başlar. Bu, başlangıçta onu otomatik olarak yeniden algılar.</string>
+    <string name="st_bt_projection">Android Auto / CarPlay bağlıyken Bluetooth kaynağı</string>
+    <string name="st_bt_projection_desc">Bir telefon yansıtma yaparken (orijinal Android Auto, CarPlay, DiAuto) Bluetooth\'u kaynaklarda tutar; örneğin DiAuto müziği Bluetooth üzerinden çaldığında. MG4Dash bu oturumlarda ona asla kendiliğinden geçmez.</string>
     <string name="dock_conn_disabled">%1$s devre dışı: telefon artık bağlanmayacak. Geri getirmek için tekrar uzun basın.</string>
     <string name="dock_conn_enabled">%1$s geri getirildi</string>
     <string name="dock_conn_off">%1$s devre dışı: geri getirmek için düğmeye uzun basın.</string>

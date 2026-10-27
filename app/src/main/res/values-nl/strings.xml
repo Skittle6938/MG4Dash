@@ -511,6 +511,8 @@
     <string name="st_aa_button_desc">Dubbeltik op de knop om de telefoonverbinding te verbreken (de app wordt uitgeschakeld, het pictogram wordt rood); nogmaals dubbeltikken om ze te herstellen. Lang drukken: app kiezen.</string>
     <string name="st_usb_kick">Bekabelde telefoon bij het starten (USB-correctie)</string>
     <string name="st_usb_kick_desc">Als de telefoon vóór het starten van de auto was aangesloten, start Android Auto pas na loskoppelen. Dit detecteert hem automatisch opnieuw bij het starten.</string>
+    <string name="st_bt_projection">Bluetooth-bron tijdens Android Auto / CarPlay</string>
+    <string name="st_bt_projection_desc">Houdt Bluetooth in de bronnen terwijl een telefoon projecteert (originele Android Auto, CarPlay, DiAuto), bijvoorbeeld als DiAuto muziek via Bluetooth speelt. MG4Dash schakelt er tijdens die sessies nooit vanzelf naartoe.</string>
     <string name="dock_conn_disabled">%1$s uitgeschakeld: de telefoon maakt geen verbinding meer. Nogmaals lang drukken om te herstellen.</string>
     <string name="dock_conn_enabled">%1$s hersteld</string>
     <string name="dock_conn_off">%1$s is uitgeschakeld: houd de knop lang ingedrukt om te herstellen.</string>

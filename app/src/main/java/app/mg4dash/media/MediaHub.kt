@@ -247,11 +247,12 @@ object MediaHub {
     } catch (_: Exception) { false }
 
     /**
-     * Source Bluetooth proposée dès qu'un téléphone est connecté en Bluetooth, même pendant Android Auto
-     * ou DiAuto : DiAuto peut faire passer le son par le Bluetooth (choix de Marc). Pendant ces sessions,
-     * la musique Bluetooth va et vient : on ne bascule alors jamais dessus tout seul (voir [projecting]).
+     * Source Bluetooth proposée dès qu'un téléphone est connecté en Bluetooth. Pendant Android Auto,
+     * CarPlay ou DiAuto, selon le réglage (activé par défaut) : DiAuto peut faire passer le son par le
+     * Bluetooth. Pendant ces sessions, on ne bascule jamais dessus tout seul (voir [projecting]).
      */
-    private fun btSource(): Boolean = app.mg4dash.system.BtAudio.phoneConnected()
+    private fun btSource(): Boolean = app.mg4dash.system.BtAudio.phoneConnected() &&
+        (!projecting || prefs()?.btDuringProjection != false)
 
     /** Android Auto / CarPlay (AllGo), DiAuto ou équivalent en session. */
     private val projecting get() = projectionLive == true || appProjecting
