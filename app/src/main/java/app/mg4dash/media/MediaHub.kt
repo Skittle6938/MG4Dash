@@ -210,7 +210,7 @@ object MediaHub {
         // Une appli a pris la source (Android Auto, CarPlay, DiAuto qui lance sa musique…) : c'est voulu, on
         // ne la lui reprend pas pour revenir à la radio (DiAuto coupé net au démarrage de sa musique)
         if (cur !in listOf(RADIO, "com.android.bluetooth", "com.saicmotor.media")) return
-        val target = order.firstOrNull { stable(it) } ?: return
+        val target = order.firstOrNull { stable(it) && !(it == BT && projecting) } ?: return
         if (target == cur) return
         // Source actuelle jamais choisie (historique vide, première utilisation) : on ne la quitte que si elle disparaît
         val curRank = order.indexOf(cur).let { if (it < 0) -1 else it }
@@ -236,7 +236,6 @@ object MediaHub {
      */
     fun resumeOnBluetooth() { resumeBtUntil = android.os.SystemClock.uptimeMillis() + 15_000 }
 
-    @Volatile private var musicSince = 0L
     /** DiAuto ou une appli équivalente (Headunit Revived) en session : son écran de projection est ouvert. */
     @Volatile private var appProjecting = false
 
@@ -246,22 +245,16 @@ object MediaHub {
             listOfNotNull(t.baseActivity, t.topActivity).any { it.className.endsWith(".AapProjectionActivity") }
         }
     } catch (_: Exception) { false }
-    @Volatile private var cutUntil = 0L
-
-    /** Connexion du téléphone coupée par le bouton : le Bluetooth est proposé avant même le retour de sa musique. */
-    fun connectionCutStarted() { cutUntil = android.os.SystemClock.uptimeMillis() + 15_000 }
 
     /**
-     * Source Bluetooth proposée : jamais pendant Android Auto / CarPlay (AllGo, DiAuto ou équivalent), et
-     * seulement quand la musique Bluetooth du téléphone est là depuis 5 s (elle va et vient à la connexion).
-     * Juste après une coupure par le bouton, le téléphone encore lié pour les appels suffit.
+     * Source Bluetooth proposée dès qu'un téléphone est connecté en Bluetooth, même pendant Android Auto
+     * ou DiAuto : DiAuto peut faire passer le son par le Bluetooth (choix de Marc). Pendant ces sessions,
+     * la musique Bluetooth va et vient : on ne bascule alors jamais dessus tout seul (voir [projecting]).
      */
-    private fun btSource(): Boolean {
-        if (projectionLive == true || appProjecting) return false
-        val now = android.os.SystemClock.uptimeMillis()
-        if (musicSince != 0L && now - musicSince >= 5_000) return true
-        return now < cutUntil && app.mg4dash.system.BtAudio.phoneConnected()
-    }
+    private fun btSource(): Boolean = app.mg4dash.system.BtAudio.phoneConnected()
+
+    /** Android Auto / CarPlay (AllGo), DiAuto ou équivalent en session. */
+    private val projecting get() = projectionLive == true || appProjecting
 
     /**
      * Connexion d'une appli coupée par le bouton Android Auto (DiAuto…) : si c'était la source écoutée, on
@@ -353,7 +346,6 @@ object MediaHub {
                 val proj = appProjection(ctx)
                 if (proj != appProjecting) { Log.i(TAG, "Android Auto app (DiAuto…): ${if (proj) "phone connected" else "no phone"}"); appProjecting = proj; main.post { reevaluate() } }
                 val bt = btConnected()
-                if (bt != true) musicSince = 0L else if (musicSince == 0L) musicSince = android.os.SystemClock.uptimeMillis()
                 if (bt != btLive) {
                     Log.i(TAG, "bluetooth audio: ${if (bt == null) "unknown" else if (bt) "phone connected" else "no phone"}")
                     btLive = bt
