@@ -241,6 +241,11 @@
     <string name="st_ha_set_token">Token</string>
     <string name="st_ha_test">Test</string>
     <string name="st_ha_ok">Home Assistant connected</string>
+    <string name="st_ha_import">Import from USB stick</string>
+    <string name="st_ha_import_desc">No paste on your keyboard? Put a file named mg4dash_ha.txt at the root of a USB stick, with the address on one line and the token on another.</string>
+    <string name="st_ha_import_done">Read from the USB stick: %1$s</string>
+    <string name="st_ha_import_none">No mg4dash_ha.txt file at the root of a USB stick</string>
+    <string name="st_paste">Paste</string>
     <string name="st_diag">DIAGNOSTICS</string>
     <string name="st_energy_log">Energy data recorder: %1$s</string>
     <string name="st_energy_log_desc">Every 5 s, writes battery power, consumption counters and equipment states to Android/data/app.mg4dash/files/energy_log.csv (read only, nothing is sent to the car).</string>

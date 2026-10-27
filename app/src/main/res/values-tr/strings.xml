@@ -241,6 +241,11 @@
     <string name="st_ha_set_token">Token</string>
     <string name="st_ha_test">Test et</string>
     <string name="st_ha_ok">Home Assistant bağlandı</string>
+    <string name="st_ha_import">USB bellekten içe aktar</string>
+    <string name="st_ha_import_desc">Klavyenizde yapıştır yok mu? Bir USB belleğin köküne, adres bir satırda ve belirteç başka bir satırda olacak şekilde mg4dash_ha.txt dosyası koyun.</string>
+    <string name="st_ha_import_done">USB bellekten okundu: %1$s</string>
+    <string name="st_ha_import_none">USB belleğin kökünde mg4dash_ha.txt dosyası yok</string>
+    <string name="st_paste">Yapıştır</string>
     <string name="st_diag">TANILAMA</string>
     <string name="st_energy_log">Enerji veri kaydedici: %1$s</string>
     <string name="st_energy_log_desc">Her 5 sn\'de batarya gücünü, tüketim sayaçlarını ve ekipman durumlarını Android/data/app.mg4dash/files/energy_log.csv dosyasına yazar (yalnızca okuma, araca hiçbir şey gönderilmez).</string>
