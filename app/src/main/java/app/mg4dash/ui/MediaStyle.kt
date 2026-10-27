@@ -36,6 +36,8 @@ class MediaStyle private constructor(
     private lateinit var texts: List<TextView>
     private lateinit var skips: List<ImageView>
     private var plain: Boolean? = null
+    /** Le panneau de la carte, dont le contour n'est montré que sans image (#36). */
+    private var panel: LinearLayout? = null
 
     private fun detach(v: View) = v.apply { (parent as? ViewGroup)?.removeView(this) }
 
@@ -51,6 +53,7 @@ class MediaStyle private constructor(
         detach(head)
         // Le panneau entier devient le lecteur : la zone cliquable (ouvre l'appli) le couvre
         card.setPadding(0, 0, 0, 0)
+        panel = card
         for (i in 0 until card.childCount) if (card.getChildAt(i) !== info) card.getChildAt(i).visibility = View.GONE
         (info.layoutParams as LinearLayout.LayoutParams).apply { topMargin = 0; height = 0; weight = 1f }
         info.orientation = LinearLayout.HORIZONTAL
@@ -131,6 +134,20 @@ class MediaStyle private constructor(
     private var shownFor = 0
 
     /**
+     * Contour du panneau seulement sans image (radio FM) : sous une pochette, son trait restait visible
+     * dans les coins sur la voiture (#36). Vérifié à chaque mise à jour, car le style des panneaux
+     * (FadeOutline) est posé après la création de la carte.
+     */
+    private fun showOutline(show: Boolean) {
+        val p = panel ?: return
+        if (show && p.background == null) {
+            p.background = FadeOutline(d, Themes.color(a, R.color.text_sub), app.mg4dash.system.Prefs(a).panelFade)
+        } else if (!show && p.background != null) {
+            p.background = null; p.elevation = 0f
+        }
+    }
+
+    /**
      * Texte et boutons sur la pochette (blancs, ombrés) ou, en [bare], directement sur le panneau de la
      * carte, aux couleurs du thème, avec un texte plus grand (radio sans image).
      */
@@ -157,6 +174,7 @@ class MediaStyle private constructor(
         if (!::frame.isInitialized) return
         // Image toute noire (station sans pochette) : traitée comme une absence d'image
         val art = source?.takeIf { !isBlank(it) }
+        showOutline(art == null && radio)
         if (art == null && radio) {
             styleTexts(true)
             lastArt = null; shownFor = 0
