@@ -444,7 +444,7 @@ object MediaHub {
      * boutons du volant partent vers Android Auto d'AllGo ; MG4Dash les lui renvoie.
      */
     fun otherAppShown(): Boolean = !radioShown && current?.packageName?.let {
-        it != RADIO && it != "com.android.bluetooth" && it != "com.saicmotor.media" && !isAndroidAuto(it) && !it.startsWith("com.allgo.")
+        it != RADIO && it != "com.android.bluetooth" && it != "com.saicmotor.media" && !isAndroidAuto(it) && (!it.startsWith("com.allgo.") || isDiAuto(it))
     } == true
 
     /**
@@ -453,7 +453,30 @@ object MediaHub {
      */
     fun shownHandlesWheelKeys(): Boolean = handlesWheelKeys(current?.packageName)
 
-    private fun handlesWheelKeys(pkg: String?) = pkg == "com.drivehub.diauto.mg4" || pkg == "app.mg4aa"
+    private fun handlesWheelKeys(pkg: String?) = isDiAuto(pkg)
+
+    private const val ALLGO_AA = "com.allgo.app.androidauto"
+    @Volatile private var allgoDiAuto: Boolean? = null
+    @Volatile private var allgoCheckedAt = 0L
+
+    /**
+     * DiAuto MG4+ : ancien nom (com.drivehub.diauto.mg4, puis app.mg4aa), ou depuis la 2.1.0 installé à la place
+     * de l'Android Auto d'AllGo, sous son nom (com.allgo.app.androidauto). On le reconnaît alors à ses écrans
+     * (Headunit Revived), revérifié chaque minute en cas de mise à jour.
+     */
+    fun isDiAuto(pkg: String?): Boolean {
+        if (pkg == "com.drivehub.diauto.mg4" || pkg == "app.mg4aa") return true
+        if (pkg != ALLGO_AA) return false
+        val now = android.os.SystemClock.uptimeMillis()
+        if (allgoDiAuto == null || now - allgoCheckedAt > 60_000) {
+            allgoCheckedAt = now
+            allgoDiAuto = try {
+                appContext?.packageManager?.getPackageInfo(ALLGO_AA, android.content.pm.PackageManager.GET_ACTIVITIES)
+                    ?.activities?.any { it.name.startsWith("com.andrerinas.") } == true
+            } catch (_: Exception) { false }
+        }
+        return allgoDiAuto == true
+    }
 
     // Boutons du volant sur le lecteur d'une autre appli : le launcher d'origine ne connaît pas ces applis
     // et agit sur la dernière source voiture (souvent la radio), qui reprend le son : gauche / droite lui
@@ -485,7 +508,7 @@ object MediaHub {
         return true
     }
 
-    fun isAndroidAuto(pkg: String?) = pkg == AA_MBS || pkg?.startsWith("com.allgo.app.androidauto") == true
+    fun isAndroidAuto(pkg: String?) = (pkg == AA_MBS || pkg?.startsWith("com.allgo.app.androidauto") == true) && !isDiAuto(pkg)
 
     /** Puce USB / BT : bascule entre le Bluetooth et l'USB, en partant de ce qui est affiché. */
     /**
@@ -518,7 +541,7 @@ object MediaHub {
     private fun otherPlayers(): List<String> = lastCandidates.filter { c ->
         val pkg = c.packageName
         pkg != appContext?.packageName && !pkg.startsWith("com.saicmotor.") && pkg != "com.android.bluetooth" &&
-            !pkg.startsWith("com.allgo.") && !gone(pkg) &&
+            (!pkg.startsWith("com.allgo.") || isDiAuto(pkg)) && !gone(pkg) &&
             ((c.playbackState?.state ?: PlaybackState.STATE_NONE) != PlaybackState.STATE_NONE || c.metadata != null)
     }.map { it.packageName }.distinct()
 
@@ -613,13 +636,13 @@ object MediaHub {
                         // Son passager d'une appli sans source voiture (type -1) : annonce de guidage DiAuto mixée
                         // par-dessus la radio (DiAuto 2.0.0-beta19). Ce n'est pas un changement de source : la carte
                         // média clignotait vers DiAuto à chaque annonce
-                        if (type == -1 && pkg != null && !pkg.startsWith("com.allgo.") && !pkg.startsWith("com.saicmotor.")) {
+                        if (type == -1 && pkg != null && (isDiAuto(pkg) || !pkg.startsWith("com.allgo.") && !pkg.startsWith("com.saicmotor."))) {
                             Log.i(TAG, "audio source: $pkg (-1) ignored: passing sound, the car source does not change")
                             return@newProxyInstance null
                         }
                         // DiAuto se présente à la voiture comme l'Android Auto d'AllGo (le launcher d'origine ne lui
                         // envoie alors plus les boutons du volant) : sans téléphone sur AllGo, c'est le lecteur DiAuto
-                        val diAuto = if (pkg == "com.allgo.app.androidauto" && projectionLive != true)
+                        val diAuto = if (isDiAuto(pkg)) pkg else if (pkg == "com.allgo.app.androidauto" && projectionLive != true)
                             lastCandidates.firstOrNull { handlesWheelKeys(it.packageName) }?.packageName else null
                         val src = when {
                             diAuto != null -> diAuto
@@ -822,7 +845,7 @@ object MediaHub {
      */
     private fun pauseOthersOnStart(candidates: List<MediaController>) {
         fun isApp(pkg: String) = pkg != RADIO && pkg != "com.android.bluetooth" && pkg != "com.saicmotor.media" &&
-            !isAndroidAuto(pkg) && !pkg.startsWith("com.allgo.") && pkg != appContext?.packageName
+            !isAndroidAuto(pkg) && (!pkg.startsWith("com.allgo.") || isDiAuto(pkg)) && pkg != appContext?.packageName
         val now = candidates.filter { isApp(it.packageName) && it.playbackState?.state == PlaybackState.STATE_PLAYING }
         val nowPkgs = now.map { it.packageName }.toSet()
         val started = nowPkgs - appsPlaying

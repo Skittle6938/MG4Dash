@@ -398,9 +398,14 @@ object Dock {
     private fun customAa(activity: Activity): android.content.ComponentName? {
         val p = Prefs(activity)
         val cn = p.dockAaTarget?.let { android.content.ComponentName.unflattenFromString(it) } ?: return null
-        // DiAuto (com.drivehub.diauto.mg4) a un temps porté un autre nom (app.mg4aa) : le bouton suit celui des
-        // deux qui est installé si l'autre a été désinstallé
-        val twin = mapOf("com.drivehub.diauto.mg4" to "app.mg4aa", "app.mg4aa" to "com.drivehub.diauto.mg4")[cn.packageName]
+        // DiAuto (com.drivehub.diauto.mg4) a porté d'autres noms (app.mg4aa, puis celui de l'Android Auto d'AllGo
+        // depuis la 2.1.0) : le bouton suit celui qui est installé si l'ancien a été désinstallé
+        val twin = when (cn.packageName) {
+            "com.drivehub.diauto.mg4", "app.mg4aa" ->
+                if (app.mg4dash.media.MediaHub.isDiAuto("com.allgo.app.androidauto")) "com.allgo.app.androidauto"
+                else mapOf("com.drivehub.diauto.mg4" to "app.mg4aa", "app.mg4aa" to "com.drivehub.diauto.mg4")[cn.packageName]
+            else -> null
+        }
         if (twin != null && activity.packageManager.getLaunchIntentForPackage(cn.packageName) == null) {
             activity.packageManager.getLaunchIntentForPackage(twin)?.component?.let { p.dockAaTarget = it.flattenToString(); return it }
         }
