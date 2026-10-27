@@ -32,13 +32,13 @@ object ConnectionToggle {
         if (off && MediaHub.playingNow()) MediaHub.resumeOnBluetooth()
         Thread {
             if (off && projection(pkg)) endSession(app)
-            if (off && MediaHub.isDiAuto(pkg)) endDiAuto(app, pkg)
+            if (off && pkg == DIAUTO) endDiAuto(app)
             val ok = set(app, pkg, off)
             android.os.Handler(android.os.Looper.getMainLooper()).post { done(if (ok) off else null) }
         }.start()
     }
 
-    private fun projection(pkg: String) = (pkg == Apps.ANDROID_AUTO.packageName || pkg == Apps.CARPLAY.packageName) && !MediaHub.isDiAuto(pkg)
+    private fun projection(pkg: String) = pkg == Apps.ANDROID_AUTO.packageName || pkg == Apps.CARPLAY.packageName
 
     /**
      * Session Android Auto / CarPlay fermée proprement avant de couper l'appli : sinon AllGo la garde
@@ -83,31 +83,31 @@ object ConnectionToggle {
         } catch (e: Throwable) { Log.w(TAG, "phone announce: ${e.message}") }
     }
 
-    /** Service de DiAuto, quel que soit son nom de paquet (ancien nom ou celui d'AllGo depuis la 2.1.0). */
-    private fun diAutoService(pkg: String) = android.content.ComponentName(pkg, "com.andrerinas.openheadunit.aap.AapService")
+    private const val DIAUTO = "com.drivehub.diauto.mg4"
+    private val DIAUTO_SERVICE = android.content.ComponentName(DIAUTO, "com.andrerinas.openheadunit.aap.AapService")
 
     /**
      * DiAuto (Android Auto sans fil) : son service ferme la session proprement (« byebye » au téléphone)
      * avant que l'appli soit coupée. Le téléphone reste lié en Bluetooth ; on lui redemande la musique.
      */
-    private fun endDiAuto(context: Context, pkg: String) {
+    private fun endDiAuto(context: Context) {
         try {
-            context.startService(android.content.Intent("com.andrerinas.openheadunit.aap.action.STOP_SERVICE").setComponent(diAutoService(pkg)))
+            context.startService(android.content.Intent("com.andrerinas.openheadunit.aap.action.STOP_SERVICE").setComponent(DIAUTO_SERVICE))
             Log.i(TAG, "DiAuto session stopped")
             Thread.sleep(2_000)
         } catch (e: Throwable) { Log.w(TAG, "DiAuto stop: ${e.message}") }
         Thread { Thread.sleep(3_000); BtAudio.connectMusic(context) }.start()
-        MediaHub.connectionCut(pkg)
+        MediaHub.connectionCut(DIAUTO)
     }
 
     /**
      * DiAuto réactivé : rien ne le relance tant que le téléphone ne se reconnecte pas en Bluetooth (il l'est
      * déjà). On démarre son service comme à la connexion Bluetooth du téléphone, qui lance Android Auto sans fil.
      */
-    private fun startDiAuto(context: Context, pkg: String) {
+    private fun startDiAuto(context: Context) {
         Thread.sleep(1_000)
         try {
-            val i = android.content.Intent("com.andrerinas.openheadunit.ACTION_BT_AUTO_START").setComponent(diAutoService(pkg))
+            val i = android.content.Intent("com.andrerinas.openheadunit.ACTION_BT_AUTO_START").setComponent(DIAUTO_SERVICE)
             BtAudio.phoneAddress()?.let { i.putExtra("extra_mac", it) }
             context.startForegroundService(i)
             Log.i(TAG, "DiAuto started")
@@ -127,7 +127,7 @@ object ConnectionToggle {
             if (off) PackageManager.COMPONENT_ENABLED_STATE_DISABLED_USER else PackageManager.COMPONENT_ENABLED_STATE_DEFAULT, 0)
         Prefs(context).connectionOff = if (off) pkg else null
         Log.i(TAG, "$pkg ${if (off) "disabled" else "enabled"}")
-        if (!off && MediaHub.isDiAuto(pkg)) Thread { startDiAuto(context.applicationContext, pkg) }.start()
+        if (!off && pkg == DIAUTO) Thread { startDiAuto(context.applicationContext) }.start()
         if (!off && projection(pkg)) Thread { restartAllGo(context.applicationContext); Thread.sleep(3_000); announcePhone(context.applicationContext) }.start()
         true
     } catch (e: Exception) { Log.w(TAG, "$pkg: ${e.message}"); false }
