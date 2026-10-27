@@ -241,6 +241,11 @@
     <string name="st_ha_set_token">Token</string>
     <string name="st_ha_test">Prova</string>
     <string name="st_ha_ok">Home Assistant connesso</string>
+    <string name="st_ha_import">Importa da chiavetta USB</string>
+    <string name="st_ha_import_desc">La tastiera non permette di incollare? Metti un file mg4dash_ha.txt nella radice di una chiavetta USB, con l\'indirizzo su una riga e il token su un\'altra.</string>
+    <string name="st_ha_import_done">Letto dalla chiavetta USB: %1$s</string>
+    <string name="st_ha_import_none">Nessun file mg4dash_ha.txt nella radice di una chiavetta USB</string>
+    <string name="st_paste">Incolla</string>
     <string name="st_diag">DIAGNOSTICA</string>
     <string name="st_energy_log">Registratore dati energia: %1$s</string>
     <string name="st_energy_log_desc">Ogni 5 s registra potenza della batteria, contatori di consumo e stato degli equipaggiamenti in Android/data/app.mg4dash/files/energy_log.csv (sola lettura, nulla viene inviato all\'auto).</string>

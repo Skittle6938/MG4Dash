@@ -313,6 +313,9 @@ class SettingsActivity : AppCompatActivity() {
                 }
             },
         )
+        // #63 : clavier sans « coller » (SWI68) : adresse et jeton lus dans un fichier texte sur la clé USB
+        row(ha, button(getString(R.string.st_ha_import)) { importHa { showHa() } })
+        text(ha, getString(R.string.st_ha_import_desc), 14f, R.color.text_title)
 
         // ── Diagnostic : compatibilité, journal, enregistreur ──
         val diag = panel(sysL, getString(R.string.st_diag))
@@ -579,12 +582,45 @@ class SettingsActivity : AppCompatActivity() {
                 (if (secret) android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD else android.text.InputType.TYPE_TEXT_VARIATION_URI)
             setSelection(text.length)
         }
-        val box = android.widget.FrameLayout(this).apply { setPadding(dp(24), dp(8), dp(24), 0); addView(input) }
+        val box = android.widget.LinearLayout(this).apply {
+            orientation = android.widget.LinearLayout.VERTICAL; setPadding(dp(24), dp(8), dp(24), 0); addView(input)
+        }
+        // Certains claviers (SWI68) n'ont pas « coller » (#63) : bouton dédié si le presse-papiers contient du texte
+        val clip = (getSystemService(CLIPBOARD_SERVICE) as android.content.ClipboardManager).primaryClip
+            ?.takeIf { it.itemCount > 0 }?.getItemAt(0)?.coerceToText(this)?.toString()?.trim()
+        if (!clip.isNullOrEmpty()) box.addView(TextView(this).apply {
+            text = getString(R.string.st_paste); setTextColor(color(R.color.accent_action)); setTextSize(TypedValue.COMPLEX_UNIT_SP, 20f)
+            setPadding(0, dp(12), 0, dp(4))
+            setOnClickListener { input.setText(clip); input.setSelection(input.text.length) }
+        })
         android.app.AlertDialog.Builder(this)
             .setTitle(title).setView(box)
             .setPositiveButton(android.R.string.ok) { _, _ -> onOk(input.text.toString()) }
             .setNegativeButton(R.string.cancel, null)
             .show()
+    }
+
+    /**
+     * Adresse et jeton Home Assistant lus dans mg4dash_ha.txt à la racine d'une clé USB : la ligne qui
+     * commence par http est l'adresse, la plus longue des autres le jeton.
+     */
+    private fun importHa(done: () -> Unit) {
+        val sm = getSystemService(STORAGE_SERVICE) as android.os.storage.StorageManager
+        val file = sm.storageVolumes.filter { it.isRemovable && it.state == android.os.Environment.MEDIA_MOUNTED }
+            .mapNotNull { v -> try { v.javaClass.getMethod("getPathFile").invoke(v) as? java.io.File } catch (_: Throwable) { null } }
+            .flatMap { dir -> dir.listFiles()?.toList().orEmpty() }
+            .firstOrNull { it.isFile && it.name.equals("mg4dash_ha.txt", ignoreCase = true) }
+        if (file == null) { app.mg4dash.ui.Toasts.show(this, R.string.st_ha_import_none, long = true); return }
+        val lines = try { file.readLines().map { it.trim().trimStart('\uFEFF') }.filter { it.isNotEmpty() } } catch (_: Exception) { emptyList() }
+        val url = lines.firstOrNull { it.startsWith("http", ignoreCase = true) }
+        val token = lines.filter { it != url && !it.contains(' ') }.maxByOrNull { it.length }
+        if (url != null) prefs.haUrl = url.trimEnd('/')
+        if (token != null) prefs.haToken = token
+        Log.i("Settings", "Home Assistant imported from ${file.name}: address ${url != null}, token ${token != null}")
+        val found = listOfNotNull(url?.let { getString(R.string.st_ha_set_url) }, token?.let { getString(R.string.st_ha_set_token) })
+        if (found.isEmpty()) { app.mg4dash.ui.Toasts.show(this, R.string.st_ha_import_none, long = true); return }
+        app.mg4dash.ui.Toasts.show(this, getString(R.string.st_ha_import_done, found.joinToString(", ")), long = true)
+        done()
     }
 
     private fun panel(parent: LinearLayout, title: String, fill: Boolean = false): LinearLayout {

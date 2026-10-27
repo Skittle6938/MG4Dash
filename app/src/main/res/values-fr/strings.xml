@@ -241,6 +241,11 @@
     <string name="st_ha_set_token">Jeton</string>
     <string name="st_ha_test">Tester</string>
     <string name="st_ha_ok">Home Assistant connecté</string>
+    <string name="st_ha_import">Importer depuis la clé USB</string>
+    <string name="st_ha_import_desc">Pas de « coller » sur votre clavier ? Mettez un fichier mg4dash_ha.txt à la racine d\'une clé USB, avec l\'adresse sur une ligne et le jeton sur une autre.</string>
+    <string name="st_ha_import_done">Lu sur la clé USB : %1$s</string>
+    <string name="st_ha_import_none">Aucun fichier mg4dash_ha.txt à la racine d\'une clé USB</string>
+    <string name="st_paste">Coller</string>
     <string name="st_diag">DIAGNOSTIC</string>
     <string name="st_energy_log">Enregistreur de données énergie : %1$s</string>
     <string name="st_energy_log_desc">Toutes les 5 s, note la puissance batterie, les compteurs de consommation et l\'état des équipements dans Android/data/app.mg4dash/files/energy_log.csv (lecture seule, rien n\'est envoyé à la voiture).</string>
