@@ -490,10 +490,19 @@ object CarBridge {
         val focus = focusedWindow()
         Log.i(TAG, "climate window: ${focus ?: "focus unknown"}")
         if (focus?.contains("hvac page") != true) return
+        // La page descend en rideau : un « retour » envoyé pendant l'animation est souvent ignoré (journal
+        // de lopezjm2001 : refermée une fois sur trois). On le renvoie tant qu'elle a le focus (3 s au plus).
         try {
-            Runtime.getRuntime().exec(arrayOf("input", "keyevent", "4")).waitFor()
-            Thread.sleep(600)
-            Log.i(TAG, "climate window closed with back: now ${focusedWindow() ?: "focus unknown"}")
+            for (attempt in 1..8) {
+                Runtime.getRuntime().exec(arrayOf("input", "keyevent", "4")).waitFor()
+                Thread.sleep(350)
+                val now = focusedWindow()
+                if (now?.contains("hvac page") != true) {
+                    Log.i(TAG, "climate window closed with back (try $attempt): now ${now ?: "focus unknown"}")
+                    return
+                }
+            }
+            Log.i(TAG, "climate window still shown after 8 backs")
         } catch (e: Throwable) { Log.w(TAG, "climate window close: ${e.message}") }
     }
 
