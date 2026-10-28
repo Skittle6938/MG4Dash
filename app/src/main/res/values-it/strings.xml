@@ -54,6 +54,7 @@
     <string name="wx_snow">Neve</string>
     <string name="wx_storm">Temporale</string>
     <string name="chart_empty">Raccolta dello storico (1 punto per km)</string>
+    <string name="chart_empty_trips">Raccolta dello storico (1 punto per viaggio)</string>
     <string name="app_unavailable">%1$s non disponibile</string>
     <string name="cs_0">Cavo scollegato</string>
     <string name="cs_1">Ricarica lenta</string>
@@ -486,9 +487,9 @@
     <string name="st_theme_smooth_desc">Attende 5 s di luci stabili (nessun cambio sotto i ponti) e sfuma in 2 s. Disattivato: cambia appena cambiano le luci.</string>
     <string name="st_hide_saic_climate">Tenere MG4Dash davanti alla schermata clima SAIC</string>
     <string name="st_hide_saic_climate_desc">Quando il clima viene acceso (da MG4Dash o con il tasto sotto lo schermo), il launcher originale apre la sua schermata clima: MG4Dash torna davanti.</string>
-    <string name="en_trips_note">%1$d viaggi, un punto per viaggio · media %2$s (tratteggiata)</string>
+    <string name="en_trips_note">%1$d viaggi, un punto per viaggio · media (tratteggiata)</string>
     <string name="en_trips_wait">La curva si riempie viaggio dopo viaggio (almeno 2 km per viaggio).</string>
-    <string name="en_curve_note">Un punto per km (uno ogni 2 minuti da fermo) · media %1$s (tratteggiata)</string>
+    <string name="en_curve_note">Un punto per km (uno ogni 2 minuti da fermo) · media (tratteggiata)</string>
     <string name="en_curve_wait">La curva si riempie guidando, un punto per km.</string>
     <string name="projection_no_phone">Nessun telefono collegato ad Android Auto o CarPlay</string>
     <string name="st_power_va">Tensione e corrente sotto la barra di potenza</string>
@@ -496,7 +497,7 @@
     <string name="fx_pumpkin">Zucca di Halloween</string>
     <string name="fx_spider">Tarantola di Halloween</string>
     <string name="en_clear_curve">Cancella la curva</string>
-    <string name="en_clear_confirm">Cancellare la curva «%1$s»?</string>
+    <string name="en_clear_confirm">Cancellare la curva «%1$s» e i suoi totali (kWh, km)?</string>
     <string name="st_cc_stopped">Curva dei consumi: anche da fermo</string>
     <string name="st_cc_stopped_desc">Un punto ogni 2 minuti ad auto ferma (clima, accessori). Disattivato: conta solo la guida. Pressione lunga sulla curva per cancellarla.</string>
     <string name="st_audio_source">Sorgente audio</string>

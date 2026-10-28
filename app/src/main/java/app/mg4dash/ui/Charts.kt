@@ -62,6 +62,9 @@ fun List<Float>.smooth3(): List<Float> = indices.map { i -> subList(maxOf(0, i -
 class LineChart @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) : View(context, attrs) {
     var values: List<Float> = emptyList()
         set(v) { field = v; invalidate() }
+    /** Texte affiché sans courbe : 1 point par km, ou par trajet sur 12 mois (#44). */
+    var emptyText: Int = app.mg4dash.R.string.chart_empty
+        set(v) { if (field != v) { field = v; invalidate() } }
 
     private val d = resources.displayMetrics.density
     private val line = Paint(Paint.ANTI_ALIAS_FLAG).apply {
@@ -85,7 +88,7 @@ class LineChart @JvmOverloads constructor(context: Context, attrs: AttributeSet?
     override fun onDraw(canvas: Canvas) {
         val left = 34 * d; val top = 6 * d; val bottom = height - 6 * d; val right = width.toFloat()
         if (values.size < 2) {
-            canvas.drawText(context.getString(app.mg4dash.R.string.chart_empty), width / 2f, height / 2f, empty)
+            canvas.drawText(context.getString(emptyText), width / 2f, height / 2f, empty)
             return
         }
         val lo = (values.minOrNull()!! - 2f).coerceAtLeast(0f)
