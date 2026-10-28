@@ -54,6 +54,7 @@
     <string name="wx_snow">Neige</string>
     <string name="wx_storm">Orage</string>
     <string name="chart_empty">Historique en cours de collecte (1 point par km)</string>
+    <string name="chart_empty_trips">Historique en cours de collecte (1 point par trajet)</string>
     <string name="app_unavailable">%1$s indisponible</string>
     <string name="cs_0">Câble débranché</string>
     <string name="cs_1">Charge lente</string>
@@ -486,9 +487,9 @@
     <string name="st_theme_smooth_desc">Attend 5 s de feux stables (pas de bascule sous les ponts) et passe en fondu sur 2 s. Désactivé : bascule dès que les feux changent.</string>
     <string name="st_hide_saic_climate">Garder MG4Dash devant l\'écran clim SAIC</string>
     <string name="st_hide_saic_climate_desc">Quand la clim s\'allume (depuis MG4Dash ou avec le bouton sous l\'écran), le launcher d\'origine ouvre son écran clim : MG4Dash repasse devant.</string>
-    <string name="en_trips_note">%1$d trajets, un point par trajet · moyenne %2$s (pointillés)</string>
+    <string name="en_trips_note">%1$d trajets, un point par trajet · moyenne (pointillés)</string>
     <string name="en_trips_wait">La courbe se remplit trajet après trajet (au moins 2 km par trajet).</string>
-    <string name="en_curve_note">Un point par km (un toutes les 2 minutes à l\'arrêt) · moyenne %1$s (pointillés)</string>
+    <string name="en_curve_note">Un point par km (un toutes les 2 minutes à l\'arrêt) · moyenne (pointillés)</string>
     <string name="en_curve_wait">La courbe se remplit en roulant, un point par km.</string>
     <string name="projection_no_phone">Aucun téléphone connecté en Android Auto ou CarPlay</string>
     <string name="st_power_va">Tension et courant sous la barre de puissance</string>
@@ -496,7 +497,7 @@
     <string name="fx_pumpkin">Citrouille d\'Halloween</string>
     <string name="fx_spider">Mygale d\'Halloween</string>
     <string name="en_clear_curve">Effacer la courbe</string>
-    <string name="en_clear_confirm">Effacer la courbe « %1$s » ?</string>
+    <string name="en_clear_confirm">Effacer la courbe « %1$s » et ses totaux (kWh, km) ?</string>
     <string name="st_cc_stopped">Courbe de conso : aussi à l\'arrêt</string>
     <string name="st_cc_stopped_desc">Un point toutes les 2 minutes voiture arrêtée (clim, accessoires). Désactivé : seule la conduite compte. Appui long sur la courbe pour l\'effacer.</string>
     <string name="st_audio_source">Source audio</string>

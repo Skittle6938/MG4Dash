@@ -54,6 +54,7 @@
     <string name="wx_snow">Nieve</string>
     <string name="wx_storm">Tormenta</string>
     <string name="chart_empty">Recopilando historial (1 punto por km)</string>
+    <string name="chart_empty_trips">Recopilando historial (1 punto por trayecto)</string>
     <string name="app_unavailable">%1$s no disponible</string>
     <string name="cs_0">Cable desconectado</string>
     <string name="cs_1">Carga lenta</string>
@@ -486,9 +487,9 @@
     <string name="st_theme_smooth_desc">Espera 5 s con luces estables (sin cambio bajo puentes) y funde en 2 s. Desactivado: cambia en cuanto cambian las luces.</string>
     <string name="st_hide_saic_climate">Mantener MG4Dash delante de la pantalla de clima SAIC</string>
     <string name="st_hide_saic_climate_desc">Cuando se enciende el clima (desde MG4Dash o con el botón bajo la pantalla), el launcher original abre su pantalla de clima: MG4Dash vuelve delante.</string>
-    <string name="en_trips_note">%1$d trayectos, un punto por trayecto · media %2$s (discontinua)</string>
+    <string name="en_trips_note">%1$d trayectos, un punto por trayecto · media (discontinua)</string>
     <string name="en_trips_wait">La curva se llena trayecto a trayecto (al menos 2 km por trayecto).</string>
-    <string name="en_curve_note">Un punto por km (uno cada 2 minutos parado) · media %1$s (discontinua)</string>
+    <string name="en_curve_note">Un punto por km (uno cada 2 minutos parado) · media (discontinua)</string>
     <string name="en_curve_wait">La curva se llena al conducir, un punto por km.</string>
     <string name="projection_no_phone">Ningún teléfono conectado a Android Auto o CarPlay</string>
     <string name="st_power_va">Tensión y corriente bajo la barra de potencia</string>
@@ -496,7 +497,7 @@
     <string name="fx_pumpkin">Calabaza de Halloween</string>
     <string name="fx_spider">Tarántula de Halloween</string>
     <string name="en_clear_curve">Borrar la curva</string>
-    <string name="en_clear_confirm">¿Borrar la curva «%1$s»?</string>
+    <string name="en_clear_confirm">¿Borrar la curva «%1$s» y sus totales (kWh, km)?</string>
     <string name="st_cc_stopped">Curva de consumo: también parado</string>
     <string name="st_cc_stopped_desc">Un punto cada 2 minutos con el coche parado (clima, accesorios). Desactivado: solo cuenta la conducción. Pulsación larga en la curva para borrarla.</string>
     <string name="st_audio_source">Fuente de audio</string>

@@ -54,6 +54,7 @@
     <string name="wx_snow">Kar</string>
     <string name="wx_storm">Gök gürültülü fırtına</string>
     <string name="chart_empty">Geçmiş toplanıyor (km başına 1 nokta)</string>
+    <string name="chart_empty_trips">Geçmiş toplanıyor (yolculuk başına 1 nokta)</string>
     <string name="app_unavailable">%1$s kullanılamıyor</string>
     <string name="cs_0">Kablo takılı değil</string>
     <string name="cs_1">Yavaş şarj</string>
@@ -486,9 +487,9 @@
     <string name="st_theme_smooth_desc">Farların 5 sn sabit kalmasını bekler (köprü altında geçiş yok) ve 2 sn\'de geçiş yapar. Kapalı: farlar değişir değişmez geçer.</string>
     <string name="st_hide_saic_climate">MG4Dash\'i SAIC klima ekranının önünde tut</string>
     <string name="st_hide_saic_climate_desc">Klima açıldığında (MG4Dash\'ten veya ekranın altındaki düğmeyle) orijinal başlatıcı kendi klima ekranını açar: MG4Dash tekrar öne gelir.</string>
-    <string name="en_trips_note">%1$d yolculuk, yolculuk başına bir nokta · ortalama %2$s (kesikli)</string>
+    <string name="en_trips_note">%1$d yolculuk, yolculuk başına bir nokta · ortalama (kesikli)</string>
     <string name="en_trips_wait">Eğri yolculuk yolculuk dolar (yolculuk başına en az 2 km).</string>
-    <string name="en_curve_note">Km başına bir nokta (dururken 2 dakikada bir) · ortalama %1$s (kesikli)</string>
+    <string name="en_curve_note">Km başına bir nokta (dururken 2 dakikada bir) · ortalama (kesikli)</string>
     <string name="en_curve_wait">Eğri sürüş sırasında dolar, km başına bir nokta.</string>
     <string name="projection_no_phone">Android Auto veya CarPlay için bağlı telefon yok</string>
     <string name="st_power_va">Güç çubuğunun altında gerilim ve akım</string>
@@ -496,7 +497,7 @@
     <string name="fx_pumpkin">Cadılar Bayramı balkabağı</string>
     <string name="fx_spider">Cadılar Bayramı tarantulası</string>
     <string name="en_clear_curve">Eğriyi temizle</string>
-    <string name="en_clear_confirm">\"%1$s\" eğrisi temizlensin mi?</string>
+    <string name="en_clear_confirm">\"%1$s\" eğrisi ve toplamları (kWh, km) temizlensin mi?</string>
     <string name="st_cc_stopped">Tüketim eğrisi: dururken de</string>
     <string name="st_cc_stopped_desc">Araç dururken 2 dakikada bir nokta (klima, aksesuarlar). Kapalı: yalnızca sürüş sayılır. Silmek için eğriye uzun basın.</string>
     <string name="st_audio_source">Ses kaynağı</string>
