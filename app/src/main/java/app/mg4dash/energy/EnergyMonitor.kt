@@ -66,6 +66,10 @@ object EnergyMonitor {
     val months: StateFlow<List<Pair<String, Totals>>> = _months
     private const val MONTHS = 12
 
+    /** Remise à zéro demandée avec l'effacement de la courbe (#44) : 0 recharge, 1 trajet, 2 12 mois ; -1 = rien. */
+    @Volatile private var resetRequest = -1
+    fun reset(period: Int) { resetRequest = period }
+
     /** Période choisie à l'écran : 0 = depuis la recharge, 1 = depuis le démarrage, 2 = 12 derniers mois. */
     fun totals(period: Int): Totals = when (period) { 1 -> sinceStart.value; 2 -> lastYear.value; else -> sinceCharge.value }
 
@@ -159,6 +163,18 @@ object EnergyMonitor {
                 }
                 if (_tripStartSoc.value == null && soc != null) {
                     _tripStartSoc.value = soc
+                }
+                // Remise à zéro des totaux de la période, avec l'effacement de sa courbe (#44)
+                when (resetRequest.also { if (it >= 0) resetRequest = -1 }) {
+                    0 -> {
+                        Log.i(TAG, "since-charge totals cleared from the screen")
+                        _sinceCharge.value = Totals()
+                        if (km != null) chargeKm = km
+                        sp.edit().putInt("em_c_km0", chargeKm)
+                            .putFloat("em_c_out", 0f).putFloat("em_c_rgn", 0f).putFloat("em_c_clim", 0f).putFloat("em_c_acc", 0f).apply()
+                    }
+                    1 -> { _sinceStart.value = Totals(); if (km != null) startKm = km }
+                    2 -> { Log.i(TAG, "12-month totals cleared from the screen"); months.clear(); pendingKm = 0; publishMonths(); saveMonths() }
                 }
                 // Recharge : le % remonte d'au moins RECHARGE_PCT points au-dessus du plus bas de la
                 // période → nouvelle période « depuis la recharge ». Comparer au plus bas (et non au %

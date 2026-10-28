@@ -85,6 +85,7 @@ class ConsumptionCard(context: Context) : LinearLayout(context) {
         regen.text = if (t.regenKwh > 0f) context.getString(R.string.en_regen, String.format(Locale.getDefault(), "%.1f", t.regenKwh)) else ""
         val (values, n) = curve(context, period)
         chart.values = values
+        chart.emptyText = if (period == 2) R.string.chart_empty_trips else R.string.chart_empty
         note.text = n
     }
 
@@ -94,6 +95,7 @@ class ConsumptionCard(context: Context) : LinearLayout(context) {
             val name = a.getString(listOf(R.string.en_since_charge, R.string.en_trip, R.string.en_last_year)[period])
             SourceMenu.confirm(a, anchor, a.getString(R.string.en_clear_confirm, name), a.getString(R.string.en_clear_curve)) {
                 app.mg4dash.energy.ConsumptionCurve.clear(period)
+                app.mg4dash.energy.EnergyMonitor.reset(period)
             }
         }
 
@@ -104,9 +106,9 @@ class ConsumptionCard(context: Context) : LinearLayout(context) {
         fun curve(c: android.content.Context, period: Int): Pair<List<Float>, String> {
             val raw = app.mg4dash.energy.ConsumptionCurve.curves.value.of(period)
             val v = raw.map { app.mg4dash.system.Units.cons(c, it) }
-            val avg = String.format(Locale.getDefault(), "%.1f", v.average())
-            return if (period == 2) v to (if (v.size >= 2) c.getString(R.string.en_trips_note, v.size, avg) else c.getString(R.string.en_trips_wait))
-            else v.smooth3() to (if (v.size >= 2) c.getString(R.string.en_curve_note, avg) else c.getString(R.string.en_curve_wait))
+            // Moyenne sans sa valeur dans la légende : l'étiquette de la ligne pointillée la donne déjà (#44)
+            return if (period == 2) v to (if (v.size >= 2) c.getString(R.string.en_trips_note, v.size) else c.getString(R.string.en_trips_wait))
+            else v.smooth3() to (if (v.size >= 2) c.getString(R.string.en_curve_note) else c.getString(R.string.en_curve_wait))
         }
     }
 }

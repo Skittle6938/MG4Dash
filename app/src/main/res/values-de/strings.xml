@@ -54,6 +54,7 @@
     <string name="wx_snow">Schnee</string>
     <string name="wx_storm">Gewitter</string>
     <string name="chart_empty">Verlauf wird erfasst (1 Punkt pro km)</string>
+    <string name="chart_empty_trips">Verlauf wird erfasst (1 Punkt pro Fahrt)</string>
     <string name="app_unavailable">%1$s nicht verfügbar</string>
     <string name="cs_0">Kabel nicht eingesteckt</string>
     <string name="cs_1">Langsames Laden</string>
@@ -486,9 +487,9 @@
     <string name="st_theme_smooth_desc">Wartet 5 s mit stabilem Licht (kein Wechsel unter Brücken) und blendet über 2 s über. Aus: wechselt sofort, wenn sich das Licht ändert.</string>
     <string name="st_hide_saic_climate">MG4Dash vor dem SAIC-Klimabildschirm halten</string>
     <string name="st_hide_saic_climate_desc">Wenn die Klimaanlage eingeschaltet wird (in MG4Dash oder mit der Taste unter dem Bildschirm), öffnet der Original-Launcher seinen Klimabildschirm: MG4Dash kommt wieder nach vorne.</string>
-    <string name="en_trips_note">%1$d Fahrten, ein Punkt pro Fahrt · Durchschnitt %2$s (gestrichelt)</string>
+    <string name="en_trips_note">%1$d Fahrten, ein Punkt pro Fahrt · Durchschnitt (gestrichelt)</string>
     <string name="en_trips_wait">Die Kurve füllt sich Fahrt für Fahrt (mindestens 2 km pro Fahrt).</string>
-    <string name="en_curve_note">Ein Punkt pro km (einer alle 2 Minuten im Stand) · Durchschnitt %1$s (gestrichelt)</string>
+    <string name="en_curve_note">Ein Punkt pro km (einer alle 2 Minuten im Stand) · Durchschnitt (gestrichelt)</string>
     <string name="en_curve_wait">Die Kurve füllt sich während der Fahrt, ein Punkt pro km.</string>
     <string name="projection_no_phone">Kein Telefon für Android Auto oder CarPlay verbunden</string>
     <string name="st_power_va">Spannung und Strom unter der Leistungsleiste</string>
@@ -496,7 +497,7 @@
     <string name="fx_pumpkin">Halloween-Kürbis</string>
     <string name="fx_spider">Halloween-Vogelspinne</string>
     <string name="en_clear_curve">Kurve löschen</string>
-    <string name="en_clear_confirm">Kurve „%1$s“ löschen?</string>
+    <string name="en_clear_confirm">Kurve „%1$s“ und ihre Summen (kWh, km) löschen?</string>
     <string name="st_cc_stopped">Verbrauchskurve: auch im Stand</string>
     <string name="st_cc_stopped_desc">Ein Punkt alle 2 Minuten im Stand (Klima, Zubehör). Aus: nur das Fahren zählt. Lange auf die Kurve drücken, um sie zu löschen.</string>
     <string name="st_audio_source">Audioquelle</string>
