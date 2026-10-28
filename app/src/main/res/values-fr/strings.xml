@@ -457,6 +457,7 @@
     <string name="map_app_pick">Appli dans le widget carte (essai)</string>
     <string name="map_app_osm">Carte OpenStreetMap (par défaut)</string>
     <string name="map_app_unavailable">Ce firmware ne permet pas d\'afficher une autre appli dans la carte</string>
+    <string name="map_app_failed">Cette appli ne peut pas s\'afficher dans la carte : retour à la carte</string>
     <string name="title_sound">SON</string>
     <string name="vh_sound">Son  ›</string>
     <string name="snd_field">RÉPARTITION DU SON</string>

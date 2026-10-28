@@ -457,6 +457,7 @@
     <string name="map_app_pick">App in de kaartkaart (test)</string>
     <string name="map_app_osm">OpenStreetMap-kaart (standaard)</string>
     <string name="map_app_unavailable">Deze firmware kan geen andere app in de kaartkaart tonen</string>
+    <string name="map_app_failed">Deze app kan niet in de kaartkaart worden getoond: terug naar de kaart</string>
     <string name="title_sound">GELUID</string>
     <string name="vh_sound">Geluid  ›</string>
     <string name="snd_field">GELUIDSVERDELING</string>

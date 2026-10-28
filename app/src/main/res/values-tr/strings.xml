@@ -457,6 +457,7 @@
     <string name="map_app_pick">Harita kartında uygulama (test)</string>
     <string name="map_app_osm">OpenStreetMap haritası (varsayılan)</string>
     <string name="map_app_unavailable">Bu yazılım harita kartında başka bir uygulama gösteremiyor</string>
+    <string name="map_app_failed">Bu uygulama harita kartında gösterilemiyor: haritaya dönülüyor</string>
     <string name="title_sound">SES</string>
     <string name="vh_sound">Ses  ›</string>
     <string name="snd_field">SES DAĞILIMI</string>

@@ -917,12 +917,57 @@ class MainActivity : AppCompatActivity() {
         b.widgetToggle.postDelayed(fadeMapAppButtons, 5000)
     }
 
+    /**
+     * Appui long sur une appli intégrée à la carte : l'appli reçoit les touchers et l'appui long de la
+     * carte ne passait plus ; avec une appli qui ne s'affiche pas (Caméra), plus moyen d'en sortir (#66).
+     * L'appui long est donc repéré ici, avant l'appli.
+     */
+    private var mapAppPressX = 0f
+    private var mapAppPressY = 0f
+    private val mapAppLongPress = Runnable { pickMapApp() }
+
     override fun dispatchTouchEvent(ev: android.view.MotionEvent): Boolean {
-        if (ev.actionMasked == android.view.MotionEvent.ACTION_DOWN && mapAppView?.visibility == View.VISIBLE) {
-            val r = android.graphics.Rect(); b.mapCard.getGlobalVisibleRect(r)
-            if (r.contains(ev.rawX.toInt(), ev.rawY.toInt())) showMapAppButtons()
+        if (mapAppView?.visibility == View.VISIBLE) {
+            when (ev.actionMasked) {
+                android.view.MotionEvent.ACTION_DOWN -> {
+                    val r = android.graphics.Rect(); b.mapCard.getGlobalVisibleRect(r)
+                    if (r.contains(ev.rawX.toInt(), ev.rawY.toInt())) {
+                        showMapAppButtons()
+                        mapAppPressX = ev.rawX; mapAppPressY = ev.rawY
+                        b.mapCard.postDelayed(mapAppLongPress, android.view.ViewConfiguration.getLongPressTimeout() + 300L)
+                    }
+                }
+                android.view.MotionEvent.ACTION_MOVE -> {
+                    val slop = android.view.ViewConfiguration.get(this).scaledTouchSlop * 2
+                    if (kotlin.math.abs(ev.rawX - mapAppPressX) > slop || kotlin.math.abs(ev.rawY - mapAppPressY) > slop) b.mapCard.removeCallbacks(mapAppLongPress)
+                }
+                android.view.MotionEvent.ACTION_UP, android.view.MotionEvent.ACTION_CANCEL,
+                android.view.MotionEvent.ACTION_POINTER_DOWN -> b.mapCard.removeCallbacks(mapAppLongPress)
+            }
         }
         return super.dispatchTouchEvent(ev)
+    }
+
+    /**
+     * Appli choisie qui ne tient pas dans la carte (Caméra…) : elle se ferme aussitôt ou ne démarre
+     * jamais, et la carte restait noire (#66). 6 s après le lancement, sans tâche de cette appli, on
+     * revient à la carte OpenStreetMap.
+     */
+    private fun checkMapAppAlive(cn: android.content.ComponentName) {
+        b.mapCard.postDelayed({
+            if (mapAppCn != cn || mapAppView?.isAttachedToWindow != true) return@postDelayed
+            val alive = try {
+                @Suppress("DEPRECATION")
+                (getSystemService(ACTIVITY_SERVICE) as android.app.ActivityManager).getRunningTasks(50)
+                    .any { it.baseActivity?.packageName == cn.packageName || it.topActivity?.packageName == cn.packageName }
+            } catch (_: Throwable) { true }
+            if (!alive) {
+                app.mg4dash.system.Log.i("MapApp", "${cn.packageName} not running in the map card: back to the map")
+                app.mg4dash.ui.Toasts.show(this, R.string.map_app_failed, long = true)
+                prefs.mapApp = null
+                applyHomeWidget()
+            }
+        }, 6_000)
     }
 
     /** Bouton plein écran de l'appli intégrée à la carte. */
@@ -953,6 +998,7 @@ class MainActivity : AppCompatActivity() {
             val relaunches = relaunchOnResize(cn.packageName)
             val v = app.mg4dash.ui.EmbeddedApp.create(this, cn) {
                 if (!relaunches) created?.let { av -> av.postDelayed({ if (av.isAttachedToWindow) av.layoutParams = android.widget.FrameLayout.LayoutParams(-1, -1) }, 5000) }
+                checkMapAppAlive(cn)
             }
             if (v == null) {
                 app.mg4dash.ui.Toasts.show(this, R.string.map_app_unavailable, long = true)
