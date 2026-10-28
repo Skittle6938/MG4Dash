@@ -31,6 +31,8 @@ class ClimateActivity : PageActivity() {
     private lateinit var feet: TextView
     private lateinit var screen: TextView
     private lateinit var auto: TextView
+    private lateinit var defLink: TextView
+    private lateinit var ecoLink: TextView
     private lateinit var ac: TextView
     private lateinit var eco: TextView
     private lateinit var recirc: TextView
@@ -103,13 +105,18 @@ class ClimateActivity : PageActivity() {
         // ── Modes ──
         val mPanel = kit.panel(getString(R.string.cl_modes))
         auto = kit.toggleTile("AUTO") { CarBridge.toggleAuto() }
+        app.mg4dash.climate.AutoAirVolume.attach(this, auto)
         ac = kit.toggleTile("A/C") { CarBridge.toggleAc() }
         app.mg4dash.climate.AcCycle.attach(ac)
         eco = kit.toggleTile("ECO") { CarBridge.toggleEco() }
         recirc = kit.toggleTile(getString(R.string.cl_recirc)) { CarBridge.toggleRecirc() }
         defFront = kit.toggleTile(getString(R.string.cl_def_front), heat = true) { CarBridge.toggleDefrostFront() }
         defRear = kit.toggleTile(getString(R.string.cl_def_rear), heat = true) { CarBridge.toggleDefrostRear() }
-        val grid = listOf(listOf(auto, ac), listOf(eco, recirc), listOf(defFront, defRear))
+        // Réglages de la clim d'origine (#65), masqués si la voiture ne les donne pas
+        defLink = kit.toggleTile(getString(R.string.cl_defrost_link)) { CarBridge.setDefrostLinked(CarBridge.state.value.defrostLinked != true) }
+        ecoLink = kit.toggleTile(getString(R.string.cl_eco_link)) { CarBridge.setEcoLinked(CarBridge.state.value.ecoLinked != true) }
+        listOf(defLink, ecoLink).forEach { it.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, 15f) }
+        val grid = listOf(listOf(auto, ac), listOf(eco, recirc), listOf(defFront, defRear), listOf(defLink, ecoLink))
         grid.forEach { pair ->
             val r = kit.row()
             pair.forEachIndexed { i, v -> r.addView(v, kit.lp(0, -1, 1f, l = if (i > 0) 10 else 0)) }
@@ -120,7 +127,7 @@ class ClimateActivity : PageActivity() {
             setOnClickListener { Apps.open(this@ClimateActivity, Apps.HVAC, "SAIC") }
         }
         mPanel.addView(origin, kit.lp(-1, -2))
-        controls += listOf(auto, ac, eco, recirc, defFront, defRear, power)
+        controls += listOf(auto, ac, eco, recirc, defFront, defRear, defLink, ecoLink, power)
 
         body.addView(tPanel, kit.lp(0, -1, 1.15f, r = 6))
         body.addView(fPanel, kit.lp(0, -1, 1f, l = 6, r = 6))
@@ -190,6 +197,12 @@ class ClimateActivity : PageActivity() {
         feet.isSelected = parts?.get(1) == true
         screen.isSelected = parts?.get(2) == true
         auto.isSelected = s.autoOn == true
+        app.mg4dash.climate.AutoAirVolume.paint(auto, s.autoAirVolume)
+        defLink.isSelected = s.defrostLinked == true
+        ecoLink.isSelected = s.ecoLinked == true
+        (defLink.parent as View).visibility = if (s.defrostLinked == null && s.ecoLinked == null) View.GONE else View.VISIBLE
+        defLink.visibility = if (s.defrostLinked == null) View.INVISIBLE else View.VISIBLE
+        ecoLink.visibility = if (s.ecoLinked == null) View.INVISIBLE else View.VISIBLE
         ac.isSelected = s.acOn == true
         app.mg4dash.climate.AcCycle.paint(ac)
         eco.isSelected = s.ecoOn == true

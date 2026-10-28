@@ -54,11 +54,14 @@
                         android:text="@string/title_climate" />
                 </LinearLayout>
 
+                <!-- Rangée ventilation à mi-hauteur entre la température et les boutons de diffusion (#34) :
+                     trois espaces égaux autour de la température et de la ventilation -->
+                <Space android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" />
+
                 <!-- Température, avec la température extérieure en petit dessous -->
                 <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="0dp"
-                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
                     android:gravity="center"
                     android:orientation="horizontal">
 
@@ -95,7 +98,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:includeFontPadding="false"
-                            android:textSize="17sp"
+                            android:textSize="24sp"
                             tools:text="Ext. 13°" />
                     </LinearLayout>
 
@@ -109,6 +112,8 @@
                         android:src="@drawable/ic_plus"
                         android:tint="@color/accent_heat" />
                 </LinearLayout>
+
+                <Space android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" />
 
                 <!-- Ventilation : mêmes boutons que la température ; appui long − = minimum, + = maximum -->
                 <LinearLayout
@@ -166,11 +171,12 @@
                         android:src="@drawable/ic_plus" />
                 </LinearLayout>
 
+                <Space android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" />
+
                 <!-- 1re rangée (#34) : pare-brise, visage, pieds (combinables), recyclage ; « A » quand la voiture décide -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
                     android:orientation="horizontal">
 
                     <FrameLayout android:id="@+id/chipScreen" style="@style/Chip" android:layout_height="48dp" android:clickable="true" android:focusable="true" android:contentDescription="@string/cl_airflow">

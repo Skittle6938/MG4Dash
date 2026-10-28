@@ -69,6 +69,17 @@ class HvacService(b: IBinder) : RemoteService(b, "com.saicmotor.carapi.hvac.ICar
     fun setFanDirection(v: Int) = voidInt(17, v)
     fun setFanSpeed(v: Int) = voidInt(19, v)
     fun setDriverTemperature(v: Float) = voidFloat(21, v)
+
+    // Réglages de la clim d'origine (#65), zone 117 côté VHAL
+    /** Débit d'air en mode AUTO : 0 = haut, 1 = moyen, 2 = bas. */
+    val autoAirVolume get() = int(40)
+    fun setAutoAirVolume(v: Int) = voidInt(39, v)
+    /** Dégivrage arrière allumé avec l'avant : 0 = oui, 1 = non. */
+    val defrostLinkage get() = int(38)
+    fun setDefrostLinkage(v: Int) = voidInt(37, v)
+    /** Clim qui suit le mode de conduite ECO : 1 = oui, 2 = non. */
+    val ecoLinkage get() = int(69)
+    fun setEcoLinkage(v: Int) = voidInt(68, v)
 }
 
 /** Énergie / recharge (queryClient 4). */

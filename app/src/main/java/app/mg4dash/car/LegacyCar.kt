@@ -106,8 +106,22 @@ object LegacyCar {
             outsideTemp = float("getOutCarTemp")?.takeIf { !it.isNaN() && it > -60f && it < 70f } ?: s.outsideTemp,
             defrostFront = b(int("getFrontWindowDefroster")),
             defrostRear = b(int("getBackWindowDefroster")),
+            // Réglages de la clim (#65) : VehicleSettingManager, mêmes valeurs supposées que sur SWI69
+            autoAirVolume = vsInt("getAutoModeAirVolume")?.takeIf { it in 0..2 },
+            defrostLinked = vsInt("getDefrostLinkage")?.takeIf { it in 0..1 }?.let { it == 0 },
+            ecoLinked = vsInt("getHvacEconLinkage")?.takeIf { it in 1..2 }?.let { it == 1 },
         )
     }
+
+    private fun vsSet(name: String, v: Int): Boolean {
+        vsInt("getAutoModeAirVolume")   // connexion au gestionnaire si besoin
+        val c = setting ?: return false
+        return try { c.javaClass.getMethod(name, Int::class.javaPrimitiveType).invoke(c, v); true }
+        catch (e: Exception) { Log.w(TAG, "$name: ${(e.cause ?: e).message}"); false }
+    }
+    fun setAutoAirVolume(level: Int) = vsSet("setAutoModeAirVolume", level)
+    fun setDefrostLinked(on: Boolean) = vsSet("setDefrostLinkage", if (on) 0 else 1)
+    fun setEcoLinked(on: Boolean) = vsSet("setHvacEconLinkage", if (on) 1 else 2)
 
     // ── Commandes (bloquantes : appelées hors du fil principal par CarBridge) ──
 

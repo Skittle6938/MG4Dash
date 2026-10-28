@@ -111,6 +111,12 @@
     <string name="cl_air_auto">ARIA AUTO</string>
     <string name="cl_def_front">SBRINAMENTO ANT.</string>
     <string name="cl_def_rear">SBRINAMENTO POST.</string>
+    <string name="cl_auto_air">Portata d\'aria in AUTO: %1$s</string>
+    <string name="cl_level_low">bassa</string>
+    <string name="cl_level_medium">media</string>
+    <string name="cl_level_high">alta</string>
+    <string name="cl_defrost_link">Lunotto con parabrezza</string>
+    <string name="cl_eco_link">Segui la modalità ECO</string>
     <string name="cl_stock">Schermata clima originale  ›</string>
     <string name="cl_outside">Esterno %1$d°</string>
     <string name="en_stock">App Energia originale  ›</string>
@@ -343,6 +349,8 @@
     <string name="st_cap_est_current">In misurazione da MG4Dash: %1$s kWh (provvisoria).</string>
     <string name="sw_batt_temp">Batteria %1$d °C</string>
     <string name="st_map_vdock">Barra verticale a sinistra (tutte le schermate e Radio Dash): %1$s</string>
+    <string name="st_wide_bar">Barra laterale larga</string>
+    <string name="st_wide_bar_desc">Larga il doppio, con icone più grandi, più facile da toccare durante la guida.</string>
     <string name="st_map_titles">Nascondi i titoli dei widget (tutti gli stili): %1$s</string>
     <string name="st_map_vdock_btn">Barra verticale</string>
     <string name="st_map_titles_btn">Titoli</string>
