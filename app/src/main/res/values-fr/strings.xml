@@ -386,6 +386,8 @@
     <string name="st_map_offline_switch">Passer au widget énergie hors ligne</string>
     <string name="st_map_offline_switch_desc">Sans connexion data, sauf si la carte autour de la voiture est dans le cache hors ligne</string>
     <string name="st_use_location">Utiliser ma position</string>
+    <string name="st_wx_model">Modèle météo : %1$s</string>
+    <string name="st_wx_model_auto">Automatique</string>
     <string name="st_no_location">Position pas encore disponible</string>
     <string name="st_heated">Sièges et volant chauffants</string>
     <string name="doors_locked">Portes verrouillées</string>

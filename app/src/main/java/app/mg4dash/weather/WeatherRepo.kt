@@ -229,7 +229,7 @@ object WeatherRepo {
                 "&hourly=temperature_2m,weather_code,is_day&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max" +
                 "&forecast_days=4&timezone=auto",
             lat, lon,
-        )
+        ) + prefs.weatherModel.takeIf { it.isNotBlank() }?.let { "&models=$it" }.orEmpty()   // modèle choisi (#67)
         val conn = URL(url).openConnection() as HttpURLConnection
         conn.connectTimeout = 10_000
         conn.readTimeout = 10_000
@@ -287,12 +287,15 @@ object WeatherRepo {
         for (i in 0 until hTimes.length()) if (hTimes.getString(i) <= curTime) start = i
         val hours = (1..5).mapNotNull { k ->
             val i = start + k
-            if (i >= hTimes.length()) null
+            // Valeur absente (modèle choisi hors de sa zone ou de sa durée, #67) : heure sautée
+            if (i >= hTimes.length() || hCodes.isNull(i) || hTemps.isNull(i)) null
             else Hour(hourLabel(hTimes.getString(i)), night(hCodes.getInt(i), hDay?.optInt(i, 1) ?: 1), Math.round(hTemps.getDouble(i)).toInt())
         }
         val daily = json.getJSONObject("daily")
         val dTimes = daily.getJSONArray("time")
-        val days = (1 until minOf(4, dTimes.length())).map { i ->
+        val days = (1 until minOf(4, dTimes.length())).filter { i ->
+            listOf("weather_code", "temperature_2m_min", "temperature_2m_max").none { daily.getJSONArray(it).isNull(i) }
+        }.map { i ->
             Day(
                 dayLabel(dTimes.getString(i)),
                 daily.getJSONArray("weather_code").getInt(i),

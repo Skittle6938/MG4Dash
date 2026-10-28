@@ -386,6 +386,8 @@
     <string name="st_map_offline_switch">Naar de energiewidget wisselen zonder verbinding</string>
     <string name="st_map_offline_switch_desc">Zonder dataverbinding, tenzij de kaart rond de auto in de offline cache staat</string>
     <string name="st_use_location">Mijn positie gebruiken</string>
+    <string name="st_wx_model">Weermodel: %1$s</string>
+    <string name="st_wx_model_auto">Automatisch</string>
     <string name="st_no_location">Positie nog niet beschikbaar</string>
     <string name="st_heated">Stoel- en stuurverwarming</string>
     <string name="doors_locked">Deuren vergrendeld</string>

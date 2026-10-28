@@ -386,6 +386,8 @@
     <string name="st_map_offline_switch">Switch to the energy widget when offline</string>
     <string name="st_map_offline_switch_desc">Without data connection, unless the map around the car is in the offline cache</string>
     <string name="st_use_location">Use my position</string>
+    <string name="st_wx_model">Weather model: %1$s</string>
+    <string name="st_wx_model_auto">Automatic</string>
     <string name="st_no_location">Position not available yet</string>
     <string name="st_heated">Heated seats and steering wheel</string>
     <string name="doors_locked">Doors locked</string>

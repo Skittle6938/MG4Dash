@@ -386,6 +386,8 @@
     <string name="st_map_offline_switch">Ohne Verbindung zum Energie-Widget wechseln</string>
     <string name="st_map_offline_switch_desc">Ohne Datenverbindung, außer die Karte um das Auto ist im Offline-Cache</string>
     <string name="st_use_location">Meine Position verwenden</string>
+    <string name="st_wx_model">Wettermodell: %1$s</string>
+    <string name="st_wx_model_auto">Automatisch</string>
     <string name="st_no_location">Position noch nicht verfügbar</string>
     <string name="st_heated">Sitz- und Lenkradheizung</string>
     <string name="doors_locked">Türen verriegelt</string>
