@@ -1462,8 +1462,19 @@ class MainActivity : AppCompatActivity() {
                 launch { app.mg4dash.energy.ConsumptionCurve.curves.collect { consumptionCard?.takeIf { it.visibility == View.VISIBLE }?.show() } }
                 launch { app.mg4dash.map.NavRepo.nav.collect { n -> navBanner?.show(n?.takeIf { effectiveWidget() == 0 }) } }
                 launch { while (true) { updatePower(); delay(1_000) } }
+                // Démarrage (#64) : l'accueil est construit avec le dernier thème connu ; dès que la voiture
+                // répond, l'état des feux est lu et le thème changé aussitôt, sans attendre la boucle de 5 s
+                launch {
+                    val t0 = android.os.SystemClock.elapsedRealtime()
+                    while (!app.mg4dash.car.CarProps.ready && android.os.SystemClock.elapsedRealtime() - t0 < 15_000) delay(100)
+                    if (!isFinishing && app.mg4dash.ui.Themes.signature(this@MainActivity) != themeSig && !app.mg4dash.ui.Themes.popupOpen(this@MainActivity)) {
+                        app.mg4dash.system.Log.i("Theme", "lights read at start: theme changed right away")
+                        app.mg4dash.ui.Themes.publish(this@MainActivity); app.mg4dash.ui.Themes.recreateSmooth(this@MainActivity)
+                    }
+                }
                 launch {
                     while (true) {
+                        if (isFinishing) return@launch
                         if (app.mg4dash.ui.Themes.signature(this@MainActivity) != themeSig && !app.mg4dash.ui.Themes.popupOpen(this@MainActivity)) { app.mg4dash.ui.Themes.publish(this@MainActivity); app.mg4dash.ui.Themes.recreateSmooth(this@MainActivity); return@launch }
                         renderSecondary()
                         renderWeatherFallbackOnly()
