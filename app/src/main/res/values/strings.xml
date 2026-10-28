@@ -250,6 +250,12 @@
     <string name="st_diag">DIAGNOSTICS</string>
     <string name="st_energy_log">Energy data recorder: %1$s</string>
     <string name="st_energy_log_desc">Every 5 s, writes battery power, consumption counters and equipment states to Android/data/app.mg4dash/files/energy_log.csv (read only, nothing is sent to the car).</string>
+    <string name="st_copy_sysui">Copy the system UI to the USB stick</string>
+    <string name="st_copy_sysui_desc">For issue #62: copies the SAIC system UI app files into a mg4dash_systemui folder on the stick. Nothing is changed in the car.</string>
+    <string name="st_copy_sysui_nousb">No USB stick found</string>
+    <string name="st_copy_sysui_busy">Copying…</string>
+    <string name="st_copy_sysui_done">%1$d file(s) copied to the mg4dash_systemui folder</string>
+    <string name="st_copy_sysui_fail">Copy failed (see the log)</string>
     <string name="sc_search">Search…</string>
     <string name="dock_phone">Phone</string>
     <string name="title_phone">PHONE</string>
