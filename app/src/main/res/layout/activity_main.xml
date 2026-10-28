@@ -767,10 +767,16 @@
                             android:progressBackgroundTint="?attr/mgGaugeOff"
                             android:progressTint="?attr/mgAction" />
 
+                        <!-- Zone morte (#67) : toute la rangée des boutons, marge comprise, absorbe les touchers ratés
+                             à côté de ⏮ ⏭ au lieu d'ouvrir l'appli de la source -->
                         <LinearLayout
+                            android:id="@+id/mediaControls"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="10dp"
+                            android:clickable="true"
+                            android:focusable="false"
+                            android:soundEffectsEnabled="false"
+                            android:paddingTop="10dp"
                             android:gravity="center"
                             android:orientation="horizontal">
 
