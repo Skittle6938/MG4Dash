@@ -334,6 +334,8 @@ class SettingsActivity : AppCompatActivity() {
             finish()
         })
         toggle(diag, R.string.st_energy_log, R.string.st_energy_log_desc, { prefs.energyLog }) { prefs.energyLog = it }
+        row(diag, button(getString(R.string.st_copy_sysui)) { copySystemUi() })
+        text(diag, getString(R.string.st_copy_sysui_desc), 14f, R.color.text_title)
 
         refreshHome()
         showTab(prefs.raw.getInt("settings_tab", 0).coerceIn(0, tabViews.size - 1))
@@ -622,6 +624,36 @@ class SettingsActivity : AppCompatActivity() {
         if (found.isEmpty()) { app.mg4dash.ui.Toasts.show(this, R.string.st_ha_import_none, long = true); return }
         app.mg4dash.ui.Toasts.show(this, getString(R.string.st_ha_import_done, found.joinToString(", ")), long = true)
         done()
+    }
+
+    /**
+     * #62 : copie sur la clé USB l'interface système SAIC (et les applis clim SAIC), pour chercher comment
+     * empêcher la page clim de passer par-dessus MG4Dash. Lecture seule : rien n'est modifié dans la voiture.
+     */
+    private fun copySystemUi() {
+        val sm = getSystemService(STORAGE_SERVICE) as android.os.storage.StorageManager
+        val usb = sm.storageVolumes.filter { it.isRemovable && it.state == android.os.Environment.MEDIA_MOUNTED }
+            .firstNotNullOfOrNull { v -> try { v.javaClass.getMethod("getPathFile").invoke(v) as? java.io.File } catch (_: Throwable) { null } }
+        if (usb == null) { app.mg4dash.ui.Toasts.show(this, R.string.st_copy_sysui_nousb, long = true); return }
+        app.mg4dash.ui.Toasts.show(this, R.string.st_copy_sysui_busy)
+        Thread {
+            val out = java.io.File(usb, "mg4dash_systemui").apply { mkdirs() }
+            val pkgs = packageManager.getInstalledApplications(0).filter { a ->
+                a.packageName == "com.android.systemui" ||
+                    a.packageName.startsWith("com.saicmotor") && listOf("hvac", "aircondition", "climate", "systemui").any { it in a.packageName.lowercase() }
+            }
+            var n = 0
+            for (a in pkgs) for (path in listOf(a.sourceDir) + a.splitSourceDirs.orEmpty()) try {
+                val src = java.io.File(path)
+                src.copyTo(java.io.File(out, "${a.packageName}${if (path == a.sourceDir) "" else "_" + src.nameWithoutExtension}.apk"), overwrite = true)
+                n++
+                Log.i("Settings", "copied ${a.packageName} ($path, ${src.length() / 1024} KB) to USB")
+            } catch (e: Exception) { Log.w("Settings", "copy ${a.packageName}: ${e.message}") }
+            runOnUiThread {
+                if (n > 0) app.mg4dash.ui.Toasts.show(this, getString(R.string.st_copy_sysui_done, n), long = true)
+                else app.mg4dash.ui.Toasts.show(this, R.string.st_copy_sysui_fail, long = true)
+            }
+        }.start()
     }
 
     private fun panel(parent: LinearLayout, title: String, fill: Boolean = false): LinearLayout {

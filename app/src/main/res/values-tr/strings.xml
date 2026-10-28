@@ -250,6 +250,12 @@
     <string name="st_diag">TANILAMA</string>
     <string name="st_energy_log">Enerji veri kaydedici: %1$s</string>
     <string name="st_energy_log_desc">Her 5 sn\'de batarya gücünü, tüketim sayaçlarını ve ekipman durumlarını Android/data/app.mg4dash/files/energy_log.csv dosyasına yazar (yalnızca okuma, araca hiçbir şey gönderilmez).</string>
+    <string name="st_copy_sysui">Sistem arayüzünü USB belleğe kopyala</string>
+    <string name="st_copy_sysui_desc">#62 numaralı sorun için: SAIC sistem arayüzü dosyalarını bellekteki mg4dash_systemui klasörüne kopyalar. Araçta hiçbir şey değiştirilmez.</string>
+    <string name="st_copy_sysui_nousb">USB bellek bulunamadı</string>
+    <string name="st_copy_sysui_busy">Kopyalanıyor…</string>
+    <string name="st_copy_sysui_done">%1$d dosya mg4dash_systemui klasörüne kopyalandı</string>
+    <string name="st_copy_sysui_fail">Kopyalama başarısız (günlüğe bakın)</string>
     <string name="sc_search">Ara…</string>
     <string name="dock_phone">Telefon</string>
     <string name="title_phone">TELEFON</string>
