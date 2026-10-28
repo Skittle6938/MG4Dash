@@ -44,8 +44,20 @@ object Themes {
         // sinon l'accueil se construisait en clair puis basculait en sombre quelques secondes plus
         // tard (et l'appli du widget carte, chassée par la reconstruction, passait en plein écran)
         val sp = context.getSharedPreferences("mg4launcher", Context.MODE_PRIVATE)
-        if (!app.mg4dash.car.CarProps.ready && !app.mg4dash.BuildConfig.MOCK) return stableNight ?: sp.getBoolean("last_night", false)
+        if (!app.mg4dash.car.CarProps.ready && !app.mg4dash.BuildConfig.MOCK) {
+            // Mode nuit d'Android déjà donné par la voiture : lisible tout de suite, sans attendre (#64)
+            val ui = context.resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK
+            if (ui == android.content.res.Configuration.UI_MODE_NIGHT_YES) return true
+            return stableNight ?: sp.getBoolean("last_night", false)
+        }
         val raw = rawNight(context)
+        // Première lecture des feux depuis le démarrage : appliquée tout de suite, sans le délai anti-tunnel.
+        // Sinon un démarrage de nuit après un arrêt de jour restait plusieurs secondes en clair (#64).
+        if (stableNight == null) {
+            stableNight = raw; pendingSince = 0L
+            if (sp.getBoolean("last_night", !raw) != raw) sp.edit().putBoolean("last_night", raw).apply()
+            return raw
+        }
         // Réglage « transition immédiate » : pas d'attente, l'état des feux est suivi tout de suite
         if (!sp.getBoolean("theme_smooth", true)) {
             if (stableNight != raw) { stableNight = raw; sp.edit().putBoolean("last_night", raw).apply() }
