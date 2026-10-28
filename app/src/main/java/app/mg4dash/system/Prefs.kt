@@ -23,6 +23,11 @@ class Prefs(context: Context) {
         get() = sp.getBoolean("vertical_dock", false)
         set(v) = sp.edit().putBoolean("vertical_dock", v).apply()
 
+    /** Barre verticale deux fois plus large, icônes plus grandes (#67). */
+    var wideBar: Boolean
+        get() = sp.getBoolean("wide_bar", false)
+        set(v) = sp.edit().putBoolean("wide_bar", v).apply()
+
     /** Style Carte : sans les titres des widgets (issue #6). */
     /** Période du widget consommation : 0 = depuis la recharge, 1 = trajet en cours, 2 = 1 000 derniers km. */
     var consumptionPeriod: Int

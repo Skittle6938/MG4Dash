@@ -306,6 +306,9 @@ object CarBridge {
             defrostFront = safe { h.frontDefrostStatus },
             defrostRear = safe { h.rearDefrostStatus },
             ecoOn = safe { h.ecoStatus },
+            autoAirVolume = safe { h.autoAirVolume }?.takeIf { it in 0..2 },
+            defrostLinked = safe { h.defrostLinkage }?.takeIf { it in 0..1 }?.let { it == 0 },
+            ecoLinked = safe { h.ecoLinkage }?.takeIf { it in 1..2 }?.let { it == 1 },
         ).let { held(it) }
     }
 
@@ -726,6 +729,21 @@ object CarBridge {
         { it.frontDefrostStatus.asInt() }, { it.switchFrontDefrostStatus() })
     fun toggleDefrostRear() = if (useLegacy) legacy("defrostRear") { LegacyCar.defrostRear(_state.value.defrostRear != true) } else cycleTo("defrostRear", toggleTarget(_state.value.defrostRear), 2,
         { it.rearDefrostStatus.asInt() }, { it.switchRearDefrostStatus() })
+
+    /** Débit d'air en mode AUTO (#65) : 0 = haut, 1 = moyen, 2 = bas, comme le réglage de la clim d'origine. */
+    fun setAutoAirVolume(level: Int) = hvacSetting("autoAirVolume=$level", { it.copy(autoAirVolume = level) },
+        { LegacyCar.setAutoAirVolume(level) }) { it.setAutoAirVolume(level) }
+    /** Dégivrage arrière allumé avec l'avant (#65). */
+    fun setDefrostLinked(on: Boolean) = hvacSetting("defrostLinked=$on", { it.copy(defrostLinked = on) },
+        { LegacyCar.setDefrostLinked(on) }) { it.setDefrostLinkage(if (on) 0 else 1) }
+    /** Clim qui suit le mode ECO (#65). */
+    fun setEcoLinked(on: Boolean) = hvacSetting("ecoLinked=$on", { it.copy(ecoLinked = on) },
+        { LegacyCar.setEcoLinked(on) }) { it.setEcoLinkage(if (on) 1 else 2) }
+
+    private fun hvacSetting(label: String, mock: (VehicleState) -> VehicleState, old: () -> Boolean, action: (HvacService) -> Unit) {
+        if (BuildConfig.MOCK) { _state.value = mock(_state.value); return }
+        if (useLegacy) legacy(label, old) else command(label, action)
+    }
 
     fun toggleEco() = cycleTo("eco", toggleTarget(_state.value.ecoOn), 2,
         { it.ecoStatus.asInt() }, { it.switchEcoStatus() })

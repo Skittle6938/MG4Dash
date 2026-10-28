@@ -111,6 +111,12 @@
     <string name="cl_air_auto">AIR AUTO</string>
     <string name="cl_def_front">FRONT DEFROST</string>
     <string name="cl_def_rear">REAR DEFROST</string>
+    <string name="cl_auto_air">Air volume in AUTO: %1$s</string>
+    <string name="cl_level_low">low</string>
+    <string name="cl_level_medium">medium</string>
+    <string name="cl_level_high">high</string>
+    <string name="cl_defrost_link">Rear defrost with front</string>
+    <string name="cl_eco_link">Follow ECO mode</string>
     <string name="cl_stock">Stock climate screen  ›</string>
     <string name="cl_outside">Outside %1$d°</string>
     <string name="en_stock">Stock Energy app  ›</string>
@@ -343,6 +349,8 @@
     <string name="st_cap_est_current">Being measured by MG4Dash: %1$s kWh (provisional).</string>
     <string name="sw_batt_temp">Battery %1$d °C</string>
     <string name="st_map_vdock">Vertical bar on the left (all screens and Radio Dash): %1$s</string>
+    <string name="st_wide_bar">Wide side bar</string>
+    <string name="st_wide_bar_desc">Twice as wide, with bigger icons, easier to hit while driving.</string>
     <string name="st_map_titles">Hide widget titles (all layouts): %1$s</string>
     <string name="st_map_vdock_btn">Vertical bar</string>
     <string name="st_map_titles_btn">Titles</string>

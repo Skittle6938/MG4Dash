@@ -111,6 +111,12 @@
     <string name="cl_air_auto">LUCHT AUTO</string>
     <string name="cl_def_front">ONTWASEMEN VOOR</string>
     <string name="cl_def_rear">ONTWASEMEN ACHTER</string>
+    <string name="cl_auto_air">Luchthoeveelheid in AUTO: %1$s</string>
+    <string name="cl_level_low">laag</string>
+    <string name="cl_level_medium">middel</string>
+    <string name="cl_level_high">hoog</string>
+    <string name="cl_defrost_link">Achterruit met voorruit</string>
+    <string name="cl_eco_link">ECO-modus volgen</string>
     <string name="cl_stock">Origineel klimaatscherm  ›</string>
     <string name="cl_outside">Buiten %1$d°</string>
     <string name="en_stock">Originele energie-app  ›</string>
@@ -343,6 +349,8 @@
     <string name="st_cap_est_current">Wordt gemeten door MG4Dash: %1$s kWh (voorlopig).</string>
     <string name="sw_batt_temp">Batterij %1$d °C</string>
     <string name="st_map_vdock">Verticale balk links (alle schermen en Radio Dash): %1$s</string>
+    <string name="st_wide_bar">Brede zijbalk</string>
+    <string name="st_wide_bar_desc">Twee keer zo breed, met grotere pictogrammen, makkelijker te raken tijdens het rijden.</string>
     <string name="st_map_titles">Widgettitels verbergen (alle stijlen): %1$s</string>
     <string name="st_map_vdock_btn">Verticale balk</string>
     <string name="st_map_titles_btn">Titels</string>

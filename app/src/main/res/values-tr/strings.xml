@@ -111,6 +111,12 @@
     <string name="cl_air_auto">HAVA OTO</string>
     <string name="cl_def_front">ÖN BUĞU ÇÖZME</string>
     <string name="cl_def_rear">ARKA BUĞU ÇÖZME</string>
+    <string name="cl_auto_air">AUTO\'da hava debisi: %1$s</string>
+    <string name="cl_level_low">düşük</string>
+    <string name="cl_level_medium">orta</string>
+    <string name="cl_level_high">yüksek</string>
+    <string name="cl_defrost_link">Arka cam ön camla</string>
+    <string name="cl_eco_link">ECO modunu izle</string>
     <string name="cl_stock">Orijinal klima ekranı  ›</string>
     <string name="cl_outside">Dış %1$d°</string>
     <string name="en_stock">Orijinal Enerji uygulaması  ›</string>
@@ -343,6 +349,8 @@
     <string name="st_cap_est_current">MG4Dash tarafından ölçülüyor: %1$s kWh (geçici).</string>
     <string name="sw_batt_temp">Batarya %1$d °C</string>
     <string name="st_map_vdock">Solda dikey çubuk (tüm ekranlar ve Radio Dash): %1$s</string>
+    <string name="st_wide_bar">Geniş yan çubuk</string>
+    <string name="st_wide_bar_desc">İki kat geniş, daha büyük simgelerle, sürüş sırasında dokunması daha kolay.</string>
     <string name="st_map_titles">Pencere öğesi başlıklarını gizle (tüm düzenler): %1$s</string>
     <string name="st_map_vdock_btn">Dikey çubuk</string>
     <string name="st_map_titles_btn">Başlıklar</string>

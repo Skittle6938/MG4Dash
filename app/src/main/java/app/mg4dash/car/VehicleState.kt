@@ -23,6 +23,12 @@ data class VehicleState(
     val defrostFront: Boolean? = null,
     val defrostRear: Boolean? = null,
     val ecoOn: Boolean? = null,
+    /** Débit d'air en mode AUTO (#65) : 0 = haut, 1 = moyen, 2 = bas. */
+    val autoAirVolume: Int? = null,
+    /** Dégivrage arrière automatique avec l'avant (#65). */
+    val defrostLinked: Boolean? = null,
+    /** Clim qui suit le mode ECO (#65). */
+    val ecoLinked: Boolean? = null,
     /** Sièges chauffants (0 éteint, 1 à 3) et volant chauffant (0 / 1), versions équipées. */
     val seatHeatL: Int? = null,
     val seatHeatR: Int? = null,

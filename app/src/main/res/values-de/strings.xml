@@ -111,6 +111,12 @@
     <string name="cl_air_auto">LUFT AUTO</string>
     <string name="cl_def_front">FRONTSCHEIBE</string>
     <string name="cl_def_rear">HECKSCHEIBE</string>
+    <string name="cl_auto_air">Luftmenge in AUTO: %1$s</string>
+    <string name="cl_level_low">niedrig</string>
+    <string name="cl_level_medium">mittel</string>
+    <string name="cl_level_high">hoch</string>
+    <string name="cl_defrost_link">Heckscheibe mit Frontscheibe</string>
+    <string name="cl_eco_link">ECO-Modus folgen</string>
     <string name="cl_stock">Original-Klimaanzeige  ›</string>
     <string name="cl_outside">Außen %1$d°</string>
     <string name="en_stock">Original-Energie-App  ›</string>
@@ -343,6 +349,8 @@
     <string name="st_cap_est_current">Wird von MG4Dash gemessen: %1$s kWh (vorläufig).</string>
     <string name="sw_batt_temp">Batterie %1$d °C</string>
     <string name="st_map_vdock">Senkrechte Leiste links (alle Bildschirme und Radio Dash): %1$s</string>
+    <string name="st_wide_bar">Breite Seitenleiste</string>
+    <string name="st_wide_bar_desc">Doppelt so breit, mit größeren Symbolen, während der Fahrt leichter zu treffen.</string>
     <string name="st_map_titles">Widget-Titel ausblenden (alle Layouts): %1$s</string>
     <string name="st_map_vdock_btn">Senkrechte Leiste</string>
     <string name="st_map_titles_btn">Titel</string>

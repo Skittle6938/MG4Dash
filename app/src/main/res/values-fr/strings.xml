@@ -111,6 +111,12 @@
     <string name="cl_air_auto">AIR AUTO</string>
     <string name="cl_def_front">DÉGIVRAGE AV</string>
     <string name="cl_def_rear">DÉGIVRAGE AR</string>
+    <string name="cl_auto_air">Débit d\'air en AUTO : %1$s</string>
+    <string name="cl_level_low">bas</string>
+    <string name="cl_level_medium">moyen</string>
+    <string name="cl_level_high">haut</string>
+    <string name="cl_defrost_link">Dégivrage arrière avec l\'avant</string>
+    <string name="cl_eco_link">Suivre le mode ECO</string>
     <string name="cl_stock">Écran clim d\'origine  ›</string>
     <string name="cl_outside">Extérieur %1$d°</string>
     <string name="en_stock">Appli Énergie d\'origine  ›</string>
@@ -343,6 +349,8 @@
     <string name="st_cap_est_current">En cours de mesure par MG4Dash : %1$s kWh (provisoire).</string>
     <string name="sw_batt_temp">Batterie %1$d °C</string>
     <string name="st_map_vdock">Barre verticale à gauche (tous les écrans et Radio Dash) : %1$s</string>
+    <string name="st_wide_bar">Barre latérale large</string>
+    <string name="st_wide_bar_desc">Deux fois plus large, avec des icônes plus grandes, plus facile à toucher en roulant.</string>
     <string name="st_map_titles">Masquer les titres des widgets (tous les styles) : %1$s</string>
     <string name="st_map_vdock_btn">Barre verticale</string>
     <string name="st_map_titles_btn">Titres</string>
