@@ -162,14 +162,23 @@ class MainActivity : AppCompatActivity() {
             .forEach { (it.parent as? android.view.ViewGroup)?.removeView(it) }
         val gap = resources.getDimensionPixelSize(R.dimen.gap)
         fun lp(weight: Float, top: Int) = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0, weight).apply { topMargin = top }
-        left.addView(b.weatherCard, lp(40f, 0)); left.addView(b.climateCard, lp(60f, gap))
         // Pile : énergie et widget du bas réunis, on passe d'une page à l'autre en balayant
         val box = app.mg4dash.ui.SwipeBox(this) { dir -> cancelBoost(); showStackPage(nextStack(prefs.stackPage, dir)) }
         box.addView(b.energyCard, android.widget.FrameLayout.LayoutParams(-1, -1))
         box.addView(b.secondaryCard, android.widget.FrameLayout.LayoutParams(-1, -1))
         // Pas de points de page sur la pile : ils ne tombaient pas au même endroit d'une page à l'autre.
         b.secondaryDots.visibility = View.GONE
-        center.addView(box, lp(40f, 0)); center.addView(b.mediaCard, lp(60f, gap))
+        // Disposition de mquiambao00 (#38) : deux rangées à gauche (météo étroite + énergie large, puis
+        // clim large + musique étroite) et la carte, plus large, sur toute la hauteur à droite
+        fun cell(weight: Float, l: Int) = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.MATCH_PARENT, weight).apply { leftMargin = l }
+        val top = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
+        top.addView(b.weatherCard, cell(37f, 0)); top.addView(box, cell(63f, gap))
+        val bottom = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
+        bottom.addView(b.climateCard, cell(57f, 0)); bottom.addView(b.mediaCard, cell(43f, gap))
+        left.addView(top, lp(40f, 0)); left.addView(bottom, lp(60f, gap))
+        (center.parent as android.view.ViewGroup).removeView(center)
+        (left.layoutParams as LinearLayout.LayoutParams).weight = 60f
+        (right.layoutParams as LinearLayout.LayoutParams).weight = 40f
         right.addView(b.mapCard, lp(100f, 0))
         // Bas des cartes Clim et Média aligné sur la barre verticale et la carte (#38) : le contour
         // s'estompe vers le bas, ce sont leurs boutons qui marquent le bord
@@ -455,6 +464,7 @@ class MainActivity : AppCompatActivity() {
             CarBridge.stepFan(VehicleState.FAN_MAX - cur); true
         }
         b.chipAuto.setOnClickListener { CarBridge.toggleAuto() }
+        app.mg4dash.climate.AutoAirVolume.attach(this, b.chipAuto)
         app.mg4dash.climate.AcCycle.attach(b.chipAc)
         b.chipEco.setOnClickListener { CarBridge.toggleEco() }
         b.chipRecirc.setOnClickListener { CarBridge.toggleRecirc() }
@@ -508,6 +518,7 @@ class MainActivity : AppCompatActivity() {
         b.fanValue.setTextColor(color(if (auto) R.color.accent_cold else if (on) R.color.text_value else R.color.text_disabled))
         b.fanValue.setTextSize(TypedValue.COMPLEX_UNIT_SP, if (auto || !on) 16f else 20f)
         b.chipAuto.isSelected = s.autoOn == true
+        app.mg4dash.climate.AutoAirVolume.paint(b.chipAuto, s.autoAirVolume)
         b.chipAc.isSelected = s.acOn == true
         app.mg4dash.climate.AcCycle.paint(b.chipAc)
         // Recyclage : 0 = recyclé, 1 = extérieur, 2 = auto (la voiture choisit ; état réel lu à part s'il existe)
@@ -624,6 +635,26 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * Disposition Carte (#38) : carte musique étroite, la source en icône au lieu de son nom
+     * (radio, Bluetooth, Android Auto / CarPlay, autre lecteur), toujours avec la flèche du menu.
+     */
+    private fun sourceIcon(pkg: String?) {
+        val icon = when {
+            pkg == null -> null
+            pkg.startsWith("com.saicmotor.radio") -> R.drawable.ic_radio
+            pkg == "com.android.bluetooth" -> R.drawable.ic_bluetooth
+            MediaHub.isAndroidAuto(pkg) || pkg.startsWith("com.allgo.") -> R.drawable.ic_projection
+            else -> R.drawable.ic_music
+        } ?: return
+        val d = androidx.core.content.ContextCompat.getDrawable(this, icon)?.mutate() ?: return
+        val px = (26 * resources.displayMetrics.density).toInt()
+        d.setBounds(0, 0, px, px); d.setTint(b.mediaSource.currentTextColor)
+        b.mediaSource.setCompoundDrawables(d, null, null, null)
+        b.mediaSource.compoundDrawablePadding = (8 * resources.displayMetrics.density).toInt()
+        b.mediaSource.text = "▾"
+    }
+
     private fun renderMedia(m: MediaHub.NowPlaying) {
         if (!m.available) {
             b.mediaSource.text = getString(R.string.title_media) + "  ▾"
@@ -632,6 +663,7 @@ class MainActivity : AppCompatActivity() {
             b.mediaAlbum.text = ""
         } else {
             b.mediaSource.text = m.source.ifEmpty { getString(R.string.title_media) } + "  ▾"
+            if (mapLayout) sourceIcon(m.packageName)
             b.mediaTitle.text = m.title.ifEmpty { m.source }
             b.mediaArtist.text = m.artist
             b.mediaAlbum.text = m.album

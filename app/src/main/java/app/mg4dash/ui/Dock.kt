@@ -168,11 +168,12 @@ object Dock {
         children.forEach { content.addView(it) }   // chaque enfant garde ses paramètres (poids, marges)
         // 72 dp, débordant de 4 dp sur la marge de l'écran : centrée sous le bouton antibrouillards
         // de MG (x 20 → 76 dp, y ≈ 14 → 70 dp), avec 8 dp à gauche, à droite et au-dessus (#38)
-        if (!right) root.addView(bar, LinearLayout.LayoutParams(kit.dp(BAR_DP), LinearLayout.LayoutParams.MATCH_PARENT).apply { leftMargin = -kit.dp(4); topMargin = -kit.dp(6) })
+        val barDp = if (Prefs(activity).wideBar) BAR_DP * 2 else BAR_DP   // réglage « barre large » (#67)
+        if (!right) root.addView(bar, LinearLayout.LayoutParams(kit.dp(barDp), LinearLayout.LayoutParams.MATCH_PARENT).apply { leftMargin = -kit.dp(4); topMargin = -kit.dp(6) })
         root.addView(content, LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.MATCH_PARENT, 1f).apply {
             if (right) rightMargin = kit.dp(12) else leftMargin = kit.dp(12)
         })
-        if (right) root.addView(bar, LinearLayout.LayoutParams(kit.dp(BAR_DP), LinearLayout.LayoutParams.MATCH_PARENT).apply { rightMargin = -kit.dp(4) })
+        if (right) root.addView(bar, LinearLayout.LayoutParams(kit.dp(barDp), LinearLayout.LayoutParams.MATCH_PARENT).apply { rightMargin = -kit.dp(4) })
         buildVertical(activity, bar, current)
     }
 
@@ -184,6 +185,33 @@ object Dock {
      * double toucher = Wi-Fi.
      */
     private const val BAR_DP = 72
+
+    /**
+     * Indicateur Wi-Fi discret à côté de l'icône Véhicule (#67) : affiché quand l'autoradio est relié à un
+     * point d'accès (partage de connexion du téléphone…), relu toutes les 5 s tant que la barre est affichée.
+     */
+    private fun wifiBadge(activity: Activity, cell: android.widget.FrameLayout, iconDp: Int) {
+        val d = activity.resources.displayMetrics.density
+        val badge = ImageView(activity).apply {
+            setImageResource(R.drawable.ic_wifi); setColorFilter(Themes.color(activity, R.color.accent_action)); visibility = android.view.View.GONE
+        }
+        val s = (iconDp * 0.5f * d).toInt()
+        cell.addView(badge, android.widget.FrameLayout.LayoutParams(s, s, android.view.Gravity.CENTER).apply {
+            leftMargin = (iconDp * 0.75f * d).toInt(); topMargin = -(iconDp * 0.6f * d).toInt()
+        })
+        val tick = object : Runnable {
+            override fun run() {
+                if (!badge.isAttachedToWindow) return
+                val on = try { app.mg4dash.system.StatusMonitor.read(activity).wifiConnected } catch (_: Exception) { false }
+                badge.visibility = if (on) android.view.View.VISIBLE else android.view.View.GONE
+                badge.postDelayed(this, 5_000)
+            }
+        }
+        badge.addOnAttachStateChangeListener(object : android.view.View.OnAttachStateChangeListener {
+            override fun onViewAttachedToWindow(v: android.view.View) { badge.removeCallbacks(tick); badge.post(tick) }
+            override fun onViewDetachedFromWindow(v: android.view.View) { badge.removeCallbacks(tick) }
+        })
+    }
 
     fun buildVertical(activity: Activity, bar: LinearLayout, current: Page) {
         val kit = Kit(activity)
@@ -232,6 +260,7 @@ object Dock {
             // un vide visuel égal entre les icônes, et recentrés (voiture tracée de y=5 à 21, maison de 3 à 20
             // dans leur cadre de 24) pour que le dessin, et pas seulement son cadre, soit au centre.
             val size = when { item.label == R.string.dock_vehicle -> 38; item.label == R.string.dock_home -> 37; projection -> 32; else -> 34 }
+                .let { if (Prefs(activity).wideBar) it * 3 / 2 else it }
             icon.translationY = when (item.label) {
                 R.string.dock_vehicle -> -kit.dp(size) / 24f
                 R.string.dock_home -> kit.dp(size) / 48f
@@ -239,6 +268,7 @@ object Dock {
             }
             if (item.label == R.string.dock_aa) markOff(activity, icon)
             cell.addView(icon, android.widget.FrameLayout.LayoutParams(kit.dp(size), kit.dp(size), android.view.Gravity.CENTER))
+            if (item.label == R.string.dock_vehicle) wifiBadge(activity, cell, size)
             when (item.label) {
                 R.string.dock_settings -> {
                     // Toucher simple (après le délai du double toucher) / double toucher / appui long

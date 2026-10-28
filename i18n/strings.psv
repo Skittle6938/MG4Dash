@@ -109,6 +109,12 @@ cl_air_outside|FRESH AIR|AIR EXTÉRIEUR|FRISCHLUFT|AIRE EXTERIOR|ARIA ESTERNA|BU
 cl_air_auto|AIR AUTO|AIR AUTO|LUFT AUTO|AIRE AUTO|ARIA AUTO|LUCHT AUTO|HAVA OTO
 cl_def_front|FRONT DEFROST|DÉGIVRAGE AV|FRONTSCHEIBE|DESEMPAÑADO DEL.|SBRINAMENTO ANT.|ONTWASEMEN VOOR|ÖN BUĞU ÇÖZME
 cl_def_rear|REAR DEFROST|DÉGIVRAGE AR|HECKSCHEIBE|DESEMPAÑADO TRAS.|SBRINAMENTO POST.|ONTWASEMEN ACHTER|ARKA BUĞU ÇÖZME
+cl_auto_air|Air volume in AUTO: %1$s|Débit d'air en AUTO : %1$s|Luftmenge in AUTO: %1$s|Caudal de aire en AUTO: %1$s|Portata d'aria in AUTO: %1$s|Luchthoeveelheid in AUTO: %1$s|AUTO'da hava debisi: %1$s
+cl_level_low|low|bas|niedrig|bajo|bassa|laag|düşük
+cl_level_medium|medium|moyen|mittel|medio|media|middel|orta
+cl_level_high|high|haut|hoch|alto|alta|hoog|yüksek
+cl_defrost_link|Rear defrost with front|Dégivrage arrière avec l'avant|Heckscheibe mit Frontscheibe|Luneta con parabrisas|Lunotto con parabrezza|Achterruit met voorruit|Arka cam ön camla
+cl_eco_link|Follow ECO mode|Suivre le mode ECO|ECO-Modus folgen|Seguir el modo ECO|Segui la modalità ECO|ECO-modus volgen|ECO modunu izle
 cl_stock|Stock climate screen  ›|Écran clim d'origine  ›|Original-Klimaanzeige  ›|Pantalla de clima original  ›|Schermata clima originale  ›|Origineel klimaatscherm  ›|Orijinal klima ekranı  ›
 cl_outside|Outside %1$d°|Extérieur %1$d°|Außen %1$d°|Exterior %1$d°|Esterno %1$d°|Buiten %1$d°|Dış %1$d°
 en_stock|Stock Energy app  ›|Appli Énergie d'origine  ›|Original-Energie-App  ›|App de energía original  ›|App Energia originale  ›|Originele energie-app  ›|Orijinal Enerji uygulaması  ›
@@ -341,6 +347,8 @@ st_cap_est|Measured by MG4Dash: %1$s kWh (%2$d charge-to-charge measurement(s), 
 st_cap_est_current|Being measured by MG4Dash: %1$s kWh (provisional).|En cours de mesure par MG4Dash : %1$s kWh (provisoire).|Wird von MG4Dash gemessen: %1$s kWh (vorläufig).|En medición por MG4Dash: %1$s kWh (provisional).|In misurazione da MG4Dash: %1$s kWh (provvisoria).|Wordt gemeten door MG4Dash: %1$s kWh (voorlopig).|MG4Dash tarafından ölçülüyor: %1$s kWh (geçici).
 sw_batt_temp|Battery %1$d °C|Batterie %1$d °C|Batterie %1$d °C|Batería %1$d °C|Batteria %1$d °C|Batterij %1$d °C|Batarya %1$d °C
 st_map_vdock|Vertical bar on the left (all screens and Radio Dash): %1$s|Barre verticale à gauche (tous les écrans et Radio Dash) : %1$s|Senkrechte Leiste links (alle Bildschirme und Radio Dash): %1$s|Barra vertical a la izquierda (todas las pantallas y Radio Dash): %1$s|Barra verticale a sinistra (tutte le schermate e Radio Dash): %1$s|Verticale balk links (alle schermen en Radio Dash): %1$s|Solda dikey çubuk (tüm ekranlar ve Radio Dash): %1$s
+st_wide_bar|Wide side bar|Barre latérale large|Breite Seitenleiste|Barra lateral ancha|Barra laterale larga|Brede zijbalk|Geniş yan çubuk
+st_wide_bar_desc|Twice as wide, with bigger icons, easier to hit while driving.|Deux fois plus large, avec des icônes plus grandes, plus facile à toucher en roulant.|Doppelt so breit, mit größeren Symbolen, während der Fahrt leichter zu treffen.|El doble de ancha, con iconos más grandes, más fácil de pulsar conduciendo.|Larga il doppio, con icone più grandi, più facile da toccare durante la guida.|Twee keer zo breed, met grotere pictogrammen, makkelijker te raken tijdens het rijden.|İki kat geniş, daha büyük simgelerle, sürüş sırasında dokunması daha kolay.
 st_map_titles|Hide widget titles (all layouts): %1$s|Masquer les titres des widgets (tous les styles) : %1$s|Widget-Titel ausblenden (alle Layouts): %1$s|Ocultar los títulos de los widgets (todos los estilos): %1$s|Nascondi i titoli dei widget (tutti gli stili): %1$s|Widgettitels verbergen (alle stijlen): %1$s|Pencere öğesi başlıklarını gizle (tüm düzenler): %1$s
 st_map_vdock_btn|Vertical bar|Barre verticale|Senkrechte Leiste|Barra vertical|Barra verticale|Verticale balk|Dikey çubuk
 st_map_titles_btn|Titles|Titres|Titel|Títulos|Titoli|Titels|Başlıklar
