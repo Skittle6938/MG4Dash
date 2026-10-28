@@ -250,6 +250,12 @@
     <string name="st_diag">DIAGNOSTIC</string>
     <string name="st_energy_log">Enregistreur de données énergie : %1$s</string>
     <string name="st_energy_log_desc">Toutes les 5 s, note la puissance batterie, les compteurs de consommation et l\'état des équipements dans Android/data/app.mg4dash/files/energy_log.csv (lecture seule, rien n\'est envoyé à la voiture).</string>
+    <string name="st_copy_sysui">Copier l\'interface système sur la clé USB</string>
+    <string name="st_copy_sysui_desc">Pour l\'issue #62 : copie les fichiers de l\'interface système SAIC dans un dossier mg4dash_systemui sur la clé. Rien n\'est modifié dans la voiture.</string>
+    <string name="st_copy_sysui_nousb">Aucune clé USB trouvée</string>
+    <string name="st_copy_sysui_busy">Copie en cours…</string>
+    <string name="st_copy_sysui_done">%1$d fichier(s) copié(s) dans le dossier mg4dash_systemui</string>
+    <string name="st_copy_sysui_fail">Échec de la copie (voir le journal)</string>
     <string name="sc_search">Rechercher…</string>
     <string name="dock_phone">Téléphone</string>
     <string name="title_phone">TÉLÉPHONE</string>

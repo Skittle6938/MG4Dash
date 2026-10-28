@@ -504,30 +504,13 @@ object CarBridge {
 
     /**
      * #62 : sur ces firmwares, la page clim SAIC est une fenêtre système « hvac page » posée par-dessus
-     * MG4Dash (journal de lopezjm2001, SWI165). Elle seule reçoit alors un « retour », qui la referme ;
-     * rien n'est envoyé si une autre fenêtre a le focus.
+     * MG4Dash (journal de lopezjm2001, SWI165). Un « retour » ne la referme pas (essais du 28/10) : on se
+     * contente de la noter dans le journal, le temps de trouver comment l'empêcher d'apparaître.
      */
     private fun closeClimateWindow() {
         val focus = focusedWindow()
         Log.i(TAG, "climate window: ${focus ?: "focus unknown"}")
-        if (focus?.contains("hvac page") != true) return
-        logHvacWindow("shown")
-        // La page descend en rideau : un « retour » envoyé pendant l'animation est souvent ignoré (journal
-        // de lopezjm2001 : refermée une fois sur trois). On le renvoie tant qu'elle a le focus (3 s au plus).
-        try {
-            for (attempt in 1..8) {
-                Runtime.getRuntime().exec(arrayOf("input", "keyevent", "4")).waitFor()
-                Thread.sleep(350)
-                val now = focusedWindow()
-                if (now?.contains("hvac page") != true) {
-                    Log.i(TAG, "climate window closed with back (try $attempt): now ${now ?: "focus unknown"}")
-                    Thread.sleep(500)
-                    logHvacWindow("after back")
-                    return
-                }
-            }
-            Log.i(TAG, "climate window still shown after 8 backs")
-        } catch (e: Throwable) { Log.w(TAG, "climate window close: ${e.message}") }
+        if (focus?.contains("hvac page") == true) logHvacWindow("shown")
     }
 
     private fun watchSaicClimate(ctx: Context) {

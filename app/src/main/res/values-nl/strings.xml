@@ -250,6 +250,12 @@
     <string name="st_diag">DIAGNOSE</string>
     <string name="st_energy_log">Energiegegevensrecorder: %1$s</string>
     <string name="st_energy_log_desc">Schrijft elke 5 s batterijvermogen, verbruikstellers en de status van voorzieningen naar Android/data/app.mg4dash/files/energy_log.csv (alleen lezen, er wordt niets naar de auto gestuurd).</string>
+    <string name="st_copy_sysui">Systeem-UI naar de USB-stick kopiëren</string>
+    <string name="st_copy_sysui_desc">Voor issue #62: kopieert de bestanden van de SAIC-systeem-UI naar een map mg4dash_systemui op de stick. Er wordt niets in de auto gewijzigd.</string>
+    <string name="st_copy_sysui_nousb">Geen USB-stick gevonden</string>
+    <string name="st_copy_sysui_busy">Bezig met kopiëren…</string>
+    <string name="st_copy_sysui_done">%1$d bestand(en) gekopieerd naar de map mg4dash_systemui</string>
+    <string name="st_copy_sysui_fail">Kopiëren mislukt (zie het logboek)</string>
     <string name="sc_search">Zoeken…</string>
     <string name="dock_phone">Telefoon</string>
     <string name="title_phone">TELEFOON</string>
