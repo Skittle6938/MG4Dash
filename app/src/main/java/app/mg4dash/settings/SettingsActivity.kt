@@ -291,6 +291,18 @@ class SettingsActivity : AppCompatActivity() {
                 showCity(); WeatherRepo.refreshNow(this)
             }
         })
+        // Modèle météo (#67) : un autre modèle peut mieux coller au temps observé selon la région
+        val models = listOf("" to getString(R.string.st_wx_model_auto), "ecmwf_ifs025" to "ECMWF", "icon_seamless" to "DWD ICON",
+            "meteofrance_seamless" to "Météo-France", "ukmo_seamless" to "UK Met Office", "gfs_seamless" to "NOAA GFS", "gem_seamless" to "GEM (Canada)")
+        lateinit var modelBtn: Button
+        fun modelLabel() = getString(R.string.st_wx_model, models.firstOrNull { it.first == prefs.weatherModel }?.second ?: models[0].second)
+        modelBtn = button(modelLabel()) {
+            app.mg4dash.ui.SourceMenu.choose(this, modelBtn, models.map { it.second }, models.indexOfFirst { it.first == prefs.weatherModel }.coerceAtLeast(0)) { i ->
+                prefs.weatherModel = models[i].first
+                modelBtn.text = modelLabel(); WeatherRepo.refreshNow(this)
+            }
+        }
+        row(weather, modelBtn)
 
         // ── Home Assistant ──
         val ha = panel(netR, "HOME ASSISTANT")

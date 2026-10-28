@@ -105,6 +105,11 @@ class Prefs(context: Context) {
     var weatherLon: Float
         get() = sp.getFloat("weather_lon", 2.3522f)
         set(v) = sp.edit().putFloat("weather_lon", v).apply()
+    /** Modèle météo Open-Meteo (#67) : vide = choix automatique d'Open-Meteo (« best match »). */
+    var weatherModel: String
+        get() = sp.getString("weather_model", "") ?: ""
+        set(v) = sp.edit().putString("weather_model", v).apply()
+
     var weatherCity: String
         get() = sp.getString("weather_city", "Paris") ?: "Paris"
         set(v) = sp.edit().putString("weather_city", v).apply()

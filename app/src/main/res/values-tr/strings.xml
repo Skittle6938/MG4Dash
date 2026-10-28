@@ -386,6 +386,8 @@
     <string name="st_map_offline_switch">Çevrimdışıyken enerji pencere öğesine geç</string>
     <string name="st_map_offline_switch_desc">Veri bağlantısı yokken, aracın etrafındaki harita çevrimdışı önbellekte değilse</string>
     <string name="st_use_location">Konumumu kullan</string>
+    <string name="st_wx_model">Hava modeli: %1$s</string>
+    <string name="st_wx_model_auto">Otomatik</string>
     <string name="st_no_location">Konum henüz mevcut değil</string>
     <string name="st_heated">Isıtmalı koltuklar ve direksiyon</string>
     <string name="doors_locked">Kapılar kilitli</string>
