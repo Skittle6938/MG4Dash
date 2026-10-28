@@ -457,6 +457,7 @@
     <string name="map_app_pick">App in the map card (test)</string>
     <string name="map_app_osm">OpenStreetMap map (default)</string>
     <string name="map_app_unavailable">This firmware can\'t show another app in the map card</string>
+    <string name="map_app_failed">This app can\'t be shown in the map card: back to the map</string>
     <string name="title_sound">SOUND</string>
     <string name="vh_sound">Sound  ›</string>
     <string name="snd_field">SOUND DISTRIBUTION</string>

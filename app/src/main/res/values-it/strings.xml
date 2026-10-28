@@ -457,6 +457,7 @@
     <string name="map_app_pick">App nella scheda mappa (prova)</string>
     <string name="map_app_osm">Mappa OpenStreetMap (predefinita)</string>
     <string name="map_app_unavailable">Questo firmware non può mostrare un\'altra app nella scheda mappa</string>
+    <string name="map_app_failed">Questa app non può essere mostrata nella scheda mappa: ritorno alla mappa</string>
     <string name="title_sound">AUDIO</string>
     <string name="vh_sound">Audio  ›</string>
     <string name="snd_field">DISTRIBUZIONE DEL SUONO</string>
