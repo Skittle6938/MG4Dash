@@ -106,7 +106,11 @@ object ProcessDialog {
             }
         }
         val dlg = AlertDialog.Builder(activity)
-            .setTitle(R.string.ps_title)
+            // Titre dessiné par MG4Dash : celui du système sortait très grand et grisé sur la voiture (#69)
+            .setCustomTitle(kit.text(activity.getString(R.string.ps_title), 22f).apply {
+                typeface = android.graphics.Typeface.create("sans-serif-medium", android.graphics.Typeface.NORMAL)
+                setPadding(kit.dp(24), kit.dp(20), kit.dp(24), kit.dp(4))
+            })
             .setView(box)
             .setPositiveButton(android.R.string.ok, null)
             .setOnDismissListener { open = false; handler.removeCallbacks(tick) }
