@@ -161,6 +161,10 @@
     <string name="vh_steering">Lenkung</string>
     <string name="vh_brake">Bremspedal</string>
     <string name="vh_endurance">Energiesparmodus</string>
+    <string name="vh_cpu">Prozessor</string>
+    <string name="vh_ram">Speicher</string>
+    <string name="vh_head_unit">RADIO</string>
+    <string name="unit_mb">MB</string>
     <string name="vh_adas">FAHRASSISTENZ</string>
     <string name="vh_lane">Spurhalteassistent</string>
     <string name="vh_aeb">Notbremsung</string>

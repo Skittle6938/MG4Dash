@@ -161,6 +161,10 @@
     <string name="vh_steering">Stuurinrichting</string>
     <string name="vh_brake">Rempedaal</string>
     <string name="vh_endurance">Energiebesparing</string>
+    <string name="vh_cpu">Processor</string>
+    <string name="vh_ram">Geheugen</string>
+    <string name="vh_head_unit">RADIO</string>
+    <string name="unit_mb">MB</string>
     <string name="vh_adas">RIJHULPSYSTEMEN</string>
     <string name="vh_lane">Rijstrookassistent</string>
     <string name="vh_aeb">Noodremming</string>
