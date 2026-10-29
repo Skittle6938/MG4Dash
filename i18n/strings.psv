@@ -159,6 +159,10 @@ vh_one_pedal|One-pedal driving|Conduite à une pédale|One-Pedal-Fahren|Conducci
 vh_steering|Steering|Direction|Lenkung|Dirección|Sterzo|Stuurinrichting|Direksiyon
 vh_brake|Brake pedal|Pédale de frein|Bremspedal|Pedal de freno|Pedale del freno|Rempedaal|Fren pedalı
 vh_endurance|Energy saving|Économie d'énergie|Energiesparmodus|Ahorro de energía|Risparmio energetico|Energiebesparing|Enerji tasarrufu
+vh_cpu|Processor|Processeur|Prozessor|Procesador|Processore|Processor|İşlemci
+vh_ram|Memory|Mémoire|Speicher|Memoria|Memoria|Geheugen|Bellek
+vh_head_unit|HEAD UNIT|AUTORADIO|RADIO|RADIO|AUTORADIO|RADIO|ANA ÜNİTE
+unit_mb|MB|Mo|MB|MB|MB|MB|MB
 vh_adas|DRIVER ASSISTANCE|AIDES À LA CONDUITE|FAHRASSISTENZ|ASISTENCIA A LA CONDUCCIÓN|ASSISTENZA ALLA GUIDA|RIJHULPSYSTEMEN|SÜRÜŞ DESTEĞİ
 vh_lane|Lane keeping|Maintien de voie|Spurhalteassistent|Mantenimiento de carril|Mantenimento corsia|Rijstrookassistent|Şerit takip
 vh_aeb|Emergency braking|Freinage d'urgence|Notbremsung|Frenado de emergencia|Frenata di emergenza|Noodremming|Acil fren

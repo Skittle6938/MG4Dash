@@ -161,6 +161,10 @@
     <string name="vh_steering">Direksiyon</string>
     <string name="vh_brake">Fren pedalı</string>
     <string name="vh_endurance">Enerji tasarrufu</string>
+    <string name="vh_cpu">İşlemci</string>
+    <string name="vh_ram">Bellek</string>
+    <string name="vh_head_unit">ANA ÜNİTE</string>
+    <string name="unit_mb">MB</string>
     <string name="vh_adas">SÜRÜŞ DESTEĞİ</string>
     <string name="vh_lane">Şerit takip</string>
     <string name="vh_aeb">Acil fren</string>

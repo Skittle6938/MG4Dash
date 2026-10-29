@@ -439,6 +439,14 @@ class MainActivity : AppCompatActivity() {
         // Appui long : clim maintenue, si elle est activée dans les réglages
         b.climPower.setOnLongClickListener { if (prefs.climateHoldEnabled) { app.mg4dash.climate.ClimateHoldPanel.show(this); true } else false }
         repeatOnHold(b.tempDown) { CarBridge.stepTemp(-1) }
+        // Ventilation centrée entre les boutons − / + de la température et la diffusion (#34) : la rangée
+        // température est plus haute que ses boutons (grand chiffre + extérieur) ; le surplus sous les boutons
+        // est ajouté au-dessus de la diffusion pour des écarts égaux de bouton à bouton
+        (b.tempDown.parent as View).addOnLayoutChangeListener { row, _, top, _, bottom, _, _, _, _ ->
+            val extra = ((bottom - top - b.tempDown.height) / 2).coerceAtLeast(0)
+            val lp = b.climDirRow.layoutParams as android.widget.LinearLayout.LayoutParams
+            if (lp.topMargin != extra) row.post { lp.topMargin = extra; b.climDirRow.layoutParams = lp }
+        }
         repeatOnHold(b.tempUp) { CarBridge.stepTemp(1) }
         // Ventilation : sous la vitesse 1, la clim s'arrête ; appui long − = minimum, appui long + = maximum
         b.fanDown.setOnClickListener {

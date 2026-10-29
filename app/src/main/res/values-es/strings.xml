@@ -161,6 +161,10 @@
     <string name="vh_steering">Dirección</string>
     <string name="vh_brake">Pedal de freno</string>
     <string name="vh_endurance">Ahorro de energía</string>
+    <string name="vh_cpu">Procesador</string>
+    <string name="vh_ram">Memoria</string>
+    <string name="vh_head_unit">RADIO</string>
+    <string name="unit_mb">MB</string>
     <string name="vh_adas">ASISTENCIA A LA CONDUCCIÓN</string>
     <string name="vh_lane">Mantenimiento de carril</string>
     <string name="vh_aeb">Frenado de emergencia</string>

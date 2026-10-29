@@ -161,6 +161,10 @@
     <string name="vh_steering">Steering</string>
     <string name="vh_brake">Brake pedal</string>
     <string name="vh_endurance">Energy saving</string>
+    <string name="vh_cpu">Processor</string>
+    <string name="vh_ram">Memory</string>
+    <string name="vh_head_unit">HEAD UNIT</string>
+    <string name="unit_mb">MB</string>
     <string name="vh_adas">DRIVER ASSISTANCE</string>
     <string name="vh_lane">Lane keeping</string>
     <string name="vh_aeb">Emergency braking</string>
