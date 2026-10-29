@@ -164,6 +164,14 @@
     <string name="vh_cpu">İşlemci</string>
     <string name="vh_ram">Bellek</string>
     <string name="vh_head_unit">ANA ÜNİTE</string>
+    <string name="ps_title">Ana ünite · çalışan uygulamalar</string>
+    <string name="ps_summary">İşlemci %1$s   ·   Bellek %2$s   ·   canlı</string>
+    <string name="ps_col_app">Uygulama</string>
+    <string name="ps_col_cpu">CPU</string>
+    <string name="ps_col_ram">RAM</string>
+    <string name="ps_service">hizmet</string>
+    <string name="ps_hint">Uygulama başına ayrıntı ›</string>
+    <string name="ps_note">≈ : canlı okunamayan uygulamalar için sistemin son ortalaması.</string>
     <string name="unit_mb">MB</string>
     <string name="vh_adas">SÜRÜŞ DESTEĞİ</string>
     <string name="vh_lane">Şerit takip</string>
@@ -573,6 +581,9 @@
     <string name="tu_next">İleri</string>
     <string name="tu_done">Bitti</string>
     <string name="tu_show">Hareket turunu göster</string>
+    <string name="apps_open">AÇIK</string>
+    <string name="apps_all">TÜM UYGULAMALAR</string>
+    <string name="apps_close_all">Tümünü kapat</string>
     <string name="aa_title">ANDROID AUTO</string>
     <string name="aa_ready">Telefon bağlı · Açmak için dokunun</string>
     <string name="aa_waiting">Telefonunuzu USB ile bağlayın</string>

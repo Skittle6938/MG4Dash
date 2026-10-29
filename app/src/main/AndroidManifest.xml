@@ -9,6 +9,10 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <!-- Liste de tous les processus et applis ouvertes (#69, #71), accordée à la signature plateforme -->
+    <uses-permission android:name="android.permission.REAL_GET_TASKS" tools:ignore="ProtectedPermissions" />
+    <uses-permission android:name="android.permission.FORCE_STOP_PACKAGES" tools:ignore="ProtectedPermissions" />
+    <uses-permission android:name="android.permission.DUMP" tools:ignore="ProtectedPermissions" />
     <!-- Copie de l'interface système sur la clé USB (#62) : écriture sur un support amovible, accordée à la signature plateforme -->
     <uses-permission android:name="android.permission.WRITE_MEDIA_STORAGE" tools:ignore="ProtectedPermissions" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />

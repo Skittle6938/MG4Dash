@@ -164,6 +164,14 @@
     <string name="vh_cpu">Procesador</string>
     <string name="vh_ram">Memoria</string>
     <string name="vh_head_unit">RADIO</string>
+    <string name="ps_title">Radio · aplicaciones en ejecución</string>
+    <string name="ps_summary">Procesador %1$s   ·   Memoria %2$s   ·   en directo</string>
+    <string name="ps_col_app">Aplicación</string>
+    <string name="ps_col_cpu">CPU</string>
+    <string name="ps_col_ram">RAM</string>
+    <string name="ps_service">servicio</string>
+    <string name="ps_hint">Detalle por aplicación ›</string>
+    <string name="ps_note">≈ : media reciente del sistema, para las aplicaciones que no se pueden leer en directo.</string>
     <string name="unit_mb">MB</string>
     <string name="vh_adas">ASISTENCIA A LA CONDUCCIÓN</string>
     <string name="vh_lane">Mantenimiento de carril</string>
@@ -573,6 +581,9 @@
     <string name="tu_next">Siguiente</string>
     <string name="tu_done">Listo</string>
     <string name="tu_show">Ver el recorrido de gestos</string>
+    <string name="apps_open">ABIERTAS</string>
+    <string name="apps_all">TODAS LAS APLICACIONES</string>
+    <string name="apps_close_all">Cerrar todo</string>
     <string name="aa_title">ANDROID AUTO</string>
     <string name="aa_ready">Teléfono conectado · Pulse para abrir</string>
     <string name="aa_waiting">Conecte su teléfono por USB</string>
