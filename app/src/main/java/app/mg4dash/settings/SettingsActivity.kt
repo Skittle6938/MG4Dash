@@ -667,8 +667,7 @@ class SettingsActivity : AppCompatActivity() {
                 Log.i("Settings", "copied ${a.packageName} ($path, ${src.length() / 1024} KB) to USB")
             } catch (e: Exception) { Log.w("Settings", "copy ${a.packageName}: ${e.message}") }
             runOnUiThread {
-                if (n > 0) app.mg4dash.ui.Toasts.show(this, getString(R.string.st_copy_sysui_done, n) + "
-" + out.absolutePath.removePrefix(usb.absolutePath).trimStart('/'), long = true)
+                if (n > 0) app.mg4dash.ui.Toasts.show(this, getString(R.string.st_copy_sysui_done, n) + " : " + out.absolutePath.removePrefix(usb.absolutePath).trimStart('/'), long = true)
                 else app.mg4dash.ui.Toasts.show(this, R.string.st_copy_sysui_fail, long = true)
             }
         }.start()
