@@ -162,6 +162,14 @@ vh_endurance|Energy saving|Économie d'énergie|Energiesparmodus|Ahorro de energ
 vh_cpu|Processor|Processeur|Prozessor|Procesador|Processore|Processor|İşlemci
 vh_ram|Memory|Mémoire|Speicher|Memoria|Memoria|Geheugen|Bellek
 vh_head_unit|HEAD UNIT|AUTORADIO|RADIO|RADIO|AUTORADIO|RADIO|ANA ÜNİTE
+ps_title|Head unit · running apps|Autoradio · applications en cours|Radio · laufende Apps|Radio · aplicaciones en ejecución|Autoradio · app in esecuzione|Radio · actieve apps|Ana ünite · çalışan uygulamalar
+ps_summary|Processor %1$s   ·   Memory %2$s   ·   live|Processeur %1$s   ·   Mémoire %2$s   ·   en direct|Prozessor %1$s   ·   Speicher %2$s   ·   live|Procesador %1$s   ·   Memoria %2$s   ·   en directo|Processore %1$s   ·   Memoria %2$s   ·   dal vivo|Processor %1$s   ·   Geheugen %2$s   ·   live|İşlemci %1$s   ·   Bellek %2$s   ·   canlı
+ps_col_app|Application|Application|Anwendung|Aplicación|Applicazione|Applicatie|Uygulama
+ps_col_cpu|CPU|CPU|CPU|CPU|CPU|CPU|CPU
+ps_col_ram|RAM|RAM|RAM|RAM|RAM|RAM|RAM
+ps_service|service|service|Dienst|servicio|servizio|dienst|hizmet
+ps_hint|Details per app ›|Détail par appli ›|Details pro App ›|Detalle por aplicación ›|Dettaglio per app ›|Details per app ›|Uygulama başına ayrıntı ›
+ps_note|≈ : recent average from the system, for apps that can't be read live.|≈ : moyenne récente donnée par le système, pour les applis qu'on ne peut pas lire en direct.|≈ : aktueller Durchschnitt des Systems, für Apps, die nicht live gelesen werden können.|≈ : media reciente del sistema, para las aplicaciones que no se pueden leer en directo.|≈ : media recente del sistema, per le app non leggibili dal vivo.|≈ : recent gemiddelde van het systeem, voor apps die niet live gelezen kunnen worden.|≈ : canlı okunamayan uygulamalar için sistemin son ortalaması.
 unit_mb|MB|Mo|MB|MB|MB|MB|MB
 vh_adas|DRIVER ASSISTANCE|AIDES À LA CONDUITE|FAHRASSISTENZ|ASISTENCIA A LA CONDUCCIÓN|ASSISTENZA ALLA GUIDA|RIJHULPSYSTEMEN|SÜRÜŞ DESTEĞİ
 vh_lane|Lane keeping|Maintien de voie|Spurhalteassistent|Mantenimiento de carril|Mantenimento corsia|Rijstrookassistent|Şerit takip
@@ -572,3 +580,6 @@ tu_skip|Skip|Passer|Überspringen|Omitir|Salta|Overslaan|Atla
 tu_next|Next|Suivant|Weiter|Siguiente|Avanti|Volgende|İleri
 tu_done|Done|Terminer|Fertig|Listo|Fine|Klaar|Bitti
 tu_show|Show the gesture tour|Revoir le tuto des gestes|Gestentour anzeigen|Ver el recorrido de gestos|Rivedi il tour dei gesti|Rondleiding gebaren tonen|Hareket turunu göster
+apps_open|OPEN|OUVERTES|GEÖFFNET|ABIERTAS|APERTE|GEOPEND|AÇIK
+apps_all|ALL APPS|TOUTES LES APPLIS|ALLE APPS|TODAS LAS APLICACIONES|TUTTE LE APP|ALLE APPS|TÜM UYGULAMALAR
+apps_close_all|Close all|Tout fermer|Alle schließen|Cerrar todo|Chiudi tutto|Alles sluiten|Tümünü kapat

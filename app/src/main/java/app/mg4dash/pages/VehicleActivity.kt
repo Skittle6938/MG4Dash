@@ -128,6 +128,9 @@ class VehicleActivity : PageActivity() {
         // Charge de l'autoradio (#69) : section à part sous l'état du véhicule, processeur et mémoire relus toutes les 2 s
         val unit = kit.panel(getString(R.string.vh_head_unit))
         listOf(R.string.vh_cpu, R.string.vh_ram).forEach { addInfo(unit, it) }
+        unit.isClickable = true; unit.isFocusable = true
+        unit.setOnClickListener { app.mg4dash.ui.ProcessDialog.show(this) }   // détail par appli
+        unit.addView(kit.text(getString(R.string.ps_hint), 15f, R.color.accent_action), kit.lp(-1, -2, t = 2))
         val right = android.widget.LinearLayout(this).apply { orientation = android.widget.LinearLayout.VERTICAL }
         right.addView(state, kit.lp(-1, 0, 1f))
         right.addView(unit, kit.lp(-1, -2, t = 12))
