@@ -1,6 +1,5 @@
 package app.mg4dash.system
 
-import app.mg4dash.car.CarBridge
 import app.mg4dash.car.CarProps
 import app.mg4dash.car.SaicHvacPage
 import android.content.BroadcastReceiver
@@ -86,10 +85,10 @@ object StarKey {
                     return
                 }
                 // Touche clim sous l'écran (288, anciens firmwares) : SystemUI ouvre sa page clim par-dessus
-                // MG4Dash ; on la referme juste après et on ouvre la page Clim de MG4Dash (#62)
+                // MG4Dash ; on la referme juste après, l'écran d'avant reste affiché (#62)
                 if (code == KEY_HVAC && !down && !long && Firmware.family != Firmware.Family.A9 && Prefs(app).hideSaicClimate) {
                     android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
-                        Thread { if (SaicHvacPage.close(app)) android.os.Handler(android.os.Looper.getMainLooper()).post { CarBridge.openOwnClimate(app) } }.start()
+                        Thread { SaicHvacPage.close(app) }.start()
                     }, 250)
                     return
                 }
