@@ -671,34 +671,6 @@ class ScreenshotTest {
     /** Pleine puissance depuis l'accueil : bascule sur le widget Puissance, animation, puis retour. */
     @Test fun boostFlames() = boost(3, "flames")
     @Test fun boostLightning() = boost(2, "lightning")
-    @Test fun boostRocket() = boost(1, "rocket")
-
-    /** Araignée d'Halloween sur l'accueil : images (640 × 240, 20 i/s) pour un GIF. */
-    @Test fun spiderFrames() {
-        val sp = org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE)
-        sp.edit().putInt("theme_mode", 1).putInt("secondary_widget", 1).putInt("power_fx", 6).commit()
-        val act = Robolectric.buildActivity(MainActivity::class.java).setup().get()
-        val looper = shadowOf(Looper.getMainLooper())
-        val big = Bitmap.createBitmap(1920, 720, Bitmap.Config.ARGB_8888)
-        var t = 0L
-        fun run(ms: Long) { val end = t + ms; while (t < end) { looper.idleFor(25, TimeUnit.MILLISECONDS); Thread.sleep(1); t += 25; act.window.decorView.draw(Canvas(big)) } }
-        run(1500)
-        val dir = File("build/screenshots").apply { mkdirs() }
-        val fps = 20; val frames = 13 * fps
-        java.io.DataOutputStream(File(dir, "spider.rgb").outputStream().buffered()).use { out ->
-            out.writeInt(640); out.writeInt(240); out.writeInt(frames); out.writeInt(100 / fps)
-            app.mg4dash.car.CarProps.setInt(app.mg4dash.car.CarProps.BMS_PACK_CRNT, 330, "test")
-            for (f in 0 until frames) {
-                run(1000L / fps)
-                if (f == 60) app.mg4dash.car.CarProps.setInt(app.mg4dash.car.CarProps.BMS_PACK_CRNT, 20, "test")
-                big.eraseColor(0); act.window.decorView.draw(Canvas(big))
-                if (f == 24) File(dir, "spider_splat.png").outputStream().use { big.compress(Bitmap.CompressFormat.PNG, 100, it) }
-                val small = Bitmap.createScaledBitmap(big, 640, 240, true)
-                val px = IntArray(640 * 240); small.getPixels(px, 0, 640, 0, 0, 640, 240)
-                px.forEach { out.writeInt(it) }
-            }
-        }
-    }
 
     private fun boost(style: Int, name: String) {
         val sp = org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE)
@@ -721,7 +693,7 @@ class ScreenshotTest {
         val sp = org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE)
         sp.edit().putInt("theme_mode", 1).commit()
         val act = Robolectric.buildActivity(SettingsActivity::class.java).setup().get()
-        val names = mapOf(1 to "rocket", 2 to "lightning", 3 to "flames", 5 to "pumpkin")
+        val names = mapOf(2 to "lightning", 3 to "flames")
         val times = longArrayOf(150, 300, 500, 900, 1300, 2500, 2800, 3200, 4200)
         for ((style, name) in names) {
             val root = android.widget.FrameLayout(act)

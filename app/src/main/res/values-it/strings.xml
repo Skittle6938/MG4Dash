@@ -408,7 +408,6 @@
     <string name="st_power_fx_desc" formatted="false">Pedale a tavoletta (oltre l\'80 % della potenza massima dell\'auto) e vedrai… poi il picco raggiunto (kW e CV) resta visibile per 10 secondi.</string>
     <string name="fx_none">Nessuna</string>
     <string name="fx_random">Casuale</string>
-    <string name="fx_rocket">Razzo</string>
     <string name="fx_lightning">Fulmine</string>
     <string name="fx_flames">Fiamme</string>
     <string name="fx_peak">Picco %1$s kW · %2$s CV</string>
@@ -510,8 +509,6 @@
     <string name="projection_no_phone">Nessun telefono collegato ad Android Auto o CarPlay</string>
     <string name="st_power_va">Tensione e corrente sotto la barra di potenza</string>
     <string name="st_power_va_desc">Attuali, minimo e massimo del viaggio. Disattivato: potenza e consumo medio più grandi.</string>
-    <string name="fx_pumpkin">Zucca di Halloween</string>
-    <string name="fx_spider">Tarantola di Halloween</string>
     <string name="en_clear_curve">Cancella la curva</string>
     <string name="en_clear_confirm">Cancellare la curva «%1$s» e i suoi totali (kWh, km)?</string>
     <string name="st_cc_stopped">Curva dei consumi: anche da fermo</string>
