@@ -197,7 +197,8 @@ object Dock {
         }
         val s = (iconDp * 0.5f * d).toInt()
         cell.addView(badge, android.widget.FrameLayout.LayoutParams(s, s, android.view.Gravity.CENTER).apply {
-            leftMargin = (iconDp * 0.75f * d).toInt(); topMargin = -(iconDp * 0.6f * d).toInt()
+            // Décalage depuis le centre de la case : 0,75 × icône débordait de la case à droite et rognait le Wi-Fi (#38)
+            leftMargin = (iconDp * 0.55f * d).toInt(); topMargin = -(iconDp * 0.5f * d).toInt()
         })
         val tick = object : Runnable {
             override fun run() {
