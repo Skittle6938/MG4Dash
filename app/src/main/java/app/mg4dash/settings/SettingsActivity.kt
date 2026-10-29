@@ -649,7 +649,12 @@ class SettingsActivity : AppCompatActivity() {
         if (usb == null) { app.mg4dash.ui.Toasts.show(this, R.string.st_copy_sysui_nousb, long = true); return }
         app.mg4dash.ui.Toasts.show(this, R.string.st_copy_sysui_busy)
         Thread {
-            val out = java.io.File(usb, "mg4dash_systemui").apply { mkdirs() }
+            // Racine de la clé non accessible en écriture (beta 10, SWI165 : « No such file or directory ») :
+            // dossier propre à MG4Dash sur la clé (Android/data/app.mg4dash/files), toujours autorisé
+            val own = getExternalFilesDirs(null).firstOrNull { it != null && it.absolutePath.startsWith(usb.absolutePath) }
+            val out = (if (java.io.File(usb, "mg4dash_systemui").let { it.mkdirs() || it.isDirectory } && java.io.File(usb, "mg4dash_systemui").canWrite())
+                java.io.File(usb, "mg4dash_systemui") else java.io.File(own ?: usb, "mg4dash_systemui").apply { mkdirs() })
+            Log.i("Settings", "system UI copy to ${out.absolutePath}")
             val pkgs = packageManager.getInstalledApplications(0).filter { a ->
                 a.packageName == "com.android.systemui" ||
                     a.packageName.startsWith("com.saicmotor") && listOf("hvac", "aircondition", "climate", "systemui").any { it in a.packageName.lowercase() }
@@ -662,7 +667,8 @@ class SettingsActivity : AppCompatActivity() {
                 Log.i("Settings", "copied ${a.packageName} ($path, ${src.length() / 1024} KB) to USB")
             } catch (e: Exception) { Log.w("Settings", "copy ${a.packageName}: ${e.message}") }
             runOnUiThread {
-                if (n > 0) app.mg4dash.ui.Toasts.show(this, getString(R.string.st_copy_sysui_done, n), long = true)
+                if (n > 0) app.mg4dash.ui.Toasts.show(this, getString(R.string.st_copy_sysui_done, n) + "
+" + out.absolutePath.removePrefix(usb.absolutePath).trimStart('/'), long = true)
                 else app.mg4dash.ui.Toasts.show(this, R.string.st_copy_sysui_fail, long = true)
             }
         }.start()
