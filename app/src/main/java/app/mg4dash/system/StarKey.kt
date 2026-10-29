@@ -1,6 +1,8 @@
 package app.mg4dash.system
 
+import app.mg4dash.car.CarBridge
 import app.mg4dash.car.CarProps
+import app.mg4dash.car.SaicHvacPage
 import android.content.BroadcastReceiver
 import android.content.ComponentName
 import android.content.Context
@@ -21,6 +23,8 @@ object StarKey {
     private const val AVM_OPEN_MS = 3 * 60_000L
     private const val ACTION = "com.saic.keyevent.hardkey.report"
     private const val KEY_LEFT_STAR = 5
+    /** Touche clim sous l'écran, anciens firmwares (relevée dans leur SystemUI, #62). */
+    private const val KEY_HVAC = 288
     /** Joystick droit (codes relevés sur SWI173, #33, et dans MG4Control) : 299 gauche, 300 droite, 301 OK. */
     private const val JOY_LEFT = 299
     private const val JOY_RIGHT = 300
@@ -81,6 +85,14 @@ object StarKey {
                     }
                     return
                 }
+                // Touche clim sous l'écran (288, anciens firmwares) : SystemUI ouvre sa page clim par-dessus
+                // MG4Dash ; on la referme juste après et on ouvre la page Clim de MG4Dash (#62)
+                if (code == KEY_HVAC && !down && !long && Firmware.family != Firmware.Family.A9 && Prefs(app).hideSaicClimate) {
+                    android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
+                        Thread { if (SaicHvacPage.close(app)) android.os.Handler(android.os.Looper.getMainLooper()).post { CarBridge.openOwnClimate(app) } }.start()
+                    }, 250)
+                    return
+                }
                 if (down || long) return
                 // Codes des « * » selon le firmware : 5 (gauche) sur le launcher SWI69 ; 17 (gauche) et
                 // 286 ou 18 (droit) ailleurs, relevés sur SWI173 (#33) comme dans MG4Control
@@ -99,6 +111,7 @@ object StarKey {
                 starAvm(app)
             }
         }
+        SaicHvacPage.prepare(app)
         try { app.registerReceiver(receiver, IntentFilter(ACTION)); Log.i(TAG, "listening to steering wheel buttons") }
         catch (e: Exception) { Log.w(TAG, "listening failed: ${e.message}") }
     }
