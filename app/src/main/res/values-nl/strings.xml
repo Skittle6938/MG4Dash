@@ -408,7 +408,6 @@
     <string name="st_power_fx_desc" formatted="false">Plankgas (boven 80 % van het maximale vermogen van de auto) en je zult het zien… daarna blijft de bereikte piek (kW en pk) 10 seconden in beeld.</string>
     <string name="fx_none">Geen</string>
     <string name="fx_random">Willekeurig</string>
-    <string name="fx_rocket">Raket</string>
     <string name="fx_lightning">Bliksem</string>
     <string name="fx_flames">Vlammen</string>
     <string name="fx_peak">Piek %1$s kW · %2$s pk</string>
@@ -510,8 +509,6 @@
     <string name="projection_no_phone">Geen telefoon verbonden voor Android Auto of CarPlay</string>
     <string name="st_power_va">Spanning en stroom onder de vermogensbalk</string>
     <string name="st_power_va_desc">Huidig, laagste en hoogste van de rit. Uit: vermogen en gemiddeld verbruik groter.</string>
-    <string name="fx_pumpkin">Halloweenpompoen</string>
-    <string name="fx_spider">Halloweenvogelspin</string>
     <string name="en_clear_curve">Curve wissen</string>
     <string name="en_clear_confirm">De curve „%1$s” en de totalen (kWh, km) wissen?</string>
     <string name="st_cc_stopped">Verbruikscurve: ook stilstaand</string>

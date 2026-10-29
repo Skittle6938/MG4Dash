@@ -67,13 +67,12 @@ Settings › Home › *Live power in the energy card* replaces the drive mode an
 Swipe or tap it to switch between its pages:
 
 - **Trip energy**: one bar and the share of driving, climate control and accessories since start-up (details on the Energy page).
-- **Live power**: kW drawn from or recovered into the battery every second, on a two-way bar from zero with a 10 s peak marker, the trip average, voltage and current. It hides a **full-throttle special**: floor it and a big rocket crosses the whole screen (slowing down in the middle, its smoke fading quickly), or lightning, or flames, then the peak reached shows (Settings › Look › Live power). Around Halloween (25 October to 2 November) a jack-o'-lantern joins them 🎃. This page leaves the widget when *Live power in the energy card* is on.
+- **Live power**: kW drawn from or recovered into the battery every second, on a two-way bar from zero with a 10 s peak marker, the trip average, voltage and current. It hides a **full-throttle special**: floor it and lightning or flames fill the card, then the peak reached shows (Settings › Look › Live power). This page leaves the widget when *Live power in the energy card* is on.
 - **Phone**: favourite contacts, 3 by default (tap to call, long press to change one or to pick 2, 3, 4, 6 or 8 shortcuts, on one or two rows; contacts already chosen are kept).
 
 | | |
 |---|---|
 | ![Live power](docs/screenshots/home_widget_power.png?v=21) | ![Phone favourites](docs/screenshots/home_widget_phone.png?v=21) |
-| ![Full-throttle special](docs/screenshots/boost_rocket_on.png?v=21) | |
 
 ## Map card
 
