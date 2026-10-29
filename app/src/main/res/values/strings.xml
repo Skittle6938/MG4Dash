@@ -408,7 +408,6 @@
     <string name="st_power_fx_desc" formatted="false">Floor it (above 80 % of the car\'s maximum power) and see what happens… then the peak reached (kW and hp) stays on screen for 10 seconds.</string>
     <string name="fx_none">None</string>
     <string name="fx_random">Random</string>
-    <string name="fx_rocket">Rocket</string>
     <string name="fx_lightning">Lightning</string>
     <string name="fx_flames">Flames</string>
     <string name="fx_peak">Peak %1$s kW · %2$s hp</string>
@@ -510,8 +509,6 @@
     <string name="projection_no_phone">No phone connected for Android Auto or CarPlay</string>
     <string name="st_power_va">Voltage and current under the power bar</string>
     <string name="st_power_va_desc">Current, lowest and highest of the trip. Off: power and average consumption shown bigger.</string>
-    <string name="fx_pumpkin">Halloween pumpkin</string>
-    <string name="fx_spider">Halloween tarantula</string>
     <string name="en_clear_curve">Clear the curve</string>
     <string name="en_clear_confirm">Clear the \"%1$s\" curve and its totals (kWh, km)?</string>
     <string name="st_cc_stopped">Consumption curve: also when stopped</string>

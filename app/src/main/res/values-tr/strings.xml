@@ -408,7 +408,6 @@
     <string name="st_power_fx_desc" formatted="false">Gaza sonuna kadar basın (aracın maksimum gücünün %80\'inin üzerinde) ve ne olacağını görün… ardından ulaşılan tepe değer (kW ve bg) 10 saniye ekranda kalır.</string>
     <string name="fx_none">Yok</string>
     <string name="fx_random">Rastgele</string>
-    <string name="fx_rocket">Roket</string>
     <string name="fx_lightning">Şimşek</string>
     <string name="fx_flames">Alevler</string>
     <string name="fx_peak">Tepe %1$s kW · %2$s bg</string>
@@ -510,8 +509,6 @@
     <string name="projection_no_phone">Android Auto veya CarPlay için bağlı telefon yok</string>
     <string name="st_power_va">Güç çubuğunun altında gerilim ve akım</string>
     <string name="st_power_va_desc">Anlık, yolculuğun en düşük ve en yüksek değerleri. Kapalı: güç ve ortalama tüketim daha büyük.</string>
-    <string name="fx_pumpkin">Cadılar Bayramı balkabağı</string>
-    <string name="fx_spider">Cadılar Bayramı tarantulası</string>
     <string name="en_clear_curve">Eğriyi temizle</string>
     <string name="en_clear_confirm">\"%1$s\" eğrisi ve toplamları (kWh, km) temizlensin mi?</string>
     <string name="st_cc_stopped">Tüketim eğrisi: dururken de</string>
