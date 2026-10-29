@@ -305,7 +305,7 @@ class Prefs(context: Context) {
 
     /** Thème : fond (0 bleu nuit, 1 noir, 2 anthracite, 3 vert sombre, 4 bordeaux) et boutons (0 bleu, 1 gris, 2 rouge, 3 vert, 4 orange). */
     var themeBackground: Int
-        get() = sp.getInt("theme_bg", 0)
+        get() = sp.getInt("theme_bg", 1)   // noir par défaut (Marc, 29/10)
         set(v) = sp.edit().putInt("theme_bg", v).commit().let { }
     /** Horloge en 12 h sans AM / PM ; 24 h par défaut (#18). */
     var clock12: Boolean
