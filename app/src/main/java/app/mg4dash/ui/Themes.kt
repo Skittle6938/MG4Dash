@@ -48,7 +48,9 @@ object Themes {
             // Mode nuit d'Android déjà donné par la voiture : lisible tout de suite, sans attendre (#64)
             val ui = context.resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK
             if (ui == android.content.res.Configuration.UI_MODE_NIGHT_YES) return true
-            return stableNight ?: sp.getBoolean("last_night", false)
+            // Toujours sombre tant que les feux ne sont pas lus (#64, idée de mquiambao00) : un démarrage
+            // de nuit n'éblouit plus ; de jour, on passe en clair dès la première lecture
+            return stableNight ?: true
         }
         val raw = rawNight(context)
         // Première lecture des feux depuis le démarrage : appliquée tout de suite, sans le délai anti-tunnel.
