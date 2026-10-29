@@ -507,14 +507,24 @@ object CarBridge {
 
     /**
      * #62 : sur ces firmwares, la page clim SAIC est une fenêtre système « hvac page » posée par-dessus
-     * MG4Dash (journal de lopezjm2001, SWI165). Un « retour » ne la referme pas (essais du 28/10) : on se
-     * contente de la noter dans le journal, le temps de trouver comment l'empêcher d'apparaître.
+     * MG4Dash (journal de lopezjm2001, SWI165). Un « retour » ne la referme pas ; on la ferme par le
+     * service de SystemUI ([SaicHvacPage]) et on ouvre la page Clim de MG4Dash à la place (réglage #48).
      */
     private fun closeClimateWindow() {
         val focus = focusedWindow()
         Log.i(TAG, "climate window: ${focus ?: "focus unknown"}")
-        if (focus?.contains("hvac page") == true) logHvacWindow("shown")
+        if (focus?.contains("hvac page") != true) return
+        logHvacWindow("shown")
+        val ctx = appContext ?: return
+        if (!app.mg4dash.system.Prefs(ctx).hideSaicClimate) return
+        if (SaicHvacPage.close(ctx)) openOwnClimate(ctx)
     }
+
+    /** Page Clim de MG4Dash, à la place de celle de SAIC (#62). */
+    fun openOwnClimate(ctx: Context) = try {
+        ctx.startActivity(android.content.Intent(ctx, app.mg4dash.pages.ClimateActivity::class.java)
+            .addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK or android.content.Intent.FLAG_ACTIVITY_REORDER_TO_FRONT))
+    } catch (e: Exception) { Log.w(TAG, "climate page: ${e.message}") }
 
     private fun watchSaicClimate(ctx: Context) {
         if (Firmware.family == Firmware.Family.A9) return
