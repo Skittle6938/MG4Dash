@@ -70,6 +70,16 @@ class VehicleActivity : PageActivity() {
         drive.addView(rRow, kit.lp(-1, -2, t = 8))
         drive.addView(kit.divider(), kit.lp(-1, 1, t = 18))
         listOf(R.string.vh_one_pedal, R.string.vh_steering, R.string.vh_brake, R.string.vh_endurance).forEach { addInfo(drive, it) }
+        lifecycleScope.launch {
+            repeatOnLifecycle(androidx.lifecycle.Lifecycle.State.STARTED) {
+                while (true) {
+                    val (cpu, mem) = withContext(Dispatchers.IO) { app.mg4dash.system.HeadUnitLoad.cpuPercent() to app.mg4dash.system.HeadUnitLoad.memoryMb() }
+                    set(R.string.vh_cpu, cpu?.let { "$it %" } ?: "—")
+                    set(R.string.vh_ram, mem?.let { (u, t) -> String.format(Locale.getDefault(), "%,d / %,d Mo", u, t).replace("Mo", getString(R.string.unit_mb)) } ?: "—")
+                    kotlinx.coroutines.delay(2_000)
+                }
+            }
+        }
 
         // ── Aides à la conduite ──
         val adas = kit.panel(getString(R.string.vh_adas))
@@ -115,7 +125,13 @@ class VehicleActivity : PageActivity() {
 
         body.addView(drive, kit.lp(0, -1, 1f, r = 6))
         body.addView(mid, kit.lp(0, -1, 1f, l = 6, r = 6))
-        body.addView(state, kit.lp(0, -1, 1f, l = 6))
+        // Charge de l'autoradio (#69) : section à part sous l'état du véhicule, processeur et mémoire relus toutes les 2 s
+        val unit = kit.panel(getString(R.string.vh_head_unit))
+        listOf(R.string.vh_cpu, R.string.vh_ram).forEach { addInfo(unit, it) }
+        val right = android.widget.LinearLayout(this).apply { orientation = android.widget.LinearLayout.VERTICAL }
+        right.addView(state, kit.lp(-1, 0, 1f))
+        right.addView(unit, kit.lp(-1, -2, t = 12))
+        body.addView(right, kit.lp(0, -1, 1f, l = 6))
     }
 
     private lateinit var sohDetail: TextView
