@@ -66,8 +66,22 @@ object Updater {
         return null
     }
 
-    /** Notes de release en texte simple (le markdown de GitHub sans gras ni code, puces « • »). */
-    fun plainNotes(md: String): String = md
+    /** Nom des blocs de langue dans les notes de release (#73) : `<details><summary>Français</summary> … </details>`. */
+    private val LANG_NAMES = mapOf("fr" to "Français", "de" to "Deutsch", "es" to "Español", "it" to "Italiano", "nl" to "Nederlands", "tr" to "Türkçe")
+
+    /**
+     * Notes dans la langue de l'autoradio (#73) : le bloc repliable de cette langue s'il existe, sinon le
+     * texte anglais (tout ce qui précède le premier bloc). Les anciennes notes sans blocs restent inchangées.
+     */
+    fun localNotes(md: String, lang: String = java.util.Locale.getDefault().language): String {
+        val english = md.substringBefore("<details>").trim()
+        val name = LANG_NAMES[lang] ?: return english
+        val re = Regex("""<details>\s*<summary>\s*""" + Regex.escape(name) + """\s*</summary>(.*?)</details>""", RegexOption.DOT_MATCHES_ALL)
+        return re.find(md)?.groupValues?.get(1)?.trim()?.takeIf { it.isNotEmpty() } ?: english
+    }
+
+    /** Notes de release en texte simple (le markdown de GitHub sans gras ni code, puces « • »), dans la langue de l'autoradio. */
+    fun plainNotes(md: String): String = localNotes(md)
         .replace("**", "").replace("`", "")
         .lines().joinToString("\n") { l -> l.trim().let { if (it.startsWith("- ")) "•  " + it.drop(2) else it } }
         .trim()

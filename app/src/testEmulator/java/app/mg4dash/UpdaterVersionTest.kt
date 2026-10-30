@@ -18,4 +18,13 @@ class UpdaterVersionTest {
         assertFalse(Updater.isNewer("1.4.1-beta0", "1.4.1-beta0"))
         assertTrue(Updater.isNewer("0.8.10", "0.8.2"))
     }
+
+    @Test fun notesLanguage() {
+        val md = "**Beta 1** english\n\n<details><summary>Français</summary>\n\n**Beta 1** français\n</details>\n<details><summary>Deutsch</summary>\ndeutsch\n</details>"
+        org.junit.Assert.assertEquals("**Beta 1** english", Updater.localNotes(md, "en"))
+        org.junit.Assert.assertEquals("**Beta 1** français", Updater.localNotes(md, "fr"))
+        org.junit.Assert.assertEquals("deutsch", Updater.localNotes(md, "de"))
+        org.junit.Assert.assertEquals("**Beta 1** english", Updater.localNotes(md, "it"))
+        org.junit.Assert.assertEquals("old notes", Updater.localNotes("old notes", "fr"))
+    }
 }
