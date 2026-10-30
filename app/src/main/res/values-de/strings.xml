@@ -526,6 +526,8 @@
     <string name="en_clear_confirm">Kurve „%1$s“ und ihre Summen (kWh, km) löschen?</string>
     <string name="st_cc_stopped">Verbrauchskurve: auch im Stand</string>
     <string name="st_cc_stopped_desc">Ein Punkt alle 2 Minuten im Stand (Klima, Zubehör). Aus: nur das Fahren zählt. Lange auf die Kurve drücken, um sie zu löschen.</string>
+    <string name="st_cons_map">Verbrauchskarte (im Test)</string>
+    <string name="st_cons_map_desc">Lernt Fahrt für Fahrt den Fahrverbrauch (ohne Klima und Zubehör, Steigungen mit der GPS-Höhe korrigiert) nach Durchschnittsgeschwindigkeit und Außentemperatur. Testfunktion, später zur Routenschätzung.</string>
     <string name="st_audio_source">Audioquelle</string>
     <string name="st_start_source">Quelle beim Start</string>
     <string name="st_src_auto">Automatisch</string>

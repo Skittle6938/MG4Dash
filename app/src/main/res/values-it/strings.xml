@@ -526,6 +526,8 @@
     <string name="en_clear_confirm">Cancellare la curva «%1$s» e i suoi totali (kWh, km)?</string>
     <string name="st_cc_stopped">Curva dei consumi: anche da fermo</string>
     <string name="st_cc_stopped_desc">Un punto ogni 2 minuti ad auto ferma (clima, accessori). Disattivato: conta solo la guida. Pressione lunga sulla curva per cancellarla.</string>
+    <string name="st_cons_map">Mappa dei consumi (in prova)</string>
+    <string name="st_cons_map_desc">Impara, viaggio dopo viaggio, il consumo di marcia (senza clima né accessori, pendenze corrette con l\'altitudine GPS) in base alla velocità media e alla temperatura esterna. Funzione in prova, servirà a stimare i percorsi.</string>
     <string name="st_audio_source">Sorgente audio</string>
     <string name="st_start_source">Sorgente all\'avvio</string>
     <string name="st_src_auto">Automatica</string>

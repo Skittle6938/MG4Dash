@@ -526,6 +526,8 @@
     <string name="en_clear_confirm">Effacer la courbe « %1$s » et ses totaux (kWh, km) ?</string>
     <string name="st_cc_stopped">Courbe de conso : aussi à l\'arrêt</string>
     <string name="st_cc_stopped_desc">Un point toutes les 2 minutes voiture arrêtée (clim, accessoires). Désactivé : seule la conduite compte. Appui long sur la courbe pour l\'effacer.</string>
+    <string name="st_cons_map">Carte de consommation (en test)</string>
+    <string name="st_cons_map_desc">Apprend, trajet après trajet, la consommation de roulage (sans clim ni accessoires, côtes corrigées avec l\'altitude GPS) selon la vitesse moyenne et la température extérieure. Fonction en test, qui servira à estimer les itinéraires.</string>
     <string name="st_audio_source">Source audio</string>
     <string name="st_start_source">Source au démarrage</string>
     <string name="st_src_auto">Automatique</string>

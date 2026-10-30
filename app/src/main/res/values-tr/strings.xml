@@ -526,6 +526,8 @@
     <string name="en_clear_confirm">\"%1$s\" eğrisi ve toplamları (kWh, km) temizlensin mi?</string>
     <string name="st_cc_stopped">Tüketim eğrisi: dururken de</string>
     <string name="st_cc_stopped_desc">Araç dururken 2 dakikada bir nokta (klima, aksesuarlar). Kapalı: yalnızca sürüş sayılır. Silmek için eğriye uzun basın.</string>
+    <string name="st_cons_map">Tüketim haritası (test aşamasında)</string>
+    <string name="st_cons_map_desc">Yolculuktan yolculuğa sürüş tüketimini (klima ve aksesuarlar hariç, eğimler GPS yüksekliğiyle düzeltilmiş) ortalama hıza ve dış sıcaklığa göre öğrenir. Test özelliği, ileride rota tahmini için kullanılacak.</string>
     <string name="st_audio_source">Ses kaynağı</string>
     <string name="st_start_source">Başlangıçtaki kaynak</string>
     <string name="st_src_auto">Otomatik</string>
