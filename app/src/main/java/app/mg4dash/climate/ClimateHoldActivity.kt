@@ -104,7 +104,7 @@ class ClimateHoldActivity : AppCompatActivity() {
         message = kit.text(getString(R.string.dm_message), 32f).apply { maxLines = 3; setLineSpacing(0f, 1.15f) }
         right.addView(message, kit.lp(-1, -2, t = 24))
         val bottom = kit.row()
-        battery = kit.text("", 34f)
+        battery = kit.text("", 34f).apply { maxLines = 2 }
         bottom.addView(battery, kit.lp(0, -2, 1f))
         bottom.addView(kit.toggleTile(getString(R.string.dm_hold_stop)) {}.apply {
             textSize = 24f
@@ -215,7 +215,35 @@ class ClimateHoldActivity : AppCompatActivity() {
             val mark = when { st.finished || i < st.run -> "✓ "; i == st.run && st.phase == ClimateHold.Phase.ON -> "▶ "; else -> "    " }
             mark + getString(R.string.dm_run_line, i + 1, hhmm(a), hhmm(b))
         }.joinToString("\n")
-        battery.text = car.batteryPercent?.let { getString(R.string.dm_battery, "$it %") } ?: ""
+        battery.text = car.batteryPercent?.let { soc ->
+            // Puissance tirée de la batterie et temps estimé avant 20 % (#72), lissés pour rester lisibles
+            val kw = powerKw()
+            val parts = mutableListOf<String>()
+            if (kw != null && kw > 0.05f) {
+                parts += String.format(java.util.Locale.getDefault(), "%.1f kW", kw)
+                if (soc > 20) {
+                    val cap = app.mg4dash.energy.BatteryCapacity.estimate(this)?.first ?: app.mg4dash.energy.BatteryCapacity.nominal(this)
+                    val h = (soc - 20) / 100f * cap / kw
+                    parts += getString(R.string.dm_to_20, left((h * 3_600_000f).toLong()))
+                }
+            }
+            val head = getString(R.string.dm_battery, "$soc %")
+            if (parts.isEmpty()) head else android.text.SpannableStringBuilder(head + "\n").apply {
+                val st = length; append(parts.joinToString("  ·  "))
+                setSpan(android.text.style.RelativeSizeSpan(0.75f), st, length, 0)
+                setSpan(android.text.style.ForegroundColorSpan(kit.color(R.color.text_sub)), st, length, 0)
+            }
+        } ?: ""
+    }
+
+    private var avgKw: Float? = null
+    /** Puissance sortant de la batterie (kW), moyenne glissante ; null si la voiture ne la donne pas. */
+    private fun powerKw(): Float? {
+        val v = app.mg4dash.car.CarProps.getFloat(app.mg4dash.car.CarProps.BMS_PACK_VOL)?.takeIf { it in 100f..900f } ?: return avgKw
+        val i = app.mg4dash.car.CarProps.getFloat(app.mg4dash.car.CarProps.BMS_PACK_CRNT) ?: return avgKw
+        val kw = v * i / 1000f
+        avgKw = avgKw?.let { it + (kw - it) * 0.2f } ?: kw
+        return avgKw
     }
 
     companion object {

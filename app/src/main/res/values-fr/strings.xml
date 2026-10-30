@@ -437,6 +437,7 @@
     <string name="dm_left">restant</string>
     <string name="dm_since">depuis l\'activation</string>
     <string name="dm_battery">Batterie %1$s</string>
+    <string name="dm_to_20">%1$s avant 20 %%</string>
     <string name="dm_hold_stop">Maintenir pour arrêter</string>
     <string name="dm_state_done">TERMINÉ · VOITURE ÉTEINTE</string>
     <string name="dm_state_battery" formatted="false">ARRÊTÉ : BATTERIE SOUS 20 %</string>

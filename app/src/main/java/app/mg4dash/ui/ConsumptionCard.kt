@@ -22,6 +22,8 @@ class ConsumptionCard(context: Context) : LinearLayout(context) {
         setTextColor(c(colorRes)); setTextSize(TypedValue.COMPLEX_UNIT_SP, sp); maxLines = 1
     }
     private val total = tv(40f, R.color.text_value)
+    /** Distance de la période (#44), à droite du total, unité en petit comme sur la carte Énergie. */
+    private val distance = tv(40f, R.color.text_value)
     private val bar = StackedBar(context)
     private val legend = LinearLayout(context).apply { orientation = VERTICAL }
     private val regen = tv(17f, R.color.accent_energy)
@@ -52,7 +54,11 @@ class ConsumptionCard(context: Context) : LinearLayout(context) {
             if (app.mg4dash.system.Prefs(context).hideTitles) visibility = INVISIBLE })
         // Période (« Depuis la recharge ▾ ») : un toucher ouvre le choix, comme le choix de la source radio
         addView(periodTv, LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT))
-        addView(total)
+        addView(LinearLayout(context).apply {
+            orientation = HORIZONTAL; gravity = Gravity.BOTTOM
+            addView(total, LayoutParams(0, LayoutParams.WRAP_CONTENT, 1f))
+            addView(distance)
+        })
         addView(bar, LayoutParams(LayoutParams.MATCH_PARENT, (22 * d).toInt()).apply { topMargin = (6 * d).toInt() })
         addView(legend, LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT).apply { topMargin = (8 * d).toInt() })
         addView(regen)
@@ -67,7 +73,8 @@ class ConsumptionCard(context: Context) : LinearLayout(context) {
         periodTv.text = periodLabels[period] + "  ▾"
         val t = EnergyMonitor.totals(period)
         val ok = t.outKwh > 0f
-        total.text = if (ok) String.format(Locale.getDefault(), "%.1f kWh", t.outKwh) else "—"
+        total.text = if (ok) smallUnit(String.format(Locale.getDefault(), "%.1f kWh", t.outKwh)) else "—"
+        distance.text = if (t.km > 0) smallUnit(app.mg4dash.system.Units.distText(context, t.km.toFloat())) else ""
         val green = c(R.color.accent_energy); val cyan = c(R.color.accent_cold); val orange = c(R.color.accent_heat)
         bar.parts = if (ok) listOf(StackedBar.Part(t.driveKwh, green), StackedBar.Part(t.climKwh, cyan), StackedBar.Part(t.accKwh, orange)) else emptyList()
         legend.removeAllViews()
@@ -87,6 +94,12 @@ class ConsumptionCard(context: Context) : LinearLayout(context) {
         chart.values = values
         chart.emptyText = if (period == 2) R.string.chart_empty_trips else R.string.chart_empty
         note.text = n
+    }
+
+    /** Unité à mi-taille après le dernier espace (« 1.6 kWh », « 12 km »). */
+    private fun smallUnit(t: String): CharSequence {
+        val i = t.lastIndexOf(' ').takeIf { it > 0 } ?: return t
+        return android.text.SpannableString(t).apply { setSpan(android.text.style.RelativeSizeSpan(0.5f), i, t.length, 0) }
     }
 
     companion object {

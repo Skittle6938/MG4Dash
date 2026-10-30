@@ -437,6 +437,7 @@
     <string name="dm_left">rimanente</string>
     <string name="dm_since">dall\'attivazione</string>
     <string name="dm_battery">Batteria %1$s</string>
+    <string name="dm_to_20">%1$s fino al 20 %%</string>
     <string name="dm_hold_stop">Tieni premuto per fermare</string>
     <string name="dm_state_done">FINITO · AUTO SPENTA</string>
     <string name="dm_state_battery" formatted="false">FERMATO: BATTERIA SOTTO 20 %</string>

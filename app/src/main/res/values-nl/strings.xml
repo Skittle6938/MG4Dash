@@ -437,6 +437,7 @@
     <string name="dm_left">resterend</string>
     <string name="dm_since">sinds activering</string>
     <string name="dm_battery">Batterij %1$s</string>
+    <string name="dm_to_20">%1$s tot 20 %%</string>
     <string name="dm_hold_stop">Ingedrukt houden om te stoppen</string>
     <string name="dm_state_done">KLAAR · AUTO UITGESCHAKELD</string>
     <string name="dm_state_battery" formatted="false">GESTOPT: BATTERIJ ONDER 20 %</string>
