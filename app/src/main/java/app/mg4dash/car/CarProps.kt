@@ -92,6 +92,26 @@ object CarProps {
 
     val ready: Boolean get() = BuildConfig.MOCK || cpm != null
 
+    /** Identifiants exposés par la voiture (lus une fois), pour choisir entre deux numéros d'une même propriété. */
+    @Volatile private var exposed: Set<Int>? = null
+    fun exposes(id: Int): Boolean {
+        val m = cpm ?: return false
+        val set = exposed ?: try {
+            @Suppress("UNCHECKED_CAST")
+            (m.javaClass.getMethod("getPropertyList").invoke(m) as List<Any>)
+                .map { it.javaClass.getMethod("getPropertyId").invoke(it) as Int }.toSet().also { exposed = it }
+        } catch (_: Throwable) { return false }
+        return id in set
+    }
+
+    /**
+     * Réchauffage de la batterie : même propriété sur tous les firmwares d'origine, zone 0, écriture 1 / 2,
+     * lecture 0 = activé ; seul le numéro change sur les autoradios Autochips Android 11 (relevé des firmwares
+     * du 2026-10-30, ID_DRVNG_PTC_HEAT = 0x21401139 au lieu de 0x2140f429).
+     */
+    val ptcHeatId: Int get() = if (!BuildConfig.MOCK && exposes(DRVNG_PTC_HEAT_A11)) DRVNG_PTC_HEAT_A11 else DRVNG_PTC_HEAT
+    const val DRVNG_PTC_HEAT_A11 = 557846841
+
     /**
      * Diagnostic : liste toutes les propriétés exposées par la voiture avec leur valeur, dans le
      * journal (balise « Props »). Sert à trouver des mesures (températures…) sans modifier quoi que ce soit.

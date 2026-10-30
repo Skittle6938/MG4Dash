@@ -82,8 +82,10 @@ class EnergyActivity : PageActivity() {
         heating = kit.toggleTile(getString(R.string.en_heating), heat = true) {
             // Écriture 1 = activer, 2 = désactiver (comme l'appli SAIC) ; la lecture rend 0 quand c'est activé
             val on = heating.isSelected
-            CarProps.setInt(CarProps.DRVNG_PTC_HEAT, if (on) 2 else 1, "battery heating")
-            heating.postDelayed({ refreshProps() }, 1500)
+            CarProps.setInt(CarProps.ptcHeatId, if (on) 2 else 1, "battery heating")
+            heatWanted = !on; heatWantedAt = android.os.SystemClock.elapsedRealtime()
+            // Relu après 3 s, comme les applis d'origine : la batterie met 2 à 3 s à rendre son nouvel état
+            heating.postDelayed({ refreshProps() }, 3000)
         }.apply { textSize = 18f; setPadding(kit.dp(20), 0, kit.dp(20), 0) }
         header.addView(heating, header.childCount - 1, kit.lp(-2, kit.dp(52), r = 12))   // avant le lien SAIC
 
@@ -236,7 +238,7 @@ class EnergyActivity : PageActivity() {
                         f(if (chrg) CarProps.CONS_ACCRY_AFT_CHRG else CarProps.CONS_ACCRY_AFT_ST, if (chrg) CarProps.OLD_ACC_AFT_CHRG else CarProps.OLD_ACC_AFT_ST) ?: -1f,
                         f(if (chrg) CarProps.CONS_RGEN_AFT_CHRG else CarProps.CONS_RGEN_AFT_ST, if (chrg) CarProps.OLD_RGEN_AFT_CHRG else CarProps.OLD_RGEN_AFT_ST) ?: -1f,
                     ),
-                    CarProps.getInt(CarProps.DRVNG_PTC_HEAT),
+                    CarProps.getInt(CarProps.ptcHeatId),
                     CarProps.getInt(CarProps.BMS_CHRG_SP_RSN),
                     CarProps.getFloat(CarProps.ONBD_CHRG_AC_VOL), CarProps.getFloat(CarProps.ONBD_CHRG_AC_CRNT),
                     CarProps.getFloat(CarProps.REGEN_RNG_AFT_CHRG),
@@ -246,9 +248,17 @@ class EnergyActivity : PageActivity() {
         }
     }
 
+    private var heatWanted: Boolean? = null
+    private var heatWantedAt = 0L
+
     private fun renderProps(p: Props) {
         reser = p.reser
-        heating.isSelected = p.heat == 0
+        // Juste après un toucher, l'état demandé est affiché jusqu'à ce que la batterie le confirme (4 s au plus) :
+        // relu trop tôt, l'ancien état faisait revenir le bouton un instant
+        val read = p.heat?.let { it == 0 }
+        val wanted = heatWanted?.takeIf { android.os.SystemClock.elapsedRealtime() - heatWantedAt < 4_000 && it != read }
+        if (read == heatWanted) heatWanted = null
+        heating.isSelected = wanted ?: (p.heat == 0)
         val locked = CarBridge.chargeLockLocked()
         gunLock.visibility = if (locked != null && VehicleState.isPlugged(CarBridge.state.value.chargeStatus)) android.view.View.VISIBLE else android.view.View.GONE
         gunLock.text = getString(if (locked == false) R.string.en_gun_lock else R.string.en_gun_unlock)
