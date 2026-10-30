@@ -82,7 +82,7 @@ class EnergyActivity : PageActivity() {
         heating = kit.toggleTile(getString(R.string.en_heating), heat = true) {
             // Écriture 1 = activer, 2 = désactiver (comme l'appli SAIC) ; la lecture rend 0 quand c'est activé
             val on = heating.isSelected
-            CarProps.setInt(CarProps.ptcHeatId, if (on) 2 else 1, "battery heating")
+            CarProps.setInt(CarProps.DRVNG_PTC_HEAT, if (on) 2 else 1, "battery heating")
             heatWanted = !on; heatWantedAt = android.os.SystemClock.elapsedRealtime()
             // Relu après 3 s, comme les applis d'origine : la batterie met 2 à 3 s à rendre son nouvel état
             heating.postDelayed({ refreshProps() }, 3000)
@@ -238,7 +238,7 @@ class EnergyActivity : PageActivity() {
                         f(if (chrg) CarProps.CONS_ACCRY_AFT_CHRG else CarProps.CONS_ACCRY_AFT_ST, if (chrg) CarProps.OLD_ACC_AFT_CHRG else CarProps.OLD_ACC_AFT_ST) ?: -1f,
                         f(if (chrg) CarProps.CONS_RGEN_AFT_CHRG else CarProps.CONS_RGEN_AFT_ST, if (chrg) CarProps.OLD_RGEN_AFT_CHRG else CarProps.OLD_RGEN_AFT_ST) ?: -1f,
                     ),
-                    CarProps.getInt(CarProps.ptcHeatId),
+                    CarProps.getInt(CarProps.DRVNG_PTC_HEAT),
                     CarProps.getInt(CarProps.BMS_CHRG_SP_RSN),
                     CarProps.getFloat(CarProps.ONBD_CHRG_AC_VOL), CarProps.getFloat(CarProps.ONBD_CHRG_AC_CRNT),
                     CarProps.getFloat(CarProps.REGEN_RNG_AFT_CHRG),
