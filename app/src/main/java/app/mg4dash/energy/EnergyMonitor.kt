@@ -156,6 +156,7 @@ object EnergyMonitor {
 
                 // Nouveau démarrage : longue pause (voiture en veille) ou premier passage
                 if (dt > SLEEP_GAP_MS || startKm < 0) {
+                    ConsumptionMap.interrupt()
                     if (km != null) startKm = km
                     _sinceStart.value = Totals()
                     _tripStartSoc.value = soc
@@ -209,6 +210,7 @@ object EnergyMonitor {
                 val i = CarProps.getFloat(CarProps.BMS_PACK_CRNT)
                 if (v == null || i == null || v < 100f || v > 900f || dt <= 0 || dt > 5000 ||
                     VehicleState.isPlugged(s.chargeStatus)) {   // en charge ou V2L : hors conso
+                    ConsumptionMap.interrupt()
                     sohSoc = null; sohKm = null; continue
                 }
                 val p = v * i
@@ -272,6 +274,8 @@ object EnergyMonitor {
                 )
                 _sinceCharge.value = add(_sinceCharge.value, km, chargeKm)
                 _sinceStart.value = add(_sinceStart.value, km, startKm)
+                // Carte de consommation (en test) : roulage seul, clim et accessoires déduits, récupération déduite
+                ConsumptionMap.tick(context, (out - clim - acc - regen) / 1000f, dt, speed, s.outsideTemp)
                 val mk = monthKey(now)
                 val m = months[mk] ?: Totals()
                 // Heure système pas encore remise à l'heure (2019 au réveil) : mois inconnu, km gardés pour après

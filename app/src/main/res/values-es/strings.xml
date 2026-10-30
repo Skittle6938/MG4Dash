@@ -526,6 +526,8 @@
     <string name="en_clear_confirm">¿Borrar la curva «%1$s» y sus totales (kWh, km)?</string>
     <string name="st_cc_stopped">Curva de consumo: también parado</string>
     <string name="st_cc_stopped_desc">Un punto cada 2 minutos con el coche parado (clima, accesorios). Desactivado: solo cuenta la conducción. Pulsación larga en la curva para borrarla.</string>
+    <string name="st_cons_map">Mapa de consumo (en pruebas)</string>
+    <string name="st_cons_map_desc">Aprende, viaje tras viaje, el consumo de marcha (sin climatización ni accesorios, pendientes corregidas con la altitud GPS) según la velocidad media y la temperatura exterior. Función en pruebas, servirá para estimar rutas.</string>
     <string name="st_audio_source">Fuente de audio</string>
     <string name="st_start_source">Fuente al arrancar</string>
     <string name="st_src_auto">Automática</string>

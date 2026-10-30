@@ -526,6 +526,8 @@
     <string name="en_clear_confirm">Clear the \"%1$s\" curve and its totals (kWh, km)?</string>
     <string name="st_cc_stopped">Consumption curve: also when stopped</string>
     <string name="st_cc_stopped_desc">One point every 2 minutes when the car is stopped (climate, accessories). Off: only driving counts. Long press the curve to clear it.</string>
+    <string name="st_cons_map">Consumption map (in test)</string>
+    <string name="st_cons_map_desc">Learns, trip after trip, the driving consumption (without climate and accessories, slopes corrected with the GPS altitude) by average speed and outside temperature. Test feature, used later to estimate routes.</string>
     <string name="st_audio_source">Audio source</string>
     <string name="st_start_source">Source at startup</string>
     <string name="st_src_auto">Automatic</string>

@@ -203,6 +203,8 @@ class SettingsActivity : AppCompatActivity() {
         row(energy, *choiceButtons(models.map { "$it kWh" }, { models.indexOf(prefs.batteryModel) }) { prefs.batteryModel = models[it] })
         toggle(energy, R.string.st_xpower, R.string.st_xpower_desc, { prefs.xpower }) { prefs.xpower = it }
         toggle(energy, R.string.st_cc_stopped, R.string.st_cc_stopped_desc, { prefs.raw.getBoolean("cc_stopped", true) }) { prefs.raw.edit().putBoolean("cc_stopped", it).apply() }
+        // Carte de consommation vitesse × température (en test, désactivée par défaut)
+        toggle(energy, R.string.st_cons_map, R.string.st_cons_map_desc, { prefs.consumptionMap }) { prefs.consumptionMap = it }
         powerFxSetting(panel(lookR, getString(R.string.sw_power)))
 
         // ════ Colonne droite : système, connexions, diagnostic ════

@@ -526,6 +526,8 @@
     <string name="en_clear_confirm">De curve „%1$s” en de totalen (kWh, km) wissen?</string>
     <string name="st_cc_stopped">Verbruikscurve: ook stilstaand</string>
     <string name="st_cc_stopped_desc">Eén punt per 2 minuten als de auto stilstaat (klimaat, accessoires). Uit: alleen rijden telt. Lang drukken op de curve om hem te wissen.</string>
+    <string name="st_cons_map">Verbruikskaart (in test)</string>
+    <string name="st_cons_map_desc">Leert rit na rit het rijverbruik (zonder airco en accessoires, hellingen gecorrigeerd met de GPS-hoogte) per gemiddelde snelheid en buitentemperatuur. Testfunctie, later voor routeschattingen.</string>
     <string name="st_audio_source">Audiobron</string>
     <string name="st_start_source">Bron bij het starten</string>
     <string name="st_src_auto">Automatisch</string>
