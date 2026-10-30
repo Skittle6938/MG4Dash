@@ -881,9 +881,9 @@ object MediaHub {
         val title = if (swap) rawArtist.trim() else rawTitle
         val artist = if (swap) rawTitle.trim() else rawArtist
         val album = md?.getString(MediaMetadata.METADATA_KEY_ALBUM) ?: ""
-        val bmp = md?.getBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART)
+        val bmp = (md?.getBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART)
             ?: md?.getBitmap(MediaMetadata.METADATA_KEY_ART)
-            ?: md?.getBitmap(MediaMetadata.METADATA_KEY_DISPLAY_ICON)
+            ?: md?.getBitmap(MediaMetadata.METADATA_KEY_DISPLAY_ICON))?.takeUnless { blank(it) }
         val np = NowPlaying(
             available = true,
             packageName = c.packageName,
@@ -958,10 +958,30 @@ object MediaHub {
         when (uri.scheme) {
             "content", "android.resource" -> ctx.contentResolver.openInputStream(uri)?.use { BitmapFactory.decodeStream(it) }
             else -> File(uri.path ?: decoded).takeIf { it.canRead() }?.let { BitmapFactory.decodeFile(it.path) }
-        }
+        }?.takeUnless { blank(it) }
     } catch (e: Exception) {
         Log.w(TAG, "album art unreadable: ${e.message}"); null
     }
+
+    /**
+     * Image vide (une seule couleur) : en Bluetooth, le téléphone envoie parfois une vignette vierge avant la
+     * vraie pochette (#36). On la traite comme « pas encore de pochette » : on garde la précédente du même
+     * morceau ou on réessaie, au lieu d'afficher un carré vide.
+     */
+    private fun blank(b: Bitmap): Boolean = try {
+        val w = b.width; val h = b.height
+        if (w < 4 || h < 4) true else {
+            val c0 = b.getPixel(w / 2, h / 2)
+            val same = listOf(w / 4 to h / 4, 3 * w / 4 to h / 4, w / 4 to 3 * h / 4, 3 * w / 4 to 3 * h / 4, w / 2 to h / 4, w / 2 to 3 * h / 4)
+                .all { (x, y) -> close(b.getPixel(x, y), c0) }
+            same
+        }
+    } catch (_: Exception) { false }
+
+    private fun close(a: Int, b: Int): Boolean =
+        kotlin.math.abs(android.graphics.Color.red(a) - android.graphics.Color.red(b)) < 8 &&
+            kotlin.math.abs(android.graphics.Color.green(a) - android.graphics.Color.green(b)) < 8 &&
+            kotlin.math.abs(android.graphics.Color.blue(a) - android.graphics.Color.blue(b)) < 8
 
     /** Radio de l'ancien SDK (SWI68…) : service SAIC au lieu d'un MediaBrowserService. */
     private val legacyRadio: Boolean get() = app.mg4dash.system.Firmware.family == app.mg4dash.system.Firmware.Family.LEGACY
