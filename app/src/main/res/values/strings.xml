@@ -437,6 +437,7 @@
     <string name="dm_left">left</string>
     <string name="dm_since">since activation</string>
     <string name="dm_battery">Battery %1$s</string>
+    <string name="dm_to_20">%1$s to 20 %%</string>
     <string name="dm_hold_stop">Hold to stop</string>
     <string name="dm_state_done">FINISHED · CAR SWITCHED OFF</string>
     <string name="dm_state_battery" formatted="false">STOPPED: BATTERY BELOW 20 %</string>

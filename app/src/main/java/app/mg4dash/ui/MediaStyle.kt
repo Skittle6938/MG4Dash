@@ -174,8 +174,10 @@ class MediaStyle private constructor(
         if (!::frame.isInitialized) return
         // Image toute noire (station sans pochette) : traitée comme une absence d'image
         val art = source?.takeIf { !isBlank(it) }
-        showOutline(art == null && radio)
-        if (art == null && radio) {
+        // Sans image, quelle que soit la source (ou rien en lecture) : texte sur le panneau et contour estompé,
+        // comme la radio FM (#36), au lieu d'un fond plein avec une note de musique
+        showOutline(art == null)
+        if (art == null) {
             styleTexts(true)
             lastArt = null; shownFor = 0
             picture.setImageDrawable(null)
