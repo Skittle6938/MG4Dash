@@ -435,6 +435,7 @@ dm_clim_off|CLIMATE OFF|CLIM ARRÊTÉE|KLIMA AUS|CLIMA APAGADO|CLIMA SPENTO|AIRC
 dm_left|left|restant|verbleibend|restante|rimanente|resterend|kaldı
 dm_since|since activation|depuis l'activation|seit der Aktivierung|desde la activación|dall'attivazione|sinds activering|etkinleştirmeden beri
 dm_battery|Battery %1$s|Batterie %1$s|Akku %1$s|Batería %1$s|Batteria %1$s|Batterij %1$s|Batarya %1$s
+dm_to_20|%1$s to 20 %%|%1$s avant 20 %%|%1$s bis 20 %%|%1$s hasta 20 %%|%1$s fino al 20 %%|%1$s tot 20 %%|%%20'ye %1$s
 dm_hold_stop|Hold to stop|Maintenir pour arrêter|Zum Stoppen halten|Mantener para detener|Tieni premuto per fermare|Ingedrukt houden om te stoppen|Durdurmak için basılı tutun
 dm_state_done|FINISHED · CAR SWITCHED OFF|TERMINÉ · VOITURE ÉTEINTE|BEENDET · AUTO AUSGESCHALTET|TERMINADO · COCHE APAGADO|FINITO · AUTO SPENTA|KLAAR · AUTO UITGESCHAKELD|BİTTİ · ARAÇ KAPATILDI
 dm_state_battery|STOPPED: BATTERY BELOW 20 %|ARRÊTÉ : BATTERIE SOUS 20 %|GESTOPPT: AKKU UNTER 20 %|DETENIDO: BATERÍA BAJO 20 %|FERMATO: BATTERIA SOTTO 20 %|GESTOPT: BATTERIJ ONDER 20 %|DURDU: BATARYA %20'NİN ALTINDA
