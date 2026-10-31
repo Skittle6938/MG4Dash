@@ -242,6 +242,11 @@ class Prefs(context: Context) {
         set(v) = sp.edit().putBoolean("hide_saic_climate", v).apply()
 
     /** Passage jour / nuit : true = attente de 5 s et fondu (défaut), false = immédiat. */
+    /** Mode auto : nuit aussi entre le coucher et le lever du soleil, même feux éteints (#64). */
+    var nightBySun: Boolean
+        get() = sp.getBoolean("night_by_sun", false)
+        set(v) = sp.edit().putBoolean("night_by_sun", v).apply()
+
     var themeSmooth: Boolean
         get() = sp.getBoolean("theme_smooth", true)
         set(v) = sp.edit().putBoolean("theme_smooth", v).apply()

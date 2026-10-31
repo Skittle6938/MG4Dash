@@ -161,6 +161,14 @@ class SettingsActivity : AppCompatActivity() {
             if (prefs.themeMode != it) { prefs.themeMode = it; onThemeChanged() }
         })
         toggle(theme, R.string.st_theme_smooth, R.string.st_theme_smooth_desc, { prefs.themeSmooth }) { prefs.themeSmooth = it }
+        toggle(theme, R.string.st_night_sun, R.string.st_night_sun_desc, { prefs.nightBySun }) { prefs.nightBySun = it; app.mg4dash.ui.Themes.publish(this) }
+        // Horaires du jour à la position de la voiture, pour information
+        text(theme, app.mg4dash.system.SunTimes.position(this)?.let { (lat, lon) ->
+            app.mg4dash.system.SunTimes.of(lat, lon)?.let { (rise, set) ->
+                val f = android.text.format.DateFormat.getTimeFormat(this)
+                getString(R.string.st_night_sun_today, f.format(java.util.Date(set)), f.format(java.util.Date(rise)))
+            }
+        } ?: getString(R.string.st_night_sun_nopos), 15f, R.color.text_sub)
         text(theme, getString(R.string.st_clock), 18f, R.color.text_value)
         row(theme, *styleButtons(listOf(R.string.st_clock_24, R.string.st_clock_12), { if (prefs.clock12) 1 else 0 }) { prefs.clock12 = it == 1 })
         text(theme, getString(R.string.st_panel_outline), 18f, R.color.text_value)

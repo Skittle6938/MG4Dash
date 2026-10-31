@@ -82,6 +82,8 @@ object Themes {
     private fun rawNight(context: Context): Boolean {
         val ui = context.resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK
         if (ui == android.content.res.Configuration.UI_MODE_NIGHT_YES) return true
+        // Option : nuit après le coucher du soleil, même feux de position éteints (#64)
+        if (Prefs(context).nightBySun && app.mg4dash.system.SunTimes.isNight(context)) return true
         // Relevé sur la voiture : feux allumés → VEH_SIDE_LGHT = 3 et PMS_SYSTEM_DAY_NIGHT_MODE = 3 (zone 0x1000000)
         return try {
             val side = app.mg4dash.car.CarProps.readAny(557880099)
