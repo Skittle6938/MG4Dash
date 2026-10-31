@@ -528,6 +528,25 @@
     <string name="st_cc_stopped_desc">One point every 2 minutes when the car is stopped (climate, accessories). Off: only driving counts. Long press the curve to clear it.</string>
     <string name="st_cons_map">Consumption map (in test)</string>
     <string name="st_cons_map_desc">Learns, trip after trip, the driving consumption (without climate and accessories, slopes corrected with the GPS altitude) by average speed and outside temperature. Test feature, used later to estimate routes.</string>
+    <string name="cm_title">Consumption map (in test)</string>
+    <string name="cm_open">Show the consumption map</string>
+    <string name="cm_grid_title">DRIVING CONSUMPTION (kWh/100 km) · SPEED × OUTSIDE TEMPERATURE</string>
+    <string name="cm_about">ABOUT</string>
+    <string name="cm_summary">%1$d km measured · %2$d of %3$d cells filled</string>
+    <string name="cm_legend">Colour: green = low, red = high consumption. Pale = few km measured, solid = 20 km or more. Grey = no data yet. Climate and accessories are not included; slopes are corrected with the GPS altitude.</string>
+    <string name="cm_tap">Tap a cell for its details.</string>
+    <string name="cm_cell">%1$s · %2$s\n%3$s kWh/100 km (± %4$s)\n%5$d km in %6$d segments</string>
+    <string name="cm_cell_empty">%1$s · %2$s\nNo data yet</string>
+    <string name="cm_export">Export</string>
+    <string name="cm_import">Import</string>
+    <string name="cm_clear">Clear</string>
+    <string name="cm_test_note">Test feature: values may be wrong.</string>
+    <string name="cm_sim_clim">Simulate with the climate on (≈ %1$d W)</string>
+    <string name="cm_sim_note">Including the climate: estimate</string>
+    <string name="cm_clear_confirm">Clear the whole consumption map?</string>
+    <string name="cm_exported">Map exported: %1$s</string>
+    <string name="cm_import_none">No %1$s file on the USB stick</string>
+    <string name="cm_imported">Map imported</string>
     <string name="st_audio_source">Audio source</string>
     <string name="st_start_source">Source at startup</string>
     <string name="st_src_auto">Automatic</string>

@@ -528,6 +528,25 @@
     <string name="st_cc_stopped_desc">Eén punt per 2 minuten als de auto stilstaat (klimaat, accessoires). Uit: alleen rijden telt. Lang drukken op de curve om hem te wissen.</string>
     <string name="st_cons_map">Verbruikskaart (in test)</string>
     <string name="st_cons_map_desc">Leert rit na rit het rijverbruik (zonder airco en accessoires, hellingen gecorrigeerd met de GPS-hoogte) per gemiddelde snelheid en buitentemperatuur. Testfunctie, later voor routeschattingen.</string>
+    <string name="cm_title">Verbruikskaart (in test)</string>
+    <string name="cm_open">Verbruikskaart tonen</string>
+    <string name="cm_grid_title">RIJVERBRUIK (kWh/100 km) · SNELHEID × BUITENTEMPERATUUR</string>
+    <string name="cm_about">OVER</string>
+    <string name="cm_summary">%1$d km gemeten · %2$d van %3$d vakken</string>
+    <string name="cm_legend">Kleur: groen = zuinig, rood = hoog. Bleek = weinig km gemeten, vol = 20 km of meer. Grijs = nog geen gegevens. Zonder airco en accessoires; hellingen gecorrigeerd met de GPS-hoogte.</string>
+    <string name="cm_tap">Tik op een vak voor details.</string>
+    <string name="cm_cell">%1$s · %2$s\n%3$s kWh/100 km (± %4$s)\n%5$d km in %6$d stukken</string>
+    <string name="cm_cell_empty">%1$s · %2$s\nNog geen gegevens</string>
+    <string name="cm_export">Exporteren</string>
+    <string name="cm_import">Importeren</string>
+    <string name="cm_clear">Wissen</string>
+    <string name="cm_test_note">Testfunctie: waarden kunnen onjuist zijn.</string>
+    <string name="cm_sim_clim">Simuleren met airco (≈ %1$d W)</string>
+    <string name="cm_sim_note">Met airco: schatting</string>
+    <string name="cm_clear_confirm">De hele verbruikskaart wissen?</string>
+    <string name="cm_exported">Kaart geëxporteerd: %1$s</string>
+    <string name="cm_import_none">Geen bestand %1$s op de USB-stick</string>
+    <string name="cm_imported">Kaart geïmporteerd</string>
     <string name="st_audio_source">Audiobron</string>
     <string name="st_start_source">Bron bij het starten</string>
     <string name="st_src_auto">Automatisch</string>
