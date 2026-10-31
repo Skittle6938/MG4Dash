@@ -147,6 +147,14 @@
     <string name="en_accessories">Accessoires</string>
     <string name="en_battery_heat">Batterijverwarming</string>
     <string name="en_regen">+ %1$s kWh teruggewonnen bij remmen</string>
+    <string name="en_regen_short">terugwinning</string>
+    <string name="cc_ago">%1$s geleden</string>
+    <string name="cc_now">nu</string>
+    <string name="cc_min">%1$d min</string>
+    <string name="cc_hours">%1$d u</string>
+    <string name="cc_days">%1$d d</string>
+    <string name="cc_weeks">%1$d wk</string>
+    <string name="cc_months">%1$d mnd</string>
     <string name="en_remaining">" · nog %1$d u %2$d min"</string>
     <string name="en_plug_v2l">Sluit een V2L-adapter aan op de laadaansluiting</string>
     <string name="en_unplugged">KABEL LOS</string>

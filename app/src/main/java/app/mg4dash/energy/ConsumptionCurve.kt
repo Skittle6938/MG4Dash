@@ -33,6 +33,8 @@ object ConsumptionCurve {
         val charge: List<Float> = emptyList(),
         /** Moyenne de chaque trajet des 12 derniers mois (kWh/100), du plus ancien au plus récent. */
         val trips: List<Float> = emptyList(),
+        /** Heure (ms) du plus ancien trajet de la courbe 12 mois, pour l'échelle de temps. */
+        val firstTripAt: Long? = null,
     ) {
         /** Courbe de la période choisie : 0 = depuis la recharge, 1 = trajet, 2 = 12 mois. */
         fun of(period: Int) = when (period) { 1 -> trip; 2 -> trips; else -> charge }
@@ -53,7 +55,8 @@ object ConsumptionCurve {
     fun start(context: Context) {
         if (BuildConfig.MOCK) {
             val trip = List(36) { i -> 15.5f + 2.2f * kotlin.math.sin(i / 6f) + (if (i % 9 == 4) 1.2f else 0f) }
-            _curves.value = Curves(trip, List(14) { 16f + it % 4 * 0.6f } + trip, List(40) { i -> 16f + 3f * kotlin.math.sin(i / 7f) + (i % 5) * 0.4f })
+            _curves.value = Curves(trip, List(14) { 16f + it % 4 * 0.6f } + trip, List(40) { i -> 16f + 3f * kotlin.math.sin(i / 7f) + (i % 5) * 0.4f },
+                System.currentTimeMillis() - 23L * 24 * 3600 * 1000)
             return
         }
         val sp = context.getSharedPreferences("mg4launcher", Context.MODE_PRIVATE)
@@ -74,7 +77,8 @@ object ConsumptionCurve {
         // 12 mois : les trajets finis, plus le trajet en cours dès 2 km (#44)
         fun publish() {
             val now = EnergyMonitor.sinceStart.value.per100
-            _curves.value = Curves(trip, charge, trips.map { it.second } + listOfNotNull(now))
+            _curves.value = Curves(trip, charge, trips.map { it.second } + listOfNotNull(now),
+                trips.firstOrNull()?.first ?: now?.let { System.currentTimeMillis() })
         }
         publish()
 

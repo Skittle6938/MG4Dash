@@ -357,6 +357,7 @@ class EnergyActivity : PageActivity() {
     private fun renderHistory() {
         val (values, note) = app.mg4dash.ui.ConsumptionCard.curve(this, period)
         chart.values = values
+        app.mg4dash.ui.ConsumptionCard.axis(this, period, values.size).let { (a, b) -> chart.startLabel = a; chart.endLabel = b }
         chart.emptyText = if (period == 2) R.string.chart_empty_trips else R.string.chart_empty
         chartNote.text = note
     }

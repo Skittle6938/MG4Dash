@@ -147,6 +147,14 @@
     <string name="en_accessories">Accessoires</string>
     <string name="en_battery_heat">Réchauffage batterie</string>
     <string name="en_regen">+ %1$s kWh récupérés au freinage</string>
+    <string name="en_regen_short">récup</string>
+    <string name="cc_ago">il y a %1$s</string>
+    <string name="cc_now">maintenant</string>
+    <string name="cc_min">%1$d min</string>
+    <string name="cc_hours">%1$d h</string>
+    <string name="cc_days">%1$d j</string>
+    <string name="cc_weeks">%1$d sem.</string>
+    <string name="cc_months">%1$d mois</string>
     <string name="en_remaining">" · %1$d h %2$d min restantes"</string>
     <string name="en_plug_v2l">Branchez un adaptateur V2L sur la prise de charge</string>
     <string name="en_unplugged">CÂBLE DÉBRANCHÉ</string>
