@@ -314,6 +314,7 @@
     <string name="st_update_check">Controleren</string>
     <string name="st_update_checking">Controleren…</string>
     <string name="st_update_error">GitHub onbereikbaar of downloaden mislukt.</string>
+    <string name="st_update_busy">Er loopt al een update…</string>
     <string name="st_update_available">Versie %2$s beschikbaar (geïnstalleerd: %1$s)</string>
     <string name="st_update_uptodate">Up-to-date (%1$s)</string>
     <string name="st_update_install">Installeren</string>
