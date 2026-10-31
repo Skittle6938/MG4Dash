@@ -101,13 +101,12 @@ class SettingsActivity : AppCompatActivity() {
         text(style, getString(R.string.st_style_desc), 16f, R.color.text_title)
         row(style, *styleButtons(listOf(R.string.st_style_full, R.string.st_style_simple, R.string.st_style_map), { prefs.homeStyle }) { prefs.homeStyle = it })
         // Barre des menus : en bas, ou verticale du côté conducteur (lu sur la voiture), à gauche ou à droite (#75)
-        text(style, getString(R.string.st_bar), 18f, R.color.text_value)
-        row(style, *styleButtons(listOf(R.string.st_bar_bottom, R.string.st_bar_auto, R.string.st_bar_left, R.string.st_bar_right),
+        dropdown(style, getString(R.string.st_bar), listOf(R.string.st_bar_bottom, R.string.st_bar_auto, R.string.st_bar_left, R.string.st_bar_right).map { getString(it) },
             { if (!prefs.verticalDock) 0 else 1 + prefs.barSide.coerceIn(0, 2) }) {
             prefs.verticalDock = it > 0
             if (it > 0) prefs.barSide = it - 1
             app.mg4dash.ui.Themes.publish(this); recreate()
-        })
+        }
         toggle(style, R.string.st_wide_bar, R.string.st_wide_bar_desc, { prefs.wideBar }) { prefs.wideBar = it; recreate() }
         toggle(style, R.string.st_fullscreen, null, { prefs.fullscreen }) { prefs.fullscreen = it; Fullscreen.apply(this) }
         toggle(style, R.string.st_energy_card_power, R.string.st_energy_card_power_desc, { prefs.energyCardPower }) { prefs.energyCardPower = it }
@@ -141,32 +140,26 @@ class SettingsActivity : AppCompatActivity() {
         toggle(src, R.string.st_usb_kick, R.string.st_usb_kick_desc, { prefs.usbKick }) { prefs.usbKick = it }
         toggle(src, R.string.st_bt_projection, R.string.st_bt_projection_desc, { prefs.btDuringProjection }) { prefs.btDuringProjection = it }
         val map = panel(homeR, getString(R.string.st_style_map).uppercase())
-        text(map, getString(R.string.st_map_zoom), 18f, R.color.text_value)
-        row(map, *choiceButtons(listOf("14", "15", "16", "17", "18"), { prefs.mapZoom - 14 }) { prefs.mapZoom = 14 + it })
-        text(map, getString(R.string.st_map_theme), 18f, R.color.text_value)
-        row(map, *styleButtons(listOf(R.string.st_mode_auto, R.string.st_mode_light, R.string.st_mode_dark), { prefs.mapTheme }) { prefs.mapTheme = it })
+        dropdown(map, getString(R.string.st_map_zoom), listOf("14", "15", "16", "17", "18"), { prefs.mapZoom - 14 }) { prefs.mapZoom = 14 + it }
+        dropdown(map, getString(R.string.st_map_theme), listOf(R.string.st_mode_auto, R.string.st_mode_light, R.string.st_mode_dark).map { getString(it) }, { prefs.mapTheme }) { prefs.mapTheme = it }
         toggle(map, R.string.st_map_auto_hide, R.string.st_map_auto_hide_desc, { prefs.mapAutoHide }) { prefs.mapAutoHide = it }
         toggle(map, R.string.st_shortcuts_page, R.string.st_shortcuts_page_desc, { prefs.shortcutsPage }) { prefs.shortcutsPage = it }
         toggle(map, R.string.st_map_offline_switch, R.string.st_map_offline_switch_desc, { prefs.mapOfflineSwitch }) { prefs.mapOfflineSwitch = it }
 
         // ════ Onglet Véhicule : unités, équipements, climatisation ════
         val units = panel(carL, getString(R.string.st_tab_car).uppercase())
-        text(units, getString(R.string.st_units), 18f, R.color.text_value)
-        row(units, *choiceButtons(listOf(getString(R.string.st_units_car), "km · kWh/100 km", "miles · mi/kWh"), { prefs.units }) { prefs.units = it })
-        text(units, getString(R.string.st_pressure), 18f, R.color.text_value)
-        row(units, *choiceButtons(listOf(getString(R.string.st_mode_auto_short), "bar", "psi", "kPa"), { prefs.pressureUnit }) { prefs.pressureUnit = it })
-        text(units, getString(R.string.st_heated), 18f, R.color.text_value)
-        row(units, *choiceButtons(listOf(getString(R.string.st_mode_auto_short), getString(R.string.yes), getString(R.string.no)), { prefs.heatedSeats }) { prefs.heatedSeats = it })
+        dropdown(units, getString(R.string.st_units), listOf(getString(R.string.st_units_car), "km · kWh/100 km", "miles · mi/kWh"), { prefs.units }) { prefs.units = it }
+        dropdown(units, getString(R.string.st_pressure), listOf(getString(R.string.st_mode_auto_short), "bar", "psi", "kPa"), { prefs.pressureUnit }) { prefs.pressureUnit = it }
+        dropdown(units, getString(R.string.st_heated), listOf(getString(R.string.st_mode_auto_short), getString(R.string.yes), getString(R.string.no)), { prefs.heatedSeats }) { prefs.heatedSeats = it }
         toggle(units, R.string.st_climhold, R.string.st_climhold_desc, { prefs.climateHoldEnabled }) { prefs.climateHoldEnabled = it }
         if (app.mg4dash.system.Firmware.family == app.mg4dash.system.Firmware.Family.LEGACY)
             toggle(units, R.string.st_hide_saic_climate, R.string.st_hide_saic_climate_desc, { prefs.hideSaicClimate }) { prefs.hideSaicClimate = it }
 
         // ════ Onglet Apparence : thème et effets ════
         val theme = panel(lookL, getString(R.string.st_theme))
-        text(theme, getString(R.string.st_theme_mode), 18f, R.color.text_value)
-        row(theme, *styleButtons(listOf(R.string.st_mode_auto, R.string.st_mode_dark, R.string.st_mode_light), { prefs.themeMode }) {
+        dropdown(theme, getString(R.string.st_theme_mode), listOf(R.string.st_mode_auto, R.string.st_mode_dark, R.string.st_mode_light).map { getString(it) }, { prefs.themeMode }) {
             if (prefs.themeMode != it) { prefs.themeMode = it; onThemeChanged() }
-        })
+        }
         toggle(theme, R.string.st_theme_smooth, R.string.st_theme_smooth_desc, { prefs.themeSmooth }) { prefs.themeSmooth = it }
         toggle(theme, R.string.st_night_sun, R.string.st_night_sun_desc, { prefs.nightBySun }) { prefs.nightBySun = it; app.mg4dash.ui.Themes.publish(this) }
         // Horaires du jour à la position de la voiture, pour information
@@ -176,12 +169,10 @@ class SettingsActivity : AppCompatActivity() {
                 getString(R.string.st_night_sun_today, f.format(java.util.Date(set)), f.format(java.util.Date(rise)))
             }
         } ?: getString(R.string.st_night_sun_nopos), 15f, R.color.text_sub)
-        text(theme, getString(R.string.st_clock), 18f, R.color.text_value)
-        row(theme, *styleButtons(listOf(R.string.st_clock_24, R.string.st_clock_12), { if (prefs.clock12) 1 else 0 }) { prefs.clock12 = it == 1 })
-        text(theme, getString(R.string.st_panel_outline), 18f, R.color.text_value)
-        row(theme, *styleButtons(listOf(R.string.st_panel_fade, R.string.st_panel_full), { if (prefs.panelFade) 0 else 1 }) {
+        dropdown(theme, getString(R.string.st_clock), listOf(R.string.st_clock_24, R.string.st_clock_12).map { getString(it) }, { if (prefs.clock12) 1 else 0 }) { prefs.clock12 = it == 1 }
+        dropdown(theme, getString(R.string.st_panel_outline), listOf(R.string.st_panel_fade, R.string.st_panel_full).map { getString(it) }, { if (prefs.panelFade) 0 else 1 }) {
             if (prefs.panelFade != (it == 0)) { prefs.panelFade = it == 0; recreate() }
-        })
+        }
         text(theme, getString(R.string.st_theme_bg), 18f, R.color.text_value)
         swatches(theme, app.mg4dash.ui.Themes.BACKGROUND_SWATCHES, prefs.themeBackground) { prefs.themeBackground = it; onThemeChanged() }
         text(theme, getString(R.string.st_theme_accent), 18f, R.color.text_value)
@@ -213,9 +204,8 @@ class SettingsActivity : AppCompatActivity() {
         )
         text(energy, getString(R.string.st_capacity_desc), 16f, R.color.text_title)
         // Modèle de batterie : référence de la santé estimée (affichée sur la page Véhicule)
-        text(energy, getString(R.string.st_battery_model), 18f, R.color.text_value)
         val models = app.mg4dash.energy.BatteryCapacity.MODELS.map { it.first }
-        row(energy, *choiceButtons(models.map { "$it kWh" }, { models.indexOf(prefs.batteryModel) }) { prefs.batteryModel = models[it] })
+        dropdown(energy, getString(R.string.st_battery_model), models.map { "$it kWh" }, { models.indexOf(prefs.batteryModel).coerceAtLeast(0) }) { prefs.batteryModel = models[it] }
         toggle(energy, R.string.st_xpower, R.string.st_xpower_desc, { prefs.xpower }) { prefs.xpower = it }
         toggle(energy, R.string.st_cc_stopped, R.string.st_cc_stopped_desc, { prefs.raw.getBoolean("cc_stopped", true) }) { prefs.raw.edit().putBoolean("cc_stopped", it).apply() }
         // Carte de consommation vitesse × température (en test, désactivée par défaut)
