@@ -147,8 +147,16 @@ object Dock {
      * confirmée sur une voiture à droite ; « force_rhd » sert aux captures.
      */
     private const val RHD_ENABLED = true
-    fun rightSide(context: android.content.Context): Boolean =
-        Prefs(context).raw.getBoolean("force_rhd", false) || (RHD_ENABLED && app.mg4dash.car.CarProps.rightHandDrive() == true)
+    fun rightSide(context: android.content.Context): Boolean {
+        val sp = Prefs(context).raw
+        if (sp.getBoolean("force_rhd", false)) return true
+        if (!RHD_ENABLED) return false
+        // Au démarrage, la voiture ne répond pas encore : la barre partait à gauche sur une conduite à droite
+        // (#75). Le dernier côté lu est gardé et sert tant que la lecture n'est pas possible.
+        val rhd = app.mg4dash.car.CarProps.rightHandDrive()
+        if (rhd != null) { if (sp.getBoolean("rhd_cached", false) != rhd || !sp.contains("rhd_cached")) sp.edit().putBoolean("rhd_cached", rhd).apply(); return rhd }
+        return sp.getBoolean("rhd_cached", false)
+    }
 
     /**
      * Pose le dock d'un écran : en bas (dock horizontal) ou, si l'option est choisie, en barre
