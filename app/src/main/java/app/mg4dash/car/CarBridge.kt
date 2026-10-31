@@ -778,7 +778,15 @@ object CarBridge {
                 }
                 val h = hvac ?: return@withLock
                 // 1) Quitter AUTO (bascule, relue)
-                for (i in 0 until 2) { if (safe { h.autoStatus } != true) break; try { h.switchAutoStatus() } catch (_: Exception) { break }; delay(500) }
+                // La voiture met parfois plus d'une seconde à rendre le nouvel état : une seule bascule, puis
+                // on relit jusqu'à 3 s avant d'en retenter une (sinon on rebasculait aussitôt en AUTO)
+                for (attempt in 0 until 2) {
+                    if (safe { h.autoStatus } != true) break
+                    try { h.switchAutoStatus() } catch (e: Exception) { Log.w(TAG, "leave AUTO: ${e.message}"); break }
+                    var waited = 0
+                    while (waited < 3000 && safe { h.autoStatus } == true) { delay(250); waited += 250 }
+                    Log.i(TAG, "leave AUTO: switch ${attempt + 1}, AUTO now ${safe { h.autoStatus }} after $waited ms")
+                }
                 delay(500)
                 // 2) Ventilation et direction : commandes directes
                 fan?.let { try { h.setFanSpeed(it) } catch (e: Exception) { Log.w(TAG, "leave AUTO fan: ${e.message}") }; delay(500) }
