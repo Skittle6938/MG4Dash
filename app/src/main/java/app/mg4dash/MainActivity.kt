@@ -509,15 +509,26 @@ class MainActivity : AppCompatActivity() {
         b.fanGauge.onColor = color(if (auto) R.color.text_disabled else R.color.accent_cold)
         b.fanGauge.value = if (on && !auto) (s.fanSpeed ?: 0) else 0
         spinFan(on && (auto || (s.fanSpeed ?: 0) > 0))
+        // En AUTO, la jauge laisse la place à « AUTO · débit » centré entre l'hélice et le + (#34) : « AUTO »
+        // à côté d'une jauge vide touchait le + sur la voiture
+        b.fanGauge.visibility = if (auto) View.GONE else View.VISIBLE
+        (b.fanValue.layoutParams as android.widget.LinearLayout.LayoutParams).let { lp ->
+            val w = if (auto) 0 else (48 * resources.displayMetrics.density).toInt()
+            val wt = if (auto) 1f else 0f
+            if (lp.width != w || lp.weight != wt) { lp.width = w; lp.weight = wt; b.fanValue.layoutParams = lp }
+        }
+        b.fanValue.gravity = (if (auto) Gravity.CENTER_HORIZONTAL else Gravity.LEFT) or Gravity.CENTER_VERTICAL
         b.fanValue.text = when {
             !on -> "0"   // comme la jauge vide (#34)
-            auto -> "AUTO"
+            auto -> listOfNotNull("AUTO", s.autoAirVolume?.let { getString(listOf(R.string.cl_level_high, R.string.cl_level_medium, R.string.cl_level_low)[it.coerceIn(0, 2)]) })
+                .joinToString("  ·  ")
             else -> s.fanSpeed?.toString() ?: "—"
         }
         b.fanValue.setTextColor(color(if (auto) R.color.accent_cold else if (on) R.color.text_value else R.color.text_disabled))
-        b.fanValue.setTextSize(TypedValue.COMPLEX_UNIT_SP, if (auto || !on) 16f else 20f)
+        b.fanValue.setTextSize(TypedValue.COMPLEX_UNIT_SP, if (auto) 20f else if (!on) 16f else 20f)
         b.chipAuto.isSelected = s.autoOn == true
-        app.mg4dash.climate.AutoAirVolume.paint(b.chipAuto, s.autoAirVolume)
+        // Le débit AUTO s'affiche sur la ligne de ventilation : plus de barres dans le bouton (#34)
+        if (b.chipAuto.text.toString() != "AUTO") b.chipAuto.text = "AUTO"
         b.chipAc.isSelected = s.acOn == true
         app.mg4dash.climate.AcCycle.paint(b.chipAc)
         // Recyclage : 0 = recyclé, 1 = extérieur, 2 = auto (la voiture choisit ; état réel lu à part s'il existe)
