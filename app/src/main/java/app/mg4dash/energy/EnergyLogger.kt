@@ -98,22 +98,34 @@ object EnergyLogger {
             }
         }
 
-        // Ligne CSV toutes les 5 s
+        // Ligne CSV toutes les 5 s, gardée en mémoire et écrite toutes les 5 min (ou dès que la voiture
+        // s'endort, que l'option est coupée) : 60 fois moins d'écritures sur la mémoire de l'autoradio
         scope.launch {
             val fmt = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US)
-            while (true) {
-                delay(5000)
-                if (!prefs.energyLog || !CarProps.ready) continue
+            val pending = StringBuilder()
+            var pendingSince = 0L
+            fun flush() {
+                if (pending.isEmpty()) return
                 try {
                     if (file.length() > MAX_BYTES) file.renameTo(File(dir, "energy_log.old.csv"))
                     if (!file.exists()) file.writeText(header() + "\n")
-                    file.appendText(row(fmt.format(Date())) + "\n")
+                    file.appendText(pending.toString())
                 } catch (e: Exception) {
                     Log.w(TAG, "write: ${e.message}")
                 }
+                pending.setLength(0)
+            }
+            while (true) {
+                delay(5000)
+                if (!prefs.energyLog || !CarProps.ready) { flush(); continue }
+                if (pending.isEmpty()) pendingSince = android.os.SystemClock.elapsedRealtime()
+                pending.append(row(fmt.format(Date()))).append('\n')
+                if (android.os.SystemClock.elapsedRealtime() - pendingSince >= FLUSH_MS) flush()
             }
         }
     }
+
+    private const val FLUSH_MS = 5 * 60_000L
 
     private fun header(): String = (listOf(
         "time", "speed_kmh", "soc", "odo_km", "charge_status",
