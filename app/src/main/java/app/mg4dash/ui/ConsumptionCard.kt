@@ -76,9 +76,14 @@ class ConsumptionCard(context: Context) : LinearLayout(context) {
         total.text = if (ok) smallUnit(String.format(Locale.getDefault(), "%.1f kWh", t.outKwh)) else "—"
         distance.text = if (t.km > 0) smallUnit(app.mg4dash.system.Units.distText(context, t.km.toFloat())) else ""
         val green = c(R.color.accent_energy); val cyan = c(R.color.accent_cold); val orange = c(R.color.accent_heat)
-        bar.parts = if (ok) listOf(StackedBar.Part(t.driveKwh, green), StackedBar.Part(t.climKwh, cyan), StackedBar.Part(t.accKwh, orange)) else emptyList()
+        val violet = c(R.color.accent_battery)
+        // Réchauffage de la batterie : seulement s'il a compté (hiver)
+        val heat = t.heatKwh >= EnergyMonitor.HEAT_SHOWN_KWH
+        bar.parts = if (ok) listOfNotNull(StackedBar.Part(t.driveKwh, green), StackedBar.Part(t.climKwh, cyan),
+            StackedBar.Part(t.heatKwh, violet).takeIf { heat }, StackedBar.Part(t.accKwh, orange)) else emptyList()
         legend.removeAllViews()
-        listOf(Triple(R.string.en_drive, t.driveKwh, green), Triple(R.string.en_climate, t.climKwh, cyan), Triple(R.string.en_accessories, t.accKwh, orange))
+        listOfNotNull(Triple(R.string.en_drive, t.driveKwh, green), Triple(R.string.en_climate, t.climKwh, cyan),
+            Triple(R.string.en_battery_heat, t.heatKwh, violet).takeIf { heat }, Triple(R.string.en_accessories, t.accKwh, orange))
             .forEach { (label, v, col) ->
                 val r = LinearLayout(context).apply { orientation = HORIZONTAL; gravity = Gravity.CENTER_VERTICAL }
                 r.addView(View(context).apply { setBackgroundColor(col) }, LayoutParams((12 * d).toInt(), (12 * d).toInt()))

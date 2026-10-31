@@ -12,7 +12,7 @@ import java.io.File
  * après trajet. Elle servira à estimer un itinéraire (DiAuto) : plan dans PLAN_CARTE_CONSO.md.
  *
  * Tronçons d'environ 1 km ; dénivelé corrigé par l'altitude GPS ; écartés : arrêt long, recharge,
- * réchauffage de la batterie activé, vitesse trop variable, valeur aberrante. Table : 15 cases de vitesse (10 km/h) × 14 cases
+ * réchauffage de la batterie pas encore appris, vitesse trop variable, valeur aberrante. Table : 15 cases de vitesse (10 km/h) × 14 cases
  * de température (5 °C, de -20 à 45 °C), chacune avec ses km, ses kWh et sa dispersion (quelques Ko).
  */
 object ConsumptionMap {
@@ -103,8 +103,6 @@ object ConsumptionMap {
     private val segDts = ArrayList<Long>()
     private var stillMs = 0L
     private var spoiled = false
-    private var ptcCheckedAt = 0L
-    private var ptcOn = false
 
     private fun reset(alt: Double?) {
         segKwh = 0f; segKm = 0f; segMs = 0L; segTempSum = 0f; segTempN = 0; segAlt0 = alt; stillMs = 0L; spoiled = false
@@ -120,12 +118,9 @@ object ConsumptionMap {
      */
     fun tick(context: Context, driveKwh: Float, dtMs: Long, speedKmh: Float?, outside: Float?) {
         if (!enabled(context)) return
-        val now = android.os.SystemClock.elapsedRealtime()
-        // Réchauffage de la batterie activé (lecture 0 = activé) : tronçon écarté, relu toutes les 30 s
-        if (now - ptcCheckedAt > 30_000) {
-            ptcCheckedAt = now
-            ptcOn = app.mg4dash.car.CarProps.getInt(app.mg4dash.car.CarProps.DRVNG_PTC_HEAT) == 0
-        }
+        // Réchauffage de la batterie : déduit par EnergyMonitor (puissance apprise) ; tant qu'elle ne l'est
+        // pas, les tronçons où il peut chauffer sont écartés
+        val ptcOn = EnergyMonitor.batteryHeatPossible && !EnergyMonitor.batteryHeatKnown
         val loc = app.mg4dash.map.LocationRepo.location.value
         val alt = loc?.takeIf { it.hasAltitude() }?.altitude
         if (segMs == 0L && segKm == 0f) segAlt0 = alt
