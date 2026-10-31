@@ -12,7 +12,7 @@ import java.io.File
  * après trajet. Elle servira à estimer un itinéraire (DiAuto) : plan dans PLAN_CARTE_CONSO.md.
  *
  * Tronçons d'environ 1 km ; dénivelé corrigé par l'altitude GPS ; écartés : arrêt long, recharge,
- * réchauffage de la batterie activé, valeur aberrante. Table : 15 cases de vitesse (10 km/h) × 14 cases
+ * réchauffage de la batterie activé, vitesse trop variable, valeur aberrante. Table : 15 cases de vitesse (10 km/h) × 14 cases
  * de température (5 °C, de -20 à 45 °C), chacune avec ses km, ses kWh et sa dispersion (quelques Ko).
  */
 object ConsumptionMap {
@@ -28,6 +28,8 @@ object ConsumptionMap {
     private const val MASS_KG = 1800f     // MG4 en ordre de marche, conducteur compris
     private const val UP_EFF = 0.9f       // montée : énergie électrique ≈ énergie potentielle / rendement
     private const val DOWN_EFF = 0.7f     // descente : part de l'énergie potentielle récupérée
+    private const val STABLE_KMH = 10f    // vitesse « stable » : à ±10 km/h de la moyenne du tronçon…
+    private const val STABLE_SHARE = 0.8f // … au moins 80 % du temps, sinon tronçon écarté (vitesses mélangées)
 
     /** Une case : km roulés, kWh (corrigés du dénivelé), nombre de tronçons, somme pondérée des carrés (dispersion). */
     data class Cell(var km: Float = 0f, var kwh: Float = 0f, var n: Int = 0, var sq: Float = 0f) {
@@ -97,6 +99,8 @@ object ConsumptionMap {
     private var segTempSum = 0f
     private var segTempN = 0
     private var segAlt0: Double? = null
+    private val segSpeeds = ArrayList<Float>()   // vitesse et durée de chaque seconde du tronçon
+    private val segDts = ArrayList<Long>()
     private var stillMs = 0L
     private var spoiled = false
     private var ptcCheckedAt = 0L
@@ -104,6 +108,7 @@ object ConsumptionMap {
 
     private fun reset(alt: Double?) {
         segKwh = 0f; segKm = 0f; segMs = 0L; segTempSum = 0f; segTempN = 0; segAlt0 = alt; stillMs = 0L; spoiled = false
+        segSpeeds.clear(); segDts.clear()
     }
 
     /** Fin du trajet (voiture en veille, recharge) : le tronçon en cours est abandonné. */
@@ -129,6 +134,7 @@ object ConsumptionMap {
         segKwh += driveKwh
         segMs += dtMs
         segKm += v * dtMs / 3_600_000f
+        segSpeeds.add(v); segDts.add(dtMs)
         if (outside != null) { segTempSum += outside; segTempN++ }
         stillMs = if (v < 1f) stillMs + dtMs else 0L
         if (stillMs > STOP_MS) spoiled = true
@@ -143,7 +149,14 @@ object ConsumptionMap {
             kwh -= if (dh > 0) potential / UP_EFF else potential * DOWN_EFF
         }
         val per100 = kwh / km * 100f
-        val ok = !spoiled && hours > 0f && segTempN > 0 && per100 in 2f..60f
+        // Vitesse stable : un km fait à 30 puis à 90 ne doit pas compter comme un km à 45
+        val mean = if (hours > 0f) km / hours else 0f
+        var stableMs = 0L
+        for (i in segSpeeds.indices) if (kotlin.math.abs(segSpeeds[i] - mean) <= STABLE_KMH) stableMs += segDts[i]
+        val stable = segMs > 0 && stableMs >= STABLE_SHARE * segMs
+        val ok = !spoiled && stable && hours > 0f && segTempN > 0 && per100 in 2f..60f
+        if (!stable && !spoiled && app.mg4dash.system.Prefs(context).energyLog)
+            Log.i(TAG, String.format(java.util.Locale.US, "segment at %.0f km/h skipped: speed stable %.0f %% of the time", mean, stableMs * 100f / segMs.coerceAtLeast(1)))
         if (ok) {
             val speed = km / hours
             val temp = segTempSum / segTempN

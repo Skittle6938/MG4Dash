@@ -197,7 +197,7 @@
     <string name="st_valet">Onderhoudsmodus</string>
     <string name="st_adb">ADB-herstel als MG4Dash niet meer start: adb shell cmd package compile -m speed -f app.mg4dash</string>
     <string name="st_capacity">Bruikbare batterijcapaciteit: %1$s kWh</string>
-    <string name="st_capacity_desc">Voor de kWh/100-schatting (MG4 Standard 51 kWh: ongeveer 49 kWh bruikbaar).</string>
+    <string name="st_capacity_desc">Voor de kWh/100-schatting (MG4 Standard 51 kWh: ongeveer 50,8 kWh bruikbaar).</string>
     <string name="st_battery_model">Batterijmodel (referentie voor de geschatte gezondheid op de voertuigpagina):</string>
     <string name="st_city">Reservestad: %1$s (als de auto geen positie geeft)</string>
     <string name="st_change_city">Stad wijzigen</string>
