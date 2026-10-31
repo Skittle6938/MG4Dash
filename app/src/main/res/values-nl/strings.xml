@@ -277,7 +277,7 @@
     <string name="st_paste">Plakken</string>
     <string name="st_diag">DIAGNOSE</string>
     <string name="st_energy_log">Energiegegevensrecorder: %1$s</string>
-    <string name="st_energy_log_desc">Schrijft elke 5 s het batterijvermogen, de verbruikstellers en de status van de apparatuur naar Android/data/app.mg4dash/files/energy_log.csv (alleen lezen, er wordt niets naar de auto gestuurd). Alleen voor foutopsporing: deze frequente schrijfacties slijten het geheugen van de radio, laat het anders uit.</string>
+    <string name="st_energy_log_desc">Schrijft elke 5 s het batterijvermogen, de verbruikstellers en de status van de apparatuur naar Android/data/app.mg4dash/files/energy_log.csv (alleen lezen, er wordt niets naar de auto gestuurd). Wordt elke 5 min opgeslagen om slijtage van het radiogeheugen te beperken. Alleen voor foutopsporing: laat het anders uit.</string>
     <string name="st_copy_sysui">Systeem-UI naar de USB-stick kopiëren</string>
     <string name="st_copy_sysui_desc">Voor issue #62: kopieert de bestanden van de SAIC-systeem-UI naar een map mg4dash_systemui op de stick. Er wordt niets in de auto gewijzigd.</string>
     <string name="st_copy_sysui_nousb">Geen USB-stick gevonden</string>
