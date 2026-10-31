@@ -35,6 +35,8 @@ class LauncherApp : Application() {
         started = true
         installCrashGuard()
         Log.i("App", "start ${BuildConfig.VERSION_NAME} (${BuildConfig.FLAVOR})")
+        // Filet de sécurité séparé (MG4Dash Rescue) : signe de vie, et son installation si besoin
+        app.mg4dash.system.Rescue.start(this)
         // Première installation : style Complet, plein écran et barre verticale à gauche par défaut.
         // Les installations existantes gardent leurs réglages (le fichier de préférences n'est pas vide).
         if (!BuildConfig.MOCK) {

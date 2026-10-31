@@ -143,6 +143,7 @@
             android:theme="@android:style/Theme.NoTitleBar.Fullscreen" android:excludeFromRecents="true" />
         <receiver android:name=".system.Updater$Result" android:exported="false" />
         <receiver android:name=".system.RadioDashUpdater$Result" android:exported="false" />
+        <receiver android:name=".system.Rescue$Result" android:exported="false" />
         <receiver
             android:name=".system.Updater$Relaunch"
             android:exported="true">
