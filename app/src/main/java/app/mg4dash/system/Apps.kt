@@ -13,6 +13,8 @@ object Apps {
     val VEHICLE = ComponentName("com.saicmotor.vehiclesetting", "com.saicmotor.vehiclesetting.ui.VehicleSettingActivity")
     val HVAC = ComponentName("com.saicmotor.hvac", "com.saicmotor.hvac.ui.activity.MainActivity")
     val ENERGY = ComponentName("com.saicmotor.saicev", "com.saicmotor.saicev.activity.MainActivity")
+    /** SWI165 : pas d'appli Énergie, la recharge est dans les réglages véhicule (#60). */
+    val ENERGY_SWI165 = ComponentName("com.saicmotor.hmi.vehiclesettings", "com.saicmotor.hmi.vehiclesettings.chargemanagement.ui.ChargeManagementActivity")
     val ANDROID_AUTO = ComponentName("com.allgo.app.androidauto", "com.allgo.app.androidauto.ProjectionActivity")
     /** CarPlay de la pile allgo (relevé sur SWI68 par adammcdonagh ; repli sur le lanceur du paquet). */
     val CARPLAY = ComponentName("com.allgo.carplay.service", "com.allgo.carplay.service.CarPlayActivity")
