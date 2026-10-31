@@ -92,9 +92,21 @@ public class RescueService extends Service {
         if (healthy(-1, 0)) { Log.i(TAG, "MG4Dash is fine"); return; }
 
         // 2) Arrêt, recompilation, relance
+        // MG4Dash étant l'accueil, Android le relance aussitôt après un arrêt : il tournait alors pendant la
+        // recompilation, qui abîmait son code (essai du 31/10). Il est donc désactivé le temps de la recompiler.
         Log.w(TAG, "MG4Dash did not start: recompiling and relaunching it");
-        forceStop(DASH);
-        recompile(DASH);
+        try {
+            pm.setApplicationEnabledSetting(DASH, PackageManager.COMPONENT_ENABLED_STATE_DISABLED, 0);
+            Thread.sleep(1000);
+            forceStop(DASH);
+            Thread.sleep(1000);
+            Log.i(TAG, "MG4Dash disabled, running: " + running(DASH));
+            recompile(DASH);
+        } finally {
+            pm.setApplicationEnabledSetting(DASH, PackageManager.COMPONENT_ENABLED_STATE_DEFAULT, PackageManager.DONT_KILL_APP);
+        }
+        setPreferred(pm, DASH_HOME);
+        // Relance sur un processus neuf : son signe de vie prouve que le code recompilé se charge
         forceStop(DASH);
         long t0 = SystemClock.elapsedRealtime();
         long wall0 = System.currentTimeMillis();
@@ -206,6 +218,13 @@ public class RescueService extends Service {
         } catch (SecurityException e) {
             Log.w(TAG, "HOME preference refused: " + e.getMessage());
         }
+    }
+
+    private boolean running(String pkg) {
+        ActivityManager am = getSystemService(ActivityManager.class);
+        List<ActivityManager.RunningAppProcessInfo> list = am.getRunningAppProcesses();
+        if (list != null) for (ActivityManager.RunningAppProcessInfo p : list) if (pkg.equals(p.processName)) return true;
+        return false;
     }
 
     private static boolean installed(PackageManager pm, String pkg) {
