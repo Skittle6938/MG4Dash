@@ -33,7 +33,7 @@ object BatteryCapacity {
     private const val MAX_SAMPLES = 300
 
     /** Modèles : capacité brute (affichée) → capacité utile d'origine (kWh). */
-    val MODELS = listOf(51 to 49.0f, 64 to 61.7f, 77 to 74.4f)
+    val MODELS = listOf(51 to 50.8f, 64 to 61.7f, 77 to 74.4f)
 
     /** Une mesure : date, capacité (kWh), baisse du % et km parcourus pendant la mesure (0 avant la 1.1.5). */
     data class Sample(val at: Long, val kwh: Float, val drop: Int, val km: Float = 0f)
@@ -133,7 +133,7 @@ object BatteryCapacity {
     /** Capacité utile d'origine du modèle choisi (kWh). */
     fun nominal(context: Context): Float {
         val gross = Prefs(context).batteryModel
-        return MODELS.firstOrNull { it.first == gross }?.second ?: 49.0f
+        return MODELS.firstOrNull { it.first == gross }?.second ?: 50.8f
     }
 
     /** Santé (%, au dixième) sur les mesures des 30 derniers jours (sinon toutes), et km couverts par ces mesures. */
