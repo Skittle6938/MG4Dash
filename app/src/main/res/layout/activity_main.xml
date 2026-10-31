@@ -131,6 +131,14 @@
                         android:padding="18dp"
                         android:src="@drawable/ic_minus" />
 
+                    <!-- En AUTO : espaces souples de part et d'autre pour centrer « hélice AUTO · débit » (#34) -->
+                    <Space
+                        android:id="@+id/fanSpaceL"
+                        android:layout_width="0dp"
+                        android:layout_height="1dp"
+                        android:layout_weight="1"
+                        android:visibility="gone" />
+
                     <ImageView
                         android:id="@+id/fanIcon"
                         android:layout_width="28dp"
@@ -160,6 +168,13 @@
                         android:textColor="?attr/mgTextValue"
                         android:textSize="23sp"
                         tools:text="4" />
+
+                    <Space
+                        android:id="@+id/fanSpaceR"
+                        android:layout_width="0dp"
+                        android:layout_height="1dp"
+                        android:layout_weight="1"
+                        android:visibility="gone" />
 
                     <ImageButton
                         android:id="@+id/fanUp"

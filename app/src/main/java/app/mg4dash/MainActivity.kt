@@ -514,12 +514,22 @@ class MainActivity : AppCompatActivity() {
         // En AUTO, la jauge laisse la place à « AUTO · débit » centré entre l'hélice et le + (#34) : « AUTO »
         // à côté d'une jauge vide touchait le + sur la voiture
         b.fanGauge.visibility = if (auto) View.GONE else View.VISIBLE
-        (b.fanValue.layoutParams as android.widget.LinearLayout.LayoutParams).let { lp ->
-            val w = if (auto) 0 else (48 * resources.displayMetrics.density).toInt()
-            val wt = if (auto) 1f else 0f
-            if (lp.width != w || lp.weight != wt) { lp.width = w; lp.weight = wt; b.fanValue.layoutParams = lp }
+        // AUTO : « hélice AUTO · débit » groupés et centrés entre − et + (#34, idée de mquiambao00)
+        b.fanSpaceL.visibility = if (auto) View.VISIBLE else View.GONE
+        b.fanSpaceR.visibility = if (auto) View.VISIBLE else View.GONE
+        (b.fanIcon.layoutParams as android.widget.LinearLayout.LayoutParams).let { lp ->
+            val m = ((if (auto) 0 else 20) * resources.displayMetrics.density).toInt()
+            if (lp.leftMargin != m) { lp.leftMargin = m; b.fanIcon.layoutParams = lp }
         }
-        b.fanValue.gravity = (if (auto) Gravity.CENTER_HORIZONTAL else Gravity.LEFT) or Gravity.CENTER_VERTICAL
+        (b.fanValue.layoutParams as android.widget.LinearLayout.LayoutParams).let { lp ->
+            val w = if (auto) android.widget.LinearLayout.LayoutParams.WRAP_CONTENT else (48 * resources.displayMetrics.density).toInt()
+            val ml = ((if (auto) 10 else 0) * resources.displayMetrics.density).toInt()
+            if (lp.width != w || lp.leftMargin != ml) { lp.width = w; lp.leftMargin = ml; b.fanValue.layoutParams = lp }
+        }
+        b.fanValue.gravity = Gravity.LEFT or Gravity.CENTER_VERTICAL
+        // Taille auto du chiffre inutilisable en largeur libre : coupée en AUTO
+        androidx.core.widget.TextViewCompat.setAutoSizeTextTypeWithDefaults(b.fanValue,
+            if (auto) androidx.core.widget.TextViewCompat.AUTO_SIZE_TEXT_TYPE_NONE else androidx.core.widget.TextViewCompat.AUTO_SIZE_TEXT_TYPE_UNIFORM)
         b.fanValue.text = when {
             !on -> "0"   // comme la jauge vide (#34)
             auto -> listOfNotNull("AUTO", s.autoAirVolume?.let { getString(listOf(R.string.cl_level_high, R.string.cl_level_medium, R.string.cl_level_low)[it.coerceIn(0, 2)]) })
