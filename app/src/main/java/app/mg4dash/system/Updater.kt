@@ -187,9 +187,9 @@ object Updater {
             val msg = intent.getStringExtra(PackageInstaller.EXTRA_STATUS_MESSAGE)
             Log.i(TAG, "install result: $status $msg")
             if (status != PackageInstaller.STATUS_SUCCESS) { end(); return }
-            // Après une installation, la compilation faite par la voiture était parfois inutilisable
-            // (ClassNotFoundException au démarrage) ; une recompilation « speed » la remplace.
-            recompile(context)
+            // Plus de recompilation ici : MG4Dash étant souvent l'accueil, Android pouvait le relancer pendant
+            // qu'elle réécrivait son code compilé, qui restait alors abîmé (écran bloqué au démarrage suivant,
+            // cas reproduit le 31/10). La compilation faite par l'installation suffit ; Rescue répare sinon.
             restart(context)
         }
     }
