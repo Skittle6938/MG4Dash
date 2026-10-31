@@ -554,6 +554,8 @@
     <string name="cm_test_note">Test özelliği: değerler yanlış olabilir.</string>
     <string name="cm_sim_clim">Klima açık simüle et (≈ %1$d W)</string>
     <string name="cm_sim_note">Klima dahil: tahmin</string>
+    <string name="cm_accel_ready">Eğimler ve hız değişimleri: ivmeölçer</string>
+    <string name="cm_accel_learning">İvmeölçer: yönü öğreniliyor (%%%1$d)</string>
     <string name="cm_clear_confirm">Tüm tüketim haritası silinsin mi?</string>
     <string name="cm_exported">Harita dışa aktarıldı: %1$s</string>
     <string name="cm_import_none">USB bellekte %1$s dosyası yok</string>

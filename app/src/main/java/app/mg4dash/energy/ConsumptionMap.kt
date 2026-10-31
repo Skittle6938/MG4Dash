@@ -107,9 +107,12 @@ object ConsumptionMap {
     private var altSmooth: Double? = null   // altitude GPS lissée sur ~30 s
     private var stillMs = 0L
     private var spoiled = false
+    private var segWorkJ = 0f              // travail d'élan et de côte mesuré par l'accéléromètre (J)
+    private var segAccel = true            // false si une seconde n'avait pas de mesure
 
     private fun reset() {
         segBin = -1; segKwh = 0f; segKm = 0f; segMs = 0L; segTempSum = 0f; segTempN = 0; stillMs = 0L; spoiled = false
+        segWorkJ = 0f; segAccel = true
     }
 
     /**
@@ -127,6 +130,8 @@ object ConsumptionMap {
      */
     fun tick(context: Context, driveKwh: Float, dtMs: Long, speedKmh: Float?, outside: Float?) {
         if (!enabled(context)) return
+        Accel.start(context)
+        val work = Accel.tick(context, speedKmh, dtMs)
         // Réchauffage de la batterie : déduit par EnergyMonitor (puissance apprise) ; tant qu'elle ne l'est
         // pas, les échantillons où il peut chauffer sont écartés
         val ptcOn = EnergyMonitor.batteryHeatPossible && !EnergyMonitor.batteryHeatKnown
@@ -141,6 +146,7 @@ object ConsumptionMap {
         segMs += dtMs
         segKm += v * dtMs / 3_600_000f
         segV1 = v
+        if (work != null) segWorkJ += work else segAccel = false
         if (outside != null) { segTempSum += outside; segTempN++ }
         stillMs = if (v < 1f) stillMs + dtMs else 0L
         if (stillMs > STOP_MS) spoiled = true
@@ -152,6 +158,9 @@ object ConsumptionMap {
         val km = segKm; val hours = segMs / 3_600_000f
         if (spoiled || segMs < SAMPLE_MS || km < 0.01f || segTempN == 0) { reset(); return }
         var kwh = segKwh
+        // Accéléromètre appris : il donne directement l'élan et la côte ; sinon vitesse et altitude GPS
+        val accelKwh = if (segAccel) segWorkJ / 3_600_000f else null
+        val raw = kwh
         // Élan : l'énergie mise dans la vitesse (ou rendue par elle) n'est pas de la consommation de roulage
         val v0 = segV0 / 3.6f; val v1 = segV1 / 3.6f
         val kinetic = 0.5f * MASS_KG * (v1 * v1 - v0 * v0) / 3_600_000f   // kWh
@@ -162,6 +171,7 @@ object ConsumptionMap {
             val potential = MASS_KG * 9.81f * (a1 - a0).toFloat() / 3_600_000f   // kWh
             kwh -= if (potential > 0) potential / UP_EFF else potential * DOWN_EFF
         }
+        if (accelKwh != null) kwh = raw - if (accelKwh > 0) accelKwh / UP_EFF else accelKwh * DOWN_EFF
         val per100 = kwh / km * 100f
         // Bornes larges : sur des échantillons courts, élan et altitude ne se compensent qu'en moyenne ;
         // les couper d'un seul côté fausserait la case
@@ -171,8 +181,8 @@ object ConsumptionMap {
             c.km += km; c.kwh += kwh; c.n++; c.sq += per100 * per100 * km
             save(context)
             if (app.mg4dash.system.Prefs(context).energyLog)
-                Log.i(TAG, String.format(java.util.Locale.US, "sample %.0f s, %.2f km at %.0f km/h, %.1f °C: %.1f kWh/100 (cell %d now %.1f, %.0f km)",
-                    segMs / 1000f, km, km / hours, temp, per100, c.n, c.per100 ?: 0f, c.km))
+                Log.i(TAG, String.format(java.util.Locale.US, "sample %.0f s, %.2f km at %.0f km/h, %.1f °C: %.1f kWh/100 (%s; raw %.1f) (cell %d now %.1f, %.0f km)",
+                    segMs / 1000f, km, km / hours, temp, per100, if (accelKwh != null) "accelerometer" else "speed + GPS", raw / km * 100f, c.n, c.per100 ?: 0f, c.km))
         }
         reset()
     }

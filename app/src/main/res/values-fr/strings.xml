@@ -554,6 +554,8 @@
     <string name="cm_test_note">Fonction en test : les valeurs peuvent être fausses.</string>
     <string name="cm_sim_clim">Simuler avec la clim (≈ %1$d W)</string>
     <string name="cm_sim_note">Clim comprise : estimation</string>
+    <string name="cm_accel_ready">Côtes et changements de vitesse : accéléromètre</string>
+    <string name="cm_accel_learning">Accéléromètre : apprentissage du sens (%1$d %%)</string>
     <string name="cm_clear_confirm">Effacer toute la carte de consommation ?</string>
     <string name="cm_exported">Carte exportée : %1$s</string>
     <string name="cm_import_none">Aucun fichier %1$s sur la clé USB</string>
