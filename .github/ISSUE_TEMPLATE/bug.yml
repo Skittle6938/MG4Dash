@@ -1,0 +1,51 @@
+name: Bug report
+description: Something doesn't work as expected
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: Thanks for the report! The more precise, the faster it gets fixed.
+  - type: input
+    id: version
+    attributes:
+      label: MG4Dash version
+      description: Settings › System (for example 1.7.1-beta18)
+    validations:
+      required: true
+  - type: input
+    id: firmware
+    attributes:
+      label: Firmware
+      description: Settings › System › Diagnostic, first line (for example SWI69-29958-1100R45)
+    validations:
+      required: true
+  - type: dropdown
+    id: severity
+    attributes:
+      label: How bad is it?
+      options:
+        - "Blocking: screen stuck, crash at start or a car function misbehaves"
+        - "Annoying, but I can work around it"
+        - "Minor or cosmetic"
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Where?
+      options: [Home screen, Climate, Energy / consumption, Media / radio, Map, Weather, Phone, Update, Other]
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened, and what did you expect?
+      description: What you tapped, what you saw. Screenshots or photos help a lot.
+    validations:
+      required: true
+  - type: textarea
+    id: log
+    attributes:
+      label: Log (optional)
+      description: Settings › System › Log, or `adb logcat -d` if you have ADB.
+      render: text
