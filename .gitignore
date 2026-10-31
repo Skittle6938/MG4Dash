@@ -9,3 +9,4 @@ dist/
 .idea/
 *.iml
 .kotlin/
+!app/src/car/assets/rescue.apk

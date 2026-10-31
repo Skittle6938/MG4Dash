@@ -315,6 +315,8 @@
     <string name="st_update_checking">Wird geprüft…</string>
     <string name="st_update_error">GitHub nicht erreichbar oder Download fehlgeschlagen.</string>
     <string name="st_update_busy">Ein Update läuft bereits…</string>
+    <string name="rescue_stock">MG4Dash ist nicht gestartet: Der SAIC-Startbildschirm wurde wiederhergestellt. Einstellungen › System › SAIC-Startbildschirm ersetzen, um MG4Dash wieder zu nutzen.</string>
+    <string name="rescue_recompiled">MG4Dash ist nicht gestartet und wurde automatisch repariert.</string>
     <string name="st_update_available">Version %2$s verfügbar (installiert: %1$s)</string>
     <string name="st_update_uptodate">Aktuell (%1$s)</string>
     <string name="st_update_install">Installieren</string>

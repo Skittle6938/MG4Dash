@@ -315,6 +315,8 @@
     <string name="st_update_checking">Kontrol ediliyor…</string>
     <string name="st_update_error">GitHub\'a ulaşılamadı veya güncelleme indirilemedi.</string>
     <string name="st_update_busy">Bir güncelleme zaten sürüyor…</string>
+    <string name="rescue_stock">MG4Dash başlamadı: SAIC ana ekranı geri getirildi. MG4Dash\'e dönmek için Ayarlar › Sistem › SAIC ana ekranını değiştir.</string>
+    <string name="rescue_recompiled">MG4Dash başlamadı ve otomatik olarak onarıldı.</string>
     <string name="st_update_available">%2$s sürümü mevcut (yüklü: %1$s)</string>
     <string name="st_update_uptodate">Güncel (%1$s)</string>
     <string name="st_update_install">Yükle</string>

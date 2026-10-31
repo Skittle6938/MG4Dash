@@ -315,6 +315,8 @@
     <string name="st_update_checking">Checking…</string>
     <string name="st_update_error">Could not reach GitHub or download the update.</string>
     <string name="st_update_busy">An update is already in progress…</string>
+    <string name="rescue_stock">MG4Dash did not start: the SAIC home screen was put back. Settings › System › Replace SAIC home to use MG4Dash again.</string>
+    <string name="rescue_recompiled">MG4Dash did not start and was repaired automatically.</string>
     <string name="st_update_available">Version %2$s available (installed: %1$s)</string>
     <string name="st_update_uptodate">Up to date (%1$s)</string>
     <string name="st_update_install">Install</string>

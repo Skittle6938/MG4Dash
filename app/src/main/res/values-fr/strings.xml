@@ -315,6 +315,8 @@
     <string name="st_update_checking">Vérification…</string>
     <string name="st_update_error">Impossible de joindre GitHub ou de télécharger la mise à jour.</string>
     <string name="st_update_busy">Une mise à jour est déjà en cours…</string>
+    <string name="rescue_stock">MG4Dash n\'avait pas démarré : l\'accueil SAIC a été remis. Réglages › Système › Remplacer l\'accueil SAIC pour revenir à MG4Dash.</string>
+    <string name="rescue_recompiled">MG4Dash n\'avait pas démarré et a été réparé automatiquement.</string>
     <string name="st_update_available">Version %2$s disponible (installée : %1$s)</string>
     <string name="st_update_uptodate">À jour (%1$s)</string>
     <string name="st_update_install">Installer</string>
