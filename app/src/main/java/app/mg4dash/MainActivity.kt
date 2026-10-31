@@ -1138,9 +1138,10 @@ class MainActivity : AppCompatActivity() {
         g.orientation = LinearLayout.VERTICAL
         // Lisible d'un coup d'œil : une grosse barre colorée et les pourcentages ; le détail est sur la page Énergie.
         val d = resources.displayMetrics.density
-        val parts = listOf(
+        val parts = listOfNotNull(
             Triple(R.string.sw_drive, t.driveKwh, color(R.color.accent_energy)),
             Triple(R.string.sw_clim, t.climKwh, color(R.color.accent_cold)),
+            Triple(R.string.sw_batt, t.heatKwh, color(R.color.accent_battery)).takeIf { t.heatKwh >= app.mg4dash.energy.EnergyMonitor.HEAT_SHOWN_KWH },
             Triple(R.string.sw_acc, t.accKwh, color(R.color.accent_heat)),
         )
         g.addView(app.mg4dash.ui.StackedBar(this).apply {

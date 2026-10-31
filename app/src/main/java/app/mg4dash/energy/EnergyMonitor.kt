@@ -42,8 +42,9 @@ object EnergyMonitor {
         val climKwh: Float = 0f,
         val accKwh: Float = 0f,
         val km: Int = 0,
+        val heatKwh: Float = 0f,     // réchauffage de la batterie (estimé)
     ) {
-        val driveKwh: Float get() = (outKwh - climKwh - accKwh).coerceAtLeast(0f)
+        val driveKwh: Float get() = (outKwh - climKwh - accKwh - heatKwh).coerceAtLeast(0f)
         val netKwh: Float get() = (outKwh - regenKwh).coerceAtLeast(0f)
         /** kWh/100 km net (récupération déduite), à partir de 2 km. */
         val per100: Float? get() = if (km >= 2 && netKwh > 0.1f) (netKwh / km * 100f).takeIf { it in 3f..60f } else null
@@ -80,12 +81,23 @@ object EnergyMonitor {
         java.text.SimpleDateFormat("yyyy-MM", java.util.Locale.US).format(java.util.Date(now))
 
     private fun sum(list: Collection<Totals>) = list.fold(Totals()) { a, t ->
-        Totals(a.outKwh + t.outKwh, a.regenKwh + t.regenKwh, a.climKwh + t.climKwh, a.accKwh + t.accKwh, a.km + t.km)
+        Totals(a.outKwh + t.outKwh, a.regenKwh + t.regenKwh, a.climKwh + t.climKwh, a.accKwh + t.accKwh, a.km + t.km, a.heatKwh + t.heatKwh)
     }
 
     /** Puissances apprises (W), pour l'affichage et le journal. */
     @Volatile var accessoriesW = 250f; private set
     @Volatile var climateW = 0f; private set
+    /** Réchauffage de la batterie : puissance moyenne apprise (W) quand il peut chauffer, 0 sinon. */
+    @Volatile var batteryHeatW = 0f; private set
+    /** Le réchauffage peut chauffer : option activée et 10 °C ou moins dehors (la voiture ne dit pas s'il chauffe). */
+    @Volatile var batteryHeatPossible = false; private set
+    /** Sa puissance a été apprise (assez de secondes à l'arrêt) : la carte de conso peut la déduire. */
+    @Volatile var batteryHeatKnown = false; private set
+    /** Seuil du manuel : le chauffage intelligent ne démarre que si la batterie est à 10 °C ou moins. */
+    const val HEAT_MAX_OUTSIDE_C = 10f
+    /** Part « Batterie » affichée dans les répartitions à partir de ce total (kWh) : rien en été. */
+    const val HEAT_SHOWN_KWH = 0.05f
+    private const val HEAT_LEARN_S = 300f   // secondes d'arrêt à apprendre avant de s'y fier
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
@@ -93,23 +105,24 @@ object EnergyMonitor {
         val prefs = Prefs(context)
         val sp = prefs.raw
         if (BuildConfig.MOCK) {
-            _sinceCharge.value = Totals(18.4f, 3.2f, 2.1f, 0.9f, 112)
-            _sinceStart.value = Totals(3.6f, 0.7f, 0.5f, 0.2f, 21)
+            _sinceCharge.value = Totals(18.4f, 3.2f, 2.1f, 0.9f, 112, heatKwh = 1.2f)
+            _sinceStart.value = Totals(3.6f, 0.7f, 0.5f, 0.2f, 21, heatKwh = 0.4f)
             val demo = listOf(19.8f, 19.1f, 17.6f, 16.0f, 15.1f, 14.4f, 14.2f, 14.6f, 15.3f, 16.4f, 17.9f, 19.2f)
             _months.value = demo.mapIndexed { i, v -> "2025-%02d".format(i + 1) to Totals(v * 10f, 1.5f, 1.2f, 0.4f, 1000).let { it.copy(outKwh = v * 10f + it.regenKwh) } }
             _lastYear.value = sum(_months.value.map { it.second })
             return
         }
-        fun load(p: String) = Totals(sp.getFloat("${p}_out", 0f), sp.getFloat("${p}_rgn", 0f), sp.getFloat("${p}_clim", 0f), sp.getFloat("${p}_acc", 0f))
+        fun load(p: String) = Totals(sp.getFloat("${p}_out", 0f), sp.getFloat("${p}_rgn", 0f), sp.getFloat("${p}_clim", 0f), sp.getFloat("${p}_acc", 0f),
+            heatKwh = sp.getFloat("${p}_heat", 0f))
         _sinceCharge.value = load("em_c")
         accessoriesW = sp.getFloat("em_base", 250f)
-        // Mois : « 2026-10=out,rgn,clim,acc,km » séparés par « ; » (12 au plus)
+        // Mois : « 2026-10=out,rgn,clim,acc,km[,heat] » séparés par « ; » (12 au plus)
         val months = java.util.TreeMap<String, Totals>()
         sp.getString("em_months", "")!!.split(';').filter { it.contains('=') }.forEach { e ->
             val (k, v) = e.split('=', limit = 2)
             val f = v.split(',').mapNotNull { it.toFloatOrNull() }
             // Mois datés de 2019 (heure de l'autoradio pas encore remise au réveil, avant la 1.1.8) : écartés
-            if (f.size == 5 && k >= "2024") months[k] = Totals(f[0], f[1], f[2], f[3], f[4].toInt())
+            if (f.size in 5..6 && k >= "2024") months[k] = Totals(f[0], f[1], f[2], f[3], f[4].toInt(), f.getOrElse(5) { 0f })
         }
         fun publishMonths() {
             while (months.size > MONTHS) months.remove(months.firstKey())
@@ -117,7 +130,7 @@ object EnergyMonitor {
             _lastYear.value = sum(months.values)
         }
         fun saveMonths() = sp.edit().putString("em_months",
-            months.entries.joinToString(";") { (k, t) -> "$k=${t.outKwh},${t.regenKwh},${t.climKwh},${t.accKwh},${t.km}" }).apply()
+            months.entries.joinToString(";") { (k, t) -> "$k=${t.outKwh},${t.regenKwh},${t.climKwh},${t.accKwh},${t.km},${t.heatKwh}" }).apply()
         publishMonths()
 
         scope.launch {
@@ -138,6 +151,8 @@ object EnergyMonitor {
             var sohKm: Int? = null         // compteur à la seconde précédente
             val learned = HashMap<String, Float>()
             fun get(k: String, def: Float) = learned.getOrPut(k) { sp.getFloat(k, def) }
+            var ptcCheckedAt = -60_000L
+            var ptcOn = false
             fun put(k: String, v: Float) { learned[k] = v }
             while (true) {
                 delay(1000)
@@ -172,7 +187,7 @@ object EnergyMonitor {
                         _sinceCharge.value = Totals()
                         if (km != null) chargeKm = km
                         sp.edit().putInt("em_c_km0", chargeKm)
-                            .putFloat("em_c_out", 0f).putFloat("em_c_rgn", 0f).putFloat("em_c_clim", 0f).putFloat("em_c_acc", 0f).apply()
+                            .putFloat("em_c_out", 0f).putFloat("em_c_rgn", 0f).putFloat("em_c_clim", 0f).putFloat("em_c_acc", 0f).putFloat("em_c_heat", 0f).apply()
                     }
                     1 -> { _sinceStart.value = Totals(); if (km != null) startKm = km }
                     2 -> { Log.i(TAG, "12-month totals cleared from the screen"); months.clear(); pendingKm = 0; publishMonths(); saveMonths() }
@@ -200,7 +215,7 @@ object EnergyMonitor {
                         // ils ne l'étaient qu'au prochain enregistrement (30 s, sauté voiture branchée), et
                         // MG4Dash arrêté entre-temps rechargeait les anciens kWh avec le nouveau km.
                         sp.edit().putInt("em_c_km0", chargeKm).putInt("em_c_soc0", soc).putInt("em_c_low", soc)
-                            .putFloat("em_c_out", 0f).putFloat("em_c_rgn", 0f).putFloat("em_c_clim", 0f).putFloat("em_c_acc", 0f).apply()
+                            .putFloat("em_c_out", 0f).putFloat("em_c_rgn", 0f).putFloat("em_c_clim", 0f).putFloat("em_c_acc", 0f).putFloat("em_c_heat", 0f).apply()
                     } else if (lowSoc < 0 || soc < lowSoc) {
                         lowSoc = soc; sp.edit().putInt("em_c_low", soc).apply()
                     }
@@ -242,7 +257,23 @@ object EnergyMonitor {
                 val accKey = "em_acc_" + accessoryKey(s)
                 val accW = get(accKey, accessoriesW)
                 val climKey = "em_clim_" + climateKey(s)
-                if (stopped && p in 30f..8000f) {
+                // Réchauffage de la batterie : option relue toutes les 30 s (lecture 0 = activé)
+                if (tick - ptcCheckedAt > 30_000) {
+                    ptcCheckedAt = tick
+                    ptcOn = CarProps.getInt(CarProps.DRVNG_PTC_HEAT) == 0
+                }
+                val heatPossible = ptcOn && (s.outsideTemp ?: 99f) <= HEAT_MAX_OUTSIDE_C
+                batteryHeatPossible = heatPossible
+                val heatLearnS = get("em_bheat_s", 0f)
+                batteryHeatKnown = heatLearnS >= HEAT_LEARN_S
+                if (stopped && heatPossible && p in 30f..12000f) {
+                    // Il peut chauffer : ce qui dépasse accessoires et clim apprises est le réchauffage
+                    // (moyenne, temps où il ne chauffe pas compris) ; accessoires et clim pas apprises ici
+                    val climPart = if (hvacOn) get(climKey, get("em_clim_any", 1000f)) else 0f
+                    val hw = (p - accW - climPart).coerceAtLeast(0f)
+                    put("em_bheat", ema(get("em_bheat", hw), hw, 0.02f))
+                    put("em_bheat_s", heatLearnS + 1f)
+                } else if (stopped && p in 30f..8000f) {
                     if (!hvacOn) {
                         val nv = ema(accW, p, 0.02f)
                         put(accKey, nv)
@@ -255,27 +286,31 @@ object EnergyMonitor {
                 }
 
                 // Répartition
-                var out = 0f; var regen = 0f; var clim = 0f; var acc = 0f
+                var out = 0f; var regen = 0f; var clim = 0f; var acc = 0f; var heat = 0f
+                val hw = if (heatPossible) get("em_bheat", 0f) else 0f
+                batteryHeatW = hw
                 if (p >= 0f) {
                     out = p * h
-                    val cw = if (!hvacOn) 0f else if (stopped) (p - accW).coerceAtLeast(0f)
+                    val cw = if (!hvacOn) 0f else if (stopped && !heatPossible) (p - accW).coerceAtLeast(0f)
                         else get(climKey, get("em_clim_any", 1000f))
                     climateW = cw
                     val cPart = minOf(cw, p)
-                    val aPart = minOf(accW, p - cPart)
-                    clim = cPart * h; acc = aPart * h
+                    // À l'arrêt, le réchauffage prend ce qui reste ; en roulant, sa puissance apprise
+                    val hPart = if (stopped) (p - cPart - accW).coerceIn(0f, if (heatPossible) p - cPart else 0f) else minOf(hw, p - cPart)
+                    val aPart = minOf(accW, p - cPart - hPart)
+                    clim = cPart * h; acc = aPart * h; heat = hPart * h
                 } else if (!stopped) {
                     regen = -p * h
                 }
                 fun add(t: Totals, k: Int?, k0: Int) = t.copy(
                     outKwh = t.outKwh + out / 1000f, regenKwh = t.regenKwh + regen / 1000f,
-                    climKwh = t.climKwh + clim / 1000f, accKwh = t.accKwh + acc / 1000f,
+                    climKwh = t.climKwh + clim / 1000f, accKwh = t.accKwh + acc / 1000f, heatKwh = t.heatKwh + heat / 1000f,
                     km = if (k != null && k0 >= 0) (k - k0).coerceAtLeast(0) else t.km,
                 )
                 _sinceCharge.value = add(_sinceCharge.value, km, chargeKm)
                 _sinceStart.value = add(_sinceStart.value, km, startKm)
                 // Carte de consommation (en test) : roulage seul, clim et accessoires déduits, récupération déduite
-                ConsumptionMap.tick(context, (out - clim - acc - regen) / 1000f, dt, speed, s.outsideTemp)
+                ConsumptionMap.tick(context, (out - clim - acc - heat - regen) / 1000f, dt, speed, s.outsideTemp)
                 val mk = monthKey(now)
                 val m = months[mk] ?: Totals()
                 // Heure système pas encore remise à l'heure (2019 au réveil) : mois inconnu, km gardés pour après
@@ -283,7 +318,7 @@ object EnergyMonitor {
                     val dKm = pendingKm; pendingKm = 0
                     months[mk] = m.copy(
                         outKwh = m.outKwh + out / 1000f, regenKwh = m.regenKwh + regen / 1000f,
-                        climKwh = m.climKwh + clim / 1000f, accKwh = m.accKwh + acc / 1000f, km = m.km + dKm,
+                        climKwh = m.climKwh + clim / 1000f, accKwh = m.accKwh + acc / 1000f, heatKwh = m.heatKwh + heat / 1000f, km = m.km + dKm,
                     )
                     publishMonths()
                 }
@@ -294,7 +329,7 @@ object EnergyMonitor {
                     val e = sp.edit()
                     learned.forEach { (k, v) -> e.putFloat(k, v) }
                     e.putFloat("em_c_out", c.outKwh).putFloat("em_c_rgn", c.regenKwh)
-                        .putFloat("em_c_clim", c.climKwh).putFloat("em_c_acc", c.accKwh)
+                        .putFloat("em_c_clim", c.climKwh).putFloat("em_c_acc", c.accKwh).putFloat("em_c_heat", c.heatKwh)
                     e.apply()
                     saveMonths()
                     BatteryCapacity.flush(context)

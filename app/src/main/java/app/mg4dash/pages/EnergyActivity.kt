@@ -305,7 +305,7 @@ class EnergyActivity : PageActivity() {
             ?.let { getString(R.string.en_regen_km, String.format(Locale.getDefault(), "%.1f", app.mg4dash.system.Units.dist(this, it)), app.mg4dash.system.Units.distUnit(this)) } ?: ""
         // Compteurs SAIC à zéro sur la voiture : consommation mesurée par MG4Dash (EnergyMonitor)
         val t = EnergyMonitor.totals(period)
-        renderConsumption(if (t.outKwh > 0f) floatArrayOf(t.outKwh, t.climKwh, t.accKwh, t.regenKwh) else p.cons)
+        renderConsumption(if (t.outKwh > 0f) floatArrayOf(t.outKwh, t.climKwh, t.accKwh, t.regenKwh, t.heatKwh) else p.cons)
     }
 
     private fun stopReasonLabel(code: Int?): String? = when (code) {
@@ -329,15 +329,21 @@ class EnergyActivity : PageActivity() {
 
     private fun renderConsumption(c: FloatArray) {
         val (total, clim, acc, rgn) = c.toList()
+        val heat = c.getOrElse(4) { 0f }.coerceAtLeast(0f)
+        val showHeat = heat >= app.mg4dash.energy.EnergyMonitor.HEAT_SHOWN_KWH
         val ok = total > 0f
-        val drive = if (ok) (total - clim.coerceAtLeast(0f) - acc.coerceAtLeast(0f)).coerceAtLeast(0f) else 0f
+        val drive = if (ok) (total - clim.coerceAtLeast(0f) - acc.coerceAtLeast(0f) - heat).coerceAtLeast(0f) else 0f
         consTotal.text = if (ok) String.format(Locale.getDefault(), "%.1f kWh", total) else "—"
         val green = kit.color(R.color.accent_energy); val cyan = kit.color(R.color.accent_cold); val orange = kit.color(R.color.accent_heat)
-        bar.parts = if (ok) listOf(
-            StackedBar.Part(drive, green), StackedBar.Part(clim.coerceAtLeast(0f), cyan), StackedBar.Part(acc.coerceAtLeast(0f), orange),
+        val violet = kit.color(R.color.accent_battery)
+        bar.parts = if (ok) listOfNotNull(
+            StackedBar.Part(drive, green), StackedBar.Part(clim.coerceAtLeast(0f), cyan), StackedBar.Part(heat, violet).takeIf { showHeat },
+            StackedBar.Part(acc.coerceAtLeast(0f), orange),
         ) else emptyList()
         legend.removeAllViews()
-        listOf(Triple(getString(R.string.en_drive), drive, green), Triple(getString(R.string.en_climate), clim, cyan), Triple(getString(R.string.en_accessories), acc, orange)).forEach { (l, v, col) ->
+        listOfNotNull(Triple(getString(R.string.en_drive), drive, green), Triple(getString(R.string.en_climate), clim, cyan),
+            Triple(getString(R.string.en_battery_heat), heat, violet).takeIf { showHeat },
+            Triple(getString(R.string.en_accessories), acc, orange)).forEach { (l, v, col) ->
             val r = kit.row()
             r.addView(android.view.View(this).apply { setBackgroundColor(col) }, kit.lp(kit.dp(12), kit.dp(12)))
             r.addView(kit.text(l, 18f, R.color.text_sub), kit.lp(0, -2, 1f, l = 10))

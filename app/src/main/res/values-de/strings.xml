@@ -145,6 +145,7 @@
     <string name="en_drive">Fahren</string>
     <string name="en_climate">Klimaanlage</string>
     <string name="en_accessories">Zubehör</string>
+    <string name="en_battery_heat">Batterieheizung</string>
     <string name="en_regen">+ %1$s kWh durch Bremsen zurückgewonnen</string>
     <string name="en_remaining">" · noch %1$d h %2$d min"</string>
     <string name="en_plug_v2l">V2L-Adapter an der Ladebuchse anschließen</string>
@@ -321,6 +322,7 @@
     <string name="sw_drive">FAHREN</string>
     <string name="sw_clim">KLIMA</string>
     <string name="sw_acc">ZUBEHÖR</string>
+    <string name="sw_batt">BATTERIE</string>
     <string name="sw_power">LEISTUNG LIVE</string>
     <string name="sw_drawn">VERBRAUCH</string>
     <string name="sw_recovering">ZURÜCKGEWONNEN</string>

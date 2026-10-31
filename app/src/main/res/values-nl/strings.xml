@@ -145,6 +145,7 @@
     <string name="en_drive">Rijden</string>
     <string name="en_climate">Klimaatregeling</string>
     <string name="en_accessories">Accessoires</string>
+    <string name="en_battery_heat">Batterijverwarming</string>
     <string name="en_regen">+ %1$s kWh teruggewonnen bij remmen</string>
     <string name="en_remaining">" · nog %1$d u %2$d min"</string>
     <string name="en_plug_v2l">Sluit een V2L-adapter aan op de laadaansluiting</string>
@@ -321,6 +322,7 @@
     <string name="sw_drive">RIJDEN</string>
     <string name="sw_clim">KLIMAAT</string>
     <string name="sw_acc">ACCESSOIRES</string>
+    <string name="sw_batt">BATTERIJ</string>
     <string name="sw_power">LIVE VERMOGEN</string>
     <string name="sw_drawn">VERBRUIKT</string>
     <string name="sw_recovering">TERUGGEWONNEN</string>
