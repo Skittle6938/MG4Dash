@@ -108,6 +108,7 @@ object UpdatePrompt {
         now = button(R.string.upd_now, R.color.accent_action) {
             val app = activity.applicationContext
             fun report(t: String) { progress = t; onProgress?.invoke(t) }
+            if (!Updater.begin()) { report(app.getString(R.string.st_update_busy)); return@button }
             report(app.getString(R.string.st_update_downloading, 0))
             scope.launch {
                 try {
@@ -118,6 +119,7 @@ object UpdatePrompt {
                     withContext(Dispatchers.IO) { Updater.install(app, apk) }
                 } catch (e: Exception) {
                     Log.w(TAG, "failed: ${e.message}")
+                    Updater.end()
                     report(app.getString(R.string.st_update_error))
                 }
             }

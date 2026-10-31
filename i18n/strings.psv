@@ -312,6 +312,7 @@ st_update_desc|Checks the latest MG4Dash release on GitHub and installs it (inte
 st_update_check|Check|Vérifier|Prüfen|Comprobar|Controlla|Controleren|Kontrol et
 st_update_checking|Checking…|Vérification…|Wird geprüft…|Comprobando…|Controllo…|Controleren…|Kontrol ediliyor…
 st_update_error|Could not reach GitHub or download the update.|Impossible de joindre GitHub ou de télécharger la mise à jour.|GitHub nicht erreichbar oder Download fehlgeschlagen.|No se pudo contactar con GitHub ni descargar la actualización.|Impossibile raggiungere GitHub o scaricare l'aggiornamento.|GitHub onbereikbaar of downloaden mislukt.|GitHub'a ulaşılamadı veya güncelleme indirilemedi.
+st_update_busy|An update is already in progress…|Une mise à jour est déjà en cours…|Ein Update läuft bereits…|Ya hay una actualización en curso…|Un aggiornamento è già in corso…|Er loopt al een update…|Bir güncelleme zaten sürüyor…
 st_update_available|Version %2$s available (installed: %1$s)|Version %2$s disponible (installée : %1$s)|Version %2$s verfügbar (installiert: %1$s)|Versión %2$s disponible (instalada: %1$s)|Versione %2$s disponibile (installata: %1$s)|Versie %2$s beschikbaar (geïnstalleerd: %1$s)|%2$s sürümü mevcut (yüklü: %1$s)
 st_update_uptodate|Up to date (%1$s)|À jour (%1$s)|Aktuell (%1$s)|Actualizado (%1$s)|Aggiornato (%1$s)|Up-to-date (%1$s)|Güncel (%1$s)
 st_update_install|Install|Installer|Installieren|Instalar|Installa|Installeren|Yükle

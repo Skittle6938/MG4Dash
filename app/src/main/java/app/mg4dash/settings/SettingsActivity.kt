@@ -226,6 +226,7 @@ class SettingsActivity : AppCompatActivity() {
         val updState = text(upd, getString(R.string.st_update_installed, BuildConfig.VERSION_NAME), 18f, R.color.text_value)
         text(upd, getString(R.string.st_update_desc), 16f, R.color.text_title)
         fun install(r: app.mg4dash.system.Updater.Release) {
+            if (!app.mg4dash.system.Updater.begin()) { updState.text = getString(R.string.st_update_busy); return }
             lifecycleScope.launch {
                 try {
                     val apk = withContext(Dispatchers.IO) {
@@ -237,6 +238,7 @@ class SettingsActivity : AppCompatActivity() {
                     withContext(Dispatchers.IO) { app.mg4dash.system.Updater.install(this@SettingsActivity, apk) }
                 } catch (e: Exception) {
                     Log.w("Update", "failed: ${e.message}")
+                    app.mg4dash.system.Updater.end()
                     updState.text = getString(R.string.st_update_error)
                 }
             }
