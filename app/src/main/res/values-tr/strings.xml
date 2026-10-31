@@ -197,7 +197,7 @@
     <string name="st_valet">Bakım modu</string>
     <string name="st_adb">MG4Dash artık açılmıyorsa ADB ile kurtarma: adb shell cmd package compile -m speed -f app.mg4dash</string>
     <string name="st_capacity">Kullanılabilir batarya kapasitesi: %1$s kWh</string>
-    <string name="st_capacity_desc">kWh/100 tahmini için kullanılır (MG4 Standard 51 kWh: yaklaşık 49 kWh kullanılabilir).</string>
+    <string name="st_capacity_desc">kWh/100 tahmini için kullanılır (MG4 Standard 51 kWh: yaklaşık 50,8 kWh kullanılabilir).</string>
     <string name="st_battery_model">Batarya modeli (Araç sayfasındaki tahmini sağlık için referans):</string>
     <string name="st_city">Yedek şehir: %1$s (araç konum vermezse)</string>
     <string name="st_change_city">Şehri değiştir</string>

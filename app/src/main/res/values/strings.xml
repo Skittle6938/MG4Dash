@@ -197,7 +197,7 @@
     <string name="st_valet">Maintenance mode</string>
     <string name="st_adb">ADB recovery if MG4Dash no longer starts: adb shell cmd package compile -m speed -f app.mg4dash</string>
     <string name="st_capacity">Usable battery capacity: %1$s kWh</string>
-    <string name="st_capacity_desc">Used for the kWh/100 estimate (MG4 Standard 51 kWh: about 49 kWh usable).</string>
+    <string name="st_capacity_desc">Used for the kWh/100 estimate (MG4 Standard 51 kWh: about 50.8 kWh usable).</string>
     <string name="st_battery_model">Battery model (reference for the estimated health on the Vehicle page):</string>
     <string name="st_city">Fallback city: %1$s (if the car provides no position)</string>
     <string name="st_change_city">Change city</string>
