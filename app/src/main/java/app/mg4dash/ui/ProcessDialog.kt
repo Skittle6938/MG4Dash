@@ -118,7 +118,7 @@ object ProcessDialog {
         // Plein écran gardé : fenêtre affichée sans prendre le focus, mêmes réglages d'écran que la page,
         // puis focus rendu (sinon les barres SAIC réapparaissent à l'ouverture)
         dlg.window?.setFlags(android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE, android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE)
-        dlg.show()
+        dlg.show(); app.mg4dash.ui.Dialogs.fix(dlg)
         dlg.window?.decorView?.systemUiVisibility = activity.window.decorView.systemUiVisibility
         dlg.window?.clearFlags(android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE)
         tick.run()

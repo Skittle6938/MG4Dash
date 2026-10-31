@@ -19,6 +19,8 @@
     <!-- Accents -->
     <color name="accent_cold">#FF00D2FF</color>
     <color name="accent_energy">#FF00E676</color>
+    <!-- Vert de l'énergie pour les textes et courbes en mode clair : le vert vif manque de contraste sur blanc -->
+    <color name="accent_energy_light">#FF00A04A</color>
     <color name="accent_heat">#FFFF9100</color>
     <!-- Réchauffage de la batterie (répartition de la conso) -->
     <color name="accent_battery">#FFB388FF</color>
