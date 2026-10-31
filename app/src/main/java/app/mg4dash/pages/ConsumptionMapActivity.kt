@@ -68,7 +68,9 @@ class ConsumptionMapActivity : PageActivity() {
         val cells = t.flatten()
         val km = cells.sumOf { it.km.toDouble() }.toFloat()
         val filled = cells.count { it.n > 0 }
-        summary.text = getString(R.string.cm_summary, Math.round(km), filled, ConsumptionMap.SPEED_BINS * ConsumptionMap.TEMP_BINS)
+        summary.text = getString(R.string.cm_summary, Math.round(km), filled, ConsumptionMap.SPEED_BINS * ConsumptionMap.TEMP_BINS) + "\n" +
+            (if (app.mg4dash.energy.Accel.ready) getString(R.string.cm_accel_ready)
+            else getString(R.string.cm_accel_learning, minOf(99, app.mg4dash.energy.Accel.learnedS * 100 / app.mg4dash.energy.Accel.LEARN_S)))
         grid.table = t
     }
 

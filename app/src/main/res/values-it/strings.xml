@@ -554,6 +554,8 @@
     <string name="cm_test_note">Funzione in prova: i valori possono essere errati.</string>
     <string name="cm_sim_clim">Simula con il clima (≈ %1$d W)</string>
     <string name="cm_sim_note">Con il clima: stima</string>
+    <string name="cm_accel_ready">Pendenze e cambi di velocità: accelerometro</string>
+    <string name="cm_accel_learning">Accelerometro: apprendimento dell\'orientamento (%1$d %%)</string>
     <string name="cm_clear_confirm">Cancellare tutta la mappa dei consumi?</string>
     <string name="cm_exported">Mappa esportata: %1$s</string>
     <string name="cm_import_none">Nessun file %1$s sulla chiavetta USB</string>

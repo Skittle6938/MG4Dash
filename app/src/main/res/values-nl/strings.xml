@@ -554,6 +554,8 @@
     <string name="cm_test_note">Testfunctie: waarden kunnen onjuist zijn.</string>
     <string name="cm_sim_clim">Simuleren met airco (≈ %1$d W)</string>
     <string name="cm_sim_note">Met airco: schatting</string>
+    <string name="cm_accel_ready">Hellingen en snelheidswisselingen: versnellingsmeter</string>
+    <string name="cm_accel_learning">Versnellingsmeter: richting wordt geleerd (%1$d %%)</string>
     <string name="cm_clear_confirm">De hele verbruikskaart wissen?</string>
     <string name="cm_exported">Kaart geëxporteerd: %1$s</string>
     <string name="cm_import_none">Geen bestand %1$s op de USB-stick</string>

@@ -554,6 +554,8 @@
     <string name="cm_test_note">Testfunktion: Werte können falsch sein.</string>
     <string name="cm_sim_clim">Mit Klima simulieren (≈ %1$d W)</string>
     <string name="cm_sim_note">Mit Klima: Schätzung</string>
+    <string name="cm_accel_ready">Steigungen und Tempowechsel: Beschleunigungssensor</string>
+    <string name="cm_accel_learning">Beschleunigungssensor: Richtung wird gelernt (%1$d %%)</string>
     <string name="cm_clear_confirm">Die ganze Verbrauchskarte löschen?</string>
     <string name="cm_exported">Karte exportiert: %1$s</string>
     <string name="cm_import_none">Keine Datei %1$s auf dem USB-Stick</string>
