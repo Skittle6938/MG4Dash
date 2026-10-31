@@ -11,7 +11,7 @@ import java.io.File
  * accessoires, récupération déduite) par vitesse moyenne et par température extérieure, affinée trajet
  * après trajet. Elle servira à estimer un itinéraire (DiAuto) : plan dans PLAN_CARTE_CONSO.md.
  *
- * Tronçons d'environ 1 km ; dénivelé corrigé par l'altitude GPS ; écartés : arrêt long, recharge,
+ * Tronçons de 1 km, ou d'une minute dès 200 m ; dénivelé corrigé par l'altitude GPS ; écartés : arrêt long, recharge,
  * réchauffage de la batterie pas encore appris, vitesse trop variable, valeur aberrante. Table : 15 cases de vitesse (10 km/h) × 14 cases
  * de température (5 °C, de -20 à 45 °C), chacune avec ses km, ses kWh et sa dispersion (quelques Ko).
  */
@@ -24,6 +24,10 @@ object ConsumptionMap {
     const val TEMP_STEP = 5
     const val TEMP_BINS = 14              // -20…-15 … 45 °C et plus
     private const val SEGMENT_KM = 1f
+    // À basse vitesse un km dure des minutes et la vitesse change avant : tronçon fermé aussi après 1 min,
+    // dès 200 m (la case reste pondérée par les km, les petits tronçons comptent moins chacun)
+    private const val SEGMENT_MS = 60_000L
+    private const val SEGMENT_MIN_KM = 0.2f
     private const val STOP_MS = 60_000L   // arrêt plus long : tronçon écarté (bouchon, feu, parking)
     private const val MASS_KG = 1800f     // MG4 en ordre de marche, conducteur compris
     private const val UP_EFF = 0.9f       // montée : énergie électrique ≈ énergie potentielle / rendement
@@ -133,7 +137,7 @@ object ConsumptionMap {
         if (outside != null) { segTempSum += outside; segTempN++ }
         stillMs = if (v < 1f) stillMs + dtMs else 0L
         if (stillMs > STOP_MS) spoiled = true
-        if (segKm < SEGMENT_KM) return
+        if (segKm < SEGMENT_KM && (segMs < SEGMENT_MS || segKm < SEGMENT_MIN_KM)) return
         // Tronçon complet
         val km = segKm; val hours = segMs / 3_600_000f
         var kwh = segKwh
@@ -149,7 +153,9 @@ object ConsumptionMap {
         var stableMs = 0L
         for (i in segSpeeds.indices) if (kotlin.math.abs(segSpeeds[i] - mean) <= STABLE_KMH) stableMs += segDts[i]
         val stable = segMs > 0 && stableMs >= STABLE_SHARE * segMs
-        val ok = !spoiled && stable && hours > 0f && segTempN > 0 && per100 in 2f..60f
+        // Bornes larges : sur les petits tronçons, l'erreur d'altitude GPS d'un tronçon est rendue par le
+        // suivant (ils partagent leur point de jonction) ; les couper d'un seul côté fausserait la moyenne
+        val ok = !spoiled && stable && hours > 0f && segTempN > 0 && per100 in -30f..90f
         if (!stable && !spoiled && app.mg4dash.system.Prefs(context).energyLog)
             Log.i(TAG, String.format(java.util.Locale.US, "segment at %.0f km/h skipped: speed stable %.0f %% of the time", mean, stableMs * 100f / segMs.coerceAtLeast(1)))
         if (ok) {
