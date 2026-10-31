@@ -67,6 +67,7 @@ object CarBridge {
         scope.launch { pollLoop() }
         watchSaicClimate(context.applicationContext)
         watchClimateWindow()
+        trackManualClimate(context.applicationContext)
     }
 
     /** Démarrage / arrêt de la charge et du V2L disponibles (service EV de la voie A9). */
@@ -727,8 +728,75 @@ object CarBridge {
         { it.hvacPowerStatus.asInt() }, { it.switchHvacPowerStatus() })
     fun toggleAc() = if (useLegacy) legacy("ac") { LegacyCar.ac(_state.value.acOn != true) } else cycleTo("ac", toggleTarget(_state.value.acOn), 2,
         { it.acStatus.asInt() }, { it.switchACStatus() })
-    fun toggleAuto() = if (useLegacy) legacy("auto") { LegacyCar.auto(_state.value.autoOn != true) } else cycleTo("auto", toggleTarget(_state.value.autoOn), 2,
-        { it.autoStatus.asInt() }, { it.switchAutoStatus() })
+    fun toggleAuto() {
+        if (_state.value.autoOn == true && _state.value.hvacOn == true) { leaveAuto(); return }
+        if (useLegacy) legacy("auto") { LegacyCar.auto(_state.value.autoOn != true) } else cycleTo("auto", toggleTarget(_state.value.autoOn), 2,
+            { it.autoStatus.asInt() }, { it.switchAutoStatus() })
+    }
+
+    /**
+     * Derniers réglages hors AUTO (ventilation, direction, recyclage), retenus en continu et gardés après
+     * un redémarrage : on y revient en quittant AUTO depuis MG4Dash (#34), même si AUTO a été activé ailleurs.
+     */
+    private fun trackManualClimate(ctx: Context) {
+        val sp = app.mg4dash.system.Prefs(ctx).raw
+        scope.launch {
+            _state.collect { s ->
+                if (s.hvacOn != true || s.autoOn != false) return@collect
+                val fan = s.fanSpeed?.takeIf { it in VehicleState.FAN_MIN..VehicleState.FAN_MAX }
+                val dir = s.fanDirection?.takeIf { it in 0..6 }
+                val rec = s.recirc?.takeIf { it in 0..2 }
+                if (fan != null && fan != sp.getInt("manual_fan", -1) || dir != null && dir != sp.getInt("manual_dir", -1) ||
+                    rec != null && rec != sp.getInt("manual_recirc", -1)) {
+                    sp.edit().apply {
+                        fan?.let { putInt("manual_fan", it) }; dir?.let { putInt("manual_dir", it) }; rec?.let { putInt("manual_recirc", it) }
+                    }.apply()
+                }
+            }
+        }
+    }
+
+    /** Quitte AUTO puis remet ventilation, direction et recyclage d'avant, en relisant la voiture à chaque étape. */
+    private fun leaveAuto() {
+        val sp = appContext?.let { app.mg4dash.system.Prefs(it).raw }
+        val fan = sp?.getInt("manual_fan", -1)?.takeIf { it >= VehicleState.FAN_MIN }
+        val dir = sp?.getInt("manual_dir", -1)?.takeIf { it in 0..6 }
+        val rec = sp?.getInt("manual_recirc", -1)?.takeIf { it in 0..2 }
+        Log.i(TAG, "leaving AUTO, back to fan $fan, direction $dir, recirc $rec")
+        if (BuildConfig.MOCK) { _state.value = _state.value.copy(autoOn = false, fanSpeed = fan ?: _state.value.fanSpeed, fanDirection = dir ?: _state.value.fanDirection, recirc = rec ?: _state.value.recirc); return }
+        ownCommandAt = android.os.SystemClock.elapsedRealtime()
+        scope.launch {
+            cycleLock.withLock {
+                if (useLegacy) {
+                    try {
+                        LegacyCar.auto(false); delay(700)
+                        fan?.let { LegacyCar.fan(it); delay(500) }
+                        dir?.let { LegacyCar.direction(it); delay(500) }
+                        rec?.let { LegacyCar.loop(it) }
+                    } catch (e: Exception) { Log.w(TAG, "leave AUTO (old SDK): ${e.message}") }
+                    delay(500); refreshHvac(); return@withLock
+                }
+                val h = hvac ?: return@withLock
+                // 1) Quitter AUTO (bascule, relue)
+                for (i in 0 until 2) { if (safe { h.autoStatus } != true) break; try { h.switchAutoStatus() } catch (_: Exception) { break }; delay(500) }
+                delay(500)
+                // 2) Ventilation et direction : commandes directes
+                fan?.let { try { h.setFanSpeed(it) } catch (e: Exception) { Log.w(TAG, "leave AUTO fan: ${e.message}") }; delay(500) }
+                dir?.let { try { h.setFanDirection(it) } catch (e: Exception) { Log.w(TAG, "leave AUTO direction: ${e.message}") }; delay(500) }
+                // 3) Recyclage : bascule à 3 états, jusqu'à la valeur voulue (3 crans au plus)
+                rec?.let { target ->
+                    for (i in 0 until 3) {
+                        val cur = safe { h.airCirculationStatus }?.takeIf { it >= 0 } ?: break
+                        if (cur == target) break
+                        try { h.switchAirCirculationStatus() } catch (_: Exception) { break }
+                        delay(400)
+                    }
+                }
+                refreshHvac()
+                Log.i(TAG, "AUTO left: fan ${_state.value.fanSpeed}, direction ${_state.value.fanDirection}, recirc ${_state.value.recirc}")
+            }
+        }
+    }
     fun toggleDefrostFront() = if (useLegacy) legacy("defrostFront") { LegacyCar.defrostFront(_state.value.defrostFront != true) } else cycleTo("defrostFront", toggleTarget(_state.value.defrostFront), 2,
         { it.frontDefrostStatus.asInt() }, { it.switchFrontDefrostStatus() })
     fun toggleDefrostRear() = if (useLegacy) legacy("defrostRear") { LegacyCar.defrostRear(_state.value.defrostRear != true) } else cycleTo("defrostRear", toggleTarget(_state.value.defrostRear), 2,

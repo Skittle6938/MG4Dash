@@ -77,6 +77,9 @@ object ConsumptionMap {
         try { file(context).writeText(toJson(t)) } catch (e: Exception) { Log.w(TAG, "save: ${e.message}") }
     }
 
+    /** Remplace la carte (import depuis la clé USB). */
+    fun replace(context: Context, t: Array<Array<Cell>>) { cells = t; save(context); Log.i(TAG, "map imported") }
+
     fun clear(context: Context) { cells = empty(); save(context); Log.i(TAG, "map cleared") }
 
     fun speedBin(kmh: Float) = (kmh / SPEED_STEP).toInt().coerceIn(0, SPEED_BINS - 1)

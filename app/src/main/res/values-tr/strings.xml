@@ -528,6 +528,25 @@
     <string name="st_cc_stopped_desc">Araç dururken 2 dakikada bir nokta (klima, aksesuarlar). Kapalı: yalnızca sürüş sayılır. Silmek için eğriye uzun basın.</string>
     <string name="st_cons_map">Tüketim haritası (test aşamasında)</string>
     <string name="st_cons_map_desc">Yolculuktan yolculuğa sürüş tüketimini (klima ve aksesuarlar hariç, eğimler GPS yüksekliğiyle düzeltilmiş) ortalama hıza ve dış sıcaklığa göre öğrenir. Test özelliği, ileride rota tahmini için kullanılacak.</string>
+    <string name="cm_title">Tüketim haritası (test)</string>
+    <string name="cm_open">Tüketim haritasını göster</string>
+    <string name="cm_grid_title">SÜRÜŞ TÜKETİMİ (kWh/100 km) · HIZ × DIŞ SICAKLIK</string>
+    <string name="cm_about">HAKKINDA</string>
+    <string name="cm_summary">%1$d km ölçüldü · %3$d hücreden %2$d dolu</string>
+    <string name="cm_legend">Renk: yeşil = düşük, kırmızı = yüksek. Soluk = az km ölçüldü, dolu = 20 km veya fazlası. Gri = henüz veri yok. Klima ve aksesuarlar hariç; eğimler GPS yüksekliğiyle düzeltilmiş.</string>
+    <string name="cm_tap">Ayrıntı için bir hücreye dokunun.</string>
+    <string name="cm_cell">%1$s · %2$s\n%3$s kWh/100 km (± %4$s)\n%6$d bölümde %5$d km</string>
+    <string name="cm_cell_empty">%1$s · %2$s\nHenüz veri yok</string>
+    <string name="cm_export">Dışa aktar</string>
+    <string name="cm_import">İçe aktar</string>
+    <string name="cm_clear">Temizle</string>
+    <string name="cm_test_note">Test özelliği: değerler yanlış olabilir.</string>
+    <string name="cm_sim_clim">Klima açık simüle et (≈ %1$d W)</string>
+    <string name="cm_sim_note">Klima dahil: tahmin</string>
+    <string name="cm_clear_confirm">Tüm tüketim haritası silinsin mi?</string>
+    <string name="cm_exported">Harita dışa aktarıldı: %1$s</string>
+    <string name="cm_import_none">USB bellekte %1$s dosyası yok</string>
+    <string name="cm_imported">Harita içe aktarıldı</string>
     <string name="st_audio_source">Ses kaynağı</string>
     <string name="st_start_source">Başlangıçtaki kaynak</string>
     <string name="st_src_auto">Otomatik</string>
