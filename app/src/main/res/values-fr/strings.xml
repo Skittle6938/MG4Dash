@@ -42,6 +42,7 @@
     <string name="charging_eta">En charge · %1$d h %2$02d</string>
     <string name="weather_pending">Prévisions en attente</string>
     <string name="weather_outside_vehicle">Température extérieure du véhicule</string>
+    <string name="weather_outside_short">Extérieur</string>
     <string name="weather_details">Ressenti %1$d° · Vent %2$d %4$s · %3$d %%</string>
     <string name="weather_here">Position actuelle</string>
     <string name="wx_sunny">Ensoleillé</string>

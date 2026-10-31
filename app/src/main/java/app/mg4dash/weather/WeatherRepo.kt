@@ -92,6 +92,19 @@ object WeatherRepo {
             return
         }
         watchNetwork(app)
+        // Entre deux météos (30 min), une petite requête toutes les 2 min voit la perte de connexion : la carte
+        // passe alors vite en hors ligne (#18). La météo réussie reste affichée (jusqu'à STALE_MS).
+        scope.launch {
+            delay(60_000)
+            while (true) {
+                if (failingSince == 0L) {
+                    val ok = probe()
+                    probeFailingSince = if (ok) 0L else probeFailingSince.takeIf { it != 0L } ?: System.currentTimeMillis()
+                    if (!ok) Log.i(TAG, "connection check failed")
+                }
+                delay(if (probeFailingSince != 0L) 30_000L else PROBE_MS)
+            }
+        }
         scope.launch {
             delay(5_000)   // laisser le réseau T-box monter après le démarrage
             var fails = 0
@@ -123,7 +136,16 @@ object WeatherRepo {
      * Requêtes météo en échec depuis plus d'une minute (pas de connexion réelle), même si Android
      * voit un réseau. Une coupure brève (tunnel, zone blanche) ne fait plus disparaître la carte.
      */
-    val offline: Boolean get() = failingSince != 0L && System.currentTimeMillis() - failingSince > OFFLINE_GRACE_MS
+    val offline: Boolean get() = listOf(failingSince, probeFailingSince).any { it != 0L && System.currentTimeMillis() - it > OFFLINE_GRACE_MS }
+    @Volatile private var probeFailingSince = 0L
+    private const val PROBE_MS = 2 * 60 * 1000L
+
+    /** Accès réel à internet : requête HEAD sans contenu vers le service météo (≈ 1 Ko). */
+    private fun probe(): Boolean = try {
+        val c = URL("https://api.open-meteo.com/").openConnection() as HttpURLConnection
+        c.requestMethod = "HEAD"; c.connectTimeout = 8000; c.readTimeout = 8000; c.instanceFollowRedirects = false
+        try { c.responseCode > 0 } finally { c.disconnect() }
+    } catch (_: Exception) { false }
     @Volatile private var missingCity = false
     private val wake = kotlinx.coroutines.channels.Channel<Unit>(kotlinx.coroutines.channels.Channel.CONFLATED)
 

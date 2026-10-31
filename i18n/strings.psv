@@ -40,6 +40,7 @@ v2l_stop|STOP V2L|ARRÊTER V2L|V2L STOPPEN|DETENER V2L|FERMA V2L|V2L STOPPEN|V2L
 charging_eta|Charging · %1$d h %2$02d|En charge · %1$d h %2$02d|Lädt · %1$d h %2$02d|Cargando · %1$d h %2$02d|In carica · %1$d h %2$02d|Laden · %1$d u %2$02d|Şarj · %1$d sa %2$02d
 weather_pending|Forecast pending|Prévisions en attente|Vorhersage folgt|Previsión pendiente|Previsioni in attesa|Voorspelling volgt|Tahmin bekleniyor
 weather_outside_vehicle|Vehicle outside temperature|Température extérieure du véhicule|Außentemperatur des Fahrzeugs|Temperatura exterior del vehículo|Temperatura esterna del veicolo|Buitentemperatuur van het voertuig|Araç dış sıcaklığı
+weather_outside_short|Outside|Extérieur|Außen|Exterior|Esterno|Buiten|Dış
 weather_details|Feels like %1$d° · Wind %2$d %4$s · %3$d %%|Ressenti %1$d° · Vent %2$d %4$s · %3$d %%|Gefühlt %1$d° · Wind %2$d %4$s · %3$d %%|Sensación %1$d° · Viento %2$d %4$s · %3$d %%|Percepita %1$d° · Vento %2$d %4$s · %3$d %%|Gevoel %1$d° · Wind %2$d %4$s · %3$d %%|Hissedilen %1$d° · Rüzgâr %2$d %4$s · %3$d %%
 weather_here|Current position|Position actuelle|Aktuelle Position|Posición actual|Posizione attuale|Huidige positie|Mevcut konum
 wx_sunny|Sunny|Ensoleillé|Sonnig|Soleado|Soleggiato|Zonnig|Güneşli
