@@ -75,7 +75,12 @@ object ConsumptionMap {
     private fun save(context: Context) {
         val t = cells ?: return
         try { file(context).writeText(toJson(t)) } catch (e: Exception) { Log.w(TAG, "save: ${e.message}") }
+        // DiAuto relit la carte (ConsumptionProvider)
+        try { context.contentResolver.notifyChange(ConsumptionProvider.MAP_URI, null) } catch (_: Exception) {}
     }
+
+    /** Heure (ms) de la dernière modification de la carte, 0 si elle n'a jamais été enregistrée. */
+    fun updatedAt(context: Context): Long = file(context).lastModified()
 
     /** Remplace la carte (import depuis la clé USB). */
     fun replace(context: Context, t: Array<Array<Cell>>) { cells = t; save(context); Log.i(TAG, "map imported") }
