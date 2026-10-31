@@ -65,7 +65,7 @@ object Dock {
                     (activity as? app.mg4dash.MainActivity)?.onDockSlotChanged()
                 }
                 .setNegativeButton(R.string.cancel, null)
-                .show()
+                .show().also { app.mg4dash.ui.Dialogs.fix(it) }
             true
         }
         if (wifi) {
@@ -383,7 +383,7 @@ object Dock {
             }
             .setNegativeButton(R.string.cancel, null)
             .setOnDismissListener { Fullscreen.apply(activity) }
-            .show()
+            .show().also { app.mg4dash.ui.Dialogs.fix(it) }
     }
 
     /** Double toucher : coupe ou rétablit la connexion du téléphone (l'appli du bouton est désactivée). */

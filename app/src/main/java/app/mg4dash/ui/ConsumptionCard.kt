@@ -78,7 +78,7 @@ class ConsumptionCard(context: Context) : LinearLayout(context) {
                 append("  +").append(String.format(Locale.getDefault(), "%.1f", t.regenKwh))
                 val unit = length
                 append(" ").append(context.getString(R.string.en_regen_short))
-                setSpan(android.text.style.ForegroundColorSpan(c(R.color.accent_energy)), st, length, 0)
+                setSpan(android.text.style.ForegroundColorSpan(Themes.energy(context)), st, length, 0)
                 setSpan(android.text.style.RelativeSizeSpan(0.6f), st, unit, 0)
                 setSpan(android.text.style.RelativeSizeSpan(0.4f), unit, length, 0)
             }

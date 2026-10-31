@@ -75,7 +75,7 @@ class LineChart @JvmOverloads constructor(context: Context, attrs: AttributeSet?
     private val d = resources.displayMetrics.density
     private val line = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         style = Paint.Style.STROKE; strokeWidth = 2.5f * d; strokeJoin = Paint.Join.ROUND
-        color = app.mg4dash.ui.Themes.color(context, R.color.accent_energy)
+        color = app.mg4dash.ui.Themes.energy(context)
     }
     private val fill = Paint(Paint.ANTI_ALIAS_FLAG)
     private val grid = Paint().apply { color = app.mg4dash.ui.Themes.color(context, R.color.panel_border); strokeWidth = 1f }
@@ -108,7 +108,8 @@ class LineChart @JvmOverloads constructor(context: Context, attrs: AttributeSet?
         val path = Path()
         values.forEachIndexed { i, v -> val x = left + i * step; if (i == 0) path.moveTo(x, y(v)) else path.lineTo(x, y(v)) }
         val area = Path(path).apply { lineTo(right, bottom); lineTo(left, bottom); close() }
-        fill.shader = LinearGradient(0f, top, 0f, bottom, 0x5500E676, 0x0000E676, Shader.TileMode.CLAMP)
+        val rgb = line.color and 0xFFFFFF
+        fill.shader = LinearGradient(0f, top, 0f, bottom, 0x55000000 or rgb, rgb, Shader.TileMode.CLAMP)
         canvas.drawPath(area, fill)
         canvas.drawPath(path, line)
         // Échelle horizontale : début à gauche, fin à droite

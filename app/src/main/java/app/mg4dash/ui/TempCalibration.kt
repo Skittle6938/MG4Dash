@@ -55,6 +55,6 @@ object TempCalibration {
             .setView(box)
             .setPositiveButton(android.R.string.ok, null)
             .setNeutralButton(R.string.temp_cal_reset) { _, _ -> step(-prefs.tempOffset) }
-            .show()
+            .show().also { app.mg4dash.ui.Dialogs.fix(it) }
     }
 }
