@@ -33,32 +33,32 @@ class ConsumptionMapActivity : PageActivity() {
         body.addView(left, kit.lp(0, -1, 2.2f, r = 6))
 
         val right = kit.panel(getString(R.string.cm_about))
-        summary = kit.text("", 18f).apply { maxLines = 3 }
+        summary = kit.text("", 22f).apply { maxLines = 3 }
         right.addView(summary, kit.lp(-1, -2, t = 8))
-        right.addView(kit.text(getString(R.string.cm_legend), 15f, R.color.text_sub).apply { maxLines = 6; setLineSpacing(0f, 1.15f) }, kit.lp(-1, -2, t = 10))
+        right.addView(kit.text(getString(R.string.cm_legend), 19f, R.color.text_sub).apply { maxLines = 6; setLineSpacing(0f, 1.15f) }, kit.lp(-1, -2, t = 10))
         // Simulation « avec la clim » (affichage seulement, rien n'est envoyé à DiAuto) : la puissance moyenne
         // de la clim apprise par MG4Dash, ramenée aux km de chaque vitesse
         val climW = app.mg4dash.system.Prefs(this).raw.getFloat("em_clim_any", 1000f)
         val sim = kit.toggleTile(getString(R.string.cm_sim_clim, Math.round(climW))) {}
         sim.setOnClickListener { sim.isSelected = !sim.isSelected; grid.extraW = if (sim.isSelected) climW else 0f; selected?.let { (a, b) -> showCell(a, b) } }
-        sim.textSize = 16f
-        right.addView(sim, kit.lp(-1, kit.dp(52), t = 12))
+        sim.textSize = 20f
+        right.addView(sim, kit.lp(-1, kit.dp(60), t = 12))
         right.addView(kit.divider(), kit.lp(-1, 1, t = 12))
-        detail = kit.text(getString(R.string.cm_tap), 18f, R.color.text_value).apply { maxLines = 5; setLineSpacing(0f, 1.15f) }
+        detail = kit.text(getString(R.string.cm_tap), 22f, R.color.text_value).apply { maxLines = 5; setLineSpacing(0f, 1.15f) }
         right.addView(detail, kit.lp(-1, -2, t = 12))
         right.addView(View(this), kit.lp(-1, 0, 1f))
         val row = kit.row()
-        row.addView(kit.toggleTile(getString(R.string.cm_export)) { export() }.apply { textSize = 17f }, kit.lp(0, kit.dp(56), 1f, r = 6))
-        row.addView(kit.toggleTile(getString(R.string.cm_import)) { import() }.apply { textSize = 17f }, kit.lp(0, kit.dp(56), 1f, l = 6, r = 6))
+        row.addView(kit.toggleTile(getString(R.string.cm_export)) { export() }.apply { textSize = 20f }, kit.lp(0, kit.dp(64), 1f, r = 6))
+        row.addView(kit.toggleTile(getString(R.string.cm_import)) { import() }.apply { textSize = 20f }, kit.lp(0, kit.dp(64), 1f, l = 6, r = 6))
         lateinit var clear: TextView
         clear = kit.toggleTile(getString(R.string.cm_clear)) {
             app.mg4dash.ui.SourceMenu.confirm(this, clear, getString(R.string.cm_clear_confirm), getString(R.string.cm_clear)) {
                 ConsumptionMap.clear(this); refresh()
             }
-        }.apply { textSize = 17f }
-        row.addView(clear, kit.lp(0, kit.dp(56), 1f, l = 6))
+        }.apply { textSize = 20f }
+        row.addView(clear, kit.lp(0, kit.dp(64), 1f, l = 6))
         right.addView(row, kit.lp(-1, -2))
-        right.addView(kit.text(getString(R.string.cm_test_note), 14f, R.color.accent_heat).apply { maxLines = 2 }, kit.lp(-1, -2, t = 8))
+        right.addView(kit.text(getString(R.string.cm_test_note), 17f, R.color.accent_heat).apply { maxLines = 2 }, kit.lp(-1, -2, t = 8))
         body.addView(right, kit.lp(0, -1, 1f, l = 6))
         refresh()
     }
@@ -137,12 +137,12 @@ class ConsumptionMapActivity : PageActivity() {
         private val d = resources.displayMetrics.density
         private val fill = Paint(Paint.ANTI_ALIAS_FLAG)
         private val stroke = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.STROKE; strokeWidth = 2.5f * d; color = Themes.color(context, R.color.accent_action) }
-        private val text = Paint(Paint.ANTI_ALIAS_FLAG).apply { textAlign = Paint.Align.CENTER; textSize = 13f * d }
-        private val axis = Paint(Paint.ANTI_ALIAS_FLAG).apply { textSize = 13f * d; color = Themes.color(context, R.color.text_sub) }
+        private val text = Paint(Paint.ANTI_ALIAS_FLAG).apply { textAlign = Paint.Align.CENTER; textSize = 17f * d }
+        private val axis = Paint(Paint.ANTI_ALIAS_FLAG).apply { textSize = 17f * d; color = Themes.color(context, R.color.text_sub) }
         private val empty = Themes.color(context, R.color.gauge_off)
         private val r = RectF()
-        private val left get() = 54 * d
-        private val bottom get() = height - 26 * d
+        private val left get() = 64 * d
+        private val bottom get() = height - 32 * d
 
         /** Vert (sobre, ≤ 12) → jaune → rouge (≥ 26 kWh/100 km). */
         private fun colorFor(v: Float): Int {
