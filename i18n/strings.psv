@@ -96,28 +96,28 @@ emergency|Emergency|Urgence|Notfall|Emergencia|Emergenza|Noodgeval|Acil
 aeb_alert_brake|Alert + braking|Alerte + freinage|Warnung + Bremsen|Alerta + frenado|Avviso + frenata|Waarschuwing + remmen|Uyarı + fren
 active|Active|Actif|Aktiv|Activo|Attivo|Actief|Etkin
 value_n|Value %1$d|Valeur %1$d|Wert %1$d|Valor %1$d|Valore %1$d|Waarde %1$d|Değer %1$d
-cl_driver_temp|DRIVER TEMPERATURE|TEMPÉRATURE CONDUCTEUR|FAHRERTEMPERATUR|TEMPERATURA CONDUCTOR|TEMPERATURA CONDUCENTE|TEMPERATUUR BESTUURDER|SÜRÜCÜ SICAKLIĞI
+cl_driver_temp|DRIVER TEMPERATURE|TEMPÉRATURE CONDUCTEUR|FAHRERTEMPERATUR|TEMPERATURA CONDUCTOR|TEMPERATURA DESIDERATA|TEMPERATUUR BESTUURDER|SÜRÜCÜ SICAKLIĞI
 cl_fan|FAN|VENTILATION|GEBLÄSE|VENTILACIÓN|VENTILAZIONE|VENTILATIE|FAN
 cl_airflow|AIR DIRECTION|DIRECTION DE L'AIR|LUFTVERTEILUNG|DIRECCIÓN DEL AIRE|DIREZIONE ARIA|LUCHTRICHTING|HAVA YÖNÜ
-cl_face|FACE|VISAGE|GESICHT|CARA|VISO|GEZICHT|YÜZ
+cl_face|FACE|VISAGE|GESICHT|CARA|FRONTALE|GEZICHT|YÜZ
 cl_feet|FEET|PIEDS|FÜSSE|PIES|PIEDI|VOETEN|AYAK
 cl_windshield|WINDSCREEN|PARE-BRISE|SCHEIBE|PARABRISAS|PARABREZZA|VOORRUIT|ÖN CAM
 cl_modes|MODES|MODES|MODI|MODOS|MODALITÀ|MODI|MODLAR
 cl_eco|ECO|ECO|ECO|ECO|ECO|ECO|ECO
 cl_recirc|RECIRCULATION|RECYCLAGE|UMLUFT|RECIRCULACIÓN|RICIRCOLO|RECIRCULATIE|İÇ HAVA DOLAŞIMI
-cl_air_recirc|RECIRCULATED AIR|AIR RECYCLÉ|UMLUFT|AIRE RECIRCULADO|ARIA RICIRCOLATA|RECIRCULATIELUCHT|İÇ HAVA
+cl_air_recirc|RECIRCULATED AIR|AIR RECYCLÉ|UMLUFT|AIRE RECIRCULADO|RICIRCOLO ARIA|RECIRCULATIELUCHT|İÇ HAVA
 cl_air_outside|FRESH AIR|AIR EXTÉRIEUR|FRISCHLUFT|AIRE EXTERIOR|ARIA ESTERNA|BUITENLUCHT|DIŞ HAVA
-cl_air_auto|AIR AUTO|AIR AUTO|LUFT AUTO|AIRE AUTO|ARIA AUTO|LUCHT AUTO|HAVA OTO
+cl_air_auto|AIR AUTO|AIR AUTO|LUFT AUTO|AIRE AUTO|RICIRCOLO AUTOMATICO|LUCHT AUTO|HAVA OTO
 cl_def_front|FRONT DEFROST|DÉGIVRAGE AV|FRONTSCHEIBE|DESEMPAÑADO DEL.|SBRINAMENTO ANT.|ONTWASEMEN VOOR|ÖN BUĞU ÇÖZME
 cl_def_rear|REAR DEFROST|DÉGIVRAGE AR|HECKSCHEIBE|DESEMPAÑADO TRAS.|SBRINAMENTO POST.|ONTWASEMEN ACHTER|ARKA BUĞU ÇÖZME
 cl_auto_air|Air volume in AUTO: %1$s|Débit d'air en AUTO : %1$s|Luftmenge in AUTO: %1$s|Caudal de aire en AUTO: %1$s|Portata d'aria in AUTO: %1$s|Luchthoeveelheid in AUTO: %1$s|AUTO'da hava debisi: %1$s
 cl_level_low|low|bas|niedrig|bajo|bassa|laag|düşük
 cl_level_medium|medium|moyen|mittel|medio|media|middel|orta
 cl_level_high|high|haut|hoch|alto|alta|hoog|yüksek
-cl_defrost_link|Rear defrost with front|Dégivrage arrière avec l'avant|Heckscheibe mit Frontscheibe|Luneta con parabrisas|Lunotto con parabrezza|Achterruit met voorruit|Arka cam ön camla
+cl_defrost_link|Rear defrost with front|Dégivrage arrière avec l'avant|Heckscheibe mit Frontscheibe|Luneta con parabrisas|Sbrinamento lunotto con parabrezza|Achterruit met voorruit|Arka cam ön camla
 cl_eco_link|Follow ECO mode|Suivre le mode ECO|ECO-Modus folgen|Seguir el modo ECO|Segui la modalità ECO|ECO-modus volgen|ECO modunu izle
 cl_stock|Stock climate screen  ›|Écran clim d'origine  ›|Original-Klimaanzeige  ›|Pantalla de clima original  ›|Schermata clima originale  ›|Origineel klimaatscherm  ›|Orijinal klima ekranı  ›
-cl_outside|Outside %1$d°|Extérieur %1$d°|Außen %1$d°|Exterior %1$d°|Esterno %1$d°|Buiten %1$d°|Dış %1$d°
+cl_outside|Outside %1$d°|Extérieur %1$d°|Außen %1$d°|Exterior %1$d°|Temp. esterna: %1$d°|Buiten %1$d°|Dış %1$d°
 en_stock|Stock Energy app  ›|Appli Énergie d'origine  ›|Original-Energie-App  ›|App de energía original  ›|App Energia originale  ›|Originele energie-app  ›|Orijinal Enerji uygulaması  ›
 en_charging|CHARGING|RECHARGE|LADEN|CARGA|RICARICA|LADEN|ŞARJ
 en_limit|CHARGE LIMIT|LIMITE DE CHARGE|LADELIMIT|LÍMITE DE CARGA|LIMITE DI RICARICA|LAADLIMIET|ŞARJ SINIRI
@@ -125,7 +125,7 @@ en_ac_current|AC CHARGING CURRENT|COURANT DE CHARGE AC|AC-LADESTROM|CORRIENTE DE
 en_max|Max|Max|Max|Máx|Max|Max|Maks
 en_scheduled|SCHEDULED CHARGING|CHARGE PROGRAMMÉE|GEPLANTES LADEN|CARGA PROGRAMADA|RICARICA PROGRAMMATA|GEPLAND LADEN|PLANLI ŞARJ
 en_schedule|SCHEDULE|PROGRAMMATION|ZEITPLAN|PROGRAMACIÓN|PROGRAMMAZIONE|PLANNING|PLAN
-en_finish|FINISH TO THE LIMIT|FINIR JUSQU'À LA LIMITE|BIS ZUM LIMIT LADEN|TERMINAR HASTA EL LÍMITE|COMPLETA FINO AL LIMITE|TOT LIMIET AFMAKEN|SINIRA KADAR TAMAMLA
+en_finish|FINISH TO THE LIMIT|FINIR JUSQU'À LA LIMITE|BIS ZUM LIMIT LADEN|TERMINAR HASTA EL LÍMITE|CONTINUA FINO AL LIMITE|TOT LIMIET AFMAKEN|SINIRA KADAR TAMAMLA
 en_start|Start|Début|Beginn|Inicio|Inizio|Begin|Başlangıç
 en_end|End|Fin|Ende|Fin|Fine|Einde|Bitiş
 en_limit_word|limit|limite|Limit|límite|limite|limiet|sınır
