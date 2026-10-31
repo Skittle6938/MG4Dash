@@ -554,6 +554,8 @@
     <string name="cm_test_note">Test feature: values may be wrong.</string>
     <string name="cm_sim_clim">Simulate with the climate on (≈ %1$d W)</string>
     <string name="cm_sim_note">Including the climate: estimate</string>
+    <string name="cm_accel_ready">Slopes and speed changes: accelerometer</string>
+    <string name="cm_accel_learning">Accelerometer: learning its direction (%1$d %%)</string>
     <string name="cm_clear_confirm">Clear the whole consumption map?</string>
     <string name="cm_exported">Map exported: %1$s</string>
     <string name="cm_import_none">No %1$s file on the USB stick</string>
