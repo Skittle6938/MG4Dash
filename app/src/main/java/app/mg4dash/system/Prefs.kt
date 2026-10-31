@@ -8,9 +8,9 @@ class Prefs(context: Context) {
     private val sp: SharedPreferences =
         context.applicationContext.getSharedPreferences("mg4launcher", Context.MODE_PRIVATE)
 
-    /** Capacité utile de la batterie, pour l'estimation de consommation (MG4 Standard 51 kWh : ~49 utiles). */
+    /** Capacité utile de la batterie, pour l'estimation de consommation ; sans mesure, celle du modèle choisi (51 kWh : 50,8 utiles). */
     var batteryKwh: Float
-        get() = sp.getFloat("battery_kwh", 49f)
+        get() = sp.getFloat("battery_kwh", app.mg4dash.energy.BatteryCapacity.MODELS.firstOrNull { it.first == batteryModel }?.second ?: 50.8f)
         set(v) = sp.edit().putFloat("battery_kwh", v).apply()
 
     /** Batterie d'origine du modèle, en kWh bruts : 51, 64 ou 77 (référence de la santé batterie). */
