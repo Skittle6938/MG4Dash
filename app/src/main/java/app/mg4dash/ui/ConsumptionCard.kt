@@ -26,7 +26,6 @@ class ConsumptionCard(context: Context) : LinearLayout(context) {
     private val distance = tv(40f, R.color.text_value)
     private val bar = StackedBar(context)
     private val legend = LinearLayout(context).apply { orientation = VERTICAL }
-    private val regen = tv(17f, R.color.accent_energy)
     private val chart = LineChart(context).apply {
         // Appui long sur la courbe : l'effacer (#44)
         setOnLongClickListener { v -> (context as? android.app.Activity)?.let { confirmClear(it, v, prefs.consumptionPeriod.coerceIn(0, 2)) }; true }
@@ -61,7 +60,6 @@ class ConsumptionCard(context: Context) : LinearLayout(context) {
         })
         addView(bar, LayoutParams(LayoutParams.MATCH_PARENT, (22 * d).toInt()).apply { topMargin = (6 * d).toInt() })
         addView(legend, LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT).apply { topMargin = (8 * d).toInt() })
-        addView(regen)
         addView(tv(15f, R.color.text_title).apply { text = context.getString(R.string.en_recent, app.mg4dash.system.Units.consUnit(context)); letterSpacing = 0.1f },
             LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT).apply { topMargin = (10 * d).toInt() })
         addView(chart, LayoutParams(LayoutParams.MATCH_PARENT, 0, 1f))
@@ -73,7 +71,18 @@ class ConsumptionCard(context: Context) : LinearLayout(context) {
         periodTv.text = periodLabels[period] + "  ▾"
         val t = EnergyMonitor.totals(period)
         val ok = t.outKwh > 0f
-        total.text = if (ok) smallUnit(String.format(Locale.getDefault(), "%.1f kWh", t.outKwh)) else "—"
+        // Récupération à côté du total (#44), en vert, unité en petit ; rien si elle est nulle
+        total.text = if (!ok) "—" else android.text.SpannableStringBuilder(smallUnit(String.format(Locale.getDefault(), "%.1f kWh", t.outKwh))).apply {
+            if (t.regenKwh >= 0.05f) {
+                val st = length
+                append("  +").append(String.format(Locale.getDefault(), "%.1f", t.regenKwh))
+                val unit = length
+                append(" ").append(context.getString(R.string.en_regen_short))
+                setSpan(android.text.style.ForegroundColorSpan(c(R.color.accent_energy)), st, length, 0)
+                setSpan(android.text.style.RelativeSizeSpan(0.6f), st, unit, 0)
+                setSpan(android.text.style.RelativeSizeSpan(0.4f), unit, length, 0)
+            }
+        }
         distance.text = if (t.km > 0) smallUnit(app.mg4dash.system.Units.distText(context, t.km.toFloat())) else ""
         val green = c(R.color.accent_energy); val cyan = c(R.color.accent_cold); val orange = c(R.color.accent_heat)
         val violet = c(R.color.accent_battery)
@@ -94,9 +103,9 @@ class ConsumptionCard(context: Context) : LinearLayout(context) {
                 })
                 legend.addView(r, LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT).apply { topMargin = (3 * d).toInt() })
             }
-        regen.text = if (t.regenKwh > 0f) context.getString(R.string.en_regen, String.format(Locale.getDefault(), "%.1f", t.regenKwh)) else ""
         val (values, n) = curve(context, period)
         chart.values = values
+        axis(context, period, values.size).let { (a, b) -> chart.startLabel = a; chart.endLabel = b }
         chart.emptyText = if (period == 2) R.string.chart_empty_trips else R.string.chart_empty
         note.text = n
     }
@@ -115,6 +124,27 @@ class ConsumptionCard(context: Context) : LinearLayout(context) {
                 app.mg4dash.energy.ConsumptionCurve.clear(period)
                 app.mg4dash.energy.EnergyMonitor.reset(period)
             }
+        }
+
+        /**
+         * Échelle horizontale (#44) : depuis combien de km (un point par km) ou, sur 12 mois, depuis combien
+         * de temps (âge du plus ancien trajet) commence la courbe ; la fin est « maintenant ».
+         */
+        fun axis(c: android.content.Context, period: Int, points: Int): Pair<String?, String?> {
+            if (points < 2) return null to null
+            val start = if (period == 2) {
+                val at = app.mg4dash.energy.ConsumptionCurve.curves.value.firstTripAt ?: return null to null
+                val min = ((System.currentTimeMillis() - at) / 60_000L).coerceAtLeast(1)
+                val (res, n) = when {
+                    min < 60 -> R.string.cc_min to min
+                    min < 24 * 60 -> R.string.cc_hours to min / 60
+                    min < 14 * 24 * 60 -> R.string.cc_days to min / (24 * 60)
+                    min < 9 * 7 * 24 * 60 -> R.string.cc_weeks to min / (7 * 24 * 60)
+                    else -> R.string.cc_months to min / (30 * 24 * 60)
+                }
+                c.getString(res, n.toInt())
+            } else app.mg4dash.system.Units.distText(c, points.toFloat())
+            return c.getString(R.string.cc_ago, start) to c.getString(R.string.cc_now)
         }
 
         /**

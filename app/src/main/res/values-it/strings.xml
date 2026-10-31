@@ -147,6 +147,14 @@
     <string name="en_accessories">Accessori</string>
     <string name="en_battery_heat">Riscaldamento batteria</string>
     <string name="en_regen">+ %1$s kWh recuperati in frenata</string>
+    <string name="en_regen_short">recup.</string>
+    <string name="cc_ago">%1$s fa</string>
+    <string name="cc_now">adesso</string>
+    <string name="cc_min">%1$d min</string>
+    <string name="cc_hours">%1$d h</string>
+    <string name="cc_days">%1$d g</string>
+    <string name="cc_weeks">%1$d sett.</string>
+    <string name="cc_months">%1$d mesi</string>
     <string name="en_remaining">" · %1$d h %2$d min rimanenti"</string>
     <string name="en_plug_v2l">Collega un adattatore V2L alla presa di ricarica</string>
     <string name="en_unplugged">CAVO SCOLLEGATO</string>

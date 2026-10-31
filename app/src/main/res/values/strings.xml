@@ -147,6 +147,14 @@
     <string name="en_accessories">Accessories</string>
     <string name="en_battery_heat">Battery heating</string>
     <string name="en_regen">+ %1$s kWh recovered by braking</string>
+    <string name="en_regen_short">regen</string>
+    <string name="cc_ago">%1$s ago</string>
+    <string name="cc_now">now</string>
+    <string name="cc_min">%1$d min</string>
+    <string name="cc_hours">%1$d h</string>
+    <string name="cc_days">%1$d d</string>
+    <string name="cc_weeks">%1$d wk</string>
+    <string name="cc_months">%1$d mo</string>
     <string name="en_remaining">" · %1$d h %2$d min left"</string>
     <string name="en_plug_v2l">Plug a V2L adapter into the charging socket</string>
     <string name="en_unplugged">CABLE UNPLUGGED</string>
