@@ -262,6 +262,10 @@ object Themes {
             tv.data else ContextCompat.getColor(context, res)
     }
 
+    /** Vert de l'énergie pour un texte ou une courbe : plus foncé en mode clair, pour rester lisible sur fond blanc. */
+    fun energy(context: Context): Int =
+        if (isLight(context)) ContextCompat.getColor(context, R.color.accent_energy_light) else color(context, R.color.accent_energy)
+
     /** Couleur de sélection (puces actives) du thème courant. */
     fun select(context: Context): Int {
         val tv = TypedValue()

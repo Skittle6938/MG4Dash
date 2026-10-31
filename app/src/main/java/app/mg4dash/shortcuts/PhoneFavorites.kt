@@ -64,7 +64,7 @@ object PhoneFavorites {
                 }
             }
             .setNegativeButton(R.string.cancel, null)
-            .show()
+            .show().also { app.mg4dash.ui.Dialogs.fix(it) }
     }
 
     /**
@@ -122,7 +122,7 @@ object PhoneFavorites {
             .setTitle(R.string.sw_fav_count)
             .setView(row)
             .setNegativeButton(R.string.cancel, null)
-            .show()
+            .show().also { app.mg4dash.ui.Dialogs.fix(it) }
     }
 
     /**

@@ -187,9 +187,9 @@ class EnergyActivity : PageActivity() {
         c3.addView(bar, kit.lp(-1, kit.dp(22), t = 10))
         legend = kit.column()
         c3.addView(legend, kit.lp(-1, -2, t = 8))
-        regen = kit.text("", 18f, R.color.accent_energy)
+        regen = kit.text("", 18f, R.color.accent_energy).apply { setTextColor(app.mg4dash.ui.Themes.energy(context)) }
         c3.addView(regen, kit.lp(-1, -2, t = 6))
-        regenKm = kit.text("", 18f, R.color.accent_energy)
+        regenKm = kit.text("", 18f, R.color.accent_energy).apply { setTextColor(app.mg4dash.ui.Themes.energy(context)) }
         c3.addView(regenKm, kit.lp(-1, -2, t = 2))
         c3.addView(kit.title(getString(R.string.en_recent, app.mg4dash.system.Units.consUnit(this))), kit.lp(-1, -2, t = 18))
         chart = LineChart(this).apply {
@@ -415,7 +415,7 @@ class EnergyActivity : PageActivity() {
             .setView(view)
             .setPositiveButton(android.R.string.ok) { _, _ -> setTime(start, read()) }
             .setNegativeButton(R.string.cancel, null)
-            .show()
+            .show().also { app.mg4dash.ui.Dialogs.fix(it) }
     }
 
     private fun shiftTime(start: Boolean, deltaMin: Int) {

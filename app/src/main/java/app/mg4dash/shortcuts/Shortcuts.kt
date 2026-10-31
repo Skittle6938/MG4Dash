@@ -204,7 +204,7 @@ object Shortcuts {
                 else apps[p - (if (extraFirst != null) 1 else 0)].activityInfo.let { onPick(ComponentName(it.packageName, it.name)) }
             }
             .setNegativeButton(R.string.cancel, null)
-            .show()
+            .show().also { app.mg4dash.ui.Dialogs.fix(it) }
     }
 
     // ─── Modification d'une case ───
@@ -226,7 +226,7 @@ object Shortcuts {
                 }
             }
             .setNegativeButton(R.string.cancel, null)
-            .show()
+            .show().also { app.mg4dash.ui.Dialogs.fix(it) }
     }
 
     // ─── Home Assistant ───
@@ -296,7 +296,7 @@ object Shortcuts {
             }
         })
         list.setOnItemClickListener { _, _, pos, _ -> dialog.dismiss(); onPick(shown[pos]) }
-        dialog.show()
+        dialog.show(); app.mg4dash.ui.Dialogs.fix(dialog)
     }
 
     /** Service appelé selon le domaine de l'entité. */

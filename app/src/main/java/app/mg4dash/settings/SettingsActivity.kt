@@ -268,7 +268,7 @@ class SettingsActivity : AppCompatActivity() {
                         .setView(notes)
                         .setPositiveButton(R.string.st_update_install) { _, _ -> install(newer) }
                         .setNegativeButton(R.string.cancel, null)
-                        .show()
+                        .show().also { app.mg4dash.ui.Dialogs.fix(it) }
                 }
             }
         })
@@ -420,7 +420,7 @@ class SettingsActivity : AppCompatActivity() {
         row(col, button("Relire") { show() })
         show()
         AlertDialog.Builder(this).setTitle("Tests (charge)").setView(ScrollView(this).apply { addView(col) })
-            .setPositiveButton(R.string.st_close, null).show()
+            .setPositiveButton(R.string.st_close, null).show().also { app.mg4dash.ui.Dialogs.fix(it) }
     }
 
     /** Radio Dash : seulement sur le firmware et l'appli radio pour lesquels elle est construite. */
@@ -458,7 +458,7 @@ class SettingsActivity : AppCompatActivity() {
                                     showState()
                                     if (!isFinishing) AlertDialog.Builder(this@SettingsActivity)
                                         .setMessage(if (ok) R.string.st_rd_done else R.string.st_update_error)
-                                        .setPositiveButton(android.R.string.ok, null).show()
+                                        .setPositiveButton(android.R.string.ok, null).show().also { app.mg4dash.ui.Dialogs.fix(it) }
                                 } }
                                 withContext(Dispatchers.IO) { R2.install(this@SettingsActivity, apk, r.version) }
                             } catch (e: Exception) {
@@ -468,7 +468,7 @@ class SettingsActivity : AppCompatActivity() {
                         }
                     }
                     .setNegativeButton(R.string.cancel, null)
-                    .show()
+                    .show().also { app.mg4dash.ui.Dialogs.fix(it) }
             }
         })
     }
@@ -519,7 +519,7 @@ class SettingsActivity : AppCompatActivity() {
                 refreshHome(); toastState(ok)
             }
             .setNegativeButton(R.string.cancel, null)
-            .show()
+            .show().also { app.mg4dash.ui.Dialogs.fix(it) }
     }
 
     private fun confirmValet() {
@@ -534,7 +534,7 @@ class SettingsActivity : AppCompatActivity() {
                 refreshHome(); toastState(ok)
             }
             .setNegativeButton(R.string.cancel, null)
-            .show()
+            .show().also { app.mg4dash.ui.Dialogs.fix(it) }
     }
 
     private fun toastState(ok: Boolean) {
@@ -564,7 +564,7 @@ class SettingsActivity : AppCompatActivity() {
             .setView(ScrollView(this).apply { addView(view) })
             .setNeutralButton(R.string.st_refresh, null)
             .setPositiveButton(R.string.st_close, null)
-            .show()
+            .show().also { app.mg4dash.ui.Dialogs.fix(it) }
         d.getButton(AlertDialog.BUTTON_NEUTRAL).setOnClickListener { view.text = Log.snapshot().joinToString("\n") }
     }
 
@@ -617,7 +617,7 @@ class SettingsActivity : AppCompatActivity() {
             .setTitle(title).setView(box)
             .setPositiveButton(android.R.string.ok) { _, _ -> onOk(input.text.toString()) }
             .setNegativeButton(R.string.cancel, null)
-            .show()
+            .show().also { app.mg4dash.ui.Dialogs.fix(it) }
     }
 
     /**

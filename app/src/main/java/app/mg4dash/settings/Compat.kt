@@ -150,6 +150,6 @@ object Compat {
                     app.mg4dash.ui.Toasts.show(a, R.string.st_compat_no_browser, long = true)
                 }
             }
-            .show()
+            .show().also { app.mg4dash.ui.Dialogs.fix(it) }
     }
 }
