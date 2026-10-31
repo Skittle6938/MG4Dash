@@ -528,6 +528,25 @@
     <string name="st_cc_stopped_desc">Un punto cada 2 minutos con el coche parado (clima, accesorios). Desactivado: solo cuenta la conducción. Pulsación larga en la curva para borrarla.</string>
     <string name="st_cons_map">Mapa de consumo (en pruebas)</string>
     <string name="st_cons_map_desc">Aprende, viaje tras viaje, el consumo de marcha (sin climatización ni accesorios, pendientes corregidas con la altitud GPS) según la velocidad media y la temperatura exterior. Función en pruebas, servirá para estimar rutas.</string>
+    <string name="cm_title">Mapa de consumo (en pruebas)</string>
+    <string name="cm_open">Ver el mapa de consumo</string>
+    <string name="cm_grid_title">CONSUMO DE MARCHA (kWh/100 km) · VELOCIDAD × TEMPERATURA EXTERIOR</string>
+    <string name="cm_about">ACERCA DE</string>
+    <string name="cm_summary">%1$d km medidos · %2$d de %3$d casillas</string>
+    <string name="cm_legend">Color: verde = bajo, rojo = alto. Pálido = pocos km medidos, intenso = 20 km o más. Gris = sin datos aún. Sin climatización ni accesorios; pendientes corregidas con la altitud GPS.</string>
+    <string name="cm_tap">Toque una casilla para ver el detalle.</string>
+    <string name="cm_cell">%1$s · %2$s\n%3$s kWh/100 km (± %4$s)\n%5$d km en %6$d tramos</string>
+    <string name="cm_cell_empty">%1$s · %2$s\nSin datos aún</string>
+    <string name="cm_export">Exportar</string>
+    <string name="cm_import">Importar</string>
+    <string name="cm_clear">Borrar</string>
+    <string name="cm_test_note">Función en pruebas: los valores pueden ser erróneos.</string>
+    <string name="cm_sim_clim">Simular con climatización (≈ %1$d W)</string>
+    <string name="cm_sim_note">Con climatización: estimación</string>
+    <string name="cm_clear_confirm">¿Borrar todo el mapa de consumo?</string>
+    <string name="cm_exported">Mapa exportado: %1$s</string>
+    <string name="cm_import_none">No hay archivo %1$s en el USB</string>
+    <string name="cm_imported">Mapa importado</string>
     <string name="st_audio_source">Fuente de audio</string>
     <string name="st_start_source">Fuente al arrancar</string>
     <string name="st_src_auto">Automática</string>

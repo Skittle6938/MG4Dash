@@ -205,6 +205,7 @@ class SettingsActivity : AppCompatActivity() {
         toggle(energy, R.string.st_cc_stopped, R.string.st_cc_stopped_desc, { prefs.raw.getBoolean("cc_stopped", true) }) { prefs.raw.edit().putBoolean("cc_stopped", it).apply() }
         // Carte de consommation vitesse × température (en test, désactivée par défaut)
         toggle(energy, R.string.st_cons_map, R.string.st_cons_map_desc, { prefs.consumptionMap }) { prefs.consumptionMap = it }
+        row(energy, button(getString(R.string.cm_open)) { startActivity(android.content.Intent(this, app.mg4dash.pages.ConsumptionMapActivity::class.java)) })
         powerFxSetting(panel(lookR, getString(R.string.sw_power)))
 
         // ════ Colonne droite : système, connexions, diagnostic ════

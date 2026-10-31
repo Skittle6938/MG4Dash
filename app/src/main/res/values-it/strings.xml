@@ -528,6 +528,25 @@
     <string name="st_cc_stopped_desc">Un punto ogni 2 minuti ad auto ferma (clima, accessori). Disattivato: conta solo la guida. Pressione lunga sulla curva per cancellarla.</string>
     <string name="st_cons_map">Mappa dei consumi (in prova)</string>
     <string name="st_cons_map_desc">Impara, viaggio dopo viaggio, il consumo di marcia (senza clima né accessori, pendenze corrette con l\'altitudine GPS) in base alla velocità media e alla temperatura esterna. Funzione in prova, servirà a stimare i percorsi.</string>
+    <string name="cm_title">Mappa dei consumi (in prova)</string>
+    <string name="cm_open">Mostra la mappa dei consumi</string>
+    <string name="cm_grid_title">CONSUMO DI MARCIA (kWh/100 km) · VELOCITÀ × TEMPERATURA ESTERNA</string>
+    <string name="cm_about">INFO</string>
+    <string name="cm_summary">%1$d km misurati · %2$d di %3$d caselle</string>
+    <string name="cm_legend">Colore: verde = basso, rosso = alto. Pallido = pochi km misurati, pieno = 20 km o più. Grigio = nessun dato. Clima e accessori esclusi; pendenze corrette con l\'altitudine GPS.</string>
+    <string name="cm_tap">Tocca una casella per il dettaglio.</string>
+    <string name="cm_cell">%1$s · %2$s\n%3$s kWh/100 km (± %4$s)\n%5$d km in %6$d tratti</string>
+    <string name="cm_cell_empty">%1$s · %2$s\nNessun dato</string>
+    <string name="cm_export">Esporta</string>
+    <string name="cm_import">Importa</string>
+    <string name="cm_clear">Cancella</string>
+    <string name="cm_test_note">Funzione in prova: i valori possono essere errati.</string>
+    <string name="cm_sim_clim">Simula con il clima (≈ %1$d W)</string>
+    <string name="cm_sim_note">Con il clima: stima</string>
+    <string name="cm_clear_confirm">Cancellare tutta la mappa dei consumi?</string>
+    <string name="cm_exported">Mappa esportata: %1$s</string>
+    <string name="cm_import_none">Nessun file %1$s sulla chiavetta USB</string>
+    <string name="cm_imported">Mappa importata</string>
     <string name="st_audio_source">Sorgente audio</string>
     <string name="st_start_source">Sorgente all\'avvio</string>
     <string name="st_src_auto">Automatica</string>

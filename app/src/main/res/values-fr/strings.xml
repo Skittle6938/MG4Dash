@@ -528,6 +528,25 @@
     <string name="st_cc_stopped_desc">Un point toutes les 2 minutes voiture arrêtée (clim, accessoires). Désactivé : seule la conduite compte. Appui long sur la courbe pour l\'effacer.</string>
     <string name="st_cons_map">Carte de consommation (en test)</string>
     <string name="st_cons_map_desc">Apprend, trajet après trajet, la consommation de roulage (sans clim ni accessoires, côtes corrigées avec l\'altitude GPS) selon la vitesse moyenne et la température extérieure. Fonction en test, qui servira à estimer les itinéraires.</string>
+    <string name="cm_title">Carte de consommation (en test)</string>
+    <string name="cm_open">Voir la carte de consommation</string>
+    <string name="cm_grid_title">CONSO DE ROULAGE (kWh/100 km) · VITESSE × TEMPÉRATURE EXTÉRIEURE</string>
+    <string name="cm_about">À PROPOS</string>
+    <string name="cm_summary">%1$d km mesurés · %2$d cases sur %3$d remplies</string>
+    <string name="cm_legend">Couleur : vert = sobre, rouge = gourmand. Pâle = peu de km mesurés, plein = 20 km ou plus. Gris = pas encore de données. Clim et accessoires non comptés ; côtes corrigées avec l\'altitude GPS.</string>
+    <string name="cm_tap">Touchez une case pour son détail.</string>
+    <string name="cm_cell">%1$s · %2$s\n%3$s kWh/100 km (± %4$s)\n%5$d km en %6$d tronçons</string>
+    <string name="cm_cell_empty">%1$s · %2$s\nPas encore de données</string>
+    <string name="cm_export">Exporter</string>
+    <string name="cm_import">Importer</string>
+    <string name="cm_clear">Effacer</string>
+    <string name="cm_test_note">Fonction en test : les valeurs peuvent être fausses.</string>
+    <string name="cm_sim_clim">Simuler avec la clim (≈ %1$d W)</string>
+    <string name="cm_sim_note">Clim comprise : estimation</string>
+    <string name="cm_clear_confirm">Effacer toute la carte de consommation ?</string>
+    <string name="cm_exported">Carte exportée : %1$s</string>
+    <string name="cm_import_none">Aucun fichier %1$s sur la clé USB</string>
+    <string name="cm_imported">Carte importée</string>
     <string name="st_audio_source">Source audio</string>
     <string name="st_start_source">Source au démarrage</string>
     <string name="st_src_auto">Automatique</string>
