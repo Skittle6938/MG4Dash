@@ -277,7 +277,7 @@
     <string name="st_paste">Pegar</string>
     <string name="st_diag">DIAGNÓSTICO</string>
     <string name="st_energy_log">Registro de datos de energía: %1$s</string>
-    <string name="st_energy_log_desc">Cada 5 s anota la potencia de la batería, los contadores de consumo y el estado de los equipos en Android/data/app.mg4dash/files/energy_log.csv (solo lectura, no se envía nada al coche).</string>
+    <string name="st_energy_log_desc">Cada 5 s anota la potencia de la batería, los contadores de consumo y el estado de los equipos en Android/data/app.mg4dash/files/energy_log.csv (solo lectura, no se envía nada al coche). Solo para diagnóstico: estas escrituras frecuentes desgastan la memoria de la radio, déjelo desactivado si no.</string>
     <string name="st_copy_sysui">Copiar la interfaz del sistema al USB</string>
     <string name="st_copy_sysui_desc">Para la incidencia #62: copia los archivos de la interfaz del sistema SAIC en una carpeta mg4dash_systemui del USB. No se modifica nada en el coche.</string>
     <string name="st_copy_sysui_nousb">No se encontró ningún USB</string>
@@ -379,10 +379,11 @@
     <string name="st_wide_bar_desc">El doble de ancha, con iconos más grandes, más fácil de pulsar conduciendo.</string>
     <string name="st_map_titles">Ocultar los títulos de los widgets (todos los estilos): %1$s</string>
     <string name="st_map_vdock_btn">Barra vertical</string>
-    <string name="st_bar_side">Lado de la barra vertical</string>
-    <string name="st_bar_side_auto">Lado del conductor</string>
-    <string name="st_bar_side_left">Izquierda</string>
-    <string name="st_bar_side_right">Derecha</string>
+    <string name="st_bar">Barra de menús</string>
+    <string name="st_bar_bottom">Horizontal abajo</string>
+    <string name="st_bar_auto">Vertical, lado del conductor</string>
+    <string name="st_bar_left">Vertical, izquierda</string>
+    <string name="st_bar_right">Vertical, derecha</string>
     <string name="st_map_titles_btn">Títulos</string>
     <string name="vh_tires">NEUMÁTICOS</string>
     <string name="vh_tire_fl">Delantero izq.</string>

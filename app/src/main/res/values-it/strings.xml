@@ -277,7 +277,7 @@
     <string name="st_paste">Incolla</string>
     <string name="st_diag">DIAGNOSTICA</string>
     <string name="st_energy_log">Registratore dati energia: %1$s</string>
-    <string name="st_energy_log_desc">Ogni 5 s registra potenza della batteria, contatori di consumo e stato degli equipaggiamenti in Android/data/app.mg4dash/files/energy_log.csv (sola lettura, nulla viene inviato all\'auto).</string>
+    <string name="st_energy_log_desc">Ogni 5 s annota la potenza della batteria, i contatori dei consumi e lo stato delle apparecchiature in Android/data/app.mg4dash/files/energy_log.csv (sola lettura, nulla viene inviato all\'auto). Solo per la diagnosi: queste scritture frequenti usurano la memoria dell\'autoradio, altrimenti lascialo disattivato.</string>
     <string name="st_copy_sysui">Copia l\'interfaccia di sistema sulla chiavetta USB</string>
     <string name="st_copy_sysui_desc">Per la segnalazione #62: copia i file dell\'interfaccia di sistema SAIC in una cartella mg4dash_systemui sulla chiavetta. Nell\'auto non viene modificato nulla.</string>
     <string name="st_copy_sysui_nousb">Nessuna chiavetta USB trovata</string>
@@ -379,10 +379,11 @@
     <string name="st_wide_bar_desc">Larga il doppio, con icone più grandi, più facile da toccare durante la guida.</string>
     <string name="st_map_titles">Nascondi i titoli dei widget (tutti gli stili): %1$s</string>
     <string name="st_map_vdock_btn">Barra verticale</string>
-    <string name="st_bar_side">Lato della barra verticale</string>
-    <string name="st_bar_side_auto">Lato guida</string>
-    <string name="st_bar_side_left">Sinistra</string>
-    <string name="st_bar_side_right">Destra</string>
+    <string name="st_bar">Barra dei menu</string>
+    <string name="st_bar_bottom">Orizzontale in basso</string>
+    <string name="st_bar_auto">Verticale, lato guida</string>
+    <string name="st_bar_left">Verticale a sinistra</string>
+    <string name="st_bar_right">Verticale a destra</string>
     <string name="st_map_titles_btn">Titoli</string>
     <string name="vh_tires">PNEUMATICI</string>
     <string name="vh_tire_fl">Anteriore sx</string>
