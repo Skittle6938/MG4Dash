@@ -42,6 +42,7 @@
     <string name="charging_eta">Laden · %1$d u %2$02d</string>
     <string name="weather_pending">Voorspelling volgt</string>
     <string name="weather_outside_vehicle">Buitentemperatuur van het voertuig</string>
+    <string name="weather_outside_short">Buiten</string>
     <string name="weather_details">Gevoel %1$d° · Wind %2$d %4$s · %3$d %%</string>
     <string name="weather_here">Huidige positie</string>
     <string name="wx_sunny">Zonnig</string>

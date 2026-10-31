@@ -42,6 +42,7 @@
     <string name="charging_eta">Şarj · %1$d sa %2$02d</string>
     <string name="weather_pending">Tahmin bekleniyor</string>
     <string name="weather_outside_vehicle">Araç dış sıcaklığı</string>
+    <string name="weather_outside_short">Dış</string>
     <string name="weather_details">Hissedilen %1$d° · Rüzgâr %2$d %4$s · %3$d %%</string>
     <string name="weather_here">Mevcut konum</string>
     <string name="wx_sunny">Güneşli</string>
