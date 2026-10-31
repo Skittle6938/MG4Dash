@@ -314,6 +314,7 @@
     <string name="st_update_check">Kontrol et</string>
     <string name="st_update_checking">Kontrol ediliyor…</string>
     <string name="st_update_error">GitHub\'a ulaşılamadı veya güncelleme indirilemedi.</string>
+    <string name="st_update_busy">Bir güncelleme zaten sürüyor…</string>
     <string name="st_update_available">%2$s sürümü mevcut (yüklü: %1$s)</string>
     <string name="st_update_uptodate">Güncel (%1$s)</string>
     <string name="st_update_install">Yükle</string>

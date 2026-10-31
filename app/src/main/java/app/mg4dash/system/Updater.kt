@@ -107,6 +107,18 @@ object Updater {
         }
     }
 
+    private val busy = java.util.concurrent.atomic.AtomicBoolean(false)
+
+    /**
+     * Une seule mise à jour de MG4Dash à la fois : un double appui, ou la fenêtre de démarrage et les réglages
+     * ensemble, lançaient deux téléchargements dans le même fichier et deux installations, avec une
+     * recompilation au milieu de l'autre (risque de code compilé abîmé). false si une est déjà en cours.
+     */
+    fun begin(): Boolean = busy.compareAndSet(false, true).also { if (!it) Log.i(TAG, "update already running, ignored") }
+
+    /** Fin d'une mise à jour en échec (en cas de succès, MG4Dash redémarre). */
+    fun end() { busy.set(false) }
+
     /** Télécharge l'APK ; [progress] reçoit 0..100. Réseau : hors du fil principal. */
     fun download(context: Context, r: Release, fileName: String = "update.apk", progress: (Int) -> Unit): File {
         val dir = context.getExternalFilesDir(null) ?: context.filesDir
@@ -174,7 +186,7 @@ object Updater {
             val status = intent.getIntExtra(PackageInstaller.EXTRA_STATUS, -999)
             val msg = intent.getStringExtra(PackageInstaller.EXTRA_STATUS_MESSAGE)
             Log.i(TAG, "install result: $status $msg")
-            if (status != PackageInstaller.STATUS_SUCCESS) return
+            if (status != PackageInstaller.STATUS_SUCCESS) { end(); return }
             // Après une installation, la compilation faite par la voiture était parfois inutilisable
             // (ClassNotFoundException au démarrage) ; une recompilation « speed » la remplace.
             recompile(context)

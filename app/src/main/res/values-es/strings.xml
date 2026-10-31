@@ -314,6 +314,7 @@
     <string name="st_update_check">Comprobar</string>
     <string name="st_update_checking">Comprobando…</string>
     <string name="st_update_error">No se pudo contactar con GitHub ni descargar la actualización.</string>
+    <string name="st_update_busy">Ya hay una actualización en curso…</string>
     <string name="st_update_available">Versión %2$s disponible (instalada: %1$s)</string>
     <string name="st_update_uptodate">Actualizado (%1$s)</string>
     <string name="st_update_install">Instalar</string>
