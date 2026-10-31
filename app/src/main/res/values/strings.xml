@@ -379,6 +379,10 @@
     <string name="st_wide_bar_desc">Twice as wide, with bigger icons, easier to hit while driving.</string>
     <string name="st_map_titles">Hide widget titles (all layouts): %1$s</string>
     <string name="st_map_vdock_btn">Vertical bar</string>
+    <string name="st_bar_side">Side of the vertical bar</string>
+    <string name="st_bar_side_auto">Driver\'s side</string>
+    <string name="st_bar_side_left">Left</string>
+    <string name="st_bar_side_right">Right</string>
     <string name="st_map_titles_btn">Titles</string>
     <string name="vh_tires">TIRES</string>
     <string name="vh_tire_fl">Front left</string>

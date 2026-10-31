@@ -379,6 +379,10 @@
     <string name="st_wide_bar_desc">Deux fois plus large, avec des icônes plus grandes, plus facile à toucher en roulant.</string>
     <string name="st_map_titles">Masquer les titres des widgets (tous les styles) : %1$s</string>
     <string name="st_map_vdock_btn">Barre verticale</string>
+    <string name="st_bar_side">Côté de la barre verticale</string>
+    <string name="st_bar_side_auto">Côté conducteur</string>
+    <string name="st_bar_side_left">Gauche</string>
+    <string name="st_bar_side_right">Droite</string>
     <string name="st_map_titles_btn">Titres</string>
     <string name="vh_tires">PNEUS</string>
     <string name="vh_tire_fl">Avant gauche</string>
