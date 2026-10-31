@@ -379,6 +379,10 @@
     <string name="st_wide_bar_desc">Doppelt so breit, mit größeren Symbolen, während der Fahrt leichter zu treffen.</string>
     <string name="st_map_titles">Widget-Titel ausblenden (alle Layouts): %1$s</string>
     <string name="st_map_vdock_btn">Senkrechte Leiste</string>
+    <string name="st_bar_side">Seite der senkrechten Leiste</string>
+    <string name="st_bar_side_auto">Fahrerseite</string>
+    <string name="st_bar_side_left">Links</string>
+    <string name="st_bar_side_right">Rechts</string>
     <string name="st_map_titles_btn">Titel</string>
     <string name="vh_tires">REIFEN</string>
     <string name="vh_tire_fl">Vorne links</string>

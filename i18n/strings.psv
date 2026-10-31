@@ -377,6 +377,10 @@ st_wide_bar|Wide side bar|Barre latérale large|Breite Seitenleiste|Barra latera
 st_wide_bar_desc|Twice as wide, with bigger icons, easier to hit while driving.|Deux fois plus large, avec des icônes plus grandes, plus facile à toucher en roulant.|Doppelt so breit, mit größeren Symbolen, während der Fahrt leichter zu treffen.|El doble de ancha, con iconos más grandes, más fácil de pulsar conduciendo.|Larga il doppio, con icone più grandi, più facile da toccare durante la guida.|Twee keer zo breed, met grotere pictogrammen, makkelijker te raken tijdens het rijden.|İki kat geniş, daha büyük simgelerle, sürüş sırasında dokunması daha kolay.
 st_map_titles|Hide widget titles (all layouts): %1$s|Masquer les titres des widgets (tous les styles) : %1$s|Widget-Titel ausblenden (alle Layouts): %1$s|Ocultar los títulos de los widgets (todos los estilos): %1$s|Nascondi i titoli dei widget (tutti gli stili): %1$s|Widgettitels verbergen (alle stijlen): %1$s|Pencere öğesi başlıklarını gizle (tüm düzenler): %1$s
 st_map_vdock_btn|Vertical bar|Barre verticale|Senkrechte Leiste|Barra vertical|Barra verticale|Verticale balk|Dikey çubuk
+st_bar_side|Side of the vertical bar|Côté de la barre verticale|Seite der senkrechten Leiste|Lado de la barra vertical|Lato della barra verticale|Kant van de verticale balk|Dikey çubuğun tarafı
+st_bar_side_auto|Driver's side|Côté conducteur|Fahrerseite|Lado del conductor|Lato guida|Bestuurderskant|Sürücü tarafı
+st_bar_side_left|Left|Gauche|Links|Izquierda|Sinistra|Links|Sol
+st_bar_side_right|Right|Droite|Rechts|Derecha|Destra|Rechts|Sağ
 st_map_titles_btn|Titles|Titres|Titel|Títulos|Titoli|Titels|Başlıklar
 vh_tires|TIRES|PNEUS|REIFEN|NEUMÁTICOS|PNEUMATICI|BANDEN|LASTİKLER
 vh_tire_fl|Front left|Avant gauche|Vorne links|Delantero izq.|Anteriore sx|Linksvoor|Ön sol

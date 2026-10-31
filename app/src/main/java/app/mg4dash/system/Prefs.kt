@@ -247,6 +247,11 @@ class Prefs(context: Context) {
         get() = sp.getBoolean("night_by_sun", true)
         set(v) = sp.edit().putBoolean("night_by_sun", v).apply()
 
+    /** Côté de la barre verticale : 0 = côté conducteur (lu sur la voiture), 1 = gauche, 2 = droite (#75). */
+    var barSide: Int
+        get() = sp.getInt("bar_side", 0)
+        set(v) = sp.edit().putInt("bar_side", v).apply()
+
     var themeSmooth: Boolean
         get() = sp.getBoolean("theme_smooth", true)
         set(v) = sp.edit().putBoolean("theme_smooth", v).apply()

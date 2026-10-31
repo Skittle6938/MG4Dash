@@ -150,6 +150,7 @@ object Dock {
     fun rightSide(context: android.content.Context): Boolean {
         val sp = Prefs(context).raw
         if (sp.getBoolean("force_rhd", false)) return true
+        when (Prefs(context).barSide) { 1 -> return false; 2 -> return true }   // côté forcé dans les réglages (#75)
         if (!RHD_ENABLED) return false
         // Au démarrage, la voiture ne répond pas encore : la barre partait à gauche sur une conduite à droite
         // (#75). Le dernier côté lu est gardé et sert tant que la lecture n'est pas possible.

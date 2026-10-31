@@ -379,6 +379,10 @@
     <string name="st_wide_bar_desc">Twee keer zo breed, met grotere pictogrammen, makkelijker te raken tijdens het rijden.</string>
     <string name="st_map_titles">Widgettitels verbergen (alle stijlen): %1$s</string>
     <string name="st_map_vdock_btn">Verticale balk</string>
+    <string name="st_bar_side">Kant van de verticale balk</string>
+    <string name="st_bar_side_auto">Bestuurderskant</string>
+    <string name="st_bar_side_left">Links</string>
+    <string name="st_bar_side_right">Rechts</string>
     <string name="st_map_titles_btn">Titels</string>
     <string name="vh_tires">BANDEN</string>
     <string name="vh_tire_fl">Linksvoor</string>
