@@ -20,6 +20,8 @@
     <color name="accent_cold">#FF00D2FF</color>
     <color name="accent_energy">#FF00E676</color>
     <color name="accent_heat">#FFFF9100</color>
+    <!-- Réchauffage de la batterie (répartition de la conso) -->
+    <color name="accent_battery">#FFB388FF</color>
     <color name="accent_action">#FF2979FF</color>
     <color name="accent_danger">#FFFF5252</color>
     <color name="gauge_off">#FF262D3D</color>

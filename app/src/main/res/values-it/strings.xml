@@ -145,6 +145,7 @@
     <string name="en_drive">Guida</string>
     <string name="en_climate">Climatizzazione</string>
     <string name="en_accessories">Accessori</string>
+    <string name="en_battery_heat">Riscaldamento batteria</string>
     <string name="en_regen">+ %1$s kWh recuperati in frenata</string>
     <string name="en_remaining">" · %1$d h %2$d min rimanenti"</string>
     <string name="en_plug_v2l">Collega un adattatore V2L alla presa di ricarica</string>
@@ -321,6 +322,7 @@
     <string name="sw_drive">GUIDA</string>
     <string name="sw_clim">CLIMA</string>
     <string name="sw_acc">ACCESSORI</string>
+    <string name="sw_batt">BATTERIA</string>
     <string name="sw_power">POTENZA IN TEMPO REALE</string>
     <string name="sw_drawn">CONSUMATA</string>
     <string name="sw_recovering">RECUPERATA</string>

@@ -143,6 +143,7 @@ en_car_only|Limit sent to the car only|Limite transmise à la voiture uniquement
 en_drive|Driving|Conduite|Fahren|Conducción|Guida|Rijden|Sürüş
 en_climate|Climate control|Climatisation|Klimaanlage|Climatización|Climatizzazione|Klimaatregeling|Klima
 en_accessories|Accessories|Accessoires|Zubehör|Accesorios|Accessori|Accessoires|Aksesuarlar
+en_battery_heat|Battery heating|Réchauffage batterie|Batterieheizung|Calefacción batería|Riscaldamento batteria|Batterijverwarming|Batarya ısıtma
 en_regen|+ %1$s kWh recovered by braking|+ %1$s kWh récupérés au freinage|+ %1$s kWh durch Bremsen zurückgewonnen|+ %1$s kWh recuperados al frenar|+ %1$s kWh recuperati in frenata|+ %1$s kWh teruggewonnen bij remmen|+ %1$s kWh frenle geri kazanıldı
 en_remaining| · %1$d h %2$d min left| · %1$d h %2$d min restantes| · noch %1$d h %2$d min| · quedan %1$d h %2$d min| · %1$d h %2$d min rimanenti| · nog %1$d u %2$d min| · %1$d sa %2$d dk kaldı
 en_plug_v2l|Plug a V2L adapter into the charging socket|Branchez un adaptateur V2L sur la prise de charge|V2L-Adapter an der Ladebuchse anschließen|Conecte un adaptador V2L a la toma de carga|Collega un adattatore V2L alla presa di ricarica|Sluit een V2L-adapter aan op de laadaansluiting|Şarj soketine bir V2L adaptörü takın
@@ -319,6 +320,7 @@ sw_energy|TRIP ENERGY|ÉNERGIE DU TRAJET|FAHRTENERGIE|ENERGÍA DEL TRAYECTO|ENER
 sw_drive|DRIVING|CONDUITE|FAHREN|CONDUCCIÓN|GUIDA|RIJDEN|SÜRÜŞ
 sw_clim|CLIMATE|CLIM|KLIMA|CLIMA|CLIMA|KLIMAAT|KLİMA
 sw_acc|ACCESSORIES|ACCESSOIRES|ZUBEHÖR|ACCESORIOS|ACCESSORI|ACCESSOIRES|AKSESUARLAR
+sw_batt|BATTERY|BATTERIE|BATTERIE|BATERÍA|BATTERIA|BATTERIJ|BATARYA
 sw_power|LIVE POWER|PUISSANCE EN DIRECT|LEISTUNG LIVE|POTENCIA EN DIRECTO|POTENZA IN TEMPO REALE|LIVE VERMOGEN|ANLIK GÜÇ
 sw_drawn|DRAWN|CONSOMMÉE|VERBRAUCH|CONSUMIDA|CONSUMATA|VERBRUIKT|ÇEKİLEN
 sw_recovering|RECOVERED|RÉCUPÉRÉE|ZURÜCKGEWONNEN|RECUPERADA|RECUPERATA|TERUGGEWONNEN|GERİ KAZANILAN

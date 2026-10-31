@@ -145,6 +145,7 @@
     <string name="en_drive">Sürüş</string>
     <string name="en_climate">Klima</string>
     <string name="en_accessories">Aksesuarlar</string>
+    <string name="en_battery_heat">Batarya ısıtma</string>
     <string name="en_regen">+ %1$s kWh frenle geri kazanıldı</string>
     <string name="en_remaining">" · %1$d sa %2$d dk kaldı"</string>
     <string name="en_plug_v2l">Şarj soketine bir V2L adaptörü takın</string>
@@ -321,6 +322,7 @@
     <string name="sw_drive">SÜRÜŞ</string>
     <string name="sw_clim">KLİMA</string>
     <string name="sw_acc">AKSESUARLAR</string>
+    <string name="sw_batt">BATARYA</string>
     <string name="sw_power">ANLIK GÜÇ</string>
     <string name="sw_drawn">ÇEKİLEN</string>
     <string name="sw_recovering">GERİ KAZANILAN</string>
