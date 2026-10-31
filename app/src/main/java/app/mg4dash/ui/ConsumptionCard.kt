@@ -75,7 +75,7 @@ class ConsumptionCard(context: Context) : LinearLayout(context) {
         total.text = if (!ok) "—" else android.text.SpannableStringBuilder(smallUnit(String.format(Locale.getDefault(), "%.1f kWh", t.outKwh))).apply {
             if (t.regenKwh >= 0.05f) {
                 val st = length
-                append("  +").append(String.format(Locale.getDefault(), "%.1f", t.regenKwh))
+                append("  −").append(String.format(Locale.getDefault(), "%.1f", t.regenKwh))   // signe « − » : énergie rendue (#44)
                 val unit = length
                 append(" ").append(context.getString(R.string.en_regen_short))
                 setSpan(android.text.style.ForegroundColorSpan(Themes.energy(context)), st, length, 0)

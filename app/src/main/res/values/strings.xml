@@ -527,6 +527,10 @@
     <string name="st_tab_system">System</string>
     <string name="st_theme_smooth">Smooth light / dark switch</string>
     <string name="st_theme_smooth_desc">Waits 5 s of stable lights (no switch under bridges) and fades over 2 s. Off: switches as soon as the lights change.</string>
+    <string name="st_night_sun">Night after sunset</string>
+    <string name="st_night_sun_desc">Automatic mode: dark from sunset to sunrise at the car\'s position, even with the side lights off. Computed on the head unit, no network needed.</string>
+    <string name="st_night_sun_today">Today here: sunset %1$s, sunrise %2$s</string>
+    <string name="st_night_sun_nopos">Position not known yet: the sunset time will appear once the car has a GPS fix.</string>
     <string name="st_hide_saic_climate">Keep MG4Dash in front of the SAIC climate screen</string>
     <string name="st_hide_saic_climate_desc">When the climate is turned on (from MG4Dash or with the button under the screen), the stock launcher opens its climate screen: MG4Dash comes back in front of it.</string>
     <string name="en_trips_note">%1$d trips, one point per trip · average (dashed)</string>
