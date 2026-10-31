@@ -304,6 +304,8 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         CarBridge.setForeground(true)
+        // MG4Dash n'avait pas démarré et l'appli de secours est intervenue : on le dit une fois
+        app.mg4dash.system.Rescue.notice?.let { app.mg4dash.system.Rescue.notice = null; app.mg4dash.ui.Toasts.show(this, it, long = true) }
         // Style d'accueil changé dans les paramètres : on reconstruit l'écran
         if ((prefs.homeStyle == 1) != simpleMode || (prefs.homeStyle == 2) != mapLayout || Dock.vertical(this) != builtVertical || prefs.hideTitles != builtHideTitles ||
             CarBridge.heatingShown(this) != builtHeating || (!simpleMode && cardPower != builtCardPower) ||

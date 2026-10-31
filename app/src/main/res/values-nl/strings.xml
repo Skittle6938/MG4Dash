@@ -315,6 +315,8 @@
     <string name="st_update_checking">Controleren…</string>
     <string name="st_update_error">GitHub onbereikbaar of downloaden mislukt.</string>
     <string name="st_update_busy">Er loopt al een update…</string>
+    <string name="rescue_stock">MG4Dash startte niet: het SAIC-startscherm is teruggezet. Instellingen › Systeem › SAIC-start vervangen om MG4Dash weer te gebruiken.</string>
+    <string name="rescue_recompiled">MG4Dash startte niet en is automatisch hersteld.</string>
     <string name="st_update_available">Versie %2$s beschikbaar (geïnstalleerd: %1$s)</string>
     <string name="st_update_uptodate">Up-to-date (%1$s)</string>
     <string name="st_update_install">Installeren</string>
