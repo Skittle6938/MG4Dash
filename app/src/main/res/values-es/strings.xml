@@ -379,6 +379,10 @@
     <string name="st_wide_bar_desc">El doble de ancha, con iconos más grandes, más fácil de pulsar conduciendo.</string>
     <string name="st_map_titles">Ocultar los títulos de los widgets (todos los estilos): %1$s</string>
     <string name="st_map_vdock_btn">Barra vertical</string>
+    <string name="st_bar_side">Lado de la barra vertical</string>
+    <string name="st_bar_side_auto">Lado del conductor</string>
+    <string name="st_bar_side_left">Izquierda</string>
+    <string name="st_bar_side_right">Derecha</string>
     <string name="st_map_titles_btn">Títulos</string>
     <string name="vh_tires">NEUMÁTICOS</string>
     <string name="vh_tire_fl">Delantero izq.</string>
