@@ -1,0 +1,44 @@
+# Étiquettes posées d'après les formulaires (gravité → P1/P2/P3, zone → area:*), et « needs-info »
+# retiré quand l'auteur répond.
+name: Triage
+on:
+  issues:
+    types: [opened, edited]
+  issue_comment:
+    types: [created]
+permissions:
+  issues: write
+jobs:
+  triage:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const issue = context.payload.issue;
+            if (issue.pull_request) return;
+            const labels = issue.labels.map(l => l.name);
+            if (context.eventName === 'issue_comment') {
+              if (context.payload.comment.user.login === issue.user.login && labels.includes('needs-info')) {
+                await github.rest.issues.removeLabel({ ...context.repo, issue_number: issue.number, name: 'needs-info' });
+              }
+              return;
+            }
+            const body = issue.body || '';
+            const field = (name) => {
+              const m = body.match(new RegExp('### ' + name + '\s*\n+([^\n]+)'));
+              return m ? m[1].trim() : '';
+            };
+            const add = [];
+            const severity = field('How bad is it\?');
+            if (!labels.some(l => /^P[123]$/.test(l))) {
+              if (severity.startsWith('Blocking')) add.push('P1');
+              else if (severity.startsWith('Annoying')) add.push('P2');
+              else if (severity.startsWith('Minor')) add.push('P3');
+            }
+            const areas = { 'Home screen': 'home', 'Climate': 'climate', 'Energy / consumption': 'energy', 'Media / radio': 'media',
+                            'Map': 'map', 'Weather': 'weather', 'Phone': 'phone', 'Update': 'update' };
+            const area = areas[field('Where\?')];
+            if (area && !labels.some(l => l.startsWith('area:'))) add.push('area:' + area);
+            if (/^Compatibility/i.test(issue.title) && !labels.includes('compatibility')) add.push('compatibility');
+            if (add.length) await github.rest.issues.addLabels({ ...context.repo, issue_number: issue.number, labels: add });

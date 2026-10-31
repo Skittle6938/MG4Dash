@@ -1,0 +1,26 @@
+# Relance puis fermeture des issues qui attendent une réponse de l'auteur (needs-info) ou son retour sur
+# une beta (in-beta) : rappel au bout de 4 jours sans activité, fermeture 3 jours plus tard.
+name: Follow-up
+on:
+  schedule:
+    - cron: "30 6 * * *"
+  workflow_dispatch:
+permissions:
+  issues: write
+jobs:
+  stale:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/stale@v9
+        with:
+          any-of-issue-labels: needs-info,in-beta
+          days-before-issue-stale: 4
+          days-before-issue-close: 3
+          days-before-pr-stale: -1
+          days-before-pr-close: -1
+          stale-issue-label: no-reply
+          stale-issue-message: >
+            Hi! Just checking in: could you tell us whether this works for you now, or answer the question above?
+            Without news this issue will be closed in 3 days; it can be reopened any time.
+          close-issue-message: Closed for lack of news. Feel free to reopen it if needed, thanks!
+          close-issue-reason: completed

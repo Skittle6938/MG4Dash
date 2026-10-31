@@ -1,0 +1,26 @@
+# PR : étiquette « translation », et rappel si un fichier de traduction généré (values*/strings.xml) est
+# modifié sans i18n/strings.psv, qui est la source. pull_request_target : écrit aussi sur les PR venant
+# d'un fork, sans jamais exécuter leur code (rien n'est récupéré).
+name: PR labels
+on:
+  pull_request_target:
+    types: [opened, synchronize]
+permissions:
+  issues: write
+  pull-requests: write
+jobs:
+  translations:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const files = await github.paginate(github.rest.pulls.listFiles, { ...context.repo, pull_number: context.issue.number });
+            const names = files.map(f => f.filename);
+            const xml = names.some(n => /res\/values[^/]*\/strings\.xml$/.test(n));
+            const psv = names.includes('i18n/strings.psv');
+            if (xml || psv) await github.rest.issues.addLabels({ ...context.repo, issue_number: context.issue.number, labels: ['translation'] });
+            if (xml && !psv && context.payload.action === 'opened') {
+              await github.rest.issues.createComment({ ...context.repo, issue_number: context.issue.number,
+                body: 'Thanks! Note: the `strings.xml` files are generated from `i18n/strings.psv` (one line per text, one column per language) by `i18n/gen.py`. Changes made only in `strings.xml` would be overwritten; we will port them to the .psv, or you can edit it directly.' });
+            }
