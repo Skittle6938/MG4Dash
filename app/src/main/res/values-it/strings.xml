@@ -117,7 +117,7 @@
     <string name="cl_level_medium">media</string>
     <string name="cl_level_high">alta</string>
     <string name="cl_defrost_link">Sbrinamento lunotto con parabrezza</string>
-    <string name="cl_eco_link">ECO</string>
+    <string name="cl_eco_link">Segui la modalità ECO</string>
     <string name="cl_stock">Schermata clima originale  ›</string>
     <string name="cl_outside">Temp. esterna: %1$d°</string>
     <string name="en_stock">App Energia originale  ›</string>
