@@ -1,0 +1,18 @@
+# Contrôle des PR : compilation et tests de la version émulateur (aussi lançable à la main).
+name: PR check
+on:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - name: Build and test
+        run: chmod +x gradlew && ./gradlew --no-daemon -q testEmulatorDebugUnitTest assembleEmulatorDebug
