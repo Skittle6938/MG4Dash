@@ -4,6 +4,9 @@ Full-screen launcher for the MG4 and its 1920 × 720 screen, for every head unit
 
 Languages: English (default), French, German, Spanish, Italian, Dutch and Turkish, following the car's system language. Units: km and kWh/100 km or miles and mi/kWh (following the car or set by hand), tyre pressure in bar, psi or kPa.
 
+> [!IMPORTANT]
+> **Safety net: MG4Dash Rescue (from 1.7.1 beta 17).** MG4Dash now installs a tiny companion system app by itself, *MG4Dash Rescue*. If MG4Dash is your home screen and does not start after the head unit boots, Rescue repairs it (recompiles and relaunches it) and, if that is not enough, puts the SAIC home screen back. It also brings the SAIC home screen back if MG4Dash is uninstalled without going through *Maintenance mode* first. If MG4Dash is not your home screen, it does nothing. Rescue will be part of the next official release: installing it as soon as it is out is strongly recommended.
+
 Current version: **1.7.0** ([releases](https://github.com/Skittle6938/MG4Dash/releases)). Betas (1.7.1-beta…) can be installed from the app, see [Updates](#updates).
 
 > Screenshots are rendered on a PC with simulated data and the **default settings** unless stated otherwise; the map excerpt is a fixed view of Paris (OpenStreetMap).
