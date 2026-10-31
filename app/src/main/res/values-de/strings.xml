@@ -527,6 +527,10 @@
     <string name="st_tab_system">System</string>
     <string name="st_theme_smooth">Sanfter Hell / Dunkel-Wechsel</string>
     <string name="st_theme_smooth_desc">Wartet 5 s mit stabilem Licht (kein Wechsel unter Brücken) und blendet über 2 s über. Aus: wechselt sofort, wenn sich das Licht ändert.</string>
+    <string name="st_night_sun">Nacht nach Sonnenuntergang</string>
+    <string name="st_night_sun_desc">Automatikmodus: dunkel von Sonnenuntergang bis Sonnenaufgang am Standort des Autos, auch bei ausgeschaltetem Standlicht. Im Radio berechnet, ohne Netz.</string>
+    <string name="st_night_sun_today">Heute hier: Sonnenuntergang %1$s, Sonnenaufgang %2$s</string>
+    <string name="st_night_sun_nopos">Position noch unbekannt: Die Uhrzeit erscheint, sobald das Auto GPS hat.</string>
     <string name="st_hide_saic_climate">MG4Dash vor dem SAIC-Klimabildschirm halten</string>
     <string name="st_hide_saic_climate_desc">Wenn die Klimaanlage eingeschaltet wird (in MG4Dash oder mit der Taste unter dem Bildschirm), öffnet der Original-Launcher seinen Klimabildschirm: MG4Dash kommt wieder nach vorne.</string>
     <string name="en_trips_note">%1$d Fahrten, ein Punkt pro Fahrt · Durchschnitt (gestrichelt)</string>

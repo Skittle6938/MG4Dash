@@ -77,7 +77,7 @@ object WeatherRepo {
         kotlinx.coroutines.flow.flow { while (true) { emit(Unit); kotlinx.coroutines.delay(300_000) } }) { w, f, _ ->
         if (w != null && (!f || System.currentTimeMillis() - w.updatedAt < STALE_MS)) w else null
     }.stateIn(scope, kotlinx.coroutines.flow.SharingStarted.Eagerly, null)
-    private const val STALE_MS = 3 * 3_600_000L
+    private const val STALE_MS = 30 * 60_000L   // une météo un peu ancienne vaut mieux que rien (choix de Marc, #18)
 
     fun start(context: Context) {
         val app = context.applicationContext

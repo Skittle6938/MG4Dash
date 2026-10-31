@@ -527,6 +527,10 @@
     <string name="st_tab_system">Sistema</string>
     <string name="st_theme_smooth">Transizione morbida chiaro / scuro</string>
     <string name="st_theme_smooth_desc">Attende 5 s di luci stabili (nessun cambio sotto i ponti) e sfuma in 2 s. Disattivato: cambia appena cambiano le luci.</string>
+    <string name="st_night_sun">Notte dopo il tramonto</string>
+    <string name="st_night_sun_desc">Modalità automatica: scuro dal tramonto all\'alba nella posizione dell\'auto, anche a luci di posizione spente. Calcolato sull\'autoradio, senza rete.</string>
+    <string name="st_night_sun_today">Oggi qui: tramonto %1$s, alba %2$s</string>
+    <string name="st_night_sun_nopos">Posizione non ancora nota: l\'orario apparirà appena l\'auto avrà il GPS.</string>
     <string name="st_hide_saic_climate">Tenere MG4Dash davanti alla schermata clima SAIC</string>
     <string name="st_hide_saic_climate_desc">Quando il clima viene acceso (da MG4Dash o con il tasto sotto lo schermo), il launcher originale apre la sua schermata clima: MG4Dash torna davanti.</string>
     <string name="en_trips_note">%1$d viaggi, un punto per viaggio · media (tratteggiata)</string>

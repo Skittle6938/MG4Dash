@@ -527,6 +527,10 @@
     <string name="st_tab_system">Sistem</string>
     <string name="st_theme_smooth">Yumuşak açık / koyu geçişi</string>
     <string name="st_theme_smooth_desc">Farların 5 sn sabit kalmasını bekler (köprü altında geçiş yok) ve 2 sn\'de geçiş yapar. Kapalı: farlar değişir değişmez geçer.</string>
+    <string name="st_night_sun">Gün batımından sonra gece</string>
+    <string name="st_night_sun_desc">Otomatik mod: aracın konumunda gün batımından gün doğumuna kadar koyu, park lambaları kapalıyken bile. Radyoda hesaplanır, ağ gerekmez.</string>
+    <string name="st_night_sun_today">Bugün burada: gün batımı %1$s, gün doğumu %2$s</string>
+    <string name="st_night_sun_nopos">Konum henüz bilinmiyor: araç GPS aldığında saat görünecek.</string>
     <string name="st_hide_saic_climate">MG4Dash\'i SAIC klima ekranının önünde tut</string>
     <string name="st_hide_saic_climate_desc">Klima açıldığında (MG4Dash\'ten veya ekranın altındaki düğmeyle) orijinal başlatıcı kendi klima ekranını açar: MG4Dash tekrar öne gelir.</string>
     <string name="en_trips_note">%1$d yolculuk, yolculuk başına bir nokta · ortalama (kesikli)</string>

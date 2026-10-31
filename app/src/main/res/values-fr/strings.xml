@@ -527,6 +527,10 @@
     <string name="st_tab_system">Système</string>
     <string name="st_theme_smooth">Transition douce clair / sombre</string>
     <string name="st_theme_smooth_desc">Attend 5 s de feux stables (pas de bascule sous les ponts) et passe en fondu sur 2 s. Désactivé : bascule dès que les feux changent.</string>
+    <string name="st_night_sun">Nuit après le coucher du soleil</string>
+    <string name="st_night_sun_desc">Mode automatique : sombre du coucher au lever du soleil à la position de la voiture, même feux de position éteints. Calculé sur l\'autoradio, sans réseau.</string>
+    <string name="st_night_sun_today">Aujourd\'hui ici : coucher %1$s, lever %2$s</string>
+    <string name="st_night_sun_nopos">Position pas encore connue : l\'heure du coucher s\'affichera dès que la voiture aura le GPS.</string>
     <string name="st_hide_saic_climate">Garder MG4Dash devant l\'écran clim SAIC</string>
     <string name="st_hide_saic_climate_desc">Quand la clim s\'allume (depuis MG4Dash ou avec le bouton sous l\'écran), le launcher d\'origine ouvre son écran clim : MG4Dash repasse devant.</string>
     <string name="en_trips_note">%1$d trajets, un point par trajet · moyenne (pointillés)</string>

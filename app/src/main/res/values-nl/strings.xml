@@ -527,6 +527,10 @@
     <string name="st_tab_system">Systeem</string>
     <string name="st_theme_smooth">Zachte overgang licht / donker</string>
     <string name="st_theme_smooth_desc">Wacht 5 s op stabiele verlichting (geen wissel onder bruggen) en vervaagt in 2 s. Uit: wisselt zodra de verlichting verandert.</string>
+    <string name="st_night_sun">Nacht na zonsondergang</string>
+    <string name="st_night_sun_desc">Automatische modus: donker van zonsondergang tot zonsopgang op de plek van de auto, ook met de stadslichten uit. Berekend op de radio, zonder netwerk.</string>
+    <string name="st_night_sun_today">Vandaag hier: zonsondergang %1$s, zonsopgang %2$s</string>
+    <string name="st_night_sun_nopos">Positie nog onbekend: de tijd verschijnt zodra de auto GPS heeft.</string>
     <string name="st_hide_saic_climate">MG4Dash voor het SAIC-klimaatscherm houden</string>
     <string name="st_hide_saic_climate_desc">Als de klimaatregeling wordt aangezet (in MG4Dash of met de knop onder het scherm), opent de originele launcher zijn klimaatscherm: MG4Dash komt er weer voor.</string>
     <string name="en_trips_note">%1$d ritten, één punt per rit · gemiddelde (gestippeld)</string>
