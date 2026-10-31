@@ -111,7 +111,7 @@ object Accel {
         val ssTot = syy - sY * sY / fitN
         val r2 = if (ssTot > 0) 1 - ssRes / ssTot else 0.0
         val gain = sqrt(w1 * w1 + w2 * w2)   // ≈ 1 si le capteur est juste
-        if (now - loggedAt > 60_000 && app.mg4dash.system.Prefs(context).energyLog) {
+        if (now - loggedAt > 60_000) {
             loggedAt = now
             Log.i(TAG, String.format(java.util.Locale.US, "axis fit: %d s, R² %.2f, gain %.2f", fitN, r2, gain))
         }
