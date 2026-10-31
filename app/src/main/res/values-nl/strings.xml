@@ -277,7 +277,7 @@
     <string name="st_paste">Plakken</string>
     <string name="st_diag">DIAGNOSE</string>
     <string name="st_energy_log">Energiegegevensrecorder: %1$s</string>
-    <string name="st_energy_log_desc">Schrijft elke 5 s batterijvermogen, verbruikstellers en de status van voorzieningen naar Android/data/app.mg4dash/files/energy_log.csv (alleen lezen, er wordt niets naar de auto gestuurd).</string>
+    <string name="st_energy_log_desc">Schrijft elke 5 s het batterijvermogen, de verbruikstellers en de status van de apparatuur naar Android/data/app.mg4dash/files/energy_log.csv (alleen lezen, er wordt niets naar de auto gestuurd). Alleen voor foutopsporing: deze frequente schrijfacties slijten het geheugen van de radio, laat het anders uit.</string>
     <string name="st_copy_sysui">Systeem-UI naar de USB-stick kopiëren</string>
     <string name="st_copy_sysui_desc">Voor issue #62: kopieert de bestanden van de SAIC-systeem-UI naar een map mg4dash_systemui op de stick. Er wordt niets in de auto gewijzigd.</string>
     <string name="st_copy_sysui_nousb">Geen USB-stick gevonden</string>
@@ -379,10 +379,11 @@
     <string name="st_wide_bar_desc">Twee keer zo breed, met grotere pictogrammen, makkelijker te raken tijdens het rijden.</string>
     <string name="st_map_titles">Widgettitels verbergen (alle stijlen): %1$s</string>
     <string name="st_map_vdock_btn">Verticale balk</string>
-    <string name="st_bar_side">Kant van de verticale balk</string>
-    <string name="st_bar_side_auto">Bestuurderskant</string>
-    <string name="st_bar_side_left">Links</string>
-    <string name="st_bar_side_right">Rechts</string>
+    <string name="st_bar">Menubalk</string>
+    <string name="st_bar_bottom">Horizontaal onder</string>
+    <string name="st_bar_auto">Verticaal, bestuurderskant</string>
+    <string name="st_bar_left">Verticaal, links</string>
+    <string name="st_bar_right">Verticaal, rechts</string>
     <string name="st_map_titles_btn">Titels</string>
     <string name="vh_tires">BANDEN</string>
     <string name="vh_tire_fl">Linksvoor</string>

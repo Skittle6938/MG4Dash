@@ -277,7 +277,7 @@
     <string name="st_paste">Einfügen</string>
     <string name="st_diag">DIAGNOSE</string>
     <string name="st_energy_log">Energiedaten-Rekorder: %1$s</string>
-    <string name="st_energy_log_desc">Schreibt alle 5 s Batterieleistung, Verbrauchszähler und Gerätezustände in Android/data/app.mg4dash/files/energy_log.csv (nur lesen, nichts wird an das Auto gesendet).</string>
+    <string name="st_energy_log_desc">Schreibt alle 5 s Batterieleistung, Verbrauchszähler und Gerätezustände in Android/data/app.mg4dash/files/energy_log.csv (nur lesend, nichts wird an das Auto gesendet). Nur zur Fehlersuche: Die häufigen Schreibvorgänge nutzen den Speicher des Radios ab, sonst bitte ausgeschaltet lassen.</string>
     <string name="st_copy_sysui">System-UI auf den USB-Stick kopieren</string>
     <string name="st_copy_sysui_desc">Für Issue #62: kopiert die Dateien der SAIC-System-UI in einen Ordner mg4dash_systemui auf dem Stick. Am Auto wird nichts geändert.</string>
     <string name="st_copy_sysui_nousb">Kein USB-Stick gefunden</string>
@@ -379,10 +379,11 @@
     <string name="st_wide_bar_desc">Doppelt so breit, mit größeren Symbolen, während der Fahrt leichter zu treffen.</string>
     <string name="st_map_titles">Widget-Titel ausblenden (alle Layouts): %1$s</string>
     <string name="st_map_vdock_btn">Senkrechte Leiste</string>
-    <string name="st_bar_side">Seite der senkrechten Leiste</string>
-    <string name="st_bar_side_auto">Fahrerseite</string>
-    <string name="st_bar_side_left">Links</string>
-    <string name="st_bar_side_right">Rechts</string>
+    <string name="st_bar">Menüleiste</string>
+    <string name="st_bar_bottom">Waagerecht unten</string>
+    <string name="st_bar_auto">Senkrecht, Fahrerseite</string>
+    <string name="st_bar_left">Senkrecht, links</string>
+    <string name="st_bar_right">Senkrecht, rechts</string>
     <string name="st_map_titles_btn">Titel</string>
     <string name="vh_tires">REIFEN</string>
     <string name="vh_tire_fl">Vorne links</string>

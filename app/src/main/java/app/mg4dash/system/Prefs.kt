@@ -310,7 +310,7 @@ class Prefs(context: Context) {
         set(v) = sp.edit().putBoolean("consumption_map", v).apply()
 
     var energyLog: Boolean
-        get() = sp.getBoolean("energy_log", true)
+        get() = sp.getBoolean("energy_log", false)   // désactivé par défaut : une écriture toutes les 5 s use la mémoire
         set(v) = sp.edit().putBoolean("energy_log", v).apply()
 
     /** Style de l'accueil : 0 = complet (3 colonnes), 1 = épuré (3 volets + 2 raccourcis + météo). */

@@ -277,7 +277,7 @@
     <string name="st_paste">Yapıştır</string>
     <string name="st_diag">TANILAMA</string>
     <string name="st_energy_log">Enerji veri kaydedici: %1$s</string>
-    <string name="st_energy_log_desc">Her 5 sn\'de batarya gücünü, tüketim sayaçlarını ve ekipman durumlarını Android/data/app.mg4dash/files/energy_log.csv dosyasına yazar (yalnızca okuma, araca hiçbir şey gönderilmez).</string>
+    <string name="st_energy_log_desc">Her 5 sn\'de batarya gücünü, tüketim sayaçlarını ve ekipman durumlarını Android/data/app.mg4dash/files/energy_log.csv dosyasına yazar (yalnızca okuma, araca hiçbir şey gönderilmez). Yalnızca sorun giderme için: bu sık yazmalar radyonun belleğini yıpratır, aksi halde kapalı bırakın.</string>
     <string name="st_copy_sysui">Sistem arayüzünü USB belleğe kopyala</string>
     <string name="st_copy_sysui_desc">#62 numaralı sorun için: SAIC sistem arayüzü dosyalarını bellekteki mg4dash_systemui klasörüne kopyalar. Araçta hiçbir şey değiştirilmez.</string>
     <string name="st_copy_sysui_nousb">USB bellek bulunamadı</string>
@@ -379,10 +379,11 @@
     <string name="st_wide_bar_desc">İki kat geniş, daha büyük simgelerle, sürüş sırasında dokunması daha kolay.</string>
     <string name="st_map_titles">Pencere öğesi başlıklarını gizle (tüm düzenler): %1$s</string>
     <string name="st_map_vdock_btn">Dikey çubuk</string>
-    <string name="st_bar_side">Dikey çubuğun tarafı</string>
-    <string name="st_bar_side_auto">Sürücü tarafı</string>
-    <string name="st_bar_side_left">Sol</string>
-    <string name="st_bar_side_right">Sağ</string>
+    <string name="st_bar">Menü çubuğu</string>
+    <string name="st_bar_bottom">Yatay, altta</string>
+    <string name="st_bar_auto">Dikey, sürücü tarafı</string>
+    <string name="st_bar_left">Dikey, sol</string>
+    <string name="st_bar_right">Dikey, sağ</string>
     <string name="st_map_titles_btn">Başlıklar</string>
     <string name="vh_tires">LASTİKLER</string>
     <string name="vh_tire_fl">Ön sol</string>

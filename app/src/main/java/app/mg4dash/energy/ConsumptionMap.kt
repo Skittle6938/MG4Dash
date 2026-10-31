@@ -77,6 +77,7 @@ object ConsumptionMap {
     }
 
     private fun save(context: Context) {
+        dirty = false; savedAt = android.os.SystemClock.elapsedRealtime()
         val t = cells ?: return
         try { file(context).writeText(toJson(t)) } catch (e: Exception) { Log.w(TAG, "save: ${e.message}") }
         // DiAuto relit la carte (ConsumptionProvider)
@@ -122,7 +123,20 @@ object ConsumptionMap {
     fun live(): Pair<Int, Boolean>? = segBin.takeIf { it >= 0 }?.let { it to (segMs >= SAMPLE_MS && !spoiled) }
 
     /** Fin du trajet (voiture en veille, recharge) : l'échantillon en cours est abandonné. */
-    fun interrupt() { reset(); altSmooth = null }
+    fun interrupt() {
+        reset(); altSmooth = null
+        if (dirty) savedFrom?.let { save(it) }
+    }
+
+    // Écriture du fichier au plus toutes les 2 min (et à l'arrêt) : un échantillon toutes les 15 s userait la mémoire
+    @Volatile private var dirty = false
+    private var savedAt = 0L
+    private var savedFrom: Context? = null
+    private fun saveSoon(context: Context) {
+        dirty = true; savedFrom = context.applicationContext
+        val now = android.os.SystemClock.elapsedRealtime()
+        if (now - savedAt >= 120_000) save(context)
+    }
 
     /**
      * Une seconde de roulage, depuis EnergyMonitor : énergie de conduite nette (kWh, clim, accessoires et
@@ -179,10 +193,9 @@ object ConsumptionMap {
             val temp = segTempSum / segTempN
             val c = table(context)[segBin][tempBin(temp)]
             c.km += km; c.kwh += kwh; c.n++; c.sq += per100 * per100 * km
-            save(context)
-            if (app.mg4dash.system.Prefs(context).energyLog)
-                Log.i(TAG, String.format(java.util.Locale.US, "sample %.0f s, %.2f km at %.0f km/h, %.1f °C: %.1f kWh/100 (%s; raw %.1f) (cell %d now %.1f, %.0f km)",
-                    segMs / 1000f, km, km / hours, temp, per100, if (accelKwh != null) "accelerometer" else "speed + GPS", raw / km * 100f, c.n, c.per100 ?: 0f, c.km))
+            saveSoon(context)
+            Log.i(TAG, String.format(java.util.Locale.US, "sample %.0f s, %.2f km at %.0f km/h, %.1f °C: %.1f kWh/100 (%s; raw %.1f) (cell %d now %.1f, %.0f km)",
+                segMs / 1000f, km, km / hours, temp, per100, if (accelKwh != null) "accelerometer" else "speed + GPS", raw / km * 100f, c.n, c.per100 ?: 0f, c.km))
         }
         reset()
     }
