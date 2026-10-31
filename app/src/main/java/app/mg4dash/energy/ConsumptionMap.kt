@@ -112,6 +112,12 @@ object ConsumptionMap {
         segBin = -1; segKwh = 0f; segKm = 0f; segMs = 0L; segTempSum = 0f; segTempN = 0; stillMs = 0L; spoiled = false
     }
 
+    /**
+     * Échantillon en cours, pour l'écran de la carte : tranche de vitesse, et true s'il compte déjà
+     * (15 s atteintes sans arrêt long ni réchauffage non appris). Null s'il n'y en a pas.
+     */
+    fun live(): Pair<Int, Boolean>? = segBin.takeIf { it >= 0 }?.let { it to (segMs >= SAMPLE_MS && !spoiled) }
+
     /** Fin du trajet (voiture en veille, recharge) : l'échantillon en cours est abandonné. */
     fun interrupt() { reset(); altSmooth = null }
 
