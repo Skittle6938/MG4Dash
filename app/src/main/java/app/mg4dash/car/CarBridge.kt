@@ -721,6 +721,9 @@ object CarBridge {
         }
     }
 
+    /** Ventilation remise en quittant AUTO quand aucun réglage manuel n'a encore été retenu. */
+    private val DEFAULT_FAN = 4
+
     private fun Boolean?.asInt(): Int? = this?.let { if (it) 1 else 0 }
     private fun toggleTarget(cur: Boolean?): Int = if (cur == true) 0 else 1
 
@@ -777,20 +780,19 @@ object CarBridge {
                     delay(500); refreshHvac(); return@withLock
                 }
                 val h = hvac ?: return@withLock
-                // 1) Quitter AUTO (bascule, relue)
-                // La voiture met parfois plus d'une seconde à rendre le nouvel état : une seule bascule, puis
-                // on relit jusqu'à 3 s avant d'en retenter une (sinon on rebasculait aussitôt en AUTO)
-                for (attempt in 0 until 2) {
-                    if (safe { h.autoStatus } != true) break
-                    try { h.switchAutoStatus() } catch (e: Exception) { Log.w(TAG, "leave AUTO: ${e.message}"); break }
-                    var waited = 0
-                    while (waited < 3000 && safe { h.autoStatus } == true) { delay(250); waited += 250 }
-                    Log.i(TAG, "leave AUTO: switch ${attempt + 1}, AUTO now ${safe { h.autoStatus }} after $waited ms")
+                // 1) Quitter AUTO en réglant la ventilation : sur SWI69 la bascule AUTO ne fait que l'activer,
+                //    alors que régler la ventilation repasse aussitôt en manuel (relevé du 31/10)
+                try { h.setFanSpeed(fan ?: DEFAULT_FAN) } catch (e: Exception) { Log.w(TAG, "leave AUTO fan: ${e.message}") }
+                var waited = 0
+                while (waited < 1500 && safe { h.autoStatus } == true) { delay(250); waited += 250 }
+                if (safe { h.autoStatus } == true) {
+                    Log.i(TAG, "leave AUTO: still AUTO after fan, switching")
+                    try { h.switchAutoStatus() } catch (e: Exception) { Log.w(TAG, "leave AUTO: ${e.message}") }
+                    delay(800)
                 }
-                delay(500)
-                // 2) Ventilation et direction : commandes directes
-                fan?.let { try { h.setFanSpeed(it) } catch (e: Exception) { Log.w(TAG, "leave AUTO fan: ${e.message}") }; delay(500) }
-                dir?.let { try { h.setFanDirection(it) } catch (e: Exception) { Log.w(TAG, "leave AUTO direction: ${e.message}") }; delay(500) }
+                Log.i(TAG, "leave AUTO: AUTO now ${safe { h.autoStatus }} after $waited ms")
+                // 2) Direction : commande directe
+                dir?.let { try { h.setFanDirection(it) } catch (e: Exception) { Log.w(TAG, "leave AUTO direction: ${e.message}") }; delay(400) }
                 // 3) Recyclage : bascule à 3 états, jusqu'à la valeur voulue (3 crans au plus)
                 rec?.let { target ->
                     for (i in 0 until 3) {
