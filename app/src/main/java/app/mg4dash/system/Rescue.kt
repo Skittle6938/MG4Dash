@@ -18,7 +18,7 @@ object Rescue {
     private const val TAG = "Rescue"
     const val PKG = "app.mg4dash.rescue"
     /** Version de l'appli de secours embarquée (versionCode de rescue/build.gradle.kts). */
-    private const val BUNDLED_VERSION = 1L
+    private const val BUNDLED_VERSION = 3L
     private const val ASSET = "rescue.apk"
 
     /** MG4Dash a démarré pendant ce démarrage de l'autoradio. */
