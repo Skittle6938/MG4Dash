@@ -118,7 +118,23 @@ class ConsumptionMapActivity : PageActivity() {
             (if (grid.extraW > 0f) "\n" + getString(R.string.cm_sim_note) else "")
     }
 
-    override fun render(s: VehicleState) {}
+    private var lastRefresh = 0L
+
+    /**
+     * Case de l'état actuel (vitesse et température de l'échantillon en cours) encadrée : rouge tant que
+     * l'échantillon ne compte pas encore, vert dès qu'il compte. Valeurs relues en direct.
+     */
+    override fun render(s: VehicleState) {
+        val live = ConsumptionMap.live()
+        val bin = live?.first ?: s.speedKmh?.let { ConsumptionMap.speedBin(it) }
+        grid.live = if (bin != null && s.outsideTemp != null) Triple(bin, ConsumptionMap.tempBin(s.outsideTemp), live?.second == true) else null
+        val now = android.os.SystemClock.elapsedRealtime()
+        if (now - lastRefresh >= 2000) {
+            lastRefresh = now
+            refresh()
+            selected?.let { (a, b) -> showCell(a, b) }
+        }
+    }
 
     private companion object {
         const val EXPORT_NAME = "mg4dash_consumption_map.json"
@@ -128,6 +144,10 @@ class ConsumptionMapActivity : PageActivity() {
     class MapView(context: Context, val onPick: (Int, Int) -> Unit) : View(context) {
         var table: Array<Array<ConsumptionMap.Cell>>? = null
             set(v) { field = v; invalidate() }
+        /** Case de l'état actuel (vitesse, température, échantillon valide), encadrée. */
+        var live: Triple<Int, Int, Boolean>? = null
+            set(v) { if (field != v) { field = v; invalidate() } }
+        private val liveStroke = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.STROKE; strokeWidth = 4f * resources.displayMetrics.density }
         /** Puissance ajoutée pour la simulation (W) : clim, affichage seulement. */
         var extraW = 0f
             set(v) { field = v; invalidate() }
@@ -175,6 +195,12 @@ class ConsumptionMapActivity : PageActivity() {
                     canvas.drawText(String.format(Locale.getDefault(), "%.0f", v), r.centerX(), r.centerY() + text.textSize / 3, text)
                 }
                 if (picked == s to tb) canvas.drawRoundRect(r, 4 * d, 4 * d, stroke)
+            }
+            live?.let { (s, tb, ok) ->
+                val x = left + s * cw; val y = bottom - (tb + 1) * ch
+                r.set(x, y, x + cw, y + ch)
+                liveStroke.color = if (ok) 0xFF22C55E.toInt() else 0xFFEF4444.toInt()
+                canvas.drawRoundRect(r, 5 * d, 5 * d, liveStroke)
             }
             // Axes : vitesse en bas (tous les 20 km/h), température à gauche (tous les 10 °C)
             axis.textAlign = Paint.Align.CENTER
