@@ -277,7 +277,7 @@
     <string name="st_paste">Yapıştır</string>
     <string name="st_diag">TANILAMA</string>
     <string name="st_energy_log">Enerji veri kaydedici: %1$s</string>
-    <string name="st_energy_log_desc">Her 5 sn\'de batarya gücünü, tüketim sayaçlarını ve ekipman durumlarını Android/data/app.mg4dash/files/energy_log.csv dosyasına yazar (yalnızca okuma, araca hiçbir şey gönderilmez). Yalnızca sorun giderme için: bu sık yazmalar radyonun belleğini yıpratır, aksi halde kapalı bırakın.</string>
+    <string name="st_energy_log_desc">Her 5 sn\'de batarya gücünü, tüketim sayaçlarını ve ekipman durumlarını Android/data/app.mg4dash/files/energy_log.csv dosyasına yazar (yalnızca okuma, araca hiçbir şey gönderilmez). Radyo belleğinin yıpranmasını sınırlamak için 5 dakikada bir kaydedilir. Yalnızca sorun giderme için: aksi halde kapalı bırakın.</string>
     <string name="st_copy_sysui">Sistem arayüzünü USB belleğe kopyala</string>
     <string name="st_copy_sysui_desc">#62 numaralı sorun için: SAIC sistem arayüzü dosyalarını bellekteki mg4dash_systemui klasörüne kopyalar. Araçta hiçbir şey değiştirilmez.</string>
     <string name="st_copy_sysui_nousb">USB bellek bulunamadı</string>

@@ -277,7 +277,7 @@
     <string name="st_paste">Coller</string>
     <string name="st_diag">DIAGNOSTIC</string>
     <string name="st_energy_log">Enregistreur de données énergie : %1$s</string>
-    <string name="st_energy_log_desc">Toutes les 5 s, note la puissance batterie, les compteurs de consommation et l\'état des équipements dans Android/data/app.mg4dash/files/energy_log.csv (lecture seule, rien n\'est envoyé à la voiture). Pour un diagnostic seulement : ces écritures fréquentes usent la mémoire de l\'autoradio, laissez-le désactivé sinon.</string>
+    <string name="st_energy_log_desc">Toutes les 5 s, note la puissance batterie, les compteurs de consommation et l\'état des équipements dans Android/data/app.mg4dash/files/energy_log.csv (lecture seule, rien n\'est envoyé à la voiture). Écrit toutes les 5 min pour limiter l\'usure de la mémoire de l\'autoradio. Pour un diagnostic seulement : laissez-le désactivé sinon.</string>
     <string name="st_copy_sysui">Copier l\'interface système sur la clé USB</string>
     <string name="st_copy_sysui_desc">Pour l\'issue #62 : copie les fichiers de l\'interface système SAIC dans un dossier mg4dash_systemui sur la clé. Rien n\'est modifié dans la voiture.</string>
     <string name="st_copy_sysui_nousb">Aucune clé USB trouvée</string>
