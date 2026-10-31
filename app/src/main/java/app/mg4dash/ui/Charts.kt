@@ -66,6 +66,12 @@ class LineChart @JvmOverloads constructor(context: Context, attrs: AttributeSet?
     var emptyText: Int = app.mg4dash.R.string.chart_empty
         set(v) { if (field != v) { field = v; invalidate() } }
 
+    /** Échelle horizontale : texte sous le début et sous la fin de la courbe (« il y a 3 sem. », « maintenant »). */
+    var startLabel: String? = null
+        set(v) { if (field != v) { field = v; invalidate() } }
+    var endLabel: String? = null
+        set(v) { if (field != v) { field = v; invalidate() } }
+
     private val d = resources.displayMetrics.density
     private val line = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         style = Paint.Style.STROKE; strokeWidth = 2.5f * d; strokeJoin = Paint.Join.ROUND
@@ -86,7 +92,9 @@ class LineChart @JvmOverloads constructor(context: Context, attrs: AttributeSet?
     }
 
     override fun onDraw(canvas: Canvas) {
-        val left = 34 * d; val top = 6 * d; val bottom = height - 6 * d; val right = width.toFloat()
+        // Courbe sur toute la largeur, l'échelle s'écrit par-dessus (#44)
+        val axisH = if (startLabel != null || endLabel != null) label.textSize + 6 * d else 0f
+        val left = 0f; val top = 6 * d; val bottom = height - 6 * d - axisH; val right = width.toFloat()
         if (values.size < 2) {
             canvas.drawText(context.getString(emptyText), width / 2f, height / 2f, empty)
             return
@@ -94,10 +102,8 @@ class LineChart @JvmOverloads constructor(context: Context, attrs: AttributeSet?
         val lo = (values.minOrNull()!! - 2f).coerceAtLeast(0f)
         val hi = values.maxOrNull()!! + 2f
         fun y(v: Float) = bottom - (v - lo) / (hi - lo) * (bottom - top)
-        listOf(lo, (lo + hi) / 2, hi).forEach { v ->
-            canvas.drawLine(left, y(v), right, y(v), grid)
-            canvas.drawText(String.format(Locale.getDefault(), "%.0f", v), 0f, y(v) + 4 * d, label)
-        }
+        val scale = listOf(lo, (lo + hi) / 2, hi)
+        scale.forEach { v -> canvas.drawLine(left, y(v), right, y(v), grid) }
         val step = (right - left) / (values.size - 1)
         val path = Path()
         values.forEachIndexed { i, v -> val x = left + i * step; if (i == 0) path.moveTo(x, y(v)) else path.lineTo(x, y(v)) }
@@ -105,6 +111,18 @@ class LineChart @JvmOverloads constructor(context: Context, attrs: AttributeSet?
         fill.shader = LinearGradient(0f, top, 0f, bottom, 0x5500E676, 0x0000E676, Shader.TileMode.CLAMP)
         canvas.drawPath(area, fill)
         canvas.drawPath(path, line)
+        // Échelle horizontale : début à gauche, fin à droite
+        if (axisH > 0f) {
+            val ty = height - 4 * d
+            startLabel?.let { label.textAlign = Paint.Align.LEFT; canvas.drawText(it, left, ty, label) }
+            endLabel?.let { label.textAlign = Paint.Align.RIGHT; canvas.drawText(it, right, ty, label) }
+            label.textAlign = Paint.Align.LEFT
+        }
+        // Valeurs de l'échelle au-dessus de leur ligne, sur la courbe
+        scale.forEachIndexed { i, v ->
+            val ty = if (i == scale.lastIndex) y(v) + label.textSize + 2 * d else y(v) - 4 * d
+            canvas.drawText(String.format(Locale.getDefault(), "%.0f", v), 2 * d, ty, label)
+        }
         // Moyenne : tracée comme un chemin (drawLine ignore les pointillés en rendu matériel, #44),
         // avec une étiquette de sa valeur au bout à droite
         val avg = values.average().toFloat()
@@ -125,7 +143,7 @@ class LineChart @JvmOverloads constructor(context: Context, attrs: AttributeSet?
     private val bubble = android.graphics.RectF()
     private val avgFill = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = app.mg4dash.ui.Themes.color(context, R.color.accent_action) }
     private val avgText = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = app.mg4dash.ui.Themes.color(context, R.color.on_action); textSize = 15f * d; textAlign = Paint.Align.CENTER
+        color = app.mg4dash.ui.Themes.color(context, R.color.on_action); textSize = 22f * d; textAlign = Paint.Align.CENTER
         typeface = android.graphics.Typeface.create("sans-serif-medium", android.graphics.Typeface.NORMAL)
     }
 }

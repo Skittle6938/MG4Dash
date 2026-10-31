@@ -145,6 +145,14 @@ en_climate|Climate control|Climatisation|Klimaanlage|Climatización|Climatizzazi
 en_accessories|Accessories|Accessoires|Zubehör|Accesorios|Accessori|Accessoires|Aksesuarlar
 en_battery_heat|Battery heating|Réchauffage batterie|Batterieheizung|Calefacción batería|Riscaldamento batteria|Batterijverwarming|Batarya ısıtma
 en_regen|+ %1$s kWh recovered by braking|+ %1$s kWh récupérés au freinage|+ %1$s kWh durch Bremsen zurückgewonnen|+ %1$s kWh recuperados al frenar|+ %1$s kWh recuperati in frenata|+ %1$s kWh teruggewonnen bij remmen|+ %1$s kWh frenle geri kazanıldı
+en_regen_short|regen|récup|rekup.|recup.|recup.|terugwinning|rejen
+cc_ago|%1$s ago|il y a %1$s|vor %1$s|hace %1$s|%1$s fa|%1$s geleden|%1$s önce
+cc_now|now|maintenant|jetzt|ahora|adesso|nu|şimdi
+cc_min|%1$d min|%1$d min|%1$d Min.|%1$d min|%1$d min|%1$d min|%1$d dk
+cc_hours|%1$d h|%1$d h|%1$d Std.|%1$d h|%1$d h|%1$d u|%1$d sa
+cc_days|%1$d d|%1$d j|%1$d T.|%1$d d|%1$d g|%1$d d|%1$d g
+cc_weeks|%1$d wk|%1$d sem.|%1$d Wo.|%1$d sem.|%1$d sett.|%1$d wk|%1$d hf
+cc_months|%1$d mo|%1$d mois|%1$d Mon.|%1$d meses|%1$d mesi|%1$d mnd|%1$d ay
 en_remaining| · %1$d h %2$d min left| · %1$d h %2$d min restantes| · noch %1$d h %2$d min| · quedan %1$d h %2$d min| · %1$d h %2$d min rimanenti| · nog %1$d u %2$d min| · %1$d sa %2$d dk kaldı
 en_plug_v2l|Plug a V2L adapter into the charging socket|Branchez un adaptateur V2L sur la prise de charge|V2L-Adapter an der Ladebuchse anschließen|Conecte un adaptador V2L a la toma de carga|Collega un adattatore V2L alla presa di ricarica|Sluit een V2L-adapter aan op de laadaansluiting|Şarj soketine bir V2L adaptörü takın
 en_unplugged|CABLE UNPLUGGED|CÂBLE DÉBRANCHÉ|KABEL GETRENNT|CABLE DESCONECTADO|CAVO SCOLLEGATO|KABEL LOS|KABLO TAKILI DEĞİL

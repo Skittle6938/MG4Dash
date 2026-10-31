@@ -147,6 +147,14 @@
     <string name="en_accessories">Zubehör</string>
     <string name="en_battery_heat">Batterieheizung</string>
     <string name="en_regen">+ %1$s kWh durch Bremsen zurückgewonnen</string>
+    <string name="en_regen_short">rekup.</string>
+    <string name="cc_ago">vor %1$s</string>
+    <string name="cc_now">jetzt</string>
+    <string name="cc_min">%1$d Min.</string>
+    <string name="cc_hours">%1$d Std.</string>
+    <string name="cc_days">%1$d T.</string>
+    <string name="cc_weeks">%1$d Wo.</string>
+    <string name="cc_months">%1$d Mon.</string>
     <string name="en_remaining">" · noch %1$d h %2$d min"</string>
     <string name="en_plug_v2l">V2L-Adapter an der Ladebuchse anschließen</string>
     <string name="en_unplugged">KABEL GETRENNT</string>

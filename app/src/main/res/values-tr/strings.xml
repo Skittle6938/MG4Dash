@@ -147,6 +147,14 @@
     <string name="en_accessories">Aksesuarlar</string>
     <string name="en_battery_heat">Batarya ısıtma</string>
     <string name="en_regen">+ %1$s kWh frenle geri kazanıldı</string>
+    <string name="en_regen_short">rejen</string>
+    <string name="cc_ago">%1$s önce</string>
+    <string name="cc_now">şimdi</string>
+    <string name="cc_min">%1$d dk</string>
+    <string name="cc_hours">%1$d sa</string>
+    <string name="cc_days">%1$d g</string>
+    <string name="cc_weeks">%1$d hf</string>
+    <string name="cc_months">%1$d ay</string>
     <string name="en_remaining">" · %1$d sa %2$d dk kaldı"</string>
     <string name="en_plug_v2l">Şarj soketine bir V2L adaptörü takın</string>
     <string name="en_unplugged">KABLO TAKILI DEĞİL</string>
