@@ -85,7 +85,7 @@ class WeatherCompact(context: Context, private val onPage: () -> Unit) : LinearL
             temp.text = outside?.let { "${Math.round(it)}°" } ?: "—"
             temp.setTextSize(TypedValue.COMPLEX_UNIT_SP, 72f)
             time.setTextSize(TypedValue.COMPLEX_UNIT_SP, 72f)
-            sub.text = context.getString(R.string.weather_outside_vehicle)
+            sub.text = context.getString(R.string.weather_outside_short)
             sub2.visibility = GONE
             top.gravity = Gravity.CENTER
             forecast.removeAllViews(); forecast.visibility = GONE; dots.visibility = GONE

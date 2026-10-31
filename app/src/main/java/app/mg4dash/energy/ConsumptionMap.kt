@@ -11,8 +11,9 @@ import java.io.File
  * accessoires, récupération déduite) par vitesse moyenne et par température extérieure, affinée trajet
  * après trajet. Elle servira à estimer un itinéraire (DiAuto) : plan dans PLAN_CARTE_CONSO.md.
  *
- * Tronçons de 1 km, ou d'une minute dès 200 m ; dénivelé corrigé par l'altitude GPS ; écartés : arrêt long, recharge,
- * réchauffage de la batterie pas encore appris, vitesse trop variable, valeur aberrante. Table : 15 cases de vitesse (10 km/h) × 14 cases
+ * Échantillons : au moins 15 s dans la même tranche de 10 km/h (1 km au plus), corrigés de l'élan (vitesse de
+ * la voiture) et du dénivelé (altitude GPS lissée) ; écartés : arrêt long, recharge, réchauffage de la batterie
+ * pas encore appris, valeur aberrante. Table : 15 cases de vitesse (10 km/h) × 14 cases
  * de température (5 °C, de -20 à 45 °C), chacune avec ses km, ses kWh et sa dispersion (quelques Ko).
  */
 object ConsumptionMap {
@@ -23,17 +24,14 @@ object ConsumptionMap {
     const val TEMP_MIN = -20
     const val TEMP_STEP = 5
     const val TEMP_BINS = 14              // -20…-15 … 45 °C et plus
-    private const val SEGMENT_KM = 1f
-    // À basse vitesse un km dure des minutes et la vitesse change avant : tronçon fermé aussi après 1 min,
-    // dès 200 m (la case reste pondérée par les km, les petits tronçons comptent moins chacun)
-    private const val SEGMENT_MS = 60_000L
-    private const val SEGMENT_MIN_KM = 0.2f
-    private const val STOP_MS = 60_000L   // arrêt plus long : tronçon écarté (bouchon, feu, parking)
+    private const val SEGMENT_KM = 1f     // échantillon fermé au plus tard après 1 km…
+    private const val SAMPLE_MS = 15_000L // … gardé s'il a duré au moins 15 s dans la même tranche de vitesse
+    private const val MARGIN_KMH = 3f     // marge autour de la tranche avant de la considérer quittée
+    private const val ALT_SMOOTH_MS = 30_000.0
+    private const val STOP_MS = 60_000L   // arrêt plus long : échantillon écarté (bouchon, feu, parking)
     private const val MASS_KG = 1800f     // MG4 en ordre de marche, conducteur compris
-    private const val UP_EFF = 0.9f       // montée : énergie électrique ≈ énergie potentielle / rendement
-    private const val DOWN_EFF = 0.7f     // descente : part de l'énergie potentielle récupérée
-    private const val STABLE_KMH = 10f    // vitesse « stable » : à ±10 km/h de la moyenne du tronçon…
-    private const val STABLE_SHARE = 0.8f // … au moins 80 % du temps, sinon tronçon écarté (vitesses mélangées)
+    private const val UP_EFF = 0.9f       // montée, accélération : énergie électrique ≈ énergie gagnée / rendement
+    private const val DOWN_EFF = 0.7f     // descente, freinage : part de l'énergie rendue récupérée
 
     /** Une case : km roulés, kWh (corrigés du dénivelé), nombre de tronçons, somme pondérée des carrés (dispersion). */
     data class Cell(var km: Float = 0f, var kwh: Float = 0f, var n: Int = 0, var sq: Float = 0f) {
@@ -96,78 +94,80 @@ object ConsumptionMap {
     fun speedBin(kmh: Float) = (kmh / SPEED_STEP).toInt().coerceIn(0, SPEED_BINS - 1)
     fun tempBin(c: Float) = ((c - TEMP_MIN) / TEMP_STEP).toInt().coerceIn(0, TEMP_BINS - 1)
 
-    // ── Tronçon en cours ──
+    // ── Échantillon en cours ──
+    private var segBin = -1          // tranche de vitesse de l'échantillon, -1 : aucun
     private var segKwh = 0f
     private var segKm = 0f
     private var segMs = 0L
     private var segTempSum = 0f
     private var segTempN = 0
+    private var segV0 = 0f           // vitesse au début et à la fin (élan)
+    private var segV1 = 0f
     private var segAlt0: Double? = null
-    private val segSpeeds = ArrayList<Float>()   // vitesse et durée de chaque seconde du tronçon
-    private val segDts = ArrayList<Long>()
+    private var altSmooth: Double? = null   // altitude GPS lissée sur ~30 s
     private var stillMs = 0L
     private var spoiled = false
 
-    private fun reset(alt: Double?) {
-        segKwh = 0f; segKm = 0f; segMs = 0L; segTempSum = 0f; segTempN = 0; segAlt0 = alt; stillMs = 0L; spoiled = false
-        segSpeeds.clear(); segDts.clear()
+    private fun reset() {
+        segBin = -1; segKwh = 0f; segKm = 0f; segMs = 0L; segTempSum = 0f; segTempN = 0; stillMs = 0L; spoiled = false
     }
 
-    /** Fin du trajet (voiture en veille, recharge) : le tronçon en cours est abandonné. */
-    fun interrupt() { reset(null) }
+    /** Fin du trajet (voiture en veille, recharge) : l'échantillon en cours est abandonné. */
+    fun interrupt() { reset(); altSmooth = null }
 
     /**
-     * Une seconde de roulage, depuis EnergyMonitor : énergie de conduite nette (kWh, clim et accessoires
-     * déduits, récupération déduite), durée, vitesse (km/h), température extérieure (°C).
+     * Une seconde de roulage, depuis EnergyMonitor : énergie de conduite nette (kWh, clim, accessoires et
+     * réchauffage déduits, récupération déduite), durée, vitesse (km/h), température extérieure (°C).
      */
     fun tick(context: Context, driveKwh: Float, dtMs: Long, speedKmh: Float?, outside: Float?) {
         if (!enabled(context)) return
         // Réchauffage de la batterie : déduit par EnergyMonitor (puissance apprise) ; tant qu'elle ne l'est
-        // pas, les tronçons où il peut chauffer sont écartés
+        // pas, les échantillons où il peut chauffer sont écartés
         val ptcOn = EnergyMonitor.batteryHeatPossible && !EnergyMonitor.batteryHeatKnown
-        val loc = app.mg4dash.map.LocationRepo.location.value
-        val alt = loc?.takeIf { it.hasAltitude() }?.altitude
-        if (segMs == 0L && segKm == 0f) segAlt0 = alt
-        if (ptcOn || speedKmh == null || outside == null) spoiled = true
+        val alt = app.mg4dash.map.LocationRepo.location.value?.takeIf { it.hasAltitude() }?.altitude
+        if (alt != null) altSmooth = altSmooth?.let { it + (alt - it) * (dtMs.toDouble() / ALT_SMOOTH_MS).coerceAtMost(1.0) } ?: alt
         val v = speedKmh ?: 0f
+        // Sortie de la tranche (avec une marge) : l'échantillon se ferme avant cette seconde
+        if (segBin >= 0 && (v < segBin * SPEED_STEP - MARGIN_KMH || v >= (segBin + 1) * SPEED_STEP + MARGIN_KMH)) close(context)
+        if (segBin < 0) { segBin = speedBin(v); segV0 = v; segAlt0 = altSmooth }
+        if (ptcOn || speedKmh == null || outside == null) spoiled = true
         segKwh += driveKwh
         segMs += dtMs
         segKm += v * dtMs / 3_600_000f
-        segSpeeds.add(v); segDts.add(dtMs)
+        segV1 = v
         if (outside != null) { segTempSum += outside; segTempN++ }
         stillMs = if (v < 1f) stillMs + dtMs else 0L
         if (stillMs > STOP_MS) spoiled = true
-        if (segKm < SEGMENT_KM && (segMs < SEGMENT_MS || segKm < SEGMENT_MIN_KM)) return
-        // Tronçon complet
+        if (segKm >= SEGMENT_KM) close(context)
+    }
+
+    /** Ferme l'échantillon : gardé s'il a duré 15 s, corrigé de l'élan et du dénivelé. */
+    private fun close(context: Context) {
         val km = segKm; val hours = segMs / 3_600_000f
+        if (spoiled || segMs < SAMPLE_MS || km < 0.01f || segTempN == 0) { reset(); return }
         var kwh = segKwh
-        val a0 = segAlt0
-        if (a0 != null && alt != null) {
-            val dh = (alt - a0).toFloat()
-            val potential = MASS_KG * 9.81f * dh / 3_600_000f   // kWh
-            kwh -= if (dh > 0) potential / UP_EFF else potential * DOWN_EFF
+        // Élan : l'énergie mise dans la vitesse (ou rendue par elle) n'est pas de la consommation de roulage
+        val v0 = segV0 / 3.6f; val v1 = segV1 / 3.6f
+        val kinetic = 0.5f * MASS_KG * (v1 * v1 - v0 * v0) / 3_600_000f   // kWh
+        kwh -= if (kinetic > 0) kinetic / UP_EFF else kinetic * DOWN_EFF
+        // Dénivelé, sur l'altitude lissée (le bruit restant est aléatoire et s'annule sur beaucoup d'échantillons)
+        val a0 = segAlt0; val a1 = altSmooth
+        if (a0 != null && a1 != null) {
+            val potential = MASS_KG * 9.81f * (a1 - a0).toFloat() / 3_600_000f   // kWh
+            kwh -= if (potential > 0) potential / UP_EFF else potential * DOWN_EFF
         }
         val per100 = kwh / km * 100f
-        // Vitesse stable : un km fait à 30 puis à 90 ne doit pas compter comme un km à 45
-        val mean = if (hours > 0f) km / hours else 0f
-        var stableMs = 0L
-        for (i in segSpeeds.indices) if (kotlin.math.abs(segSpeeds[i] - mean) <= STABLE_KMH) stableMs += segDts[i]
-        val stable = segMs > 0 && stableMs >= STABLE_SHARE * segMs
-        // Bornes larges : sur les petits tronçons, l'erreur d'altitude GPS d'un tronçon est rendue par le
-        // suivant (ils partagent leur point de jonction) ; les couper d'un seul côté fausserait la moyenne
-        val ok = !spoiled && stable && hours > 0f && segTempN > 0 && per100 in -30f..90f
-        if (!stable && !spoiled && app.mg4dash.system.Prefs(context).energyLog)
-            Log.i(TAG, String.format(java.util.Locale.US, "segment at %.0f km/h skipped: speed stable %.0f %% of the time", mean, stableMs * 100f / segMs.coerceAtLeast(1)))
-        if (ok) {
-            val speed = km / hours
+        // Bornes larges : sur des échantillons courts, élan et altitude ne se compensent qu'en moyenne ;
+        // les couper d'un seul côté fausserait la case
+        if (hours > 0f && per100 in -60f..120f) {
             val temp = segTempSum / segTempN
-            val c = table(context)[speedBin(speed)][tempBin(temp)]
+            val c = table(context)[segBin][tempBin(temp)]
             c.km += km; c.kwh += kwh; c.n++; c.sq += per100 * per100 * km
             save(context)
             if (app.mg4dash.system.Prefs(context).energyLog)
-                Log.i(TAG, String.format(java.util.Locale.US, "segment %.2f km at %.0f km/h, %.1f °C: %.1f kWh/100 (cell %d now %.1f, %.0f km)",
-                    km, speed, temp, per100, c.n, c.per100 ?: 0f, c.km))
+                Log.i(TAG, String.format(java.util.Locale.US, "sample %.0f s, %.2f km at %.0f km/h, %.1f °C: %.1f kWh/100 (cell %d now %.1f, %.0f km)",
+                    segMs / 1000f, km, km / hours, temp, per100, c.n, c.per100 ?: 0f, c.km))
         }
-        reset(alt)
+        reset()
     }
 }

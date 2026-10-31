@@ -42,6 +42,7 @@
     <string name="charging_eta">Lädt · %1$d h %2$02d</string>
     <string name="weather_pending">Vorhersage folgt</string>
     <string name="weather_outside_vehicle">Außentemperatur des Fahrzeugs</string>
+    <string name="weather_outside_short">Außen</string>
     <string name="weather_details">Gefühlt %1$d° · Wind %2$d %4$s · %3$d %%</string>
     <string name="weather_here">Aktuelle Position</string>
     <string name="wx_sunny">Sonnig</string>
