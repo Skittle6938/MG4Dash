@@ -80,7 +80,7 @@ object StarKey {
                     when (code) {
                         JOY_LEFT -> MediaHub.previous()
                         JOY_RIGHT -> MediaHub.next()
-                        JOY_OK -> MediaHub.playPause()
+                        JOY_OK -> MediaHub.playPauseNow()   // tout de suite, sans changer de source (DiAuto #3)
                     }
                     return
                 }
