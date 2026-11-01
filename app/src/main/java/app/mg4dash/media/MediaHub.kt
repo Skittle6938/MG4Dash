@@ -1084,6 +1084,20 @@ object MediaHub {
         playPauseRaw()
     }
 
+    /**
+     * Volant SWI173 (DiAuto #3) : lecture / pause envoyée tout de suite au lecteur affiché (Bluetooth…), sans
+     * redemander la source à la voiture ni réessayer, comme le launcher d'origine. Le chemin normal attendait
+     * jusqu'à 3,5 s avant que la musique reprenne.
+     */
+    fun playPauseNow() {
+        val c = current
+        if (BuildConfig.MOCK || radioShown || c == null || isAndroidAuto(c.packageName)) { playPause(); return }
+        val playing = isPlaying(c)
+        prefs()?.lastPlaying = !playing; pausedSince = 0L
+        if (playing) c.transportControls.pause() else c.transportControls.play()
+        force(c.packageName, !playing)
+    }
+
     private fun playPauseRaw() {
         if (radioShown) { val playing = SaicRadio.last?.playing == true; radioCommand { if (playing) SaicRadio.pause() else SaicRadio.play() }; return }
         val c = current ?: return
