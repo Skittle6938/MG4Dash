@@ -37,6 +37,9 @@ class LauncherApp : Application() {
         Log.i("App", "start ${BuildConfig.VERSION_NAME} (${BuildConfig.FLAVOR})")
         // Filet de sécurité séparé (MG4Dash Rescue) : signe de vie, et son installation si besoin
         app.mg4dash.system.Rescue.start(this)
+        // Carte de consommation retirée (1/11) : fichier et réglages de l'accéléromètre effacés
+        java.io.File(filesDir, "consumption_map.json").takeIf { it.exists() }?.let { it.delete(); Log.i("App", "old consumption map deleted") }
+        java.io.File(applicationInfo.dataDir, "shared_prefs/accel_cal.xml").takeIf { it.exists() }?.delete()
         // Première installation : style Complet, plein écran et barre verticale à gauche par défaut.
         // Les installations existantes gardent leurs réglages (le fichier de préférences n'est pas vide).
         if (!BuildConfig.MOCK) {
