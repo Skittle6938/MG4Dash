@@ -206,11 +206,7 @@
     <string name="st_replace">Remplacer l\'accueil SAIC</string>
     <string name="st_valet">Mode Entretien</string>
     <string name="st_adb">Secours ADB si MG4Dash ne démarre plus : adb shell cmd package compile -m speed -f app.mg4dash</string>
-    <string name="st_capacity">Capacité actuelle de la batterie : %1$s kWh</string>
-    <string name="st_capacity_desc">Capacité utile de votre batterie aujourd\'hui (usure comprise), utilisée pour l\'estimation kWh/100. Santé = capacité actuelle ÷ capacité neuve.</string>
-    <string name="st_capacity_new">Capacité utile neuve (données MG, %2$d kWh) : %1$s kWh</string>
-    <string name="st_soh">Santé batterie estimée : %1$s %%</string>
-    <string name="st_soh_none">Santé batterie estimée : pas encore mesurée</string>
+    <string name="st_battery_line">Neuve : %1$s kWh  ·  Actuelle : %2$s kWh  ·  Santé : %3$s</string>
     <string name="st_battery_model">Modèle de batterie (référence de la santé estimée, page Véhicule) :</string>
     <string name="st_city">Ville de repli : %1$s (si la voiture ne fournit pas de position)</string>
     <string name="st_change_city">Changer de ville</string>
