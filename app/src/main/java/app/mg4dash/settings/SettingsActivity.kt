@@ -187,7 +187,6 @@ class SettingsActivity : AppCompatActivity() {
             val car = app.mg4dash.energy.BatteryCapacity.fromCar()
             val est = app.mg4dash.energy.BatteryCapacity.estimate(this)
             capSrc.text = when {
-                prefs.batteryKwhManual -> getString(R.string.st_cap_manual)
                 car != null -> getString(R.string.st_cap_car, String.format(Locale.getDefault(), "%.1f", car))
                 est != null -> getString(R.string.st_cap_est, String.format(Locale.getDefault(), "%.1f", est.first), est.second)
                 else -> app.mg4dash.energy.BatteryCapacity.progress(this).provisional
@@ -195,12 +194,8 @@ class SettingsActivity : AppCompatActivity() {
                     ?: getString(R.string.st_cap_none)
             }
         }
+        app.mg4dash.energy.BatteryCapacity.apply(this)
         showCap()
-        row(energy,
-            button("− 0.5 kWh") { prefs.batteryKwhManual = true; prefs.batteryKwh = (prefs.batteryKwh - 0.5f).coerceAtLeast(30f); showCap() },
-            button("+ 0.5 kWh") { prefs.batteryKwhManual = true; prefs.batteryKwh = (prefs.batteryKwh + 0.5f).coerceAtMost(100f); showCap() },
-            button(getString(R.string.st_cap_auto)) { prefs.batteryKwhManual = false; app.mg4dash.energy.BatteryCapacity.apply(this); showCap() },
-        )
         text(energy, getString(R.string.st_capacity_desc), 16f, R.color.text_title)
         // Modèle de batterie : référence de la santé estimée (affichée sur la page Véhicule)
         val models = app.mg4dash.energy.BatteryCapacity.MODELS.map { it.first }

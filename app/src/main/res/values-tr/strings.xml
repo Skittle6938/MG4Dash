@@ -206,8 +206,8 @@
     <string name="st_replace">SAIC ana ekranını değiştir</string>
     <string name="st_valet">Bakım modu</string>
     <string name="st_adb">MG4Dash artık açılmıyorsa ADB ile kurtarma: adb shell cmd package compile -m speed -f app.mg4dash</string>
-    <string name="st_capacity">Kullanılabilir batarya kapasitesi: %1$s kWh</string>
-    <string name="st_capacity_desc">kWh/100 tahmini için kullanılır (MG4 Standard 51 kWh: yaklaşık 50,8 kWh kullanılabilir).</string>
+    <string name="st_capacity">Mevcut batarya kapasitesi: %1$s kWh</string>
+    <string name="st_capacity_desc">Bataryanızın bugünkü kullanılabilir kapasitesi (yıpranma dahil), kWh/100 tahmini için kullanılır. Yeniyken: 51 kWh için 50,8 kWh, 64 kWh için 61,7 kWh, 77 kWh için 74,4 kWh (aşağıdaki batarya modeli).</string>
     <string name="st_battery_model">Batarya modeli (Araç sayfasındaki tahmini sağlık için referans):</string>
     <string name="st_city">Yedek şehir: %1$s (araç konum vermezse)</string>
     <string name="st_change_city">Şehri değiştir</string>
@@ -369,8 +369,6 @@
     <string name="dock_slot_wifi_short">Wi-Fi</string>
     <string name="st_cap_car">Araçtan okundu: %1$s kWh.</string>
     <string name="st_cap_none" formatted="false">Araç bunu bildirmiyor: MG4Dash sürüş sırasında %15\'lik bir düşüşten sonra ölçecek (birkaç yolculuk boyunca toplanır).</string>
-    <string name="st_cap_manual">Elle ayarlandı (Oto: araç veya ölçülen değere döner).</string>
-    <string name="st_cap_auto">Oto</string>
     <string name="st_cap_est">MG4Dash tarafından ölçüldü: %1$s kWh (%2$d şarjdan şarja ölçüm, 30 gün boyunca yumuşatıldı).</string>
     <string name="st_cap_est_current">MG4Dash tarafından ölçülüyor: %1$s kWh (geçici).</string>
     <string name="sw_batt_temp">Batarya %1$d °C</string>

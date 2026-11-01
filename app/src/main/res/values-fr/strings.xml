@@ -206,8 +206,8 @@
     <string name="st_replace">Remplacer l\'accueil SAIC</string>
     <string name="st_valet">Mode Entretien</string>
     <string name="st_adb">Secours ADB si MG4Dash ne démarre plus : adb shell cmd package compile -m speed -f app.mg4dash</string>
-    <string name="st_capacity">Capacité utile de la batterie : %1$s kWh</string>
-    <string name="st_capacity_desc">Sert à l\'estimation kWh/100 (MG4 Standard 51 kWh : environ 50,8 kWh utiles).</string>
+    <string name="st_capacity">Capacité actuelle de la batterie : %1$s kWh</string>
+    <string name="st_capacity_desc">Capacité utile de votre batterie aujourd\'hui (usure comprise), utilisée pour l\'estimation kWh/100. Neuve : 50,8 kWh pour la 51 kWh, 61,7 kWh pour la 64 kWh, 74,4 kWh pour la 77 kWh (modèle de batterie ci-dessous).</string>
     <string name="st_battery_model">Modèle de batterie (référence de la santé estimée, page Véhicule) :</string>
     <string name="st_city">Ville de repli : %1$s (si la voiture ne fournit pas de position)</string>
     <string name="st_change_city">Changer de ville</string>
@@ -369,8 +369,6 @@
     <string name="dock_slot_wifi_short">Wi-Fi</string>
     <string name="st_cap_car">Lue sur la voiture : %1$s kWh.</string>
     <string name="st_cap_none" formatted="false">La voiture ne la fournit pas : MG4Dash la mesurera en roulant, après 15 % de baisse (cumulée sur plusieurs trajets).</string>
-    <string name="st_cap_manual">Réglée à la main (Auto : revenir à la valeur de la voiture ou mesurée).</string>
-    <string name="st_cap_auto">Auto</string>
     <string name="st_cap_est">Mesurée par MG4Dash : %1$s kWh (%2$d mesure(s) entre deux recharges, lissées sur 30 jours).</string>
     <string name="st_cap_est_current">En cours de mesure par MG4Dash : %1$s kWh (provisoire).</string>
     <string name="sw_batt_temp">Batterie %1$d °C</string>
