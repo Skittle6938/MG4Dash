@@ -171,7 +171,7 @@ public final class MainActivity extends Activity {
         // Mise à jour installée dans /data/app : on prend aussi la version d'usine, sur /system
         if ((ai.flags & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0) {
             try {
-                File factory = new File(pm.getApplicationInfo(pkg, MATCH_FACTORY_ONLY).sourceDir).getParentFile();
+                File factory = new File(pm.getPackageInfo(pkg, MATCH_FACTORY_ONLY).applicationInfo.sourceDir).getParentFile();
                 if (!factory.equals(current)) {
                     report.append(pkg).append(" factory: ").append(factory).append('\n');
                     n += ZipFolder.addDir(zip, factory, pkg + "/factory", report);
