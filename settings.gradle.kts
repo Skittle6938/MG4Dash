@@ -13,4 +13,4 @@ dependencyResolutionManagement {
     }
 }
 rootProject.name = "MG4Dash"
-include(":app", ":rescue")
+include(":app", ":rescue", ":copytool")
