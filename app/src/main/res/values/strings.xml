@@ -206,8 +206,8 @@
     <string name="st_replace">Replace SAIC home</string>
     <string name="st_valet">Maintenance mode</string>
     <string name="st_adb">ADB recovery if MG4Dash no longer starts: adb shell cmd package compile -m speed -f app.mg4dash</string>
-    <string name="st_capacity">Usable battery capacity: %1$s kWh</string>
-    <string name="st_capacity_desc">Used for the kWh/100 estimate (MG4 Standard 51 kWh: about 50.8 kWh usable).</string>
+    <string name="st_capacity">Current battery capacity: %1$s kWh</string>
+    <string name="st_capacity_desc">Usable capacity of your battery today (wear included), used for the kWh/100 estimate. When new: 50.8 kWh for the 51 kWh, 61.7 kWh for the 64 kWh, 74.4 kWh for the 77 kWh (battery model below).</string>
     <string name="st_battery_model">Battery model (reference for the estimated health on the Vehicle page):</string>
     <string name="st_city">Fallback city: %1$s (if the car provides no position)</string>
     <string name="st_change_city">Change city</string>
@@ -369,8 +369,6 @@
     <string name="dock_slot_wifi_short">Wi-Fi</string>
     <string name="st_cap_car">Read from the car: %1$s kWh.</string>
     <string name="st_cap_none" formatted="false">The car does not report it: MG4Dash will measure it while driving, after a 15 % drop (added up over several trips).</string>
-    <string name="st_cap_manual">Set by hand (Auto: back to the car\'s or the measured value).</string>
-    <string name="st_cap_auto">Auto</string>
     <string name="st_cap_est">Measured by MG4Dash: %1$s kWh (%2$d charge-to-charge measurement(s), smoothed over 30 days).</string>
     <string name="st_cap_est_current">Being measured by MG4Dash: %1$s kWh (provisional).</string>
     <string name="sw_batt_temp">Battery %1$d °C</string>
