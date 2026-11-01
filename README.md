@@ -49,8 +49,6 @@ The player (Full, Map and Simple layouts) works like the Android Auto player: th
 
 **Cut the phone connection**: double tap the Android Auto button (dock or vertical bar) to close the Android Auto / CarPlay session and keep it off; the icon turns red, even after a restart. The phone stays connected over Bluetooth for calls and music, and Bluetooth is offered in the sources (it is hidden while Android Auto, CarPlay or DiAuto is running). Double tap again: Android Auto comes back by itself, with the phone still plugged in. It works the same with [DiAuto MG4+](https://github.com/Skittle6938/DiAuto-MG4) chosen for the button (long press › Other app): its session is closed and it reconnects wirelessly on the next double tap. Music that was playing carries on over Bluetooth after a cut.
 
-**Wired phone at startup** (Settings › Home › Audio source, on by default): if the phone was plugged in before the car started, the stock Android Auto doesn't start until you unplug it and plug it back. MG4Dash re-detects the phone by itself at startup (the USB fix of [AA Kick](https://github.com/Skittle6938/MG4-AndroidAuto-BootFix)). If AA Kick is installed too, turn its *Wired phone fix* off.
-
 **Audio source at startup** (Settings › Home › Audio source): *Automatic* (default) remembers the sources you pick and goes back by itself to the last one still available, as soon as it returns (phone reconnected, USB key plugged in…); a source that disappears is replaced after 1 s. You can also leave it to the car (*Same as the car*) or always start on Radio, Bluetooth, USB or CarPlay / Android Auto. CarPlay is never picked automatically. *Playback at startup*: as when the car was switched off (default), always paused or always playing.
 
 **Steering wheel**: left / right change track on the source shown, apps included. The car does not know the apps (DiAuto, SimpMusic…) and still hands these buttons to its last own source, often the radio, which briefly takes the sound: MG4Dash puts the radio back on its station and returns to the app at once.
@@ -216,7 +214,6 @@ Features a firmware does not expose are hidden instead of failing (for example t
   - `system/Projection.kt`: Android Auto / CarPlay session read from (and closed through) the AllGo remote UI service
   - `system/ConnectionToggle.kt`: phone connection cut / restored from the Android Auto button
   - `system/BtAudio.kt`: Bluetooth music of the phone asked again when Android Auto stops
-  - `system/UsbKick.kt`: wired phone re-detected at startup (USB fix of AA Kick)
   - `energy/EnergyLogger.kt`: read-only CSV recorder of battery power, consumption counters and equipment states
   - `media/MediaHub.kt`: active player and audio sources (the car's and other apps'), automatic source, steering wheel for apps
   - `map/NavRepo.kt`: turn-by-turn data broadcast by DiAuto / Headunit Revived
