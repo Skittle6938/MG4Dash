@@ -65,6 +65,10 @@ class WeatherCompact(context: Context, private val onPage: () -> Unit) : LinearL
         tick()
     }
 
+    private fun setTempMargin(px: Int) {
+        (temp.layoutParams as LayoutParams).let { if (it.leftMargin != px) { it.leftMargin = px; temp.layoutParams = it } }
+    }
+
     private val ticker = Runnable { tick() }
 
     private fun tick() {
@@ -82,6 +86,8 @@ class WeatherCompact(context: Context, private val onPage: () -> Unit) : LinearL
         if (w == null) {
             // Hors connexion (#18) : heure et température extérieure en grand, centrées dans tout le widget
             icon.visibility = GONE
+            // Sans icône, plus de marge : la température s'aligne à gauche sur « Extérieur » (#18)
+            setTempMargin(0)
             temp.text = outside?.let { "${Math.round(it)}°" } ?: "—"
             temp.setTextSize(TypedValue.COMPLEX_UNIT_SP, 72f)
             time.setTextSize(TypedValue.COMPLEX_UNIT_SP, 72f)
@@ -92,6 +98,7 @@ class WeatherCompact(context: Context, private val onPage: () -> Unit) : LinearL
             return
         }
         icon.visibility = VISIBLE
+        setTempMargin((10 * d).toInt())
         // Icône et température à la hauteur de l'heure ; le bloc remonte pour la ligne vent / pluie (#34)
         temp.setTextSize(TypedValue.COMPLEX_UNIT_SP, 50f)
         time.setTextSize(TypedValue.COMPLEX_UNIT_SP, 50f)
