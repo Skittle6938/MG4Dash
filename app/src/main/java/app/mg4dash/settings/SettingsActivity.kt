@@ -182,8 +182,14 @@ class SettingsActivity : AppCompatActivity() {
         val energy = panel(carR, getString(R.string.title_energy))
         val cap = text(energy, "", 18f, R.color.text_value)
         val capSrc = text(energy, "", 16f, R.color.text_title)
+        // Capacité utile neuve (fiche MG du modèle choisi) et santé estimée = capacité actuelle ÷ neuve
+        val capNew = text(energy, "", 18f, R.color.text_value)
+        val soh = text(energy, "", 18f, R.color.text_value)
         fun showCap() {
             cap.text = getString(R.string.st_capacity, String.format(Locale.getDefault(), "%.1f", prefs.batteryKwh))
+            capNew.text = getString(R.string.st_capacity_new, String.format(Locale.getDefault(), "%.1f", app.mg4dash.energy.BatteryCapacity.nominal(this)), prefs.batteryModel)
+            soh.text = app.mg4dash.energy.BatteryCapacity.health(this)?.let { getString(R.string.st_soh, String.format(Locale.getDefault(), "%.1f", it.percent)) }
+                ?: getString(R.string.st_soh_none)
             val car = app.mg4dash.energy.BatteryCapacity.fromCar()
             val est = app.mg4dash.energy.BatteryCapacity.estimate(this)
             capSrc.text = when {
@@ -199,7 +205,7 @@ class SettingsActivity : AppCompatActivity() {
         text(energy, getString(R.string.st_capacity_desc), 16f, R.color.text_title)
         // Modèle de batterie : référence de la santé estimée (affichée sur la page Véhicule)
         val models = app.mg4dash.energy.BatteryCapacity.MODELS.map { it.first }
-        dropdown(energy, getString(R.string.st_battery_model), models.map { "$it kWh" }, { models.indexOf(prefs.batteryModel).coerceAtLeast(0) }) { prefs.batteryModel = models[it] }
+        dropdown(energy, getString(R.string.st_battery_model), models.map { "$it kWh" }, { models.indexOf(prefs.batteryModel).coerceAtLeast(0) }) { prefs.batteryModel = models[it]; showCap() }
         toggle(energy, R.string.st_xpower, R.string.st_xpower_desc, { prefs.xpower }) { prefs.xpower = it }
         toggle(energy, R.string.st_cc_stopped, R.string.st_cc_stopped_desc, { prefs.raw.getBoolean("cc_stopped", true) }) { prefs.raw.edit().putBoolean("cc_stopped", it).apply() }
         // Carte de consommation vitesse × température (en test, désactivée par défaut)
