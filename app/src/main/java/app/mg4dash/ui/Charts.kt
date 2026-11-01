@@ -164,6 +164,7 @@ class PowerBar @JvmOverloads constructor(context: Context, attrs: AttributeSet? 
     var labelSp = 12f
     var kw: Float = 0f
         set(v) {
+            if (v == field) return   // même valeur à chaque rafraîchissement de l'accueil : rien à redessiner
             field = v
             if (v > maxDrawKw) { maxDrawKw = Math.ceil(v / 50.0).toFloat() * 50f; onScale?.invoke(maxDrawKw) }
             if (-v > maxRegenKw) { maxRegenKw = Math.ceil(-v / 25.0).toFloat() * 25f }
@@ -313,6 +314,17 @@ class PowerBar @JvmOverloads constructor(context: Context, attrs: AttributeSet? 
         }
 
         // Tant que la valeur bouge ou qu'un pic redescend, on redessine
-        if (kotlin.math.abs(kw - shown) > 0.05f || peak > kw + 0.1f || peakRegen > -kw + 0.1f) postInvalidateOnAnimation() else lastFrame = 0L
+        // Redessin seulement si ça bouge d'au moins un demi-pixel : à l'arrêt, les petites variations de
+        // puissance (0,1 à 0,3 kW) relançaient l'animation sans fin, à 30 images par seconde
+        // (pics tenus 10 s : pas d'animation pendant la tenue, un seul redessin quand la descente commence)
+        val peakUp = peak > kw && kotlin.math.abs(xFor(peak) - xFor(kw)) > 0.5f
+        val regenUp = peakRegen > -kw && kotlin.math.abs(xFor(-peakRegen) - xFor(kw)) > 0.5f
+        val decaying = (peakUp && now - peakAt > PEAK_HOLD_MS) || (regenUp && now - peakRegenAt > PEAK_HOLD_MS)
+        if (kotlin.math.abs(xFor(kw) - xFor(shown)) > 0.5f || decaying) postInvalidateOnAnimation()
+        else {
+            shown = kw; lastFrame = 0L
+            val holdLeft = listOfNotNull((PEAK_HOLD_MS - (now - peakAt)).takeIf { peakUp }, (PEAK_HOLD_MS - (now - peakRegenAt)).takeIf { regenUp }).minOrNull()
+            if (holdLeft != null) postInvalidateDelayed(holdLeft.coerceAtLeast(16L))
+        }
     }
 }
