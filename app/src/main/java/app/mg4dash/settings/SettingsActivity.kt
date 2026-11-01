@@ -137,7 +137,6 @@ class SettingsActivity : AppCompatActivity() {
             }
         }
         text(src, getString(R.string.st_aa_button_desc), 16f, R.color.text_title)
-        toggle(src, R.string.st_usb_kick, R.string.st_usb_kick_desc, { prefs.usbKick }) { prefs.usbKick = it }
         toggle(src, R.string.st_bt_projection, R.string.st_bt_projection_desc, { prefs.btDuringProjection }) { prefs.btDuringProjection = it }
         val map = panel(homeR, getString(R.string.st_style_map).uppercase())
         dropdown(map, getString(R.string.st_map_zoom), listOf("14", "15", "16", "17", "18"), { prefs.mapZoom - 14 }) { prefs.mapZoom = 14 + it }

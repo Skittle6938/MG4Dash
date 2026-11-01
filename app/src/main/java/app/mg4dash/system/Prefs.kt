@@ -176,11 +176,6 @@ class Prefs(context: Context) {
         get() = sp.getBoolean("bt_during_projection", true)
         set(v) = sp.edit().putBoolean("bt_during_projection", v).apply()
 
-    /** Téléphone branché en USB avant le démarrage : relancé pour qu'Android Auto démarre (repris d'AA Kick). */
-    var usbKick: Boolean
-        get() = sp.getBoolean("usb_kick", true)
-        set(v) = sp.edit().putBoolean("usb_kick", v).apply()
-
     /** Appli de connexion du téléphone désactivée par MG4Dash (appui long sur le bouton Android Auto). */
     var connectionOff: String?
         get() = sp.getString("connection_off", null)
