@@ -421,7 +421,7 @@
     <string name="st_map_auto_hide">Ocultar los botones de zoom y pantalla completa del mapa</string>
     <string name="st_map_auto_hide_desc">Aparecen unos segundos al tocar el mapa; el botón de rumbo se queda</string>
     <string name="st_map_offline_switch">Cambiar al widget de energía sin conexión</string>
-    <string name="st_map_offline_switch_desc">Sin conexión de datos, salvo si el mapa alrededor del coche está en la caché sin conexión</string>
+    <string name="st_map_offline_switch_desc">Sin conexión de datos, salvo si todo el mapa mostrado está en la caché sin conexión</string>
     <string name="st_use_location">Usar mi posición</string>
     <string name="st_wx_model">Modelo meteorológico: %1$s</string>
     <string name="st_wx_model_auto">Automático</string>

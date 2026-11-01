@@ -421,7 +421,7 @@
     <string name="st_map_auto_hide">Harita yakınlaştırma ve tam ekran düğmelerini gizle</string>
     <string name="st_map_auto_hide_desc">Haritaya dokunduğunuzda birkaç saniye görünürler; yön düğmesi kalır</string>
     <string name="st_map_offline_switch">Çevrimdışıyken enerji pencere öğesine geç</string>
-    <string name="st_map_offline_switch_desc">Veri bağlantısı yokken, aracın etrafındaki harita çevrimdışı önbellekte değilse</string>
+    <string name="st_map_offline_switch_desc">Veri bağlantısı yokken, gösterilen haritanın tamamı çevrimdışı önbellekte değilse</string>
     <string name="st_use_location">Konumumu kullan</string>
     <string name="st_wx_model">Hava modeli: %1$s</string>
     <string name="st_wx_model_auto">Otomatik</string>

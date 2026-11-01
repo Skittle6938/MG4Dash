@@ -421,7 +421,7 @@
     <string name="st_map_auto_hide">Masquer les boutons zoom et plein écran de la carte</string>
     <string name="st_map_auto_hide_desc">Ils apparaissent quelques secondes au toucher de la carte ; le bouton de cap reste</string>
     <string name="st_map_offline_switch">Passer au widget énergie hors ligne</string>
-    <string name="st_map_offline_switch_desc">Sans connexion data, sauf si la carte autour de la voiture est dans le cache hors ligne</string>
+    <string name="st_map_offline_switch_desc">Sans connexion data, sauf si toute la carte affichée est dans le cache hors ligne</string>
     <string name="st_use_location">Utiliser ma position</string>
     <string name="st_wx_model">Modèle météo : %1$s</string>
     <string name="st_wx_model_auto">Automatique</string>

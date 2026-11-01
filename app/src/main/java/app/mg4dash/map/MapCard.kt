@@ -39,7 +39,14 @@ class MapCard(private val context: Context, holder: ViewGroup) {
     /** Carte orientée selon le cap de la voiture (sinon nord en haut) ; 2e appui sur « recentrer ». */
     var headingUp = app.mg4dash.system.Prefs(context).mapHeadingUp
         private set
-    private companion object { const val RESUME_FOLLOW_MS = 20_000L }
+    private companion object {
+        const val RESUME_FOLLOW_MS = 20_000L
+        const val TILES_CHECK_MS = 5_000L
+        const val DEFAULT_MAP_W = 600
+        const val DEFAULT_MAP_H = 420
+        /** Voiture plus bas que le centre en mode cap, en part de la hauteur de la carte. */
+        const val HEADING_OFFSET = 0.38f
+    }
 
     init {
         // Robolectric (captures sur PC) ne sait pas dessiner osmdroid : on laisse le fond.
@@ -140,20 +147,30 @@ class MapCard(private val context: Context, holder: ViewGroup) {
 
     private val tileCache by lazy { try { org.osmdroid.tileprovider.modules.SqlTileWriter() } catch (_: Throwable) { null } }
 
+    private var tilesCheckedAt = 0L
+    private var tilesCached = false
+
     /**
-     * Tuile sous la voiture déjà en cache (trajet connu) : sans internet, la carte reste utile et
-     * ne cède plus sa place à la consommation (coupure 4G de plus de 15 min constatée le 2026-10-18).
+     * Toutes les tuiles affichées sont en cache, au bon niveau de zoom (trajet connu) : sans internet, la carte
+     * reste utile et ne cède pas sa place à la consommation. Une seule tuile absente laisserait une zone vide
+     * ou floue (#15). Vérifié toutes les 5 s au plus : ce test passe par la base du cache, sur le fil principal.
      */
     fun hasCachedTiles(location: Location?): Boolean {
-        if (map == null || location == null) return false
-        val z = zoomLevel.toInt()
-        val n = 1 shl z
-        val x = ((location.longitude + 180.0) / 360.0 * n).toInt().coerceIn(0, n - 1)
-        val lat = Math.toRadians(location.latitude)
-        val y = ((1.0 - Math.log(Math.tan(lat) + 1.0 / Math.cos(lat)) / Math.PI) / 2.0 * n).toInt().coerceIn(0, n - 1)
-        return try {
-            tileCache?.exists(TileSourceFactory.MAPNIK, org.osmdroid.util.MapTileIndex.getTileIndex(z, x, y)) == true
+        val m = map
+        if (m == null || location == null) return false
+        val now = android.os.SystemClock.uptimeMillis()
+        if (tilesCheckedAt != 0L && now - tilesCheckedAt < TILES_CHECK_MS) return tilesCached
+        tilesCheckedAt = now
+        // Carte masquée : sa dernière taille reste connue, et le suivi se fait toujours autour de la voiture
+        val w = m.width.takeIf { it > 0 } ?: DEFAULT_MAP_W
+        val h = m.height.takeIf { it > 0 } ?: DEFAULT_MAP_H
+        val center = if (follow) null else m.mapCenter
+        val tiles = VisibleTiles.around(center?.latitude ?: location.latitude, center?.longitude ?: location.longitude, zoomLevel,
+            org.osmdroid.util.TileSystem.getTileSize(), w, h, m.mapOrientation, if (follow && headingUp) (h * HEADING_OFFSET).toInt() else 0)
+        tilesCached = try {
+            tiles.all { tileCache?.exists(TileSourceFactory.MAPNIK, org.osmdroid.util.MapTileIndex.getTileIndex(it.z, it.x, it.y)) == true }
         } catch (_: Throwable) { false }
+        return tilesCached
     }
 
 
@@ -199,7 +216,7 @@ class MapCard(private val context: Context, holder: ViewGroup) {
         if (!follow && System.currentTimeMillis() - lastTouch > RESUME_FOLLOW_MS) follow = true
         if (follow && headingUp && location.hasBearing() && location.speed > 1f) m.mapOrientation = -location.bearing
         // Cap en haut : la voiture descend vers le bas du widget pour montrer plus de route devant (issue #6)
-        m.setMapCenterOffset(0, if (headingUp && follow) (m.height * 0.38f).toInt() else 0)
+        m.setMapCenterOffset(0, if (headingUp && follow) (m.height * HEADING_OFFSET).toInt() else 0)
         if (follow) m.controller.animateTo(p, zoomLevel, 800L)
         m.invalidate()
     }
