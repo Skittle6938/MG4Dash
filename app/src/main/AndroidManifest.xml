@@ -136,7 +136,6 @@
 
         <!-- Mise à jour depuis GitHub : résultat de l'installation et relance de l'accueil -->
         <!-- Clim maintenue : écran lisible de dehors -->
-        <activity android:name=".pages.ConsumptionMapActivity" android:exported="false" android:screenOrientation="landscape" />
         <activity android:name=".climate.ClimateHoldActivity" android:exported="false" android:screenOrientation="landscape"
             android:theme="@style/Theme.MG4Launcher" android:excludeFromRecents="true" android:launchMode="singleTask" />
         <activity android:name=".ui.ScreenOffActivity" android:exported="false"
@@ -151,9 +150,5 @@
                 <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
             </intent-filter>
         </receiver>
-        <provider
-            android:name=".energy.ConsumptionProvider"
-            android:authorities="app.mg4dash.consumption"
-            android:exported="true" />
     </application>
 </manifest>
