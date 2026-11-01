@@ -317,8 +317,9 @@ class PowerBar @JvmOverloads constructor(context: Context, attrs: AttributeSet? 
         // Redessin seulement si ça bouge d'au moins un demi-pixel : à l'arrêt, les petites variations de
         // puissance (0,1 à 0,3 kW) relançaient l'animation sans fin, à 30 images par seconde
         // (pics tenus 10 s : pas d'animation pendant la tenue, un seul redessin quand la descente commence)
-        val peakUp = peak > kw && kotlin.math.abs(xFor(peak) - xFor(kw)) > 0.5f
-        val regenUp = peakRegen > -kw && kotlin.math.abs(xFor(-peakRegen) - xFor(kw)) > 0.5f
+        // Chaque pic redescend vers la valeur de son côté (0 quand la puissance est de l'autre côté)
+        val peakUp = kotlin.math.abs(xFor(peak) - xFor(kw.coerceAtLeast(0f))) > 0.5f
+        val regenUp = kotlin.math.abs(xFor(-peakRegen) - xFor(kw.coerceAtMost(0f))) > 0.5f
         val decaying = (peakUp && now - peakAt > PEAK_HOLD_MS) || (regenUp && now - peakRegenAt > PEAK_HOLD_MS)
         if (kotlin.math.abs(xFor(kw) - xFor(shown)) > 0.5f || decaying) postInvalidateOnAnimation()
         else {
