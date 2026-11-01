@@ -107,6 +107,10 @@ object Updater {
         }
     }
 
+    /** Avertissement affiché en haut des fenêtres de mise à jour : taille du téléchargement, connexion conseillée. */
+    fun dataWarning(context: Context, r: Release): String = context.getString(app.mg4dash.R.string.upd_data_warning,
+        String.format(java.util.Locale.getDefault(), "%.1f", r.size / 1_000_000f))
+
     private val busy = java.util.concurrent.atomic.AtomicBoolean(false)
 
     /**

@@ -79,6 +79,7 @@ object UpdatePrompt {
             maxLines = 2; setPadding(0, kit.dp(12), 0, kit.dp(8))
         }
         panel.addView(state)
+        panel.addView(kit.text(Updater.dataWarning(activity, r), 18f, R.color.accent_heat).apply { maxLines = 3; setPadding(0, 0, 0, kit.dp(8)) })
         val notes = Updater.plainNotes(r.notes)
         if (notes.isNotEmpty()) {
             panel.addView(ScrollView(activity).apply {

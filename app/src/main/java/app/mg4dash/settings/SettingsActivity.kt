@@ -264,9 +264,17 @@ class SettingsActivity : AppCompatActivity() {
                 if (newer != null && !isFinishing) {
                     val notes = ScrollView(this@SettingsActivity).apply {
                         setPadding(dp(24), dp(8), dp(24), 0)
-                        addView(TextView(this@SettingsActivity).apply {
-                            text = app.mg4dash.system.Updater.plainNotes(newer.notes); setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f)
-                            setTextColor(color(R.color.text_value)); setLineSpacing(0f, 1.15f)
+                        addView(LinearLayout(this@SettingsActivity).apply {
+                            orientation = LinearLayout.VERTICAL
+                            // Taille du téléchargement et connexion conseillée, en orange et avant les notes
+                            addView(TextView(this@SettingsActivity).apply {
+                                text = app.mg4dash.system.Updater.dataWarning(this@SettingsActivity, newer); setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f)
+                                setTextColor(color(R.color.accent_heat)); setPadding(0, 0, 0, dp(10))
+                            })
+                            addView(TextView(this@SettingsActivity).apply {
+                                text = app.mg4dash.system.Updater.plainNotes(newer.notes); setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f)
+                                setTextColor(color(R.color.text_value)); setLineSpacing(0f, 1.15f)
+                            })
                         })
                     }
                     AlertDialog.Builder(this@SettingsActivity)
@@ -452,7 +460,10 @@ class SettingsActivity : AppCompatActivity() {
                 showState()
                 AlertDialog.Builder(this@SettingsActivity)
                     .setTitle(getString(R.string.st_rd_available, r.version))
-                    .setMessage(app.mg4dash.system.Updater.plainNotes(r.notes))
+                    .setMessage(android.text.SpannableStringBuilder(app.mg4dash.system.Updater.dataWarning(this@SettingsActivity, r)).apply {
+                        setSpan(android.text.style.ForegroundColorSpan(color(R.color.accent_heat)), 0, length, 0)
+                        append("\n\n").append(app.mg4dash.system.Updater.plainNotes(r.notes))
+                    })
                     .setPositiveButton(R.string.st_update_install) { _, _ ->
                         lifecycleScope.launch {
                             try {
