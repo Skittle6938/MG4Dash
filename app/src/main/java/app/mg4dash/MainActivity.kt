@@ -524,7 +524,10 @@ class MainActivity : AppCompatActivity() {
         (b.fanValue.layoutParams as android.widget.LinearLayout.LayoutParams).let { lp ->
             val w = if (auto) android.widget.LinearLayout.LayoutParams.WRAP_CONTENT else (48 * resources.displayMetrics.density).toInt()
             val ml = ((if (auto) 10 else 0) * resources.displayMetrics.density).toInt()
-            if (lp.width != w || lp.leftMargin != ml) { lp.width = w; lp.leftMargin = ml; b.fanValue.layoutParams = lp }
+            // Marge à droite = hélice + écart : c'est le texte « AUTO · bas » qui est centré sous la température,
+            // l'hélice dépasse à gauche (#34, photo de mquiambao00)
+            val mr = ((if (auto) 38 else 0) * resources.displayMetrics.density).toInt()
+            if (lp.width != w || lp.leftMargin != ml || lp.rightMargin != mr) { lp.width = w; lp.leftMargin = ml; lp.rightMargin = mr; b.fanValue.layoutParams = lp }
         }
         b.fanValue.gravity = Gravity.LEFT or Gravity.CENTER_VERTICAL
         // Taille auto du chiffre inutilisable en largeur libre : coupée en AUTO
