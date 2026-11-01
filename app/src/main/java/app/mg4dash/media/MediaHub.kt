@@ -188,6 +188,8 @@ object MediaHub {
         }
         fun stable(pkg: String) = (seenSince[pkg]?.let { now - it >= 5_000 } == true) && !(pkg == AA_MBS && carPlay)
         trackPlayback(p, now)
+        // Dernière fois où chaque source de la voiture jouait : sert à ne relancer après une annonce que ce qui jouait
+        for (pkg in CAR_SOURCES) if (browserControllers[pkg]?.let { isPlaying(it) } == true) playingAt[pkg] = now
         restoreAfterPrompt(now)
         // Type 70 (Android Auto) tenu par une autre appli (DiAuto) alors qu'AllGo n'a aucun téléphone : la
         // source réelle est le lecteur de cette appli, et non un Android Auto « disparu » à remplacer
@@ -222,6 +224,9 @@ object MediaHub {
     /** Source de la voiture avant qu'une appli (DiAuto) la prenne pour une annonce, et depuis quand. */
     @Volatile private var promptFrom: String? = null
     @Volatile private var promptAt = 0L
+    /** La source d'avant jouait quand l'annonce l'a interrompue : sinon on lui rend la source sans « lecture ». */
+    @Volatile private var promptWasPlaying = false
+    private val playingAt = java.util.concurrent.ConcurrentHashMap<String, Long>()
     private var promptQuiet = 0
     private var promptSounding = 0
 
@@ -248,8 +253,10 @@ object MediaHub {
         promptSounding = 0
         if (++promptQuiet < 2) return
         promptFrom = null
-        Log.i(TAG, "announcement from $app over: car source back to $back")
-        autoSwitch(back, "announcement over")
+        Log.i(TAG, "announcement from $app over: car source back to $back (${if (promptWasPlaying) "was playing" else "was paused, no play"})")
+        // Musique en pause avant l'annonce : la source revient, mais pas la lecture (DiAuto #3 : le Bluetooth
+        // repartait tout seul après une pause, à chaque annonce de guidage)
+        autoSwitch(back, "announcement over", play = promptWasPlaying)
     }
 
     /**
@@ -368,7 +375,7 @@ object MediaHub {
     private var autoTarget: String? = null
     private var autoTries = 0
 
-    private fun autoSwitch(pkg: String, why: String) {
+    private fun autoSwitch(pkg: String, why: String, play: Boolean = true) {
         val now = android.os.SystemClock.uptimeMillis()
         // La voiture refuse la bascule (source muette…) : 3 essais au plus, puis on attend 2 min
         if (pkg == autoTarget && autoTries >= 3 && now - autoSwitchAt < 120_000) return
@@ -380,7 +387,7 @@ object MediaHub {
         main.post { reevaluate() }
         if (pkg == AA_MBS) { browserControllers[AA_MBS]?.let { aaControl(it, AA_PLAY, KeyEvent.KEYCODE_MEDIA_PLAY) }; return }
         activateSource(pkg)
-        main.postDelayed({ browserControllers[pkg]?.takeIf { !isPlaying(it) }?.transportControls?.play() }, 1500)
+        if (play) main.postDelayed({ browserControllers[pkg]?.takeIf { !isPlaying(it) }?.transportControls?.play() }, 1500)
     }
 
     /** Lecteur à écarter : projection ou Bluetooth sans téléphone connecté. */
@@ -653,7 +660,8 @@ object MediaHub {
                             // la source de la voiture d'avant pour la lui rendre une fois l'annonce finie
                             if (src != null && handlesWheelKeys(src) && prev in CAR_SOURCES) {
                                 promptFrom = prev; promptAt = android.os.SystemClock.uptimeMillis(); promptQuiet = 0; promptSounding = 0
-                                Log.i(TAG, "$src took the car source from $prev (music over Bluetooth: ${musicOverBluetooth(src)})")
+                                promptWasPlaying = prev != null && promptAt - (playingAt[prev] ?: 0L) < 3_000
+                                Log.i(TAG, "$src took the car source from $prev (music over Bluetooth: ${musicOverBluetooth(src)}, was playing: $promptWasPlaying)")
                             } else if (src in CAR_SOURCES) promptFrom = null
                             // Seulement les sources de la voiture : une appli qui prend la main un instant (annonce de
                             // guidage DiAuto…) n'est pas un choix de source
