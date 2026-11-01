@@ -421,7 +421,7 @@
     <string name="st_map_auto_hide">Nascondi i pulsanti zoom e schermo intero della mappa</string>
     <string name="st_map_auto_hide_desc">Compaiono per qualche secondo toccando la mappa; il pulsante della direzione resta</string>
     <string name="st_map_offline_switch">Passa al widget energia offline</string>
-    <string name="st_map_offline_switch_desc">Senza connessione dati, salvo se la mappa intorno all\'auto è nella cache offline</string>
+    <string name="st_map_offline_switch_desc">Senza connessione dati, a meno che tutta la mappa mostrata sia nella cache offline</string>
     <string name="st_use_location">Usa la mia posizione</string>
     <string name="st_wx_model">Modello meteo: %1$s</string>
     <string name="st_wx_model_auto">Automatico</string>
