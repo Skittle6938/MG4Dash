@@ -91,13 +91,10 @@ object EnergyMonitor {
     @Volatile var batteryHeatW = 0f; private set
     /** Le réchauffage peut chauffer : option activée et 10 °C ou moins dehors (la voiture ne dit pas s'il chauffe). */
     @Volatile var batteryHeatPossible = false; private set
-    /** Sa puissance a été apprise (assez de secondes à l'arrêt) : la carte de conso peut la déduire. */
-    @Volatile var batteryHeatKnown = false; private set
     /** Seuil du manuel : le chauffage intelligent ne démarre que si la batterie est à 10 °C ou moins. */
     const val HEAT_MAX_OUTSIDE_C = 10f
     /** Part « Batterie » affichée dans les répartitions à partir de ce total (kWh) : rien en été. */
     const val HEAT_SHOWN_KWH = 0.05f
-    private const val HEAT_LEARN_S = 300f   // secondes d'arrêt à apprendre avant de s'y fier
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
@@ -171,7 +168,6 @@ object EnergyMonitor {
 
                 // Nouveau démarrage : longue pause (voiture en veille) ou premier passage
                 if (dt > SLEEP_GAP_MS || startKm < 0) {
-                    ConsumptionMap.interrupt()
                     if (km != null) startKm = km
                     _sinceStart.value = Totals()
                     _tripStartSoc.value = soc
@@ -225,7 +221,6 @@ object EnergyMonitor {
                 val i = CarProps.getFloat(CarProps.BMS_PACK_CRNT)
                 if (v == null || i == null || v < 100f || v > 900f || dt <= 0 || dt > 5000 ||
                     VehicleState.isPlugged(s.chargeStatus)) {   // en charge ou V2L : hors conso
-                    ConsumptionMap.interrupt()
                     sohSoc = null; sohKm = null; continue
                 }
                 val p = v * i
@@ -265,7 +260,6 @@ object EnergyMonitor {
                 val heatPossible = ptcOn && (s.outsideTemp ?: 99f) <= HEAT_MAX_OUTSIDE_C
                 batteryHeatPossible = heatPossible
                 val heatLearnS = get("em_bheat_s", 0f)
-                batteryHeatKnown = heatLearnS >= HEAT_LEARN_S
                 if (stopped && heatPossible && p in 30f..12000f) {
                     // Il peut chauffer : ce qui dépasse accessoires et clim apprises est le réchauffage
                     // (moyenne, temps où il ne chauffe pas compris) ; accessoires et clim pas apprises ici
@@ -309,8 +303,6 @@ object EnergyMonitor {
                 )
                 _sinceCharge.value = add(_sinceCharge.value, km, chargeKm)
                 _sinceStart.value = add(_sinceStart.value, km, startKm)
-                // Carte de consommation (en test) : roulage seul, clim et accessoires déduits, récupération déduite
-                ConsumptionMap.tick(context, (out - clim - acc - heat - regen) / 1000f, dt, speed, s.outsideTemp)
                 val mk = monthKey(now)
                 val m = months[mk] ?: Totals()
                 // Heure système pas encore remise à l'heure (2019 au réveil) : mois inconnu, km gardés pour après

@@ -299,11 +299,6 @@ class Prefs(context: Context) {
         get() = sp.getString("update_skipped", null)
         set(v) = sp.edit().putString("update_skipped", v).apply()
 
-    /** Carte de consommation vitesse × température (en test, désactivée par défaut). */
-    var consumptionMap: Boolean
-        get() = sp.getBoolean("consumption_map", false)
-        set(v) = sp.edit().putBoolean("consumption_map", v).apply()
-
     var energyLog: Boolean
         get() = sp.getBoolean("energy_log", false)   // désactivé par défaut : une écriture toutes les 5 s use la mémoire
         set(v) = sp.edit().putBoolean("energy_log", v).apply()
