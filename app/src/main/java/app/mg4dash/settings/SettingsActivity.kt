@@ -172,10 +172,17 @@ class SettingsActivity : AppCompatActivity() {
         dropdown(theme, getString(R.string.st_panel_outline), listOf(R.string.st_panel_fade, R.string.st_panel_full).map { getString(it) }, { if (prefs.panelFade) 0 else 1 }) {
             if (prefs.panelFade != (it == 0)) { prefs.panelFade = it == 0; recreate() }
         }
-        text(theme, getString(R.string.st_theme_bg), 18f, R.color.text_value)
-        swatches(theme, app.mg4dash.ui.Themes.BACKGROUND_SWATCHES, prefs.themeBackground) { prefs.themeBackground = it; onThemeChanged() }
-        text(theme, getString(R.string.st_theme_accent), 18f, R.color.text_value)
-        swatches(theme, app.mg4dash.ui.Themes.ACCENT_SWATCHES, prefs.themeAccent) { prefs.themeAccent = it; onThemeChanged() }
+        // Fond et couleur des boutons côte à côte
+        val colors = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
+        val bgCol = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
+        val accentCol = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
+        colors.addView(bgCol, LinearLayout.LayoutParams(0, -2, 1f))
+        colors.addView(accentCol, LinearLayout.LayoutParams(0, -2, 1f))
+        theme.addView(colors, LinearLayout.LayoutParams(-1, -2))
+        text(bgCol, getString(R.string.st_theme_bg), 18f, R.color.text_value)
+        swatches(bgCol, app.mg4dash.ui.Themes.BACKGROUND_SWATCHES, prefs.themeBackground) { prefs.themeBackground = it; onThemeChanged() }
+        text(accentCol, getString(R.string.st_theme_accent), 18f, R.color.text_value)
+        swatches(accentCol, app.mg4dash.ui.Themes.ACCENT_SWATCHES, prefs.themeAccent) { prefs.themeAccent = it; onThemeChanged() }
         text(theme, getString(R.string.st_theme_desc), 16f, R.color.text_title)
 
         // ── Énergie ──
