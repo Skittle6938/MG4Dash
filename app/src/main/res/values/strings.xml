@@ -206,11 +206,7 @@
     <string name="st_replace">Replace SAIC home</string>
     <string name="st_valet">Maintenance mode</string>
     <string name="st_adb">ADB recovery if MG4Dash no longer starts: adb shell cmd package compile -m speed -f app.mg4dash</string>
-    <string name="st_capacity">Current battery capacity: %1$s kWh</string>
-    <string name="st_capacity_desc">Usable capacity of your battery today (wear included), used for the kWh/100 estimate. Health = current capacity ÷ capacity when new.</string>
-    <string name="st_capacity_new">Usable capacity when new (MG data, %2$d kWh): %1$s kWh</string>
-    <string name="st_soh">Estimated battery health: %1$s %%</string>
-    <string name="st_soh_none">Estimated battery health: not measured yet</string>
+    <string name="st_battery_line">New: %1$s kWh  ·  Current: %2$s kWh  ·  Health: %3$s</string>
     <string name="st_battery_model">Battery model (reference for the estimated health on the Vehicle page):</string>
     <string name="st_city">Fallback city: %1$s (if the car provides no position)</string>
     <string name="st_change_city">Change city</string>
