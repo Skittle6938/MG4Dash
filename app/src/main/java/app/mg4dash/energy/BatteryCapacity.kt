@@ -146,10 +146,12 @@ object BatteryCapacity {
         return Health((m / nominal(context) * 100f).coerceAtMost(100f), recent.sumOf { it.km.toDouble() }.toFloat(), recent.size)
     }
 
-    /** Remet la capacité utilisée sur la meilleure source, sauf réglage manuel. */
+    /**
+     * Capacité actuelle (usure comprise) : celle de la voiture, sinon la mesure de MG4Dash. Plus de réglage à
+     * la main : il se figeait tout seul dès la première mesure (la clé existait) et la mesure n'était plus suivie.
+     */
     fun apply(context: Context) {
         val prefs = Prefs(context)
-        if (prefs.batteryKwhManual) return
         val v = fromCar() ?: estimate(context)?.first ?: return
         if (Math.abs(v - prefs.batteryKwh) >= 0.1f) {
             prefs.batteryKwh = Math.round(v * 10f) / 10f
