@@ -82,6 +82,7 @@ object MediaHub {
         // même en lecture, donc absentes de getActiveSessions(). Comme le launcher d'origine,
         // on se connecte directement à leurs MediaBrowserService pour obtenir leur contrôleur.
         BROWSERS.forEach { connectBrowser(it) }
+        listenRdsText(context)
         if (legacyRadio) {
             SaicRadio.connect(context)
             // Pas de rappel côté radio : relecture de la station toutes les 2 s.
@@ -938,6 +939,21 @@ object MediaHub {
         }
     }
 
+    @Volatile private var rdsText = ""
+    private var rdsStation = ""
+
+    /** Texte RDS de la station FM, envoyé par Radio Dash : seule source, sa session média ne le contient pas. */
+    private fun listenRdsText(context: Context) {
+        val receiver = object : android.content.BroadcastReceiver() {
+            override fun onReceive(c: Context, i: Intent) {
+                rdsText = i.getStringExtra("text").orEmpty()
+                main.post { publish() }
+            }
+        }
+        try { context.applicationContext.registerReceiver(receiver, android.content.IntentFilter("app.mg4dash.RDS_TEXT")) }
+        catch (e: Exception) { Log.w(TAG, "RDS text: ${e.message}") }
+    }
+
     private fun publish() {
         if (radioShown) { publishRadio(); return }
         val c = current
@@ -954,7 +970,9 @@ object MediaHub {
         val swap = analog && rawArtist.isNotBlank()
         val title = if (swap) rawArtist.trim() else rawTitle
         val artist = if (swap) rawTitle.trim() else rawArtist
-        val album = md?.getString(MediaMetadata.METADATA_KEY_ALBUM) ?: ""
+        // FM : texte RDS envoyé par Radio Dash (la session ne contient que la fréquence et le nom), effacé au changement de station
+        if (rdsStation != rawTitle) { rdsStation = rawTitle; rdsText = "" }
+        val album = if (analog) rdsText else md?.getString(MediaMetadata.METADATA_KEY_ALBUM) ?: ""
         val bmp = (md?.getBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART)
             ?: md?.getBitmap(MediaMetadata.METADATA_KEY_ART)
             ?: md?.getBitmap(MediaMetadata.METADATA_KEY_DISPLAY_ICON))?.takeUnless { blank(it) }
