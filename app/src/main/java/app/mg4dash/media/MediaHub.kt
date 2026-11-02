@@ -990,8 +990,14 @@ object MediaHub {
             kotlin.math.abs(android.graphics.Color.green(a) - android.graphics.Color.green(b)) < 8 &&
             kotlin.math.abs(android.graphics.Color.blue(a) - android.graphics.Color.blue(b)) < 8
 
-    /** Radio de l'ancien SDK (SWI68…) : service SAIC au lieu d'un MediaBrowserService. */
-    private val legacyRadio: Boolean get() = app.mg4dash.system.Firmware.family == app.mg4dash.system.Firmware.Family.LEGACY
+    /**
+     * Radio d'origine des anciens firmwares, pilotée par son service. Radio Dash installée à sa place (#80) est
+     * une autre appli, avec un service de lecture standard : elle passe alors par le chemin du SWI69.
+     */
+    private val legacyRadio: Boolean by lazy {
+        app.mg4dash.system.Firmware.family == app.mg4dash.system.Firmware.Family.LEGACY &&
+            appContext?.let { app.mg4dash.system.RadioDashUpdater.installed(it) } != true
+    }
     @Volatile private var radioShown = false
 
     private fun publishRadio() {
