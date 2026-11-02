@@ -69,7 +69,10 @@ class LauncherApp : Application() {
         MediaHub.start(this)
         app.mg4dash.map.LocationRepo.start(this)
         app.mg4dash.map.NavRepo.start(this)
-        if (!BuildConfig.MOCK) app.mg4dash.system.StarKey.start(this)
+        if (!BuildConfig.MOCK) {
+            app.mg4dash.system.StarKey.start(this)
+            app.mg4dash.system.LauncherLink.start(this)
+        }
         WeatherRepo.start(this)
         app.mg4dash.ui.Themes.publish(this)
         startThemeWatch()
