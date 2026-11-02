@@ -187,7 +187,7 @@ class SettingsActivity : AppCompatActivity() {
 
         // ── Énergie ──
         val energy = panel(carR, getString(R.string.title_energy))
-        // Une ligne : capacité neuve (données MG du modèle choisi), actuelle (mesurée, usure comprise) et santé
+        // Une ligne : capacité neuve (référence non officielle, modifiable), actuelle (mesurée, usure comprise) et santé
         val cap = text(energy, "", 18f, R.color.text_value)
         val capSrc = text(energy, "", 15f, R.color.text_title)
         fun showCap() {
@@ -208,7 +208,25 @@ class SettingsActivity : AppCompatActivity() {
         showCap()
         // Modèle de batterie : référence de la santé estimée (affichée sur la page Véhicule)
         val models = app.mg4dash.energy.BatteryCapacity.MODELS.map { it.first }
-        dropdown(energy, getString(R.string.st_battery_model), models.map { "$it kWh" }, { models.indexOf(prefs.batteryModel).coerceAtLeast(0) }) { prefs.batteryModel = models[it]; showCap() }
+        lateinit var newCapDrop: TextView
+        fun newCapLabel(): String {
+            val f = { v: Float -> String.format(Locale.getDefault(), "%.1f", v) }
+            return if (prefs.batteryNewKwh > 0f) getString(R.string.st_new_cap_custom, f(prefs.batteryNewKwh))
+            else getString(R.string.st_new_cap_default, f(app.mg4dash.energy.BatteryCapacity.modelNominal(this)))
+        }
+        fun paintNewCap() { newCapDrop.text = newCapLabel() + "   ▾" }
+        dropdown(energy, getString(R.string.st_battery_model), models.map { "$it kWh" }, { models.indexOf(prefs.batteryModel).coerceAtLeast(0) }) { prefs.batteryModel = models[it]; showCap(); paintNewCap() }
+        // Capacité neuve de référence pour la santé (#77) : aucune valeur officielle, et la voiture ne la donne pas
+        newCapDrop = dropdown(energy, getString(R.string.st_new_cap), listOf(getString(R.string.st_new_cap_item_default), getString(R.string.st_new_cap_item_custom)),
+            { if (prefs.batteryNewKwh > 0f) 1 else 0 }) { choice ->
+            if (choice == 0) { prefs.batteryNewKwh = 0f; showCap() }
+            else ask(getString(R.string.st_new_cap_title), if (prefs.batteryNewKwh > 0f) prefs.batteryNewKwh.toString() else "", false, number = true) { typed ->
+                typed.trim().replace(',', '.').toFloatOrNull()?.takeIf { it in 30f..120f }?.let { prefs.batteryNewKwh = Math.round(it * 10f) / 10f }
+                showCap(); paintNewCap()
+            }
+            newCapDrop.post { paintNewCap() }
+        }
+        paintNewCap()
         toggle(energy, R.string.st_xpower, R.string.st_xpower_desc, { prefs.xpower }) { prefs.xpower = it }
         // V2L au branchement (#82) : avertissement à l'activation, la décharge partira sans autre action
         var repaintV2l: () -> Unit = {}
@@ -622,11 +640,12 @@ class SettingsActivity : AppCompatActivity() {
 
     // ── Petites briques d'UI ──
 
-    /** Saisie d'un texte (adresse, jeton masqué). */
-    private fun ask(title: String, initial: String, secret: Boolean, onOk: (String) -> Unit) {
+    /** Saisie d'un texte (adresse, jeton masqué) ou d'un nombre. */
+    private fun ask(title: String, initial: String, secret: Boolean, number: Boolean = false, onOk: (String) -> Unit) {
         val input = android.widget.EditText(this).apply {
             setText(initial); setSingleLine()
-            inputType = android.text.InputType.TYPE_CLASS_TEXT or
+            inputType = if (number) android.text.InputType.TYPE_CLASS_NUMBER or android.text.InputType.TYPE_NUMBER_FLAG_DECIMAL
+            else android.text.InputType.TYPE_CLASS_TEXT or
                 (if (secret) android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD else android.text.InputType.TYPE_TEXT_VARIATION_URI)
             setSelection(text.length)
         }
@@ -765,7 +784,7 @@ class SettingsActivity : AppCompatActivity() {
 
     /** Boutons à choix unique : celui qui est actif est en couleur, et la couleur suit tout de suite le choix. */
     /** Ligne « libellé — menu déroulant » (même menu que les sources de la carte). */
-    private fun dropdown(parent: LinearLayout, label: String, labels: List<String>, current: () -> Int, onPick: (Int) -> Unit) {
+    private fun dropdown(parent: LinearLayout, label: String, labels: List<String>, current: () -> Int, onPick: (Int) -> Unit): TextView {
         val dp = resources.displayMetrics.density
         val row = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = android.view.Gravity.CENTER_VERTICAL }
         row.addView(TextView(this).apply {
@@ -780,6 +799,7 @@ class SettingsActivity : AppCompatActivity() {
         drop.setOnClickListener { v -> app.mg4dash.ui.SourceMenu.choose(this, v, labels, current()) { onPick(it); drop.text = labels[it] + "   ▾" } }
         row.addView(drop, LinearLayout.LayoutParams((340 * dp).toInt(), (56 * dp).toInt()))
         parent.addView(row, LinearLayout.LayoutParams(-1, -2).apply { topMargin = (8 * dp).toInt() })
+        return drop
     }
 
     private fun choiceButtons(labels: List<String>, current: () -> Int, onPick: (Int) -> Unit): Array<Button> {
