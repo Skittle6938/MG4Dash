@@ -208,6 +208,12 @@
     <string name="st_adb">ADB-herstel als MG4Dash niet meer start: adb shell cmd package compile -m speed -f app.mg4dash</string>
     <string name="st_battery_line">Nieuw: %1$s kWh  ·  Huidig: %2$s kWh  ·  Gezondheid: %3$s</string>
     <string name="st_battery_model">Batterijmodel (referentie voor de geschatte gezondheid op de voertuigpagina):</string>
+    <string name="st_new_cap">Nieuwe capaciteit voor de gezondheidsberekening:</string>
+    <string name="st_new_cap_default">%1$s kWh (standaard)</string>
+    <string name="st_new_cap_custom">%1$s kWh (eigen waarde)</string>
+    <string name="st_new_cap_item_default">Standaardwaarde</string>
+    <string name="st_new_cap_item_custom">Eigen waarde…</string>
+    <string name="st_new_cap_title">Nieuwe capaciteit in kWh (30 tot 120)</string>
     <string name="st_city">Reservestad: %1$s (als de auto geen positie geeft)</string>
     <string name="st_change_city">Stad wijzigen</string>
     <string name="st_startup">OPSTARTEN</string>

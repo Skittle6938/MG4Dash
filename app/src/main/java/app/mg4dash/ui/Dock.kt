@@ -29,7 +29,7 @@ import java.util.Locale
  * Appui long sur Accueil : liste des applis ; sur Paramètres : réglages du launcher.
  */
 object Dock {
-    enum class Page { HOME, VEHICLE, CLIMATE, ENERGY, PHONE, SETTINGS }
+    enum class Page { HOME, VEHICLE, CLIMATE, ENERGY, PHONE, SETTINGS, APPS }
 
     private data class Item(val icon: Int, val label: Int, val page: Page?, val accent: Boolean = false)
 
@@ -129,7 +129,7 @@ object Dock {
             })
             if (item.label == R.string.dock_vehicle) watchEsc(activity, cell, iconView, selected)
             when (item.label) {
-                R.string.dock_home -> cell.setOnLongClickListener { activity.startActivity(Intent(activity, AppsActivity::class.java)); true }
+                R.string.dock_home -> cell.setOnLongClickListener { if (current != Page.APPS) activity.startActivity(Intent(activity, AppsActivity::class.java)); true }
                 R.string.dock_aa -> aaGestures(activity, cell, { open(activity, item, current) }) { build(activity, dock, current, simple) }
                 else -> pageGestures(activity, cell, iconView, item, current, selected)
             }
@@ -284,7 +284,7 @@ object Dock {
             if (item.label == R.string.dock_vehicle) watchEsc(activity, cell, icon, selected)
             if (!pageGestures(activity, cell, icon, item, current, selected)) {
                 cell.setOnClickListener { open(activity, item, current) }
-                if (item.label == R.string.dock_home) cell.setOnLongClickListener { activity.startActivity(Intent(activity, AppsActivity::class.java)); true }
+                if (item.label == R.string.dock_home) cell.setOnLongClickListener { if (current != Page.APPS) activity.startActivity(Intent(activity, AppsActivity::class.java)); true }
                 // Appui long : choix de l'appli ; double toucher : coupe ou rétablit la connexion du téléphone
                 if (item.label == R.string.dock_aa) aaGestures(activity, cell, { open(activity, item, current) }) { buildVertical(activity, bar, current) }
             }
@@ -504,6 +504,7 @@ object Dock {
             Page.ENERGY -> EnergyActivity::class.java
             Page.PHONE -> app.mg4dash.pages.PhoneActivity::class.java
             Page.SETTINGS -> SettingsActivity::class.java
+            Page.APPS -> return
         }
         // L'accueil (singleTask) referme les pages au-dessus de lui ; entre deux pages, on
         // remplace la page courante pour ne pas empiler l'historique.
