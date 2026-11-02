@@ -210,6 +210,17 @@ class SettingsActivity : AppCompatActivity() {
         val models = app.mg4dash.energy.BatteryCapacity.MODELS.map { it.first }
         dropdown(energy, getString(R.string.st_battery_model), models.map { "$it kWh" }, { models.indexOf(prefs.batteryModel).coerceAtLeast(0) }) { prefs.batteryModel = models[it]; showCap() }
         toggle(energy, R.string.st_xpower, R.string.st_xpower_desc, { prefs.xpower }) { prefs.xpower = it }
+        // V2L au branchement (#82) : avertissement à l'activation, la décharge partira sans autre action
+        var repaintV2l: () -> Unit = {}
+        repaintV2l = toggle(energy, R.string.st_v2l_auto, R.string.st_v2l_auto_desc, { prefs.v2lAuto }) { on ->
+            if (!on) prefs.v2lAuto = false
+            else AlertDialog.Builder(this)
+                .setTitle(R.string.st_v2l_auto)
+                .setMessage(R.string.st_v2l_auto_warning)
+                .setPositiveButton(R.string.st_v2l_auto_enable) { _, _ -> prefs.v2lAuto = true; repaintV2l() }
+                .setNegativeButton(R.string.cancel, null)
+                .show().also { app.mg4dash.ui.Dialogs.fix(it) }
+        }
         toggle(energy, R.string.st_cc_stopped, R.string.st_cc_stopped_desc, { prefs.raw.getBoolean("cc_stopped", true) }) { prefs.raw.edit().putBoolean("cc_stopped", it).apply() }
         // Carte de consommation vitesse × température (en test, désactivée par défaut)
         powerFxSetting(panel(lookR, getString(R.string.sw_power)))
@@ -728,7 +739,8 @@ class SettingsActivity : AppCompatActivity() {
      * Option oui / non sur une ligne : libellé (le « : %1$s » de la chaîne est retiré) et description
      * éventuelle à gauche, un seul bouton à droite qui affiche OUI ou NON et se surligne quand l'option est active.
      */
-    private fun toggle(parent: LinearLayout, labelRes: Int, descRes: Int?, get: () -> Boolean, set: (Boolean) -> Unit) {
+    /** Rend de quoi repeindre le bouton, pour un choix confirmé plus tard dans une fenêtre. */
+    private fun toggle(parent: LinearLayout, labelRes: Int, descRes: Int?, get: () -> Boolean, set: (Boolean) -> Unit): () -> Unit {
         val line = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL }
         val texts = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
         text(texts, getString(labelRes, "").trimEnd(' ', ':', '\u00a0', '\u202f'), 18f, R.color.text_value)
@@ -748,6 +760,7 @@ class SettingsActivity : AppCompatActivity() {
         paint()
         line.addView(btn, LinearLayout.LayoutParams(dp(130), dp(56)))
         parent.addView(line, LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(12) })
+        return { paint() }
     }
 
     /** Boutons à choix unique : celui qui est actif est en couleur, et la couleur suit tout de suite le choix. */

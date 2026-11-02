@@ -547,6 +547,10 @@
     <string name="en_clear_confirm">Effacer la courbe « %1$s » et ses totaux (kWh, km) ?</string>
     <string name="st_cc_stopped">Courbe de conso : aussi à l\'arrêt</string>
     <string name="st_cc_stopped_desc">Un point toutes les 2 minutes voiture arrêtée (clim, accessoires). Désactivé : seule la conduite compte. Appui long sur la courbe pour l\'effacer.</string>
+    <string name="st_v2l_auto">Démarrer le V2L au branchement du câble</string>
+    <string name="st_v2l_auto_desc">Désactivé par défaut. La décharge démarre dès le branchement du câble V2L, autoradio allumé, et s\'arrête au seuil réglé sur la page Énergie.</string>
+    <string name="st_v2l_auto_warning">Attention : dès le branchement d\'un câble V2L, la décharge se mettra en route toute seule, sans autre action, et ce qui est relié au câble sera alimenté.</string>
+    <string name="st_v2l_auto_enable">Activer</string>
     <string name="st_audio_source">Source audio</string>
     <string name="st_start_source">Source au démarrage</string>
     <string name="st_src_auto">Automatique</string>
