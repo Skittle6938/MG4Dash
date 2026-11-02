@@ -547,6 +547,10 @@
     <string name="en_clear_confirm">Cancellare la curva «%1$s» e i suoi totali (kWh, km)?</string>
     <string name="st_cc_stopped">Curva dei consumi: anche da fermo</string>
     <string name="st_cc_stopped_desc">Un punto ogni 2 minuti ad auto ferma (clima, accessori). Disattivato: conta solo la guida. Pressione lunga sulla curva per cancellarla.</string>
+    <string name="st_v2l_auto">Avvia V2L al collegamento del cavo</string>
+    <string name="st_v2l_auto_desc">Disattivato di default. La scarica parte appena si collega il cavo V2L, con l\'autoradio acceso, e si ferma alla soglia impostata nella pagina Energia.</string>
+    <string name="st_v2l_auto_warning">Attenzione: appena si collega un cavo V2L, la scarica partirà da sola, senza altre azioni, e ciò che è collegato al cavo sarà alimentato.</string>
+    <string name="st_v2l_auto_enable">Attiva</string>
     <string name="st_audio_source">Sorgente audio</string>
     <string name="st_start_source">Sorgente all\'avvio</string>
     <string name="st_src_auto">Automatica</string>

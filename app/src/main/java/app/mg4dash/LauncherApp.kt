@@ -72,6 +72,7 @@ class LauncherApp : Application() {
         if (!BuildConfig.MOCK) {
             app.mg4dash.system.StarKey.start(this)
             app.mg4dash.system.LauncherLink.start(this)
+            app.mg4dash.energy.V2lAuto.start(this)
         }
         WeatherRepo.start(this)
         app.mg4dash.ui.Themes.publish(this)

@@ -547,6 +547,10 @@
     <string name="en_clear_confirm">De curve „%1$s” en de totalen (kWh, km) wissen?</string>
     <string name="st_cc_stopped">Verbruikscurve: ook stilstaand</string>
     <string name="st_cc_stopped_desc">Eén punt per 2 minuten als de auto stilstaat (klimaat, accessoires). Uit: alleen rijden telt. Lang drukken op de curve om hem te wissen.</string>
+    <string name="st_v2l_auto">V2L starten bij het aansluiten van de kabel</string>
+    <string name="st_v2l_auto_desc">Standaard uit. Het ontladen start zodra de V2L-kabel is aangesloten en de radio aan staat, en stopt bij de drempel op de pagina Energie.</string>
+    <string name="st_v2l_auto_warning">Let op: zodra een V2L-kabel wordt aangesloten, start het ontladen vanzelf, zonder verdere actie, en alles wat op de kabel is aangesloten krijgt stroom.</string>
+    <string name="st_v2l_auto_enable">Inschakelen</string>
     <string name="st_audio_source">Audiobron</string>
     <string name="st_start_source">Bron bij het starten</string>
     <string name="st_src_auto">Automatisch</string>

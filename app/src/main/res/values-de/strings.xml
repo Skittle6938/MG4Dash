@@ -547,6 +547,10 @@
     <string name="en_clear_confirm">Kurve „%1$s“ und ihre Summen (kWh, km) löschen?</string>
     <string name="st_cc_stopped">Verbrauchskurve: auch im Stand</string>
     <string name="st_cc_stopped_desc">Ein Punkt alle 2 Minuten im Stand (Klima, Zubehör). Aus: nur das Fahren zählt. Lange auf die Kurve drücken, um sie zu löschen.</string>
+    <string name="st_v2l_auto">V2L beim Einstecken des Kabels starten</string>
+    <string name="st_v2l_auto_desc">Standardmäßig aus. Die Entladung startet, sobald das V2L-Kabel eingesteckt ist und das Radio läuft, und stoppt an der Schwelle der Energieseite.</string>
+    <string name="st_v2l_auto_warning">Achtung: Sobald ein V2L-Kabel eingesteckt wird, startet die Entladung von selbst, ohne weitere Aktion, und alles, was am Kabel hängt, wird mit Strom versorgt.</string>
+    <string name="st_v2l_auto_enable">Aktivieren</string>
     <string name="st_audio_source">Audioquelle</string>
     <string name="st_start_source">Quelle beim Start</string>
     <string name="st_src_auto">Automatisch</string>
