@@ -192,8 +192,12 @@ object MediaHub {
         for (pkg in CAR_SOURCES) if (browserControllers[pkg]?.let { isPlaying(it) } == true) playingAt[pkg] = now
         restoreAfterPrompt(now)
         // Type 70 (Android Auto) tenu par une autre appli (DiAuto) alors qu'AllGo n'a aucun téléphone : la
-        // source réelle est le lecteur de cette appli, et non un Android Auto « disparu » à remplacer
-        if (sourcePkg == AA_MBS && projectionLive == false && otherAppShown()) sourcePkg = current?.packageName
+        // source réelle est le lecteur de cette appli, et non un Android Auto « disparu » à remplacer. DiAuto
+        // compte même hors de la carte : la bascule relançait la musique en pause sur le Bluetooth (#78)
+        if (sourcePkg == AA_MBS && projectionLive == false) {
+            (current?.packageName?.takeIf { otherAppShown() } ?: lastCandidates.firstOrNull { handlesWheelKeys(it.packageName) }?.packageName)
+                ?.let { sourcePkg = it }
+        }
         val cur = sourcePkg ?: return
         if (now - autoSwitchAt < 10_000 || now - startedAt < 5_000) return
         // Source de la voiture disparue (téléphone débranché…) depuis 1 s : quel que soit le réglage, on
