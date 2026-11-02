@@ -44,6 +44,8 @@ class EnergyActivity : PageActivity() {
     private lateinit var limitNote: TextView
     private lateinit var setLimit: (Int?) -> Unit
     private lateinit var setCurrent: (Int?) -> Unit
+    private lateinit var currentTitle: TextView
+    private lateinit var currentRow: android.view.View
     private lateinit var heating: TextView
     private lateinit var gunLock: TextView
     // Programmation
@@ -128,11 +130,13 @@ class EnergyActivity : PageActivity() {
             limitNote = kit.text("", 16f, R.color.text_title).apply { maxLines = 2 }
             c1.addView(limitNote, kit.lp(-1, -2, t = 8))
         }
-        c1.addView(kit.title(getString(R.string.en_ac_current)), kit.lp(-1, -2, t = 14))
+        currentTitle = kit.title(getString(R.string.en_ac_current))
+        c1.addView(currentTitle, kit.lp(-1, -2, t = 14))
         val (cRow, cSet) = kit.segmented(listOf("6 A", "8 A", "16 A", getString(R.string.en_max))) { i ->
             CarProps.setInt(CarProps.ALTNG_CHRG_CRNT, i + 1, "AC current"); refreshProps()
         }
         setCurrent = cSet
+        currentRow = cRow
         c1.addView(cRow, kit.lp(-1, -2, t = 8))
 
         // ── Colonne 2 : programmation + V2L ──
@@ -377,6 +381,10 @@ class EnergyActivity : PageActivity() {
         }))
         action.text = mainActionLabel(s)
         action.isEnabled = VehicleState.isPlugged(s.chargeStatus)
+        // Courant de charge sans objet en V2L : la limite vient de la résistance de l'adaptateur (#81)
+        val currentShown = if (VehicleState.isDischargeMode(s.chargeStatus)) android.view.View.GONE else android.view.View.VISIBLE
+        currentTitle.visibility = currentShown
+        currentRow.visibility = currentShown
         // Démarrer / arrêter la charge et le V2L : seulement là où le service EV répond (voie A9)
         action.visibility = if (CarBridge.chargeControl) android.view.View.VISIBLE else android.view.View.INVISIBLE
         v2lAction.visibility = if (CarBridge.chargeControl) android.view.View.VISIBLE else android.view.View.INVISIBLE
