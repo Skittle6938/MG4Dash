@@ -81,6 +81,11 @@ class Prefs(context: Context) {
         get() = sp.getFloat("battery_new_kwh", 0f)
         set(v) = sp.edit().putFloat("battery_new_kwh", v).apply()
 
+    /** Radio Dash installée : DAB et FM comme deux sources séparées sur l'accueil. */
+    var radioDashBands: Boolean
+        get() = sp.getBoolean("radio_dash_bands", true)
+        set(v) = sp.edit().putBoolean("radio_dash_bands", v).apply()
+
     /** Décharge V2L lancée au branchement de l'adaptateur (#82), désactivée par défaut. */
     var v2lAuto: Boolean
         get() = sp.getBoolean("v2l_auto", false)
