@@ -30,6 +30,7 @@ import java.util.Locale
  * consommation. Réglages écrits sur les mêmes propriétés que l'appli Énergie SAIC (EH32 EU).
  */
 class EnergyActivity : PageActivity() {
+    private companion object { const val V2L_CONFIRM_MS = 10_000L }
     override val pageTitle get() = getString(R.string.title_energy)
     override val page = app.mg4dash.ui.Dock.Page.ENERGY
 
@@ -57,6 +58,8 @@ class EnergyActivity : PageActivity() {
     private lateinit var v2lStatus: TextView
     private lateinit var setV2l: (Int?) -> Unit
     private lateinit var v2lAction: TextView
+    private var v2lWanted: Boolean? = null
+    private var v2lWantedUntil = 0L
     // Conso
     private lateinit var setPeriod: (Int?) -> Unit
     private lateinit var consTotal: TextView
@@ -171,7 +174,11 @@ class EnergyActivity : PageActivity() {
         c2.addView(vRow, kit.lp(-1, -2, t = 8))
         v2lAction = kit.toggleTile(getString(R.string.en_v2l_start), heat = true) {
             val s = CarBridge.state.value
-            if (VehicleState.isDischarging(s)) CarBridge.stopV2L() else CarBridge.startV2L()
+            val on = !v2lShownOn(s)
+            if (on) CarBridge.startV2L() else CarBridge.stopV2L()
+            // La voiture confirme en quelques secondes : le bouton change tout de suite
+            v2lWanted = on; v2lWantedUntil = android.os.SystemClock.uptimeMillis() + V2L_CONFIRM_MS
+            paintV2l(s)
         }.apply { textSize = 18f }
         c2.addView(LinearLayout(this), kit.lp(-1, 0, 1f))
         c2.addView(v2lAction, kit.lp(-1, kit.dp(60), t = 10))
@@ -386,15 +393,33 @@ class EnergyActivity : PageActivity() {
         currentTitle.visibility = currentShown
         currentRow.visibility = currentShown
         // Démarrer / arrêter la charge et le V2L : seulement là où le service EV répond (voie A9)
-        action.visibility = if (CarBridge.chargeControl) android.view.View.VISIBLE else android.view.View.INVISIBLE
+        // En V2L, seul le bouton des réglages V2L reste : celui de la charge faisait doublon
+        action.visibility = when {
+            VehicleState.isDischargeMode(s.chargeStatus) -> android.view.View.GONE
+            CarBridge.chargeControl -> android.view.View.VISIBLE
+            else -> android.view.View.INVISIBLE
+        }
         v2lAction.visibility = if (CarBridge.chargeControl) android.view.View.VISIBLE else android.view.View.INVISIBLE
         action.isSelected = s.chargeCtrl == 1 || VehicleState.isDischarging(s)
         v2lStatus.text = if (discharge) VehicleState.chargeStatusLabel(s.chargeStatus) +
             (s.dischargeRemainMin?.takeIf { it in 1..6000 }?.let { getString(R.string.en_remaining, it / 60, it % 60) } ?: "")
         else getString(R.string.en_plug_v2l)
         v2lAction.isEnabled = discharge
-        v2lAction.isSelected = VehicleState.isDischarging(s)
-        v2lAction.text = getString(if (VehicleState.isDischarging(s)) R.string.en_v2l_stopbtn else R.string.en_v2l_start)
+        paintV2l(s)
+    }
+
+    /** État du bouton V2L : celui demandé tant que la voiture ne l'a pas confirmé, sinon celui de la voiture. */
+    private fun v2lShownOn(s: VehicleState): Boolean {
+        val real = VehicleState.isDischarging(s)
+        val wanted = v2lWanted ?: return real
+        if (wanted == real || android.os.SystemClock.uptimeMillis() > v2lWantedUntil) { v2lWanted = null; return real }
+        return wanted
+    }
+
+    private fun paintV2l(s: VehicleState) {
+        val on = v2lShownOn(s)
+        v2lAction.isSelected = on
+        v2lAction.text = getString(if (on) R.string.en_v2l_stopbtn else R.string.en_v2l_start)
     }
 
     private fun mainActionLabel(s: VehicleState): String = when {

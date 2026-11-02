@@ -590,13 +590,21 @@ object MediaHub {
         }, 1_500)
     }
 
+    private const val SWIPE_CHAIN_MS = 8_000L
+    private var swipeTarget: String? = null
+    private var swipeAt = 0L
+
     fun cycleSource(dir: Int) {
         if (BuildConfig.MOCK) return
         val available = menuSources()
         if (available.isEmpty()) return
-        val cur = currentSource()
+        // Balayages rapprochés : on repart de la source visée, pas de celle affichée. Android Auto en lecture reprend
+        // l'affichage quand on vise le Bluetooth, et chaque balayage retombait sur le Bluetooth sans aller plus loin
+        val now = android.os.SystemClock.uptimeMillis()
+        val cur = swipeTarget?.takeIf { now - swipeAt < SWIPE_CHAIN_MS && it in available } ?: currentSource()
         val i = available.indexOf(cur)
         val next = available.getOrNull(Math.floorMod((if (i < 0) 0 else i) + dir, available.size)) ?: return
+        swipeTarget = next; swipeAt = now
         Log.i(TAG, "swipe: source $cur → $next (available: $available)")
         switchTo(next)
     }
