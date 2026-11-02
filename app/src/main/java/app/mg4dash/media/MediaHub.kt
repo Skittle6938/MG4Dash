@@ -443,9 +443,6 @@ object MediaHub {
 
     fun selectAndroidAuto() = select(AA_MBS)
 
-    /** Lecteur commandé par MG4Dash (Bluetooth, USB, DiAuto…), hors radio et Android Auto / CarPlay. */
-    fun ownPlayerShown(): Boolean = !radioShown && current?.let { !isAndroidAuto(it.packageName) } == true
-
     /**
      * Lecteur d'une autre appli affiché (DiAuto…) : la voiture n'a pas de source pour elle, et les
      * boutons du volant partent vers Android Auto d'AllGo ; MG4Dash les lui renvoie.
@@ -458,8 +455,6 @@ object MediaHub {
      * Appli affichée qui lit elle-même le bouton lecture / pause du volant (DiAuto MG4+ et son ancien
      * nom) : MG4Dash ne le lui renvoie pas, sinon il se mettrait en pause puis relancerait aussitôt.
      */
-    fun shownHandlesWheelKeys(): Boolean = handlesWheelKeys(current?.packageName)
-
     private fun handlesWheelKeys(pkg: String?) = pkg == "com.drivehub.diauto.mg4" || pkg == "app.mg4aa"
 
     // Boutons du volant sur le lecteur d'une autre appli : le launcher d'origine ne connaît pas ces applis
@@ -1082,20 +1077,6 @@ object MediaHub {
         // Choix explicite de l'utilisateur : retenu tel quel pour la lecture au démarrage
         prefs()?.lastPlaying = !_now.value.playing; pausedSince = 0L
         playPauseRaw()
-    }
-
-    /**
-     * Volant SWI173 (DiAuto #3) : lecture / pause envoyée tout de suite au lecteur affiché (Bluetooth…), sans
-     * redemander la source à la voiture ni réessayer, comme le launcher d'origine. Le chemin normal attendait
-     * jusqu'à 3,5 s avant que la musique reprenne.
-     */
-    fun playPauseNow() {
-        val c = current
-        if (BuildConfig.MOCK || radioShown || c == null || isAndroidAuto(c.packageName)) { playPause(); return }
-        val playing = isPlaying(c)
-        prefs()?.lastPlaying = !playing; pausedSince = 0L
-        if (playing) c.transportControls.pause() else c.transportControls.play()
-        force(c.packageName, !playing)
     }
 
     private fun playPauseRaw() {
