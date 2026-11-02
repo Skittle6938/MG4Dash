@@ -76,6 +76,10 @@ class Prefs(context: Context) {
     var mapApp: String?
         get() = sp.getString("map_app", null)
         set(v) = sp.edit().putString("map_app", v).apply()
+    /** Décharge V2L lancée au branchement de l'adaptateur (#82), désactivée par défaut. */
+    var v2lAuto: Boolean
+        get() = sp.getBoolean("v2l_auto", false)
+        set(v) = sp.edit().putBoolean("v2l_auto", v).apply()
     var mapOfflineSwitch: Boolean
         get() = sp.getBoolean("map_offline_switch", true)
         set(v) = sp.edit().putBoolean("map_offline_switch", v).apply()
