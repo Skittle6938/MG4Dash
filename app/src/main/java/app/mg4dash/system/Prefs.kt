@@ -76,6 +76,11 @@ class Prefs(context: Context) {
     var mapApp: String?
         get() = sp.getString("map_app", null)
         set(v) = sp.edit().putString("map_app", v).apply()
+    /** Capacité neuve saisie à la main pour le calcul de santé (#77) ; 0 = valeur par défaut du modèle. */
+    var batteryNewKwh: Float
+        get() = sp.getFloat("battery_new_kwh", 0f)
+        set(v) = sp.edit().putFloat("battery_new_kwh", v).apply()
+
     /** Décharge V2L lancée au branchement de l'adaptateur (#82), désactivée par défaut. */
     var v2lAuto: Boolean
         get() = sp.getBoolean("v2l_auto", false)

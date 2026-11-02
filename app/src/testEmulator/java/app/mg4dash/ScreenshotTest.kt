@@ -215,6 +215,7 @@ class ScreenshotTest {
     @Test fun home() = shoot(MainActivity::class.java, "home.png", bluetooth("Midnight Boulevard", "Velvet Avenue", "Neon Skyline", neonSkyline()))
     @Test fun climate() = shoot(ClimateActivity::class.java, "climate.png")
     @Test fun vehicle() = shoot(app.mg4dash.pages.VehicleActivity::class.java, "vehicle.png")
+    @Test fun appsPage() = shoot(app.mg4dash.apps.AppsActivity::class.java, "apps_page.png")
     @Test fun energy() = shoot(app.mg4dash.pages.EnergyActivity::class.java, "energy.png")
     @Test fun settings() = shoot(SettingsActivity::class.java, "settings.png")
     @Test fun homeLight() {

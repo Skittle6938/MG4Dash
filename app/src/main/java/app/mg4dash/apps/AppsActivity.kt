@@ -38,7 +38,8 @@ class AppsActivity : AppCompatActivity() {
 
         val root = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            setPadding(dp(24), dp(84), dp(24), dp(24))   // haut : zone antibrouillards
+            // Haut : zone antibrouillards, sauf si la barre verticale l'occupe
+            setPadding(dp(24), dp(if (app.mg4dash.ui.Dock.vertical(this@AppsActivity)) 12 else 84), dp(24), dp(24))
         }
 
         // ── Ouvertes ──
@@ -61,7 +62,9 @@ class AppsActivity : AppCompatActivity() {
 
         // ── Toutes les applis ──
         root.addView(sectionTitle(R.string.apps_all), LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(14) })
-        val grid = GridLayout(this).apply { columnCount = 8 }
+        // Autant de colonnes que la largeur laissée par la barre verticale le permet
+        val widthDp = resources.displayMetrics.widthPixels / resources.displayMetrics.density - if (app.mg4dash.ui.Dock.vertical(this)) 120 else 48
+        val grid = GridLayout(this).apply { columnCount = (widthDp / 208).toInt().coerceIn(4, 8) }
         apps.forEach { ri ->
             val cell = tile(ri.loadIcon(pm), ri.loadLabel(pm)) {
                 val i = Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER)
@@ -76,7 +79,13 @@ class AppsActivity : AppCompatActivity() {
             })
         }
         root.addView(grid, LinearLayout.LayoutParams(-2, -2).apply { topMargin = dp(4) })
-        setContentView(ScrollView(this).apply { addView(root) })
+        // Même barre de menus que les autres pages (#79)
+        val page = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; setPadding(dp(12), dp(8), dp(12), dp(8)) }
+        page.addView(ScrollView(this).apply { addView(root) }, LinearLayout.LayoutParams(-1, 0, 1f))
+        val dock = LinearLayout(this)
+        page.addView(dock, LinearLayout.LayoutParams(-1, dp(84)).apply { topMargin = dp(8) })
+        app.mg4dash.ui.Dock.mount(this, page, dock, app.mg4dash.ui.Dock.Page.APPS)
+        setContentView(page)
         renderOpen()
     }
 

@@ -32,7 +32,7 @@ object BatteryCapacity {
     private const val MONTH_MS = 30L * 24 * 3600_000L
     private const val MAX_SAMPLES = 300
 
-    /** Modèles : capacité brute (affichée) → capacité utile d'origine (kWh). */
+    /** Modèles : capacité brute (affichée) → capacité utile neuve par défaut (kWh), valeurs non officielles (#77). */
     val MODELS = listOf(51 to 50.8f, 64 to 61.7f, 77 to 74.4f)
 
     /** Une mesure : date, capacité (kWh), baisse du % et km parcourus pendant la mesure (0 avant la 1.1.5). */
@@ -130,8 +130,11 @@ object BatteryCapacity {
         return (netKwh / socDrop * 100f).takeIf { it in 30f..100f }
     }
 
-    /** Capacité utile d'origine du modèle choisi (kWh). */
-    fun nominal(context: Context): Float {
+    /** Capacité utile neuve de référence (kWh) : celle saisie à la main (#77), sinon celle du modèle choisi. */
+    fun nominal(context: Context): Float = Prefs(context).batteryNewKwh.takeIf { it > 0f } ?: modelNominal(context)
+
+    /** Capacité utile neuve par défaut du modèle choisi (kWh). */
+    fun modelNominal(context: Context): Float {
         val gross = Prefs(context).batteryModel
         return MODELS.firstOrNull { it.first == gross }?.second ?: 50.8f
     }

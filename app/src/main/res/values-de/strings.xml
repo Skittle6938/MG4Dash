@@ -208,6 +208,12 @@
     <string name="st_adb">ADB-Notfall, falls MG4Dash nicht mehr startet: adb shell cmd package compile -m speed -f app.mg4dash</string>
     <string name="st_battery_line">Neu: %1$s kWh  ·  Aktuell: %2$s kWh  ·  Zustand: %3$s</string>
     <string name="st_battery_model">Batteriemodell (Bezug für den geschätzten Zustand auf der Fahrzeugseite):</string>
+    <string name="st_new_cap">Neukapazität für den Zustandswert:</string>
+    <string name="st_new_cap_default">%1$s kWh (Standard)</string>
+    <string name="st_new_cap_custom">%1$s kWh (eigener Wert)</string>
+    <string name="st_new_cap_item_default">Standardwert</string>
+    <string name="st_new_cap_item_custom">Eigener Wert…</string>
+    <string name="st_new_cap_title">Neukapazität in kWh (30 bis 120)</string>
     <string name="st_city">Ersatzstadt: %1$s (falls das Auto keine Position liefert)</string>
     <string name="st_change_city">Stadt ändern</string>
     <string name="st_startup">START</string>

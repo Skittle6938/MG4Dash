@@ -208,6 +208,12 @@
     <string name="st_adb">MG4Dash artık açılmıyorsa ADB ile kurtarma: adb shell cmd package compile -m speed -f app.mg4dash</string>
     <string name="st_battery_line">Yeni: %1$s kWh  ·  Mevcut: %2$s kWh  ·  Sağlık: %3$s</string>
     <string name="st_battery_model">Batarya modeli (Araç sayfasındaki tahmini sağlık için referans):</string>
+    <string name="st_new_cap">Sağlık hesabı için yeni kapasite:</string>
+    <string name="st_new_cap_default">%1$s kWh (varsayılan)</string>
+    <string name="st_new_cap_custom">%1$s kWh (özel)</string>
+    <string name="st_new_cap_item_default">Varsayılan değer</string>
+    <string name="st_new_cap_item_custom">Özel değer…</string>
+    <string name="st_new_cap_title">kWh cinsinden yeni kapasite (30 ile 120 arası)</string>
     <string name="st_city">Yedek şehir: %1$s (araç konum vermezse)</string>
     <string name="st_change_city">Şehri değiştir</string>
     <string name="st_startup">BAŞLANGIÇ</string>
