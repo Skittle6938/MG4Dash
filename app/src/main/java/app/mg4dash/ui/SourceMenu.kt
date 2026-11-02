@@ -26,7 +26,7 @@ object SourceMenu {
             setOnDismissListener { Fullscreen.apply(activity) }
         }
         val cur = MediaHub.currentSource()
-        MediaHub.availableSources().forEach { pkg ->
+        MediaHub.menuSources().forEach { pkg ->
             list.addView(TextView(activity).apply {
                 text = MediaHub.sourceLabel(pkg)
                 setTextSize(TypedValue.COMPLEX_UNIT_SP, 21f)
