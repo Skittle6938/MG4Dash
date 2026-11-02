@@ -205,7 +205,7 @@ object MediaHub {
         // plus (#36). 1 s suffit (demandé par Marc) : la disparition vient de l'état de connexion, pas d'un clignotement.
         val curGone = goneSince[cur]?.let { now - it >= 1_000 } == true
         val order = fallbackOrder(mode, p)
-        if (curGone) { Log.i(TAG, "$cur gone: mode $mode, order $order, available $avail"); order.firstOrNull { it != cur && it in avail && !(it == AA_MBS && carPlay) }?.let { autoSwitch(it, "$cur gone") }; return }
+        if (curGone) { Log.i(TAG, "$cur gone: mode $mode, order $order, available $avail"); order.firstOrNull { it != cur && it in avail && !(it == AA_MBS && carPlay) }?.let { autoSwitch(it, "$cur gone", play = _now.value.playing) }; return }
         if (mode == 1) return
         if (mode >= 2) {
             if (startDone) return
@@ -544,6 +544,13 @@ object MediaHub {
 
     private fun radioBandsSplit() = radioDashInstalled && prefs()?.radioDashBands == true
 
+    /**
+     * Ancien firmware avec Radio Dash affichée : son launcher ne connaît que sa propre radio et ne lui transmet
+     * pas les boutons du volant, MG4Dash s'en charge. Sur SWI69, le launcher d'origine le fait déjà.
+     */
+    fun radioDashNeedsWheelKeys(): Boolean =
+        app.mg4dash.system.Firmware.family == app.mg4dash.system.Firmware.Family.LEGACY && radioDashInstalled && current?.packageName == RADIO
+
     /** Sources proposées par le balayage et le menu : celles disponibles, la radio séparée en DAB et FM. */
     fun menuSources(): List<String> {
         val split = radioBandsSplit()
@@ -676,7 +683,10 @@ object MediaHub {
                         // Son passager d'une appli sans source voiture (type -1) : annonce de guidage DiAuto mixée
                         // par-dessus la radio (DiAuto 2.0.0-beta19). Ce n'est pas un changement de source : la carte
                         // média clignotait vers DiAuto à chaque annonce
-                        if (type == -1 && pkg != null && !pkg.startsWith("com.allgo.") && !pkg.startsWith("com.saicmotor.")) {
+                        // Même chose pour AllGo sans téléphone : DiAuto refermé l'annonce sous son nom, et la bascule
+                        // qui suivait, Android Auto étant absent, relançait le Bluetooth en pause (#78)
+                        if (type == -1 && pkg != null && (!pkg.startsWith("com.saicmotor.") && !pkg.startsWith("com.allgo.") ||
+                                pkg == "com.allgo.app.androidauto" && projectionLive != true)) {
                             Log.i(TAG, "audio source: $pkg (-1) ignored: passing sound, the car source does not change")
                             return@newProxyInstance null
                         }
