@@ -140,7 +140,6 @@ class SettingsActivity : AppCompatActivity() {
             }
         }
         text(src, getString(R.string.st_aa_button_desc), 16f, R.color.text_title)
-        toggle(src, R.string.st_bt_projection, R.string.st_bt_projection_desc, { prefs.btDuringProjection }) { prefs.btDuringProjection = it }
         val map = panel(homeR, getString(R.string.st_style_map).uppercase())
         dropdown(map, getString(R.string.st_map_zoom), listOf("14", "15", "16", "17", "18"), { prefs.mapZoom - 14 }) { prefs.mapZoom = 14 + it }
         dropdown(map, getString(R.string.st_map_theme), listOf(R.string.st_mode_auto, R.string.st_mode_light, R.string.st_mode_dark).map { getString(it) }, { prefs.mapTheme }) { prefs.mapTheme = it }
