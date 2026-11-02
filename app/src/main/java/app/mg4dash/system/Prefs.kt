@@ -180,10 +180,6 @@ class Prefs(context: Context) {
         get() = sp.getInt("start_source", 0)
         set(v) = sp.edit().putInt("start_source", v).apply()
 
-    /** Source Bluetooth proposée aussi pendant Android Auto, CarPlay ou DiAuto. */
-    var btDuringProjection: Boolean
-        get() = sp.getBoolean("bt_during_projection", true)
-        set(v) = sp.edit().putBoolean("bt_during_projection", v).apply()
 
     /** Appli de connexion du téléphone désactivée par MG4Dash (appui long sur le bouton Android Auto). */
     var connectionOff: String?

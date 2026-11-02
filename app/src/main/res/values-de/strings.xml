@@ -570,8 +570,6 @@
     <string name="st_play_play">Immer abspielen</string>
     <string name="st_aa_button">Android-Auto-Taste der Leiste</string>
     <string name="st_aa_button_desc">Doppeltippen, um die Telefonverbindung zu trennen (die App wird deaktiviert, das Symbol wird rot); erneut doppeltippen, um sie wiederherzustellen. Lange drücken: App wählen.</string>
-    <string name="st_bt_projection">Bluetooth-Quelle während Android Auto / CarPlay</string>
-    <string name="st_bt_projection_desc">Behält Bluetooth in den Quellen, während ein Telefon projiziert (Original-Android Auto, CarPlay, DiAuto), z. B. wenn DiAuto Musik über Bluetooth spielt. MG4Dash wechselt in diesen Sitzungen nie von selbst dorthin.</string>
     <string name="dock_conn_disabled">%1$s deaktiviert: Das Telefon verbindet sich nicht mehr. Erneut lange drücken zum Wiederherstellen.</string>
     <string name="dock_conn_enabled">%1$s wiederhergestellt</string>
     <string name="dock_conn_off">%1$s ist deaktiviert: Taste lange drücken zum Wiederherstellen.</string>
