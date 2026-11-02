@@ -28,6 +28,9 @@ object StarKey {
     private const val JOY_LEFT = 299
     private const val JOY_RIGHT = 300
     private const val JOY_OK = 301
+    /** Touches média du launcher d'origine (SwcManager) : 88 précédent, 87 suivant. */
+    private const val KEY_MEDIA_PREVIOUS = 88
+    private const val KEY_MEDIA_NEXT = 87
     /** Volume : haut / bas du joystick (297 / 298) et touches volume Android (24 / 25). */
     private val VOLUME_KEYS = setOf(297, 298, 24, 25)
     private const val SWC_CLIMATE = 2
@@ -62,6 +65,16 @@ object StarKey {
                 if ((code in JOY_LEFT..JOY_OK || code in VOLUME_KEYS) &&
                     CarProps.getInt(CarProps.SWC_FUNCTION) == SWC_CLIMATE) {
                     if (down) Log.i(TAG, "steering wheel in climate mode: button left to the climate window")
+                    return
+                }
+                // Radio Dash sur ancien firmware : joystick droit, ou touches média selon les versions du volant
+                if (!down && !long && code in setOf(JOY_LEFT, JOY_RIGHT, JOY_OK, KEY_MEDIA_PREVIOUS, KEY_MEDIA_NEXT) && MediaHub.radioDashNeedsWheelKeys()) {
+                    Log.i(TAG, "steering wheel button $code sent to Radio Dash")
+                    when (code) {
+                        JOY_LEFT, KEY_MEDIA_PREVIOUS -> MediaHub.previous()
+                        JOY_RIGHT, KEY_MEDIA_NEXT -> MediaHub.next()
+                        JOY_OK -> MediaHub.playPause()
+                    }
                     return
                 }
                 if (code == JOY_LEFT || code == JOY_RIGHT) {
