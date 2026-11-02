@@ -528,12 +528,63 @@ object MediaHub {
             ((c.playbackState?.state ?: PlaybackState.STATE_NONE) != PlaybackState.STATE_NONE || c.metadata != null)
     }.map { it.packageName }.distinct()
 
-    /** Source affichée, Android Auto ramené à son lecteur. */
-    fun currentSource(): String? = if (radioShown) RADIO else current?.packageName?.let { if (isAndroidAuto(it)) AA_MBS else it }
+    /** Source affichée, Android Auto ramené à son lecteur, la radio à sa bande si DAB et FM sont séparées. */
+    fun currentSource(): String? {
+        val pkg = if (radioShown) RADIO else current?.packageName?.let { if (isAndroidAuto(it)) AA_MBS else it }
+        return if (pkg == RADIO && radioBandsSplit()) currentBandSource() ?: RADIO_DAB else pkg
+    }
+
+    // ── Radio Dash : DAB et FM, deux sources de l'accueil (balayage et menu) d'une même appli ──
+    const val RADIO_DAB = "com.saicmotor.radio#dab"
+    const val RADIO_FM = "com.saicmotor.radio#fm"
+    private const val ACTION_NEXT_BAND = "__ACTION_NEXT_SOURCE__"
+    private val radioDashInstalled by lazy { appContext?.let { app.mg4dash.system.RadioDashUpdater.installed(it) } == true }
+    /** Bande voulue, tant que la radio n'y est pas arrivée. */
+    @Volatile private var bandTarget: String? = null
+
+    private fun radioBandsSplit() = radioDashInstalled && prefs()?.radioDashBands == true
+
+    /** Sources proposées par le balayage et le menu : celles disponibles, la radio séparée en DAB et FM. */
+    fun menuSources(): List<String> {
+        val split = radioBandsSplit()
+        return availableSources().flatMap { if (it == RADIO && split) listOf(RADIO_DAB, RADIO_FM) else listOf(it) }
+    }
+
+    /** Bande d'après les métadonnées de la radio : auteur « DAB », ou fréquence en titre pour FM / AM. */
+    fun radioBandOf(author: String?, title: String?): String? = when {
+        author == "DAB" -> RADIO_DAB
+        title?.trim()?.startsWith("FM") == true -> RADIO_FM
+        title?.trim()?.startsWith("AM") == true -> "AM"
+        else -> null
+    }
+
+    private fun currentBandSource(): String? {
+        val md = browserControllers[RADIO]?.metadata ?: return null
+        return radioBandOf(md.getString(MediaMetadata.METADATA_KEY_AUTHOR), md.getString(MediaMetadata.METADATA_KEY_TITLE))
+    }
+
+    /**
+     * La radio ne sait que passer à la bande suivante (commande de sa session) : on avance jusqu'à la bande
+     * voulue, en relisant à chaque fois. Elle compte aussi l'AM là où cet onglet existe, d'où 3 essais.
+     */
+    private fun reachBand(target: String, tries: Int) {
+        main.postDelayed({
+            if (bandTarget != target) return@postDelayed
+            val c = browserControllers[RADIO]
+            val band = currentBandSource()
+            if (band == target || c == null || tries == 0) {
+                Log.i(TAG, "radio band: $band, wanted $target")
+                bandTarget = null
+            } else {
+                c.transportControls.sendCustomAction(ACTION_NEXT_BAND, null)
+                reachBand(target, tries - 1)
+            }
+        }, 1_500)
+    }
 
     fun cycleSource(dir: Int) {
         if (BuildConfig.MOCK) return
-        val available = availableSources()
+        val available = menuSources()
         if (available.isEmpty()) return
         val cur = currentSource()
         val i = available.indexOf(cur)
@@ -545,6 +596,12 @@ object MediaHub {
     /** Bascule la voiture sur cette source et lance la lecture (balayage ou menu des sources). */
     fun switchTo(next: String) {
         if (BuildConfig.MOCK) return
+        if (next == RADIO_DAB || next == RADIO_FM) {
+            bandTarget = next
+            switchTo(RADIO)
+            reachBand(next, 3)
+            return
+        }
         Log.i(TAG, "source picked: $next")
         wheelFrom = null // choix de l'utilisateur : pas de retour automatique à l'appli
         promptFrom = null
@@ -894,7 +951,7 @@ object MediaHub {
         val np = NowPlaying(
             available = true,
             packageName = c.packageName,
-            source = sourceLabel(c.packageName),
+            source = if (c.packageName == RADIO && radioBandsSplit()) sourceLabel(currentBandSource() ?: RADIO) else sourceLabel(c.packageName),
             title = title,
             artist = artist,
             album = album,
@@ -1047,6 +1104,8 @@ object MediaHub {
     fun sourceLabel(pkg: String?): String = when {
         pkg == null -> ""
         pkg == "com.android.bluetooth" -> "BLUETOOTH"
+        pkg == RADIO_DAB -> "RADIO DAB"
+        pkg == RADIO_FM -> "RADIO FM"
         pkg == "com.saicmotor.radio" -> "RADIO"
         pkg == "com.saicmotor.media" -> "USB"
         pkg == AA_MBS && carPlay -> "CARPLAY"

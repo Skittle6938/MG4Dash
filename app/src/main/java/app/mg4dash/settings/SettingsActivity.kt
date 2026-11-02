@@ -117,6 +117,9 @@ class SettingsActivity : AppCompatActivity() {
         val srcLabels = listOf(getString(R.string.st_src_auto), getString(R.string.st_src_car), "Radio", "Bluetooth", "USB", "CarPlay / Android Auto")
         dropdown(src, getString(R.string.st_start_source), srcLabels, { prefs.startSource }) { prefs.startSource = it }
         text(src, getString(R.string.st_start_source_desc), 16f, R.color.text_title)
+        // Seulement pour ceux qui ont Radio Dash : DAB et FM comme deux sources de l'accueil
+        if (app.mg4dash.system.RadioDashUpdater.installed(this))
+            toggle(src, R.string.st_radio_bands, R.string.st_radio_bands_desc, { prefs.radioDashBands }) { prefs.radioDashBands = it }
         // Lecture au démarrage (remplace la reprise automatique de Radio Dash)
         dropdown(src, getString(R.string.st_start_playback),
             listOf(getString(R.string.st_play_resume), getString(R.string.st_play_pause), getString(R.string.st_play_play)), { prefs.startPlayback }) { prefs.startPlayback = it }
