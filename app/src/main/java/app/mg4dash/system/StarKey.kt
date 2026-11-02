@@ -39,7 +39,6 @@ object StarKey {
     private const val KEY_RIGHT_STAR = 286
     private const val KEY_RIGHT_STAR_ALT = 18
     private const val FUNCTION_AVM = 3
-    private const val FUNCTION_AVM_SWI173 = 6
 
     private val AVM = listOf(
         "com.saicmotor.avm" to "com.saicmotor.avm.service.SaicMotorAvmService",
@@ -55,9 +54,6 @@ object StarKey {
                 val long = i.getBooleanExtra("android.intent.extra.hardkey.longpress", false)
                 // Diagnostic (#33) : chaque bouton du volant reçu, visible dans le journal des réglages
                 Log.i(TAG, "steering wheel button: code $code ${if (down) "pressed" else "released"}${if (long) " (long)" else ""}")
-                // SWI173 (#33) : le joystick droit n'agit pas sur la musique Bluetooth / DiAuto quand
-                // MG4Dash est l'accueil ; gauche = précédent, droite = suivant, OK = lecture / pause.
-                // Limité à SWI173 : ailleurs le joystick change déjà piste ou volume tout seul.
                 // Musique d'une autre appli (SimpMusic…) : la voiture n'envoie pas suivant / précédent à
                 // cette appli ; on les passe au lecteur affiché (DiAuto ne lit que lecture / pause)
                 // (gauche = précédent, droite = suivant, comme pour les autres sources)
@@ -75,15 +71,6 @@ object StarKey {
                 // Volume (haut / bas du volant) : le launcher d'origine relance la radio en pause, MG4Dash
                 // revient aussitôt à l'appli qui jouait
                 if (down && code in VOLUME_KEYS) MediaHub.wheelPressed(null)
-                if (Firmware.gen == Firmware.Gen.SWI173 && !down && !long && code in JOY_LEFT..JOY_OK &&
-                    MediaHub.ownPlayerShown() && !MediaHub.shownHandlesWheelKeys()) {
-                    when (code) {
-                        JOY_LEFT -> MediaHub.previous()
-                        JOY_RIGHT -> MediaHub.next()
-                        JOY_OK -> MediaHub.playPauseNow()   // tout de suite, sans changer de source (DiAuto #3)
-                    }
-                    return
-                }
                 // Touche clim sous l'écran (288, anciens firmwares) : SystemUI ouvre sa page clim par-dessus
                 // MG4Dash ; on la referme juste après, l'écran d'avant reste affiché (#62)
                 if (code == KEY_HVAC && !down && !long && Firmware.family != Firmware.Family.A9 && Prefs(app).hideSaicClimate) {
@@ -93,8 +80,10 @@ object StarKey {
                     return
                 }
                 if (down || long) return
+                // SWI173 : le launcher d'origine garde l'état de la caméra et la pilote lui-même (LauncherLink, #78)
+                if (Firmware.gen == Firmware.Gen.SWI173) return
                 // Codes des « * » selon le firmware : 5 (gauche) sur le launcher SWI69 ; 17 (gauche) et
-                // 286 ou 18 (droit) ailleurs, relevés sur SWI173 (#33) comme dans MG4Control
+                // 286 ou 18 (droit) sur les anciens firmwares, comme dans MG4Control
                 val a9 = Firmware.gen in setOf(Firmware.Gen.SWI69, Firmware.Gen.SWI131, Firmware.Gen.SWI132)
                 val setting = when {
                     code == KEY_LEFT_STAR && a9 -> STAR_FUNCTION
@@ -104,9 +93,7 @@ object StarKey {
                 }
                 val fn = try { android.provider.Settings.System.getInt(app.contentResolver, setting, -1) } catch (_: Exception) { -1 }
                 Log.i(TAG, "\"*\" ($code) released, $setting = $fn")
-                // Valeur « caméra 360 » : 3 sur le launcher SWI69, 6 sur SWI173 (relevé dans le journal, #33)
-                val avm = if (Firmware.gen == Firmware.Gen.SWI173) FUNCTION_AVM_SWI173 else FUNCTION_AVM
-                if (fn != avm || Prefs(app).valetMode) return
+                if (fn != FUNCTION_AVM || Prefs(app).valetMode) return
                 starAvm(app)
             }
         }
