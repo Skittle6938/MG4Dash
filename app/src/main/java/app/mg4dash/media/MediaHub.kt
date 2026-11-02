@@ -324,8 +324,24 @@ object MediaHub {
      * CarPlay ou DiAuto, selon le réglage (activé par défaut) : DiAuto peut faire passer le son par le
      * Bluetooth. Pendant ces sessions, on ne bascule jamais dessus tout seul (voir [projecting]).
      */
-    private fun btSource(): Boolean = app.mg4dash.system.BtAudio.phoneConnected() &&
-        (!projecting || prefs()?.btDuringProjection != false)
+    private fun btSource(): Boolean = app.mg4dash.system.BtAudio.phoneConnected() && (!projecting || diAutoOverBluetooth())
+
+    private var diAutoBtReadAt = 0L
+    private var diAutoBt = false
+
+    /**
+     * Pendant une projection, le Bluetooth n'est une source que si DiAuto y envoie la musique : avec Android Auto
+     * d'origine, CarPlay ou DiAuto en Wi-Fi, c'est la projection qui a le son. Relu au plus toutes les 10 s (fichier).
+     */
+    private fun diAutoOverBluetooth(): Boolean {
+        if (!appProjecting) return false
+        val now = android.os.SystemClock.uptimeMillis()
+        if (diAutoBtReadAt == 0L || now - diAutoBtReadAt > 10_000) {
+            diAutoBtReadAt = now
+            diAutoBt = listOf("com.drivehub.diauto.mg4", "app.mg4aa", "com.allgo.app.androidauto").any { musicOverBluetooth(it) }
+        }
+        return diAutoBt
+    }
 
     /** Android Auto / CarPlay (AllGo), DiAuto ou équivalent en session. */
     private val projecting get() = projectionLive == true || appProjecting
@@ -532,13 +548,14 @@ object MediaHub {
     /** Source affichée, Android Auto ramené à son lecteur, la radio à sa bande si DAB et FM sont séparées. */
     fun currentSource(): String? {
         val pkg = if (radioShown) RADIO else current?.packageName?.let { if (isAndroidAuto(it)) AA_MBS else it }
-        return if (pkg == RADIO && radioBandsSplit()) currentBandSource() ?: RADIO_DAB else pkg
+        return if (pkg == RADIO && radioBandsSplit()) bandTarget ?: currentBandSource() ?: RADIO_DAB else pkg
     }
 
     // ── Radio Dash : DAB et FM, deux sources de l'accueil (balayage et menu) d'une même appli ──
     const val RADIO_DAB = "com.saicmotor.radio#dab"
     const val RADIO_FM = "com.saicmotor.radio#fm"
     private const val ACTION_NEXT_BAND = "__ACTION_NEXT_SOURCE__"
+    private const val BAND_RETRY_MS = 800L
     private val radioDashInstalled by lazy { appContext?.let { app.mg4dash.system.RadioDashUpdater.installed(it) } == true }
     /** Bande voulue, tant que la radio n'y est pas arrivée. */
     @Volatile private var bandTarget: String? = null
@@ -575,7 +592,7 @@ object MediaHub {
      * La radio ne sait que passer à la bande suivante (commande de sa session) : on avance jusqu'à la bande
      * voulue, en relisant à chaque fois. Elle compte aussi l'AM là où cet onglet existe, d'où 3 essais.
      */
-    private fun reachBand(target: String, tries: Int) {
+    private fun reachBand(target: String, tries: Int, delayMs: Long = BAND_RETRY_MS) {
         main.postDelayed({
             if (bandTarget != target) return@postDelayed
             val c = browserControllers[RADIO]
@@ -583,11 +600,13 @@ object MediaHub {
             if (band == target || c == null || tries == 0) {
                 Log.i(TAG, "radio band: $band, wanted $target")
                 bandTarget = null
+                if (c != null && !isPlaying(c)) c.transportControls.play()
+                publish()
             } else {
                 c.transportControls.sendCustomAction(ACTION_NEXT_BAND, null)
                 reachBand(target, tries - 1)
             }
-        }, 1_500)
+        }, delayMs)
     }
 
     private const val SWIPE_CHAIN_MS = 8_000L
@@ -614,8 +633,10 @@ object MediaHub {
         if (BuildConfig.MOCK) return
         if (next == RADIO_DAB || next == RADIO_FM) {
             bandTarget = next
-            switchTo(RADIO)
-            reachBand(next, 3)
+            // Indicateur tout de suite, sans attendre que la radio confirme la bande
+            publish()
+            // Déjà sur la radio : pas de changement de source à la voiture, on passe directement à la bande
+            if (current?.packageName == RADIO) reachBand(next, 3, 0) else { switchTo(RADIO); reachBand(next, 3) }
             return
         }
         Log.i(TAG, "source picked: $next")
@@ -987,7 +1008,7 @@ object MediaHub {
         val np = NowPlaying(
             available = true,
             packageName = c.packageName,
-            source = if (c.packageName == RADIO && radioBandsSplit()) sourceLabel(currentBandSource() ?: RADIO) else sourceLabel(c.packageName),
+            source = if (c.packageName == RADIO && radioBandsSplit()) sourceLabel(bandTarget ?: currentBandSource() ?: RADIO) else sourceLabel(c.packageName),
             title = title,
             artist = artist,
             album = album,
