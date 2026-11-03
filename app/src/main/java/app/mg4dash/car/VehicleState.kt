@@ -5,8 +5,8 @@ import app.mg4dash.Tr
 import java.util.Locale
 
 /**
- * Instantané de l'état véhicule affiché par le launcher.
- * Un champ à null = valeur non lue (service absent ou getter en échec) : l'UI affiche « — ».
+ * Snapshot of the vehicle state shown by the launcher.
+ * A null field = value not read (service missing or getter failed): the UI shows "—".
  */
 data class VehicleState(
     val connected: Boolean = false,
@@ -14,7 +14,7 @@ data class VehicleState(
     val hvacOn: Boolean? = null,
     val acOn: Boolean? = null,
     val autoOn: Boolean? = null,
-    /** 0 = air recyclé, 1 = air extérieur, 2 = auto (convention MG4Control, à confirmer sur A9). */
+    /** 0 = recirculated air, 1 = outside air, 2 = auto (MG4Control convention, to confirm on A9). */
     val recirc: Int? = null,
     val fanSpeed: Int? = null,
     val fanDirection: Int? = null,
@@ -23,26 +23,26 @@ data class VehicleState(
     val defrostFront: Boolean? = null,
     val defrostRear: Boolean? = null,
     val ecoOn: Boolean? = null,
-    /** Débit d'air en mode AUTO (#65) : 0 = haut, 1 = moyen, 2 = bas. */
+    /** Air flow in AUTO mode (#65): 0 = high, 1 = medium, 2 = low. */
     val autoAirVolume: Int? = null,
-    /** Dégivrage arrière automatique avec l'avant (#65). */
+    /** Automatic rear defrost with the front (#65). */
     val defrostLinked: Boolean? = null,
-    /** Clim qui suit le mode ECO (#65). */
+    /** Climate following ECO mode (#65). */
     val ecoLinked: Boolean? = null,
-    /** Sièges chauffants (0 éteint, 1 à 3) et volant chauffant (0 / 1), versions équipées. */
+    /** Heated seats (0 off, 1 to 3) and heated steering wheel (0 / 1), equipped versions. */
     val seatHeatL: Int? = null,
     val seatHeatR: Int? = null,
     val wheelHeat: Int? = null,
-    // Énergie (CarEvClient, code 4)
+    // Energy (CarEvClient, code 4)
     val batteryPercent: Int? = null,
-    /** Niveau de batterie au dixième (BMS_PACK_SOC_DSP), quand la voiture le donne. */
+    /** Battery level to the tenth (BMS_PACK_SOC_DSP), when the car gives it. */
     val socPrecise: Float? = null,
     val rangeKm: Int? = null,
     val chargeStatus: Int? = null,
     val chargeRemainMin: Int? = null,
-    /** Bouton de charge : 1 = charge en cours (proposer « Arrêter »), 2 = arrêtée (« Charger »). */
+    /** Charge button: 1 = charging (offer "Stop"), 2 = stopped ("Charge"). */
     val chargeCtrl: Int? = null,
-    /** Bouton V2L : 1 = décharge en cours, 2 = arrêtée. */
+    /** V2L button: 1 = discharging, 2 = stopped. */
     val dischargeCtrl: Int? = null,
     val dischargeRemainMin: Int? = null,
     // Conduite (CarVehicleSettingClient, code 8)
@@ -52,13 +52,13 @@ data class VehicleState(
     val steeringMode: Int? = null,
     val brakePedalMode: Int? = null,
     val enduranceMode: Int? = null,
-    // Aides à la conduite (lecture seule)
+    // Driving aids (read only)
     val lasMode: Int? = null,
     val fcwState: Int? = null,
     val fcwBrakeMode: Int? = null,
     val overSpeedSound: Int? = null,
     val speedLimitSound: Int? = null,
-    // Général (CarGeneralClient, code 1)
+    // General (CarGeneralClient, code 1)
     val odometerKm: Int? = null,
     val speedKmh: Float? = null,
 ) {
@@ -66,13 +66,13 @@ data class VehicleState(
         const val TEMP_MIN = 17.5f   // position LO
         const val TEMP_MAX = 32.5f   // position HI
         const val TEMP_STEP = 1f
-        /** « 78.4 % » si le dixième est disponible et cohérent avec le % entier, sinon « 78 % ». */
+        /** "78.4 %" if the tenth is available and consistent with the whole %, otherwise "78 %". */
         fun socLabel(s: VehicleState): String? {
             val p = s.socPrecise?.takeIf { v -> s.batteryPercent == null || kotlin.math.abs(v - s.batteryPercent) < 1.5f }
             return p?.let { String.format(java.util.Locale.getDefault(), "%.1f %%", it) } ?: s.batteryPercent?.let { "$it %" }
         }
 
-        /** Direction de l'air (échelle 0–6) en sorties actives : visage, pieds, pare-brise. */
+        /** Air direction (0–6 scale) as active outlets: face, feet, windscreen. */
         fun flowParts(d: Int?): BooleanArray? = when (d) {
             0 -> booleanArrayOf(true, false, false)
             1 -> booleanArrayOf(true, true, false)
@@ -99,8 +99,8 @@ data class VehicleState(
         const val FAN_MAX = 11
 
         /**
-         * État de charge (getChargeStatus), table a9_ev_status du launcher d'origine :
-         * 0 = débranché, 1..10 et 12 = recharge, 11 et 13..15 = décharge (V2L).
+         * Charge state (getChargeStatus), a9_ev_status table of the stock launcher:
+         * 0 = unplugged, 1..10 and 12 = charging, 11 and 13..15 = discharging (V2L).
          */
         fun chargeStatusLabel(v: Int?): String = when (v) {
             0 -> Tr.s(R.string.cs_0)
@@ -123,11 +123,11 @@ data class VehicleState(
             else -> Tr.s(R.string.cs_other, v)
         }
 
-        /** Mode V2L : même règle que le launcher d'origine (11 et ≥ 13 = écran de décharge). */
+        /** V2L mode: same rule as the stock launcher (11 and ≥ 13 = discharge screen). */
         fun isDischargeMode(v: Int?): Boolean = v == 11 || (v != null && v >= 13)
         /**
-         * V2L en cours : bouton V2L à 1, ou état « décharge en cours » (13). Les anciens firmwares
-         * (SWI68, #8) ne renvoient pas l'état du bouton : le bouton restait sur « Lancer ».
+         * V2L running: V2L button at 1, or "discharging" state (13). Old firmwares
+         * (SWI68, #8) do not return the button state: the button stayed on "Start".
          */
         fun isDischarging(s: VehicleState): Boolean = s.dischargeCtrl == 1 || s.chargeStatus == 13
         fun isPlugged(v: Int?): Boolean = v != null && v != 0
@@ -143,14 +143,14 @@ data class VehicleState(
             else -> Tr.s(R.string.mode_n, v)
         }
 
-        /** Niveau de récupération (KERS) en index de jauge 1..4, 0 si inconnu. */
-        /** -1 = niveau inconnu (jauge grisée). */
+        /** Regeneration level (KERS) as a gauge index 1..4, 0 if unknown. */
+        /** -1 = unknown level (greyed gauge). */
         fun regenGauge(v: Int?): Int = when (v) {
             0 -> 1
             1 -> 2
             2 -> 3
             3 -> 4
-            6 -> 4          // 6 = conduite à une pédale (relevé sur la voiture le 2026-10-18)
+            6 -> 4          // 6 = one-pedal driving (found on the car on 2026-10-18)
             else -> -1
         }
 
@@ -171,16 +171,16 @@ data class VehicleState(
             else -> "—"
         }
 
-        /** Direction : 1 = confort, 2 = normal, 3 = sport (échelle A9 relevée par MG4Control). */
+        /** Steering: 1 = comfort, 2 = normal, 3 = sport (A9 scale found by MG4Control). */
         fun steeringLabel(v: Int?): String = when (v) { 1 -> Tr.s(R.string.cf_comfort); 2 -> Tr.s(R.string.dm_normal); 3 -> Tr.s(R.string.dm_sport); null -> "—"; else -> Tr.s(R.string.mode_n, v) }
 
-        /** Pédale de frein : 1 = confort, 0 = normal, 2 = sport (normal vaut zéro). */
+        /** Brake pedal: 1 = comfort, 0 = normal, 2 = sport (normal is zero). */
         fun pedalLabel(v: Int?): String = when (v) { 1 -> Tr.s(R.string.cf_comfort); 0 -> Tr.s(R.string.dm_normal); 2 -> Tr.s(R.string.dm_sport); null -> "—"; else -> Tr.s(R.string.mode_n, v) }
 
-        /** Aide au maintien de voie : 1 = arrêt, 2 = alerte, 3 = assistance, 5 = urgence. */
+        /** Lane keeping: 1 = off, 2 = warning, 3 = assist, 5 = emergency. */
         fun lasLabel(v: Int?): String = when (v) { 1 -> Tr.s(R.string.st_off); 2 -> Tr.s(R.string.alert); 3 -> Tr.s(R.string.assist); 5 -> Tr.s(R.string.emergency); null -> "—"; else -> Tr.s(R.string.mode_n, v) }
 
-        /** Freinage d'urgence (A9) : état 1 = arrêt, 2 = actif ; mode 1 = alerte, 2 = alerte + freinage. */
+        /** Emergency braking (A9): state 1 = off, 2 = active; mode 1 = warning, 2 = warning + braking. */
         fun aebLabel(state: Int?, mode: Int?): String = when {
             state == 1 -> Tr.s(R.string.st_off)
             state == 2 && mode == 2 -> Tr.s(R.string.aeb_alert_brake)
@@ -191,10 +191,10 @@ data class VehicleState(
 
         fun onOff(v: Int?): String = when (v) { 0 -> Tr.s(R.string.st_off); 1 -> Tr.s(R.string.st_on); null -> "—"; else -> Tr.s(R.string.value_n, v) }
 
-        /** Calibration de la consigne affichée (appui long sur la température), réglée au démarrage. */
+        /** Calibration of the displayed set point (long press on the temperature), set at startup. */
         @Volatile var tempOffset = 0
 
-        /** LO / HI d'après la consigne de la voiture ; le chiffre affiché inclut la calibration. */
+        /** LO / HI from the car's set point; the displayed number includes the calibration. */
         fun tempLabel(t: Float?): String = when {
             t == null || t.isNaN() || t <= 0f -> "—"
             t <= TEMP_MIN -> "LO"

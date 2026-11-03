@@ -10,8 +10,8 @@ android {
     defaultConfig {
         applicationId = "app.mg4dash"
         minSdk = 28
-        // Cible Android 9 comme le reste du système : pas de restrictions d'arrière-plan
-        // ni de permissions d'exécution à gérer pour une appli au uid système.
+        // Targets Android 9 like the rest of the system: no background restrictions
+        // or runtime permissions to handle for an app with the system uid.
         targetSdk = 28
         versionCode = 241
         versionName = "1.7.2-beta8"
@@ -19,12 +19,12 @@ android {
 
     flavorDimensions += "target"
     productFlavors {
-        // Voiture : uid système (src/car/AndroidManifest.xml), vraies données carapi.
+        // Car: system uid (src/car/AndroidManifest.xml), real carapi data.
         create("car") {
             dimension = "target"
             buildConfigField("boolean", "MOCK", "false")
         }
-        // Émulateur : même appli sans uid système, données simulées.
+        // Emulator: same app without the system uid, simulated data.
         create("emulator") {
             dimension = "target"
             applicationIdSuffix = ".emu"
@@ -74,8 +74,8 @@ dependencies {
     testImplementation("androidx.test:core:1.6.1")
 }
 
-// Pas de profil ART embarqué (assets/dexopt) : sur la voiture, la compilation « speed-profile »
-// faite à l'installation produisait parfois un code inutilisable (ClassNotFoundException au démarrage).
+// No embedded ART profile (assets/dexopt): on the car, the "speed-profile" compilation
+// done at install sometimes produced unusable code (ClassNotFoundException at startup).
 configurations.all { exclude(group = "androidx.profileinstaller", module = "profileinstaller") }
 tasks.configureEach {
     if (name.contains("ArtProfile", ignoreCase = true)) enabled = false

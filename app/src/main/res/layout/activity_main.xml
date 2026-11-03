@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Accueil 3 colonnes, zone appli de la MG4 : 1778 × 640 dp (160 dpi), sous la barre SAIC. -->
+<!-- 3 column home, MG4 app area: 1778 × 640 dp (160 dpi), under the SAIC bar. -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -20,7 +20,7 @@
         android:baselineAligned="false"
         android:orientation="horizontal">
 
-        <!-- ─── Colonne 1 : Clim + Énergie ─── -->
+        <!-- ─── Column 1: Climate + Energy ─── -->
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="match_parent"
@@ -44,7 +44,7 @@
                     android:gravity="center_vertical"
                     android:orientation="horizontal">
 
-                    <!-- Marge gauche : zone du bouton antibrouillards superposé par MG. -->
+                    <!-- Left margin: area of the fog light button overlaid by MG. -->
                     <TextView
                         style="@style/CardTitle"
                         android:layout_width="0dp"
@@ -54,11 +54,11 @@
                         android:text="@string/title_climate" />
                 </LinearLayout>
 
-                <!-- Rangée ventilation à mi-hauteur entre la température et les boutons de diffusion (#34) :
-                     trois espaces égaux autour de la température et de la ventilation -->
+                <!-- Fan row at mid height between the temperature and the air outlet buttons (#34):
+                     three equal gaps around the temperature and the fan -->
                 <Space android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" />
 
-                <!-- Température, avec la température extérieure en petit dessous -->
+                <!-- Temperature, with the outside temperature small below -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -115,7 +115,7 @@
 
                 <Space android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" />
 
-                <!-- Ventilation : mêmes boutons que la température ; appui long − = minimum, + = maximum -->
+                <!-- Fan: same buttons as temperature; long press − = minimum, + = maximum -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="68dp"
@@ -131,7 +131,7 @@
                         android:padding="18dp"
                         android:src="@drawable/ic_minus" />
 
-                    <!-- En AUTO : espaces souples de part et d'autre pour centrer « hélice AUTO · débit » (#34) -->
+                    <!-- In AUTO: flexible spaces on either side to centre "fan AUTO · flow" (#34) -->
                     <Space
                         android:id="@+id/fanSpaceL"
                         android:layout_width="0dp"
@@ -155,7 +155,7 @@
                         android:layout_marginRight="12dp"
                         android:layout_weight="1" />
 
-                    <!-- Jauge centrée entre − et + (#34) : 20 + 28 + 12 à gauche, 12 + 48 à droite ; chiffre collé à la jauge -->
+                    <!-- Gauge centred between − and + (#34): 20 + 28 + 12 on the left, 12 + 48 on the right; number against the gauge -->
                     <TextView
                         android:id="@+id/fanValue"
                         android:layout_width="48dp"
@@ -188,7 +188,7 @@
 
                 <Space android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" />
 
-                <!-- 1re rangée (#34) : pare-brise, visage, pieds (combinables), recyclage ; « A » quand la voiture décide -->
+                <!-- First row (#34): windscreen, face, feet (combinable), recirculation; "A" when the car decides -->
                 <LinearLayout
                     android:id="@+id/climDirRow"
                     android:layout_width="match_parent"
@@ -210,7 +210,7 @@
                     </FrameLayout>
                 </LinearLayout>
 
-                <!-- 2e rangée : marche, A/C, AUTO, ECO -->
+                <!-- Second row: on, A/C, AUTO, ECO -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -224,7 +224,7 @@
                 </LinearLayout>
             </LinearLayout>
 
-            <!-- Énergie -->
+            <!-- Energy -->
             <LinearLayout
                 android:id="@+id/energyCard"
                 style="@style/Panel"
@@ -260,7 +260,7 @@
                         android:textSize="19sp"
                         tools:text="En charge · 1 h 20" />
 
-                    <!-- Charger / Arrêter, ou Lancer / Arrêter le V2L quand un adaptateur est branché -->
+                    <!-- Charge / Stop, or Start / Stop V2L when an adapter is plugged in -->
                     <TextView
                         android:id="@+id/chargeAction"
                         style="@style/Chip"
@@ -395,7 +395,7 @@
             </LinearLayout>
         </LinearLayout>
 
-        <!-- ─── Colonne 2 : Position + Météo ─── -->
+        <!-- ─── Column 2: Position + Weather ─── -->
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="match_parent"
@@ -499,7 +499,7 @@
                         android:contentDescription="@string/cd_zoom_out"
                         android:src="@drawable/ic_minus" />
 
-                    <!-- Carte en plein écran (issue #4), la barre verticale reste -->
+                    <!-- Full screen map (issue #4), the vertical bar stays -->
                     <ImageButton
                         android:id="@+id/mapFullscreen"
                         style="@style/RoundButton"
@@ -517,7 +517,7 @@
                     android:textColor="?attr/mgTextTitle"
                     android:textSize="13sp" />
 
-                <!-- Raccourcis (applis, Home Assistant), à la place de la carte au choix -->
+                <!-- Shortcuts (apps, Home Assistant), in place of the map if chosen -->
                 <LinearLayout
                     android:id="@+id/shortcutsHolder"
                     style="@style/Panel"
@@ -629,7 +629,7 @@
             </LinearLayout>
         </LinearLayout>
 
-        <!-- ─── Colonne 3 : Média + widget secondaire ─── -->
+        <!-- ─── Column 3: Media + secondary widget ─── -->
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="match_parent"
@@ -696,7 +696,7 @@
                         android:visibility="gone" />
                 </LinearLayout>
 
-                <!-- Pochette grand format à gauche (carré sur toute la hauteur), infos et commandes à droite -->
+                <!-- Large cover on the left (square at full height), info and controls on the right -->
                 <LinearLayout
                     android:id="@+id/mediaInfo"
                     android:layout_width="match_parent"
@@ -783,8 +783,8 @@
                             android:progressBackgroundTint="?attr/mgGaugeOff"
                             android:progressTint="?attr/mgAction" />
 
-                        <!-- Zone morte (#67) : toute la rangée des boutons, marge comprise, absorbe les touchers ratés
-                             à côté de ⏮ ⏭ au lieu d'ouvrir l'appli de la source -->
+                        <!-- Dead zone (#67): the whole button row, margin included, absorbs missed touches
+                             next to ⏮ ⏭ instead of opening the source app -->
                         <LinearLayout
                             android:id="@+id/mediaControls"
                             android:layout_width="match_parent"
@@ -829,7 +829,7 @@
                 </LinearLayout>
             </LinearLayout>
 
-            <!-- Widget secondaire paramétrable : toucher pour changer (énergie du trajet / puissance / téléphone) -->
+            <!-- Configurable secondary widget: touch to change (trip energy / power / phone) -->
             <LinearLayout
                 android:id="@+id/secondaryCard"
                 style="@style/Panel"
@@ -876,8 +876,8 @@
         </LinearLayout>
     </LinearLayout>
 
-    <!-- ═══ Dock inférieur ═══ -->
-    <!-- Apparence fixée par Dock.build(), commune à toutes les pages. -->
+    <!-- ═══ Bottom dock ═══ -->
+    <!-- Appearance set by Dock.build(), common to all pages. -->
     <LinearLayout
         android:id="@+id/dock"
         android:layout_width="match_parent"

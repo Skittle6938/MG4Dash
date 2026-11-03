@@ -13,11 +13,11 @@ import app.mg4dash.R
 import kotlin.math.roundToInt
 
 /**
- * Répartition du son vue de dessus : la voiture, ses haut-parleurs et un point à faire glisser
- * (balance gauche / droite en x, fader avant / arrière en y). Double toucher = recentrer.
+ * Sound balance seen from above: the car, its speakers and a point to drag
+ * (left / right balance in x, front / rear fader in y). Double touch = recentre.
  */
 class SoundFieldView(context: Context) : View(context) {
-    /** −RANGE (gauche / arrière) … +RANGE (droite / avant). */
+    /** −RANGE (left / rear) … +RANGE (right / front). */
     var balance = 0; set(v) { field = v.coerceIn(-RANGE, RANGE); invalidate() }
     var fader = 0; set(v) { field = v.coerceIn(-RANGE, RANGE); invalidate() }
     var onChange: ((balance: Int, fader: Int) -> Unit)? = null
@@ -31,32 +31,32 @@ class SoundFieldView(context: Context) : View(context) {
     private val car = RectF()
     private var lastTap = 0L
 
-    /** Photo de la MG4 vue de dessus (celle de WinClose), passée en gris clair transparent. */
+    /** Top view photo of the MG4 (WinClose's), turned light grey and transparent. */
     private val photo: android.graphics.Bitmap? = try {
         android.graphics.BitmapFactory.decodeResource(resources, R.drawable.mg4_top)
     } catch (_: Throwable) { null }
     private val photoPaint = Paint(Paint.ANTI_ALIAS_FLAG or Paint.FILTER_BITMAP_FLAG)
     private var photoTone = 0
-    /** Caisse (sans les rétroviseurs) : zone où l'on place le point de son. */
+    /** Body (without mirrors): area where the sound point is placed. */
     private val shell = RectF()
 
     override fun onDraw(cv: Canvas) {
         val w = width.toFloat(); val h = height.toFloat()
-        // Photo à l'échelle de la hauteur disponible, avant en haut
-        // (la photo a une marge transparente : on la laisse déborder un peu sur les libellés avant / arrière)
+        // Photo scaled to the available height, front at the top
+        // (the photo has a transparent margin: let it overlap the front / rear labels a little)
         val ch = h - 16 * d
         val ratio = photo?.let { it.width.toFloat() / it.height } ?: 0.63f
         val cw = ch * ratio
         car.set((w - cw) / 2, 8 * d, (w + cw) / 2, 8 * d + ch)
         shell.set(car.left + cw * 0.2f, car.top + ch * 0.07f, car.left + cw * 0.81f, car.top + ch * 0.93f)
         photo?.let { bmp ->
-            // Gris clair (sombre en thème clair) : luminance de la photo ramenée vers la couleur du texte
+            // Light grey (dark in light theme): photo luminance brought towards the text colour
             val tone = c(R.color.text_value)
             if (photoPaint.colorFilter == null || photoTone != tone) {
                 photoTone = tone
                 val r = android.graphics.Color.red(tone) / 255f; val g = android.graphics.Color.green(tone) / 255f; val b = android.graphics.Color.blue(tone) / 255f
                 val dark = (r + g + b) < 1.5f
-                // Gris : luminance, éclaircie (thème sombre) ou assombrie (thème clair), puis transparence
+                // Grey: luminance, lightened (dark theme) or darkened (light theme), then transparency
                 val k = if (dark) 0.75f else 0.9f; val off = if (dark) 60f else 90f
                 val m = android.graphics.ColorMatrix(floatArrayOf(
                     0.299f * k, 0.587f * k, 0.114f * k, 0f, off,
@@ -67,17 +67,17 @@ class SoundFieldView(context: Context) : View(context) {
             }
             cv.drawBitmap(bmp, null, car, photoPaint)
         }
-        // Haut-parleurs (portes avant et arrière)
+        // Speakers (front and rear doors)
         fill.color = c(R.color.text_title)
         for ((sx, sy) in listOf(0f to 0.4f, 1f to 0.4f, 0f to 0.64f, 1f to 0.64f))
             cv.drawCircle(shell.left + shell.width() * sx, car.top + ch * sy, 5.5f * d, fill)
-        // Repères et libellés
+        // Markers and labels
         text.color = c(R.color.text_title)
         cv.drawText(context.getString(R.string.snd_front), w / 2, 18 * d, text)
         cv.drawText(context.getString(R.string.snd_rear), w / 2, h - 8 * d, text)
         cv.drawText(context.getString(R.string.snd_left), car.left - 40 * d, h / 2 + 5 * d, text)
         cv.drawText(context.getString(R.string.snd_right), car.right + 40 * d, h / 2 + 5 * d, text)
-        // Point de son
+        // Sound point
         val px = shell.left + shell.width() * (0.5f + balance / (2f * RANGE) * 0.9f)
         val py = shell.top + shell.height() * (0.5f - fader / (2f * RANGE) * 0.85f)
         line.color = Themes.select(context); line.alpha = 120
@@ -109,8 +109,8 @@ class SoundFieldView(context: Context) : View(context) {
 }
 
 /**
- * Égaliseur : un curseur vertical par bande, la courbe passe par les curseurs.
- * Valeurs −RANGE … +RANGE ; glisser un curseur le règle.
+ * Equaliser: one vertical slider per band, the curve goes through the sliders.
+ * Values −RANGE … +RANGE; dragging a slider sets it.
  */
 class EqualizerView(context: Context) : View(context) {
     val labels = listOf("80 Hz", "500 Hz", "1 kHz", "5 kHz", "16 kHz")
@@ -119,7 +119,7 @@ class EqualizerView(context: Context) : View(context) {
 
     fun set(vs: IntArray) { vs.copyInto(values); invalidate() }
 
-    /** Spectre de la musique en cours (0…1 par barre, des graves aux aigus), dessiné derrière ; null = rien. */
+    /** Spectrum of the current music (0…1 per bar, bass to treble), drawn behind; null = nothing. */
     var spectrum: FloatArray? = null; set(v) { field = v; invalidate() }
 
     private val d = resources.displayMetrics.density
@@ -138,10 +138,10 @@ class EqualizerView(context: Context) : View(context) {
 
     override fun onDraw(cv: Canvas) {
         top = 44 * d; bottom = height - 40 * d
-        // Repères 0 et ±RANGE
+        // 0 and ±RANGE markers
         grid.color = c(R.color.panel_border)
         for (v in listOf(-RANGE, 0, RANGE)) cv.drawLine(0f, y(v), width.toFloat(), y(v), grid)
-        // Spectre en direct, en transparence derrière les curseurs
+        // Live spectrum, transparent behind the sliders
         spectrum?.let { sp ->
             val n = sp.size; val bw = width.toFloat() / n
             fill.color = Themes.select(context)
@@ -152,7 +152,7 @@ class EqualizerView(context: Context) : View(context) {
             }
             fill.alpha = 255
         }
-        // Courbe lissée et zone sous la courbe
+        // Smoothed curve and area under the curve
         val p = Path().apply {
             moveTo(0f, y(values[0]))
             lineTo(x(0), y(values[0]))

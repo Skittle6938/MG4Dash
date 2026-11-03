@@ -1,8 +1,8 @@
 plugins {
     id("com.android.application")
 }
-// Petit outil autonome : copie sur clé USB, en lecture seule, le launcher et le SystemUI d'origine d'un
-// firmware dont on n'a pas le code, pour les étudier quand la personne n'a pas ADB. Non embarqué dans MG4Dash.
+// Small standalone tool: copies to a USB stick, read only, the stock launcher and SystemUI of a
+// firmware whose code we do not have, to study them when the person has no ADB. Not embedded in MG4Dash.
 
 android {
     namespace = "app.mg4dash.copytool"

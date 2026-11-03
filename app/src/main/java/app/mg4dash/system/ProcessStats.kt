@@ -5,10 +5,10 @@ import android.content.Context
 import java.io.File
 
 /**
- * Consommation des applis et services de l'autoradio (#69). Mémoire : PSS donnée par le système pour
- * tous les processus. Processeur : en direct (temps CPU entre deux relevés de /proc/<pid>/stat) pour les
- * processus que MG4Dash peut lire (applis système) ; les autres (applis installées, Bluetooth…) sont
- * refusés par le système, on prend alors leur moyenne récente donnée par « dumpsys cpuinfo » ([Proc.cpuAverage]).
+ * Consumption of the head unit's apps and services (#69). Memory: PSS given by the system for
+ * all processes. CPU: live (CPU time between two reads of /proc/<pid>/stat) for the
+ * processes MG4Dash can read (system apps); the others (installed apps, Bluetooth…) are
+ * refused by the system, so their recent average from "dumpsys cpuinfo" is used ([Proc.cpuAverage]).
  */
 object ProcessStats {
     data class Proc(val pid: Int, val packageName: String, val label: String, val service: Boolean,
@@ -23,14 +23,14 @@ object ProcessStats {
         File("/proc/stat").bufferedReader().use { it.readLine() }.trim().split(Regex("\\s+")).drop(1).mapNotNull { it.toLongOrNull() }.sum()
     } catch (_: Exception) { null }
 
-    /** utime + stime du processus (champs 14 et 15 de /proc/<pid>/stat, après le nom entre parenthèses). */
+    /** Process utime + stime (fields 14 and 15 of /proc/<pid>/stat, after the name in parentheses). */
     private fun procTicks(pid: Int): Long? = try {
         val s = File("/proc/$pid/stat").readText()
         val f = s.substring(s.lastIndexOf(')') + 2).split(' ')
         f[11].toLong() + f[12].toLong()
     } catch (_: Exception) { null }
 
-    /** % moyen par processus sur la dernière période du système (« 20% 5487/com.exemple: … »), relu toutes les 10 s. */
+    /** Average % per process over the system's last period ("20% 5487/com.example: …"), reread every 10 s. */
     private fun recentAverages(): Map<Int, Float> {
         val now = android.os.SystemClock.elapsedRealtime()
         if (now - averagesAt < 10_000 && averages.isNotEmpty()) return averages
@@ -63,7 +63,7 @@ object ProcessStats {
             val average = if (ticks == null) (avg ?: recentAverages().also { avg = it })[p.pid] ?: 0f else null
             val pkg = p.pkgList?.firstOrNull() ?: p.processName.substringBefore(':')
             val appLabel = try { pm.getApplicationInfo(pkg, 0).loadLabel(pm).toString() } catch (_: Exception) { pkg }
-            // Processus secondaire (« :service ») : son nom après le libellé de l'appli
+            // Secondary process (":service"): its name after the app's label
             val label = if (p.processName.contains(':')) "$appLabel (${p.processName.substringAfter(':')})" else appLabel
             val service = pm.getLaunchIntentForPackage(pkg) == null || p.processName.contains(':')
             Proc(p.pid, pkg, label, service, live ?: average, live == null && average != null, mem?.getOrNull(i)?.totalPss?.let { it / 1024 })

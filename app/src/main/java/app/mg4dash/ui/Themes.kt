@@ -10,13 +10,13 @@ import app.mg4dash.system.Log
 import app.mg4dash.system.Prefs
 
 /**
- * Thèmes : fond et couleur des boutons, choisis séparément (5 × 5).
- * Les ressources utilisent des attributs (?attr/mgPanel…) ; on superpose ici les styles choisis
- * au thème de chaque écran, avant son affichage. Les couleurs « qui ont un sens » (batterie,
- * chaud, froid, alerte) ne changent pas.
+ * Themes: background and button colour, chosen separately (5 × 5).
+ * Resources use attributes (?attr/mgPanel…); the chosen styles are overlaid here on
+ * each screen's theme, before it shows. Colours "with a meaning" (battery,
+ * hot, cold, alert) do not change.
  *
- * Le choix est aussi publié dans Settings.Global ("mg4dash_theme" = "fond,boutons") pour que
- * Radio Dash, qui tourne dans l'appli radio SAIC, suive le même thème.
+ * The choice is also published in Settings.Global ("mg4dash_theme" = "background,buttons") so that
+ * Radio Dash, running in the SAIC radio app, follows the same theme.
  */
 object Themes {
     val BACKGROUNDS = listOf(R.style.MgBg_Night, R.style.MgBg_Black, R.style.MgBg_Charcoal, R.style.MgBg_Forest, R.style.MgBg_Burgundy)
@@ -25,9 +25,9 @@ object Themes {
     val ACCENTS_LIGHT = listOf(R.style.MgAccentLight_Blue, R.style.MgAccentLight_Grey, R.style.MgAccentLight_Red, R.style.MgAccentLight_Green, R.style.MgAccentLight_Orange)
 
     /**
-     * Mode clair ? Réglage : 0 = auto, 1 = sombre, 2 = clair. En auto, on suit le mode jour/nuit de
-     * la voiture : mode nuit d'Android (piloté par la voiture) ou PMS_SYSTEM_DAY_NIGHT_MODE (3 = nuit,
-     * relevé sur la voiture : passe à 3 quand les feux s'allument).
+     * Light mode? Setting: 0 = auto, 1 = dark, 2 = light. In auto, follow the car's day/night
+     * mode: Android's night mode (driven by the car) or PMS_SYSTEM_DAY_NIGHT_MODE (3 = night,
+     * found on the car: goes to 3 when the lights come on).
      */
     fun isLight(context: Context): Boolean = when (Prefs(context).themeMode) {
         1 -> false
@@ -36,31 +36,31 @@ object Themes {
     }
 
     /**
-     * Jour / nuit stabilisé : le changement n'est retenu que si les feux restent dans le nouvel état
-     * au moins [HOLD_MS] (un pont ou un court tunnel ne fait plus basculer l'écran).
+     * Stabilised day / night: the change is only kept if the lights stay in the new state
+     * for at least [HOLD_MS] (a bridge or a short tunnel no longer switches the screen).
      */
     fun isNight(context: Context): Boolean {
-        // Au démarrage, tant que la voiture ne répond pas encore, on garde le dernier état connu :
-        // sinon l'accueil se construisait en clair puis basculait en sombre quelques secondes plus
-        // tard (et l'appli du widget carte, chassée par la reconstruction, passait en plein écran)
+        // At startup, as long as the car does not answer yet, keep the last known state:
+        // otherwise home was built light then switched to dark a few seconds
+        // later (and the map widget's app, chased off by the rebuild, went full screen)
         val sp = context.getSharedPreferences("mg4launcher", Context.MODE_PRIVATE)
         if (!app.mg4dash.car.CarProps.ready && !app.mg4dash.BuildConfig.MOCK) {
-            // Mode nuit d'Android déjà donné par la voiture : lisible tout de suite, sans attendre (#64)
+            // Android's night mode already given by the car: readable at once, without waiting (#64)
             val ui = context.resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK
             if (ui == android.content.res.Configuration.UI_MODE_NIGHT_YES) return true
-            // Toujours sombre tant que les feux ne sont pas lus (#64, idée de mquiambao00) : un démarrage
-            // de nuit n'éblouit plus ; de jour, on passe en clair dès la première lecture
+            // Always dark until the lights are read (#64, idea from mquiambao00): a night
+            // start no longer dazzles; by day, go light from the first read
             return stableNight ?: true
         }
         val raw = rawNight(context)
-        // Première lecture des feux depuis le démarrage : appliquée tout de suite, sans le délai anti-tunnel.
-        // Sinon un démarrage de nuit après un arrêt de jour restait plusieurs secondes en clair (#64).
+        // First read of the lights since startup: applied at once, without the anti-tunnel delay.
+        // Otherwise a night start after a day stop stayed light for several seconds (#64).
         if (stableNight == null) {
             stableNight = raw; pendingSince = 0L
             if (sp.getBoolean("last_night", !raw) != raw) sp.edit().putBoolean("last_night", raw).apply()
             return raw
         }
-        // Réglage « transition immédiate » : pas d'attente, l'état des feux est suivi tout de suite
+        // "Immediate transition" setting: no wait, the lights state is followed at once
         if (!sp.getBoolean("theme_smooth", true)) {
             if (stableNight != raw) { stableNight = raw; sp.edit().putBoolean("last_night", raw).apply() }
             pendingSince = 0L; return raw
@@ -82,9 +82,9 @@ object Themes {
     private fun rawNight(context: Context): Boolean {
         val ui = context.resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK
         if (ui == android.content.res.Configuration.UI_MODE_NIGHT_YES) return true
-        // Option : nuit après le coucher du soleil, même feux de position éteints (#64)
+        // Option: night after sunset, even with side lights off (#64)
         if (Prefs(context).nightBySun && app.mg4dash.system.SunTimes.isNight(context)) return true
-        // Relevé sur la voiture : feux allumés → VEH_SIDE_LGHT = 3 et PMS_SYSTEM_DAY_NIGHT_MODE = 3 (zone 0x1000000)
+        // Found on the car: lights on → VEH_SIDE_LGHT = 3 and PMS_SYSTEM_DAY_NIGHT_MODE = 3 (area 0x1000000)
         return try {
             val side = app.mg4dash.car.CarProps.readAny(557880099)
             (side.isNotEmpty() && side != "0" && side != "false") ||
@@ -92,16 +92,16 @@ object Themes {
         } catch (_: Exception) { false }
     }
 
-    /** Couleurs des pastilles du sélecteur (même ordre que les listes). */
+    /** Colours of the selector's dots (same order as the lists). */
     val BACKGROUND_SWATCHES = intArrayOf(0xFF141B29.toInt(), 0xFF0E0E10.toInt(), 0xFF2B2F35.toInt(), 0xFF16271F.toInt(), 0xFF29161C.toInt())
     val ACCENT_SWATCHES = intArrayOf(0xFF2979FF.toInt(), 0xFF8E99A8.toInt(), 0xFFE53935.toInt(), 0xFF00C853.toInt(), 0xFFFF8F00.toInt())
 
     private const val GLOBAL_KEY = "mg4dash_theme"
 
-    /** Signature du thème courant : sert à savoir si un écran doit se redessiner. */
+    /** Signature of the current theme: used to know if a screen must redraw. */
     fun signature(context: Context): Int = Prefs(context).let { it.themeBackground * 10 + it.themeAccent + (if (isLight(context)) 100 else 0) + (if (it.verticalDock) 1000 else 0) + (if (it.panelFade) 0 else 10000) + (if (it.wideBar) 100000 else 0) }
 
-    /** À appeler dans onCreate, avant setContentView ; [dark] force le thème sombre. */
+    /** To call in onCreate, before setContentView; [dark] forces the dark theme. */
     fun apply(activity: Activity, dark: Boolean = false) {
         val p = Prefs(activity)
         val light = !dark && isLight(activity)
@@ -114,28 +114,28 @@ object Themes {
     }
 
     private const val FADE_MS = 2_000L
-    /** Fenêtre posée au-dessus de tout pendant la recréation (garde l'ancienne image, sans noir). */
+    /** Window placed above everything during recreation (keeps the old image, with no black). */
     private var fadeWindow: android.widget.ImageView? = null
 
     /**
-     * Change de thème (jour / nuit…) en fondu. L'image de l'écran actuel est posée dans une petite
-     * fenêtre système au-dessus de tout, qui survit à la recréation de l'activité : pendant que
-     * l'écran se reconstruit (court passage au noir d'Android), on voit toujours l'ancienne image,
-     * puis elle s'efface en fondu sur le nouvel écran.
+     * Changes theme (day / night…) with a fade. The image of the current screen is placed in a small
+     * system window above everything, which survives the activity's recreation: while
+     * the screen rebuilds (Android's short black moment), the old image is still seen,
+     * then it fades out onto the new screen.
      */
-    /** Menus et confirmations posés par l'appli (fenêtres flottantes), suivis sans les retenir. */
+    /** Menus and confirmations placed by the app (floating windows), followed without retaining them. */
     private val popups = java.util.WeakHashMap<android.widget.PopupWindow, Boolean>()
     fun track(p: android.widget.PopupWindow) { popups[p] = true }
     private var lastOpen = false
 
     /**
-     * Une fenêtre est ouverte par-dessus l'écran (boîte de dialogue, qui prend le focus, ou menu /
-     * confirmation de l'appli) : le changement de thème automatique attend qu'elle soit fermée,
-     * sinon la recréation de l'écran la faisait disparaître.
+     * A window is open over the screen (dialog, which takes focus, or the app's menu /
+     * confirmation): the automatic theme change waits for it to close,
+     * otherwise the screen's recreation made it disappear.
      */
     fun popupOpen(activity: Activity): Boolean {
         if (popups.keys.any { it.isShowing }) return true
-        // Boîtes de dialogue (type APPLICATION) et fenêtres rattachées (sous-fenêtres 1000-1999) de l'appli
+        // The app's dialogs (APPLICATION type) and attached windows (sub-windows 1000-1999)
         return try {
             val g = Class.forName("android.view.WindowManagerGlobal")
             val inst = g.getMethod("getInstance").invoke(null)
@@ -158,8 +158,8 @@ object Themes {
         recreating = true
         val v = activity.window.decorView
         if (v.width <= 0 || v.height <= 0) { recreating = false; activity.recreate(); return }
-        // Copie des pixels réellement affichés (PixelCopy) : un dessin logiciel de l'écran sortait
-        // noir sur la voiture (rendu matériel), d'où la seconde de noir avant le fondu
+        // Copy of the pixels really shown (PixelCopy): a software draw of the screen came out
+        // black on the car (hardware rendering), hence the second of black before the fade
         val shot = android.graphics.Bitmap.createBitmap(v.width, v.height, android.graphics.Bitmap.Config.ARGB_8888)
         try {
             android.view.PixelCopy.request(activity.window, shot, { result ->
@@ -171,7 +171,7 @@ object Themes {
 
     @Volatile private var recreating = false
 
-    /** Fenêtre de l'ancienne image posée, puis recréation une fois qu'elle est dessinée. */
+    /** Old image window placed, then recreation once it is drawn. */
     private fun overlayThenRecreate(activity: Activity, shot: android.graphics.Bitmap) {
         if (activity.isFinishing || activity.isDestroyed) { recreating = false; return }
         try {
@@ -189,8 +189,8 @@ object Themes {
             ).apply { gravity = android.view.Gravity.TOP or android.view.Gravity.START; x = 0; y = 0; windowAnimations = 0 }
             wm.addView(img, lp)
             fadeWindow = img
-            // Fondu image par image (sans animateur : l'échelle des animations peut être à 0 sur la voiture),
-            // après un court délai pour laisser le nouvel écran se dessiner dessous
+            // Frame by frame fade (no animator: the animation scale can be 0 on the car),
+            // after a short delay to let the new screen draw underneath
             val t0 = android.os.SystemClock.uptimeMillis() + 700
             img.post(object : Runnable {
                 override fun run() {
@@ -200,7 +200,7 @@ object Themes {
                     img.postDelayed(this, 16)
                 }
             })
-            // Recréation seulement quand l'ancienne image est à l'écran, au-dessus de tout
+            // Recreation only when the old image is on screen, above everything
             img.viewTreeObserver.addOnPreDrawListener(object : android.view.ViewTreeObserver.OnPreDrawListener {
                 override fun onPreDraw(): Boolean {
                     img.viewTreeObserver.removeOnPreDrawListener(this)
@@ -218,15 +218,15 @@ object Themes {
     private fun fadeFromPrevious(activity: Activity) {}
 
     /**
-     * Écran moins haut que la dalle (barres SAIC affichées hors plein écran, #43) : tout est
-     * réduit d'autant, pour que les pages dessinées pour 720 dp de haut tiennent sans être coupées.
+     * Screen shorter than the panel (SAIC bars shown outside full screen, #43): everything is
+     * reduced accordingly, so pages drawn for 720 dp of height fit without being cut.
      */
     private fun fitHeight(activity: Activity) {
         val h = activity.resources.configuration.screenHeightDp
         val sys = android.content.res.Resources.getSystem().displayMetrics
-        // Plein écran (réglage par défaut) : la dalle entière est à nous, même si la configuration
-        // annonce une hauteur réduite par les barres SAIC masquées ; réduire décalait tout,
-        // dont la barre verticale sous le bouton antibrouillards (#38)
+        // Full screen (default setting): the whole panel is ours, even if the configuration
+        // announces a height reduced by the hidden SAIC bars; reducing shifted everything,
+        // including the vertical bar under the fog light button (#38)
         val full = Prefs(activity).fullscreen
         val scale = if (!full && h in 400 until FULL_HEIGHT_DP - 8) h / FULL_HEIGHT_DP.toFloat() else 1f
         val m = activity.resources.displayMetrics
@@ -237,7 +237,7 @@ object Themes {
 
     private const val FULL_HEIGHT_DP = 720
 
-    /** Publie le thème pour Radio Dash (uid système requis ; sans effet sinon). */
+    /** Publishes the theme for Radio Dash (system uid required; no effect otherwise). */
     fun publish(context: Context) {
         val p = Prefs(context)
         try {
@@ -256,7 +256,7 @@ object Themes {
         R.color.text_sub to R.attr.mgTextSub, R.color.text_disabled to R.attr.mgTextDisabled,
     )
 
-    /** Couleur d'une ressource, en suivant le thème pour les teintes réglables. */
+    /** Colour of a resource, following the theme for adjustable tints. */
     fun color(context: Context, res: Int): Int {
         val attr = ATTRS[res] ?: return ContextCompat.getColor(context, res)
         val tv = TypedValue()
@@ -264,11 +264,11 @@ object Themes {
             tv.data else ContextCompat.getColor(context, res)
     }
 
-    /** Vert de l'énergie pour un texte ou une courbe : plus foncé en mode clair, pour rester lisible sur fond blanc. */
+    /** Energy green for a text or curve: darker in light mode, to stay readable on white. */
     fun energy(context: Context): Int =
         if (isLight(context)) ContextCompat.getColor(context, R.color.accent_energy_light) else color(context, R.color.accent_energy)
 
-    /** Couleur de sélection (puces actives) du thème courant. */
+    /** Selection colour (active chips) of the current theme. */
     fun select(context: Context): Int {
         val tv = TypedValue()
         return if (context.theme.resolveAttribute(R.attr.mgSelect, tv, true)) tv.data else ContextCompat.getColor(context, R.color.accent_cold)

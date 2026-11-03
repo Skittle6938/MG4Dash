@@ -11,9 +11,9 @@ import app.mg4dash.energy.EnergyMonitor
 import java.util.Locale
 
 /**
- * Page « Consommation » du widget carte (issue #6) : même contenu que sur la page Énergie,
- * depuis la dernière recharge — total, répartition conduite / clim / accessoires, énergie
- * récupérée, et courbe des derniers km. Affichée d'office quand la carte n'a pas de connexion.
+ * "Consumption" page of the map widget (issue #6): same content as on the Energy page,
+ * since the last charge: total, driving / climate / accessories breakdown, recovered
+ * energy, and curve of the last km. Shown automatically when the map has no connection.
  */
 class ConsumptionCard(context: Context) : LinearLayout(context) {
     private val d = resources.displayMetrics.density
@@ -22,11 +22,11 @@ class ConsumptionCard(context: Context) : LinearLayout(context) {
         setTextColor(c(colorRes)); setTextSize(TypedValue.COMPLEX_UNIT_SP, sp); maxLines = 1
     }
     private val total = tv(40f, R.color.text_value)
-    /** Distance de la période (#44), à droite du total, unité en petit comme sur la carte Énergie. */
+    /** Period's distance (#44), to the right of the total, small unit as on the Energy card. */
     private val distance = tv(40f, R.color.text_value)
     private val legend = LinearLayout(context).apply { orientation = HORIZONTAL; gravity = Gravity.CENTER_VERTICAL }
     private val chart = LineChart(context).apply {
-        // Appui long sur la courbe : l'effacer (#44)
+        // Long press on the curve: erase it (#44)
         setOnLongClickListener { v -> (context as? android.app.Activity)?.let { confirmClear(it, v, prefs.consumptionPeriod.coerceIn(0, 2)) }; true }
     }
     private val note = tv(15f, R.color.text_sub)
@@ -47,10 +47,10 @@ class ConsumptionCard(context: Context) : LinearLayout(context) {
     init {
         orientation = VERTICAL
         setPadding((20 * d).toInt(), (16 * d).toInt(), (20 * d).toInt(), (16 * d).toInt())
-        // Titre masqué avec l'option « Masquer les titres » (la place reste, pour ne rien décaler)
+        // Title hidden with the "Hide titles" option (the space stays, so nothing shifts)
         addView(tv(17f, R.color.text_title).apply { text = context.getString(R.string.en_consumption); letterSpacing = 0.12f
             if (app.mg4dash.system.Prefs(context).hideTitles) visibility = INVISIBLE })
-        // Période (« Depuis la recharge ▾ ») : un toucher ouvre le choix, comme le choix de la source radio
+        // Period ("Since the charge ▾"): a touch opens the choice, like the radio source choice
         addView(periodTv, LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT))
         addView(LinearLayout(context).apply {
             orientation = HORIZONTAL; gravity = Gravity.BOTTOM
@@ -69,11 +69,11 @@ class ConsumptionCard(context: Context) : LinearLayout(context) {
         periodTv.text = periodLabels[period] + "  ▾"
         val t = EnergyMonitor.totals(period)
         val ok = t.outKwh > 0f
-        // Récupération à côté du total (#44), en vert, unité en petit ; rien si elle est nulle
+        // Regeneration next to the total (#44), in green, small unit; nothing if it is zero
         total.text = if (!ok) "—" else android.text.SpannableStringBuilder(smallUnit(String.format(Locale.getDefault(), "%.1f kWh", t.outKwh))).apply {
             if (t.regenKwh >= 0.05f) {
                 val st = length
-                append("  −").append(String.format(Locale.getDefault(), "%.1f", t.regenKwh))   // signe « − » : énergie rendue (#44)
+                append("  −").append(String.format(Locale.getDefault(), "%.1f", t.regenKwh))   // "−" sign: energy given back (#44)
                 val unit = length
                 append(" ").append(context.getString(R.string.en_regen_short))
                 setSpan(android.text.style.ForegroundColorSpan(Themes.energy(context)), st, length, 0)
@@ -89,14 +89,14 @@ class ConsumptionCard(context: Context) : LinearLayout(context) {
         note.text = n
     }
 
-    /** Unité à mi-taille après le dernier espace (« 1.6 kWh », « 12 km »). */
+    /** Half size unit after the last space ("1.6 kWh", "12 km"). */
     private fun smallUnit(t: String): CharSequence {
         val i = t.lastIndexOf(' ').takeIf { it > 0 } ?: return t
         return android.text.SpannableString(t).apply { setSpan(android.text.style.RelativeSizeSpan(0.5f), i, t.length, 0) }
     }
 
     companion object {
-        /** Demande confirmation puis efface la courbe de [period] (0 recharge, 1 trajet, 2 12 mois). */
+        /** Asks for confirmation then erases the curve of [period] (0 charge, 1 trip, 2 12 months). */
         fun confirmClear(a: android.app.Activity, anchor: android.view.View, period: Int) {
             val name = a.getString(listOf(R.string.en_since_charge, R.string.en_trip, R.string.en_last_year)[period])
             SourceMenu.confirm(a, anchor, a.getString(R.string.en_clear_confirm, name), a.getString(R.string.en_clear_curve)) {
@@ -106,8 +106,8 @@ class ConsumptionCard(context: Context) : LinearLayout(context) {
         }
 
         /**
-         * Échelle horizontale (#44) : depuis combien de km (un point par km) ou, sur 12 mois, depuis combien
-         * de temps (âge du plus ancien trajet) commence la courbe ; la fin est « maintenant ».
+         * Horizontal scale (#44): how many km ago (one point per km) or, over 12 months, how long
+         * ago (age of the oldest trip) the curve starts; the end is "now".
          */
         fun axis(c: android.content.Context, period: Int, points: Int): Pair<String?, String?> {
             if (points < 2) return null to null
@@ -129,12 +129,12 @@ class ConsumptionCard(context: Context) : LinearLayout(context) {
         }
 
         /**
-         * Remplit le graphique de la période et rend (nombre de points d'origine, légende) (#44) : trajet par km,
-         * lissé sur 3 points ; recharge et 12 mois selon la date. Les points de recharge d'avant les dates restent par km.
+         * Fills the period's chart and returns (number of original points, legend) (#44): trip by km,
+         * smoothed over 3 points; charge and 12 months by date. Charge points from before dates stay by km.
          */
         fun fill(c: android.content.Context, chart: LineChart, period: Int, stacked: Boolean = false): Pair<Int, String> {
             val curves = app.mg4dash.energy.ConsumptionCurve.curves.value
-            // Graphique empilé : en kWh pour 100 km ou 100 miles, seule unité dont les postes s'additionnent
+            // Stacked chart: in kWh per 100 km or 100 miles, the only unit whose items add up
             val v = curves.of(period).map { if (stacked) app.mg4dash.system.Units.stackValue(c, it) else app.mg4dash.system.Units.cons(c, it) }
             if (stacked && showStack(c, chart, curves, period, v)) {
                 return v.size to if (period == 2) c.getString(R.string.en_trips_note, v.size)
@@ -149,7 +149,7 @@ class ConsumptionCard(context: Context) : LinearLayout(context) {
             return v.size to curveNote(c, period, v)
         }
 
-        /** Graphique empilé (page Énergie) : un poste par couche ; les points sans composition forment une couche grise. */
+        /** Stacked chart (Energy page): one item per layer; points without composition form a grey layer. */
         private fun showStack(c: android.content.Context, chart: LineChart, curves: app.mg4dash.energy.ConsumptionCurve.Curves, period: Int, v: List<Float>): Boolean {
             val mixes = curves.mixOf(period)
             if (v.size < 2 || mixes.size != v.size || mixes.all { it == null }) return false
@@ -168,7 +168,7 @@ class ConsumptionCard(context: Context) : LinearLayout(context) {
             return true
         }
 
-        /** Légende compacte : couleur, poste et part de chacun, conduite récupération déduite. */
+        /** Compact legend: colour, item and share of each, driving with regeneration deducted. */
         private fun fillLegend(c: android.content.Context, legend: LinearLayout, t: EnergyMonitor.Totals) {
             legend.removeAllViews()
             val drive = (t.driveKwh - t.regenKwh).coerceAtLeast(0f)
@@ -191,7 +191,7 @@ class ConsumptionCard(context: Context) : LinearLayout(context) {
         }
 
         private fun curveNote(c: android.content.Context, period: Int, v: List<Float>): String {
-            // Moyenne sans sa valeur dans la légende : l'étiquette de la ligne pointillée la donne déjà (#44)
+            // Average without its value in the legend: the dashed line's label already gives it (#44)
             return if (period == 2) (if (v.size >= 2) c.getString(R.string.en_trips_note, v.size) else c.getString(R.string.en_trips_wait))
             else (if (v.size >= 2) c.getString(R.string.en_curve_note) else c.getString(R.string.en_curve_wait))
         }

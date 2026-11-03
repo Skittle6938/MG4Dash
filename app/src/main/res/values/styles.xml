@@ -6,7 +6,7 @@
         <item name="android:statusBarColor">?attr/mgBgTop</item>
         <item name="android:navigationBarColor">?attr/mgBgTop</item>
         <item name="android:windowAnimationStyle">@null</item>
-        <!-- Fenêtres de dialogue aux couleurs du thème MG4Dash en cours (et non au style de la voiture) -->
+        <!-- Dialog windows in the current MG4Dash theme colours (not the car style) -->
         <item name="android:alertDialogTheme">@style/MG4Dialog</item>
         <item name="alertDialogTheme">@style/MG4Dialog</item>
         <item name="colorAccent">?attr/mgAction</item>

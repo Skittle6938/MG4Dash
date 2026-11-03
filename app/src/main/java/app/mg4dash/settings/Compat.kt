@@ -25,11 +25,11 @@ import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel
 import java.net.URLEncoder
 
 /**
- * Écran Compatibilité : ce que ce firmware expose à MG4Dash, en un rapport court que le
- * conducteur peut envoyer depuis son téléphone (QR code → issue GitHub pré-remplie).
+ * Compatibility screen: what this firmware exposes to MG4Dash, as a short report the
+ * driver can send from their phone (QR code → prefilled GitHub issue).
  *
- * Le rapport ne contient aucune donnée personnelle : versions, services qui répondent et
- * quelques mesures de la voiture (batterie, autonomie, clim). Ni position, ni VIN, ni compte.
+ * The report contains no personal data: versions, services that answer and
+ * a few car measurements (battery, range, climate). No position, VIN or account.
  */
 object Compat {
     private const val ISSUES = "https://github.com/Skittle6938/MG4Dash/issues/new"
@@ -40,7 +40,7 @@ object Compat {
         fun pkg(p: String) = if (Firmware.installed(a, p)) "yes" else "no"
         fun i(id: Int) = CarProps.readIntArea(id, 0x1000000)?.toString() ?: "—"
         fun f(id: Int) = CarProps.readFloatArea(id, 0x1000000)?.let { String.format(java.util.Locale.US, "%.1f", it) } ?: "—"
-        // Taille de l'appli = écran moins la barre SAIC (1920 − 142 = 1778) : on note aussi l'écran entier
+        // App size = screen minus the SAIC bar (1920 − 142 = 1778): also note the whole screen
         fun realSize(c: android.content.Context): String = try {
             val m = android.util.DisplayMetrics()
             (c.getSystemService(android.content.Context.WINDOW_SERVICE) as android.view.WindowManager).defaultDisplay.getRealMetrics(m)
@@ -57,12 +57,12 @@ object Compat {
             appendLine("Battery capacity: car=${app.mg4dash.energy.BatteryCapacity.fromCar() ?: "—"} measured=${app.mg4dash.energy.BatteryCapacity.estimate(a)?.let { "${"%.1f".format(java.util.Locale.US, it.first)} (${it.second} samples)" } ?: "—"}")
             appendLine("Shown: battery=${s.batteryPercent ?: "—"} range=${s.rangeKm ?: "—"} chargeStatus=${s.chargeStatus ?: "—"} chargeControl=${CarBridge.chargeControl}")
             appendLine("Climate: on=${s.hvacOn ?: "—"} temp=${s.driverTemp ?: "—"} fan=${s.fanSpeed ?: "—"} ac=${s.acOn ?: "—"} auto=${s.autoOn ?: "—"} recirc=${s.recirc ?: "—"} outside=${s.outsideTemp ?: "—"}")
-            // Équipements et commandes à adapter selon le firmware (valeurs brutes de la voiture)
+            // Equipment and commands to adapt by firmware (raw car values)
             fun hv(id: Int) = CarProps.readIntArea(id, 0x75)?.toString() ?: "—"
             val (seatCfg, wheelCfg) = CarBridge.heatingConfig()
             appendLine("Heating: config seat=${seatCfg ?: "—"} wheel=${wheelCfg ?: "—"}; props seatL=${hv(0x15402513)} seatR=${hv(0x15402514)} wheel=${hv(0x1540253a)}")
             appendLine("Drive side: ${CarProps.readBytes(CarProps.CAL_DRIVE_HDL_TYPE)?.joinToString("") { String.format("%02x", it) } ?: "—"} (${when (CarProps.rightHandDrive()) { true -> "right-hand"; false -> "left-hand"; null -> "?" }})")
-            // Essuie-glaces et capteur de pluie (lecture seule) : équipement et état actuel
+            // Wipers and rain sensor (read only): equipment and current state
             fun ints(vararg p: Pair<String, Int>) = p.joinToString(" · ") { (n, id) -> "$n ${CarProps.getInt(id) ?: "—"}" }
             fun hex(id: Int) = CarProps.readBytes(id)?.joinToString("") { String.format("%02x", it) } ?: "—"
             appendLine("Wipers config: front ${hex(561005115)} · assy ${hex(561005187)}")
@@ -76,11 +76,11 @@ object Compat {
         }
     }
 
-    /** Classes de l'ancien SDK trouvées, et dans quel paquet (sert à piloter charge, ESC, aides). */
+    /** Old SDK classes found, and in which package (used to drive charging, ESC, aids). */
     private fun sdkClasses(a: Activity): String {
         val classes = listOf("VehicleSettingManager", "VehicleControlManager", "VehicleChargingManager", "VehicleConditionManager",
             "VehiclePropertyManager", "AirConditionManager")
-        // Paquets candidats seulement (charger chaque appli coûte du temps)
+        // Candidate packages only (loading each app takes time)
         val pkgs = saicPackages(a).filter { p -> listOf("launcher", "vehicle", "setting", ".ev", "charg", "service", "adapter").any { p.contains(it) } }
         return classes.joinToString(" ") { c ->
             val where = pkgs.firstOrNull { p ->
@@ -97,7 +97,7 @@ object Compat {
         a.packageManager.getInstalledPackages(0).map { it.packageName }.filter { it.startsWith("com.saicmotor.") }.sorted()
     } catch (_: Exception) { emptyList() }
 
-    /** Applis SAIC lançables (nom de paquet seulement) : pour ouvrir l'appli Énergie, Réglages… */
+    /** Launchable SAIC apps (package name only): to open the Energy app, Settings… */
     private fun saicApps(a: Activity): String = try {
         val pm = a.packageManager
         pm.queryIntentActivities(Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER), 0)
@@ -122,7 +122,7 @@ object Compat {
         }
     } catch (_: Exception) { null }
 
-    /** Rapport + QR code ; « Ouvrir » tente aussi le navigateur de la voiture, s'il y en a un. */
+    /** Report + QR code; "Open" also tries the car's browser, if there is one. */
     fun show(a: Activity) {
         val text = report(a)
         val url = issueUrl(text).let { u ->

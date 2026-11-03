@@ -4,12 +4,12 @@ import android.os.IBinder
 import android.os.Parcel
 
 /**
- * Appels binder vers les services « carapi » de CarAdapterService (famille A9 / SWI69).
+ * Binder calls to the "carapi" services of CarAdapterService (A9 / SWI69 family).
  *
- * Écrit pour MG4Dash : seuls l'interface (descripteur) et le numéro de transaction de chaque
- * méthode utilisée sont repris, relevés sur la voiture par analyse du launcher d'origine.
- * Tous les appels sont synchrones (two-way) et suivent le format AIDL standard :
- * jeton d'interface, arguments, puis exception éventuelle et valeur de retour.
+ * Written for MG4Dash: only the interface (descriptor) and the transaction number of each
+ * method used are reused, found on the car by analysing the stock launcher.
+ * All calls are synchronous (two-way) and follow the standard AIDL format:
+ * interface token, arguments, then any exception and the return value.
  */
 open class RemoteService(private val binder: IBinder, private val descriptor: String) {
 
@@ -40,12 +40,12 @@ open class RemoteService(private val binder: IBinder, private val descriptor: St
     protected fun <T> raw(code: Int, write: (Parcel) -> Unit, read: (Parcel) -> T): T = call(code, write, read)
 }
 
-/** CarAdapterService : distribue un binder par domaine (queryClient). */
+/** CarAdapterService: hands out one binder per domain (queryClient). */
 class AdapterService(b: IBinder) : RemoteService(b, "com.saicmotor.carapi.ICarAdapterService") {
     fun queryClient(code: Int): IBinder? = binderInt(1, code)
 }
 
-/** Climatisation (queryClient 7). Les « switch » avancent d'un cran, sans argument. */
+/** Climate (queryClient 7). The "switch" calls move one step, with no argument. */
 class HvacService(b: IBinder) : RemoteService(b, "com.saicmotor.carapi.hvac.ICarHvacService") {
     val hvacPowerStatus get() = bool(6)
     val acStatus get() = bool(8)
@@ -70,19 +70,19 @@ class HvacService(b: IBinder) : RemoteService(b, "com.saicmotor.carapi.hvac.ICar
     fun setFanSpeed(v: Int) = voidInt(19, v)
     fun setDriverTemperature(v: Float) = voidFloat(21, v)
 
-    // Réglages de la clim d'origine (#65), zone 117 côté VHAL
-    /** Débit d'air en mode AUTO : 0 = haut, 1 = moyen, 2 = bas. */
+    // Stock climate settings (#65), area 117 on the VHAL side
+    /** Air flow in AUTO mode: 0 = high, 1 = medium, 2 = low. */
     val autoAirVolume get() = int(40)
     fun setAutoAirVolume(v: Int) = voidInt(39, v)
-    /** Dégivrage arrière allumé avec l'avant : 0 = oui, 1 = non. */
+    /** Rear defrost on with the front: 0 = yes, 1 = no. */
     val defrostLinkage get() = int(38)
     fun setDefrostLinkage(v: Int) = voidInt(37, v)
-    /** Clim qui suit le mode de conduite ECO : 1 = oui, 2 = non. */
+    /** Climate following the ECO drive mode: 1 = yes, 2 = no. */
     val ecoLinkage get() = int(69)
     fun setEcoLinkage(v: Int) = voidInt(68, v)
 }
 
-/** Énergie / recharge (queryClient 4). */
+/** Energy / charging (queryClient 4). */
 class EvService(b: IBinder) : RemoteService(b, "com.saicmotor.carapi.ev.ICarEvService") {
     val chargePercentChange get() = int(3)
     val chargeStatus get() = int(4)
@@ -92,14 +92,14 @@ class EvService(b: IBinder) : RemoteService(b, "com.saicmotor.carapi.ev.ICarEvSe
     val chargeCtrlStatus get() = int(20)
     val disChargeCtrl get() = int(24)
 
-    /** 1 = démarrer, 2 = arrêter (comme le bouton du launcher d'origine). */
+    /** 1 = start, 2 = stop (like the stock launcher's button). */
     fun chargeCtrl(v: Int) = voidInt(5, v)
     fun disChargeCtrl(v: Int) = voidInt(8, v)
-    /** Verrou du pistolet de charge : 1 = verrouiller, 2 = déverrouiller (bouton du launcher d'origine). */
+    /** Charge gun lock: 1 = lock, 2 = unlock (stock launcher's button). */
     fun elecClckCtrl(v: Int) = voidInt(16, v)
 }
 
-/** Réglages véhicule (queryClient 8). Seules la régénération et la conduite à une pédale sont modifiées. */
+/** Vehicle settings (queryClient 8). Only regeneration and one-pedal driving are changed. */
 class VehicleSettingService(b: IBinder) : RemoteService(b, "com.saicmotor.carapi.vs.ICarVehicleSettingService") {
     val fcwState get() = int(20)
     val fcwAutoBrakeMode get() = int(22)
@@ -115,23 +115,23 @@ class VehicleSettingService(b: IBinder) : RemoteService(b, "com.saicmotor.carapi
 
     /** 0 faible, 1 moyen, 2 fort, 3 adaptatif. */
     fun setRegenerativeLevel(v: Int) = voidInt(159, v)
-    /** Conduite à une pédale : 1 = oui, 0 = non. */
+    /** One-pedal driving: 1 = yes, 0 = no. */
     fun setSignalPedalState(v: Int) = voidInt(162, v)
 }
 
-/** Configuration du véhicule (queryClient 2) : équipements présents (codes relevés dans l'appli clim SAIC). */
+/** Vehicle configuration (queryClient 2): fitted equipment (codes found in the SAIC climate app). */
 class ConfigService(b: IBinder) : RemoteService(b, "com.saicmotor.carapi.config.ICarConfigService") {
     val seatHeatingConfig get() = int(23)
     val steeringWheelHeatConfig get() = int(52)
 }
 
 /**
- * Son (queryClient 10), mêmes appels que les réglages de son de l'appli Média d'origine.
- * Égaliseur : 5 bandes (80 Hz, 500 Hz, 1 kHz, 5 kHz, 16 kHz) de 0 à 14 (7 = neutre) ;
- * préréglages 2 Classique, 3 Pop, 4 Voix, 5 Jazz, 6 Rock, 7 Utilisateur.
+ * Sound (queryClient 10), same calls as the sound settings of the stock Media app.
+ * Equaliser: 5 bands (80 Hz, 500 Hz, 1 kHz, 5 kHz, 16 kHz) from 0 to 14 (7 = neutral);
+ * presets 2 Classic, 3 Pop, 4 Vocal, 5 Jazz, 6 Rock, 7 User.
  */
 open class AudioService(b: IBinder, descriptor: String = "com.saicmotor.carapi.audio.ICarAudioService") : RemoteService(b, descriptor) {
-    /** Répartition toujours centrée sur 7 ; sinon la page Son déduit le centre des valeurs lues. */
+    /** Balance always centred on 7; otherwise the Sound page deduces the centre from the values read. */
     open val centredOnSeven get() = false
     open val loudness get() = bool(16)
     open val equalizerPreset get() = int(23)
@@ -141,7 +141,7 @@ open class AudioService(b: IBinder, descriptor: String = "com.saicmotor.carapi.a
     open fun setLoudness(on: Boolean) = raw(15, { it.writeInt(if (on) 1 else 0) }) { it.readInt() != 0 }
     open fun setEqualizerPreset(v: Int) = raw(22, { it.writeInt(v) }) { it.readInt() != 0 }
     open fun setSoundField(balance: Int, fader: Int) = raw(30, { it.writeInt(balance); it.writeInt(fader) }) { it.readInt() != 0 }
-    /** Courbe d'un préréglage (7 = utilisateur), 5 valeurs ; null si le service ne répond pas. */
+    /** Curve of a preset (7 = user), 5 values; null if the service does not answer. */
     open fun eqBand(preset: Int): IntArray? = raw(21, { it.writeInt(preset) }) { readEq(it) }
     open val userEq: IntArray? get() = raw(20, {}) { readEq(it) }
     open fun setUserEq(v: IntArray) = raw(19, { p -> p.writeInt(1); v.forEach { p.writeInt(it) } }) { it.readInt() != 0 }
@@ -149,18 +149,18 @@ open class AudioService(b: IBinder, descriptor: String = "com.saicmotor.carapi.a
     private fun readEq(p: Parcel): IntArray? = if (p.readInt() == 0) null else IntArray(5) { p.readInt() }
 }
 
-/** T-box, réseau mobile (queryClient 16). */
+/** T-box, mobile network (queryClient 16). */
 class TboxService(b: IBinder) : RemoteService(b, "com.saicmotor.carapi.tbox.ITboxService") {
     val connected get() = bool(4)
-    /** Puissance du signal, 0 à 31. */
+    /** Signal strength, 0 to 31. */
     val csq get() = int(8)
-    /** 0 pas de réseau, 1 commutation de circuits, 2 à 4 : 2G à 4G. */
+    /** 0 no network, 1 circuit switched, 2 to 4: 2G to 4G. */
     val wanStatus get() = int(9)
 }
 
-/** Informations générales (queryClient 1). */
+/** General information (queryClient 1). */
 class GeneralService(b: IBinder) : RemoteService(b, "com.saicmotor.carapi.general.ICarGeneralService") {
-    /** Rétroéclairage de l'écran central : false = éteint (commande « écran éteint » du launcher d'origine). */
+    /** Central screen backlight: false = off (the stock launcher's "screen off" command). */
     fun setDisplayState(on: Boolean) = voidInt(4, if (on) 1 else 0)
     val latestSpeed get() = float(17)
     val totalMileage get() = int(23)

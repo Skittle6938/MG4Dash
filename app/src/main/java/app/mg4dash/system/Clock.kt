@@ -5,12 +5,12 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-/** Heure affichée par MG4Dash : 24 h (par défaut) ou 12 h sans AM / PM (réglage Apparence, #18). */
+/** Time shown by MG4Dash: 24 h (default) or 12 h without AM / PM (Appearance setting, #18). */
 object Clock {
     fun hm(context: Context, date: Date = Date()): String =
         SimpleDateFormat(if (Prefs(context).clock12) "h:mm" else "HH:mm", Locale.getDefault()).format(date)
 
-    /** Heure de la prévision météo (« 14h » ou « 14:00 ») passée en 12 h sans AM / PM si le réglage le demande. */
+    /** Weather forecast time ("14h" or "14:00") changed to 12 h without AM / PM if the setting asks for it. */
     fun hourLabel(context: Context, label: String): String {
         if (!Prefs(context).clock12) return label
         val m = Regex("^([0-9]{1,2})(h|:00)$").find(label) ?: return label

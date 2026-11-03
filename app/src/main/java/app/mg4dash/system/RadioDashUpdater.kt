@@ -8,36 +8,36 @@ import android.content.pm.PackageInstaller
 import java.io.File
 
 /**
- * Mise à jour de Radio Dash (appli radio SAIC modifiée, publiée sur GitHub) depuis MG4Dash.
- * Radio Dash remplace com.saicmotor.radio et n'est construite que pour la radio du firmware SWI69 :
- * le bouton n'apparaît que sur ce firmware, avec cette version de l'appli radio d'origine.
- * Comme pour « adb shell pm install -r -f », l'installation passe par PackageInstaller (uid système) ;
- * Android vérifie la signature. La nouvelle radio ne s'applique qu'après un redémarrage de l'écran central.
+ * Update of Radio Dash (modified SAIC radio app, published on GitHub) from MG4Dash.
+ * Radio Dash replaces com.saicmotor.radio and is only built for the radio of the SWI69 firmware:
+ * the button only appears on this firmware, with this version of the stock radio app.
+ * As with "adb shell pm install -r -f", installation goes through PackageInstaller (system uid);
+ * Android checks the signature. The new radio only applies after a restart of the central screen.
  */
 object RadioDashUpdater {
     private const val TAG = "RadioDashUpdate"
     const val PKG = "com.saicmotor.radio"
     private const val API = "https://api.github.com/repos/Skittle6938/MG4-Radio-Dash/releases?per_page=10"
-    /** Version de l'appli radio d'origine sur laquelle Radio Dash est construite (et qu'elle garde). */
+    /** Version of the stock radio app on which Radio Dash is built (and which it keeps). */
     private const val RADIO_VERSION = "A9_Radio_V1.0.0.115"
 
-    /** Firmware et appli radio compatibles avec Radio Dash. */
+    /** Firmware and radio app compatible with Radio Dash. */
     fun compatible(context: Context): Boolean = Firmware.gen == Firmware.Gen.SWI69 && radioVersion(context) == RADIO_VERSION
 
     private fun radioVersion(context: Context): String? = try {
         context.packageManager.getPackageInfo(PKG, 0).versionName
     } catch (_: Exception) { null }
 
-    /** Radio Dash est installée (ses icônes de dock sont présentes dans l'appli radio). */
+    /** Radio Dash is installed (its dock icons are in the radio app). */
     fun installed(context: Context): Boolean = try {
         val res = context.packageManager.getResourcesForApplication(PKG)
         res.getIdentifier("rd_ic_home", "drawable", PKG) != 0
     } catch (_: Exception) { false }
 
-    /** Version installée depuis MG4Dash (null si inconnue : installée par ADB ou clé USB). */
+    /** Version installed from MG4Dash (null if unknown: installed by ADB or USB stick). */
     fun installedVersion(context: Context): String? = Prefs(context).raw.getString("radio_dash_version", null)
 
-    /** Dernière release de Radio Dash ; pré-versions comprises si l'option « versions bêta » de MG4Dash est cochée. */
+    /** Latest Radio Dash release; pre-releases included if MG4Dash's "beta versions" option is ticked. */
     fun latest(beta: Boolean): Updater.Release? = Updater.latest(beta, api = API)
 
     fun download(context: Context, r: Updater.Release, progress: (Int) -> Unit): File =
@@ -51,7 +51,7 @@ object RadioDashUpdater {
             setInstallLocation(android.content.pm.PackageInfo.INSTALL_LOCATION_INTERNAL_ONLY)
             try {
                 val f = javaClass.getField("installFlags")
-                f.setInt(this, f.getInt(this) or 0x00000010)   // INSTALL_INTERNAL, comme « pm install -f »
+                f.setInt(this, f.getInt(this) or 0x00000010)   // INSTALL_INTERNAL, like "pm install -f"
             } catch (e: Exception) { Log.w(TAG, "INSTALL_INTERNAL flag: ${e.message}") }
         }
         val id = pi.createSession(params)
@@ -65,7 +65,7 @@ object RadioDashUpdater {
         }
     }
 
-    /** Résultat de l'installation : version retenue et rappel de redémarrer l'écran central. */
+    /** Installation result: version kept and reminder to restart the central screen. */
     class Result : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             val status = intent.getIntExtra(PackageInstaller.EXTRA_STATUS, -999)
@@ -78,6 +78,6 @@ object RadioDashUpdater {
         }
     }
 
-    /** Écran de réglages ouvert : prévenu du résultat. */
+    /** Settings screen open: notified of the result. */
     @Volatile var listener: ((Boolean) -> Unit)? = null
 }

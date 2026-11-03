@@ -14,8 +14,8 @@ import android.view.ViewOutlineProvider
 import app.mg4dash.R
 
 /**
- * Panneaux de l'accueil dans le style du tableau de bord MG (issue #38) : pas de fond plein, un
- * contour fin, clair en haut, qui s'estompe vers le bas. La barre verticale garde son fond.
+ * Home panels in the style of the MG dashboard (issue #38): no solid background, a
+ * thin outline, light at the top, fading downwards. The vertical bar keeps its background.
  */
 class FadeOutline(private val d: Float, color: Int, private val fade: Boolean = true) : Drawable() {
     private val rgb = color and 0x00FFFFFF
@@ -25,7 +25,7 @@ class FadeOutline(private val d: Float, color: Int, private val fade: Boolean = 
     override fun draw(c: Canvas) {
         val b = bounds
         p.shader = LinearGradient(0f, b.top.toFloat(), 0f, b.bottom.toFloat(),
-            // Contour complet (#40) : même teinte tout autour, sans s'effacer en bas
+            // Full outline (#40): same tint all around, not fading at the bottom
             if (fade) intArrayOf(rgb or (0x8C shl 24), rgb or (0x40 shl 24), rgb) else intArrayOf(rgb or (0x70 shl 24), rgb or (0x70 shl 24), rgb or (0x70 shl 24)),
             floatArrayOf(0f, 0.55f, 1f), Shader.TileMode.CLAMP)
         val h = p.strokeWidth
@@ -41,9 +41,9 @@ class FadeOutline(private val d: Float, color: Int, private val fade: Boolean = 
         private const val RADIUS = 14f
 
         /**
-         * Applique le style aux panneaux (fond bg_panel avec l'élévation des panneaux) une fois la
-         * mise en page faite ; la barre verticale (étroite) est laissée telle quelle. La carte
-         * reçoit les mêmes coins arrondis et le même contour.
+         * Applies the style to the panels (bg_panel background with the panels' elevation) once
+         * layout is done; the (narrow) vertical bar is left as it is. The map
+         * receives the same rounded corners and the same outline.
          */
         fun applyTo(root: View) {
             root.post {

@@ -9,8 +9,8 @@ import app.mg4dash.car.VehicleState
 import app.mg4dash.system.Prefs
 
 /**
- * Calibration de la température affichée (appui long sur la consigne) : la consigne de la voiture
- * ne colle pas toujours au ressenti. Décalage de −5 à +5 °, par degré, sur l'affichage seulement.
+ * Calibration of the displayed temperature (long press on the set point): the car's set point
+ * does not always match how it feels. Offset from −5 to +5 °, by degree, on the display only.
  */
 object TempCalibration {
     fun show(activity: Activity, onChange: () -> Unit) {
@@ -35,7 +35,7 @@ object TempCalibration {
         r.addView(kit.roundButton(R.drawable.ic_plus, 64) { step(1) })
         box.addView(r)
         box.addView(preview, kit.lp(-1, -2, t = 14))
-        // A/C intermittent (#34) : durées de marche et d'arrêt, réglées par 30 s
+        // Intermittent A/C (#34): on and off durations, set in 30 s steps
         box.addView(kit.text(activity.getString(R.string.ac_cycle_title), 18f, R.color.text_title), kit.lp(-1, -2, t = 22))
         fun mmss(sec: Int) = String.format(java.util.Locale.getDefault(), "%d:%02d", sec / 60, sec % 60)
         fun durRow(label: Int, get: () -> Int, set: (Int) -> Unit) {

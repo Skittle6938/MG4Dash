@@ -16,26 +16,26 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 /**
- * Clim maintenue (suite de l'issue #26) : la voiture reste allumée pendant l'absence du conducteur,
- * les portes se verrouillent après un compte à rebours, et la clim tourne avec ses réglages actuels :
- * - tout de suite, jusqu'à une durée maximale (illimitée par défaut) ;
- * - ou à une heure choisie, en un ou plusieurs cycles (durée, pause), la voiture attendant allumée et
- *   clim coupée (environ 0,2 kW d'après l'auteur de l'issue).
- * Une voiture éteinte ne peut pas être rallumée par l'autoradio (essais du 2026-10-19) : elle n'est
- * éteinte qu'à la fin (durée atteinte, dernier cycle fini ou batterie sous 20 %). Le conducteur qui
- * revient et déverrouille, ou la voiture qui roule, arrête le mode en laissant tout en l'état.
+ * Keep climate on (follow-up to issue #26): the car stays on while the driver is away,
+ * the doors lock after a countdown, and the climate runs with its current settings:
+ * - right away, up to a maximum duration (unlimited by default);
+ * - or at a chosen time, in one or more cycles (duration, pause), the car waiting on with the
+ *   climate off (about 0.2 kW according to the issue's author).
+ * A car that is off cannot be turned back on by the head unit (tests of 2026-10-19): it is only
+ * switched off at the end (duration reached, last cycle done or battery below 20 %). The driver
+ * coming back and unlocking, or the car moving, stops the mode and leaves everything as it is.
  */
 object ClimateHold {
     private const val TAG = "ClimHold"
     const val MIN_SOC = 20
-    /** Durées maximales proposées en mode « tout de suite », en minutes ; 0 = illimitée. */
+    /** Maximum durations offered in "right away" mode, in minutes; 0 = unlimited. */
     val DURATIONS = intArrayOf(0, 15, 30, 60, 120, 240, 480)
 
     enum class Phase { IDLE, ARMED, WAITING, ON, DONE, BATTERY }
 
     /**
-     * Échéances en temps écoulé depuis le démarrage de l'autoradio ([runs] : [début, fin] de chaque cycle,
-     * vide en mode « tout de suite ») ; [clock] : les mêmes cycles en heure murale, pour l'affichage.
+     * Deadlines in time elapsed since the head unit started ([runs]: [start, end] of each cycle,
+     * empty in "right away" mode); [clock]: the same cycles in wall clock time, for display.
      */
     data class Status(
         val phase: Phase = Phase.IDLE,
@@ -57,7 +57,7 @@ object ClimateHold {
     private var job: Job? = null
     private var wake: PowerManager.WakeLock? = null
 
-    /** Tout de suite : clim en marche, verrouillage après [lockSec] s, fin après [maxMin] min (0 = jamais). */
+    /** Right away: climate on, lock after [lockSec] s, end after [maxMin] min (0 = never). */
     fun start(context: Context, maxMin: Int, lockSec: Int) {
         val now = SystemClock.elapsedRealtime()
         begin(context, Status(Phase.ARMED, now, if (maxMin > 0) now + maxMin * 60_000L else 0L, now + lockSec * 1000L))
@@ -66,8 +66,8 @@ object ClimateHold {
     }
 
     /**
-     * À une heure : premier cycle à [firstWall] (heure murale), [runs] cycles de [durMin] min séparés
-     * de [gapMin] min ; clim coupée pendant l'attente.
+     * At a set time: first cycle at [firstWall] (wall clock), [runs] cycles of [durMin] min separated
+     * by [gapMin] min; climate off while waiting.
      */
     fun schedule(context: Context, firstWall: Long, runs: Int, durMin: Int, gapMin: Int, lockSec: Int) {
         val now = SystemClock.elapsedRealtime(); val wall = System.currentTimeMillis()
@@ -91,7 +91,7 @@ object ClimateHold {
         show(app)
     }
 
-    /** Arrêt par le conducteur : la voiture et la clim restent dans l'état où elles sont. */
+    /** Stopped by the driver: the car and climate stay in their current state. */
     fun stop(reason: String) {
         if (job == null && _status.value.phase == Phase.IDLE) return
         Log.i(TAG, "stop: $reason")
@@ -114,13 +114,13 @@ object ClimateHold {
                 if (now >= st.lockAt) {
                     CarBridge.lockDoors()
                     Log.i(TAG, "doors locked")
-                    // À une heure précise : clim coupée jusqu'au premier cycle (#26)
+                    // At a set time: climate off until the first cycle (#26)
                     if (st.scheduled) CarBridge.setHvac(false)
                     _status.value = st.copy(phase = if (st.scheduled) Phase.WAITING else Phase.ON)
                 }
                 continue
             }
-            // Retour du conducteur : portes déverrouillées après le verrouillage, on rend la main
+            // Driver back: doors unlocked after locking, hand back control
             if (now > st.lockAt + 15_000) {
                 unlockedReads = if (CarBridge.doorsLocked() == false) unlockedReads + 1 else 0
                 if (unlockedReads >= 2) { stop("portes déverrouillées : retour du conducteur"); return }
@@ -132,7 +132,7 @@ object ClimateHold {
                 Phase.WAITING -> if (now >= st.runs[st.run][0]) {
                     Log.i(TAG, "cycle ${st.run + 1}: climate on")
                     CarBridge.setHvac(true); offReads = 0
-                    // Compresseur aussi à chaque cycle (#26), une fois la clim allumée
+                    // Compressor too at each cycle (#26), once the climate is on
                     scope.launch { delay(2500); if (CarBridge.state.value.acOn != true) CarBridge.toggleAc() }
                     _status.value = st.copy(phase = Phase.ON)
                 }
@@ -144,7 +144,7 @@ object ClimateHold {
                         continue
                     }
                     if (!st.scheduled && st.endAt > 0 && now >= st.endAt) { end(Phase.DONE); return }
-                    // La clim doit tourner : relancée si elle s'arrête (voiture qui coupe, appui sur le bouton…)
+                    // The climate must run: restarted if it stops (car cutting it, button press…)
                     offReads = if (car.hvacOn == false) offReads + 1 else 0
                     if (offReads >= 30) { Log.w(TAG, "climate stopped: restarting"); CarBridge.setHvac(true); offReads = 0 }
                 }
@@ -153,7 +153,7 @@ object ClimateHold {
         }
     }
 
-    /** Fin normale : clim arrêtée, voiture éteinte, résultat affiché 5 minutes. */
+    /** Normal end: climate off, car switched off, result shown for 5 minutes. */
     private suspend fun end(phase: Phase) {
         CarBridge.setHvac(false)
         delay(3000)

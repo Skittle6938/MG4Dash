@@ -14,10 +14,10 @@ import app.mg4dash.system.ProcessStats
 import java.util.Locale
 
 /**
- * Détail de la charge de l'autoradio (#69), ouvert depuis la section « Autoradio » de la page Véhicule :
- * une ligne par appli ou service avec son processeur et sa mémoire, relus toutes les 2 s, triés par nom,
- * processeur ou mémoire (boutons en haut des colonnes ; un nouvel appui inverse l'ordre).
- * Fenêtre comme les autres : le changement de thème attend sa fermeture (voir Themes.popupOpen).
+ * Detail of the head unit's load (#69), opened from the "Head unit" section of the Vehicle page:
+ * one line per app or service with its CPU and memory, reread every 2 s, sorted by name,
+ * CPU or memory (buttons at the top of the columns; another press reverses the order).
+ * A window like the others: the theme change waits for it to close (see Themes.popupOpen).
  */
 object ProcessDialog {
     private const val BY_NAME = 0
@@ -59,7 +59,7 @@ object ProcessDialog {
                 name.addView(kit.text(p.label, 19f).apply { maxLines = 1; ellipsize = android.text.TextUtils.TruncateAt.END })
                 if (p.service) name.addView(kit.text(activity.getString(R.string.ps_service), 14f, R.color.text_sub))
                 r.addView(name, kit.lp(0, -2, 1f))
-                // « ≈ » : moyenne récente du système (appli que MG4Dash ne peut pas lire en direct), en gris
+                // "≈": the system's recent average (app MG4Dash cannot read live), in grey
                 r.addView(kit.text(p.cpu?.let { (if (p.cpuAverage) "≈ " else "") + String.format(Locale.getDefault(), if (it < 10f) "%.1f %%" else "%.0f %%", it) } ?: "—", 19f,
                     if (p.cpuAverage) R.color.text_sub else R.color.text_value)
                     .apply { gravity = Gravity.END }, kit.lp(kit.dp(150), -2, l = 10))
@@ -106,7 +106,7 @@ object ProcessDialog {
             }
         }
         val dlg = AlertDialog.Builder(activity)
-            // Titre dessiné par MG4Dash : celui du système sortait très grand et grisé sur la voiture (#69)
+            // Title drawn by MG4Dash: the system's came out very large and greyed on the car (#69)
             .setCustomTitle(kit.text(activity.getString(R.string.ps_title), 22f).apply {
                 typeface = android.graphics.Typeface.create("sans-serif-medium", android.graphics.Typeface.NORMAL)
                 setPadding(kit.dp(24), kit.dp(20), kit.dp(24), kit.dp(4))
@@ -115,8 +115,8 @@ object ProcessDialog {
             .setPositiveButton(android.R.string.ok, null)
             .setOnDismissListener { open = false; handler.removeCallbacks(tick) }
             .create()
-        // Plein écran gardé : fenêtre affichée sans prendre le focus, mêmes réglages d'écran que la page,
-        // puis focus rendu (sinon les barres SAIC réapparaissent à l'ouverture)
+        // Full screen kept: window shown without taking focus, same screen settings as the page,
+        // then focus given back (otherwise the SAIC bars reappear on opening)
         dlg.window?.setFlags(android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE, android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE)
         dlg.show(); app.mg4dash.ui.Dialogs.fix(dlg)
         dlg.window?.decorView?.systemUiVisibility = activity.window.decorView.systemUiVisibility

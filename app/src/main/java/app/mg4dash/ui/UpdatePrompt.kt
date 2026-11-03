@@ -24,21 +24,21 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 /**
- * Au démarrage, propose la dernière release non bêta si elle est plus récente que la version
- * installée : « Ne plus notifier cette release », « Plus tard » ou « Mettre à jour ».
- * Une seule vérification par démarrage de l'appli, dès qu'un réseau est disponible ; les erreurs
- * sont silencieuses. Le popup est une vue posée dans la fenêtre de l'accueil (pas un Dialog) :
- * l'activité garde le focus, donc le mode immersif reste actif et ni la barre latérale ni le
- * bandeau SAIC ne réapparaissent.
- * L'accueil est reconstruit quand le thème passe de clair à sombre : la proposition (et le
- * téléchargement en cours) survit et réapparaît dans la nouvelle fenêtre tant qu'on n'a pas répondu.
+ * At startup, offers the latest non-beta release if it is newer than the installed
+ * version: "Do not notify about this release", "Later" or "Update".
+ * A single check per app start, as soon as a network is available; errors
+ * are silent. The popup is a view placed in the home window (not a Dialog):
+ * the activity keeps focus, so immersive mode stays active and neither the side bar nor the
+ * SAIC banner reappear.
+ * Home is rebuilt when the theme goes from light to dark: the offer (and the
+ * running download) survives and reappears in the new window until answered.
  */
 object UpdatePrompt {
     private const val TAG = "Update"
     private var checked = false
-    /** Release proposée et pas encore écartée ; null une fois répondu « Plus tard » / « Ne plus notifier ». */
+    /** Release offered and not yet dismissed; null once answered "Later" / "Do not notify". */
     private var pending: Updater.Release? = null
-    /** Texte d'état du téléchargement en cours (null : pas lancé), et la fenêtre qui l'affiche. */
+    /** Status text of the running download (null: not started), and the window showing it. */
     private var progress: String? = null
     private var shownIn: java.lang.ref.WeakReference<Activity>? = null
     private var onProgress: ((String?) -> Unit)? = null
@@ -68,7 +68,7 @@ object UpdatePrompt {
         shownIn = java.lang.ref.WeakReference(activity)
         val kit = Kit(activity)
         val root = activity.findViewById<ViewGroup>(android.R.id.content) ?: return
-        // Voile sombre plein écran : capte les touchers pour que l'accueil reste inactif derrière
+        // Full screen dark veil: catches touches so home stays inactive behind
         val scrim = FrameLayout(activity).apply {
             setBackgroundColor(Color.argb(0xB3, 0, 0, 0))
             isClickable = true; isFocusable = true
@@ -91,7 +91,7 @@ object UpdatePrompt {
         fun button(label: Int, colorRes: Int, onClick: () -> Unit) = Button(activity).apply {
             setText(label); isAllCaps = false; setTextColor(kit.color(colorRes)); setTextSize(TypedValue.COMPLEX_UNIT_SP, 19f)
             setBackgroundResource(R.drawable.bg_button); minHeight = kit.dp(56); setPadding(kit.dp(20), 0, kit.dp(20), 0)
-            stateListAnimator = null; elevation = 0f   // pas de relief ni d'ombre (style Material), comme les autres boutons
+            stateListAnimator = null; elevation = 0f   // no relief or shadow (Material style), like the other buttons
             setOnClickListener { onClick() }
         }
         val buttons = kit.row()
@@ -100,7 +100,7 @@ object UpdatePrompt {
         lateinit var now: Button
         skip = button(R.string.upd_skip, R.color.text_sub) { Prefs(activity).updateSkipped = r.version; close() }
         later = button(R.string.upd_later, R.color.text_value) { close() }
-        // État du téléchargement affiché dans la fenêtre courante (il continue si l'accueil est reconstruit)
+        // Download status shown in the current window (it continues if home is rebuilt)
         fun render(text: String?) {
             val busy = text != null && text != activity.getString(R.string.st_update_error)
             if (text != null) state.text = text
@@ -129,7 +129,7 @@ object UpdatePrompt {
         listOf(skip, later, now).forEachIndexed { i, v -> buttons.addView(v, kit.lp(0, -1, 1f, l = if (i > 0) 10 else 0)) }
         panel.addView(buttons, LinearLayout.LayoutParams(-1, -2).apply { topMargin = kit.dp(16) })
 
-        // Hauteur bornée avec des notes : elles défilent au lieu de pousser les boutons hors de l'écran
+        // Bounded height with notes: they scroll instead of pushing the buttons off screen
         val h = if (notes.isEmpty()) -2 else minOf(kit.dp(560), (activity.resources.displayMetrics.heightPixels * 0.85f).toInt())
         scrim.addView(panel, FrameLayout.LayoutParams(kit.dp(900), h, Gravity.CENTER))
         root.addView(scrim, FrameLayout.LayoutParams(-1, -1))

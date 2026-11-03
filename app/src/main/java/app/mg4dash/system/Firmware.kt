@@ -1,7 +1,7 @@
 /*
- * MG4Dash — détection du firmware de l'autoradio.
- * Adapté de FirmwareInfo.kt de MG4Control (https://github.com/SliDeeN/MG4Control),
- * Copyright © 2026 Slice Denkins et les contributeurs de MG4Control, GPL v3 ou ultérieure.
+ * MG4Dash — head unit firmware detection.
+ * Adapted from FirmwareInfo.kt of MG4Control (https://github.com/SliDeeN/MG4Control),
+ * Copyright © 2026 Slice Denkins and the MG4Control contributors, GPL v3 or later.
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 package app.mg4dash.system
@@ -10,18 +10,18 @@ import android.annotation.SuppressLint
 import android.content.Context
 
 /**
- * Génération du firmware SAIC, lue dans `ro.build.mt2712.version` (repli sur la version
- * incrémentale d'Android), par exemple « SWI69-… ».
+ * SAIC firmware generation, read from `ro.build.mt2712.version` (fallback on Android's
+ * incremental version), for example "SWI69-…".
  *
- * Deux familles d'accès à la voiture (relevées par MG4Control) :
- *  - **A9** (SWI69, SWI131, SWI132, SWI173) : service `com.saicmotor.caradapter`, un binder par domaine
- *    (clim, EV, réglages, général). C'est la voie d'origine de MG4Dash, testée sur SWI69.
- *  - **Ancien SDK** (SWI68, SWI165, SWI133) : les gestionnaires SAIC (clim : AirConditionManager)
- *    sont chargés depuis le launcher d'origine `com.saicmotor.hmi.launcher`.
- * Dans les deux cas, les mesures batterie (CarPropertyManager) utilisent les mêmes identifiants.
+ * Two families of car access (found by MG4Control):
+ *  - **A9** (SWI69, SWI131, SWI132, SWI173): `com.saicmotor.caradapter` service, one binder per domain
+ *    (climate, EV, settings, general). This is MG4Dash's original route, tested on SWI69.
+ *  - **Old SDK** (SWI68, SWI165, SWI133): SAIC managers (climate: AirConditionManager)
+ *    are loaded from the stock launcher `com.saicmotor.hmi.launcher`.
+ * In both cases, battery measurements (CarPropertyManager) use the same identifiers.
  *
- * Un firmware inconnu essaie la voie A9, puis l'ancien SDK ; l'écran Compatibilité des réglages
- * dit ce qui répond.
+ * An unknown firmware tries the A9 route, then the old SDK; the settings' Compatibility screen
+ * says what answers.
  */
 object Firmware {
     enum class Gen { SWI69, SWI131, SWI132, SWI173, SWI68, SWI165, SWI133, UNKNOWN }
@@ -30,7 +30,7 @@ object Firmware {
     @Volatile private var cached: Gen? = null
     @Volatile private var raw: String? = null
 
-    /** Chaîne brute du firmware (ex. « SWI69-12345 »), ou « ? ». */
+    /** Raw firmware string (e.g. "SWI69-12345"), or "?". */
     val version: String get() { gen; return raw ?: "?" }
 
     val gen: Gen get() {
@@ -59,15 +59,15 @@ object Firmware {
     }
 
     /**
-     * L'ancien SDK arrête lui-même la charge à la limite choisie : la fonction « arrêt auto »
-     * de MG4Dash (pensée pour SWI69) y est masquée.
+     * The old SDK stops charging at the chosen limit itself: MG4Dash's "auto stop"
+     * feature (designed for SWI69) is hidden there.
      */
     val nativeChargeLimit: Boolean get() = family == Family.LEGACY
 
-    /** Firmware sur lequel MG4Dash a été mis au point et testé. */
+    /** Firmware on which MG4Dash was developed and tested. */
     val tested: Boolean get() = gen == Gen.SWI69
 
-    /** Launcher d'origine de l'ancien SDK (porte les classes SAIC de la clim). */
+    /** Stock launcher of the old SDK (holds the SAIC climate classes). */
     const val LEGACY_LAUNCHER = "com.saicmotor.hmi.launcher"
 
     fun installed(context: Context, pkg: String): Boolean = try {

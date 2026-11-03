@@ -23,26 +23,26 @@ import java.net.URL
 import java.util.Locale
 
 /**
- * Météo Open-Meteo (choix 4A) : gratuit, sans clé, nécessite internet dans la voiture.
- * Position : dernière localisation connue du système, sinon la ville réglée dans les paramètres.
+ * Open-Meteo weather (choice 4A): free, no key, needs internet in the car.
+ * Position: the system's last known location, otherwise the city set in the settings.
  */
 object WeatherRepo {
     private const val TAG = "Weather"
     private const val REFRESH_MS = 30 * 60 * 1000L
     private const val RETRY_MS = 2 * 60 * 1000L
-    /** Distance parcourue depuis la dernière météo qui déclenche une nouvelle requête (issue #18). */
+    /** Distance driven since the last weather that triggers a new request (issue #18). */
     private const val MOVE_M = 5000f
-    /** Distance qui déclenche la mise à jour du seul nom de ville, plus fréquente que la météo. */
+    /** Distance that triggers an update of the city name alone, more frequent than the weather. */
     private const val CITY_MOVE_M = 2000f
-    /** Délai minimal entre deux essais de nom de ville hors requête météo (échecs hors ligne). */
+    /** Minimum delay between two city name attempts outside a weather request (offline failures). */
     private const val CITY_RETRY_MS = 60_000L
     /**
-     * Échecs successifs : nouvel essai rapide, plafonné à 30 s. La carte attend le retour d'internet
-     * pour réapparaître, et sur la voiture le réseau T-box reste « disponible » pendant une coupure
-     * 4G : aucun rappel réseau ne réveille alors la boucle (constaté le 2026-10-18).
+     * Successive failures: quick new attempt, capped at 30 s. The map waits for internet to return
+     * to reappear, and on the car the T-box network stays "available" during a 4G
+     * outage: no network callback then wakes the loop (found on 2026-10-18).
      */
     private val FAIL_DELAYS = longArrayOf(15_000L, 30_000L)
-    /** Coupure plus courte que ça : la carte reste affichée (tuiles en cache), pas de bascule. */
+    /** Outage shorter than this: the map stays shown (cached tiles), no switch. */
     private const val OFFLINE_GRACE_MS = 60_000L
 
     data class Hour(val label: String, val code: Int, val tempC: Int)
@@ -59,25 +59,25 @@ object WeatherRepo {
         val updatedAt: Long,
         val todayMin: Int? = null,
         val todayMax: Int? = null,
-        /** Risque de pluie du jour, en % (#34). */
+        /** Today's chance of rain, in % (#34). */
         val rainPct: Int? = null,
     )
 
     private val _weather = MutableStateFlow<Weather?>(null)
     val weather: StateFlow<Weather?> = _weather
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
-    /** Dernière requête en échec (toucher, 5 km parcourus ou rafraîchissement des 30 min). */
+    /** Last request failed (touch, 5 km driven or 30 min refresh). */
     private val _failed = MutableStateFlow(false)
     /**
-     * Météo à afficher. Une requête en échec garde les dernières prévisions tant qu'elles ont moins
-     * de [STALE_MS] ; au-delà (ou sans prévisions), affichage hors ligne : heure et température
-     * extérieure (issue #18). Réévalué toutes les 5 min, même sans nouvelle requête.
+     * Weather to show. A failed request keeps the last forecast as long as it is less than
+     * [STALE_MS] old; beyond that (or with no forecast), offline display: time and outside
+     * temperature (issue #18). Re-evaluated every 5 min, even with no new request.
      */
     val shown: StateFlow<Weather?> = kotlinx.coroutines.flow.combine(_weather, _failed,
         kotlinx.coroutines.flow.flow { while (true) { emit(Unit); kotlinx.coroutines.delay(300_000) } }) { w, f, _ ->
         if (w != null && (!f || System.currentTimeMillis() - w.updatedAt < STALE_MS)) w else null
     }.stateIn(scope, kotlinx.coroutines.flow.SharingStarted.Eagerly, null)
-    private const val STALE_MS = 30 * 60_000L   // une météo un peu ancienne vaut mieux que rien (choix de Marc, #18)
+    private const val STALE_MS = 30 * 60_000L   // slightly old weather is better than nothing (owner's choice, #18)
 
     fun start(context: Context) {
         val app = context.applicationContext
@@ -92,8 +92,8 @@ object WeatherRepo {
             return
         }
         watchNetwork(app)
-        // Entre deux météos (30 min), une petite requête toutes les 2 min voit la perte de connexion : la carte
-        // passe alors vite en hors ligne (#18). La météo réussie reste affichée (jusqu'à STALE_MS).
+        // Between two weather updates (30 min), a small request every 2 min sees the loss of connection: the map
+        // then goes offline quickly (#18). Successful weather stays shown (up to STALE_MS).
         scope.launch {
             delay(60_000)
             while (true) {
@@ -106,7 +106,7 @@ object WeatherRepo {
             }
         }
         scope.launch {
-            delay(5_000)   // laisser le réseau T-box monter après le démarrage
+            delay(5_000)   // let the T-box network come up after startup
             var fails = 0
             while (true) {
                 val ok = try { refresh(app) } catch (e: Exception) {
@@ -115,32 +115,32 @@ object WeatherRepo {
                 lastFailed = !ok
                 _failed.value = !ok
                 failingSince = if (ok) 0L else failingSince.takeIf { it != 0L } ?: System.currentTimeMillis()
-                // Échec (pas de réseau) : on réessaie vite. Réussi mais sans position ou sans nom de
-                // ville : on réessaie aussi, plus calmement, au lieu d'attendre 30 min.
+                // Failure (no network): retry quickly. Successful but with no position or city
+                // name: also retry, more calmly, instead of waiting 30 min.
                 val wait = when {
                     !ok -> FAIL_DELAYS[minOf(fails++, FAIL_DELAYS.size - 1)]
                     usedFallback || missingCity -> { fails = 0; RETRY_MS }
                     else -> { fails = 0; REFRESH_MS }
                 }
                 if (!ok || usedFallback || missingCity) Log.i(TAG, "retry in ${wait / 1000} s (network ${if (ok) "ok" else "missing"}, location ${if (usedFallback) "missing" else "ok"}, city ${if (missingCity) "missing" else "ok"})")
-                // Le retour du réseau (ou une position) réveille la boucle sans attendre la fin du délai
+                // The network's return (or a position) wakes the loop without waiting for the delay to end
                 kotlinx.coroutines.withTimeoutOrNull(wait) { wake.receive() }
             }
         }
     }
 
     @Volatile private var lastFailed = false
-    /** Début de la série d'échecs en cours (0 : dernière requête réussie). */
+    /** Start of the current series of failures (0: last request succeeded). */
     @Volatile private var failingSince = 0L
     /**
-     * Requêtes météo en échec depuis plus d'une minute (pas de connexion réelle), même si Android
-     * voit un réseau. Une coupure brève (tunnel, zone blanche) ne fait plus disparaître la carte.
+     * Weather requests failing for more than a minute (no real connection), even if Android
+     * sees a network. A brief outage (tunnel, dead zone) no longer makes the map disappear.
      */
     val offline: Boolean get() = listOf(failingSince, probeFailingSince).any { it != 0L && System.currentTimeMillis() - it > OFFLINE_GRACE_MS }
     @Volatile private var probeFailingSince = 0L
     private const val PROBE_MS = 2 * 60 * 1000L
 
-    /** Accès réel à internet : requête HEAD sans contenu vers le service météo (≈ 1 Ko). */
+    /** Real internet access: HEAD request with no content to the weather service (≈ 1 KB). */
     private fun probe(): Boolean = try {
         val c = URL("https://api.open-meteo.com/").openConnection() as HttpURLConnection
         c.requestMethod = "HEAD"; c.connectTimeout = 8000; c.readTimeout = 8000; c.instanceFollowRedirects = false
@@ -149,7 +149,7 @@ object WeatherRepo {
     @Volatile private var missingCity = false
     private val wake = kotlinx.coroutines.channels.Channel<Unit>(kotlinx.coroutines.channels.Channel.CONFLATED)
 
-    /** Dès que la voiture retrouve internet, une météo manquante ou incomplète est redemandée. */
+    /** As soon as the car gets internet back, missing or incomplete weather is requested again. */
     private fun watchNetwork(context: Context) {
         try {
             val cm = context.getSystemService(Context.CONNECTIVITY_SERVICE) as android.net.ConnectivityManager
@@ -167,14 +167,14 @@ object WeatherRepo {
     @Volatile private var usedFallback = false
 
     /**
-     * Au démarrage, la météo est demandée avant le premier relevé GPS : elle partait alors sur la
-     * ville de repli jusqu'au rafraîchissement suivant. Dès qu'une position arrive, on la redemande.
+     * At startup, the weather is requested before the first GPS fix: it then used the
+     * fallback city until the next refresh. As soon as a position arrives, it is requested again.
      */
     fun onLocation(context: Context) {
         if (usedFallback) { usedFallback = false; wake.trySend(Unit); return }
-        // En roulant, la météo suivait la voiture avec jusqu'à 30 min de retard (issue #18) : après
-        // MOVE_M parcourus depuis la dernière météo réussie, on la redemande. Rien si une requête est
-        // déjà en cours ou si la dernière a échoué (la boucle gère alors ses propres nouveaux essais).
+        // While driving, the weather followed the car up to 30 min late (issue #18): after
+        // MOVE_M driven since the last successful weather, request it again. Nothing if a request is
+        // already running or if the last one failed (the loop then handles its own retries).
         val from = fetchedAt ?: return
         val cur = app.mg4dash.map.LocationRepo.location.value ?: return
         if (busy || lastFailed) return
@@ -189,8 +189,8 @@ object WeatherRepo {
     }
 
     /**
-     * Nom de ville seul, sans nouvelle météo : redemandé après CITY_MOVE_M depuis le dernier nom
-     * obtenu, une requête à la fois et au plus une par CITY_RETRY_MS.
+     * City name alone, with no new weather: requested again after CITY_MOVE_M since the last name
+     * obtained, one request at a time and at most one per CITY_RETRY_MS.
      */
     private fun updateCity(context: Context, lat: Double, lon: Double) {
         val at = cityAt ?: return
@@ -207,14 +207,14 @@ object WeatherRepo {
         }
     }
 
-    /** Position du dernier nom de ville obtenu (null tant qu'aucun). */
+    /** Position of the last city name obtained (null while none). */
     @Volatile private var cityAt: Pair<Double, Double>? = null
     @Volatile private var cityBusy = false
     @Volatile private var cityTry = 0L
 
-    /** Position de la dernière météo réussie (null : ville de repli ou pas encore de météo). */
+    /** Position of the last successful weather (null: fallback city or no weather yet). */
     @Volatile private var fetchedAt: Pair<Double, Double>? = null
-    /** Requête en cours ou déjà demandée : évite de réveiller la boucle à chaque relevé GPS. */
+    /** Request running or already asked: avoids waking the loop at each GPS fix. */
     @Volatile private var busy = false
 
     fun refreshNow(context: Context) {
@@ -227,8 +227,8 @@ object WeatherRepo {
         }
     }
 
-    // Pas de test préalable de connectivité : sur la voiture, internet passe par l'interface
-    // Ethernet de la T-box, et la requête elle-même est le seul test fiable.
+    // No prior connectivity test: on the car, internet goes through the T-box's Ethernet
+    // interface, and the request itself is the only reliable test.
     private fun refresh(context: Context): Boolean {
         busy = true
         try { return doRefresh(context) } finally { busy = false }
@@ -251,7 +251,7 @@ object WeatherRepo {
                 "&hourly=temperature_2m,weather_code,is_day&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max" +
                 "&forecast_days=4&timezone=auto",
             lat, lon,
-        ) + prefs.weatherModel.takeIf { it.isNotBlank() }?.let { "&models=$it" }.orEmpty()   // modèle choisi (#67)
+        ) + prefs.weatherModel.takeIf { it.isNotBlank() }?.let { "&models=$it" }.orEmpty()   // chosen model (#67)
         val conn = URL(url).openConnection() as HttpURLConnection
         conn.connectTimeout = 10_000
         conn.readTimeout = 10_000
@@ -266,9 +266,9 @@ object WeatherRepo {
     }
 
     /**
-     * Nom de la ville approximative (OpenStreetMap Nominatim, géocodage inverse), mis en cache :
-     * nouvelle requête seulement après 5 km ou au changement de langue (issue #6 : afficher la ville
-     * plutôt que « Position actuelle »). Null hors ligne ou en cas d'échec.
+     * Approximate city name (OpenStreetMap Nominatim, reverse geocoding), cached:
+     * new request only after 5 km or on language change (issue #6: show the city
+     * rather than "Current position"). Null offline or on failure.
      */
     private fun cityName(context: Context, lat: Double, lon: Double): String? {
         val sp = Prefs(context).raw
@@ -303,13 +303,13 @@ object WeatherRepo {
         val hTemps = hourly.getJSONArray("temperature_2m")
         val hCodes = hourly.getJSONArray("weather_code")
         val hDay = hourly.optJSONArray("is_day")
-        // Ciel dégagé la nuit : lune et « Dégagé » au lieu du soleil (issue #7)
+        // Clear sky at night: moon and "Clear" instead of the sun (issue #7)
         fun night(code: Int, isDay: Int) = if (isDay == 0 && code <= 1) NIGHT_CLEAR else code
         var start = 0
         for (i in 0 until hTimes.length()) if (hTimes.getString(i) <= curTime) start = i
         val hours = (1..5).mapNotNull { k ->
             val i = start + k
-            // Valeur absente (modèle choisi hors de sa zone ou de sa durée, #67) : heure sautée
+            // Missing value (chosen model outside its area or duration, #67): hour skipped
             if (i >= hTimes.length() || hCodes.isNull(i) || hTemps.isNull(i)) null
             else Hour(hourLabel(hTimes.getString(i)), night(hCodes.getInt(i), hDay?.optInt(i, 1) ?: 1), Math.round(hTemps.getDouble(i)).toInt())
         }
@@ -346,7 +346,7 @@ object WeatherRepo {
         java.text.SimpleDateFormat("EEE", Locale.getDefault()).format(d!!).trimEnd('.').replaceFirstChar { it.uppercase() }
     } catch (_: Exception) { iso.takeLast(5) }
 
-    /** « 14h » en français, « 14:00 » ailleurs. */
+    /** "14h" in French, "14:00" elsewhere. */
     private fun hourLabel(iso: String): String =
         if (Locale.getDefault().language == "fr") iso.substring(11, 13).trimStart('0').ifEmpty { "0" } + "h"
         else iso.substring(11, 16)
@@ -361,10 +361,10 @@ object WeatherRepo {
             ?.let { it.latitude to it.longitude }
     } catch (_: Exception) { null }
 
-    /** Code interne : ciel dégagé de nuit (codes WMO 0 et 1 quand il fait nuit). */
+    /** Internal code: clear sky at night (WMO codes 0 and 1 when it is night). */
     const val NIGHT_CLEAR = 100
 
-    /** Codes WMO → libellé français. */
+    /** WMO codes → French label. */
     fun label(code: Int): String = when (code) {
         NIGHT_CLEAR -> Tr.s(R.string.wx_clear)
         0 -> Tr.s(R.string.wx_sunny)
@@ -379,7 +379,7 @@ object WeatherRepo {
         else -> "—"
     }
 
-    /** Couleur de l'icône : soleil orange, pluie cyan, orage orange, neige et nuages en clair. */
+    /** Icon colour: orange sun, cyan rain, orange storm, light snow and clouds. */
     fun iconColor(code: Int): Int = when (code) {
         NIGHT_CLEAR -> R.color.text_value
         0, 1 -> R.color.accent_heat

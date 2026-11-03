@@ -9,8 +9,8 @@ import java.util.List;
 import java.util.Locale;
 
 /**
- * Écrit un seul flux dans plusieurs fichiers name.001, name.002… de taille limitée : le site GitHub refuse
- * les fichiers de plus de 25 Mo. On les recolle dans l'ordre (cat name.* > name).
+ * Writes a single stream to several size-limited files name.001, name.002…: the GitHub site refuses
+ * files over 25 MB. They are joined back in order (cat name.* > name).
  */
 final class PartOutputStream extends OutputStream {
     private final File dir;
@@ -54,7 +54,7 @@ final class PartOutputStream extends OutputStream {
     private void closeCurrent() throws IOException {
         if (current == null) return;
         current.flush();
-        current.getFD().sync();   // clé USB : les données doivent y être quand l'appli annonce la fin
+        current.getFD().sync();   // USB stick: the data must be there when the app announces the end
         current.close();
         current = null;
     }

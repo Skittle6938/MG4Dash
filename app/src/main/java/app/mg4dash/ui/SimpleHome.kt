@@ -29,9 +29,9 @@ import app.mg4dash.weather.WeatherRepo
 import kotlinx.coroutines.launch
 
 /**
- * Accueil épuré : trois volets (climatisation, batterie, multimédia) et une bande avec deux
- * raccourcis configurables et la météo du jour. Peu de boutons, grands textes.
- * Les raccourcis utilisent les cases 100 et 101 de [Shortcuts].
+ * Simple home: three panes (climate, battery, media) and a strip with two
+ * configurable shortcuts and today's weather. Few buttons, large texts.
+ * The shortcuts use slots 100 and 101 of [Shortcuts].
  */
 class SimpleHome(private val a: AppCompatActivity) {
     private val kit = Kit(a)
@@ -74,7 +74,7 @@ class SimpleHome(private val a: AppCompatActivity) {
         top.addView(buildBattery(), kit.lp(0, -1, 1f, l = 6, r = 6))
         val media = buildMedia()
         top.addView(media, kit.lp(0, -1, 1f, l = 6))
-        // Balayage vertical sur la carte musique : source suivante / précédente (comme les autres accueils)
+        // Vertical swipe on the music card: next / previous source (like the other homes)
         SwipeBox.wrap(media, vertical = true, horizontal = false) { MediaHub.cycleSource(it) }
             .onHorizontal = { if (it > 0) MediaHub.next() else MediaHub.previous() }
         root.addView(top, kit.lp(-1, 0, 62f))
@@ -115,12 +115,12 @@ class SimpleHome(private val a: AppCompatActivity) {
 
     private fun buildClimate(): LinearLayout {
         climateCard = kit.panel()
-        // Titre seul ; coin haut-gauche libre pour le bouton des antibrouillards (sauf barre verticale)
+        // Title only; top left corner free for the fog light button (except vertical bar)
         val head = kit.row()
         head.addView(title(a.getString(R.string.title_climate)), kit.lp(0, -2, 1f, l = if (Dock.vertical(a)) 0 else Kit.FOG_SAFE_DP - 20))
         climateCard.addView(head, kit.lp(-1, kit.dp(40)))
         if (hideTitles) head.visibility = if (Dock.vertical(a)) View.GONE else View.INVISIBLE
-        // Sièges et volant chauffants (versions équipées) : trois boutons centrés à la place du titre
+        // Heated seats and wheel (equipped versions): three centred buttons instead of the title
         if (CarBridge.heatingShown(a)) {
             head.visibility = View.VISIBLE; head.getChildAt(0).visibility = View.GONE; head.gravity = Gravity.CENTER
             fun chip(icon: Int, mirror: Boolean, onClick: () -> Unit) = iconChip(icon, onClick).apply {
@@ -134,7 +134,7 @@ class SimpleHome(private val a: AppCompatActivity) {
             listOf(heatSeatL!!, heatWheel!!, heatSeatR!!).forEachIndexed { i, v -> head.addView(v, kit.lp(kit.dp(96), kit.dp(40), l = if (i > 0) 10 else 0)) }
         }
 
-        // Température, avec la température extérieure en petit dessous
+        // Temperature, with the outside temperature small below
         val tRow = kit.row().apply { gravity = Gravity.CENTER }
         tRow.addView(holdButton(R.drawable.ic_minus, 84, R.color.accent_cold) { CarBridge.stepTemp(-1) })
         val tBox = kit.column().apply { gravity = Gravity.CENTER }
@@ -145,7 +145,7 @@ class SimpleHome(private val a: AppCompatActivity) {
         tRow.addView(holdButton(R.drawable.ic_plus, 84, R.color.accent_heat) { CarBridge.stepTemp(1) })
         climateCard.addView(tRow, kit.lp(-1, 0, 1f))
 
-        // Ventilation : mêmes boutons que la température ; sous 1 = arrêt, appui long − = minimum, + = maximum
+        // Fan: same buttons as temperature; below 1 = off, long press − = minimum, + = maximum
         val fRow = kit.row().apply { gravity = Gravity.CENTER }
         fRow.addView(kit.roundButton(R.drawable.ic_minus, 84) {
             val s = CarBridge.state.value
@@ -184,7 +184,7 @@ class SimpleHome(private val a: AppCompatActivity) {
         }
         chipRecirc.addView(recircAuto, android.widget.FrameLayout.LayoutParams(-2, -2, Gravity.TOP or Gravity.END).apply { rightMargin = kit.dp(8) })
         listOf<View>(chipScreen, chipFace, chipFeet, chipRecirc).forEachIndexed { i, v -> r2.addView(v, kit.lp(0, kit.dp(48), 1f, l = if (i > 0) 8 else 0)) }
-        // Sorties d'air en haut, marche / A/C / AUTO / ECO en dessous (#34)
+        // Air outlets at the top, on / A/C / AUTO / ECO below (#34)
         climateCard.addView(r2, kit.lp(-1, -2, t = 10))
         climateCard.addView(r1, kit.lp(-1, -2, t = 8))
 
@@ -202,7 +202,7 @@ class SimpleHome(private val a: AppCompatActivity) {
     private lateinit var chipRecirc: android.widget.FrameLayout
     private lateinit var recircAuto: TextView
 
-    /** Bascule à icône (même fond que les autres bascules ; l'icône suit l'état sélectionné). */
+    /** Icon toggle (same background as other toggles; the icon follows the selected state). */
     private fun iconChip(icon: Int, onClick: () -> Unit) = android.widget.FrameLayout(a).apply {
         setBackgroundResource(R.drawable.bg_chip); isClickable = true; isFocusable = true
         addView(ImageView(a).apply {
@@ -212,7 +212,7 @@ class SimpleHome(private val a: AppCompatActivity) {
         setOnClickListener { onClick() }
     }
 
-    /** Pare-brise, visage et pieds se combinent ; au moins une sortie reste active. */
+    /** Windscreen, face and feet combine; at least one outlet stays active. */
     private fun toggleFlow(i: Int) {
         val parts = VehicleState.flowParts(CarBridge.state.value.fanDirection)?.copyOf() ?: booleanArrayOf(false, false, false)
         parts[i] = !parts[i]
@@ -228,7 +228,7 @@ class SimpleHome(private val a: AppCompatActivity) {
         p.addView(battery, kit.lp(-1, 0, 1f))
         range = big("— km", 44f).apply { gravity = Gravity.CENTER }
         p.addView(range, kit.lp(-1, -2, t = 6))
-        gauge = SocBar(a).apply { currentBubble = false }   // le grand % est juste au-dessus
+        gauge = SocBar(a).apply { currentBubble = false }   // the large % is just above
         p.addView(gauge, kit.lp(-1, kit.dp(28), t = 2))
         chargeState = kit.text("", 22f, R.color.accent_energy).apply { gravity = Gravity.CENTER }
         p.addView(chargeState, kit.lp(-1, -2, t = 10))
@@ -242,9 +242,9 @@ class SimpleHome(private val a: AppCompatActivity) {
 
     private fun buildMedia(): LinearLayout {
         val p = kit.panel()
-        // Source active en haut à gauche (« Radio ▾ ») : un toucher ouvre la liste des sources
+        // Active source at the top left ("Radio ▾"): a touch opens the list of sources
         mediaSource = title(a.getString(R.string.title_media)).apply { SourceMenu.attach(a, this) }
-        // Puces de source : elles basculent la source affichée (sans ouvrir l'appli)
+        // Source chips: they switch the displayed source (without opening the app)
         val head = kit.row()
         head.addView(mediaSource, kit.lp(0, -2, 1f))
         p.addView(head, kit.lp(-1, kit.dp(52)))
@@ -282,7 +282,7 @@ class SimpleHome(private val a: AppCompatActivity) {
         val next = kit.roundButton(R.drawable.ic_next, 76) { MediaHub.next() }
         controls.addView(next)
         p.addView(controls, kit.lp(-1, -2, t = 8))
-        // Lecteur Immersif comme sur l'accueil complet
+        // Immersive player as on full home
         mediaStyle = MediaStyle.immersive(a, p, head, info, mediaTitle, mediaArtist, prev, mediaPlay, next)
         return p
     }
@@ -301,7 +301,7 @@ class SimpleHome(private val a: AppCompatActivity) {
         weatherPlace = kit.text("", 22f, R.color.text_sub)
         col.addView(weatherLabel); col.addView(weatherPlace, kit.lp(-1, -2, t = 4))
         p.addView(col, kit.lp(0, -2, 1f, l = 20))
-        // Heure à droite, à la minute (barre réduite de ce style : pas d'autre horloge)
+        // Time on the right, to the minute (this style's reduced bar: no other clock)
         val clock = big("", 48f, light = true)
         p.addView(clock, kit.lp(-2, -2, l = 16))
         clock.post(object : Runnable {
@@ -315,7 +315,7 @@ class SimpleHome(private val a: AppCompatActivity) {
         return p
     }
 
-    /** Tuile de raccourci : appli ou action Home Assistant ; case vide = « + ». */
+    /** Shortcut tile: app or Home Assistant action; empty slot = "+". */
     private fun shortcutTile(n: Int): LinearLayout {
         val slot = 100 + n
         val tile = shortcutHolders[n]
@@ -361,7 +361,7 @@ class SimpleHome(private val a: AppCompatActivity) {
         }
     }
 
-    /** Appui = un cran ; maintenu = répétition. */
+    /** Press = one step; hold = repeat. */
     private fun holdButton(icon: Int, sizeDp: Int, tint: Int, action: () -> Unit): ImageButton =
         kit.roundButton(icon, sizeDp, tint) {}.apply {
             val repeat = object : Runnable { override fun run() { action(); handler.postDelayed(this, 350) } }
@@ -385,7 +385,7 @@ class SimpleHome(private val a: AppCompatActivity) {
         fun paint(v: android.widget.FrameLayout?, level: Int?, showLevel: Boolean) {
             v ?: return
             v.isSelected = (level ?: 0) > 0
-            // Siège : 0 à 3 flux de chaleur dessinés au-dessus de l'assise selon le niveau
+            // Seat: 0 to 3 heat waves drawn above the seat according to the level
             if (showLevel) (v.getChildAt(0) as? ImageView)?.setImageResource(when (level) { 1 -> R.drawable.ic_seat_heat_1; 2 -> R.drawable.ic_seat_heat_2; 3 -> R.drawable.ic_seat_heat_3; else -> R.drawable.ic_seat_heat_0 })
         }
         paint(heatSeatL, s.seatHeatL, true); paint(heatSeatR, s.seatHeatR, true); paint(heatWheel, s.wheelHeat, false)
@@ -431,7 +431,7 @@ class SimpleHome(private val a: AppCompatActivity) {
             else -> VehicleState.chargeStatusLabel(s.chargeStatus)
         }
         chargeState.setTextColor(kit.color(if (discharge) R.color.accent_heat else R.color.accent_energy))
-        // Le bouton n'apparaît que câble branché
+        // The button only appears with the cable plugged in
         val plugged = VehicleState.isPlugged(s.chargeStatus)
         chargeAction.visibility = if (plugged && CarBridge.chargeControl) View.VISIBLE else View.GONE
         chargeAction.isSelected = if (discharge) VehicleState.isDischarging(s) else s.chargeCtrl == 1

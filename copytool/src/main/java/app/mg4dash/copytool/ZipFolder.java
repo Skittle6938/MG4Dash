@@ -7,11 +7,11 @@ import java.util.Arrays;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-/** Ajoute des fichiers et des dossiers à un zip ; un fichier illisible est noté dans le rapport, sans arrêter la copie. */
+/** Adds files and folders to a zip; an unreadable file is noted in the report, without stopping the copy. */
 final class ZipFolder {
     private ZipFolder() {}
 
-    /** Nombre de fichiers ajoutés. Une erreur d'écriture (clé pleine, retirée) remonte et arrête tout. */
+    /** Number of files added. A write error (stick full, removed) propagates and stops everything. */
     static int addDir(ZipOutputStream zip, File dir, String prefix, StringBuilder report) throws IOException {
         File[] files = dir.listFiles();
         if (files == null) {
@@ -49,7 +49,7 @@ final class ZipFolder {
         }
     }
 
-    /** Une erreur de lecture coupe ce fichier seulement ; celles de la clé passent par zip.write. */
+    /** A read error only cuts this file; the stick's errors go through zip.write. */
     private static int read(FileInputStream in, byte[] buf, File f, StringBuilder report) {
         try {
             return in.read(buf);

@@ -8,22 +8,22 @@ import org.json.JSONArray
 import org.json.JSONObject
 
 /**
- * Capacité utile de la batterie et santé (SOH) estimée, sans réglage à la main si possible.
+ * Usable battery capacity and estimated health (SOH), with no manual setting if possible.
  *
- * Capacité :
- *  1) la valeur annoncée par la voiture (INFO_EV_BATTERY_CAPACITY, AOSP, en Wh ; MG4Control l'a
- *     trouvée à 0 sur SWI133, elle peut répondre ailleurs) ;
- *  2) sinon, la mesure de MG4Dash, faite en roulant (décharge) : énergie nette sortie de la batterie
- *     (récupération déduite) ÷ baisse du %, comptées seulement quand MG4Dash voit les deux (écran
- *     allumé). Le % perdu voiture fermée, et la recharge, sont hors mesure : la baisse se cumule sur
- *     plusieurs trajets et plusieurs jours, sans attendre de recharge, et le cumul est gardé avec les
- *     préférences (conservées par les mises à jour). Dès 15 % de baisse cumulée, la mesure rejoint
- *     l'historique, datée ; lissage : moyenne pondérée par la baisse de %, sur les 30 derniers jours.
- * Santé : capacité mesurée ÷ capacité utile d'origine du modèle (51, 64 ou 77 kWh), aussi lissée
- * sur 30 jours, et sur toute la période mesurée pour suivre l'évolution.
+ * Capacity:
+ *  1) the value announced by the car (INFO_EV_BATTERY_CAPACITY, AOSP, in Wh; MG4Control found
+ *     it at 0 on SWI133, it may answer elsewhere);
+ *  2) otherwise, MG4Dash's measurement, made while driving (discharge): net energy out of the battery
+ *     (regeneration deducted) ÷ drop in %, counted only when MG4Dash sees both (screen
+ *     on). The % lost with the car closed, and charging, are outside the measurement: the drop adds up over
+ *     several trips and days, without waiting for a charge, and the total is kept with the
+ *     preferences (kept across updates). From 15 % of total drop, the measurement joins the
+ *     history, dated; smoothing: average weighted by the % drop, over the last 30 days.
+ * Health: measured capacity ÷ the model's original usable capacity (51, 64 or 77 kWh), also smoothed
+ * over 30 days, and over the whole measured period to follow the trend.
  *
- * Jusqu'à la 1.1.3, la mesure allait d'une recharge à la suivante : elle comptait le % perdu voiture
- * fermée sans l'énergie correspondante, et ne se terminait pas si la recharge était vue % par %.
+ * Up to 1.1.3, the measurement ran from one charge to the next: it counted the % lost with the car
+ * closed without the matching energy, and did not end if the charge was seen % by %.
  */
 object BatteryCapacity {
     private const val TAG = "Capacity"
@@ -32,13 +32,13 @@ object BatteryCapacity {
     private const val MONTH_MS = 30L * 24 * 3600_000L
     private const val MAX_SAMPLES = 300
 
-    /** Modèles : capacité brute (affichée) → capacité utile neuve par défaut (kWh), valeurs non officielles (#77). */
+    /** Models: gross capacity (displayed) → default new usable capacity (kWh), unofficial values (#77). */
     val MODELS = listOf(51 to 50.8f, 64 to 61.7f, 77 to 74.4f)
 
-    /** Une mesure : date, capacité (kWh), baisse du % et km parcourus pendant la mesure (0 avant la 1.1.5). */
+    /** One measurement: date, capacity (kWh), % drop and km driven during the measurement (0 before 1.1.5). */
     data class Sample(val at: Long, val kwh: Float, val drop: Int, val km: Float = 0f)
 
-    /** Capacité annoncée par la voiture, en kWh, ou null. */
+    /** Capacity announced by the car, in kWh, or null. */
     fun fromCar(): Float? {
         val raw = CarProps.readFloatArea(PROP_EV_BATTERY_CAPACITY, 0)?.takeIf { it.isFinite() && it > 0f }
             ?: CarProps.readFloatArea(PROP_EV_BATTERY_CAPACITY, 0x1000000)?.takeIf { it.isFinite() && it > 0f }
@@ -63,7 +63,7 @@ object BatteryCapacity {
         return if (w == 0) null else list.sumOf { (it.kwh * it.drop).toDouble() }.toFloat() / w
     }
 
-    /** Capacité mesurée, lissée sur 30 jours (sinon toutes les mesures), et nombre de mesures. */
+    /** Measured capacity, smoothed over 30 days (otherwise all measurements), and number of measurements. */
     fun estimate(context: Context): Pair<Float, Int>? {
         val all = samples(context)
         val recent = all.filter { System.currentTimeMillis() - it.at < MONTH_MS }
@@ -72,8 +72,8 @@ object BatteryCapacity {
         return null
     }
 
-    // Mesure en cours : énergie nette (kWh) et baisse du % cumulées, gardées en mémoire et
-    // enregistrées par [flush] (toutes les 30 s par EnergyMonitor).
+    // Current measurement: total net energy (kWh) and % drop, kept in memory and
+    // saved by [flush] (every 30 s by EnergyMonitor).
     private var accKwh = 0f
     private var accDrop = 0f
     private var accKm = 0f
@@ -83,7 +83,7 @@ object BatteryCapacity {
         if (loaded) return
         val sp = Prefs(context).raw
         accKwh = sp.getFloat("soh_kwh", 0f); accDrop = sp.getFloat("soh_drop", 0f); accKm = sp.getFloat("soh_km", 0f)
-        // Anciennes clés (mesure d'une recharge à l'autre) : plus utilisées
+        // Old keys (measurement from one charge to the next): no longer used
         if (sp.contains("cap_current")) sp.edit().remove("cap_current").remove("cap_current_drop").apply()
         loaded = true
     }
@@ -95,8 +95,8 @@ object BatteryCapacity {
     }
 
     /**
-     * Une seconde observée : [kwh] = énergie sortie de la batterie (négative en récupération),
-     * [drop] = baisse du % sur la même seconde (négative si le % remonte), [km] = distance parcourue.
+     * One observed second: [kwh] = energy out of the battery (negative when regenerating),
+     * [drop] = % drop over the same second (negative if the % goes up), [km] = distance driven.
      */
     @Synchronized
     fun accumulate(context: Context, kwh: Float, drop: Float, km: Float) {
@@ -115,7 +115,7 @@ object BatteryCapacity {
         if (est != null) apply(context)
     }
 
-    /** Mesure en cours : baisse cumulée (%), capacité provisoire (kWh, à partir de 5 %) et km parcourus. */
+    /** Current measurement: total drop (%), provisional capacity (kWh, from 5 %) and km driven. */
     data class Progress(val drop: Float, val provisional: Float?, val km: Float)
 
     @Synchronized
@@ -130,16 +130,16 @@ object BatteryCapacity {
         return (netKwh / socDrop * 100f).takeIf { it in 30f..100f }
     }
 
-    /** Capacité utile neuve de référence (kWh) : celle saisie à la main (#77), sinon celle du modèle choisi. */
+    /** Reference new usable capacity (kWh): the one entered by hand (#77), otherwise the chosen model's. */
     fun nominal(context: Context): Float = Prefs(context).batteryNewKwh.takeIf { it > 0f } ?: modelNominal(context)
 
-    /** Capacité utile neuve par défaut du modèle choisi (kWh). */
+    /** Default new usable capacity of the chosen model (kWh). */
     fun modelNominal(context: Context): Float {
         val gross = Prefs(context).batteryModel
         return MODELS.firstOrNull { it.first == gross }?.second ?: 50.8f
     }
 
-    /** Santé (%, au dixième) sur les mesures des 30 derniers jours (sinon toutes), et km couverts par ces mesures. */
+    /** Health (%, to the tenth) over the measurements of the last 30 days (otherwise all), and km they cover. */
     data class Health(val percent: Float, val km: Float, val count: Int)
 
     fun health(context: Context): Health? {
@@ -150,8 +150,8 @@ object BatteryCapacity {
     }
 
     /**
-     * Capacité actuelle (usure comprise) : celle de la voiture, sinon la mesure de MG4Dash. Plus de réglage à
-     * la main : il se figeait tout seul dès la première mesure (la clé existait) et la mesure n'était plus suivie.
+     * Current capacity (wear included): the car's, otherwise MG4Dash's measurement. No more manual
+     * setting: it froze by itself at the first measurement (the key existed) and the measurement was no longer followed.
      */
     fun apply(context: Context) {
         val prefs = Prefs(context)

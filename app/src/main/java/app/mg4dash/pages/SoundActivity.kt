@@ -13,8 +13,8 @@ import app.mg4dash.ui.SoundFieldView
 import java.util.concurrent.Executors
 
 /**
- * Page Son : répartition avant / arrière / gauche / droite et égaliseur 5 bandes avec
- * préréglages et Loudness, envoyés au service son SAIC (mêmes réglages que l'appli Média).
+ * Sound page: front / rear / left / right balance and 5 band equaliser with
+ * presets and Loudness, sent to the SAIC sound service (same settings as the Media app).
  */
 class SoundActivity : PageActivity() {
     override val pageTitle get() = getString(R.string.title_sound)
@@ -26,15 +26,15 @@ class SoundActivity : PageActivity() {
     private lateinit var pickPreset: (Int?) -> Unit
     private lateinit var loudness: android.widget.TextView
 
-    /** Un seul fil pour les appels au service son : les réglages partent dans l'ordre. */
+    /** A single thread for sound service calls: settings go out in order. */
     private val io = Executors.newSingleThreadExecutor()
     private var audio: AudioService? = null
-    /** Écart entre nos valeurs (−7…+7) et celles du service (0…14, 7 = centre / neutre). */
+    /** Offset between our values (−7…+7) and the service's (0…14, 7 = centre / neutral). */
     private var fieldOffset = 7
 
-    /** Pastilles → numéro de préréglage SAIC (2 Classique, 3 Pop, 4 Voix, 5 Jazz, 6 Rock, 7 Utilisateur). */
+    /** Chips → SAIC preset number (2 Classic, 3 Pop, 4 Vocal, 5 Jazz, 6 Rock, 7 User). */
     private val presetIds = intArrayOf(USER, 2, 5, 3, 6, 4)
-    /** Courbes affichées (−7…+7) ; remplacées par celles de la voiture quand elle répond. */
+    /** Displayed curves (−7…+7); replaced by the car's when it answers. */
     private val curves = mutableMapOf(
         USER to intArrayOf(0, 0, 0, 0, 0),
         2 to intArrayOf(4, 2, 0, 2, 4), 5 to intArrayOf(3, 1, -1, 2, 3), 3 to intArrayOf(-1, 2, 4, 2, -1),
@@ -42,7 +42,7 @@ class SoundActivity : PageActivity() {
     )
 
     override fun buildBody() {
-        // ── Répartition ──
+        // ── Balance ──
         val fPanel = kit.panel(getString(R.string.snd_field))
         field = SoundFieldView(this).apply { onChange = { b, f -> showField(b, f); sendField(b, f) } }
         fPanel.addView(field, kit.lp(-1, 0, 1f, t = 4))
@@ -54,14 +54,14 @@ class SoundActivity : PageActivity() {
         fPanel.addView(fRow, kit.lp(-1, -2, t = 8))
         body.addView(fPanel, kit.lp(0, -1, 34f))
 
-        // ── Égaliseur ──
+        // ── Equaliser ──
         val ePanel = kit.panel(getString(R.string.snd_eq))
         val names = listOf(R.string.snd_user, R.string.snd_classic, R.string.snd_jazz, R.string.snd_pop, R.string.snd_rock, R.string.snd_vocal).map { getString(it) }
         val (pRow, pick) = kit.segmented(names) { i -> choosePreset(presetIds[i]) }
         pickPreset = pick
         ePanel.addView(pRow, kit.lp(-1, -2, t = 10))
         eq = EqualizerView(this).apply {
-            // Toucher un curseur : la courbe devient la courbe utilisateur
+            // Touching a slider: the curve becomes the user curve
             onChange = { _, _ -> pickPreset(0); curves[USER] = values.copyOf(); sendUserEq(values.copyOf()) }
         }
         ePanel.addView(eq, kit.lp(-1, 0, 1f, t = 12))
@@ -83,20 +83,20 @@ class SoundActivity : PageActivity() {
         else { showField(0, 0); show(USER, false); load() }
     }
 
-    /** Lecture des réglages actuels de la voiture. */
+    /** Reads the car's current settings. */
     private fun load() = io.execute {
         val a = CarBridge.audio().also { audio = it }
         if (a == null) { Log.w(TAG, "sound service unavailable"); return@execute }
         try {
             val b = a.balance; val f = a.fader
-            // Valeurs relevées : centre 7 (0…14) comme l'égaliseur, ou 0 (−7…+7) sur d'autres versions
+            // Values found: centre 7 (0…14) like the equaliser, or 0 (−7…+7) on other versions
             fieldOffset = if (!a.centredOnSeven && (b < 0 || f < 0 || (b == 0 && f == 0))) 0 else 7
             val preset = a.equalizerPreset
             val loud = a.loudness
             for (id in presetIds) (if (id == USER) a.userEq else a.eqBand(id))?.let { raw -> curves[id] = IntArray(5) { raw[it] - EQ_CENTER } }
             Log.i(TAG, "read: balance $b, fader $f (offset $fieldOffset), preset $preset, loudness $loud, curve ${curves[preset]?.joinToString()}")
             runOnUiThread {
-                field.balance = b - fieldOffset; field.fader = fieldOffset - f   // fader du service : grand = arrière
+                field.balance = b - fieldOffset; field.fader = fieldOffset - f   // service's fader: high = rear
                 showField(field.balance, field.fader)
                 show(if (preset in presetIds) preset else USER, false)
                 loudness.isSelected = loud
@@ -109,7 +109,7 @@ class SoundActivity : PageActivity() {
         io.execute { call("préréglage $id") { it.setEqualizerPreset(id) } }
     }
 
-    /** Affiche un préréglage (pastille + courbe). */
+    /** Shows a preset (chip + curve). */
     private fun show(id: Int, send: Boolean) {
         pickPreset(presetIds.indexOf(id).coerceAtLeast(0))
         eq.set(curves[id] ?: IntArray(5))
@@ -138,7 +138,7 @@ class SoundActivity : PageActivity() {
         }
     }
 
-    /** Appel au service son, sur le fil `io` ; journalisé pour les retours de test. */
+    /** Sound service call, on the `io` thread; logged for test feedback. */
     private fun call(what: String, block: (AudioService) -> Any?) {
         val a = audio ?: CarBridge.audio().also { audio = it } ?: run { Log.w(TAG, "$what: sound service unavailable"); return }
         try { Log.i(TAG, "$what → ${block(a)}") } catch (e: Exception) { Log.w(TAG, "$what: ${e.message}") }
@@ -155,7 +155,7 @@ class SoundActivity : PageActivity() {
         io.shutdown()
     }
 
-    // ── Spectre en direct (Visualizer sur la sortie audio générale, session 0) ──
+    // ── Live spectrum (Visualizer on the general audio output, session 0) ──
     private var visualizer: android.media.audiofx.Visualizer? = null
     private val bars = FloatArray(BARS)
 
@@ -184,7 +184,7 @@ class SoundActivity : PageActivity() {
         visualizer = null
     }
 
-    /** FFT → BARS barres réparties en échelle log de 60 Hz à 16 kHz, montée rapide et retombée douce. */
+    /** FFT → BARS bars on a log scale from 60 Hz to 16 kHz, fast rise and gentle fall. */
     private fun onFft(fft: ByteArray, sampleHz: Float) {
         val n = fft.size / 2; if (n < 2 || sampleHz <= 0f) return
         val binHz = sampleHz / 2f / n
@@ -194,7 +194,7 @@ class SoundActivity : PageActivity() {
             val i0 = (f0 / binHz).toInt().coerceIn(1, n - 1); val i1 = (f1 / binHz).toInt().coerceIn(i0, n - 1)
             var m = 0f
             for (i in i0..i1) { val re = fft[2 * i].toFloat(); val im = fft[2 * i + 1].toFloat(); m = maxOf(m, kotlin.math.hypot(re, im)) }
-            // dB ramené à 0…1 (≈ 50 dB de dynamique)
+            // dB brought to 0…1 (≈ 50 dB of dynamic range)
             val db = if (m > 0f) 20f * kotlin.math.log10(m) else 0f
             val target = ((db - 5f) / 40f).coerceIn(0f, 1f)
             bars[k] = if (target > bars[k]) target else bars[k] * 0.85f + target * 0.15f

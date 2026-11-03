@@ -14,20 +14,20 @@ import java.net.HttpURLConnection
 import java.net.URL
 
 /**
- * Mise à jour de MG4Dash depuis les releases GitHub (pré-versions comprises).
- * Téléchargement de l'APK, puis installation par PackageInstaller (uid système) : Android
- * vérifie lui-même que l'APK est signé avec la même clé. Après l'installation, l'accueil
- * est relancé ([Relaunch]).
+ * MG4Dash update from GitHub releases (pre-releases included).
+ * APK download, then installation through PackageInstaller (system uid): Android
+ * itself checks that the APK is signed with the same key. After installation, home
+ * is relaunched ([Relaunch]).
  */
 object Updater {
     private const val TAG = "Update"
     private const val API = "https://api.github.com/repos/Skittle6938/MG4Dash/releases?per_page=10"
-    /** Dernière release non bêta (GitHub ignore les pré-versions et les brouillons). */
+    /** Latest non-beta release (GitHub ignores pre-releases and drafts). */
     private const val API_STABLE = "https://api.github.com/repos/Skittle6938/MG4Dash/releases/latest"
 
     data class Release(val version: String, val url: String, val size: Long, val notes: String)
 
-    /** Dernière release publiée (pré-versions comprises si [beta]), ou null s'il n'y en a pas. Réseau : hors du fil principal. */
+    /** Latest published release (pre-releases included if [beta]), or null if none. Network: off the main thread. */
     fun latest(beta: Boolean = true, api: String = API): Release? {
         val arr = JSONArray(get(api))
         for (i in 0 until arr.length()) {
@@ -39,7 +39,7 @@ object Updater {
         return null
     }
 
-    /** Dernière release non bêta, même plus ancienne que les dix dernières pré-versions. Réseau : hors du fil principal. */
+    /** Latest non-beta release, even older than the last ten pre-releases. Network: off the main thread. */
     fun latestStable(): Release? = parse(JSONObject(get(API_STABLE)))
 
     private fun get(api: String): String {
@@ -53,7 +53,7 @@ object Updater {
         } finally { c.disconnect() }
     }
 
-    /** Release avec son APK, ou null si elle n'en a pas. */
+    /** Release with its APK, or null if it has none. */
     private fun parse(r: JSONObject): Release? {
         val assets = r.optJSONArray("assets") ?: return null
         for (j in 0 until assets.length()) {
@@ -66,12 +66,12 @@ object Updater {
         return null
     }
 
-    /** Nom des blocs de langue dans les notes de release (#73) : `<details><summary>Français</summary> … </details>`. */
+    /** Name of the language blocks in the release notes (#73): `<details><summary>Français</summary> … </details>`. */
     private val LANG_NAMES = mapOf("fr" to "Français", "de" to "Deutsch", "es" to "Español", "it" to "Italiano", "nl" to "Nederlands", "tr" to "Türkçe")
 
     /**
-     * Notes dans la langue de l'autoradio (#73) : le bloc repliable de cette langue s'il existe, sinon le
-     * texte anglais (tout ce qui précède le premier bloc). Les anciennes notes sans blocs restent inchangées.
+     * Notes in the head unit's language (#73): this language's collapsible block if it exists, otherwise the
+     * English text (everything before the first block). Old notes without blocks stay unchanged.
      */
     fun localNotes(md: String, lang: String = java.util.Locale.getDefault().language): String {
         val english = md.substringBefore("<details>").trim()
@@ -80,16 +80,16 @@ object Updater {
         return re.find(md)?.groupValues?.get(1)?.trim()?.takeIf { it.isNotEmpty() } ?: english
     }
 
-    /** Notes de release en texte simple (le markdown de GitHub sans gras ni code, puces « • »), dans la langue de l'autoradio. */
+    /** Release notes as plain text (GitHub markdown without bold or code, "•" bullets), in the head unit's language. */
     fun plainNotes(md: String): String = localNotes(md)
         .replace("**", "").replace("`", "")
         .lines().joinToString("\n") { l -> l.trim().let { if (it.startsWith("- ")) "•  " + it.drop(2) else it } }
         .trim()
 
     /**
-     * true si [remote] est plus récente que la version installée (comparaison numérique 0.8.2 < 0.8.10).
-     * À numéros égaux, la version finale l'emporte sur la bêta (1.4.1-beta3 < 1.4.1), et les bêtas
-     * se suivent par leur numéro (1.4.1-beta0 < 1.4.1-beta1 ; « -beta » sans numéro compte pour 0).
+     * true if [remote] is newer than the installed version (numeric comparison 0.8.2 < 0.8.10).
+     * With equal numbers, the final version wins over the beta (1.4.1-beta3 < 1.4.1), and betas
+     * follow by their number (1.4.1-beta0 < 1.4.1-beta1; "-beta" with no number counts as 0).
      */
     fun isNewer(remote: String, local: String = BuildConfig.VERSION_NAME): Boolean {
         fun core(v: String) = v.substringBefore('-').split('.').map { it.toIntOrNull() ?: 0 }
@@ -101,29 +101,29 @@ object Updater {
         }
         val pa = pre(remote); val pb = pre(local)
         return when {
-            pa == null -> pb != null      // finale contre bêta : plus récente
-            pb == null -> false           // bêta contre finale : plus ancienne
+            pa == null -> pb != null      // final against beta: newer
+            pb == null -> false           // beta against final: older
             else -> pa > pb
         }
     }
 
-    /** Avertissement affiché en haut des fenêtres de mise à jour : taille du téléchargement, connexion conseillée. */
+    /** Warning shown at the top of update windows: download size, advised connection. */
     fun dataWarning(context: Context, r: Release): String = context.getString(app.mg4dash.R.string.upd_data_warning,
         String.format(java.util.Locale.getDefault(), "%.1f", r.size / 1_000_000f))
 
     private val busy = java.util.concurrent.atomic.AtomicBoolean(false)
 
     /**
-     * Une seule mise à jour de MG4Dash à la fois : un double appui, ou la fenêtre de démarrage et les réglages
-     * ensemble, lançaient deux téléchargements dans le même fichier et deux installations, avec une
-     * recompilation au milieu de l'autre (risque de code compilé abîmé). false si une est déjà en cours.
+     * Only one MG4Dash update at a time: a double press, or the startup window and the settings
+     * together, started two downloads into the same file and two installations, with one
+     * recompilation in the middle of the other (risk of damaged compiled code). false if one is already running.
      */
     fun begin(): Boolean = busy.compareAndSet(false, true).also { if (!it) Log.i(TAG, "update already running, ignored") }
 
-    /** Fin d'une mise à jour en échec (en cas de succès, MG4Dash redémarre). */
+    /** End of a failed update (on success, MG4Dash restarts). */
     fun end() { busy.set(false) }
 
-    /** Télécharge l'APK ; [progress] reçoit 0..100. Réseau : hors du fil principal. */
+    /** Downloads the APK; [progress] receives 0..100. Network: off the main thread. */
     fun download(context: Context, r: Release, fileName: String = "update.apk", progress: (Int) -> Unit): File {
         val dir = context.getExternalFilesDir(null) ?: context.filesDir
         val out = File(dir, fileName)
@@ -158,17 +158,17 @@ object Updater {
         return out
     }
 
-    /** Installe l'APK téléchargé ; MG4Dash est arrêté puis relancé par Android. */
+    /** Installs the downloaded APK; MG4Dash is stopped then relaunched by Android. */
     fun install(context: Context, apk: File) {
         val pi = context.packageManager.packageInstaller
         val params = PackageInstaller.SessionParams(PackageInstaller.SessionParams.MODE_FULL_INSTALL).apply {
             setAppPackageName(context.packageName)
-            // Équivalent de « pm install -f » : la voiture refuse sinon les applis hors système sur la mémoire interne
+            // Equivalent of "pm install -f": otherwise the car refuses non-system apps on internal storage
             setInstallLocation(android.content.pm.PackageInfo.INSTALL_LOCATION_INTERNAL_ONLY)
             try {
                 val f = javaClass.getField("installFlags")
-                // INSTALL_INTERNAL (0x10) ; INSTALL_DONT_KILL_APP (0x1000) : on garde la main pour recompiler
-                // proprement avant de redémarrer (voir Result)
+                // INSTALL_INTERNAL (0x10); INSTALL_DONT_KILL_APP (0x1000): keep control to recompile
+                // cleanly before restarting (see Result)
                 f.setInt(this, f.getInt(this) or 0x00000010 or 0x00001000)
             } catch (e: Exception) { Log.w(TAG, "INSTALL_INTERNAL flag: ${e.message}") }
         }
@@ -184,21 +184,21 @@ object Updater {
         }
     }
 
-    /** Résultat de l'installation (journal). */
+    /** Installation result (log). */
     class Result : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             val status = intent.getIntExtra(PackageInstaller.EXTRA_STATUS, -999)
             val msg = intent.getStringExtra(PackageInstaller.EXTRA_STATUS_MESSAGE)
             Log.i(TAG, "install result: $status $msg")
             if (status != PackageInstaller.STATUS_SUCCESS) { end(); return }
-            // Plus de recompilation ici : MG4Dash étant souvent l'accueil, Android pouvait le relancer pendant
-            // qu'elle réécrivait son code compilé, qui restait alors abîmé (écran bloqué au démarrage suivant,
-            // cas reproduit le 31/10). La compilation faite par l'installation suffit ; Rescue répare sinon.
+            // No more recompilation here: as MG4Dash is often home, Android could relaunch it while
+            // it rewrote its compiled code, which then stayed damaged (screen stuck at the next start,
+            // reproduced on 31/10). The compilation done by the installation is enough; Rescue repairs otherwise.
             restart(context)
         }
     }
 
-    /** Recompile MG4Dash en mode « speed » (équivalent de adb shell cmd package compile -m speed -f). */
+    /** Recompiles MG4Dash in "speed" mode (equivalent of adb shell cmd package compile -m speed -f). */
     fun recompile(context: Context) {
         try {
             val pm = Class.forName("android.app.ActivityThread").getMethod("getPackageManager").invoke(null)
@@ -210,7 +210,7 @@ object Updater {
         }
     }
 
-    /** Redémarre MG4Dash sur la nouvelle version. */
+    /** Restarts MG4Dash on the new version. */
     private fun restart(context: Context) {
         val intent = Intent(context, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
         val pi = PendingIntent.getActivity(context, 1, intent, PendingIntent.FLAG_CANCEL_CURRENT)
@@ -219,7 +219,7 @@ object Updater {
         android.os.Process.killProcess(android.os.Process.myPid())
     }
 
-    /** Après une mise à jour, l'accueil MG4Dash est rouvert. */
+    /** After an update, MG4Dash home is reopened. */
     class Relaunch : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             if (intent.action != Intent.ACTION_MY_PACKAGE_REPLACED) return

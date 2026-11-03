@@ -13,8 +13,8 @@ class LauncherApp : Application() {
     override fun onCreate() {
         super.onCreate()
         Tr.app = this
-        // Démarrage de la voiture avant le déverrouillage (écran BootSplash) : le stockage des réglages
-        // n'est pas encore lisible ; tout le reste démarre au déverrouillage, dans le même processus.
+        // Car started before unlock (BootSplash screen): the settings storage
+        // is not readable yet; everything else starts at unlock, in the same process.
         val um = getSystemService(USER_SERVICE) as android.os.UserManager
         if (!um.isUserUnlocked) {
             registerReceiver(object : android.content.BroadcastReceiver() {
@@ -35,20 +35,20 @@ class LauncherApp : Application() {
         started = true
         installCrashGuard()
         Log.i("App", "start ${BuildConfig.VERSION_NAME} (${BuildConfig.FLAVOR})")
-        // Filet de sécurité séparé (MG4Dash Rescue) : signe de vie, et son installation si besoin
+        // Separate safety net (MG4Dash Rescue): sign of life, and its installation if needed
         app.mg4dash.system.Rescue.start(this)
-        // Carte de consommation retirée (1/11) : fichier et réglages de l'accéléromètre effacés
+        // Consumption map removed (1/11): file and accelerometer settings deleted
         java.io.File(filesDir, "consumption_map.json").takeIf { it.exists() }?.let { it.delete(); Log.i("App", "old consumption map deleted") }
         java.io.File(applicationInfo.dataDir, "shared_prefs/accel_cal.xml").takeIf { it.exists() }?.delete()
-        // Première installation : style Complet, plein écran et barre verticale à gauche par défaut.
-        // Les installations existantes gardent leurs réglages (le fichier de préférences n'est pas vide).
+        // First install: Full layout, full screen and vertical bar on the left by default.
+        // Existing installs keep their settings (the preferences file is not empty).
         if (!BuildConfig.MOCK) {
             val sp = app.mg4dash.system.Prefs(this).raw
             if (!sp.contains("defaults_v1")) {
                 val fresh = sp.all.isEmpty()
                 sp.edit().apply {
                     if (fresh) putInt("home_style", 0).putBoolean("fullscreen", true).putBoolean("vertical_dock", true)
-                        .putBoolean("tutorial_pending", true)   // tuto des gestes au premier accueil
+                        .putBoolean("tutorial_pending", true)   // gesture tutorial on the first home screen
                     putBoolean("defaults_v1", true)
                 }.apply()
                 if (fresh) Log.i("App", "first install: Full layout, full screen, vertical bar")
@@ -62,7 +62,7 @@ class LauncherApp : Application() {
         app.mg4dash.energy.EnergyMonitor.start(this)
         app.mg4dash.climate.AcCycle.resume(this)
         app.mg4dash.energy.ConsumptionCurve.start(this)
-        // Capacité de la batterie : valeur de la voiture dès qu'elle répond (CarPropertyManager asynchrone)
+        // Battery capacity: the car's value as soon as it answers (asynchronous CarPropertyManager)
         android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({ app.mg4dash.energy.BatteryCapacity.apply(this) }, 15_000)
         ConsumptionEstimator.start(this)
         app.mg4dash.energy.EnergyLogger.start(this)
@@ -80,8 +80,8 @@ class LauncherApp : Application() {
     }
 
     private fun startThemeWatch() {
-        // Thème auto pour Radio Dash : l'accueil ne republie le thème que lorsqu'il est affiché ; quand
-        // la radio est au premier plan, les feux qui s'allument n'étaient donc jamais transmis.
+        // Auto theme for Radio Dash: the home screen only republishes the theme while displayed; when
+        // the radio was in front, lights coming on were therefore never passed on.
         val h = android.os.Handler(android.os.Looper.getMainLooper())
         var lastSig = app.mg4dash.ui.Themes.signature(this)
         h.postDelayed(object : Runnable {
@@ -93,15 +93,15 @@ class LauncherApp : Application() {
         }, 5_000)
     }
 
-    /** Langue de la voiture changée : la météo (libellés, lieu, heures) est recalculée dans la nouvelle langue. */
+    /** Car language changed: the weather (labels, place, hours) is recomputed in the new language. */
     override fun onConfigurationChanged(newConfig: android.content.res.Configuration) {
         super.onConfigurationChanged(newConfig)
         WeatherRepo.refreshNow(this)
     }
 
     /**
-     * Garde-fou : 3 plantages en moins de 3 minutes → le launcher SAIC redevient l'accueil,
-     * pour que l'écran de la voiture ne reste jamais inutilisable.
+     * Safeguard: 3 crashes in under 3 minutes → the SAIC launcher becomes the home screen again,
+     * so the car's screen never stays unusable.
      */
     private fun installCrashGuard() {
         val previous = Thread.getDefaultUncaughtExceptionHandler()
@@ -119,7 +119,7 @@ class LauncherApp : Application() {
                     HomeSwitcher.switchToStock(this)
                 }
             } catch (_: Throwable) {
-                // Ne jamais masquer le plantage d'origine.
+                // Never hide the original crash.
             }
             previous?.uncaughtException(thread, error)
         }
@@ -131,7 +131,7 @@ class LauncherApp : Application() {
     }
 }
 
-/** Accès aux textes traduits depuis du code sans Context (états véhicule, météo…). */
+/** Access to translated texts from code without a Context (vehicle states, weather…). */
 object Tr {
     lateinit var app: Application
     fun s(id: Int, vararg args: Any): String = app.getString(id, *args)

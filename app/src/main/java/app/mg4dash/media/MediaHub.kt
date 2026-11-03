@@ -28,9 +28,9 @@ import java.io.File
 import java.net.URLDecoder
 
 /**
- * Lecteur courant, quelle que soit la source (radio DAB/FM SAIC, Bluetooth, USB, Android Auto…).
- * Repose sur MediaSessionManager.getActiveSessions(), réservé au uid système
- * (MEDIA_CONTENT_CONTROL) : c'est ce que fait le launcher d'origine.
+ * Current player, whatever the source (SAIC DAB/FM radio, Bluetooth, USB, Android Auto…).
+ * Relies on MediaSessionManager.getActiveSessions(), reserved to the system uid
+ * (MEDIA_CONTENT_CONTROL): this is what the stock launcher does.
  */
 object MediaHub {
     private const val TAG = "Media"
@@ -46,11 +46,11 @@ object MediaHub {
         val playing: Boolean = false,
         val durationMs: Long = 0,
         val positionMs: Long = 0,
-        /** Radio FM ou AM : [artist] contient la fréquence, si le titre est le nom de la station. */
+        /** FM or AM radio: [artist] holds the frequency, if the title is the station name. */
         val analog: Boolean = false,
-        /** Texte RDS de la station FM, envoyé par Radio Dash. */
+        /** RDS text of the FM station, sent by Radio Dash. */
         val radioText: String = "",
-        /** Android Auto connecté (son lecteur a quelque chose à afficher) : la puce AA est proposée. */
+        /** Android Auto connected (its player has something to show): the AA chip is offered. */
         val androidAuto: Boolean = false,
     )
 
@@ -63,9 +63,9 @@ object MediaHub {
     private var manager: MediaSessionManager? = null
     private var current: MediaController? = null
     private var lastArtKey: String? = null
-    /** Tentatives de lecture de la pochette du morceau en cours (0 : rien en attente). */
+    /** Attempts to read the current track's cover (0: nothing pending). */
     @Volatile private var artTries = 0
-    /** Adresse de la pochette essayée en dernier, et essai en cours ou programmé (un seul à la fois). */
+    /** Cover address last tried, and attempt running or scheduled (only one at a time). */
     @Volatile private var lastArtUri: String? = null
     @Volatile private var artPending = false
 
@@ -82,14 +82,14 @@ object MediaHub {
         } catch (e: SecurityException) {
             Log.w(TAG, "MEDIA_CONTENT_CONTROL denied (system uid required): ${e.message}")
         }
-        // Constaté sur la voiture : les sessions SAIC (radio, Bluetooth) restent « inactives »
-        // même en lecture, donc absentes de getActiveSessions(). Comme le launcher d'origine,
-        // on se connecte directement à leurs MediaBrowserService pour obtenir leur contrôleur.
+        // Found on the car: SAIC sessions (radio, Bluetooth) stay "inactive"
+        // even while playing, so they are missing from getActiveSessions(). Like the stock launcher,
+        // connect directly to their MediaBrowserService to get their controller.
         BROWSERS.forEach { connectBrowser(it) }
         listenRdsText(context)
         if (legacyRadio) {
             SaicRadio.connect(context)
-            // Pas de rappel côté radio : relecture de la station toutes les 2 s.
+            // No callback on the radio side: reread the station every 2 s.
             main.postDelayed(object : Runnable {
                 override fun run() {
                     io.launch { val before = SaicRadio.last; SaicRadio.refresh(); if (SaicRadio.last != before) main.post { reevaluate() } }
@@ -101,31 +101,31 @@ object MediaHub {
         watchProjection(context.applicationContext)
         watchAudioSource(context)
         reevaluate()
-        // Filet de sécurité : relecture régulière du lecteur (titre, pochette, état), au cas où un
-        // rappel de la radio se perd (service radio redémarré, session remplacée).
+        // Safety net: regular reread of the player (title, cover, state), in case a
+        // radio callback gets lost (radio service restarted, session replaced).
         main.postDelayed(object : Runnable {
             override fun run() { checkStaleBrowsers(); reevaluate(); main.postDelayed(this, 5_000) }
         }, 5_000)
     }
 
     /**
-     * Source audio active selon la voiture (API SAIC de AudioManager, comme le launcher d'origine) :
-     * c'est elle qui décide du lecteur affiché, la radio restant « en lecture » même muette.
+     * Active audio source according to the car (SAIC AudioManager API, like the stock launcher):
+     * it decides the player shown, the radio staying "playing" even when muted.
      */
     @Volatile private var sourcePkg: String? = null
 
-    /** Source choisie à la main sur la carte (puces RADIO / USB-BT), jusqu'à ce que la voiture change de source. */
+    /** Source chosen by hand on the card (RADIO / USB-BT chips), until the car changes source. */
     @Volatile private var pinnedPkg: String? = null
 
     /**
-     * La voiture annonce aussi Android Auto comme source quand seul le guidage GPS parle par-dessus
-     * la radio (constaté le 2026-10-18) : on garde la source d'avant tant que le lecteur Android Auto
-     * ne joue pas vraiment.
+     * The car also announces Android Auto as the source when only GPS guidance speaks over
+     * the radio (found on 2026-10-18): the previous source is kept as long as the Android Auto
+     * player is not really playing.
      */
     @Volatile private var aaUnconfirmed = false
     @Volatile private var sourceBeforeAa: String? = null
 
-    /** Source réelle : celle de la voiture, sauf une bascule Android Auto due au seul guidage. */
+    /** Real source: the car's, except an Android Auto switch due to guidance alone. */
     private fun effectiveSource(candidates: List<MediaController> = lastCandidates): String? {
         if (sourcePkg != AA_MBS || !aaUnconfirmed) return sourcePkg
         val aaPlaying = candidates.any { isAndroidAuto(it.packageName) && it.playbackState?.state == PlaybackState.STATE_PLAYING }
@@ -135,7 +135,7 @@ object MediaHub {
         return sourcePkg
     }
 
-    /** Affiche la source donnée sans ouvrir son appli. */
+    /** Shows the given source without opening its app. */
     fun select(pkg: String) {
         if (BuildConfig.MOCK) return
         remember(pkg); autoTarget = null
@@ -143,24 +143,24 @@ object MediaHub {
         main.post { reevaluate() }
     }
 
-    /** Android Auto connecté : son lecteur existe et a un état ou un titre. */
+    /** Android Auto connected: its player exists and has a state or a title. */
     /**
-     * Téléphone en projection selon AllGo (relu toutes les 5 s) : false = aucun ; null = inconnu.
-     * Débranché, le lecteur RemoteUI gardait son dernier titre : la source CarPlay / Android Auto restait
-     * proposée et menait à un écran noir (#36).
+     * Phone projecting according to AllGo (reread every 5 s): false = none; null = unknown.
+     * Once unplugged, the RemoteUI player kept its last title: the CarPlay / Android Auto source stayed
+     * offered and led to a black screen (#36).
      */
     @Volatile private var projectionLive: Boolean? = null
-    /** Téléphone connecté en audio Bluetooth (A2DP) ; false : son lecteur n'est plus proposé (#36). */
+    /** Phone connected over Bluetooth audio (A2DP); false: its player is no longer offered (#36). */
     @Volatile private var btLive: Boolean? = null
 
     private fun btConnected(): Boolean? = try {
         android.bluetooth.BluetoothAdapter.getDefaultAdapter()?.getProfileConnectionState(11) == android.bluetooth.BluetoothProfile.STATE_CONNECTED
     } catch (_: Exception) { null }
 
-    // ── Source automatique (réglage « Source au démarrage ») ──
+    // ── Automatic source ("Source at startup" setting) ──
     private fun prefs() = appContext?.let { app.mg4dash.system.Prefs(it) }
 
-    /** Choix de l'utilisateur : en tête de l'historique (la radio reste le dernier recours). */
+    /** User's choice: at the top of the history (the radio stays the last resort). */
     private fun remember(pkg: String) {
         val p = prefs() ?: return
         val h = listOf(pkg) + p.sourceHistory.filter { it != pkg }
@@ -170,16 +170,16 @@ object MediaHub {
     @Volatile private var autoSwitchAt = 0L
     private val startedAt = android.os.SystemClock.uptimeMillis()
     private var startDone = false
-    /** Depuis quand chaque source est disponible / absente (évite de suivre un Bluetooth qui clignote). */
+    /** Since when each source is available / missing (avoids following a flickering Bluetooth). */
     private val seenSince = mutableMapOf<String, Long>()
     private val goneSince = mutableMapOf<String, Long>()
 
     /**
-     * Toutes les secondes. Dans tous les modes, une source de la voiture disparue depuis 1 s est remplacée
-     * (automatique : par la première de l'historique ; sinon par la radio ou la source fixe). Automatique :
-     * la première source de l'historique disponible depuis 5 s devient la source si l'actuelle est moins bien
-     * placée. Source fixe : une seule bascule au démarrage. CarPlay n'est jamais une cible : AllGo ne lui
-     * rend pas l'audio sur commande.
+     * Every second. In all modes, a car source gone for 1 s is replaced
+     * (automatic: by the first in the history; otherwise by the radio or the fixed source). Automatic:
+     * the first history source available for 5 s becomes the source if the current one is ranked
+     * lower. Fixed source: a single switch at startup. CarPlay is never a target: AllGo does not
+     * give it back the audio on command.
      */
     private fun autoSource() {
         val p = prefs() ?: return
@@ -193,21 +193,21 @@ object MediaHub {
         }
         fun stable(pkg: String) = (seenSince[pkg]?.let { now - it >= 5_000 } == true) && !(pkg == AA_MBS && carPlay)
         trackPlayback(p, now)
-        // Dernière fois où chaque source de la voiture jouait : sert à ne relancer après une annonce que ce qui jouait
+        // Last time each car source was playing: used to restart after an announcement only what was playing
         for (pkg in CAR_SOURCES) if (browserControllers[pkg]?.let { isPlaying(it) } == true) playingAt[pkg] = now
         restoreAfterPrompt(now)
-        // Type 70 (Android Auto) tenu par une autre appli (DiAuto) alors qu'AllGo n'a aucun téléphone : la
-        // source réelle est le lecteur de cette appli, et non un Android Auto « disparu » à remplacer. DiAuto
-        // compte même hors de la carte : la bascule relançait la musique en pause sur le Bluetooth (#78)
+        // Type 70 (Android Auto) held by another app (DiAuto) while AllGo has no phone: the
+        // real source is that app's player, not a "gone" Android Auto to replace. DiAuto
+        // counts even off the card: the switch restarted paused music on Bluetooth (#78)
         if (sourcePkg == AA_MBS && projectionLive == false) {
             (current?.packageName?.takeIf { otherAppShown() } ?: lastCandidates.firstOrNull { handlesWheelKeys(it.packageName) }?.packageName)
                 ?.let { sourcePkg = it }
         }
         val cur = sourcePkg ?: return
         if (now - autoSwitchAt < 10_000 || now - startedAt < 5_000) return
-        // Source de la voiture disparue (téléphone débranché…) depuis 1 s : quel que soit le réglage, on
-        // bascule, sinon la voiture restait sur une source muette et les boutons du volant n'agissaient
-        // plus (#36). 1 s suffit (demandé par Marc) : la disparition vient de l'état de connexion, pas d'un clignotement.
+        // Car source gone (phone unplugged…) for 1 s: whatever the setting, switch,
+        // otherwise the car stayed on a silent source and the steering wheel buttons no longer
+        // acted (#36). 1 s is enough (owner's request): the loss comes from the connection state, not from flickering.
         val curGone = goneSince[cur]?.let { now - it >= 1_000 } == true
         val order = fallbackOrder(mode, p)
         if (curGone) { Log.i(TAG, "$cur gone: mode $mode, order $order, available $avail"); order.firstOrNull { it != cur && it in avail && !(it == AA_MBS && carPlay) }?.let { autoSwitch(it, "$cur gone", play = _now.value.playing) }; return }
@@ -219,39 +219,39 @@ object MediaHub {
             if (stable(want)) { startDone = true; autoSwitch(want, "startup source") }
             return
         }
-        // Une appli a pris la source (Android Auto, CarPlay, DiAuto qui lance sa musique…) : c'est voulu, on
-        // ne la lui reprend pas pour revenir à la radio (DiAuto coupé net au démarrage de sa musique)
+        // An app took the source (Android Auto, CarPlay, DiAuto starting its music…): that is intended,
+        // it is not taken back to return to the radio (DiAuto cut off as its music started)
         if (cur !in listOf(RADIO, "com.android.bluetooth", "com.saicmotor.media")) return
         val target = order.firstOrNull { stable(it) && !(it == BT && projecting) } ?: return
         if (target == cur) return
-        // Source actuelle jamais choisie (historique vide, première utilisation) : on ne la quitte que si elle disparaît
+        // Current source never chosen (empty history, first use): only left if it disappears
         val curRank = order.indexOf(cur).let { if (it < 0) -1 else it }
         if (order.indexOf(target) < curRank) autoSwitch(target, "$target back")
     }
 
     private val CAR_SOURCES = listOf(RADIO, "com.android.bluetooth", "com.saicmotor.media")
-    /** Source de la voiture avant qu'une appli (DiAuto) la prenne pour une annonce, et depuis quand. */
+    /** Car source before an app (DiAuto) took it for an announcement, and since when. */
     @Volatile private var promptFrom: String? = null
     @Volatile private var promptAt = 0L
-    /** La source d'avant jouait quand l'annonce l'a interrompue : sinon on lui rend la source sans « lecture ». */
+    /** The previous source was playing when the announcement interrupted it: otherwise the source is returned without "play". */
     @Volatile private var promptWasPlaying = false
     private val playingAt = java.util.concurrent.ConcurrentHashMap<String, Long>()
     private var promptQuiet = 0
     private var promptSounding = 0
 
     /**
-     * Annonce de guidage DiAuto en mode hybride (musique en Bluetooth) : la voiture passe sur la source de
-     * DiAuto et y reste après l'annonce ; l'écran revient sur le Bluetooth mais la musique ne reprend pas
-     * (Marc, 27/10). Une fois DiAuto silencieux 2 s, on rend à la voiture sa source d'avant, comme un
-     * aller-retour manuel, puis « lecture ». Un son DiAuto de plus de 25 s d'affilée est de la musique
-     * (mode musique par Android Auto) : on ne touche alors à rien.
+     * DiAuto guidance announcement in hybrid mode (music over Bluetooth): the car moves to DiAuto's
+     * source and stays there after the announcement; the screen returns to Bluetooth but the music does not resume
+     * (seen on 27/10). Once DiAuto has been silent for 2 s, the car gets its previous source back, like a
+     * manual round trip, then "play". DiAuto sound for more than 25 s in a row is music
+     * (music through Android Auto mode): then nothing is touched.
      */
     private fun restoreAfterPrompt(now: Long) {
         val back = promptFrom ?: return
         val app = sourcePkg
         if (app == null || !handlesWheelKeys(app) || now - promptAt > 10 * 60_000) { promptFrom = null; return }
-        // Seulement en mode hybride : sinon DiAuto prend la source pour sa propre musique (journal du 27/10 :
-        // retour au Bluetooth à tort pendant que la musique DiAuto démarrait)
+        // Only in hybrid mode: otherwise DiAuto takes the source for its own music (log of 27/10:
+        // wrong return to Bluetooth while DiAuto music was starting)
         if (!musicOverBluetooth(app)) { promptFrom = null; return }
         if (now - promptAt < 2_000) return
         if (appSounding(app)) {
@@ -263,14 +263,14 @@ object MediaHub {
         if (++promptQuiet < 2) return
         promptFrom = null
         Log.i(TAG, "announcement from $app over: car source back to $back (${if (promptWasPlaying) "was playing" else "was paused, no play"})")
-        // Musique en pause avant l'annonce : la source revient, mais pas la lecture (DiAuto #3 : le Bluetooth
-        // repartait tout seul après une pause, à chaque annonce de guidage)
+        // Music paused before the announcement: the source returns, but not playback (DiAuto #3: Bluetooth
+        // restarted by itself after a pause, at each guidance announcement)
         autoSwitch(back, "announcement over", play = promptWasPlaying)
     }
 
     /**
-     * DiAuto réglé en mode hybride (musique par le Bluetooth, Android Auto pour le guidage seul) : lu dans
-     * ses réglages, accessibles car DiAuto tourne sous le même utilisateur système que MG4Dash.
+     * DiAuto set to hybrid mode (music over Bluetooth, Android Auto for guidance only): read from
+     * its settings, accessible because DiAuto runs under the same system user as MG4Dash.
      */
     private fun musicOverBluetooth(pkg: String): Boolean = try {
         java.io.File("/data/user/0/$pkg/shared_prefs/settings.xml").readText()
@@ -278,9 +278,9 @@ object MediaHub {
     } catch (_: Throwable) { false }
 
     /**
-     * L'appli a un lecteur audio démarré (annonce ou musique), d'après l'état des lecteurs vu par le
-     * système. DiAuto tourne en uid système comme d'autres applis : on compare le processus, pas l'uid.
-     * Illisible : considéré comme en train de jouer (on ne rend jamais la source à l'aveugle).
+     * The app has a started audio player (announcement or music), from the player state seen by the
+     * system. DiAuto runs as a system uid like other apps: compare the process, not the uid.
+     * Unreadable: considered as playing (the source is never returned blindly).
      */
     private fun appSounding(pkg: String): Boolean = try {
         val ctx = appContext ?: throw IllegalStateException("no context")
@@ -294,7 +294,7 @@ object MediaHub {
         }
     } catch (e: Throwable) { Log.w(TAG, "$pkg players unreadable: ${(e.cause ?: e).message}"); true }
 
-    /** Sources de remplacement selon le réglage : automatique = historique des choix, puis la radio. */
+    /** Replacement sources according to the setting: automatic = history of choices, then the radio. */
     private fun fallbackOrder(mode: Int, p: app.mg4dash.system.Prefs) = when (mode) {
         0 -> (p.sourceHistory + RADIO).distinct()
         1 -> listOf(RADIO)
@@ -304,16 +304,16 @@ object MediaHub {
     private const val BT = "com.android.bluetooth"
     @Volatile private var resumeBtUntil = 0L
 
-    /** Lecture en cours sur la carte (avant de couper la connexion du téléphone). */
+    /** Playing on the card (before cutting the phone's connection). */
     fun playingNow(): Boolean = current?.let { isPlaying(it) } == true
 
     /**
-     * Connexion du téléphone coupée pendant la lecture : la source de remplacement est souvent le Bluetooth,
-     * dont la musique ne revient que quelques secondes plus tard ; « lecture » y est renvoyé à son retour.
+     * Phone connection cut while playing: the replacement source is often Bluetooth,
+     * whose music only returns a few seconds later; "play" is sent to it when it returns.
      */
     fun resumeOnBluetooth() { resumeBtUntil = android.os.SystemClock.uptimeMillis() + 15_000 }
 
-    /** DiAuto ou une appli équivalente (Headunit Revived) en session : son écran de projection est ouvert. */
+    /** DiAuto or an equivalent app (Headunit Revived) in session: its projection screen is open. */
     @Volatile private var appProjecting = false
 
     private fun appProjection(ctx: Context): Boolean = try {
@@ -324,9 +324,9 @@ object MediaHub {
     } catch (_: Exception) { false }
 
     /**
-     * Source Bluetooth proposée dès qu'un téléphone est connecté en Bluetooth. Pendant Android Auto,
-     * CarPlay ou DiAuto, selon le réglage (activé par défaut) : DiAuto peut faire passer le son par le
-     * Bluetooth. Pendant ces sessions, on ne bascule jamais dessus tout seul (voir [projecting]).
+     * Bluetooth source offered as soon as a phone is connected over Bluetooth. During Android Auto,
+     * CarPlay or DiAuto, depending on the setting (on by default): DiAuto can route sound through
+     * Bluetooth. During these sessions, it never switches to it by itself (see [projecting]).
      */
     private fun btSource(): Boolean = app.mg4dash.system.BtAudio.phoneConnected() && (!projecting || diAutoOverBluetooth())
 
@@ -334,8 +334,8 @@ object MediaHub {
     private var diAutoBt = false
 
     /**
-     * Pendant une projection, le Bluetooth n'est une source que si DiAuto y envoie la musique : avec Android Auto
-     * d'origine, CarPlay ou DiAuto en Wi-Fi, c'est la projection qui a le son. Relu au plus toutes les 10 s (fichier).
+     * During projection, Bluetooth is only a source if DiAuto sends music to it: with stock Android
+     * Auto, CarPlay or DiAuto over Wi-Fi, the projection has the sound. Reread every 10 s at most (file).
      */
     private fun diAutoOverBluetooth(): Boolean {
         if (!appProjecting) return false
@@ -347,12 +347,12 @@ object MediaHub {
         return diAutoBt
     }
 
-    /** Android Auto / CarPlay (AllGo), DiAuto ou équivalent en session. */
+    /** Android Auto / CarPlay (AllGo), DiAuto or equivalent in session. */
     private val projecting get() = projectionLive == true || appProjecting
 
     /**
-     * Connexion d'une appli coupée par le bouton Android Auto (DiAuto…) : si c'était la source écoutée, on
-     * passe à la source de remplacement du réglage, comme pour une source de la voiture qui disparaît.
+     * App connection cut by the Android Auto button (DiAuto…): if it was the source being listened to,
+     * move to the setting's replacement source, as for a car source that disappears.
      */
     fun connectionCut(pkg: String) = main.post {
         val p = prefs() ?: return@post
@@ -362,16 +362,16 @@ object MediaHub {
             ?.let { autoSwitch(it, "$pkg cut") }
     }
 
-    // ── Lecture au démarrage (réglage, remplace la reprise automatique de Radio Dash) ──
-    /** Démarrage de la voiture : MG4Dash lancé dans les 5 minutes qui suivent l'allumage de l'autoradio. */
+    // ── Play at startup (setting, replaces Radio Dash's automatic resume) ──
+    /** Car start: MG4Dash launched within 5 minutes of the head unit turning on. */
     private val carStart = android.os.SystemClock.elapsedRealtime() < 5 * 60_000
     private var playbackApplied = false
     private var pausedSince = 0L
 
     /**
-     * Retient si la musique joue (une pause n'est retenue qu'après 30 s : à l'arrêt, la voiture met tout en
-     * pause juste avant de s'éteindre, ce qui ne doit pas compter), puis applique le réglage une fois, au
-     * démarrage, après la source de démarrage (8 s), sur la source affichée.
+     * Remembers if music is playing (a pause is only remembered after 30 s: when stopping, the car pauses everything
+     * just before switching off, which must not count), then applies the setting once, at
+     * startup, after the startup source (8 s), on the displayed source.
      */
     private fun trackPlayback(p: app.mg4dash.system.Prefs, now: Long) {
         val playing = _now.value.playing && _now.value.available
@@ -386,8 +386,8 @@ object MediaHub {
         if (!carStart || now - startedAt > 40_000) { playbackApplied = true; return }
         if (now - startedAt < 8_000 || now - autoSwitchAt < 4_000 || !_now.value.available) return
         playbackApplied = true
-        // DiAuto (Android Auto sans fil) : c'est le téléphone qui décide de lancer la musique (réglage
-        // « lancer la musique automatiquement » de son appli Android Auto), MG4Dash n'y touche pas
+        // DiAuto (wireless Android Auto): the phone decides to start the music ("start music
+        // automatically" setting of its Android Auto app), MG4Dash does not touch it
         if (handlesWheelKeys(_now.value.packageName) || handlesWheelKeys(sourcePkg) ||
             (sourcePkg == AA_MBS && projectionLive != true && lastCandidates.any { handlesWheelKeys(it.packageName) })) {
             Log.i(TAG, "startup playback: left to the phone (DiAuto)"); return
@@ -402,7 +402,7 @@ object MediaHub {
 
     private fun autoSwitch(pkg: String, why: String, play: Boolean = true) {
         val now = android.os.SystemClock.uptimeMillis()
-        // La voiture refuse la bascule (source muette…) : 3 essais au plus, puis on attend 2 min
+        // The car refuses the switch (silent source…): 3 tries at most, then wait 2 min
         if (pkg == autoTarget && autoTries >= 3 && now - autoSwitchAt < 120_000) return
         if (pkg != autoTarget || now - autoSwitchAt >= 120_000) { autoTarget = pkg; autoTries = 0 }
         autoTries++
@@ -415,7 +415,7 @@ object MediaHub {
         if (play) main.postDelayed({ browserControllers[pkg]?.takeIf { !isPlaying(it) }?.transportControls?.play() }, 1500)
     }
 
-    /** Lecteur à écarter : projection ou Bluetooth sans téléphone connecté. */
+    /** Player to discard: projection or Bluetooth with no phone connected. */
     private fun gone(pkg: String?): Boolean =
         (projectionLive == false && isAndroidAuto(pkg)) || (btLive == false && pkg == "com.android.bluetooth")
 
@@ -423,12 +423,12 @@ object MediaHub {
         io.launch {
             while (true) {
                 val s = app.mg4dash.system.Projection.session(ctx).let {
-                    // Connexion coupée par le bouton : AllGo garde la session mais l'appli est désactivée
+                    // Connection cut by the button: AllGo keeps the session but the app is disabled
                     if (it is app.mg4dash.system.Projection.Session.Read && it.target != null &&
                         app.mg4dash.system.ConnectionToggle.isOff(ctx, it.target.packageName)) app.mg4dash.system.Projection.Session.Read(null) else it
                 }
                 val live = (s as? app.mg4dash.system.Projection.Session.Read)?.let { it.target != null }
-                // Fin de la projection : le téléphone ne rebranche pas la musique Bluetooth de lui-même
+                // End of projection: the phone does not reconnect Bluetooth music by itself
                 if (projectionLive == true && live == false) io.launch { kotlinx.coroutines.delay(3_000); app.mg4dash.system.BtAudio.connectMusic(ctx) }
                 if (s is app.mg4dash.system.Projection.Session.Read && s.target != null) carPlay = s.target == app.mg4dash.system.Apps.CARPLAY
                 if (live != projectionLive) {
@@ -436,7 +436,7 @@ object MediaHub {
                     projectionLive = live
                     main.post { reevaluate() }
                 }
-                // Bluetooth coupé pendant la lecture : la carte restait sur le Bluetooth jusqu'au balayage (#36)
+                // Bluetooth cut while playing: the card stayed on Bluetooth until a swipe (#36)
                 val proj = appProjection(ctx)
                 if (proj != appProjecting) { Log.i(TAG, "Android Auto app (DiAuto…): ${if (proj) "phone connected" else "no phone"}"); appProjecting = proj; main.post { reevaluate() } }
                 val bt = btConnected()
@@ -444,7 +444,7 @@ object MediaHub {
                     Log.i(TAG, "bluetooth audio: ${if (bt == null) "unknown" else if (bt) "phone connected" else "no phone"}")
                     btLive = bt
                     main.post { reevaluate() }
-                    // Musique coupée avec la connexion du téléphone : elle reprend sur le Bluetooth revenu
+                    // Music cut with the phone connection: it resumes on the returned Bluetooth
                     if (bt == true && android.os.SystemClock.uptimeMillis() < resumeBtUntil) {
                         resumeBtUntil = 0L
                         main.postDelayed({
@@ -469,26 +469,26 @@ object MediaHub {
     fun selectAndroidAuto() = select(AA_MBS)
 
     /**
-     * Lecteur d'une autre appli affiché (DiAuto…) : la voiture n'a pas de source pour elle, et les
-     * boutons du volant partent vers Android Auto d'AllGo ; MG4Dash les lui renvoie.
+     * Player of another app shown (DiAuto…): the car has no source for it, and the
+     * steering wheel buttons go to AllGo's Android Auto; MG4Dash passes them on to it.
      */
     fun otherAppShown(): Boolean = !radioShown && current?.packageName?.let {
         it != RADIO && it != "com.android.bluetooth" && it != "com.saicmotor.media" && !isAndroidAuto(it) && !it.startsWith("com.allgo.")
     } == true
 
     /**
-     * Appli affichée qui lit elle-même le bouton lecture / pause du volant (DiAuto MG4+ et son ancien
-     * nom) : MG4Dash ne le lui renvoie pas, sinon il se mettrait en pause puis relancerait aussitôt.
+     * Shown app that reads the wheel's play / pause button itself (DiAuto MG4+ and its old
+     * name): MG4Dash does not pass it on, otherwise it would pause and restart at once.
      */
     private fun handlesWheelKeys(pkg: String?) = pkg == "com.drivehub.diauto.mg4" || pkg == "app.mg4aa"
 
-    // Boutons du volant sur le lecteur d'une autre appli : le launcher d'origine ne connaît pas ces applis
-    // et agit sur la dernière source voiture (souvent la radio), qui reprend le son : gauche / droite lui
-    // font changer de station, haut / bas (volume) la relancent si elle est en pause. On note l'appli à
-    // l'appui pour la remettre aussitôt (voir watchAudioSource).
+    // Wheel buttons on another app's player: the stock launcher does not know these apps
+    // and acts on the last car source (often the radio), which takes the sound back: left / right make it
+    // change station, up / down (volume) restart it if paused. The app is noted at the
+    // press to put it back at once (see watchAudioSource).
     @Volatile private var wheelFrom: String? = null
     @Volatile private var wheelAt = 0L
-    /** true / false : suivant / précédent (station à rétablir) ; null : volume (rien à rétablir). */
+    /** true / false: next / previous (station to restore); null: volume (nothing to restore). */
     @Volatile private var wheelForward: Boolean? = null
 
     fun wheelPressed(forward: Boolean?) {
@@ -496,13 +496,13 @@ object MediaHub {
         wheelFrom = current?.packageName
         wheelAt = android.os.SystemClock.uptimeMillis()
         wheelForward = forward
-        // La carte reste sur l'appli pendant le bref passage par la radio
+        // The card stays on the app during the brief passage through the radio
         pinnedPkg = wheelFrom
     }
 
     /**
-     * Bouton relâché : suivant / précédent à l'appli notée à l'appui (la radio a pu être affichée entre
-     * les deux). DiAuto ne lit que lecture / pause du volant, pas gauche / droite. false = pas d'autre appli.
+     * Button released: next / previous to the app noted at the press (the radio may have been shown in
+     * between). DiAuto only reads the wheel's play / pause, not left / right. false = no other app.
      */
     fun wheelReleased(forward: Boolean): Boolean {
         val pkg = wheelFrom?.takeIf { android.os.SystemClock.uptimeMillis() - wheelAt < 2_000 }
@@ -514,13 +514,13 @@ object MediaHub {
 
     fun isAndroidAuto(pkg: String?) = pkg == AA_MBS || pkg?.startsWith("com.allgo.app.androidauto") == true
 
-    /** Puce USB / BT : bascule entre le Bluetooth et l'USB, en partant de ce qui est affiché. */
+    /** USB / BT chip: switches between Bluetooth and USB, starting from what is shown. */
     /**
-     * Balayage vertical sur la carte musique (issue #6) : source suivante (+1) ou précédente (−1)
-     * parmi celles disponibles (radio, Bluetooth connecté, clé USB, Android Auto connecté),
-     * puis bascule de la source de la voiture et lecture.
+     * Vertical swipe on the music card (issue #6): next (+1) or previous (−1) source
+     * among those available (radio, connected Bluetooth, USB stick, connected Android Auto),
+     * then switch of the car's source and playback.
      */
-    /** Sources disponibles maintenant, dans l'ordre : radio, Bluetooth connecté, clé USB, Android Auto connecté. */
+    /** Sources available now, in order: radio, connected Bluetooth, USB stick, connected Android Auto. */
     fun availableSources(): List<String> {
         if (BuildConfig.MOCK) return listOf("com.saicmotor.radio", "com.android.bluetooth", AA_MBS)
         val ctx = appContext ?: return emptyList()
@@ -539,8 +539,8 @@ object MediaHub {
     }
 
     /**
-     * Autres applis qui ont un lecteur actif (DiAuto, Spotify installé sur l'autoradio…) : proposées au
-     * balayage et dans le menu des sources (#36 / DiAuto : impossible de revenir dessus après la radio).
+     * Other apps with an active player (DiAuto, Spotify installed on the head unit…): offered by
+     * swipe and in the source menu (#36 / DiAuto: impossible to go back to them after the radio).
      */
     private fun otherPlayers(): List<String> = lastCandidates.filter { c ->
         val pkg = c.packageName
@@ -549,37 +549,37 @@ object MediaHub {
             ((c.playbackState?.state ?: PlaybackState.STATE_NONE) != PlaybackState.STATE_NONE || c.metadata != null)
     }.map { it.packageName }.distinct()
 
-    /** Source affichée, Android Auto ramené à son lecteur, la radio à sa bande si DAB et FM sont séparées. */
+    /** Shown source, Android Auto mapped to its player, the radio to its band if DAB and FM are separate. */
     fun currentSource(): String? {
         val pkg = if (radioShown) RADIO else current?.packageName?.let { if (isAndroidAuto(it)) AA_MBS else it }
         return if (pkg == RADIO && radioBandsSplit()) bandTarget ?: currentBandSource() ?: RADIO_DAB else pkg
     }
 
-    // ── Radio Dash : DAB et FM, deux sources de l'accueil (balayage et menu) d'une même appli ──
+    // ── Radio Dash: DAB and FM, two home sources (swipe and menu) of one app ──
     const val RADIO_DAB = "com.saicmotor.radio#dab"
     const val RADIO_FM = "com.saicmotor.radio#fm"
     private const val ACTION_NEXT_BAND = "__ACTION_NEXT_SOURCE__"
     private const val BAND_RETRY_MS = 800L
     private val radioDashInstalled by lazy { appContext?.let { app.mg4dash.system.RadioDashUpdater.installed(it) } == true }
-    /** Bande voulue, tant que la radio n'y est pas arrivée. */
+    /** Wanted band, until the radio gets there. */
     @Volatile private var bandTarget: String? = null
 
     private fun radioBandsSplit() = radioDashInstalled && prefs()?.radioDashBands == true
 
     /**
-     * Ancien firmware avec Radio Dash affichée : son launcher ne connaît que sa propre radio et ne lui transmet
-     * pas les boutons du volant, MG4Dash s'en charge. Sur SWI69, le launcher d'origine le fait déjà.
+     * Old firmware with Radio Dash shown: its launcher only knows its own radio and does not pass it
+     * the wheel buttons, MG4Dash does it. On SWI69, the stock launcher already does.
      */
     fun radioDashNeedsWheelKeys(): Boolean =
         app.mg4dash.system.Firmware.family == app.mg4dash.system.Firmware.Family.LEGACY && radioDashInstalled && current?.packageName == RADIO
 
-    /** Sources proposées par le balayage et le menu : celles disponibles, la radio séparée en DAB et FM. */
+    /** Sources offered by swipe and menu: those available, the radio split into DAB and FM. */
     fun menuSources(): List<String> {
         val split = radioBandsSplit()
         return availableSources().flatMap { if (it == RADIO && split) listOf(RADIO_DAB, RADIO_FM) else listOf(it) }
     }
 
-    /** Bande d'après les métadonnées de la radio : auteur « DAB », ou fréquence en titre pour FM / AM. */
+    /** Band from the radio's metadata: author "DAB", or frequency as title for FM / AM. */
     fun radioBandOf(author: String?, title: String?): String? = when {
         author == "DAB" -> RADIO_DAB
         title?.trim()?.startsWith("FM") == true -> RADIO_FM
@@ -593,8 +593,8 @@ object MediaHub {
     }
 
     /**
-     * La radio ne sait que passer à la bande suivante (commande de sa session) : on avance jusqu'à la bande
-     * voulue, en relisant à chaque fois. Elle compte aussi l'AM là où cet onglet existe, d'où 3 essais.
+     * The radio can only move to the next band (command of its session): advance to the wanted
+     * band, rereading each time. It also counts AM where that tab exists, hence 3 tries.
      */
     private fun reachBand(target: String, tries: Int, delayMs: Long = BAND_RETRY_MS) {
         main.postDelayed({
@@ -621,8 +621,8 @@ object MediaHub {
         if (BuildConfig.MOCK) return
         val available = menuSources()
         if (available.isEmpty()) return
-        // Balayages rapprochés : on repart de la source visée, pas de celle affichée. Android Auto en lecture reprend
-        // l'affichage quand on vise le Bluetooth, et chaque balayage retombait sur le Bluetooth sans aller plus loin
+        // Quick successive swipes: start from the targeted source, not the shown one. Android Auto playing takes
+        // the display back when targeting Bluetooth, and each swipe fell back on Bluetooth without going further
         val now = android.os.SystemClock.uptimeMillis()
         val cur = swipeTarget?.takeIf { now - swipeAt < SWIPE_CHAIN_MS && it in available } ?: currentSource()
         val i = available.indexOf(cur)
@@ -632,22 +632,22 @@ object MediaHub {
         switchTo(next)
     }
 
-    /** Bascule la voiture sur cette source et lance la lecture (balayage ou menu des sources). */
+    /** Switches the car to this source and starts playback (swipe or source menu). */
     fun switchTo(next: String) {
         if (BuildConfig.MOCK) return
         if (next == RADIO_DAB || next == RADIO_FM) {
             bandTarget = next
-            // Indicateur tout de suite, sans attendre que la radio confirme la bande
+            // Indicator right away, without waiting for the radio to confirm the band
             publish()
-            // Déjà sur la radio : pas de changement de source à la voiture, on passe directement à la bande
+            // Already on the radio: no source change to the car, go directly to the band
             if (current?.packageName == RADIO) reachBand(next, 3, 0) else { switchTo(RADIO); reachBand(next, 3) }
             return
         }
         Log.i(TAG, "source picked: $next")
-        wheelFrom = null // choix de l'utilisateur : pas de retour automatique à l'appli
+        wheelFrom = null // user's choice: no automatic return to the app
         promptFrom = null
-        // On quitte le lecteur d'une autre appli (DiAuto, SimpMusic…) : la voiture n'a pas de source à lui
-        // retirer et certaines applis continuent malgré la perte du focus, d'où deux musiques en même temps
+        // Leaving another app's player (DiAuto, SimpMusic…): the car has no source to take from it
+        // and some apps carry on despite the loss of focus, hence two musics at once
         current?.takeIf { otherAppShown() && it.packageName != next }?.let {
             Log.i(TAG, "pausing ${it.packageName} (leaving it)")
             it.transportControls.pause()
@@ -657,7 +657,7 @@ object MediaHub {
         main.post { reevaluate() }
         if (next == AA_MBS) {
             if (carPlay) { selectProjectionSource(); return }
-            // CarPlay pas encore vu depuis le démarrage : on demande à AllGo quel téléphone est en projection
+            // CarPlay not seen yet since startup: ask AllGo which phone is projecting
             val ctx = appContext
             io.launch {
                 val s = ctx?.let { app.mg4dash.system.Projection.session(it) }
@@ -670,13 +670,13 @@ object MediaHub {
             return
         }
         if (next == "com.android.bluetooth") appContext?.let { app.mg4dash.system.BtAudio.connectMusic(it) }
-        // Autre appli (DiAuto…) : pas de commande de source voiture, on lance directement son lecteur
+        // Other app (DiAuto…): no car source command, start its player directly
         val carSource = activateSource(next)
-        // La radio ne perd pas toujours le son au profit de l'appli (DiAuto ne le demande pas) : pause
+        // The radio does not always lose the sound to the app (DiAuto does not ask for it): pause
         if (!carSource && (radioShown || sourcePkg == RADIO)) pauseRadio()
         main.postDelayed({
-            // Autre appli : « lecture » envoyé même si elle se croit déjà en lecture. DiAuto reste en lecture
-            // côté téléphone quand la radio lui prend la source ; c'est ce « lecture » qui la lui fait reprendre
+            // Other app: "play" sent even if it thinks it is already playing. DiAuto stays playing
+            // on the phone side when the radio takes the source from it; this "play" makes it resume
             (browserControllers[next] ?: lastCandidates.firstOrNull { it.packageName == next })
                 ?.takeIf { !carSource || !isPlaying(it) }?.transportControls?.play()
         }, if (carSource) 1500 else 0)
@@ -714,18 +714,18 @@ object MediaHub {
                         val type = try {
                             (attrs?.javaClass?.getMethod("getBundle")?.invoke(attrs) as? android.os.Bundle)?.getInt("key_car_source_type", -1) ?: -1
                         } catch (_: Throwable) { -1 }
-                        // Son passager d'une appli sans source voiture (type -1) : annonce de guidage DiAuto mixée
-                        // par-dessus la radio (DiAuto 2.0.0-beta19). Ce n'est pas un changement de source : la carte
-                        // média clignotait vers DiAuto à chaque annonce
-                        // Même chose pour AllGo sans téléphone : DiAuto refermé l'annonce sous son nom, et la bascule
-                        // qui suivait, Android Auto étant absent, relançait le Bluetooth en pause (#78)
+                        // Passenger sound of an app with no car source (type -1): DiAuto guidance announcement mixed
+                        // over the radio (DiAuto 2.0.0-beta19). This is not a source change: the media
+                        // card flickered to DiAuto at each announcement
+                        // Same for AllGo without a phone: DiAuto closed the announcement under its name, and the following
+                        // switch, Android Auto being absent, restarted paused Bluetooth (#78)
                         if (type == -1 && pkg != null && (!pkg.startsWith("com.saicmotor.") && !pkg.startsWith("com.allgo.") ||
                                 pkg == "com.allgo.app.androidauto" && projectionLive != true)) {
                             Log.i(TAG, "audio source: $pkg (-1) ignored: passing sound, the car source does not change")
                             return@newProxyInstance null
                         }
-                        // DiAuto se présente à la voiture comme l'Android Auto d'AllGo (le launcher d'origine ne lui
-                        // envoie alors plus les boutons du volant) : sans téléphone sur AllGo, c'est le lecteur DiAuto
+                        // DiAuto presents itself to the car as AllGo's Android Auto (the stock launcher then no longer
+                        // sends it the wheel buttons): with no phone on AllGo, this is the DiAuto player
                         val diAuto = if (pkg == "com.allgo.app.androidauto" && projectionLive != true)
                             lastCandidates.firstOrNull { handlesWheelKeys(it.packageName) }?.packageName else null
                         val src = when {
@@ -737,8 +737,8 @@ object MediaHub {
                             else -> pkg
                         }
                         Log.i(TAG, "audio source: $pkg ($type) → $src")
-                        // Radio reprise par le launcher d'origine juste après gauche / droite du volant : retour à
-                        // l'appli. Traité ici, sans attendre le fil principal (souvent occupé à ce moment-là)
+                        // Radio taken back by the stock launcher right after wheel left / right: back to
+                        // the app. Handled here, without waiting for the main thread (often busy at that moment)
                         val back = wheelFrom?.takeIf { src == RADIO && android.os.SystemClock.uptimeMillis() - wheelAt < 2_000 }
                         if (back != null) {
                             wheelFrom = null
@@ -750,21 +750,21 @@ object MediaHub {
                         }
                         main.post {
                             if (src == AA_MBS) {
-                                // Le choix manuel reste tant qu'Android Auto ne joue pas (guidage seul)
+                                // The manual choice stays as long as Android Auto is not playing (guidance only)
                                 if (sourcePkg != AA_MBS) { aaUnconfirmed = true; sourceBeforeAa = sourcePkg }
                             } else { aaUnconfirmed = false; sourceBeforeAa = null; pinnedPkg = null }
-                            // Changement fait sur la voiture (bouton source, appli d'origine) : c'est aussi un choix
-                            // de l'utilisateur, sauf s'il suit une bascule automatique ou la perte de l'ancienne source
+                            // Change made on the car (source button, stock app): this is also a user's
+                            // choice, unless it follows an automatic switch or the loss of the old source
                             val prev = sourcePkg
-                            // DiAuto prend la source pour une annonce (mode hybride : musique en Bluetooth) : on retient
-                            // la source de la voiture d'avant pour la lui rendre une fois l'annonce finie
+                            // DiAuto takes the source for an announcement (hybrid mode: music over Bluetooth): remember
+                            // the car's previous source to give it back once the announcement is over
                             if (src != null && handlesWheelKeys(src) && prev in CAR_SOURCES) {
                                 promptFrom = prev; promptAt = android.os.SystemClock.uptimeMillis(); promptQuiet = 0; promptSounding = 0
                                 promptWasPlaying = prev != null && promptAt - (playingAt[prev] ?: 0L) < 3_000
                                 Log.i(TAG, "$src took the car source from $prev (music over Bluetooth: ${musicOverBluetooth(src)}, was playing: $promptWasPlaying)")
                             } else if (src in CAR_SOURCES) promptFrom = null
-                            // Seulement les sources de la voiture : une appli qui prend la main un instant (annonce de
-                            // guidage DiAuto…) n'est pas un choix de source
+                            // Only car sources: an app taking over for a moment (DiAuto guidance
+                            // announcement…) is not a source choice
                             if (src != null && src in listOf(RADIO, "com.android.bluetooth", "com.saicmotor.media") && src != prev && android.os.SystemClock.uptimeMillis() - autoSwitchAt > 8_000 &&
                                 (prev == null || prev in availableSources())) { remember(src); autoTarget = null }
                             sourcePkg = src; reevaluate()
@@ -783,7 +783,7 @@ object MediaHub {
         } catch (e: Throwable) { Log.w(TAG, "registerAudioSourceChange unavailable: ${e.message}") }
     }
 
-    /** Logo de station fictif pour les captures d'écran (comme une image diffusée en DAB+). */
+    /** Dummy station logo for screenshots (like a picture broadcast over DAB+). */
     private fun mockLogo(): Bitmap {
         val size = 320
         val bmp = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)
@@ -820,9 +820,9 @@ object MediaHub {
     private val emptySince = mutableMapOf<String, Long>()
 
     /**
-     * Lien périmé avec un lecteur : la radio (ou le Bluetooth) a recréé sa session, par exemple après
-     * un redémarrage de son service. L'ancien contrôleur ne reçoit plus rien (ni titre ni pochette)
-     * alors que la source affichée reste « Radio ». On se reconnecte à son MediaBrowserService.
+     * Stale link with a player: the radio (or Bluetooth) recreated its session, for example after
+     * its service restarted. The old controller receives nothing more (no title or cover)
+     * while the shown source stays "Radio". Reconnect to its MediaBrowserService.
      */
     private fun reconnectBrowser(pkg: String, why: String) {
         val component = BROWSERS.firstOrNull { it.packageName == pkg } ?: return
@@ -833,11 +833,11 @@ object MediaHub {
         connectBrowser(component)
     }
 
-    /** Vérification périodique : un contrôleur de navigateur resté sans état ni titre plus de 20 s est relancé. */
+    /** Periodic check: a browser controller left with no state or title for more than 20 s is restarted. */
     private fun checkStaleBrowsers() {
         val now = System.currentTimeMillis()
-        // Radio seulement : se déconnecter du lecteur Bluetooth de la voiture pouvait arrêter la musique
-        // (issue #10, coupure à la première notification du téléphone).
+        // Radio only: disconnecting from the car's Bluetooth player could stop the music
+        // (issue #10, cut at the phone's first notification).
         browserControllers.toMap().filterKeys { it == RADIO }.forEach { (pkg, c) ->
             val empty = try { c.metadata == null && c.playbackState == null } catch (_: Exception) { true }
             if (!empty) { emptySince.remove(pkg); return@forEach }
@@ -870,13 +870,13 @@ object MediaHub {
     }
 
     /**
-     * Choix du lecteur à afficher, sans clignoter :
-     * 0) celui de la source audio active de la voiture ; 1) une session en lecture ; 2) la session déjà affichée tant qu'elle existe ;
-     * 3) la radio, puis le Bluetooth, puis l'USB (même s'ils sont en pause).
+     * Choosing the player to show, without flickering:
+     * 0) the one of the car's active audio source; 1) a playing session; 2) the session already shown as long as it exists;
+     * 3) the radio, then Bluetooth, then USB (even if paused).
      */
     private fun reevaluate() {
         val active = try { manager?.getActiveSessions(null).orEmpty() } catch (_: SecurityException) { emptyList() }
-        // Plus de téléphone en projection : le lecteur CarPlay / Android Auto n'est plus proposé (#36)
+        // No more phone projecting: the CarPlay / Android Auto player is no longer offered (#36)
         val candidates = (active + browserControllers.values).filter { !gone(it.packageName) }
         lastCandidates = candidates
         candidates.forEach { c ->
@@ -885,8 +885,8 @@ object MediaHub {
         val playing = candidates.firstOrNull { it.playbackState?.state == PlaybackState.STATE_PLAYING }
         pauseOthersOnStart(candidates)
         val source = effectiveSource(candidates)
-        // Radio de l'ancien SDK : aucun contrôleur, on l'affiche d'après la source de la voiture, le
-        // choix sur la carte, ou parce qu'elle joue alors qu'aucun autre lecteur ne joue.
+        // Old SDK radio: no controller, it is shown from the car's source, the
+        // choice on the card, or because it plays while no other player does.
         val showRadio = legacyRadio && SaicRadio.ready && when (pinnedPkg) {
             RADIO -> true
             null -> source == RADIO || (source == null && playing == null && SaicRadio.last?.playing == true)
@@ -895,8 +895,8 @@ object MediaHub {
         if (showRadio != radioShown) Log.i(TAG, "player shown: ${if (showRadio) "radio (SAIC service)" else "media session"}")
         radioShown = showRadio
         if (showRadio) { current = null; publish(); return }
-        // Un lecteur peut avoir deux contrôleurs (session active, navigateur média) : on préfère celui
-        // qui a un titre, puis celui qui a un état, puis le navigateur.
+        // A player can have two controllers (active session, media browser): prefer the one
+        // with a title, then the one with a state, then the browser.
         fun bestFor(pkg: String): MediaController? {
             if (gone(pkg)) return null
             val all = candidates.filter { it.packageName == pkg }
@@ -920,13 +920,13 @@ object MediaHub {
 
     @Volatile private var lastCandidates: List<MediaController> = emptyList()
 
-    /** Lecteurs d'applis qui jouaient au dernier passage. */
+    /** App players that were playing at the last pass. */
     private val appsPlaying = mutableSetOf<String>()
 
     /**
-     * Une appli se met à jouer (lancée depuis son écran, ou choisie comme source) : les autres applis qui
-     * jouaient encore sont mises en pause. La voiture n'a pas de source pour elles et certaines ignorent la
-     * perte du focus audio, d'où DiAuto et SimpMusic qui jouaient ensemble.
+     * An app starts playing (launched from its screen, or chosen as source): the other apps still
+     * playing are paused. The car has no source for them and some ignore the
+     * loss of audio focus, hence DiAuto and SimpMusic playing together.
      */
     private fun pauseOthersOnStart(candidates: List<MediaController>) {
         fun isApp(pkg: String) = pkg != RADIO && pkg != "com.android.bluetooth" && pkg != "com.saicmotor.media" &&
@@ -945,12 +945,12 @@ object MediaHub {
     }
 
     /**
-     * Un même lecteur peut avoir deux contrôleurs (session active et navigateur média) : sur la
-     * voiture, l'état Bluetooth ne suivait que sur l'un des deux, et le bouton lecture/pause du
-     * widget restait figé. On prend l'état le plus récemment mis à jour.
+     * One player can have two controllers (active session and media browser): on the
+     * car, the Bluetooth state only followed on one of them, and the widget's play/pause
+     * button stayed frozen. Take the most recently updated state.
      */
     private fun isPlaying(c: MediaController): Boolean {
-        // L'état le plus récent parmi les contrôleurs de ce lecteur fait foi.
+        // The most recent state among this player's controllers prevails.
         val st = (lastCandidates.filter { it.packageName == c.packageName } + c)
             .mapNotNull { it.playbackState }
             .maxByOrNull { it.lastPositionUpdateTime }
@@ -961,7 +961,7 @@ object MediaHub {
         override fun onPlaybackStateChanged(state: PlaybackState?) = reevaluate()
         override fun onMetadataChanged(metadata: MediaMetadata?) = publish()
         override fun onSessionDestroyed() {
-            // Le rappel ne dit pas quel lecteur : on relance les navigateurs dont la session a disparu.
+            // The callback does not say which player: restart browsers whose session disappeared.
             browserControllers.toMap().filterKeys { it == RADIO }.forEach { (pkg, c) ->
                 val dead = try { c.playbackState == null && c.metadata == null } catch (_: Exception) { true }
                 if (dead) main.postDelayed({ reconnectBrowser(pkg, "session détruite") }, 1_000)
@@ -975,7 +975,7 @@ object MediaHub {
     @Volatile private var rdsText = ""
     private var rdsStation = ""
 
-    /** Texte RDS de la station FM, envoyé par Radio Dash : seule source, sa session média ne le contient pas. */
+    /** RDS text of the FM station, sent by Radio Dash: only source, its media session does not contain it. */
     private fun listenRdsText(context: Context) {
         val receiver = object : android.content.BroadcastReceiver() {
             override fun onReceive(c: Context, i: Intent) {
@@ -997,9 +997,9 @@ object MediaHub {
             ?: md?.getString(MediaMetadata.METADATA_KEY_DISPLAY_TITLE) ?: ""
         val rawArtist = md?.getString(MediaMetadata.METADATA_KEY_ARTIST)
             ?: md?.getString(MediaMetadata.METADATA_KEY_DISPLAY_SUBTITLE) ?: ""
-        // Radio FM / AM : la voiture met la fréquence en titre (« FM 98.20 ») et le nom RDS en artiste ;
-        // le nom passe en titre et la fréquence en dessous ; sans nom, la fréquence reste en titre. Le texte RDS
-        // envoyé par Radio Dash (la session ne contient que la fréquence et le nom) est effacé au changement de station
+        // FM / AM radio: the car puts the frequency as title ("FM 98.20") and the RDS name as artist;
+        // the name moves to title and the frequency below; with no name, the frequency stays as title. The RDS text
+        // sent by Radio Dash (the session only has frequency and name) is cleared on station change
         val analog = c.packageName == RADIO && ANALOG.matches(rawTitle.trim())
         if (rdsStation != rawTitle) { rdsStation = rawTitle; rdsText = "" }
         val swap = analog && rawArtist.isNotBlank()
@@ -1028,15 +1028,15 @@ object MediaHub {
         val artUri = md?.getString(MediaMetadata.METADATA_KEY_ALBUM_ART_URI)
             ?: md?.getString(MediaMetadata.METADATA_KEY_ART_URI)
         val key = "$title|$artist"
-        // Radio DAB sans image : la radio efface la pochette à chaque changement de station et ne
-        // l'envoie qu'à l'arrivée du slideshow. Comme Radio Dash, on prend l'image en cache de la station.
+        // DAB radio without a picture: the radio clears the cover at each station change and only
+        // sends it when the slideshow arrives. Like Radio Dash, take the station's cached image.
         if (bmp == null && artUri == null && c.packageName == "com.saicmotor.radio" && !analog && title.isNotBlank() && key != lastArtKey) {
             lastArtKey = key
             io.launch { cachedDabArt(title)?.let { a -> if (_now.value.title == title && _now.value.packageName == "com.saicmotor.radio") _now.value = _now.value.copy(art = a) } }
         } else if (bmp == null && artUri != null && (key != lastArtKey || artUri != lastArtUri || (np.art == null && !artPending))) {
-            // Bluetooth : la pochette n'est pas toujours lisible tout de suite (liaison image du téléphone
-            // établie après le titre, ou adresse qui change en cours de morceau) et on ne réessayait qu'au
-            // morceau suivant. On réessaie tant que le morceau dure : toutes les 3 s, puis toutes les 15 s.
+            // Bluetooth: the cover is not always readable at once (phone's image link
+            // established after the title, or address changing during the track) and it was only retried at
+            // the next track. Retry as long as the track lasts: every 3 s, then every 15 s.
             if (key != lastArtKey || artUri != lastArtUri) artTries = 0
             lastArtKey = key; lastArtUri = artUri; artTries++; artPending = true
             val tries = artTries
@@ -1056,9 +1056,9 @@ object MediaHub {
     }
 
     /**
-     * Image en cache de la station DAB en cours (fichiers/dab_<serviceId>.jpg du patch DAB+), si le
-     * nom de la station correspond au titre affiché (évite l'image d'une station DAB précédente en FM).
-     * La radio tourne en uid système comme MG4Dash : ses fichiers sont lisibles.
+     * Cached image of the current DAB station (files/dab_<serviceId>.jpg of the DAB+ patch), if the
+     * station name matches the displayed title (avoids a previous DAB station's image on FM).
+     * The radio runs as a system uid like MG4Dash: its files are readable.
      */
     private fun cachedDabArt(title: String): Bitmap? = try {
         val db = android.database.sqlite.SQLiteDatabase.openDatabase(
@@ -1091,9 +1091,9 @@ object MediaHub {
     }
 
     /**
-     * Image vide (une seule couleur) : en Bluetooth, le téléphone envoie parfois une vignette vierge avant la
-     * vraie pochette (#36). On la traite comme « pas encore de pochette » : on garde la précédente du même
-     * morceau ou on réessaie, au lieu d'afficher un carré vide.
+     * Blank image (a single colour): over Bluetooth, the phone sometimes sends a blank thumbnail before the
+     * real cover (#36). It is treated as "no cover yet": keep the previous one of the same
+     * track or retry, instead of showing an empty square.
      */
     private fun blank(b: Bitmap): Boolean = try {
         val w = b.width; val h = b.height
@@ -1111,8 +1111,8 @@ object MediaHub {
             kotlin.math.abs(android.graphics.Color.blue(a) - android.graphics.Color.blue(b)) < 8
 
     /**
-     * Radio d'origine des anciens firmwares, pilotée par son service. Radio Dash installée à sa place (#80) est
-     * une autre appli, avec un service de lecture standard : elle passe alors par le chemin du SWI69.
+     * Stock radio of old firmwares, driven through its service. Radio Dash installed in its place (#80) is
+     * another app, with a standard playback service: it then goes through the SWI69 path.
      */
     private val legacyRadio: Boolean by lazy {
         app.mg4dash.system.Firmware.family == app.mg4dash.system.Firmware.Family.LEGACY &&
@@ -1134,11 +1134,11 @@ object MediaHub {
         )
     }
 
-    /** Commande radio hors du fil principal, puis relecture de la station. */
+    /** Radio command off the main thread, then reread the station. */
     /**
-     * La radio a changé de station sur un bouton du volant destiné à une autre appli : commande inverse
-     * par sa session (le même chemin que le launcher d'origine), puis retour à l'appli une fois la
-     * radio retombée sur sa station ([then] la met en pause en quittant la radio).
+     * The radio changed station on a wheel button meant for another app: reverse command
+     * through its session (the same path as the stock launcher), then back to the app once the
+     * radio is back on its station ([then] pauses it when leaving the radio).
      */
     private fun undoRadioSkip(forward: Boolean, then: () -> Unit) {
         val rc = browserControllers[RADIO] ?: lastCandidates.firstOrNull { it.packageName == RADIO }
@@ -1148,7 +1148,7 @@ object MediaHub {
         main.postDelayed(then, 200)
     }
 
-    /** Pause de la radio : par sa session, sinon par son service. */
+    /** Pauses the radio: through its session, otherwise through its service. */
     private fun pauseRadio() {
         val rc = browserControllers[RADIO] ?: lastCandidates.firstOrNull { it.packageName == RADIO }
         Log.i(TAG, "pausing the radio")
@@ -1183,9 +1183,9 @@ object MediaHub {
     }
 
     /**
-     * Lecture / pause demandée : affichée tout de suite. Le Bluetooth ne met à jour son état
-     * qu'avec plusieurs secondes de retard (#36) ; l'état réel reprend la main dès qu'il concorde,
-     * ou au bout de 4 s.
+     * Play / pause requested: shown at once. Bluetooth only updates its state
+     * several seconds late (#36); the real state takes over as soon as it matches,
+     * or after 4 s.
      */
     private var forcedPlay: Pair<String, Boolean>? = null
     private var forcedUntil = 0L
@@ -1206,7 +1206,7 @@ object MediaHub {
 
     fun playPause() {
         if (BuildConfig.MOCK) { _now.value = _now.value.copy(playing = !_now.value.playing); return }
-        // Choix explicite de l'utilisateur : retenu tel quel pour la lecture au démarrage
+        // User's explicit choice: kept as is for play at startup
         prefs()?.lastPlaying = !_now.value.playing; pausedSince = 0L
         playPauseRaw()
     }
@@ -1215,9 +1215,9 @@ object MediaHub {
         if (radioShown) { val playing = SaicRadio.last?.playing == true; radioCommand { if (playing) SaicRadio.pause() else SaicRadio.play() }; return }
         val c = current ?: return
         val playing = isPlaying(c)
-        // La voiture est sur une autre source (ex. FM) : un « lecture » envoyé au Bluetooth ou à
-        // l'USB est ignoré. On demande d'abord à la voiture de changer de source (comme le launcher
-        // d'origine), puis on lance la lecture si elle n'a pas démarré toute seule.
+        // The car is on another source (e.g. FM): a "play" sent to Bluetooth or
+        // USB is ignored. First ask the car to change source (like the stock
+        // launcher), then start playback if it did not start by itself.
         if (!playing && !isAndroidAuto(c.packageName) && effectiveSource().let { it != null && it != c.packageName } &&
             activateSource(c.packageName)) {
             main.postDelayed({
@@ -1226,19 +1226,19 @@ object MediaHub {
             }, 1500)
             return
         }
-        // CarPlay après la radio : l'iPhone n'a plus l'audio principal, la touche lecture restait sans
-        // effet tant qu'on ne relançait pas la musique sur le téléphone (#36). On repasse d'abord sur
-        // la source CarPlay comme le launcher d'origine, qui rend l'audio au téléphone.
+        // CarPlay after the radio: the iPhone no longer has main audio, the play key had no
+        // effect until music was restarted on the phone (#36). First go back to
+        // the CarPlay source like the stock launcher, which gives audio back to the phone.
         if (carPlay && !playing && isAndroidAuto(c.packageName) && effectiveSource().let { it != null && it != c.packageName }) {
             selectProjectionSource(); return
         }
-        // Android Auto (RemoteUI) ne réagit qu'aux touches média, pas aux commandes play()/pause()
+        // Android Auto (RemoteUI) only reacts to media keys, not play()/pause() commands
         if (isAndroidAuto(c.packageName)) { aaControl(c, if (playing) AA_PAUSE else AA_PLAY, if (playing) KeyEvent.KEYCODE_MEDIA_PAUSE else KeyEvent.KEYCODE_MEDIA_PLAY); return }
         if (playing) c.transportControls.pause() else c.transportControls.play()
         force(c.packageName, !playing)
-        // Après un redémarrage, la voiture annonce le Bluetooth (ou l'USB) comme source mais ne l'a pas
-        // réactivée : le « lecture » reste sans effet tant qu'on ne change pas de source (#36). Si rien
-        // ne joue au bout de 2 s, on redemande la source à la voiture, puis la lecture.
+        // After a restart, the car announces Bluetooth (or USB) as the source but has not
+        // reactivated it: "play" has no effect until the source changes (#36). If nothing
+        // plays after 2 s, ask the car for the source again, then playback.
         if (!playing && c.packageName != RADIO) main.postDelayed({
             val now = current?.takeIf { it.packageName == c.packageName } ?: return@postDelayed
             if (isPlaying(now) || !activateSource(c.packageName)) return@postDelayed
@@ -1259,8 +1259,8 @@ object MediaHub {
         if (isAndroidAuto(c.packageName)) aaControl(c, AA_PREVIOUS, KeyEvent.KEYCODE_MEDIA_PREVIOUS) else c.transportControls.skipToPrevious()
     }
 
-    // ── Android Auto : commandes de lecture par le service allgo (comme le fait RemoteUI SAIC) ──
-    // IAndroidAutoMainService.sendMediaPlayControl(int) : 1 lecture, 2 pause, 3 suivant, 4 précédent
+    // ── Android Auto: playback commands through the allgo service (as SAIC RemoteUI does) ──
+    // IAndroidAutoMainService.sendMediaPlayControl(int): 1 play, 2 pause, 3 next, 4 previous
     private const val AA_PLAY = 1
     private const val AA_PAUSE = 2
     private const val AA_NEXT = 3
@@ -1283,16 +1283,16 @@ object MediaHub {
     }
 
     /**
-     * CarPlay passe par le même lecteur RemoteUI qu'Android Auto, mais pas par le service Android
-     * Auto : ses commandes tactiles restaient sans effet (#36, à tester). Les touches média du
-     * système, celles du volant, vont à la session active.
+     * CarPlay goes through the same RemoteUI player as Android Auto, but not through the Android
+     * Auto service: its touch commands had no effect (#36, to test). System media
+     * keys, those of the wheel, go to the active session.
      */
     @Volatile private var carPlay = false
 
     /**
-     * Service CarPlay d'allgo (ICarPlayService, relevé dans AllgoCarplay_EH32) :
-     * dispatchKeyEvent(code, 2 = appui + relâchement) sur 85 / 87 / 88 / 126 / 127 (transaction 4),
-     * launchApp(4 = « À l'écoute ») (transaction 13). Les touches média du système ne lui parvenaient pas.
+     * allgo's CarPlay service (ICarPlayService, found in AllgoCarplay_EH32):
+     * dispatchKeyEvent(code, 2 = press + release) on 85 / 87 / 88 / 126 / 127 (transaction 4),
+     * launchApp(4 = "Now Playing") (transaction 13). System media keys did not reach it.
      */
     private const val CP_DESCRIPTOR = "com.allgo.carplay.service.ICarPlayService"
     @Volatile private var cpService: android.os.IBinder? = null
@@ -1325,26 +1325,26 @@ object MediaHub {
     }
 
     /**
-     * Passage sur la source CarPlay comme le launcher d'origine (onSwitchCarPlayAASourceOnly) :
-     * touche 1 au service RemoteUI d'AllGo, qui rend l'audio principal à l'iPhone et relance la
-     * lecture (#36). À défaut de service, la touche lecture / pause de CarPlay comme avant.
+     * Moves to the CarPlay source like the stock launcher (onSwitchCarPlayAASourceOnly):
+     * key 1 to AllGo's RemoteUI service, which gives main audio back to the iPhone and restarts
+     * playback (#36). Without the service, CarPlay's play / pause key as before.
      */
     private fun selectProjectionSource() {
         val ctx = appContext ?: return
-        // Touche lecture de la projection, comme le launcher d'origine. Après la radio, CarPlay ne reprend
-        // pas l'audio tout seul, ni ici ni avec le launcher d'origine (#36) : limite d'AllGo.
+        // Projection play key, like the stock launcher. After the radio, CarPlay does not take
+        // the audio back by itself, here or with the stock launcher (#36): AllGo limitation.
         Thread {
             if (!app.mg4dash.system.Projection.mediaKey(ctx, app.mg4dash.system.Projection.KEY_SELECT_SOURCE))
                 systemMediaKey(KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE)
         }.start()
-        // Journal de #36 : la voiture ne rend l'audio à CarPlay que quand CarPlay s'ouvre à l'écran ;
-        // on note si la touche a suffi (pas d'ouverture forcée : refusée, l'écran CarPlay clignotait)
+        // Log of #36: the car only gives audio back to CarPlay when CarPlay opens on screen;
+        // note if the key was enough (no forced opening: refused, the CarPlay screen flickered)
         main.postDelayed({
             Log.i(TAG, "CarPlay audio after source key: ${if (sourcePkg == AA_MBS) "taken" else "still on $sourcePkg"}")
         }, 2000)
     }
 
-    /** Touche média vers CarPlay ; à défaut de service, touche média du système. */
+    /** Media key to CarPlay; without the service, system media key. */
     private fun systemMediaKey(code: Int) {
         if (cpCall(4, code, 2)) return
         val am = appContext?.getSystemService(Context.AUDIO_SERVICE) as? android.media.AudioManager ?: return
@@ -1354,10 +1354,10 @@ object MediaHub {
         Log.i(TAG, "CarPlay: system media key $code")
     }
 
-    /** Toucher sur la carte média en CarPlay : CarPlay au premier plan, sur l'écran « À l'écoute ». */
+    /** Touch on the media card in CarPlay: CarPlay in front, on the "Now Playing" screen. */
     fun openCarPlayNowPlaying(): Boolean {
-        // Seulement quand la carte montre CarPlay : sur la radio ou le Bluetooth, le dernier CarPlay
-        // connecté était ouvert, et menait à un écran noir une fois l'iPhone débranché (#36)
+        // Only when the card shows CarPlay: on the radio or Bluetooth, the last connected CarPlay
+        // was opened, and led to a black screen once the iPhone was unplugged (#36)
         if (!carPlay || radioShown || projectionLive == false || current?.let { isAndroidAuto(it.packageName) } != true) return false
         val ctx = appContext ?: return false
         app.mg4dash.system.Apps.open(ctx, app.mg4dash.system.Apps.CARPLAY, "CarPlay")
@@ -1365,11 +1365,11 @@ object MediaHub {
         return true
     }
 
-    /** Commande envoyée au service Android Auto ; à défaut, touche média vers sa session. */
+    /** Command sent to the Android Auto service; otherwise, media key to its session. */
     private fun aaControl(c: MediaController, code: Int, fallbackKey: Int) {
         if (carPlay) {
-            // CarPlay ne dit pas s'il joue : lecture et pause passent par la touche bascule (85), que
-            // son service accepte comme le volant (#36). On n'ouvre plus CarPlay à la bascule de source.
+            // CarPlay does not say if it is playing: play and pause go through the toggle key (85), which
+            // its service accepts like the wheel (#36). CarPlay is no longer opened on source switch.
             val key = if (code == AA_PLAY || code == AA_PAUSE) KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE else fallbackKey
             systemMediaKey(key); return
         }
@@ -1388,7 +1388,7 @@ object MediaHub {
         } finally { data.recycle(); reply.recycle() }
     }
 
-    /** Appui + relâchement d'une touche média, envoyés à la session du lecteur. */
+    /** Press + release of a media key, sent to the player's session. */
     private fun mediaKey(c: MediaController, code: Int) {
         val t = android.os.SystemClock.uptimeMillis()
         val ok = c.dispatchMediaButtonEvent(KeyEvent(t, t, KeyEvent.ACTION_DOWN, code, 0)) and
@@ -1396,11 +1396,11 @@ object MediaHub {
         Log.i(TAG, "media key $code → ${c.packageName}: $ok")
     }
 
-    /** Composant à ouvrir quand on touche la carte média. */
+    /** Component to open when touching the media card. */
     fun ownerComponent(): ComponentName? =
         if (radioShown) ownerOf(RADIO) else current?.packageName?.let { pkg -> ownerOf(pkg) }
 
-    /** Appli d'origine d'une source ; le Bluetooth (sans appli à lui) est lu par l'appli Média SAIC. */
+    /** Stock app of a source; Bluetooth (with no app of its own) is played by the SAIC Media app. */
     private fun ownerOf(pkg: String): ComponentName? = when (pkg) {
         AA_MBS -> if (carPlay) app.mg4dash.system.Apps.CARPLAY else app.mg4dash.system.Apps.ANDROID_AUTO
         "com.android.bluetooth" -> app.mg4dash.system.Apps.MEDIA
@@ -1409,16 +1409,16 @@ object MediaHub {
     }
 
     /**
-     * Bascule la source audio de la voiture comme le launcher d'origine (ModeManager.switchSource,
-     * relevé sur SWI69) : commande 0x8001 « changer de source » envoyée au service de l'appli
-     * média ou radio. Types du launcher : USB = 0, Bluetooth = 2 ; la radio reprend sa bande.
-     * L'appli média lance elle-même la lecture de la source choisie.
+     * Switches the car's audio source like the stock launcher (ModeManager.switchSource,
+     * found on SWI69): command 0x8001 "change source" sent to the service of the media
+     * or radio app. Launcher types: USB = 0, Bluetooth = 2; the radio resumes its band.
+     * The media app starts playback of the chosen source itself.
      */
     private fun activateSource(pkg: String): Boolean {
         val ctx = appContext ?: return false
         if (pkg == RADIO && legacyRadio) { radioCommand { SaicRadio.play() }; return true }
-        // SWI68 (issue #19) : la commande 0x8001 ne change pas la source et la radio continuait
-        // par-dessus le Bluetooth ; on met d'abord en pause la radio de l'ancien SDK.
+        // SWI68 (issue #19): command 0x8001 does not change the source and the radio continued
+        // over Bluetooth; first pause the old SDK radio.
         if (legacyRadio && SaicRadio.ready && SaicRadio.last?.playing == true) {
             Log.i(TAG, "old SDK: radio paused before switching to $pkg")
             radioCommand { SaicRadio.pause() }

@@ -19,15 +19,15 @@ import java.io.File
 import java.util.concurrent.TimeUnit
 
 /**
- * Rendu des écrans en plein écran sur la dalle de la MG4 (1920 × 720 dp, 160 dpi),
- * avec les données simulées. Les PNG sont écrits dans build/screenshots/.
+ * Full screen rendering of the screens on the MG4's panel (1920 × 720 dp, 160 dpi),
+ * with simulated data. PNGs are written to build/screenshots/.
  */
 @RunWith(RobolectricTestRunner::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 @Config(sdk = [28], qualifiers = "w1920dp-h720dp-land-mdpi")
 class ScreenshotTest {
 
-    /** Barre verticale à gauche, comme sur une nouvelle installation ; un test la remet en bas. */
+    /** Vertical bar on the left, as on a new install; one test puts it back at the bottom. */
     @org.junit.Before fun verticalBarByDefault() {
         org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE)
             .edit().putBoolean("vertical_dock", true).commit()
@@ -39,7 +39,7 @@ class ScreenshotTest {
         shoot(MainActivity::class.java, "home_bottom_bar.png")
     }
 
-    /** Ecran plus bas (barres SAIC visibles, #43) : barre en bas. */
+    /** Shorter screen (SAIC bars visible, #43): bar at the bottom. */
     @Test @Config(qualifiers = "w1790dp-h640dp-land-mdpi") fun homeBottomBarShort() {
         org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE)
             .edit().putBoolean("vertical_dock", false).putInt("theme_mode", 1).putBoolean("fullscreen", false).commit()
@@ -69,7 +69,7 @@ class ScreenshotTest {
     @Test @Config(qualifiers = "tr-w1920dp-h720dp-land-mdpi") fun energyTurkish() = shoot(app.mg4dash.pages.EnergyActivity::class.java, "energy_tr.png")
     @Test @Config(qualifiers = "tr-w1920dp-h720dp-land-mdpi") fun climateTurkish() = shoot(ClimateActivity::class.java, "climate_tr.png")
 
-    /** Simulation du bouton antibrouillards de MG (56 dp à x = 20 dp, #38) posé sur la barre. */
+    /** Simulation of MG's fog light button (56 dp at x = 20 dp, #38) placed on the bar. */
     @Test fun homeFogSim() {
         org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE)
             .edit().putInt("theme_mode", 1).commit()
@@ -88,7 +88,7 @@ class ScreenshotTest {
         File(dir, "home_fog_sim.png").outputStream().use { bmp.compress(Bitmap.CompressFormat.PNG, 100, it) }
     }
 
-    /** Page Son (maquette) : répartition et égaliseur. */
+    /** Sound page (mockup): balance and equaliser. */
     @Test fun sound() = shoot(app.mg4dash.pages.SoundActivity::class.java, "sound.png")
     @Test fun soundLight() {
         org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE)
@@ -98,7 +98,7 @@ class ScreenshotTest {
     @Test @Config(qualifiers = "fr-w1920dp-h720dp-land-mdpi") fun soundFr() = shoot(app.mg4dash.pages.SoundActivity::class.java, "sound_fr.png")
     @Test @Config(qualifiers = "fr-w1920dp-h720dp-land-mdpi") fun vehicleFr() = shoot(app.mg4dash.pages.VehicleActivity::class.java, "vehicle_fr.png")
 
-    /** Animation de démarrage : images brutes (640 × 240, 20 i/s) pour en faire un GIF, et une image fixe. */
+    /** Startup animation: raw frames (640 × 240, 20 fps) to make a GIF, and a still image. */
     @Test fun splashFrames() {
         val ctx = org.robolectric.RuntimeEnvironment.getApplication()
         val v = app.mg4dash.ui.SplashView(ctx).apply { version = "1.4.1" }
@@ -119,7 +119,7 @@ class ScreenshotTest {
         }
     }
 
-    /** Réglages en onglets (maquette) : un rendu par onglet, en français. */
+    /** Settings in tabs (mockup): one render per tab, in French. */
     @Test @Config(qualifiers = "fr-w1920dp-h720dp-land-mdpi") fun settingsTabs() {
         for (t in 0..4) {
             org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE).edit().putInt("settings_tab", t).commit()
@@ -127,7 +127,7 @@ class ScreenshotTest {
         }
     }
 
-    /** Onglets des réglages en anglais, pour le README. */
+    /** Settings tabs in English, for the README. */
     @Test fun settingsTabsEn() {
         for (t in 0..4) {
             org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE).edit().putInt("settings_tab", t).commit()
@@ -135,7 +135,7 @@ class ScreenshotTest {
         }
     }
 
-    /** Popup de mise à jour : toujours là après la reconstruction de l'accueil (passage clair / sombre). */
+    /** Update popup: still there after home is rebuilt (light / dark change). */
     @Test fun updatePromptSurvivesRecreate() {
         val f = app.mg4dash.ui.UpdatePrompt::class.java.getDeclaredField("pending").apply { isAccessible = true }
         f.set(app.mg4dash.ui.UpdatePrompt, app.mg4dash.system.Updater.Release("9.9.9", "", 0, "Notes"))
@@ -156,7 +156,7 @@ class ScreenshotTest {
         else -> false
     }
 
-    /** Radio FM sans image : rien que le texte (RDS plus grand) et les boutons, sombre et clair. */
+    /** FM radio without an image: only the text (larger RDS) and buttons, dark and light. */
     @Test fun homeFmDark() = fmShot(1, "home_fm_dark.png", "NRJ", "FM 100.30")
     @Test fun homeFmLight() = fmShot(2, "home_fm_light.png", "FM 98.20", "")
     private fun fmShot(mode: Int, name: String, title: String, sub: String) {
@@ -171,7 +171,7 @@ class ScreenshotTest {
         save(activity.window.decorView, name)
     }
 
-    /** Fenêtres de dialogue au style MG4Dash (calibration de la température), sombre et clair. */
+    /** Dialog windows in MG4Dash style (temperature calibration), dark and light. */
     @Test fun dialogDark() = dialogShot(1, "dialog_dark.png")
     @Test fun dialogLight() = dialogShot(2, "dialog_light.png")
     private fun dialogShot(mode: Int, name: String) {
@@ -188,7 +188,7 @@ class ScreenshotTest {
         File(dir, name).outputStream().use { bmp.compress(Bitmap.CompressFormat.PNG, 100, it) }
     }
 
-    /** Capture README : une appli tierce dans la carte (dessin de démonstration, style Carte). */
+    /** README screenshot: a third party app in the map (demonstration drawing, Map layout). */
     @Test fun homeMapAppPlanner() = mapApp({ FakePlannerView(it) }, "home_map_app_planner.png")
     @Test fun homeMapAppGuidance() = mapApp({ FakeGuidanceView(it) }, "home_map_app_guidance.png")
     private fun mapApp(make: (android.content.Context) -> View, name: String) {
@@ -198,7 +198,7 @@ class ScreenshotTest {
         repeat(3) { shadowOf(Looper.getMainLooper()).idleFor(200, TimeUnit.MILLISECONDS) }
         val card = act.findViewById<android.widget.FrameLayout>(R.id.mapCard)
         val toggle = act.findViewById<View>(R.id.widgetToggle)
-        // Comme une vraie appli intégrée : boutons et vitesse de la carte cachés, la carte reste dessous
+        // Like a real embedded app: map buttons and speed hidden, the map stays underneath
         listOf(R.id.mapButtons).forEach { act.findViewById<View>(it)?.visibility = View.GONE }
         (act.findViewById<View>(R.id.mapSpeed)?.parent as? View)?.visibility = View.GONE
         card.addView(make(act), card.indexOfChild(toggle), android.widget.FrameLayout.LayoutParams(-1, -1))
@@ -316,7 +316,7 @@ class ScreenshotTest {
         shoot(MainActivity::class.java, name)
     }
 
-    /** Carte énergie « puissance » (#29), styles Complet et Carte. */
+    /** "Power" energy card (#29), Full and Map layouts. */
     @Test fun homeEnergyCardPower() {
         org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE).edit()
             .putInt("theme_mode", 1).putBoolean("energy_card_power", true).commit()
@@ -326,8 +326,8 @@ class ScreenshotTest {
         shoot(MainActivity::class.java, "home_energy_card_power.png")
     }
 
-    /** Même carte, câble débranché (en roulant) : prise avec éclair sous les km. */
-    /** Même carte en recharge (#29) : courant de charge et son maxi depuis le branchement. */
+    /** Same card, cable unplugged (driving): plug with lightning bolt under the km. */
+    /** Same card charging (#29): charge current and its max since plugging in. */
     @Test fun homeEnergyCardPowerCharging() {
         org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE).edit()
             .putInt("theme_mode", 1).putBoolean("energy_card_power", true).putBoolean("power_va", true).commit()
@@ -369,7 +369,7 @@ class ScreenshotTest {
         shoot(MainActivity::class.java, "home_map_energy_card_power.png")
     }
 
-    /** Conduite à droite : barre verticale à droite, pleine hauteur. */
+    /** Right-hand drive: vertical bar on the right, full height. */
     @Test fun homeRightHand() {
         org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE).edit()
             .putInt("theme_mode", 1).putBoolean("force_rhd", true).commit()
@@ -467,7 +467,7 @@ class ScreenshotTest {
     @Test fun homeMapLayoutOffline() {
         org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE).edit()
             .putInt("home_style", 2).apply()
-        // Pas de météo (hors connexion) : on vide la météo simulée
+        // No weather (offline): empty the simulated weather
         val f = app.mg4dash.weather.WeatherRepo::class.java.getDeclaredField("_weather").apply { isAccessible = true }
         @Suppress("UNCHECKED_CAST")
         val flow = f.get(app.mg4dash.weather.WeatherRepo) as kotlinx.coroutines.flow.MutableStateFlow<Any?>
@@ -511,7 +511,7 @@ class ScreenshotTest {
         shoot(MainActivity::class.java, "home_widget_power.png")
     }
 
-    /** Raccourcis téléphone : 2, 3 (une ligne), 4, 6, 8 (deux lignes), et le choix du nombre. */
+    /** Phone shortcuts: 2, 3 (one line), 4, 6, 8 (two lines), and the number choice. */
     @Test fun phoneFavs2() = phoneFavs(2)
     @Test fun phoneFavs4() = phoneFavs(4)
     @Test fun phoneFavs6() = phoneFavs(6)
@@ -533,7 +533,7 @@ class ScreenshotTest {
         save(org.robolectric.shadows.ShadowDialog.getLatestDialog().window!!.decorView, "phone_fav_count_dialog.png")
     }
 
-    /** Tuto : étape Musique animée (glisser haut / bas puis gauche / droite), images pour un GIF. */
+    /** Tutorial: animated Music step (swipe up / down then left / right), frames for a GIF. */
     @Test @Config(qualifiers = "fr-w1920dp-h720dp-land-mdpi") fun tutorialSwipeFrames() {
         org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE).edit().putInt("theme_mode", 1).commit()
         val activity = Robolectric.buildActivity(MainActivity::class.java).setup().get()
@@ -552,7 +552,7 @@ class ScreenshotTest {
         }
     }
 
-    /** Tuto des gestes : quelques étapes, en français. */
+    /** Gesture tutorial: a few steps, in French. */
     @Test @Config(qualifiers = "fr-w1920dp-h720dp-land-mdpi") fun tutorialSteps() {
         org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE).edit().putInt("theme_mode", 1).commit()
         val activity = Robolectric.buildActivity(MainActivity::class.java).setup().get()
@@ -599,7 +599,7 @@ class ScreenshotTest {
         shoot(MainActivity::class.java, "home_shortcuts_fr.png")
     }
 
-    /** Clim maintenue : fenêtre sur l'accueil, puis son écran (lisible de dehors). */
+    /** Keep climate on: window on home, then its screen (readable from outside). */
     @Test @Config(qualifiers = "fr-w1920dp-h720dp-land-mdpi")
     fun climateHold() = climateHoldShots("")
 
@@ -635,7 +635,7 @@ class ScreenshotTest {
     @Test @Config(qualifiers = "fr-w1920dp-h720dp-land-mdpi")
     fun homeFr() = shoot(MainActivity::class.java, "home_fr.png")
 
-    /** Aperçu des icônes proposées pour les boutons de clim (repos / sélectionné). */
+    /** Preview of the icons offered for climate buttons (idle / selected). */
     @Test fun climateIconsPreview() {
         val act = Robolectric.buildActivity(app.mg4dash.apps.AppsActivity::class.java).setup().get()
         val kit = app.mg4dash.ui.Kit(act)
@@ -674,7 +674,7 @@ class ScreenshotTest {
         File(dir, "climate_icons_preview.png").outputStream().use { bmp.compress(Bitmap.CompressFormat.PNG, 100, it) }
     }
 
-    /** Icône Véhicule de la barre : normale et en dérive (ESC coupé), en rouge. */
+    /** Bar's Vehicle icon: normal and skidding (ESC off), in red. */
     @Test fun carDriftIcon() {
         val ctx = org.robolectric.RuntimeEnvironment.getApplication()
         val bmp = Bitmap.createBitmap(260, 120, Bitmap.Config.ARGB_8888); bmp.eraseColor(0xFF0B0F17.toInt())
@@ -686,7 +686,7 @@ class ScreenshotTest {
         File(File("build/screenshots").apply { mkdirs() }, "car_drift_icon.png").outputStream().use { bmp.compress(Bitmap.CompressFormat.PNG, 100, it) }
     }
 
-    /** Pleine puissance depuis l'accueil : bascule sur le widget Puissance, animation, puis retour. */
+    /** Full power from home: switch to the Power widget, animation, then back. */
     @Test fun boostFlames() = boost(3, "flames")
     @Test fun boostLightning() = boost(2, "lightning")
 
@@ -706,7 +706,7 @@ class ScreenshotTest {
         save(act.window.decorView, "boost_${name}_after.png")
     }
 
-    /** Animation pleine puissance : images successives de l'aperçu des réglages, une planche par style. */
+    /** Full power animation: successive frames of the settings preview, one sheet per style. */
     @Test fun powerFx() {
         val sp = org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE)
         sp.edit().putInt("theme_mode", 1).commit()
@@ -740,7 +740,7 @@ class ScreenshotTest {
         }
     }
 
-    /** Maquette issue #29 : barres autonomie et énergie dans le style de la barre de puissance. */
+    /** Issue #29 mockup: range and energy bars in the power bar style. */
     @Test @Config(qualifiers = "fr-w1920dp-h720dp-land-mdpi")
     fun barsMockup() { barsSheet(1, "bars_mockup_dark.png"); }
     @Test @Config(qualifiers = "fr-w1920dp-h720dp-land-mdpi")
@@ -802,7 +802,7 @@ class ScreenshotTest {
     }
 
     private fun <T : Activity> shoot(cls: Class<T>, name: String, media: app.mg4dash.media.MediaHub.NowPlaying? = null) {
-        // Captures en mode sombre, sauf si le test a choisi un autre mode
+        // Screenshots in dark mode, unless the test chose another mode
         val sp = org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE)
         if (!sp.contains("theme_mode")) sp.edit().putInt("theme_mode", 1).commit()
         val activity = Robolectric.buildActivity(cls).setup().get()
@@ -816,7 +816,7 @@ class ScreenshotTest {
         save(activity.window.decorView, name)
     }
 
-    // ── Musique d'exemple pour les captures du README : albums et artistes fictifs, pochettes dessinées ──
+    // ── Sample music for README screenshots: fictional albums and artists, drawn covers ──
 
     private fun bluetooth(title: String, artist: String, album: String, art: Bitmap) = app.mg4dash.media.MediaHub.NowPlaying(
         true, "com.android.bluetooth", "BLUETOOTH", title, artist, album, art, true, durationMs = 214_000, positionMs = 83_000)
@@ -832,7 +832,7 @@ class ScreenshotTest {
         return bmp
     }
 
-    /** « Neon Skyline » : soleil rayé sur un ciel violet et une grille rose. */
+    /** "Neon Skyline": striped sun on a purple sky and a pink grid. */
     private fun neonSkyline() = cover { c, p, n ->
         p.shader = android.graphics.LinearGradient(0f, 0f, 0f, n * 0.62f, intArrayOf(0xFF1A0B3D.toInt(), 0xFF6B1E7A.toInt(), 0xFFF0567A.toInt()), null, android.graphics.Shader.TileMode.CLAMP)
         c.drawRect(0f, 0f, n, n * 0.62f, p)
@@ -846,7 +846,7 @@ class ScreenshotTest {
         for (i in -8..8) c.drawLine(n / 2 + i * n * 0.04f, n * 0.62f, n / 2 + i * n * 0.22f, n, p)
     }
 
-    /** « Golden Hours » : soleil couchant sur une mer turquoise, un palmier. */
+    /** "Golden Hours": sunset on a turquoise sea, a palm tree. */
     private fun goldenHours() = cover { c, p, n ->
         p.shader = android.graphics.LinearGradient(0f, 0f, 0f, n * 0.6f, intArrayOf(0xFFFFB347.toInt(), 0xFFFF7E5F.toInt(), 0xFFE0567A.toInt()), null, android.graphics.Shader.TileMode.CLAMP)
         c.drawRect(0f, 0f, n, n * 0.6f, p)
@@ -864,7 +864,7 @@ class ScreenshotTest {
         }
     }
 
-    /** « Northern Lights » : aurore verte sur des montagnes et un ciel étoilé. */
+    /** "Northern Lights": green aurora over mountains and a starry sky. */
     private fun northernLights() = cover { c, p, n ->
         p.shader = android.graphics.LinearGradient(0f, 0f, 0f, n, 0xFF050B24.toInt(), 0xFF0E2A4A.toInt(), android.graphics.Shader.TileMode.CLAMP)
         c.drawRect(0f, 0f, n, n, p)
@@ -883,9 +883,9 @@ class ScreenshotTest {
     }
 
     /**
-     * Robolectric ne rogne pas les vues à leur contour (clipToOutline) : la carte et le lecteur
-     * sortaient à angles droits. On repeint les coins hors de l'arrondi avec la couleur prise juste
-     * à côté de la vue, comme sur la voiture.
+     * Robolectric does not crop views to their outline (clipToOutline): the map and player
+     * came out with square corners. Corners outside the rounding are repainted with the colour taken just
+     * beside the view, as on the car.
      */
     private fun roundClipped(root: View, bmp: Bitmap) {
         val outline = android.graphics.Outline()
@@ -901,7 +901,7 @@ class ScreenshotTest {
                 val r = outline.radius
                 if (r > 0f) {
                     val l = x.toFloat(); val t = y.toFloat(); val rr = (x + v.width).toFloat(); val b = (y + v.height).toFloat()
-                    // Coin, point d'échantillonnage juste à l'extérieur de la vue
+                    // Corner, sampling point just outside the view
                     listOf(
                         Triple(android.graphics.RectF(l, t, l + r, t + r), android.graphics.PointF(l + r, t + r), pixel(x - 3, y + r.toInt())),
                         Triple(android.graphics.RectF(rr - r, t, rr, t + r), android.graphics.PointF(rr - r, t + r), pixel(x + v.width + 2, y + r.toInt())),

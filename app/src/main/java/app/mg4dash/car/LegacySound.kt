@@ -11,9 +11,9 @@ import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
 /**
- * Son des firmwares « ancien SDK » (SWI68, #84) : pas de caradapter, mais le service exporté SettingsService
- * (ISmartSoundService de SystemSettingsService), mêmes échelles que sur A9 (0 à 14, 7 = neutre ou centre).
- * Numéros relevés par analyse de SWI68 R46.
+ * Sound on "old SDK" firmwares (SWI68, #84): no caradapter, but the exported SettingsService
+ * (ISmartSoundService of SystemSettingsService), same scales as on A9 (0 to 14, 7 = neutral or centre).
+ * Numbers found by analysing SWI68 R46.
  */
 object LegacySound {
     private const val TAG = "LegacySound"
@@ -23,7 +23,7 @@ object LegacySound {
 
     @Volatile private var binder: IBinder? = null
 
-    /** Service son ; attend la liaison, donc à appeler hors du fil principal. */
+    /** Sound service; waits for the binding, so call off the main thread. */
     fun service(context: Context): AudioService? {
         binder?.takeIf { it.isBinderAlive }?.let { return Service(it) }
         val bound = CountDownLatch(1)
@@ -43,14 +43,14 @@ object LegacySound {
         override val centredOnSeven get() = true
         override val loudness get() = bool(7)
         override val equalizerPreset get() = int(26)
-        /** -1 si le service ne sait pas : on affiche le centre. */
+        /** -1 if the service does not know: show the centre. */
         override val balance get() = int(17).takeIf { it >= 0 } ?: CENTRE
         override val fader get() = int(18).takeIf { it >= 0 } ?: CENTRE
 
         override fun setLoudness(on: Boolean) = raw(8, { it.writeInt(if (on) 1 else 0) }) { it.readInt() != 0 }
         override fun setEqualizerPreset(v: Int) = raw(27, { it.writeInt(v) }) { it.readInt() != 0 }
         override fun setSoundField(balance: Int, fader: Int) = raw(19, { it.writeInt(balance); it.writeInt(fader) }) { it.readInt() != 0 }
-        /** Le service ne donne pas les courbes des préréglages : celles qu'affichent ses réglages d'origine. */
+        /** The service does not give the preset curves: those shown by its stock settings. */
         override fun eqBand(preset: Int): IntArray? = PRESETS[preset]
         override val userEq: IntArray? get() = raw(28, {}) { p: Parcel -> if (p.readInt() == 0) null else IntArray(5) { p.readInt() } }
         override fun setUserEq(v: IntArray) = raw(29, { p -> p.writeInt(1); v.forEach { p.writeInt(it) } }) { it.readInt() != 0 }

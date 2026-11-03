@@ -12,15 +12,15 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 /**
- * Consommation moyenne estimée (choix 3A) : aucune donnée kWh/100 n'existe dans carapi.
+ * Estimated average consumption (choice 3A): no kWh/100 data exists in carapi.
  *
- *   conso = (baisse du % batterie × capacité utile) / km parcourus × 100
+ *   consumption = (battery % drop × usable capacity) / km driven × 100
  *
  * Deux compteurs :
- *  - « depuis la dernière recharge » : remis à zéro quand le % remonte (charge) ;
- *  - « trajet » : remis à zéro à chaque démarrage du launcher (≈ mise sous tension).
- * Résolution limitée par le % entier : l'estimation n'est affichée qu'après 5 km et 2 points
- * de batterie consommés, sinon elle serait trop bruitée.
+ *  - "since the last charge": reset when the % goes up (charging);
+ *  - "trip": reset at each launcher start (≈ power on).
+ * Resolution limited by the whole %: the estimate is shown only after 5 km and 2 points
+ * of battery used, otherwise it would be too noisy.
  */
 object ConsumptionEstimator {
     private const val TAG = "Consumption"
@@ -34,7 +34,7 @@ object ConsumptionEstimator {
     )
 
     private val _average = MutableStateFlow<Float?>(null)
-    /** kWh/100 km depuis la dernière recharge, ou null tant que la base est insuffisante. */
+    /** kWh/100 km since the last charge, or null while the basis is insufficient. */
     val average: StateFlow<Float?> = _average
 
     private val _trip = MutableStateFlow(Trip())
@@ -54,11 +54,11 @@ object ConsumptionEstimator {
                 val soc = s.batteryPercent ?: return@collect
                 val capacity = prefs.batteryKwh
 
-                // Référence « depuis la dernière recharge »
+                // "Since the last charge" reference
                 var refKm = sp.getInt("ref_km", -1)
                 var refSoc = sp.getInt("ref_soc", -1)
-                // Recharge : le % remonte de quelques points au-dessus du plus bas depuis la référence
-                // (même suivie % par %, MG4Dash pouvant tourner en veille pendant la charge)
+                // Charge: the % goes up a few points above the lowest since the reference
+                // (even followed % by %, as MG4Dash can run in standby during charging)
                 val lowSoc = sp.getInt("ref_low", sp.getInt("last_soc", -1))
                 if (refKm < 0 || refSoc < 0 || km < refKm || (lowSoc >= 0 && soc >= lowSoc + EnergyMonitor.RECHARGE_PCT) ||
                     soc >= refSoc + EnergyMonitor.RECHARGE_PCT) {
@@ -68,10 +68,10 @@ object ConsumptionEstimator {
                 } else if (lowSoc < 0 || soc < lowSoc) {
                     sp.edit().putInt("ref_low", soc).apply()
                 }
-                // Mesure par puissance batterie si disponible, sinon estimation par le % batterie
+                // Measurement by battery power if available, otherwise estimate from the battery %
                 val sc = EnergyMonitor.sinceCharge.value
                 _average.value = sc.per100 ?: estimate(km - refKm, refSoc - soc, capacity)
-                // Diagnostic (conso « — » sur l'accueil) : références à chaque apparition / disparition
+                // Diagnostic (consumption "—" on home): references at each appearance / disappearance
                 val shown = _average.value != null
                 if (shown != lastShown) {
                     lastShown = shown
@@ -79,7 +79,7 @@ object ConsumptionEstimator {
                         "capacity $capacity kWh; since charge ${sc.km} km, ${"%.2f".format(java.util.Locale.US, sc.netKwh)} kWh net")
                 }
 
-                // Trajet en cours
+                // Current trip
                 if (tripStartKm == null) { tripStartKm = km; tripStartSoc = soc }
                 if (soc > (tripStartSoc ?: soc) + 1) tripStartSoc = soc
                 val d = km - (tripStartKm ?: km)

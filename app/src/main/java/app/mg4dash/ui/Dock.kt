@@ -24,9 +24,9 @@ import java.util.Date
 import java.util.Locale
 
 /**
- * Dock inférieur commun à tous les écrans : horloge + Accueil, Véhicule, Clim, Énergie,
- * Android Auto, Paramètres. On passe d'une page à l'autre sans repasser par l'accueil.
- * Appui long sur Accueil : liste des applis ; sur Paramètres : réglages du launcher.
+ * Bottom dock common to all screens: clock + Home, Vehicle, Climate, Energy,
+ * Android Auto, Settings. Move from one page to another without going back through home.
+ * Long press on Home: list of apps; on Settings: launcher settings.
  */
 object Dock {
     enum class Page { HOME, VEHICLE, CLIMATE, ENERGY, PHONE, SETTINGS, APPS }
@@ -47,14 +47,14 @@ object Dock {
         val kit = Kit(activity)
         fun color(r: Int) = app.mg4dash.ui.Themes.color(activity, r)
         dock.removeAllViews()
-        // Le dock fixe lui-même son apparence : identique sur l'accueil et sur toutes les pages.
+        // The dock sets its own appearance: identical on home and on all pages.
         dock.orientation = LinearLayout.HORIZONTAL
         dock.setBackgroundResource(R.drawable.bg_panel)
         dock.setPadding(kit.dp(8), kit.dp(6), kit.dp(8), kit.dp(6))
         dock.elevation = kit.dp(6).toFloat()
 
         val clockCell = kit.column().apply { gravity = Gravity.CENTER; setPadding(kit.dp(12), 0, kit.dp(20), 0) }
-        // Case de gauche : horloge ou raccourci Wi-Fi, au choix par appui long
+        // Left slot: clock or Wi-Fi shortcut, chosen by long press
         val wifi = app.mg4dash.system.Prefs(activity).dockSlot == 1
         clockCell.setOnLongClickListener {
             android.app.AlertDialog.Builder(activity)
@@ -95,7 +95,7 @@ object Dock {
         }
         tick.run()
 
-        // Accueil épuré : seulement Accueil, Téléphone, Android Auto et Paramètres, en plus grand.
+        // Simple home: only Home, Phone, Android Auto and Settings, larger.
         val shown = if (simple) ITEMS.filter {
             it.label == R.string.dock_home || it.label == R.string.dock_phone || it.label == R.string.dock_aa || it.label == R.string.dock_settings
         } else ITEMS
@@ -108,7 +108,7 @@ object Dock {
                 isSelected = selected
                 setOnClickListener { open(activity, item, current) }
             }
-            // Bouton Android Auto : remplaçable par une autre appli (appui long)
+            // Android Auto button: replaceable by another app (long press)
             val custom = if (item.label == R.string.dock_aa) customAa(activity) else null
             val iconView = ImageView(activity)
             cell.addView(iconView.apply {
@@ -139,31 +139,31 @@ object Dock {
     private fun pkgIcon(activity: Activity, pkg: String): android.graphics.drawable.Drawable? =
         try { activity.packageManager.getApplicationIcon(pkg) } catch (_: Exception) { null }
 
-    /** Barre verticale à gauche choisie dans les réglages (tous les écrans). */
+    /** Vertical bar on the left chosen in the settings (all screens). */
     fun vertical(context: android.content.Context): Boolean = Prefs(context).verticalDock
 
     /**
-     * Conduite à droite : barre verticale à droite, sur toute la hauteur (le bouton antibrouillards
-     * reste à gauche, géré par la voiture). Activé quand la lecture de CAL_DRIVE_HDL_TYPE aura été
-     * confirmée sur une voiture à droite ; « force_rhd » sert aux captures.
+     * Right-hand drive: vertical bar on the right, at full height (the fog light button
+     * stays on the left, handled by the car). Enabled when the reading of CAL_DRIVE_HDL_TYPE has been
+     * confirmed on a right-hand drive car; "force_rhd" is used for screenshots.
      */
     private const val RHD_ENABLED = true
     fun rightSide(context: android.content.Context): Boolean {
         val sp = Prefs(context).raw
         if (sp.getBoolean("force_rhd", false)) return true
-        when (Prefs(context).barSide) { 1 -> return false; 2 -> return true }   // côté forcé dans les réglages (#75)
+        when (Prefs(context).barSide) { 1 -> return false; 2 -> return true }   // side forced in the settings (#75)
         if (!RHD_ENABLED) return false
-        // Au démarrage, la voiture ne répond pas encore : la barre partait à gauche sur une conduite à droite
-        // (#75). Le dernier côté lu est gardé et sert tant que la lecture n'est pas possible.
+        // At startup, the car does not answer yet: the bar went left on a right-hand drive
+        // (#75). The last side read is kept and used as long as reading is not possible.
         val rhd = app.mg4dash.car.CarProps.rightHandDrive()
         if (rhd != null) { if (sp.getBoolean("rhd_cached", false) != rhd || !sp.contains("rhd_cached")) sp.edit().putBoolean("rhd_cached", rhd).apply(); return rhd }
         return sp.getBoolean("rhd_cached", false)
     }
 
     /**
-     * Pose le dock d'un écran : en bas (dock horizontal) ou, si l'option est choisie, en barre
-     * verticale à gauche. [root] est la colonne de l'écran, [dock] son dernier enfant.
-     * En vertical, tous les autres enfants passent dans une colonne à droite de la barre.
+     * Places a screen's dock: at the bottom (horizontal dock) or, if the option is chosen, as a vertical
+     * bar on the left. [root] is the screen's column, [dock] its last child.
+     * When vertical, all other children move to a column to the right of the bar.
      */
     fun mount(activity: Activity, root: LinearLayout, dock: LinearLayout, current: Page, simple: Boolean = false) {
         if (!vertical(activity)) { build(activity, dock, current, simple); return }
@@ -171,14 +171,14 @@ object Dock {
         val children = (0 until root.childCount).map { root.getChildAt(it) }.filter { it !== dock }
         root.removeAllViews()
         root.orientation = LinearLayout.HORIZONTAL
-        root.clipToPadding = false   // la barre déborde un peu sur la marge de l'écran (#38)
+        root.clipToPadding = false   // the bar overlaps the screen margin a little (#38)
         val bar = LinearLayout(activity)
         val right = rightSide(activity)
         val content = LinearLayout(activity).apply { orientation = LinearLayout.VERTICAL }
-        children.forEach { content.addView(it) }   // chaque enfant garde ses paramètres (poids, marges)
-        // 72 dp, débordant de 4 dp sur la marge de l'écran : centrée sous le bouton antibrouillards
-        // de MG (x 20 → 76 dp, y ≈ 14 → 70 dp), avec 8 dp à gauche, à droite et au-dessus (#38)
-        val barDp = if (Prefs(activity).wideBar) BAR_DP * 2 else BAR_DP   // réglage « barre large » (#67)
+        children.forEach { content.addView(it) }   // each child keeps its parameters (weight, margins)
+        // 72 dp, overlapping the screen margin by 4 dp: centred under MG's fog light
+        // button (x 20 → 76 dp, y ≈ 14 → 70 dp), with 8 dp on the left, right and above (#38)
+        val barDp = if (Prefs(activity).wideBar) BAR_DP * 2 else BAR_DP   // "wide bar" setting (#67)
         if (!right) root.addView(bar, LinearLayout.LayoutParams(kit.dp(barDp), LinearLayout.LayoutParams.MATCH_PARENT).apply { leftMargin = -kit.dp(4); topMargin = -kit.dp(6) })
         root.addView(content, LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.MATCH_PARENT, 1f).apply {
             if (right) rightMargin = kit.dp(12) else leftMargin = kit.dp(12)
@@ -188,17 +188,17 @@ object Dock {
     }
 
     /**
-     * Barre verticale à gauche (option ; issue #6) : icônes seules, sous le bouton
-     * antibrouillards de MG qui se superpose en haut à gauche et semble ainsi en faire partie.
-     * Ordre : Réglages, Android Auto / CarPlay (en gris), Téléphone, Énergie, Véhicule, Accueil.
-     * Réglages : toucher = réglages du launcher, appui long = réglages de la voiture,
+     * Vertical bar on the left (option; issue #6): icons only, under MG's fog light
+     * button which overlays the top left and so seems to be part of it.
+     * Order: Settings, Android Auto / CarPlay (grey), Phone, Energy, Vehicle, Home.
+     * Settings: touch = launcher settings, long press = car settings,
      * double toucher = Wi-Fi.
      */
     private const val BAR_DP = 72
 
     /**
-     * Indicateur Wi-Fi discret à côté de l'icône Véhicule (#67) : affiché quand l'autoradio est relié à un
-     * point d'accès (partage de connexion du téléphone…), relu toutes les 5 s tant que la barre est affichée.
+     * Discreet Wi-Fi indicator next to the Vehicle icon (#67): shown when the head unit is linked to an
+     * access point (phone hotspot…), reread every 5 s while the bar is shown.
      */
     private fun wifiBadge(activity: Activity, cell: android.widget.FrameLayout, iconDp: Int) {
         val d = activity.resources.displayMetrics.density
@@ -207,7 +207,7 @@ object Dock {
         }
         val s = (iconDp * 0.5f * d).toInt()
         cell.addView(badge, android.widget.FrameLayout.LayoutParams(s, s, android.view.Gravity.CENTER).apply {
-            // Décalage depuis le centre de la case : 0,75 × icône débordait de la case à droite et rognait le Wi-Fi (#38)
+            // Offset from the slot's centre: 0.75 × icon overflowed the slot on the right and cropped the Wi-Fi (#38)
             leftMargin = (iconDp * 0.55f * d).toInt(); topMargin = -(iconDp * 0.5f * d).toInt()
         })
         val tick = object : Runnable {
@@ -232,8 +232,8 @@ object Dock {
         bar.setBackgroundResource(R.drawable.bg_panel)
         bar.elevation = kit.dp(6).toFloat()
         bar.setPadding(kit.dp(4), kit.dp(4), kit.dp(4), kit.dp(6))
-        // Place du bouton antibrouillards (superposé par MG, on ne peut pas le dessiner nous-mêmes) ;
-        // à droite (conduite à droite), il reste à gauche : la barre prend toute la hauteur
+        // Place of the fog light button (overlaid by MG, it cannot be drawn by us);
+        // on the right (right-hand drive), it stays on the left: the bar takes the full height
         if (!rightSide(activity)) bar.addView(android.view.View(activity), LinearLayout.LayoutParams(-1, kit.dp(68)))
         val order = listOf(
             ITEMS.first { it.label == R.string.dock_settings },
@@ -251,7 +251,7 @@ object Dock {
             }
             val icon = ImageView(activity)
             val custom = if (item.label == R.string.dock_aa) customAa(activity) else null
-            // Android Auto et CarPlay : un seul pictogramme neutre ; une autre appli garde son icône (en gris)
+            // Android Auto and CarPlay: a single neutral pictogram; another app keeps its icon (grey)
             val projection = item.label == R.string.dock_aa && (custom == null || custom.packageName == Apps.CARPLAY.packageName ||
                 custom.packageName.startsWith("com.allgo.app.androidauto"))
             val appIcon = if (projection) null else custom?.let { Shortcuts.appIcon(activity, it) }
@@ -259,7 +259,7 @@ object Dock {
                 icon.setImageResource(R.drawable.ic_projection)
                 icon.setColorFilter(color(if (selected) R.color.accent_action else R.color.text_sub))
             } else if (appIcon != null) {
-                // Icône d'appli en niveaux de gris, pour s'accorder aux autres icônes de la barre
+                // App icon in greyscale, to match the bar's other icons
                 icon.setImageDrawable(appIcon.mutate().apply {
                     colorFilter = android.graphics.ColorMatrixColorFilter(android.graphics.ColorMatrix().apply { setSaturation(0f) })
                 })
@@ -267,9 +267,9 @@ object Dock {
                 icon.setImageResource(item.icon)
                 icon.setColorFilter(color(if (selected) R.color.accent_action else R.color.text_sub))
             }
-            // Véhicule et Accueil sont des dessins plus plats que les autres (et Android Auto plus haut) : retaillés pour
-            // un vide visuel égal entre les icônes, et recentrés (voiture tracée de y=5 à 21, maison de 3 à 20
-            // dans leur cadre de 24) pour que le dessin, et pas seulement son cadre, soit au centre.
+            // Vehicle and Home are flatter drawings than the others (and Android Auto taller): resized for
+            // an equal visual gap between icons, and recentred (car drawn from y=5 to 21, house from 3 to 20
+            // in their 24 frame) so the drawing, not only its frame, is in the centre.
             val size = when { item.label == R.string.dock_vehicle -> 38; item.label == R.string.dock_home -> 37; projection -> 32; else -> 34 }
                 .let { if (Prefs(activity).wideBar) it * 3 / 2 else it }
             icon.translationY = when (item.label) {
@@ -279,21 +279,21 @@ object Dock {
             }
             if (item.label == R.string.dock_aa) markOff(activity, icon)
             cell.addView(icon, android.widget.FrameLayout.LayoutParams(kit.dp(size), kit.dp(size), android.view.Gravity.CENTER))
-            // Remplacé par les icônes de connexion de la météo, absentes de l'accueil épuré (#86)
+            // Replaced by the weather's connection icons, absent from simple home (#86)
             val prefs = app.mg4dash.system.Prefs(activity)
             if (item.label == R.string.dock_vehicle && (!prefs.connectionIcons || prefs.homeStyle == 1)) wifiBadge(activity, cell, size)
             if (item.label == R.string.dock_vehicle) watchEsc(activity, cell, icon, selected)
             if (!pageGestures(activity, cell, icon, item, current, selected)) {
                 cell.setOnClickListener { open(activity, item, current) }
                 if (item.label == R.string.dock_home) cell.setOnLongClickListener { if (current != Page.APPS) activity.startActivity(Intent(activity, AppsActivity::class.java)); true }
-                // Appui long : choix de l'appli ; double toucher : coupe ou rétablit la connexion du téléphone
+                // Long press: choice of app; double touch: cuts or restores the phone connection
                 if (item.label == R.string.dock_aa) aaGestures(activity, cell, { open(activity, item, current) }) { buildVertical(activity, bar, current) }
             }
             bar.addView(cell, LinearLayout.LayoutParams(-1, 0, 1f).apply { topMargin = kit.dp(4) })
         }
     }
 
-    /** Icône Véhicule : rouge, en dérive, tant que l'ESC est coupé. */
+    /** Vehicle icon: red, skidding, while ESC is off. */
     private fun tintVehicle(activity: Activity, icon: ImageView, selected: Boolean) {
         fun color(r: Int) = app.mg4dash.ui.Themes.color(activity, r)
         val escOff = app.mg4dash.car.CarBridge.escActive() == false
@@ -302,7 +302,7 @@ object Dock {
         if (icon.tag != res) { icon.setImageResource(res); icon.tag = res }
     }
 
-    /** État de l'ESC relu régulièrement : il peut aussi changer depuis le menu MG. */
+    /** ESC state reread regularly: it can also change from the MG menu. */
     private fun watchEsc(activity: Activity, cell: android.view.View, icon: ImageView, selected: Boolean) {
         tintVehicle(activity, icon, selected)
         val refresh = object : Runnable {
@@ -312,34 +312,34 @@ object Dock {
     }
 
     /**
-     * Gestes des boutons Réglages, Énergie et Véhicule, les mêmes sur les deux barres (#79).
-     * Rend false si ce bouton n'en a pas : il garde alors son simple toucher.
+     * Gestures of the Settings, Energy and Vehicle buttons, the same on both bars (#79).
+     * Returns false if this button has none: it then keeps its simple touch.
      */
     private fun pageGestures(activity: Activity, cell: android.view.View, icon: ImageView, item: Item, current: Page, selected: Boolean): Boolean {
         val listener: android.view.GestureDetector.SimpleOnGestureListener = when (item.label) {
-            // Toucher simple (après le délai du double toucher) / double toucher / appui long
+            // Simple touch (after the double touch delay) / double touch / long press
             R.string.dock_settings -> object : android.view.GestureDetector.SimpleOnGestureListener() {
                 override fun onSingleTapConfirmed(e: android.view.MotionEvent): Boolean { open(activity, item, current); return true }
                 override fun onDoubleTap(e: android.view.MotionEvent): Boolean { openWifi(activity); return true }
                 override fun onLongPress(e: android.view.MotionEvent) { Apps.open(activity, Apps.SETTINGS, activity.getString(R.string.dock_settings)) }
                 override fun onDown(e: android.view.MotionEvent) = true
             }
-            // Double toucher : écran éteint ; toucher : page Énergie
+            // Double touch: screen off; touch: Energy page
             R.string.dock_energy -> object : android.view.GestureDetector.SimpleOnGestureListener() {
                 override fun onSingleTapConfirmed(e: android.view.MotionEvent): Boolean { open(activity, item, current); return true }
                 override fun onDoubleTap(e: android.view.MotionEvent): Boolean {
-                    // Même commande que le launcher d'origine ; un toucher sur l'écran noir le rallume
+                    // Same command as the stock launcher; a touch on the black screen turns it back on
                     activity.startActivity(Intent(activity, ScreenOffActivity::class.java)); return true
                 }
-                // Appui long : éteindre la voiture (#12), sans confirmation, mais jamais en roulant
+                // Long press: switch the car off (#12), without confirmation, but never while driving
                 override fun onLongPress(e: android.view.MotionEvent) {
                     if (!app.mg4dash.car.CarBridge.powerOffCar())
                         app.mg4dash.ui.Toasts.show(activity, R.string.power_off_driving)
                 }
                 override fun onDown(e: android.view.MotionEvent) = true
             }
-            // Toucher : page Véhicule ; double toucher : portes verrouillées / déverrouillées (utile depuis
-            // l'arrière, issue #12) ; appui long : ESC (pas de confirmation, la voiture le signale elle-même)
+            // Touch: Vehicle page; double touch: doors locked / unlocked (useful from
+            // the back, issue #12); long press: ESC (no confirmation, the car signals it itself)
             R.string.dock_vehicle -> object : android.view.GestureDetector.SimpleOnGestureListener() {
                 override fun onSingleTapConfirmed(e: android.view.MotionEvent): Boolean { open(activity, item, current); return true }
                 override fun onDoubleTap(e: android.view.MotionEvent): Boolean {
@@ -362,7 +362,7 @@ object Dock {
         return true
     }
 
-    /** Réglages Wi-Fi d'Android, sinon les réglages de la voiture. */
+    /** Android Wi-Fi settings, otherwise the car's settings. */
     fun openWifi(activity: Activity) {
         try {
             activity.startActivity(Intent(android.provider.Settings.ACTION_WIFI_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
@@ -372,8 +372,8 @@ object Dock {
     }
 
     /**
-     * Bouton Android Auto : toucher = ouvrir, appui long = choisir Android Auto, CarPlay ou une autre appli,
-     * double toucher = couper ou rétablir la connexion du téléphone.
+     * Android Auto button: touch = open, long press = choose Android Auto, CarPlay or another app,
+     * double touch = cut or restore the phone connection.
      */
     private fun aaGestures(activity: Activity, cell: android.view.View, open: () -> Unit, rebuild: () -> Unit) {
         val gd = android.view.GestureDetector(activity, object : android.view.GestureDetector.SimpleOnGestureListener() {
@@ -386,10 +386,10 @@ object Dock {
         cell.setOnTouchListener { v, ev -> v.isPressed = ev.actionMasked == android.view.MotionEvent.ACTION_DOWN; gd.onTouchEvent(ev) }
     }
 
-    /** Comme le launcher d'origine : le bouton ouvre Android Auto, CarPlay ou n'importe quelle appli. */
+    /** Like the stock launcher: the button opens Android Auto, CarPlay or any app. */
     private fun pickAaTarget(activity: Activity, onDone: () -> Unit) {
         val choices = arrayOf(activity.getString(R.string.dock_aa_stock), activity.getString(R.string.dock_cp_stock), activity.getString(R.string.dock_other_app))
-        // Changement d'appli : celle qui avait été coupée est d'abord réactivée
+        // App change: the one that was cut is first re-enabled
         fun choose(target: String?) { app.mg4dash.system.ConnectionToggle.restore(activity); Prefs(activity).dockAaTarget = target; onDone() }
         android.app.AlertDialog.Builder(activity)
             .setTitle(R.string.dock_aa_pick)
@@ -405,7 +405,7 @@ object Dock {
             .show().also { app.mg4dash.ui.Dialogs.fix(it) }
     }
 
-    /** Double toucher : coupe ou rétablit la connexion du téléphone (l'appli du bouton est désactivée). */
+    /** Double touch: cuts or restores the phone connection (the button's app is disabled). */
     private fun toggleConnection(activity: Activity, rebuild: () -> Unit) {
         val name = connectionName(activity)
         app.mg4dash.system.ConnectionToggle.toggle(activity) { state ->
@@ -422,7 +422,7 @@ object Dock {
         if (it.packageName == Apps.CARPLAY.packageName) activity.getString(R.string.dock_cp) else Shortcuts.appLabel(activity, it)
     } ?: activity.getString(R.string.dock_aa)
 
-    /** Connexion coupée : icône en rouge, barrée. */
+    /** Connection cut: red icon, crossed out. */
     private fun markOff(activity: Activity, icon: ImageView) {
         if (!app.mg4dash.system.ConnectionToggle.isOff(activity)) return
         val red = ContextCompat.getColor(activity, R.color.accent_danger)
@@ -430,7 +430,7 @@ object Dock {
         icon.foreground = StrikeDrawable(red, activity.resources.displayMetrics.density * 3f)
     }
 
-    /** Trait en diagonale par-dessus une icône. */
+    /** Diagonal line over an icon. */
     private class StrikeDrawable(color: Int, width: Float) : android.graphics.drawable.Drawable() {
         private val p = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG).apply {
             this.color = color; strokeWidth = width; strokeCap = android.graphics.Paint.Cap.ROUND
@@ -448,8 +448,8 @@ object Dock {
     private fun customAa(activity: Activity): android.content.ComponentName? {
         val p = Prefs(activity)
         val cn = p.dockAaTarget?.let { android.content.ComponentName.unflattenFromString(it) } ?: return null
-        // DiAuto (com.drivehub.diauto.mg4) a un temps porté un autre nom (app.mg4aa) : le bouton suit celui des
-        // deux qui est installé si l'autre a été désinstallé
+        // DiAuto (com.drivehub.diauto.mg4) once had another name (app.mg4aa): the button follows whichever
+        // of the two is installed if the other was uninstalled
         val twin = mapOf("com.drivehub.diauto.mg4" to "app.mg4aa", "app.mg4aa" to "com.drivehub.diauto.mg4")[cn.packageName]
         if (twin != null && activity.packageManager.getLaunchIntentForPackage(cn.packageName) == null) {
             activity.packageManager.getLaunchIntentForPackage(twin)?.component?.let { p.dockAaTarget = it.flattenToString(); return it }
@@ -458,18 +458,18 @@ object Dock {
     }
 
     private fun open(activity: Activity, item: Item, current: Page) {
-        // Carte en plein écran (issue #4) : tout bouton de la barre la ramène à sa taille de widget
+        // Full screen map (issue #4): any bar button brings it back to its widget size
         (activity as? app.mg4dash.MainActivity)?.exitMapFullscreen()
         when (item.label) {
             R.string.dock_aa -> {
-                // Connexion coupée par un appui long : on le rappelle au lieu d'ouvrir un écran vide
+                // Connection cut by a long press: remind it instead of opening an empty screen
                 if (app.mg4dash.system.ConnectionToggle.isOff(activity)) {
                     Toasts.show(activity, activity.getString(R.string.dock_conn_off, connectionName(activity)), long = true); return
                 }
                 val custom = customAa(activity)
                 if (custom != null && custom != Apps.CARPLAY) { Shortcuts.launch(activity, custom); return }
-                // Android Auto / CarPlay d'origine : sans téléphone connecté, l'écran reste noir (#41).
-                // On ouvre la projection du téléphone en session, ou on prévient qu'il n'y en a pas.
+                // Stock Android Auto / CarPlay: with no phone connected, the screen stays black (#41).
+                // Open the projection of the phone in session, or warn there is none.
                 val fallback = custom ?: Apps.ANDROID_AUTO
                 Thread {
                     val s = app.mg4dash.system.Projection.session(activity)
@@ -486,7 +486,7 @@ object Dock {
                 }.start()
                 return
             }
-            // Toucher : réglages MG4Dash ; appui long : réglages de la voiture
+            // Touch: MG4Dash settings; long press: car settings
             R.string.dock_settings -> {
                 if (current == Page.SETTINGS) return
                 activity.startActivity(Intent(activity, SettingsActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION))
@@ -507,8 +507,8 @@ object Dock {
             Page.SETTINGS -> SettingsActivity::class.java
             Page.APPS -> return
         }
-        // L'accueil (singleTask) referme les pages au-dessus de lui ; entre deux pages, on
-        // remplace la page courante pour ne pas empiler l'historique.
+        // Home (singleTask) closes the pages above it; between two pages,
+        // replace the current page so as not to stack the history.
         activity.startActivity(Intent(activity, target).addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION))
         if (current != Page.HOME) activity.finish()
         @Suppress("DEPRECATION")
