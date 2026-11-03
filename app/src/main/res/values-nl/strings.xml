@@ -540,7 +540,7 @@
     <string name="st_night_sun_nopos">Positie nog onbekend: de tijd verschijnt zodra de auto GPS heeft.</string>
     <string name="st_hide_saic_climate">MG4Dash voor het SAIC-klimaatscherm houden</string>
     <string name="st_hide_saic_climate_desc">Als de klimaatregeling wordt aangezet (in MG4Dash of met de knop onder het scherm), opent de originele launcher zijn klimaatscherm: MG4Dash komt er weer voor.</string>
-    <string name="en_trips_note">%1$d ritten, één punt per rit · gemiddelde (gestippeld)</string>
+    <string name="en_trips_note">%1$d ritten, op datum en afgevlakt · gemiddelde (gestippeld)</string>
     <string name="en_trips_wait">De curve vult zich rit na rit (minstens 2 km per rit).</string>
     <string name="en_curve_note">Eén punt per km (één per 2 minuten stilstaand) · gemiddelde (gestippeld)</string>
     <string name="en_curve_wait">De curve vult zich tijdens het rijden, één punt per km.</string>
@@ -624,6 +624,7 @@
     <string name="conn_not_connected">Niet verbonden</string>
     <string name="conn_no_network">Geen netwerk</string>
     <string name="conn_usb_count">%1$d verbonden</string>
+    <string name="en_time_note">Op datum en afgevlakt · gemiddelde (gestippeld)</string>
     <string name="aa_title">ANDROID AUTO</string>
     <string name="aa_ready">Telefoon verbonden · Tik om te openen</string>
     <string name="aa_waiting">Sluit je telefoon aan via USB</string>

@@ -540,7 +540,7 @@
     <string name="st_night_sun_nopos">Posición aún desconocida: la hora aparecerá cuando el coche tenga GPS.</string>
     <string name="st_hide_saic_climate">Mantener MG4Dash delante de la pantalla de clima SAIC</string>
     <string name="st_hide_saic_climate_desc">Cuando se enciende el clima (desde MG4Dash o con el botón bajo la pantalla), el launcher original abre su pantalla de clima: MG4Dash vuelve delante.</string>
-    <string name="en_trips_note">%1$d trayectos, un punto por trayecto · media (discontinua)</string>
+    <string name="en_trips_note">%1$d trayectos, según la fecha y suavizados · media (puntos)</string>
     <string name="en_trips_wait">La curva se llena trayecto a trayecto (al menos 2 km por trayecto).</string>
     <string name="en_curve_note">Un punto por km (uno cada 2 minutos parado) · media (discontinua)</string>
     <string name="en_curve_wait">La curva se llena al conducir, un punto por km.</string>
@@ -624,6 +624,7 @@
     <string name="conn_not_connected">No conectado</string>
     <string name="conn_no_network">Sin red</string>
     <string name="conn_usb_count">%1$d conectado(s)</string>
+    <string name="en_time_note">Según la fecha y suavizada · media (puntos)</string>
     <string name="aa_title">ANDROID AUTO</string>
     <string name="aa_ready">Teléfono conectado · Pulse para abrir</string>
     <string name="aa_waiting">Conecte su teléfono por USB</string>
