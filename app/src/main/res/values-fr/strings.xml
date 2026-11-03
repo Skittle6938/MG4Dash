@@ -632,6 +632,9 @@
     <string name="st_sound_no_file">Aucun son sélectionné</string>
     <string name="st_sound_file_too_large">Les fichiers audio ne doivent pas dépasser 20 Mo</string>
     <string name="st_sound_import_failed">Impossible d’importer le fichier audio</string>
+    <string name="st_sound_scanning">Recherche de fichiers audio…</string>
+    <string name="st_sound_none_found">Aucun fichier audio trouvé (USB ou stockage interne)</string>
+    <string name="st_sound_imported">Fichier audio importé : %1$s</string>
     <string name="st_sound_test">Écouter</string>
     <string name="st_sound_stop">Arrêter</string>
     <string name="st_sound_volume">Volume média de la voiture</string>

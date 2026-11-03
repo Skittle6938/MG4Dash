@@ -541,13 +541,13 @@ class SettingsActivity : AppCompatActivity() {
 
         val btnRow = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
         val pickBtn = button(getString(R.string.st_sound_pick_file)) {
-            val progress = android.app.ProgressDialog.show(this, "", "Scansione file audio...", true)
+            val progress = android.app.ProgressDialog.show(this, "", getString(R.string.st_sound_scanning), true)
             Thread {
                 val items = app.mg4dash.sound.SoundImporter.findAvailableAudioFiles(this)
                 runOnUiThread {
                     progress.dismiss()
                     if (items.isEmpty()) {
-                        app.mg4dash.ui.Toasts.show(this, "Nessun file audio trovato (USB o memoria interna)", long = true)
+                        app.mg4dash.ui.Toasts.show(this, R.string.st_sound_none_found, long = true)
                         return@runOnUiThread
                     }
                     val titles = items.map { "${it.file.name} (${it.durationMs / 1000}s)" }.toTypedArray()
@@ -562,7 +562,7 @@ class SettingsActivity : AppCompatActivity() {
                             val imported = app.mg4dash.sound.SoundImporter.importSound(this, chosen.file)
                             if (imported != null) {
                                 curFileView.text = imported.name
-                                app.mg4dash.ui.Toasts.show(this, "Audio importato: ${imported.name}")
+                                app.mg4dash.ui.Toasts.show(this, getString(R.string.st_sound_imported, imported.name))
                             } else {
                                 app.mg4dash.ui.Toasts.show(this, R.string.st_sound_import_failed, long = true)
                             }

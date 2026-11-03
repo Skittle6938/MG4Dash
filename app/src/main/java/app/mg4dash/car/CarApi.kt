@@ -113,7 +113,7 @@ class VehicleSettingService(b: IBinder) : RemoteService(b, "com.saicmotor.carapi
     val overSpeedSoundMode get() = int(180)
     val speedLimitSoundMode get() = int(182)
 
-    /** 0 faible, 1 moyen, 2 fort, 3 adaptatif. */
+    /** 0 = low, 1 = medium, 2 = high, 3 = adaptive. */
     fun setRegenerativeLevel(v: Int) = voidInt(159, v)
     /** One-pedal driving: 1 = yes, 0 = no. */
     fun setSignalPedalState(v: Int) = voidInt(162, v)
