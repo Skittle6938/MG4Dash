@@ -36,6 +36,12 @@ class VisibleTilesTest {
         assertEquals(listOf(Tile(2, 3, 1)), east)
     }
 
+    @Test fun metersPerPixelAtEquatorAndParis() {
+        assertEquals(156_543.0, VisibleTiles.metersPerPixel(0.0, 0.0, 256), 1.0)
+        // Zoom 16 à Paris : environ 1,6 m par pixel, donc 2 pixels pour un écart GPS de plus de 3 m
+        assertEquals(1.57, VisibleTiles.metersPerPixel(48.85, 16.0, 256), 0.01)
+    }
+
     @Test fun rotationWidensTheCoveredArea() {
         val flat = VisibleTiles.around(48.85, 2.35, 16.0, 256, 600, 420)
         val rotated = VisibleTiles.around(48.85, 2.35, 16.0, 256, 600, 420, 45f)

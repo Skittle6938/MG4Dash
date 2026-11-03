@@ -42,6 +42,7 @@ class MapCard(private val context: Context, holder: ViewGroup) {
     private companion object {
         const val RESUME_FOLLOW_MS = 20_000L
         const val TILES_CHECK_MS = 5_000L
+        const val MIN_MOVE_PX = 2f
         const val DEFAULT_MAP_W = 600
         const val DEFAULT_MAP_H = 420
         /** Voiture plus bas que le centre en mode cap, en part de la hauteur de la carte. */
@@ -207,13 +208,33 @@ class MapCard(private val context: Context, holder: ViewGroup) {
         frame
     } catch (_: Throwable) { null }
 
+    private var shownLocation: Location? = null
+    private var shownState = ""
+
+    /**
+     * Position vraiment changée à l'écran. Le GPS répond chaque seconde même à l'arrêt : l'animation de 0,8 s qui
+     * suivait gardait la carte en mouvement 80 % du temps, à 30 images par seconde, et chargeait tout l'écran.
+     */
+    private fun needsDrawing(m: MapView, location: Location, state: String): Boolean {
+        val last = shownLocation
+        val moved = last == null || location.distanceTo(last) / VisibleTiles.metersPerPixel(location.latitude, zoomLevel,
+            org.osmdroid.util.TileSystem.getTileSize()) >= MIN_MOVE_PX
+        if (!moved && state == shownState) return false
+        shownLocation = location
+        shownState = state
+        return true
+    }
+
     fun update(location: Location) {
         val m = map ?: return
         refreshDark(m)
         val p = GeoPoint(location.latitude, location.longitude)
+        if (!follow && System.currentTimeMillis() - lastTouch > RESUME_FOLLOW_MS) follow = true
+        // Cap arrondi à 2° : à l'arrêt il oscille sans que l'icône ait besoin de tourner
+        val state = "$follow|$headingUp|${m.height}|${if (location.hasBearing()) Math.round(location.bearing / 2f) else -1}"
+        if (!needsDrawing(m, location, state)) return
         marker?.position = p
         if (location.hasBearing()) marker?.rotation = -location.bearing
-        if (!follow && System.currentTimeMillis() - lastTouch > RESUME_FOLLOW_MS) follow = true
         if (follow && headingUp && location.hasBearing() && location.speed > 1f) m.mapOrientation = -location.bearing
         // Cap en haut : la voiture descend vers le bas du widget pour montrer plus de route devant (issue #6)
         m.setMapCenterOffset(0, if (headingUp && follow) (m.height * HEADING_OFFSET).toInt() else 0)
@@ -229,6 +250,7 @@ class MapCard(private val context: Context, holder: ViewGroup) {
             if (!headingUp) map?.mapOrientation = 0f
         }
         follow = true
+        shownLocation = null
         location?.let { update(it) }
     }
 
