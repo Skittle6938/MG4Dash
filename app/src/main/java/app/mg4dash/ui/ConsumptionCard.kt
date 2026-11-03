@@ -24,8 +24,7 @@ class ConsumptionCard(context: Context) : LinearLayout(context) {
     private val total = tv(40f, R.color.text_value)
     /** Distance de la période (#44), à droite du total, unité en petit comme sur la carte Énergie. */
     private val distance = tv(40f, R.color.text_value)
-    private val bar = StackedBar(context)
-    private val legend = LinearLayout(context).apply { orientation = VERTICAL }
+    private val legend = LinearLayout(context).apply { orientation = HORIZONTAL; gravity = Gravity.CENTER_VERTICAL }
     private val chart = LineChart(context).apply {
         // Appui long sur la courbe : l'effacer (#44)
         setOnLongClickListener { v -> (context as? android.app.Activity)?.let { confirmClear(it, v, prefs.consumptionPeriod.coerceIn(0, 2)) }; true }
@@ -58,7 +57,6 @@ class ConsumptionCard(context: Context) : LinearLayout(context) {
             addView(total, LayoutParams(0, LayoutParams.WRAP_CONTENT, 1f))
             addView(distance)
         })
-        addView(bar, LayoutParams(LayoutParams.MATCH_PARENT, (22 * d).toInt()).apply { topMargin = (6 * d).toInt() })
         addView(legend, LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT).apply { topMargin = (8 * d).toInt() })
         addView(tv(15f, R.color.text_title).apply { text = context.getString(R.string.en_recent, app.mg4dash.system.Units.consUnit(context)); letterSpacing = 0.1f },
             LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT).apply { topMargin = (10 * d).toInt() })
@@ -84,25 +82,7 @@ class ConsumptionCard(context: Context) : LinearLayout(context) {
             }
         }
         distance.text = if (t.km > 0) smallUnit(app.mg4dash.system.Units.distText(context, t.km.toFloat())) else ""
-        val green = c(R.color.accent_energy); val cyan = c(R.color.accent_cold); val orange = c(R.color.accent_heat)
-        val violet = c(R.color.accent_battery)
-        // Réchauffage de la batterie : seulement s'il a compté (hiver)
-        val heat = t.heatKwh >= EnergyMonitor.HEAT_SHOWN_KWH
-        bar.parts = if (ok) listOfNotNull(StackedBar.Part(t.driveKwh, green), StackedBar.Part(t.climKwh, cyan),
-            StackedBar.Part(t.heatKwh, violet).takeIf { heat }, StackedBar.Part(t.accKwh, orange)) else emptyList()
-        legend.removeAllViews()
-        listOfNotNull(Triple(R.string.en_drive, t.driveKwh, green), Triple(R.string.en_climate, t.climKwh, cyan),
-            Triple(R.string.en_battery_heat, t.heatKwh, violet).takeIf { heat }, Triple(R.string.en_accessories, t.accKwh, orange))
-            .forEach { (label, v, col) ->
-                val r = LinearLayout(context).apply { orientation = HORIZONTAL; gravity = Gravity.CENTER_VERTICAL }
-                r.addView(View(context).apply { setBackgroundColor(col) }, LayoutParams((12 * d).toInt(), (12 * d).toInt()))
-                r.addView(tv(17f, R.color.text_sub).apply { text = context.getString(label) },
-                    LayoutParams(0, LayoutParams.WRAP_CONTENT, 1f).apply { leftMargin = (10 * d).toInt() })
-                r.addView(tv(17f, R.color.text_value).apply {
-                    text = if (ok) String.format(Locale.getDefault(), "%.1f kWh · %d %%", v, Math.round(v / t.outKwh * 100)) else "—"
-                })
-                legend.addView(r, LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT).apply { topMargin = (3 * d).toInt() })
-            }
+        fillLegend(context, legend, t)
         val (points, n) = fill(context, chart, period)
         axis(context, period, points).let { (a, b) -> chart.startLabel = a; chart.endLabel = b }
         chart.emptyText = if (period == 2) R.string.chart_empty_trips else R.string.chart_empty
@@ -152,16 +132,62 @@ class ConsumptionCard(context: Context) : LinearLayout(context) {
          * Remplit le graphique de la période et rend (nombre de points d'origine, légende) (#44) : trajet par km,
          * lissé sur 3 points ; recharge et 12 mois selon la date. Les points de recharge d'avant les dates restent par km.
          */
-        fun fill(c: android.content.Context, chart: LineChart, period: Int): Pair<Int, String> {
+        fun fill(c: android.content.Context, chart: LineChart, period: Int, stacked: Boolean = false): Pair<Int, String> {
             val curves = app.mg4dash.energy.ConsumptionCurve.curves.value
-            val v = curves.of(period).map { app.mg4dash.system.Units.cons(c, it) }
+            // Graphique empilé : en kWh pour 100 km ou 100 miles, seule unité dont les postes s'additionnent
+            val v = curves.of(period).map { if (stacked) app.mg4dash.system.Units.stackValue(c, it) else app.mg4dash.system.Units.cons(c, it) }
+            if (stacked && showStack(c, chart, curves, period, v)) {
+                return v.size to if (period == 2) c.getString(R.string.en_trips_note, v.size)
+                    else c.getString(if (period == 0 && curves.chargeTimes.size == v.size) R.string.en_time_note else R.string.en_curve_note)
+            }
             val line = app.mg4dash.energy.ConsumptionCurve.timeLine(curves.timesOf(period), v)
             if (line.size >= 2) {
                 chart.showTimeline(line, v.average().toFloat())
                 return v.size to if (period == 2) c.getString(R.string.en_trips_note, v.size) else c.getString(R.string.en_time_note)
             }
-            chart.values = if (period == 2) v else v.smooth3()
+            chart.values = if (period == 2) v else v.smoothed()
             return v.size to curveNote(c, period, v)
+        }
+
+        /** Graphique empilé (page Énergie) : un poste par couche ; les points sans composition forment une couche grise. */
+        private fun showStack(c: android.content.Context, chart: LineChart, curves: app.mg4dash.energy.ConsumptionCurve.Curves, period: Int, v: List<Float>): Boolean {
+            val mixes = curves.mixOf(period)
+            if (v.size < 2 || mixes.size != v.size || mixes.all { it == null }) return false
+            val colors = listOf(Themes.color(c, R.color.text_sub), Themes.color(c, R.color.accent_energy), Themes.color(c, R.color.accent_cold),
+                Themes.color(c, R.color.accent_battery), Themes.color(c, R.color.accent_heat))
+            val parts = listOf<List<Float>>(v.indices.map { i -> if (mixes[i] == null) v[i] else 0f }) +
+                (0..3).map { k -> v.indices.map { i -> mixes[i]?.parts()?.get(k)?.let { app.mg4dash.system.Units.stackValue(c, it) } ?: 0f } }
+            val times = curves.timesOf(period)
+            if (times.size == v.size) {
+                val lines = parts.map { app.mg4dash.energy.ConsumptionCurve.timeLine(times, it) }
+                if (lines[0].size < 2) return false
+                chart.showLayers(lines[0].map { it.first }, lines.mapIndexed { k, l -> LineChart.Layer(colors[k], l.map { it.second }) }, v.average().toFloat())
+            } else {
+                chart.showLayers(null, parts.mapIndexed { k, l -> LineChart.Layer(colors[k], l.smoothed().atMost(50)) }, v.average().toFloat())
+            }
+            return true
+        }
+
+        /** Légende compacte : couleur, poste et part de chacun, conduite récupération déduite. */
+        private fun fillLegend(c: android.content.Context, legend: LinearLayout, t: EnergyMonitor.Totals) {
+            legend.removeAllViews()
+            val drive = (t.driveKwh - t.regenKwh).coerceAtLeast(0f)
+            val all = drive + t.climKwh + t.heatKwh + t.accKwh
+            if (all <= 0f) return
+            val d = c.resources.displayMetrics.density
+            listOfNotNull(Triple(R.string.sw_drive, drive, R.color.accent_energy), Triple(R.string.sw_clim, t.climKwh, R.color.accent_cold),
+                Triple(R.string.sw_batt, t.heatKwh, R.color.accent_battery).takeIf { t.heatKwh >= EnergyMonitor.HEAT_SHOWN_KWH },
+                Triple(R.string.sw_acc, t.accKwh, R.color.accent_heat)).forEach { (label, v, col) ->
+                legend.addView(View(c).apply {
+                    background = android.graphics.drawable.GradientDrawable().apply { shape = android.graphics.drawable.GradientDrawable.OVAL; setColor(Themes.color(c, col)) }
+                }, LayoutParams((10 * d).toInt(), (10 * d).toInt()))
+                legend.addView(TextView(c).apply {
+                    text = "${c.getString(label)} ${Math.round(v / all * 100)} %"
+                    setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f)
+                    setTextColor(Themes.color(c, R.color.text_sub))
+                    maxLines = 1
+                }, LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT).apply { leftMargin = (5 * d).toInt(); rightMargin = (12 * d).toInt() })
+            }
         }
 
         private fun curveNote(c: android.content.Context, period: Int, v: List<Float>): String {
