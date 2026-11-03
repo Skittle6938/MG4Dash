@@ -33,7 +33,7 @@ object StarKey {
     private const val KEY_MEDIA_NEXT = 87
     /** Volume : haut / bas du joystick (297 / 298) et touches volume Android (24 / 25). */
     private val VOLUME_KEYS = setOf(297, 298, 24, 25)
-    private const val SWC_CLIMATE = 2
+    private const val SWC_HEAD_UNIT = 0
     /** Settings.System : fonction du « * » gauche ; 3 = caméra de recul / 360 (CarHardKey SAIC). */
     private const val STAR_FUNCTION = "star_key_function"
     /** Même chose pour le « * » droit. */
@@ -60,11 +60,11 @@ object StarKey {
                 // Musique d'une autre appli (SimpMusic…) : la voiture n'envoie pas suivant / précédent à
                 // cette appli ; on les passe au lecteur affiché (DiAuto ne lit que lecture / pause)
                 // (gauche = précédent, droite = suivant, comme pour les autres sources)
-                // Fenêtre de clim rapide ouverte depuis le volant : les boutons règlent la clim, MG4Dash
-                // ne les passe pas au lecteur (relevé dans SystemUI : fonction du volant = 2 « clim »)
+                // Boutons du volant affectés au combiné ou à la fenêtre de clim rapide (#80) : MG4Dash ne les passe
+                // pas au lecteur, comme le launcher d'origine, qui n'agit que sur la fonction 0 « écran central »
                 if ((code in JOY_LEFT..JOY_OK || code in VOLUME_KEYS) &&
-                    CarProps.getInt(CarProps.SWC_FUNCTION) == SWC_CLIMATE) {
-                    if (down) Log.i(TAG, "steering wheel in climate mode: button left to the climate window")
+                    (CarProps.getInt(CarProps.SWC_FUNCTION) ?: SWC_HEAD_UNIT) != SWC_HEAD_UNIT) {
+                    if (down) Log.i(TAG, "steering wheel on the driver's display or climate window: button ignored")
                     return
                 }
                 // Radio Dash sur ancien firmware : joystick droit, ou touches média selon les versions du volant
