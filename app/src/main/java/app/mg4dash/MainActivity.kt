@@ -662,6 +662,17 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    /** Sous le titre : l'artiste ; en FM, la fréquence en plus petit et grisée, puis le texte RDS. */
+    private fun artistLines(m: MediaHub.NowPlaying): CharSequence {
+        if (m.radioText.isBlank()) return m.artist
+        if (m.artist.isBlank()) return m.radioText
+        return android.text.SpannableStringBuilder(m.artist).apply {
+            setSpan(android.text.style.RelativeSizeSpan(0.8f), 0, length, 0)
+            setSpan(android.text.style.ForegroundColorSpan(color(R.color.text_disabled)), 0, length, 0)
+            append("\n").append(m.radioText)
+        }
+    }
+
     private fun renderMedia(m: MediaHub.NowPlaying) {
         if (!m.available) {
             b.mediaSource.put(getString(R.string.title_media) + "  ▾")
@@ -671,11 +682,14 @@ class MainActivity : AppCompatActivity() {
         } else {
             b.mediaSource.put(m.source.ifEmpty { getString(R.string.title_media) } + "  ▾")
             b.mediaTitle.put(m.title.ifEmpty { m.source })
-            b.mediaArtist.put(m.artist)
+            b.mediaArtist.put(artistLines(m))
             b.mediaAlbum.put(m.album)
         }
         if (shownArt !== m.art) { shownArt = m.art; b.mediaArt.setImageBitmap(m.art) }
         mediaStyle?.update(m.art, m.packageName == "com.saicmotor.radio")
+        // Fréquence puis texte RDS, sur deux lignes de texte au plus ; ensuite, ce que le lecteur prévoit pour cette source
+        if (m.artist.isNotBlank() && m.radioText.isNotBlank()) { if (b.mediaArtist.maxLines != 3) b.mediaArtist.maxLines = 3 }
+        else if (b.mediaArtist.maxLines == 3) b.mediaArtist.maxLines = if (m.art == null) 2 else 1
         b.mediaArtPlaceholder.visibility = if (m.art == null) View.VISIBLE else View.INVISIBLE
         b.mediaPlay.putImage(if (m.playing) R.drawable.ic_pause else R.drawable.ic_play)
         b.mediaProgress.visibility = if (m.durationMs > 0) View.VISIBLE else View.INVISIBLE
