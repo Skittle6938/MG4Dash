@@ -62,7 +62,6 @@ object Dock {
                 .setItems(arrayOf(activity.getString(R.string.dock_slot_clock), activity.getString(R.string.dock_slot_wifi))) { _, w ->
                     app.mg4dash.system.Prefs(activity).dockSlot = w
                     build(activity, dock, current, simple)
-                    (activity as? app.mg4dash.MainActivity)?.onDockSlotChanged()
                 }
                 .setNegativeButton(R.string.cancel, null)
                 .show().also { app.mg4dash.ui.Dialogs.fix(it) }

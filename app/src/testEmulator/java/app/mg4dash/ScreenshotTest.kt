@@ -447,6 +447,23 @@ class ScreenshotTest {
         shoot(MainActivity::class.java, "home_miles.png")
     }
 
+    private fun offline(name: String) {
+        val f = app.mg4dash.weather.WeatherRepo::class.java.getDeclaredField("_weather").apply { isAccessible = true }
+        @Suppress("UNCHECKED_CAST")
+        val flow = f.get(app.mg4dash.weather.WeatherRepo) as kotlinx.coroutines.flow.MutableStateFlow<Any?>
+        val saved = flow.value
+        flow.value = null
+        try { shoot(MainActivity::class.java, name) } finally { flow.value = saved }
+    }
+
+    @Test fun homeOffline() = offline("home_offline.png")
+
+    @Test fun homeSimpleOffline() {
+        org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE).edit()
+            .putInt("home_style", 1).apply()
+        offline("home_simple_offline.png")
+    }
+
     @Test fun homeMapLayoutOffline() {
         org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE).edit()
             .putInt("home_style", 2).apply()

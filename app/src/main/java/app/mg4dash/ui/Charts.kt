@@ -59,9 +59,20 @@ class StackedBar @JvmOverloads constructor(context: Context, attrs: AttributeSet
 /** Courbe lissée (#44) : chaque point = moyenne de lui-même et des 2 précédents. */
 fun List<Float>.smooth3(): List<Float> = indices.map { i -> subList(maxOf(0, i - 2), i + 1).average().toFloat() }
 
+private const val MAX_POINTS = 50
+
+/**
+ * Au plus [max] points, dans l'ordre : chacun est la moyenne d'une tranche égale de la liste. Une longue période
+ * (12 mois) reste lisible et se dessine vite ; en dessous de [max] points, rien ne change.
+ */
+fun List<Float>.atMost(max: Int): List<Float> =
+    if (size <= max) this else List(max) { i -> subList(i * size / max, (i + 1) * size / max).average().toFloat() }
+
 class LineChart @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) : View(context, attrs) {
     var values: List<Float> = emptyList()
-        set(v) { field = v; invalidate() }
+        set(v) { field = v.atMost(MAX_POINTS); average = v.average().toFloat(); invalidate() }
+    /** Moyenne de toutes les valeurs reçues, pas des points gardés (tranches arrondies, pas toutes égales). */
+    private var average = 0f
     /** Texte affiché sans courbe : 1 point par km, ou par trajet sur 12 mois (#44). */
     var emptyText: Int = app.mg4dash.R.string.chart_empty
         set(v) { if (field != v) { field = v; invalidate() } }
@@ -126,7 +137,7 @@ class LineChart @JvmOverloads constructor(context: Context, attrs: AttributeSet?
         }
         // Moyenne : tracée comme un chemin (drawLine ignore les pointillés en rendu matériel, #44),
         // avec une étiquette de sa valeur au bout à droite
-        val avg = values.average().toFloat()
+        val avg = average
         val ay = y(avg)
         canvas.drawPath(Path().apply { moveTo(left, ay); lineTo(right, ay) }, avgPaint)
         val txt = String.format(Locale.getDefault(), "%.1f", avg)
