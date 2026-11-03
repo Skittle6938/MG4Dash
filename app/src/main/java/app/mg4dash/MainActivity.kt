@@ -80,7 +80,6 @@ class MainActivity : AppCompatActivity() {
             setContentView(sh.root)
             app.mg4dash.ui.FadeOutline.applyTo(sh.root)
             sh.start()
-            warmUpStockLauncherIfNeeded()
             return
         }
         registerReceiver(callChanged, android.content.IntentFilter("android.bluetooth.headsetclient.profile.action.AG_CALL_CHANGED"))
@@ -130,7 +129,6 @@ class MainActivity : AppCompatActivity() {
         mediaStyle = app.mg4dash.ui.MediaStyle.apply(this, b)
         wireCards()
         observe()
-        warmUpStockLauncherIfNeeded()
         // Carte (ou appli de la carte) en plein écran avant une reconstruction (thème jour / nuit…) :
         // elle y reste ; seuls Home et le bouton agrandir / réduire la ramènent au widget
         if (savedInstanceState?.getBoolean(KEY_MAP_FULL) == true || mapFullOnRecreate) b.mapCard.post { setMapFullscreen(true) }
@@ -1555,32 +1553,6 @@ class MainActivity : AppCompatActivity() {
 
     private fun renderWeatherFallbackOnly() {
         if (WeatherRepo.shown.value == null) renderWeather(null, CarBridge.state.value)
-    }
-
-    // ── Démarrage : laisser le launcher SAIC enregistrer son interface ───────
-
-    /**
-     * Le service du launcher SAIC (caméra, sources audio, commandes de SystemUI) ne reçoit
-     * son interface de rappel que lorsque son écran d'accueil est créé. Une fois par démarrage
-     * de la voiture, on l'ouvre donc brièvement puis on revient ici.
-     */
-    private fun warmUpStockLauncherIfNeeded() {
-        if (BuildConfig.MOCK || !prefs.warmUpStock) return
-        if (!HomeSwitcher.isStockEnabled(this)) return   // accueil SAIC désactivé (remplacé par MG4Dash)
-        val bootCount = try { Settings.Global.getInt(contentResolver, Settings.Global.BOOT_COUNT) } catch (_: Exception) { -1 }
-        val sp = prefs.raw
-        if (bootCount >= 0 && sp.getInt("warmup_boot", -2) == bootCount) return
-        sp.edit().putInt("warmup_boot", bootCount).apply()
-        Log.i("Boot", "briefly opening the SAIC launcher (boot #$bootCount)")
-        try {
-            startActivity(Intent(Intent.ACTION_MAIN).setComponent(HomeSwitcher.STOCK).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
-            // Handler distinct : celui de l'activité est vidé dans onPause, qui survient justement ici.
-            Handler(Looper.getMainLooper()).postDelayed({
-                startActivity(Intent(this, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_REORDER_TO_FRONT))
-            }, 1500)
-        } catch (e: Exception) {
-            Log.w("Boot", "SAIC launcher not opened: ${e.message}")
-        }
     }
 
     private fun color(res: Int) = app.mg4dash.ui.Themes.color(this, res)

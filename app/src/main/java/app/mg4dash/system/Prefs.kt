@@ -216,9 +216,6 @@ class Prefs(context: Context) {
         set(v) = sp.edit().putInt("secondary_widget", v).apply()
 
     /** Ouvre brièvement le launcher SAIC au démarrage pour qu'il enregistre son interface. */
-    var warmUpStock: Boolean
-        get() = sp.getBoolean("warmup_stock", true)
-        set(v) = sp.edit().putBoolean("warmup_stock", v).apply()
 
     /** Mode Entretien : le launcher SAIC reste l'accueil, MG4Dash ne reprend pas la main. */
     var valetMode: Boolean

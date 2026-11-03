@@ -217,8 +217,6 @@
     <string name="st_city">Reservestad: %1$s (als de auto geen positie geeft)</string>
     <string name="st_change_city">Stad wijzigen</string>
     <string name="st_startup">OPSTARTEN</string>
-    <string name="st_warm">SAIC-launcher kort openen bij opstarten: %1$s</string>
-    <string name="st_warm_desc">Laat de SAIC-dienst (audiobronnen, camera, systeembalkopdrachten) zijn interface registreren.</string>
     <string name="st_toggle">Wisselen</string>
     <string name="st_display">WEERGAVE</string>
     <string name="st_fullscreen">Volledig scherm (verbergt de SAIC-zijbalk en -banner): %1$s</string>

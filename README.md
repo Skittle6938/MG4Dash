@@ -174,7 +174,7 @@ Five tabs along the top; the last one used opens next time. Each on / off option
 | Look | light / dark / auto, night after sunset, smooth light / dark switch, clock 24 h or 12 h (no AM / PM), panel outline, background, button colour, full-throttle special |
 | Vehicle | units, tyre pressure unit, heated seats and steering wheel, Keep climate on, keep MG4Dash in front of the SAIC climate screen (old firmwares), battery capacity when new, current capacity and health, battery model, MG4 XPower |
 | Connections | weather (fallback city or current position), Home Assistant (address, token, test) |
-| System | replace the SAIC home, maintenance mode, briefly open the SAIC launcher at startup, updates (include betas, Radio Dash), diagnostics (compatibility test, log, energy data recorder: off by default, saved every 5 minutes to limit memory wear), gesture tour |
+| System | replace the SAIC home, maintenance mode, updates (include betas, Radio Dash), diagnostics (compatibility test, log, energy data recorder: off by default, saved every 5 minutes to limit memory wear), gesture tour |
 
 ## Updates
 

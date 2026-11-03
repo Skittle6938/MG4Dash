@@ -217,8 +217,6 @@
     <string name="st_city">Fallback city: %1$s (if the car provides no position)</string>
     <string name="st_change_city">Change city</string>
     <string name="st_startup">STARTUP</string>
-    <string name="st_warm">Briefly open the SAIC launcher at startup: %1$s</string>
-    <string name="st_warm_desc">Lets the SAIC service (audio sources, camera, system bar commands) register its interface.</string>
     <string name="st_toggle">Toggle</string>
     <string name="st_display">DISPLAY</string>
     <string name="st_fullscreen">Full screen (hides the SAIC side bar and banner): %1$s</string>

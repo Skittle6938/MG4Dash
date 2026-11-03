@@ -217,8 +217,6 @@
     <string name="st_city">Ville de repli : %1$s (si la voiture ne fournit pas de position)</string>
     <string name="st_change_city">Changer de ville</string>
     <string name="st_startup">DÉMARRAGE</string>
-    <string name="st_warm">Ouverture brève du launcher SAIC au démarrage : %1$s</string>
-    <string name="st_warm_desc">Permet au service SAIC (sources audio, caméra, commandes de la barre système) d\'enregistrer son interface.</string>
     <string name="st_toggle">Basculer</string>
     <string name="st_display">AFFICHAGE</string>
     <string name="st_fullscreen">Plein écran (masque la barre latérale et le bandeau SAIC) : %1$s</string>

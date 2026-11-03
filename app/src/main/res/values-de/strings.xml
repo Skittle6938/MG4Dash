@@ -217,8 +217,6 @@
     <string name="st_city">Ersatzstadt: %1$s (falls das Auto keine Position liefert)</string>
     <string name="st_change_city">Stadt ändern</string>
     <string name="st_startup">START</string>
-    <string name="st_warm">SAIC-Launcher beim Start kurz öffnen: %1$s</string>
-    <string name="st_warm_desc">Damit der SAIC-Dienst (Audioquellen, Kamera, Systemleisten-Befehle) seine Oberfläche registriert.</string>
     <string name="st_toggle">Umschalten</string>
     <string name="st_display">ANZEIGE</string>
     <string name="st_fullscreen">Vollbild (blendet SAIC-Seitenleiste und Banner aus): %1$s</string>
