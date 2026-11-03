@@ -25,4 +25,18 @@ object Fullscreen {
             View.SYSTEM_UI_FLAG_VISIBLE
         }
     }
+
+    /**
+     * La fenêtre d'appel de la voiture fait réapparaître les barres, qui restaient ensuite par-dessus l'accueil :
+     * réécrire les mêmes réglages n'a pas d'effet, on les quitte un instant. Rien à faire si les barres sont déjà masquées.
+     */
+    @Suppress("DEPRECATION")
+    fun restore(activity: Activity) {
+        if (!Prefs(activity).fullscreen) return
+        val decor = activity.window.decorView
+        val insets = decor.rootWindowInsets ?: return
+        if (insets.systemWindowInsetTop == 0 && insets.systemWindowInsetLeft == 0) return
+        decor.systemUiVisibility = View.SYSTEM_UI_FLAG_VISIBLE
+        decor.post { apply(activity) }
+    }
 }
