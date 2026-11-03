@@ -15,6 +15,10 @@ import kotlin.math.tan
 object VisibleTiles {
     data class Tile(val z: Int, val x: Int, val y: Int)
 
+    /** Mètres couverts par un pixel de la carte à cette latitude et ce zoom. */
+    fun metersPerPixel(lat: Double, zoom: Double, tileSizePx: Int): Double =
+        40_075_016.686 * cos(Math.toRadians(lat)) / (tileSizePx * 2.0.pow(zoom))
+
     /**
      * @param lat,lon point de la carte retenu (la voiture en mode suivi)
      * @param tileSizePx taille d'une tuile à l'écran au zoom entier 0 (osmdroid : TileSystem.getTileSize())
