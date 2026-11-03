@@ -46,6 +46,8 @@ object MediaHub {
         val playing: Boolean = false,
         val durationMs: Long = 0,
         val positionMs: Long = 0,
+        /** Radio FM ou AM : [artist] contient la fréquence, si le titre est le nom de la station. */
+        val analog: Boolean = false,
         /** Texte RDS de la station FM, envoyé par Radio Dash. */
         val radioText: String = "",
         /** Android Auto connecté (son lecteur a quelque chose à afficher) : la puce AA est proposée. */
@@ -1018,6 +1020,7 @@ object MediaHub {
             playing = shownPlaying(c),
             durationMs = md?.getLong(MediaMetadata.METADATA_KEY_DURATION) ?: 0,
             positionMs = st?.position ?: 0,
+            analog = analog,
             radioText = if (analog) rdsText else "",
             androidAuto = androidAutoAvailable(),
         )

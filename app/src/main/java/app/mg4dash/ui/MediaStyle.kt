@@ -38,6 +38,8 @@ class MediaStyle private constructor(
     private var plain: Boolean? = null
     /** Le panneau de la carte, dont le contour n'est montré que sans image (#36). */
     private var panel: LinearLayout? = null
+    private lateinit var radioLine: TextView
+    private lateinit var lowerSpace: View
 
     private fun detach(v: View) = v.apply { (parent as? ViewGroup)?.removeView(this) }
 
@@ -78,6 +80,8 @@ class MediaStyle private constructor(
         over.addView(View(a), LinearLayout.LayoutParams(1, 0, 1f))
         over.addView(title, LinearLayout.LayoutParams(-1, -2))
         over.addView(artist, LinearLayout.LayoutParams(-1, -2))
+        radioLine = TextView(a).apply { maxLines = 2; ellipsize = android.text.TextUtils.TruncateAt.END; visibility = View.GONE }
+        over.addView(radioLine, LinearLayout.LayoutParams(-1, -2))
         progress?.let {
             over.addView(it, LinearLayout.LayoutParams(-1, dp(6)).apply { topMargin = dp(12) })
             it.progressBackgroundTintList = ColorStateList.valueOf(0x55FFFFFF)
@@ -95,6 +99,9 @@ class MediaStyle private constructor(
             v.setPadding(dp(18), dp(18), dp(18), dp(18))
             row.addView(v, LinearLayout.LayoutParams(dp(80), dp(80)).apply { leftMargin = dp(20) })
         }
+        // Sans image (styleTexts), ce second espace centre les textes entre la source et les boutons
+        lowerSpace = View(a)
+        over.addView(lowerSpace, LinearLayout.LayoutParams(1, 0, 1f))
         over.addView(row, LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(10) })
         frame.addView(over, FrameLayout.LayoutParams(-1, -1))
         info.addView(frame, LinearLayout.LayoutParams(0, -1, 1f))
@@ -163,7 +170,26 @@ class MediaStyle private constructor(
         headTitle?.setTextColor(if (bare) Themes.color(a, R.color.text_title) else Color.WHITE)
         skips.forEach { it.imageTintList = ColorStateList.valueOf(main) }
         shade.visibility = if (bare) View.GONE else View.VISIBLE
+        lowerSpace.visibility = if (bare) View.VISIBLE else View.GONE
+        // Même écart entre les lignes : sans la marge de police, qui s'ajoute surtout sous le grand titre
+        listOf(title, artist, radioLine).forEach { it.includeFontPadding = !bare }
+        listOf(artist, radioLine).forEach { (it.layoutParams as LinearLayout.LayoutParams).topMargin = if (bare) dp(LINE_GAP_DP) else 0 }
         progress?.progressBackgroundTintList = ColorStateList.valueOf(if (bare) Themes.color(a, R.color.gauge_off) else 0x55FFFFFF)
+    }
+
+    /** Radio FM ou AM, après [update] : fréquence plus petite et grisée, puis ligne du texte RDS. */
+    fun radioLines(analog: Boolean, text: String) {
+        if (!::frame.isInitialized) return
+        val bare = plain == true
+        val artist = texts[1]
+        val sub = if (bare) Themes.color(a, R.color.text_sub) else 0xFFE6E6E6.toInt()
+        artist.textSize = if (bare) (if (analog) 21f else 26f) else (if (analog) 18f else 22f)
+        artist.setTextColor(if (analog && bare) Themes.color(a, R.color.text_disabled) else sub)
+        artist.visibility = if (analog && artist.text.isNullOrBlank()) View.GONE else View.VISIBLE
+        radioLine.put(text)
+        radioLine.textSize = if (bare) 26f else 22f
+        radioLine.setTextColor(sub)
+        radioLine.visibility = if (text.isBlank()) View.GONE else View.VISIBLE
     }
 
     /**
@@ -226,6 +252,8 @@ class MediaStyle private constructor(
     }
 
     companion object {
+        private const val LINE_GAP_DP = 10
+
         fun apply(a: Activity, b: ActivityMainBinding): MediaStyle? = try {
             MediaStyle(a, b.mediaPlay, b.mediaProgress).apply {
                 b.mediaAlbum.visibility = View.GONE

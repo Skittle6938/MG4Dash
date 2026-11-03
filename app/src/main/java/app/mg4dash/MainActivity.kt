@@ -83,6 +83,7 @@ class MainActivity : AppCompatActivity() {
             warmUpStockLauncherIfNeeded()
             return
         }
+        registerReceiver(callChanged, android.content.IntentFilter("android.bluetooth.headsetclient.profile.action.AG_CALL_CHANGED"))
         b = ActivityMainBinding.inflate(layoutInflater)
         setContentView(b.root)
         app.mg4dash.ui.FadeOutline.applyTo(b.root)
@@ -145,7 +146,16 @@ class MainActivity : AppCompatActivity() {
         if (isChangingConfigurations && hiddenForMap != null) mapFullOnRecreate = true
     }
 
+    private val restoreBars = Runnable { Fullscreen.restore(this) }
+    private val callChanged = object : android.content.BroadcastReceiver() {
+        override fun onReceive(c: android.content.Context?, i: Intent?) {
+            window.decorView.removeCallbacks(restoreBars)
+            window.decorView.postDelayed(restoreBars, 1500)
+        }
+    }
+
     override fun onDestroy() {
+        try { unregisterReceiver(callChanged) } catch (_: Exception) {}
         if (isChangingConfigurations && hiddenForMap != null) mapFullOnRecreate = true
         super.onDestroy()
     }
@@ -662,17 +672,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    /** Sous le titre : l'artiste ; en FM, la fréquence en plus petit et grisée, puis le texte RDS. */
-    private fun artistLines(m: MediaHub.NowPlaying): CharSequence {
-        if (m.radioText.isBlank()) return m.artist
-        if (m.artist.isBlank()) return m.radioText
-        return android.text.SpannableStringBuilder(m.artist).apply {
-            setSpan(android.text.style.RelativeSizeSpan(0.8f), 0, length, 0)
-            setSpan(android.text.style.ForegroundColorSpan(color(R.color.text_disabled)), 0, length, 0)
-            append("\n").append(m.radioText)
-        }
-    }
-
     private fun renderMedia(m: MediaHub.NowPlaying) {
         if (!m.available) {
             b.mediaSource.put(getString(R.string.title_media) + "  ▾")
@@ -682,17 +681,16 @@ class MainActivity : AppCompatActivity() {
         } else {
             b.mediaSource.put(m.source.ifEmpty { getString(R.string.title_media) } + "  ▾")
             b.mediaTitle.put(m.title.ifEmpty { m.source })
-            b.mediaArtist.put(artistLines(m))
+            b.mediaArtist.put(m.artist)
             b.mediaAlbum.put(m.album)
         }
         if (shownArt !== m.art) { shownArt = m.art; b.mediaArt.setImageBitmap(m.art) }
         mediaStyle?.update(m.art, m.packageName == "com.saicmotor.radio")
-        // Fréquence puis texte RDS, sur deux lignes de texte au plus ; ensuite, ce que le lecteur prévoit pour cette source
-        if (m.artist.isNotBlank() && m.radioText.isNotBlank()) { if (b.mediaArtist.maxLines != 3) b.mediaArtist.maxLines = 3 }
-        else if (b.mediaArtist.maxLines == 3) b.mediaArtist.maxLines = if (m.art == null) 2 else 1
+        mediaStyle?.radioLines(m.analog, m.radioText)
         b.mediaArtPlaceholder.visibility = if (m.art == null) View.VISIBLE else View.INVISIBLE
         b.mediaPlay.putImage(if (m.playing) R.drawable.ic_pause else R.drawable.ic_play)
-        b.mediaProgress.visibility = if (m.durationMs > 0) View.VISIBLE else View.INVISIBLE
+        // Sans image, les textes sont centrés : la barre absente ne doit pas garder sa place
+        b.mediaProgress.visibility = if (m.durationMs > 0) View.VISIBLE else if (m.art == null) View.GONE else View.INVISIBLE
         if (m.durationMs > 0) b.mediaProgress.progress = (m.positionMs * 1000 / m.durationMs).toInt()
         val controls = m.available
         b.mediaPlay.isEnabled = controls; b.mediaNext.isEnabled = controls; b.mediaPrev.isEnabled = controls
