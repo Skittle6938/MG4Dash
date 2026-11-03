@@ -137,7 +137,7 @@ class MainActivity : AppCompatActivity() {
         if (savedInstanceState == null && intent?.getBooleanExtra(app.mg4dash.ui.Tutorial.EXTRA_SHOW, false) == true) b.root.post { app.mg4dash.ui.Tutorial.show(this) }
         else if (savedInstanceState == null) app.mg4dash.ui.Tutorial.showIfPending(this)
 
-        // Trigger son all'avvio: riproduce immediatamente appena l'app compare
+        // Play the startup sound as soon as the app appears.
         if (savedInstanceState == null) {
             app.mg4dash.sound.SoundTrigger.onBootOrAppStart(this)
         }

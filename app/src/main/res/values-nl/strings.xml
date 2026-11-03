@@ -630,6 +630,8 @@
     <string name="st_sound_boot_trigger">Afspelen bij opstarten</string>
     <string name="st_sound_pick_file">Audio kiezen</string>
     <string name="st_sound_no_file">Geen geluid geselecteerd</string>
+    <string name="st_sound_file_too_large">Audiobestanden mogen maximaal 20 MB groot zijn</string>
+    <string name="st_sound_import_failed">Audiobestand importeren is mislukt</string>
     <string name="st_sound_test">Test</string>
     <string name="st_sound_stop">Stoppen</string>
     <string name="st_sound_volume">Mediavolume auto</string>

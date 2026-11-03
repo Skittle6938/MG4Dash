@@ -630,6 +630,8 @@
     <string name="st_sound_boot_trigger">Reproducir al inicio</string>
     <string name="st_sound_pick_file">Elegir audio</string>
     <string name="st_sound_no_file">Ningún sonido seleccionado</string>
+    <string name="st_sound_file_too_large">Los archivos de audio deben ocupar 20 MB o menos</string>
+    <string name="st_sound_import_failed">No se pudo importar el archivo de audio</string>
     <string name="st_sound_test">Probar</string>
     <string name="st_sound_stop">Detener</string>
     <string name="st_sound_volume">Volumen multimedia del coche</string>
