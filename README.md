@@ -173,7 +173,7 @@ Five tabs along the top; the last one used opens next time. Each on / off option
 |---|---|
 | Home | home layout (Full, Simple, Map), audio source and playback at startup, menu bar (bottom or vertical, side), wide side bar, connection icons, full screen (hides the SAIC side bar and banner), live power in the energy card, voltage and current under the power bar, map stack back to the battery when plugged in, map zoom and colours, hide the map buttons, shortcuts page, switch to the energy widget when offline |
 | Look | light / dark / auto, night after sunset, smooth light / dark switch, clock 24 h or 12 h (no AM / PM), panel outline, background, button colour, full-throttle special |
-| Vehicle | units, tyre pressure unit, heated seats and steering wheel, Keep climate on, keep MG4Dash in front of the SAIC climate screen (old firmwares), battery capacity when new, current capacity and health, battery model, MG4 XPower |
+| Vehicle | units, tyre pressure unit, heated seats and steering wheel, Keep climate on, keep MG4Dash in front of the SAIC climate screen (old firmwares), startup sound (audio file from a USB stick or internal storage, 30 s and 20 MB at most, with its own volume), battery capacity when new, current capacity and health, battery model, MG4 XPower |
 | Connections | weather (fallback city or current position), Home Assistant (address, token, test) |
 | System | replace the SAIC home, maintenance mode, updates (include betas, Radio Dash), diagnostics (compatibility test, log, energy data recorder: off by default, saved every 5 minutes to limit memory wear), gesture tour |
 
