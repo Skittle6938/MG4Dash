@@ -524,18 +524,17 @@ class SettingsActivity : AppCompatActivity() {
         })
     }
 
-    /** Full power animation of the live Power widget: drop-down list, preview on a mini map. */
-    /** Configurazione Trigger Audio (avvio launcher / suoni personalizzati). */
+    /** Startup sound settings. */
     private fun soundTriggersSetting(parent: LinearLayout) {
         text(parent, getString(R.string.st_sound_trigger_desc), 15f, R.color.text_title)
 
-        // Un solo interruttore: abilita o disabilita il suono scelto all'apertura del launcher.
+        // A single switch controls playback when MG4Dash opens.
         toggle(parent, R.string.st_sound_boot_trigger, null,
             { app.mg4dash.sound.SoundTriggerSettings.isBootTriggerEnabled(this) },
             { app.mg4dash.sound.SoundTriggerSettings.setBootTriggerEnabled(this, it) }
         )
 
-        // Selezione file audio
+        // Select and import an audio file.
         val selectedPath = app.mg4dash.sound.SoundTriggerSettings.getSelectedSoundPath(this)
         val fileLabel = selectedPath?.let { java.io.File(it).name } ?: getString(R.string.st_sound_no_file)
         val curFileView = text(parent, fileLabel, 16f, R.color.text_sub)
@@ -556,10 +555,16 @@ class SettingsActivity : AppCompatActivity() {
                         .setTitle(R.string.st_sound_pick_file)
                         .setItems(titles) { _, which ->
                             val chosen = items[which]
+                            if (chosen.file.length() > app.mg4dash.sound.SoundImporter.MAX_FILE_SIZE_BYTES) {
+                                app.mg4dash.ui.Toasts.show(this, R.string.st_sound_file_too_large)
+                                return@setItems
+                            }
                             val imported = app.mg4dash.sound.SoundImporter.importSound(this, chosen.file)
                             if (imported != null) {
                                 curFileView.text = imported.name
                                 app.mg4dash.ui.Toasts.show(this, "Audio importato: ${imported.name}")
+                            } else {
+                                app.mg4dash.ui.Toasts.show(this, R.string.st_sound_import_failed, long = true)
                             }
                         }
                         .setNegativeButton(R.string.cancel, null)
@@ -593,7 +598,7 @@ class SettingsActivity : AppCompatActivity() {
         btnRow.addView(testBtn, LinearLayout.LayoutParams(dp(130), -2))
         parent.addView(btnRow, LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(10) })
 
-        // Livello media assoluto dell'auto (0..32), ripristinato dopo la riproduzione.
+        // Absolute car media level (0..32), restored after playback.
         val savedVolume = app.mg4dash.sound.SoundTriggerSettings.getVolumeLevel(this)
         val volumeLine = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
         val volumeHeader = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL }
@@ -629,6 +634,7 @@ class SettingsActivity : AppCompatActivity() {
         parent.addView(volumeLine, LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(12) })
     }
 
+    /** Full power animation of the live Power widget: drop-down list, preview on a mini map. */
     private fun powerFxSetting(parent: LinearLayout) {
         text(parent, getString(R.string.st_power_fx), 18f, R.color.text_value)
         // No preview: the surprise is for the road. Displayed order: random first (default).

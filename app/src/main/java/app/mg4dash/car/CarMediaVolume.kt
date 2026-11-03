@@ -9,9 +9,8 @@ import app.mg4dash.system.Log
 import java.lang.reflect.Modifier
 
 /**
- * Volume media absolu de la voiture, par les mêmes voies que MG4Control.
- * Chaque lecture/écriture pendant une lecture garde le même [Route], car les voies ont des échelles
- * différentes. La route SAIC est prioritaire, puis CarAudioManager et AudioManager vérifié.
+ * Absolute car media volume using the same routes as MG4Control.
+ * Keep one [Route] for each read/write pair because the routes use different scales.
  */
 object CarMediaVolume {
     const val UI_MAX = 32
@@ -38,7 +37,7 @@ object CarMediaVolume {
     @Volatile private var smartSoundListener: Any? = null
     @Volatile private var smartSoundInitAt = 0L
 
-    /** Choisit une voie disponible et sa propre échelle, prioritairement les API SAIC. */
+    /** Select an available route and its native scale, preferring SAIC APIs. */
     internal fun route(context: Context, waitForSaicMs: Long = 0): Route? {
         appContext = context.applicationContext
         val deadline = SystemClock.elapsedRealtime() + waitForSaicMs.coerceAtLeast(0)
@@ -50,6 +49,7 @@ object CarMediaVolume {
                     if (max > 0) return Route(Channel.SAIC_LEGACY, max, manager)
                 }
             }
+            // LegacySound uses a different binder contract; do not send A9 volume transaction IDs to it.
             if (Firmware.family == Firmware.Family.A9 || Firmware.family == Firmware.Family.UNKNOWN) {
                 runCatching { CarBridge.audio() }.getOrNull()?.let { service ->
                     val max = runCatching { service.getMediaVolumeMax() }.getOrDefault(-1)
@@ -71,7 +71,7 @@ object CarMediaVolume {
         Channel.ANDROID -> runCatching { audioManager()?.getStreamVolume(AudioManager.STREAM_MUSIC) ?: -1 }.getOrDefault(-1)
     }
 
-    /** Fixe un volume absolu sur la route retenue ; les replis Android vérifient la valeur relue. */
+    /** Set an absolute volume on the selected route; Android fallbacks verify the value by reading it back. */
     internal fun write(route: Route, level: Int): Boolean {
         val target = level.coerceIn(0, route.max)
         val ok = when (route.channel) {
@@ -84,7 +84,7 @@ object CarMediaVolume {
         return ok
     }
 
-    /** Convertit le curseur fixe 0..32 vers l'échelle native de la voie choisie. */
+    /** Map the fixed 0..32 slider to the selected route's native scale. */
     internal fun nativeLevel(uiLevel: Int, route: Route): Int =
         ((uiLevel.coerceIn(0, UI_MAX).toFloat() / UI_MAX) * route.max).toInt().coerceIn(0, route.max)
 
@@ -145,7 +145,7 @@ object CarMediaVolume {
         true
     }.getOrDefault(false)
 
-    /** Initialisation du SDK SAIC ancien, comme dans MG4Control ; peut se terminer au callback. */
+    /** Initialize the legacy SAIC SDK as MG4Control does; connection may complete in a callback. */
     private fun initializeSmartSound(context: Context) {
         if (smartSound != null) return
         val now = SystemClock.elapsedRealtime()

@@ -629,6 +629,8 @@ st_sound_trigger_desc|Choose an audio file from a USB stick (or internal storage
 st_sound_boot_trigger|Play at startup|Lire au démarrage|Bei Start abspielen|Reproducir al inicio|Riproduci all’avvio|Afspelen bij opstarten|Başlangıçta çal
 st_sound_pick_file|Choose audio|Choisir un fichier audio|Audio auswählen|Elegir audio|Scegli audio|Audio kiezen|Ses seç
 st_sound_no_file|No sound file selected|Aucun son sélectionné|Kein Ton ausgewählt|Ningún sonido seleccionado|Nessun file selezionato|Geen geluid geselecteerd|Ses dosyası seçilmedi
+st_sound_file_too_large|Audio files must be 20 MB or smaller|Les fichiers audio ne doivent pas dépasser 20 Mo|Audiodateien dürfen höchstens 20 MB groß sein|Los archivos de audio deben ocupar 20 MB o menos|I file audio devono avere una dimensione massima di 20 MB|Audiobestanden mogen maximaal 20 MB groot zijn|Ses dosyaları en fazla 20 MB olmalıdır
+st_sound_import_failed|Could not import the audio file|Impossible d’importer le fichier audio|Audiodatei konnte nicht importiert werden|No se pudo importar el archivo de audio|Impossibile importare il file audio|Audiobestand importeren is mislukt|Ses dosyası içe aktarılamadı
 st_sound_test|Test|Écouter|Testen|Probar|Ascolta|Test|Test Et
 st_sound_stop|Stop|Arrêter|Stopp|Detener|Ferma|Stoppen|Durdur
 st_sound_volume|Car media volume|Volume média de la voiture|Medienlautstärke des Autos|Volumen multimedia del coche|Volume media auto|Mediavolume auto|Araç medya ses düzeyi

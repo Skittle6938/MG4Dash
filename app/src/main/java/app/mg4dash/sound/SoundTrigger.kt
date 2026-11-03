@@ -4,7 +4,6 @@ import android.content.Context
 import android.media.AudioAttributes
 import android.media.AudioFocusRequest
 import android.media.AudioManager
-import android.media.MediaDataSource
 import android.media.MediaPlayer
 import android.os.Handler
 import android.os.HandlerThread
@@ -14,10 +13,7 @@ import app.mg4dash.car.CarMediaVolume
 import app.mg4dash.system.Log
 import java.io.File
 
-/**
- * Gestore dell'esecuzione immediata dell'audio al trigger (es. Boot / Avvio app).
- * Esegue in un thread dedicato per non bloccare l'UI o il caricamento di MainActivity.
- */
+/** Plays startup and preview sounds on a worker thread without blocking the UI. */
 object SoundTrigger {
     private const val TAG = "SoundTrigger"
     private const val SAFETY_MARGIN_MS = 3_000L
@@ -38,15 +34,14 @@ object SoundTrigger {
     private var bootTriggered = false
     @Volatile private var appCtx: Context? = null
 
-    /**
-     * Trigger istantaneo all'apertura dell'interfaccia principale (MainActivity / LauncherApp).
-     */
+    /** Trigger startup playback when the main interface opens. */
     fun onBootOrAppStart(context: Context) {
         val ctx = context.applicationContext.also { appCtx = it }
         if (bootTriggered) return
         bootTriggered = true
 
         threadHandler.post {
+            restoreInterruptedCarVolume(ctx)
             if (!SoundTriggerSettings.isBootTriggerEnabled(ctx)) {
                 return@post
             }
@@ -60,9 +55,7 @@ object SoundTrigger {
         }
     }
 
-    /**
-     * Riproduce un file audio (può essere usato sia per i trigger che per l'anteprima/test).
-     */
+    /** Play an audio file for startup playback or preview. */
     fun playSoundFile(context: Context, file: File, isTest: Boolean = false, onComplete: (() -> Unit)? = null) {
         val appCtx = context.applicationContext
         threadHandler.post {
@@ -74,10 +67,8 @@ object SoundTrigger {
                 return@post
             }
 
-            val bytes = try {
-                file.readBytes()
-            } catch (e: Exception) {
-                Log.w(TAG, "Failed reading audio file: ${e.message}")
+            if (file.length() > SoundImporter.MAX_FILE_SIZE_BYTES) {
+                Log.w(TAG, "Audio file exceeds the ${SoundImporter.MAX_FILE_SIZE_BYTES / (1024 * 1024)} MB limit")
                 onComplete?.let { Handler(context.mainLooper).post(it) }
                 return@post
             }
@@ -90,7 +81,7 @@ object SoundTrigger {
                         .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
                         .build()
                 )
-                player.setDataSource(MemoryAudioSource(bytes))
+                player.setDataSource(file.absolutePath)
                 player.prepare()
             } catch (e: Exception) {
                 Log.w(TAG, "MediaPlayer prepare error: ${e.message}")
@@ -139,9 +130,7 @@ object SoundTrigger {
         }
     }
 
-    /**
-     * Interrompe la riproduzione in corso.
-     */
+    /** Stop the current playback. */
     fun stop(context: Context? = null) {
         threadHandler.post { stopPlayback("user stopped") }
     }
@@ -169,7 +158,12 @@ object SoundTrigger {
     }
 
     private fun applyTargetVolume(context: Context) {
-        // Laisse au service audio SAIC le temps de se connecter au démarrage, comme MG4Control.
+        if (SoundTriggerSettings.getPendingVolumeRestore(context) != null) {
+            Log.w(TAG, "A previous car volume restore is still pending; leaving volume unchanged")
+            return
+        }
+
+        // Give the SAIC audio service time to connect during startup, as MG4Control does.
         val route = CarMediaVolume.route(context, waitForSaicMs = 2_000)
         if (route == null) {
             Log.w(TAG, "Car media volume route unavailable; leaving vehicle volume unchanged")
@@ -186,13 +180,48 @@ object SoundTrigger {
             Log.i(TAG, "Car media volume already at $target/${route.max}")
             return
         }
+        if (!SoundTriggerSettings.savePendingVolumeRestore(
+                context, route.channel.name, route.max, route.group, before, target
+            )) {
+            Log.w(TAG, "Could not persist the original car media volume; leaving it unchanged")
+            return
+        }
+        volumeRoute = route
+        volumeBefore = before
+        volumeWritten = target
         if (CarMediaVolume.write(route, target)) {
-            volumeRoute = route
-            volumeBefore = before
-            volumeWritten = target
             Log.i(TAG, "Car media volume temporarily set $before → $target/${route.max}")
         } else {
-            Log.w(TAG, "Failed to set car media volume to $target/${route.max}")
+            Log.w(TAG, "Could not verify car media volume $target/${route.max}; keeping the restore record")
+        }
+    }
+
+    private fun restoreInterruptedCarVolume(context: Context) {
+        val pending = SoundTriggerSettings.getPendingVolumeRestore(context) ?: return
+        val route = CarMediaVolume.route(context, waitForSaicMs = 2_000) ?: run {
+            Log.w(TAG, "Car volume route unavailable; keeping the pending restore for the next start")
+            return
+        }
+        if (route.channel.name != pending.channel || route.max != pending.max || route.group != pending.group) {
+            Log.w(TAG, "Car volume route changed; keeping the pending restore for the next start")
+            return
+        }
+
+        val current = CarMediaVolume.read(route)
+        when {
+            current == pending.written -> {
+                if (CarMediaVolume.write(route, pending.before)) {
+                    SoundTriggerSettings.clearPendingVolumeRestore(context)
+                    Log.i(TAG, "Restored car media volume after interrupted playback")
+                } else {
+                    Log.w(TAG, "Could not restore car media volume; keeping the pending restore")
+                }
+            }
+            current >= 0 -> {
+                SoundTriggerSettings.clearPendingVolumeRestore(context)
+                Log.i(TAG, "Car media volume changed since playback; leaving it unchanged")
+            }
+            else -> Log.w(TAG, "Could not read car media volume; keeping the pending restore")
         }
     }
 
@@ -200,10 +229,17 @@ object SoundTrigger {
         val route = volumeRoute ?: return
         val current = CarMediaVolume.read(route)
         if (current == volumeWritten && volumeBefore >= 0) {
-            CarMediaVolume.write(route, volumeBefore)
-            Log.i(TAG, "Restored car media volume $volumeWritten → $volumeBefore")
-        } else {
+            if (CarMediaVolume.write(route, volumeBefore)) {
+                appCtx?.let { SoundTriggerSettings.clearPendingVolumeRestore(it) }
+                Log.i(TAG, "Restored car media volume $volumeWritten → $volumeBefore")
+            } else {
+                Log.w(TAG, "Could not restore car media volume; keeping the pending restore")
+            }
+        } else if (current >= 0) {
+            appCtx?.let { SoundTriggerSettings.clearPendingVolumeRestore(it) }
             Log.i(TAG, "Car media volume changed during sound ($current); leaving it unchanged")
+        } else {
+            Log.w(TAG, "Could not read car media volume; keeping the pending restore")
         }
         volumeRoute = null
         volumeBefore = -1
@@ -251,16 +287,4 @@ object SoundTrigger {
         wakeLock = null
     }
 
-    private class MemoryAudioSource(private val bytes: ByteArray) : MediaDataSource() {
-        override fun readAt(position: Long, buffer: ByteArray, offset: Int, size: Int): Int {
-            if (position >= bytes.size) return -1
-            val n = minOf(size.toLong(), bytes.size - position).toInt()
-            System.arraycopy(bytes, position.toInt(), buffer, offset, n)
-            return n
-        }
-
-        override fun getSize(): Long = bytes.size.toLong()
-
-        override fun close() {}
-    }
 }

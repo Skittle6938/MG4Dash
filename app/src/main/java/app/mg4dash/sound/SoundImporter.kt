@@ -7,13 +7,12 @@ import android.os.storage.StorageManager
 import app.mg4dash.system.Log
 import java.io.File
 
-/**
- * Gestione ricerca e importazione di file audio da memorie USB o storage locale.
- */
+/** Finds and imports audio files from USB drives or local storage. */
 object SoundImporter {
     private const val TAG = "SoundImporter"
     private val SUPPORTED_EXTS = setOf("mp3", "wav", "ogg", "m4a", "flac", "aac")
-    const val MAX_DURATION_MS = 30_000L // Massimo 30 secondi per suoni di benvenuto / trigger
+    const val MAX_DURATION_MS = 30_000L
+    const val MAX_FILE_SIZE_BYTES = 20L * 1024L * 1024L
 
     data class AudioItem(
         val file: File,
@@ -21,14 +20,12 @@ object SoundImporter {
         val durationMs: Long
     )
 
-    /**
-     * Cerca file audio sia nei volumi USB montati che nella memoria interna Download/Music.
-     */
+    /** Search mounted USB volumes and the internal Download/Music folders. */
     fun findAvailableAudioFiles(context: Context): List<AudioItem> {
         val found = mutableListOf<File>()
         val sm = context.getSystemService(Context.STORAGE_SERVICE) as? StorageManager
 
-        // 1. Storage USB
+        // Search mounted USB storage first.
         sm?.storageVolumes?.filter { it.isRemovable && it.state == Environment.MEDIA_MOUNTED }?.forEach { vol ->
             try {
                 val dir = vol.javaClass.getMethod("getPathFile").invoke(vol) as? File
@@ -40,13 +37,13 @@ object SoundImporter {
             }
         }
 
-        // 2. Storage esterno / Altri mount
+        // Also check other readable mounts exposed under /storage.
         val fallbackUsb = File("/storage").listFiles()?.filter {
             it.name != "emulated" && it.name != "self" && it.canRead()
         }.orEmpty()
         fallbackUsb.forEach { scanDirectory(it, found, maxDepth = 3) }
 
-        // 3. Cartelle multimediali interne
+        // Search common internal media folders.
         listOf(
             Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MUSIC),
             Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
@@ -57,7 +54,7 @@ object SoundImporter {
             }
         }
 
-        // Filtra unici e analizza durata
+        // Deduplicate files and keep only supported durations.
         val retriever = MediaMetadataRetriever()
         val items = found.distinctBy { it.absolutePath }.mapNotNull { f ->
             try {
@@ -92,23 +89,35 @@ object SoundImporter {
         }
     }
 
-    /**
-     * Copia il file selezionato all'interno della directory privata dell'app,
-     * così che rimanga disponibile anche dopo la rimozione della chiavetta USB.
-     */
+    /** Copy the selected file into app-private storage so it remains available after USB removal. */
     fun importSound(context: Context, source: File): File? {
         return try {
+            if (!source.isFile || source.length() > MAX_FILE_SIZE_BYTES) {
+                Log.w(TAG, "Audio file exceeds the ${MAX_FILE_SIZE_BYTES / (1024 * 1024)} MB limit")
+                return null
+            }
             val destDir = SoundTriggerSettings.soundDir(context)
             val destFile = File(destDir, source.name)
             source.inputStream().use { input ->
                 destFile.outputStream().use { output ->
-                    input.copyTo(output)
+                    val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
+                    var total = 0L
+                    while (true) {
+                        val count = input.read(buffer)
+                        if (count < 0) break
+                        total += count
+                        if (total > MAX_FILE_SIZE_BYTES) {
+                            destFile.delete()
+                            throw IllegalArgumentException("Audio file exceeds the size limit")
+                        }
+                        output.write(buffer, 0, count)
+                    }
                 }
             }
-            // Pulisce vecchi suoni non più usati
+            // Remove previous imported sounds.
             destDir.listFiles()?.filter { it.isFile && it != destFile }?.forEach { it.delete() }
             SoundTriggerSettings.setSelectedSoundPath(context, destFile.absolutePath)
-            Log.i(TAG, "Imported sound ${source.name} to ${destFile.absolutePath}")
+            Log.i(TAG, "Imported audio ${source.name} to ${destFile.absolutePath}")
             destFile
         } catch (e: Exception) {
             Log.w(TAG, "Failed importing sound: ${e.message}")
