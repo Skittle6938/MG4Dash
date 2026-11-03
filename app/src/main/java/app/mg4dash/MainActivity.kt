@@ -27,6 +27,9 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import app.mg4dash.ui.put
+import app.mg4dash.ui.putImage
+import app.mg4dash.ui.putTint
 import app.mg4dash.apps.AppsActivity
 import app.mg4dash.car.CarBridge
 import app.mg4dash.car.VehicleState
@@ -356,11 +359,11 @@ class MainActivity : AppCompatActivity() {
         b.mapEmpty.visibility = if (effectiveWidget() == 0 && (loc == null || !mapCard.available)) View.VISIBLE else View.GONE
         if (!mapCard.available) b.mapEmpty.text = getString(R.string.map_unavailable)
         val speed = s.speedKmh?.takeIf { it >= 0f } ?: loc?.takeIf { it.hasSpeed() }?.speed?.times(3.6f)
-        b.mapSpeed.text = speed?.let { app.mg4dash.system.Units.speedText(this, it) } ?: "— ${app.mg4dash.system.Units.speedUnit(this)}"
-        b.mapInfo.text = listOfNotNull(
+        b.mapSpeed.put(speed?.let { app.mg4dash.system.Units.speedText(this, it) } ?: "— ${app.mg4dash.system.Units.speedUnit(this)}")
+        b.mapInfo.put(listOfNotNull(
             loc?.takeIf { it.hasBearing() }?.let { getString(R.string.heading, LocationRepo.cardinal(it.bearing)) },
             loc?.takeIf { it.hasAltitude() }?.let { getString(R.string.altitude, Math.round(it.altitude).toInt()) },
-        ).joinToString(" · ")
+        ).joinToString(" · "))
         loc?.let { mapCard.update(it) }
     }
 
@@ -430,7 +433,7 @@ class MainActivity : AppCompatActivity() {
             v ?: return
             v.isSelected = (level ?: 0) > 0
             // Siège : 0 à 3 flux de chaleur dessinés au-dessus de l'assise selon le niveau
-            if (showLevel) (v.getChildAt(0) as? ImageView)?.setImageResource(when (level) { 1 -> R.drawable.ic_seat_heat_1; 2 -> R.drawable.ic_seat_heat_2; 3 -> R.drawable.ic_seat_heat_3; else -> R.drawable.ic_seat_heat_0 })
+            if (showLevel) (v.getChildAt(0) as? ImageView)?.putImage(when (level) { 1 -> R.drawable.ic_seat_heat_1; 2 -> R.drawable.ic_seat_heat_2; 3 -> R.drawable.ic_seat_heat_3; else -> R.drawable.ic_seat_heat_0 })
         }
         paint(heatSeatL, s.seatHeatL, true); paint(heatSeatR, s.seatHeatR, true); paint(heatWheel, s.wheelHeat, false)
     }
@@ -501,10 +504,10 @@ class MainActivity : AppCompatActivity() {
         val on = s.hvacOn == true
         val known = s.connected && s.hvacOn != null
         b.climPower.isSelected = on
-        b.climPower.setColorFilter(color(if (on) R.color.accent_action else R.color.text_sub))
-        b.temp.text = if (on || s.driverTemp != null) VehicleState.tempLabel(s.driverTemp) else getString(R.string.no_data)
+        b.climPower.putTint(color(if (on) R.color.accent_action else R.color.text_sub))
+        b.temp.put(if (on || s.driverTemp != null) VehicleState.tempLabel(s.driverTemp) else getString(R.string.no_data))
         b.temp.setTextColor(color(if (on) R.color.text_value else R.color.text_disabled))
-        b.climOutside.text = s.outsideTemp?.let { getString(R.string.cl_outside, Math.round(it)) } ?: ""
+        b.climOutside.put(s.outsideTemp?.let { getString(R.string.cl_outside, Math.round(it)) } ?: "")
         // En mode AUTO, la voiture rapporte une vitesse peu parlante (souvent le maximum) :
         // on affiche « AUTO » et une jauge grisée plutôt qu'un niveau trompeur.
         val auto = on && s.autoOn == true
@@ -530,12 +533,12 @@ class MainActivity : AppCompatActivity() {
         // Taille auto du chiffre inutilisable en largeur libre : coupée en AUTO
         androidx.core.widget.TextViewCompat.setAutoSizeTextTypeWithDefaults(b.fanValue,
             if (auto) androidx.core.widget.TextViewCompat.AUTO_SIZE_TEXT_TYPE_NONE else androidx.core.widget.TextViewCompat.AUTO_SIZE_TEXT_TYPE_UNIFORM)
-        b.fanValue.text = when {
+        b.fanValue.put(when {
             !on -> "0"   // comme la jauge vide (#34)
             auto -> listOfNotNull("AUTO", s.autoAirVolume?.let { getString(listOf(R.string.cl_level_high, R.string.cl_level_medium, R.string.cl_level_low)[it.coerceIn(0, 2)]) })
                 .joinToString("  ·  ")
             else -> s.fanSpeed?.toString() ?: "—"
-        }
+        })
         b.fanValue.setTextColor(color(if (auto) R.color.accent_cold else if (on) R.color.text_value else R.color.text_disabled))
         b.fanValue.setTextSize(TypedValue.COMPLEX_UNIT_SP, if (auto) 20f else if (!on) 16f else 20f)
         b.chipAuto.isSelected = s.autoOn == true
@@ -547,7 +550,7 @@ class MainActivity : AppCompatActivity() {
         val autoRecirc = s.recirc == 2
         val inner = if (autoRecirc) actualRecirc else s.recirc == 0
         b.chipRecirc.isSelected = autoRecirc   // surligné seulement en mode auto ; pas de clignotement pendant la bascule
-        b.chipRecircIcon.setImageResource(if (inner == true) R.drawable.ic_air_recirc else R.drawable.ic_air_outside)
+        b.chipRecircIcon.putImage(if (inner == true) R.drawable.ic_air_recirc else R.drawable.ic_air_outside)
         b.chipRecircAuto.visibility = if (autoRecirc) View.VISIBLE else View.GONE
         // Direction de l'air ; en mode AUTO, c'est la voiture qui la choisit
         b.chipEco.isSelected = s.ecoOn == true
@@ -573,30 +576,31 @@ class MainActivity : AppCompatActivity() {
 
     private fun renderEnergy(s: VehicleState, avg: Float?) {
         val pct = s.batteryPercent
-        b.battery.text = VehicleState.socLabel(s) ?: "— %"
+        val batteryText = VehicleState.socLabel(s) ?: "— %"
         b.batteryGauge.currentBubble = false   // le grand % est juste au-dessus
         b.batteryGauge.soc = pct?.toFloat() ?: 0f
         b.batteryGauge.tripStart = app.mg4dash.energy.EnergyMonitor.tripStartSoc.value?.toFloat()
         b.batteryGauge.charging = VehicleState.isCharging(s.chargeStatus)
         blinkPlug(s.batteryPercent)
-        b.range.text = s.rangeKm?.let { app.mg4dash.system.Units.distText(this, it.toFloat()) } ?: "— ${app.mg4dash.system.Units.distUnit(this)}"
+        val rangeText = s.rangeKm?.let { app.mg4dash.system.Units.distText(this, it.toFloat()) } ?: "— ${app.mg4dash.system.Units.distUnit(this)}"
         // Carte puissance (#29) : unités deux fois plus petites que les chiffres
-        if (cardPower) { b.battery.text = halfUnit(b.battery.text); b.range.text = halfUnit(b.range.text) }
-        b.consumption.text = avg?.let { app.mg4dash.system.Units.consText(this, it) } ?: "—"
-        b.consAvgLabel.text = getString(if (app.mg4dash.system.Units.miles(this)) R.string.cons_avg_mi else R.string.cons_avg)
-        b.driveMode.text = VehicleState.driveModeLabel(s.driveMode)
+        b.battery.put(if (cardPower) halfUnit(batteryText) else batteryText)
+        b.range.put(if (cardPower) halfUnit(rangeText) else rangeText)
+        b.consumption.put(avg?.let { app.mg4dash.system.Units.consText(this, it) } ?: "—")
+        b.consAvgLabel.put(getString(if (app.mg4dash.system.Units.miles(this)) R.string.cons_avg_mi else R.string.cons_avg))
+        b.driveMode.put(VehicleState.driveModeLabel(s.driveMode))
         b.kersGauge.value = if (s.onePedal == 1) 4 else VehicleState.regenGauge(s.regenLevel)
-        b.kersLabel.text = VehicleState.regenLabel(s.regenLevel, s.onePedal)
+        b.kersLabel.put(VehicleState.regenLabel(s.regenLevel, s.onePedal))
         // État de charge : valeurs relevées dans le launcher d'origine non encore confirmées sur
         // véhicule ; on n'affiche que « en charge » quand un temps restant est fourni.
         val remain = s.chargeRemainMin
         val discharge = VehicleState.isDischargeMode(s.chargeStatus)
-        b.chargeState.text = when {
+        b.chargeState.put(when {
             !VehicleState.isPlugged(s.chargeStatus) -> ""
             VehicleState.isCharging(s.chargeStatus) && remain != null && remain in 1..2000 ->
                 getString(R.string.charging_eta, remain / 60, remain % 60)
             else -> VehicleState.chargeStatusLabel(s.chargeStatus)
-        }
+        })
         b.chargeState.setTextColor(color(if (discharge) R.color.accent_heat else R.color.accent_energy))
         // Bouton comme sur le launcher d'origine : inactif câble débranché, et bascule
         // automatiquement en « V2L » quand un adaptateur de décharge est branché.
@@ -619,11 +623,11 @@ class MainActivity : AppCompatActivity() {
         b.chargeAction.setBackgroundResource(if (discharge) R.drawable.bg_chip_heat else R.drawable.bg_chip)
         b.chargeAction.setTextColor(androidx.core.content.ContextCompat.getColorStateList(this, if (discharge) R.color.chip_text_heat else R.color.chip_text))
         b.chargeAction.isSelected = if (discharge) VehicleState.isDischarging(s) else s.chargeCtrl == 1
-        b.chargeAction.text = when {
+        b.chargeAction.put(when {
             discharge -> getString(if (VehicleState.isDischarging(s)) R.string.v2l_stop else R.string.v2l_start)
             s.chargeCtrl == 1 -> getString(R.string.stop_btn)
             else -> getString(R.string.charge_btn)
-        }
+        })
     }
 
     private fun onChargeAction() {
@@ -639,6 +643,7 @@ class MainActivity : AppCompatActivity() {
     // ── Média ────────────────────────────────────────────────────────────────
 
     private var mediaStyle: app.mg4dash.ui.MediaStyle? = null
+    private var shownArt: android.graphics.Bitmap? = null
 
     private fun wireMedia() {
         b.mediaPlay.setOnClickListener { MediaHub.playPause() }
@@ -659,20 +664,20 @@ class MainActivity : AppCompatActivity() {
 
     private fun renderMedia(m: MediaHub.NowPlaying) {
         if (!m.available) {
-            b.mediaSource.text = getString(R.string.title_media) + "  ▾"
-            b.mediaTitle.text = getString(R.string.no_media)
-            b.mediaArtist.text = getString(R.string.media_hint)
-            b.mediaAlbum.text = ""
+            b.mediaSource.put(getString(R.string.title_media) + "  ▾")
+            b.mediaTitle.put(getString(R.string.no_media))
+            b.mediaArtist.put(getString(R.string.media_hint))
+            b.mediaAlbum.put("")
         } else {
-            b.mediaSource.text = m.source.ifEmpty { getString(R.string.title_media) } + "  ▾"
-            b.mediaTitle.text = m.title.ifEmpty { m.source }
-            b.mediaArtist.text = m.artist
-            b.mediaAlbum.text = m.album
+            b.mediaSource.put(m.source.ifEmpty { getString(R.string.title_media) } + "  ▾")
+            b.mediaTitle.put(m.title.ifEmpty { m.source })
+            b.mediaArtist.put(m.artist)
+            b.mediaAlbum.put(m.album)
         }
-        b.mediaArt.setImageBitmap(m.art)
+        if (shownArt !== m.art) { shownArt = m.art; b.mediaArt.setImageBitmap(m.art) }
         mediaStyle?.update(m.art, m.packageName == "com.saicmotor.radio")
         b.mediaArtPlaceholder.visibility = if (m.art == null) View.VISIBLE else View.INVISIBLE
-        b.mediaPlay.setImageResource(if (m.playing) R.drawable.ic_pause else R.drawable.ic_play)
+        b.mediaPlay.putImage(if (m.playing) R.drawable.ic_pause else R.drawable.ic_play)
         b.mediaProgress.visibility = if (m.durationMs > 0) View.VISIBLE else View.INVISIBLE
         if (m.durationMs > 0) b.mediaProgress.progress = (m.positionMs * 1000 / m.durationMs).toInt()
         val controls = m.available
@@ -684,20 +689,20 @@ class MainActivity : AppCompatActivity() {
     private fun renderWeather(w: WeatherRepo.Weather?, s: VehicleState) {
         weatherCompact?.let { it.show(w, s.outsideTemp, prefs.weatherCity, prefs.weatherPage); return }
         if (w == null) {
-            b.weatherTemp.text = s.outsideTemp?.let { "${Math.round(it)}°" } ?: "—"
-            b.weatherLabel.text = getString(R.string.weather_pending)
-            b.weatherDetails.text = if (s.outsideTemp != null) getString(R.string.weather_outside_vehicle) else ""
-            b.weatherPlace.text = ""
-            b.weatherHours.removeAllViews()
+            b.weatherTemp.put(s.outsideTemp?.let { "${Math.round(it)}°" } ?: "—")
+            b.weatherLabel.put(getString(R.string.weather_pending))
+            b.weatherDetails.put(if (s.outsideTemp != null) getString(R.string.weather_outside_vehicle) else "")
+            b.weatherPlace.put("")
+            if (b.weatherHours.childCount > 0) b.weatherHours.removeAllViews()
             weatherDots?.visibility = View.GONE
             return
         }
-        b.weatherPlace.text = w.place
-        b.weatherIcon.setImageResource(WeatherRepo.icon(w.code))
-        b.weatherIcon.setColorFilter(color(WeatherRepo.iconColor(w.code)))
-        b.weatherTemp.text = "${w.tempC}°"
-        b.weatherLabel.text = WeatherRepo.label(w.code)
-        b.weatherDetails.text = getString(R.string.weather_details, w.feelsC, Math.round(app.mg4dash.system.Units.dist(this, w.windKmh.toFloat())), w.humidity, app.mg4dash.system.Units.speedUnit(this))
+        b.weatherPlace.put(w.place)
+        b.weatherIcon.putImage(WeatherRepo.icon(w.code))
+        b.weatherIcon.putTint(color(WeatherRepo.iconColor(w.code)))
+        b.weatherTemp.put("${w.tempC}°")
+        b.weatherLabel.put(WeatherRepo.label(w.code))
+        b.weatherDetails.put(getString(R.string.weather_details, w.feelsC, Math.round(app.mg4dash.system.Units.dist(this, w.windKmh.toFloat())), w.humidity, app.mg4dash.system.Units.speedUnit(this)))
         val page = prefs.weatherPage
         fillForecast(b.weatherHours, if (page == 0) w.hours.map { Triple(app.mg4dash.system.Clock.hourLabel(this, it.label), it.code, "${it.tempC}°") }
             else w.days.map { Triple(it.label, it.code, "${it.minC}/${it.maxC}°") })
@@ -1141,11 +1146,16 @@ class MainActivity : AppCompatActivity() {
     private fun kwh(v: Float) = String.format(Locale.getDefault(), "%.1f", v)
 
     /** Énergie depuis le démarrage, répartie comme sur la page Énergie (mesures de MG4Dash). */
+    private var tripShown: String? = null
+
     private fun renderTripEnergy() {
         stackTitle(b.secondaryTitle, getString(R.string.sw_energy))
         val t = app.mg4dash.energy.EnergyMonitor.sinceStart.value
         val ok = t.outKwh > 0f
         val g = b.secondaryGrid
+        val key = "$ok ${t.driveKwh} ${t.climKwh} ${t.heatKwh} ${t.accKwh} ${t.outKwh}"
+        if (builtMode == 0 && key == tripShown && g.childCount > 0) return
+        tripShown = key
         g.removeAllViews()
         g.orientation = LinearLayout.VERTICAL
         // Lisible d'un coup d'œil : une grosse barre colorée et les pourcentages ; le détail est sur la page Énergie.
@@ -1365,9 +1375,9 @@ class MainActivity : AppCompatActivity() {
             if (builtMode != 1) return
         }
         val regen = kw != null && kw < -0.05f && !plugged
-        powerValue?.text = kw?.let { String.format(Locale.getDefault(), "%.1f kW", kotlin.math.abs(it)) } ?.let { if (cardPower) scaleUnit(it) else it } ?: "—"
+        powerValue?.put(kw?.let { String.format(Locale.getDefault(), "%.1f kW", kotlin.math.abs(it)) } ?.let { if (cardPower) scaleUnit(it) else it } ?: "—")
         powerValue?.setTextColor(color(if (regen) R.color.accent_energy else R.color.text_value))
-        powerLabel?.text = getString(when { plugged -> R.string.sw_charging; regen -> R.string.sw_recovering; else -> R.string.sw_drawn })
+        powerLabel?.put(getString(when { plugged -> R.string.sw_charging; regen -> R.string.sw_recovering; else -> R.string.sw_drawn }))
         powerBar?.kw = if (plugged) 0f else kw ?: 0f
         val bar = powerBar; val under = powerExtra
         if (bar != null && under != null) powerFx?.let { fx ->
@@ -1388,7 +1398,7 @@ class MainActivity : AppCompatActivity() {
             fx.update(if (plugged) 0f else kw ?: 0f, bar.peakKw * 0.8f, bar.peakKw)
         }
         val avg = app.mg4dash.energy.EnergyMonitor.sinceStart.value.per100
-        powerAvg?.text = avg?.let { "${app.mg4dash.system.Units.consText(this, it)} ${if (app.mg4dash.system.Units.miles(this)) "mi/kWh" else "kWh/100"}" }?.let { if (cardPower) scaleUnit(it) else it } ?: "—"
+        powerAvg?.put(avg?.let { "${app.mg4dash.system.Units.consText(this, it)} ${if (app.mg4dash.system.Units.miles(this)) "mi/kWh" else "kWh/100"}" }?.let { if (cardPower) scaleUnit(it) else it } ?: "—")
         if (cardPower) powerExtra?.let { tv ->
             val trip = app.mg4dash.energy.EnergyMonitor.tripSeq
             if (trip != minMaxTrip) { if (minMaxTrip >= 0) { minVolts = null; maxAmps = null }; minMaxTrip = trip }
@@ -1414,12 +1424,12 @@ class MainActivity : AppCompatActivity() {
                     if (a < -0.5f) setSpan(android.text.style.ForegroundColorSpan(color(R.color.accent_energy)), 0, length, 0)
                 }
             }
-            tv.text = android.text.SpannableStringBuilder()
+            tv.put(android.text.SpannableStringBuilder()
                 .append(line(volts?.let { half(String.format(Locale.getDefault(), "%.0f V", it)) }, minVolts?.let { String.format(Locale.getDefault(), "%.0f min", it) }))
                 .append(android.text.SpannableString("   |   ").apply { setSpan(android.text.style.ForegroundColorSpan(color(R.color.text_disabled)), 0, length, 0) })
                 .append(ampsTxt ?: "—").append(shownMax?.let { m ->
                     android.text.SpannableString(String.format(Locale.getDefault(), " %.1f max", m)).apply { setSpan(android.text.style.ForegroundColorSpan(dim), 0, length, 0); setSpan(android.text.style.RelativeSizeSpan(0.7f), length - 3, length, 0) }
-                } ?: "")
+                } ?: ""))
         } else powerExtra?.let { tv ->
             val parts = mutableListOf<CharSequence>()
             volts?.let { parts.add(String.format(Locale.getDefault(), "%.0f V", it)) }
@@ -1429,7 +1439,7 @@ class MainActivity : AppCompatActivity() {
                     setSpan(android.text.style.ForegroundColorSpan(color(R.color.accent_energy)), 0, txt.length, 0)
                 } else txt)
             }
-            tv.text = android.text.TextUtils.join(if (cardPower) " · " else "   ·   ", parts)
+            tv.put(android.text.TextUtils.join(if (cardPower) " · " else "   ·   ", parts))
         }
     }
 
@@ -1487,7 +1497,14 @@ class MainActivity : AppCompatActivity() {
     private fun observe() {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-                launch { CarBridge.state.collect { s -> renderClimate(s); renderEnergy(s, ConsumptionEstimator.average.value); stackAuto(s) } }
+                launch {
+                    var shown: VehicleState? = null
+                    CarBridge.state.collect { s ->
+                        // Vitesse et compteur changent sans cesse en roulant, et ces cartes ne les affichent pas
+                        val quiet = s.copy(speedKmh = null, odometerKm = null)
+                        if (quiet != shown) { shown = quiet; renderClimate(s); renderEnergy(s, ConsumptionEstimator.average.value); stackAuto(s) }
+                    }
+                }
                 launch { ConsumptionEstimator.average.collect { renderEnergy(CarBridge.state.value, it) } }
                 launch { MediaHub.now.collect { renderMedia(it) } }
                 launch { WeatherRepo.shown.collect { renderWeather(it, CarBridge.state.value) } }
@@ -1513,9 +1530,10 @@ class MainActivity : AppCompatActivity() {
                         renderSecondary()
                         renderWeatherFallbackOnly()
                         if (effectiveWidget() != lastWidgetMode || effectiveWidget() == 2) { lastWidgetMode = effectiveWidget(); applyHomeWidget() }
-                        actualRecirc = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+                        val recircNow = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
                             app.mg4dash.car.CarProps.readAny(354419976).let { v -> when (v) { "true", "1" -> true; "false", "0" -> false; else -> null } }
                         }
+                        if (recircNow != actualRecirc) { actualRecirc = recircNow; renderClimate(CarBridge.state.value) }
                         delay(5_000)
                     }
                 }

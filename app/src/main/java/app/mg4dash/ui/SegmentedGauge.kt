@@ -19,10 +19,10 @@ class SegmentedGauge @JvmOverloads constructor(
 
     /** Nombre de segments allumés, 0..segments ; négatif = inconnu (tout éteint, grisé). */
     var value: Int = 0
-        set(v) { field = v; invalidate() }
+        set(v) { if (field != v) { field = v; invalidate() } }
 
     var onColor: Int = app.mg4dash.ui.Themes.color(context, R.color.accent_cold)
-        set(v) { field = v; invalidate() }
+        set(v) { if (field != v) { field = v; invalidate() } }
 
     /** Toucher une case : son index 0..segments-1 (null = jauge non tactile). */
     var onSegmentTap: ((Int) -> Unit)? = null
