@@ -35,6 +35,14 @@ class ScreenOffActivity : Activity() {
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean { wake(); return true }
 
+    /** SWI68 : c'est la fenêtre noire de SystemUI qui prend le toucher ; à sa disparition, l'écran est déjà rallumé. */
+    private var covered = false
+
+    override fun onWindowFocusChanged(hasFocus: Boolean) {
+        super.onWindowFocusChanged(hasFocus)
+        if (!hasFocus) covered = true else if (covered && off) wake()
+    }
+
     private fun wake() {
         handler.removeCallbacksAndMessages(null)
         if (off) { CarBridge.setDisplay(true); off = false }
