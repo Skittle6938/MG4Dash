@@ -611,3 +611,15 @@ tu_show|Show the gesture tour|Revoir le tuto des gestes|Gestentour anzeigen|Ver 
 apps_open|OPEN|OUVERTES|GEÖFFNET|ABIERTAS|APERTE|GEOPEND|AÇIK
 apps_all|ALL APPS|TOUTES LES APPLIS|ALLE APPS|TODAS LAS APLICACIONES|TUTTE LE APP|ALLE APPS|TÜM UYGULAMALAR
 apps_close_all|Close all|Tout fermer|Alle schließen|Cerrar todo|Chiudi tutto|Alles sluiten|Tümünü kapat
+st_conn_icons|Connection icons on the weather card: %1$s|Icônes de connexion sur la carte météo : %1$s|Verbindungssymbole auf der Wetterkarte: %1$s|Iconos de conexión en la tarjeta del tiempo: %1$s|Icone di connessione sulla scheda meteo: %1$s|Verbindingspictogrammen op de weerkaart: %1$s|Hava kartında bağlantı simgeleri: %1$s
+conn_title|Connections|Connexions|Verbindungen|Conexiones|Connessioni|Verbindingen|Bağlantılar
+conn_bt|Bluetooth|Bluetooth|Bluetooth|Bluetooth|Bluetooth|Bluetooth|Bluetooth
+conn_wifi|Wi-Fi|Wi-Fi|WLAN|Wi-Fi|Wi-Fi|Wifi|Wi-Fi
+conn_hotspot|Hotspot|Point d'accès|Hotspot|Punto de acceso|Hotspot|Hotspot|Erişim noktası
+conn_signal|Mobile network|Réseau mobile|Mobilfunknetz|Red móvil|Rete mobile|Mobiel netwerk|Mobil ağ
+conn_usb|USB|USB|USB|USB|USB|USB|USB
+conn_on|On|Activé|An|Activado|Attivato|Aan|Açık
+conn_off|Off|Coupé|Aus|Desactivado|Disattivato|Uit|Kapalı
+conn_not_connected|Not connected|Non connecté|Nicht verbunden|No conectado|Non connesso|Niet verbonden|Bağlı değil
+conn_no_network|No network|Pas de réseau|Kein Netz|Sin red|Nessuna rete|Geen netwerk|Ağ yok
+conn_usb_count|%1$d connected|%1$d connecté(s)|%1$d verbunden|%1$d conectado(s)|%1$d collegato/i|%1$d verbonden|%1$d bağlı

@@ -112,6 +112,7 @@ class SettingsActivity : AppCompatActivity() {
         toggle(style, R.string.st_energy_card_power, R.string.st_energy_card_power_desc, { prefs.energyCardPower }) { prefs.energyCardPower = it }
         toggle(style, R.string.st_power_va, R.string.st_power_va_desc, { prefs.powerVa }) { prefs.powerVa = it }
         toggle(style, R.string.st_stack_auto, null, { prefs.stackAuto }) { prefs.stackAuto = it }
+        toggle(style, R.string.st_conn_icons, null, { prefs.connectionIcons }) { prefs.connectionIcons = it }
         // Source audio : menu déroulant (même style que les menus de la carte)
         val src = panel(homeR, getString(R.string.st_audio_source).uppercase())
         val srcLabels = listOf(getString(R.string.st_src_auto), getString(R.string.st_src_car), "Radio", "Bluetooth", "USB", "CarPlay / Android Auto")

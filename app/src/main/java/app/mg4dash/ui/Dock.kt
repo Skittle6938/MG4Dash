@@ -280,7 +280,9 @@ object Dock {
             }
             if (item.label == R.string.dock_aa) markOff(activity, icon)
             cell.addView(icon, android.widget.FrameLayout.LayoutParams(kit.dp(size), kit.dp(size), android.view.Gravity.CENTER))
-            if (item.label == R.string.dock_vehicle) wifiBadge(activity, cell, size)
+            // Remplacé par les icônes de connexion de la météo, absentes de l'accueil épuré (#86)
+            val prefs = app.mg4dash.system.Prefs(activity)
+            if (item.label == R.string.dock_vehicle && (!prefs.connectionIcons || prefs.homeStyle == 1)) wifiBadge(activity, cell, size)
             if (item.label == R.string.dock_vehicle) watchEsc(activity, cell, icon, selected)
             if (!pageGestures(activity, cell, icon, item, current, selected)) {
                 cell.setOnClickListener { open(activity, item, current) }

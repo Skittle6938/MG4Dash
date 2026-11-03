@@ -186,6 +186,11 @@ class Prefs(context: Context) {
         get() = sp.getString("connection_off", null)
         set(v) = sp.edit().putString("connection_off", v).apply()
 
+    /** Icônes de connexion sur la carte météo (#86). */
+    var connectionIcons: Boolean
+        get() = sp.getBoolean("connection_icons", true)
+        set(v) = sp.edit().putBoolean("connection_icons", v).apply()
+
     /** Lecture au démarrage de la voiture : 0 comme à l'arrêt (défaut), 1 toujours en pause, 2 toujours en lecture. */
     var startPlayback: Int
         get() = sp.getInt("start_playback", 0)

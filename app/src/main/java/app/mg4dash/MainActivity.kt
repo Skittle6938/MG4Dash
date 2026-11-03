@@ -75,6 +75,7 @@ class MainActivity : AppCompatActivity() {
             builtVertical = Dock.vertical(this)
             builtHideTitles = prefs.hideTitles
             builtHeating = CarBridge.heatingShown(this)
+            builtConnections = prefs.connectionIcons
             val sh = SimpleHome(this)
             simple = sh
             setContentView(sh.root)
@@ -124,6 +125,7 @@ class MainActivity : AppCompatActivity() {
         })
         buildDock()
         setupWeatherClock()
+        setupConnections()
         wireClimate()
         wireMedia()
         mediaStyle = app.mg4dash.ui.MediaStyle.apply(this, b)
@@ -298,6 +300,22 @@ class MainActivity : AppCompatActivity() {
         tickWeatherClock()
     }
 
+    private var builtConnections = false
+
+    /** Icônes de connexion (#86) : la ville passe à gauche de l'en-tête de la météo, les icônes à droite. */
+    private fun setupConnections() {
+        builtConnections = prefs.connectionIcons
+        if (!builtConnections) return
+        val row = app.mg4dash.ui.ConnectionRow(this)
+        weatherCompact?.let { it.addConnections(row); return }
+        val header = b.weatherPlace.parent as LinearLayout
+        val title = header.getChildAt(0)
+        (title.layoutParams as LinearLayout.LayoutParams).apply { width = LinearLayout.LayoutParams.WRAP_CONTENT; weight = 0f }
+        if (title.visibility == View.INVISIBLE) title.visibility = View.GONE
+        (b.weatherPlace.layoutParams as LinearLayout.LayoutParams).apply { width = 0; weight = 1f }
+        header.addView(row)
+    }
+
     private val weatherClockTick = Runnable { tickWeatherClock() }
 
     private fun tickWeatherClock() {
@@ -320,6 +338,7 @@ class MainActivity : AppCompatActivity() {
         // Style d'accueil changé dans les paramètres : on reconstruit l'écran
         if ((prefs.homeStyle == 1) != simpleMode || (prefs.homeStyle == 2) != mapLayout || Dock.vertical(this) != builtVertical || prefs.hideTitles != builtHideTitles ||
             CarBridge.heatingShown(this) != builtHeating || (!simpleMode && cardPower != builtCardPower) ||
+            prefs.connectionIcons != builtConnections ||
             app.mg4dash.ui.Themes.signature(this) != themeSig) { app.mg4dash.ui.Themes.recreateSmooth(this); return }
         // Appli de la carte désinstallée entre-temps (#54) : on revient à la carte OpenStreetMap
         mapAppCn?.let { if (!mapAppInstalled(it)) applyHomeWidget() }

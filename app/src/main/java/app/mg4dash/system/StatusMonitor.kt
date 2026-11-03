@@ -31,6 +31,43 @@ object StatusMonitor {
         )
     }
 
+    /** Icônes de connexion de l'accueil. [signalLevel] : null si la voiture n'a pas de T-box lisible. */
+    data class Connections(
+        val btOn: Boolean, val btConnected: Boolean, val btName: String?,
+        val wifiOn: Boolean, val wifiConnected: Boolean, val wifiName: String?,
+        val hotspotOn: Boolean, val signalLevel: Int?, val signalMode: Int, val usbCount: Int,
+    )
+
+    const val SIGNAL_MAX = 4
+    private const val CSQ_MAX = 31
+
+    /** Appeler hors du fil principal : service de la T-box et stockage. */
+    fun connections(context: Context): Connections {
+        val s = read(context)
+        val wm = context.applicationContext.getSystemService(Context.WIFI_SERVICE) as? WifiManager
+        val btName = if (!s.btConnected) null else try {
+            BluetoothAdapter.getDefaultAdapter()?.bondedDevices?.firstOrNull { d ->
+                d.javaClass.getMethod("isConnected").invoke(d) == true
+            }?.name
+        } catch (_: Throwable) { null }
+        val ssid = if (!s.wifiConnected) null else try {
+            wm?.connectionInfo?.ssid?.trim('"')?.takeUnless { it.isBlank() || it == "<unknown ssid>" }
+        } catch (_: Exception) { null }
+        // Méthode masquée, comme le bandeau d'origine (ApController de SystemUI)
+        val ap = try { wm?.javaClass?.getMethod("isWifiApEnabled")?.invoke(wm) == true } catch (_: Throwable) { false }
+        val tbox = try { app.mg4dash.car.CarBridge.tbox() } catch (_: Exception) { null }
+        // Même calcul que le bandeau d'origine (SignalController) : puissance 0 à 31, en crans
+        val level = try {
+            tbox?.let { t -> if (!t.connected) 0 else (t.csq.coerceIn(0, CSQ_MAX) * SIGNAL_MAX / CSQ_MAX) }
+        } catch (_: Exception) { null }
+        val mode = try { tbox?.wanStatus ?: 0 } catch (_: Exception) { 0 }
+        val storage = context.getSystemService(Context.STORAGE_SERVICE) as? android.os.storage.StorageManager
+        val usb = try {
+            storage?.storageVolumes?.count { it.isRemovable && it.state == android.os.Environment.MEDIA_MOUNTED } ?: 0
+        } catch (_: Exception) { 0 }
+        return Connections(s.btOn, s.btConnected, btName, s.wifiOn, s.wifiConnected, ssid, ap, level, mode.coerceIn(0, 4), usb)
+    }
+
     fun hasInternet(context: Context): Boolean {
         val cm = context.getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager ?: return false
         val caps = try { cm.getNetworkCapabilities(cm.activeNetwork) } catch (_: Exception) { null } ?: return false
