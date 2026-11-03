@@ -200,7 +200,7 @@
     <string name="vh_soh">Salute batteria (stimata)</string>
     <string name="vh_soh_detail">Stimata su circa %1$s percorsi.</string>
     <string name="vh_soh_progress">In misura: %1$s %% di 15 %%, finora %2$s.</string>
-    <string name="vh_soh_disclaimer">Stima MG4Dash, non ufficiale. In prova.</string>
+    <string name="vh_soh_disclaimer" formatted="false">Stima, non ufficiale. Riferimento: energia da 100 % a 0 % visualizzati.</string>
     <string name="st_home">SCHERMATA HOME</string>
     <string name="st_home_desc">«Sostituisci home SAIC» rende MG4Dash la schermata iniziale. Niente viene disinstallato o eliminato: la home originale è solo disattivata come schermata iniziale e il resto dell\'auto funziona come prima (telecamera, radio, sorgenti audio, barra di sistema). La Modalità manutenzione la riattiva con un tocco, ad esempio prima di un tagliando.</string>
     <string name="st_replace">Sostituisci home SAIC</string>

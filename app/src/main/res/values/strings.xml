@@ -200,7 +200,7 @@
     <string name="vh_soh">Battery health (estimated)</string>
     <string name="vh_soh_detail">Estimated over about %1$s driven.</string>
     <string name="vh_soh_progress">Measuring: %1$s %% of 15 %%, %2$s so far.</string>
-    <string name="vh_soh_disclaimer">MG4Dash estimate, not official. Being tested.</string>
+    <string name="vh_soh_disclaimer" formatted="false">Estimate, not official. Reference: energy from 100 % to 0 % displayed.</string>
     <string name="st_home">HOME SCREEN</string>
     <string name="st_home_desc">“Replace SAIC home” makes MG4Dash the home screen. Nothing is uninstalled or deleted: the original home screen is only switched off as the home screen, and the rest of the car keeps working as before (camera, radio, audio sources, system bar). Maintenance mode switches it back on in one tap, for example before a dealer visit.</string>
     <string name="st_replace">Replace SAIC home</string>

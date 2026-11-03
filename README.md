@@ -145,7 +145,7 @@ Charging (start / stop, charge limit where the car applies it, AC current, time 
 
 ### Vehicle
 ![Vehicle](docs/screenshots/vehicle.png?v=25)
-Drive mode (with Eco, Snow and Custom where available), regeneration (level 6 is one-pedal driving), driver assistance, tyre pressures and temperatures, vehicle status, a shortcut to MG4 Control, and the **battery health estimate**: while driving, MG4Dash measures the energy taken from the battery and divides it by the drop in battery %; from a 15 % drop (added up over several trips) it gives a dated measurement of the usable capacity, averaged over 30 days and compared with a new battery of your model (51, 64 or 77 kWh). This is an estimate, not an official measurement.
+Drive mode (with Eco, Snow and Custom where available), regeneration (level 6 is one-pedal driving), driver assistance, tyre pressures and temperatures, vehicle status, a shortcut to MG4 Control, and the **battery health estimate**: while driving, MG4Dash measures the energy taken from the battery and divides it by the drop in battery %; from a 15 % drop (added up over several trips) it gives a dated measurement of the usable capacity, averaged over 30 days and compared with a new battery of your model. The default references are 49, 61 and 72.5 kWh for the 51, 64 and 77 kWh models: they are estimates of the energy from 100 % to 0 % displayed, not the battery's total usable capacity, since it also keeps a buffer. You can enter your own in the settings. This is an estimate, not an official measurement.
 
 ### Sound
 ![Sound](docs/screenshots/sound.png?v=25)
@@ -312,6 +312,22 @@ A short tour of the main gestures opens after a first install (*Skip* closes it 
 ## Support
 
 MG4Dash is free and will stay free. If it is useful to you and you want to help cover the AI subscription and the time spent on it, you can leave a few euros here: [Ko-fi](https://ko-fi.com/skittle6938). Entirely optional, thank you!
+
+## Appendix: MG4 battery capacities
+
+The most likely values for a new battery, measured from 100 % until the car stops, at the battery (without charging losses):
+
+- **51 kWh LFP: about 50 kWh**
+  - Between the 49.5 kWh measured in tests and the 50.8 kWh reported by owners.
+  - From 100 % to 0 % shown: about 49 kWh.
+- **64 kWh NMC: about 62.5 kWh**
+  - Between the official 61.7 kWh and the 63.2 kWh measured by Green NCAP.
+  - From 100 % to 0 % shown: about 61 kWh.
+- **77 kWh NMC: about 74.5 kWh**
+  - The official 74.4 kWh are probably reached or slightly exceeded, as on the 64 kWh.
+  - From 100 % to 0 % shown: about 72.5 kWh.
+
+For range, rely on the "0 % shown" values. These are the ones MG4Dash uses by default.
 
 ## Licence
 

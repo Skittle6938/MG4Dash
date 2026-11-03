@@ -8,9 +8,9 @@ class Prefs(context: Context) {
     private val sp: SharedPreferences =
         context.applicationContext.getSharedPreferences("mg4launcher", Context.MODE_PRIVATE)
 
-    /** Usable battery capacity, for the consumption estimate; with no measurement, the chosen model's (51 kWh: 50.8 usable). */
+    /** Usable battery capacity, for the consumption estimate; with no measurement, the chosen model's (51 kWh: 49 from 100 % to 0 % displayed). */
     var batteryKwh: Float
-        get() = sp.getFloat("battery_kwh", app.mg4dash.energy.BatteryCapacity.MODELS.firstOrNull { it.first == batteryModel }?.second ?: 50.8f)
+        get() = sp.getFloat("battery_kwh", app.mg4dash.energy.BatteryCapacity.MODELS.firstOrNull { it.first == batteryModel }?.second ?: 49f)
         set(v) = sp.edit().putFloat("battery_kwh", v).apply()
 
     /** Model's original battery, in gross kWh: 51, 64 or 77 (battery health reference). */
