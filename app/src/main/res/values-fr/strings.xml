@@ -625,6 +625,16 @@
     <string name="conn_no_network">Pas de réseau</string>
     <string name="conn_usb_count">%1$d connecté(s)</string>
     <string name="en_time_note">Placée selon la date et lissée · moyenne (pointillés)</string>
+    <string name="st_sound_trigger">Son au démarrage</string>
+    <string name="st_sound_trigger_desc">Choisissez un fichier audio sur une clé USB ou dans la mémoire interne. Il est copié dans l’application et reste disponible après le retrait de la clé.</string>
+    <string name="st_sound_boot_trigger">Lire au démarrage</string>
+    <string name="st_sound_pick_file">Choisir un fichier audio</string>
+    <string name="st_sound_no_file">Aucun son sélectionné</string>
+    <string name="st_sound_test">Écouter</string>
+    <string name="st_sound_stop">Arrêter</string>
+    <string name="st_sound_volume">Volume média de la voiture</string>
+    <string name="st_sound_vol_default">Volume actuel de la voiture</string>
+    <string name="st_sound_volume_level">%1$d / 32</string>
     <string name="aa_title">ANDROID AUTO</string>
     <string name="aa_ready">Téléphone connecté · Appuyer pour ouvrir</string>
     <string name="aa_waiting">Branchez votre téléphone en USB</string>

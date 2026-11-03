@@ -625,6 +625,16 @@
     <string name="conn_no_network">Nessuna rete</string>
     <string name="conn_usb_count">%1$d collegato/i</string>
     <string name="en_time_note">Per data e livellata · media (tratteggiata)</string>
+    <string name="st_sound_trigger">Audio all\'avvio</string>
+    <string name="st_sound_trigger_desc">Scegli un file audio dalla chiavetta USB o dalla memoria interna. Viene copiato nell’app e resta disponibile anche dopo aver rimosso la chiavetta.</string>
+    <string name="st_sound_boot_trigger">Riproduci all’avvio</string>
+    <string name="st_sound_pick_file">Scegli audio</string>
+    <string name="st_sound_no_file">Nessun file selezionato</string>
+    <string name="st_sound_test">Ascolta</string>
+    <string name="st_sound_stop">Ferma</string>
+    <string name="st_sound_volume">Volume media auto</string>
+    <string name="st_sound_vol_default">Volume attuale dell\'auto</string>
+    <string name="st_sound_volume_level">%1$d / 32</string>
     <string name="aa_title">ANDROID AUTO</string>
     <string name="aa_ready">Telefono connesso · Tocca per aprire</string>
     <string name="aa_waiting">Collega il telefono via USB</string>

@@ -90,6 +90,11 @@ object CarProps {
         }
     }
 
+    /** Gestionnaire CarAudioManager réutilisant la connexion Car déjà ouverte. */
+    fun carAudioManager(): Any? = car?.let { c ->
+        runCatching { c.javaClass.getMethod("getCarManager", String::class.java).invoke(c, "audio") }.getOrNull()
+    }
+
     val ready: Boolean get() = BuildConfig.MOCK || cpm != null
 
     /**
