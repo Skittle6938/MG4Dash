@@ -301,6 +301,16 @@ class SimpleHome(private val a: AppCompatActivity) {
         weatherPlace = kit.text("", 22f, R.color.text_sub)
         col.addView(weatherLabel); col.addView(weatherPlace, kit.lp(-1, -2, t = 4))
         p.addView(col, kit.lp(0, -2, 1f, l = 20))
+        // Heure à droite, à la minute (barre réduite de ce style : pas d'autre horloge)
+        val clock = big("", 48f, light = true)
+        p.addView(clock, kit.lp(-2, -2, l = 16))
+        clock.post(object : Runnable {
+            override fun run() {
+                if (!clock.isAttachedToWindow) return
+                clock.text = app.mg4dash.system.Clock.hm(a)
+                clock.postDelayed(this, 60_000L - System.currentTimeMillis() % 60_000L)
+            }
+        })
         p.setOnClickListener { WeatherRepo.refreshNow(a) }
         return p
     }

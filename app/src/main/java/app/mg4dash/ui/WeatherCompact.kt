@@ -17,10 +17,10 @@ import java.util.Locale
  * Météo du style Carte, façon widget (issue #6) :
  *  - à gauche, l'icône et la température, puis « min~max · état » ;
  *  - à droite, la date, l'heure en grand et la ville ;
- *  - en bas, une pile : prévisions par heure ou par jour (balayer ou toucher les points).
+ *  - en bas, une pile : prévisions par heure ou par jour (balayer).
  * Sans données météo (pas de connexion) : la date, l'heure et la température extérieure de la voiture.
  */
-class WeatherCompact(context: Context, private val onPage: () -> Unit) : LinearLayout(context) {
+class WeatherCompact(context: Context) : LinearLayout(context) {
     private val d = resources.displayMetrics.density
     private fun c(res: Int) = Themes.color(context, res)
     private fun tv(sp: Float, colorRes: Int, bold: Boolean = false) = TextView(context).apply {
@@ -40,11 +40,7 @@ class WeatherCompact(context: Context, private val onPage: () -> Unit) : LinearL
     private val city = tv(18f, R.color.text_sub).apply { gravity = Gravity.END }
     private val cityLine = LinearLayout(context).apply { orientation = HORIZONTAL; gravity = Gravity.CENTER_VERTICAL or Gravity.END }
     private val forecast = LinearLayout(context).apply { orientation = HORIZONTAL }
-    private val dots = tv(15f, R.color.text_title).apply {
-        letterSpacing = 0.3f; gravity = Gravity.CENTER
-        setPadding((12 * d).toInt(), 0, (12 * d).toInt(), 0)
-        setOnClickListener { onPage() }
-    }
+    private val right = LinearLayout(context)
 
     init {
         orientation = VERTICAL
@@ -57,15 +53,19 @@ class WeatherCompact(context: Context, private val onPage: () -> Unit) : LinearL
         left.addView(sub, LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT).apply { topMargin = (4 * d).toInt() })
         left.addView(sub2, LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT).apply { topMargin = (2 * d).toInt() })
         top.addView(left, LayoutParams(0, LayoutParams.WRAP_CONTENT, 1f))
-        val right = LinearLayout(context).apply { orientation = VERTICAL; gravity = Gravity.END }
-        right.addView(date); right.addView(time); right.addView(cityLine)
+        right.apply { orientation = VERTICAL; gravity = Gravity.END }
+        right.addView(date); right.addView(time)
         cityLine.addView(city)
         top.addView(right, LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT))
+        // Ville et icônes de connexion tout en haut à droite (#86)
+        addView(cityLine, LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT))
         addView(top, LayoutParams(LayoutParams.MATCH_PARENT, 0, 1f))
         addView(forecast, LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT))
-        addView(dots, LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT).apply { gravity = Gravity.CENTER_HORIZONTAL })
         tick()
     }
+
+    /** Marge à gauche du contenu, sous la ville : la place du bouton antibrouillards. */
+    fun setLeftInset(px: Int) = top.setPadding(px, 0, 0, 0)
 
     /** Icônes de connexion (#86) : à droite de la ville. */
     fun addConnections(row: android.view.View) = cityLine.addView(row)
@@ -99,8 +99,9 @@ class WeatherCompact(context: Context, private val onPage: () -> Unit) : LinearL
             sub.put(context.getString(R.string.weather_outside_short))
             sub2.visibility = GONE
             top.gravity = Gravity.CENTER
+            right.setPadding(0, 0, 0, 0)
             if (forecast.childCount > 0) forecast.removeAllViews()
-            forecast.visibility = GONE; dots.visibility = GONE
+            forecast.visibility = GONE
             return
         }
         icon.visibility = VISIBLE
@@ -109,6 +110,8 @@ class WeatherCompact(context: Context, private val onPage: () -> Unit) : LinearL
         temp.setTextSize(TypedValue.COMPLEX_UNIT_SP, 50f)
         time.setTextSize(TypedValue.COMPLEX_UNIT_SP, 50f)
         top.gravity = Gravity.TOP
+        // Date et heure un peu plus bas : de l'air sous les icônes de connexion
+        right.setPadding(0, (RIGHT_TOP_DP * d).toInt(), 0, 0)
         icon.setImageResource(WeatherRepo.icon(w.code))
         icon.setColorFilter(c(WeatherRepo.iconColor(w.code)))
         temp.text = "${w.tempC}°"
@@ -121,8 +124,7 @@ class WeatherCompact(context: Context, private val onPage: () -> Unit) : LinearL
             "${Math.round(app.mg4dash.system.Units.dist(context, w.windKmh.toFloat()))} ${app.mg4dash.system.Units.speedUnit(context)}",
             w.rainPct?.let { context.getString(R.string.weather_rain, it) },
         ).joinToString("  ·  ")
-        forecast.visibility = VISIBLE; dots.visibility = VISIBLE
-        dots.text = (0..1).joinToString(" ") { if (it == page) "●" else "○" }
+        forecast.visibility = VISIBLE
         val items = if (page == 0) w.hours.map { Triple(app.mg4dash.system.Clock.hourLabel(context, it.label), it.code, "${it.tempC}°") }
             else w.days.map { Triple(it.label, it.code, "${it.minC}/${it.maxC}°") }
         forecast.removeAllViews()
@@ -135,4 +137,6 @@ class WeatherCompact(context: Context, private val onPage: () -> Unit) : LinearL
             forecast.addView(cell, LayoutParams(0, LayoutParams.WRAP_CONTENT, 1f))
         }
     }
+
+    private companion object { const val RIGHT_TOP_DP = 12 }
 }
