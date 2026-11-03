@@ -141,6 +141,10 @@ open class AudioService(b: IBinder, descriptor: String = "com.saicmotor.carapi.a
     open fun setLoudness(on: Boolean) = raw(15, { it.writeInt(if (on) 1 else 0) }) { it.readInt() != 0 }
     open fun setEqualizerPreset(v: Int) = raw(22, { it.writeInt(v) }) { it.readInt() != 0 }
     open fun setSoundField(balance: Int, fader: Int) = raw(30, { it.writeInt(balance); it.writeInt(fader) }) { it.readInt() != 0 }
+    /** Vehicle media volume on the native 0..getMediaVolumeMax() scale. */
+    fun getMediaVolumeMax(): Int = raw(5, { it.writeInt(0) }) { it.readInt() }
+    fun getMediaVolume(): Int = raw(6, { it.writeInt(0) }) { it.readInt() }
+    fun setMediaVolume(level: Int): Boolean = raw(7, { it.writeInt(0); it.writeInt(level); it.writeInt(0) }) { true }
     /** Curve of a preset (7 = user), 5 values; null if the service does not answer. */
     open fun eqBand(preset: Int): IntArray? = raw(21, { it.writeInt(preset) }) { readEq(it) }
     open val userEq: IntArray? get() = raw(20, {}) { readEq(it) }

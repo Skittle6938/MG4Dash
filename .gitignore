@@ -2,10 +2,19 @@
 build/
 app/build/
 local.properties
-keys/*.pk8
+
+# Local signing material and build output must never be committed.
+keys/
+*.jks
+*.keystore
+*.pk8
+*.pk12
+*.priv.pem
 *.apk
 dist/
 *.idsig
+.DS_Store
+
 .idea/
 *.iml
 .kotlin/

@@ -82,6 +82,9 @@ class MainActivity : AppCompatActivity() {
             app.mg4dash.ui.FadeOutline.applyTo(sh.root)
             sh.start()
             warmUpStockLauncherIfNeeded()
+            if (savedInstanceState == null) {
+                app.mg4dash.sound.SoundTrigger.onBootOrAppStart(this)
+            }
             return
         }
         registerReceiver(callChanged, android.content.IntentFilter("android.bluetooth.headsetclient.profile.action.AG_CALL_CHANGED"))
@@ -133,6 +136,11 @@ class MainActivity : AppCompatActivity() {
         // Gesture tutorial: once after a first install, or when asked from the settings
         if (savedInstanceState == null && intent?.getBooleanExtra(app.mg4dash.ui.Tutorial.EXTRA_SHOW, false) == true) b.root.post { app.mg4dash.ui.Tutorial.show(this) }
         else if (savedInstanceState == null) app.mg4dash.ui.Tutorial.showIfPending(this)
+
+        // Trigger son all'avvio: riproduce immediatamente appena l'app compare
+        if (savedInstanceState == null) {
+            app.mg4dash.sound.SoundTrigger.onBootOrAppStart(this)
+        }
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
