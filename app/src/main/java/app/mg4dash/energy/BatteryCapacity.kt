@@ -19,7 +19,7 @@ import org.json.JSONObject
  *     several trips and days, without waiting for a charge, and the total is kept with the
  *     preferences (kept across updates). From 15 % of total drop, the measurement joins the
  *     history, dated; smoothing: average weighted by the % drop, over the last 30 days.
- * Health: measured capacity ÷ the model's original usable capacity (51, 64 or 77 kWh), also smoothed
+ * Health: measured capacity ÷ the reference of the model (51, 64 or 77 kWh: see [MODELS]), also smoothed
  * over 30 days, and over the whole measured period to follow the trend.
  *
  * Up to 1.1.3, the measurement ran from one charge to the next: it counted the % lost with the car
@@ -32,8 +32,12 @@ object BatteryCapacity {
     private const val MONTH_MS = 30L * 24 * 3600_000L
     private const val MAX_SAMPLES = 300
 
-    /** Models: gross capacity (displayed) → default new usable capacity (kWh), unofficial values (#77). */
-    val MODELS = listOf(51 to 50.8f, 64 to 61.7f, 77 to 74.4f)
+    /**
+     * Models: gross capacity (displayed) → default new reference (kWh), unofficial values (#77). This is the estimated
+     * energy from 100 % to 0 % displayed, which is what the measurement gives, not the battery's total usable capacity:
+     * the battery also keeps a buffer.
+     */
+    val MODELS = listOf(51 to 49f, 64 to 61f, 77 to 72.5f)
 
     /** One measurement: date, capacity (kWh), % drop and km driven during the measurement (0 before 1.1.5). */
     data class Sample(val at: Long, val kwh: Float, val drop: Int, val km: Float = 0f)
@@ -136,7 +140,7 @@ object BatteryCapacity {
     /** Default new usable capacity of the chosen model (kWh). */
     fun modelNominal(context: Context): Float {
         val gross = Prefs(context).batteryModel
-        return MODELS.firstOrNull { it.first == gross }?.second ?: 50.8f
+        return MODELS.firstOrNull { it.first == gross }?.second ?: 49f
     }
 
     /** Health (%, to the tenth) over the measurements of the last 30 days (otherwise all), and km they cover. */

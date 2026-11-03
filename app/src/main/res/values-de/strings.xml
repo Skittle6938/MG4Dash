@@ -200,7 +200,7 @@
     <string name="vh_soh">Batteriezustand (geschätzt)</string>
     <string name="vh_soh_detail">Geschätzt über etwa %1$s Fahrt.</string>
     <string name="vh_soh_progress">Messung: %1$s %% von 15 %%, bisher %2$s.</string>
-    <string name="vh_soh_disclaimer">Schätzung von MG4Dash, nicht offiziell. In Test.</string>
+    <string name="vh_soh_disclaimer" formatted="false">Schätzung, nicht offiziell. Bezug: Energie von 100 % bis 0 % Anzeige.</string>
     <string name="st_home">STARTBILDSCHIRM</string>
     <string name="st_home_desc">„SAIC-Startbildschirm ersetzen“ macht MG4Dash zum Startbildschirm. Nichts wird deinstalliert oder gelöscht: Der Original-Startbildschirm wird nur als Startbildschirm abgeschaltet, alles andere im Auto funktioniert wie bisher (Kamera, Radio, Audioquellen, Systemleiste). Der Wartungsmodus schaltet ihn mit einem Tippen wieder ein, z. B. vor einem Werkstattbesuch.</string>
     <string name="st_replace">SAIC-Startbildschirm ersetzen</string>

@@ -200,7 +200,7 @@
     <string name="vh_soh">Salud de la batería (estimada)</string>
     <string name="vh_soh_detail">Estimada sobre unos %1$s recorridos.</string>
     <string name="vh_soh_progress">Midiendo: %1$s %% de 15 %%, %2$s por ahora.</string>
-    <string name="vh_soh_disclaimer">Estimación de MG4Dash, no oficial. En prueba.</string>
+    <string name="vh_soh_disclaimer" formatted="false">Estimación, no oficial. Referencia: energía de 100 % a 0 % mostrados.</string>
     <string name="st_home">PANTALLA DE INICIO</string>
     <string name="st_home_desc">«Sustituir inicio SAIC» convierte MG4Dash en la pantalla de inicio. No se desinstala ni se borra nada: el inicio original solo se desactiva como pantalla de inicio y el resto del coche funciona como antes (cámara, radio, fuentes de audio, barra del sistema). El Modo mantenimiento lo reactiva con un toque, por ejemplo antes de una visita al concesionario.</string>
     <string name="st_replace">Sustituir inicio SAIC</string>

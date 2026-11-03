@@ -200,7 +200,7 @@
     <string name="vh_soh">Batterijgezondheid (geschat)</string>
     <string name="vh_soh_detail">Geschat over ongeveer %1$s gereden.</string>
     <string name="vh_soh_progress">Meting: %1$s %% van 15 %%, tot nu toe %2$s.</string>
-    <string name="vh_soh_disclaimer">Schatting van MG4Dash, niet officieel. In test.</string>
+    <string name="vh_soh_disclaimer" formatted="false">Schatting, niet officieel. Referentie: energie van 100 % tot 0 % getoond.</string>
     <string name="st_home">STARTSCHERM</string>
     <string name="st_home_desc">„SAIC-start vervangen” maakt MG4Dash het startscherm. Er wordt niets verwijderd of gewist: het originele startscherm wordt alleen uitgeschakeld als startscherm en de rest van de auto werkt zoals voorheen (camera, radio, audiobronnen, systeembalk). De Onderhoudsmodus zet het met één tik weer aan, bijvoorbeeld vóór een dealerbezoek.</string>
     <string name="st_replace">SAIC-start vervangen</string>

@@ -200,7 +200,7 @@
     <string name="vh_soh">Santé batterie (estimée)</string>
     <string name="vh_soh_detail">Estimée sur environ %1$s parcourus.</string>
     <string name="vh_soh_progress">Mesure en cours : %1$s %% sur 15 %%, %2$s pour l\'instant.</string>
-    <string name="vh_soh_disclaimer">Estimation MG4Dash, pas officielle. En test.</string>
+    <string name="vh_soh_disclaimer" formatted="false">Estimation, pas officielle. Référence : énergie de 100 % à 0 % affichés.</string>
     <string name="st_home">ÉCRAN D\'ACCUEIL</string>
     <string name="st_home_desc">« Remplacer l\'accueil SAIC » fait de MG4Dash l\'écran d\'accueil. Rien n\'est désinstallé ni supprimé : l\'accueil d\'origine est seulement désactivé en tant qu\'écran d\'accueil, et le reste de la voiture fonctionne comme avant (caméra, radio, sources audio, barre du haut). Le mode Entretien le réactive en un geste, par exemple avant une révision en concession.</string>
     <string name="st_replace">Remplacer l\'accueil SAIC</string>
