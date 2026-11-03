@@ -637,7 +637,7 @@
     <string name="st_sound_imported">İçe aktarılan ses: %1$s</string>
     <string name="st_sound_test">Test Et</string>
     <string name="st_sound_stop">Durdur</string>
-    <string name="st_sound_volume">Ses Seviyesi</string>
+    <string name="st_sound_volume">Araç medya ses düzeyi</string>
     <string name="st_sound_vol_default">Mevcut araç sesi</string>
     <string name="st_sound_volume_level">%1$d / 32</string>
     <string name="aa_title">ANDROID AUTO</string>
