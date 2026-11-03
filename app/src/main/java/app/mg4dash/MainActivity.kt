@@ -104,13 +104,7 @@ class MainActivity : AppCompatActivity() {
         app.mg4dash.ui.SwipeBox.wrap(b.mediaCard, vertical = true, horizontal = false) { MediaHub.cycleSource(it) }
             .onHorizontal = { if (it > 0) MediaHub.next() else MediaHub.previous() }
         if (!mapLayout) {
-            // Météo (style Complet) : balayer ou toucher les points = prévisions par heure / par jour
-            weatherDots = TextView(this).apply {
-                setTextColor(color(R.color.text_title)); setTextSize(TypedValue.COMPLEX_UNIT_SP, 15f); letterSpacing = 0.3f
-                gravity = Gravity.CENTER; isClickable = true; setOnClickListener { flipWeather(1) }
-            }
-            (b.weatherHours.parent as LinearLayout).addView(weatherDots, LinearLayout.LayoutParams(-2, -2).apply { gravity = Gravity.CENTER_HORIZONTAL })
-            app.mg4dash.ui.SwipeBox.wrap(b.weatherCard) { flipWeather(it) }
+            useCompactWeather(0)
             if (prefs.hideTitles) hideFullTitles()
         }
         if (!mapLayout) app.mg4dash.ui.SwipeBox.wrap(b.secondaryCard) { dir ->
@@ -125,7 +119,6 @@ class MainActivity : AppCompatActivity() {
             leftMargin = (12 * nd).toInt(); topMargin = ((if (mapLayout) 76 else 12) * nd).toInt()
         })
         buildDock()
-        setupWeatherClock()
         setupConnections()
         wireClimate()
         wireMedia()
@@ -203,12 +196,7 @@ class MainActivity : AppCompatActivity() {
             .filter { it is TextView && it.text?.toString() == getString(R.string.title_position) }
             .forEach { b.mapCard.removeView(it) }   // retiré : applyHomeWidget réaffiche les enfants de la carte
         ((b.mapSpeed.parent as View).layoutParams as android.widget.FrameLayout.LayoutParams).gravity = Gravity.TOP or Gravity.START
-        val wc = app.mg4dash.ui.WeatherCompact(this) { flipWeather(1) }
-        wc.getChildAt(0).setPadding(if (Dock.vertical(this)) 0 else fogSafe, 0, 0, 0)
-        b.weatherCard.removeAllViews()
-        b.weatherCard.addView(wc, LinearLayout.LayoutParams(-1, -1))
-        weatherCompact = wc
-        app.mg4dash.ui.SwipeBox.wrap(b.weatherCard) { flipWeather(it) }
+        useCompactWeather(if (Dock.vertical(this)) 0 else fogSafe)
         showStackPage(prefs.stackPage)
         // Sans titres (option) : moins chargé ; les points de la pile et les infos utiles restent
         if (prefs.hideTitles) {
@@ -263,11 +251,7 @@ class MainActivity : AppCompatActivity() {
         lastPlugged = plugged
     }
 
-    /** Heure et date dans l'en-tête de la météo (style Carte, ou quand le dock affiche le Wi-Fi). */
-    private var weatherClock: TextView? = null
-
     private var weatherCompact: app.mg4dash.ui.WeatherCompact? = null
-    private var weatherDots: TextView? = null
 
     /**
      * Style Complet sans titres (option) : on masque les titres des cartes (la place reste, pour ne pas
@@ -283,55 +267,32 @@ class MainActivity : AppCompatActivity() {
             .forEach { b.mapCard.removeView(it) }
     }
 
+    /** Météo façon widget (issue #6), styles Complet et Carte : balayer = prévisions par heure / par jour. */
+    private fun useCompactWeather(leftInset: Int) {
+        val wc = app.mg4dash.ui.WeatherCompact(this)
+        wc.setLeftInset(leftInset)
+        b.weatherCard.removeAllViews()
+        b.weatherCard.addView(wc, LinearLayout.LayoutParams(-1, -1))
+        weatherCompact = wc
+        app.mg4dash.ui.SwipeBox.wrap(b.weatherCard) { flipWeather(it) }
+    }
+
     private fun flipWeather(dir: Int) {
         prefs.weatherPage = Math.floorMod(prefs.weatherPage + dir, 2)
         renderWeather(WeatherRepo.shown.value, CarBridge.state.value)
     }
 
-    private fun setupWeatherClock() {
-        if (weatherCompact != null) return   // le style Carte a sa propre horloge dans la météo
-        val header = b.weatherPlace.parent as LinearLayout
-        weatherClock?.let { header.removeView(it) }
-        weatherClock = null
-        if (!mapLayout && prefs.dockSlot != 1) return
-        weatherClock = TextView(this).apply {
-            setTextColor(color(R.color.text_value)); setTextSize(TypedValue.COMPLEX_UNIT_SP, 19f)
-            setPadding(0, 0, (16 * resources.displayMetrics.density).toInt(), 0)
-        }
-        header.addView(weatherClock, header.indexOfChild(b.weatherPlace))
-        tickWeatherClock()
-    }
-
     private var builtConnections = false
 
-    /** Icônes de connexion (#86) : la ville passe à gauche de l'en-tête de la météo, les icônes à droite. */
+    /** Icônes de connexion (#86) : en haut à droite de la météo, à droite de la ville. */
     private fun setupConnections() {
         builtConnections = prefs.connectionIcons
         if (!builtConnections) return
         val row = app.mg4dash.ui.ConnectionRow(this)
-        weatherCompact?.let { it.addConnections(row); return }
-        val header = b.weatherPlace.parent as LinearLayout
-        val title = header.getChildAt(0)
-        (title.layoutParams as LinearLayout.LayoutParams).apply { width = LinearLayout.LayoutParams.WRAP_CONTENT; weight = 0f }
-        if (title.visibility == View.INVISIBLE) title.visibility = View.GONE
-        (b.weatherPlace.layoutParams as LinearLayout.LayoutParams).apply { width = 0; weight = 1f }
-        header.addView(row)
-    }
-
-    private val weatherClockTick = Runnable { tickWeatherClock() }
-
-    private fun tickWeatherClock() {
-        val c = weatherClock ?: return
-        val now = java.util.Date()
-        c.text = app.mg4dash.system.Clock.hm(this, now) + "  ·  " +
-            java.text.SimpleDateFormat("EEE d MMM", Locale.getDefault()).format(now).trimEnd('.')
-        c.removeCallbacks(weatherClockTick)
-        c.postDelayed(weatherClockTick, 60_000L - System.currentTimeMillis() % 60_000L)
+        weatherCompact?.addConnections(row)
     }
 
     /** Appelé par le dock quand la case horloge / Wi-Fi change. */
-    fun onDockSlotChanged() { if (!simpleMode) setupWeatherClock() }
-
     override fun onResume() {
         super.onResume()
         CarBridge.setForeground(true)
@@ -718,47 +679,7 @@ class MainActivity : AppCompatActivity() {
     // ── Météo ────────────────────────────────────────────────────────────────
 
     private fun renderWeather(w: WeatherRepo.Weather?, s: VehicleState) {
-        weatherCompact?.let { it.show(w, s.outsideTemp, prefs.weatherCity, prefs.weatherPage); return }
-        if (w == null) {
-            b.weatherTemp.put(s.outsideTemp?.let { "${Math.round(it)}°" } ?: "—")
-            b.weatherLabel.put(getString(R.string.weather_pending))
-            b.weatherDetails.put(if (s.outsideTemp != null) getString(R.string.weather_outside_vehicle) else "")
-            b.weatherPlace.put("")
-            if (b.weatherHours.childCount > 0) b.weatherHours.removeAllViews()
-            weatherDots?.visibility = View.GONE
-            return
-        }
-        b.weatherPlace.put(w.place)
-        b.weatherIcon.putImage(WeatherRepo.icon(w.code))
-        b.weatherIcon.putTint(color(WeatherRepo.iconColor(w.code)))
-        b.weatherTemp.put("${w.tempC}°")
-        b.weatherLabel.put(WeatherRepo.label(w.code))
-        b.weatherDetails.put(getString(R.string.weather_details, w.feelsC, Math.round(app.mg4dash.system.Units.dist(this, w.windKmh.toFloat())), w.humidity, app.mg4dash.system.Units.speedUnit(this)))
-        val page = prefs.weatherPage
-        fillForecast(b.weatherHours, if (page == 0) w.hours.map { Triple(app.mg4dash.system.Clock.hourLabel(this, it.label), it.code, "${it.tempC}°") }
-            else w.days.map { Triple(it.label, it.code, "${it.minC}/${it.maxC}°") })
-        weatherDots?.apply { visibility = View.VISIBLE; text = (0..1).joinToString(" ") { if (it == page) "●" else "○" } }
-    }
-
-    private fun fillForecast(row: LinearLayout, items: List<Triple<String, Int, String>>) {
-        row.removeAllViews()
-        items.forEach { (label, code, value) ->
-            // Heure, icône et température empilées : plus gros, et la hauteur du cadre est mieux utilisée
-            val cell = LinearLayout(this).apply {
-                orientation = LinearLayout.VERTICAL
-                gravity = Gravity.CENTER
-            }
-            cell.addView(TextView(this).apply {
-                text = label; setTextColor(color(R.color.text_title)); setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f); gravity = Gravity.CENTER
-            })
-            cell.addView(ImageView(this).apply {
-                setImageResource(WeatherRepo.icon(code)); setColorFilter(color(WeatherRepo.iconColor(code)))
-            }, LinearLayout.LayoutParams(dp(30), dp(30)).apply { topMargin = dp(2); bottomMargin = dp(2) })
-            cell.addView(TextView(this).apply {
-                text = value; setTextColor(color(R.color.text_value)); setTextSize(TypedValue.COMPLEX_UNIT_SP, 23f); gravity = Gravity.CENTER
-            })
-            row.addView(cell, LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f))
-        }
+        weatherCompact?.show(w, s.outsideTemp, prefs.weatherCity, prefs.weatherPage)
     }
 
     // ── Widget secondaire ────────────────────────────────────────────────────

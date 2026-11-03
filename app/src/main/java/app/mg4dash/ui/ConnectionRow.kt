@@ -27,7 +27,7 @@ class ConnectionRow(private val activity: Activity) : LinearLayout(activity) {
     private val bt = icon(R.drawable.ic_bluetooth)
     private val wifi = icon(R.drawable.ic_wifi)
     private val hotspot = icon(R.drawable.ic_conn_hotspot)
-    private val signal = SignalBars(activity).also { addView(it, LayoutParams(dp(26), dp(22)).apply { leftMargin = dp(12) }) }
+    private val signal = SignalBars(activity).also { addView(it, LayoutParams(dp(34), dp(28)).apply { leftMargin = dp(16) }) }
     private val usb = icon(R.drawable.ic_conn_usb)
     private var last: StatusMonitor.Connections? = null
 
@@ -51,7 +51,7 @@ class ConnectionRow(private val activity: Activity) : LinearLayout(activity) {
     private fun icon(res: Int) = ImageView(activity).apply {
         setImageResource(res)
         putTint(color(R.color.text_disabled))
-        addView(this, LayoutParams(dp(24), dp(24)).apply { leftMargin = dp(12) })
+        addView(this, LayoutParams(dp(32), dp(32)).apply { leftMargin = dp(16) })
     }
 
     override fun onAttachedToWindow() {
