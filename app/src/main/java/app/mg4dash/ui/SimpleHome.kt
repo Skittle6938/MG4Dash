@@ -450,7 +450,7 @@ class SimpleHome(private val a: AppCompatActivity) {
         } else {
             mediaSource.text = m.source.ifEmpty { a.getString(R.string.title_media) } + "  ▾"
             mediaTitle.text = m.title.ifEmpty { m.source }
-            mediaArtist.text = listOf(m.artist, m.album, m.radioText).filter { it.isNotBlank() }.joinToString(" · ")
+            mediaArtist.text = listOf(m.artist, m.album).filter { it.isNotBlank() }.joinToString(" · ")
         }
         mediaArt.setImageBitmap(m.art)
         mediaStyle?.update(m.art, m.packageName == "com.saicmotor.radio")
