@@ -56,8 +56,8 @@ class StackedBar @JvmOverloads constructor(context: Context, attrs: AttributeSet
 }
 
 /** Courbe de consommation (kWh/100 km) avec aire dégradée et ligne de moyenne. */
-/** Courbe lissée (#44) : chaque point = moyenne de lui-même et des 2 précédents. */
-fun List<Float>.smooth3(): List<Float> = indices.map { i -> subList(maxOf(0, i - 2), i + 1).average().toFloat() }
+/** Courbe lissée (#44) : chaque point = moyenne de lui-même et de ses 2 voisins de chaque côté. */
+fun List<Float>.smoothed(): List<Float> = indices.map { i -> subList(maxOf(0, i - 2), minOf(size, i + 3)).average().toFloat() }
 
 private const val MAX_POINTS = 50
 
@@ -88,7 +88,7 @@ fun List<Float>.atMost(max: Int): List<Float> =
 
 class LineChart @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) : View(context, attrs) {
     var values: List<Float> = emptyList()
-        set(v) { field = v.atMost(MAX_POINTS); positions = null; average = v.average().toFloat(); invalidate() }
+        set(v) { field = v.atMost(MAX_POINTS); positions = null; layers = null; average = v.average().toFloat(); invalidate() }
     /** Position de chaque point sur la largeur (0..1), si la courbe suit le temps ; sinon points réguliers. */
     private var positions: List<Float>? = null
     /** Moyenne de toutes les valeurs reçues, pas des points gardés (tranches arrondies, pas toutes égales). */
@@ -107,6 +107,20 @@ class LineChart @JvmOverloads constructor(context: Context, attrs: AttributeSet?
     fun showTimeline(points: List<Pair<Float, Float>>, mean: Float) {
         values = points.map { it.second }
         positions = points.map { it.first }
+        average = mean
+        invalidate()
+    }
+
+    /** Couche empilée d'une courbe : sa couleur et sa valeur à chaque point. */
+    class Layer(val color: Int, val values: List<Float>)
+    private var layers: List<Layer>? = null
+
+    /** Courbes superposées et additionnées : la dernière couche donne le total ; [points] : positions 0..1, ou régulières. */
+    fun showLayers(points: List<Float>?, stack: List<Layer>, mean: Float) {
+        val n = stack.first().values.size
+        values = List(n) { i -> stack.sumOf { it.values[i].toDouble() }.toFloat() }
+        positions = points
+        layers = stack.filter { l -> l.values.any { it > 0.01f } }
         average = mean
         invalidate()
     }
@@ -130,15 +144,42 @@ class LineChart @JvmOverloads constructor(context: Context, attrs: AttributeSet?
         color = app.mg4dash.ui.Themes.color(context, R.color.text_sub); textSize = 17f * d; textAlign = Paint.Align.CENTER
     }
 
+    /** Du haut vers le bas : voile de couleur entre deux courbes cumulées, puis la courbe de chaque poste, fine. */
+    private fun drawLayers(canvas: Canvas, stack: List<Layer>, x: FloatArray, top: Float, bottom: Float, y: (Float) -> Float) {
+        val tops = ArrayList<FloatArray>()
+        val sum = FloatArray(x.size)
+        stack.forEach { l -> for (i in sum.indices) sum[i] += l.values[i]; tops.add(sum.copyOf()) }
+        val floor = FloatArray(x.size) { y(0f).coerceAtMost(bottom) }
+        for (k in stack.indices.reversed()) {
+            val upper = FloatArray(x.size) { y(tops[k][it]) }
+            val lower = if (k == 0) floor else FloatArray(x.size) { y(tops[k - 1][it]) }
+            val band = curvePath(x, upper)
+            band.lineTo(x.last(), lower.last())
+            addCurve(band, x.reversedArray(), lower.reversedArray())
+            band.close()
+            val rgb = stack[k].color and 0xFFFFFF
+            fill.shader = LinearGradient(0f, top, 0f, bottom, 0x50000000 or rgb, 0x10000000 or rgb, Shader.TileMode.CLAMP)
+            canvas.drawPath(band, fill)
+            line.color = stack[k].color
+            canvas.drawPath(curvePath(x, upper), line)
+        }
+    }
+
     /** Courbe arrondie passant par chaque point, sans dépasser ses voisins (interpolation cubique monotone). */
     private fun curvePath(x: FloatArray, y: FloatArray): Path {
-        val slopes = curveSlopes(x, y)
         val path = Path().apply { moveTo(x[0], y[0]) }
+        addCurve(path, x, y)
+        return path
+    }
+
+    private fun addCurve(path: Path, x: FloatArray, y: FloatArray) {
+        // Courbe parcourue de droite à gauche (bas d'une bande) : mêmes pentes qu'à l'endroit
+        val back = x.size > 1 && x[1] < x[0]
+        val slopes = if (back) curveSlopes(x.reversedArray(), y.reversedArray()).reversedArray() else curveSlopes(x, y)
         for (i in 0 until x.size - 1) {
             val h = (x[i + 1] - x[i]) / 3f
             path.cubicTo(x[i] + h, y[i] + slopes[i] * h, x[i + 1] - h, y[i + 1] - slopes[i + 1] * h, x[i + 1], y[i + 1])
         }
-        return path
     }
 
     override fun onDraw(canvas: Canvas) {
@@ -149,7 +190,8 @@ class LineChart @JvmOverloads constructor(context: Context, attrs: AttributeSet?
             canvas.drawText(context.getString(emptyText), width / 2f, height / 2f, empty)
             return
         }
-        val lo = (values.minOrNull()!! - 2f).coerceAtLeast(0f)
+        // Empilé : l'échelle part de zéro, sinon le bas des couches serait coupé
+        val lo = if (layers != null) 0f else (values.minOrNull()!! - 2f).coerceAtLeast(0f)
         val hi = values.maxOrNull()!! + 2f
         fun y(v: Float) = bottom - (v - lo) / (hi - lo) * (bottom - top)
         val scale = listOf(lo, (lo + hi) / 2, hi)
@@ -161,10 +203,16 @@ class LineChart @JvmOverloads constructor(context: Context, attrs: AttributeSet?
         val first = xs?.first()?.let { left + it * (right - left) } ?: left
         val last = xs?.last()?.let { left + it * (right - left) } ?: right
         val area = Path(path).apply { lineTo(last, bottom); lineTo(first, bottom); close() }
-        val rgb = line.color and 0xFFFFFF
-        fill.shader = LinearGradient(0f, top, 0f, bottom, 0x55000000 or rgb, rgb, Shader.TileMode.CLAMP)
-        canvas.drawPath(area, fill)
-        canvas.drawPath(path, line)
+        val stack = layers
+        if (stack != null) {
+            drawLayers(canvas, stack, FloatArray(values.size) { i -> left + (xs?.get(i) ?: (i.toFloat() / (values.size - 1))) * (right - left) }, top, bottom, ::y)
+        } else {
+            line.color = app.mg4dash.ui.Themes.energy(context)
+            val rgb = line.color and 0xFFFFFF
+            fill.shader = LinearGradient(0f, top, 0f, bottom, 0x55000000 or rgb, rgb, Shader.TileMode.CLAMP)
+            canvas.drawPath(area, fill)
+            canvas.drawPath(path, line)
+        }
         // Échelle horizontale : début à gauche, fin à droite
         if (axisH > 0f) {
             val ty = height - 4 * d
