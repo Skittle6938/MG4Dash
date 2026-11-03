@@ -82,19 +82,20 @@ class WeatherCompact(context: Context, private val onPage: () -> Unit) : LinearL
     /** [page] : 0 = par heure, 1 = par jour. */
     fun show(w: WeatherRepo.Weather?, outside: Float?, place: String, page: Int) {
         tick()
-        city.text = w?.place ?: place
+        city.put(w?.place ?: place)
         if (w == null) {
             // Hors connexion (#18) : heure et température extérieure en grand, centrées dans tout le widget
             icon.visibility = GONE
             // Sans icône, plus de marge : la température s'aligne à gauche sur « Extérieur » (#18)
             setTempMargin(0)
-            temp.text = outside?.let { "${Math.round(it)}°" } ?: "—"
+            temp.put(outside?.let { "${Math.round(it)}°" } ?: "—")
             temp.setTextSize(TypedValue.COMPLEX_UNIT_SP, 72f)
             time.setTextSize(TypedValue.COMPLEX_UNIT_SP, 72f)
-            sub.text = context.getString(R.string.weather_outside_short)
+            sub.put(context.getString(R.string.weather_outside_short))
             sub2.visibility = GONE
             top.gravity = Gravity.CENTER
-            forecast.removeAllViews(); forecast.visibility = GONE; dots.visibility = GONE
+            if (forecast.childCount > 0) forecast.removeAllViews()
+            forecast.visibility = GONE; dots.visibility = GONE
             return
         }
         icon.visibility = VISIBLE
