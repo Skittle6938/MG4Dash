@@ -217,8 +217,6 @@
     <string name="st_city">Yedek şehir: %1$s (araç konum vermezse)</string>
     <string name="st_change_city">Şehri değiştir</string>
     <string name="st_startup">BAŞLANGIÇ</string>
-    <string name="st_warm">Başlangıçta SAIC başlatıcısını kısa süre aç: %1$s</string>
-    <string name="st_warm_desc">SAIC servisinin (ses kaynakları, kamera, sistem çubuğu komutları) arayüzünü kaydetmesini sağlar.</string>
     <string name="st_toggle">Değiştir</string>
     <string name="st_display">EKRAN</string>
     <string name="st_fullscreen">Tam ekran (SAIC yan çubuğunu ve şeridini gizler): %1$s</string>

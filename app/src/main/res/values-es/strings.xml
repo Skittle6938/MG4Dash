@@ -217,8 +217,6 @@
     <string name="st_city">Ciudad de respaldo: %1$s (si el coche no da la posición)</string>
     <string name="st_change_city">Cambiar ciudad</string>
     <string name="st_startup">ARRANQUE</string>
-    <string name="st_warm">Abrir brevemente el launcher SAIC al arrancar: %1$s</string>
-    <string name="st_warm_desc">Permite al servicio SAIC (fuentes de audio, cámara, comandos de la barra del sistema) registrar su interfaz.</string>
     <string name="st_toggle">Cambiar</string>
     <string name="st_display">PANTALLA</string>
     <string name="st_fullscreen">Pantalla completa (oculta la barra lateral y el banner SAIC): %1$s</string>
