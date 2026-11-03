@@ -5,15 +5,15 @@ import app.mg4dash.car.CarProps
 import app.mg4dash.system.Prefs
 
 /**
- * Limite de charge (envoyée à la voiture). Les courbes de consommation sont dans [ConsumptionCurve].
+ * Charge limit (sent to the car). Consumption curves are in [ConsumptionCurve].
  *
- * Seul l'ancien SDK applique la limite lui-même. Jusqu'à la 1.1.3, MG4Dash arrêtait aussi la charge
- * à la limite sur la MG4 Standard (chargeCtrl(2)), mais il est coupé quand la voiture est fermée :
- * la charge n'était pas arrêtée (constaté le 2026-10-18). Fonction retirée.
+ * Only the old SDK applies the limit itself. Up to 1.1.3, MG4Dash also stopped charging
+ * at the limit on the MG4 Standard (chargeCtrl(2)), but it is cut when the car is closed:
+ * charging was not stopped (found on 2026-10-18). Feature removed.
  */
 object ChargeGuard {
 
-    /** Envoie la limite à la voiture (appliquée par l'ancien SDK). */
+    /** Sends the limit to the car (applied by the old SDK). */
     fun setLimit(context: Context, percent: Int) {
         val p = percent.coerceIn(40, 100)
         Prefs(context).chargeLimit = p

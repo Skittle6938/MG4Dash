@@ -20,13 +20,13 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
 /**
- * Accès véhicule par la voie « carapi » de la famille A9 (SWI69) :
- * CarAdapterService (com.saicmotor.caradapter) → queryClient(code) → un binder par domaine.
+ * Vehicle access through the "carapi" route of the A9 family (SWI69):
+ * CarAdapterService (com.saicmotor.caradapter) → queryClient(code) → one binder per domain.
  *
- * Les états sont lus par interrogation périodique plutôt que par callbacks : moins de code
- * AIDL à maintenir, et la reprise est automatique si un service SAIC redémarre.
- * Les commandes clim suivent le choix 2A : une bascule par appui, l'affichage suit la lecture.
- * Aucune écriture n'est faite sur le mode de conduite ni la récupération : lecture seule.
+ * States are read by polling rather than callbacks: less AIDL code
+ * to maintain, and recovery is automatic if a SAIC service restarts.
+ * Climate commands follow choice 2A: one toggle per press, the display follows the reading.
+ * Nothing is written to the drive mode or regeneration: read only.
  */
 object CarBridge {
     private const val TAG = "Car"
@@ -61,7 +61,7 @@ object CarBridge {
             return
         }
         // Firmware A9 (SWI69/131/132) : service caradapter. Ancien SDK (SWI68/165/133) : gestionnaires
-        // SAIC du launcher d'origine. Firmware inconnu : on tente les deux.
+        // the stock launcher's SAIC. Unknown firmware: try both.
         if (Firmware.family != Firmware.Family.LEGACY) bind()
         if (Firmware.family != Firmware.Family.A9) LegacyCar.init(context)
         Log.i(TAG, "firmware ${Firmware.version} (${Firmware.gen}, family ${Firmware.family})")
@@ -71,18 +71,18 @@ object CarBridge {
         trackManualClimate(context.applicationContext)
     }
 
-    /** Démarrage / arrêt de la charge et du V2L disponibles (service EV de la voie A9). */
+    /** Charge and V2L start / stop available (EV service of the A9 route). */
     val chargeControl: Boolean get() = BuildConfig.MOCK || ev != null || LegacyCar.chargingReady ||
-        CarProps.readIntArea(CHRG_CTRL, 0x1000000) != null   // secours : propriété CHRG_CTRL (testée sur SWI69)
+        CarProps.readIntArea(CHRG_CTRL, 0x1000000) != null   // fallback: CHRG_CTRL property (tested on SWI69)
 
-    private const val CHRG_CTRL = 0x2140f412          // 1 = démarrer, 2 = arrêter la charge (testé le 2026-10-18)
-    private const val ELEC_CLCK_CTRL = 0x2140f413     // pistolet : 1 = verrouillé, 2 = libre
-    private const val VEHICLE_LOCK = 289421312        // 0x11403800 : portes ; écriture 1 = verrouiller, 2 = déverrouiller
+    private const val CHRG_CTRL = 0x2140f412          // 1 = start, 2 = stop charging (tested on 2026-10-18)
+    private const val ELEC_CLCK_CTRL = 0x2140f413     // gun: 1 = locked, 2 = free
+    private const val VEHICLE_LOCK = 289421312        // 0x11403800: doors; write 1 = lock, 2 = unlock
 
-    /** Pistolet de charge verrouillé ? null si la voiture ne le dit pas. */
+    /** Charge gun locked? null if the car does not say. */
     fun chargeLockLocked(): Boolean? = CarProps.readIntArea(ELEC_CLCK_CTRL, 0x1000000)?.let { if (it == 1) true else if (it == 2 || it == 0) false else null }
 
-    /** Verrouille / déverrouille le pistolet : service EV (A9), sinon la propriété directement. */
+    /** Locks / unlocks the gun: EV service (A9), otherwise the property directly. */
     fun toggleChargeLock() {
         val target = if (chargeLockLocked() == true) 2 else 1
         if (BuildConfig.MOCK) return
@@ -93,11 +93,11 @@ object CarBridge {
         }
     }
 
-    private const val POWER_MODE = 557897487   // 0x2140d70f : 2 = éteindre (SystemUI d'origine, CarComfortableController)
+    private const val POWER_MODE = 557897487   // 0x2140d70f: 2 = switch off (stock SystemUI, CarComfortableController)
 
-    /** Éteint la voiture, comme le bouton « Éteindre » du panneau rapide d'origine. */
+    /** Switches the car off, like the "Switch off" button of the stock quick panel. */
     fun powerOffCar(): Boolean {
-        // Jamais en roulant : vitesse inconnue ou au-dessus de 1 km/h = refus
+        // Never while driving: unknown speed or above 1 km/h = refused
         val v = state.value.speedKmh
         if (v == null || v > 1f) { Log.w(TAG, "power off refused, speed $v"); return false }
         if (BuildConfig.MOCK) return true
@@ -105,20 +105,20 @@ object CarBridge {
         return true
     }
 
-    /** Verrouille les portes (sans rien faire si elles le sont déjà). */
+    /** Locks the doors (does nothing if they already are). */
     fun lockDoors(): Boolean {
         if (doorsLocked() == true) return true
         if (BuildConfig.MOCK) return true
         return CarProps.setIntArea(VEHICLE_LOCK, 0x1000000, 1, "doors: lock")
     }
 
-    /** Met la clim en marche ou l'arrête si elle n'est pas déjà dans cet état. */
+    /** Turns the climate on or off if it is not already in that state. */
     fun setHvac(on: Boolean) { if (_state.value.hvacOn != on) togglePower() }
 
-    /** Portes verrouillées ? (SystemUI d'origine : 0 = ouvertes, 1 à 4 = verrouillées). */
+    /** Doors locked? (stock SystemUI: 0 = open, 1 to 4 = locked). */
     fun doorsLocked(): Boolean? = CarProps.readIntArea(VEHICLE_LOCK, 0x1000000)?.let { it in 1..4 }
 
-    /** Verrouille ou déverrouille les portes, comme la tuile du panneau rapide d'origine. Rend l'action faite. */
+    /** Locks or unlocks the doors, like the stock quick panel tile. Returns the action done. */
     fun toggleDoors(): Boolean? {
         val locked = doorsLocked() ?: return null
         if (BuildConfig.MOCK) return !locked
@@ -126,7 +126,7 @@ object CarBridge {
         return !locked
     }
 
-    /** Services qui répondent, pour l'écran Compatibilité. */
+    /** Services that answer, for the Compatibility screen. */
     fun probe(): List<Pair<String, String>> = listOf(
         "caradapter" to if (adapter != null) "ok" else "absent",
         "hvac (7)" to if (hvac != null) "ok" else "absent",
@@ -137,7 +137,7 @@ object CarBridge {
         "VehicleChargingManager" to LegacyCar.probeCharging(),
     )
 
-    /** Ralentit l'interrogation quand l'accueil n'est pas visible. */
+    /** Slows polling when home is not visible. */
     fun setForeground(foreground: Boolean) {
         fastPoll = foreground
     }
@@ -170,7 +170,7 @@ object CarBridge {
 
     private var tboxService: TboxService? = null
 
-    /** T-box (icônes de connexion) ; null sur les anciens firmwares. Appeler hors du fil principal. */
+    /** T-box (connection icons); null on old firmwares. Call off the main thread. */
     fun tbox(): TboxService? {
         if (tboxService?.alive != true) tboxService = query(CODE_TBOX)?.let { TboxService(it) }
         return tboxService
@@ -178,7 +178,7 @@ object CarBridge {
 
     private var audioService: AudioService? = null
 
-    /** Service son (page Son) ; demandé au premier usage. Appeler hors du fil principal. */
+    /** Sound service (Sound page); requested on first use. Call off the main thread. */
     fun audio(): AudioService? {
         if (Firmware.family == Firmware.Family.LEGACY) return appContext?.let { LegacySound.service(it) }
         if (audioService?.alive != true) audioService = query(CODE_AUDIO)?.let { AudioService(it) }
@@ -197,7 +197,7 @@ object CarBridge {
         if (vs?.alive != true) vs = query(CODE_VS)?.let { VehicleSettingService(it) }
         if (general?.alive != true) {
             general = query(CODE_GENERAL)?.let { GeneralService(it) }
-            // Au démarrage, écran rallumé : si MG4Dash l'avait éteint puis a été relancé, rien d'autre ne le rallume
+            // At startup, screen back on: if MG4Dash had turned it off then was relaunched, nothing else turns it on
             if (general != null && !displayChecked) { displayChecked = true; setDisplay(true) }
         }
     }
@@ -224,9 +224,9 @@ object CarBridge {
 
     private inline fun <T> safe(block: () -> T): T? = try { block() } catch (_: Exception) { null }
 
-    // Valeur réglée à l'instant : la voiture met un moment à l'appliquer, et la relecture (chaque
-    // seconde) réaffichait l'ancienne valeur entre-temps (« la valeur hésite », issue #6). On garde
-    // l'affichage sur la nouvelle valeur jusqu'à ce que la voiture la confirme, 3 s au plus.
+    // Value just set: the car takes a moment to apply it, and the reread (every
+    // second) showed the old value again in the meantime ("the value hesitates", issue #6). Keep
+    // the display on the new value until the car confirms it, 3 s at most.
     @Volatile private var holdTemp: Pair<Float, Long>? = null
     @Volatile private var holdFan: Pair<Int, Long>? = null
     private const val HOLD_MS = 3000L
@@ -243,7 +243,7 @@ object CarBridge {
         return r
     }
 
-    // ── Sièges et volant chauffants (propriétés clim, zone 0x75, relevées par MG4Control) ──
+    // ── Heated seats and steering wheel (climate properties, area 0x75, found by MG4Control) ──
     private const val SEAT_HEAT_L = 0x15402513
     private const val SEAT_HEAT_R = 0x15402514
     private const val WHEEL_HEAT = 0x1540253a
@@ -257,7 +257,7 @@ object CarBridge {
         val r = CarProps.readIntArea(SEAT_HEAT_R, HEAT_AREA)?.takeIf { it in 0..3 }
         val w = CarProps.readIntArea(WHEEL_HEAT, HEAT_AREA)?.takeIf { it >= 0 }?.let { if (it > 0) 1 else 0 }
         if (l != s.seatHeatL || r != s.seatHeatR || w != s.wheelHeat) _state.value = s.copy(seatHeatL = l, seatHeatR = r, wheelHeat = w)
-        // Une lecture ratée (démarrage, voiture en veille) ne doit plus faire disparaître les boutons (#19)
+        // A failed read (startup, car asleep) must no longer make the buttons disappear (#19)
         if (l != null) appContext?.let { c ->
             val sp = app.mg4dash.system.Prefs(c).raw
             if (!sp.getBoolean("heat_seen", false)) sp.edit().putBoolean("heat_seen", true).apply()
@@ -265,8 +265,8 @@ object CarBridge {
     }
 
     /**
-     * Siège chauffant : la voiture ne connaît qu'un « cran » (valeur 1) qui fait DESCENDRE
-     * (éteint → 3 → 2 → 1 → éteint, établi sur véhicule par MG4Control). Affichage anticipé, puis relecture.
+     * Heated seat: the car only knows a "step" (value 1) that goes DOWN
+     * (off → 3 → 2 → 1 → off, established on a vehicle by MG4Control). Display ahead of time, then reread.
      */
     fun stepSeatHeat(left: Boolean) {
         val cur = (if (left) _state.value.seatHeatL else _state.value.seatHeatR) ?: 0
@@ -280,7 +280,7 @@ object CarBridge {
         }
     }
 
-    /** Volant chauffant : une bascule (valeur 1), comme le bouton d'origine. */
+    /** Heated steering wheel: a toggle (value 1), like the stock button. */
     fun toggleWheelHeat() {
         val on = _state.value.wheelHeat == 1
         _state.value = _state.value.copy(wheelHeat = if (on) 0 else 1)
@@ -292,7 +292,7 @@ object CarBridge {
         }
     }
 
-    /** Sièges / volant chauffants à afficher : réglage, sinon versions 64 / 77 kWh dont la voiture les expose. */
+    /** Heated seats / wheel to show: setting, otherwise 64 / 77 kWh versions whose car exposes them. */
     fun heatingShown(context: Context): Boolean {
         val p = app.mg4dash.system.Prefs(context)
         return when (p.heatedSeats) {
@@ -329,8 +329,8 @@ object CarBridge {
         val v = vs
         val g = general
         _state.value = s.copy(
-            // Anciens firmwares (SWI68…) : pas de CarAdapter, la clim passe par LegacyCar. Remettre
-            // « connecté » à faux ici grisait la carte clim de l'accueil un instant à chaque relecture (#47)
+            // Old firmwares (SWI68…): no CarAdapter, climate goes through LegacyCar. Setting
+            // "connected" to false here greyed the home climate card for a moment at each reread (#47)
             connected = adapter != null || LegacyCar.ready,
             batteryPercent = e?.let { safe { it.chargePercentChange } }?.takeIf { it in 0..100 } ?: s.batteryPercent,
             rangeKm = e?.let { safe { it.currentRange } }?.takeIf { it in 0..2000 } ?: s.rangeKm,
@@ -353,7 +353,7 @@ object CarBridge {
             odometerKm = g?.let { safe { it.totalMileage } }?.takeIf { it > 0 } ?: s.odometerKm,
             speedKmh = g?.let { safe { it.latestSpeed } } ?: s.speedKmh,
         )
-        // Dixième de % (BMS) : lu à part, sur toutes les voies d'accès
+        // Tenth of % (BMS): read separately, on all access routes
         if (!BuildConfig.MOCK) {
             val precise = (CarProps.getFloat(0x2160f404) ?: CarProps.readFloatArea(0x2160f404, 0x1000000))?.takeIf { it in 0.1f..100f }
             if (precise != _state.value.socPrecise) _state.value = _state.value.copy(socPrecise = precise)
@@ -364,8 +364,8 @@ object CarBridge {
     }
 
     /**
-     * Repli commun à tous les firmwares : mesures du CarPropertyManager, mêmes identifiants sur
-     * SWI133 (relevés MG4Control) et SWI69. Ne remplit que ce que les services n'ont pas donné.
+     * Fallback common to all firmwares: CarPropertyManager measurements, same identifiers on
+     * SWI133 (found by MG4Control) and SWI69. Only fills in what the services did not give.
      */
     private fun refreshFromProps() {
         val s = _state.value
@@ -374,20 +374,20 @@ object CarBridge {
         fun f(id: Int) = CarProps.readFloatArea(id, area)?.takeIf { it.isFinite() && it != 82.3f && it != 511.5f }
         val soc = f(0x2160f404)?.takeIf { it in 0f..100f }?.let { Math.round(it) }
         val range = i(0x2140f41c)?.takeIf { it in 1..1500 }
-        // État de charge BMS : même échelle que le service EV (10 = charge rapide, relevé sur SWI133 en
-        // charge DC, issue #13) ; 0 câble branché = connecté sans charger.
+        // BMS charge state: same scale as the EV service (10 = fast charge, found on SWI133 while
+        // DC charging, issue #13); 0 with the cable plugged = connected without charging.
         val raw = i(0x2140f409)
         val dc = i(0x2140f43f)?.takeIf { it != 0 && it != 1023 } != null
         val ac = i(0x2140f43e)?.takeIf { it != 0 && it != 1023 } != null
         val status = when { raw != null && raw in 1..15 -> raw; dc || ac -> 7; else -> 0 }
-        // Mode de conduite (propriété) → échelle A9 (2 éco, 3 normal, 4 sport, 6 neige, 7 personnalisé).
-        // SWI68 donne directement cette échelle (appli Réglages d'origine : 6, 2, 3, 4, 7) ; la table
-        // 0 neige / 1 éco reste pour les firmwares qui l'utilisent. Les valeurs ne se chevauchent pas.
+        // Drive mode (property) → A9 scale (2 eco, 3 normal, 4 sport, 6 snow, 7 custom).
+        // SWI68 gives this scale directly (stock Settings app: 6, 2, 3, 4, 7); the table
+        // 0 snow / 1 eco stays for firmwares using it. The values do not overlap.
         val dm = when (val m = i(0x2140a17c)) { 2, 3, 4, 6, 7 -> m; 0 -> 6; 1 -> 2; else -> null }
-        // Sans service EV, les propriétés sont la seule source : on les reprend à chaque passage
-        // (avant, la première valeur lue restait affichée : % et autonomie figés, issue #13).
+        // Without an EV service, the properties are the only source: reread on each pass
+        // (before, the first value read stayed shown: % and range frozen, issue #13).
         val noEv = ev == null
-        /** Valeur de la propriété si le service réglages manque, sinon celle du service (propriété en repli). */
+        /** Property value if the settings service is missing, otherwise the service's (property as a fallback). */
         fun fresh(prop: Int?, cur: Int?): Int? = if (vs == null) prop ?: cur else cur ?: prop
         _state.value = s.copy(
             connected = s.connected || soc != null,
@@ -396,18 +396,18 @@ object CarBridge {
             chargeStatus = if (ev == null) status else s.chargeStatus,
             odometerKm = s.odometerKm ?: i(0x21401566)?.takeIf { it > 0 },
             driveMode = if (vs == null) dm ?: s.driveMode else s.driveMode ?: dm,
-            // Sans service réglages (SWI68, #19), la propriété est relue à chaque passage : avant, la
-            // première valeur restait affichée et un changement de régénération ne se voyait pas.
+            // Without a settings service (SWI68, #19), the property is reread on each pass: before, the
+            // first value stayed shown and a regeneration change did not show.
             regenLevel = fresh(i(0x2140a191)?.takeIf { it in 0..7 }, s.regenLevel),
-            // Aides à la conduite (relevé sur SWI69 : mêmes échelles que le service réglages)
+            // Driving aids (found on SWI69: same scales as the settings service)
             lasMode = fresh(i(0x2140a104)?.takeIf { it in 1..5 }, s.lasMode),
             fcwState = fresh(i(0x2140a108)?.takeIf { it in 1..2 }, s.fcwState),
             overSpeedSound = fresh(i(0x2140a16c)?.takeIf { it in 0..1 }, s.overSpeedSound),
-            // Bip de limite de vitesse sans service réglages (SWI165, #37). Direction, pédale de frein
-            // et Range+ n'existent pas sur ces voitures (valeurs sans sens) : lignes masquées.
+            // Speed limit beep without a settings service (SWI165, #37). Steering, brake pedal
+            // and Range+ do not exist on these cars (meaningless values): lines hidden.
             speedLimitSound = fresh((i(0x2140a1ba) ?: i(0x2140a1b4))?.takeIf { it in 0..3 }, s.speedLimitSound),
-            // Vitesse sans service général (SWI68, #19) : PERF_VEHICLE_SPEED, comme MG4Control sur
-            // tous les firmwares ; déjà en km/h chez SAIC malgré la spec AOSP, négative en marche arrière.
+            // Speed without a general service (SWI68, #19): PERF_VEHICLE_SPEED, like MG4Control on
+            // all firmwares; already in km/h at SAIC despite the AOSP spec, negative in reverse.
             speedKmh = if (general != null) s.speedKmh else
                 (CarProps.readFloatArea(0x11600207, 0x1000000) ?: CarProps.readFloatArea(0x11600207, 0))
                     ?.takeIf { !it.isNaN() }?.let { Math.abs(it) }?.takeIf { it < 300f } ?: s.speedKmh,
@@ -416,9 +416,9 @@ object CarBridge {
     }
 
     // ── Commandes clim ────────────────────────────────────────────────────────
-    // Exécutées hors thread principal, puis relecture rapide pour que l'UI suive l'état réel.
+    // Run off the main thread, then a quick reread so the UI follows the real state.
 
-    /** Commande clim des firmwares ancien SDK (bloquante, donc hors du fil principal). */
+    /** Climate command on old SDK firmwares (blocking, so off the main thread). */
     private fun legacy(label: String, action: () -> Boolean) {
         ownCommandAt = android.os.SystemClock.elapsedRealtime()
         scope.launch {
@@ -431,7 +431,7 @@ object CarBridge {
         }
     }
 
-    /** Tâche MG4Dash au premier plan avant une commande, ou null. */
+    /** MG4Dash task in the foreground before a command, or null. */
     private fun ourFrontTask(): Int? = try {
         val ctx = appContext
         val am = ctx?.getSystemService(Context.ACTIVITY_SERVICE) as? android.app.ActivityManager
@@ -440,8 +440,8 @@ object CarBridge {
     } catch (_: Throwable) { null }
 
     /**
-     * Ancien SDK : allumer la clim fait ouvrir l'écran clim du launcher SAIC par-dessus MG4Dash
-     * (#48). Si une page MG4Dash était devant, on la remet devant (réglage, actif par défaut).
+     * Old SDK: turning the climate on opens the SAIC launcher's climate screen over MG4Dash
+     * (#48). If an MG4Dash page was in front, bring it back in front (setting, on by default).
      */
     private fun keepFront(task: Int?) {
         val ctx = appContext ?: return
@@ -459,18 +459,18 @@ object CarBridge {
     }
 
     /**
-     * Ancien SDK, bouton clim physique sous l'écran (#62) : la voiture ouvre aussi son écran clim par-dessus
-     * MG4Dash. Chaque seconde on retient si MG4Dash est devant ; si un écran clim SAIC le remplace dans les
-     * 3 s, on remet MG4Dash devant (même réglage que #48). Pas quand MG4Dash a lui-même ouvert une appli.
+     * Old SDK, physical climate button under the screen (#62): the car also opens its climate screen over
+     * MG4Dash. Every second, note whether MG4Dash is in front; if a SAIC climate screen replaces it within
+     * 3 s, bring MG4Dash back in front (same setting as #48). Not when MG4Dash opened an app itself.
      */
     private var lastTopSeen: String? = null
-    /** Dernière commande clim envoyée par MG4Dash (elapsedRealtime). */
+    /** Last climate command sent by MG4Dash (elapsedRealtime). */
     @Volatile private var ownCommandAt = 0L
 
     /**
-     * Diagnostic (#62) : clim allumée par la voiture (bouton sous l'écran), pas par MG4Dash. Sur certains
-     * anciens firmwares la page clim SAIC est une fenêtre posée par-dessus MG4Dash, sans changer l'appli au
-     * premier plan : on note la fenêtre qui a le focus et les fenêtres du haut, lues dans l'état du système.
+     * Diagnostic (#62): climate turned on by the car (button under the screen), not by MG4Dash. On some
+     * old firmwares the SAIC climate page is a window over MG4Dash, without changing the
+     * foreground app: note the focused window and the top windows, read from the system state.
      */
     private fun watchClimateWindow() {
         if (Firmware.family == Firmware.Family.A9) return
@@ -488,8 +488,8 @@ object CarBridge {
     }
 
     /**
-     * #62 : qui possède la page clim et si elle reste affichée : paquet, uid, type de fenêtre et
-     * visibilité, lus dans l'état des fenêtres. Sert à savoir si on peut l'empêcher d'apparaître.
+     * #62: who owns the climate page and whether it stays shown: package, uid, window type and
+     * visibility, read from the window state. Used to know if it can be prevented from appearing.
      */
     private fun logHvacWindow(moment: String) {
         try {
@@ -508,7 +508,7 @@ object CarBridge {
         } catch (e: Throwable) { Log.w(TAG, "climate window owner: ${e.message}") }
     }
 
-    /** Fenêtre qui a le focus, lue dans l'état du système (null si illisible). */
+    /** Focused window, read from the system state (null if unreadable). */
     private fun focusedWindow(): String? = try {
         val p = Runtime.getRuntime().exec(arrayOf("dumpsys", "window", "windows"))
         val lines = p.inputStream.bufferedReader().readLines()
@@ -517,9 +517,9 @@ object CarBridge {
     } catch (e: Throwable) { Log.w(TAG, "climate window: ${e.message}"); null }
 
     /**
-     * #62 : sur ces firmwares, la page clim SAIC est une fenêtre système « hvac page » posée par-dessus
-     * MG4Dash (journal de lopezjm2001, SWI165). Un « retour » ne la referme pas ; on la ferme par le
-     * service de SystemUI ([SaicHvacPage]) : l'écran d'avant reste affiché (réglage #48).
+     * #62: on these firmwares, the SAIC climate page is a system "hvac page" window over
+     * MG4Dash (lopezjm2001's log, SWI165). A "back" does not close it; it is closed through
+     * SystemUI's service ([SaicHvacPage]): the previous screen stays shown (setting #48).
      */
     private fun closeClimateWindow() {
         val focus = focusedWindow()
@@ -528,7 +528,7 @@ object CarBridge {
         logHvacWindow("shown")
         val ctx = appContext ?: return
         if (!app.mg4dash.system.Prefs(ctx).hideSaicClimate) return
-        SaicHvacPage.close(ctx)   // retour à l'écran d'avant, comme demandé par lopezjm2001 (#62)
+        SaicHvacPage.close(ctx)   // back to the previous screen, as asked by lopezjm2001 (#62)
     }
 
     private fun watchSaicClimate(ctx: Context) {
@@ -549,7 +549,7 @@ object CarBridge {
                     @Suppress("DEPRECATION")
                     val top = am.getRunningTasks(1).firstOrNull()?.topActivity ?: continue
                     val name = top.flattenToShortString().lowercase()
-                    // Diagnostic (#62) : ce qui passe devant MG4Dash, pour reconnaître l'écran clim de chaque firmware
+                    // Diagnostic (#62): what comes in front of MG4Dash, to recognise each firmware's climate screen
                     if (top.flattenToShortString() != lastTopSeen) { lastTopSeen = top.flattenToShortString(); Log.i(TAG, "front after MG4Dash: $lastTopSeen") }
                     if (top.packageName.startsWith("com.saicmotor") &&
                         listOf("hvac", "aircondition", "climate").any { it in name }) {
@@ -580,8 +580,8 @@ object CarBridge {
         }
     }
 
-    // ── Recharge et V2L : mêmes commandes que les boutons du launcher d'origine ──
-    // chargeCtrl(1) = démarrer, chargeCtrl(2) = arrêter ; idem disChargeCtrl pour le V2L.
+    // ── Charging and V2L: same commands as the stock launcher's buttons ──
+    // chargeCtrl(1) = start, chargeCtrl(2) = stop; likewise disChargeCtrl for V2L.
 
     private fun evCommand(label: String, action: (EvService) -> Unit) {
         if (BuildConfig.MOCK) { MockCar.command(label, _state); return }
@@ -597,7 +597,7 @@ object CarBridge {
                     Log.i(TAG, "EV $label (old SDK) → $ok")
                     delay(1500); refreshEnergy(); delay(3000); refreshEnergy()
                 } else if (label == "startCharge" || label == "stopCharge") {
-                    // Secours sans service EV ni SDK : la propriété CHRG_CTRL (même effet, testé sur SWI69)
+                    // Fallback without an EV service or SDK: the CHRG_CTRL property (same effect, tested on SWI69)
                     CarProps.setIntArea(CHRG_CTRL, 0x1000000, if (label == "startCharge") 1 else 2, label)
                     delay(1500); refreshEnergy(); delay(3000); refreshEnergy()
                 } else Log.w(TAG, "$label ignored: EV service not connected")
@@ -609,18 +609,18 @@ object CarBridge {
         }
     }
 
-    // ── Écran éteint et ESC (gestes de la barre verticale, issue #12) ──
+    // ── Screen off and ESC (vertical bar gestures, issue #12) ──
 
     @Volatile private var displayChecked = false
 
-    /** Équipement chauffant déclaré par la voiture (A9) : sièges, volant ; null si inconnu. */
+    /** Heating equipment declared by the car (A9): seats, wheel; null if unknown. */
     fun heatingConfig(): Pair<Int?, Int?> {
         val b = try { adapter?.queryClient(2) } catch (_: Exception) { null } ?: return null to null
         val c = ConfigService(b)
         return (try { c.seatHeatingConfig } catch (_: Exception) { null }) to (try { c.steeringWheelHeatConfig } catch (_: Exception) { null })
     }
 
-    /** Allume ou éteint l'écran central par le service véhicule ; false si le service ne répond pas. */
+    /** Turns the central screen on or off through the vehicle service; false if the service does not answer. */
     fun setDisplay(on: Boolean): Boolean {
         if (BuildConfig.MOCK) return true
         if (Firmware.family == Firmware.Family.LEGACY) return setDisplayLegacy(on)
@@ -630,8 +630,8 @@ object CarBridge {
     }
 
     /**
-     * SWI68 / SWI133 (#79) : pas de commande d'écran dans le service général, mais SystemUI reçoit les mêmes ordres
-     * que son interrupteur d'origine. Un toucher ou une touche rallume l'écran, quel que soit l'appelant.
+     * SWI68 / SWI133 (#79): no screen command in the general service, but SystemUI receives the same orders
+     * as its stock switch. A touch or a key turns the screen back on, whoever the caller is.
      */
     private fun setDisplayLegacy(on: Boolean): Boolean {
         val ctx = appContext ?: return false
@@ -643,34 +643,34 @@ object CarBridge {
     }
 
     /**
-     * ESC actif ? 1 = actif, 0 = coupé (VEHICLE_ESP, relevé sur la voiture le 2026-10-18).
-     * null si la voiture ne le dit pas.
+     * ESC active? 1 = active, 0 = off (VEHICLE_ESP, found on the car on 2026-10-18).
+     * null if the car does not say.
      */
     fun escActive(): Boolean? {
         if (BuildConfig.MOCK) return mockEsc
-        // Relevé sur la voiture : l'état suit VEHICLE_ESP lui-même (1 = actif, 0 = coupé), comme TCS_OPNG_MD
+        // Found on the car: the state follows VEHICLE_ESP itself (1 = active, 0 = off), like TCS_OPNG_MD
         val v = CarProps.readIntArea(VEHICLE_ESP, 0x1000000) ?: CarProps.readIntArea(TCS_OPNG_MD, 0x1000000)
             ?: return if (Firmware.family == Firmware.Family.LEGACY) LegacyCar.escActive() else null
         return v != 0
     }
     private var mockEsc = true
 
-    /** Bascule l'ESC : la commande SAIC est un appui (valeur 1), comme l'interrupteur du menu MG. */
+    /** Toggles ESC: the SAIC command is a press (value 1), like the MG menu switch. */
     fun toggleEsc() {
         if (BuildConfig.MOCK) { mockEsc = !mockEsc; return }
-        // Ancien SDK sans la propriété : VehicleControlManager (SWI68/165)
+        // Old SDK without the property: VehicleControlManager (SWI68/165)
         if (CarProps.readIntArea(VEHICLE_ESP, 0x1000000) == null && Firmware.family == Firmware.Family.LEGACY) {
             Log.i(TAG, "ESC (old SDK): ${LegacyCar.toggleEsc()}"); return
         }
         val ok = CarProps.setIntArea(VEHICLE_ESP, 0x1000000, 1, "ESC (press)")
         Log.i(TAG, "ESC: command sent → $ok, state before: ${escActive()}")
     }
-    private const val VEHICLE_ESP = 289421317       // 0x11403805 : commande ESC (setDrivingEpsMode du menu MG)
-    private const val TCS_OPNG_MD = 289421343       // 0x1140381f : 1 = ESC actif, 0 = coupé (repli)
+    private const val VEHICLE_ESP = 289421317       // 0x11403805: ESC command (setDrivingEpsMode of the MG menu)
+    private const val TCS_OPNG_MD = 289421343       // 0x1140381f: 1 = ESC active, 0 = off (fallback)
 
-    // ── Régénération : touchée depuis la jauge KERS (accueil, page Véhicule) ──
+    // ── Regeneration: touched from the KERS gauge (home, Vehicle page) ──
 
-    /** Niveau de régénération 0..3 ; la conduite à une pédale est d'abord coupée si elle est active. */
+    /** Regeneration level 0..3; one-pedal driving is turned off first if active. */
     fun setRegenLevel(level: Int) {
         if (BuildConfig.MOCK) { _state.value = _state.value.copy(regenLevel = level, onePedal = 0); return }
         scope.launch {
@@ -688,7 +688,7 @@ object CarBridge {
         }
     }
 
-    /** Conduite à une pédale : bascule (appui long sur la jauge KERS). */
+    /** One-pedal driving: toggle (long press on the KERS gauge). */
     fun toggleOnePedal() {
         val target = if (_state.value.onePedal == 1) 0 else 1
         if (BuildConfig.MOCK) { _state.value = _state.value.copy(onePedal = target); return }
@@ -708,13 +708,13 @@ object CarBridge {
     fun startV2L() = evCommand("startV2L") { it.disChargeCtrl(1) }
     fun stopV2L() = evCommand("stopV2L") { it.disChargeCtrl(2) }
 
-    /** Relecture immédiate de l'énergie (après un réglage de recharge). */
+    /** Immediate reread of energy (after a charge setting). */
     fun refreshEnergyNow() { scope.launch { refreshEnergy() } }
 
-    // ── Bascules : boucle « lire, basculer, relire » jusqu'à l'état visé (choix du propriétaire) ──
-    // Les commandes switch…() du service SAIC n'ont pas d'argument : elles avancent d'un cran.
-    // Un appui fixe donc un état CIBLE (l'inverse de l'état lu), puis on bascule et on relit
-    // jusqu'à l'atteindre, avec un nombre de crans borné pour ne jamais tourner en rond.
+    // ── Toggles: "read, toggle, reread" loop until the target state (owner's choice) ──
+    // The SAIC service's switch…() commands have no argument: they move one step.
+    // A press therefore sets a TARGET state (the opposite of the state read), then toggle and reread
+    // until reaching it, with a limited number of steps so it never loops forever.
 
     private val cycleLock = Mutex()
 
@@ -745,7 +745,7 @@ object CarBridge {
         }
     }
 
-    /** Ventilation remise en quittant AUTO quand aucun réglage manuel n'a encore été retenu. */
+    /** Fan restored when leaving AUTO when no manual setting was kept yet. */
     private val DEFAULT_FAN = 4
 
     private fun Boolean?.asInt(): Int? = this?.let { if (it) 1 else 0 }
@@ -762,8 +762,8 @@ object CarBridge {
     }
 
     /**
-     * Derniers réglages hors AUTO (ventilation, direction, recyclage), retenus en continu et gardés après
-     * un redémarrage : on y revient en quittant AUTO depuis MG4Dash (#34), même si AUTO a été activé ailleurs.
+     * Last settings outside AUTO (fan, direction, recirculation), kept continuously and after
+     * a restart: restored when leaving AUTO from MG4Dash (#34), even if AUTO was turned on elsewhere.
      */
     private fun trackManualClimate(ctx: Context) {
         val sp = app.mg4dash.system.Prefs(ctx).raw
@@ -783,7 +783,7 @@ object CarBridge {
         }
     }
 
-    /** Quitte AUTO puis remet ventilation, direction et recyclage d'avant, en relisant la voiture à chaque étape. */
+    /** Leaves AUTO then restores previous fan, direction and recirculation, rereading the car at each step. */
     private fun leaveAuto() {
         val sp = appContext?.let { app.mg4dash.system.Prefs(it).raw }
         val fan = sp?.getInt("manual_fan", -1)?.takeIf { it >= VehicleState.FAN_MIN }
@@ -804,8 +804,8 @@ object CarBridge {
                     delay(500); refreshHvac(); return@withLock
                 }
                 val h = hvac ?: return@withLock
-                // 1) Quitter AUTO en réglant la ventilation : sur SWI69 la bascule AUTO ne fait que l'activer,
-                //    alors que régler la ventilation repasse aussitôt en manuel (relevé du 31/10)
+                // 1) Leave AUTO by setting the fan: on SWI69 the AUTO toggle only turns it on,
+                //    while setting the fan goes back to manual at once (found on 31/10)
                 try { h.setFanSpeed(fan ?: DEFAULT_FAN) } catch (e: Exception) { Log.w(TAG, "leave AUTO fan: ${e.message}") }
                 var waited = 0
                 while (waited < 1500 && safe { h.autoStatus } == true) { delay(250); waited += 250 }
@@ -817,7 +817,7 @@ object CarBridge {
                 Log.i(TAG, "leave AUTO: AUTO now ${safe { h.autoStatus }} after $waited ms")
                 // 2) Direction : commande directe
                 dir?.let { try { h.setFanDirection(it) } catch (e: Exception) { Log.w(TAG, "leave AUTO direction: ${e.message}") }; delay(400) }
-                // 3) Recyclage : bascule à 3 états, jusqu'à la valeur voulue (3 crans au plus)
+                // 3) Recirculation: 3-state toggle, until the wanted value (3 steps at most)
                 rec?.let { target ->
                     for (i in 0 until 3) {
                         val cur = safe { h.airCirculationStatus }?.takeIf { it >= 0 } ?: break
@@ -836,13 +836,13 @@ object CarBridge {
     fun toggleDefrostRear() = if (useLegacy) legacy("defrostRear") { LegacyCar.defrostRear(_state.value.defrostRear != true) } else cycleTo("defrostRear", toggleTarget(_state.value.defrostRear), 2,
         { it.rearDefrostStatus.asInt() }, { it.switchRearDefrostStatus() })
 
-    /** Débit d'air en mode AUTO (#65) : 0 = haut, 1 = moyen, 2 = bas, comme le réglage de la clim d'origine. */
+    /** Air flow in AUTO mode (#65): 0 = high, 1 = medium, 2 = low, like the stock climate setting. */
     fun setAutoAirVolume(level: Int) = hvacSetting("autoAirVolume=$level", { it.copy(autoAirVolume = level) },
         { LegacyCar.setAutoAirVolume(level) }) { it.setAutoAirVolume(level) }
-    /** Dégivrage arrière allumé avec l'avant (#65). */
+    /** Rear defrost on with the front (#65). */
     fun setDefrostLinked(on: Boolean) = hvacSetting("defrostLinked=$on", { it.copy(defrostLinked = on) },
         { LegacyCar.setDefrostLinked(on) }) { it.setDefrostLinkage(if (on) 0 else 1) }
-    /** Clim qui suit le mode ECO (#65). */
+    /** Climate following ECO mode (#65). */
     fun setEcoLinked(on: Boolean) = hvacSetting("ecoLinked=$on", { it.copy(ecoLinked = on) },
         { LegacyCar.setEcoLinked(on) }) { it.setEcoLinkage(if (on) 1 else 2) }
 
@@ -854,11 +854,11 @@ object CarBridge {
     fun toggleEco() = cycleTo("eco", toggleTarget(_state.value.ecoOn), 2,
         { it.ecoStatus.asInt() }, { it.switchEcoStatus() })
 
-    /** Recyclage : air recyclé (0) ↔ air extérieur (1) ; cycle à 3 états, donc 3 crans au plus. */
+    /** Recirculation: recirculated (0) ↔ outside air (1); 3-state cycle, so 3 steps at most. */
     /**
-     * Recyclage en 3 états : extérieur (1) → recyclé (0) → auto (2) → extérieur.
-     * La commande SAIC n'a pas d'argument et avance d'un cran ; si la voiture ne propose pas
-     * l'état auto par ce bouton, deux crans ramènent à l'état de départ (aucun changement).
+     * 3-state recirculation: outside (1) → recirculated (0) → auto (2) → outside.
+     * The SAIC command has no argument and moves one step; if the car does not offer
+     * the auto state through this button, two steps go back to the start state (no change).
      */
     fun toggleRecirc() {
         val cur = _state.value.recirc
@@ -868,8 +868,8 @@ object CarBridge {
     }
 
     /**
-     * Température au pas de 1° : LO, 18 à 32, HI (bornes mesurées par MG4Control sur A9).
-     * Depuis une valeur en demi-degré, le premier appui arrondit dans le sens demandé.
+     * Temperature in 1° steps: LO, 18 to 32, HI (limits measured by MG4Control on A9).
+     * From a half-degree value, the first press rounds in the requested direction.
      */
     fun stepTemp(direction: Int) {
         val cur = _state.value.driverTemp ?: return
@@ -881,7 +881,7 @@ object CarBridge {
             else -> (Math.ceil(cur.toDouble()) - 1).toFloat()
         }.let { t -> if (t < 18f) min else if (t > 32f) max else t }
         if (target == cur) return
-        _state.value = _state.value.copy(driverTemp = target)   // retour visuel immédiat
+        _state.value = _state.value.copy(driverTemp = target)   // immediate visual feedback
         holdTemp = target to System.currentTimeMillis() + HOLD_MS
         if (useLegacy) legacy("temp=$target") { LegacyCar.temp(Math.round(target)) }
         else command("temp=$target") { it.setDriverTemperature(target) }
@@ -889,10 +889,10 @@ object CarBridge {
 
     fun stepFan(delta: Int) {
         val cur = _state.value.fanSpeed ?: return
-        // Clim arrêtée : baisser la ventilation la rallumait (#34), seul + la démarre
+        // Climate off: lowering the fan turned it back on (#34), only + starts it
         if (delta < 0 && _state.value.hvacOn != true) return
-        // Clim arrêtée, « + » : on la rallume comme le bouton marche, la voiture reprend son dernier niveau
-        // de ventilation au lieu de partir de 1 (#34)
+        // Climate off, "+": turn it back on like the power button, the car resumes its last fan
+        // level instead of starting from 1 (#34)
         if (delta == 1 && _state.value.hvacOn != true) { togglePower(); return }
         val target = (cur + delta).coerceIn(VehicleState.FAN_MIN, VehicleState.FAN_MAX)
         if (target == cur) return
@@ -902,7 +902,7 @@ object CarBridge {
         else command("fan=$target") { it.setFanSpeed(target) }
     }
 
-    /** Direction de l'air, échelle 0–6 (table AirFlow de MG4Control). */
+    /** Air direction, 0–6 scale (MG4Control's AirFlow table). */
     fun setFanDirection(value: Int) {
         if (value !in 0..6) return
         _state.value = _state.value.copy(fanDirection = value)

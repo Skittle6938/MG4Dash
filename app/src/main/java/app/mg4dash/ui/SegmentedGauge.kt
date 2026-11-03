@@ -9,7 +9,7 @@ import android.view.View
 import androidx.core.content.ContextCompat
 import app.mg4dash.R
 
-/** Jauge horizontale segmentée (ventilation, batterie, KERS). */
+/** Segmented horizontal gauge (fan, battery, KERS). */
 class SegmentedGauge @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null,
 ) : View(context, attrs) {
@@ -17,14 +17,14 @@ class SegmentedGauge @JvmOverloads constructor(
     var segments: Int = 10
         set(v) { field = v.coerceAtLeast(1); invalidate() }
 
-    /** Nombre de segments allumés, 0..segments ; négatif = inconnu (tout éteint, grisé). */
+    /** Number of lit segments, 0..segments; negative = unknown (all off, greyed). */
     var value: Int = 0
         set(v) { if (field != v) { field = v; invalidate() } }
 
     var onColor: Int = app.mg4dash.ui.Themes.color(context, R.color.accent_cold)
         set(v) { if (field != v) { field = v; invalidate() } }
 
-    /** Toucher une case : son index 0..segments-1 (null = jauge non tactile). */
+    /** Touching a slot: its index 0..segments-1 (null = non-touch gauge). */
     var onSegmentTap: ((Int) -> Unit)? = null
     var onLongTap: (() -> Unit)? = null
 

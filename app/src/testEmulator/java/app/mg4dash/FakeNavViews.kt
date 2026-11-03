@@ -10,15 +10,15 @@ import android.graphics.Typeface
 import android.view.View
 
 /**
- * Vues de démonstration pour les captures du README : à quoi peut ressembler une appli tierce
- * affichée dans la carte (planificateur de trajet électrique, guidage). Dessins génériques, sans
- * logo ni marque, sur un fond de rues fictives.
+ * Demonstration views for README screenshots: what a third party app can look like
+ * shown in the map (electric trip planner, guidance). Generic drawings, with no
+ * logo or brand, on a background of fictional streets.
  */
 abstract class FakeAppView(context: Context) : View(context) {
     protected val d = resources.displayMetrics.density
     protected val p = Paint(Paint.ANTI_ALIAS_FLAG)
 
-    /** Plan de rues fictif (grille légèrement irrégulière, parc, rivière). */
+    /** Fictional street plan (slightly irregular grid, park, river). */
     protected fun streets(c: Canvas, dark: Boolean) {
         val w = width.toFloat(); val h = height.toFloat()
         c.drawColor(if (dark) 0xFF1E2430.toInt() else 0xFFEDEBE6.toInt())
@@ -38,7 +38,7 @@ abstract class FakeAppView(context: Context) : View(context) {
         p.style = Paint.Style.FILL
     }
 
-    /** Trait d'itinéraire avec liseré blanc, comme dans les applis de navigation. */
+    /** Route line with a white border, as in navigation apps. */
     protected fun routeLine(c: Canvas, path: Path, color: Int, widthDp: Float) {
         p.style = Paint.Style.STROKE; p.strokeJoin = Paint.Join.ROUND; p.strokeCap = Paint.Cap.ROUND
         p.color = Color.WHITE; p.strokeWidth = (widthDp + 4) * d; c.drawPath(path, p)
@@ -53,13 +53,13 @@ abstract class FakeAppView(context: Context) : View(context) {
     }
 }
 
-/** Planificateur électrique : itinéraire, arrêt de recharge, % de batterie à chaque étape. */
+/** Electric planner: route, charging stop, battery % at each step. */
 class FakePlannerView(context: Context) : FakeAppView(context) {
     override fun onDraw(c: Canvas) {
         val w = width.toFloat(); val h = height.toFloat()
-        // Carte OpenStreetMap dessous, assombrie comme un planificateur en thème sombre
+        // OpenStreetMap map underneath, darkened like a planner in dark theme
         p.style = Paint.Style.FILL; p.color = 0x8C0B0F17.toInt(); c.drawRect(0f, 0f, w, h, p)
-        // Itinéraire le long des grands axes (lignes brisées, coins arrondis)
+        // Route along main roads (polylines, rounded corners)
         val route = Path().apply {
             moveTo(w * 0.12f, h * 0.88f); lineTo(w * 0.2f, h * 0.7f); lineTo(w * 0.33f, h * 0.62f); lineTo(w * 0.42f, h * 0.47f)
             lineTo(w * 0.5f, h * 0.42f); lineTo(w * 0.62f, h * 0.36f); lineTo(w * 0.7f, h * 0.22f); lineTo(w * 0.86f, h * 0.12f)
@@ -75,7 +75,7 @@ class FakePlannerView(context: Context) : FakeAppView(context) {
         stop(w * 0.12f, h * 0.88f, 0xFF00E676.toInt(), "Start · 82 %", "14:05")
         stop(w * 0.5f, h * 0.42f, 0xFFFFB300.toInt(), "Charge 18 min", "24 % → 61 %")
         stop(w * 0.86f, h * 0.12f, 0xFF2E7DFF.toInt(), "Arrival · 19 %", "17:40", left = true)
-        // Bandeau du bas : résumé du trajet
+        // Bottom banner: trip summary
         val bar = RectF(0f, h - 70 * d, w, h)
         p.color = 0xF0141A26.toInt(); c.drawRect(bar, p)
         text(c, "3 h 35", 16 * d, h - 40 * d, 20f, Color.WHITE, bold = true)
@@ -85,24 +85,24 @@ class FakePlannerView(context: Context) : FakeAppView(context) {
     }
 }
 
-/** Guidage : flèche de direction, nom de rue, itinéraire, temps et distance restants. */
+/** Guidance: direction arrow, street name, route, time and distance remaining. */
 class FakeGuidanceView(context: Context) : FakeAppView(context) {
     override fun onDraw(c: Canvas) {
         val w = width.toFloat(); val h = height.toFloat()
-        // Carte OpenStreetMap dessous ; itinéraire, puis bandeaux de l'appli
+        // OpenStreetMap map underneath; route, then the app's banners
         val route = Path().apply { moveTo(w * 0.5f, h); lineTo(w * 0.5f, h * 0.33f); lineTo(w * 0.3f, h * 0.27f); lineTo(w * 0.1f, h * 0.24f) }
         routeLine(c, route, 0xFF2F80ED.toInt(), 10f)
-        // Limitation de vitesse
+        // Speed limit
         p.style = Paint.Style.FILL; p.color = Color.WHITE; c.drawCircle(w - 42 * d, h - 100 * d, 26 * d, p)
         p.style = Paint.Style.STROKE; p.strokeWidth = 5 * d; p.color = 0xFFE53935.toInt(); c.drawCircle(w - 42 * d, h - 100 * d, 23 * d, p)
         p.style = Paint.Style.FILL
         text(c, "50", w - 42 * d, h - 92 * d, 20f, 0xFF1D2433.toInt(), bold = true, align = Paint.Align.CENTER)
-        // Position de la voiture
-        // (posée sur le repère de position de la carte, au centre)
+        // Car position
+        // (placed on the map's position marker, in the centre)
         val cx = w * 0.5f; val cy = h * 0.5f
         val car = Path().apply { moveTo(cx, cy - 14 * d); lineTo(cx + 11 * d, cy + 12 * d); lineTo(cx, cy + 6 * d); lineTo(cx - 11 * d, cy + 12 * d); close() }
         p.color = Color.WHITE; c.drawCircle(cx, cy, 22 * d, p); p.color = 0xFFE53935.toInt(); c.drawPath(car, p)
-        // Bandeau de direction
+        // Direction banner
         val top = RectF(10 * d, 10 * d, w - 70 * d, 90 * d)
         p.color = 0xFF2F80ED.toInt(); c.drawRoundRect(top, 14 * d, 14 * d, p)
         p.style = Paint.Style.STROKE; p.strokeWidth = 5 * d; p.color = Color.WHITE
@@ -112,7 +112,7 @@ class FakeGuidanceView(context: Context) : FakeAppView(context) {
         c.drawPath(head, p)
         text(c, "150 m", top.left + 64 * d, top.top + 34 * d, 20f, Color.WHITE, bold = true)
         text(c, "Allée Thomy Thierry", top.left + 64 * d, top.top + 62 * d, 17f, Color.WHITE)
-        // Bandeau du bas : arrivée, durée, distance
+        // Bottom banner: arrival, duration, distance
         val bar = RectF(0f, h - 64 * d, w, h)
         p.color = Color.WHITE; c.drawRect(bar, p)
         text(c, "18:27", 16 * d, h - 32 * d, 20f, 0xFF1D2433.toInt(), bold = true)

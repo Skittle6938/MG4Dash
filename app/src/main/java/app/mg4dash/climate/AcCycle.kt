@@ -19,10 +19,10 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 /**
- * A/C intermittent (issue #34) : appui long sur A/C, le compresseur alterne marche et arrêt
- * (durées réglées dans la calibration de la température). Un toucher sur A/C arrête le cycle et
- * laisse le compresseur en marche. Clim ou voiture éteinte, le cycle attend et reprend au
- * rallumage, d'un trajet à l'autre, tant que le conducteur ne l'a pas arrêté (#61).
+ * Intermittent A/C (issue #34): long press on A/C, the compressor alternates on and off
+ * (durations set in the temperature calibration). A touch on A/C stops the cycle and
+ * leaves the compressor on. With the climate or car off, the cycle waits and resumes when
+ * turned back on, from one trip to the next, as long as the driver has not stopped it (#61).
  */
 object AcCycle {
     private const val TAG = "AcCycle"
@@ -42,7 +42,7 @@ object AcCycle {
         run(prefs, "started")
     }
 
-    /** Démarrage de MG4Dash : reprend le cycle laissé actif au trajet précédent (#61). */
+    /** MG4Dash startup: resumes the cycle left active on the previous trip (#61). */
     fun resume(context: Context) {
         val prefs = Prefs(context.applicationContext)
         if (prefs.acCycleOn && !_active.value) run(prefs, "resumed from the last trip")
@@ -53,7 +53,7 @@ object AcCycle {
         Log.i(TAG, "$why: ${prefs.acCycleOnSec} s on / ${prefs.acCycleOffSec} s off")
         job = scope.launch {
             while (true) {
-                // Clim éteinte (ou voiture arrêtée) : on attend qu'elle se rallume, le cycle reste actif
+                // Climate off (or car stopped): wait for it to come back on, the cycle stays active
                 while (CarBridge.state.value.hvacOn != true) delay(2000)
                 var on = true
                 cycle@ while (true) {
@@ -69,7 +69,7 @@ object AcCycle {
         }
     }
 
-    /** Arrêt par le conducteur : le compresseur reste en marche, et le cycle ne reprendra plus. */
+    /** Stopped by the driver: the compressor stays on, and the cycle will not resume. */
     fun stop(context: Context) {
         if (!_active.value) return
         Prefs(context.applicationContext).acCycleOn = false
@@ -85,14 +85,14 @@ object AcCycle {
 
     private fun setAc(on: Boolean) { if (CarBridge.state.value.acOn != on) CarBridge.toggleAc() }
 
-    /** Boutons A/C : toucher = bascule (ou fin du cycle), appui long = cycle. */
+    /** A/C buttons: touch = toggle (or end of the cycle), long press = cycle. */
     fun attach(view: View) {
-        // Le clignotement s'arrête tout de suite (l'état A/C ne change pas forcément, #34)
+        // Blinking stops at once (the A/C state does not necessarily change, #34)
         view.setOnClickListener { if (_active.value) { stop(view.context); paint(view) } else CarBridge.toggleAc() }
         view.setOnLongClickListener { start(view.context); paint(view); true }
     }
 
-    /** Clignotement lent et doux du bouton tant que le cycle tourne. */
+    /** Slow, gentle blinking of the button while the cycle runs. */
     fun paint(view: View) {
         val anim = view.getTag(R.id.tag_ac_cycle) as? ObjectAnimator
         if (_active.value && anim == null) {

@@ -32,10 +32,10 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 /**
- * Page Téléphone : appels récents, contacts avec recherche, clavier.
- * Les données viennent du téléphone connecté en Bluetooth (PBAP → ContactsProvider et journal
- * d'appels, comme l'appli SAIC) ; l'appel passe par le compte HFP de Telecom, et l'écran d'appel
- * en cours reste celui de l'appli SAIC (son InCallService).
+ * Phone page: recent calls, contacts with search, keypad.
+ * Data comes from the phone connected over Bluetooth (PBAP → ContactsProvider and call
+ * log, like the SAIC app); calls go through Telecom's HFP account, and the in-call screen
+ * stays the SAIC app's (its InCallService).
  */
 class PhoneActivity : PageActivity() {
     override val pageTitle get() = getString(R.string.title_phone)
@@ -44,7 +44,7 @@ class PhoneActivity : PageActivity() {
     data class Entry(val name: String, val number: String, val detail: String, val type: Int = 0)
 
     companion object {
-        /** Appels récents du téléphone connecté (journal synchronisé par PBAP), du plus récent au plus ancien. */
+        /** Recent calls of the connected phone (log synced by PBAP), newest to oldest. */
         fun recentCalls(ctx: Context, max: Int = 100): List<Entry> {
             if (BuildConfig.MOCK) return mockCalls()
             return try {
@@ -67,7 +67,7 @@ class PhoneActivity : PageActivity() {
             }
         }
 
-        /** Nom du téléphone connecté en mains libres (HFP), ou null. */
+        /** Name of the phone connected hands-free (HFP), or null. */
         fun connectedPhone(): String? {
             if (BuildConfig.MOCK) return "Pixel 8"
             return try {
@@ -77,7 +77,7 @@ class PhoneActivity : PageActivity() {
             } catch (e: Exception) { null }
         }
 
-        /** Appel par le compte Bluetooth mains libres (HFP), comme l'appli SAIC. */
+        /** Call through the Bluetooth hands-free account (HFP), like the SAIC app. */
         fun placeCall(ctx: Context, number: String) {
             val n = number.trim()
             if (n.isEmpty()) return
@@ -104,7 +104,7 @@ class PhoneActivity : PageActivity() {
             Entry("Sophie Leroy", "+33 6 11 22 33 44", "2 days", CallLog.Calls.MISSED_TYPE),
         )
 
-        /** Répertoire du téléphone connecté (ContactsProvider, rempli par PBAP), trié par nom. */
+        /** Phone book of the connected phone (ContactsProvider, filled by PBAP), sorted by name. */
         fun contacts(ctx: Context): List<Entry> {
             if (BuildConfig.MOCK) return mockContacts()
             return try {
@@ -130,7 +130,7 @@ class PhoneActivity : PageActivity() {
             }
         }
 
-        /** Demande au téléphone connecté (PBAP) de renvoyer répertoire et journal d'appels. */
+        /** Asks the connected phone (PBAP) to send its phone book and call log again. */
         fun sync(ctx: Context, manual: Boolean) {
             if (BuildConfig.MOCK) return
             val adapter = BluetoothAdapter.getDefaultAdapter() ?: return
@@ -187,7 +187,7 @@ class PhoneActivity : PageActivity() {
             setOnClickListener { Apps.open(this@PhoneActivity, Apps.BT_PHONE, "SAIC") }
         })
 
-        // ── Récents ──
+        // ── Recent ──
         val recent = kit.panel(getString(R.string.ph_recent))
         recentAdapter = EntryAdapter(showType = true)
         recentEmpty = kit.text(getString(R.string.ph_no_phone), 18f, R.color.text_title).apply { maxLines = 3 }
@@ -260,7 +260,7 @@ class PhoneActivity : PageActivity() {
         contentResolver.unregisterContentObserver(observer)
     }
 
-    /** Le répertoire ou le journal changent (synchronisation en cours) : rechargement groupé. */
+    /** The phone book or log changes (sync running): grouped reload. */
     private val reload = Runnable { load() }
     private val observer = object : android.database.ContentObserver(android.os.Handler(android.os.Looper.getMainLooper())) {
         override fun onChange(selfChange: Boolean) {
@@ -271,8 +271,8 @@ class PhoneActivity : PageActivity() {
     private var autoSyncDone = false
 
     /**
-     * Demande au téléphone son répertoire et son journal d'appels (PBAP), comme le fait l'appli
-     * téléphone SAIC (BluetoothPbapClient.downloadPhoneBook / downloadCallLog, méthodes SAIC).
+     * Asks the phone for its phone book and call log (PBAP), as the SAIC phone
+     * app does (BluetoothPbapClient.downloadPhoneBook / downloadCallLog, SAIC methods).
      */
     override fun render(s: VehicleState) {}
 
@@ -283,7 +283,7 @@ class PhoneActivity : PageActivity() {
         setOnItemClickListener { _, _, pos, _ -> call(adapter.items[pos].number) }
     }
 
-    // ── Données ──
+    // ── Data ──
 
     private fun load() {
         lifecycleScope.launch {
@@ -297,7 +297,7 @@ class PhoneActivity : PageActivity() {
             recentEmpty.text = getString(if (device == null) R.string.ph_no_phone else R.string.ph_no_calls)
             contactEmpty.text = getString(if (device == null) R.string.ph_no_phone else R.string.ph_no_contacts)
             filterContacts("")
-            // Téléphone connecté mais rien de reçu : on lance la synchronisation une fois
+            // Phone connected but nothing received: start the sync once
             if (device != null && book.isEmpty() && calls.isEmpty() && !autoSyncDone) { autoSyncDone = true; sync(this@PhoneActivity, manual = false) }
         }
     }

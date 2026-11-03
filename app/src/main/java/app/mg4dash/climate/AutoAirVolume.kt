@@ -10,14 +10,14 @@ import app.mg4dash.car.CarBridge
 import app.mg4dash.ui.Themes
 
 /**
- * Débit d'air en mode AUTO (#65) : appui long sur AUTO pour choisir bas / moyen / haut, comme le
- * réglage de la clim d'origine ; le niveau s'affiche en trois petites barres dans le bouton.
- * Valeurs de la voiture : 0 = haut, 1 = moyen, 2 = bas.
+ * Air flow in AUTO mode (#65): long press on AUTO to choose low / medium / high, like the
+ * stock climate setting; the level shows as three small bars in the button.
+ * Car values: 0 = high, 1 = medium, 2 = low.
  */
 object AutoAirVolume {
     private val LABELS = listOf(R.string.cl_level_low, R.string.cl_level_medium, R.string.cl_level_high)
 
-    /** Texte du bouton : « AUTO » suivi des barres (rien si la voiture ne donne pas le réglage). */
+    /** Button text: "AUTO" followed by the bars (nothing if the car does not give the setting). */
     fun paint(chip: TextView, level: Int?) {
         if (level !in 0..2) { if (chip.text.toString() != "AUTO") chip.text = "AUTO"; return }
         val bars = 3 - level!!   // bas = 1 barre, moyen = 2, haut = 3

@@ -22,22 +22,22 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Filet de sécurité de MG4Dash. Quand MG4Dash a remplacé l'accueil SAIC, seul lui peut le réactiver : s'il ne
- * démarre plus (code compilé abîmé, plantage au lancement), l'écran reste bloqué. Ce service, dans une appli à
- * part sans code commun avec MG4Dash :
- *  1. 90 s après le démarrage, regarde si MG4Dash est l'accueil et s'il a donné signe de vie pendant ce
- *     démarrage (réglage global mg4dash_alive, écrit par MG4Dash à son lancement) sans planter en boucle ;
- *  2. sinon, arrête MG4Dash, recompile son code, le relance et attend 60 s ;
- *  3. s'il ne démarre toujours pas, réactive l'accueil SAIC, le remet par défaut et l'ouvre.
- * Le résultat est laissé dans mg4dash_rescued pour que MG4Dash l'affiche à son prochain lancement.
- * Si MG4Dash a été désinstallé sans passer par le mode Entretien, l'accueil SAIC est aussi réactivé.
+ * MG4Dash safety net. When MG4Dash has replaced SAIC home, only it can re-enable it: if it no longer
+ * starts (damaged compiled code, crash at launch), the screen stays stuck. This service, in a separate app
+ * with no code shared with MG4Dash:
+ *  1. 90 s after boot, checks whether MG4Dash is home and gave a sign of life during this
+ *     boot (global setting mg4dash_alive, written by MG4Dash at launch) without crash looping;
+ *  2. otherwise, stops MG4Dash, recompiles its code, relaunches it and waits 60 s;
+ *  3. if it still does not start, re-enables SAIC home, makes it the default again and opens it.
+ * The result is left in mg4dash_rescued for MG4Dash to show at its next launch.
+ * If MG4Dash was uninstalled without going through Service mode, SAIC home is also re-enabled.
  */
 public class RescueService extends Service {
     static final String TAG = "MG4Rescue";
     private static final String DASH = "app.mg4dash";
     private static final ComponentName DASH_HOME = new ComponentName(DASH, "app.mg4dash.MainActivity");
-    private static final String KEY_ALIVE = "mg4dash_alive";      // « nombre de démarrages:elapsedRealtime »
-    private static final String KEY_RESCUED = "mg4dash_rescued";  // « recompiled|stock:heure »
+    private static final String KEY_ALIVE = "mg4dash_alive";      // "boot count:elapsedRealtime"
+    private static final String KEY_RESCUED = "mg4dash_rescued";  // "recompiled|stock:time"
     private static final long FIRST_CHECK_MS = 90_000;
     private static final long RETRY_WAIT_MS = 60_000;
     private static final int CRASH_LIMIT = 3;
@@ -81,19 +81,19 @@ public class RescueService extends Service {
         boolean stockDisabled = stock != null && pm.getComponentEnabledSetting(stock) == PackageManager.COMPONENT_ENABLED_STATE_DISABLED;
         Log.i(TAG, "check: MG4Dash " + (dashInstalled ? "installed" : "absent") + ", SAIC home " + stock + (stockDisabled ? " disabled" : " enabled"));
 
-        // MG4Dash désinstallé alors qu'il avait désactivé l'accueil SAIC : on le remet
+        // MG4Dash uninstalled while it had disabled SAIC home: restore it
         if (!dashInstalled) {
             if (stockDisabled) restoreStock(pm, stock, "MG4Dash not installed");
             return;
         }
-        // MG4Dash n'est pas l'accueil (accueil SAIC ou autre launcher) : rien à faire
+        // MG4Dash is not home (SAIC home or another launcher): nothing to do
         if (!stockDisabled) return;
 
         if (healthy(-1, 0)) { Log.i(TAG, "MG4Dash is fine"); return; }
 
-        // 2) Arrêt, recompilation, relance
-        // MG4Dash étant l'accueil, Android le relance aussitôt après un arrêt : il tournait alors pendant la
-        // recompilation, qui abîmait son code (essai du 31/10). Il est donc désactivé le temps de la recompiler.
+        // 2) Stop, recompile, relaunch
+        // As MG4Dash is home, Android relaunches it right after a stop: it then ran during the
+        // recompilation, which damaged its code (trial of 31/10). So it is disabled while recompiling.
         Log.w(TAG, "MG4Dash did not start: recompiling and relaunching it");
         try {
             pm.setApplicationEnabledSetting(DASH, PackageManager.COMPONENT_ENABLED_STATE_DISABLED, 0);
@@ -106,7 +106,7 @@ public class RescueService extends Service {
             pm.setApplicationEnabledSetting(DASH, PackageManager.COMPONENT_ENABLED_STATE_DEFAULT, PackageManager.DONT_KILL_APP);
         }
         setPreferred(pm, DASH_HOME);
-        // Relance sur un processus neuf : son signe de vie prouve que le code recompilé se charge
+        // Relaunch on a fresh process: its sign of life proves the recompiled code loads
         forceStop(DASH);
         long t0 = SystemClock.elapsedRealtime();
         long wall0 = System.currentTimeMillis();
@@ -122,13 +122,13 @@ public class RescueService extends Service {
             mark("recompiled");
             return;
         }
-        // 3) Accueil SAIC
+        // 3) SAIC home
         restoreStock(pm, stock, "MG4Dash still not starting");
     }
 
     /**
-     * MG4Dash en bonne santé : signe de vie pendant ce démarrage (après [afterElapsed] si ≥ 0) et moins de
-     * [CRASH_LIMIT] plantages depuis [sinceWall] (0 : depuis le démarrage de l'autoradio).
+     * MG4Dash healthy: sign of life during this boot (after [afterElapsed] if ≥ 0) and fewer than
+     * [CRASH_LIMIT] crashes since [sinceWall] (0: since the head unit booted).
      */
     private boolean healthy(long afterElapsed, long sinceWall) {
         boolean alive = false;
@@ -146,7 +146,7 @@ public class RescueService extends Service {
         return alive && crashes < CRASH_LIMIT;
     }
 
-    /** Plantages de MG4Dash depuis [since] (heure murale), d'après le journal des plantages d'Android. */
+    /** MG4Dash crashes since [since] (wall clock), from Android's crash log. */
     private int crashes(long since) {
         int n = 0;
         try {
@@ -189,7 +189,7 @@ public class RescueService extends Service {
         }
     }
 
-    /** Accueil SAIC de ce firmware (désactivé compris), hors assistant de premier démarrage. */
+    /** SAIC home of this firmware (disabled included), excluding the first boot wizard. */
     private static ComponentName findStock(PackageManager pm) {
         Intent home = new Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_HOME);
         ComponentName best = null;
@@ -241,7 +241,7 @@ public class RescueService extends Service {
         }
     }
 
-    /** Équivalent de « cmd package compile -m speed -f app.mg4dash ». */
+    /** Equivalent of "cmd package compile -m speed -f app.mg4dash". */
     private static void recompile(String pkg) {
         try {
             Object pm = Class.forName("android.app.ActivityThread").getMethod("getPackageManager").invoke(null);

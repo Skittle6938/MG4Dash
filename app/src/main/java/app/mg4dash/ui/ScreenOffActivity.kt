@@ -11,10 +11,10 @@ import android.view.View
 import app.mg4dash.car.CarBridge
 
 /**
- * Écran éteint (double toucher sur Énergie dans la barre verticale, issue #12) : le rétroéclairage
- * est coupé par la commande du launcher d'origine. Comme le launcher d'origine (ScreenOffView), un
- * écran noir reste par-dessus : la voiture ne rallume pas l'écran d'elle-même, c'est ce toucher
- * (ou une touche) qui le rallume.
+ * Screen off (double touch on Energy in the vertical bar, issue #12): the backlight
+ * is cut by the stock launcher's command. Like the stock launcher (ScreenOffView), a
+ * black screen stays on top: the car does not turn the screen back on by itself, this touch
+ * (or a key) does.
  */
 class ScreenOffActivity : Activity() {
     private val handler = Handler(Looper.getMainLooper())
@@ -24,7 +24,7 @@ class ScreenOffActivity : Activity() {
         super.onCreate(savedInstanceState)
         setContentView(View(this).apply { setBackgroundColor(Color.BLACK) })
         Fullscreen.apply(this)
-        // Petit délai : le doigt du double toucher est levé avant l'extinction
+        // Small delay: the double touch's finger is lifted before switching off
         handler.postDelayed({ off = CarBridge.setDisplay(false); if (!off) finish() }, 300)
     }
 
@@ -35,7 +35,7 @@ class ScreenOffActivity : Activity() {
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean { wake(); return true }
 
-    /** SWI68 : c'est la fenêtre noire de SystemUI qui prend le toucher ; à sa disparition, l'écran est déjà rallumé. */
+    /** SWI68: SystemUI's black window takes the touch; when it disappears, the screen is already back on. */
     private var covered = false
 
     override fun onWindowFocusChanged(hasFocus: Boolean) {

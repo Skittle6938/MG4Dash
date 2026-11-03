@@ -16,10 +16,10 @@ import app.mg4dash.R
 import app.mg4dash.databinding.ActivityMainBinding
 
 /**
- * Présentation de la carte média de l'accueil, comme le lecteur d'Android Auto : la pochette nette
- * couvre la carte, prolongée par la couleur de son bord quand elle n'a pas le format de la carte ;
- * titre et artiste par-dessus, bouton lecture en pilule et barre de progression à la couleur vive
- * de l'image. (La présentation « Classique » a été retirée.)
+ * Presentation of the home media card, like the Android Auto player: the sharp cover
+ * covers the card, extended by its edge colour when it does not have the card's shape;
+ * title and artist on top, pill play button and progress bar in the image's
+ * vivid colour. (The "Classic" presentation was removed.)
  */
 class MediaStyle private constructor(
     private val a: Activity, private val play: ImageView, private val progress: android.widget.ProgressBar?,
@@ -36,7 +36,7 @@ class MediaStyle private constructor(
     private lateinit var texts: List<TextView>
     private lateinit var skips: List<ImageView>
     private var plain: Boolean? = null
-    /** Le panneau de la carte, dont le contour n'est montré que sans image (#36). */
+    /** The card's panel, whose outline is only shown without an image (#36). */
     private var panel: LinearLayout? = null
     private lateinit var radioLine: TextView
     private lateinit var lowerSpace: View
@@ -44,8 +44,8 @@ class MediaStyle private constructor(
     private fun detach(v: View) = v.apply { (parent as? ViewGroup)?.removeView(this) }
 
     /**
-     * [card] : le panneau ; [head] : sa ligne de titre (source ▾) ; [info] : la zone cliquable qui
-     * reçoit le lecteur (elle ouvre l'appli de la source). Les vues passées sont déplacées, pas recréées.
+     * [card]: the panel; [head]: its title line (source ▾); [info]: the clickable area that
+     * receives the player (it opens the source's app). Passed views are moved, not recreated.
      */
     private fun buildImmersive(card: LinearLayout, head: View, info: LinearLayout, title: TextView, artist: TextView,
                                prev: ImageView, next: ImageView) {
@@ -53,14 +53,14 @@ class MediaStyle private constructor(
         progress?.let { detach(it) }
         info.removeAllViews()
         detach(head)
-        // Le panneau entier devient le lecteur : la zone cliquable (ouvre l'appli) le couvre
+        // The whole panel becomes the player: the clickable area (opens the app) covers it
         card.setPadding(0, 0, 0, 0)
         panel = card
         for (i in 0 until card.childCount) if (card.getChildAt(i) !== info) card.getChildAt(i).visibility = View.GONE
         (info.layoutParams as LinearLayout.LayoutParams).apply { topMargin = 0; height = 0; weight = 1f }
         info.orientation = LinearLayout.HORIZONTAL
-        // Le lecteur recouvre tout le panneau, cadre compris ; ses coins un peu moins arrondis (19 dp contre 20)
-        // couvrent aussi ceux du cadre, qui dépassaient sous une image sombre
+        // The player covers the whole panel, frame included; its slightly less rounded corners (19 dp vs 20)
+        // also cover the frame's, which stuck out under a dark image
         frame = RoundedFrame(a, radiusDp = 19f)
         picture = ImageView(a).apply { scaleType = ImageView.ScaleType.FIT_END }
         frame.addView(picture, FrameLayout.LayoutParams(-1, -1))
@@ -99,7 +99,7 @@ class MediaStyle private constructor(
             v.setPadding(dp(18), dp(18), dp(18), dp(18))
             row.addView(v, LinearLayout.LayoutParams(dp(80), dp(80)).apply { leftMargin = dp(20) })
         }
-        // Sans image (styleTexts), ce second espace centre les textes entre la source et les boutons
+        // Without an image (styleTexts), this second space centres the texts between the source and the buttons
         lowerSpace = View(a)
         over.addView(lowerSpace, LinearLayout.LayoutParams(1, 0, 1f))
         over.addView(row, LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(10) })
@@ -108,12 +108,12 @@ class MediaStyle private constructor(
         update(null)
     }
 
-    /** Fondu posé sur le bord gauche de l'image (calée à droite) : la couleur du bord s'y prolonge sans cassure. */
+    /** Fade set on the image's left edge (aligned right): the edge colour extends there with no break. */
     /**
-     * Image calée à droite à la hauteur de la carte, jamais rognée sur les côtés : ses bandes noires du
-     * haut et du bas ne sont retirées que tant que l'image agrandie tient dans la largeur de la carte
-     * (sa forme change selon la disposition). La couleur moyenne de son bord gauche la prolonge, avec
-     * un fondu posé sur ce bord.
+     * Image aligned right at the card's height, never cropped on the sides: its black bands at the
+     * top and bottom are only removed as long as the enlarged image fits in the card's width
+     * (its shape changes with the layout). The average colour of its left edge extends it, with
+     * a fade set on that edge.
      */
     private fun placeFade() {
         val w = frame.width; val h = frame.height
@@ -141,9 +141,9 @@ class MediaStyle private constructor(
     private var shownFor = 0
 
     /**
-     * Contour du panneau seulement sans image (radio FM) : sous une pochette, son trait restait visible
-     * dans les coins sur la voiture (#36). Vérifié à chaque mise à jour, car le style des panneaux
-     * (FadeOutline) est posé après la création de la carte.
+     * Panel outline only without an image (FM radio): under a cover, its line stayed visible
+     * in the corners on the car (#36). Checked at each update, as the panel style
+     * (FadeOutline) is set after the card is created.
      */
     private fun showOutline(show: Boolean) {
         val p = panel ?: return
@@ -155,8 +155,8 @@ class MediaStyle private constructor(
     }
 
     /**
-     * Texte et boutons sur la pochette (blancs, ombrés) ou, en [bare], directement sur le panneau de la
-     * carte, aux couleurs du thème, avec un texte plus grand (radio sans image).
+     * Text and buttons on the cover (white, shadowed) or, in [bare], directly on the card's
+     * panel, in the theme's colours, with larger text (radio without an image).
      */
     private fun styleTexts(bare: Boolean) {
         if (plain == bare) return
@@ -171,13 +171,13 @@ class MediaStyle private constructor(
         skips.forEach { it.imageTintList = ColorStateList.valueOf(main) }
         shade.visibility = if (bare) View.GONE else View.VISIBLE
         lowerSpace.visibility = if (bare) View.VISIBLE else View.GONE
-        // Même écart entre les lignes : sans la marge de police, qui s'ajoute surtout sous le grand titre
+        // Same gap between lines: without the font margin, which adds up mostly under the large title
         listOf(title, artist, radioLine).forEach { it.includeFontPadding = !bare }
         listOf(artist, radioLine).forEach { (it.layoutParams as LinearLayout.LayoutParams).topMargin = if (bare) dp(LINE_GAP_DP) else 0 }
         progress?.progressBackgroundTintList = ColorStateList.valueOf(if (bare) Themes.color(a, R.color.gauge_off) else 0x55FFFFFF)
     }
 
-    /** Radio FM ou AM, après [update] : fréquence plus petite et grisée, puis ligne du texte RDS. */
+    /** FM or AM radio, after [update]: smaller, greyed frequency, then the RDS text line. */
     fun radioLines(analog: Boolean, text: String) {
         if (!::frame.isInitialized) return
         val bare = plain == true
@@ -193,15 +193,15 @@ class MediaStyle private constructor(
     }
 
     /**
-     * Nouvelle pochette : image, prolongement et couleur vive recalculés (une fois par image).
-     * [radio] : source radio ; sans image (FM, station sans logo), rien que le texte et les boutons.
+     * New cover: image, extension and vivid colour recomputed (once per image).
+     * [radio]: radio source; without an image (FM, station with no logo), only the text and buttons.
      */
     fun update(source: Bitmap?, radio: Boolean = false) {
         if (!::frame.isInitialized) return
-        // Image toute noire (station sans pochette) : traitée comme une absence d'image
+        // All black image (station with no cover): treated as no image
         val art = source?.takeIf { !isBlank(it) }
-        // Sans image, quelle que soit la source (ou rien en lecture) : texte sur le panneau et contour estompé,
-        // comme la radio FM (#36), au lieu d'un fond plein avec une note de musique
+        // Without an image, whatever the source (or nothing playing): text on the panel and faded outline,
+        // like FM radio (#36), instead of a solid background with a music note
         showOutline(art == null)
         if (art == null) {
             styleTexts(true)
@@ -219,8 +219,8 @@ class MediaStyle private constructor(
         lastArt = art
         val edge: Int
         val light = Themes.isLight(a)
-        // Sans image : fond blanc ou noir selon le thème, note de musique discrète ; le titre de la source
-        // passe en sombre sur le blanc (le bas reste assombri pour le titre et l'artiste)
+        // Without an image: white or black background according to the theme, discreet music note; the source title
+        // turns dark on white (the bottom stays darkened for title and artist)
         headTitle?.setTextColor(if (art == null && light) Themes.color(a, R.color.text_value) else Color.WHITE)
         if (art == null) {
             picture.setImageResource(R.drawable.ic_music)
@@ -236,7 +236,7 @@ class MediaStyle private constructor(
         }
         frame.setBackgroundColor(edge)
         fade.background = GradientDrawable(GradientDrawable.Orientation.LEFT_RIGHT, intArrayOf(edge, edge and 0x00FFFFFF))
-        // Image recadrée à la taille de la carte (placeFade, aussi rappelé à chaque mise en page)
+        // Image cropped to the card's size (placeFade, also called again at each layout)
         shownFor = 0
         placeFade()
         paintAccent()
@@ -261,15 +261,15 @@ class MediaStyle private constructor(
             }
         } catch (e: Exception) { app.mg4dash.system.Log.w("Media", "player style: ${e.message}"); null }
 
-        /** Mode épuré : même lecteur Immersif, sans barre de progression. */
+        /** Simple mode: same Immersive player, without a progress bar. */
         fun immersive(a: Activity, card: LinearLayout, head: View, info: LinearLayout, title: TextView, artist: TextView,
                       prev: ImageView, play: ImageView, next: ImageView): MediaStyle? = try {
             MediaStyle(a, play, null).apply { buildImmersive(card, head, info, title, artist, prev, next) }
         } catch (e: Exception) { app.mg4dash.system.Log.w("Media", "simple player: ${e.message}"); null }
 
         /**
-         * Image sans ses bandes noires (ou presque noires) en haut et en bas, comme sur les pochettes
-         * de radio au format 16:9 mises dans un carré. Au plus 35 % retirés de chaque côté.
+         * Image without its black (or almost black) bands at the top and bottom, as on 16:9
+         * radio covers put in a square. At most 35 % removed from each side.
          */
         fun cropBars(b: Bitmap, frameW: Int, frameH: Int): Bitmap {
             val h = b.height; val w = b.width
@@ -281,13 +281,13 @@ class MediaStyle private constructor(
                     val c = b.getPixel(x, y); n++
                     if (Color.red(c) > 28 || Color.green(c) > 28 || Color.blue(c) > 28) bright++
                 }
-                return bright * 20 <= n   // au plus 5 % de pixels clairs
+                return bright * 20 <= n   // at most 5 % of light pixels
             }
             val max = h * 35 / 100
             var top = 0; while (top < max && dark(top)) top++
             var bottom = 0; while (bottom < max && dark(h - 1 - bottom)) bottom++
             if (top + bottom < h / 20) return b
-            // Pas plus que ce qui garde l'image agrandie dans la largeur du cadre (jamais rognée sur les côtés)
+            // No more than what keeps the enlarged image within the frame's width (never cropped on the sides)
             val minH = ((w.toLong() * frameH + frameW - 1) / frameW).toInt()
             val newH = maxOf(h - top - bottom, minH)
             if (newH >= h) return b
@@ -296,7 +296,7 @@ class MediaStyle private constructor(
             return Bitmap.createBitmap(b, 0, cutTop, w, newH)
         }
 
-        /** Image presque uniformément noire. */
+        /** Almost uniformly black image. */
         fun isBlank(b: Bitmap): Boolean {
             val step = maxOf(1, b.width / 24)
             var bright = 0; var n = 0
@@ -304,10 +304,10 @@ class MediaStyle private constructor(
                 val c = b.getPixel(x, y); n++
                 if (Color.red(c) > 24 || Color.green(c) > 24 || Color.blue(c) > 24) bright++
             }
-            return n > 0 && bright * 50 < n   // moins de 2 % de pixels non noirs
+            return n > 0 && bright * 50 < n   // less than 2 % of non-black pixels
         }
 
-        /** Couleur moyenne de la bande gauche de l'image (prolongement quand elle n'a pas le format de la carte). */
+        /** Average colour of the image's left band (extension when it does not have the card's shape). */
         fun edgeColor(b: Bitmap): Int {
             var r = 0L; var g = 0L; var bl = 0L; var n = 0L
             val w = maxOf(1, b.width / 12)
@@ -318,7 +318,7 @@ class MediaStyle private constructor(
             return Color.rgb((r / n).toInt(), (g / n).toInt(), (bl / n).toInt())
         }
 
-        /** Couleur vive dominante : la teinte (par tranches de 30°) qui pèse le plus en saturation × luminosité. */
+        /** Dominant vivid colour: the hue (in 30° slices) weighing most in saturation × brightness. */
         fun vividColor(b: Bitmap): Int? {
             val w = FloatArray(12); val hsv = FloatArray(3)
             val sum = Array(12) { FloatArray(3) }
@@ -331,7 +331,7 @@ class MediaStyle private constructor(
             }
             val k = w.indices.maxByOrNull { w[it] } ?: return null
             if (w[k] == 0f) return null
-            // Assez saturée et claire pour ressortir sur l'image assombrie
+            // Saturated and light enough to stand out on the darkened image
             return Color.HSVToColor(floatArrayOf(sum[k][0] / w[k], maxOf(0.65f, sum[k][1] / w[k]), maxOf(0.85f, sum[k][2] / w[k])))
         }
     }

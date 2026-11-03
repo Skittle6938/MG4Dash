@@ -16,20 +16,20 @@ import java.util.Date
 import java.util.Locale
 
 /**
- * Enregistreur de données énergie (étape 1 du chantier « consommations ») : lecture seule.
+ * Energy data recorder (step 1 of the "consumption" work): read only.
  *
- * Toutes les secondes : tension × courant batterie, cumulés en énergie sortie / rentrée.
- * Toutes les 5 s : une ligne CSV avec ces cumuls, les compteurs SAIC, l'état de la clim et des
- * équipements (feux, essuie-glaces, sièges et volant chauffants, dégivrage), vitesse et batterie.
+ * Every second: battery voltage × current, totalled as energy out / in.
+ * Every 5 s: a CSV line with these totals, the SAIC counters, the state of the climate and
+ * equipment (lights, wipers, heated seats and wheel, defrost), speed and battery.
  *
- * Fichier : /sdcard/Android/data/app.mg4dash/files/energy_log.csv (récupérable par
- * adb pull), remplacé par energy_log.old.csv au-delà de 8 Mo.
+ * File: /sdcard/Android/data/app.mg4dash/files/energy_log.csv (retrievable with
+ * adb pull), replaced by energy_log.old.csv above 8 MB.
  */
 object EnergyLogger {
     private const val TAG = "EnergyLog"
     private const val MAX_BYTES = 8L * 1024 * 1024
 
-    /** Propriétés lues telles quelles (nom de colonne → identifiant). */
+    /** Properties read as they are (column name → identifier). */
     private val PROPS = linkedMapOf(
         "cons_total_st" to CarProps.CONS_TOTAL_AFT_ST,
         "cons_atc_st" to CarProps.CONS_ATC_AFT_ST,
@@ -48,9 +48,9 @@ object EnergyLogger {
         "bat_enrg_avg_rate" to 560002081,   // BAT_ELEC_ENRG_AVG_RATE
         "pwr_md" to 356525623,              // PWR_MD
         "ptc_heat" to 557904937,            // DRVNG_PTC_HEAT
-        "hvestb_cond" to 0x2140f457,        // HVESTB_COND : sens inconnu, candidat « réchauffeur batterie en marche » (31/10)
-        "side_lights" to 557880099,         // VEH_SIDE_LGHT (feux, constaté sur la voiture)
-        "day_night" to 289442317,           // PMS_SYSTEM_DAY_NIGHT_MODE (3 = feux allumés)
+        "hvestb_cond" to 0x2140f457,        // HVESTB_COND: unknown meaning, candidate "battery heater running" (31/10)
+        "side_lights" to 557880099,         // VEH_SIDE_LGHT (lights, found on the car)
+        "day_night" to 289442317,           // PMS_SYSTEM_DAY_NIGHT_MODE (3 = lights on)
         "headlights" to 289410560,          // HEADLIGHTS_STATE
         "high_beam" to 289410561,           // HIGH_BEAM_LIGHTS_STATE
         "fog" to 289410562,                 // FOG_LIGHTS_STATE
@@ -68,7 +68,7 @@ object EnergyLogger {
         "mirror_heat" to 339739916,         // HVAC_SIDE_MIRROR_HEAT
     )
 
-    /** Énergie cumulée depuis le démarrage du launcher (Wh), selon le signe du courant. */
+    /** Energy totalled since the launcher started (Wh), by sign of the current. */
     @Volatile var whPositive = 0.0; private set
     @Volatile var whNegative = 0.0; private set
     @Volatile var lastPowerW: Float? = null; private set
@@ -81,7 +81,7 @@ object EnergyLogger {
         val file = File(dir, "energy_log.csv")
         Log.i(TAG, "file: Android/data/<app>/files/${file.name} (enabled: ${prefs.energyLog})")
 
-        // Intégration de la puissance, chaque seconde
+        // Power integration, every second
         scope.launch {
             var last = System.currentTimeMillis()
             while (true) {
@@ -98,8 +98,8 @@ object EnergyLogger {
             }
         }
 
-        // Ligne CSV toutes les 5 s, gardée en mémoire et écrite toutes les 5 min (ou dès que la voiture
-        // s'endort, que l'option est coupée) : 60 fois moins d'écritures sur la mémoire de l'autoradio
+        // CSV line every 5 s, kept in memory and written every 5 min (or as soon as the car
+        // goes to sleep or the option is turned off): 60 times fewer writes to the head unit's storage
         scope.launch {
             val fmt = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US)
             val pending = StringBuilder()

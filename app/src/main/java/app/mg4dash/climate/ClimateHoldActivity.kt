@@ -16,9 +16,9 @@ import app.mg4dash.ui.Themes
 import java.util.Locale
 
 /**
- * Écran de la clim maintenue : très gros, lisible depuis l'extérieur à travers la vitre. Température
- * intérieure avec un code couleur, état de la clim, temps restant (ou écoulé), message aux passants,
- * batterie. L'écran reste allumé ; maintenir le bouton arrête le mode.
+ * Keep climate on screen: very large, readable from outside through the window. Inside
+ * temperature with a colour code, climate state, time remaining (or elapsed), message to passers-by,
+ * battery. The screen stays on; holding the button stops the mode.
  */
 class ClimateHoldActivity : AppCompatActivity() {
     private lateinit var kit: Kit
@@ -36,7 +36,7 @@ class ClimateHoldActivity : AppCompatActivity() {
     private var brightUntil = 0L
     private var dimmed = false
 
-    /** Luminosité au minimum une fois verrouillé (préserve l'écran), normale le temps d'un toucher. */
+    /** Minimum brightness once locked (saves the screen), normal for the time of a touch. */
     private fun dim(on: Boolean) {
         if (on == dimmed) return
         dimmed = on
@@ -45,7 +45,7 @@ class ClimateHoldActivity : AppCompatActivity() {
         }
     }
 
-    /** Écran coupé (rétroéclairage, comme le double toucher sur Énergie) ou rallumé. */
+    /** Screen cut (backlight, like the double touch on Energy) or back on. */
     private fun display(on: Boolean) {
         if (on == !displayOff) return
         displayOff = !on
@@ -53,7 +53,7 @@ class ClimateHoldActivity : AppCompatActivity() {
         CarBridge.setDisplay(on)
     }
 
-    /** Écran éteint : le premier toucher le rallume 10 s, sans actionner ce qu'il y a dessous. */
+    /** Screen off: the first touch turns it on for 10 s, without triggering what is underneath. */
     override fun dispatchTouchEvent(ev: android.view.MotionEvent): Boolean {
         if (ev.actionMasked == android.view.MotionEvent.ACTION_DOWN) { brightUntil = SystemClock.elapsedRealtime() + 10_000; dim(false) }
         if (displayOff) {
@@ -71,7 +71,7 @@ class ClimateHoldActivity : AppCompatActivity() {
     private val handler = Handler(Looper.getMainLooper())
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        // Toujours sombre, même en mode jour : moins de lumière dans l'habitacle, l'écran s'use moins
+        // Always dark, even in day mode: less light in the cabin, less screen wear
         Themes.apply(this, dark = true)
         super.onCreate(savedInstanceState)
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON or WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or
@@ -81,16 +81,16 @@ class ClimateHoldActivity : AppCompatActivity() {
             setBackgroundResource(R.drawable.bg_root)
             setPadding(kit.dp(Kit.FOG_SAFE_DP + 24), kit.dp(28), kit.dp(40), kit.dp(28))
         }
-        // Gauche : la température intérieure, en énorme
+        // Left: the inside temperature, huge
         val left = kit.column().apply { gravity = Gravity.CENTER }
-        // La voiture ne donne pas la température de l'habitacle (essais du 2026-10-20) : l'extérieur, en grand
+        // The car does not give the cabin temperature (tests of 2026-10-20): the outside one, large
         left.addView(kit.text(getString(R.string.dm_outside_title), 34f, R.color.text_title).apply { letterSpacing = 0.15f })
         inside = kit.text("—", 230f, light = true).apply { gravity = Gravity.CENTER; fontFeatureSettings = "tnum" }
         left.addView(inside, kit.lp(-2, -2))
         outside = kit.text("", 30f, R.color.text_sub).apply { gravity = Gravity.CENTER; maxLines = 2 }
         left.addView(outside, kit.lp(-2, -2, t = 4))
         root.addView(left, kit.lp(0, -1, 1f))
-        // Droite : état de la clim, temps, message aux passants, batterie, arrêt
+        // Right: climate state, time, message to passers-by, battery, stop
         val right = kit.column().apply { gravity = Gravity.CENTER_VERTICAL }
         state = kit.text("", 58f).apply { typeface = android.graphics.Typeface.create("sans-serif-medium", android.graphics.Typeface.NORMAL) }
         right.addView(state)
@@ -98,7 +98,7 @@ class ClimateHoldActivity : AppCompatActivity() {
         right.addView(time, kit.lp(-2, -2, t = 4))
         timeLabel = kit.text("", 30f, R.color.text_sub)
         right.addView(timeLabel, kit.lp(-2, -2))
-        // Cycles programmés (heures murales), celui en cours repéré par une flèche
+        // Scheduled cycles (wall clock), the current one marked by an arrow
         runs = kit.text("", 26f, R.color.text_sub).apply { maxLines = 6; setLineSpacing(0f, 1.1f) }
         right.addView(runs, kit.lp(-2, -2, t = 10))
         message = kit.text(getString(R.string.dm_message), 32f).apply { maxLines = 3; setLineSpacing(0f, 1.15f) }
@@ -114,7 +114,7 @@ class ClimateHoldActivity : AppCompatActivity() {
         right.addView(bottom, kit.lp(-1, -2, t = 24))
         root.addView(right, kit.lp(0, -1, 1.25f, l = 40))
         main = root
-        // Compte à rebours avant le verrouillage : le conducteur sort, en gros les deux rappels utiles
+        // Countdown before locking: the driver gets out, the two useful reminders in large text
         val arm = kit.column().apply {
             gravity = Gravity.CENTER
             setBackgroundResource(R.drawable.bg_root)
@@ -133,7 +133,7 @@ class ClimateHoldActivity : AppCompatActivity() {
         val frame = android.widget.FrameLayout(this)
         frame.addView(root, android.widget.FrameLayout.LayoutParams(-1, -1))
         frame.addView(arm, android.widget.FrameLayout.LayoutParams(-1, -1))
-        // Écran éteint une fois verrouillé (option) : un voile noir par-dessus, un toucher le lève 10 s
+        // Screen off once locked (option): a black veil on top, a touch lifts it for 10 s
         blank = android.view.View(this).apply { setBackgroundColor(android.graphics.Color.BLACK); visibility = android.view.View.GONE }
         frame.addView(blank, android.widget.FrameLayout.LayoutParams(-1, -1))
         setContentView(frame)
@@ -173,14 +173,14 @@ class ClimateHoldActivity : AppCompatActivity() {
         val on = car.hvacOn == true
         val counting = st.phase == ClimateHold.Phase.ARMED
         val locked = st.phase == ClimateHold.Phase.WAITING || st.phase == ClimateHold.Phase.ON
-        // Écran éteint une fois verrouillé (option : dormir dedans, discrétion). À la fin, la voiture
-        // éteinte coupe l'écran d'elle-même au bout d'un moment : on laisse l'écran tel quel.
+        // Screen off once locked (option: sleeping inside, discretion). At the end, the car once
+        // off cuts the screen by itself after a while: the screen is left as it is.
         val prefs = app.mg4dash.system.Prefs(this)
         if (locked && prefs.climateHoldScreenOff) {
-            if (wakeUntil == 0L) wakeUntil = now + 3000   // le temps de voir le verrouillage
+            if (wakeUntil == 0L) wakeUntil = now + 3000   // time to see the locking
             if (now >= wakeUntil) display(false)
         } else if (!st.finished) display(true)
-        // Écran allumé une fois verrouillé : luminosité au minimum (un toucher la remonte 10 s)
+        // Screen on once locked: minimum brightness (a touch raises it for 10 s)
         if (locked && brightUntil == 0L) brightUntil = now + 3000
         dim((locked || st.finished) && now >= brightUntil)
         armed.visibility = if (counting) android.view.View.VISIBLE else android.view.View.GONE
@@ -216,7 +216,7 @@ class ClimateHoldActivity : AppCompatActivity() {
             mark + getString(R.string.dm_run_line, i + 1, hhmm(a), hhmm(b))
         }.joinToString("\n")
         battery.text = car.batteryPercent?.let { soc ->
-            // Puissance tirée de la batterie et temps estimé avant 20 % (#72), lissés pour rester lisibles
+            // Power drawn from the battery and estimated time before 20 % (#72), smoothed to stay readable
             val kw = powerKw()
             val parts = mutableListOf<String>()
             if (kw != null && kw > 0.05f) {
@@ -237,7 +237,7 @@ class ClimateHoldActivity : AppCompatActivity() {
     }
 
     private var avgKw: Float? = null
-    /** Puissance sortant de la batterie (kW), moyenne glissante ; null si la voiture ne la donne pas. */
+    /** Power leaving the battery (kW), moving average; null if the car does not give it. */
     private fun powerKw(): Float? {
         val v = app.mg4dash.car.CarProps.getFloat(app.mg4dash.car.CarProps.BMS_PACK_VOL)?.takeIf { it in 100f..900f } ?: return avgKw
         val i = app.mg4dash.car.CarProps.getFloat(app.mg4dash.car.CarProps.BMS_PACK_CRNT) ?: return avgKw
@@ -249,7 +249,7 @@ class ClimateHoldActivity : AppCompatActivity() {
     companion object {
         fun hhmm(wall: Long): String = app.mg4dash.system.Clock.hm(app.mg4dash.Tr.app, java.util.Date(wall))
 
-        /** Durée : « 12:34 », ou « 1 h 05 » au-delà d'une heure. */
+        /** Duration: "12:34", or "1 h 05" above one hour. */
         fun left(ms: Long): String {
             val s = (ms.coerceAtLeast(0) + 999) / 1000
             return if (s >= 3600) String.format(Locale.getDefault(), "%d h %02d", s / 3600, s % 3600 / 60)

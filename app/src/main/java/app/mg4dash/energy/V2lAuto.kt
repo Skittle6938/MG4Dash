@@ -10,15 +10,15 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 
 /**
- * Décharge V2L lancée dès le branchement de l'adaptateur (#82), option désactivée par défaut. La voiture signale
- * l'adaptateur par l'état de charge 11. L'autoradio doit être allumé : au démarrage, un adaptateur déjà branché
- * compte comme un branchement. La décharge s'arrête au seuil réglé sur la page Énergie.
+ * V2L discharge started as soon as the adapter is plugged in (#82), option off by default. The car signals
+ * the adapter with charge state 11. The head unit must be on: at startup, an adapter already plugged in
+ * counts as plugging in. Discharge stops at the threshold set on the Energy page.
  */
 object V2lAuto {
     private const val STATUS_ADAPTER = 11
     private val DISCHARGE_DONE_OR_STOPPED = 13..15
 
-    /** Pas après une décharge arrêtée ou terminée, sinon la voiture repartirait toute seule à chaque arrêt. */
+    /** Not after a stopped or finished discharge, otherwise the car would restart by itself at each stop. */
     fun shouldStart(previous: Int?, status: Int?): Boolean =
         status == STATUS_ADAPTER && previous != STATUS_ADAPTER && previous !in DISCHARGE_DONE_OR_STOPPED
 

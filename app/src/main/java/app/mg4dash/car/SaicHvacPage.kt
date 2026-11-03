@@ -9,10 +9,10 @@ import android.os.Parcel
 import app.mg4dash.system.Log
 
 /**
- * Page clim SAIC des anciens firmwares (#62) : fenêtre « hvac page » de l'interface système, ouverte par
- * la touche clim sous l'écran (288) ou à l'allumage de la clim. Aucun réglage ne la désactive ; on la
- * referme comme SystemUI lui-même, par son service exporté StartActivityService (transaction 2 =
- * stopHVAC). Relevé dans les SystemUI SWI68, SWI133 et XPower ; absent sur SWI69.
+ * SAIC climate page of old firmwares (#62): "hvac page" window of the system UI, opened by
+ * the climate key under the screen (288) or when the climate is turned on. No setting disables it; it is
+ * closed as SystemUI itself does, through its exported StartActivityService (transaction 2 =
+ * stopHVAC). Found in the SWI68, SWI133 and XPower SystemUI; absent on SWI69.
  */
 object SaicHvacPage {
     private const val TAG = "HvacPage"
@@ -37,10 +37,10 @@ object SaicHvacPage {
         if (!ok) { binding = false; Log.i(TAG, "SystemUI StartActivityService not available on this firmware") }
     }
 
-    /** Prépare la connexion (anciens firmwares seulement), pour pouvoir fermer la page sans attendre. */
+    /** Prepares the connection (old firmwares only), to be able to close the page without waiting. */
     fun prepare(ctx: Context) { if (app.mg4dash.system.Firmware.family != app.mg4dash.system.Firmware.Family.A9) bind(ctx) }
 
-    /** Ferme la page clim SAIC ; false si le service n'est pas joignable. */
+    /** Closes the SAIC climate page; false if the service cannot be reached. */
     fun close(ctx: Context): Boolean {
         val b = binder?.takeIf { it.isBinderAlive } ?: run { bind(ctx); return false }
         val data = Parcel.obtain(); val reply = Parcel.obtain()

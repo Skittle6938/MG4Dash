@@ -12,20 +12,20 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
 /**
- * Guidage de l'appli Android Auto « DiAuto » (com.drivehub.diauto.mg4, basée sur Headunit Revived).
+ * Guidance from the "DiAuto" Android Auto app (com.drivehub.diauto.mg4, based on Headunit Revived).
  *
- * Contrairement à l'Android Auto d'origine de la voiture, elle reçoit du téléphone la prochaine
- * manœuvre et la diffuse environ chaque seconde (action NAVIGATION_UPDATE, extras relevés dans
- * son code : NavigationUpdateIntent). La diffusion est réservée à une permission de l'appli ;
- * MG4Dash, en uid système, la reçoit sans rien modifier. Sans nouvelle pendant 8 s, le guidage
- * est considéré comme terminé.
+ * Unlike the car's stock Android Auto, it receives the next manoeuvre from the phone
+ * and broadcasts it about every second (NAVIGATION_UPDATE action, extras found in
+ * its code: NavigationUpdateIntent). The broadcast is restricted to a permission of the app;
+ * MG4Dash, as a system uid, receives it with no change. With no news for 8 s, guidance
+ * is considered finished.
  */
 object NavRepo {
     private const val TAG = "Guidance"
     const val ACTION = "com.andrerinas.headunitrevived.NAVIGATION_UPDATE"
     private const val TIMEOUT_MS = 8_000L
 
-    /** Types de manœuvre (NextTurnEnum d'Android Auto). */
+    /** Manoeuvre types (Android Auto's NextTurnEnum). */
     object Turn {
         const val DEPART = 1; const val NAME_CHANGE = 2; const val SLIGHT = 3; const val TURN = 4
         const val SHARP = 5; const val U_TURN = 6; const val ON_RAMP = 7; const val OFF_RAMP = 8
@@ -40,7 +40,7 @@ object NavRepo {
         val road: String,
         val eventType: Int,
         val actionText: String,
-        val side: Int?,          // 1 gauche, 2 droite, 3 non précisé
+        val side: Int?,          // 1 left, 2 right, 3 unspecified
         val exitNumber: Int?,
         val angle: Int?,
         val totalMeters: Int?,
@@ -61,7 +61,7 @@ object NavRepo {
         } catch (e: Exception) { Log.w(TAG, "guidance listener failed: ${e.message}") }
     }
 
-    /** Pour les captures d'écran du PC. */
+    /** For PC screenshots. */
     fun setForTest(n: Nav?) { _nav.value = n }
 
     private val receiver = object : BroadcastReceiver() {

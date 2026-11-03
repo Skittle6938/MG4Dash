@@ -21,23 +21,23 @@ import app.mg4dash.R
 import app.mg4dash.system.Prefs
 
 /**
- * Petit tuto des gestes de l'accueil : un voile sombre, la carte concernée mise en valeur, une flèche
- * vers elle et une bulle avec les gestes principaux. Suivant / Passer ; « Passer » le referme pour de bon.
- * Lancé une fois après une première installation, ou depuis Réglages › Système.
+ * Small tutorial of home gestures: a dark veil, the relevant card highlighted, an arrow
+ * towards it and a bubble with the main gestures. Next / Skip; "Skip" closes it for good.
+ * Launched once after a first install, or from Settings › System.
  */
 object Tutorial {
 
-    /** Étape : vue à mettre en valeur (null = aucune, bulle au centre), titre et lignes de gestes. */
-    /** [swipes] : gestes de glisser montrés en flèches animées sur la carte ('H' gauche / droite, 'V' haut / bas). */
-    /** [homePanel] : le panneau « Écran d'accueil » des réglages reproduit dans la bulle (ses deux boutons). */
+    /** Step: view to highlight (null = none, bubble in the centre), title and gesture lines. */
+    /** [swipes]: swipe gestures shown as animated arrows on the card ('H' left / right, 'V' up / down). */
+    /** [homePanel]: the settings' "Home screen" panel reproduced in the bubble (its two buttons). */
     private class Step(val target: Int?, val title: Int, val lines: List<Int>, val images: List<Pair<Int, Int>> = emptyList(),
                        val swipes: String = "", val homePanel: Boolean = false)
 
     private val STEPS = listOf(
         Step(null, R.string.tu_welcome_t, listOf(R.string.tu_welcome_1)),
-        // Remplacer l'accueil SAIC, et le mode Entretien pour revenir à l'origine
+        // Replace SAIC home, and Service mode to go back to stock
         Step(null, R.string.tu_home_t, listOf(R.string.tu_home_1, R.string.tu_home_2), homePanel = true),
-        // Les trois dispositions de l'accueil, en miniature
+        // The three home layouts, in miniature
         Step(null, R.string.tu_layouts_t, listOf(R.string.tu_layouts_1, R.string.tu_layouts_2), listOf(
             R.drawable.tu_layout_full to R.string.st_style_full,
             R.drawable.tu_layout_simple to R.string.st_style_simple,
@@ -52,7 +52,7 @@ object Tutorial {
         Step(null, R.string.tu_end_t, listOf(R.string.tu_end_1)),
     )
 
-    /** Première installation : le tuto s'ouvre une fois sur l'accueil complet. */
+    /** First install: the tutorial opens once on full home. */
     fun showIfPending(activity: Activity) {
         val p = Prefs(activity)
         if (!p.raw.getBoolean("tutorial_pending", false)) return
@@ -65,7 +65,7 @@ object Tutorial {
         root.addView(Overlay(activity, from).apply { tag = TAG }, FrameLayout.LayoutParams(-1, -1))
     }
 
-    /** Fermé (Terminer ou Passer) : ne revient plus tout seul. */
+    /** Closed (Finish or Skip): no longer comes back by itself. */
     private fun done(activity: Activity) {
         Prefs(activity).raw.edit().putBoolean("tutorial_pending", false).apply()
         val root = activity.findViewById<ViewGroup>(android.R.id.content)
@@ -73,7 +73,7 @@ object Tutorial {
     }
 
     private const val TAG = "mg4dash_tutorial"
-    /** Extra de l'accueil : ouvrir le tuto (Réglages › Système). */
+    /** Home extra: open the tutorial (Settings › System). */
     const val EXTRA_SHOW = "show_tutorial"
 
     private class Overlay(val activity: Activity, var index: Int) : FrameLayout(activity) {
@@ -92,7 +92,7 @@ object Tutorial {
         init {
             setWillNotDraw(false)
             setLayerType(View.LAYER_TYPE_SOFTWARE, null)
-            isClickable = true   // l'accueil dessous ne reçoit rien pendant le tuto
+            isClickable = true   // home underneath receives nothing during the tutorial
             addView(bubble, LayoutParams(-2, -2))
             render()
         }
@@ -114,7 +114,7 @@ object Tutorial {
             setOnClickListener { onClick() }
         }
 
-        /** Réglages › Système › Écran d'accueil, comme à l'écran : titre du panneau et ses deux boutons. */
+        /** Settings › System › Home screen, as on screen: panel title and its two buttons. */
         private fun homePanel(): View {
             val panel = LinearLayout(context).apply {
                 orientation = LinearLayout.VERTICAL
@@ -142,7 +142,7 @@ object Tutorial {
         private fun render() {
             val step = STEPS[index]
             bubble.removeAllViews()
-            // Bulle à largeur fixe (texte), plus large pour les miniatures des dispositions
+            // Fixed width bubble (text), wider for the layout miniatures
             bubble.layoutParams = (bubble.layoutParams as LayoutParams).apply { width = dp(if (step.images.isEmpty()) 760 else 1000) }
             bubble.orientation = LinearLayout.VERTICAL
             bubble.setPadding(dp(28), dp(24), dp(28), dp(20))
@@ -185,7 +185,7 @@ object Tutorial {
         private fun target(): View? {
             val id = STEPS[index].target ?: return null
             activity.findViewById<View>(id)?.takeIf { it.isShown && it.width > 0 }?.let { return it }
-            // Barre verticale (réglage par défaut) : pas d'identifiant, c'est la colonne étroite à côté du contenu
+            // Vertical bar (default setting): no identifier, it is the narrow column next to the content
             if (id != R.id.dock) return null
             var v: View? = activity.findViewById(R.id.climateCard)
             while (v != null) {
@@ -210,11 +210,11 @@ object Tutorial {
                 val me = IntArray(2); getLocationInWindow(me)
                 val x = (loc[0] - me[0]).toFloat(); val y = (loc[1] - me[1]).toFloat()
                 hole.set(x - dp(6), y - dp(6), x + v.width + dp(6), y + v.height + dp(6))
-                // Bulle du côté libre de l'écran, à mi-hauteur de la carte si possible
+                // Bubble on the free side of the screen, at mid height of the card if possible
                 val gap = dp(110)
                 bx = if (hole.centerX() < width / 2f) (hole.right + gap).toInt() else (hole.left - gap - bw).toInt()
                 if (bx < dp(16) || bx + bw > width - dp(16)) {
-                    // Pas la place à côté (carte large) : au-dessus ou au-dessous
+                    // No room beside it (wide card): above or below
                     bx = (hole.centerX() - bw / 2f).toInt()
                     by = if (hole.centerY() < height / 2f) (hole.bottom + gap).toInt() else (hole.top - gap - bh).toInt()
                 } else by = (hole.centerY() - bh / 2f).toInt()
@@ -241,8 +241,8 @@ object Tutorial {
         private val dotPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = Color.WHITE }
 
         /**
-         * Glisser animé sur la carte : un doigt (rond) part du centre et file dans un sens puis dans l'autre,
-         * suivi d'une flèche translucide. Les sens de [Step.swipes] se succèdent (1,6 s chacun).
+         * Animated swipe on the card: a finger (circle) starts from the centre and runs one way then the other,
+         * followed by a translucent arrow. The [Step.swipes] directions follow each other (1.6 s each).
          */
         private fun drawSwipes(canvas: Canvas) {
             val sw = STEPS[index].swipes
@@ -250,17 +250,17 @@ object Tutorial {
             val cycle = 1600L
             val t = android.os.SystemClock.uptimeMillis()
             val n = (t / cycle).toInt()
-            val axis = sw[(n / 2) % sw.length]          // chaque sens joué aller puis retour
+            val axis = sw[(n / 2) % sw.length]          // each direction played there and back
             val dir = if (n % 2 == 0) 1f else -1f
             val u = (t % cycle) / cycle.toFloat()
-            val e = (1 - Math.cos(Math.PI * u.coerceAtMost(0.8f) / 0.8f).toFloat()) / 2f      // départ et arrivée en douceur
+            val e = (1 - Math.cos(Math.PI * u.coerceAtMost(0.8f) / 0.8f).toFloat()) / 2f      // gentle start and arrival
             val alpha = when { u < 0.15f -> u / 0.15f; u > 0.8f -> 1f - (u - 0.8f) / 0.2f; else -> 1f }
             val cx = hole.centerX(); val cy = hole.centerY()
             val span = if (axis == 'H') hole.width() * 0.32f else hole.height() * 0.3f
             val sx = cx - dir * span * (if (axis == 'H') 1f else 0f); val sy = cy - dir * span * (if (axis == 'V') 1f else 0f)
             val ex = cx + dir * span * (if (axis == 'H') 1f else 0f); val ey = cy + dir * span * (if (axis == 'V') 1f else 0f)
             val px = sx + (ex - sx) * e; val py = sy + (ey - sy) * e
-            // Traînée en flèche du départ au doigt
+            // Arrow trail from the start to the finger
             swipePaint.strokeWidth = 14 * d; swipePaint.alpha = (110 * alpha).toInt()
             canvas.drawLine(sx, sy, px, py, swipePaint)
             val ang = Math.atan2((ey - sy).toDouble(), (ex - sx).toDouble())
@@ -274,7 +274,7 @@ object Tutorial {
             postInvalidateOnAnimation()
         }
 
-        /** Flèche courbe du bord de la bulle vers la carte mise en valeur. */
+        /** Curved arrow from the bubble's edge to the highlighted card. */
         private fun drawArrow(canvas: Canvas) {
             val bl = bubble.left.toFloat(); val br = bubble.right.toFloat(); val bt = bubble.top.toFloat(); val bb = bubble.bottom.toFloat()
             val bcx = (bl + br) / 2; val bcy = (bt + bb) / 2

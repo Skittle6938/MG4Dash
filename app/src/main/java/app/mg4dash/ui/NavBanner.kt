@@ -15,8 +15,8 @@ import app.mg4dash.map.NavRepo
 import java.util.Locale
 
 /**
- * Bandeau de guidage posé sur la carte de l'accueil pendant un trajet DiAuto :
- * flèche de la prochaine manœuvre, distance, rue, puis temps restant et heure d'arrivée.
+ * Guidance banner placed on the home map during a DiAuto trip:
+ * next manoeuvre arrow, distance, street, then time remaining and arrival time.
  */
 class NavBanner(context: Context) : LinearLayout(context) {
     private val d = resources.displayMetrics.density
@@ -28,7 +28,7 @@ class NavBanner(context: Context) : LinearLayout(context) {
     init {
         orientation = HORIZONTAL
         gravity = Gravity.CENTER_VERTICAL
-        // Fond opaque : la carte et son titre ne doivent pas transparaître sous le guidage
+        // Opaque background: the map and its title must not show through under the guidance
         background = android.graphics.drawable.GradientDrawable().apply {
             cornerRadius = 16 * d
             setColor(Themes.color(context, R.color.bg_bottom))
@@ -67,7 +67,7 @@ class NavBanner(context: Context) : LinearLayout(context) {
     }
 
     private fun formatDistance(m: Int): String = if (app.mg4dash.system.Units.miles(context)) {
-        // Miles au-delà de 0,1 mi, sinon yards (usage britannique)
+        // Miles above 0.1 mi, otherwise yards (British usage)
         val mi = m / 1609.344f
         when {
             mi >= 10f -> "${Math.round(mi)} mi"
@@ -82,7 +82,7 @@ class NavBanner(context: Context) : LinearLayout(context) {
     }
 }
 
-/** Flèche de manœuvre dessinée (tout droit, virage, demi-tour, rond-point avec sortie, arrivée). */
+/** Drawn manoeuvre arrow (straight, turn, U-turn, roundabout with exit, arrival). */
 class NavArrowView(context: Context) : View(context) {
     private val d = resources.displayMetrics.density
     private val stroke = Paint(Paint.ANTI_ALIAS_FLAG).apply {
@@ -104,7 +104,7 @@ class NavArrowView(context: Context) : View(context) {
         val w = width.toFloat(); val h = height.toFloat()
         val cx = w / 2; val sign = when (n.side) { 1 -> -1f; 2 -> 1f; else -> 0f }
         when (n.eventType) {
-            NavRepo.Turn.DESTINATION -> {   // repère d'arrivée
+            NavRepo.Turn.DESTINATION -> {   // arrival marker
                 c.drawCircle(cx, h * 0.38f, w * 0.24f, accent)
                 c.drawCircle(cx, h * 0.38f, w * 0.09f, fill)
                 val p = Path().apply { moveTo(cx - w * 0.17f, h * 0.55f); lineTo(cx, h * 0.9f); lineTo(cx + w * 0.17f, h * 0.55f); close() }
@@ -114,7 +114,7 @@ class NavArrowView(context: Context) : View(context) {
                 val r = w * 0.2f; val cy = h * 0.5f
                 c.drawCircle(cx, cy, r, stroke)
                 c.drawLine(cx, h * 0.95f, cx, cy + r, stroke)
-                // Sortie : angle fourni (0 = tout droit), sinon selon le côté
+                // Exit: angle provided (0 = straight), otherwise according to the side
                 val deg = n.angle?.toFloat() ?: (sign * 90f)
                 val a = Math.toRadians((deg - 90).toDouble())
                 val ex = cx + (r * Math.cos(a)).toFloat(); val ey = cy + (r * Math.sin(a)).toFloat()
@@ -152,7 +152,7 @@ class NavArrowView(context: Context) : View(context) {
         }
     }
 
-    /** Pointe de flèche au point (x, y), orientée selon l'angle a (radians). */
+    /** Arrow head at point (x, y), oriented by angle a (radians). */
     private fun head(c: Canvas, x: Float, y: Float, a: Double) {
         val s = 16 * d
         val p = Path().apply {

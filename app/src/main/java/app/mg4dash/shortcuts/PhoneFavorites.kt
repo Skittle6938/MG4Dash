@@ -11,19 +11,19 @@ import app.mg4dash.system.Prefs
 import kotlin.concurrent.thread
 
 /**
- * Contacts favoris du widget Téléphone (2, 3, 4, 6 ou 8 ; 3 par défaut), choisis dans le répertoire du
- * téléphone. Les cases au-delà du nombre affiché gardent leur contact pour le jour où on le remonte.
- * Nom et numéro sont gardés dans les préférences : ils restent appelables même quand le
- * téléphone est déconnecté (PBAP efface alors le répertoire de la voiture). Le dernier
- * répertoire lu est aussi gardé, pour pouvoir choisir un contact sans attendre la synchro.
+ * Favourite contacts of the Phone widget (2, 3, 4, 6 or 8; 3 by default), chosen from the phone's
+ * phone book. Slots beyond the displayed number keep their contact for when it is raised again.
+ * Name and number are kept in the preferences: they stay callable even when the
+ * phone is disconnected (PBAP then erases the car's phone book). The last
+ * phone book read is also kept, to be able to choose a contact without waiting for the sync.
  */
 object PhoneFavorites {
-    /** Nombres proposés : 2 et 3 sur une ligne, 4, 6 et 8 sur deux lignes. */
+    /** Offered numbers: 2 and 3 on one line, 4, 6 and 8 on two lines. */
     val COUNTS = listOf(2, 3, 4, 6, 8)
 
     fun count(prefs: Prefs): Int = prefs.raw.getInt("fav_phone_count", 3).takeIf { it in COUNTS } ?: 3
 
-    /** Colonnes de la grille pour [n] raccourcis (une ligne jusqu'à 3, deux lignes au-delà). */
+    /** Grid columns for [n] shortcuts (one line up to 3, two lines beyond). */
     fun columns(n: Int): Int = if (n <= 3) n else n / 2
     private const val SEP = '\u001F'
     private const val CACHE = "phone_book_cache"
@@ -38,7 +38,7 @@ object PhoneFavorites {
         prefs.raw.edit().apply { if (f == null) remove("fav_phone_$i") else putString("fav_phone_$i", f.name + SEP + f.number) }.apply()
     }
 
-    /** Mémorise le répertoire lu (appelé dès qu'un répertoire non vide est lu). */
+    /** Remembers the phone book read (called as soon as a non-empty phone book is read). */
     fun remember(prefs: Prefs, book: List<PhoneActivity.Entry>) {
         if (book.isEmpty()) return
         prefs.raw.edit().putString(CACHE, book.joinToString("\n") { it.name + SEP + it.number + SEP + it.detail }).apply()
@@ -49,7 +49,7 @@ object PhoneFavorites {
             l.split(SEP).takeIf { it.size == 3 }?.let { PhoneActivity.Entry(it[0], it[1], it[2]) }
         } ?: emptyList()
 
-    /** Choix pour une case : un contact du répertoire, ou vider la case. */
+    /** Choice for a slot: a contact from the phone book, or empty the slot. */
     fun edit(activity: Activity, i: Int, refresh: () -> Unit) {
         val prefs = Prefs(activity)
         val choices = arrayOf(activity.getString(R.string.sw_fav_pick), activity.getString(R.string.sc_clear),
@@ -68,8 +68,8 @@ object PhoneFavorites {
     }
 
     /**
-     * Nombre de raccourcis : un aperçu de chaque disposition (cases en miniature) avec son nombre ;
-     * toucher une disposition l'applique. Les contacts déjà choisis sont gardés.
+     * Number of shortcuts: a preview of each layout (miniature slots) with its number;
+     * touching a layout applies it. Contacts already chosen are kept.
      */
     fun chooseCount(activity: Activity, refresh: () -> Unit) {
         val prefs = Prefs(activity)
@@ -98,7 +98,7 @@ object PhoneFavorites {
                     dialog?.dismiss(); refresh()
                 }
             }
-            // Aperçu : la grille de la disposition, cases arrondies
+            // Preview: the layout's grid, rounded slots
             val cols = columns(n); val rows = if (n <= 3) 1 else 2
             val grid = android.widget.LinearLayout(activity).apply { orientation = android.widget.LinearLayout.VERTICAL }
             for (r in 0 until rows) {
@@ -126,9 +126,9 @@ object PhoneFavorites {
     }
 
     /**
-     * Relance la synchro du répertoire, puis affiche la liste avec recherche : le répertoire de la
-     * voiture s'il est rempli, sinon le dernier répertoire mémorisé ; si les deux sont vides, on
-     * attend la synchro (jusqu'à 15 s).
+     * Restarts the phone book sync, then shows the list with search: the car's phone book
+     * if filled, otherwise the last one remembered; if both are empty,
+     * wait for the sync (up to 15 s).
      */
     private fun pick(activity: Activity, onPick: (PhoneActivity.Entry) -> Unit) {
         val prefs = Prefs(activity)

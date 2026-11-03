@@ -7,16 +7,16 @@ import android.content.IntentFilter
 import android.content.pm.PackageManager
 
 /**
- * Écran d'accueil (HOME).
+ * Home screen (HOME).
  *
- * Le launcher SAIC déclare une priorité 2 sur HOME ; une appli installée est plafonnée à 0,
- * et Android ignore alors le choix « par défaut ». Pour que MG4Dash soit l'accueil (choix B
- * du propriétaire), on DÉSACTIVE uniquement l'activité d'accueil SAIC ; son service (caméra, sources
- * audio, commandes SystemUI) reste actif. Le mode Entretien et le garde-fou anti-crash la
- * réactivent. Exige le uid système.
+ * The SAIC launcher declares priority 2 on HOME; an installed app is capped at 0,
+ * and Android then ignores the "default" choice. For MG4Dash to be home (owner's choice
+ * B), ONLY the SAIC home activity is DISABLED; its service (camera, audio sources,
+ * SystemUI commands) stays active. Service mode and the crash safeguard
+ * re-enable it. Requires the system uid.
  *
- * Attention : « adb shell pm enable … » est refusé sur la voiture (le shell n'a pas le droit) ;
- * seul MG4Dash (uid système) peut réactiver l'accueil SAIC. Si MG4Dash ne démarre plus :
+ * Warning: "adb shell pm enable …" is refused on the car (the shell has no right);
+ * only MG4Dash (system uid) can re-enable SAIC home. If MG4Dash no longer starts:
  *   adb shell cmd package compile -m speed -f app.mg4dash
  *   adb shell cmd package set-home-activity --user 0 app.mg4dash/.MainActivity
  */
@@ -25,9 +25,9 @@ object HomeSwitcher {
     private val DEFAULT_STOCK = ComponentName("com.saicmotor.launcher", "com.saicmotor.launcher.view.MainActivity")
 
     /**
-     * Accueil SAIC de ce firmware : com.saicmotor.launcher sur SWI69, com.saicmotor.hmi.launcher
-     * sur l'ancien SDK. Trouvé parmi les activités HOME (désactivées comprises) d'un paquet SAIC,
-     * puis mémorisé : une fois désactivé, il n'apparaît plus dans les résolutions ordinaires.
+     * SAIC home of this firmware: com.saicmotor.launcher on SWI69, com.saicmotor.hmi.launcher
+     * on the old SDK. Found among HOME activities (disabled included) of a SAIC package,
+     * then remembered: once disabled, it no longer appears in ordinary resolutions.
      */
     @Volatile var STOCK: ComponentName = DEFAULT_STOCK
         private set
@@ -36,8 +36,8 @@ object HomeSwitcher {
         val sp = Prefs(context).raw
         val saved = sp.getString("stock_home", null)?.let { ComponentName.unflattenFromString(it) }
         if (saved != null && !isWizard(saved)) { STOCK = saved; return }
-        // Versions ≤ 1.5.0 pouvaient retenir l'assistant de premier démarrage (SWI165, #50) : on
-        // cherche le vrai accueil. L'assistant reste tel quel (le réactiver pourrait le relancer)
+        // Versions ≤ 1.5.0 could keep the first boot wizard (SWI165, #50): look for
+        // the real home. The wizard stays as it is (re-enabling it could restart it)
         val wizardWasReplaced = saved != null && try {
             context.packageManager.getComponentEnabledSetting(saved) == PackageManager.COMPONENT_ENABLED_STATE_DISABLED
         } catch (_: Exception) { false }
@@ -52,16 +52,16 @@ object HomeSwitcher {
         STOCK = found ?: DEFAULT_STOCK
         if (found != null) sp.edit().putString("stock_home", found.flattenToString()).apply()
         Log.i(TAG, "SAIC home: ${STOCK.flattenToShortString()}")
-        // L'utilisateur avait demandé à remplacer l'accueil : on le fait sur le bon composant
+        // The user had asked to replace home: do it on the right component
         if (wizardWasReplaced && found != null) replaceStock(context)
     }
 
-    /** L'assistant de premier démarrage (com.saicmotor.hmi.setupwizard) déclare aussi HOME : ce n'est pas l'accueil. */
+    /** The first boot wizard (com.saicmotor.hmi.setupwizard) also declares HOME: it is not home. */
     private fun isWizard(c: ComponentName) = c.packageName.contains("setupwizard")
 
     fun ours(context: Context) = ComponentName(context.packageName, "app.mg4dash.MainActivity")
 
-    /** Composant HOME résolu actuellement, ou null. */
+    /** Currently resolved HOME component, or null. */
     fun currentHome(context: Context): ComponentName? {
         val intent = Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_HOME)
         val ri = context.packageManager.resolveActivity(intent, PackageManager.MATCH_DEFAULT_ONLY)
@@ -72,7 +72,7 @@ object HomeSwitcher {
         context.packageManager.getComponentEnabledSetting(STOCK) != PackageManager.COMPONENT_ENABLED_STATE_DISABLED
     } catch (_: Exception) { true }
 
-    /** MG4Dash devient l'accueil : préférence posée, puis accueil SAIC désactivé. */
+    /** MG4Dash becomes home: preference set, then SAIC home disabled. */
     fun replaceStock(context: Context): Boolean {
         Prefs(context).valetMode = false
         setPreferred(context, ours(context))
@@ -89,7 +89,7 @@ object HomeSwitcher {
         }
     }
 
-    /** Mode Entretien : réactive l'accueil SAIC, le rend préféré, puis l'ouvre. */
+    /** Service mode: re-enables SAIC home, makes it preferred, then opens it. */
     fun switchToStock(context: Context): Boolean {
         Prefs(context).valetMode = true
         val ok = try {

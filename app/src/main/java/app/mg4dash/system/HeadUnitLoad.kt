@@ -3,14 +3,14 @@ package app.mg4dash.system
 import java.io.File
 
 /**
- * Charge de l'autoradio (#69) : processeur (écart entre deux lectures de /proc/stat) et mémoire
- * (/proc/meminfo, utilisée = totale − disponible). Null si le système refuse la lecture.
+ * Head unit load (#69): CPU (difference between two reads of /proc/stat) and memory
+ * (/proc/meminfo, used = total − available). Null if the system refuses the read.
  */
 object HeadUnitLoad {
     private var lastIdle = -1L
     private var lastTotal = -1L
 
-    /** % du processeur depuis l'appel précédent (le premier appel ne donne rien). */
+    /** CPU % since the previous call (the first call gives nothing). */
     fun cpuPercent(): Int? = try {
         val f = File("/proc/stat").bufferedReader().use { it.readLine() }.trim().split(Regex("\\s+")).drop(1).mapNotNull { it.toLongOrNull() }
         val idle = f[3] + f.getOrElse(4) { 0L }   // inactif + attente disque
@@ -21,7 +21,7 @@ object HeadUnitLoad {
         if (prev < 0 || dTotal <= 0) null else (100 * (dTotal - dIdle) / dTotal).toInt().coerceIn(0, 100)
     } catch (e: Exception) { null }
 
-    /** Mémoire utilisée et totale, en Mo. */
+    /** Used and total memory, in MB. */
     fun memoryMb(): Pair<Int, Int>? = try {
         val m = File("/proc/meminfo").readLines().associate { l ->
             l.substringBefore(':') to (l.substringAfter(':').trim().substringBefore(' ').toLongOrNull() ?: 0L)

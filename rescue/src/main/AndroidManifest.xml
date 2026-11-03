@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- uid système, comme MG4Dash : seul ce uid peut réactiver l'accueil SAIC et recompiler MG4Dash -->
+<!-- System uid, like MG4Dash: only this uid can re-enable SAIC home and recompile MG4Dash -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:sharedUserId="android.uid.system">
@@ -20,7 +20,7 @@
         <receiver android:name=".BootReceiver" android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
-                <!-- Envoyé par MG4Dash juste après l'installation : sort l'appli de l'état « arrêtée » -->
+                <!-- Sent by MG4Dash right after installation: takes the app out of the "stopped" state -->
                 <action android:name="app.mg4dash.rescue.INIT" />
                 <action android:name="app.mg4dash.rescue.CHECK" />
             </intent-filter>

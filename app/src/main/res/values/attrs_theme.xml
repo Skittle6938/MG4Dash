@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Couleurs réglables (thèmes) : fond et couleur des boutons, choisis séparément dans les paramètres. -->
+<!-- Adjustable colours (themes): background and button colour, chosen separately in the settings. -->
 <resources>
     <attr name="mgBgTop" format="color" />
     <attr name="mgBgBottom" format="color" />

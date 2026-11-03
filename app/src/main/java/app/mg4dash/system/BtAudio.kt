@@ -6,9 +6,9 @@ import android.bluetooth.BluetoothProfile
 import android.content.Context
 
 /**
- * Audio Bluetooth du téléphone. Pendant Android Auto le téléphone ne garde que l'appel (HFP) ; quand la
- * projection s'arrête (connexion coupée par le bouton), il ne rebranche pas la musique de lui-même et la
- * source Bluetooth disparaissait. La voiture (rôle « puits » A2DP) peut la lui redemander.
+ * Phone's Bluetooth audio. During Android Auto the phone only keeps calls (HFP); when
+ * projection stops (connection cut by the button), it does not reconnect music by itself and the
+ * Bluetooth source disappeared. The car (A2DP "sink" role) can ask it again.
  */
 object BtAudio {
     private const val TAG = "BtAudio"
@@ -20,10 +20,10 @@ object BtAudio {
     } catch (_: Exception) { false }
 
     fun musicConnected() = state(A2DP_SINK)
-    /** Téléphone connecté en Bluetooth (appels), avec ou sans la musique. */
+    /** Phone connected over Bluetooth (calls), with or without music. */
     fun phoneConnected() = state(HEADSET_CLIENT) || musicConnected()
 
-    /** Adresse du téléphone connecté pour les appels (HFP), ou null. */
+    /** Address of the phone connected for calls (HFP), or null. */
     fun phoneAddress(): String? = try {
         val a = BluetoothAdapter.getDefaultAdapter()
         a?.bondedDevices?.firstOrNull { d ->
@@ -31,7 +31,7 @@ object BtAudio {
         }?.address
     } catch (_: Throwable) { null }
 
-    /** Redemande la musique au téléphone connecté pour les appels. */
+    /** Asks the phone connected for calls for music again. */
     fun connectMusic(context: Context) {
         if (musicConnected()) return
         val adapter = BluetoothAdapter.getDefaultAdapter() ?: return

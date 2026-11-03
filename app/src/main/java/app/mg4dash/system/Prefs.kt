@@ -3,90 +3,90 @@ package app.mg4dash.system
 import android.content.Context
 import android.content.SharedPreferences
 
-/** Réglages persistants du launcher. */
+/** Persistent launcher settings. */
 class Prefs(context: Context) {
     private val sp: SharedPreferences =
         context.applicationContext.getSharedPreferences("mg4launcher", Context.MODE_PRIVATE)
 
-    /** Capacité utile de la batterie, pour l'estimation de consommation ; sans mesure, celle du modèle choisi (51 kWh : 50,8 utiles). */
+    /** Usable battery capacity, for the consumption estimate; with no measurement, the chosen model's (51 kWh: 50.8 usable). */
     var batteryKwh: Float
         get() = sp.getFloat("battery_kwh", app.mg4dash.energy.BatteryCapacity.MODELS.firstOrNull { it.first == batteryModel }?.second ?: 50.8f)
         set(v) = sp.edit().putFloat("battery_kwh", v).apply()
 
-    /** Batterie d'origine du modèle, en kWh bruts : 51, 64 ou 77 (référence de la santé batterie). */
+    /** Model's original battery, in gross kWh: 51, 64 or 77 (battery health reference). */
     var batteryModel: Int
         get() = sp.getInt("battery_model", 51)
         set(v) = sp.edit().putInt("battery_model", v).apply()
 
-    /** Style Carte : barre verticale à gauche au lieu du dock du bas (issue #6). */
+    /** Map layout: vertical bar on the left instead of the bottom dock (issue #6). */
     var verticalDock: Boolean
         get() = sp.getBoolean("vertical_dock", false)
         set(v) = sp.edit().putBoolean("vertical_dock", v).apply()
 
-    /** Barre verticale deux fois plus large, icônes plus grandes (#67). */
+    /** Vertical bar twice as wide, larger icons (#67). */
     var wideBar: Boolean
         get() = sp.getBoolean("wide_bar", false)
         set(v) = sp.edit().putBoolean("wide_bar", v).apply()
 
-    /** Style Carte : sans les titres des widgets (issue #6). */
-    /** Période du widget consommation : 0 = depuis la recharge, 1 = trajet en cours, 2 = 1 000 derniers km. */
+    /** Map layout: without the widget titles (issue #6). */
+    /** Consumption widget period: 0 = since the charge, 1 = current trip, 2 = last 1,000 km. */
     var consumptionPeriod: Int
         get() = sp.getInt("consumption_period", 0)
         set(v) = sp.edit().putInt("consumption_period", v).apply()
 
-    /** Pression des pneus : 0 = auto (psi en miles, sinon bar), 1 = bar, 2 = psi, 3 = kPa. */
+    /** Tyre pressure: 0 = auto (psi with miles, otherwise bar), 1 = bar, 2 = psi, 3 = kPa. */
     var pressureUnit: Int
         get() = sp.getInt("pressure_unit", 0)
         set(v) = sp.edit().putInt("pressure_unit", v).apply()
 
-    /** A/C intermittent (#34) : durées de marche et d'arrêt du compresseur, en secondes. */
+    /** Intermittent A/C (#34): compressor on and off durations, in seconds. */
     var acCycleOnSec: Int
         get() = sp.getInt("ac_cycle_on", 300)
         set(v) = sp.edit().putInt("ac_cycle_on", v.coerceIn(30, 1800)).apply()
     var acCycleOffSec: Int
         get() = sp.getInt("ac_cycle_off", 300)
         set(v) = sp.edit().putInt("ac_cycle_off", v.coerceIn(30, 1800)).apply()
-    /** A/C intermittent activé par le conducteur : il reste actif d'un trajet à l'autre jusqu'à ce qu'il l'arrête (#61). */
+    /** Intermittent A/C turned on by the driver: stays active from one trip to the next until stopped (#61). */
     var acCycleOn: Boolean
         get() = sp.getBoolean("ac_cycle_active", false)
         set(v) = sp.edit().putBoolean("ac_cycle_active", v).apply()
 
-    /** Calibration de la consigne affichée, en degrés (−5 à +5) : affichage seulement, la voiture reçoit sa valeur. */
+    /** Calibration of the displayed set point, in degrees (−5 to +5): display only, the car receives its value. */
     var tempOffset: Int
         get() = sp.getInt("temp_offset", 0).coerceIn(-5, 5)
         set(v) = sp.edit().putInt("temp_offset", v.coerceIn(-5, 5)).apply()
 
-    /** Carte : zoom par défaut (14 à 18) et thème (0 = comme l'appli, 1 = clair, 2 = sombre). */
+    /** Map: default zoom (14 to 18) and theme (0 = like the app, 1 = light, 2 = dark). */
     var mapZoom: Int
         get() = sp.getInt("map_zoom", 16)
         set(v) = sp.edit().putInt("map_zoom", v).apply()
     var mapTheme: Int
         get() = sp.getInt("map_theme", 0)
         set(v) = sp.edit().putInt("map_theme", v).apply()
-    /** Sans connexion (et sans tuiles en cache), la carte cède la place au widget énergie (#15). */
-    /** Boutons zoom +, zoom − et plein écran masqués, affichés quelques secondes au toucher de la carte (#15). */
+    /** With no connection (and no cached tiles), the map gives way to the energy widget (#15). */
+    /** Zoom +, zoom − and full screen buttons hidden, shown for a few seconds on touching the map (#15). */
     var mapAutoHide: Boolean
         get() = sp.getBoolean("map_auto_hide", false)
         set(v) = sp.edit().putBoolean("map_auto_hide", v).apply()
-    /** Page de raccourcis dans la rotation du widget carte (#38) ; décochée : carte ↔ consommation. */
+    /** Shortcuts page in the map widget's rotation (#38); unticked: map ↔ consumption. */
     var shortcutsPage: Boolean
         get() = sp.getBoolean("shortcuts_page", true)
         set(v) = sp.edit().putBoolean("shortcuts_page", v).apply()
-    /** Appli affichée dans le widget carte à la place de la carte (#41, essai) ; null = carte OSM. */
+    /** App shown in the map widget instead of the map (#41, trial); null = OSM map. */
     var mapApp: String?
         get() = sp.getString("map_app", null)
         set(v) = sp.edit().putString("map_app", v).apply()
-    /** Capacité neuve saisie à la main pour le calcul de santé (#77) ; 0 = valeur par défaut du modèle. */
+    /** New capacity entered by hand for the health calculation (#77); 0 = the model's default value. */
     var batteryNewKwh: Float
         get() = sp.getFloat("battery_new_kwh", 0f)
         set(v) = sp.edit().putFloat("battery_new_kwh", v).apply()
 
-    /** Radio Dash installée : DAB et FM comme deux sources séparées sur l'accueil. */
+    /** Radio Dash installed: DAB and FM as two separate sources on home. */
     var radioDashBands: Boolean
         get() = sp.getBoolean("radio_dash_bands", true)
         set(v) = sp.edit().putBoolean("radio_dash_bands", v).apply()
 
-    /** Décharge V2L lancée au branchement de l'adaptateur (#82), désactivée par défaut. */
+    /** V2L discharge started on plugging in the adapter (#82), off by default. */
     var v2lAuto: Boolean
         get() = sp.getBoolean("v2l_auto", false)
         set(v) = sp.edit().putBoolean("v2l_auto", v).apply()
@@ -94,32 +94,32 @@ class Prefs(context: Context) {
         get() = sp.getBoolean("map_offline_switch", true)
         set(v) = sp.edit().putBoolean("map_offline_switch", v).apply()
 
-    /** Sièges / volant chauffants : 0 = auto (batterie 64 / 77 kWh), 1 = afficher, 2 = masquer. */
+    /** Heated seats / wheel: 0 = auto (64 / 77 kWh battery), 1 = show, 2 = hide. */
     var heatedSeats: Int
         get() = sp.getInt("heated_seats", 0)
         set(v) = sp.edit().putInt("heated_seats", v).apply()
 
-    /** Unités : 0 = comme la voiture, 1 = km, 2 = miles. */
+    /** Units: 0 = like the car, 1 = km, 2 = miles. */
     var units: Int
         get() = sp.getInt("units", 0)
         set(v) = sp.edit().putInt("units", v).apply()
 
-    /** Titres des widgets : toujours masqués (moins chargé, l'option a été retirée). */
+    /** Widget titles: always hidden (less busy, the option was removed). */
     val hideTitles: Boolean get() = true
 
-    /** Météo du style Carte : 0 = prévisions par heure, 1 = par jour. */
+    /** Map layout weather: 0 = hourly forecast, 1 = daily. */
     var weatherPage: Int
         get() = sp.getInt("weather_page", 0)
         set(v) = sp.edit().putInt("weather_page", v).apply()
 
-    /** Position météo de repli quand le véhicule ne fournit pas de localisation. */
+    /** Fallback weather position when the vehicle gives no location. */
     var weatherLat: Float
         get() = sp.getFloat("weather_lat", 48.8566f)
         set(v) = sp.edit().putFloat("weather_lat", v).apply()
     var weatherLon: Float
         get() = sp.getFloat("weather_lon", 2.3522f)
         set(v) = sp.edit().putFloat("weather_lon", v).apply()
-    /** Modèle météo Open-Meteo (#67) : vide = choix automatique d'Open-Meteo (« best match »). */
+    /** Open-Meteo weather model (#67): empty = Open-Meteo's automatic choice ("best match"). */
     var weatherModel: String
         get() = sp.getString("weather_model", "") ?: ""
         set(v) = sp.edit().putString("weather_model", v).apply()
@@ -128,23 +128,23 @@ class Prefs(context: Context) {
         get() = sp.getString("weather_city", "Paris") ?: "Paris"
         set(v) = sp.edit().putString("weather_city", v).apply()
 
-    /** Clim maintenue (appui long sur le bouton marche de la clim). Désactivé par défaut. */
+    /** Keep climate on (long press on the climate power button). Off by default. */
     var climateHoldEnabled: Boolean
         get() = sp.getBoolean("climhold_enabled", false)
         set(v) = sp.edit().putBoolean("climhold_enabled", v).apply()
-    /** Durée maximale de la clim maintenue en minutes ; 0 = illimitée (seul le seuil de batterie l'arrête). */
-    /** Délai avant le verrouillage des portes en clim maintenue, en secondes (le temps de sortir avec la clé). */
+    /** Maximum keep climate on duration in minutes; 0 = unlimited (only the battery threshold stops it). */
+    /** Delay before locking the doors in keep climate on, in seconds (time to get out with the key). */
     var climateHoldLockSec: Int
         get() = sp.getInt("climhold_lock_sec", 20)
         set(v) = sp.edit().putInt("climhold_lock_sec", v).apply()
-    /** Clim maintenue à une heure précise (sinon tout de suite), heure du premier cycle (minutes depuis minuit), cycles. */
+    /** Keep climate on at a set time (otherwise right away), first cycle time (minutes since midnight), cycles. */
     var climateHoldScheduled: Boolean
         get() = sp.getBoolean("climhold_scheduled", false)
         set(v) = sp.edit().putBoolean("climhold_scheduled", v).apply()
     var climateHoldStartMin: Int
         get() = sp.getInt("climhold_start_min", 18 * 60)
         set(v) = sp.edit().putInt("climhold_start_min", v).apply()
-    /** Clim maintenue : écran éteint une fois les portes verrouillées (dormir dans la voiture, discrétion). */
+    /** Keep climate on: screen off once the doors are locked (sleeping in the car, discretion). */
     var climateHoldScreenOff: Boolean
         get() = sp.getBoolean("climhold_screen_off", false)
         set(v) = sp.edit().putBoolean("climhold_screen_off", v).apply()
@@ -161,52 +161,52 @@ class Prefs(context: Context) {
         get() = sp.getInt("climhold_max_min", 0)
         set(v) = sp.edit().putInt("climhold_max_min", v).apply()
 
-    /** MG4 XPower (320 kW) : reconnue d'elle-même au-delà de 350 ch mesurés, ou choisie dans les réglages. */
+    /** MG4 XPower (320 kW): recognised by itself above 350 hp measured, or chosen in the settings. */
     var xpower: Boolean
         get() = sp.getBoolean("xpower", false)
         set(v) = sp.edit().putBoolean("xpower", v).apply()
 
-    /** Animation pleine puissance du widget Puissance : 0 = aucune, 1 = fusée, 2 = éclair, 3 = flammes, 4 = au hasard. */
+    /** Full power animation of the Power widget: 0 = none, 1 = rocket, 2 = lightning, 3 = flames, 4 = random. */
     var powerFx: Int
         get() = sp.getInt("power_fx", 4)
         set(v) = sp.edit().putInt("power_fx", v).apply()
 
     /**
-     * Carte énergie « puissance » (#29) : barre de puissance en direct dans la carte énergie, sans
-     * mode de conduite ni KERS ; la page Puissance quitte alors le widget défilant.
+     * "Power" energy card (#29): live power bar in the energy card, without
+     * drive mode or KERS; the Power page then leaves the scrolling widget.
      */
-    /** Source audio au démarrage : 0 automatique (défaut), 1 comme la voiture, 2 radio, 3 Bluetooth, 4 USB, 5 CarPlay / Android Auto. */
+    /** Audio source at startup: 0 automatic (default), 1 like the car, 2 radio, 3 Bluetooth, 4 USB, 5 CarPlay / Android Auto. */
     var startSource: Int
         get() = sp.getInt("start_source", 0)
         set(v) = sp.edit().putInt("start_source", v).apply()
 
 
-    /** Appli de connexion du téléphone désactivée par MG4Dash (appui long sur le bouton Android Auto). */
+    /** Phone connection app disabled by MG4Dash (long press on the Android Auto button). */
     var connectionOff: String?
         get() = sp.getString("connection_off", null)
         set(v) = sp.edit().putString("connection_off", v).apply()
 
-    /** Icônes de connexion sur la carte météo (#86). */
+    /** Connection icons on the weather card (#86). */
     var connectionIcons: Boolean
         get() = sp.getBoolean("connection_icons", true)
         set(v) = sp.edit().putBoolean("connection_icons", v).apply()
 
-    /** Lecture au démarrage de la voiture : 0 comme à l'arrêt (défaut), 1 toujours en pause, 2 toujours en lecture. */
+    /** Play at car start: 0 as when stopped (default), 1 always paused, 2 always playing. */
     var startPlayback: Int
         get() = sp.getInt("start_playback", 0)
         set(v) = sp.edit().putInt("start_playback", v).apply()
 
-    /** La musique jouait-elle à l'arrêt de la voiture (pour « comme à l'arrêt ») ? */
+    /** Was music playing when the car stopped (for "as when stopped")? */
     var lastPlaying: Boolean
         get() = sp.getBoolean("last_playing", true)
         set(v) = sp.edit().putBoolean("last_playing", v).apply()
 
-    /** Sources choisies par l'utilisateur, la plus récente d'abord (mode automatique). */
+    /** Sources chosen by the user, most recent first (automatic mode). */
     var sourceHistory: List<String>
         get() = sp.getString("source_history", "").orEmpty().split(',').filter { it.isNotBlank() }
         set(v) = sp.edit().putString("source_history", v.joinToString(",")).apply()
 
-    /** Carte puissance : tension et courant (actuels, mini / maxi) sous la barre ; désactivé par défaut. */
+    /** Power card: voltage and current (current, min / max) under the bar; off by default. */
     var powerVa: Boolean
         get() = sp.getBoolean("power_va", false)
         set(v) = sp.edit().putBoolean("power_va", v).apply()
@@ -215,41 +215,41 @@ class Prefs(context: Context) {
         get() = sp.getBoolean("energy_card_power", false)
         set(v) = sp.edit().putBoolean("energy_card_power", v).apply()
 
-    /** Widget secondaire de la colonne droite : 0 = trajet, 1 = statut, 2 = météo compacte. */
+    /** Secondary widget of the right column: 0 = trip, 1 = status, 2 = compact weather. */
     var secondaryWidget: Int
         get() = sp.getInt("secondary_widget", 0)
         set(v) = sp.edit().putInt("secondary_widget", v).apply()
 
-    /** Ouvre brièvement le launcher SAIC au démarrage pour qu'il enregistre son interface. */
+    /** Briefly opens the SAIC launcher at startup so it registers its interface. */
 
-    /** Mode Entretien : le launcher SAIC reste l'accueil, MG4Dash ne reprend pas la main. */
+    /** Service mode: the SAIC launcher stays home, MG4Dash does not take back control. */
     var valetMode: Boolean
         get() = sp.getBoolean("valet_mode", false)
         set(v) = sp.edit().putBoolean("valet_mode", v).commit().let { }
 
-    /** Limite de charge voulue (%), envoyée à la voiture. */
+    /** Wanted charge limit (%), sent to the car. */
     var chargeLimit: Int
         get() = sp.getInt("charge_limit", 100)
         set(v) = sp.edit().putInt("charge_limit", v).apply()
 
-    /** Masque la barre latérale et le bandeau SAIC (mode immersif). */
+    /** Hides the SAIC side bar and banner (immersive mode). */
     var fullscreen: Boolean
         get() = sp.getBoolean("fullscreen", true)
         set(v) = sp.edit().putBoolean("fullscreen", v).apply()
 
     /** Widget central haut : 0 = carte OpenStreetMap, 1 = raccourcis. */
-    /** Ancien SDK : remettre MG4Dash devant quand le launcher SAIC ouvre son écran clim (#48). */
+    /** Old SDK: bring MG4Dash back in front when the SAIC launcher opens its climate screen (#48). */
     var hideSaicClimate: Boolean
         get() = sp.getBoolean("hide_saic_climate", true)
         set(v) = sp.edit().putBoolean("hide_saic_climate", v).apply()
 
-    /** Passage jour / nuit : true = attente de 5 s et fondu (défaut), false = immédiat. */
-    /** Mode auto : nuit aussi entre le coucher et le lever du soleil, même feux éteints (#64) ; activé par défaut. */
+    /** Day / night change: true = 5 s wait and fade (default), false = immediate. */
+    /** Auto mode: night also between sunset and sunrise, even with lights off (#64); on by default. */
     var nightBySun: Boolean
         get() = sp.getBoolean("night_by_sun", true)
         set(v) = sp.edit().putBoolean("night_by_sun", v).apply()
 
-    /** Côté de la barre verticale : 0 = côté conducteur (lu sur la voiture), 1 = gauche, 2 = droite (#75). */
+    /** Vertical bar side: 0 = driver's side (read from the car), 1 = left, 2 = right (#75). */
     var barSide: Int
         get() = sp.getInt("bar_side", 0)
         set(v) = sp.edit().putInt("bar_side", v).apply()
@@ -262,12 +262,12 @@ class Prefs(context: Context) {
         get() = sp.getInt("home_widget", 0)
         set(v) = sp.edit().putInt("home_widget", v).apply()
 
-    /** Bouton Android Auto du dock : composant d'une autre appli, ou null = Android Auto d'origine. */
+    /** Dock's Android Auto button: component of another app, or null = stock Android Auto. */
     var dockAaTarget: String?
         get() = sp.getString("dock_aa_target", null)
         set(v) = sp.edit().putString("dock_aa_target", v).apply()
 
-    /** Home Assistant : adresse (ex. http://homeassistant.local:8123) et jeton d'accès longue durée. */
+    /** Home Assistant: address (e.g. http://homeassistant.local:8123) and long-lived access token. */
     var haUrl: String
         get() = sp.getString("ha_url", "") ?: ""
         set(v) = sp.edit().putString("ha_url", v.trim()).apply()
@@ -275,59 +275,59 @@ class Prefs(context: Context) {
         get() = sp.getString("ha_token", "") ?: ""
         set(v) = sp.edit().putString("ha_token", v.trim()).apply()
 
-    /** Enregistreur de données énergie (diagnostic, fichier CSV). */
-    /** Style « Carte » : page affichée dans la pile (0 énergie, 1 trajet, 2 puissance, 3 téléphone). */
+    /** Energy data recorder (diagnostic, CSV file). */
+    /** "Map" layout: page shown in the stack (0 energy, 1 trip, 2 power, 3 phone). */
     var stackPage: Int
         get() = sp.getInt("stack_page", 0)
         set(v) = sp.edit().putInt("stack_page", v).apply()
 
-    /** Pile automatique : revient sur la batterie quand la voiture est branchée. */
+    /** Auto stack: goes back to the battery when the car is plugged in. */
     var stackAuto: Boolean
         get() = sp.getBoolean("stack_auto", true)
         set(v) = sp.edit().putBoolean("stack_auto", v).apply()
 
-    /** Case de gauche du dock : 0 = horloge, 1 = réglages Wi-Fi. */
+    /** Dock's left slot: 0 = clock, 1 = Wi-Fi settings. */
     var dockSlot: Int
         get() = sp.getInt("dock_slot", 0)
         set(v) = sp.edit().putInt("dock_slot", v).apply()
 
-    /** Carte de l'accueil orientée selon le cap de la voiture (sinon nord en haut). */
+    /** Home map oriented to the car's heading (otherwise north up). */
     var mapHeadingUp: Boolean
         get() = sp.getBoolean("map_heading_up", false)
         set(v) = sp.edit().putBoolean("map_heading_up", v).apply()
 
-    /** Mise à jour : proposer aussi les versions bêta (pré-versions GitHub). */
+    /** Update: also offer beta versions (GitHub pre-releases). */
     var updateBeta: Boolean
         get() = sp.getBoolean("update_beta", true)
         set(v) = sp.edit().putBoolean("update_beta", v).apply()
 
-    /** Release non bêta pour laquelle l'utilisateur a choisi « ne plus notifier » au démarrage (version, ex. 1.1.0). */
+    /** Non-beta release for which the user chose "do not notify again" at startup (version, e.g. 1.1.0). */
     var updateSkipped: String?
         get() = sp.getString("update_skipped", null)
         set(v) = sp.edit().putString("update_skipped", v).apply()
 
     var energyLog: Boolean
-        get() = sp.getBoolean("energy_log", false)   // désactivé par défaut : une écriture toutes les 5 s use la mémoire
+        get() = sp.getBoolean("energy_log", false)   // off by default: a write every 5 s wears the storage
         set(v) = sp.edit().putBoolean("energy_log", v).apply()
 
-    /** Style de l'accueil : 0 = complet (3 colonnes), 1 = épuré (3 volets + 2 raccourcis + météo). */
+    /** Home style: 0 = full (3 columns), 1 = simple (3 panes + 2 shortcuts + weather). */
     var homeStyle: Int
         get() = sp.getInt("home_style", 0)
         set(v) = sp.edit().putInt("home_style", v).apply()
 
-    /** Thème : fond (0 bleu nuit, 1 noir, 2 anthracite, 3 vert sombre, 4 bordeaux) et boutons (0 bleu, 1 gris, 2 rouge, 3 vert, 4 orange). */
+    /** Theme: background (0 navy, 1 black, 2 charcoal, 3 dark green, 4 burgundy) and buttons (0 blue, 1 grey, 2 red, 3 green, 4 orange). */
     var themeBackground: Int
-        get() = sp.getInt("theme_bg", 1)   // noir par défaut (Marc, 29/10)
+        get() = sp.getInt("theme_bg", 1)   // black by default
         set(v) = sp.edit().putInt("theme_bg", v).commit().let { }
-    /** Horloge en 12 h sans AM / PM ; 24 h par défaut (#18). */
+    /** 12 h clock without AM / PM; 24 h by default (#18). */
     var clock12: Boolean
         get() = sp.getBoolean("clock_12", false)
         set(v) = sp.edit().putBoolean("clock_12", v).apply()
-    /** Contour des panneaux de l'accueil : estompé vers le bas (style tableau de bord, #38) ou complet (#40). */
+    /** Home panel outline: faded downwards (dashboard style, #38) or full (#40). */
     var panelFade: Boolean
         get() = sp.getBoolean("panel_fade", true)
         set(v) = sp.edit().putBoolean("panel_fade", v).apply()
-    /** Clair / sombre : 0 = auto (jour / nuit de la voiture), 1 = sombre, 2 = clair. */
+    /** Light / dark: 0 = auto (the car's day / night), 1 = dark, 2 = light. */
     var themeMode: Int
         get() = sp.getInt("theme_mode", 0)
         set(v) = sp.edit().putInt("theme_mode", v).commit().let { }

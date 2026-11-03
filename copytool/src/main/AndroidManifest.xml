@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- uid système, comme MG4Dash : lecture des dossiers d'applis système et du journal. Aucune écriture hors de la clé USB. -->
+<!-- System uid, like MG4Dash: reads system app folders and the log. No writing outside the USB stick. -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:sharedUserId="android.uid.system">

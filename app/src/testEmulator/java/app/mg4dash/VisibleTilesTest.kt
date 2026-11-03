@@ -6,39 +6,39 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
-/** Tuiles de la carte affichée (#15), sur des cas calculables à la main. */
+/** Tiles of the displayed map (#15), on cases computable by hand. */
 class VisibleTilesTest {
-    // Au zoom 2 la grille fait 4 × 4 ; le point (0, 0) est le coin commun des tuiles x 1-2, y 1-2
+    // At zoom 2 the grid is 4 × 4; point (0, 0) is the common corner of tiles x 1-2, y 1-2
     @Test fun pointAtTheCornerOfFourTiles() {
         val t = VisibleTiles.around(0.0, 0.0, 2.0, 256, 100, 100)
         assertEquals(setOf(Tile(2, 1, 1), Tile(2, 2, 1), Tile(2, 1, 2), Tile(2, 2, 2)), t.toSet())
     }
 
     @Test fun smallWindowInsideOneTile() {
-        // Centre de la tuile x 2, y 1 du zoom 2
+        // Centre of tile x 2, y 1 at zoom 2
         val t = VisibleTiles.around(40.97, 45.0, 2.0, 256, 50, 50)
         assertEquals(listOf(Tile(2, 2, 1)), t)
     }
 
     @Test fun fractionalZoomUsesTheLowerLevelWithLargerTiles() {
-        // Zoom 2,5 : on dessine le niveau 2 agrandi, une fenêtre de 300 px tient donc dans moins de tuiles
+        // Zoom 2.5: level 2 is drawn enlarged, so a 300 px window fits in fewer tiles
         val t = VisibleTiles.around(40.97, 45.0, 2.5, 256, 300, 300)
         assertTrue(t.all { it.z == 2 })
         assertEquals(setOf(Tile(2, 2, 1)), t.toSet())
     }
 
     @Test fun carLowerOnScreenLooksAheadInItsHeading() {
-        // Une tuile de décalage, cap nord (0°) : le centre remonte d'une tuile
+        // One tile offset, north heading (0°): the centre moves up one tile
         val north = VisibleTiles.around(40.97, 45.0, 2.0, 256, 10, 10, 0f, 256)
         assertEquals(listOf(Tile(2, 2, 0)), north)
-        // Cap est : rotation -90°, le centre part vers l'est
+        // East heading: rotation -90°, the centre moves east
         val east = VisibleTiles.around(40.97, 45.0, 2.0, 256, 10, 10, -90f, 256)
         assertEquals(listOf(Tile(2, 3, 1)), east)
     }
 
     @Test fun metersPerPixelAtEquatorAndParis() {
         assertEquals(156_543.0, VisibleTiles.metersPerPixel(0.0, 0.0, 256), 1.0)
-        // Zoom 16 à Paris : environ 1,6 m par pixel, donc 2 pixels pour un écart GPS de plus de 3 m
+        // Zoom 16 in Paris: about 1.6 m per pixel, so 2 pixels for a GPS difference of more than 3 m
         assertEquals(1.57, VisibleTiles.metersPerPixel(48.85, 16.0, 256), 0.01)
     }
 

@@ -2,9 +2,9 @@ plugins {
     id("com.android.application")
 }
 
-// MG4Dash Rescue : petite appli système séparée (Java, sans dépendances) qui remet un accueil qui marche
-// si MG4Dash ne démarre plus. Signée avec la clé plateforme puis embarquée dans MG4Dash (assets de la
-// version voiture), qui l'installe lui-même.
+// MG4Dash Rescue: small separate system app (Java, no dependencies) that restores a working home
+// if MG4Dash no longer starts. Signed with the platform key then embedded in MG4Dash (assets of the
+// car version), which installs it itself.
 android {
     namespace = "app.mg4dash.rescue"
     compileSdk = 34

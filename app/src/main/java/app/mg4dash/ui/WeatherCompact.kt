@@ -14,11 +14,11 @@ import java.util.Date
 import java.util.Locale
 
 /**
- * Météo du style Carte, façon widget (issue #6) :
- *  - à gauche, l'icône et la température, puis « min~max · état » ;
- *  - à droite, la date, l'heure en grand et la ville ;
- *  - en bas, une pile : prévisions par heure ou par jour (balayer).
- * Sans données météo (pas de connexion) : la date, l'heure et la température extérieure de la voiture.
+ * Map layout weather, widget style (issue #6):
+ *  - on the left, the icon and temperature, then "min~max · condition";
+ *  - on the right, the date, the time in large and the city;
+ *  - at the bottom, a stack: hourly or daily forecast (swipe).
+ * With no weather data (no connection): the date, time and the car's outside temperature.
  */
 class WeatherCompact(context: Context) : LinearLayout(context) {
     private val d = resources.displayMetrics.density
@@ -33,7 +33,7 @@ class WeatherCompact(context: Context) : LinearLayout(context) {
     private val top = LinearLayout(context)
     private val temp = tv(52f, R.color.text_value, bold = true)
     private val sub = tv(18f, R.color.text_sub)
-    /** Vent et risque de pluie, sur leur propre ligne (#34). */
+    /** Wind and chance of rain, on their own line (#34). */
     private val sub2 = tv(18f, R.color.text_sub)
     private val date = tv(18f, R.color.text_sub).apply { gravity = Gravity.END }
     private val time = tv(50f, R.color.text_value, bold = true).apply { gravity = Gravity.END }
@@ -57,17 +57,17 @@ class WeatherCompact(context: Context) : LinearLayout(context) {
         right.addView(date); right.addView(time)
         cityLine.addView(city)
         top.addView(right, LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT))
-        // Ville et icônes de connexion tout en haut à droite (#86)
+        // City and connection icons at the very top right (#86)
         addView(cityLine, LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT))
         addView(top, LayoutParams(LayoutParams.MATCH_PARENT, 0, 1f))
         addView(forecast, LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT))
         tick()
     }
 
-    /** Marge à gauche du contenu, sous la ville : la place du bouton antibrouillards. */
+    /** Left margin of the content, under the city: room for the fog light button. */
     fun setLeftInset(px: Int) = top.setPadding(px, 0, 0, 0)
 
-    /** Icônes de connexion (#86) : à droite de la ville. */
+    /** Connection icons (#86): to the right of the city. */
     fun addConnections(row: android.view.View) = cityLine.addView(row)
 
     private fun setTempMargin(px: Int) {
@@ -84,14 +84,14 @@ class WeatherCompact(context: Context) : LinearLayout(context) {
         postDelayed(ticker, 60_000L - System.currentTimeMillis() % 60_000L)
     }
 
-    /** [page] : 0 = par heure, 1 = par jour. */
+    /** [page]: 0 = hourly, 1 = daily. */
     fun show(w: WeatherRepo.Weather?, outside: Float?, place: String, page: Int) {
         tick()
         city.put(w?.place ?: place)
         if (w == null) {
-            // Hors connexion (#18) : heure et température extérieure en grand, centrées dans tout le widget
+            // Offline (#18): time and outside temperature in large, centred in the whole widget
             icon.visibility = GONE
-            // Sans icône, plus de marge : la température s'aligne à gauche sur « Extérieur » (#18)
+            // Without an icon, more margin: the temperature aligns left with "Outside" (#18)
             setTempMargin(0)
             temp.put(outside?.let { "${Math.round(it)}°" } ?: "—")
             temp.setTextSize(TypedValue.COMPLEX_UNIT_SP, 72f)
@@ -106,11 +106,11 @@ class WeatherCompact(context: Context) : LinearLayout(context) {
         }
         icon.visibility = VISIBLE
         setTempMargin((10 * d).toInt())
-        // Icône et température à la hauteur de l'heure ; le bloc remonte pour la ligne vent / pluie (#34)
+        // Icon and temperature at the time's height; the block moves up for the wind / rain line (#34)
         temp.setTextSize(TypedValue.COMPLEX_UNIT_SP, 50f)
         time.setTextSize(TypedValue.COMPLEX_UNIT_SP, 50f)
         top.gravity = Gravity.TOP
-        // Date et heure un peu plus bas : de l'air sous les icônes de connexion
+        // Date and time a little lower: some air under the connection icons
         right.setPadding(0, (RIGHT_TOP_DP * d).toInt(), 0, 0)
         icon.setImageResource(WeatherRepo.icon(w.code))
         icon.setColorFilter(c(WeatherRepo.iconColor(w.code)))

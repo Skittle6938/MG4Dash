@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Version voiture : uid système, comme les applis SAIC et MG4Control.
-     Exige la signature avec la clé plateforme AOSP (voir sign_platform.ps1). -->
+<!-- Car version: system uid, like the SAIC apps and MG4Control.
+     Requires signing with the AOSP platform key (see sign_platform.ps1). -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     android:sharedUserId="android.uid.system" />

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Repère de position : flèche bleue cerclée, pointant vers le cap. -->
+<!-- Position marker: circled blue arrow, pointing to the heading. -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="44dp" android:height="44dp"
     android:viewportWidth="44" android:viewportHeight="44">
