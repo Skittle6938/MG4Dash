@@ -90,7 +90,7 @@ class SoundActivity : PageActivity() {
         try {
             val b = a.balance; val f = a.fader
             // Valeurs relevées : centre 7 (0…14) comme l'égaliseur, ou 0 (−7…+7) sur d'autres versions
-            fieldOffset = if (b < 0 || f < 0 || (b == 0 && f == 0)) 0 else 7
+            fieldOffset = if (!a.centredOnSeven && (b < 0 || f < 0 || (b == 0 && f == 0))) 0 else 7
             val preset = a.equalizerPreset
             val loud = a.loudness
             for (id in presetIds) (if (id == USER) a.userEq else a.eqBand(id))?.let { raw -> curves[id] = IntArray(5) { raw[it] - EQ_CENTER } }
