@@ -68,6 +68,10 @@ object HomeSwitcher {
         return ri?.activityInfo?.let { ComponentName(it.packageName, it.name) }
     }
 
+    fun isStockEnabled(context: Context): Boolean = try {
+        context.packageManager.getComponentEnabledSetting(STOCK) != PackageManager.COMPONENT_ENABLED_STATE_DISABLED
+    } catch (_: Exception) { true }
+
     /** MG4Dash devient l'accueil : préférence posée, puis accueil SAIC désactivé. */
     fun replaceStock(context: Context): Boolean {
         Prefs(context).valetMode = false

@@ -26,7 +26,7 @@ object LauncherLink {
     private const val CALLBACK_DESCRIPTOR = "com.saicmotor.launcher.ILauncherCallback"
     private const val TX_REGISTER_CALLBACK = IBinder.FIRST_CALL_TRANSACTION
     private const val TX_ON_LAUNCH_COMPONENT = IBinder.FIRST_CALL_TRANSACTION + 2
-    /** L'accueil d'origine efface l'enregistrement en se refermant, s'il a été ouvert. */
+    /** L'accueil d'origine, ouvert un instant au démarrage, efface l'enregistrement en se refermant. */
     private const val REGISTER_EVERY_MS = 30_000L
 
     private lateinit var appContext: Context
