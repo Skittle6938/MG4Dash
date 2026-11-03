@@ -15,7 +15,6 @@ import app.mg4dash.energy.ChargeGuard
 import app.mg4dash.system.Apps
 import app.mg4dash.system.Prefs
 import app.mg4dash.ui.LineChart
-import app.mg4dash.ui.smooth3
 import app.mg4dash.ui.PageActivity
 import app.mg4dash.ui.SegmentedGauge
 import app.mg4dash.ui.StackedBar
@@ -366,9 +365,8 @@ class EnergyActivity : PageActivity() {
     }
 
     private fun renderHistory() {
-        val (values, note) = app.mg4dash.ui.ConsumptionCard.curve(this, period)
-        chart.values = values
-        app.mg4dash.ui.ConsumptionCard.axis(this, period, values.size).let { (a, b) -> chart.startLabel = a; chart.endLabel = b }
+        val (points, note) = app.mg4dash.ui.ConsumptionCard.fill(this, chart, period)
+        app.mg4dash.ui.ConsumptionCard.axis(this, period, points).let { (a, b) -> chart.startLabel = a; chart.endLabel = b }
         chart.emptyText = if (period == 2) R.string.chart_empty_trips else R.string.chart_empty
         chartNote.text = note
     }

@@ -61,6 +61,24 @@ fun List<Float>.smooth3(): List<Float> = indices.map { i -> subList(maxOf(0, i -
 
 private const val MAX_POINTS = 50
 
+/** Pente de la courbe à chaque point : nulle aux sommets et aux creux, pour ne jamais dépasser les points voisins. */
+fun curveSlopes(x: FloatArray, y: FloatArray): FloatArray {
+    val n = x.size
+    val d = FloatArray(n - 1) { i -> (y[i + 1] - y[i]) / (x[i + 1] - x[i]).coerceAtLeast(0.001f) }
+    return FloatArray(n) { i ->
+        when {
+            i == 0 -> d[0]
+            i == n - 1 -> d[n - 2]
+            d[i - 1] * d[i] <= 0f -> 0f
+            else -> {
+                val h0 = x[i] - x[i - 1]; val h1 = x[i + 1] - x[i]
+                val w1 = 2 * h1 + h0; val w2 = h1 + 2 * h0
+                (w1 + w2) / (w1 / d[i - 1] + w2 / d[i])
+            }
+        }
+    }
+}
+
 /**
  * Au plus [max] points, dans l'ordre : chacun est la moyenne d'une tranche égale de la liste. Une longue période
  * (12 mois) reste lisible et se dessine vite ; en dessous de [max] points, rien ne change.
@@ -70,7 +88,9 @@ fun List<Float>.atMost(max: Int): List<Float> =
 
 class LineChart @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) : View(context, attrs) {
     var values: List<Float> = emptyList()
-        set(v) { field = v.atMost(MAX_POINTS); average = v.average().toFloat(); invalidate() }
+        set(v) { field = v.atMost(MAX_POINTS); positions = null; average = v.average().toFloat(); invalidate() }
+    /** Position de chaque point sur la largeur (0..1), si la courbe suit le temps ; sinon points réguliers. */
+    private var positions: List<Float>? = null
     /** Moyenne de toutes les valeurs reçues, pas des points gardés (tranches arrondies, pas toutes égales). */
     private var average = 0f
     /** Texte affiché sans courbe : 1 point par km, ou par trajet sur 12 mois (#44). */
@@ -82,6 +102,14 @@ class LineChart @JvmOverloads constructor(context: Context, attrs: AttributeSet?
         set(v) { if (field != v) { field = v; invalidate() } }
     var endLabel: String? = null
         set(v) { if (field != v) { field = v; invalidate() } }
+
+    /** Courbe placée selon le temps : (position 0..1, valeur) ; [mean] : moyenne de toutes les valeurs d'origine. */
+    fun showTimeline(points: List<Pair<Float, Float>>, mean: Float) {
+        values = points.map { it.second }
+        positions = points.map { it.first }
+        average = mean
+        invalidate()
+    }
 
     private val d = resources.displayMetrics.density
     private val line = Paint(Paint.ANTI_ALIAS_FLAG).apply {
@@ -102,6 +130,17 @@ class LineChart @JvmOverloads constructor(context: Context, attrs: AttributeSet?
         color = app.mg4dash.ui.Themes.color(context, R.color.text_sub); textSize = 17f * d; textAlign = Paint.Align.CENTER
     }
 
+    /** Courbe arrondie passant par chaque point, sans dépasser ses voisins (interpolation cubique monotone). */
+    private fun curvePath(x: FloatArray, y: FloatArray): Path {
+        val slopes = curveSlopes(x, y)
+        val path = Path().apply { moveTo(x[0], y[0]) }
+        for (i in 0 until x.size - 1) {
+            val h = (x[i + 1] - x[i]) / 3f
+            path.cubicTo(x[i] + h, y[i] + slopes[i] * h, x[i + 1] - h, y[i + 1] - slopes[i + 1] * h, x[i + 1], y[i + 1])
+        }
+        return path
+    }
+
     override fun onDraw(canvas: Canvas) {
         // Courbe sur toute la largeur, l'échelle s'écrit par-dessus (#44)
         val axisH = if (startLabel != null || endLabel != null) label.textSize + 6 * d else 0f
@@ -115,10 +154,13 @@ class LineChart @JvmOverloads constructor(context: Context, attrs: AttributeSet?
         fun y(v: Float) = bottom - (v - lo) / (hi - lo) * (bottom - top)
         val scale = listOf(lo, (lo + hi) / 2, hi)
         scale.forEach { v -> canvas.drawLine(left, y(v), right, y(v), grid) }
-        val step = (right - left) / (values.size - 1)
-        val path = Path()
-        values.forEachIndexed { i, v -> val x = left + i * step; if (i == 0) path.moveTo(x, y(v)) else path.lineTo(x, y(v)) }
-        val area = Path(path).apply { lineTo(right, bottom); lineTo(left, bottom); close() }
+        val xs = positions
+        val path = curvePath(
+            FloatArray(values.size) { i -> left + (xs?.get(i) ?: (i.toFloat() / (values.size - 1))) * (right - left) },
+            FloatArray(values.size) { i -> y(values[i]) })
+        val first = xs?.first()?.let { left + it * (right - left) } ?: left
+        val last = xs?.last()?.let { left + it * (right - left) } ?: right
+        val area = Path(path).apply { lineTo(last, bottom); lineTo(first, bottom); close() }
         val rgb = line.color and 0xFFFFFF
         fill.shader = LinearGradient(0f, top, 0f, bottom, 0x55000000 or rgb, rgb, Shader.TileMode.CLAMP)
         canvas.drawPath(area, fill)

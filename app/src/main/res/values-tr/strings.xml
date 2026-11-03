@@ -540,7 +540,7 @@
     <string name="st_night_sun_nopos">Konum henüz bilinmiyor: araç GPS aldığında saat görünecek.</string>
     <string name="st_hide_saic_climate">MG4Dash\'i SAIC klima ekranının önünde tut</string>
     <string name="st_hide_saic_climate_desc">Klima açıldığında (MG4Dash\'ten veya ekranın altındaki düğmeyle) orijinal başlatıcı kendi klima ekranını açar: MG4Dash tekrar öne gelir.</string>
-    <string name="en_trips_note">%1$d yolculuk, yolculuk başına bir nokta · ortalama (kesikli)</string>
+    <string name="en_trips_note">%1$d yolculuk, tarihe göre ve yumuşatılmış · ortalama (kesikli)</string>
     <string name="en_trips_wait">Eğri yolculuk yolculuk dolar (yolculuk başına en az 2 km).</string>
     <string name="en_curve_note">Km başına bir nokta (dururken 2 dakikada bir) · ortalama (kesikli)</string>
     <string name="en_curve_wait">Eğri sürüş sırasında dolar, km başına bir nokta.</string>
@@ -624,6 +624,7 @@
     <string name="conn_not_connected">Bağlı değil</string>
     <string name="conn_no_network">Ağ yok</string>
     <string name="conn_usb_count">%1$d bağlı</string>
+    <string name="en_time_note">Tarihe göre ve yumuşatılmış · ortalama (kesikli)</string>
     <string name="aa_title">ANDROID AUTO</string>
     <string name="aa_ready">Telefon bağlı · Açmak için dokunun</string>
     <string name="aa_waiting">Telefonunuzu USB ile bağlayın</string>

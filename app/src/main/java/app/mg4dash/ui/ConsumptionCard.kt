@@ -103,9 +103,8 @@ class ConsumptionCard(context: Context) : LinearLayout(context) {
                 })
                 legend.addView(r, LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT).apply { topMargin = (3 * d).toInt() })
             }
-        val (values, n) = curve(context, period)
-        chart.values = values
-        axis(context, period, values.size).let { (a, b) -> chart.startLabel = a; chart.endLabel = b }
+        val (points, n) = fill(context, chart, period)
+        axis(context, period, points).let { (a, b) -> chart.startLabel = a; chart.endLabel = b }
         chart.emptyText = if (period == 2) R.string.chart_empty_trips else R.string.chart_empty
         note.text = n
     }
@@ -132,8 +131,10 @@ class ConsumptionCard(context: Context) : LinearLayout(context) {
          */
         fun axis(c: android.content.Context, period: Int, points: Int): Pair<String?, String?> {
             if (points < 2) return null to null
-            val start = if (period == 2) {
-                val at = app.mg4dash.energy.ConsumptionCurve.curves.value.firstTripAt ?: return null to null
+            val curves = app.mg4dash.energy.ConsumptionCurve.curves.value
+            val dated = curves.chargeTimes.firstOrNull().takeIf { period == 0 }
+            val start = if (period == 2 || dated != null) {
+                val at = dated ?: curves.firstTripAt ?: return null to null
                 val min = ((System.currentTimeMillis() - at) / 60_000L).coerceAtLeast(1)
                 val (res, n) = when {
                     min < 60 -> R.string.cc_min to min
@@ -148,15 +149,25 @@ class ConsumptionCard(context: Context) : LinearLayout(context) {
         }
 
         /**
-         * Courbe et légende de la période (#44) : un point par km du trajet ou depuis la recharge
-         * (moyenne glissante sur 3 points), ou un point par trajet sur 12 mois.
+         * Remplit le graphique de la période et rend (nombre de points d'origine, légende) (#44) : trajet par km,
+         * lissé sur 3 points ; recharge et 12 mois selon la date. Les points de recharge d'avant les dates restent par km.
          */
-        fun curve(c: android.content.Context, period: Int): Pair<List<Float>, String> {
-            val raw = app.mg4dash.energy.ConsumptionCurve.curves.value.of(period)
-            val v = raw.map { app.mg4dash.system.Units.cons(c, it) }
+        fun fill(c: android.content.Context, chart: LineChart, period: Int): Pair<Int, String> {
+            val curves = app.mg4dash.energy.ConsumptionCurve.curves.value
+            val v = curves.of(period).map { app.mg4dash.system.Units.cons(c, it) }
+            val line = app.mg4dash.energy.ConsumptionCurve.timeLine(curves.timesOf(period), v)
+            if (line.size >= 2) {
+                chart.showTimeline(line, v.average().toFloat())
+                return v.size to if (period == 2) c.getString(R.string.en_trips_note, v.size) else c.getString(R.string.en_time_note)
+            }
+            chart.values = if (period == 2) v else v.smooth3()
+            return v.size to curveNote(c, period, v)
+        }
+
+        private fun curveNote(c: android.content.Context, period: Int, v: List<Float>): String {
             // Moyenne sans sa valeur dans la légende : l'étiquette de la ligne pointillée la donne déjà (#44)
-            return if (period == 2) v to (if (v.size >= 2) c.getString(R.string.en_trips_note, v.size) else c.getString(R.string.en_trips_wait))
-            else v.smooth3() to (if (v.size >= 2) c.getString(R.string.en_curve_note) else c.getString(R.string.en_curve_wait))
+            return if (period == 2) (if (v.size >= 2) c.getString(R.string.en_trips_note, v.size) else c.getString(R.string.en_trips_wait))
+            else (if (v.size >= 2) c.getString(R.string.en_curve_note) else c.getString(R.string.en_curve_wait))
         }
     }
 }

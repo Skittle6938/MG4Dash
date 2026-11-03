@@ -17,7 +17,7 @@ import kotlinx.coroutines.launch
  * récupération déduite) plutôt que de la conso instantanée de la voiture, trop bruitée :
  *  - trajet en cours : un point par km (kWh nets × 100 / km), et à l'arrêt voiture allumée un
  *    point toutes les 2 minutes, compté comme 1 km ; vidée à chaque démarrage ;
- *  - depuis la recharge : les points de tous les trajets depuis la dernière recharge ;
+ *  - depuis la recharge : les points de tous les trajets depuis la dernière recharge, datés ;
  *  - 12 derniers mois : un point par trajet (sa moyenne), à partir de 2 km.
  */
 object ConsumptionCurve {
@@ -35,7 +35,13 @@ object ConsumptionCurve {
         val trips: List<Float> = emptyList(),
         /** Heure (ms) du plus ancien trajet de la courbe 12 mois, pour l'échelle de temps. */
         val firstTripAt: Long? = null,
+        /** Heure (ms) de chaque point de [trips]. */
+        val tripTimes: List<Long> = emptyList(),
+        /** Heure (ms) de chaque point de [charge] ; vide tant que la courbe a des points d'avant les dates. */
+        val chargeTimes: List<Long> = emptyList(),
     ) {
+        /** Heures des points de la période, si elle en a. */
+        fun timesOf(period: Int) = when (period) { 2 -> tripTimes; 0 -> chargeTimes; else -> emptyList() }
         /** Courbe de la période choisie : 0 = depuis la recharge, 1 = trajet, 2 = 12 mois. */
         fun of(period: Int) = when (period) { 1 -> trip; 2 -> trips; else -> charge }
     }
@@ -49,14 +55,43 @@ object ConsumptionCurve {
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
+    /** Courbe placée selon le temps : au plus ce nombre de tranches de durée égale. */
+    private const val TIME_SLICES = 50
+
+    /**
+     * Points (position 0..1 sur la durée, valeur) : moyenne de chaque tranche de durée égale, à la date moyenne de ses
+     * points, puis léger lissage avec les tranches voisines. Une tranche vide ne donne pas de point et coupe le lissage :
+     * une période sans rouler reste visible, et aucune valeur ne déborde de l'autre côté.
+     */
+    fun timeLine(times: List<Long>, values: List<Float>, slices: Int = TIME_SLICES): List<Pair<Float, Float>> {
+        if (times.size != values.size || times.size < 2) return emptyList()
+        val from = times.minOrNull()!!; val span = times.maxOrNull()!! - from
+        if (span <= 0L) return emptyList()
+        val sumT = DoubleArray(slices); val sumV = DoubleArray(slices); val n = IntArray(slices)
+        times.forEachIndexed { i, t ->
+            val s = ((t - from).toDouble() / span * slices).toInt().coerceIn(0, slices - 1)
+            sumT[s] += (t - from).toDouble(); sumV[s] += values[i].toDouble(); n[s]++
+        }
+        val mean = DoubleArray(slices) { if (n[it] > 0) sumV[it] / n[it] else 0.0 }
+        return (0 until slices).filter { n[it] > 0 }.map { s ->
+            val near = (s - 1..s + 1).filter { it in 0 until slices && n[it] > 0 }
+            (sumT[s] / n[s] / span).toFloat() to near.map { mean[it] }.average().toFloat()
+        }
+    }
+
     private fun parse(s: String?) = (s ?: "").split(',').mapNotNull { it.toFloatOrNull() }
     private fun join(l: List<Float>) = l.joinToString(",") { String.format(java.util.Locale.US, "%.1f", it) }
 
     fun start(context: Context) {
         if (BuildConfig.MOCK) {
             val trip = List(36) { i -> 15.5f + 2.2f * kotlin.math.sin(i / 6f) + (if (i % 9 == 4) 1.2f else 0f) }
+            val now = System.currentTimeMillis()
+            val day = 24L * 3600 * 1000
+            val chargePoints = 14 + trip.size
+            // Exemple : aucun trajet pendant une semaine, à mi-parcours
+            val tripDays = List(40) { i -> now - (23.0 * day * (39 - i) / 39).toLong() - if (i < 20) 7 * day else 0L }
             _curves.value = Curves(trip, List(14) { 16f + it % 4 * 0.6f } + trip, List(40) { i -> 16f + 3f * kotlin.math.sin(i / 7f) + (i % 5) * 0.4f },
-                System.currentTimeMillis() - 23L * 24 * 3600 * 1000)
+                tripDays.first(), tripDays, List(chargePoints) { i -> now - (3.0 * day * (chargePoints - 1 - i) / (chargePoints - 1)).toLong() })
             return
         }
         val sp = context.getSharedPreferences("mg4launcher", Context.MODE_PRIVATE)
@@ -74,11 +109,16 @@ object ConsumptionCurve {
         trips.removeAll { System.currentTimeMillis() - it.first > YEAR_MS }
         var trip = parse(sp.getString("cc_trip", "")).takeLast(MAX_POINTS)
         var charge = parse(sp.getString("cc_charge", "")).takeLast(MAX_POINTS)
+        // Points d'avant les dates : sans heures, la courbe reste par km jusqu'à la prochaine recharge
+        var chargeTimes = (sp.getString("cc_charge_t", "") ?: "").split(',').mapNotNull { it.toLongOrNull() }.takeLast(MAX_POINTS)
+        if (chargeTimes.size != charge.size) chargeTimes = emptyList()
         // 12 mois : les trajets finis, plus le trajet en cours dès 2 km (#44)
         fun publish() {
             val now = EnergyMonitor.sinceStart.value.per100
+            val clock = System.currentTimeMillis()
             _curves.value = Curves(trip, charge, trips.map { it.second } + listOfNotNull(now),
-                trips.firstOrNull()?.first ?: now?.let { System.currentTimeMillis() })
+                trips.firstOrNull()?.first ?: now?.let { clock },
+                trips.map { it.first } + listOfNotNull(now?.let { clock }), chargeTimes)
         }
         publish()
 
@@ -111,13 +151,13 @@ object ConsumptionCurve {
                 }
                 // Recharge : les kWh depuis la recharge repartent de zéro
                 val chargeOut = EnergyMonitor.sinceCharge.value.outKwh
-                if (chargeOut + 0.05f < lastChargeOut) { charge = emptyList(); changed = true }
+                if (chargeOut + 0.05f < lastChargeOut) { charge = emptyList(); chargeTimes = emptyList(); changed = true }
                 lastChargeOut = chargeOut
                 lastStart = start
 
                 // Effacement demandé (#44)
                 when (clearRequest) {
-                    0 -> charge = emptyList()
+                    0 -> { charge = emptyList(); chargeTimes = emptyList() }
                     1 -> trip = emptyList()
                     2 -> trips.clear()
                 }
@@ -150,6 +190,7 @@ object ConsumptionCurve {
                     lastNet = net
                     if (point in 0f..80f) {
                         trip = (trip + point).takeLast(MAX_POINTS)
+                        if (chargeTimes.size == charge.size) chargeTimes = (chargeTimes + System.currentTimeMillis()).takeLast(MAX_POINTS)
                         charge = (charge + point).takeLast(MAX_POINTS)
                         changed = true
                     }
@@ -157,6 +198,7 @@ object ConsumptionCurve {
                 if (changed) {
                     publish()
                     sp.edit().putString("cc_trip", join(trip)).putString("cc_charge", join(charge))
+                        .putString("cc_charge_t", chargeTimes.joinToString(","))
                         .putString("cc_trips", trips.joinToString(";") { "${it.first}:${String.format(java.util.Locale.US, "%.1f", it.second)}" })
                         .apply {
                             // Moyenne du trajet en cours, reprise au prochain démarrage s'il se termine voiture coupée
