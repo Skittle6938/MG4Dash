@@ -632,6 +632,9 @@
     <string name="st_sound_no_file">Nessun file selezionato</string>
     <string name="st_sound_file_too_large">I file audio devono avere una dimensione massima di 20 MB</string>
     <string name="st_sound_import_failed">Impossibile importare il file audio</string>
+    <string name="st_sound_scanning">Scansione dei file audio…</string>
+    <string name="st_sound_none_found">Nessun file audio trovato (USB o memoria interna)</string>
+    <string name="st_sound_imported">Audio importato: %1$s</string>
     <string name="st_sound_test">Ascolta</string>
     <string name="st_sound_stop">Ferma</string>
     <string name="st_sound_volume">Volume media auto</string>

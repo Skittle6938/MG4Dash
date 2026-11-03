@@ -632,6 +632,9 @@
     <string name="st_sound_no_file">Geen geluid geselecteerd</string>
     <string name="st_sound_file_too_large">Audiobestanden mogen maximaal 20 MB groot zijn</string>
     <string name="st_sound_import_failed">Audiobestand importeren is mislukt</string>
+    <string name="st_sound_scanning">Audiobestanden zoeken…</string>
+    <string name="st_sound_none_found">Geen audiobestanden gevonden (USB of interne opslag)</string>
+    <string name="st_sound_imported">Audio geïmporteerd: %1$s</string>
     <string name="st_sound_test">Test</string>
     <string name="st_sound_stop">Stoppen</string>
     <string name="st_sound_volume">Mediavolume auto</string>

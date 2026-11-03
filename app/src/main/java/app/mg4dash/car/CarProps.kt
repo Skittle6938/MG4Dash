@@ -9,7 +9,7 @@ import app.mg4dash.system.Log
 
 /**
  * "BMS" vehicle properties and consumption, read as the SAIC Energy app does
- * (com.saicmotor.saicev, variante EH32 EU) : CarPropertyManager, zone globale 0.
+ * (com.saicmotor.saicev, EH32 EU variant): CarPropertyManager, global area 0.
  * Reflection access to android.car (system library), like MG4Control.
  */
 object CarProps {
@@ -22,7 +22,7 @@ object CarProps {
     const val RESER_ST_MIN = 557904911
     const val RESER_SP_HOUR = 557904912
     const val RESER_SP_MIN = 557904913
-    const val ALTNG_CHRG_CRNT = 557904907        // courant AC : 1 = 6 A, 2 = 8 A, 3 = 16 A, 4 = max
+    const val ALTNG_CHRG_CRNT = 557904907        // AC current: 1 = 6 A, 2 = 8 A, 3 = 16 A, 4 = max
     const val V2X_SP_SOC = 557904943             // V2L stop threshold: code 1..7 = 20..80 %
     const val V2X = 557904944                    // V2L discharge running: 1
     const val DRVNG_PTC_HEAT = 557904937         // battery heating: write 1 = on, 2 = off; read 0 = on, 1 = off (found on the car on 2026-10-15)
@@ -31,18 +31,18 @@ object CarProps {
     const val ONBD_CHRG_AC_CRNT = 560002108      // on-board charger: AC input current (A)
     const val ONBD_CHRG_AC_VOL = 560002109       // on-board charger: AC input voltage (V)
     const val REGEN_RNG_AFT_CHRG = 559980964     // range recovered by braking since the charge (km)
-    const val BMS_PACK_VOL = 560002054           // tension batterie (V, float)
-    const val BMS_PACK_CRNT = 560002055          // courant batterie (A, float)
+    const val BMS_PACK_VOL = 560002054           // battery pack voltage (V, float)
+    const val BMS_PACK_CRNT = 560002055          // battery pack current (A, float)
     /** Steering wheel button function (0x21407b14): 0 = central screen, 1 = driver's display, 2 = climate (quick climate window open). */
     const val SWC_FUNCTION = 557873940
     const val ELEC_CSUMP_PERKM = 560002077       // recent consumption (kWh/100 km, float)
     const val CONS_TOTAL_AFT_CHRG = 559980987    // energy since the charge (float)
     const val CONS_TOTAL_AFT_ST = 559980988      // energy since start
-    const val CONS_ACCRY_AFT_CHRG = 559980989    // accessoires
+    const val CONS_ACCRY_AFT_CHRG = 559980989    // accessories
     const val CONS_ACCRY_AFT_ST = 559980990
     const val CONS_RGEN_AFT_CHRG = 559980991     // regeneration
     const val CONS_RGEN_AFT_ST = 559980992
-    const val CONS_ATC_AFT_CHRG = 559980993      // climatisation
+    const val CONS_ATC_AFT_CHRG = 559980993      // climate control
     const val CONS_ATC_AFT_ST = 559980994
     // Old identifiers (other variants): fallback if the new ones do not answer
     const val OLD_ACC_AFT_CHRG = 559980951
@@ -90,7 +90,7 @@ object CarProps {
         }
     }
 
-    /** Gestionnaire CarAudioManager réutilisant la connexion Car déjà ouverte. */
+    /** Return the CarAudioManager from the existing Car connection. */
     fun carAudioManager(): Any? = car?.let { c ->
         runCatching { c.javaClass.getMethod("getCarManager", String::class.java).invoke(c, "audio") }.getOrNull()
     }

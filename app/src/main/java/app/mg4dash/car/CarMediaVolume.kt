@@ -80,7 +80,7 @@ object CarMediaVolume {
             Channel.CAR_AUDIO -> carAudioWrite(route.manager, route.group, target)
             Channel.ANDROID -> androidAudioWrite(target, route.max)
         }
-        Log.i(TAG, "Volume média $target/${route.max}, voie=${route.channel}, écrit=$ok")
+        Log.i(TAG, "Media volume $target/${route.max}, route=${route.channel}, writeSucceeded=$ok")
         return ok
     }
 
