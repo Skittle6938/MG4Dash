@@ -62,6 +62,7 @@ class EnergyActivity : PageActivity() {
     private lateinit var setPeriod: (Int?) -> Unit
     private lateinit var consTotal: TextView
     private lateinit var legend: LinearLayout
+    private lateinit var ring: app.mg4dash.ui.RingChart
     private lateinit var regen: TextView
     private lateinit var regenKm: TextView
     private lateinit var chart: LineChart
@@ -196,8 +197,14 @@ class EnergyActivity : PageActivity() {
         val recovered = kit.column()
         totalRow.addView(recovered, kit.lp(0, -2, 1f, l = 16))
         c3.addView(totalRow, kit.lp(-1, -2, t = 14))
+        // Anneau de répartition à gauche, le détail à droite
+        ring = app.mg4dash.ui.RingChart(this)
         legend = kit.column()
-        c3.addView(legend, kit.lp(-1, -2, t = 8))
+        c3.addView(kit.row().apply {
+            gravity = android.view.Gravity.CENTER_VERTICAL
+            addView(ring, kit.lp(kit.dp(104), kit.dp(104)))
+            addView(legend, kit.lp(0, -2, 1f, l = 16))
+        }, kit.lp(-1, -2, t = 8))
         regen = kit.text("", 15f, R.color.accent_energy).apply { setTextColor(app.mg4dash.ui.Themes.energy(context)) }
         recovered.addView(regen, kit.lp(-1, -2))
         regenKm = kit.text("", 15f, R.color.accent_energy).apply { setTextColor(app.mg4dash.ui.Themes.energy(context)) }
@@ -350,6 +357,8 @@ class EnergyActivity : PageActivity() {
         consTotal.text = if (ok) String.format(Locale.getDefault(), "%.1f kWh", total) else "—"
         val green = kit.color(R.color.accent_energy); val cyan = kit.color(R.color.accent_cold); val orange = kit.color(R.color.accent_heat)
         val violet = kit.color(R.color.accent_battery)
+        ring.show(if (ok) listOfNotNull(drive to green, clim.coerceAtLeast(0f) to cyan, (heat to violet).takeIf { showHeat }, acc.coerceAtLeast(0f) to orange) else emptyList(),
+            if (ok) "${Math.round(drive / shared * 100)} %" else "")
         legend.removeAllViews()
         listOfNotNull(Triple(getString(R.string.en_drive), drive, green), Triple(getString(R.string.en_climate), clim, cyan),
             Triple(getString(R.string.en_battery_heat), heat, violet).takeIf { showHeat },
