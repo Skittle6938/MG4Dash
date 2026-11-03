@@ -46,6 +46,8 @@ object MediaHub {
         val playing: Boolean = false,
         val durationMs: Long = 0,
         val positionMs: Long = 0,
+        /** Texte RDS de la station FM, envoyé par Radio Dash. */
+        val radioText: String = "",
         /** Android Auto connecté (son lecteur a quelque chose à afficher) : la puce AA est proposée. */
         val androidAuto: Boolean = false,
     )
@@ -1001,7 +1003,7 @@ object MediaHub {
         val artist = if (swap) rawTitle.trim() else rawArtist
         // FM : texte RDS envoyé par Radio Dash (la session ne contient que la fréquence et le nom), effacé au changement de station
         if (rdsStation != rawTitle) { rdsStation = rawTitle; rdsText = "" }
-        val album = if (analog) rdsText else md?.getString(MediaMetadata.METADATA_KEY_ALBUM) ?: ""
+        val album = md?.getString(MediaMetadata.METADATA_KEY_ALBUM) ?: ""
         val bmp = (md?.getBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART)
             ?: md?.getBitmap(MediaMetadata.METADATA_KEY_ART)
             ?: md?.getBitmap(MediaMetadata.METADATA_KEY_DISPLAY_ICON))?.takeUnless { blank(it) }
@@ -1016,6 +1018,7 @@ object MediaHub {
             playing = shownPlaying(c),
             durationMs = md?.getLong(MediaMetadata.METADATA_KEY_DURATION) ?: 0,
             positionMs = st?.position ?: 0,
+            radioText = if (analog) rdsText else "",
             androidAuto = androidAutoAvailable(),
         )
         _now.value = np

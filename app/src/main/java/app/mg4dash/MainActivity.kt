@@ -671,7 +671,8 @@ class MainActivity : AppCompatActivity() {
         } else {
             b.mediaSource.put(m.source.ifEmpty { getString(R.string.title_media) } + "  ▾")
             b.mediaTitle.put(m.title.ifEmpty { m.source })
-            b.mediaArtist.put(m.artist)
+            // Fréquence puis texte RDS : la ligne de l'album n'existe pas dans ce lecteur
+            b.mediaArtist.put(listOf(m.artist, m.radioText).filter { it.isNotBlank() }.joinToString(" · "))
             b.mediaAlbum.put(m.album)
         }
         if (shownArt !== m.art) { shownArt = m.art; b.mediaArt.setImageBitmap(m.art) }
