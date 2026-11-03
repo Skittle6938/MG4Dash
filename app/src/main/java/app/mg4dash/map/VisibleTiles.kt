@@ -9,34 +9,34 @@ import kotlin.math.sin
 import kotlin.math.tan
 
 /**
- * Tuiles couvertes par la carte affichée, au niveau de zoom que dessine osmdroid (partie entière du zoom) :
- * une tuile absente de ce niveau est remplacée à l'écran par une zone vide ou floue (#15).
+ * Tiles covered by the displayed map, at the zoom level osmdroid draws (integer part of the zoom):
+ * a tile missing at this level is replaced on screen by an empty or blurred area (#15).
  */
 object VisibleTiles {
     data class Tile(val z: Int, val x: Int, val y: Int)
 
-    /** Mètres couverts par un pixel de la carte à cette latitude et ce zoom. */
+    /** Metres covered by a map pixel at this latitude and zoom. */
     fun metersPerPixel(lat: Double, zoom: Double, tileSizePx: Int): Double =
         40_075_016.686 * cos(Math.toRadians(lat)) / (tileSizePx * 2.0.pow(zoom))
 
     /**
-     * @param lat,lon point de la carte retenu (la voiture en mode suivi)
-     * @param tileSizePx taille d'une tuile à l'écran au zoom entier 0 (osmdroid : TileSystem.getTileSize())
-     * @param rotationDeg orientation de la carte (osmdroid : -cap, 0 = nord en haut)
-     * @param pointBelowCenterPx distance à l'écran entre ce point et le centre de la carte (voiture plus bas en mode cap)
+     * @param lat,lon map point used (the car in following mode)
+     * @param tileSizePx size of a tile on screen at integer zoom 0 (osmdroid: TileSystem.getTileSize())
+     * @param rotationDeg map orientation (osmdroid: -heading, 0 = north up)
+     * @param pointBelowCenterPx on-screen distance between this point and the map's centre (car lower in heading mode)
      */
     fun around(lat: Double, lon: Double, zoom: Double, tileSizePx: Int, widthPx: Int, heightPx: Int,
                rotationDeg: Float = 0f, pointBelowCenterPx: Int = 0): List<Tile> {
         val z = floor(zoom).toInt()
         val n = 1 shl z
-        // Taille d'un pixel de l'écran, en tuiles du niveau z
+        // Size of a screen pixel, in tiles of level z
         val perPx = 1.0 / (tileSizePx * 2.0.pow(zoom - z))
         val a = Math.toRadians(rotationDeg.toDouble())
         val latRad = Math.toRadians(lat.coerceIn(-85.05, 85.05))
-        // Le haut de l'écran pointe vers le cap : le centre est devant le point, vu de la carte
+        // The top of the screen points to the heading: the centre is ahead of the point, seen from the map
         val cx = (lon + 180.0) / 360.0 * n + sin(-a) * pointBelowCenterPx * perPx
         val cy = (1.0 - ln(tan(latRad) + 1.0 / cos(latRad)) / Math.PI) / 2.0 * n - cos(a) * pointBelowCenterPx * perPx
-        // Rectangle de l'écran tourné : son encombrement sur la grille des tuiles
+        // Rotated screen rectangle: its footprint on the tile grid
         val halfX = (abs(cos(a)) * widthPx + abs(sin(a)) * heightPx) / 2.0 * perPx
         val halfY = (abs(sin(a)) * widthPx + abs(cos(a)) * heightPx) / 2.0 * perPx
         val out = ArrayList<Tile>()

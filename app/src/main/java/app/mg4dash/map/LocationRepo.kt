@@ -14,8 +14,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
 /**
- * Position du véhicule. La MG4 expose un fournisseur « fused » précis (vérifié sur la voiture
- * le 2026-10-13), avec vitesse et cap ; repli sur « gps ».
+ * Vehicle position. The MG4 exposes a precise "fused" provider (checked on the car
+ * on 2026-10-13), with speed and heading; fallback on "gps".
  */
 object LocationRepo {
     private const val TAG = "Location"
@@ -38,9 +38,9 @@ object LocationRepo {
             lm.allProviders.mapNotNull { lm.getLastKnownLocation(it) }.maxByOrNull { it.time }?.let { _location.value = it }
         } catch (_: Exception) {}
         subscribe(lm)
-        // Constaté sur la voiture : au démarrage, « fused » n'est pas toujours encore déclaré et
-        // l'abonnement partait sur « gps », qui ne fournit rien. On s'abonne donc à tous les
-        // fournisseurs, et on vérifie régulièrement qu'il n'en manque pas.
+        // Found on the car: at startup, "fused" is not always declared yet and
+        // the subscription went to "gps", which provides nothing. So subscribe to all
+        // providers, and regularly check that none is missing.
         val handler = Handler(Looper.getMainLooper())
         handler.postDelayed(object : Runnable {
             override fun run() { subscribe(lm); handler.postDelayed(this, 30_000) }
@@ -69,7 +69,7 @@ object LocationRepo {
     private val listener = object : LocationListener {
         override fun onLocationChanged(location: Location) {
             val cur = _location.value
-            // Garde la position la plus récente, et préfère « fused » (le plus précis) quand il émet.
+            // Keeps the most recent position, and prefers "fused" (the most precise) when it emits.
             if (cur != null && location.provider != "fused" && cur.provider == "fused" &&
                 location.time - cur.time < 5_000) return
             _location.value = location

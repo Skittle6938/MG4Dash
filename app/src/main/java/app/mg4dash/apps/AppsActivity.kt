@@ -19,8 +19,8 @@ import app.mg4dash.R
 import app.mg4dash.system.Log
 
 /**
- * Liste des applis installées (appui long sur « Accueil » dans le dock), avec en haut les applis ouvertes
- * (#70, #71) : une croix ferme l'appli, « Tout fermer » ferme toutes celles qui ne tiennent pas la voiture.
+ * List of installed apps (long press on "Home" in the dock), with open apps at the top
+ * (#70, #71): a cross closes the app, "Close all" closes all those that do not hold the car.
  */
 class AppsActivity : AppCompatActivity() {
 
@@ -38,7 +38,7 @@ class AppsActivity : AppCompatActivity() {
 
         val root = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            // Haut : zone antibrouillards, sauf si la barre verticale l'occupe
+            // Top: fog light area, unless the vertical bar takes it
             setPadding(dp(24), dp(if (app.mg4dash.ui.Dock.vertical(this@AppsActivity)) 12 else 84), dp(24), dp(24))
         }
 
@@ -60,9 +60,9 @@ class AppsActivity : AppCompatActivity() {
             LinearLayout.LayoutParams(-1, 1).apply { topMargin = dp(18); leftMargin = dp(6); rightMargin = dp(6) })
         root.addView(openSection)
 
-        // ── Toutes les applis ──
+        // ── All apps ──
         root.addView(sectionTitle(R.string.apps_all), LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(14) })
-        // Autant de colonnes que la largeur laissée par la barre verticale le permet
+        // As many columns as the width left by the vertical bar allows
         val widthDp = resources.displayMetrics.widthPixels / resources.displayMetrics.density - if (app.mg4dash.ui.Dock.vertical(this)) 120 else 48
         val grid = GridLayout(this).apply { columnCount = (widthDp / 208).toInt().coerceIn(4, 8) }
         apps.forEach { ri ->
@@ -79,7 +79,7 @@ class AppsActivity : AppCompatActivity() {
             })
         }
         root.addView(grid, LinearLayout.LayoutParams(-2, -2).apply { topMargin = dp(4) })
-        // Même barre de menus que les autres pages (#79)
+        // Same menu bar as the other pages (#79)
         val page = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; setPadding(dp(12), dp(8), dp(12), dp(8)) }
         page.addView(ScrollView(this).apply { addView(root) }, LinearLayout.LayoutParams(-1, 0, 1f))
         val dock = LinearLayout(this)
@@ -95,7 +95,7 @@ class AppsActivity : AppCompatActivity() {
         if (::openRow.isInitialized) renderOpen()
     }
 
-    /** Applis ouvertes : tâches en cours, sans MG4Dash, les launchers SAIC ni l'interface système. */
+    /** Open apps: running tasks, without MG4Dash, the SAIC launchers or the system UI. */
     private fun openPackages(): List<String> = try {
         @Suppress("DEPRECATION")
         (getSystemService(ACTIVITY_SERVICE) as ActivityManager).getRunningTasks(30)
@@ -124,7 +124,7 @@ class AppsActivity : AppCompatActivity() {
         }
     }
 
-    /** Ferme une appli (arrêt forcé, permis à MG4Dash en appli système). */
+    /** Closes an app (force stop, allowed to MG4Dash as a system app). */
     private fun close(pkg: String) {
         try {
             val am = getSystemService(ACTIVITY_SERVICE) as ActivityManager
@@ -133,7 +133,7 @@ class AppsActivity : AppCompatActivity() {
         } catch (e: Exception) { Log.w(TAG, "close $pkg: ${(e.cause ?: e).message}") }
     }
 
-    /** Tout fermer : sauf Android Auto / CarPlay / DiAuto (la connexion du téléphone) et les applis SAIC. */
+    /** Close all: except Android Auto / CarPlay / DiAuto (the phone connection) and SAIC apps. */
     private fun closeAll() {
         openPackages().filter { !it.startsWith("com.allgo.") && !it.startsWith("com.saicmotor.") && !it.startsWith("com.drivehub.") }
             .forEach { close(it) }

@@ -12,17 +12,17 @@ import android.widget.TextView
 import androidx.core.content.ContextCompat
 import app.mg4dash.R
 
-/** Briques d'interface partagées par les pages (même charte que l'accueil). */
+/** UI building blocks shared by the pages (same look as home). */
 class Kit(private val c: Context) {
     companion object {
         /**
-         * Largeur réservée en haut à gauche de tous les écrans : MG y superpose le bouton des
-         * antibrouillards (environ 20→76 px en x, 12→68 px en y sur la dalle 1920 × 720).
+         * Width reserved at the top left of all screens: MG overlays the fog light
+         * button there (about 20→76 px in x, 12→68 px in y on the 1920 × 720 panel).
          */
         const val FOG_SAFE_DP = 76
     }
 
-    /** Sélecteur à choix unique (puces) ; renvoie la rangée et une fonction de mise à jour. */
+    /** Single choice selector (chips); returns the row and an update function. */
     fun segmented(labels: List<String>, onPick: (Int) -> Unit): Pair<LinearLayout, (Int?) -> Unit> {
         val r = row()
         val chips = labels.mapIndexed { i, l ->
@@ -33,8 +33,8 @@ class Kit(private val c: Context) {
         return r to { sel -> chips.forEachIndexed { i, v -> v.isSelected = i == sel } }
     }
 
-    /** Réglage d'heure « − HH:MM + » par pas de 15 min ; renvoie la rangée et le libellé. */
-    /** Heure réglable : − / + par 30 min, toucher l'heure pour la régler aux roues ([onPick]). */
+    /** Time setting "− HH:MM +" in 15 min steps; returns the row and the label. */
+    /** Adjustable time: − / + by 30 min, touch the time to set it with wheels ([onPick]). */
     fun timeStepper(label: String, onPick: (() -> Unit)? = null, onStep: (Int) -> Unit): Pair<LinearLayout, TextView> {
         val r = row()
         r.addView(text(label, 19f, R.color.text_sub), lp(0, -2, 1f))
@@ -49,8 +49,8 @@ class Kit(private val c: Context) {
     }
 
     /**
-     * Roues heures : minutes (comme « clim à une heure précise ») : flèches ou glisser sur le chiffre,
-     * minutes par [minStep]. Rend la vue et une lecture de l'heure choisie (minutes depuis minuit).
+     * Hours : minutes wheels (like "climate at a set time"): arrows or swipe on the digit,
+     * minutes by [minStep]. Returns the view and a read of the chosen time (minutes since midnight).
      */
     fun timeWheels(initialMin: Int, minStep: Int = 5): Pair<View, () -> Int> {
         var t = Math.floorMod(initialMin, 1440)
@@ -125,7 +125,7 @@ class Kit(private val c: Context) {
             setOnClickListener { onClick() }
         }
 
-    /** Tuile-bascule : libellé + état, sélectionnée = accent froid (ou chaud). */
+    /** Toggle tile: label + state, selected = cold (or warm) accent. */
     fun toggleTile(label: String, heat: Boolean = false, onClick: () -> Unit): TextView = TextView(c).apply {
         text = label; gravity = Gravity.CENTER
         setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f)
@@ -137,7 +137,7 @@ class Kit(private val c: Context) {
         setOnClickListener { onClick() }
     }
 
-    /** Ligne « libellé ……… valeur » pour les pages d'information. */
+    /** "Label ……… value" line for information pages. */
     fun infoRow(label: String): Pair<LinearLayout, TextView> {
         val r = row().apply { setPadding(0, dp(10), 0, dp(10)) }
         r.addView(text(label, 19f, R.color.text_sub), LinearLayout.LayoutParams(0, -2, 1f))

@@ -27,7 +27,7 @@ class ChartPointsTest {
 
     @Test fun timeLinePlacesPointsByDateAndKeepsGaps() {
         val day = 86_400_000L
-        // Deux groupes de trajets séparés par 40 jours sans rouler
+        // Two groups of trips separated by 40 days without driving
         val times = List(5) { it * day } + List(5) { (45 + it) * day }
         val line = ConsumptionCurve.timeLine(times, List(10) { 15f }, 50)
         assertEquals(10, line.size)

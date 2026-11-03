@@ -6,17 +6,17 @@ import android.content.Context
 import android.content.Intent
 import android.widget.Toast
 
-/** Raccourcis vers les applis SAIC (composants relevés sur la voiture le 2026-10-13). */
+/** Shortcuts to SAIC apps (components found on the car on 2026-10-13). */
 object Apps {
     private const val TAG = "Apps"
 
     val VEHICLE = ComponentName("com.saicmotor.vehiclesetting", "com.saicmotor.vehiclesetting.ui.VehicleSettingActivity")
     val HVAC = ComponentName("com.saicmotor.hvac", "com.saicmotor.hvac.ui.activity.MainActivity")
     val ENERGY = ComponentName("com.saicmotor.saicev", "com.saicmotor.saicev.activity.MainActivity")
-    /** SWI165 : pas d'appli Énergie, la recharge est dans les réglages véhicule (#60). */
+    /** SWI165: no Energy app, charging is in the vehicle settings (#60). */
     val ENERGY_SWI165 = ComponentName("com.saicmotor.hmi.vehiclesettings", "com.saicmotor.hmi.vehiclesettings.chargemanagement.ui.ChargeManagementActivity")
     val ANDROID_AUTO = ComponentName("com.allgo.app.androidauto", "com.allgo.app.androidauto.ProjectionActivity")
-    /** CarPlay de la pile allgo (relevé sur SWI68 par adammcdonagh ; repli sur le lanceur du paquet). */
+    /** CarPlay of the allgo stack (found on SWI68 by adammcdonagh; fallback on the package's launcher). */
     val CARPLAY = ComponentName("com.allgo.carplay.service", "com.allgo.carplay.service.CarPlayActivity")
     val SETTINGS = ComponentName("com.saicmotor.settings", "com.saicmotor.settings.ui.MainActivity")
     val RADIO = ComponentName("com.saicmotor.radio", "com.saicmotor.radio.view.RadioMainActivity")
@@ -24,7 +24,7 @@ object Apps {
     val MG4_CONTROL = ComponentName("com.mg4.control", "com.mg4.control.MainActivity")
     val BT_PHONE = ComponentName("com.saicmotor.btphone", "com.saicmotor.btphone.view.activity.BTPhoneMainActivity")
 
-    /** Dernière ouverture d'une appli par MG4Dash (elapsedRealtime) : l'écran clim SAIC ouvert exprès reste devant. */
+    /** Last app opening by MG4Dash (elapsedRealtime): the SAIC climate screen opened on purpose stays in front. */
     @Volatile var openedAt = 0L
 
     fun open(context: Context, component: ComponentName, label: String): Boolean {
@@ -45,19 +45,19 @@ object Apps {
 
     fun openPackage(context: Context, pkg: String, label: String = pkg): Boolean = fallback(context, pkg, label)
 
-    /** L'appli existe sur ce firmware (activité connue, lanceur du paquet ou nom voisin) : sinon on cache son bouton. */
+    /** The app exists on this firmware (known activity, package launcher or similar name): otherwise its button is hidden. */
     fun available(context: Context, component: ComponentName): Boolean {
         val pm = context.packageManager
         return pm.resolveActivity(Intent(Intent.ACTION_MAIN).setComponent(component), 0) != null ||
             pm.getLaunchIntentForPackage(component.packageName) != null || searchLauncher(context, component.packageName) != null
     }
 
-    /** Autres noms connus selon le firmware : mots-clés cherchés dans les paquets lanceurs (issue #13). */
+    /** Other known names by firmware: keywords searched in launcher packages (issue #13). */
     private val ALIASES = mapOf(
         "com.saicmotor.vehiclesetting" to listOf("vehiclesetting", "vehicle.setting", "carsetting", "vehicle"),
         "com.mg4.control" to listOf("mg4control", "mg4.control", "mg4"),
         "com.saicmotor.saicev" to listOf("saicev", "hmi.ev", "hmi.chargesettings", "chargesettings", "energy", "charging"),
-        // Anciens firmwares (SWI68/165/133) : clim d'origine dans com.saicmotor.hmi.hvac (issue #30)
+        // Old firmwares (SWI68/165/133): stock climate in com.saicmotor.hmi.hvac (issue #30)
         "com.saicmotor.hvac" to listOf("hmi.hvac", "hvac", "climate", "aircondition"),
         "com.saicmotor.settings" to listOf("hmi.settings", "systemsetting", "settings"),
     )

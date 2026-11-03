@@ -18,11 +18,11 @@ import java.util.Calendar
 import java.util.Locale
 
 /**
- * Fenêtre de la clim maintenue (appui long sur le bouton marche de la clim) : clim tout de suite ou à
- * une heure précise. L'heure se règle comme une roue (glisser vers le haut / le bas sur les chiffres,
- * ou les flèches), avec des raccourcis « dans 30 min / 1 h / 2 h ». À droite, les réglages du mode
- * choisi. Dessinée par-dessus la page dans la même fenêtre : une boîte de dialogue ferait réapparaître
- * les barres système d'origine. Si le mode tourne déjà, l'appui long rouvre directement son écran.
+ * Keep climate on window (long press on the climate power button): climate right away or at a
+ * set time. The time is set like a wheel (swipe up / down on the digits,
+ * or the arrows), with "in 30 min / 1 h / 2 h" shortcuts. On the right, the settings of the chosen
+ * mode. Drawn over the page in the same window: a dialog would bring back the
+ * stock system bars. If the mode is already running, the long press reopens its screen directly.
  */
 object ClimateHoldPanel {
     private val TAG = Any()
@@ -36,11 +36,11 @@ object ClimateHoldPanel {
         val shade = FrameLayout(a).apply {
             tag = TAG
             setBackgroundColor(0xB3000000.toInt())
-            isClickable = true   // la page dessous ne reçoit plus les touchers
+            isClickable = true   // the page underneath no longer receives touches
         }
         val panel = kit.panel(a.getString(R.string.dm_title)).apply {
             setPadding(kit.dp(32), kit.dp(22), kit.dp(32), kit.dp(22))
-            // Fond plein : l'accueil ne doit pas se voir à travers
+            // Solid background: the home screen must not show through
             background = GradientDrawable().apply {
                 setColor(kit.color(R.color.bg_bottom)); cornerRadius = a.resources.getDimension(R.dimen.radius_panel)
                 setStroke(kit.dp(1), kit.color(R.color.panel_border))
@@ -50,25 +50,25 @@ object ClimateHoldPanel {
         content.addView(shade, FrameLayout.LayoutParams(-1, -1))
         val close = { content.removeView(shade) }
 
-        // ── Quand : tout de suite / à une heure précise ──
+        // ── When: right away / at a set time ──
         var scheduled = prefs.climateHoldScheduled
         val (modeRow, paintMode) = kit.segmented(listOf(a.getString(R.string.dm_now), a.getString(R.string.dm_at_time))) {}
         panel.addView(modeRow, kit.lp(-1, -2, t = 12))
 
         val body = kit.row().apply { gravity = Gravity.TOP }
         panel.addView(body, kit.lp(-1, -2, t = 16))
-        // Gauche : la grande commande du mode (durée maximale, ou heure de mise en marche)
+        // Left: the mode's main control (maximum duration, or start time)
         val left = kit.column().apply {
             gravity = Gravity.CENTER
             background = GradientDrawable().apply { setColor(kit.color(R.color.button_idle)); cornerRadius = kit.dp(18).toFloat() }
             setPadding(kit.dp(20), kit.dp(14), kit.dp(20), kit.dp(16))
         }
         body.addView(left, kit.lp(0, kit.dp(318), 1f))
-        // Droite : réglages fins
+        // Right: fine settings
         val right = kit.column()
         body.addView(right, kit.lp(0, -2, 1.05f, l = 24))
 
-        // Durée maximale (tout de suite)
+        // Maximum duration (right away)
         var idx = ClimateHold.DURATIONS.indexOf(prefs.climateHoldMaxMin).coerceAtLeast(0)
         fun fmtMax(m: Int) = when { m == 0 -> a.getString(R.string.dm_unlimited); m >= 60 -> "${m / 60} h"; else -> "$m min" }
         val maxBox = kit.column().apply { gravity = Gravity.CENTER_HORIZONTAL }
@@ -81,7 +81,7 @@ object ClimateHoldPanel {
         maxBox.addView(kit.text(a.getString(R.string.dm_max_hint), 19f, R.color.text_title).apply { gravity = Gravity.CENTER; maxLines = 2 },
             kit.lp(-1, -2, t = 6))
 
-        // Heure de mise en marche (à une heure précise) : heures et minutes en roues, pas de 5 min
+        // Start time (at a set time): hours and minutes as wheels, 5 min steps
         var minuteOfDay = prefs.climateHoldStartMin
         val timeBox = kit.column().apply { gravity = Gravity.CENTER_HORIZONTAL }
         timeBox.addView(kit.text(a.getString(R.string.dm_first_start), 24f, R.color.text_sub).apply { gravity = Gravity.CENTER }, kit.lp(-1, -2))
@@ -107,7 +107,7 @@ object ClimateHoldPanel {
         })
         timeBox.addView(clock, kit.lp(-2, -2))
         timeBox.addView(inLabel, kit.lp(-2, -2, t = 2))
-        // Raccourcis : dans 30 min, 1 h, 2 h (arrondi aux 5 minutes)
+        // Shortcuts: in 30 min, 1 h, 2 h (rounded to 5 minutes)
         val quick = kit.row()
         listOf(30, 60, 120).forEachIndexed { i, m ->
             quick.addView(kit.toggleTile(a.getString(R.string.dm_in, if (m >= 60) "${m / 60} h" else "$m min")) {
@@ -118,7 +118,7 @@ object ClimateHoldPanel {
         timeBox.addView(quick, kit.lp(-1, -2, t = 10))
         paintTime()
 
-        // Réglages fins à droite
+        // Fine settings on the right
         var lockSec = prefs.climateHoldLockSec
         var runs = prefs.climateHoldRuns; var dur = prefs.climateHoldRunMin; var gap = prefs.climateHoldGapMin
         fun mins(m: Int) = if (m >= 60) String.format(Locale.getDefault(), "%d h %02d", m / 60, m % 60) else "$m min"
@@ -131,13 +131,13 @@ object ClimateHoldPanel {
         val gapRow = stepper(kit, a.getString(R.string.dm_gap), mins(gap)) { d, v ->
             gap = (gap + d * 5).coerceIn(5, 240); prefs.climateHoldGapMin = gap; v.text = mins(gap) }
         val note = kit.text("", 18f, R.color.text_title).apply { maxLines = 4; setLineSpacing(0f, 1.1f) }
-        // Écran éteint une fois verrouillé : un seul bouton OUI / NON, comme les options des réglages
+        // Screen off once locked: a single YES / NO button, like the options in the settings
         val offRow = kit.row()
         offRow.addView(kit.column().apply {
             addView(kit.text(a.getString(R.string.dm_screen_off), 22f, R.color.text_sub))
             addView(kit.text(a.getString(R.string.dm_screen_off_hint), 17f, R.color.text_title).apply { maxLines = 2 }, kit.lp(-1, -2, t = 2))
         }, kit.lp(0, -2, 1f))
-        // Un seul interrupteur : à la fin, la voiture éteinte coupe d'elle-même l'écran au bout d'un moment
+        // A single switch: at the end, the car once off cuts the screen by itself after a while
         lateinit var offBtn: TextView
         fun paintOff() {
             offBtn.text = a.getString(if (prefs.climateHoldScreenOff) R.string.yes else R.string.no); offBtn.isSelected = prefs.climateHoldScreenOff
@@ -154,13 +154,13 @@ object ClimateHoldPanel {
             listOf(durRow, runsRow, gapRow).forEach { it.visibility = if (scheduled) View.VISIBLE else View.GONE }
             note.text = a.getString(if (scheduled) R.string.dm_note_at else R.string.dm_note_now)
         }
-        // Le sélecteur rappelle onPick : on rebranche les puces une fois la vue construite
+        // The selector calls onPick back: the chips are wired once the view is built
         for (i in 0 until modeRow.childCount) modeRow.getChildAt(i).setOnClickListener {
             scheduled = i == 1; prefs.climateHoldScheduled = scheduled; paintAll()
         }
         paintAll()
 
-        // Avertissement bien visible : ce mode ne protège pas un enfant ou un animal laissé seul
+        // Clearly visible warning: this mode does not protect a child or animal left alone
         panel.addView(kit.text(a.getString(R.string.dm_warning), 20f, R.color.accent_danger).apply { maxLines = 2; setLineSpacing(0f, 1.1f) },
             kit.lp(-1, -2, t = 14))
         val buttons = kit.row()
@@ -168,7 +168,7 @@ object ClimateHoldPanel {
         buttons.addView(kit.toggleTile(a.getString(R.string.dm_start)) {
             close()
             if (scheduled) {
-                // Heure murale du premier cycle : aujourd'hui, ou demain si l'heure est passée
+                // Wall clock time of the first cycle: today, or tomorrow if the time has passed
                 val c = Calendar.getInstance(); c.set(Calendar.SECOND, 0); c.set(Calendar.MILLISECOND, 0)
                 c.add(Calendar.MINUTE, minutesUntil())
                 ClimateHold.schedule(a, c.timeInMillis, runs, dur, gap, lockSec)
@@ -177,7 +177,7 @@ object ClimateHoldPanel {
         panel.addView(buttons, kit.lp(-1, -2, t = 14))
     }
 
-    /** Ligne « libellé  −  valeur  + » compacte. */
+    /** Compact "label  −  value  +" line. */
     private fun stepper(kit: Kit, label: String, initial: String, onStep: (Int, TextView) -> Unit): LinearLayout {
         val line = kit.row()
         line.addView(kit.text(label, 22f, R.color.text_sub), kit.lp(0, -2, 1f))
@@ -189,8 +189,8 @@ object ClimateHoldPanel {
     }
 
     /**
-     * Roue : flèche haut, valeur, flèche bas ; glisser le doigt sur la valeur fait défiler (un cran tous
-     * les 36 dp), comme une roue d'heures. [vertical] = false : flèches de part et d'autre (durée).
+     * Wheel: up arrow, value, down arrow; swiping on the value scrolls (one notch every
+     * 36 dp), like an hour wheel. [vertical] = false: arrows on either side (duration).
      */
     @SuppressLint("ClickableViewAccessibility")
     private fun wheel(kit: Kit, value: TextView, vertical: Boolean = false, onStep: (Int) -> Unit): View {

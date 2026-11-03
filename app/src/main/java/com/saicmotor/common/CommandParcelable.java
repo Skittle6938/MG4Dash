@@ -5,10 +5,10 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 /**
- * Copie de la commande que le launcher SAIC envoie aux services des applis média et radio
- * (extra « command » d'un startService). Le nom de classe et l'ordre du Parcel doivent être
- * identiques à ceux du firmware : l'appli qui reçoit la relit avec sa propre classe.
- * Relevé sur SWI69 (launcher com.saicmotor.launcher, ModeManager.switchSource).
+ * Copy of the command the SAIC launcher sends to the services of media and radio apps
+ * ("command" extra of a startService). The class name and Parcel order must be
+ * identical to the firmware's: the receiving app rereads it with its own class.
+ * Found on SWI69 (launcher com.saicmotor.launcher, ModeManager.switchSource).
  */
 public class CommandParcelable implements Parcelable {
     private int mEvent = -1;

@@ -7,11 +7,11 @@ import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.net.wifi.WifiManager
 
-/** État Bluetooth / Wi-Fi pour la barre supérieure. Lecture seule. */
+/** Bluetooth / Wi-Fi state for the top bar. Read only. */
 object StatusMonitor {
     data class Status(val btOn: Boolean, val btConnected: Boolean, val wifiOn: Boolean, val wifiConnected: Boolean)
 
-    // Profils côté voiture (rôle « puits ») : A2DP_SINK = 11, HEADSET_CLIENT = 16 (constantes masquées).
+    // Car side profiles ("sink" role): A2DP_SINK = 11, HEADSET_CLIENT = 16 (hidden constants).
     private val PROFILES = intArrayOf(11, 16, BluetoothProfile.A2DP, BluetoothProfile.HEADSET)
 
     fun read(context: Context): Status {
@@ -31,7 +31,7 @@ object StatusMonitor {
         )
     }
 
-    /** Icônes de connexion de l'accueil. [signalLevel] : null si la voiture n'a pas de T-box lisible. */
+    /** Home connection icons. [signalLevel]: null if the car has no readable T-box. */
     data class Connections(
         val btOn: Boolean, val btConnected: Boolean, val btName: String?,
         val wifiOn: Boolean, val wifiConnected: Boolean, val wifiName: String?,
@@ -41,7 +41,7 @@ object StatusMonitor {
     const val SIGNAL_MAX = 4
     private const val CSQ_MAX = 31
 
-    /** Appeler hors du fil principal : service de la T-box et stockage. */
+    /** Call off the main thread: T-box service and storage. */
     fun connections(context: Context): Connections {
         val s = read(context)
         val wm = context.applicationContext.getSystemService(Context.WIFI_SERVICE) as? WifiManager
@@ -53,10 +53,10 @@ object StatusMonitor {
         val ssid = if (!s.wifiConnected) null else try {
             wm?.connectionInfo?.ssid?.trim('"')?.takeUnless { it.isBlank() || it == "<unknown ssid>" }
         } catch (_: Exception) { null }
-        // Méthode masquée, comme le bandeau d'origine (ApController de SystemUI)
+        // Hidden method, like the stock banner (SystemUI's ApController)
         val ap = try { wm?.javaClass?.getMethod("isWifiApEnabled")?.invoke(wm) == true } catch (_: Throwable) { false }
         val tbox = try { app.mg4dash.car.CarBridge.tbox() } catch (_: Exception) { null }
-        // Même calcul que le bandeau d'origine (SignalController) : puissance 0 à 31, en crans
+        // Same calculation as the stock banner (SignalController): strength 0 to 31, in steps
         val level = try {
             tbox?.let { t -> if (!t.connected) 0 else (t.csq.coerceIn(0, CSQ_MAX) * SIGNAL_MAX / CSQ_MAX) }
         } catch (_: Exception) { null }

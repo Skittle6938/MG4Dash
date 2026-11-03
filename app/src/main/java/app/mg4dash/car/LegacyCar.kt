@@ -1,7 +1,7 @@
 /*
- * MG4Dash — accès voiture des firmwares « ancien SDK » (SWI68, SWI165, SWI133).
- * Clim adaptée de MG4Hardware.kt de MG4Control (https://github.com/SliDeeN/MG4Control),
- * Copyright © 2026 Slice Denkins et les contributeurs de MG4Control, GPL v3 ou ultérieure.
+ * MG4Dash — car access for "old SDK" firmwares (SWI68, SWI165, SWI133).
+ * Climate adapted from MG4Hardware.kt of MG4Control (https://github.com/SliDeeN/MG4Control),
+ * Copyright © 2026 Slice Denkins and the MG4Control contributors, GPL v3 or later.
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 package app.mg4dash.car
@@ -11,14 +11,14 @@ import app.mg4dash.system.Firmware
 import app.mg4dash.system.Log
 
 /**
- * Clim des firmwares ancien SDK : `AirConditionManager`, chargé depuis le launcher d'origine
- * (`com.saicmotor.hmi.launcher`) puis initialisé avec un écouteur factice (le SDK refuse null).
+ * Climate on old SDK firmwares: `AirConditionManager`, loaded from the stock launcher
+ * (`com.saicmotor.hmi.launcher`) then initialised with a dummy listener (the SDK refuses null).
  *
- * Non testé par l'auteur (SWI69) : tout est lu par réflexion et chaque échec rend null, l'écran
- * grise alors le réglage. Comportements relevés par MG4Control sur ces firmwares :
- *  - A/C, AUTO et recyclage sont des **appuis** : l'argument est ignoré, on avance d'un cran
- *    puis on relit ;
- *  - le recyclage se lit sur la propriété HVAC_AC_LOOP_MODE (0 intérieur, 1 extérieur, 2 auto).
+ * Not tested by the author (SWI69): everything is read by reflection and each failure returns null, the screen
+ * then greys the setting. Behaviours found by MG4Control on these firmwares:
+ *  - A/C, AUTO and recirculation are **presses**: the argument is ignored, move one step
+ *    then reread;
+ *  - recirculation is read on the HVAC_AC_LOOP_MODE property (0 inside, 1 outside, 2 auto).
  */
 object LegacyCar {
     private const val TAG = "CarLegacy"
@@ -89,7 +89,7 @@ object LegacyCar {
 
     private fun prop(id: Int): Int? = CarProps.readIntArea(id, AREA_HVAC)?.takeIf { it >= 0 }
 
-    /** Lecture de la clim dans l'état véhicule ; inchangé si le service ne répond pas. */
+    /** Reads the climate into the vehicle state; unchanged if the service does not answer. */
     fun readHvac(s: VehicleState): VehicleState {
         if (ac == null) { initDone = false; connect() }
         if (ac == null) return s
@@ -106,7 +106,7 @@ object LegacyCar {
             outsideTemp = float("getOutCarTemp")?.takeIf { !it.isNaN() && it > -60f && it < 70f } ?: s.outsideTemp,
             defrostFront = b(int("getFrontWindowDefroster")),
             defrostRear = b(int("getBackWindowDefroster")),
-            // Réglages de la clim (#65) : VehicleSettingManager, mêmes valeurs supposées que sur SWI69
+            // Climate settings (#65): VehicleSettingManager, same values assumed as on SWI69
             autoAirVolume = vsInt("getAutoModeAirVolume")?.takeIf { it in 0..2 },
             defrostLinked = vsInt("getDefrostLinkage")?.takeIf { it in 0..1 }?.let { it == 0 },
             ecoLinked = vsInt("getHvacEconLinkage")?.takeIf { it in 1..2 }?.let { it == 1 },
@@ -114,7 +114,7 @@ object LegacyCar {
     }
 
     private fun vsSet(name: String, v: Int): Boolean {
-        vsInt("getAutoModeAirVolume")   // connexion au gestionnaire si besoin
+        vsInt("getAutoModeAirVolume")   // connect to the manager if needed
         val c = setting ?: return false
         return try { c.javaClass.getMethod(name, Int::class.javaPrimitiveType).invoke(c, v); true }
         catch (e: Exception) { Log.w(TAG, "$name: ${(e.cause ?: e).message}"); false }
@@ -123,7 +123,7 @@ object LegacyCar {
     fun setDefrostLinked(on: Boolean) = vsSet("setDefrostLinkage", if (on) 0 else 1)
     fun setEcoLinked(on: Boolean) = vsSet("setHvacEconLinkage", if (on) 1 else 2)
 
-    // ── Commandes (bloquantes : appelées hors du fil principal par CarBridge) ──
+    // ── Commands (blocking: called off the main thread by CarBridge) ──
 
     fun power(on: Boolean) = call(if (on) "openHvacPower" else "closeHvacPower")
     fun temp(c: Int) = set("setDrvTemp", c)
@@ -132,17 +132,17 @@ object LegacyCar {
     fun defrostFront(on: Boolean) = call(if (on) "openFrontWindowDefroster" else "closeFrontWindowDefroster")
     fun defrostRear(on: Boolean) = call(if (on) "openBackWindowDefroster" else "closeBackWindowDefroster")
 
-    /** A/C : appui, relu sur HVAC_AC_ON (1 = allumé). */
+    /** A/C: press, reread on HVAC_AC_ON (1 = on). */
     fun ac(on: Boolean) = cycle(PROP_AC_ON, if (on) 1 else 0, 2) { set("setAcStatus", 1) }
 
-    /** AUTO : un appui l'allume ; pour en sortir, on écrit un niveau de ventilation (comme l'écran d'origine). */
+    /** AUTO: a press turns it on; to leave it, write a fan level (like the stock screen). */
     fun auto(on: Boolean): Boolean {
         val cur = int("getAutoStatus")?.let { it == 1 }
         if (cur == on) return true
         return if (on) set("setAutoStatus", 1) else fan((int("getAirVolumeLevel")?.takeIf { it in 1..10 } ?: 3))
     }
 
-    /** Recyclage : appui qui avance d'un cran (extérieur → intérieur → auto), relu sur la propriété. */
+    /** Recirculation: press moving one step (outside → inside → auto), reread on the property. */
     fun loop(target: Int) = cycle(PROP_LOOP_MODE, target, 3) { set("setLoopMode", 1) }
 
     private fun cycle(id: Int, target: Int, max: Int, advance: () -> Unit): Boolean {
@@ -155,9 +155,9 @@ object LegacyCar {
         return prop(id) == target
     }
 
-    // ── Recharge et V2L : VehicleChargingManager du même SDK ──
-    // Même logique que la voie A9 : 1 = démarrer, 2 = arrêter (signaux CHARGING / DISCHARGING
-    // _CONTROL_SWITCH) ; l'état de charge suit la même table que le launcher A9.
+    // ── Charging and V2L: VehicleChargingManager of the same SDK ──
+    // Same logic as the A9 route: 1 = start, 2 = stop (CHARGING / DISCHARGING
+    // _CONTROL_SWITCH signals); the charge state follows the same table as the A9 launcher.
     private const val CHARGING_CLASS = "com.saicmotor.sdk.vehiclesettings.manager.VehicleChargingManager"
     @Volatile private var charging: Any? = null
     @Volatile private var chargingInit = false
@@ -171,7 +171,7 @@ object LegacyCar {
         charging = sdkManager(ctx, CHARGING_CLASS) { charging = it }
     }
 
-    /** Charge un gestionnaire du SDK SAIC depuis le launcher d'origine et l'initialise (écouteur factice). */
+    /** Loads a SAIC SDK manager from the stock launcher and initialises it (dummy listener). */
     private fun sdkManager(ctx: Context, className: String, onConnected: (Any?) -> Unit): Any? {
         val launcher = listOf(Firmware.LEGACY_LAUNCHER, "com.saicmotor.launcher").firstNotNullOfOrNull { pkg ->
             try { ctx.createPackageContext(pkg, Context.CONTEXT_INCLUDE_CODE or Context.CONTEXT_IGNORE_SECURITY) } catch (_: Exception) { null }
@@ -194,9 +194,9 @@ object LegacyCar {
         return singleton()
     }
 
-    // ── Réglages de conduite : VehicleSettingManager du même SDK (SWI68/165, comme MG4Control, #37) ──
-    // Direction et pédale du mode Personnalisé (méthodes « …Level », échelles 1/2/3 et 1/0/2) et
-    // Range+ (« LongerEndurance »). Les propriétés VHAL lues directement donnaient des valeurs sans sens.
+    // ── Driving settings: VehicleSettingManager of the same SDK (SWI68/165, like MG4Control, #37) ──
+    // Custom mode steering and pedal ("…Level" methods, scales 1/2/3 and 1/0/2) and
+    // Range+ ("LongerEndurance"). VHAL properties read directly gave meaningless values.
     private const val SETTING_CLASS = "com.saicmotor.sdk.vehiclesettings.manager.VehicleSettingManager"
     @Volatile private var setting: Any? = null
     @Volatile private var settingInit = false
@@ -207,7 +207,7 @@ object LegacyCar {
         return try { c.javaClass.getMethod(name).invoke(c) as? Int } catch (_: Exception) { null }
     }
 
-    /** Direction et pédale seulement en mode Personnalisé (7), comme l'écran d'origine ; sinon masquées. */
+    /** Steering and pedal only in Custom mode (7), like the stock screen; otherwise hidden. */
     fun readDriving(s: VehicleState): VehicleState {
         val custom = s.driveMode == 7
         return s.copy(
@@ -217,8 +217,8 @@ object LegacyCar {
         )
     }
 
-    // ── ESC : VehicleControlManager du même SDK (SWI68/165, méthodes relevées par MG4Control) ──
-    // Lecture 1 = actif, 0 ou 2 = coupé ; l'écriture est une bascule (1), comme l'interrupteur d'origine.
+    // ── ESC: VehicleControlManager of the same SDK (SWI68/165, methods found by MG4Control) ──
+    // Read 1 = active, 0 or 2 = off; writing is a toggle (1), like the stock switch.
     private const val CONTROL_CLASS = "com.saicmotor.sdk.vehiclesettings.manager.VehicleControlManager"
     @Volatile private var control: Any? = null
     @Volatile private var controlInit = false
@@ -230,7 +230,7 @@ object LegacyCar {
         control = sdkManager(ctx, CONTROL_CLASS) { control = it }
     }
 
-    /** ESC actif (true), coupé (false), ou null si ce SDK ne répond pas. */
+    /** ESC active (true), off (false), or null if this SDK does not answer. */
     fun escActive(): Boolean? {
         connectControl()
         val c = control ?: return null
@@ -256,7 +256,7 @@ object LegacyCar {
         catch (e: Exception) { Log.w(TAG, "$name($v): ${(e.cause ?: e).message}"); false }
     }
 
-    /** État de charge et commandes en cours ; inchangé si le service ne répond pas. */
+    /** Charge state and running commands; unchanged if the service does not answer. */
     fun readCharging(s: VehicleState): VehicleState {
         if (charging == null) { chargingInit = false; connectCharging() }
         if (charging == null) return s
@@ -272,7 +272,7 @@ object LegacyCar {
     fun chargeCtrl(v: Int) = chSet("setChargingControlSwitch", v)
     fun dischargeCtrl(v: Int) = chSet("setDischrgControlSwitch", v)
 
-    /** Pour l'écran Compatibilité. */
+    /** For the Compatibility screen. */
     fun probe(): String = when {
         ac == null -> "absent"
         else -> "ok (temp ${int("getDrvTemp")}, fan ${int("getAirVolumeLevel")})"

@@ -7,7 +7,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
-/** Bande de la radio lue dans ses métadonnées : DAB et FM sont deux sources avec Radio Dash. */
+/** Radio band read from its metadata: DAB and FM are two sources with Radio Dash. */
 @RunWith(RobolectricTestRunner::class)
 class RadioBandTest {
     @Test fun dabFromTheAuthor() {

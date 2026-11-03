@@ -11,12 +11,12 @@ import android.os.IBinder
 import android.os.Parcel
 
 /**
- * Launcher d'origine du SWI173 (A9_Launcher_V1.0.1.71, #78) : son service reçoit les boutons du volant, mais
- * les abandonne tant qu'un écran d'accueil ne s'est pas enregistré auprès de lui (ModeManager.processKeyEvent :
- * « mCurrentController | mLauncherCallback == null »). Le launcher du SWI69 n'a pas cette condition.
- * Quand MG4Dash est l'accueil, il s'enregistre à sa place : le service pilote lui-même lecture, précédent et
- * suivant, et garde l'état de la caméra 360. Seule l'ouverture et la fermeture de la caméra, confiées à
- * l'accueil (LauncherPresenter.onLaunchComponent), restent à faire ici ; le reste de l'interface est ignoré.
+ * Stock launcher of SWI173 (A9_Launcher_V1.0.1.71, #78): its service receives the wheel buttons, but
+ * drops them until a home screen has registered with it (ModeManager.processKeyEvent:
+ * "mCurrentController | mLauncherCallback == null"). The SWI69 launcher does not have this condition.
+ * When MG4Dash is home, it registers in its place: the service itself drives play, previous and
+ * next, and keeps the 360 camera state. Only opening and closing the camera, left to
+ * home (LauncherPresenter.onLaunchComponent), remain to do here; the rest of the interface is ignored.
  */
 object LauncherLink {
     private const val TAG = "LauncherLink"
@@ -26,7 +26,7 @@ object LauncherLink {
     private const val CALLBACK_DESCRIPTOR = "com.saicmotor.launcher.ILauncherCallback"
     private const val TX_REGISTER_CALLBACK = IBinder.FIRST_CALL_TRANSACTION
     private const val TX_ON_LAUNCH_COMPONENT = IBinder.FIRST_CALL_TRANSACTION + 2
-    /** L'accueil d'origine, ouvert un instant au démarrage, efface l'enregistrement en se refermant. */
+    /** The stock home, opened for a moment at startup, erases the registration when closing. */
     private const val REGISTER_EVERY_MS = 30_000L
 
     private lateinit var appContext: Context
@@ -40,7 +40,7 @@ object LauncherLink {
             if (code !in IBinder.FIRST_CALL_TRANSACTION..IBinder.LAST_CALL_TRANSACTION) return super.onTransact(code, data, reply, flags)
             data.enforceInterface(CALLBACK_DESCRIPTOR)
             if (code == TX_ON_LAUNCH_COMPONENT) launchComponent(data.readString(), data.readInt())
-            // Rien à afficher pour le launcher : toutes les réponses sont vides, ou « non » pour celles qui en attendent une
+            // Nothing to show for the launcher: all answers are empty, or "no" for those expecting one
             reply?.writeNoException()
             reply?.writeInt(0)
             return true
@@ -74,7 +74,7 @@ object LauncherLink {
         } catch (e: Exception) { Log.w(TAG, "binding stock launcher service: ${e.message}") }
     }
 
-    /** MG4Dash ne prend jamais la place de l'accueil d'origine quand celui-ci est l'accueil (mode Entretien). */
+    /** MG4Dash never takes the stock home's place when that one is home (Service mode). */
     private fun isHome() = HomeSwitcher.currentHome(appContext) == HomeSwitcher.ours(appContext)
 
     private fun register() {
@@ -100,7 +100,7 @@ object LauncherLink {
         try { appContext.startService(intent) } catch (e: Exception) { Log.w(TAG, "camera: ${e.message}") }
     }
 
-    /** Mêmes intentions que LauncherPresenter.onLaunchComponent : 0 ferme la caméra, sinon l'ouvre. */
+    /** Same intents as LauncherPresenter.onLaunchComponent: 0 closes the camera, otherwise opens it. */
     fun cameraIntent(pkg: String?, type: Int): Intent? = when (pkg) {
         "com.saicmotor.evs" -> Intent().setComponent(ComponentName(pkg, "com.saicmotor.evs.service.EvsService"))
             .putExtra("state", if (type == 0) 0 else 1)

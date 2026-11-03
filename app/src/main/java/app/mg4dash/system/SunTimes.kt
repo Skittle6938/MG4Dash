@@ -9,15 +9,15 @@ import kotlin.math.sin
 import kotlin.math.tan
 
 /**
- * Lever et coucher du soleil à la position de la voiture, calculés sur place (formules de la NOAA, à une ou
- * deux minutes près) : pas besoin de réseau. Sert au mode nuit automatique (#64) : la nuit, même feux de
- * position éteints, l'écran reste sombre.
+ * Sunrise and sunset at the car's position, computed locally (NOAA formulas, within one or
+ * two minutes): no network needed. Used by the automatic night mode (#64): at night, even with
+ * side lights off, the screen stays dark.
  */
 object SunTimes {
-    /** Lever et coucher (heure en ms) du jour de [now] à [lat]/[lon], ou null au-delà du cercle polaire. */
+    /** Sunrise and sunset (time in ms) of the day of [now] at [lat]/[lon], or null beyond the polar circle. */
     fun of(lat: Double, lon: Double, now: Long = System.currentTimeMillis()): Pair<Long, Long>? {
         val utc = Calendar.getInstance(TimeZone.getTimeZone("UTC")).apply { timeInMillis = now }
-        // Jour local approché par la longitude (le fuseau de l'autoradio peut être faux au réveil)
+        // Local day approximated from longitude (the head unit's time zone can be wrong at wake-up)
         utc.timeInMillis = now + (lon / 15.0 * 3_600_000).toLong()
         val day = utc.get(Calendar.DAY_OF_YEAR)
         utc.set(Calendar.HOUR_OF_DAY, 0); utc.set(Calendar.MINUTE, 0); utc.set(Calendar.SECOND, 0); utc.set(Calendar.MILLISECOND, 0)
@@ -35,7 +35,7 @@ object SunTimes {
         return (midnight + (rise * 60_000).toLong()) to (midnight + (set * 60_000).toLong())
     }
 
-    /** Dernière position connue (gardée pour les démarrages sans GPS), ou null. */
+    /** Last known position (kept for starts without GPS), or null. */
     fun position(context: Context): Pair<Double, Double>? {
         val sp = Prefs(context).raw
         val loc = app.mg4dash.map.LocationRepo.location.value
@@ -48,7 +48,7 @@ object SunTimes {
         return if (lat < 900f && lon < 900f) lat.toDouble() to lon.toDouble() else null
     }
 
-    /** Nuit à la position de la voiture (avant le lever ou après le coucher du soleil) ; false si position inconnue. */
+    /** Night at the car's position (before sunrise or after sunset); false if position unknown. */
     fun isNight(context: Context, now: Long = System.currentTimeMillis()): Boolean {
         val (lat, lon) = position(context) ?: return false
         val t = of(lat, lon, now) ?: return false

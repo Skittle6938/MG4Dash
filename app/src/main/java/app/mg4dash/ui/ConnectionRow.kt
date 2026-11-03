@@ -16,8 +16,8 @@ import app.mg4dash.system.Apps
 import app.mg4dash.system.StatusMonitor
 
 /**
- * Icônes de connexion de l'accueil (#86), comme le bandeau d'origine : Bluetooth, Wi-Fi, point d'accès, réseau
- * mobile et USB. Un toucher ouvre le détail, avec le lien vers chaque réglage.
+ * Home connection icons (#86), like the stock banner: Bluetooth, Wi-Fi, hotspot, mobile
+ * network and USB. A touch opens the detail, with the link to each setting.
  */
 class ConnectionRow(private val activity: Activity) : LinearLayout(activity) {
     private val d = resources.displayMetrics.density
@@ -76,7 +76,7 @@ class ConnectionRow(private val activity: Activity) : LinearLayout(activity) {
     private fun openPanel(c: StatusMonitor.Connections) {
         val box = LinearLayout(activity).apply {
             orientation = VERTICAL
-            // Fond plein : la carte se devinait sous le panneau, trop chargé pour un fond translucide
+            // Solid background: the map showed under the panel, too busy for a translucent background
             background = android.graphics.drawable.GradientDrawable().apply {
                 setColor(color(R.color.panel) or 0xFF000000.toInt())
                 cornerRadius = resources.getDimension(R.dimen.radius_panel)
@@ -102,7 +102,7 @@ class ConnectionRow(private val activity: Activity) : LinearLayout(activity) {
         }
         row(R.drawable.ic_bluetooth, c.btConnected, R.string.conn_bt, if (!c.btOn) off else c.btName ?: none, BLUETOOTH_SETTINGS)
         row(R.drawable.ic_wifi, c.wifiConnected, R.string.conn_wifi, if (!c.wifiOn) off else c.wifiName ?: none, WIFI_SETTINGS)
-        // La voiture n'a pas de page de réglage propre au point d'accès : il se règle avec le Wi-Fi
+        // The car has no settings page of its own for the hotspot: it is set with Wi-Fi
         row(R.drawable.ic_conn_hotspot, c.hotspotOn, R.string.conn_hotspot, activity.getString(if (c.hotspotOn) R.string.conn_on else R.string.conn_off), WIFI_SETTINGS)
         c.signalLevel?.let { level ->
             val text = if (level == 0) activity.getString(R.string.conn_no_network)
@@ -158,7 +158,7 @@ class ConnectionRow(private val activity: Activity) : LinearLayout(activity) {
         }
     }
 
-    /** Barres du réseau mobile, comme sur un téléphone : allumées selon le niveau, les autres grisées. */
+    /** Mobile network bars, as on a phone: lit according to the level, the others greyed. */
     private class SignalBars(context: android.content.Context) : View(context) {
         var level = 0
             set(v) { if (field != v) { field = v; invalidate() } }
@@ -182,7 +182,7 @@ class ConnectionRow(private val activity: Activity) : LinearLayout(activity) {
         const val REFRESH_MS = 5_000L
         const val BLUETOOTH_SETTINGS = android.provider.Settings.ACTION_BLUETOOTH_SETTINGS
         const val WIFI_SETTINGS = android.provider.Settings.ACTION_WIFI_SETTINGS
-        /** Lectures hors du fil principal : service de la voiture et stockage. */
+        /** Reads off the main thread: car service and storage. */
         val worker by lazy { Handler(HandlerThread("connections").apply { start() }.looper) }
     }
 }

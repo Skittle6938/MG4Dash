@@ -16,37 +16,37 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 /**
- * Consommation mesurée, répartie entre conduite, climatisation et accessoires.
+ * Measured consumption, split between driving, climate and accessories.
  *
- * Constaté sur la voiture (journal du 2026-10-14) : les compteurs de consommation SAIC restent
- * à zéro, mais tension et courant batterie sont fiables. Donc, chaque seconde :
- *  - P = tension × courant ; P > 0 = énergie consommée, P < 0 en roulant = récupération ;
- *  - à l'arrêt, clim coupée : P = accessoires (12 V, écran…) → appris, par état des feux /
- *    essuie-glaces (différence mesurée en conditions identiques) ;
- *  - à l'arrêt, clim allumée : P − accessoires = clim → appris par réglage (ventilation,
- *    chauffage / froid, dégivrage) ;
- *  - en roulant : clim et accessoires = valeurs apprises, le reste = conduite.
- * Trois périodes : depuis la dernière recharge, depuis le démarrage (pause de plus de 10 min), et les
- * 12 derniers mois (un total par mois, le plus ancien retiré : mémoire bornée, et l'évolution au fil
- * des saisons se lit mois par mois).
+ * Found on the car (log of 2026-10-14): the SAIC consumption counters stay
+ * at zero, but battery voltage and current are reliable. So, every second:
+ *  - P = voltage × current; P > 0 = energy consumed, P < 0 while moving = regeneration;
+ *  - stopped, climate off: P = accessories (12 V, screen…) → learned, by state of the lights /
+ *    wipers (difference measured in identical conditions);
+ *  - stopped, climate on: P − accessories = climate → learned by setting (fan,
+ *    heating / cooling, defrost);
+ *  - moving: climate and accessories = learned values, the rest = driving.
+ * Three periods: since the last charge, since the start (pause of more than 10 min), and the
+ * last 12 months (one total per month, the oldest removed: bounded memory, and the trend through
+ * the seasons reads month by month).
  */
 object EnergyMonitor {
     private const val TAG = "EnergyMon"
     private const val SLEEP_GAP_MS = 10 * 60_000L
-    /** Remontée du % (points) qui marque une recharge ; la récupération en descente reste en dessous. */
+    /** % rise (points) that marks a charge; regeneration downhill stays below it. */
     const val RECHARGE_PCT = 3
 
     data class Totals(
-        val outKwh: Float = 0f,      // énergie sortie de la batterie
-        val regenKwh: Float = 0f,    // récupérée en roulant
+        val outKwh: Float = 0f,      // energy out of the battery
+        val regenKwh: Float = 0f,    // recovered while moving
         val climKwh: Float = 0f,
         val accKwh: Float = 0f,
         val km: Int = 0,
-        val heatKwh: Float = 0f,     // réchauffage de la batterie (estimé)
+        val heatKwh: Float = 0f,     // battery heating (estimated)
     ) {
         val driveKwh: Float get() = (outKwh - climKwh - accKwh - heatKwh).coerceAtLeast(0f)
         val netKwh: Float get() = (outKwh - regenKwh).coerceAtLeast(0f)
-        /** kWh/100 km net (récupération déduite), à partir de 2 km. */
+        /** Net kWh/100 km (regeneration deducted), from 2 km. */
         val per100: Float? get() = if (km >= 2 && netKwh > 0.1f) (netKwh / km * 100f).takeIf { it in 3f..60f } else null
     }
 
@@ -54,27 +54,27 @@ object EnergyMonitor {
     val sinceCharge: StateFlow<Totals> = _sinceCharge
     private val _sinceStart = MutableStateFlow(Totals())
     val sinceStart: StateFlow<Totals> = _sinceStart
-    /** % de batterie au départ du trajet en cours (repère de la barre d'autonomie, issue #29). */
+    /** Battery % at the start of the current trip (range bar marker, issue #29). */
     private val _tripStartSoc = MutableStateFlow<Int?>(null)
     val tripStartSoc: StateFlow<Int?> = _tripStartSoc
-    /** Numéro du trajet, augmenté à chaque nouveau démarrage (remise à zéro des V min / A max, #29). */
+    /** Trip number, increased at each new start (reset of min V / max A, #29). */
     @Volatile var tripSeq = 0; private set
     private val _lastYear = MutableStateFlow(Totals())
-    /** Les 12 derniers mois (mois en cours compris). */
+    /** The last 12 months (current month included). */
     val lastYear: StateFlow<Totals> = _lastYear
     private val _months = MutableStateFlow<List<Pair<String, Totals>>>(emptyList())
-    /** Totaux mois par mois (« 2026-10 »), du plus ancien au plus récent : 12 au plus. */
+    /** Month by month totals ("2026-10"), oldest to newest: 12 at most. */
     val months: StateFlow<List<Pair<String, Totals>>> = _months
     private const val MONTHS = 12
 
-    /** Remise à zéro demandée avec l'effacement de la courbe (#44) : 0 recharge, 1 trajet, 2 12 mois ; -1 = rien. */
+    /** Reset requested with the curve's erase (#44): 0 charge, 1 trip, 2 12 months; -1 = nothing. */
     @Volatile private var resetRequest = -1
     fun reset(period: Int) { resetRequest = period }
 
-    /** Période choisie à l'écran : 0 = depuis la recharge, 1 = depuis le démarrage, 2 = 12 derniers mois. */
+    /** Period chosen on screen: 0 = since the charge, 1 = since the start, 2 = last 12 months. */
     fun totals(period: Int): Totals = when (period) { 1 -> sinceStart.value; 2 -> lastYear.value; else -> sinceCharge.value }
 
-    /** kWh/100 km de chaque mois assez roulé (au moins 20 km), pour la courbe de l'année. */
+    /** kWh/100 km of each month driven enough (at least 20 km), for the year's curve. */
     fun monthlyPer100(): List<Float> = months.value.mapNotNull { (_, t) -> if (t.km >= 20) t.per100 else null }
 
     private fun monthKey(now: Long = System.currentTimeMillis()) =
@@ -84,16 +84,16 @@ object EnergyMonitor {
         Totals(a.outKwh + t.outKwh, a.regenKwh + t.regenKwh, a.climKwh + t.climKwh, a.accKwh + t.accKwh, a.km + t.km, a.heatKwh + t.heatKwh)
     }
 
-    /** Puissances apprises (W), pour l'affichage et le journal. */
+    /** Learned powers (W), for the display and the log. */
     @Volatile var accessoriesW = 250f; private set
     @Volatile var climateW = 0f; private set
-    /** Réchauffage de la batterie : puissance moyenne apprise (W) quand il peut chauffer, 0 sinon. */
+    /** Battery heating: learned average power (W) when it can heat, 0 otherwise. */
     @Volatile var batteryHeatW = 0f; private set
-    /** Le réchauffage peut chauffer : option activée et 10 °C ou moins dehors (la voiture ne dit pas s'il chauffe). */
+    /** Heating can run: option on and 10 °C or less outside (the car does not say if it is heating). */
     @Volatile var batteryHeatPossible = false; private set
-    /** Seuil du manuel : le chauffage intelligent ne démarre que si la batterie est à 10 °C ou moins. */
+    /** Manual's threshold: smart heating only starts if the battery is at 10 °C or less. */
     const val HEAT_MAX_OUTSIDE_C = 10f
-    /** Part « Batterie » affichée dans les répartitions à partir de ce total (kWh) : rien en été. */
+    /** "Battery" share shown in the breakdowns from this total (kWh): nothing in summer. */
     const val HEAT_SHOWN_KWH = 0.05f
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
@@ -113,12 +113,12 @@ object EnergyMonitor {
             heatKwh = sp.getFloat("${p}_heat", 0f))
         _sinceCharge.value = load("em_c")
         accessoriesW = sp.getFloat("em_base", 250f)
-        // Mois : « 2026-10=out,rgn,clim,acc,km[,heat] » séparés par « ; » (12 au plus)
+        // Months: "2026-10=out,rgn,clim,acc,km[,heat]" separated by ";" (12 at most)
         val months = java.util.TreeMap<String, Totals>()
         sp.getString("em_months", "")!!.split(';').filter { it.contains('=') }.forEach { e ->
             val (k, v) = e.split('=', limit = 2)
             val f = v.split(',').mapNotNull { it.toFloatOrNull() }
-            // Mois datés de 2019 (heure de l'autoradio pas encore remise au réveil, avant la 1.1.8) : écartés
+            // Months dated 2019 (head unit clock not yet reset at wake-up, before 1.1.8): discarded
             if (f.size in 5..6 && k >= "2024") months[k] = Totals(f[0], f[1], f[2], f[3], f[4].toInt(), f.getOrElse(5) { 0f })
         }
         fun publishMonths() {
@@ -131,21 +131,21 @@ object EnergyMonitor {
         publishMonths()
 
         scope.launch {
-            // Horloge interne : l'heure système de l'autoradio repart en 2019 à chaque réveil puis revient
-            // (journal du 2026-10-19), ce qui donnait des durées négatives et faussait les kWh.
+            // Internal clock: the head unit's system time goes back to 2019 at each wake-up then returns
+            // (log of 2026-10-19), which gave negative durations and skewed the kWh.
             var last = android.os.SystemClock.elapsedRealtime()
             var chargeKm = sp.getInt("em_c_km0", -1)
-            var monthKm = -1   // compteur au dernier passage
-            var pendingKm = 0  // km parcourus pas encore comptés dans le mois en cours
+            var monthKm = -1   // odometer at the last pass
+            var pendingKm = 0  // km driven not yet counted in the current month
             var startKm = -1
-            // Plus bas % de la période en cours (avant la 1.1.4 : dernier % vu, « em_last_soc »)
+            // Lowest % of the current period (before 1.1.4: last % seen, "em_last_soc")
             var lowSoc = sp.getInt("em_c_low", sp.getInt("em_last_soc", -1))
             Log.i(TAG, "since charge: start ${sp.getInt("em_c_soc0", -1)} % at $chargeKm km, lowest $lowSoc %, " +
                 "${"%.2f".format(java.util.Locale.US, _sinceCharge.value.netKwh)} kWh net")
             var saveTick = 0
-            var sohSoc: Float? = null      // % à la seconde précédente, null hors observation
+            var sohSoc: Float? = null      // % at the previous second, null outside observation
             var sohPrecise = false
-            var sohKm: Int? = null         // compteur à la seconde précédente
+            var sohKm: Int? = null         // odometer at the previous second
             val learned = HashMap<String, Float>()
             fun get(k: String, def: Float) = learned.getOrPut(k) { sp.getFloat(k, def) }
             var ptcCheckedAt = -60_000L
@@ -160,13 +160,13 @@ object EnergyMonitor {
                 val s = CarBridge.state.value
                 val km = s.odometerKm
                 val soc = s.batteryPercent
-                // Km du mois : lus à chaque passage (même quand la mesure de puissance est sautée)
+                // Month's km: read at each pass (even when the power measurement is skipped)
                 if (km != null) {
                     if (monthKm >= 0 && km > monthKm) pendingKm += (km - monthKm).coerceAtMost(1000)
                     monthKm = km
                 }
 
-                // Nouveau démarrage : longue pause (voiture en veille) ou premier passage
+                // New start: long pause (car in standby) or first pass
                 if (dt > SLEEP_GAP_MS || startKm < 0) {
                     if (km != null) startKm = km
                     _sinceStart.value = Totals()
@@ -176,7 +176,7 @@ object EnergyMonitor {
                 if (_tripStartSoc.value == null && soc != null) {
                     _tripStartSoc.value = soc
                 }
-                // Remise à zéro des totaux de la période, avec l'effacement de sa courbe (#44)
+                // Reset of the period's totals, with the erase of its curve (#44)
                 when (resetRequest.also { if (it >= 0) resetRequest = -1 }) {
                     0 -> {
                         Log.i(TAG, "since-charge totals cleared from the screen")
@@ -188,16 +188,16 @@ object EnergyMonitor {
                     1 -> { _sinceStart.value = Totals(); if (km != null) startKm = km }
                     2 -> { Log.i(TAG, "12-month totals cleared from the screen"); months.clear(); pendingKm = 0; publishMonths(); saveMonths() }
                 }
-                // Recharge : le % remonte d'au moins RECHARGE_PCT points au-dessus du plus bas de la
-                // période → nouvelle période « depuis la recharge ». Comparer au plus bas (et non au %
-                // précédent) couvre aussi une recharge suivie % par % : MG4Dash peut tourner en veille
-                // pendant la charge (constaté le 2026-10-18, compteurs non remis à zéro).
+                // Charge: the % goes up at least RECHARGE_PCT points above the lowest of the
+                // period → new "since the charge" period. Comparing to the lowest (and not to the previous
+                // %) also covers a charge followed % by %: MG4Dash can run in standby
+                // during charging (found on 2026-10-18, counters not reset).
                 if (soc != null) {
-                    // Filet : % au-dessus du % de départ de la période → recharge forcément passée (période
-                    // restée bloquée avant la 1.1.4, quand la recharge vue % par % n'était pas détectée)
+                    // Safety net: % above the period's start % → a charge must have happened (period
+                    // left stuck before 1.1.4, when a charge seen % by % was not detected)
                     val soc0 = sp.getInt("em_c_soc0", -1)
-                    // Période incohérente : plus de 60 kWh/100 sur au moins 10 km (kWh d'une période
-                    // précédente gardés avec le km de la nouvelle, voir l'enregistrement ci-dessous)
+                    // Inconsistent period: more than 60 kWh/100 over at least 10 km (kWh of a previous period
+                    // kept with the new one's km, see the save below)
                     val c = _sinceCharge.value
                     val bogus = c.km >= 10 && c.netKwh / c.km * 100f > 60f
                     if (lowSoc >= 0 && soc >= lowSoc + RECHARGE_PCT || soc0 >= 0 && soc >= soc0 + RECHARGE_PCT ||
@@ -207,9 +207,9 @@ object EnergyMonitor {
                         _sinceCharge.value = Totals()
                         chargeKm = km ?: -1
                         lowSoc = soc
-                        // Compteurs remis à zéro enregistrés tout de suite avec le km de départ : avant la 1.1.8,
-                        // ils ne l'étaient qu'au prochain enregistrement (30 s, sauté voiture branchée), et
-                        // MG4Dash arrêté entre-temps rechargeait les anciens kWh avec le nouveau km.
+                        // Reset counters saved at once with the start km: before 1.1.8,
+                        // they were only saved at the next save (30 s, skipped with the car plugged in), and
+                        // MG4Dash stopped in between reloaded the old kWh with the new km.
                         sp.edit().putInt("em_c_km0", chargeKm).putInt("em_c_soc0", soc).putInt("em_c_low", soc)
                             .putFloat("em_c_out", 0f).putFloat("em_c_rgn", 0f).putFloat("em_c_clim", 0f).putFloat("em_c_acc", 0f).putFloat("em_c_heat", 0f).apply()
                     } else if (lowSoc < 0 || soc < lowSoc) {
@@ -220,13 +220,13 @@ object EnergyMonitor {
                 val v = CarProps.getFloat(CarProps.BMS_PACK_VOL)
                 val i = CarProps.getFloat(CarProps.BMS_PACK_CRNT)
                 if (v == null || i == null || v < 100f || v > 900f || dt <= 0 || dt > 5000 ||
-                    VehicleState.isPlugged(s.chargeStatus)) {   // en charge ou V2L : hors conso
+                    VehicleState.isPlugged(s.chargeStatus)) {   // charging or V2L: outside consumption
                     sohSoc = null; sohKm = null; continue
                 }
                 val p = v * i
                 val h = dt / 3_600_000f
-                // Santé batterie : énergie de cette seconde et baisse du % depuis la seconde précédente.
-                // Le % au dixième si la voiture le donne (même source tout au long d'une séquence observée).
+                // Battery health: energy of this second and % drop since the previous second.
+                // The % to the tenth if the car gives it (same source throughout an observed sequence).
                 val precise = s.socPrecise?.takeIf { soc != null && kotlin.math.abs(it - soc) < 1.5f }
                 val cur = if (sohPrecise) precise else soc?.toFloat()
                 val prev = sohSoc
@@ -241,18 +241,18 @@ object EnergyMonitor {
                     sohSoc = cur
                     if (km != null) sohKm = km
                 }
-                // Anciens firmwares (SWI68, #19) : pas de vitesse véhicule, la récupération restait à 0 kWh ;
-                // repli sur la vitesse GPS récente.
+                // Old firmwares (SWI68, #19): no vehicle speed, regeneration stayed at 0 kWh;
+                // fallback on recent GPS speed.
                 val speed = s.speedKmh ?: app.mg4dash.map.LocationRepo.location.value
                     ?.takeIf { it.hasSpeed() && android.os.SystemClock.elapsedRealtimeNanos() - it.elapsedRealtimeNanos < 10_000_000_000L }?.speed?.times(3.6f)
                 val stopped = (speed ?: 0f) < 0.5f
                 val hvacOn = s.hvacOn == true
 
-                // Apprentissage à l'arrêt
+                // Learning when stopped
                 val accKey = "em_acc_" + accessoryKey(s)
                 val accW = get(accKey, accessoriesW)
                 val climKey = "em_clim_" + climateKey(s)
-                // Réchauffage de la batterie : option relue toutes les 30 s (lecture 0 = activé)
+                // Battery heating: option reread every 30 s (read 0 = on)
                 if (tick - ptcCheckedAt > 30_000) {
                     ptcCheckedAt = tick
                     ptcOn = CarProps.getInt(CarProps.DRVNG_PTC_HEAT) == 0
@@ -261,8 +261,8 @@ object EnergyMonitor {
                 batteryHeatPossible = heatPossible
                 val heatLearnS = get("em_bheat_s", 0f)
                 if (stopped && heatPossible && p in 30f..12000f) {
-                    // Il peut chauffer : ce qui dépasse accessoires et clim apprises est le réchauffage
-                    // (moyenne, temps où il ne chauffe pas compris) ; accessoires et clim pas apprises ici
+                    // It can heat: what exceeds learned accessories and climate is the heating
+                    // (average, time when it is not heating included); accessories and climate not learned here
                     val climPart = if (hvacOn) get(climKey, get("em_clim_any", 1000f)) else 0f
                     val hw = (p - accW - climPart).coerceAtLeast(0f)
                     put("em_bheat", ema(get("em_bheat", hw), hw, 0.02f))
@@ -279,7 +279,7 @@ object EnergyMonitor {
                     }
                 }
 
-                // Répartition
+                // Breakdown
                 var out = 0f; var regen = 0f; var clim = 0f; var acc = 0f; var heat = 0f
                 val hw = if (heatPossible) get("em_bheat", 0f) else 0f
                 batteryHeatW = hw
@@ -289,7 +289,7 @@ object EnergyMonitor {
                         else get(climKey, get("em_clim_any", 1000f))
                     climateW = cw
                     val cPart = minOf(cw, p)
-                    // À l'arrêt, le réchauffage prend ce qui reste ; en roulant, sa puissance apprise
+                    // When stopped, heating takes what remains; when moving, its learned power
                     val hPart = if (stopped) (p - cPart - accW).coerceIn(0f, if (heatPossible) p - cPart else 0f) else minOf(hw, p - cPart)
                     val aPart = minOf(accW, p - cPart - hPart)
                     clim = cPart * h; acc = aPart * h; heat = hPart * h
@@ -305,7 +305,7 @@ object EnergyMonitor {
                 _sinceStart.value = add(_sinceStart.value, km, startKm)
                 val mk = monthKey(now)
                 val m = months[mk] ?: Totals()
-                // Heure système pas encore remise à l'heure (2019 au réveil) : mois inconnu, km gardés pour après
+                // System time not yet set (2019 at wake-up): unknown month, km kept for later
                 if (mk >= "2024") {
                     val dKm = pendingKm; pendingKm = 0
                     months[mk] = m.copy(
@@ -330,7 +330,7 @@ object EnergyMonitor {
         }
     }
 
-    /** Réglage de clim : ventilation (tranches), chauffage / froid / ventilation seule, dégivrage. */
+    /** Climate setting: fan (ranges), heating / cooling / fan only, defrost. */
     private fun climateKey(s: VehicleState): String {
         val fan = s.fanSpeed ?: 0
         val fanBucket = when { fan >= 15 -> "max"; fan >= 7 -> "hi"; fan >= 4 -> "mid"; else -> "lo" }
@@ -345,11 +345,11 @@ object EnergyMonitor {
         return "$mode-$fanBucket-$def"
     }
 
-    /** Équipements électriques visibles : feux, essuie-glaces. "off" = rien d'allumé. */
+    /** Visible electrical equipment: lights, wipers. "off" = nothing on. */
     private fun accessoryKey(s: VehicleState): String {
         val parts = buildList {
-            // Feux : VEH_SIDE_LGHT (0 = éteints), sinon mode jour / nuit du système (3 = feux allumés),
-            // relevés sur la voiture le 2026-10-14 ; HEADLIGHTS_STATE n'existe pas sur ce modèle.
+            // Lights: VEH_SIDE_LGHT (0 = off), otherwise the system's day / night mode (3 = lights on),
+            // found on the car on 2026-10-14; HEADLIGHTS_STATE does not exist on this model.
             val side = CarProps.readAny(557880099)
             val night = CarProps.readAny(289442317)
             if (side.isNotEmpty() && side != "0" && side != "false" || side.isEmpty() && night == "3") add("lights")

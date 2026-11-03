@@ -13,7 +13,7 @@ import androidx.core.content.ContextCompat
 import app.mg4dash.R
 import java.util.Locale
 
-/** Barre horizontale empilée : répartition de l'énergie (conduite, clim, accessoires). */
+/** Stacked horizontal bar: energy breakdown (driving, climate, accessories). */
 class StackedBar @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) : View(context, attrs) {
     data class Part(val value: Float, val color: Int)
 
@@ -29,8 +29,8 @@ class StackedBar @JvmOverloads constructor(context: Context, attrs: AttributeSet
     private val clip = Path()
 
     /**
-     * Style de la barre de puissance (issue #29) : rail fin arrondi centré dans la vue, une part en
-     * dégradé par poste, séparées d'une fente fine.
+     * Power bar style (issue #29): thin rounded rail centred in the view, one gradient
+     * part per item, separated by a thin gap.
      */
     override fun onDraw(canvas: Canvas) {
         val d = resources.displayMetrics.density
@@ -55,7 +55,7 @@ class StackedBar @JvmOverloads constructor(context: Context, attrs: AttributeSet
     }
 }
 
-/** Anneau de répartition, en commençant en haut ; [center] : texte au milieu. */
+/** Breakdown ring, starting at the top; [center]: text in the middle. */
 class RingChart @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) : View(context, attrs) {
     private var parts: List<Pair<Float, Int>> = emptyList()
     private var center = ""
@@ -91,13 +91,13 @@ class RingChart @JvmOverloads constructor(context: Context, attrs: AttributeSet?
     }
 }
 
-/** Courbe de consommation (kWh/100 km) avec aire dégradée et ligne de moyenne. */
-/** Courbe lissée (#44) : chaque point = moyenne de lui-même et de ses 2 voisins de chaque côté. */
+/** Consumption curve (kWh/100 km) with a gradient area and average line. */
+/** Smoothed curve (#44): each point = average of itself and its 2 neighbours on each side. */
 fun List<Float>.smoothed(): List<Float> = indices.map { i -> subList(maxOf(0, i - 2), minOf(size, i + 3)).average().toFloat() }
 
 private const val MAX_POINTS = 50
 
-/** Pente de la courbe à chaque point : nulle aux sommets et aux creux, pour ne jamais dépasser les points voisins. */
+/** Curve slope at each point: zero at peaks and troughs, so as never to overshoot neighbouring points. */
 fun curveSlopes(x: FloatArray, y: FloatArray): FloatArray {
     val n = x.size
     val d = FloatArray(n - 1) { i -> (y[i + 1] - y[i]) / (x[i + 1] - x[i]).coerceAtLeast(0.001f) }
@@ -116,8 +116,8 @@ fun curveSlopes(x: FloatArray, y: FloatArray): FloatArray {
 }
 
 /**
- * Au plus [max] points, dans l'ordre : chacun est la moyenne d'une tranche égale de la liste. Une longue période
- * (12 mois) reste lisible et se dessine vite ; en dessous de [max] points, rien ne change.
+ * At most [max] points, in order: each is the average of an equal slice of the list. A long period
+ * (12 months) stays readable and draws quickly; below [max] points, nothing changes.
  */
 fun List<Float>.atMost(max: Int): List<Float> =
     if (size <= max) this else List(max) { i -> subList(i * size / max, (i + 1) * size / max).average().toFloat() }
@@ -125,21 +125,21 @@ fun List<Float>.atMost(max: Int): List<Float> =
 class LineChart @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) : View(context, attrs) {
     var values: List<Float> = emptyList()
         set(v) { field = v.atMost(MAX_POINTS); positions = null; layers = null; average = v.average().toFloat(); invalidate() }
-    /** Position de chaque point sur la largeur (0..1), si la courbe suit le temps ; sinon points réguliers. */
+    /** Position of each point across the width (0..1), if the curve follows time; otherwise regular points. */
     private var positions: List<Float>? = null
-    /** Moyenne de toutes les valeurs reçues, pas des points gardés (tranches arrondies, pas toutes égales). */
+    /** Average of all values received, not of the points kept (rounded slices, not all equal). */
     private var average = 0f
-    /** Texte affiché sans courbe : 1 point par km, ou par trajet sur 12 mois (#44). */
+    /** Text shown without a curve: 1 point per km, or per trip over 12 months (#44). */
     var emptyText: Int = app.mg4dash.R.string.chart_empty
         set(v) { if (field != v) { field = v; invalidate() } }
 
-    /** Échelle horizontale : texte sous le début et sous la fin de la courbe (« il y a 3 sem. », « maintenant »). */
+    /** Horizontal scale: text under the start and end of the curve ("3 weeks ago", "now"). */
     var startLabel: String? = null
         set(v) { if (field != v) { field = v; invalidate() } }
     var endLabel: String? = null
         set(v) { if (field != v) { field = v; invalidate() } }
 
-    /** Courbe placée selon le temps : (position 0..1, valeur) ; [mean] : moyenne de toutes les valeurs d'origine. */
+    /** Curve placed over time: (position 0..1, value); [mean]: average of all original values. */
     fun showTimeline(points: List<Pair<Float, Float>>, mean: Float) {
         values = points.map { it.second }
         positions = points.map { it.first }
@@ -147,11 +147,11 @@ class LineChart @JvmOverloads constructor(context: Context, attrs: AttributeSet?
         invalidate()
     }
 
-    /** Couche empilée d'une courbe : sa couleur et sa valeur à chaque point. */
+    /** Stacked layer of a curve: its colour and its value at each point. */
     class Layer(val color: Int, val values: List<Float>)
     private var layers: List<Layer>? = null
 
-    /** Courbes superposées et additionnées : la dernière couche donne le total ; [points] : positions 0..1, ou régulières. */
+    /** Overlaid and added curves: the last layer gives the total; [points]: positions 0..1, or regular. */
     fun showLayers(points: List<Float>?, stack: List<Layer>, mean: Float) {
         val n = stack.first().values.size
         values = List(n) { i -> stack.sumOf { it.values[i].toDouble() }.toFloat() }
@@ -170,7 +170,7 @@ class LineChart @JvmOverloads constructor(context: Context, attrs: AttributeSet?
     private val grid = Paint().apply { color = app.mg4dash.ui.Themes.color(context, R.color.panel_border); strokeWidth = 1f }
     private val avgPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         style = Paint.Style.STROKE; strokeWidth = 1.5f * d
-        color = app.mg4dash.ui.Themes.color(context, R.color.accent_action)   // couleur des boutons du thème
+        color = app.mg4dash.ui.Themes.color(context, R.color.accent_action)   // theme's button colour
         pathEffect = android.graphics.DashPathEffect(floatArrayOf(6 * d, 6 * d), 0f)
     }
     private val label = Paint(Paint.ANTI_ALIAS_FLAG).apply {
@@ -180,7 +180,7 @@ class LineChart @JvmOverloads constructor(context: Context, attrs: AttributeSet?
         color = app.mg4dash.ui.Themes.color(context, R.color.text_sub); textSize = 17f * d; textAlign = Paint.Align.CENTER
     }
 
-    /** Du haut vers le bas : voile de couleur entre deux courbes cumulées, puis la courbe de chaque poste, fine. */
+    /** Top to bottom: colour veil between two cumulative curves, then each item's thin curve. */
     private fun drawLayers(canvas: Canvas, stack: List<Layer>, x: FloatArray, top: Float, bottom: Float, y: (Float) -> Float) {
         val tops = ArrayList<FloatArray>()
         val sum = FloatArray(x.size)
@@ -201,7 +201,7 @@ class LineChart @JvmOverloads constructor(context: Context, attrs: AttributeSet?
         }
     }
 
-    /** Courbe arrondie passant par chaque point, sans dépasser ses voisins (interpolation cubique monotone). */
+    /** Rounded curve through each point, without overshooting its neighbours (monotone cubic interpolation). */
     private fun curvePath(x: FloatArray, y: FloatArray): Path {
         val path = Path().apply { moveTo(x[0], y[0]) }
         addCurve(path, x, y)
@@ -209,7 +209,7 @@ class LineChart @JvmOverloads constructor(context: Context, attrs: AttributeSet?
     }
 
     private fun addCurve(path: Path, x: FloatArray, y: FloatArray) {
-        // Courbe parcourue de droite à gauche (bas d'une bande) : mêmes pentes qu'à l'endroit
+        // Curve run right to left (bottom of a band): same slopes as the forward way
         val back = x.size > 1 && x[1] < x[0]
         val slopes = if (back) curveSlopes(x.reversedArray(), y.reversedArray()).reversedArray() else curveSlopes(x, y)
         for (i in 0 until x.size - 1) {
@@ -219,14 +219,14 @@ class LineChart @JvmOverloads constructor(context: Context, attrs: AttributeSet?
     }
 
     override fun onDraw(canvas: Canvas) {
-        // Courbe sur toute la largeur, l'échelle s'écrit par-dessus (#44)
+        // Curve across the full width, the scale is written on top (#44)
         val axisH = if (startLabel != null || endLabel != null) label.textSize + 6 * d else 0f
         val left = 0f; val top = 6 * d; val bottom = height - 6 * d - axisH; val right = width.toFloat()
         if (values.size < 2) {
             canvas.drawText(context.getString(emptyText), width / 2f, height / 2f, empty)
             return
         }
-        // Empilé : l'échelle part de zéro, sinon le bas des couches serait coupé
+        // Stacked: the scale starts from zero, otherwise the bottom of the layers would be cut
         val lo = if (layers != null) 0f else (values.minOrNull()!! - 2f).coerceAtLeast(0f)
         val hi = values.maxOrNull()!! + 2f
         fun y(v: Float) = bottom - (v - lo) / (hi - lo) * (bottom - top)
@@ -249,20 +249,20 @@ class LineChart @JvmOverloads constructor(context: Context, attrs: AttributeSet?
             canvas.drawPath(area, fill)
             canvas.drawPath(path, line)
         }
-        // Échelle horizontale : début à gauche, fin à droite
+        // Horizontal scale: start on the left, end on the right
         if (axisH > 0f) {
             val ty = height - 4 * d
             startLabel?.let { label.textAlign = Paint.Align.LEFT; canvas.drawText(it, left, ty, label) }
             endLabel?.let { label.textAlign = Paint.Align.RIGHT; canvas.drawText(it, right, ty, label) }
             label.textAlign = Paint.Align.LEFT
         }
-        // Valeurs de l'échelle au-dessus de leur ligne, sur la courbe
+        // Scale values above their line, on the curve
         scale.forEachIndexed { i, v ->
             val ty = if (i == scale.lastIndex) y(v) + label.textSize + 2 * d else y(v) - 4 * d
             canvas.drawText(String.format(Locale.getDefault(), "%.0f", v), 2 * d, ty, label)
         }
-        // Moyenne : tracée comme un chemin (drawLine ignore les pointillés en rendu matériel, #44),
-        // avec une étiquette de sa valeur au bout à droite
+        // Average: drawn as a path (drawLine ignores dashes in hardware rendering, #44),
+        // with a label of its value at the right end
         val avg = average
         val ay = y(avg)
         canvas.drawPath(Path().apply { moveTo(left, ay); lineTo(right, ay) }, avgPaint)
@@ -270,7 +270,7 @@ class LineChart @JvmOverloads constructor(context: Context, attrs: AttributeSet?
         val tw = avgText.measureText(txt)
         val padH = 7 * d; val h = avgText.textSize + 6 * d
         val bx1 = right - 2 * d; val bx0 = bx1 - tw - 2 * padH
-        // Au-dessus de la ligne, ou dessous si elle touche le haut du graphique
+        // Above the line, or below if it touches the top of the chart
         val above = ay - h - 4 * d >= top
         val by0 = if (above) ay - h - 4 * d else ay + 4 * d
         bubble.set(bx0, by0, bx1, by0 + h)
@@ -287,21 +287,21 @@ class LineChart @JvmOverloads constructor(context: Context, attrs: AttributeSet?
 }
 
 /**
- * Puissance instantanée, zéro décalé à gauche : à gauche la récupération (vert, jusqu'à [maxRegenKw]),
- * à droite la puissance tirée de la batterie (couleur des boutons, jusqu'à [maxDrawKw]).
+ * Instantaneous power, zero offset to the left: on the left regeneration (green, up to [maxRegenKw]),
+ * on the right power drawn from the battery (button colour, up to [maxDrawKw]).
  */
 /**
- * Barre de puissance bidirectionnelle : le 0 au centre (décalé selon les plages), la consommation part
- * vers la droite en dégradé (cyan → bleu → orange), la récupération vers la gauche en vert. Le bout côté
- * 0 est droit, le bout extérieur arrondi avec une pastille. Un repère garde le pic des 10 dernières
- * secondes puis redescend doucement ; la valeur s'anime.
+ * Two-way power bar: the 0 in the centre (offset according to the ranges), consumption goes
+ * right as a gradient (cyan → blue → orange), regeneration left in green. The end at
+ * 0 is straight, the outer end rounded with a dot. A marker keeps the peak of the last 10
+ * seconds then falls gently; the value animates.
  */
 class PowerBar @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) : View(context, attrs) {
-    /** Taille des graduations (sp) ; plus grande dans la carte énergie « puissance » (#29). */
+    /** Tick size (sp); larger in the "power" energy card (#29). */
     var labelSp = 12f
     var kw: Float = 0f
         set(v) {
-            if (v == field) return   // même valeur à chaque rafraîchissement de l'accueil : rien à redessiner
+            if (v == field) return   // same value at each home refresh: nothing to redraw
             field = v
             if (v > maxDrawKw) { maxDrawKw = Math.ceil(v / 50.0).toFloat() * 50f; onScale?.invoke(maxDrawKw) }
             if (-v > maxRegenKw) { maxRegenKw = Math.ceil(-v / 25.0).toFloat() * 25f }
@@ -312,18 +312,18 @@ class PowerBar @JvmOverloads constructor(context: Context, attrs: AttributeSet? 
         }
     var maxRegenKw = 50f
     var maxDrawKw = 140f
-    /** Puissance continue et maximale du modèle (manuel MG4) : orange au-delà de la continue, rouge vers le max (#16). */
+    /** Model's continuous and maximum power (MG4 manual): orange above continuous, red towards max (#16). */
     var continuousKw = 54f
     var peakKw = 125f
-    /** Appelé quand l'échelle s'élargit (puissance mesurée au-delà du maximum prévu). */
+    /** Called when the scale widens (measured power above the expected maximum). */
     var onScale: ((Float) -> Unit)? = null
 
     companion object {
         private const val PEAK_HOLD_MS = 10_000L; private const val DECAY_KW_PER_S = 8f
         const val XPOWER_PEAK_KW = 320f
-        /** Au-delà de 350 ch mesurés, seule une XPower (435 ch) est possible : la voiture ne donne pas sa version. */
+        /** Above 350 hp measured, only an XPower (435 hp) is possible: the car does not give its version. */
         const val XPOWER_DETECT_KW = 257f
-        /** Puissance maximale du modèle (référence des 80 % de l'animation). */
+        /** Model's maximum power (reference for the animation's 80 %). */
         fun peakFor(batteryModel: Int, xpower: Boolean) = when { xpower -> XPOWER_PEAK_KW; batteryModel == 51 -> 125f; else -> 150f }
     }
 
@@ -340,13 +340,13 @@ class PowerBar @JvmOverloads constructor(context: Context, attrs: AttributeSet? 
     private val danger = app.mg4dash.ui.Themes.color(context, R.color.accent_danger)
     private val tick = app.mg4dash.ui.Themes.color(context, R.color.text_sub)
 
-    private var shown = 0f          // valeur affichée (animée vers kw)
+    private var shown = 0f          // displayed value (animated towards kw)
     private var first = true
     private var lastFrame = 0L
     private var peak = 0f; private var peakAt = 0L
     private var peakRegen = 0f; private var peakRegenAt = 0L
 
-    /** Barre pleine d'un côté : bout droit au 0, bout extérieur arrondi. */
+    /** Full bar on one side: straight end at 0, rounded outer end. */
     private fun fill(left: Float, top: Float, right: Float, bottom: Float, roundRight: Boolean) {
         val r = (bottom - top) / 2f
         val radii = if (roundRight) floatArrayOf(0f, 0f, r, r, r, r, 0f, 0f) else floatArrayOf(r, r, 0f, 0f, 0f, 0f, r, r)
@@ -354,8 +354,8 @@ class PowerBar @JvmOverloads constructor(context: Context, attrs: AttributeSet? 
     }
 
     /**
-     * Puissances de référence du modèle (manuel MG4, puissance nette batterie) : 51 kWh 54 kW en continu /
-     * 125 kW max, autres 68 / 150 (#16), XPower 320 kW (435 ch) ; échelle avec une marge pour les pertes.
+     * Model's reference powers (MG4 manual, net battery power): 51 kWh 54 kW continuous /
+     * 125 kW max, others 68 / 150 (#16), XPower 320 kW (435 hp); scale with a margin for losses.
      */
     fun configureFor(batteryModel: Int, xpower: Boolean) {
         continuousKw = if (!xpower && batteryModel == 51) 54f else 68f
@@ -363,7 +363,7 @@ class PowerBar @JvmOverloads constructor(context: Context, attrs: AttributeSet? 
         maxDrawKw = when { xpower -> 350f; batteryModel == 77 -> 200f; batteryModel == 64 -> 170f; else -> 140f }
     }
 
-    /** Abscisse d'une puissance sur la barre (coordonnées de la vue), même calcul que onDraw : pour PowerFx. */
+    /** X position of a power on the bar (view coordinates), same calculation as onDraw: for PowerFx. */
     fun xAt(v: Float): Float {
         val h = height.toFloat()
         val barH = (if (h >= 26 * d) h * 0.42f else h * 0.6f).coerceAtMost(14 * d)
@@ -372,7 +372,7 @@ class PowerBar @JvmOverloads constructor(context: Context, attrs: AttributeSet? 
         return if (v >= 0f) zero + (x1 - zero) * (v / maxDrawKw).coerceIn(0f, 1f) else zero - (zero - x0) * (-v / maxRegenKw).coerceIn(0f, 1f)
     }
 
-    /** Hauteur du milieu de la barre (coordonnées de la vue). */
+    /** Height of the bar's middle (view coordinates). */
     fun barCenterY(): Float {
         val h = height.toFloat()
         val labels = h >= 26 * d
@@ -385,8 +385,8 @@ class PowerBar @JvmOverloads constructor(context: Context, attrs: AttributeSet? 
         val now = System.currentTimeMillis()
         val dt = if (lastFrame == 0L) 0f else ((now - lastFrame) / 1000f).coerceAtMost(0.1f)
         lastFrame = now
-        // Animation douce de la valeur, et descente lente des pics après 10 s
-        if (first) { shown = kw; first = false }   // premier affichage : directement la valeur
+        // Gentle animation of the value, and slow fall of the peaks after 10 s
+        if (first) { shown = kw; first = false }   // first display: directly the value
         shown += (kw - shown) * (1f - Math.exp(-dt * 10.0).toFloat())
         if (now - peakAt > PEAK_HOLD_MS) peak = maxOf(kw.coerceAtLeast(0f), peak - DECAY_KW_PER_S * dt)
         if (now - peakRegenAt > PEAK_HOLD_MS) peakRegen = maxOf((-kw).coerceAtLeast(0f), peakRegen - DECAY_KW_PER_S * dt)
@@ -395,7 +395,7 @@ class PowerBar @JvmOverloads constructor(context: Context, attrs: AttributeSet? 
         val barH = (if (labels) h * 0.42f else h * 0.6f).coerceAtMost(14 * d)
         val top = if (labels) 4 * d else (h - barH) / 2f
         val bottom = top + barH
-        val pad = barH                       // place pour la pastille aux extrémités
+        val pad = barH                       // room for the dot at the ends
         val x0 = pad; val x1 = w - pad
         val zero = x0 + (x1 - x0) * maxRegenKw / (maxRegenKw + maxDrawKw)
         fun xFor(v: Float) = if (v >= 0f) zero + (x1 - zero) * (v / maxDrawKw).coerceIn(0f, 1f)
@@ -407,7 +407,7 @@ class PowerBar @JvmOverloads constructor(context: Context, attrs: AttributeSet? 
 
         val end = xFor(shown)
         if (shown > 0.05f) {
-            // Bleu jusqu'à la puissance continue, orange au-delà, rouge à partir de 80 % du maximum
+            // Blue up to continuous power, orange beyond, red from 80 % of the maximum
             val endCol = when { shown >= peakKw * 0.8f -> danger; shown > continuousKw -> heat; else -> draw }
             paint.shader = LinearGradient(zero, 0f, maxOf(end, zero + barH), 0f, intArrayOf(cold, endCol), null, Shader.TileMode.CLAMP)
             fill(zero, top, maxOf(end, zero + barH), bottom, roundRight = true); canvas.drawPath(path, paint)
@@ -417,7 +417,7 @@ class PowerBar @JvmOverloads constructor(context: Context, attrs: AttributeSet? 
         }
         paint.shader = null
 
-        // Pastille au bout, avec un halo
+        // Dot at the end, with a halo
         if (kotlin.math.abs(shown) > 0.05f) {
             val col = if (shown > 0f) (when { shown >= peakKw * 0.8f -> danger; shown > continuousKw -> heat; else -> draw }) else regen
             val cy = (top + bottom) / 2f
@@ -425,21 +425,21 @@ class PowerBar @JvmOverloads constructor(context: Context, attrs: AttributeSet? 
             paint.alpha = 255; paint.color = 0xFFFFFFFF.toInt(); canvas.drawCircle(end, cy, barH * 0.42f, paint)
         }
 
-        // Pics des 10 dernières secondes : petit trait au-dessus de la barre
+        // Peaks of the last 10 seconds: small line above the bar
         paint.color = tick
         if (peak > 1f && peak > shown + 1f) { val px = xFor(peak); canvas.drawRect(px - d, top - 3 * d, px + d, bottom + 3 * d, paint) }
         if (peakRegen > 1f && -peakRegen < shown - 1f) {
             val px = xFor(-peakRegen); paint.color = regen; canvas.drawRect(px - d, top - 3 * d, px + d, bottom + 3 * d, paint)
         }
 
-        // Repères discrets : puissance continue et 80 % du maximum
+        // Discreet markers: continuous power and 80 % of the maximum
         paint.color = tick; paint.alpha = 110
         listOf(continuousKw, peakKw * 0.8f).filter { it < maxDrawKw }.forEach { k ->
             val px = xFor(k); canvas.drawRect(px - d * 0.6f, top, px + d * 0.6f, bottom, paint)
         }
         paint.alpha = 255
 
-        // Repère du 0 et graduations
+        // 0 marker and ticks
         paint.color = tick
         canvas.drawRect(zero - d, top - 4 * d, zero + d, bottom + 4 * d, paint)
         if (labels) {
@@ -450,11 +450,11 @@ class PowerBar @JvmOverloads constructor(context: Context, attrs: AttributeSet? 
             text.textAlign = Paint.Align.RIGHT; canvas.drawText("+${maxDrawKw.toInt()} kW", x1, ty, text)
         }
 
-        // Tant que la valeur bouge ou qu'un pic redescend, on redessine
-        // Redessin seulement si ça bouge d'au moins un demi-pixel : à l'arrêt, les petites variations de
-        // puissance (0,1 à 0,3 kW) relançaient l'animation sans fin, à 30 images par seconde
-        // (pics tenus 10 s : pas d'animation pendant la tenue, un seul redessin quand la descente commence)
-        // Chaque pic redescend vers la valeur de son côté (0 quand la puissance est de l'autre côté)
+        // While the value moves or a peak falls, redraw
+        // Redraw only if it moves by at least half a pixel: when stopped, small power
+        // variations (0.1 to 0.3 kW) restarted the animation endlessly, at 30 frames per second
+        // (peaks held for 10 s: no animation during the hold, a single redraw when the fall starts)
+        // Each peak falls towards its side's value (0 when power is on the other side)
         val peakUp = kotlin.math.abs(xFor(peak) - xFor(kw.coerceAtLeast(0f))) > 0.5f
         val regenUp = kotlin.math.abs(xFor(-peakRegen) - xFor(kw.coerceAtMost(0f))) > 0.5f
         val decaying = (peakUp && now - peakAt > PEAK_HOLD_MS) || (regenUp && now - peakRegenAt > PEAK_HOLD_MS)

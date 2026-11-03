@@ -6,8 +6,8 @@ import java.util.Date
 import java.util.Locale
 
 /**
- * Journal : logcat (tag « MG4L.<zone> ») + tampon mémoire des 300 dernières lignes,
- * consultable dans les paramètres du launcher sans ADB.
+ * Log: logcat ("MG4L.<area>" tag) + memory buffer of the last 300 lines,
+ * viewable in the launcher settings without ADB.
  */
 object Log {
     private const val PREFIX = "MG4L."
@@ -28,7 +28,7 @@ object Log {
         buffer.addLast("${fmt.format(Date())} $level/$tag  $msg")
     }
 
-    /** Lignes les plus récentes en premier. */
+    /** Most recent lines first. */
     @Synchronized
     fun snapshot(): List<String> = buffer.reversed()
 }

@@ -13,9 +13,9 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 /**
- * Répertoire du téléphone récupéré en arrière-plan : dès qu'un téléphone est connecté en Bluetooth
- * et que le répertoire de la voiture est vide, on lance la synchronisation (PBAP), sans attendre
- * l'ouverture de la page Téléphone. Nouvel essai au plus toutes les 5 min tant qu'il reste vide.
+ * Phone book fetched in the background: as soon as a phone is connected over Bluetooth
+ * and the car's phone book is empty, the sync (PBAP) starts, without waiting for
+ * the Phone page to open. New attempt every 5 min at most while it stays empty.
  */
 object PhoneBookAuto {
     private const val CHECK_MS = 30_000L
@@ -28,7 +28,7 @@ object PhoneBookAuto {
         if (BuildConfig.MOCK) return
         val app = context.applicationContext
         scope.launch {
-            delay(20_000)   // laisser le Bluetooth se reconnecter au démarrage
+            delay(20_000)   // let Bluetooth reconnect at startup
             var lastTry = 0L
             while (true) {
                 try {
@@ -41,7 +41,7 @@ object PhoneBookAuto {
                         Log.i("Phone", "empty phone book, phone connected: background sync")
                         PhoneActivity.sync(app, manual = false)
                     }
-                    if (!phone) lastTry = 0L   // prochain téléphone connecté : essai tout de suite
+                    if (!phone) lastTry = 0L   // next phone connected: try at once
                 } catch (e: Exception) {
                     Log.w("Phone", "background phone book: ${e.message}")
                 }

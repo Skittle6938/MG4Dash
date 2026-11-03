@@ -9,10 +9,10 @@ import android.view.ViewGroup
 import app.mg4dash.system.Log
 
 /**
- * Une autre appli (Waze, ABRP…) affichée dans le widget carte (#41, essai). Android 9 a un
- * composant caché, android.app.ActivityView (celui du launcher voiture d'AOSP) : il lance l'appli
- * dans un écran virtuel intégré à la vue et lui transmet les touchers. Réservé aux applis système,
- * ce qu'est MG4Dash ; appelé par réflexion, null s'il manque sur ce firmware.
+ * Another app (Waze, ABRP…) shown in the map widget (#41, trial). Android 9 has a
+ * hidden component, android.app.ActivityView (the one of AOSP's car launcher): it launches the app
+ * in a virtual display built into the view and passes touches to it. Reserved to system apps,
+ * which MG4Dash is; called by reflection, null if missing on this firmware.
  */
 object EmbeddedApp {
     private const val TAG = "MapApp"
@@ -23,7 +23,7 @@ object EmbeddedApp {
         val start = cls.getMethod("startActivity", Intent::class.java)
         val intent = Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER).setComponent(cn)
             .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        // L'écran virtuel n'existe qu'une fois la surface créée : on réessaie jusqu'à ce qu'il soit prêt
+        // The virtual display only exists once the surface is created: retry until it is ready
         fun tryStart(n: Int) {
             view.postDelayed({
                 if (!view.isAttachedToWindow) return@postDelayed
@@ -32,14 +32,14 @@ object EmbeddedApp {
                     Log.i(TAG, "${cn.flattenToShortString()} started in the map widget (${view.width}×${view.height})")
                     onStarted?.invoke()
                 } catch (e: java.lang.reflect.InvocationTargetException) {
-                    // Pas de limite : l'écran virtuel n'existe que quand l'accueil est affiché (sinon le widget restait noir)
+                    // No limit: the virtual display only exists when home is shown (otherwise the widget stayed black)
                     if (n == 20) Log.w(TAG, "waiting for the virtual display: ${e.cause?.message}")
                     tryStart(n + 1)
                 }
             }, if (n < 20) 300L else 1000L)
         }
-        // Taille changée (plein écran) : l'écran virtuel de l'appli suit la nouvelle taille, sinon
-        // l'appli garde l'ancienne largeur et le reste du widget reste noir
+        // Size changed (full screen): the app's virtual display follows the new size, otherwise
+        // the app keeps the old width and the rest of the widget stays black
         view.addOnLayoutChangeListener { v, l, t, r, b, ol, ot, or, ob ->
             if (r - l != or - ol || b - t != ob - ot) v.post { resize(v) }
         }
@@ -55,16 +55,16 @@ object EmbeddedApp {
     }
 
     /**
-     * Plein écran : en touchant l'appli intégrée, c'est sa fenêtre qui prend la main, et comme elle
-     * ne demande pas le mode immersif, les barres SAIC réapparaissaient. Le réglage système
-     * « policy_control » force le mode immersif pour cette appli (et MG4Dash) ; retiré sans appli.
+     * Full screen: when touching the embedded app, its window takes control, and as it
+     * does not ask for immersive mode, the SAIC bars reappeared. The system setting
+     * "policy_control" forces immersive mode for this app (and MG4Dash); removed with no app.
      */
     fun immersive(context: Context, pkg: String?) {
         val want = if (pkg != null && app.mg4dash.system.Prefs(context).fullscreen) "immersive.full=${context.packageName},$pkg" else null
         try {
             val cr = context.contentResolver
             val cur = android.provider.Settings.Global.getString(cr, "policy_control")
-            // On ne touche qu'à une valeur posée par nous (ou vide)
+            // Only touch a value set by us (or empty)
             if (cur != null && cur.isNotEmpty() && !cur.startsWith("immersive.full=${context.packageName},")) return
             if (cur != want) {
                 android.provider.Settings.Global.putString(cr, "policy_control", want)

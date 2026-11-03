@@ -29,9 +29,9 @@ import java.net.URL
 import kotlin.concurrent.thread
 
 /**
- * Raccourcis de l'accueil : 4 × 2 cases, chacune vide, une appli ou une action
+ * Home shortcuts: 4 × 2 slots, each empty, an app or an action
  * Home Assistant. Toucher = lancer ; appui long = modifier.
- * Stockage : "sc_<n>" = "app|<composant>" ou "ha|<entity_id>|<libellé>".
+ * Storage: "sc_<n>" = "app|<component>" or "ha|<entity_id>|<label>".
  */
 object Shortcuts {
     const val COLS = 4
@@ -67,15 +67,15 @@ object Shortcuts {
 
     // ─── Vue ───
 
-    /** Construit (ou reconstruit) la grille dans [holder] ; [page] = page affichée. */
-    /** [rows] : 2 sur l'accueil Complet, 3 dans le style Carte (cases 8 à 11 en plus). */
+    /** Builds (or rebuilds) the grid in [holder]; [page] = displayed page. */
+    /** [rows]: 2 on the Full home, 3 in the Map layout (slots 8 to 11 added). */
     fun render(activity: Activity, holder: LinearLayout, page: Int, rows: Int = ROWS, onPage: (Int) -> Unit) {
         val kit = Kit(activity)
         val prefs = Prefs(activity)
         holder.removeAllViews()
         val head = kit.row()
         head.addView(kit.title(activity.getString(R.string.title_shortcuts)).apply {
-            if (app.mg4dash.system.Prefs(activity).hideTitles) visibility = android.view.View.INVISIBLE   // option « Masquer les titres »
+            if (app.mg4dash.system.Prefs(activity).hideTitles) visibility = android.view.View.INVISIBLE   // "Hide titles" option
         }, kit.lp(0, -2, 1f, l = Kit.FOG_SAFE_DP - 20))
         holder.addView(head, kit.lp(-1, kit.dp(48)))
         val grid = kit.column()
@@ -146,7 +146,7 @@ object Shortcuts {
         c.packageManager.getActivityInfo(cn, 0).loadLabel(c.packageManager).toString()
     } catch (_: Exception) { cn.packageName.substringAfterLast('.') }
 
-    /** Caméra 360 : le launcher d'origine ne lance pas l'activité, il démarre le service AVM (#33). */
+    /** 360 camera: the stock launcher does not launch the activity, it starts the AVM service (#33). */
     private val AVM_SERVICES = mapOf(
         "com.saicmotor.avm" to "com.saicmotor.avm.service.SaicMotorAvmService",
         "com.saicmotor.hmi.aroundview" to "com.saicmotor.hmi.aroundview.AvmService",
@@ -169,7 +169,7 @@ object Shortcuts {
         }
     }
 
-    /** Liste des applis lançables, avec icônes ; [extraFirst] = entrée ajoutée en tête (ex. « Android Auto d'origine »). */
+    /** List of launchable apps, with icons; [extraFirst] = entry added at the top (e.g. "Stock Android Auto"). */
     fun pickApp(activity: Activity, title: String, extraFirst: String? = null, onPick: (ComponentName?) -> Unit) {
         val pm = activity.packageManager
         val apps = pm.queryIntentActivities(Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER), 0)
@@ -207,7 +207,7 @@ object Shortcuts {
             .show().also { app.mg4dash.ui.Dialogs.fix(it) }
     }
 
-    // ─── Modification d'une case ───
+    // ─── Editing a slot ───
 
     fun edit(activity: Activity, i: Int, refresh: () -> Unit) {
         val prefs = Prefs(activity)
@@ -233,7 +233,7 @@ object Shortcuts {
 
     private val HA_DOMAINS = listOf("script", "automation", "scene", "button", "input_button", "cover", "switch", "light", "lock", "input_boolean")
 
-    /** Liste les entités actionnables de Home Assistant et laisse choisir. */
+    /** Lists Home Assistant's actionable entities and lets the user choose. */
     private fun pickHa(activity: Activity, onPick: (String, String) -> Unit) {
         val prefs = Prefs(activity)
         if (prefs.haUrl.isBlank() || prefs.haToken.isBlank()) {
@@ -261,8 +261,8 @@ object Shortcuts {
     }
 
     /**
-     * Liste avec champ de recherche filtrant au fil de la frappe (sans tenir compte des accents
-     * ni de la casse ; plusieurs mots = tous doivent apparaître). Renvoie l'index d'origine.
+     * List with a search field filtering as you type (ignoring accents
+     * and case; several words = all must appear). Returns the original index.
      */
     fun searchList(activity: Activity, title: String, labels: List<String>, onPick: (Int) -> Unit) {
         val kit = Kit(activity)
@@ -299,7 +299,7 @@ object Shortcuts {
         dialog.show(); app.mg4dash.ui.Dialogs.fix(dialog)
     }
 
-    /** Service appelé selon le domaine de l'entité. */
+    /** Service called according to the entity's domain. */
     private fun service(entity: String): String = when (entity.substringBefore('.')) {
         "script" -> "script/turn_on"
         "automation" -> "automation/trigger"
@@ -327,7 +327,7 @@ object Shortcuts {
         }
     }
 
-    /** Vérifie l'adresse et le jeton (réglages). */
+    /** Checks the address and token (settings). */
     fun testHa(context: Context, onResult: (Boolean) -> Unit) {
         val prefs = Prefs(context)
         thread {

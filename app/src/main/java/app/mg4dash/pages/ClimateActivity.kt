@@ -15,7 +15,7 @@ import app.mg4dash.system.Apps
 import app.mg4dash.ui.PageActivity
 import app.mg4dash.ui.SegmentedGauge
 
-/** Page Climatisation : température, ventilation, direction de l'air et modes. */
+/** Climate page: temperature, fan, air direction and modes. */
 class ClimateActivity : PageActivity() {
     override val pageTitle get() = getString(R.string.title_climate)
     override val page = app.mg4dash.ui.Dock.Page.CLIMATE
@@ -41,14 +41,14 @@ class ClimateActivity : PageActivity() {
     private val controls = mutableListOf<View>()
 
     override fun buildBody() {
-        // En-tête : température extérieure + marche/arrêt
+        // Header: outside temperature + on/off
         outside = kit.text("", 18f, R.color.text_sub)
         header.addView(outside, kit.lp(-2, -2, r = 20))
         power = kit.roundButton(R.drawable.ic_power, 56) { CarBridge.togglePower() }
             .apply { setOnLongClickListener { if (app.mg4dash.system.Prefs(context).climateHoldEnabled) { app.mg4dash.climate.ClimateHoldPanel.show(context as android.app.Activity); true } else false } }
         header.addView(power)
 
-        // ── Température ──
+        // ── Temperature ──
         val tPanel = kit.panel(getString(R.string.cl_driver_temp))
         temp = kit.text("—", 120f, light = true).apply {
             gravity = Gravity.CENTER
@@ -74,13 +74,13 @@ class ClimateActivity : PageActivity() {
         }, kit.lp(-1, -2, t = 6))
         controls += listOf(down, up)
 
-        // ── Ventilation et direction ──
+        // ── Fan and direction ──
         val fPanel = kit.panel(getString(R.string.cl_fan))
         fanValue = kit.text("—", 72f, light = true).apply { gravity = Gravity.CENTER }
         fPanel.addView(fanValue, kit.lp(-1, 0, 1f))
         fanGauge = SegmentedGauge(this).apply { segments = VehicleState.FAN_MAX }
         val fRow = kit.row()
-        // Comme sur l'accueil : − au premier cran éteint la clim, et ne fait rien clim éteinte (#34)
+        // As on home: − at the first notch turns the climate off, and does nothing with the climate off (#34)
         val fDown = kit.roundButton(R.drawable.ic_minus, 72) {
             val s = CarBridge.state.value
             if (s.hvacOn == true) {
@@ -112,7 +112,7 @@ class ClimateActivity : PageActivity() {
         recirc = kit.toggleTile(getString(R.string.cl_recirc)) { CarBridge.toggleRecirc() }
         defFront = kit.toggleTile(getString(R.string.cl_def_front), heat = true) { CarBridge.toggleDefrostFront() }
         defRear = kit.toggleTile(getString(R.string.cl_def_rear), heat = true) { CarBridge.toggleDefrostRear() }
-        // Réglages de la clim d'origine (#65), masqués si la voiture ne les donne pas
+        // Stock climate settings (#65), hidden if the car does not give them
         defLink = kit.toggleTile(getString(R.string.cl_defrost_link)) { CarBridge.setDefrostLinked(CarBridge.state.value.defrostLinked != true) }
         ecoLink = kit.toggleTile(getString(R.string.cl_eco_link)) { CarBridge.setEcoLinked(CarBridge.state.value.ecoLinked != true) }
         listOf(defLink, ecoLink).forEach { it.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, 15f) }
@@ -134,7 +134,7 @@ class ClimateActivity : PageActivity() {
         body.addView(mPanel, kit.lp(0, -1, 1f, l = 6))
     }
 
-    // Direction de l'air : table décodée par MG4Control (ce n'est pas un masque de bits).
+    // Air direction: table decoded by MG4Control (this is not a bit mask).
     private fun partsOf(d: Int?): BooleanArray? = when (d) {
         0 -> booleanArrayOf(true, false, false)
         1 -> booleanArrayOf(true, true, false)
@@ -160,15 +160,15 @@ class ClimateActivity : PageActivity() {
     private fun toggleFlow(index: Int) {
         val parts = partsOf(CarBridge.state.value.fanDirection)?.copyOf() ?: booleanArrayOf(false, false, false)
         parts[index] = !parts[index]
-        directionFor(parts)?.let { CarBridge.setFanDirection(it) }   // au moins une sortie reste active
+        directionFor(parts)?.let { CarBridge.setFanDirection(it) }   // at least one outlet stays active
     }
 
     private var lastKnownAt = 0L
 
     override fun render(s: VehicleState) {
         val known = s.connected && s.hvacOn != null
-        // Ancien SDK : une lecture vide de temps en temps grisait toute la page un instant (#47) ;
-        // on garde l'affichage précédent tant que la dernière lecture valide a moins de 10 s
+        // Old SDK: an occasional empty read greyed the whole page for a moment (#47);
+        // keep the previous display while the last valid read is under 10 s old
         val now = android.os.SystemClock.elapsedRealtime()
         if (known) lastKnownAt = now
         else if (lastKnownAt != 0L && now - lastKnownAt < 10_000) { app.mg4dash.system.Log.i("Clim", "empty climate reading ignored"); return }
@@ -206,7 +206,7 @@ class ClimateActivity : PageActivity() {
         ac.isSelected = s.acOn == true
         app.mg4dash.climate.AcCycle.paint(ac)
         eco.isSelected = s.ecoOn == true
-        recirc.isSelected = s.recirc == 2   // surligné en mode auto, comme sur l'accueil
+        recirc.isSelected = s.recirc == 2   // highlighted in auto mode, as on home
         recirc.text = when (s.recirc) { 0 -> getString(R.string.cl_air_recirc); 1 -> getString(R.string.cl_air_outside); 2 -> getString(R.string.cl_air_auto); else -> getString(R.string.cl_recirc) }
         defFront.isSelected = s.defrostFront == true
         defRear.isSelected = s.defrostRear == true

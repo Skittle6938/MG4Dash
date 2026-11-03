@@ -24,8 +24,8 @@ import kotlinx.coroutines.withContext
 import java.util.Locale
 
 /**
- * Page Énergie : recharge (limite, courant, démarrage/arrêt), programmation, V2L et
- * consommation. Réglages écrits sur les mêmes propriétés que l'appli Énergie SAIC (EH32 EU).
+ * Energy page: charging (limit, current, start/stop), schedule, V2L and
+ * consumption. Settings written to the same properties as the SAIC Energy app (EH32 EU).
  */
 class EnergyActivity : PageActivity() {
     private companion object { const val V2L_CONFIRM_MS = 10_000L }
@@ -68,7 +68,7 @@ class EnergyActivity : PageActivity() {
     private lateinit var chart: LineChart
     private lateinit var chartNote: TextView
 
-    private var period = 0          // 0 = depuis la recharge, 1 = trajet en cours, 2 = 1 000 derniers km
+    private var period = 0          // 0 = since the charge, 1 = current trip, 2 = last 1,000 km
     private var reser: Int? = null
     private var stH = 22; private var stM = 0; private var spH = 6; private var spM = 0
 
@@ -77,21 +77,21 @@ class EnergyActivity : PageActivity() {
         header.addView(kit.text(getString(R.string.en_stock), 19f, R.color.accent_action).apply {
             setPadding(kit.dp(16), kit.dp(12), kit.dp(16), kit.dp(12))
             setBackgroundResource(R.drawable.bg_button)
-            // Appli Énergie d'origine, ou sa page recharge sur SWI165 (#60) ; bouton caché s'il n'y a ni l'une ni l'autre
+            // Stock Energy app, or its charging page on SWI165 (#60); button hidden if neither exists
             val stock = listOf(Apps.ENERGY, Apps.ENERGY_SWI165).firstOrNull { Apps.available(this@EnergyActivity, it) }
             setOnClickListener { stock?.let { Apps.open(this@EnergyActivity, it, "SAIC") } }
             if (stock == null) visibility = android.view.View.GONE
         })
-        // Réchauffage de la batterie en roulant (même réglage que l'appli Énergie SAIC)
+        // Battery heating while driving (same setting as the SAIC Energy app)
         heating = kit.toggleTile(getString(R.string.en_heating), heat = true) {
-            // Écriture 1 = activer, 2 = désactiver (comme l'appli SAIC) ; la lecture rend 0 quand c'est activé
+            // Write 1 = on, 2 = off (like the SAIC app); reading returns 0 when on
             val on = heating.isSelected
             CarProps.setInt(CarProps.DRVNG_PTC_HEAT, if (on) 2 else 1, "battery heating")
             heatWanted = !on; heatWantedAt = android.os.SystemClock.elapsedRealtime()
-            // Relu après 3 s, comme les applis d'origine : la batterie met 2 à 3 s à rendre son nouvel état
+            // Reread after 3 s, like the stock apps: the battery takes 2 to 3 s to return its new state
             heating.postDelayed({ refreshProps() }, 3000)
         }.apply { textSize = 18f; setPadding(kit.dp(20), 0, kit.dp(20), 0) }
-        header.addView(heating, header.childCount - 1, kit.lp(-2, kit.dp(52), r = 12))   // avant le lien SAIC
+        header.addView(heating, header.childCount - 1, kit.lp(-2, kit.dp(52), r = 12))   // before the SAIC link
 
         // ── Colonne 1 : recharge ──
         val c1 = kit.panel(getString(R.string.en_charging))
@@ -109,7 +109,7 @@ class EnergyActivity : PageActivity() {
         power = kit.text("", 18f, R.color.text_sub)
         c1.addView(power, kit.lp(-1, -2, t = 8))
         action = kit.toggleTile("—") { onMainAction() }.apply { textSize = 20f }
-        // Bouton principal et, câble branché, verrou du pistolet (bouton du launcher d'origine)
+        // Main button and, with the cable plugged in, gun lock (stock launcher's button)
         val actRow = kit.row()
         actRow.addView(action, kit.lp(0, kit.dp(64), 1f))
         gunLock = kit.toggleTile(getString(R.string.en_gun_unlock)) {
@@ -117,9 +117,9 @@ class EnergyActivity : PageActivity() {
         }.apply { textSize = 18f; setPadding(kit.dp(16), 0, kit.dp(16), 0); visibility = android.view.View.GONE }
         actRow.addView(gunLock, kit.lp(-2, kit.dp(64), l = 10))
         c1.addView(actRow, kit.lp(-1, -2, t = 12))
-        // Limite de charge : seulement là où la voiture l'applique elle-même (ancien SDK). Ailleurs
-        // (MG4 Standard sans la limite d'origine), la voiture l'ignore, et MG4Dash ne peut pas arrêter
-        // la charge à sa place : il est coupé quand la voiture est fermée (constaté le 2026-10-18).
+        // Charge limit: only where the car applies it itself (old SDK). Elsewhere
+        // (MG4 Standard without the stock limit), the car ignores it, and MG4Dash cannot stop
+        // charging in its place: it is cut when the car is closed (found on 2026-10-18).
         if (app.mg4dash.system.Firmware.nativeChargeLimit) {
             c1.addView(kit.title(getString(R.string.en_limit)), kit.lp(-1, -2, t = 18))
             val limits = listOf(50, 60, 70, 80, 90, 100)
@@ -174,7 +174,7 @@ class EnergyActivity : PageActivity() {
             val s = CarBridge.state.value
             val on = !v2lShownOn(s)
             if (on) CarBridge.startV2L() else CarBridge.stopV2L()
-            // La voiture confirme en quelques secondes : le bouton change tout de suite
+            // The car confirms within a few seconds: the button changes at once
             v2lWanted = on; v2lWantedUntil = android.os.SystemClock.uptimeMillis() + V2L_CONFIRM_MS
             paintV2l(s)
         }.apply { textSize = 18f }
@@ -190,14 +190,14 @@ class EnergyActivity : PageActivity() {
         period = prefs.consumptionPeriod.coerceIn(0, 2)
         pSet(period)
         c3.addView(pRow, kit.lp(-1, -2, t = 10))
-        // Total, et à sa droite ce que la récupération a rendu
+        // Total, and to its right what regeneration gave back
         consTotal = kit.text("—", 36f, light = true)
         val totalRow = kit.row().apply { gravity = android.view.Gravity.CENTER_VERTICAL }
         totalRow.addView(consTotal, kit.lp(-2, -2))
         val recovered = kit.column()
         totalRow.addView(recovered, kit.lp(0, -2, 1f, l = 16))
         c3.addView(totalRow, kit.lp(-1, -2, t = 14))
-        // Anneau de répartition à gauche, le détail à droite
+        // Breakdown ring on the left, the detail on the right
         ring = app.mg4dash.ui.RingChart(this)
         legend = kit.column()
         c3.addView(kit.row().apply {
@@ -211,7 +211,7 @@ class EnergyActivity : PageActivity() {
         recovered.addView(regenKm, kit.lp(-1, -2, t = 2))
         c3.addView(kit.title(getString(R.string.en_recent, app.mg4dash.system.Units.stackUnit(this))), kit.lp(-1, -2, t = 18))
         chart = LineChart(this).apply {
-            // Appui long sur la courbe : l'effacer (#44)
+            // Long press on the curve: erase it (#44)
             setOnLongClickListener { app.mg4dash.ui.ConsumptionCard.confirmClear(this@EnergyActivity, this, period); true }
         }
         c3.addView(chart, kit.lp(-1, 0, 1f, t = 8))
@@ -231,7 +231,7 @@ class EnergyActivity : PageActivity() {
         renderLimit()
     }
 
-    // ── Données BMS (lues hors thread principal) ──
+    // ── BMS data (read off the main thread) ──
 
     private data class Props(
         val target: Int?, val current: Int?, val reser: Int?, val st: Pair<Int?, Int?>, val sp: Pair<Int?, Int?>,
@@ -272,8 +272,8 @@ class EnergyActivity : PageActivity() {
 
     private fun renderProps(p: Props) {
         reser = p.reser
-        // Juste après un toucher, l'état demandé est affiché jusqu'à ce que la batterie le confirme (4 s au plus) :
-        // relu trop tôt, l'ancien état faisait revenir le bouton un instant
+        // Right after a touch, the requested state is shown until the battery confirms it (4 s at most):
+        // reread too early, the old state brought the button back for a moment
         val read = p.heat?.let { it == 0 }
         val wanted = heatWanted?.takeIf { android.os.SystemClock.elapsedRealtime() - heatWantedAt < 4_000 && it != read }
         if (read == heatWanted) heatWanted = null
@@ -289,8 +289,8 @@ class EnergyActivity : PageActivity() {
         schedule.isSelected = on
         finish.isSelected = p.reser == 3
         finish.isEnabled = on
-        // Heure qu'on vient de régler : la relecture de la voiture est ignorée un instant (comme pour la clim),
-        // sinon l'affichage revenait à l'ancienne heure le temps que la voiture prenne la nouvelle
+        // Time just set: the car's reread is ignored for a moment (as for the climate),
+        // otherwise the display returned to the old time until the car took the new one
         val now = android.os.SystemClock.uptimeMillis()
         if (now >= holdStartUntil) {
             p.st.first?.let { stH = it }; p.st.second?.let { stM = it }
@@ -312,17 +312,17 @@ class EnergyActivity : PageActivity() {
             kw?.takeIf { kotlin.math.abs(it) >= 0.1f }?.let { getString(R.string.en_power, String.format(Locale.getDefault(), "%.1f", kotlin.math.abs(it))) },
             s.chargeRemainMin?.takeIf { VehicleState.isCharging(s.chargeStatus) && it in 1..2000 }
                 ?.let { getString(R.string.en_ends_in, it / 60, it % 60) },
-            // Entrée du chargeur embarqué (charge AC) : tension et courant pris sur le secteur
+            // On-board charger input (AC charge): voltage and current taken from the mains
             p.acVolt?.takeIf { VehicleState.isCharging(s.chargeStatus) && it in 80f..450f }?.let { v ->
                 getString(R.string.en_ac_input, Math.round(v), String.format(Locale.getDefault(), "%.1f", p.acAmp ?: 0f))
             },
-            // Charge interrompue : motif donné par la batterie (BMS)
+            // Charge interrupted: reason given by the battery (BMS)
             stopReasonLabel(p.stopReason)?.takeIf { VehicleState.isPlugged(s.chargeStatus) && !VehicleState.isCharging(s.chargeStatus) }
                 ?.let { getString(R.string.en_stop_reason, it) },
         ).joinToString(" · ")
         regenKm.text = p.regenKm?.takeIf { it > 0.05f && it < 2000f }
             ?.let { getString(R.string.en_regen_km, String.format(Locale.getDefault(), "%.1f", app.mg4dash.system.Units.dist(this, it)), app.mg4dash.system.Units.distUnit(this)) } ?: ""
-        // Compteurs SAIC à zéro sur la voiture : consommation mesurée par MG4Dash (EnergyMonitor)
+        // SAIC counters at zero on the car: consumption measured by MG4Dash (EnergyMonitor)
         val t = EnergyMonitor.totals(period)
         renderConsumption(if (t.outKwh > 0f) floatArrayOf(t.outKwh, t.climKwh, t.accKwh, t.regenKwh, t.heatKwh) else p.cons)
     }
@@ -338,8 +338,8 @@ class EnergyActivity : PageActivity() {
 
     private fun renderLimit(carLimit: Int? = null) {
         if (!::setLimit.isInitialized) return
-        // La limite réglée dans la voiture (appli d'origine, iSMART) fait foi : avant, on affichait la
-        // dernière valeur choisie dans MG4Dash (100 % par défaut) même si la voiture était à 80 % (#50)
+        // The limit set in the car (stock app, iSMART) prevails: before, the last value
+        // chosen in MG4Dash was shown (100 % by default) even if the car was at 80 % (#50)
         val wanted = carLimit?.takeIf { it in 50..100 }?.also { if (it != prefs.chargeLimit) prefs.chargeLimit = it } ?: prefs.chargeLimit
         setLimit(listOf(50, 60, 70, 80, 90, 100).indexOf(wanted).takeIf { it >= 0 })
         limitNote.text = if (wanted >= 100) getString(R.string.en_no_limit)
@@ -351,7 +351,7 @@ class EnergyActivity : PageActivity() {
         val heat = c.getOrElse(4) { 0f }.coerceAtLeast(0f)
         val showHeat = heat >= app.mg4dash.energy.EnergyMonitor.HEAT_SHOWN_KWH
         val ok = total > 0f
-        // Conduite récupération déduite, comme le graphique ; les parts se comptent sur ce total
+        // Driving with regeneration deducted, like the chart; shares are counted on this total
         val drive = if (ok) (total - clim.coerceAtLeast(0f) - acc.coerceAtLeast(0f) - heat - rgn.coerceAtLeast(0f)).coerceAtLeast(0f) else 0f
         val shared = (drive + clim.coerceAtLeast(0f) + acc.coerceAtLeast(0f) + heat).coerceAtLeast(0.001f)
         consTotal.text = if (ok) String.format(Locale.getDefault(), "%.1f kWh", total) else "—"
@@ -394,12 +394,12 @@ class EnergyActivity : PageActivity() {
         }))
         action.text = mainActionLabel(s)
         action.isEnabled = VehicleState.isPlugged(s.chargeStatus)
-        // Courant de charge sans objet en V2L : la limite vient de la résistance de l'adaptateur (#81)
+        // Charge current meaningless in V2L: the limit comes from the adapter's resistor (#81)
         val currentShown = if (VehicleState.isDischargeMode(s.chargeStatus)) android.view.View.GONE else android.view.View.VISIBLE
         currentTitle.visibility = currentShown
         currentRow.visibility = currentShown
-        // Démarrer / arrêter la charge et le V2L : seulement là où le service EV répond (voie A9)
-        // En V2L, seul le bouton des réglages V2L reste : celui de la charge faisait doublon
+        // Start / stop charging and V2L: only where the EV service answers (A9 route)
+        // In V2L, only the V2L settings button stays: the charge one was redundant
         action.visibility = when {
             VehicleState.isDischargeMode(s.chargeStatus) -> android.view.View.GONE
             CarBridge.chargeControl -> android.view.View.VISIBLE
@@ -414,7 +414,7 @@ class EnergyActivity : PageActivity() {
         paintV2l(s)
     }
 
-    /** État du bouton V2L : celui demandé tant que la voiture ne l'a pas confirmé, sinon celui de la voiture. */
+    /** V2L button state: the requested one until the car has confirmed it, otherwise the car's. */
     private fun v2lShownOn(s: VehicleState): Boolean {
         val real = VehicleState.isDischarging(s)
         val wanted = v2lWanted ?: return real
@@ -445,7 +445,7 @@ class EnergyActivity : PageActivity() {
         }
     }
 
-    /** Toucher l'heure : roues heures / minutes, comme « clim à une heure précise ». */
+    /** Touching the time: hour / minute wheels, like "climate at a set time". */
     private fun pickTime(start: Boolean) {
         val cur = if (start) stH * 60 + stM else spH * 60 + spM
         val (view, read) = kit.timeWheels(cur)
@@ -471,7 +471,7 @@ class EnergyActivity : PageActivity() {
         if (start) holdStartUntil = until else holdEndUntil = until
         val nh = total / 60; val nm = total % 60
         val other = if (start) spH * 60 + spM else stH * 60 + stM
-        if (total == other) return    // l'appli SAIC refuse début = fin
+        if (total == other) return    // the SAIC app refuses start = end
         if (start) {
             stH = nh; stM = nm
             CarProps.setInt(CarProps.RESER_ST_HOUR, nh, "schedule start (h)")
@@ -483,8 +483,8 @@ class EnergyActivity : PageActivity() {
             CarProps.setInt(CarProps.RESER_SP_MIN, nm, "schedule end (min)")
             endTime.text = hhmm(nh, nm)
         }
-        // Comme l'appli Énergie SAIC : 50 ms après les heures, l'état de la charge programmée est réécrit
-        // tel quel ; sans cette confirmation la voiture ne gardait pas la nouvelle heure
+        // Like the SAIC Energy app: 50 ms after the times, the scheduled charge state is rewritten
+        // unchanged; without this confirmation the car did not keep the new time
         startTime.postDelayed({
             val ctrl = CarProps.getInt(CarProps.RESER_CTRL) ?: reser
             if (ctrl != null) CarProps.setInt(CarProps.RESER_CTRL, ctrl, "schedule confirm")

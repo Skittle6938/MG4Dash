@@ -6,23 +6,23 @@ import android.widget.TextView
 import app.mg4dash.R
 
 /*
- * Android redessine une vue qu'on réécrit à l'identique, et refait la mise en page de l'écran quand sa largeur suit
- * le texte. L'accueil relit ses valeurs chaque seconde : sans ces gardes, il se redessinait sans que rien ne change.
+ * Android redraws a view rewritten identically, and redoes the screen layout when its width follows
+ * the text. Home rereads its values every second: without these guards, it redrew with nothing changing.
  */
 
-/** Texte, seulement s'il a changé (les styles du texte ne sont pas comparés). */
+/** Text, only if it changed (text styles are not compared). */
 fun TextView.put(value: CharSequence?) {
     if (!TextUtils.equals(text, value ?: "")) text = value
 }
 
-/** Image, seulement si elle a changé ; à utiliser pour toutes les écritures de cette vue. */
+/** Image, only if it changed; to use for all writes to this view. */
 fun ImageView.putImage(res: Int) {
     if (getTag(R.id.tag_shown_image) == res) return
     setTag(R.id.tag_shown_image, res)
     setImageResource(res)
 }
 
-/** Teinte, seulement si elle a changé ; à utiliser pour toutes les écritures de cette vue. */
+/** Tint, only if it changed; to use for all writes to this view. */
 fun ImageView.putTint(color: Int) {
     if (getTag(R.id.tag_shown_tint) == color) return
     setTag(R.id.tag_shown_tint, color)

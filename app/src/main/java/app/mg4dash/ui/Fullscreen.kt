@@ -5,10 +5,10 @@ import android.view.View
 import app.mg4dash.system.Prefs
 
 /**
- * Plein écran : masque la barre latérale et le bandeau SAIC (fenêtres système standard
- * TYPE_NAVIGATION_BAR / TYPE_STATUS_BAR de SystemUI) par le mode immersif d'Android.
- * Mode « sticky » : un glissement depuis le bord gauche ou le haut les fait réapparaître
- * quelques secondes, ce qui garde toujours un accès aux commandes d'origine.
+ * Full screen: hides the SAIC side bar and banner (standard SystemUI windows
+ * TYPE_NAVIGATION_BAR / TYPE_STATUS_BAR) through Android's immersive mode.
+ * "Sticky" mode: a swipe from the left edge or the top brings them back for
+ * a few seconds, which always keeps access to the stock controls.
  */
 object Fullscreen {
     @Suppress("DEPRECATION")
@@ -27,8 +27,8 @@ object Fullscreen {
     }
 
     /**
-     * La fenêtre d'appel de la voiture fait réapparaître les barres, qui restaient ensuite par-dessus l'accueil :
-     * réécrire les mêmes réglages n'a pas d'effet, on les quitte un instant. Rien à faire si les barres sont déjà masquées.
+     * The car's call window brings the bars back, which then stayed over home:
+     * rewriting the same settings has no effect, so leave them for a moment. Nothing to do if the bars are already hidden.
      */
     @Suppress("DEPRECATION")
     fun restore(activity: Activity) {

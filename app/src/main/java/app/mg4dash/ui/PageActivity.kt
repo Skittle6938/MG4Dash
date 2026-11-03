@@ -12,8 +12,8 @@ import app.mg4dash.car.VehicleState
 import kotlinx.coroutines.launch
 
 /**
- * Page secondaire (Clim, Véhicule…) : en-tête « ‹ Accueil | TITRE | actions » + contenu,
- * plein écran, rafraîchie à chaque état véhicule.
+ * Secondary page (Climate, Vehicle…): "‹ Home | TITLE | actions" header + content,
+ * full screen, refreshed at each vehicle state.
  */
 abstract class PageActivity : AppCompatActivity() {
     protected lateinit var kit: Kit
@@ -22,7 +22,7 @@ abstract class PageActivity : AppCompatActivity() {
     private var themeSig = 0
     private var builtVertical = false
 
-    /** Mode auto : bascule jour / nuit (feux) pendant que la page est ouverte. */
+    /** Auto mode: day / night switch (lights) while the page is open. */
     private val themeWatch = object : Runnable {
         override fun run() {
             if (Themes.signature(this@PageActivity) != themeSig && !Themes.popupOpen(this@PageActivity)) { Themes.publish(this@PageActivity); Themes.recreateSmooth(this@PageActivity); return }
@@ -50,23 +50,23 @@ abstract class PageActivity : AppCompatActivity() {
             setPadding(kit.dp(16), kit.dp(12), kit.dp(16), kit.dp(12))
         }
         header = kit.row()
-        // Coin haut-gauche laissé libre : MG y superpose le bouton des antibrouillards.
-        // (avec la barre verticale, le bouton se pose sur la barre : pas de place à laisser)
+        // Top left corner left free: MG overlays the fog light button there.
+        // (with the vertical bar, the button sits on the bar: no room to leave)
         header.addView(android.view.View(this), kit.lp(if (Dock.vertical(this)) kit.dp(4) else kit.dp(Kit.FOG_SAFE_DP), 1))
-        // Hauteur fixe : l'en-tête garde la même taille sur toutes les pages.
+        // Fixed height: the header keeps the same size on all pages.
         val title = kit.title(pageTitle).apply { textSize = 20f; gravity = android.view.Gravity.CENTER_VERTICAL }
         header.addView(title, kit.lp(0, kit.dp(52), 1f, l = 8))
         root.addView(header, kit.lp(-1, -2))
         body = kit.row().apply { isBaselineAligned = false }
         root.addView(body, kit.lp(-1, 0, 1f, t = 8))
-        // Même dock qu'à l'accueil : on passe d'une page à l'autre directement.
-        val dock = LinearLayout(this)   // apparence fixée par Dock.build(), comme sur l'accueil
+        // Same dock as on home: move directly from one page to another.
+        val dock = LinearLayout(this)   // appearance set by Dock.build(), as on home
         root.addView(dock, kit.lp(-1, kit.dp(84), t = 12))
         Dock.mount(this, root, dock, page)
         builtVertical = Dock.vertical(this)
         setContentView(root)
         buildBody()
-        // Même contour de panneaux que l'accueil, estompé ou complet selon le réglage (#40)
+        // Same panel outline as home, faded or full according to the setting (#40)
         FadeOutline.applyTo(root)
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) { CarBridge.state.collect { render(it) } }

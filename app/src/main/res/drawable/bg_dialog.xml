@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Fond des fenêtres de dialogue : panneau opaque aux couleurs du thème MG4Dash en cours -->
+<!-- Dialog window background: opaque panel in the current MG4Dash theme colours -->
 <inset xmlns:android="http://schemas.android.com/apk/res/android" android:inset="16dp">
     <shape android:shape="rectangle">
         <solid android:color="?attr/mgBgBottom" />

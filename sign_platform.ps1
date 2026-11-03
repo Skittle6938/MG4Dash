@@ -1,6 +1,6 @@
-﻿# Compile la version voiture et la signe avec la clé plateforme AOSP (test-keys),
-# la même que celle des applis SAIC de la MG4 (série b3998086d056cffa).
-# Résultat : dist\MG4Launcher-car-<version>.apk
+﻿# Builds the car version and signs it with the AOSP platform key (test-keys),
+# the same as the SAIC apps of the MG4 (serial b3998086d056cffa).
+# Result: dist\MG4Launcher-car-<version>.apk
 param([string]$BuildType = "Release")
 
 $ErrorActionPreference = "Stop"

@@ -7,7 +7,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
-/** Caméra confiée à l'accueil par le launcher du SWI173 (#78) : mêmes ordres que son LauncherPresenter. */
+/** Camera left to home by the SWI173 launcher (#78): same orders as its LauncherPresenter. */
 @RunWith(RobolectricTestRunner::class)
 class LauncherLinkTest {
     @Test fun avm() {

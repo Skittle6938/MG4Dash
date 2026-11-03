@@ -9,15 +9,15 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    <!-- Liste de tous les processus et applis ouvertes (#69, #71), accordée à la signature plateforme -->
+    <!-- List of all processes and open apps (#69, #71), granted to the platform signature -->
     <uses-permission android:name="android.permission.REAL_GET_TASKS" tools:ignore="ProtectedPermissions" />
     <uses-permission android:name="android.permission.FORCE_STOP_PACKAGES" tools:ignore="ProtectedPermissions" />
     <uses-permission android:name="android.permission.DUMP" tools:ignore="ProtectedPermissions" />
-    <!-- Copie de l'interface système sur la clé USB (#62) : écriture sur un support amovible, accordée à la signature plateforme -->
+    <!-- Copy of the system UI to the USB stick (#62): writing to removable storage, granted to the platform signature -->
     <uses-permission android:name="android.permission.WRITE_MEDIA_STORAGE" tools:ignore="ProtectedPermissions" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
-    <!-- Accordées d'office au uid système (version voiture) -->
+    <!-- Granted automatically to the system uid (car version) -->
     <uses-permission android:name="android.permission.MEDIA_CONTENT_CONTROL" />
     <uses-permission android:name="android.permission.SET_PREFERRED_APPLICATIONS" />
     <uses-permission android:name="android.permission.READ_CONTACTS" />
@@ -25,11 +25,11 @@
     <uses-permission android:name="android.permission.READ_CALL_LOG" />
     <uses-permission android:name="android.permission.CALL_PHONE" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
-    <!-- Page Son : spectre de la musique en cours (Visualizer sur la sortie audio) -->
+    <!-- Sound page: spectrum of the current music (Visualizer on the audio output) -->
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
-    <!-- Fondu jour / nuit : image de l'ancien écran gardée au-dessus pendant la reconstruction -->
+    <!-- Day / night fade: image of the old screen kept on top during the rebuild -->
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
-    <!-- Appli intégrée à la carte : mode immersif forcé (policy_control) -->
+    <!-- App embedded in the map: forced immersive mode (policy_control) -->
     <uses-permission android:name="android.permission.WRITE_SECURE_SETTINGS" />
     <uses-permission android:name="android.permission.REORDER_TASKS" />
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
@@ -79,7 +79,7 @@
             android:screenOrientation="landscape"
             android:theme="@style/Theme.MG4Launcher" />
 
-        <!-- Démarrage de la voiture : animation à la place de « Le téléphone démarre » (avant déverrouillage) -->
+        <!-- Car start: animation instead of "Phone is starting" (before unlocking) -->
         <activity
             android:name=".ui.BootSplashActivity"
             android:directBootAware="true"
@@ -134,8 +134,8 @@
             </intent-filter>
         </receiver>
 
-        <!-- Mise à jour depuis GitHub : résultat de l'installation et relance de l'accueil -->
-        <!-- Clim maintenue : écran lisible de dehors -->
+        <!-- Update from GitHub: installation result and home relaunch -->
+        <!-- Keep climate on: screen readable from outside -->
         <activity android:name=".climate.ClimateHoldActivity" android:exported="false" android:screenOrientation="landscape"
             android:theme="@style/Theme.MG4Launcher" android:excludeFromRecents="true" android:launchMode="singleTask" />
         <activity android:name=".ui.ScreenOffActivity" android:exported="false"

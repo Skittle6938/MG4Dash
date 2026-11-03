@@ -9,18 +9,18 @@ import android.widget.TextView
 import app.mg4dash.R
 import app.mg4dash.media.MediaHub
 
-/** Menu des sources audio sous le nom de la source (« Radio ▾ ») : la source active est en couleur. */
+/** Audio source menu under the source name ("Radio ▾"): the active source is coloured. */
 object SourceMenu {
     fun show(activity: Activity, anchor: View) {
         val d = activity.resources.displayMetrics.density
         val list = LinearLayout(activity).apply {
             orientation = LinearLayout.VERTICAL
             setBackgroundResource(R.drawable.bg_panel)
-            setPadding((8 * d).toInt(), (6 * d).toInt(), (8 * d).toInt(), (16 * d).toInt())   // marge basse : le contour de la dernière ligne surlignée n'est plus coupé
+            setPadding((8 * d).toInt(), (6 * d).toInt(), (8 * d).toInt(), (16 * d).toInt())   // bottom margin: the outline of the last highlighted line is no longer cut
             elevation = 12 * d
         }
-        // Fenêtre non focalisable : sinon elle prend le focus et la voiture réaffiche sa barre latérale et
-        // son bandeau (plein écran perdu). Un toucher à côté la ferme quand même.
+        // Non-focusable window: otherwise it takes focus and the car shows its side bar and
+        // banner again (full screen lost). A touch beside it still closes it.
         val popup = android.widget.PopupWindow(list, (300 * d).toInt(), LinearLayout.LayoutParams.WRAP_CONTENT, false).apply {
             isOutsideTouchable = true
             setOnDismissListener { Fullscreen.apply(activity) }
@@ -39,14 +39,14 @@ object SourceMenu {
             }, LinearLayout.LayoutParams(-1, (60 * d).toInt()).apply { topMargin = (4 * d).toInt() })
         }
         popup.setBackgroundDrawable(android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT))
-        // Hauteur mesurée explicitement : en ouverture vers le bas (carte musique en haut de l'écran),
-        // la hauteur « wrap_content » coupait le bas de la dernière ligne.
+        // Height measured explicitly: when opening downwards (music card at the top of the screen),
+        // "wrap_content" height cut the bottom of the last line.
         list.measure(View.MeasureSpec.makeMeasureSpec(popup.width, View.MeasureSpec.EXACTLY), View.MeasureSpec.UNSPECIFIED)
         popup.height = list.measuredHeight + (6 * d).toInt()
         popup.showAsDropDown(anchor, 0, (4 * d).toInt()); Themes.track(popup)
     }
 
-    /** Confirmation dans le style des menus, centrée sur [anchor] : [message], Annuler et [ok] (en couleur). */
+    /** Confirmation in the menu style, centred on [anchor]: [message], Cancel and [ok] (coloured). */
     fun confirm(activity: Activity, anchor: View, message: String, ok: String, onOk: () -> Unit) {
         val d = activity.resources.displayMetrics.density
         val box = LinearLayout(activity).apply {
@@ -79,7 +79,7 @@ object SourceMenu {
         }
         box.addView(row, LinearLayout.LayoutParams(-1, -2).apply { topMargin = (18 * d).toInt() })
         popup.setBackgroundDrawable(android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT))
-        // Centrée sur la vue touchée (la courbe), sans déborder de l'écran
+        // Centred on the touched view (the curve), without overflowing the screen
         box.measure(View.MeasureSpec.makeMeasureSpec(popup.width, View.MeasureSpec.EXACTLY), View.MeasureSpec.UNSPECIFIED)
         val at = IntArray(2).also { anchor.getLocationOnScreen(it) }
         val screenW = anchor.rootView.width
@@ -88,13 +88,13 @@ object SourceMenu {
         popup.showAtLocation(anchor.rootView, Gravity.TOP or Gravity.START, x, y); Themes.track(popup)
     }
 
-    /** Menu de choix générique sous [anchor] ; [current] est en couleur. */
+    /** Generic choice menu under [anchor]; [current] is coloured. */
     fun choose(activity: Activity, anchor: View, labels: List<String>, current: Int, onPick: (Int) -> Unit) {
         val d = activity.resources.displayMetrics.density
         val list = LinearLayout(activity).apply {
             orientation = LinearLayout.VERTICAL
             setBackgroundResource(R.drawable.bg_panel)
-            setPadding((8 * d).toInt(), (6 * d).toInt(), (8 * d).toInt(), (16 * d).toInt())   // marge basse : le contour de la dernière ligne surlignée n'est plus coupé
+            setPadding((8 * d).toInt(), (6 * d).toInt(), (8 * d).toInt(), (16 * d).toInt())   // bottom margin: the outline of the last highlighted line is no longer cut
             elevation = 12 * d
         }
         val popup = android.widget.PopupWindow(list, (340 * d).toInt(), LinearLayout.LayoutParams.WRAP_CONTENT, false).apply {
@@ -114,14 +114,14 @@ object SourceMenu {
             }, LinearLayout.LayoutParams(-1, (60 * d).toInt()).apply { topMargin = (4 * d).toInt() })
         }
         popup.setBackgroundDrawable(android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT))
-        // Hauteur mesurée explicitement : en ouverture vers le bas (carte musique en haut de l'écran),
-        // la hauteur « wrap_content » coupait le bas de la dernière ligne.
+        // Height measured explicitly: when opening downwards (music card at the top of the screen),
+        // "wrap_content" height cut the bottom of the last line.
         list.measure(View.MeasureSpec.makeMeasureSpec(popup.width, View.MeasureSpec.EXACTLY), View.MeasureSpec.UNSPECIFIED)
         popup.height = list.measuredHeight + (6 * d).toInt()
         popup.showAsDropDown(anchor, 0, (4 * d).toInt()); Themes.track(popup)
     }
 
-    /** Prépare un titre de carte comme sélecteur de source. */
+    /** Prepares a card title as a source selector. */
     fun attach(activity: Activity, title: TextView) {
         val d = activity.resources.displayMetrics.density
         title.isClickable = true

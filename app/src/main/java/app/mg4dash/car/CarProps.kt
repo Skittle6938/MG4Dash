@@ -8,43 +8,43 @@ import app.mg4dash.BuildConfig
 import app.mg4dash.system.Log
 
 /**
- * Propriétés véhicule « BMS » et consommation, lues comme le fait l'appli Énergie SAIC
+ * "BMS" vehicle properties and consumption, read as the SAIC Energy app does
  * (com.saicmotor.saicev, variante EH32 EU) : CarPropertyManager, zone globale 0.
- * Accès par réflexion à android.car (bibliothèque système), comme MG4Control.
+ * Reflection access to android.car (system library), like MG4Control.
  */
 object CarProps {
     private const val TAG = "BMS"
 
-    // ── Identifiants relevés dans CarBMSManager / CarAdvancedAssistedDrivingManager SAIC ──
-    const val CHRG_TRGT_SOC = 557904908          // limite de charge : code 1..7 = 40..100 %
-    const val RESER_CTRL = 557904909             // charge programmée : 1 = oui, 2 = non, 3 = oui + continuer jusqu'à la limite
+    // ── Identifiers found in SAIC's CarBMSManager / CarAdvancedAssistedDrivingManager ──
+    const val CHRG_TRGT_SOC = 557904908          // charge limit: code 1..7 = 40..100 %
+    const val RESER_CTRL = 557904909             // scheduled charging: 1 = yes, 2 = no, 3 = yes + continue to the limit
     const val RESER_ST_HOUR = 557904910
     const val RESER_ST_MIN = 557904911
     const val RESER_SP_HOUR = 557904912
     const val RESER_SP_MIN = 557904913
     const val ALTNG_CHRG_CRNT = 557904907        // courant AC : 1 = 6 A, 2 = 8 A, 3 = 16 A, 4 = max
-    const val V2X_SP_SOC = 557904943             // seuil d'arrêt V2L : code 1..7 = 20..80 %
-    const val V2X = 557904944                    // décharge V2L en cours : 1
-    const val DRVNG_PTC_HEAT = 557904937         // réchauffage batterie : écriture 1 = activer, 2 = désactiver ; lecture 0 = activé, 1 = désactivé (relevé sur la voiture le 2026-10-15)
-    const val BMS_CHRG_SP_RSN = 557904917        // motif d'arrêt de charge : 1 défaut, 2 surchauffe, 3 prise, 4 tension, 5 autre
-    const val SPR_CHRG = 557904916               // « SPR_CHRG » : rôle inconnu, test caché dans les réglages
-    const val ONBD_CHRG_AC_CRNT = 560002108      // chargeur embarqué : courant d'entrée AC (A)
-    const val ONBD_CHRG_AC_VOL = 560002109       // chargeur embarqué : tension d'entrée AC (V)
-    const val REGEN_RNG_AFT_CHRG = 559980964     // autonomie récupérée au freinage depuis la recharge (km)
+    const val V2X_SP_SOC = 557904943             // V2L stop threshold: code 1..7 = 20..80 %
+    const val V2X = 557904944                    // V2L discharge running: 1
+    const val DRVNG_PTC_HEAT = 557904937         // battery heating: write 1 = on, 2 = off; read 0 = on, 1 = off (found on the car on 2026-10-15)
+    const val BMS_CHRG_SP_RSN = 557904917        // charge stop reason: 1 fault, 2 overheating, 3 socket, 4 voltage, 5 other
+    const val SPR_CHRG = 557904916               // "SPR_CHRG": unknown role, hidden test in the settings
+    const val ONBD_CHRG_AC_CRNT = 560002108      // on-board charger: AC input current (A)
+    const val ONBD_CHRG_AC_VOL = 560002109       // on-board charger: AC input voltage (V)
+    const val REGEN_RNG_AFT_CHRG = 559980964     // range recovered by braking since the charge (km)
     const val BMS_PACK_VOL = 560002054           // tension batterie (V, float)
     const val BMS_PACK_CRNT = 560002055          // courant batterie (A, float)
-    /** Fonction des boutons du volant (0x21407b14) : 0 = écran central, 1 = combiné, 2 = clim (fenêtre de clim rapide ouverte). */
+    /** Steering wheel button function (0x21407b14): 0 = central screen, 1 = driver's display, 2 = climate (quick climate window open). */
     const val SWC_FUNCTION = 557873940
-    const val ELEC_CSUMP_PERKM = 560002077       // conso récente (kWh/100 km, float)
-    const val CONS_TOTAL_AFT_CHRG = 559980987    // énergie depuis la recharge (float)
-    const val CONS_TOTAL_AFT_ST = 559980988      // énergie depuis le démarrage
+    const val ELEC_CSUMP_PERKM = 560002077       // recent consumption (kWh/100 km, float)
+    const val CONS_TOTAL_AFT_CHRG = 559980987    // energy since the charge (float)
+    const val CONS_TOTAL_AFT_ST = 559980988      // energy since start
     const val CONS_ACCRY_AFT_CHRG = 559980989    // accessoires
     const val CONS_ACCRY_AFT_ST = 559980990
-    const val CONS_RGEN_AFT_CHRG = 559980991     // récupération
+    const val CONS_RGEN_AFT_CHRG = 559980991     // regeneration
     const val CONS_RGEN_AFT_ST = 559980992
     const val CONS_ATC_AFT_CHRG = 559980993      // climatisation
     const val CONS_ATC_AFT_ST = 559980994
-    // Anciens identifiants (autres variantes) : repli si les nouveaux ne répondent pas
+    // Old identifiers (other variants): fallback if the new ones do not answer
     const val OLD_ACC_AFT_CHRG = 559980951
     const val OLD_ACC_AFT_ST = 559980952
     const val OLD_TOTAL_AFT_CHRG = 559980953
@@ -93,8 +93,8 @@ object CarProps {
     val ready: Boolean get() = BuildConfig.MOCK || cpm != null
 
     /**
-     * Diagnostic : liste toutes les propriétés exposées par la voiture avec leur valeur, dans le
-     * journal (balise « Props »). Sert à trouver des mesures (températures…) sans modifier quoi que ce soit.
+     * Diagnostic: lists all properties exposed by the car with their value, in the
+     * log ("Props" tag). Used to find measurements (temperatures…) without changing anything.
      */
     fun dumpAll() {
         val m = cpm ?: return
@@ -130,10 +130,10 @@ object CarProps {
     }
 
     /**
-     * Lecture « quel que soit le type » pour l'enregistreur : essaie entier, réel puis booléen,
-     * sur la zone globale puis sur les zones habituelles (siège conducteur, rangée 1…).
+     * "Whatever the type" read for the recorder: tries integer, float then boolean,
+     * on the global area then on the usual areas (driver's seat, row 1…).
      */
-    /** Lecture entière sur une zone précise (ex. 0x1000000 pour le mode jour / nuit). */
+    /** Integer read on a specific area (e.g. 0x1000000 for day / night mode). */
     fun readIntArea(id: Int, area: Int): Int? {
         if (BuildConfig.MOCK) return null
         val m = cpm ?: return null
@@ -142,7 +142,7 @@ object CarProps {
         } catch (_: Throwable) { null }
     }
 
-    /** Lecture réelle sur une zone précise (ex. 0x1000000, zone globale des mesures batterie). */
+    /** Float read on a specific area (e.g. 0x1000000, global area of battery measurements). */
     fun readFloatArea(id: Int, area: Int): Float? {
         if (BuildConfig.MOCK) return null
         val m = cpm ?: return null
@@ -153,7 +153,7 @@ object CarProps {
 
     private val areaCache =java.util.concurrent.ConcurrentHashMap<Int, Int>()
 
-    /** Propriété en octets (type 0x0070…), ou null ; zones essayées : globale puis 0x1000000. */
+    /** Byte property (type 0x0070…), or null; areas tried: global then 0x1000000. */
     fun readBytes(id: Int): ByteArray? {
         if (BuildConfig.MOCK) return null
         val m = cpm ?: return null
@@ -168,8 +168,8 @@ object CarProps {
     }
 
     /**
-     * Côté conduite (calibration CAL_DRIVE_HDL_TYPE, lue comme le fait le service CarPlay d'allgo) :
-     * 0x00 = conduite à gauche, 0x01 = conduite à droite ; null si la voiture ne la fournit pas.
+     * Driving side (calibration CAL_DRIVE_HDL_TYPE, read as allgo's CarPlay service does):
+     * 0x00 = left-hand drive, 0x01 = right-hand drive; null if the car does not provide it.
      */
     fun rightHandDrive(): Boolean? = readBytes(CAL_DRIVE_HDL_TYPE)?.firstOrNull()?.toInt()?.let { when (it) { 0 -> false; 1 -> true; else -> null } }
     const val CAL_DRIVE_HDL_TYPE = 561005086   // 0x2170421e (YFVehicleProperty)
@@ -192,7 +192,7 @@ object CarProps {
         return ""
     }
 
-    /** Écriture entière sur une zone précise (ex. 0x1000000 pour l'ESC, comme le menu MG). */
+    /** Integer write on a specific area (e.g. 0x1000000 for ESC, like the MG menu). */
     fun setIntArea(id: Int, area: Int, value: Int, label: String): Boolean {
         if (BuildConfig.MOCK) { mock[id] = value; return true }
         val m = cpm ?: run { Log.w(TAG, "SET $label ignored: service not ready"); return false }
@@ -207,7 +207,7 @@ object CarProps {
         }
     }
 
-    /** Écriture entière ; relue ensuite par l'appelant pour confirmer. */
+    /** Integer write; reread by the caller to confirm. */
     fun setInt(id: Int, value: Int, label: String): Boolean {
         if (BuildConfig.MOCK) { mock[id] = value; return true }
         val m = cpm ?: run { Log.w(TAG, "SET $label ignored: service not ready"); return false }
@@ -232,7 +232,7 @@ object CarProps {
         mock[CONS_TOTAL_AFT_ST] = 3.6f; mock[CONS_ATC_AFT_ST] = 0.5f; mock[CONS_ACCRY_AFT_ST] = 0.2f; mock[CONS_RGEN_AFT_ST] = 0.7f
     }
 
-    // ── Conversions code ↔ pourcentage (tables de l'appli Énergie SAIC) ──
+    // ── Code ↔ percentage conversions (SAIC Energy app tables) ──
     fun targetSocPercent(code: Int?): Int? = code?.takeIf { it in 1..7 }?.let { 30 + it * 10 }
     fun targetSocCode(percent: Int): Int = ((percent - 30) / 10).coerceIn(1, 7)
     fun v2lPercent(code: Int?): Int? = code?.takeIf { it in 1..7 }?.let { 10 + it * 10 }

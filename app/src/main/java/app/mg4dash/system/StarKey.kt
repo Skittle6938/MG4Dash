@@ -10,33 +10,33 @@ import android.content.IntentFilter
 import app.mg4dash.media.MediaHub
 
 /**
- * Bouton « * » du volant réglé sur la caméra 360 (issue #33). Le service du launcher SAIC reçoit
- * bien le bouton, mais il ouvre la caméra en passant par son propre écran d'accueil, absent quand
- * MG4Dash le remplace : rien ne se passe. On écoute la même diffusion que lui
- * (com.saic.keyevent.hardkey.report, code 5 = « * » gauche) et on démarre le service caméra comme
- * il le ferait. Les autres fonctions du bouton (mode de conduite, régénération…) restent à SAIC.
+ * Steering wheel "*" button set to the 360 camera (issue #33). The SAIC launcher's service does receive
+ * the button, but opens the camera through its own home screen, missing when
+ * MG4Dash replaces it: nothing happens. Listen to the same broadcast
+ * (com.saic.keyevent.hardkey.report, code 5 = left "*") and start the camera service as
+ * it would. The button's other functions (drive mode, regeneration…) stay with SAIC.
  */
 object StarKey {
     private const val TAG = "StarKey"
-    /** Au-delà, on considère que la caméra a été refermée autrement (bouton à l'écran, en roulant). */
+    /** Beyond this, the camera is considered closed in another way (on-screen button, while driving). */
     private const val AVM_OPEN_MS = 3 * 60_000L
     private const val ACTION = "com.saic.keyevent.hardkey.report"
     private const val KEY_LEFT_STAR = 5
-    /** Touche clim sous l'écran, anciens firmwares (relevée dans leur SystemUI, #62). */
+    /** Climate key under the screen, old firmwares (found in their SystemUI, #62). */
     private const val KEY_HVAC = 288
-    /** Joystick droit (codes relevés sur SWI173, #33, et dans MG4Control) : 299 gauche, 300 droite, 301 OK. */
+    /** Right joystick (codes found on SWI173, #33, and in MG4Control): 299 left, 300 right, 301 OK. */
     private const val JOY_LEFT = 299
     private const val JOY_RIGHT = 300
     private const val JOY_OK = 301
-    /** Touches média du launcher d'origine (SwcManager) : 88 précédent, 87 suivant. */
+    /** Stock launcher's media keys (SwcManager): 88 previous, 87 next. */
     private const val KEY_MEDIA_PREVIOUS = 88
     private const val KEY_MEDIA_NEXT = 87
-    /** Volume : haut / bas du joystick (297 / 298) et touches volume Android (24 / 25). */
+    /** Volume: joystick up / down (297 / 298) and Android volume keys (24 / 25). */
     private val VOLUME_KEYS = setOf(297, 298, 24, 25)
     private const val SWC_HEAD_UNIT = 0
-    /** Settings.System : fonction du « * » gauche ; 3 = caméra de recul / 360 (CarHardKey SAIC). */
+    /** Settings.System: left "*" function; 3 = rear / 360 camera (SAIC CarHardKey). */
     private const val STAR_FUNCTION = "star_key_function"
-    /** Même chose pour le « * » droit. */
+    /** Same for the right "*". */
     private const val RIGHT_STAR_FUNCTION = "right_star_key_function"
     private const val KEY_LEFT_STAR_ALT = 17
     private const val KEY_RIGHT_STAR = 286
@@ -55,19 +55,19 @@ object StarKey {
                 val code = i.getIntExtra("android.intent.extra.hardkey.keycode", -1)
                 val down = i.getBooleanExtra("android.intent.extra.hardkey.down", false)
                 val long = i.getBooleanExtra("android.intent.extra.hardkey.longpress", false)
-                // Diagnostic (#33) : chaque bouton du volant reçu, visible dans le journal des réglages
+                // Diagnostic (#33): each wheel button received, visible in the settings log
                 Log.i(TAG, "steering wheel button: code $code ${if (down) "pressed" else "released"}${if (long) " (long)" else ""}")
-                // Musique d'une autre appli (SimpMusic…) : la voiture n'envoie pas suivant / précédent à
-                // cette appli ; on les passe au lecteur affiché (DiAuto ne lit que lecture / pause)
-                // (gauche = précédent, droite = suivant, comme pour les autres sources)
-                // Boutons du volant affectés au combiné ou à la fenêtre de clim rapide (#80) : MG4Dash ne les passe
-                // pas au lecteur, comme le launcher d'origine, qui n'agit que sur la fonction 0 « écran central »
+                // Music from another app (SimpMusic…): the car does not send next / previous to
+                // this app; pass them to the shown player (DiAuto only reads play / pause)
+                // (left = previous, right = next, as for the other sources)
+                // Wheel buttons assigned to the cluster or the quick climate window (#80): MG4Dash does not pass
+                // them to the player, like the stock launcher, which only acts on function 0 "central screen"
                 if ((code in JOY_LEFT..JOY_OK || code in VOLUME_KEYS) &&
                     (CarProps.getInt(CarProps.SWC_FUNCTION) ?: SWC_HEAD_UNIT) != SWC_HEAD_UNIT) {
                     if (down) Log.i(TAG, "steering wheel on the driver's display or climate window: button ignored")
                     return
                 }
-                // Radio Dash sur ancien firmware : joystick droit, ou touches média selon les versions du volant
+                // Radio Dash on old firmware: right joystick, or media keys depending on wheel versions
                 if (down && !long && code in setOf(JOY_LEFT, JOY_RIGHT, JOY_OK, KEY_MEDIA_PREVIOUS, KEY_MEDIA_NEXT) && MediaHub.radioDashNeedsWheelKeys()) {
                     Log.i(TAG, "steering wheel button $code sent to Radio Dash")
                     when (code) {
@@ -78,14 +78,14 @@ object StarKey {
                     return
                 }
                 if (code == JOY_LEFT || code == JOY_RIGHT) {
-                    // Dès l'appui : la commande part vers l'appli sans attendre le relâchement
+                    // From the press: the command goes to the app without waiting for the release
                     if (down && !long) { MediaHub.wheelPressed(code == JOY_RIGHT); if (MediaHub.wheelReleased(code == JOY_RIGHT)) return }
                 }
-                // Volume (haut / bas du volant) : le launcher d'origine relance la radio en pause, MG4Dash
-                // revient aussitôt à l'appli qui jouait
+                // Volume (wheel up / down): the stock launcher restarts the paused radio, MG4Dash
+                // returns at once to the app that was playing
                 if (down && code in VOLUME_KEYS) MediaHub.wheelPressed(null)
-                // Touche clim sous l'écran (288, anciens firmwares) : SystemUI ouvre sa page clim par-dessus
-                // MG4Dash ; on la referme juste après, l'écran d'avant reste affiché (#62)
+                // Climate key under the screen (288, old firmwares): SystemUI opens its climate page over
+                // MG4Dash; it is closed right after, the previous screen stays shown (#62)
                 if (code == KEY_HVAC && !down && !long && Firmware.family != Firmware.Family.A9 && Prefs(app).hideSaicClimate) {
                     android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
                         Thread { SaicHvacPage.close(app) }.start()
@@ -93,10 +93,10 @@ object StarKey {
                     return
                 }
                 if (!down || long) return
-                // SWI173 : le launcher d'origine garde l'état de la caméra et la pilote lui-même (LauncherLink, #78)
+                // SWI173: the stock launcher keeps the camera state and drives it itself (LauncherLink, #78)
                 if (Firmware.gen == Firmware.Gen.SWI173) return
-                // Codes des « * » selon le firmware : 5 (gauche) sur le launcher SWI69 ; 17 (gauche) et
-                // 286 ou 18 (droit) sur les anciens firmwares, comme dans MG4Control
+                // "*" codes by firmware: 5 (left) on the SWI69 launcher; 17 (left) and
+                // 286 or 18 (right) on old firmwares, as in MG4Control
                 val a9 = Firmware.gen in setOf(Firmware.Gen.SWI69, Firmware.Gen.SWI131, Firmware.Gen.SWI132)
                 val setting = when {
                     code == KEY_LEFT_STAR && a9 -> STAR_FUNCTION
@@ -116,16 +116,16 @@ object StarKey {
     }
 
     /**
-     * « * » réglé sur la caméra 360 : l'ouvre, ou la referme si elle est déjà à l'écran (#33),
-     * comme le launcher SAIC (START_ENTER / STOP vers le service de la caméra installée).
+     * "*" set to the 360 camera: opens it, or closes it if already on screen (#33),
+     * like the SAIC launcher (START_ENTER / STOP to the installed camera's service).
      */
-    /** Heure de la dernière ouverture par « * » (0 = fermée) : sur certains firmwares la caméra
-     *  s'affiche par-dessus sans devenir la tâche du haut (#33), on se souvient donc de l'état. */
+    /** Time of the last opening by "*" (0 = closed): on some firmwares the camera
+     *  shows on top without becoming the top task (#33), so the state is remembered. */
     @Volatile private var avmStartedAt = 0L
 
     private val handler = android.os.Handler(android.os.Looper.getMainLooper())
 
-    /** Caméra installée et au premier plan (sur certains firmwares elle ne s'y montre pas, #33). */
+    /** Camera installed and in the foreground (on some firmwares it does not show there, #33). */
     private fun avmTop(context: Context, pkg: String): Boolean = try {
         @Suppress("DEPRECATION")
         (context.getSystemService(Context.ACTIVITY_SERVICE) as android.app.ActivityManager)
@@ -133,9 +133,9 @@ object StarKey {
     } catch (_: Exception) { false }
 
     /**
-     * « * » réglé sur la caméra 360 : priorité au launcher d'origine, qui sait parfois l'ouvrir lui-même
-     * (son écran d'accueil a été créé). On note l'état à l'appui, on attend 0,7 s, et MG4Dash n'agit que si
-     * rien n'a changé ; sinon il ouvrait la caméra puis la refermait aussitôt par-dessus le launcher.
+     * "*" set to the 360 camera: priority to the stock launcher, which can sometimes open it itself
+     * (its home screen was created). The state is noted at the press, wait 0.7 s, and MG4Dash only acts if
+     * nothing changed; otherwise it opened the camera then closed it at once over the launcher.
      */
     private fun starAvm(context: Context) {
         val pkg = AVM.firstOrNull { Firmware.installed(context, it.first) }?.first ?: return

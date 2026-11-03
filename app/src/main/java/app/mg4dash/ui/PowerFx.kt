@@ -27,36 +27,36 @@ import kotlin.math.exp
 import kotlin.math.sin
 
 /**
- * Animation « pleine puissance » du widget Puissance en direct : au-delà de 80 % de la puissance
- * maximale du modèle, un éclair ou des flammes, puis le pic atteint (kW et ch) affiché
- * jusqu'à 10 s après le dernier passage au-dessus du seuil. Dessinée dans l'overlay de la carte du
- * widget : par-dessus son contenu, sans toucher à la mise en page.
+ * "Full power" animation of the live Power widget: above 80 % of the model's maximum
+ * power, lightning or flames, then the peak reached (kW and hp) shown
+ * until 10 s after the last pass above the threshold. Drawn in the overlay of the
+ * widget's card: over its content, without touching the layout.
  */
 class PowerFx(private val context: Context) : Drawable() {
     companion object {
         const val NONE = 0; const val LIGHTNING = 2; const val FLAMES = 3
-        /** Style joué pour un réglage : au hasard entre l'éclair et les flammes ; un ancien choix retiré compte comme « au hasard ». */
+        /** Style played for a setting: random between lightning and flames; an old removed choice counts as "random". */
         fun pick(setting: Int): Int = when (setting) {
             NONE, LIGHTNING, FLAMES -> setting
             else -> listOf(LIGHTNING, FLAMES).random()
         }
-        /** Choix des réglages seulement : une des trois animations, tirée à chaque déclenchement. */
+        /** Settings choice only: one of the three animations, drawn at each trigger. */
         const val RANDOM = 4
         const val HOLD_MS = 10_000L
         private const val FADE_MS = 700L
-        /** Chevaux (ch DIN) d'une puissance en kW. */
+        /** Horsepower (DIN hp) of a power in kW. */
         fun hp(kw: Float) = Math.round(kw * 1.35962f)
     }
 
     var style = FLAMES
-    /** Badge du pic autorisé : seulement quand le conducteur affiche lui-même le widget Puissance. */
+    /** Peak badge allowed: only when the driver shows the Power widget themselves. */
     var badgeAllowed = true
         set(v) { if (v != field) { field = v; if (active) stop() } }
-    /** Appelé quand le badge du pic apparaît (true) ou disparaît (false) : l'hôte masque son texte dessous. */
+    /** Called when the peak badge appears (true) or disappears (false): the host hides its text underneath. */
     var onBadge: ((Boolean) -> Unit)? = null
-    /** Arrondi des bords : celui des cartes, 0 quand l'animation couvre tout l'écran. */
+    /** Edge rounding: that of the cards, 0 when the animation covers the whole screen. */
     var corner = 20 * context.resources.displayMetrics.density
-    /** Vue secouée pendant l'arrivée de la fusée (le contenu de l'écran ; l'animation, elle, reste stable). */
+    /** View shaken during the rocket's arrival (the screen's content; the animation itself stays stable). */
     var shake: View? = null
 
     private fun shakeBy(amp: Float) {
@@ -77,18 +77,18 @@ class PowerFx(private val context: Context) : Drawable() {
     private val cPanel = col(R.color.button_idle)
     private val cText = col(R.color.text_value)
 
-    // Géométrie, en coordonnées de la carte (place())
+    // Geometry, in card coordinates (place())
     private val badgeArea = RectF()
     private var barY = 0f
     private var barX0 = 0f; private var barZero = 0f; private var barX1 = 0f; private var barMax = 140f
     private fun barX(kw: Float) = barZero + (barX1 - barZero) * (kw / barMax).coerceIn(0f, 1f)
 
     private var active = false
-    private var record = 0f            // pic de la séquence
-    private var shown = 0f             // compteur affiché, monte vers le pic
-    private var eventAt = 0L           // dernier départ / nouveau record
+    private var record = 0f            // peak of the sequence
+    private var shown = 0f             // displayed counter, rises towards the peak
+    private var eventAt = 0L           // last start / new record
     private var lastAbove = 0L
-    private var heat = 0f; private var heatTarget = 0f   // intensité des flammes
+    private var heat = 0f; private var heatTarget = 0f   // flame intensity
     private var lastFrame = 0L
     private val rnd = java.util.Random()
 
@@ -104,9 +104,9 @@ class PowerFx(private val context: Context) : Drawable() {
     private var host: View? = null; private var hBar: PowerBar? = null; private var hUnder: View? = null
 
     /**
-     * Rattache l'animation : [host] est la vue dont l'overlay la dessine (la carte du widget, ou toute la
-     * fenêtre pour l'éclair et les flammes), [bar] la barre de puissance, [under] la zone du badge.
-     * La géométrie est relue à chaque image : le widget peut venir d'être construit.
+     * Attaches the animation: [host] is the view whose overlay draws it (the widget's card, or the whole
+     * window for lightning and flames), [bar] the power bar, [under] the badge's area.
+     * Geometry is reread at each frame: the widget may have just been built.
      */
     fun attach(host: View, bar: PowerBar, under: View) { this.host = host; hBar = bar; hUnder = under; invalidateSelf() }
 
@@ -123,7 +123,7 @@ class PowerFx(private val context: Context) : Drawable() {
         badgeArea.set((u[0] - c[0]).toFloat(), (u[1] - c[1]).toFloat(), (u[0] - c[0] + under.width).toFloat(), (u[1] - c[1] + under.height).toFloat())
     }
 
-    /** Nouvelle mesure : déclenche, relance (nouveau record) ou laisse retomber l'animation. */
+    /** New measurement: triggers, restarts (new record) or lets the animation fall. */
     fun update(kw: Float, threshold: Float, peakKw: Float) {
         val now = SystemClock.uptimeMillis()
         if (style == NONE) { if (active) stop(); return }
@@ -139,13 +139,13 @@ class PowerFx(private val context: Context) : Drawable() {
             lastAbove = now
         } else {
             heatTarget = 0.15f
-            // Fin aussi sans image dessinée (écran éteint, appli en arrière-plan)
+            // End also with no frame drawn (screen off, app in the background)
             if (active && now > endAt() + FADE_MS) { stop(); return }
         }
         invalidateSelf()
     }
 
-    /** Fin de l'animation : 10 s après le dernier passage au seuil. */
+    /** End of the animation: 10 s after the last pass at the threshold. */
     private fun endAt(): Long = lastAbove + HOLD_MS
 
     fun stop() {
@@ -183,12 +183,12 @@ class PowerFx(private val context: Context) : Drawable() {
         invalidateSelf()   // image suivante
     }
 
-    // ── Badge du pic ────────────────────────────────────────────────────────
+    // ── Peak badge ────────────────────────────────────────────────────────
 
     private fun peakText() = context.getString(R.string.fx_peak,
         String.format(Locale.getDefault(), "%.0f", shown), hp(shown).toString())
 
-    /** Pastille sombre du pic ; [revealX] : texte visible jusqu'à cette abscisse (la fusée l'écrit). */
+    /** Dark peak chip; [revealX]: text visible up to this x position (the rocket writes it). */
     private fun drawBadge(c: Canvas, x: Float, cy: Float, w: Float, h: Float, accent: Int, text: String, textX: Float, revealX: Float = Float.MAX_VALUE) {
         r.set(x, cy - h / 2f, x + w, cy + h / 2f)
         paint.shader = null; paint.style = Paint.Style.FILL
@@ -208,9 +208,9 @@ class PowerFx(private val context: Context) : Drawable() {
         return Pair(textPaint.measureText(text) + icon + h * 0.9f, h)
     }
 
-    // ── Éclair : il traverse toute la carte en passant par le pic sur la barre, flash, puis grésille ──
+    // ── Lightning: crosses the whole card through the peak on the bar, flash, then crackles ──
 
-    private val bolt = ArrayList<FloatArray>()     // segments de l'éclair principal et de ses branches
+    private val bolt = ArrayList<FloatArray>()     // segments of the main bolt and its branches
     private var boltSeed = 0L
     private var nextAftershock = 0L
     private class Crackle(val pts: FloatArray, val until: Long)
@@ -234,7 +234,7 @@ class PowerFx(private val context: Context) : Drawable() {
         jagged(sx, b.top.toFloat(), px, py, b.height() * 0.7f, 5, main)
         jagged(px, py, b.right - b.width() * rnd.nextFloat() * 0.1f, b.bottom.toFloat(), b.height() * 0.7f, 5, main)
         bolt.add(main.toFloatArray())
-        // Branches vers le bas
+        // Branches downwards
         repeat(3) {
             val i = (2 + rnd.nextInt(main.size / 2 - 4)) * 2
             val bx = main[i]; val by = main[i + 1]
@@ -263,7 +263,7 @@ class PowerFx(private val context: Context) : Drawable() {
     private fun drawLightningScene(c: Canvas, now: Long, dt: Float) {
         val b = bounds
         val t = now - eventAt
-        // Coup de foudre : 3 éclats en 450 ms, nouvelle forme à chaque éclat, flash de toute la carte
+        // Lightning strike: 3 bursts in 450 ms, new shape at each burst, flash of the whole card
         if (t < 450) {
             val flick = (t / 150).toLong()
             if (flick != boltSeed || bolt.isEmpty()) { boltSeed = flick; buildBolt() }
@@ -274,7 +274,7 @@ class PowerFx(private val context: Context) : Drawable() {
             drawBoltSet(c, a, 1f)
             nextAftershock = now + 2500
         } else if (now >= nextAftershock) {
-            // Réplique : un petit éclair du pic de la barre jusqu'au badge
+            // Aftershock: a small bolt from the bar's peak to the badge
             if (now - nextAftershock < 220) {
                 if (crackles.isEmpty() || crackles.last().until < nextAftershock) {
                     val pts = ArrayList<Float>(); val px = barX(record)
@@ -289,7 +289,7 @@ class PowerFx(private val context: Context) : Drawable() {
         val icon = textPaint.textSize * 0.9f
         val (bw, bh) = badgeSize(text, icon)
         val bx = badgeArea.centerX() - bw / 2f; val cy = badgeArea.centerY()
-        // Grésillement autour du badge
+        // Crackling around the badge
         if (t > 300 && rnd.nextFloat() < dt * 9f && crackles.count { it.until > now } < 3) {
             val side = rnd.nextInt(4)
             val px = bx + rnd.nextFloat() * bw; val py = cy + (if (side % 2 == 0) -bh / 2f else bh / 2f)
@@ -300,7 +300,7 @@ class PowerFx(private val context: Context) : Drawable() {
         crackles.removeAll { it.until < now }
         drawBadge(c, bx, cy, bw, bh, cCold, text, bx + bh * 0.45f + icon)
         for (k in crackles) { drawPoly(c, k.pts, cCold, 110, 5 * d); drawPoly(c, k.pts, 0xFFFFFFFF.toInt(), 255, 1.4f * d) }
-        // Petit éclair devant le texte
+        // Small bolt in front of the text
         val ix = bx + bh * 0.45f; val s = icon
         path.reset()
         path.moveTo(ix + s * 0.55f, cy - s * 0.6f); path.lineTo(ix + s * 0.1f, cy + s * 0.08f); path.lineTo(ix + s * 0.42f, cy + s * 0.08f)
@@ -308,7 +308,7 @@ class PowerFx(private val context: Context) : Drawable() {
         paint.shader = null; paint.color = cCold; paint.alpha = 255; c.drawPath(path, paint)
     }
 
-    // ── Flammes : feu sur toute la largeur du widget, plus haut quand on pousse, braises et bord rougeoyant ──
+    // ── Flames: fire across the widget's full width, higher when pushing, embers and glowing edge ──
 
     private class Flame(var x: Float, var y: Float, var vy: Float, val r0: Float, var age: Float, val life: Float, val phase: Float, val ember: Boolean)
     private val flames = ArrayList<Flame>()
@@ -327,9 +327,9 @@ class PowerFx(private val context: Context) : Drawable() {
 
     private fun drawFlameScene(c: Canvas, now: Long, dt: Float) {
         val b = bounds
-        val burst = ((900 - (now - eventAt)) / 900f).coerceIn(0f, 1f)   // gerbe au départ et à chaque record
+        val burst = ((900 - (now - eventAt)) / 900f).coerceIn(0f, 1f)   // burst at the start and at each record
         val power = (heat + burst * 0.6f).coerceAtMost(1.4f)
-        // Lueur du bas et bord rougeoyant
+        // Bottom glow and glowing edge
         paint.shader = LinearGradient(0f, b.bottom.toFloat(), 0f, b.top + b.height() * 0.35f,
             intArrayOf(cDanger and 0x00FFFFFF or ((110 * power.coerceAtMost(1f)).toInt() shl 24), 0), null, Shader.TileMode.CLAMP)
         c.drawRect(b, paint); paint.shader = null
@@ -337,7 +337,7 @@ class PowerFx(private val context: Context) : Drawable() {
         r.set(b); r.inset(1.5f * d, 1.5f * d)
         stroke.color = cHeat; stroke.alpha = (90 * pulse * power.coerceAtMost(1f)).toInt(); stroke.strokeWidth = 9 * d; c.drawRoundRect(r, corner, corner, stroke)
         stroke.alpha = (220 * pulse * power.coerceAtMost(1f)).toInt(); stroke.strokeWidth = 2.5f * d; c.drawRoundRect(r, corner, corner, stroke)
-        // Nouvelles flammes au pied du widget (ou de l'écran), braises qui montent jusqu'en haut
+        // New flames at the foot of the widget (or screen), embers rising to the top
         val area = (b.width() / (600 * d)).coerceIn(1f, 4f)
         var n = (60f + 380f * power) * dt * area
         while (n > 0f) {
@@ -377,7 +377,7 @@ class PowerFx(private val context: Context) : Drawable() {
         val (bw, bh) = badgeSize(text, icon)
         val bx = badgeArea.centerX() - bw / 2f; val cy = badgeArea.centerY()
         drawBadge(c, bx, cy, bw, bh, cHeat, text, bx + bh * 0.45f + icon)
-        // Petite flamme devant le texte
+        // Small flame in front of the text
         val ix = bx + bh * 0.45f + icon * 0.42f; val s = icon * 0.5f
         val fk = 0.92f + rnd.nextFloat() * 0.12f
         path.reset()
@@ -403,8 +403,8 @@ class PowerFx(private val context: Context) : Drawable() {
 }
 
 /**
- * Aperçu de l'animation pleine puissance dans les réglages : une mini carte Puissance en direct
- * qui simule une accélération franche (montée à 86 %, nouveau record à 95 %, puis relâché).
+ * Preview of the full power animation in the settings: a mini live Power card
+ * simulating hard acceleration (rise to 86 %, new record at 95 %, then release).
  */
 class PowerFxPreview(context: Context) : android.widget.LinearLayout(context) {
     private val d = resources.displayMetrics.density
@@ -443,7 +443,7 @@ class PowerFxPreview(context: Context) : android.widget.LinearLayout(context) {
         override fun run() {
             val t = (android.os.SystemClock.uptimeMillis() - start) / 1000f
             val pk = bar.peakKw
-            // Pied au plancher, palier, coup de pied (record), puis on relâche
+            // Pedal to the floor, plateau, kick (record), then release
             val kw = when {
                 t < 1.2f -> 12f + (pk * 0.86f - 12f) * (t / 1.2f)
                 t < 2.4f -> pk * 0.86f
@@ -457,7 +457,7 @@ class PowerFxPreview(context: Context) : android.widget.LinearLayout(context) {
         }
     }
 
-    /** Joue la démonstration avec le style choisi. */
+    /** Plays the demonstration with the chosen style. */
     fun play(style: Int) {
         handler.removeCallbacks(step)
         fx.stop()

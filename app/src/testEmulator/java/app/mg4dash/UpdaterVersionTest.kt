@@ -5,7 +5,7 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
-/** Ordre des versions pour la mise à jour : 1.3.7-beta < 1.4.0 < 1.4.1-beta0 < 1.4.1-beta1 < 1.4.1. */
+/** Version order for updates: 1.3.7-beta < 1.4.0 < 1.4.1-beta0 < 1.4.1-beta1 < 1.4.1. */
 class UpdaterVersionTest {
     @Test fun order() {
         assertTrue(Updater.isNewer("1.4.0", "1.3.7-beta"))

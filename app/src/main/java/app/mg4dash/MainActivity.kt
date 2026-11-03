@@ -62,15 +62,15 @@ class MainActivity : AppCompatActivity() {
         prefs = Prefs(this)
         app.mg4dash.ui.Themes.apply(this)
         themeSig = app.mg4dash.ui.Themes.signature(this)
-        // Sièges chauffants lus après la construction de l'écran (redémarrage de l'appli) : on reconstruit
-        // pour afficher leurs boutons, au lieu d'attendre un retour sur l'accueil (#19).
+        // Heated seats read after the screen was built (app restart): rebuild
+        // to show their buttons, instead of waiting for a return to the home screen (#19).
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 CarBridge.state.collect { if (!builtHeating && CarBridge.heatingShown(this@MainActivity)) recreate() }
             }
         }
         if (prefs.homeStyle == 1) {
-            // Accueil épuré : même activité HOME, autre contenu
+            // Simple home: same HOME activity, other content
             simpleMode = true
             builtVertical = Dock.vertical(this)
             builtHideTitles = prefs.hideTitles
@@ -91,16 +91,16 @@ class MainActivity : AppCompatActivity() {
         b.fanGauge.segments = VehicleState.FAN_MAX
         b.kersGauge.segments = 4
         b.kersGauge.onColor = color(R.color.accent_energy)
-        // Toucher une case = niveau de régénération ; appui long = conduite à une pédale
+        // Touch a segment = regeneration level; long press = one-pedal driving
         b.kersGauge.onSegmentTap = { CarBridge.setRegenLevel(it) }
         b.kersGauge.onLongTap = { CarBridge.toggleOnePedal() }
         if (prefs.homeStyle == 2) applyMapLayout()
         builtCardPower = cardPower
         if (cardPower) buildPowerEnergyCard()
         else if (!mapLayout && !simpleMode && !Dock.vertical(this)) compactEnergyCard()
-        // Balayage vertical (issue #6) : carte musique = source suivante / précédente ;
-        // widget du bas (style Complet) = page suivante / précédente
-        // Haut / bas : source ; gauche / droite : morceau suivant / précédent, comme les boutons
+        // Vertical swipe (issue #6): music card = next / previous source;
+        // bottom widget (Full layout) = next / previous page
+        // Up / down: source; left / right: next / previous track, like the buttons
         app.mg4dash.ui.SwipeBox.wrap(b.mediaCard, vertical = true, horizontal = false) { MediaHub.cycleSource(it) }
             .onHorizontal = { if (it > 0) MediaHub.next() else MediaHub.previous() }
         if (!mapLayout) {
@@ -126,11 +126,11 @@ class MainActivity : AppCompatActivity() {
         wireCards()
         observe()
         warmUpStockLauncherIfNeeded()
-        // Carte (ou appli de la carte) en plein écran avant une reconstruction (thème jour / nuit…) :
-        // elle y reste ; seuls Home et le bouton agrandir / réduire la ramènent au widget
+        // Map (or map app) in full screen before a rebuild (day / night theme…):
+        // it stays there; only Home and the enlarge / reduce button bring it back to the widget
         if (savedInstanceState?.getBoolean(KEY_MAP_FULL) == true || mapFullOnRecreate) b.mapCard.post { setMapFullscreen(true) }
         mapFullOnRecreate = false
-        // Tuto des gestes : une fois après une première installation, ou demandé depuis les réglages
+        // Gesture tutorial: once after a first install, or when asked from the settings
         if (savedInstanceState == null && intent?.getBooleanExtra(app.mg4dash.ui.Tutorial.EXTRA_SHOW, false) == true) b.root.post { app.mg4dash.ui.Tutorial.show(this) }
         else if (savedInstanceState == null) app.mg4dash.ui.Tutorial.showIfPending(this)
     }
@@ -156,10 +156,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     /**
-     * Style « Carte » (proposition d'un utilisateur, issue #6) : mêmes widgets, autre place.
-     * Gauche : météo (petite) au-dessus de la clim (grande) ; centre : énergie (petite) au-dessus
-     * de la musique (grande) ; droite : la carte sur toute la hauteur. Les rangées sont inversées
-     * (petite en haut, grande en bas) pour que chaque widget garde sa taille.
+     * "Map" layout (a user's proposal, issue #6): same widgets, other place.
+     * Left: weather (small) above climate (large); centre: energy (small) above
+     * music (large); right: the map at full height. The rows are inverted
+     * (small on top, large at the bottom) so each widget keeps its size.
      */
     private fun applyMapLayout() {
         mapLayout = true
@@ -170,35 +170,35 @@ class MainActivity : AppCompatActivity() {
             .forEach { (it.parent as? android.view.ViewGroup)?.removeView(it) }
         val gap = resources.getDimensionPixelSize(R.dimen.gap)
         fun lp(weight: Float, top: Int) = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0, weight).apply { topMargin = top }
-        // Pile : énergie et widget du bas réunis, on passe d'une page à l'autre en balayant
+        // Stack: energy and bottom widget together, swipe to go from one page to the other
         val box = app.mg4dash.ui.SwipeBox(this) { dir -> cancelBoost(); showStackPage(nextStack(prefs.stackPage, dir)) }
         box.addView(b.energyCard, android.widget.FrameLayout.LayoutParams(-1, -1))
         box.addView(b.secondaryCard, android.widget.FrameLayout.LayoutParams(-1, -1))
-        // Pas de points de page sur la pile : ils ne tombaient pas au même endroit d'une page à l'autre.
+        // No page dots on the stack: they did not fall in the same place from one page to the next.
         b.secondaryDots.visibility = View.GONE
         left.addView(b.weatherCard, lp(40f, 0)); left.addView(b.climateCard, lp(60f, gap))
         center.addView(box, lp(40f, 0)); center.addView(b.mediaCard, lp(60f, gap))
         right.addView(b.mapCard, lp(100f, 0))
-        // Bas des cartes Clim et Média aligné sur la barre verticale et la carte (#38) : le contour
-        // s'estompe vers le bas, ce sont leurs boutons qui marquent le bord
+        // Bottom of the Climate and Media cards aligned with the vertical bar and the map (#38): the outline
+        // fades downwards, their buttons mark the edge
         val dd = resources.displayMetrics.density
-        // (seulement avec le contour estompé ; avec le contour complet, le cadre garde sa marge)
+        // (only with the faded outline; with the full outline, the frame keeps its margin)
         if (prefs.panelFade) listOf(b.climateCard, b.mediaCard).forEach { it.setPadding(it.paddingLeft, it.paddingTop, it.paddingRight, (2 * dd).toInt()) }
-        // Le bouton antibrouillards de MG se superpose en haut à gauche : la marge passe du titre
-        // Climatisation (qui descend) au titre Météo (qui monte).
+        // MG's fog light button overlaps the top left: the margin moves from the
+        // Climate title (going down) to the Weather title (going up).
         val fogSafe = (64 * resources.displayMetrics.density).toInt()
         ((b.climateCard.getChildAt(0) as LinearLayout).getChildAt(0).layoutParams as LinearLayout.LayoutParams).leftMargin = 0
         ((b.weatherPlace.parent as LinearLayout).getChildAt(0).layoutParams as LinearLayout.LayoutParams).leftMargin = fogSafe
-        // Météo façon widget (issue #6) : remplace le contenu de la carte Météo ; le haut gauche
-        // reste libre pour le bouton antibrouillards ; balayer = prévisions par heure / par jour.
-        // Carte : vitesse / cap / altitude en haut à gauche, à la place du titre « Position » (issue #6)
+        // Widget-style weather (issue #6): replaces the Weather card's content; the top left
+        // stays free for the fog light button; swipe = hourly / daily forecast.
+        // Map: speed / heading / altitude at the top left, in place of the "Position" title (issue #6)
         (0 until b.mapCard.childCount).map { b.mapCard.getChildAt(it) }
             .filter { it is TextView && it.text?.toString() == getString(R.string.title_position) }
-            .forEach { b.mapCard.removeView(it) }   // retiré : applyHomeWidget réaffiche les enfants de la carte
+            .forEach { b.mapCard.removeView(it) }   // removed: applyHomeWidget shows the map's children again
         ((b.mapSpeed.parent as View).layoutParams as android.widget.FrameLayout.LayoutParams).gravity = Gravity.TOP or Gravity.START
         useCompactWeather(if (Dock.vertical(this)) 0 else fogSafe)
         showStackPage(prefs.stackPage)
-        // Sans titres (option) : moins chargé ; les points de la pile et les infos utiles restent
+        // No titles (option): less busy; the stack dots and useful info stay
         if (prefs.hideTitles) {
             b.climHeader.visibility = View.GONE
             listOf((b.energyCard.getChildAt(0) as LinearLayout).getChildAt(0),
@@ -215,7 +215,7 @@ class MainActivity : AppCompatActivity() {
 
     private var builtCardPower = false
 
-    /** Carte énergie « puissance » (#29) : la page Puissance n'est plus dans le widget défilant. */
+    /** "Power" energy card (#29): the Power page is no longer in the scrolling widget. */
     private val cardPower: Boolean get() = prefs.energyCardPower && !simpleMode
 
     private fun nextSecondary(cur: Int, dir: Int): Int {
@@ -230,7 +230,7 @@ class MainActivity : AppCompatActivity() {
         return n
     }
 
-    /** Page de la pile : 0 = énergie, 1..3 = énergie du trajet, puissance, téléphone. */
+    /** Stack page: 0 = energy, 1..3 = trip energy, power, phone. */
     private fun showStackPage(page: Int) {
         val p = if (cardPower && page == 2) 0 else page
         prefs.stackPage = p
@@ -241,10 +241,10 @@ class MainActivity : AppCompatActivity() {
         stackDotViews.forEach { it.text = dots }
     }
 
-    /** Titre des pages du widget du bas / de la pile. */
+    /** Title of the bottom widget / stack pages. */
     private fun stackTitle(tv: TextView, base: String) { tv.text = base }
 
-    /** Pile automatique : quand la voiture vient d'être branchée, on revient sur la batterie. */
+    /** Auto stack: when the car has just been plugged in, go back to the battery. */
     private fun stackAuto(s: VehicleState) {
         val plugged = VehicleState.isPlugged(s.chargeStatus)
         if (mapLayout && prefs.stackAuto && plugged && lastPlugged == false) showStackPage(0)
@@ -254,8 +254,8 @@ class MainActivity : AppCompatActivity() {
     private var weatherCompact: app.mg4dash.ui.WeatherCompact? = null
 
     /**
-     * Style Complet sans titres (option) : on masque les titres des cartes (la place reste, pour ne pas
-     * décaler les widgets) ; les infos utiles de l'en-tête (ville, points, boutons) restent visibles.
+     * Full layout without titles (option): hide the card titles (the space stays, so as not to
+     * shift the widgets); useful header info (city, dots, buttons) stays visible.
      */
     private fun hideFullTitles() {
         b.climHeader.visibility = if (Dock.vertical(this)) View.GONE else View.INVISIBLE
@@ -267,7 +267,7 @@ class MainActivity : AppCompatActivity() {
             .forEach { b.mapCard.removeView(it) }
     }
 
-    /** Météo façon widget (issue #6), styles Complet et Carte : balayer = prévisions par heure / par jour. */
+    /** Widget-style weather (issue #6), Full and Map layouts: swipe = hourly / daily forecast. */
     private fun useCompactWeather(leftInset: Int) {
         val wc = app.mg4dash.ui.WeatherCompact(this)
         wc.setLeftInset(leftInset)
@@ -284,7 +284,7 @@ class MainActivity : AppCompatActivity() {
 
     private var builtConnections = false
 
-    /** Icônes de connexion (#86) : en haut à droite de la météo, à droite de la ville. */
+    /** Connection icons (#86): at the top right of the weather, to the right of the city. */
     private fun setupConnections() {
         builtConnections = prefs.connectionIcons
         if (!builtConnections) return
@@ -292,18 +292,18 @@ class MainActivity : AppCompatActivity() {
         weatherCompact?.addConnections(row)
     }
 
-    /** Appelé par le dock quand la case horloge / Wi-Fi change. */
+    /** Called by the dock when the clock / Wi-Fi slot changes. */
     override fun onResume() {
         super.onResume()
         CarBridge.setForeground(true)
-        // MG4Dash n'avait pas démarré et l'appli de secours est intervenue : on le dit une fois
+        // MG4Dash had not started and the rescue app stepped in: say so once
         app.mg4dash.system.Rescue.notice?.let { app.mg4dash.system.Rescue.notice = null; app.mg4dash.ui.Toasts.show(this, it, long = true) }
-        // Style d'accueil changé dans les paramètres : on reconstruit l'écran
+        // Home layout changed in the settings: rebuild the screen
         if ((prefs.homeStyle == 1) != simpleMode || (prefs.homeStyle == 2) != mapLayout || Dock.vertical(this) != builtVertical || prefs.hideTitles != builtHideTitles ||
             CarBridge.heatingShown(this) != builtHeating || (!simpleMode && cardPower != builtCardPower) ||
             prefs.connectionIcons != builtConnections ||
             app.mg4dash.ui.Themes.signature(this) != themeSig) { app.mg4dash.ui.Themes.recreateSmooth(this); return }
-        // Appli de la carte désinstallée entre-temps (#54) : on revient à la carte OpenStreetMap
+        // Map app uninstalled in the meantime (#54): back to the OpenStreetMap map
         mapAppCn?.let { if (!mapAppInstalled(it)) applyHomeWidget() }
         app.mg4dash.ui.UpdatePrompt.maybeShow(this)
         if (simpleMode) { simple?.onResume(); Fullscreen.apply(this); return }
@@ -314,7 +314,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onConfigurationChanged(newConfig: android.content.res.Configuration) {
         super.onConfigurationChanged(newConfig)
-        // Passage jour / nuit de la voiture (mode auto) : on redessine avec l'autre thème
+        // Car day / night change (auto mode): redraw with the other theme
         if (app.mg4dash.ui.Themes.signature(this) != themeSig) { app.mg4dash.ui.Themes.publish(this); app.mg4dash.ui.Themes.recreateSmooth(this) }
     }
 
@@ -327,13 +327,13 @@ class MainActivity : AppCompatActivity() {
     override fun onPause() {
         super.onPause()
         CarBridge.setForeground(false)
-        // (le plein écran de la carte n'est plus quitté ici : la barre le fait en ouvrant une page, et
-        // une reconstruction (thème) ou l'appli de la carte qui prend la main ne doivent pas le quitter)
+        // (the map's full screen is no longer left here: the bar does it when opening a page, and
+        // a rebuild (theme) or the map app taking over must not leave it)
         if (!simpleMode) mapCard.onPause()
         handler.removeCallbacksAndMessages(null)
     }
 
-    /** HOME pressé alors qu'on est déjà l'accueil : on ne recrée rien, la carte reprend sa taille de widget. */
+    /** HOME pressed while already home: nothing is recreated, the map goes back to its widget size. */
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
         if (!simpleMode) setMapFullscreen(false)
@@ -360,8 +360,8 @@ class MainActivity : AppCompatActivity() {
     // ── Dock ─────────────────────────────────────────────────────────────────
 
     private fun buildDock() {
-        // Barre verticale (option, tous les écrans) : le bouton antibrouillards se pose sur elle,
-        // les widgets du haut à gauche n'ont plus à lui laisser de place.
+        // Vertical bar (option, all screens): the fog light button sits on it,
+        // the top left widgets no longer need to leave room for it.
         if (Dock.vertical(this)) {
             ((b.climateCard.parent as View).parent as View).let { row ->
                 (row.layoutParams as LinearLayout.LayoutParams).bottomMargin = 0
@@ -387,8 +387,8 @@ class MainActivity : AppCompatActivity() {
     private var heatWheel: android.widget.FrameLayout? = null
 
     /**
-     * Sièges et volant chauffants (versions équipées) : trois boutons centrés sur la ligne du haut du
-     * widget clim, qui n'a plus de titre. Siège : un toucher = cran suivant ; volant : marche / arrêt.
+     * Heated seats and steering wheel (equipped versions): three buttons centred on the top line of the
+     * climate widget, which no longer has a title. Seat: a touch = next level; wheel: on / off.
      */
     private fun buildHeating() {
         if (!CarBridge.heatingShown(this)) return
@@ -403,7 +403,7 @@ class MainActivity : AppCompatActivity() {
                 setImageResource(icon); isDuplicateParentStateEnabled = true; if (mirror) scaleX = -1f
                 imageTintList = androidx.core.content.ContextCompat.getColorStateList(this@MainActivity, R.color.chip_text)
             }, android.widget.FrameLayout.LayoutParams((36 * d).toInt(), (36 * d).toInt(), Gravity.CENTER))
-            // Niveau du siège (1 à 3) en petit, en haut à droite
+            // Seat level (1 to 3), small, at the top right
             addView(TextView(this@MainActivity).apply {
                 tag = "level"; setTextSize(TypedValue.COMPLEX_UNIT_SP, 13f); setTextColor(color(R.color.accent_action))
                 typeface = android.graphics.Typeface.create("sans-serif-medium", android.graphics.Typeface.NORMAL)
@@ -422,7 +422,7 @@ class MainActivity : AppCompatActivity() {
         fun paint(v: android.widget.FrameLayout?, level: Int?, showLevel: Boolean) {
             v ?: return
             v.isSelected = (level ?: 0) > 0
-            // Siège : 0 à 3 flux de chaleur dessinés au-dessus de l'assise selon le niveau
+            // Seat: 0 to 3 heat waves drawn above the seat according to the level
             if (showLevel) (v.getChildAt(0) as? ImageView)?.putImage(when (level) { 1 -> R.drawable.ic_seat_heat_1; 2 -> R.drawable.ic_seat_heat_2; 3 -> R.drawable.ic_seat_heat_3; else -> R.drawable.ic_seat_heat_0 })
         }
         paint(heatSeatL, s.seatHeatL, true); paint(heatSeatR, s.seatHeatR, true); paint(heatWheel, s.wheelHeat, false)
@@ -431,22 +431,22 @@ class MainActivity : AppCompatActivity() {
     private fun wireClimate() {
         buildHeating()
         b.climPower.setOnClickListener { CarBridge.togglePower() }
-        // Appui long : clim maintenue, si elle est activée dans les réglages
+        // Long press: keep climate on, if enabled in the settings
         b.climPower.setOnLongClickListener { if (prefs.climateHoldEnabled) { app.mg4dash.climate.ClimateHoldPanel.show(this); true } else false }
         repeatOnHold(b.tempDown) { CarBridge.stepTemp(-1) }
-        // Ventilation centrée entre les boutons − / + de la température et la diffusion (#34) : la rangée
-        // température est plus haute que ses boutons (grand chiffre + extérieur) ; le surplus sous les boutons
-        // est ajouté au-dessus de la diffusion pour des écarts égaux de bouton à bouton
+        // Fan centred between the temperature − / + buttons and the air flow (#34): the
+        // temperature row is taller than its buttons (large number + outside); the extra below the buttons
+        // is added above the air flow for equal gaps from button to button
         (b.tempDown.parent as View).addOnLayoutChangeListener { row, _, top, _, bottom, _, _, _, _ ->
             val extra = ((bottom - top - b.tempDown.height) / 2).coerceAtLeast(0)
             val lp = b.climDirRow.layoutParams as android.widget.LinearLayout.LayoutParams
             if (lp.topMargin != extra) row.post { lp.topMargin = extra; b.climDirRow.layoutParams = lp }
         }
         repeatOnHold(b.tempUp) { CarBridge.stepTemp(1) }
-        // Ventilation : sous la vitesse 1, la clim s'arrête ; appui long − = minimum, appui long + = maximum
+        // Fan: below speed 1 the climate stops; long press − = minimum, long press + = maximum
         b.fanDown.setOnClickListener {
             val s = CarBridge.state.value
-            // Clim arrêtée : − ne fait rien (baisser la vitesse la rallumait, #34)
+            // Climate off: − does nothing (lowering the speed turned it back on, #34)
             if (s.hvacOn != true) return@setOnClickListener
             if (s.autoOn != true && (s.fanSpeed ?: 0) <= VehicleState.FAN_MIN) CarBridge.togglePower()
             else CarBridge.stepFan(-1)
@@ -462,7 +462,7 @@ class MainActivity : AppCompatActivity() {
         app.mg4dash.climate.AcCycle.attach(b.chipAc)
         b.chipEco.setOnClickListener { CarBridge.toggleEco() }
         b.chipRecirc.setOnClickListener { CarBridge.toggleRecirc() }
-        // Direction de l'air : pare-brise, visage et pieds se combinent (au moins une sortie reste active)
+        // Air direction: windscreen, face and feet combine (at least one outlet stays active)
         listOf(b.chipFace to 0, b.chipFeet to 1, b.chipScreen to 2).forEach { (chip, i) ->
             chip.setOnClickListener {
                 val parts = VehicleState.flowParts(CarBridge.state.value.fanDirection)?.copyOf() ?: booleanArrayOf(false, false, false)
@@ -471,11 +471,11 @@ class MainActivity : AppCompatActivity() {
             }
         }
         b.temp.setOnClickListener { startActivity(Intent(this, ClimateActivity::class.java)) }
-        // Appui long : calibration de la température affichée
+        // Long press: calibrate the displayed temperature
         b.temp.setOnLongClickListener { app.mg4dash.ui.TempCalibration.show(this) { renderClimate(CarBridge.state.value) }; true }
     }
 
-    /** Appui = un cran ; appui maintenu = répétition toutes les 350 ms. */
+    /** Press = one step; hold = repeat every 350 ms. */
     private fun repeatOnHold(view: View, action: () -> Unit) {
         val repeat = object : Runnable {
             override fun run() { action(); handler.postDelayed(this, 350) }
@@ -498,16 +498,16 @@ class MainActivity : AppCompatActivity() {
         b.temp.put(if (on || s.driverTemp != null) VehicleState.tempLabel(s.driverTemp) else getString(R.string.no_data))
         b.temp.setTextColor(color(if (on) R.color.text_value else R.color.text_disabled))
         b.climOutside.put(s.outsideTemp?.let { getString(R.string.cl_outside, Math.round(it)) } ?: "")
-        // En mode AUTO, la voiture rapporte une vitesse peu parlante (souvent le maximum) :
-        // on affiche « AUTO » et une jauge grisée plutôt qu'un niveau trompeur.
+        // In AUTO mode the car reports a meaningless speed (often the maximum):
+        // show "AUTO" and a greyed gauge rather than a misleading level.
         val auto = on && s.autoOn == true
         b.fanGauge.onColor = color(if (auto) R.color.text_disabled else R.color.accent_cold)
         b.fanGauge.value = if (on && !auto) (s.fanSpeed ?: 0) else 0
         spinFan(on && (auto || (s.fanSpeed ?: 0) > 0))
-        // En AUTO, la jauge laisse la place à « AUTO · débit » centré entre l'hélice et le + (#34) : « AUTO »
-        // à côté d'une jauge vide touchait le + sur la voiture
+        // In AUTO the gauge gives way to "AUTO · flow" centred between the fan and the + (#34): "AUTO"
+        // next to an empty gauge touched the + on the car
         b.fanGauge.visibility = if (auto) View.GONE else View.VISIBLE
-        // AUTO : « hélice AUTO · débit » groupés et centrés entre − et + (#34, idée de mquiambao00)
+        // AUTO: "fan AUTO · flow" grouped and centred between − and + (#34, idea from mquiambao00)
         b.fanSpaceL.visibility = if (auto) View.VISIBLE else View.GONE
         b.fanSpaceR.visibility = if (auto) View.VISIBLE else View.GONE
         (b.fanIcon.layoutParams as android.widget.LinearLayout.LayoutParams).let { lp ->
@@ -520,11 +520,11 @@ class MainActivity : AppCompatActivity() {
             if (lp.width != w || lp.leftMargin != ml) { lp.width = w; lp.leftMargin = ml; b.fanValue.layoutParams = lp }
         }
         b.fanValue.gravity = Gravity.LEFT or Gravity.CENTER_VERTICAL
-        // Taille auto du chiffre inutilisable en largeur libre : coupée en AUTO
+        // Automatic text size unusable with a free width: off in AUTO
         androidx.core.widget.TextViewCompat.setAutoSizeTextTypeWithDefaults(b.fanValue,
             if (auto) androidx.core.widget.TextViewCompat.AUTO_SIZE_TEXT_TYPE_NONE else androidx.core.widget.TextViewCompat.AUTO_SIZE_TEXT_TYPE_UNIFORM)
         b.fanValue.put(when {
-            !on -> "0"   // comme la jauge vide (#34)
+            !on -> "0"   // like the empty gauge (#34)
             auto -> listOfNotNull("AUTO", s.autoAirVolume?.let { getString(listOf(R.string.cl_level_high, R.string.cl_level_medium, R.string.cl_level_low)[it.coerceIn(0, 2)]) })
                 .joinToString("  ·  ")
             else -> s.fanSpeed?.toString() ?: "—"
@@ -532,20 +532,20 @@ class MainActivity : AppCompatActivity() {
         b.fanValue.setTextColor(color(if (auto) R.color.accent_cold else if (on) R.color.text_value else R.color.text_disabled))
         b.fanValue.setTextSize(TypedValue.COMPLEX_UNIT_SP, if (auto) 20f else if (!on) 16f else 20f)
         b.chipAuto.isSelected = s.autoOn == true
-        // Le débit AUTO s'affiche sur la ligne de ventilation : plus de barres dans le bouton (#34)
+        // AUTO flow shows on the fan line: no more bars in the button (#34)
         if (b.chipAuto.text.toString() != "AUTO") b.chipAuto.text = "AUTO"
         b.chipAc.isSelected = s.acOn == true
         app.mg4dash.climate.AcCycle.paint(b.chipAc)
-        // Recyclage : 0 = recyclé, 1 = extérieur, 2 = auto (la voiture choisit ; état réel lu à part s'il existe)
+        // Recirculation: 0 = recirculated, 1 = outside, 2 = auto (the car chooses; real state read separately if it exists)
         val autoRecirc = s.recirc == 2
         val inner = if (autoRecirc) actualRecirc else s.recirc == 0
-        b.chipRecirc.isSelected = autoRecirc   // surligné seulement en mode auto ; pas de clignotement pendant la bascule
+        b.chipRecirc.isSelected = autoRecirc   // highlighted only in auto mode; no blinking during the change
         b.chipRecircIcon.putImage(if (inner == true) R.drawable.ic_air_recirc else R.drawable.ic_air_outside)
         b.chipRecircAuto.visibility = if (autoRecirc) View.VISIBLE else View.GONE
-        // Direction de l'air ; en mode AUTO, c'est la voiture qui la choisit
+        // Air direction; in AUTO mode the car chooses it
         b.chipEco.isSelected = s.ecoOn == true
         val parts = VehicleState.flowParts(s.fanDirection)
-        // Clim éteinte : la voiture garde la dernière direction, mais rien ne souffle (#34)
+        // Climate off: the car keeps the last direction, but nothing blows (#34)
         b.chipFace.isSelected = on && parts?.get(0) == true
         b.chipFeet.isSelected = on && parts?.get(1) == true
         b.chipScreen.isSelected = on && parts?.get(2) == true
@@ -556,24 +556,24 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-    /** Recyclage réellement actif (HVAC_RECIRC_ON), lu toutes les 5 s ; null si la voiture ne le fournit pas. */
+    /** Recirculation really active (HVAC_RECIRC_ON), read every 5 s; null if the car does not provide it. */
     @Volatile private var actualRecirc: Boolean? = null
 
-    // ── Énergie ──────────────────────────────────────────────────────────────
+    // ── Energy ───────────────────────────────────────────────────────────────
 
-    /** Hauteur de la barre de batterie de la carte puissance, débranché (repère de départ compris). */
+    /** Height of the power card's battery bar, unplugged (start marker included). */
     private var gaugeHeight = 0
 
     private fun renderEnergy(s: VehicleState, avg: Float?) {
         val pct = s.batteryPercent
         val batteryText = VehicleState.socLabel(s) ?: "— %"
-        b.batteryGauge.currentBubble = false   // le grand % est juste au-dessus
+        b.batteryGauge.currentBubble = false   // the large % is just above
         b.batteryGauge.soc = pct?.toFloat() ?: 0f
         b.batteryGauge.tripStart = app.mg4dash.energy.EnergyMonitor.tripStartSoc.value?.toFloat()
         b.batteryGauge.charging = VehicleState.isCharging(s.chargeStatus)
         blinkPlug(s.batteryPercent)
         val rangeText = s.rangeKm?.let { app.mg4dash.system.Units.distText(this, it.toFloat()) } ?: "— ${app.mg4dash.system.Units.distUnit(this)}"
-        // Carte puissance (#29) : unités deux fois plus petites que les chiffres
+        // Power card (#29): units half the size of the numbers
         b.battery.put(if (cardPower) halfUnit(batteryText) else batteryText)
         b.range.put(if (cardPower) halfUnit(rangeText) else rangeText)
         b.consumption.put(avg?.let { app.mg4dash.system.Units.consText(this, it) } ?: "—")
@@ -581,8 +581,8 @@ class MainActivity : AppCompatActivity() {
         b.driveMode.put(VehicleState.driveModeLabel(s.driveMode))
         b.kersGauge.value = if (s.onePedal == 1) 4 else VehicleState.regenGauge(s.regenLevel)
         b.kersLabel.put(VehicleState.regenLabel(s.regenLevel, s.onePedal))
-        // État de charge : valeurs relevées dans le launcher d'origine non encore confirmées sur
-        // véhicule ; on n'affiche que « en charge » quand un temps restant est fourni.
+        // Charge state: values found in the stock launcher, not yet confirmed on the
+        // vehicle; only "charging" is shown when a remaining time is provided.
         val remain = s.chargeRemainMin
         val discharge = VehicleState.isDischargeMode(s.chargeStatus)
         b.chargeState.put(when {
@@ -592,17 +592,17 @@ class MainActivity : AppCompatActivity() {
             else -> VehicleState.chargeStatusLabel(s.chargeStatus)
         })
         b.chargeState.setTextColor(color(if (discharge) R.color.accent_heat else R.color.accent_energy))
-        // Bouton comme sur le launcher d'origine : inactif câble débranché, et bascule
-        // automatiquement en « V2L » quand un adaptateur de décharge est branché.
+        // Button as on the stock launcher: inactive with the cable unplugged, and switches
+        // automatically to "V2L" when a discharge adapter is plugged in.
         b.chargeAction.isEnabled = VehicleState.isPlugged(s.chargeStatus)
-        // Carte « puissance » : la ligne charge / V2L n'apparaît que câble branché (#29)
+        // "Power" card: the charge / V2L line only appears with the cable plugged in (#29)
         if (cardPower) {
             val plugged = VehicleState.isPlugged(s.chargeStatus)
             (b.chargeState.parent as View).visibility = if (plugged) View.VISIBLE else View.GONE
-            // Câble branché : la ligne de charge prend la place, la prise sous les km s'efface
+            // Cable plugged in: the charge line takes the place, the plug under the km disappears
             b.rangePlug.visibility = View.GONE
-            // ... et le repère de départ du trajet aussi : la barre remonte sous les chiffres, les km
-            // restent alignés avec le % sans que le bouton de charge les pousse (#29)
+            // ... and so does the trip start marker: the bar moves up under the numbers, the km
+            // stay aligned with the % without the charge button pushing them (#29)
             if (plugged) b.batteryGauge.tripStart = null
             val lp = b.batteryGauge.layoutParams as LinearLayout.LayoutParams
             if (gaugeHeight == 0) gaugeHeight = lp.height
@@ -630,19 +630,19 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // ── Média ────────────────────────────────────────────────────────────────
+    // ── Media ────────────────────────────────────────────────────────────────
 
     private var mediaStyle: app.mg4dash.ui.MediaStyle? = null
     private var shownArt: android.graphics.Bitmap? = null
 
     private fun wireMedia() {
         b.mediaPlay.setOnClickListener { MediaHub.playPause() }
-        // Appui long sur lecture / pause : réglages du son (page Son)
+        // Long press on play / pause: sound settings (Sound page)
         b.mediaPlay.setOnLongClickListener { startActivity(android.content.Intent(this, app.mg4dash.pages.SoundActivity::class.java)); true }
         b.mediaNext.setOnClickListener { MediaHub.next() }
         b.mediaPrev.setOnClickListener { MediaHub.previous() }
-        // Les puces basculent la source affichée ; l'appli ne s'ouvre qu'en touchant la pochette / les infos.
-        // Source en haut à gauche (« Radio ▾ ») : un toucher ouvre la liste des sources disponibles
+        // The chips switch the displayed source; the app only opens by touching the cover / info.
+        // Source at the top left ("Radio ▾"): a touch opens the list of available sources
         listOf(b.srcRadio, b.srcMedia, b.srcAa).forEach { it.visibility = View.GONE }
         app.mg4dash.ui.SourceMenu.attach(this, b.mediaSource)
         b.mediaInfo.setOnClickListener {
@@ -669,14 +669,14 @@ class MainActivity : AppCompatActivity() {
         mediaStyle?.radioLines(m.analog, m.radioText)
         b.mediaArtPlaceholder.visibility = if (m.art == null) View.VISIBLE else View.INVISIBLE
         b.mediaPlay.putImage(if (m.playing) R.drawable.ic_pause else R.drawable.ic_play)
-        // Sans image, les textes sont centrés : la barre absente ne doit pas garder sa place
+        // Without a picture the texts are centred: the missing bar must not keep its place
         b.mediaProgress.visibility = if (m.durationMs > 0) View.VISIBLE else if (m.art == null) View.GONE else View.INVISIBLE
         if (m.durationMs > 0) b.mediaProgress.progress = (m.positionMs * 1000 / m.durationMs).toInt()
         val controls = m.available
         b.mediaPlay.isEnabled = controls; b.mediaNext.isEnabled = controls; b.mediaPrev.isEnabled = controls
     }
 
-    // ── Météo ────────────────────────────────────────────────────────────────
+    // ── Weather ──────────────────────────────────────────────────────────────
 
     private fun renderWeather(w: WeatherRepo.Weather?, s: VehicleState) {
         weatherCompact?.show(w, s.outsideTemp, prefs.weatherCity, prefs.weatherPage)
@@ -689,38 +689,38 @@ class MainActivity : AppCompatActivity() {
         b.chargeAction.setOnClickListener { onChargeAction() }
         b.weatherCard.setOnClickListener { WeatherRepo.refreshNow(this) }
         b.secondaryCard.setOnClickListener {
-            // Style Carte : le toucher fait avancer la pile (énergie → trajet → puissance → téléphone)
+            // Map layout: a touch moves the stack forward (energy → trip → power → phone)
             cancelBoost()
             if (mapLayout) { showStackPage(nextStack(prefs.stackPage, 1)); return@setOnClickListener }
             prefs.secondaryWidget = nextSecondary(prefs.secondaryWidget, 1)
             renderSecondary()
             lifecycleScope.launch { updatePower() }
         }
-        // Boutons masqués (#15) : chaque appui relance les 6 s d'affichage
+        // Hidden buttons (#15): each press restarts the 6 s display
         b.mapZoomIn.setOnClickListener { extendMapButtons(); mapCard.zoom(1) }
         b.mapZoomOut.setOnClickListener { extendMapButtons(); mapCard.zoom(-1) }
         b.mapFullscreen.setOnClickListener { extendMapButtons(); setMapFullscreen(hiddenForMap == null) }
         b.mapCenter.setOnClickListener { extendMapButtons(); mapCard.recenter(LocationRepo.location.value); tintMapCenter() }
         tintMapCenter()
         mapCard.onTouch = { showMapButtons() }
-        // Appui long sur la carte (ou sur son bouton en haut à droite) : une autre appli à sa place (#41)
+        // Long press on the map (or its top right button): another app in its place (#41)
         mapCard.onLongPress = { pickMapApp() }
         b.widgetToggle.setOnLongClickListener { pickMapApp(); true }
         applyMapButtons()
-        // Carte → Consommation → Raccourcis → Carte (issue #6 : la consommation dans le widget carte)
+        // Map → Consumption → Shortcuts → Map (issue #6: consumption in the map widget)
         b.widgetToggle.setOnClickListener {
-            // Page raccourcis retirable de la rotation (#38) : carte → conso → carte
+            // Shortcuts page removable from the rotation (#38): map → consumption → map
             prefs.homeWidget = when (effectiveWidget()) { 0 -> 2; 2 -> if (prefs.shortcutsPage) 1 else 0; else -> 0 }
             applyHomeWidget()
         }
         applyHomeWidget()
     }
 
-    // ── Carte ou raccourcis ──────────────────────────────────────────────────
+    // ── Map or shortcuts ─────────────────────────────────────────────────────
 
     private var shortcutsPage = 0
 
-    /** Ventilateur en marche : l'icône tourne lentement, quelle que soit la vitesse (#34). */
+    /** Fan running: the icon turns slowly, whatever the speed (#34). */
     private var fanSpin: android.animation.ObjectAnimator? = null
     private fun spinFan(on: Boolean) {
         if (on == (fanSpin != null)) return
@@ -730,7 +730,7 @@ class MainActivity : AppCompatActivity() {
         } else { fanSpin?.cancel(); fanSpin = null; b.fanIcon.rotation = 0f }
     }
 
-    /** Icône prise sous l'autonomie : clignote doucement sous 30 %, plus vite sous 15 % (#29). */
+    /** Plug icon under the range: blinks gently below 30 %, faster below 15 % (#29). */
     private var plugBlink: android.animation.ObjectAnimator? = null
     private var plugBlinkMs = 0L
     private fun blinkPlug(soc: Int?) {
@@ -745,11 +745,11 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    /** Fin de l'affichage des boutons masqués de la carte (uptime), après un toucher. */
+    /** End of the display of the map's hidden buttons (uptime), after a touch. */
     private var mapButtonsUntil = 0L
     private val hideMapButtons = Runnable { applyMapButtons() }
 
-    /** Appui sur un bouton de la carte pendant qu'ils sont affichés : on repart pour 6 s. */
+    /** Press on a map button while they are shown: restart for 6 s. */
     private fun extendMapButtons() { if (android.os.SystemClock.uptimeMillis() < mapButtonsUntil) showMapButtons() }
 
     private fun showMapButtons() {
@@ -761,8 +761,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     /**
-     * Option (#15) : zoom +, zoom − et plein écran masqués ; le bouton cap reste, en haut sous la
-     * bascule de widget. Un toucher sur la carte les montre 6 s.
+     * Option (#15): zoom +, zoom − and full screen hidden; the heading button stays, at the top under the
+     * widget switch. A touch on the map shows them for 6 s.
      */
     private fun applyMapButtons() {
         val hide = prefs.mapAutoHide && android.os.SystemClock.uptimeMillis() >= mapButtonsUntil
@@ -774,7 +774,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    /** Bouton « recentrer » vert quand la carte suit le cap de la voiture, couleur des boutons en nord en haut. */
+    /** "Recentre" button green when the map follows the car's heading, button colour when north is up. */
     private fun tintMapCenter() {
         b.mapCenter.setColorFilter(color(if (mapCard.headingUp) R.color.accent_energy else R.color.accent_action))
     }
@@ -782,10 +782,10 @@ class MainActivity : AppCompatActivity() {
     private var consumptionCard: app.mg4dash.ui.ConsumptionCard? = null
     private var lastWidgetMode = -1
 
-    /** Sans connexion data, la carte (tuiles en ligne) cède la place à la consommation. */
+    /** Without a data connection, the map (online tiles) gives way to consumption. */
     private fun offline(): Boolean {
-        // Même signal que le widget météo (#15) : pas de météo, ou dernière requête en échec ;
-        // « internet disponible » d'Android restait vrai sans accès réel.
+        // Same signal as the weather widget (#15): no weather, or last request failed;
+        // Android's "internet available" stayed true without real access.
         val w = WeatherRepo.weather.value
         return w == null || WeatherRepo.offline ||
             !app.mg4dash.system.StatusMonitor.hasInternet(this) && System.currentTimeMillis() - w.updatedAt > 3600_000L
@@ -796,20 +796,20 @@ class MainActivity : AppCompatActivity() {
         if (it == 0 && prefs.mapOfflineSwitch && offline() && !mapCard.hasCachedTiles(LocationRepo.location.value)) 2 else it
     }
 
-    /** Vues masquées par la carte en plein écran, avec leur visibilité d'avant (null : carte en widget). */
+    /** Views hidden by the full screen map, with their previous visibility (null: map as a widget). */
     private var hiddenForMap: List<Pair<View, Int>>? = null
 
-    /** Appelé par la barre : chacun de ses boutons ramène la carte à sa taille de widget. */
+    /** Called by the bar: each of its buttons brings the map back to its widget size. */
     fun exitMapFullscreen() = setMapFullscreen(false)
 
     /**
-     * Carte en plein écran (issue #4) : les autres widgets s'effacent, la barre (verticale ou du bas)
-     * reste. HOME, un bouton de la barre ou le même bouton ramènent la carte à sa taille de widget.
+     * Full screen map (issue #4): the other widgets disappear, the bar (vertical or bottom)
+     * stays. HOME, a bar button or the same button bring the map back to its widget size.
      */
     private fun setMapFullscreen(on: Boolean) {
         if (simpleMode || on == (hiddenForMap != null)) return
         if (on) {
-            // On remonte de la carte jusqu'à la rangée des colonnes en masquant tout ce qui l'entoure
+            // Walk up from the map to the column row, hiding everything around it
             val row = (b.climateCard.parent as View).parent as android.view.ViewGroup
             val hidden = mutableListOf<Pair<View, Int>>()
             var child: View = b.mapCard
@@ -828,8 +828,8 @@ class MainActivity : AppCompatActivity() {
         }
         b.mapFullscreen.setImageResource(if (on) R.drawable.ic_fullscreen_exit else R.drawable.ic_fullscreen)
         mapAppFull?.setImageResource(if (on) R.drawable.ic_fullscreen_exit else R.drawable.ic_fullscreen)
-        // Appli qui fixe sa taille au lancement (CarPlay sans fil MG4CPlay / DiPlay : la vidéo restait à
-        // la taille de la carte en plein écran, #52) : on la relance à la nouvelle taille
+        // App that sets its size at launch (wireless CarPlay MG4CPlay / DiPlay: the video stayed at
+        // the map's size in full screen, #52): relaunch it at the new size
         if (mapAppCn?.let { relaunchOnResize(it.packageName) } == true) b.mapCard.post { rebuildMapApp() }
     }
 
@@ -853,7 +853,7 @@ class MainActivity : AppCompatActivity() {
         cc.visibility = if (consumption) View.VISIBLE else View.GONE
         if (consumption) cc.show()
         val shortcuts = mode == 1
-        // La carte et ses commandes disparaissent derrière les raccourcis (et inversement).
+        // The map and its controls disappear behind the shortcuts (and vice versa).
         for (i in 0 until b.mapCard.childCount) {
             val v = b.mapCard.getChildAt(i)
             if (v === b.widgetToggle || v === navBanner || v === cc) continue
@@ -861,14 +861,14 @@ class MainActivity : AppCompatActivity() {
             else v.visibility = if (shortcuts || consumption) View.INVISIBLE else View.VISIBLE
         }
         if (mode == 0) renderLocation(LocationRepo.location.value, CarBridge.state.value)
-        // L'icône annonce la page suivante ; sans page de raccourcis (#38), la conso ramène à la carte
+        // The icon announces the next page; without a shortcuts page (#38), consumption goes back to the map
         b.widgetToggle.setImageResource(when (mode) { 0 -> R.drawable.ic_bolt; 2 -> if (prefs.shortcutsPage) R.drawable.ic_apps else R.drawable.ic_map; else -> R.drawable.ic_map })
         navBanner?.show(app.mg4dash.map.NavRepo.nav.value?.takeIf { mode == 0 })
         if (shortcuts) renderShortcuts()
         applyMapApp(mode == 0)
     }
 
-    /** Appli intégrée au widget carte (#41, essai) et son composant. */
+    /** App embedded in the map widget (#41, trial) and its component. */
     private var mapAppView: android.view.ViewGroup? = null
     private var mapAppCn: android.content.ComponentName? = null
 
@@ -879,7 +879,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    /** Si l'appli de la carte est passée devant l'accueil (sur l'écran principal), on remet l'accueil devant. */
+    /** If the map's app came in front of the home screen (on the main screen), bring home back in front. */
     private fun reclaimFromApp(pkg: String) {
         try {
             val am = getSystemService(ACTIVITY_SERVICE) as android.app.ActivityManager
@@ -893,8 +893,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     /**
-     * Appli dans la carte : les boutons de bascule et de plein écran s'effacent après 5 s pour ne pas
-     * cacher l'appli ; un toucher n'importe où sur la carte les fait revenir.
+     * App in the map: the switch and full screen buttons fade after 5 s so as not to
+     * hide the app; a touch anywhere on the map brings them back.
      */
     private val fadeMapAppButtons = Runnable {
         listOfNotNull(b.widgetToggle, mapAppFull).forEach { v -> v.animate().alpha(0f).setDuration(400).withEndAction { v.visibility = View.INVISIBLE }.start() }
@@ -908,9 +908,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     /**
-     * Appui long sur une appli intégrée à la carte : l'appli reçoit les touchers et l'appui long de la
-     * carte ne passait plus ; avec une appli qui ne s'affiche pas (Caméra), plus moyen d'en sortir (#66).
-     * L'appui long est donc repéré ici, avant l'appli.
+     * Long press on an app embedded in the map: the app receives the touches and the map's long press
+     * no longer got through; with an app that does not display (Camera), no way out (#66).
+     * The long press is therefore detected here, before the app.
      */
     private var mapAppPressX = 0f
     private var mapAppPressY = 0f
@@ -939,9 +939,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     /**
-     * Appli choisie qui ne tient pas dans la carte (Caméra…) : elle se ferme aussitôt ou ne démarre
-     * jamais, et la carte restait noire (#66). 6 s après le lancement, sans tâche de cette appli, on
-     * revient à la carte OpenStreetMap.
+     * Chosen app that does not fit in the map (Camera…): it closes at once or never
+     * starts, and the map stayed black (#66). 6 s after launch, with no task of this app, go
+     * back to the OpenStreetMap map.
      */
     private fun checkMapAppAlive(cn: android.content.ComponentName) {
         b.mapCard.postDelayed({
@@ -960,10 +960,10 @@ class MainActivity : AppCompatActivity() {
         }, 6_000)
     }
 
-    /** Bouton plein écran de l'appli intégrée à la carte. */
+    /** Full screen button of the app embedded in the map. */
     private var mapAppFull: android.widget.ImageButton? = null
 
-    /** Appli de la carte encore installée ? (désinstallée, la carte restait noire et sans appui long, #54) */
+    /** Map app still installed? (uninstalled, the map stayed black with no long press, #54) */
     private fun mapAppInstalled(cn: android.content.ComponentName): Boolean =
         try { packageManager.getActivityInfo(cn, 0); true } catch (_: Exception) { false }
 
@@ -982,8 +982,8 @@ class MainActivity : AppCompatActivity() {
         app.mg4dash.ui.EmbeddedApp.immersive(this, cn?.packageName)
         if (cn == null) return
         if (mapAppView == null) {
-            // Ramenée à la taille de la carte seulement quelques secondes après le lancement effectif
-            // (au démarrage de la voiture, l'écran virtuel met parfois plus de 10 s à être prêt)
+            // Brought back to the map's size only a few seconds after the actual launch
+            // (at car start, the virtual display sometimes takes more than 10 s to be ready)
             var created: View? = null
             val relaunches = relaunchOnResize(cn.packageName)
             val v = app.mg4dash.ui.EmbeddedApp.create(this, cn) {
@@ -994,19 +994,19 @@ class MainActivity : AppCompatActivity() {
                 app.mg4dash.ui.Toasts.show(this, R.string.map_app_unavailable, long = true)
                 prefs.mapApp = null; return
             }
-            // Par-dessus la carte et ses boutons, sous le bouton de bascule
-            // Créée d'abord à la largeur de l'écran (puis ramenée à la carte) : Android fixe la taille de
-            // la surface de l'appli d'après celle de son écran virtuel à la création ; créée à la taille
-            // de la carte, l'appli restait ensuite coupée à droite en plein écran
+            // Above the map and its buttons, under the switch button
+            // Created first at screen width (then brought back to the map): Android sets the size of
+            // the app's surface from its virtual display at creation; created at the size
+            // of the map, the app then stayed cut off on the right in full screen
             val screenW = resources.displayMetrics.widthPixels
             b.mapCard.addView(v, b.mapCard.indexOfChild(b.widgetToggle), android.widget.FrameLayout.LayoutParams(if (relaunches) -1 else screenW, -1))
             created = v
             mapAppView = v; mapAppCn = cn
-            // Accueil reconstruit (thème jour / nuit…) : l'ancien écran virtuel disparaît et Android
-            // remet l'appli au premier plan, en plein écran. On reprend la main : la nouvelle carte
-            // peut alors la récupérer.
+            // Home rebuilt (day / night theme…): the old virtual display disappears and Android
+            // brings the app to the foreground, in full screen. Take back control: the new map
+            // can then get it back.
             for (delay in longArrayOf(800, 1800, 3000, 4500)) v.postDelayed({ reclaimFromApp(cn.packageName) }, delay)
-            // Bouton plein écran, comme pour la carte OpenStreetMap, sous le bouton de bascule
+            // Full screen button, as for the OpenStreetMap map, under the switch button
             val d = resources.displayMetrics.density
             val full = android.widget.ImageButton(this).apply {
                 setBackgroundResource(R.drawable.bg_button); scaleType = android.widget.ImageView.ScaleType.FIT_CENTER
@@ -1032,7 +1032,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // Widget du bas : énergie du trajet, puissance en direct, téléphone (toucher le widget pour changer)
+    // Bottom widget: trip energy, live power, phone (touch the widget to change)
     private var builtMode = -1
     private var powerValue: TextView? = null
     private var powerLabel: TextView? = null
@@ -1041,14 +1041,14 @@ class MainActivity : AppCompatActivity() {
     private var powerFx: app.mg4dash.ui.PowerFx? = null
     private var xpowerHits = 0
 
-    /** Retire l'animation pleine puissance de la carte (autre widget, ou carte reconstruite). */
+    /** Removes the full power animation from the map (other widget, or map rebuilt). */
     private fun dropPowerFx() {
         powerFx?.let { fxHost?.overlay?.remove(it); it.onBadge = null; it.stop() }
         powerFx = null; fxHost = null
     }
 
-    // Pleine puissance alors que le widget Puissance n'est pas affiché : on le montre le temps de
-    // l'animation et du pic, puis on revient au widget d'avant (styles Complet et Carte).
+    // Full power while the Power widget is not shown: show it for the time of the
+    // animation and peak, then go back to the previous widget (Full and Map layouts).
     private var fxBoost = false
     private var fxPrevStack = -1
     private var fxHost: View? = null
@@ -1067,7 +1067,7 @@ class MainActivity : AppCompatActivity() {
         fxPrevStack = -1
     }
 
-    /** Le conducteur change lui-même de widget : on ne reviendra pas en arrière. */
+    /** The driver changes the widget: no going back. */
     private fun cancelBoost() { fxBoost = false; fxPrevStack = -1 }
 
     private fun renderSecondary() {
@@ -1097,7 +1097,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun kwh(v: Float) = String.format(Locale.getDefault(), "%.1f", v)
 
-    /** Énergie depuis le démarrage, répartie comme sur la page Énergie (mesures de MG4Dash). */
+    /** Energy since start, split as on the Energy page (MG4Dash measurements). */
     private var tripShown: String? = null
 
     private fun renderTripEnergy() {
@@ -1110,7 +1110,7 @@ class MainActivity : AppCompatActivity() {
         tripShown = key
         g.removeAllViews()
         g.orientation = LinearLayout.VERTICAL
-        // Lisible d'un coup d'œil : une grosse barre colorée et les pourcentages ; le détail est sur la page Énergie.
+        // Readable at a glance: a big coloured bar and the percentages; the detail is on the Energy page.
         val d = resources.displayMetrics.density
         val parts = listOfNotNull(
             Triple(R.string.sw_drive, t.driveKwh, color(R.color.accent_energy)),
@@ -1135,11 +1135,11 @@ class MainActivity : AppCompatActivity() {
         g.removeAllViews()
         g.orientation = LinearLayout.VERTICAL
         val d = resources.displayMetrics.density
-        // Même présentation que l'énergie du trajet : grosse barre, puis les chiffres en grand
+        // Same presentation as trip energy: big bar, then the large numbers
         powerBar = app.mg4dash.ui.PowerBar(this).apply {
-            // Échelle selon le modèle (puissance moteur : 51 kWh 170 ch / 125 kW, 64 kWh 204 ch / 150 kW,
-            // 77 kWh 245 ch / 180 kW), plus une marge pour les pertes ; elle s'élargit d'elle-même si la
-            // voiture tire davantage (XPower 435 ch / 320 kW), par paliers de 50 kW, et s'en souvient.
+            // Scale by model (motor power: 51 kWh 170 hp / 125 kW, 64 kWh 204 hp / 150 kW,
+            // 77 kWh 245 hp / 180 kW), plus a margin for losses; it widens by itself if the
+            // car draws more (XPower 435 hp / 320 kW), in 50 kW steps, and remembers it.
             configureFor(prefs.batteryModel, prefs.xpower)
             maxDrawKw = maxOf(maxDrawKw, prefs.raw.getFloat("power_scale_kw", 0f))
             onScale = { prefs.raw.edit().putFloat("power_scale_kw", it).apply() }
@@ -1153,18 +1153,18 @@ class MainActivity : AppCompatActivity() {
         row.addView(left, LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f))
         row.addView(right, LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f))
         g.addView(row, LinearLayout.LayoutParams(-1, -2).apply { topMargin = (12 * d).toInt() })
-        // Détail : tension, courant (vert en récupération), centré dans la place restante sous les chiffres
+        // Detail: voltage, current (green when recovering), centred in the space left under the numbers
         powerExtra = TextView(this).apply {
             setTextColor(color(R.color.text_sub)); setTextSize(TypedValue.COMPLEX_UNIT_SP, 24f); gravity = Gravity.CENTER
             fontFeatureSettings = "tnum"
         }
         g.addView(powerExtra, LinearLayout.LayoutParams(-1, 0, 1f))
-        // Animation pleine puissance (réglages) : par-dessus la carte, le pic remplace la ligne tension · courant
+        // Full power animation (settings): above the map, the peak replaces the voltage · current line
         dropPowerFx()
         powerFx = app.mg4dash.ui.PowerFx(this).also { fx ->
             fx.onBadge = { on ->
                 powerExtra?.animate()?.alpha(if (on) 0f else 1f)?.setDuration(250)?.start()
-                if (!on) b.root.post { endBoost() }   // pas pendant le dessin de l'animation
+                if (!on) b.root.post { endBoost() }   // not while the animation is drawing
             }
         }
     }
@@ -1172,12 +1172,12 @@ class MainActivity : AppCompatActivity() {
     private var powerExtra: TextView? = null
 
     /**
-     * Carte énergie « puissance » (#29, réglage) : sans mode de conduite, KERS ni conso moyenne en
-     * haut ; l'autonomie passe à droite, la barre de puissance en direct sous celle de la batterie,
-     * puis kW à gauche, tension · courant au centre, kWh/100 à droite. Elle prend la place de la
-     * page Puissance du widget défilant, animation pleine puissance comprise.
+     * "Power" energy card (#29, setting): no drive mode, KERS or average consumption at
+     * the top; the range moves to the right, the live power bar under the battery one,
+     * then kW on the left, voltage · current in the centre, kWh/100 on the right. It takes the place of
+     * the scrolling widget's Power page, full power animation included.
      */
-    /** Barre en bas (style Complet) : la carte énergie est moins haute, chiffres réduits (#43). */
+    /** Bottom bar (Full layout): the energy card is shorter, smaller numbers (#43). */
     private fun compactEnergyCard() {
         val d = resources.displayMetrics.density
         b.battery.setTextSize(TypedValue.COMPLEX_UNIT_SP, 46f)
@@ -1195,20 +1195,20 @@ class MainActivity : AppCompatActivity() {
         (b.consumption.parent as View).visibility = View.GONE
         (b.range.parent as LinearLayout).gravity = Gravity.END
         (b.chargeState.parent as View).visibility = View.GONE
-        // Plus de place verticale : chiffres un peu plus petits, barre batterie plus basse
-        // % et km à la même taille, unités à moitié, épingle à la hauteur des chiffres (#29)
+        // More vertical room: slightly smaller numbers, lower battery bar
+        // % and km at the same size, units at half size, pin at the numbers' height (#29)
         b.battery.setTextSize(TypedValue.COMPLEX_UNIT_SP, 44f)
         b.range.setTextSize(TypedValue.COMPLEX_UNIT_SP, 44f); b.range.typeface = b.battery.typeface
-        // Chiffres posés près de la barre (#29), prise pleine avec éclair, repères plus lisibles
+        // Numbers close to the bar (#29), solid plug with a lightning bolt, more readable marks
         (b.battery.parent as LinearLayout).gravity = Gravity.BOTTOM
-        // Prise pleine avec éclair, réduite pour que km + prise fassent la hauteur du % (#29)
-        // Câble long et épais, sous toute la largeur des km ; même écart avec la barre que le % (#29)
+        // Solid plug with a lightning bolt, reduced so km + plug match the % height (#29)
+        // Long thick cable, under the full width of the km; same gap with the bar as the % (#29)
         b.rangePlug.setImageResource(R.drawable.ic_range_plug_bolt_long)
         b.rangePlug.layoutParams = (b.rangePlug.layoutParams as LinearLayout.LayoutParams).apply {
             width = (110 * d).toInt(); height = (20 * d).toInt(); topMargin = (2 * d).toInt(); bottomMargin = (9 * d).toInt()
         }
         b.batteryGauge.smallSp = 16f; b.batteryGauge.tickSp = 15f
-        // Pas d'icône devant les km (#29)
+        // No icon before the km (#29)
         b.rangePlug.visibility = View.GONE
         (b.batteryGauge.layoutParams as LinearLayout.LayoutParams).apply { height = (62 * d).toInt(); bottomMargin = (-2 * d).toInt() }
         val card = b.energyCard
@@ -1225,7 +1225,7 @@ class MainActivity : AppCompatActivity() {
             setTextColor(color(colorRes)); setTextSize(TypedValue.COMPLEX_UNIT_SP, sp); gravity = g; maxLines = 1; fontFeatureSettings = "tnum"
         }
         powerValue = tv(26f, R.color.text_value, Gravity.START)
-        // V · A sur une ligne, 50 % plus grands qu'avant (#29), réduits seulement si la place manque
+        // V · A on one line, 50 % larger than before (#29), reduced only if room is short
         powerExtra = tv(22f, R.color.text_value, Gravity.CENTER).apply {
             maxLines = 1
             setAutoSizeTextTypeUniformWithConfiguration(12, 22, 1, TypedValue.COMPLEX_UNIT_SP)
@@ -1236,14 +1236,14 @@ class MainActivity : AppCompatActivity() {
         row.addView(powerExtra, LinearLayout.LayoutParams(0, -2, 1f))
         row.addView(powerAvg, LinearLayout.LayoutParams(-2, -2))
         card.addView(row, at + 1, LinearLayout.LayoutParams(-1, -2).apply { topMargin = (6 * d).toInt() })
-        // V / A en option (#29) : sans eux, kW et conso moyenne prennent la place et grossissent
+        // V / A optional (#29): without them, kW and average consumption take the space and grow
         val va = prefs.powerVa
         if (!va) { powerExtra?.visibility = View.INVISIBLE; powerValue?.setTextSize(TypedValue.COMPLEX_UNIT_SP, 30f); powerAvg?.setTextSize(TypedValue.COMPLEX_UNIT_SP, 30f) }
         else row.addOnLayoutChangeListener { v, l, _, r, _, ol, _, or_, _ -> if (r - l != or_ - ol && r > l) v.post { fixVaSize(r - l) } }
         powerFx = app.mg4dash.ui.PowerFx(this).also { fx ->
             fx.onBadge = { on -> if (va) powerExtra?.animate()?.alpha(if (on) 0f else 1f)?.setDuration(250)?.start() }
         }
-        // Barre en bas (style Complet) : carte moins haute, tout est resserré (#43)
+        // Bottom bar (Full layout): shorter card, everything tightened (#43)
         if (!mapLayout && !Dock.vertical(this)) {
             b.battery.setTextSize(TypedValue.COMPLEX_UNIT_SP, 34f)
             b.range.setTextSize(TypedValue.COMPLEX_UNIT_SP, 34f)
@@ -1258,9 +1258,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     /**
-     * Ligne V / A à taille fixe (#29) : kW et conso moyenne prennent la largeur de leurs valeurs les plus
-     * longues, et le V / A la taille qui fait tenir sa ligne la plus longue dans ce qui reste. Elle ne
-     * rétrécit plus quand les chiffres changent.
+     * Fixed size V / A line (#29): kW and average consumption take the width of their longest
+     * values, and V / A the size that fits its longest line in what remains. It no longer
+     * shrinks when the numbers change.
      */
     private fun fixVaSize(rowW: Int) {
         val pv = powerValue ?: return; val pa = powerAvg ?: return; val ex = powerExtra ?: return
@@ -1278,28 +1278,28 @@ class MainActivity : AppCompatActivity() {
         pv.requestLayout()
     }
 
-    /** Unités kW et kWh/100 à la taille des graduations de la barre de puissance (#29). */
+    /** kW and kWh/100 units at the size of the power bar's marks (#29). */
     private fun scaleUnit(t: CharSequence): CharSequence {
         val i = t.lastIndexOf(' ').takeIf { it > 0 } ?: return t
         val sp = powerBar?.labelSp ?: 15f
         return android.text.SpannableString(t).apply { setSpan(android.text.style.AbsoluteSizeSpan(sp.toInt(), true), i, t.length, 0) }
     }
 
-    /** Unité (après le dernier espace) à demi-taille : « 79.7 % », « 347 km ». */
+    /** Unit (after the last space) at half size: "79.7 %", "347 km". */
     private fun halfUnit(t: CharSequence): CharSequence {
         val i = t.lastIndexOf(' ').takeIf { it > 0 } ?: return t
         return android.text.SpannableString(t).apply { setSpan(android.text.style.RelativeSizeSpan(0.5f), i, t.length, 0) }
     }
 
-    /** Tension la plus basse et courant le plus fort du trajet (#29), remis à zéro à chaque démarrage. */
+    /** Lowest voltage and highest current of the trip (#29), reset at each start. */
     private var minVolts: Float? = if (BuildConfig.MOCK) 325f else null
     private var maxAmps: Float? = if (BuildConfig.MOCK) 150.6f else null
     private var minMaxTrip = -1
-    /** Courant de charge le plus fort depuis le branchement (#29), affiché à la place du maxi tiré en recharge. */
+    /** Highest charge current since plugging in (#29), shown instead of the highest drawn while charging. */
     private var maxChargeAmps: Float? = null
     private var wasCharging = false
 
-    /** Puissance batterie (tension × courant) : positive = tirée, négative = récupérée. */
+    /** Battery power (voltage × current): positive = drawn, negative = recovered. */
     private suspend fun updatePower() {
         if (simpleMode) return
         var volts: Float? = null; var amps: Float? = null
@@ -1310,9 +1310,9 @@ class MainActivity : AppCompatActivity() {
             if (v != null && i != null && v in 100f..900f) v * i / 1000f else null
         }
         val plugged = VehicleState.isCharging(CarBridge.state.value.chargeStatus)
-        // XPower : la voiture ne donne pas sa version ; deux mesures de suite au-delà de 350 ch la trahissent
-        // Seulement en roulant et hors recharge : une mesure aberrante à l'arrêt ou en charge (anciens
-        // firmwares, issue #28) ne doit pas faire passer la voiture pour une XPower
+        // XPower: the car does not give its version; two measurements in a row above 350 hp give it away
+        // Only while driving and not charging: an aberrant reading when stopped or charging (old
+        // firmwares, issue #28) must not make the car pass for an XPower
         val rolling = (CarBridge.state.value.speedKmh ?: 0f) > 5f && !VehicleState.isPlugged(CarBridge.state.value.chargeStatus)
         xpowerHits = if (rolling && !plugged && kw != null && kw >= app.mg4dash.ui.PowerBar.XPOWER_DETECT_KW && kw < 400f) xpowerHits + 1 else 0
         if (xpowerHits >= 2 && !prefs.xpower) {
@@ -1333,11 +1333,11 @@ class MainActivity : AppCompatActivity() {
         powerBar?.kw = if (plugged) 0f else kw ?: 0f
         val bar = powerBar; val under = powerExtra
         if (bar != null && under != null) powerFx?.let { fx ->
-            // Au hasard : nouveau tirage tant que rien ne joue, gardé pendant l'animation
+            // Random: new draw as long as nothing plays, kept during the animation
             if (!fx.isActive) fx.style = app.mg4dash.ui.PowerFx.pick(prefs.powerFx)
-            // Badge du pic de la mygale : seulement si le conducteur affiche lui-même le widget Puissance
+            // Peak badge: only if the driver shows the Power widget themselves
             fx.badgeAllowed = cardPower || (if (mapLayout) (if (fxPrevStack >= 0) fxPrevStack else prefs.stackPage) == 2 else prefs.secondaryWidget == 1)
-            // Sur tout l'écran : la fusée arrive du bord gauche, l'éclair et les flammes couvrent l'accueil
+            // Across the screen: the rocket arrives from the left edge, lightning and flames cover the home screen
             val wide = fx.style != app.mg4dash.ui.PowerFx.NONE
             val host: View = if (wide) window.decorView else if (cardPower) b.energyCard else b.secondaryCard
             if (fxHost !== host) {
@@ -1360,14 +1360,14 @@ class MainActivity : AppCompatActivity() {
             wasCharging = plugged
             amps?.let { a -> if (plugged && a < 0f) maxChargeAmps = maxOf(maxChargeAmps ?: -a, -a) }
             val shownMax = if (plugged) maxChargeAmps else maxAmps
-            // Une ligne : tension · tension mini | courant · courant maxi (mini et maxi légèrement estompés, #29)
+            // One line: voltage · lowest voltage | current · highest current (lowest and highest slightly dimmed, #29)
             val dim = color(R.color.text_sub)
             fun line(now: CharSequence?, extreme: String?): CharSequence = android.text.SpannableStringBuilder().apply {
                 append(now ?: "—")
                 extreme?.let { val st = length; append(" $it"); setSpan(android.text.style.ForegroundColorSpan(dim), st, length, 0)
                     setSpan(android.text.style.RelativeSizeSpan(0.7f), st + it.lastIndexOf(' ') + 2, length, 0) }
             }
-            // Unités V et A à demi-taille, comme kW et kWh/100 (#29)
+            // V and A units at half size, like kW and kWh/100 (#29)
             fun half(t: String): android.text.SpannableString = android.text.SpannableString(t).apply {
                 setSpan(android.text.style.RelativeSizeSpan(0.7f), t.lastIndexOf(' ') + 1, t.length, 0)
             }
@@ -1395,12 +1395,12 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    /** Trois contacts favoris, choisis dans le répertoire ; toucher = appeler, appui long = changer. */
+    /** Three favourite contacts, chosen from the phone book; touch = call, long press = change. */
     private fun renderPhoneFavs() {
         stackTitle(b.secondaryTitle, getString(R.string.sw_phone))
         val g = b.secondaryGrid
         g.removeAllViews()
-        // 2 ou 3 raccourcis sur une ligne, 4, 6 ou 8 sur deux lignes ; icône et nom réduits sur deux lignes
+        // 2 or 3 shortcuts on one line, 4, 6 or 8 on two lines; icon and name reduced on two lines
         val n = app.mg4dash.shortcuts.PhoneFavorites.count(prefs)
         val cols = app.mg4dash.shortcuts.PhoneFavorites.columns(n)
         val twoRows = n > 3
@@ -1444,7 +1444,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // ── Observation des sources de données ───────────────────────────────────
+    // ── Watching the data sources ────────────────────────────────────────────
 
     private fun observe() {
         lifecycleScope.launch {
@@ -1452,7 +1452,7 @@ class MainActivity : AppCompatActivity() {
                 launch {
                     var shown: VehicleState? = null
                     CarBridge.state.collect { s ->
-                        // Vitesse et compteur changent sans cesse en roulant, et ces cartes ne les affichent pas
+                        // Speed and odometer keep changing while driving, and these cards do not show them
                         val quiet = s.copy(speedKmh = null, odometerKm = null)
                         if (quiet != shown) { shown = quiet; renderClimate(s); renderEnergy(s, ConsumptionEstimator.average.value); stackAuto(s) }
                     }
@@ -1461,12 +1461,12 @@ class MainActivity : AppCompatActivity() {
                 launch { MediaHub.now.collect { renderMedia(it) } }
                 launch { WeatherRepo.shown.collect { renderWeather(it, CarBridge.state.value) } }
                 launch { LocationRepo.location.collect { renderLocation(it, CarBridge.state.value) } }
-                // Guidage DiAuto : bandeau sur la carte (pas sur les raccourcis)
+                // DiAuto guidance: banner on the map (not on the shortcuts)
                 launch { app.mg4dash.energy.ConsumptionCurve.curves.collect { consumptionCard?.takeIf { it.visibility == View.VISIBLE }?.show() } }
                 launch { app.mg4dash.map.NavRepo.nav.collect { n -> navBanner?.show(n?.takeIf { effectiveWidget() == 0 }) } }
                 launch { while (true) { updatePower(); delay(1_000) } }
-                // Démarrage (#64) : l'accueil est construit avec le dernier thème connu ; dès que la voiture
-                // répond, l'état des feux est lu et le thème changé aussitôt, sans attendre la boucle de 5 s
+                // Startup (#64): home is built with the last known theme; as soon as the car
+                // answers, the lights state is read and the theme changed at once, without waiting for the 5 s loop
                 launch {
                     val t0 = android.os.SystemClock.elapsedRealtime()
                     while (!app.mg4dash.car.CarProps.ready && android.os.SystemClock.elapsedRealtime() - t0 < 15_000) delay(100)
@@ -1497,16 +1497,16 @@ class MainActivity : AppCompatActivity() {
         if (WeatherRepo.shown.value == null) renderWeather(null, CarBridge.state.value)
     }
 
-    // ── Démarrage : laisser le launcher SAIC enregistrer son interface ───────
+    // ── Startup: let the SAIC launcher register its interface ────────────────
 
     /**
-     * Le service du launcher SAIC (caméra, sources audio, commandes de SystemUI) ne reçoit
-     * son interface de rappel que lorsque son écran d'accueil est créé. Une fois par démarrage
-     * de la voiture, on l'ouvre donc brièvement puis on revient ici.
+     * The SAIC launcher's service (camera, audio sources, SystemUI commands) only receives
+     * its callback interface once its home screen is created. Once per car
+     * start, it is therefore opened briefly, then we come back here.
      */
     private fun warmUpStockLauncherIfNeeded() {
         if (BuildConfig.MOCK) return
-        if (!HomeSwitcher.isStockEnabled(this)) return   // accueil SAIC désactivé (remplacé par MG4Dash)
+        if (!HomeSwitcher.isStockEnabled(this)) return   // SAIC home disabled (replaced by MG4Dash)
         val bootCount = try { Settings.Global.getInt(contentResolver, Settings.Global.BOOT_COUNT) } catch (_: Exception) { -1 }
         val sp = prefs.raw
         if (bootCount >= 0 && sp.getInt("warmup_boot", -2) == bootCount) return
@@ -1514,7 +1514,7 @@ class MainActivity : AppCompatActivity() {
         Log.i("Boot", "briefly opening the SAIC launcher (boot #$bootCount)")
         try {
             startActivity(Intent(Intent.ACTION_MAIN).setComponent(HomeSwitcher.STOCK).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
-            // Handler distinct : celui de l'activité est vidé dans onPause, qui survient justement ici.
+            // Separate Handler: the activity's one is emptied in onPause, which happens right here.
             Handler(Looper.getMainLooper()).postDelayed({
                 startActivity(Intent(this, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_REORDER_TO_FRONT))
             }, 1500)
@@ -1527,7 +1527,7 @@ class MainActivity : AppCompatActivity() {
     private fun dp(v: Int) = (v * resources.displayMetrics.density).toInt()
     private companion object {
         const val KEY_MAP_FULL = "map_full"
-        /** Plein écran de la carte à rétablir après une recréation (en plus de l'état sauvegardé). */
+        /** Map full screen to restore after a recreation (in addition to the saved state). */
         var mapFullOnRecreate = false
     }
 }

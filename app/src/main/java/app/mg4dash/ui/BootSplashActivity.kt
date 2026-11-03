@@ -13,12 +13,12 @@ import android.os.UserManager
 import android.view.View
 
 /**
- * Écran de démarrage, à la place de « Le téléphone démarre » d'Android.
+ * Startup screen, instead of Android's "Phone is starting".
  *
- * Tant que la session n'est pas déverrouillée (chiffrement par fichier), Android n'affiche que les
- * accueils « directBootAware » : celui-ci (priorité −1, au-dessus de l'écran d'attente d'Android à
- * −1000 mais sous l'accueil MG4Dash à 0, qui reste donc l'accueil normal). Il ne lit rien sur le
- * stockage chiffré : il anime, puis ouvre l'accueil MG4Dash dès le déverrouillage.
+ * As long as the session is not unlocked (file-based encryption), Android only shows
+ * "directBootAware" home screens: this one (priority −1, above Android's waiting screen at
+ * −1000 but below MG4Dash home at 0, which stays the normal home). It reads nothing from
+ * encrypted storage: it animates, then opens MG4Dash home as soon as unlocked.
  */
 class BootSplashActivity : Activity() {
     private val handler = Handler(Looper.getMainLooper())
@@ -28,7 +28,7 @@ class BootSplashActivity : Activity() {
         override fun onReceive(c: Context?, i: Intent?) { openHome() }
     }
 
-    /** Filet de sécurité : on vérifie aussi l'état toutes les secondes. */
+    /** Safety net: the state is also checked every second. */
     private val poll = object : Runnable {
         override fun run() { if (isUnlocked()) openHome() else handler.postDelayed(this, 1000) }
     }
@@ -37,7 +37,7 @@ class BootSplashActivity : Activity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // Déjà déverrouillé (accueil demandé plus tard) : directement l'accueil MG4Dash
+        // Already unlocked (home requested later): directly MG4Dash home
         if (isUnlocked()) { openHome(); return }
         val v = SplashView(this).apply {
             version = try { packageManager.getPackageInfo(packageName, 0).versionName.substringBefore('-') } catch (_: Throwable) { "" }

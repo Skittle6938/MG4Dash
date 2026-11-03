@@ -32,15 +32,15 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 /**
- * Copie sur la clé USB le launcher et le SystemUI d'origine (dossiers entiers, oat/ compris), plus les lignes
- * du journal sur les boutons du volant. Ne modifie rien dans la voiture, et ne touche pas à internet.
+ * Copies to the USB stick the stock launcher and SystemUI (whole folders, oat/ included), plus the log
+ * lines about the steering wheel buttons. Changes nothing in the car, and does not touch the internet.
  */
 public final class MainActivity extends Activity {
     private static final String[] PACKAGES = { "com.saicmotor.launcher", "com.android.systemui" };
     private static final String ZIP_NAME = "swi173_files.zip";
     private static final long PART_SIZE = 20L * 1024 * 1024;
     private static final int MATCH_FACTORY_ONLY = 0x00200000;
-    /** Seules ces lignes du journal sont gardées : les boutons du volant, rien de personnel. */
+    /** Only these log lines are kept: the steering wheel buttons, nothing personal. */
     private static final Pattern LOG_LINES = Pattern.compile("key receive|processKeyEvent|mCurrentController|SwcManager|StarKey");
     private static final int MAX_LOG_LINES = 20000;
 
@@ -105,7 +105,7 @@ public final class MainActivity extends Activity {
         return null;
     }
 
-    /** Racine de la clé si on peut y écrire (refusé sur certains firmwares), sinon le dossier propre à l'appli sur la clé. */
+    /** Stick root if writable (refused on some firmwares), otherwise the app's own folder on the stick. */
     private File outputDir(File usb) throws IOException {
         File root = new File(usb, "mg4_files");
         if ((root.mkdirs() || root.isDirectory()) && canWrite(root)) return root;
@@ -168,7 +168,7 @@ public final class MainActivity extends Activity {
         report.append('\n').append(pkg).append(": ").append(ai.sourceDir).append('\n');
         int n = ZipFolder.addDir(zip, current, pkg + "/current", report);
         n += addDalvikCache(zip, current, pkg + "/dalvik-cache", report);
-        // Mise à jour installée dans /data/app : on prend aussi la version d'usine, sur /system
+        // Update installed in /data/app: also take the factory version, on /system
         if ((ai.flags & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0) {
             try {
                 File factory = new File(pm.getPackageInfo(pkg, MATCH_FACTORY_ONLY).applicationInfo.sourceDir).getParentFile();
@@ -184,7 +184,7 @@ public final class MainActivity extends Activity {
         return n;
     }
 
-    /** Code compilé d'une appli système rangé hors de son dossier (arm64/system@priv-app@Nom@Nom.apk@classes.*), si lisible. */
+    /** Compiled code of a system app stored outside its folder (arm64/system@priv-app@Name@Name.apk@classes.*), if readable. */
     private int addDalvikCache(ZipOutputStream zip, File appDir, String prefix, StringBuilder report) throws IOException {
         String marker = "@" + appDir.getName() + "@";
         int n = 0;

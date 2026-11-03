@@ -13,12 +13,12 @@ import android.view.View
 import android.view.animation.LinearInterpolator
 
 /**
- * Animation de démarrage : « MG4Dash » qui apparaît, puis une barre fine qui se remplit comme la
- * barre de batterie, pastille lumineuse au bout. Couleurs fixes (pas de thème) : l'écran peut
- * s'afficher avant le déverrouillage, quand les réglages ne sont pas encore lisibles.
+ * Startup animation: "MG4Dash" appearing, then a thin bar filling like the
+ * battery bar, a glowing dot at the end. Fixed colours (no theme): the screen can
+ * show before unlocking, when the settings are not readable yet.
  */
 class SplashView(context: Context) : View(context) {
-    /** Temps de l'animation en secondes (piloté par [start], ou fixé pour les captures). */
+    /** Animation time in seconds (driven by [start], or fixed for screenshots). */
     var time = 0f; set(v) { field = v; invalidate() }
     var version = ""
 
@@ -45,14 +45,14 @@ class SplashView(context: Context) : View(context) {
 
     override fun onDraw(c: Canvas) {
         val w = width.toFloat(); val h = height.toFloat()
-        // Fond : même dégradé sombre que MG4Dash
+        // Background: same dark gradient as MG4Dash
         paint.shader = LinearGradient(0f, 0f, 0f, h, BG_TOP, BG_BOTTOM, Shader.TileMode.CLAMP)
         c.drawRect(0f, 0f, w, h, paint); paint.shader = null
         val t = time % CYCLE
-        // Disparition en fin de cycle, reprise en douceur
+        // Fade out at the end of the cycle, gentle restart
         val out = 1f - ease((t - (CYCLE - 0.35f)) / 0.35f)
         val cx = w / 2; val cy = h / 2 - 20 * d
-        // Mot-symbole : « MG4 » appuyé, « Dash » léger, glisse légèrement en apparaissant
+        // Wordmark: bold "MG4", light "Dash", slides slightly as it appears
         val a = ease(t / 0.6f) * out
         paint.textSize = 64 * sd
         paint.typeface = bold; val w1 = paint.measureText("MG4")
@@ -60,7 +60,7 @@ class SplashView(context: Context) : View(context) {
         val x0 = cx - (w1 + w2) / 2; val y0 = cy + (1 - a) * 10 * d
         paint.color = withAlpha(TEXT, a); paint.typeface = bold; c.drawText("MG4", x0, y0, paint)
         paint.color = withAlpha(ACCENT, a); paint.typeface = light; c.drawText("Dash", x0 + w1, y0, paint)
-        // Barre de « charge »
+        // "Charge" bar
         val bw = 420 * d; val bh = 6 * d
         val bx = cx - bw / 2; val by = cy + 46 * d
         val track = RectF(bx, by, bx + bw, by + bh)
@@ -71,13 +71,13 @@ class SplashView(context: Context) : View(context) {
             val end = bx + bw * p
             paint.shader = LinearGradient(bx, 0f, end, 0f, withAlpha(ENERGY, 0.55f * out), withAlpha(ENERGY, out), Shader.TileMode.CLAMP)
             c.drawRoundRect(RectF(bx, by, end, by + bh), bh / 2, bh / 2, paint); paint.shader = null
-            // Pastille avec halo au bout de la barre
+            // Dot with a halo at the end of the bar
             val my = by + bh / 2
             paint.shader = RadialGradient(end, my, 22 * d, withAlpha(ENERGY, 0.5f * out), withAlpha(ENERGY, 0f), Shader.TileMode.CLAMP)
             c.drawCircle(end, my, 22 * d, paint); paint.shader = null
             paint.color = withAlpha(0xFFFFFFFF.toInt(), out); c.drawCircle(end, my, 6 * d, paint)
         }
-        // Version, en petit, en fondu
+        // Version, small, fading in
         if (version.isNotEmpty()) {
             paint.textSize = 15 * sd; paint.typeface = light; paint.textAlign = Paint.Align.CENTER
             paint.color = withAlpha(SUB, ease((t - 0.8f) / 0.6f) * out)

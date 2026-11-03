@@ -5,7 +5,7 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
-/** Démarrage du V2L au branchement (#82) : états de charge 0 = débranché, 11 = adaptateur, 13-15 = décharge. */
+/** V2L start on plugging in (#82): charge states 0 = unplugged, 11 = adapter, 13-15 = discharging. */
 class V2lAutoTest {
     @Test fun startsWhenPluggedOrAlreadyPluggedAtStartup() {
         assertTrue(V2lAuto.shouldStart(0, 11))

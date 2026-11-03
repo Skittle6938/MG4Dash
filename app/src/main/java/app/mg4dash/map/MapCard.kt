@@ -18,25 +18,25 @@ import org.osmdroid.views.overlay.Marker
 import java.io.File
 
 /**
- * Carte OpenStreetMap sombre centrée sur la voiture (remplace la tuile Android Auto,
- * déjà présente dans le dock). Suit la position tant que l'utilisateur ne la déplace pas ;
- * le bouton « recentrer » reprend le suivi.
+ * Dark OpenStreetMap map centred on the car (replaces the Android Auto tile,
+ * already in the dock). Follows the position as long as the user does not move it;
+ * the "recentre" button resumes following.
  */
 class MapCard(private val context: Context, holder: ViewGroup) {
 
     private val map: MapView?
     private val marker: Marker?
-    /** Captures d'écran (PC) : extrait de carte fixe, tuiles OpenStreetMap fournies par les tests. */
+    /** Screenshots (PC): fixed map extract, OpenStreetMap tiles provided by the tests. */
     private var preview: android.view.View? = null
     private var follow = true
     private var lastTouch = 0L
-    /** Toucher sur la carte (fait réapparaître les boutons masqués, #15). */
+    /** Touch on the map (brings back the hidden buttons, #15). */
     var onTouch: (() -> Unit)? = null
-    /** Appui long sur la carte : choisir une appli à afficher à sa place (#41). */
+    /** Long press on the map: choose an app to show in its place (#41). */
     var onLongPress: (() -> Unit)? = null
-    /** Niveau de zoom voulu : le suivi l'utilise, sinon chaque position annulait le zoom en cours. */
+    /** Wanted zoom level: following uses it, otherwise each position cancelled the zoom in progress. */
     private var zoomLevel = app.mg4dash.system.Prefs(context).mapZoom.coerceIn(14, 18).toDouble()
-    /** Carte orientée selon le cap de la voiture (sinon nord en haut) ; 2e appui sur « recentrer ». */
+    /** Map oriented to the car's heading (otherwise north up); second press on "recentre". */
     var headingUp = app.mg4dash.system.Prefs(context).mapHeadingUp
         private set
     private companion object {
@@ -45,12 +45,12 @@ class MapCard(private val context: Context, holder: ViewGroup) {
         const val MIN_MOVE_PX = 2f
         const val DEFAULT_MAP_W = 600
         const val DEFAULT_MAP_H = 420
-        /** Voiture plus bas que le centre en mode cap, en part de la hauteur de la carte. */
+        /** Car below the centre in heading mode, as a share of the map's height. */
         const val HEADING_OFFSET = 0.38f
     }
 
     init {
-        // Robolectric (captures sur PC) ne sait pas dessiner osmdroid : on laisse le fond.
+        // Robolectric (PC screenshots) cannot draw osmdroid: leave the background.
         if (Build.FINGERPRINT == "robolectric") {
             map = null; marker = null
             preview = screenshotPreview(holder)
@@ -68,7 +68,7 @@ class MapCard(private val context: Context, holder: ViewGroup) {
                 minZoomLevel = 5.0
                 maxZoomLevel = 19.0
                 controller.setZoom(zoomLevel)
-                // Carte sombre en thème sombre ; tuiles d'origine en thème clair
+                // Dark map in dark theme; original tiles in light theme
                 dark = darkMap(); darkCheckedAt = System.currentTimeMillis()
                 if (dark == true) overlayManager.tilesOverlay.setColorFilter(darkFilter())
                 overlayManager.tilesOverlay.loadingBackgroundColor = app.mg4dash.ui.Themes.color(context, R.color.bg_top)
@@ -81,8 +81,8 @@ class MapCard(private val context: Context, holder: ViewGroup) {
                 setInfoWindow(null)
             }
             m.overlays.add(mk)
-            // Le suivi ne s'arrête que sur un vrai déplacement au doigt (les événements de défilement
-            // de l'animation coupaient le suivi en roulant), et reprend tout seul après 20 s.
+            // Following only stops on a real finger move (scroll events from the
+            // animation cut following while driving), and resumes by itself after 20 s.
             var downX = 0f; var downY = 0f
             val longPress = android.view.GestureDetector(context, object : android.view.GestureDetector.SimpleOnGestureListener() {
                 override fun onLongPress(e: MotionEvent) { onLongPress?.invoke() }
@@ -94,7 +94,7 @@ class MapCard(private val context: Context, holder: ViewGroup) {
                     MotionEvent.ACTION_MOVE -> if (Math.hypot((ev.x - downX).toDouble(), (ev.y - downY).toDouble()) > 24) {
                         follow = false; lastTouch = System.currentTimeMillis()
                     }
-                    // Zoom au doigt (pincement) : on garde le niveau choisi pour le suivi
+                    // Pinch zoom: keep the chosen level for following
                     MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> zoomLevel = m.zoomLevelDouble
                 }
                 false
@@ -104,7 +104,7 @@ class MapCard(private val context: Context, holder: ViewGroup) {
         }
     }
 
-    /** Thème de la carte (#15) : auto (jour / nuit de la voiture, quel que soit le thème de l'appli), clair ou sombre. */
+    /** Map theme (#15): auto (the car's day / night, whatever the app's theme), light or dark. */
     private fun darkMap(): Boolean = when (app.mg4dash.system.Prefs(context).mapTheme) {
         1 -> false
         2 -> true
@@ -113,7 +113,7 @@ class MapCard(private val context: Context, holder: ViewGroup) {
     private var dark: Boolean? = null
     private var darkCheckedAt = 0L
 
-    /** En auto, la carte suit le passage jour / nuit sans attendre que l'écran soit reconstruit. */
+    /** In auto, the map follows day / night changes without waiting for the screen to be rebuilt. */
     private fun refreshDark(m: MapView) {
         val now = System.currentTimeMillis()
         if (now - darkCheckedAt < 30_000L) return
@@ -124,7 +124,7 @@ class MapCard(private val context: Context, holder: ViewGroup) {
         m.overlayManager.tilesOverlay.setColorFilter(if (d) darkFilter() else null)
     }
 
-    /** Inversion des couleurs + désaturation : rendu « nuit » lisible, sans clé ni style payant. */
+    /** Colour inversion + desaturation: readable "night" look, with no key or paid style. */
     private fun darkFilter(): ColorMatrixColorFilter {
         val invert = ColorMatrix(floatArrayOf(
             -1f, 0f, 0f, 0f, 255f,
@@ -152,9 +152,9 @@ class MapCard(private val context: Context, holder: ViewGroup) {
     private var tilesCached = false
 
     /**
-     * Toutes les tuiles affichées sont en cache, au bon niveau de zoom (trajet connu) : sans internet, la carte
-     * reste utile et ne cède pas sa place à la consommation. Une seule tuile absente laisserait une zone vide
-     * ou floue (#15). Vérifié toutes les 5 s au plus : ce test passe par la base du cache, sur le fil principal.
+     * All displayed tiles are cached, at the right zoom level (known route): without internet, the map
+     * stays useful and does not give way to consumption. A single missing tile would leave an empty
+     * or blurred area (#15). Checked every 5 s at most: this test goes through the cache database, on the main thread.
      */
     fun hasCachedTiles(location: Location?): Boolean {
         val m = map
@@ -162,7 +162,7 @@ class MapCard(private val context: Context, holder: ViewGroup) {
         val now = android.os.SystemClock.uptimeMillis()
         if (tilesCheckedAt != 0L && now - tilesCheckedAt < TILES_CHECK_MS) return tilesCached
         tilesCheckedAt = now
-        // Carte masquée : sa dernière taille reste connue, et le suivi se fait toujours autour de la voiture
+        // Map hidden: its last size stays known, and following is still around the car
         val w = m.width.takeIf { it > 0 } ?: DEFAULT_MAP_W
         val h = m.height.takeIf { it > 0 } ?: DEFAULT_MAP_H
         val center = if (follow) null else m.mapCenter
@@ -184,7 +184,7 @@ class MapCard(private val context: Context, holder: ViewGroup) {
             cl.getResourceAsStream("map_preview/tile_${x}_$y.png")?.use { android.graphics.BitmapFactory.decodeStream(it) }
                 ?.let { canvas.drawBitmap(it, x * 256f, y * 256f, null) }
         }
-        // Zone centrée sur le point, à la taille du widget
+        // Area centred on the point, at the widget's size
         val frame = object : android.widget.FrameLayout(context) {
             override fun onLayout(changed: Boolean, l: Int, t: Int, r: Int, b: Int) {
                 super.onLayout(changed, l, t, r, b)
@@ -212,8 +212,8 @@ class MapCard(private val context: Context, holder: ViewGroup) {
     private var shownState = ""
 
     /**
-     * Position vraiment changée à l'écran. Le GPS répond chaque seconde même à l'arrêt : l'animation de 0,8 s qui
-     * suivait gardait la carte en mouvement 80 % du temps, à 30 images par seconde, et chargeait tout l'écran.
+     * Position really changed on screen. GPS answers every second even when stopped: the 0.8 s animation that
+     * followed kept the map moving 80 % of the time, at 30 frames per second, and loaded the whole screen.
      */
     private fun needsDrawing(m: MapView, location: Location, state: String): Boolean {
         val last = shownLocation
@@ -230,19 +230,19 @@ class MapCard(private val context: Context, holder: ViewGroup) {
         refreshDark(m)
         val p = GeoPoint(location.latitude, location.longitude)
         if (!follow && System.currentTimeMillis() - lastTouch > RESUME_FOLLOW_MS) follow = true
-        // Cap arrondi à 2° : à l'arrêt il oscille sans que l'icône ait besoin de tourner
+        // Heading rounded to 2°: when stopped it oscillates with no need for the icon to turn
         val state = "$follow|$headingUp|${m.height}|${if (location.hasBearing()) Math.round(location.bearing / 2f) else -1}"
         if (!needsDrawing(m, location, state)) return
         marker?.position = p
         if (location.hasBearing()) marker?.rotation = -location.bearing
         if (follow && headingUp && location.hasBearing() && location.speed > 1f) m.mapOrientation = -location.bearing
-        // Cap en haut : la voiture descend vers le bas du widget pour montrer plus de route devant (issue #6)
+        // Heading up: the car moves towards the bottom of the widget to show more road ahead (issue #6)
         m.setMapCenterOffset(0, if (headingUp && follow) (m.height * HEADING_OFFSET).toInt() else 0)
         if (follow) m.controller.animateTo(p, zoomLevel, 800L)
         m.invalidate()
     }
 
-    /** 1er appui : reprendre le suivi ; appui suivant (déjà centrée) : nord en haut ↔ cap de la voiture. */
+    /** First press: resume following; next press (already centred): north up ↔ car heading. */
     fun recenter(location: Location?) {
         if (follow) {
             headingUp = !headingUp

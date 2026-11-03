@@ -3,7 +3,7 @@
     <!-- Fonds -->
     <color name="bg_top">#FF0B0F17</color>
     <color name="bg_bottom">#FF141B29</color>
-    <color name="panel">#D912161F</color>          <!-- #12161F à ~85 % -->
+    <color name="panel">#D912161F</color>          <!-- #12161F at ~85 % -->
     <color name="panel_raised">#E61A2030</color>
     <color name="panel_border">#FF2A3142</color>
     <color name="button_idle">#FF1C2231</color>
@@ -11,7 +11,7 @@
 
     <!-- Texte -->
     <color name="text_value">#FFFFFFFF</color>
-    <color name="on_action">#FFFFFFFF</color>          <!-- texte / icône posés sur la couleur des boutons (fixe) -->
+    <color name="on_action">#FFFFFFFF</color>          <!-- text / icon on the button colour (fixed) -->
     <color name="text_title">#FF8A94A6</color>
     <color name="text_sub">#FFA0AEC0</color>
     <color name="text_disabled">#FF4A5366</color>
@@ -19,10 +19,10 @@
     <!-- Accents -->
     <color name="accent_cold">#FF00D2FF</color>
     <color name="accent_energy">#FF00E676</color>
-    <!-- Vert de l'énergie pour les textes et courbes en mode clair : le vert vif manque de contraste sur blanc -->
+    <!-- Energy green for texts and curves in light mode: the vivid green lacks contrast on white -->
     <color name="accent_energy_light">#FF00A04A</color>
     <color name="accent_heat">#FFFF9100</color>
-    <!-- Réchauffage de la batterie (répartition de la conso) -->
+    <!-- Battery heating (consumption breakdown) -->
     <color name="accent_battery">#FFB388FF</color>
     <color name="accent_action">#FF2979FF</color>
     <color name="accent_danger">#FFFF5252</color>

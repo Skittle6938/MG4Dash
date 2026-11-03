@@ -5,7 +5,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 
-/** Données simulées pour l'émulateur : permet de valider l'UI sans la voiture. */
+/** Simulated data for the emulator: lets the UI be checked without the car. */
 object MockCar {
     fun start(scope: CoroutineScope, state: MutableStateFlow<VehicleState>) {
         state.value = VehicleState(

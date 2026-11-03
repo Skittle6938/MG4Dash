@@ -7,7 +7,7 @@ import android.widget.TextView
 import android.widget.Toast
 import app.mg4dash.R
 
-/** Messages courts au style MG4Dash (couleurs du thème en cours), au lieu du style de la voiture. */
+/** Short messages in MG4Dash style (current theme's colours), instead of the car's style. */
 object Toasts {
     fun show(context: Context, text: CharSequence, long: Boolean = false) {
         val d = context.resources.displayMetrics.density

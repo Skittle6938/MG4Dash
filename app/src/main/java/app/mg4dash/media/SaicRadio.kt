@@ -9,16 +9,16 @@ import android.os.Parcel
 import app.mg4dash.system.Log
 
 /**
- * Radio des firmwares ancien SDK (SWI68…) : pas de MediaBrowserService ni de session média,
- * seulement le service `com.saicmotor.service.radio` et son interface AIDL `IRadioAppService`.
- * Codes de transaction relevés dans IRadioAppService$Stub du RadioService d'origine (SWI68 R46).
+ * Radio of old SDK firmwares (SWI68…): no MediaBrowserService or media session,
+ * only the `com.saicmotor.service.radio` service and its AIDL interface `IRadioAppService`.
+ * Transaction codes found in IRadioAppService$Stub of the stock RadioService (SWI68 R46).
  */
 object SaicRadio {
     private const val TAG = "Radio"
     private const val PKG = "com.saicmotor.service.radio"
     private const val ACTION = "com.saicmotor.service.radio.radioservice"
     private const val DESCRIPTOR = "com.saicmotor.sdk.radio.IRadioAppService"
-    /** Appli radio d'origine (écran ouvert en touchant la carte). */
+    /** Stock radio app (screen opened by touching the card). */
     const val HMI_PKG = "com.saicmotor.hmi.radio"
 
     private const val TX_NEXT = 13
@@ -69,8 +69,8 @@ object SaicRadio {
     }
 
     /**
-     * Station en cours (getCurrentRadioInfo). RadioBean.writeToParcel commence par : enable (byte),
-     * nom, rds (byte), pochette, fréquence (kHz), bande, état (1 = lecture) ; un byte occupe un int.
+     * Current station (getCurrentRadioInfo). RadioBean.writeToParcel starts with: enable (byte),
+     * name, rds (byte), cover, frequency (kHz), band, state (1 = playing); a byte takes one int.
      */
     fun refresh(): Station? {
         val st = call(TX_CURRENT_INFO) { r ->

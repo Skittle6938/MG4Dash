@@ -17,8 +17,8 @@ import app.mg4dash.ui.SegmentedGauge
 import java.util.Locale
 
 /**
- * Page Véhicule, en lecture seule : les réglages se font dans MG4 Control (raccourci en
- * en-tête) ou dans les réglages SAIC d'origine.
+ * Vehicle page, read only: settings are made in MG4 Control (shortcut in the
+ * header) or in the stock SAIC settings.
  */
 class VehicleActivity : PageActivity() {
     override val pageTitle get() = getString(R.string.title_vehicle)
@@ -34,7 +34,7 @@ class VehicleActivity : PageActivity() {
     private val values = mutableMapOf<Int, TextView>()
 
     override fun buildBody() {
-        // Page Son (égaliseur, répartition) : notre propre écran
+        // Sound page (equaliser, balance): our own screen
         header.addView(kit.text(getString(R.string.vh_sound), 19f, R.color.text_sub).apply {
             setPadding(kit.dp(16), kit.dp(12), kit.dp(16), kit.dp(12))
             setBackgroundResource(R.drawable.bg_button)
@@ -81,12 +81,12 @@ class VehicleActivity : PageActivity() {
             }
         }
 
-        // ── Aides à la conduite ──
+        // ── Driving aids ──
         val adas = kit.panel(getString(R.string.vh_adas))
         listOf(R.string.vh_lane, R.string.vh_aeb, R.string.vh_overspeed, R.string.vh_limit_beep).forEach { addInfo(adas, it) }
         adas.addView(kit.text(getString(R.string.vh_use_mg4control), 17f, R.color.text_title), kit.lp(-1, -2, t = 10))
 
-        // ── Pneus : pression et température (capteurs TPMS) ──
+        // ── Tyres: pressure and temperature (TPMS sensors) ──
         val tires = kit.panel(getString(R.string.vh_tires))
         val grid = kit.column()
         listOf(listOf(0, 1), listOf(2, 3)).forEach { pair ->
@@ -112,10 +112,10 @@ class VehicleActivity : PageActivity() {
             }
         }
 
-        // ── État ──
+        // ── State ──
         val state = kit.panel(getString(R.string.vh_state))
         listOf(R.string.vh_battery, R.string.vh_range, R.string.vh_avg_cons, R.string.vh_odometer, R.string.vh_speed, R.string.vh_outside, R.string.vh_charge).forEach { addInfo(state, it) }
-        // Santé batterie estimée par MG4Dash (capacité mesurée ÷ capacité d'origine du modèle)
+        // Battery health estimated by MG4Dash (measured capacity ÷ the model's original capacity)
         state.addView(kit.divider(), kit.lp(-1, 1, t = 4))
         addInfo(state, R.string.vh_soh)
         sohDetail = kit.text("", 16f, R.color.text_sub).apply { maxLines = 2 }
@@ -125,11 +125,11 @@ class VehicleActivity : PageActivity() {
 
         body.addView(drive, kit.lp(0, -1, 1f, r = 6))
         body.addView(mid, kit.lp(0, -1, 1f, l = 6, r = 6))
-        // Charge de l'autoradio (#69) : section à part sous l'état du véhicule, processeur et mémoire relus toutes les 2 s
+        // Head unit load (#69): separate section under the vehicle state, CPU and memory reread every 2 s
         val unit = kit.panel(getString(R.string.vh_head_unit))
         listOf(R.string.vh_cpu, R.string.vh_ram).forEach { addInfo(unit, it) }
         unit.isClickable = true; unit.isFocusable = true
-        unit.setOnClickListener { app.mg4dash.ui.ProcessDialog.show(this) }   // détail par appli
+        unit.setOnClickListener { app.mg4dash.ui.ProcessDialog.show(this) }   // per app detail
         unit.addView(kit.text(getString(R.string.ps_hint), 15f, R.color.accent_action), kit.lp(-1, -2, t = 2))
         val right = android.widget.LinearLayout(this).apply { orientation = android.widget.LinearLayout.VERTICAL }
         right.addView(state, kit.lp(-1, 0, 1f))
@@ -139,7 +139,7 @@ class VehicleActivity : PageActivity() {
 
     private lateinit var sohDetail: TextView
 
-    /** Santé au dixième et km couverts par la mesure (le modèle de batterie se choisit dans les réglages). */
+    /** Health to the tenth and km covered by the measurement (the battery model is chosen in the settings). */
     private fun renderSoh() {
         val bc = app.mg4dash.energy.BatteryCapacity
         val units = app.mg4dash.system.Units
@@ -157,7 +157,7 @@ class VehicleActivity : PageActivity() {
     private val tirePressure = mutableListOf<TextView>()
     private val tireTemp = mutableListOf<TextView>()
 
-    /** Pression (kPa, affichée en bar), température (°C) et état du capteur : AVG, AVD, ARG, ARD. */
+    /** Pressure (kPa, shown in bar), temperature (°C) and sensor state: FL, FR, RL, RR. */
     private suspend fun refreshTires() {
         val data = withContext(Dispatchers.IO) {
             (0..3).map { i ->
@@ -183,7 +183,7 @@ class VehicleActivity : PageActivity() {
 
     private fun set(label: Int, v: String) { values[label]?.text = v }
 
-    /** Réglage que la voiture ne fournit pas (anciens firmwares, #37) : ligne masquée. */
+    /** Setting the car does not provide (old firmwares, #37): line hidden. */
     private fun setOpt(label: Int, raw: Int?, v: String) {
         val tv = values[label] ?: return
         tv.text = v

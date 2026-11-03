@@ -11,12 +11,12 @@ import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
 /**
- * Téléphone en projection (Android Auto / CarPlay), en lecture seule (#41).
+ * Phone in projection (Android Auto / CarPlay), read only (#41).
  *
- * Ouvrir Android Auto ou CarPlay sans téléphone connecté laisse un écran noir. Comme les lanceurs
- * d'origine, on demande au service AllGo `com.allgo.rui/.RemoteUIService` l'appareil en session
- * (`IRemoteUIService.getActiveRemoteDevice`, transaction 15) : rien = aucune session, sinon son type
- * (1 CarPlay, 2 Android Auto). Voie documentée par MG4Control (SliDeeN, branche beta, 2026-10-23).
+ * Opening Android Auto or CarPlay with no phone connected leaves a black screen. Like the stock
+ * launchers, ask the AllGo service `com.allgo.rui/.RemoteUIService` for the device in session
+ * (`IRemoteUIService.getActiveRemoteDevice`, transaction 15): nothing = no session, otherwise its type
+ * (1 CarPlay, 2 Android Auto). Route documented by MG4Control (SliDeeN, beta branch, 2026-10-23).
  */
 object Projection {
     private const val TAG = "Projection"
@@ -25,9 +25,9 @@ object Projection {
     private val SERVICE = ComponentName("com.allgo.rui", "com.allgo.rui.RemoteUIService")
 
     sealed class Session {
-        /** AllGo a répondu : [target] = écran de la projection en cours, null = aucun téléphone. */
+        /** AllGo answered: [target] = screen of the current projection, null = no phone. */
         data class Read(val target: ComponentName?) : Session()
-        /** Service absent ou muet : on ne sait pas, on ouvre comme avant. */
+        /** Service missing or silent: unknown, open as before. */
         object Unknown : Session()
     }
 
@@ -38,7 +38,7 @@ object Projection {
         override fun onServiceDisconnected(name: ComponentName?) { binder = null }
     }
 
-    /** Hors du fil principal : la première liaison attend la réponse du service (2 s au plus). */
+    /** Off the main thread: the first binding waits for the service's answer (2 s at most). */
     fun session(context: Context): Session {
         val b = bind(context) ?: return Session.Unknown
         val data = Parcel.obtain(); val reply = Parcel.obtain()
@@ -47,8 +47,8 @@ object Projection {
             b.transact(TX_ACTIVE_DEVICE, data, reply, 0)
             reply.readException()
             if (reply.readInt() == 0) return Session.Read(null)
-            reply.readInt()          // statut de session
-            reply.readString()       // nom du téléphone (non gardé)
+            reply.readInt()          // session status
+            reply.readString()       // phone name (not kept)
             reply.readString()       // UUID
             reply.readString()       // adresse BT
             when (val type = reply.readInt()) {
@@ -62,10 +62,10 @@ object Projection {
     }
 
     /**
-     * Touche média vers la projection, comme le launcher d'origine (CPAAModel.mediaControlCPAA) :
-     * `IRemoteUIService.sendMediaPlayControlKey` (transaction 18). En passant sur la source
-     * CarPlay / Android Auto, le launcher envoie 1 : AllGo rend alors l'audio principal au téléphone,
-     * que la radio avait pris (#36). Bloquant : hors du fil principal.
+     * Media key to the projection, like the stock launcher (CPAAModel.mediaControlCPAA):
+     * `IRemoteUIService.sendMediaPlayControlKey` (transaction 18). When moving to the CarPlay /
+     * Android Auto source, the launcher sends 1: AllGo then gives main audio back to the phone,
+     * which the radio had taken (#36). Blocking: off the main thread.
      */
     fun mediaKey(context: Context, code: Int): Boolean {
         val b = bind(context) ?: return false
@@ -82,14 +82,14 @@ object Projection {
     }
 
     /**
-     * Arrête la session en cours (`stopRemoteSession`, transaction 3), avec l'appareil renvoyé tel quel par
-     * `getActiveRemoteDevice`. Couper seulement l'appli Android Auto laissait la session ouverte chez AllGo :
-     * les réglages d'origine se croyaient toujours en Android Auto et recoupaient la musique Bluetooth.
-     * Bloquant : hors du fil principal.
+     * Stops the current session (`stopRemoteSession`, transaction 3), with the device returned as is by
+     * `getActiveRemoteDevice`. Cutting only the Android Auto app left the session open at AllGo:
+     * the stock settings still believed they were in Android Auto and cut Bluetooth music again.
+     * Blocking: off the main thread.
      */
     fun stopSession(context: Context): Boolean = onActiveDevice(context, "stopped", TX_STOP_SESSION)
 
-    /** Appelle [tx] avec l'appareil renvoyé tel quel par `getActiveRemoteDevice`. */
+    /** Calls [tx] with the device returned as is by `getActiveRemoteDevice`. */
     private fun onActiveDevice(context: Context, label: String, tx: Int): Boolean {
         val b = bind(context) ?: return false
         val q = Parcel.obtain(); val dev = Parcel.obtain(); val data = Parcel.obtain(); val reply = Parcel.obtain()
@@ -111,7 +111,7 @@ object Projection {
     }
     private const val TX_STOP_SESSION = 3
 
-    /** Code du launcher d'origine pour « passer sur la source projection ». */
+    /** Stock launcher's code for "move to the projection source". */
     const val KEY_SELECT_SOURCE = 1
     private const val TX_MEDIA_KEY = 18
 

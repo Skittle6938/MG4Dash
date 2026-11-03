@@ -8,20 +8,20 @@ import app.mg4dash.BuildConfig
 import java.io.File
 
 /**
- * Lien avec MG4Dash Rescue (module rescue/), le filet de sécurité séparé : s'il ne voit pas MG4Dash démarrer,
- * il le recompile et le relance, puis remet l'accueil SAIC si ça ne suffit pas.
- *  - signe de vie à chaque lancement (réglage global mg4dash_alive) ;
- *  - installation de l'appli de secours embarquée (assets de la version voiture) si elle manque ou est plus ancienne ;
- *  - message au lancement suivant quand elle a dû intervenir.
+ * Link with MG4Dash Rescue (rescue/ module), the separate safety net: if it does not see MG4Dash start,
+ * it recompiles and relaunches it, then restores SAIC home if that is not enough.
+ *  - sign of life at each launch (global setting mg4dash_alive);
+ *  - installation of the embedded rescue app (assets of the car version) if missing or older;
+ *  - message at the next launch when it had to step in.
  */
 object Rescue {
     private const val TAG = "Rescue"
     const val PKG = "app.mg4dash.rescue"
-    /** Version de l'appli de secours embarquée (versionCode de rescue/build.gradle.kts). */
+    /** Version of the embedded rescue app (versionCode of rescue/build.gradle.kts). */
     private const val BUNDLED_VERSION = 3L
     private const val ASSET = "rescue.apk"
 
-    /** MG4Dash a démarré pendant ce démarrage de l'autoradio. */
+    /** MG4Dash started during this head unit boot. */
     fun alive(context: Context) {
         if (BuildConfig.MOCK) return
         try {
@@ -30,10 +30,10 @@ object Rescue {
         } catch (e: Exception) { Log.w(TAG, "alive: ${e.message}") }
     }
 
-    /** Message à montrer une fois sur l'accueil (texte déjà traduit), ou null. */
+    /** Message to show once on home (text already translated), or null. */
     @Volatile var notice: Int? = null
 
-    /** Au lancement : signe de vie, intervention éventuelle de l'appli de secours, installation de celle-ci. */
+    /** At launch: sign of life, possible rescue app intervention, its installation. */
     fun start(context: Context) {
         if (BuildConfig.MOCK) return
         alive(context)
@@ -44,7 +44,7 @@ object Rescue {
         Thread { Thread.sleep(30_000); ensureInstalled(context) }.start()
     }
 
-    /** Intervention de l'appli de secours depuis le dernier lancement : « recompiled » ou « stock », puis effacée. */
+    /** Rescue app intervention since the last launch: "recompiled" or "stock", then erased. */
     fun takeRescued(context: Context): String? = try {
         Settings.Global.getString(context.contentResolver, "mg4dash_rescued")?.substringBefore(':')?.also {
             Settings.Global.putString(context.contentResolver, "mg4dash_rescued", null)
@@ -52,7 +52,7 @@ object Rescue {
         }
     } catch (e: Exception) { null }
 
-    /** Installe l'appli de secours si besoin (hors du fil principal), puis la réveille. */
+    /** Installs the rescue app if needed (off the main thread), then wakes it. */
     fun ensureInstalled(context: Context) {
         if (BuildConfig.MOCK) return
         val installed = try {
@@ -68,7 +68,7 @@ object Rescue {
                 setInstallLocation(android.content.pm.PackageInfo.INSTALL_LOCATION_INTERNAL_ONLY)
                 try {
                     val f = javaClass.getField("installFlags")
-                    f.setInt(this, f.getInt(this) or 0x00000010)   // INSTALL_INTERNAL, comme « pm install -f »
+                    f.setInt(this, f.getInt(this) or 0x00000010)   // INSTALL_INTERNAL, like "pm install -f"
                 } catch (e: Exception) { Log.w(TAG, "INSTALL_INTERNAL flag: ${e.message}") }
             }
             val id = pi.createSession(params)
@@ -85,8 +85,8 @@ object Rescue {
     }
 
     /**
-     * Une appli installée reste « arrêtée » et ne reçoit pas le démarrage de l'autoradio tant qu'aucun de ses
-     * composants n'a servi : un message explicite l'en sort.
+     * An installed app stays "stopped" and does not receive the head unit's boot until one of its
+     * components has been used: an explicit message gets it out of that state.
      */
     private fun wake(context: Context) {
         try {
