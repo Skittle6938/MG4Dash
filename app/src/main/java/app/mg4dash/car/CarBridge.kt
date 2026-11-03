@@ -171,6 +171,7 @@ object CarBridge {
 
     /** Service son (page Son) ; demandé au premier usage. Appeler hors du fil principal. */
     fun audio(): AudioService? {
+        if (Firmware.family == Firmware.Family.LEGACY) return appContext?.let { LegacySound.service(it) }
         if (audioService?.alive != true) audioService = query(CODE_AUDIO)?.let { AudioService(it) }
         return audioService
     }
@@ -613,8 +614,22 @@ object CarBridge {
     /** Allume ou éteint l'écran central par le service véhicule ; false si le service ne répond pas. */
     fun setDisplay(on: Boolean): Boolean {
         if (BuildConfig.MOCK) return true
+        if (Firmware.family == Firmware.Family.LEGACY) return setDisplayLegacy(on)
         val g = general ?: run { Log.w(TAG, "screen: general service missing"); return false }
         return try { g.setDisplayState(on); Log.i(TAG, "screen ${if (on) "on" else "off"}"); true }
+        catch (e: Exception) { Log.w(TAG, "screen: ${e.message}"); false }
+    }
+
+    /**
+     * SWI68 / SWI133 (#79) : pas de commande d'écran dans le service général, mais SystemUI reçoit les mêmes ordres
+     * que son interrupteur d'origine. Un toucher ou une touche rallume l'écran, quel que soit l'appelant.
+     */
+    private fun setDisplayLegacy(on: Boolean): Boolean {
+        val ctx = appContext ?: return false
+        val intent = android.content.Intent(if (on) "com.saicmotor.screen.on" else "com.saicmotor.screen.off")
+            .putExtra("pid", android.os.Process.myPid())
+        if (on) intent.putExtra("trans", false) else intent.putExtra("showTime", false).putExtra("theme", 0)
+        return try { ctx.sendBroadcast(intent); Log.i(TAG, "screen ${if (on) "on" else "off"} (SystemUI)"); true }
         catch (e: Exception) { Log.w(TAG, "screen: ${e.message}"); false }
     }
 
