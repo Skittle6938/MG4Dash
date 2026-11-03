@@ -68,7 +68,7 @@ object StarKey {
                     return
                 }
                 // Radio Dash sur ancien firmware : joystick droit, ou touches média selon les versions du volant
-                if (!down && !long && code in setOf(JOY_LEFT, JOY_RIGHT, JOY_OK, KEY_MEDIA_PREVIOUS, KEY_MEDIA_NEXT) && MediaHub.radioDashNeedsWheelKeys()) {
+                if (down && !long && code in setOf(JOY_LEFT, JOY_RIGHT, JOY_OK, KEY_MEDIA_PREVIOUS, KEY_MEDIA_NEXT) && MediaHub.radioDashNeedsWheelKeys()) {
                     Log.i(TAG, "steering wheel button $code sent to Radio Dash")
                     when (code) {
                         JOY_LEFT, KEY_MEDIA_PREVIOUS -> MediaHub.previous()
@@ -78,8 +78,8 @@ object StarKey {
                     return
                 }
                 if (code == JOY_LEFT || code == JOY_RIGHT) {
-                    if (down && !long) MediaHub.wheelPressed(code == JOY_RIGHT)
-                    else if (!down && !long && MediaHub.wheelReleased(code == JOY_RIGHT)) return
+                    // Dès l'appui : la commande part vers l'appli sans attendre le relâchement
+                    if (down && !long) { MediaHub.wheelPressed(code == JOY_RIGHT); if (MediaHub.wheelReleased(code == JOY_RIGHT)) return }
                 }
                 // Volume (haut / bas du volant) : le launcher d'origine relance la radio en pause, MG4Dash
                 // revient aussitôt à l'appli qui jouait
@@ -92,7 +92,7 @@ object StarKey {
                     }, 250)
                     return
                 }
-                if (down || long) return
+                if (!down || long) return
                 // SWI173 : le launcher d'origine garde l'état de la caméra et la pilote lui-même (LauncherLink, #78)
                 if (Firmware.gen == Firmware.Gen.SWI173) return
                 // Codes des « * » selon le firmware : 5 (gauche) sur le launcher SWI69 ; 17 (gauche) et
@@ -105,7 +105,7 @@ object StarKey {
                     else -> return
                 }
                 val fn = try { android.provider.Settings.System.getInt(app.contentResolver, setting, -1) } catch (_: Exception) { -1 }
-                Log.i(TAG, "\"*\" ($code) released, $setting = $fn")
+                Log.i(TAG, "\"*\" ($code) pressed, $setting = $fn")
                 if (fn != FUNCTION_AVM || Prefs(app).valetMode) return
                 starAvm(app)
             }
