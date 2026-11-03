@@ -55,6 +55,42 @@ class StackedBar @JvmOverloads constructor(context: Context, attrs: AttributeSet
     }
 }
 
+/** Anneau de répartition, en commençant en haut ; [center] : texte au milieu. */
+class RingChart @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) : View(context, attrs) {
+    private var parts: List<Pair<Float, Int>> = emptyList()
+    private var center = ""
+    private val d = resources.displayMetrics.density
+    private val ring = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.STROKE; strokeWidth = 16f * d; strokeCap = Paint.Cap.BUTT }
+    private val text = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = app.mg4dash.ui.Themes.color(context, R.color.text_value); textSize = 17f * d; textAlign = Paint.Align.CENTER
+    }
+    private val box = RectF()
+
+    fun show(values: List<Pair<Float, Int>>, label: String) {
+        if (values == parts && label == center) return
+        parts = values; center = label; invalidate()
+    }
+
+    override fun onDraw(canvas: Canvas) {
+        val all = parts.sumOf { it.first.toDouble() }.toFloat()
+        val r = minOf(width, height) / 2f - ring.strokeWidth / 2f
+        box.set(width / 2f - r, height / 2f - r, width / 2f + r, height / 2f + r)
+        if (all <= 0f) {
+            ring.color = app.mg4dash.ui.Themes.color(context, R.color.gauge_off)
+            canvas.drawArc(box, 0f, 360f, false, ring)
+            return
+        }
+        var start = -90f
+        parts.forEach { (v, c) ->
+            val sweep = v / all * 360f
+            ring.color = c
+            canvas.drawArc(box, start, sweep, false, ring)
+            start += sweep
+        }
+        canvas.drawText(center, width / 2f, height / 2f - (text.ascent() + text.descent()) / 2f, text)
+    }
+}
+
 /** Courbe de consommation (kWh/100 km) avec aire dégradée et ligne de moyenne. */
 /** Courbe lissée (#44) : chaque point = moyenne de lui-même et de ses 2 voisins de chaque côté. */
 fun List<Float>.smoothed(): List<Float> = indices.map { i -> subList(maxOf(0, i - 2), minOf(size, i + 3)).average().toFloat() }
