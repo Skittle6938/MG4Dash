@@ -38,6 +38,7 @@ class WeatherCompact(context: Context, private val onPage: () -> Unit) : LinearL
     private val date = tv(18f, R.color.text_sub).apply { gravity = Gravity.END }
     private val time = tv(50f, R.color.text_value, bold = true).apply { gravity = Gravity.END }
     private val city = tv(18f, R.color.text_sub).apply { gravity = Gravity.END }
+    private val cityLine = LinearLayout(context).apply { orientation = HORIZONTAL; gravity = Gravity.CENTER_VERTICAL or Gravity.END }
     private val forecast = LinearLayout(context).apply { orientation = HORIZONTAL }
     private val dots = tv(15f, R.color.text_title).apply {
         letterSpacing = 0.3f; gravity = Gravity.CENTER
@@ -57,13 +58,17 @@ class WeatherCompact(context: Context, private val onPage: () -> Unit) : LinearL
         left.addView(sub2, LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT).apply { topMargin = (2 * d).toInt() })
         top.addView(left, LayoutParams(0, LayoutParams.WRAP_CONTENT, 1f))
         val right = LinearLayout(context).apply { orientation = VERTICAL; gravity = Gravity.END }
-        right.addView(date); right.addView(time); right.addView(city)
+        right.addView(date); right.addView(time); right.addView(cityLine)
+        cityLine.addView(city)
         top.addView(right, LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT))
         addView(top, LayoutParams(LayoutParams.MATCH_PARENT, 0, 1f))
         addView(forecast, LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT))
         addView(dots, LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT).apply { gravity = Gravity.CENTER_HORIZONTAL })
         tick()
     }
+
+    /** Icônes de connexion (#86) : à droite de la ville. */
+    fun addConnections(row: android.view.View) = cityLine.addView(row)
 
     private fun setTempMargin(px: Int) {
         (temp.layoutParams as LayoutParams).let { if (it.leftMargin != px) { it.leftMargin = px; temp.layoutParams = it } }

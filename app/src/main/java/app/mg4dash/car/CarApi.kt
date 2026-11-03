@@ -149,6 +149,15 @@ open class AudioService(b: IBinder, descriptor: String = "com.saicmotor.carapi.a
     private fun readEq(p: Parcel): IntArray? = if (p.readInt() == 0) null else IntArray(5) { p.readInt() }
 }
 
+/** T-box, réseau mobile (queryClient 16). */
+class TboxService(b: IBinder) : RemoteService(b, "com.saicmotor.carapi.tbox.ITboxService") {
+    val connected get() = bool(4)
+    /** Puissance du signal, 0 à 31. */
+    val csq get() = int(8)
+    /** 0 pas de réseau, 1 commutation de circuits, 2 à 4 : 2G à 4G. */
+    val wanStatus get() = int(9)
+}
+
 /** Informations générales (queryClient 1). */
 class GeneralService(b: IBinder) : RemoteService(b, "com.saicmotor.carapi.general.ICarGeneralService") {
     /** Rétroéclairage de l'écran central : false = éteint (commande « écran éteint » du launcher d'origine). */
