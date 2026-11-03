@@ -4,6 +4,7 @@ import android.content.Context
 import android.media.AudioAttributes
 import android.media.AudioFocusRequest
 import android.media.AudioManager
+import android.media.MediaDataSource
 import android.media.MediaPlayer
 import android.os.Handler
 import android.os.HandlerThread
@@ -12,6 +13,7 @@ import android.os.SystemClock
 import app.mg4dash.car.CarMediaVolume
 import app.mg4dash.system.Log
 import java.io.File
+import java.io.RandomAccessFile
 
 /** Plays startup and preview sounds on a worker thread without blocking the UI. */
 object SoundTrigger {
@@ -81,7 +83,7 @@ object SoundTrigger {
                         .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
                         .build()
                 )
-                player.setDataSource(file.absolutePath)
+                player.setDataSource(FileAudioSource(file))
                 player.prepare()
             } catch (e: Exception) {
                 Log.w(TAG, "MediaPlayer prepare error: ${e.message}")
@@ -285,6 +287,23 @@ object SoundTrigger {
     private fun releaseWakeLock() {
         runCatching { wakeLock?.takeIf { it.isHeld }?.release() }
         wakeLock = null
+    }
+
+    private class FileAudioSource(file: File) : MediaDataSource() {
+        private val input = RandomAccessFile(file, "r")
+
+        override fun readAt(position: Long, buffer: ByteArray, offset: Int, size: Int): Int = synchronized(input) {
+            val length = input.length()
+            if (position >= length) return@synchronized -1
+            input.seek(position)
+            input.read(buffer, offset, minOf(size.toLong(), length - position).toInt())
+        }
+
+        override fun getSize(): Long = input.length()
+
+        override fun close() {
+            input.close()
+        }
     }
 
 }
