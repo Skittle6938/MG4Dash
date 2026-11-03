@@ -37,6 +37,7 @@ object CarBridge {
     private const val CODE_HVAC = 7
     private const val CODE_VS = 8
     private const val CODE_AUDIO = 10
+    private const val CODE_TBOX = 16
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private val _state = MutableStateFlow(VehicleState())
@@ -165,6 +166,14 @@ object CarBridge {
             adapter = null; hvac = null; ev = null; vs = null; general = null
             _state.value = _state.value.copy(connected = false)
         }
+    }
+
+    private var tboxService: TboxService? = null
+
+    /** T-box (icônes de connexion) ; null sur les anciens firmwares. Appeler hors du fil principal. */
+    fun tbox(): TboxService? {
+        if (tboxService?.alive != true) tboxService = query(CODE_TBOX)?.let { TboxService(it) }
+        return tboxService
     }
 
     private var audioService: AudioService? = null
