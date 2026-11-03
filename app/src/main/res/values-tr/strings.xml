@@ -200,7 +200,7 @@
     <string name="vh_soh">Batarya sağlığı (tahmini)</string>
     <string name="vh_soh_detail">Yaklaşık %1$s sürüşte tahmin edildi.</string>
     <string name="vh_soh_progress">Ölçülüyor: %%15\'in %%%1$s kadarı, şimdiye kadar %2$s.</string>
-    <string name="vh_soh_disclaimer">MG4Dash tahmini, resmi değil. Test aşamasında.</string>
+    <string name="vh_soh_disclaimer" formatted="false">Tahmini, resmi değil. Referans: gösterilen %100 ile %0 arası enerji.</string>
     <string name="st_home">ANA EKRAN</string>
     <string name="st_home_desc">“SAIC ana ekranını değiştir” MG4Dash\'i ana ekran yapar. Hiçbir şey kaldırılmaz veya silinmez: orijinal ana ekran yalnızca ana ekran olarak kapatılır, aracın geri kalanı eskisi gibi çalışır (kamera, radyo, ses kaynakları, sistem çubuğu). Bakım modu onu tek dokunuşla yeniden açar, örneğin bayi ziyaretinden önce.</string>
     <string name="st_replace">SAIC ana ekranını değiştir</string>
