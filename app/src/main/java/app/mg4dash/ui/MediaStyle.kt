@@ -184,8 +184,7 @@ class MediaStyle private constructor(
             frame.setBackgroundColor(Color.TRANSPARENT)
             fade.visibility = View.GONE
             accent = Themes.color(a, R.color.accent_action)
-            play.background = GradientDrawable().apply { cornerRadius = dp(38).toFloat(); setColor(accent) }
-            progress?.progressTintList = ColorStateList.valueOf(accent)
+            paintAccent()
             return
         }
         val wasBare = plain == true
@@ -214,6 +213,14 @@ class MediaStyle private constructor(
         // Image recadrée à la taille de la carte (placeFade, aussi rappelé à chaque mise en page)
         shownFor = 0
         placeFade()
+        paintAccent()
+    }
+
+    private var paintedAccent: Int? = null
+
+    private fun paintAccent() {
+        if (paintedAccent == accent) return
+        paintedAccent = accent
         play.background = GradientDrawable().apply { cornerRadius = dp(38).toFloat(); setColor(accent) }
         progress?.progressTintList = ColorStateList.valueOf(accent)
     }

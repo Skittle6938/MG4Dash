@@ -2,4 +2,7 @@
 <resources>
     <!-- Animation de clignotement du bouton A/C pendant le cycle intermittent (#34) -->
     <item name="tag_ac_cycle" type="id" />
+    <!-- Dernière image et dernière teinte écrites sur une vue (QuietViews) -->
+    <item name="tag_shown_image" type="id" />
+    <item name="tag_shown_tint" type="id" />
 </resources>

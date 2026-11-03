@@ -40,11 +40,11 @@ private class BarStyle(v: View) {
  * Couleur selon le niveau : vert, orange sous 30 %, rouge sous 15 % ; bleu clair → vert en recharge.
  */
 class SocBar @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) : View(context, attrs) {
-    var soc = 82f; set(v) { field = v; invalidate() }
-    var tripStart: Float? = 90f; set(v) { field = v; invalidate() }
-    var charging = false; set(v) { field = v; invalidate() }
+    var soc = 82f; set(v) { if (field != v) { field = v; invalidate() } }
+    var tripStart: Float? = 90f; set(v) { if (field != v) { field = v; invalidate() } }
+    var charging = false; set(v) { if (field != v) { field = v; invalidate() } }
     /** Bulle du % actuel au-dessus de la pastille ; inutile quand le grand % est affiché juste au-dessus. */
-    var currentBubble = true; set(v) { field = v; invalidate() }
+    var currentBubble = true; set(v) { if (field != v) { field = v; invalidate() } }
     /** Taille de la petite bulle de départ et des graduations (sp), plus grande dans la carte « puissance » (#29). */
     var smallSp = 11f; set(v) { field = v; invalidate() }
     var tickSp = 12f; set(v) { field = v; invalidate() }
