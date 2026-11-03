@@ -630,6 +630,8 @@
     <string name="st_sound_boot_trigger">Bei Start abspielen</string>
     <string name="st_sound_pick_file">Audio auswählen</string>
     <string name="st_sound_no_file">Kein Ton ausgewählt</string>
+    <string name="st_sound_file_too_large">Audiodateien dürfen höchstens 20 MB groß sein</string>
+    <string name="st_sound_import_failed">Audiodatei konnte nicht importiert werden</string>
     <string name="st_sound_test">Testen</string>
     <string name="st_sound_stop">Stopp</string>
     <string name="st_sound_volume">Medienlautstärke des Autos</string>

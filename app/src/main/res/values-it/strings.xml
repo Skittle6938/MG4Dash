@@ -630,6 +630,8 @@
     <string name="st_sound_boot_trigger">Riproduci all’avvio</string>
     <string name="st_sound_pick_file">Scegli audio</string>
     <string name="st_sound_no_file">Nessun file selezionato</string>
+    <string name="st_sound_file_too_large">I file audio devono avere una dimensione massima di 20 MB</string>
+    <string name="st_sound_import_failed">Impossibile importare il file audio</string>
     <string name="st_sound_test">Ascolta</string>
     <string name="st_sound_stop">Ferma</string>
     <string name="st_sound_volume">Volume media auto</string>

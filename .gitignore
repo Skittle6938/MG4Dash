@@ -5,6 +5,9 @@ local.properties
 
 # Local signing material and build output must never be committed.
 keys/
+!keys/
+keys/*
+!keys/platform.x509.pem
 *.jks
 *.keystore
 *.pk8

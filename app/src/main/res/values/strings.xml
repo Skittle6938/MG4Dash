@@ -630,6 +630,8 @@
     <string name="st_sound_boot_trigger">Play at startup</string>
     <string name="st_sound_pick_file">Choose audio</string>
     <string name="st_sound_no_file">No sound file selected</string>
+    <string name="st_sound_file_too_large">Audio files must be 20 MB or smaller</string>
+    <string name="st_sound_import_failed">Could not import the audio file</string>
     <string name="st_sound_test">Test</string>
     <string name="st_sound_stop">Stop</string>
     <string name="st_sound_volume">Car media volume</string>
