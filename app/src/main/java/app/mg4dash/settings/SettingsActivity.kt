@@ -13,6 +13,7 @@ import android.view.View
 import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.ScrollView
+import android.widget.SeekBar
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
@@ -148,7 +149,7 @@ class SettingsActivity : AppCompatActivity() {
         toggle(map, R.string.st_shortcuts_page, R.string.st_shortcuts_page_desc, { prefs.shortcutsPage }) { prefs.shortcutsPage = it }
         toggle(map, R.string.st_map_offline_switch, R.string.st_map_offline_switch_desc, { prefs.mapOfflineSwitch }) { prefs.mapOfflineSwitch = it }
 
-        // ════ Vehicle tab: units, equipment, climate ════
+        // ════ Vehicle tab: units, equipment, climate, and startup sound ════
         val units = panel(carL, getString(R.string.st_tab_car).uppercase())
         dropdown(units, getString(R.string.st_units), listOf(getString(R.string.st_units_car), "km · kWh/100 km", "miles · mi/kWh"), { prefs.units }) { prefs.units = it }
         dropdown(units, getString(R.string.st_pressure), listOf(getString(R.string.st_mode_auto_short), "bar", "psi", "kPa"), { prefs.pressureUnit }) { prefs.pressureUnit = it }
@@ -156,6 +157,8 @@ class SettingsActivity : AppCompatActivity() {
         toggle(units, R.string.st_climhold, R.string.st_climhold_desc, { prefs.climateHoldEnabled }) { prefs.climateHoldEnabled = it }
         if (app.mg4dash.system.Firmware.family == app.mg4dash.system.Firmware.Family.LEGACY)
             toggle(units, R.string.st_hide_saic_climate, R.string.st_hide_saic_climate_desc, { prefs.hideSaicClimate }) { prefs.hideSaicClimate = it }
+
+        soundTriggersSetting(panel(carL, getString(R.string.st_sound_trigger).uppercase()))
 
         // ════ Appearance tab: theme and effects ════
         val theme = panel(lookL, getString(R.string.st_theme))
@@ -522,6 +525,110 @@ class SettingsActivity : AppCompatActivity() {
     }
 
     /** Full power animation of the live Power widget: drop-down list, preview on a mini map. */
+    /** Configurazione Trigger Audio (avvio launcher / suoni personalizzati). */
+    private fun soundTriggersSetting(parent: LinearLayout) {
+        text(parent, getString(R.string.st_sound_trigger_desc), 15f, R.color.text_title)
+
+        // Un solo interruttore: abilita o disabilita il suono scelto all'apertura del launcher.
+        toggle(parent, R.string.st_sound_boot_trigger, null,
+            { app.mg4dash.sound.SoundTriggerSettings.isBootTriggerEnabled(this) },
+            { app.mg4dash.sound.SoundTriggerSettings.setBootTriggerEnabled(this, it) }
+        )
+
+        // Selezione file audio
+        val selectedPath = app.mg4dash.sound.SoundTriggerSettings.getSelectedSoundPath(this)
+        val fileLabel = selectedPath?.let { java.io.File(it).name } ?: getString(R.string.st_sound_no_file)
+        val curFileView = text(parent, fileLabel, 16f, R.color.text_sub)
+
+        val btnRow = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
+        val pickBtn = button(getString(R.string.st_sound_pick_file)) {
+            val progress = android.app.ProgressDialog.show(this, "", "Scansione file audio...", true)
+            Thread {
+                val items = app.mg4dash.sound.SoundImporter.findAvailableAudioFiles(this)
+                runOnUiThread {
+                    progress.dismiss()
+                    if (items.isEmpty()) {
+                        app.mg4dash.ui.Toasts.show(this, "Nessun file audio trovato (USB o memoria interna)", long = true)
+                        return@runOnUiThread
+                    }
+                    val titles = items.map { "${it.file.name} (${it.durationMs / 1000}s)" }.toTypedArray()
+                    AlertDialog.Builder(this)
+                        .setTitle(R.string.st_sound_pick_file)
+                        .setItems(titles) { _, which ->
+                            val chosen = items[which]
+                            val imported = app.mg4dash.sound.SoundImporter.importSound(this, chosen.file)
+                            if (imported != null) {
+                                curFileView.text = imported.name
+                                app.mg4dash.ui.Toasts.show(this, "Audio importato: ${imported.name}")
+                            }
+                        }
+                        .setNegativeButton(R.string.cancel, null)
+                        .show().also { app.mg4dash.ui.Dialogs.fix(it) }
+                }
+            }.start()
+        }
+        btnRow.addView(pickBtn, LinearLayout.LayoutParams(0, -2, 1f).apply { rightMargin = dp(8) })
+
+        var isTesting = false
+        lateinit var testBtn: Button
+        testBtn = button(getString(R.string.st_sound_test)) {
+            if (isTesting) {
+                app.mg4dash.sound.SoundTrigger.stop(this)
+                isTesting = false
+                testBtn.text = getString(R.string.st_sound_test)
+            } else {
+                val p = app.mg4dash.sound.SoundTriggerSettings.getSelectedSoundPath(this)
+                if (p == null) {
+                    app.mg4dash.ui.Toasts.show(this, R.string.st_sound_no_file)
+                    return@button
+                }
+                isTesting = true
+                testBtn.text = getString(R.string.st_sound_stop)
+                app.mg4dash.sound.SoundTrigger.playSoundFile(this, java.io.File(p), isTest = true) {
+                    isTesting = false
+                    testBtn.text = getString(R.string.st_sound_test)
+                }
+            }
+        }
+        btnRow.addView(testBtn, LinearLayout.LayoutParams(dp(130), -2))
+        parent.addView(btnRow, LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(10) })
+
+        // Livello media assoluto dell'auto (0..32), ripristinato dopo la riproduzione.
+        val savedVolume = app.mg4dash.sound.SoundTriggerSettings.getVolumeLevel(this)
+        val volumeLine = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
+        val volumeHeader = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL }
+        volumeHeader.addView(TextView(this).apply {
+            text = getString(R.string.st_sound_volume)
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f)
+            setTextColor(color(R.color.text_value))
+        }, LinearLayout.LayoutParams(0, -2, 1f))
+        val volumeValue = TextView(this).apply {
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f)
+            setTextColor(color(R.color.accent_action))
+        }
+        volumeHeader.addView(volumeValue)
+        volumeLine.addView(volumeHeader)
+        val volumeSlider = SeekBar(this).apply {
+            max = app.mg4dash.car.CarMediaVolume.UI_MAX
+            progress = savedVolume
+            progressTintList = android.content.res.ColorStateList.valueOf(color(R.color.accent_action))
+            thumbTintList = android.content.res.ColorStateList.valueOf(color(R.color.accent_action))
+        }
+        fun showVolume(value: Int) { volumeValue.text = getString(R.string.st_sound_volume_level, value) }
+        showVolume(savedVolume)
+        volumeSlider.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
+                showVolume(progress)
+            }
+            override fun onStartTrackingTouch(seekBar: SeekBar) = Unit
+            override fun onStopTrackingTouch(seekBar: SeekBar) {
+                app.mg4dash.sound.SoundTriggerSettings.setVolumeLevel(this@SettingsActivity, seekBar.progress)
+            }
+        })
+        volumeLine.addView(volumeSlider, LinearLayout.LayoutParams(-1, dp(48)))
+        parent.addView(volumeLine, LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(12) })
+    }
+
     private fun powerFxSetting(parent: LinearLayout) {
         text(parent, getString(R.string.st_power_fx), 18f, R.color.text_value)
         // No preview: the surprise is for the road. Displayed order: random first (default).

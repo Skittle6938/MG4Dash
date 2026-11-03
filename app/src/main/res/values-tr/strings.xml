@@ -625,6 +625,16 @@
     <string name="conn_no_network">Ağ yok</string>
     <string name="conn_usb_count">%1$d bağlı</string>
     <string name="en_time_note">Tarihe göre ve yumuşatılmış · ortalama (kesikli)</string>
+    <string name="st_sound_trigger">Başlangıç Sesi</string>
+    <string name="st_sound_trigger_desc">USB bellekten veya dahili depolamadan bir ses dosyası seçin. Dosya uygulamaya kopyalanır ve bellek çıkarıldıktan sonra da kullanılabilir.</string>
+    <string name="st_sound_boot_trigger">Başlangıçta çal</string>
+    <string name="st_sound_pick_file">Ses seç</string>
+    <string name="st_sound_no_file">Ses dosyası seçilmedi</string>
+    <string name="st_sound_test">Test Et</string>
+    <string name="st_sound_stop">Durdur</string>
+    <string name="st_sound_volume">Ses Seviyesi</string>
+    <string name="st_sound_vol_default">Mevcut araç sesi</string>
+    <string name="st_sound_volume_level">%1$d / 32</string>
     <string name="aa_title">ANDROID AUTO</string>
     <string name="aa_ready">Telefon bağlı · Açmak için dokunun</string>
     <string name="aa_waiting">Telefonunuzu USB ile bağlayın</string>
