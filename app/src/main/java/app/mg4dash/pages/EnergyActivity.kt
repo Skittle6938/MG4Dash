@@ -17,7 +17,6 @@ import app.mg4dash.system.Prefs
 import app.mg4dash.ui.LineChart
 import app.mg4dash.ui.PageActivity
 import app.mg4dash.ui.SegmentedGauge
-import app.mg4dash.ui.StackedBar
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -62,7 +61,6 @@ class EnergyActivity : PageActivity() {
     // Conso
     private lateinit var setPeriod: (Int?) -> Unit
     private lateinit var consTotal: TextView
-    private lateinit var bar: StackedBar
     private lateinit var legend: LinearLayout
     private lateinit var regen: TextView
     private lateinit var regenKm: TextView
@@ -191,17 +189,20 @@ class EnergyActivity : PageActivity() {
         period = prefs.consumptionPeriod.coerceIn(0, 2)
         pSet(period)
         c3.addView(pRow, kit.lp(-1, -2, t = 10))
-        consTotal = kit.text("—", 44f, light = true)
-        c3.addView(consTotal, kit.lp(-1, -2, t = 14))
-        bar = StackedBar(this)
-        c3.addView(bar, kit.lp(-1, kit.dp(22), t = 10))
+        // Total, et à sa droite ce que la récupération a rendu
+        consTotal = kit.text("—", 36f, light = true)
+        val totalRow = kit.row().apply { gravity = android.view.Gravity.CENTER_VERTICAL }
+        totalRow.addView(consTotal, kit.lp(-2, -2))
+        val recovered = kit.column()
+        totalRow.addView(recovered, kit.lp(0, -2, 1f, l = 16))
+        c3.addView(totalRow, kit.lp(-1, -2, t = 14))
         legend = kit.column()
         c3.addView(legend, kit.lp(-1, -2, t = 8))
-        regen = kit.text("", 18f, R.color.accent_energy).apply { setTextColor(app.mg4dash.ui.Themes.energy(context)) }
-        c3.addView(regen, kit.lp(-1, -2, t = 6))
-        regenKm = kit.text("", 18f, R.color.accent_energy).apply { setTextColor(app.mg4dash.ui.Themes.energy(context)) }
-        c3.addView(regenKm, kit.lp(-1, -2, t = 2))
-        c3.addView(kit.title(getString(R.string.en_recent, app.mg4dash.system.Units.consUnit(this))), kit.lp(-1, -2, t = 18))
+        regen = kit.text("", 15f, R.color.accent_energy).apply { setTextColor(app.mg4dash.ui.Themes.energy(context)) }
+        recovered.addView(regen, kit.lp(-1, -2))
+        regenKm = kit.text("", 15f, R.color.accent_energy).apply { setTextColor(app.mg4dash.ui.Themes.energy(context)) }
+        recovered.addView(regenKm, kit.lp(-1, -2, t = 2))
+        c3.addView(kit.title(getString(R.string.en_recent, app.mg4dash.system.Units.stackUnit(this))), kit.lp(-1, -2, t = 18))
         chart = LineChart(this).apply {
             // Appui long sur la courbe : l'effacer (#44)
             setOnLongClickListener { app.mg4dash.ui.ConsumptionCard.confirmClear(this@EnergyActivity, this, period); true }
@@ -343,14 +344,12 @@ class EnergyActivity : PageActivity() {
         val heat = c.getOrElse(4) { 0f }.coerceAtLeast(0f)
         val showHeat = heat >= app.mg4dash.energy.EnergyMonitor.HEAT_SHOWN_KWH
         val ok = total > 0f
-        val drive = if (ok) (total - clim.coerceAtLeast(0f) - acc.coerceAtLeast(0f) - heat).coerceAtLeast(0f) else 0f
+        // Conduite récupération déduite, comme le graphique ; les parts se comptent sur ce total
+        val drive = if (ok) (total - clim.coerceAtLeast(0f) - acc.coerceAtLeast(0f) - heat - rgn.coerceAtLeast(0f)).coerceAtLeast(0f) else 0f
+        val shared = (drive + clim.coerceAtLeast(0f) + acc.coerceAtLeast(0f) + heat).coerceAtLeast(0.001f)
         consTotal.text = if (ok) String.format(Locale.getDefault(), "%.1f kWh", total) else "—"
         val green = kit.color(R.color.accent_energy); val cyan = kit.color(R.color.accent_cold); val orange = kit.color(R.color.accent_heat)
         val violet = kit.color(R.color.accent_battery)
-        bar.parts = if (ok) listOfNotNull(
-            StackedBar.Part(drive, green), StackedBar.Part(clim.coerceAtLeast(0f), cyan), StackedBar.Part(heat, violet).takeIf { showHeat },
-            StackedBar.Part(acc.coerceAtLeast(0f), orange),
-        ) else emptyList()
         legend.removeAllViews()
         listOfNotNull(Triple(getString(R.string.en_drive), drive, green), Triple(getString(R.string.en_climate), clim, cyan),
             Triple(getString(R.string.en_battery_heat), heat, violet).takeIf { showHeat },
@@ -358,14 +357,14 @@ class EnergyActivity : PageActivity() {
             val r = kit.row()
             r.addView(android.view.View(this).apply { setBackgroundColor(col) }, kit.lp(kit.dp(12), kit.dp(12)))
             r.addView(kit.text(l, 18f, R.color.text_sub), kit.lp(0, -2, 1f, l = 10))
-            r.addView(kit.text(if (ok && v >= 0f) String.format(Locale.getDefault(), "%.1f kWh · %d %%", v, Math.round(v / total * 100)) else "—", 18f))
+            r.addView(kit.text(if (ok && v >= 0f) String.format(Locale.getDefault(), "%.1f kWh · %d %%", v, Math.round(v / shared * 100)) else "—", 18f))
             legend.addView(r, kit.lp(-1, -2, t = 6))
         }
         regen.text = if (rgn > 0f) getString(R.string.en_regen, String.format(Locale.getDefault(), "%.1f", rgn)) else ""
     }
 
     private fun renderHistory() {
-        val (points, note) = app.mg4dash.ui.ConsumptionCard.fill(this, chart, period)
+        val (points, note) = app.mg4dash.ui.ConsumptionCard.fill(this, chart, period, stacked = true)
         app.mg4dash.ui.ConsumptionCard.axis(this, period, points).let { (a, b) -> chart.startLabel = a; chart.endLabel = b }
         chart.emptyText = if (period == 2) R.string.chart_empty_trips else R.string.chart_empty
         chartNote.text = note

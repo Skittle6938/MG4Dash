@@ -29,6 +29,9 @@ object Units {
     fun distUnit(c: Context) = if (miles(c)) "mi" else "km"
     fun speedUnit(c: Context) = if (miles(c)) "mph" else "km/h"
     fun consUnit(c: Context) = if (miles(c)) "mi/kWh" else "kWh/100 km"
+    /** Graphique empilé : kWh pour 100 km ou 100 miles, en miles aussi, car des mi/kWh ne s'additionnent pas. */
+    fun stackUnit(c: Context) = if (miles(c)) "kWh/100 mi" else "kWh/100 km"
+    fun stackValue(c: Context, per100: Float) = if (miles(c)) per100 * KM_PER_MI else per100
 
     /** km → unité affichée. */
     fun dist(c: Context, km: Float): Float = if (miles(c)) km / KM_PER_MI else km
