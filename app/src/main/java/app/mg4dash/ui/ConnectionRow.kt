@@ -29,7 +29,7 @@ class ConnectionRow(private val activity: Activity) : LinearLayout(activity) {
     private val phoneGroup = LinearLayout(activity).apply { orientation = HORIZONTAL; gravity = Gravity.CENTER_VERTICAL }
         .also { addView(it, LayoutParams(LayoutParams.WRAP_CONTENT, dp(ICON_DP + 4)).apply { leftMargin = dp(GAP_DP) }) }
     private val phoneBattery = BatteryIcon(activity).also { phoneGroup.addView(it, LayoutParams(dp(30), dp(15))) }
-    private val phoneSignal = SignalBars(activity, PHONE_LEVELS).also { phoneGroup.addView(it, LayoutParams(dp(ICON_DP), dp(ICON_DP - 6)).apply { leftMargin = dp(8) }) }
+    private val phoneSignal = SignalBars(activity).also { phoneGroup.addView(it, LayoutParams(dp(ICON_DP), dp(ICON_DP - 6)).apply { leftMargin = dp(8) }) }
     private val bt = icon(R.drawable.ic_bluetooth, 16)
     private val wifi = WifiArcs(activity).also { addView(it, LayoutParams(dp(28), dp(ICON_DP - 2)).apply { leftMargin = dp(GAP_DP) }) }
     private val hotspot = icon(R.drawable.ic_conn_hotspot)
@@ -92,11 +92,14 @@ class ConnectionRow(private val activity: Activity) : LinearLayout(activity) {
         wifi.level = if (c.wifiConnected) c.wifiLevel else -1
         hotspot.putImage(if (c.hotspotClients > 1) R.drawable.ic_conn_hotspot_multi else R.drawable.ic_conn_hotspot)
         phoneBattery.level = c.phone?.battery ?: 0
-        phoneSignal.level = c.phone?.signal ?: 0
+        phoneSignal.level = phoneBars(c.phone?.signal)
         applyChoice()
         signal.level = c.signalLevel ?: 0
         signal.label = c.signalMode.takeIf { it >= 2 }?.let { "${it}G" }
     }
+
+    /** Phone signal, from 0 to 5 over Bluetooth, on the same 4 bars as the car's network. */
+    private fun phoneBars(signal: Int?): Int = ((signal ?: 0) * StatusMonitor.SIGNAL_MAX + PHONE_LEVELS - 1) / PHONE_LEVELS
 
     /** Shows the icons chosen by a long press (#86); those with no data stay hidden. */
     private fun applyChoice() {
@@ -111,7 +114,7 @@ class ConnectionRow(private val activity: Activity) : LinearLayout(activity) {
         val anyPhone = framed || phoneBattery.visibility == View.VISIBLE
         phoneGroup.visibility = if (anyPhone) View.VISIBLE else View.GONE
         phoneGroup.background = if (framed) android.graphics.drawable.GradientDrawable().apply {
-            cornerRadius = dp(9).toFloat(); setStroke(dp(1), color(R.color.panel_border))
+            cornerRadius = dp(9).toFloat(); setStroke((1.5f * d).toInt().coerceAtLeast(2), color(R.color.panel_border))
         } else null
         phoneGroup.setPadding(if (framed) dp(8) else 0, 0, if (framed) dp(8) else 0, 0)
         (phoneSignal.layoutParams as LayoutParams).leftMargin = if (phoneBattery.visibility == View.VISIBLE) dp(8) else 0
@@ -225,7 +228,7 @@ class ConnectionRow(private val activity: Activity) : LinearLayout(activity) {
         c.phone?.let { p ->
             box.addView(panelRow(null, true, R.string.conn_phone, p.operator ?: "", PHONE_PAGE) { popup.dismiss() }.also { r ->
                 p.battery?.let { b -> r.addView(BatteryIcon(activity).apply { level = b }, 0, LayoutParams(dp(28), dp(14))) }
-                p.signal?.let { s -> r.addView(SignalBars(activity, PHONE_LEVELS).apply { level = s }, r.childCount - 1, LayoutParams(dp(28), dp(24)).apply { leftMargin = dp(12) }) }
+                p.signal?.let { s -> r.addView(SignalBars(activity).apply { level = phoneBars(s) }, r.childCount - 1, LayoutParams(dp(28), dp(24)).apply { leftMargin = dp(12) }) }
             }, LayoutParams(-1, dp(60)).apply { topMargin = dp(4) })
         }
         row(R.drawable.ic_conn_usb, c.usbCount > 0, R.string.conn_usb, if (c.usbCount > 0) activity.getString(R.string.conn_usb_count, c.usbCount) else none, null)
