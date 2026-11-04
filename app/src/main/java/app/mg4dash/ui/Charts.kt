@@ -151,6 +151,9 @@ class LineChart @JvmOverloads constructor(context: Context, attrs: AttributeSet?
     class Layer(val color: Int, val values: List<Float>)
     private var layers: List<Layer>? = null
 
+    /** Top of the scale: higher values are cut there (#44), like on the driver display. */
+    var cap: Float? = null
+
     /** Overlaid and added curves: the last layer gives the total; [points]: positions 0..1, or regular. */
     fun showLayers(points: List<Float>?, stack: List<Layer>, mean: Float) {
         val n = stack.first().values.size
@@ -227,9 +230,9 @@ class LineChart @JvmOverloads constructor(context: Context, attrs: AttributeSet?
             return
         }
         // Stacked: the scale starts from zero, otherwise the bottom of the layers would be cut
-        val lo = if (layers != null) 0f else (values.minOrNull()!! - 2f).coerceAtLeast(0f)
-        val hi = values.maxOrNull()!! + 2f
-        fun y(v: Float) = bottom - (v - lo) / (hi - lo) * (bottom - top)
+        val hi = (values.maxOrNull()!! + 2f).coerceAtMost(cap ?: Float.MAX_VALUE)
+        val lo = if (layers != null) 0f else (values.minOrNull()!! - 2f).coerceIn(0f, hi - 2f)
+        fun y(v: Float) = bottom - (v.coerceAtMost(hi) - lo) / (hi - lo) * (bottom - top)
         val scale = listOf(lo, (lo + hi) / 2, hi)
         scale.forEach { v -> canvas.drawLine(left, y(v), right, y(v), grid) }
         val xs = positions
