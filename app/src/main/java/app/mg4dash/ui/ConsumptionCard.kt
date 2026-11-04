@@ -24,7 +24,12 @@ class ConsumptionCard(context: Context) : LinearLayout(context) {
     private val total = tv(40f, R.color.text_value)
     /** Period's distance (#44), to the right of the total, small unit as on the Energy card. */
     private val distance = tv(40f, R.color.text_value)
-    private val legend = LinearLayout(context).apply { orientation = HORIZONTAL; gravity = Gravity.CENTER_VERTICAL }
+    /** Map layout: same detail as the Energy page, with its ring. Full layout: no ring, it takes too much room. */
+    private val withRing = app.mg4dash.system.Prefs(context).homeStyle == 2
+    private val regenLabel = tv(13f, R.color.text_sub).apply { text = context.getString(R.string.en_regen_short).uppercase(); letterSpacing = 0.1f; includeFontPadding = false }
+    private val regen = tv(20f, R.color.accent_energy).apply { setTextColor(Themes.energy(context)); includeFontPadding = false }
+    private val ring = RingChart(context)
+    private val legend = LinearLayout(context).apply { orientation = if (withRing) VERTICAL else HORIZONTAL; gravity = Gravity.CENTER_VERTICAL }
     private val chart = LineChart(context).apply {
         // Long press on the curve: erase it (#44)
         setOnLongClickListener { v -> (context as? android.app.Activity)?.let { confirmClear(it, v, prefs.consumptionPeriod.coerceIn(0, 2)) }; true }
@@ -48,17 +53,25 @@ class ConsumptionCard(context: Context) : LinearLayout(context) {
         orientation = VERTICAL
         setPadding((20 * d).toInt(), (16 * d).toInt(), (20 * d).toInt(), (16 * d).toInt())
         // Title hidden with the "Hide titles" option (the space stays, so nothing shifts)
-        addView(tv(17f, R.color.text_title).apply { text = context.getString(R.string.en_consumption); letterSpacing = 0.12f
-            if (app.mg4dash.system.Prefs(context).hideTitles) visibility = INVISIBLE })
         // Period ("Since the charge ▾"): a touch opens the choice, like the radio source choice
         addView(periodTv, LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT))
         addView(LinearLayout(context).apply {
             orientation = HORIZONTAL; gravity = Gravity.BOTTOM
-            addView(total, LayoutParams(0, LayoutParams.WRAP_CONTENT, 1f))
+            addView(total, LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT))
+            addView(LinearLayout(context).apply {
+                orientation = VERTICAL
+                addView(regenLabel)
+                addView(regen)
+            }, LayoutParams(0, LayoutParams.WRAP_CONTENT, 1f).apply { leftMargin = (14 * d).toInt(); bottomMargin = (9 * d).toInt() })
             addView(distance)
-        })
-        addView(legend, LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT).apply { topMargin = (8 * d).toInt() })
-        addView(tv(15f, R.color.text_title).apply { text = context.getString(R.string.en_recent, app.mg4dash.system.Units.consUnit(context)); letterSpacing = 0.1f },
+        }, LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT).apply { topMargin = (10 * d).toInt() })
+        if (withRing) addView(LinearLayout(context).apply {
+            orientation = HORIZONTAL; gravity = Gravity.CENTER_VERTICAL
+            addView(ring, LayoutParams((104 * d).toInt(), (104 * d).toInt()))
+            addView(legend, LayoutParams(0, LayoutParams.WRAP_CONTENT, 1f).apply { leftMargin = (16 * d).toInt() })
+        }, LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT).apply { topMargin = (6 * d).toInt() })
+        else addView(legend, LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT).apply { topMargin = (6 * d).toInt() })
+        addView(tv(15f, R.color.text_title).apply { text = context.getString(R.string.en_recent, app.mg4dash.system.Units.stackUnit(context)); letterSpacing = 0.1f },
             LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT).apply { topMargin = (10 * d).toInt() })
         addView(chart, LayoutParams(LayoutParams.MATCH_PARENT, 0, 1f))
         addView(note)
@@ -70,23 +83,40 @@ class ConsumptionCard(context: Context) : LinearLayout(context) {
         val t = EnergyMonitor.totals(period)
         val ok = t.outKwh > 0f
         // Regeneration next to the total (#44), in green, small unit; nothing if it is zero
-        total.text = if (!ok) "—" else android.text.SpannableStringBuilder(smallUnit(String.format(Locale.getDefault(), "%.1f kWh", t.outKwh))).apply {
-            if (t.regenKwh >= 0.05f) {
-                val st = length
-                append("  −").append(String.format(Locale.getDefault(), "%.1f", t.regenKwh))   // "−" sign: energy given back (#44)
-                val unit = length
-                append(" ").append(context.getString(R.string.en_regen_short))
-                setSpan(android.text.style.ForegroundColorSpan(Themes.energy(context)), st, length, 0)
-                setSpan(android.text.style.RelativeSizeSpan(0.6f), st, unit, 0)
-                setSpan(android.text.style.RelativeSizeSpan(0.4f), unit, length, 0)
-            }
-        }
+        total.text = if (!ok) "—" else smallUnit(String.format(Locale.getDefault(), "%.1f kWh", t.outKwh))
+        val hasRegen = ok && t.regenKwh >= 0.05f
+        // The car only gives the recovered range since the last charge
+        regen.text = if (hasRegen) regenValues(context, t.regenKwh, if (period == 0) carRegenKm() else null) else ""
+        regenLabel.visibility = if (hasRegen) VISIBLE else INVISIBLE
         distance.text = if (t.km > 0) smallUnit(app.mg4dash.system.Units.distText(context, t.km.toFloat())) else ""
-        fillLegend(context, legend, t)
-        val (points, n) = fill(context, chart, period)
+        if (withRing) fillRing(t) else fillLegend(context, legend, t)
+        val (points, n) = fill(context, chart, period, stacked = true)
         axis(context, period, points).let { (a, b) -> chart.startLabel = a; chart.endLabel = b }
         chart.emptyText = if (period == 2) R.string.chart_empty_trips else R.string.chart_empty
         note.text = n
+    }
+
+    private fun carRegenKm(): Float? =
+        if (app.mg4dash.BuildConfig.MOCK) 50.9f else app.mg4dash.car.CarProps.getFloat(app.mg4dash.car.CarProps.REGEN_RNG_AFT_CHRG)
+
+    /** Ring and detail, like the Energy page (Map layout). */
+    private fun fillRing(t: EnergyMonitor.Totals) {
+        legend.removeAllViews()
+        val drive = (t.driveKwh - t.regenKwh).coerceAtLeast(0f)
+        val all = drive + t.climKwh + t.heatKwh + t.accKwh
+        if (all <= 0f) { ring.show(emptyList(), ""); return }
+        val items = listOfNotNull(Triple(R.string.en_drive, drive, R.color.accent_energy), Triple(R.string.en_climate, t.climKwh, R.color.accent_cold),
+            Triple(R.string.en_battery_heat, t.heatKwh, R.color.accent_battery).takeIf { t.heatKwh >= EnergyMonitor.HEAT_SHOWN_KWH },
+            Triple(R.string.en_accessories, t.accKwh, R.color.accent_heat))
+        ring.show(items.map { it.second to c(it.third) }, "${Math.round(drive / all * 100)} %")
+        items.forEach { (label, v, col) ->
+            legend.addView(LinearLayout(context).apply {
+                orientation = HORIZONTAL; gravity = Gravity.CENTER_VERTICAL
+                addView(View(context).apply { setBackgroundColor(c(col)) }, LayoutParams((12 * d).toInt(), (12 * d).toInt()))
+                addView(tv(17f, R.color.text_sub).apply { text = context.getString(label) }, LayoutParams(0, LayoutParams.WRAP_CONTENT, 1f).apply { leftMargin = (10 * d).toInt() })
+                addView(tv(17f, R.color.text_value).apply { text = String.format(Locale.getDefault(), "%.1f kWh · %d %%", v, Math.round(v / all * 100)) })
+            }, LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT))
+        }
     }
 
     /** Half size unit after the last space ("1.6 kWh", "12 km"). */
@@ -96,6 +126,12 @@ class ConsumptionCard(context: Context) : LinearLayout(context) {
     }
 
     companion object {
+        /** "+3.2 kWh   +50.9 km"; no km if unknown or out of range. */
+        fun regenValues(c: android.content.Context, kwh: Float, km: Float?): String {
+            val kmText = km?.takeIf { it > 0.05f && it < 2000f }?.let { "   +" + app.mg4dash.system.Units.distText(c, it, 1) } ?: ""
+            return String.format(Locale.getDefault(), "+%.1f kWh", kwh) + kmText
+        }
+
         /** Asks for confirmation then erases the curve of [period] (0 charge, 1 trip, 2 12 months). */
         fun confirmClear(a: android.app.Activity, anchor: android.view.View, period: Int) {
             val name = a.getString(listOf(R.string.en_since_charge, R.string.en_trip, R.string.en_last_year)[period])

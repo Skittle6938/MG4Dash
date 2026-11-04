@@ -145,7 +145,6 @@ en_drive|Driving|Conduite|Fahren|Conducción|Guida|Rijden|Sürüş
 en_climate|Climate control|Climatisation|Klimaanlage|Climatización|Climatizzazione|Klimaatregeling|Klima
 en_accessories|Accessories|Accessoires|Zubehör|Accesorios|Accessori|Accessoires|Aksesuarlar
 en_battery_heat|Battery heating|Réchauffage batterie|Batterieheizung|Calefacción batería|Riscaldamento batteria|Batterijverwarming|Batarya ısıtma
-en_regen|+ %1$s kWh recovered by braking|+ %1$s kWh récupérés au freinage|+ %1$s kWh durch Bremsen zurückgewonnen|+ %1$s kWh recuperados al frenar|+ %1$s kWh recuperati in frenata|+ %1$s kWh teruggewonnen bij remmen|+ %1$s kWh frenle geri kazanıldı
 en_regen_short|regen|récup|rekup.|recup.|recup.|terugwinning|rejen
 cc_ago|%1$s ago|il y a %1$s|vor %1$s|hace %1$s|%1$s fa|%1$s geleden|%1$s önce
 cc_now|now|maintenant|jetzt|ahora|adesso|nu|şimdi
@@ -398,7 +397,6 @@ sr_overtemp|over-temperature|surchauffe|Übertemperatur|sobretemperatura|surrisc
 sr_plug|plug not properly connected|prise mal branchée|Stecker nicht richtig verbunden|conector mal conectado|presa non collegata bene|stekker niet goed aangesloten|fiş düzgün takılmamış
 sr_voltage|voltage mismatch|tension incompatible|Spannung passt nicht|tensión incompatible|tensione incompatibile|spanning past niet|voltaj uyumsuzluğu
 sr_other|other cause|autre cause|andere Ursache|otra causa|altra causa|andere oorzaak|başka bir neden
-en_regen_km|+ %1$s %2$s of range recovered since the last charge|+ %1$s %2$s d'autonomie récupérés depuis la recharge|+ %1$s %2$s Reichweite seit dem Laden zurückgewonnen|+ %1$s %2$s de autonomía recuperados desde la carga|+ %1$s %2$s di autonomia recuperati dalla ricarica|+ %1$s %2$s bereik teruggewonnen sinds het laden|son şarjdan beri + %1$s %2$s menzil geri kazanıldı
 st_rd_state|Radio Dash: %1$s|Radio Dash : %1$s|Radio Dash: %1$s|Radio Dash: %1$s|Radio Dash: %1$s|Radio Dash: %1$s|Radio Dash: %1$s
 st_rd_none|not installed|non installée|nicht installiert|no instalada|non installata|niet geïnstalleerd|yüklü değil
 st_rd_unknown|installed (version unknown)|installée (version inconnue)|installiert (Version unbekannt)|instalada (versión desconocida)|installata (versione sconosciuta)|geïnstalleerd (versie onbekend)|yüklü (sürüm bilinmiyor)
