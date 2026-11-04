@@ -9,12 +9,14 @@ import android.view.KeyEvent
 import android.view.MotionEvent
 import android.view.View
 import app.mg4dash.car.CarBridge
+import app.mg4dash.system.Firmware
 
 /**
  * Screen off (double touch on Energy in the vertical bar, issue #12): the backlight
  * is cut by the stock launcher's command. Like the stock launcher (ScreenOffView), a
  * black screen stays on top: the car does not turn the screen back on by itself, this touch
- * (or a key) does.
+ * (or a key) does. On old SDK firmwares (#79) SystemUI has its own black window, which takes the
+ * touch and turns the screen back on: ours would stay on top, so it closes once the screen is off.
  */
 class ScreenOffActivity : Activity() {
     private val handler = Handler(Looper.getMainLooper())
@@ -25,7 +27,11 @@ class ScreenOffActivity : Activity() {
         setContentView(View(this).apply { setBackgroundColor(Color.BLACK) })
         Fullscreen.apply(this)
         // Small delay: the double touch's finger is lifted before switching off
-        handler.postDelayed({ off = CarBridge.setDisplay(false); if (!off) finish() }, 300)
+        handler.postDelayed({
+            off = CarBridge.setDisplay(false)
+            if (!off) finish()
+            else if (Firmware.family == Firmware.Family.LEGACY) { off = false; finish() }
+        }, 300)
     }
 
     override fun onTouchEvent(event: MotionEvent): Boolean {
@@ -34,14 +40,6 @@ class ScreenOffActivity : Activity() {
     }
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean { wake(); return true }
-
-    /** SWI68: SystemUI's black window takes the touch; when it disappears, the screen is already back on. */
-    private var covered = false
-
-    override fun onWindowFocusChanged(hasFocus: Boolean) {
-        super.onWindowFocusChanged(hasFocus)
-        if (!hasFocus) covered = true else if (covered && off) wake()
-    }
 
     private fun wake() {
         handler.removeCallbacksAndMessages(null)
