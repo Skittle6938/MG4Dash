@@ -33,7 +33,11 @@ class ConsumptionCard(context: Context) : LinearLayout(context) {
     private val chart = LineChart(context).apply {
         // Long press on the curve: erase it (#44)
         setOnLongClickListener { v -> (context as? android.app.Activity)?.let { confirmClear(it, v, prefs.consumptionPeriod.coerceIn(0, 2)) }; true }
+        setOnClickListener { openEnergy() }
     }
+
+    /** A touch opens the Energy page, like the battery widget. */
+    private fun openEnergy() = context.startActivity(android.content.Intent(context, app.mg4dash.pages.EnergyActivity::class.java))
     private val note = tv(15f, R.color.text_sub)
 
     private val prefs = app.mg4dash.system.Prefs(context)
@@ -50,6 +54,7 @@ class ConsumptionCard(context: Context) : LinearLayout(context) {
         }
 
     init {
+        setOnClickListener { openEnergy() }
         orientation = VERTICAL
         setPadding((20 * d).toInt(), (16 * d).toInt(), (20 * d).toInt(), (16 * d).toInt())
         // Title hidden with the "Hide titles" option (the space stays, so nothing shifts)
@@ -85,8 +90,7 @@ class ConsumptionCard(context: Context) : LinearLayout(context) {
         // Regeneration next to the total (#44), in green, small unit; nothing if it is zero
         total.text = if (!ok) "—" else smallUnit(String.format(Locale.getDefault(), "%.1f kWh", t.outKwh))
         val hasRegen = ok && t.regenKwh >= 0.05f
-        // The car only gives the recovered range since the last charge
-        regen.text = if (hasRegen) regenValues(context, t.regenKwh, if (period == 0) carRegenKm() else null) else ""
+        regen.text = if (hasRegen) regenValues(context, t.regenKwh, if (period == 0) carRegenKm() else regenKmEstimate(t)) else ""
         regenLabel.visibility = if (hasRegen) VISIBLE else INVISIBLE
         distance.text = if (t.km > 0) smallUnit(app.mg4dash.system.Units.distText(context, t.km.toFloat())) else ""
         if (withRing) fillRing(t) else fillLegend(context, legend, t)
@@ -126,6 +130,12 @@ class ConsumptionCard(context: Context) : LinearLayout(context) {
     }
 
     companion object {
+        /** Range the recovered energy gave back at the period's consumption; the car only counts it since the last charge. */
+        fun regenKmEstimate(t: EnergyMonitor.Totals): Float? {
+            val net = t.outKwh - t.regenKwh
+            return if (t.km >= 2 && net > 0f) t.regenKwh * t.km / net else null
+        }
+
         /** "+3.2 kWh   +50.9 km"; no km if unknown or out of range. */
         fun regenValues(c: android.content.Context, kwh: Float, km: Float?): String {
             val kmText = km?.takeIf { it > 0.05f && it < 2000f }?.let { "   +" + app.mg4dash.system.Units.distText(c, it, 1) } ?: ""

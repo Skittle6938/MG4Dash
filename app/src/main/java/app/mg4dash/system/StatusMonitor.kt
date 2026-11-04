@@ -38,6 +38,8 @@ object StatusMonitor {
         val hotspotOn: Boolean, val signalLevel: Int?, val signalMode: Int, val usbCount: Int,
         /** Wi-Fi strength, 0 to 3 (#86). */
         val wifiLevel: Int,
+        /** Phone connected over Bluetooth, null if there is none (#86). */
+        val phone: BtAudio.PhoneIndicators? = null,
     )
 
     const val SIGNAL_MAX = 4
@@ -71,7 +73,7 @@ object StatusMonitor {
         val wifiLevel = try {
             WifiManager.calculateSignalLevel(wm?.connectionInfo?.rssi ?: -127, WIFI_LEVELS)
         } catch (_: Exception) { 0 }
-        return Connections(s.btOn, s.btConnected, btName, s.wifiOn, s.wifiConnected, ssid, ap, level, mode.coerceIn(0, 4), usb, wifiLevel)
+        return Connections(s.btOn, s.btConnected, btName, s.wifiOn, s.wifiConnected, ssid, ap, level, mode.coerceIn(0, 4), usb, wifiLevel, BtAudio.phoneIndicators(context))
     }
 
     fun hasInternet(context: Context): Boolean {
