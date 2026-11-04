@@ -103,8 +103,10 @@ class ConnectionRow(private val activity: Activity) : LinearLayout(activity) {
         }
         row(R.drawable.ic_bluetooth, c.btConnected, R.string.conn_bt, if (!c.btOn) off else c.btName ?: none, BLUETOOTH_SETTINGS)
         row(R.drawable.ic_wifi, c.wifiConnected, R.string.conn_wifi, if (!c.wifiOn) off else c.wifiName ?: none, WIFI_SETTINGS)
-        // No stock setting opens the hotspot page directly on any firmware: Wi-Fi settings instead
-        row(R.drawable.ic_conn_hotspot, c.hotspotOn, R.string.conn_hotspot, activity.getString(if (c.hotspotOn) R.string.conn_on else R.string.conn_off), WIFI_SETTINGS)
+        // No stock setting opens the hotspot page directly: Android's own page on old firmwares (#86);
+        // on A9 the hotspot is not an official function, so Wi-Fi settings
+        row(R.drawable.ic_conn_hotspot, c.hotspotOn, R.string.conn_hotspot, activity.getString(if (c.hotspotOn) R.string.conn_on else R.string.conn_off),
+            if (app.mg4dash.system.Firmware.family == app.mg4dash.system.Firmware.Family.LEGACY) TETHER_SETTINGS else WIFI_SETTINGS)
         c.signalLevel?.let { level ->
             val text = if (level == 0) activity.getString(R.string.conn_no_network)
                 else "${if (c.signalMode >= 2) "${c.signalMode}G · " else ""}$level/${StatusMonitor.SIGNAL_MAX}"
@@ -153,7 +155,8 @@ class ConnectionRow(private val activity: Activity) : LinearLayout(activity) {
 
     private fun openSettings(action: String) {
         try {
-            activity.startActivity(Intent(action).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+            val intent = if (action == TETHER_SETTINGS) Intent().setClassName("com.android.settings", TETHER_SETTINGS) else Intent(action)
+            activity.startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
         } catch (_: Exception) {
             Apps.open(activity, Apps.SETTINGS, activity.getString(R.string.dock_settings))
         }
@@ -212,6 +215,7 @@ class ConnectionRow(private val activity: Activity) : LinearLayout(activity) {
         const val GAP_DP = 13
         const val BLUETOOTH_SETTINGS = android.provider.Settings.ACTION_BLUETOOTH_SETTINGS
         const val WIFI_SETTINGS = android.provider.Settings.ACTION_WIFI_SETTINGS
+        const val TETHER_SETTINGS = "com.android.settings.TetherSettings"
         /** Reads off the main thread: car service and storage. */
         val worker by lazy { Handler(HandlerThread("connections").apply { start() }.looper) }
     }
