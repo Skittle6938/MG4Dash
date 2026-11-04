@@ -295,6 +295,7 @@ A short tour of the main gestures opens after a first install (*Skip* closes it 
 - Long press the set temperature: temperature calibration; long press fan minus: lowest fan speed; long press A/C: intermittent A/C
 - Long press play / pause: Sound page
 - Steering wheel * button: 360 camera on / off
+- Swipe the map card: map → consumption → shortcuts; move and zoom the map with two fingers (one finger in full screen)
 - Swipe the weather card: hourly ↔ daily forecast
 - Tap a segment of the KERS gauge: regeneration level; long press: one-pedal driving
 - Button at the top right of the map: map → consumption → shortcuts; long press a shortcut to edit it
