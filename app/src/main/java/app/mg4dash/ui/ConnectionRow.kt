@@ -30,6 +30,7 @@ class ConnectionRow(private val activity: Activity) : LinearLayout(activity) {
     private val signal = SignalBars(activity).also { addView(it, LayoutParams(dp(ICON_DP), dp(ICON_DP - 4)).apply { leftMargin = dp(GAP_DP) }) }
     private val usb = icon(R.drawable.ic_conn_usb)
     private var last: StatusMonitor.Connections? = null
+    private var panelClosedAt = 0L
 
     private val refresh = object : Runnable {
         override fun run() {
@@ -45,7 +46,8 @@ class ConnectionRow(private val activity: Activity) : LinearLayout(activity) {
         orientation = HORIZONTAL
         gravity = Gravity.CENTER_VERTICAL
         isClickable = true
-        setOnClickListener { last?.let { openPanel(it) } }
+        // The touch that closes the panel from outside also reaches this row: it must not reopen it (#18)
+        setOnClickListener { if (android.os.SystemClock.uptimeMillis() - panelClosedAt > REOPEN_GUARD_MS) last?.let { openPanel(it) } }
     }
 
     private fun icon(res: Int) = ImageView(activity).apply {
@@ -88,6 +90,7 @@ class ConnectionRow(private val activity: Activity) : LinearLayout(activity) {
         }
         val popup = PopupWindow(box, dp(520), LayoutParams.WRAP_CONTENT, false).apply {
             isOutsideTouchable = true
+            setOnDismissListener { panelClosedAt = android.os.SystemClock.uptimeMillis() }
             setOnDismissListener { Fullscreen.apply(activity) }
         }
         box.addView(TextView(activity).apply {
@@ -211,6 +214,7 @@ class ConnectionRow(private val activity: Activity) : LinearLayout(activity) {
 
     private companion object {
         const val REFRESH_MS = 5_000L
+        const val REOPEN_GUARD_MS = 400L
         const val ICON_DP = 26
         const val GAP_DP = 13
         const val BLUETOOTH_SETTINGS = android.provider.Settings.ACTION_BLUETOOTH_SETTINGS
