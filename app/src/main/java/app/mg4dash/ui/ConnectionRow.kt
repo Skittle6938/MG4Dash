@@ -33,7 +33,7 @@ class ConnectionRow(private val activity: Activity) : LinearLayout(activity) {
     private val bt = icon(R.drawable.ic_bluetooth, 16)
     private val wifi = WifiArcs(activity).also { addView(it, LayoutParams(dp(28), dp(ICON_DP - 2)).apply { leftMargin = dp(GAP_DP) }) }
     private val hotspot = icon(R.drawable.ic_conn_hotspot)
-    private val signal = SignalBars(activity).also { addView(it, LayoutParams(dp(ICON_DP + 12), dp(ICON_DP - 3)).apply { leftMargin = dp(GAP_DP) }) }
+    private val signal = SignalBars(activity).also { addView(it, LayoutParams(dp(ICON_DP + 4), dp(ICON_DP - 3)).apply { leftMargin = dp(GAP_DP) }) }
     private val usb = icon(R.drawable.ic_conn_usb, 18)
     private var last: StatusMonitor.Connections? = null
     private var panelClosedAt = 0L
@@ -350,7 +350,7 @@ class ConnectionRow(private val activity: Activity) : LinearLayout(activity) {
     private class SignalBars(context: android.content.Context, private val n: Int = StatusMonitor.SIGNAL_MAX) : View(context) {
         var level = 0
             set(v) { if (field != v) { field = v; invalidate() } }
-        /** Network generation, to the left of the bars ("4" for 4G). */
+        /** Network generation above the short bars ("4" for 4G). */
         var label: String? = null
             set(v) { if (field != v) { field = v; invalidate() } }
         private val on = Themes.color(context, R.color.accent_action)
@@ -358,18 +358,16 @@ class ConnectionRow(private val activity: Activity) : LinearLayout(activity) {
         private val paint = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG)
 
         override fun onDraw(canvas: android.graphics.Canvas) {
-            // The digit has its own place to the left of the bars, so it never touches them
-            var left = 0f
+            // Above the two short bars, without touching the second one (its top is at half height)
             label?.let {
-                paint.color = on; paint.textSize = height * 0.8f; paint.isFakeBoldText = true
-                canvas.drawText(it, 0f, height * 0.86f, paint)
-                left = paint.measureText(it) + height * 0.16f
+                paint.color = on; paint.textSize = height * 0.6f; paint.isFakeBoldText = true
+                canvas.drawText(it, 0f, height * 0.44f, paint)
             }
-            val gap = (width - left) * 0.08f
-            val w = (width - left - gap * (n - 1)) / n
+            val gap = width * 0.08f
+            val w = (width - gap * (n - 1)) / n
             for (i in 0 until n) {
                 paint.color = if (i < level) on else off
-                val x = left + i * (w + gap)
+                val x = i * (w + gap)
                 canvas.drawRect(x, height * (n - 1 - i) / n.toFloat(), x + w, height.toFloat(), paint)
             }
         }
