@@ -629,6 +629,7 @@
     <string name="conn_off">Aus</string>
     <string name="conn_not_connected">Nicht verbunden</string>
     <string name="conn_no_network">Kein Netz</string>
+    <string name="conn_ap_clients">%1$d Gerät(e)</string>
     <string name="conn_usb_count">%1$d verbunden</string>
     <string name="en_time_note">Nach Datum und geglättet · Durchschnitt (gestrichelt)</string>
     <string name="st_sound_trigger">Startton</string>

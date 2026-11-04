@@ -629,6 +629,7 @@
     <string name="conn_off">Uit</string>
     <string name="conn_not_connected">Niet verbonden</string>
     <string name="conn_no_network">Geen netwerk</string>
+    <string name="conn_ap_clients">%1$d apparaat/apparaten</string>
     <string name="conn_usb_count">%1$d verbonden</string>
     <string name="en_time_note">Op datum en afgevlakt · gemiddelde (gestippeld)</string>
     <string name="st_sound_trigger">Opstartgeluid</string>

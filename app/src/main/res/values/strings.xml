@@ -629,6 +629,7 @@
     <string name="conn_off">Off</string>
     <string name="conn_not_connected">Not connected</string>
     <string name="conn_no_network">No network</string>
+    <string name="conn_ap_clients">%1$d device(s)</string>
     <string name="conn_usb_count">%1$d connected</string>
     <string name="en_time_note">Placed by date and smoothed · average (dashed)</string>
     <string name="st_sound_trigger">Startup Sound</string>

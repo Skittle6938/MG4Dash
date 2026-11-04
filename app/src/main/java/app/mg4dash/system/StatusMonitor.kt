@@ -40,11 +40,37 @@ object StatusMonitor {
         val wifiLevel: Int,
         /** Phone connected over Bluetooth, null if there is none (#86). */
         val phone: BtAudio.PhoneIndicators? = null,
+        /** Devices connected to the hotspot, as the stock status bar counts them (#86). */
+        val hotspotClients: Int = 0,
     )
 
     const val SIGNAL_MAX = 4
     private const val WIFI_LEVELS = 4
     private const val CSQ_MAX = 31
+
+    @Volatile private var hotspotClients = 0
+    private var hotspotCallback: Any? = null
+
+    /** Number of hotspot clients: only given by a callback, the one the stock status bar uses (hidden API). */
+    private fun watchHotspotClients(wm: WifiManager?): Int {
+        if (hotspotCallback == null && wm != null) try {
+            val type = Class.forName("android.net.wifi.WifiManager\$SoftApCallback")
+            val callback = java.lang.reflect.Proxy.newProxyInstance(type.classLoader, arrayOf(type)) { self, method, args ->
+                when (method.name) {
+                    "onNumClientsChanged" -> { hotspotClients = args?.get(0) as? Int ?: 0; null }
+                    // WifiManager keeps the callback in a map
+                    "hashCode" -> System.identityHashCode(self)
+                    "equals" -> self === args?.get(0)
+                    "toString" -> "SoftApCallback"
+                    else -> null
+                }
+            }
+            wm.javaClass.getMethod("registerSoftApCallback", type, android.os.Handler::class.java)
+                .invoke(wm, callback, android.os.Handler(android.os.Looper.getMainLooper()))
+            hotspotCallback = callback
+        } catch (e: Throwable) { Log.w("Status", "hotspot clients: ${e.cause ?: e}") }
+        return hotspotClients
+    }
 
     /** Call off the main thread: T-box service and storage. */
     fun connections(context: Context): Connections {
@@ -73,7 +99,7 @@ object StatusMonitor {
         val wifiLevel = try {
             WifiManager.calculateSignalLevel(wm?.connectionInfo?.rssi ?: -127, WIFI_LEVELS)
         } catch (_: Exception) { 0 }
-        return Connections(s.btOn, s.btConnected, btName, s.wifiOn, s.wifiConnected, ssid, ap, level, mode.coerceIn(0, 4), usb, wifiLevel, BtAudio.phoneIndicators(context))
+        return Connections(s.btOn, s.btConnected, btName, s.wifiOn, s.wifiConnected, ssid, ap, level, mode.coerceIn(0, 4), usb, wifiLevel, BtAudio.phoneIndicators(context), if (ap) watchHotspotClients(wm) else 0)
     }
 
     fun hasInternet(context: Context): Boolean {

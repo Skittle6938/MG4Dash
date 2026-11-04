@@ -629,6 +629,7 @@
     <string name="conn_off">Coupé</string>
     <string name="conn_not_connected">Non connecté</string>
     <string name="conn_no_network">Pas de réseau</string>
+    <string name="conn_ap_clients">%1$d appareil(s)</string>
     <string name="conn_usb_count">%1$d connecté(s)</string>
     <string name="en_time_note">Placée selon la date et lissée · moyenne (pointillés)</string>
     <string name="st_sound_trigger">Son au démarrage</string>
