@@ -63,8 +63,10 @@ class EnergyActivity : PageActivity() {
     private lateinit var consTotal: TextView
     private lateinit var legend: LinearLayout
     private lateinit var ring: app.mg4dash.ui.RingChart
+    private lateinit var regenLabel: TextView
     private lateinit var regen: TextView
-    private lateinit var regenKm: TextView
+    /** Range recovered since the last charge (km, from the car); only shown for that period. */
+    private var regenKm: Float? = null
     private lateinit var chart: LineChart
     private lateinit var chartNote: TextView
 
@@ -196,6 +198,8 @@ class EnergyActivity : PageActivity() {
         totalRow.addView(consTotal, kit.lp(-2, -2))
         val recovered = kit.column()
         totalRow.addView(recovered, kit.lp(0, -2, 1f, l = 16))
+        regenLabel = kit.text(getString(R.string.en_regen_short).uppercase(), 15f, R.color.text_sub).apply { letterSpacing = 0.1f }
+        recovered.addView(regenLabel, kit.lp(-1, -2))
         c3.addView(totalRow, kit.lp(-1, -2, t = 14))
         // Breakdown ring on the left, the detail on the right
         ring = app.mg4dash.ui.RingChart(this)
@@ -205,10 +209,8 @@ class EnergyActivity : PageActivity() {
             addView(ring, kit.lp(kit.dp(104), kit.dp(104)))
             addView(legend, kit.lp(0, -2, 1f, l = 16))
         }, kit.lp(-1, -2, t = 8))
-        regen = kit.text("", 15f, R.color.accent_energy).apply { setTextColor(app.mg4dash.ui.Themes.energy(context)) }
+        regen = kit.text("", 22f, R.color.accent_energy).apply { setTextColor(app.mg4dash.ui.Themes.energy(context)) }
         recovered.addView(regen, kit.lp(-1, -2))
-        regenKm = kit.text("", 15f, R.color.accent_energy).apply { setTextColor(app.mg4dash.ui.Themes.energy(context)) }
-        recovered.addView(regenKm, kit.lp(-1, -2, t = 2))
         c3.addView(kit.title(getString(R.string.en_recent, app.mg4dash.system.Units.stackUnit(this))), kit.lp(-1, -2, t = 18))
         chart = LineChart(this).apply {
             // Long press on the curve: erase it (#44)
@@ -320,8 +322,7 @@ class EnergyActivity : PageActivity() {
             stopReasonLabel(p.stopReason)?.takeIf { VehicleState.isPlugged(s.chargeStatus) && !VehicleState.isCharging(s.chargeStatus) }
                 ?.let { getString(R.string.en_stop_reason, it) },
         ).joinToString(" · ")
-        regenKm.text = p.regenKm?.takeIf { it > 0.05f && it < 2000f }
-            ?.let { getString(R.string.en_regen_km, String.format(Locale.getDefault(), "%.1f", app.mg4dash.system.Units.dist(this, it)), app.mg4dash.system.Units.distUnit(this)) } ?: ""
+        regenKm = p.regenKm
         // SAIC counters at zero on the car: consumption measured by MG4Dash (EnergyMonitor)
         val t = EnergyMonitor.totals(period)
         renderConsumption(if (t.outKwh > 0f) floatArrayOf(t.outKwh, t.climKwh, t.accKwh, t.regenKwh, t.heatKwh) else p.cons)
@@ -369,7 +370,8 @@ class EnergyActivity : PageActivity() {
             r.addView(kit.text(if (ok && v >= 0f) String.format(Locale.getDefault(), "%.1f kWh · %d %%", v, Math.round(v / shared * 100)) else "—", 18f))
             legend.addView(r, kit.lp(-1, -2, t = 6))
         }
-        regen.text = if (rgn > 0f) getString(R.string.en_regen, String.format(Locale.getDefault(), "%.1f", rgn)) else ""
+        regen.text = if (rgn > 0f) app.mg4dash.ui.ConsumptionCard.regenValues(this, rgn, regenKm.takeIf { period == 0 }) else ""
+        regenLabel.visibility = if (rgn > 0f) android.view.View.VISIBLE else android.view.View.INVISIBLE
     }
 
     private fun renderHistory() {

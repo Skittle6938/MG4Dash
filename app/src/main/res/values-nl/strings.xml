@@ -147,7 +147,6 @@
     <string name="en_climate">Klimaatregeling</string>
     <string name="en_accessories">Accessoires</string>
     <string name="en_battery_heat">Batterijverwarming</string>
-    <string name="en_regen">+ %1$s kWh teruggewonnen bij remmen</string>
     <string name="en_regen_short">terugwinning</string>
     <string name="cc_ago">%1$s geleden</string>
     <string name="cc_now">nu</string>
@@ -400,7 +399,6 @@
     <string name="sr_plug">stekker niet goed aangesloten</string>
     <string name="sr_voltage">spanning past niet</string>
     <string name="sr_other">andere oorzaak</string>
-    <string name="en_regen_km">+ %1$s %2$s bereik teruggewonnen sinds het laden</string>
     <string name="st_rd_state">Radio Dash: %1$s</string>
     <string name="st_rd_none">niet geïnstalleerd</string>
     <string name="st_rd_unknown">geïnstalleerd (versie onbekend)</string>
