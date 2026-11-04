@@ -49,7 +49,8 @@ class ClimateHoldActivity : AppCompatActivity() {
     private fun display(on: Boolean) {
         if (on == !displayOff) return
         displayOff = !on
-        blank.visibility = if (on) android.view.View.GONE else android.view.View.VISIBLE
+        // Old SDK (#79): SystemUI's black window takes the touch that wakes the screen, ours would stay on top
+        blank.visibility = if (on || app.mg4dash.system.Firmware.family == app.mg4dash.system.Firmware.Family.LEGACY) android.view.View.GONE else android.view.View.VISIBLE
         CarBridge.setDisplay(on)
     }
 
