@@ -457,6 +457,28 @@ object Dock {
         return cn
     }
 
+    /** Opens the app of the Android Auto button (also the two finger pull from the top of the screen). */
+    fun openProjection(activity: Activity) {
+        val custom = customAa(activity)
+        if (custom != null && custom != Apps.CARPLAY) { Shortcuts.launch(activity, custom); return }
+        // Stock Android Auto / CarPlay: with no phone connected, the screen stays black (#41).
+        // Open the projection of the phone in session, or warn there is none.
+        val fallback = custom ?: Apps.ANDROID_AUTO
+        Thread {
+            val s = app.mg4dash.system.Projection.session(activity)
+            activity.runOnUiThread {
+                when {
+                    s is app.mg4dash.system.Projection.Session.Read && s.target == null ->
+                        app.mg4dash.ui.Toasts.show(activity, R.string.projection_no_phone)
+                    else -> {
+                        val target = (s as? app.mg4dash.system.Projection.Session.Read)?.target ?: fallback
+                        Apps.open(activity, target, activity.getString(if (target == Apps.CARPLAY) R.string.dock_cp else R.string.dock_aa))
+                    }
+                }
+            }
+        }.start()
+    }
+
     private fun open(activity: Activity, item: Item, current: Page) {
         // Full screen map (issue #4): any bar button brings it back to its widget size
         (activity as? app.mg4dash.MainActivity)?.exitMapFullscreen()
@@ -466,24 +488,7 @@ object Dock {
                 if (app.mg4dash.system.ConnectionToggle.isOff(activity)) {
                     Toasts.show(activity, activity.getString(R.string.dock_conn_off, connectionName(activity)), long = true); return
                 }
-                val custom = customAa(activity)
-                if (custom != null && custom != Apps.CARPLAY) { Shortcuts.launch(activity, custom); return }
-                // Stock Android Auto / CarPlay: with no phone connected, the screen stays black (#41).
-                // Open the projection of the phone in session, or warn there is none.
-                val fallback = custom ?: Apps.ANDROID_AUTO
-                Thread {
-                    val s = app.mg4dash.system.Projection.session(activity)
-                    activity.runOnUiThread {
-                        when {
-                            s is app.mg4dash.system.Projection.Session.Read && s.target == null ->
-                                app.mg4dash.ui.Toasts.show(activity, R.string.projection_no_phone)
-                            else -> {
-                                val target = (s as? app.mg4dash.system.Projection.Session.Read)?.target ?: fallback
-                                Apps.open(activity, target, activity.getString(if (target == Apps.CARPLAY) R.string.dock_cp else R.string.dock_aa))
-                            }
-                        }
-                    }
-                }.start()
+                openProjection(activity)
                 return
             }
             // Touch: MG4Dash settings; long press: car settings

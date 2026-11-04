@@ -350,6 +350,9 @@ object MediaHub {
     /** Android Auto / CarPlay (AllGo), DiAuto or equivalent in session. */
     private val projecting get() = projectionLive == true || appProjecting
 
+    /** A phone is connected through Android Auto, CarPlay or DiAuto. */
+    val phoneProjecting get() = projecting
+
     /**
      * App connection cut by the Android Auto button (DiAuto…): if it was the source being listened to,
      * move to the setting's replacement source, as for a car source that disappears.

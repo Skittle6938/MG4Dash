@@ -945,7 +945,10 @@ class MainActivity : AppCompatActivity() {
     private var mapAppPressY = 0f
     private val mapAppLongPress = Runnable { pickMapApp() }
 
+    private val twoFingerPull by lazy { app.mg4dash.ui.TwoFingerPull(this) }
+
     override fun dispatchTouchEvent(ev: android.view.MotionEvent): Boolean {
+        if (twoFingerPull.onTouch(ev) { super.dispatchTouchEvent(it) }) return true
         if (mapAppView?.visibility == View.VISIBLE) {
             when (ev.actionMasked) {
                 android.view.MotionEvent.ACTION_DOWN -> {

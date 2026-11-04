@@ -16,6 +16,11 @@ import kotlinx.coroutines.launch
  * full screen, refreshed at each vehicle state.
  */
 abstract class PageActivity : AppCompatActivity() {
+    private val twoFingerPull by lazy { TwoFingerPull(this) }
+
+    override fun dispatchTouchEvent(ev: android.view.MotionEvent): Boolean =
+        twoFingerPull.onTouch(ev) { super.dispatchTouchEvent(it) } || super.dispatchTouchEvent(ev)
+
     protected lateinit var kit: Kit
     protected lateinit var header: LinearLayout
     protected lateinit var body: LinearLayout
