@@ -51,7 +51,8 @@ class FadeOutline(private val d: Float, color: Int, private val fade: Boolean = 
                 val color = Themes.color(root.context, R.color.text_sub)
                 val fade = app.mg4dash.system.Prefs(root.context).panelFade
                 fun walk(v: View) {
-                    if (v.elevation >= 5.5f * d && v.background != null && v.width > 120 * d) {
+                    // Not the guidance banner: already shown when home is rebuilt during a trip, it lost its background
+                    if (v !is NavBanner && v.elevation >= 5.5f * d && v.background != null && v.width > 120 * d) {
                         v.background = FadeOutline(d, color, fade); v.elevation = 0f
                     }
                     if (v is ViewGroup) for (i in 0 until v.childCount) walk(v.getChildAt(i))
