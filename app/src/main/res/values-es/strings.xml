@@ -629,6 +629,7 @@
     <string name="conn_off">Desactivado</string>
     <string name="conn_not_connected">No conectado</string>
     <string name="conn_no_network">Sin red</string>
+    <string name="conn_ap_clients">%1$d dispositivo(s)</string>
     <string name="conn_usb_count">%1$d conectado(s)</string>
     <string name="en_time_note">Según la fecha y suavizada · media (puntos)</string>
     <string name="st_sound_trigger">Sonido de inicio</string>

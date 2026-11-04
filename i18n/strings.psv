@@ -628,6 +628,7 @@ conn_on|On|Activé|An|Activado|Attivato|Aan|Açık
 conn_off|Off|Coupé|Aus|Desactivado|Disattivato|Uit|Kapalı
 conn_not_connected|Not connected|Non connecté|Nicht verbunden|No conectado|Non connesso|Niet verbonden|Bağlı değil
 conn_no_network|No network|Pas de réseau|Kein Netz|Sin red|Nessuna rete|Geen netwerk|Ağ yok
+conn_ap_clients|%1$d device(s)|%1$d appareil(s)|%1$d Gerät(e)|%1$d dispositivo(s)|%1$d dispositivo/i|%1$d apparaat/apparaten|%1$d cihaz
 conn_usb_count|%1$d connected|%1$d connecté(s)|%1$d verbunden|%1$d conectado(s)|%1$d collegato/i|%1$d verbonden|%1$d bağlı
 en_time_note|Placed by date and smoothed · average (dashed)|Placée selon la date et lissée · moyenne (pointillés)|Nach Datum und geglättet · Durchschnitt (gestrichelt)|Según la fecha y suavizada · media (puntos)|Per data e livellata · media (tratteggiata)|Op datum en afgevlakt · gemiddelde (gestippeld)|Tarihe göre ve yumuşatılmış · ortalama (kesikli)
 st_sound_trigger|Startup Sound|Son au démarrage|Startton|Sonido de inicio|Audio all'avvio|Opstartgeluid|Başlangıç Sesi

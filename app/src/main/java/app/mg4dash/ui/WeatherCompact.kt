@@ -38,7 +38,7 @@ class WeatherCompact(context: Context) : LinearLayout(context) {
     private val date = tv(18f, R.color.text_sub).apply { gravity = Gravity.END }
     private val time = tv(50f, R.color.text_value, bold = true).apply { gravity = Gravity.END }
     private val city = tv(18f, R.color.text_sub).apply { gravity = Gravity.END }
-    private val cityLine = LinearLayout(context).apply { orientation = HORIZONTAL; gravity = Gravity.CENTER_VERTICAL or Gravity.END }
+    private val cityLine = LinearLayout(context).apply { orientation = HORIZONTAL; gravity = Gravity.CENTER }
     private val forecast = LinearLayout(context).apply { orientation = HORIZONTAL }
     private val right = LinearLayout(context)
 
