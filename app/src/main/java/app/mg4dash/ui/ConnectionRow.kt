@@ -297,12 +297,14 @@ class ConnectionRow(private val activity: Activity) : LinearLayout(activity) {
         var level = 0
             set(v) { if (field != v) { field = v; invalidate() } }
         private val on = Themes.color(context, R.color.accent_action)
-        private val low = Themes.color(context, R.color.accent_danger)
+        private val low = Themes.color(context, R.color.accent_heat)
+        private val empty = Themes.color(context, R.color.accent_danger)
         private val off = Themes.color(context, R.color.text_disabled)
         private val paint = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG)
 
         override fun onDraw(canvas: android.graphics.Canvas) {
-            val col = if (level <= 1) low else on
+            // The phone only sends 0 to 5: 0 (under about 10 %) in red, 1 (under about 30 %) in orange
+            val col = when { level <= 0 -> empty; level == 1 -> low; else -> on }
             val tip = width * 0.08f
             val body = width - tip
             val stroke = height * 0.12f
