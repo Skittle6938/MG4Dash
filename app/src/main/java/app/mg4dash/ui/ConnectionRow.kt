@@ -95,7 +95,7 @@ class ConnectionRow(private val activity: Activity) : LinearLayout(activity) {
         phoneSignal.level = phoneBars(c.phone?.signal)
         applyChoice()
         signal.level = c.signalLevel ?: 0
-        signal.label = c.signalMode.takeIf { it >= 2 }?.toString()
+        signal.label = c.signalMode.takeIf { it >= 2 }?.let { "${it}G" }
     }
 
     /** Phone signal, from 0 to 5 over Bluetooth, on the same 4 bars as the car's network. */
@@ -350,7 +350,7 @@ class ConnectionRow(private val activity: Activity) : LinearLayout(activity) {
     private class SignalBars(context: android.content.Context, private val n: Int = StatusMonitor.SIGNAL_MAX) : View(context) {
         var level = 0
             set(v) { if (field != v) { field = v; invalidate() } }
-        /** Network generation above the short bars ("4" for 4G). */
+        /** Network type above the short bars, like the stock icon ("4G"). */
         var label: String? = null
             set(v) { if (field != v) { field = v; invalidate() } }
         private val on = Themes.color(context, R.color.accent_action)
@@ -360,8 +360,8 @@ class ConnectionRow(private val activity: Activity) : LinearLayout(activity) {
         override fun onDraw(canvas: android.graphics.Canvas) {
             // Above the two short bars, without touching the second one (its top is at half height)
             label?.let {
-                paint.color = on; paint.textSize = height * 0.6f; paint.isFakeBoldText = true
-                canvas.drawText(it, 0f, height * 0.44f, paint)
+                paint.color = on; paint.textSize = height * 0.5f; paint.isFakeBoldText = true
+                canvas.drawText(it, 0f, height * 0.42f, paint)
             }
             val gap = width * 0.08f
             val w = (width - gap * (n - 1)) / n
