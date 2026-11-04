@@ -85,8 +85,18 @@ object MediaHub {
         // Found on the car: SAIC sessions (radio, Bluetooth) stay "inactive"
         // even while playing, so they are missing from getActiveSessions(). Like the stock launcher,
         // connect directly to their MediaBrowserService to get their controller.
-        BROWSERS.forEach { connectBrowser(it) }
+        BROWSERS.filterNot { serviceMedia && it.packageName == USB }.forEach { connectBrowser(it) }
         listenRdsText(context)
+        if (serviceMedia) {
+            SaicMedia.connect(context)
+            // No callback read on the USB side: reread the track every 2 s, like the old SDK radio.
+            main.postDelayed(object : Runnable {
+                override fun run() {
+                    io.launch { val before = SaicMedia.last; SaicMedia.refresh(); if (SaicMedia.last != before) main.post { reevaluate() } }
+                    main.postDelayed(this, 2_000)
+                }
+            }, 1_000)
+        }
         if (legacyRadio) {
             SaicRadio.connect(context)
             // No callback on the radio side: reread the station every 2 s.
@@ -554,7 +564,7 @@ object MediaHub {
 
     /** Shown source, Android Auto mapped to its player, the radio to its band if DAB and FM are separate. */
     fun currentSource(): String? {
-        val pkg = if (radioShown) RADIO else current?.packageName?.let { if (isAndroidAuto(it)) AA_MBS else it }
+        val pkg = if (radioShown) RADIO else if (usbShown) USB else current?.packageName?.let { if (isAndroidAuto(it)) AA_MBS else it }
         return if (pkg == RADIO && radioBandsSplit()) bandTarget ?: currentBandSource() ?: RADIO_DAB else pkg
     }
 
@@ -734,6 +744,9 @@ object MediaHub {
                         val src = when {
                             diAuto != null -> diAuto
                             pkg == "com.saicmotor.media" && type == 5 -> "com.android.bluetooth"
+                            // Old SDK (#80): the same service holds the source for Bluetooth (5) and USB (6)
+                            pkg == "com.saicmotor.service.media" && type == 5 -> "com.android.bluetooth"
+                            pkg == "com.saicmotor.service.media" && type == 6 -> USB
                             pkg == "com.allgo.app.androidauto" -> AA_MBS.also { carPlay = false }
                             pkg == "com.allgo.carplay.service" -> AA_MBS.also { carPlay = true }
                             pkg == SaicRadio.HMI_PKG || pkg == "com.saicmotor.service.radio" -> RADIO
@@ -897,7 +910,15 @@ object MediaHub {
         }
         if (showRadio != radioShown) Log.i(TAG, "player shown: ${if (showRadio) "radio (SAIC service)" else "media session"}")
         radioShown = showRadio
-        if (showRadio) { current = null; publish(); return }
+        // Old SDK USB (#80): no controller either, shown from the same signals as the radio
+        val showUsb = !showRadio && serviceMedia && SaicMedia.ready && USB in availableSources() && when (pinnedPkg) {
+            USB -> true
+            null -> source == USB || (source == null && playing == null && SaicMedia.last?.playing == true)
+            else -> false
+        }
+        if (showUsb != usbShown) Log.i(TAG, "player shown: ${if (showUsb) "USB (SAIC service)" else "not USB"}")
+        usbShown = showUsb
+        if (showRadio || showUsb) { current = null; publish(); return }
         // A player can have two controllers (active session, media browser): prefer the one
         // with a title, then the one with a state, then the browser.
         fun bestFor(pkg: String): MediaController? {
@@ -992,6 +1013,7 @@ object MediaHub {
 
     private fun publish() {
         if (radioShown) { publishRadio(); return }
+        if (usbShown) { publishUsb(); return }
         val c = current
         if (c == null) { _now.value = NowPlaying(); return }
         val md = c.metadata
@@ -1122,6 +1144,30 @@ object MediaHub {
             appContext?.let { app.mg4dash.system.RadioDashUpdater.installed(it) } != true
     }
     @Volatile private var radioShown = false
+    @Volatile private var usbShown = false
+    private const val USB = "com.saicmotor.media"
+    /** Old SDK without com.saicmotor.media: Bluetooth and USB go through its service (#80). */
+    private val serviceMedia: Boolean by lazy { appContext?.let { SaicMedia.applies(it) } == true }
+
+    /**
+     * Like the old SDK launcher (MusicViewModel.checkResource): pause the old source, then "play" on the new
+     * one, with no source command. If USB has nothing to play yet, its list is loaded by the stock music app.
+     */
+    private fun activateServiceMedia(ctx: Context, pkg: String): Boolean {
+        if (!legacyRadio && (radioShown || sourcePkg == RADIO || current?.packageName == RADIO)) pauseRadio()
+        val fromBluetooth = current?.packageName == "com.android.bluetooth"
+        Log.i(TAG, "audio source switch through the media service: $pkg")
+        if (pkg == USB) usbCommand {
+            if (fromBluetooth) SaicMedia.btPause()
+            SaicMedia.usbPlay().also { ok ->
+                if (!ok) main.post {
+                    Log.i(TAG, "USB not ready: opening the stock music app")
+                    ctx.packageManager.getLaunchIntentForPackage(SaicMedia.HMI_PKG)?.let { ctx.startActivity(it.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)) }
+                }
+            }
+        } else io.launch { if (!SaicMedia.btPlay()) Log.w(TAG, "Bluetooth play refused") }
+        return true
+    }
 
     private fun publishRadio() {
         val st = SaicRadio.last
@@ -1135,6 +1181,30 @@ object MediaHub {
             playing = st?.playing == true,
             androidAuto = androidAutoAvailable(),
         )
+    }
+
+    /** USB of old SDK firmwares (#80). */
+    private fun publishUsb() {
+        val st = SaicMedia.last
+        _now.value = NowPlaying(
+            available = true,
+            packageName = USB,
+            source = "USB",
+            title = st?.track?.title?.takeIf { it.isNotBlank() } ?: "USB",
+            artist = st?.track?.artist.orEmpty(),
+            album = st?.track?.album.orEmpty(),
+            playing = st?.playing == true,
+            androidAuto = androidAutoAvailable(),
+        )
+    }
+
+    /** USB command off the main thread, then reread the track. */
+    private fun usbCommand(action: () -> Boolean) {
+        io.launch {
+            if (!action()) Log.w(TAG, "USB command refused")
+            kotlinx.coroutines.delay(400); SaicMedia.refresh()
+            main.post { reevaluate() }
+        }
     }
 
     /** Radio command off the main thread, then reread the station. */
@@ -1215,6 +1285,7 @@ object MediaHub {
     }
 
     private fun playPauseRaw() {
+        if (usbShown) { val playing = SaicMedia.last?.playing == true; usbCommand { if (playing) SaicMedia.usbPause() else SaicMedia.usbPlay() }; return }
         if (radioShown) { val playing = SaicRadio.last?.playing == true; radioCommand { if (playing) SaicRadio.pause() else SaicRadio.play() }; return }
         val c = current ?: return
         val playing = isPlaying(c)
@@ -1269,12 +1340,14 @@ object MediaHub {
 
     fun next() {
         if (radioShown) { radioCommand { SaicRadio.next() }; return }
+        if (usbShown) { usbCommand { SaicMedia.usbNext() }; return }
         val c = current ?: return
         if (isAndroidAuto(c.packageName)) aaControl(c, AA_NEXT, KeyEvent.KEYCODE_MEDIA_NEXT) else c.transportControls.skipToNext()
     }
 
     fun previous() {
         if (radioShown) { radioCommand { SaicRadio.previous() }; return }
+        if (usbShown) { usbCommand { SaicMedia.usbPrevious() }; return }
         val c = current ?: return
         if (isAndroidAuto(c.packageName)) aaControl(c, AA_PREVIOUS, KeyEvent.KEYCODE_MEDIA_PREVIOUS) else c.transportControls.skipToPrevious()
     }
@@ -1418,10 +1491,15 @@ object MediaHub {
 
     /** Component to open when touching the media card. */
     fun ownerComponent(): ComponentName? =
-        if (radioShown) ownerOf(RADIO) else current?.packageName?.let { pkg -> ownerOf(pkg) }
+        if (radioShown) ownerOf(RADIO) else if (usbShown) ownerOf(USB) else current?.packageName?.let { pkg -> ownerOf(pkg) }
 
     /** Stock app of a source; Bluetooth (with no app of its own) is played by the SAIC Media app. */
-    private fun ownerOf(pkg: String): ComponentName? = when (pkg) {
+    private fun ownerOf(pkg: String): ComponentName? = when {
+        serviceMedia && (pkg == "com.android.bluetooth" || pkg == USB) -> appContext?.packageManager?.getLaunchIntentForPackage(SaicMedia.HMI_PKG)?.component
+        else -> ownerOnOtherFirmwares(pkg)
+    }
+
+    private fun ownerOnOtherFirmwares(pkg: String): ComponentName? = when (pkg) {
         AA_MBS -> if (carPlay) app.mg4dash.system.Apps.CARPLAY else app.mg4dash.system.Apps.ANDROID_AUTO
         "com.android.bluetooth" -> app.mg4dash.system.Apps.MEDIA
         RADIO -> appContext?.packageManager?.let { pm -> (pm.getLaunchIntentForPackage(pkg) ?: pm.getLaunchIntentForPackage(SaicRadio.HMI_PKG))?.component }
@@ -1436,6 +1514,10 @@ object MediaHub {
      */
     private fun activateSource(pkg: String): Boolean {
         val ctx = appContext ?: return false
+        if (serviceMedia && pkg != USB && SaicMedia.last?.playing == true) {
+            Log.i(TAG, "USB paused before switching to $pkg")
+            usbCommand { SaicMedia.usbPause() }
+        }
         if (pkg == RADIO && legacyRadio) { radioCommand { SaicRadio.play() }; return true }
         // SWI68 (issue #19): command 0x8001 does not change the source and the radio continued
         // over Bluetooth; first pause the old SDK radio.
@@ -1443,6 +1525,7 @@ object MediaHub {
             Log.i(TAG, "old SDK: radio paused before switching to $pkg")
             radioCommand { SaicRadio.pause() }
         }
+        if (serviceMedia && (pkg == "com.android.bluetooth" || pkg == USB)) return activateServiceMedia(ctx, pkg)
         val (target, type) = when (pkg) {
             "com.android.bluetooth" -> ComponentName("com.saicmotor.media", "com.saicmotor.media.service.MediaService") to 2
             "com.saicmotor.media" -> ComponentName("com.saicmotor.media", "com.saicmotor.media.service.MediaService") to 0
