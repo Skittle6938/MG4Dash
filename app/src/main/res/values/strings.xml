@@ -585,6 +585,7 @@
     <string name="tu_bar_3">Vehicle: double tap = lock / unlock the doors, long press = ESC off / on</string>
     <string name="tu_bar_4">Home: long press = all apps</string>
     <string name="tu_bar_5">Android Auto: long press = choose the app (Android Auto, CarPlay or another), double tap = cut / restore the phone connection</string>
+    <string name="tu_bar_6">Two fingers sliding down from the top of the screen: open Android Auto, when a phone is connected</string>
     <string name="tu_climate_t">Climate</string>
     <string name="tu_climate_1">Long press A/C: intermittent A/C (tap A/C to stop it)</string>
     <string name="tu_climate_2">Long press the temperature: calibration; long press power: keep the climate on after leaving the car (camping)</string>

@@ -585,6 +585,7 @@
     <string name="tu_bar_3">Veicolo: doppio tocco = blocca / sblocca le porte, pressione lunga = ESC off / on</string>
     <string name="tu_bar_4">Home: pressione lunga = tutte le app</string>
     <string name="tu_bar_5">Android Auto: pressione lunga = scegli l\'app (Android Auto, CarPlay o un\'altra), doppio tocco = interrompi / ripristina la connessione del telefono</string>
+    <string name="tu_bar_6">Due dita fatte scorrere dall\'alto dello schermo: apri Android Auto, con un telefono connesso</string>
     <string name="tu_climate_t">Climatizzazione</string>
     <string name="tu_climate_1">Pressione lunga su A/C: A/C intermittente (tocca A/C per fermarlo)</string>
     <string name="tu_climate_2">Pressione lunga sulla temperatura: calibrazione; sull\'accensione: clima acceso uscendo dall\'auto (campeggio)</string>

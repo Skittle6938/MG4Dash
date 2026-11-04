@@ -585,6 +585,7 @@
     <string name="tu_bar_3">Araç: çift dokun = kapıları kilitle / aç, uzun bas = ESC kapalı / açık</string>
     <string name="tu_bar_4">Ana ekran: uzun bas = tüm uygulamalar</string>
     <string name="tu_bar_5">Android Auto: uzun bas = uygulamayı seç (Android Auto, CarPlay veya başka), çift dokun = telefon bağlantısını kes / geri getir</string>
+    <string name="tu_bar_6">Telefon bağlıyken iki parmağı ekranın üstünden aşağı kaydır: Android Auto\'yu aç</string>
     <string name="tu_climate_t">Klima</string>
     <string name="tu_climate_1">A/C\'ye uzun bas: aralıklı A/C (durdurmak için A/C\'ye dokun)</string>
     <string name="tu_climate_2">Sıcaklığa uzun bas: kalibrasyon; güce uzun bas: araçtan inince klimayı açık tut (kamp)</string>

@@ -585,6 +585,7 @@
     <string name="tu_bar_3">Véhicule : double toucher = verrouiller / déverrouiller les portes, appui long = ESP coupé / réactivé</string>
     <string name="tu_bar_4">Accueil : appui long = toutes les applis</string>
     <string name="tu_bar_5">Android Auto : appui long = choisir l\'appli (Android Auto, CarPlay ou une autre), double toucher = couper / rétablir la connexion du téléphone</string>
+    <string name="tu_bar_6">Deux doigts glissés depuis le haut de l\'écran : ouvrir Android Auto, quand un téléphone est connecté</string>
     <string name="tu_climate_t">Climatisation</string>
     <string name="tu_climate_1">Appui long sur A/C : A/C intermittent (toucher A/C pour l\'arrêter)</string>
     <string name="tu_climate_2">Appui long sur la température : calibration ; appui long sur marche : garder la clim hors de la voiture (camping)</string>
