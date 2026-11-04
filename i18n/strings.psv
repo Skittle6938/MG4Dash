@@ -618,6 +618,11 @@ conn_wifi|Wi-Fi|Wi-Fi|WLAN|Wi-Fi|Wi-Fi|Wifi|Wi-Fi
 conn_hotspot|Hotspot|Point d'accès|Hotspot|Punto de acceso|Hotspot|Hotspot|Erişim noktası
 conn_signal|Mobile network|Réseau mobile|Mobilfunknetz|Red móvil|Rete mobile|Mobiel netwerk|Mobil ağ
 conn_phone|Phone|Téléphone|Telefon|Teléfono|Telefono|Telefoon|Telefon
+conn_icons_title|Bar icons|Icônes de la barre|Symbole der Leiste|Iconos de la barra|Icone della barra|Pictogrammen van de balk|Çubuk simgeleri
+conn_icon_battery|Phone battery|Batterie du téléphone|Telefonakku|Batería del teléfono|Batteria del telefono|Telefoonaccu|Telefon bataryası
+conn_icon_net|Phone network|Réseau du téléphone|Telefonnetz|Red del teléfono|Rete del telefono|Telefoonnetwerk|Telefon ağı
+conn_icon_car_net|Car network|Réseau de la voiture|Fahrzeugnetz|Red del coche|Rete dell'auto|Autonetwerk|Araç ağı
+conn_icons_note|The panel keeps showing everything.|Le panneau garde tout, quel que soit ce choix.|Die Übersicht zeigt weiterhin alles.|El panel sigue mostrándolo todo.|Il pannello continua a mostrare tutto.|Het paneel blijft alles tonen.|Panel her şeyi göstermeye devam eder.
 conn_usb|USB|USB|USB|USB|USB|USB|USB
 conn_on|On|Activé|An|Activado|Attivato|Aan|Açık
 conn_off|Off|Coupé|Aus|Desactivado|Disattivato|Uit|Kapalı
