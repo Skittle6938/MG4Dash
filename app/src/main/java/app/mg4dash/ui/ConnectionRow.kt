@@ -90,8 +90,7 @@ class ConnectionRow(private val activity: Activity) : LinearLayout(activity) {
         }
         val popup = PopupWindow(box, dp(520), LayoutParams.WRAP_CONTENT, false).apply {
             isOutsideTouchable = true
-            setOnDismissListener { panelClosedAt = android.os.SystemClock.uptimeMillis() }
-            setOnDismissListener { Fullscreen.apply(activity) }
+            setOnDismissListener { panelClosedAt = android.os.SystemClock.uptimeMillis(); Fullscreen.apply(activity) }
         }
         box.addView(TextView(activity).apply {
             setText(R.string.conn_title)
