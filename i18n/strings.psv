@@ -617,6 +617,7 @@ conn_bt|Bluetooth|Bluetooth|Bluetooth|Bluetooth|Bluetooth|Bluetooth|Bluetooth
 conn_wifi|Wi-Fi|Wi-Fi|WLAN|Wi-Fi|Wi-Fi|Wifi|Wi-Fi
 conn_hotspot|Hotspot|Point d'accès|Hotspot|Punto de acceso|Hotspot|Hotspot|Erişim noktası
 conn_signal|Mobile network|Réseau mobile|Mobilfunknetz|Red móvil|Rete mobile|Mobiel netwerk|Mobil ağ
+conn_phone|Phone|Téléphone|Telefon|Teléfono|Telefono|Telefoon|Telefon
 conn_usb|USB|USB|USB|USB|USB|USB|USB
 conn_on|On|Activé|An|Activado|Attivato|Aan|Açık
 conn_off|Off|Coupé|Aus|Desactivado|Disattivato|Uit|Kapalı

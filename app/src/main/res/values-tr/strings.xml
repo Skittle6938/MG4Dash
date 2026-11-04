@@ -618,6 +618,7 @@
     <string name="conn_wifi">Wi-Fi</string>
     <string name="conn_hotspot">Erişim noktası</string>
     <string name="conn_signal">Mobil ağ</string>
+    <string name="conn_phone">Telefon</string>
     <string name="conn_usb">USB</string>
     <string name="conn_on">Açık</string>
     <string name="conn_off">Kapalı</string>

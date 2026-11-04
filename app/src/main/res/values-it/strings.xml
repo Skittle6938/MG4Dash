@@ -618,6 +618,7 @@
     <string name="conn_wifi">Wi-Fi</string>
     <string name="conn_hotspot">Hotspot</string>
     <string name="conn_signal">Rete mobile</string>
+    <string name="conn_phone">Telefono</string>
     <string name="conn_usb">USB</string>
     <string name="conn_on">Attivato</string>
     <string name="conn_off">Disattivato</string>

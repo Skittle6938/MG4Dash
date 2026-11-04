@@ -64,7 +64,7 @@ class EnergyActivity : PageActivity() {
     private lateinit var ring: app.mg4dash.ui.RingChart
     private lateinit var regenLabel: TextView
     private lateinit var regen: TextView
-    /** Range recovered since the last charge (km, from the car); only shown for that period. */
+    /** Range recovered since the last charge (km, from the car); the other periods are estimated. */
     private var regenKm: Float? = null
     private lateinit var chart: LineChart
     private lateinit var chartNote: TextView
@@ -369,7 +369,8 @@ class EnergyActivity : PageActivity() {
             r.addView(kit.text(if (ok && v >= 0f) String.format(Locale.getDefault(), "%.1f kWh · %d %%", v, Math.round(v / shared * 100)) else "—", 18f))
             legend.addView(r, kit.lp(-1, -2, t = 6))
         }
-        regen.text = if (rgn > 0f) app.mg4dash.ui.ConsumptionCard.regenValues(this, rgn, regenKm.takeIf { period == 0 }) else ""
+        regen.text = if (rgn > 0f) app.mg4dash.ui.ConsumptionCard.regenValues(this, rgn,
+            if (period == 0) regenKm else app.mg4dash.ui.ConsumptionCard.regenKmEstimate(EnergyMonitor.totals(period))) else ""
         regenLabel.visibility = if (rgn > 0f) android.view.View.VISIBLE else android.view.View.INVISIBLE
     }
 
