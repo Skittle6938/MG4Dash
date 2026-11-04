@@ -54,7 +54,7 @@ object Compat {
             appendLine("Stock home: ${HomeSwitcher.STOCK.flattenToShortString()}")
             appendLine("Services: " + CarBridge.probe().joinToString(", ") { "${it.first}=${it.second}" })
             appendLine("CarPropertyManager: ${if (CarProps.ready) "ok" else "absent"}; SOC=${f(0x2160f404)} range=${i(0x2140f41c)} V=${f(0x2160f406)} A=${f(0x2160f407)} driveMode=${i(0x2140a17c)} regen=${i(0x2140a191)} charge=${i(0x2140f409)}")
-            appendLine("12 V battery: ${app.mg4dash.car.CarProps.battery12V() ?: "—"}")
+            appendLine("12 V battery: ${app.mg4dash.car.CarProps.battery12V() ?: "—"} (raw global=${app.mg4dash.car.CarProps.readFloatArea(app.mg4dash.car.CarProps.BAT_VOL, 0x1000000) ?: "—"} area0=${app.mg4dash.car.CarProps.readFloatArea(app.mg4dash.car.CarProps.BAT_VOL, 0) ?: "—"})")
             appendLine("Battery capacity: car=${app.mg4dash.energy.BatteryCapacity.fromCar() ?: "—"} measured=${app.mg4dash.energy.BatteryCapacity.estimate(a)?.let { "${"%.1f".format(java.util.Locale.US, it.first)} (${it.second} samples)" } ?: "—"}")
             appendLine("Shown: battery=${s.batteryPercent ?: "—"} range=${s.rangeKm ?: "—"} chargeStatus=${s.chargeStatus ?: "—"} chargeControl=${CarBridge.chargeControl}")
             appendLine("Climate: on=${s.hvacOn ?: "—"} temp=${s.driverTemp ?: "—"} fan=${s.fanSpeed ?: "—"} ac=${s.acOn ?: "—"} auto=${s.autoOn ?: "—"} recirc=${s.recirc ?: "—"} outside=${s.outsideTemp ?: "—"}")
