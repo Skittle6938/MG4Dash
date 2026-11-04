@@ -458,6 +458,7 @@
     <string name="dm_left">verbleibend</string>
     <string name="dm_since">seit der Aktivierung</string>
     <string name="dm_battery">Akku %1$s</string>
+    <string name="dm_aux_battery">Starterbatterie: %1$s V</string>
     <string name="dm_to_20">%1$s bis 20 %%</string>
     <string name="dm_hold_stop">Zum Stoppen halten</string>
     <string name="dm_state_done">BEENDET · AUTO AUSGESCHALTET</string>

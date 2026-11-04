@@ -25,9 +25,9 @@ class ConnectionRow(private val activity: Activity) : LinearLayout(activity) {
     private fun color(res: Int) = Themes.color(activity, res)
 
     private val bt = icon(R.drawable.ic_bluetooth)
-    private val wifi = icon(R.drawable.ic_wifi)
+    private val wifi = WifiArcs(activity).also { addView(it, LayoutParams(dp(ICON_DP), dp(ICON_DP)).apply { leftMargin = dp(GAP_DP) }) }
     private val hotspot = icon(R.drawable.ic_conn_hotspot)
-    private val signal = SignalBars(activity).also { addView(it, LayoutParams(dp(34), dp(28)).apply { leftMargin = dp(16) }) }
+    private val signal = SignalBars(activity).also { addView(it, LayoutParams(dp(ICON_DP), dp(ICON_DP - 4)).apply { leftMargin = dp(GAP_DP) }) }
     private val usb = icon(R.drawable.ic_conn_usb)
     private var last: StatusMonitor.Connections? = null
 
@@ -51,12 +51,12 @@ class ConnectionRow(private val activity: Activity) : LinearLayout(activity) {
     private fun icon(res: Int) = ImageView(activity).apply {
         setImageResource(res)
         putTint(color(R.color.text_disabled))
-        addView(this, LayoutParams(dp(32), dp(32)).apply { leftMargin = dp(16) })
+        addView(this, LayoutParams(dp(ICON_DP), dp(ICON_DP)).apply { leftMargin = dp(GAP_DP) })
     }
 
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
-        if (app.mg4dash.BuildConfig.MOCK) show(StatusMonitor.Connections(true, true, "Phone", true, true, "Home", false, 3, 4, 1))
+        if (app.mg4dash.BuildConfig.MOCK) show(StatusMonitor.Connections(true, true, "Phone", true, true, "Home", false, 3, 4, 1, 2))
         else post(refresh)
     }
 
@@ -68,7 +68,8 @@ class ConnectionRow(private val activity: Activity) : LinearLayout(activity) {
     private fun show(c: StatusMonitor.Connections) {
         last = c
         fun tint(v: ImageView, on: Boolean) = v.putTint(color(if (on) R.color.accent_action else R.color.text_disabled))
-        tint(bt, c.btConnected); tint(wifi, c.wifiConnected); tint(hotspot, c.hotspotOn); tint(usb, c.usbCount > 0)
+        tint(bt, c.btConnected); tint(hotspot, c.hotspotOn); tint(usb, c.usbCount > 0)
+        wifi.level = if (c.wifiConnected) c.wifiLevel else -1
         signal.level = c.signalLevel ?: 0
         signal.visibility = if (c.signalLevel == null) View.GONE else View.VISIBLE
     }
@@ -102,7 +103,7 @@ class ConnectionRow(private val activity: Activity) : LinearLayout(activity) {
         }
         row(R.drawable.ic_bluetooth, c.btConnected, R.string.conn_bt, if (!c.btOn) off else c.btName ?: none, BLUETOOTH_SETTINGS)
         row(R.drawable.ic_wifi, c.wifiConnected, R.string.conn_wifi, if (!c.wifiOn) off else c.wifiName ?: none, WIFI_SETTINGS)
-        // The car has no settings page of its own for the hotspot: it is set with Wi-Fi
+        // No stock setting opens the hotspot page directly on any firmware: Wi-Fi settings instead
         row(R.drawable.ic_conn_hotspot, c.hotspotOn, R.string.conn_hotspot, activity.getString(if (c.hotspotOn) R.string.conn_on else R.string.conn_off), WIFI_SETTINGS)
         c.signalLevel?.let { level ->
             val text = if (level == 0) activity.getString(R.string.conn_no_network)
@@ -158,6 +159,33 @@ class ConnectionRow(private val activity: Activity) : LinearLayout(activity) {
         }
     }
 
+    /** Wi-Fi strength (#86): a dot and three arcs, lit according to the level; -1 = not connected, all grey. */
+    private class WifiArcs(context: android.content.Context) : View(context) {
+        var level = -1
+            set(v) { if (field != v) { field = v; invalidate() } }
+        private val on = Themes.color(context, R.color.accent_action)
+        private val off = Themes.color(context, R.color.text_disabled)
+        private val paint = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG).apply { strokeCap = android.graphics.Paint.Cap.ROUND }
+        private val box = android.graphics.RectF()
+
+        override fun onDraw(canvas: android.graphics.Canvas) {
+            val cx = width / 2f
+            val cy = height * 0.84f
+            val step = height * 0.25f
+            paint.style = android.graphics.Paint.Style.FILL
+            paint.color = if (level >= 0) on else off
+            canvas.drawCircle(cx, cy, height * 0.08f, paint)
+            paint.style = android.graphics.Paint.Style.STROKE
+            paint.strokeWidth = height * 0.11f
+            for (i in 1..3) {
+                val r = step * i
+                paint.color = if (level >= i) on else off
+                box.set(cx - r, cy - r, cx + r, cy + r)
+                canvas.drawArc(box, 225f, 90f, false, paint)
+            }
+        }
+    }
+
     /** Mobile network bars, as on a phone: lit according to the level, the others greyed. */
     private class SignalBars(context: android.content.Context) : View(context) {
         var level = 0
@@ -180,6 +208,8 @@ class ConnectionRow(private val activity: Activity) : LinearLayout(activity) {
 
     private companion object {
         const val REFRESH_MS = 5_000L
+        const val ICON_DP = 26
+        const val GAP_DP = 13
         const val BLUETOOTH_SETTINGS = android.provider.Settings.ACTION_BLUETOOTH_SETTINGS
         const val WIFI_SETTINGS = android.provider.Settings.ACTION_WIFI_SETTINGS
         /** Reads off the main thread: car service and storage. */

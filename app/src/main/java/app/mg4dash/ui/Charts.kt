@@ -447,7 +447,7 @@ class PowerBar @JvmOverloads constructor(context: Context, attrs: AttributeSet? 
             val ty = h - 1 * d
             text.textAlign = Paint.Align.LEFT; canvas.drawText("−${maxRegenKw.toInt()}", x0, ty, text)
             text.textAlign = Paint.Align.CENTER; canvas.drawText("0", zero, ty, text)
-            text.textAlign = Paint.Align.RIGHT; canvas.drawText("+${maxDrawKw.toInt()} kW", x1, ty, text)
+            text.textAlign = Paint.Align.RIGHT; canvas.drawText("+${maxDrawKw.toInt()}", x1, ty, text)
         }
 
         // While the value moves or a peak falls, redraw

@@ -23,6 +23,8 @@ object Apps {
     val MEDIA = ComponentName("com.saicmotor.media", "com.saicmotor.media.ui.activity.MainActivity")
     val MG4_CONTROL = ComponentName("com.mg4.control", "com.mg4.control.MainActivity")
     val BT_PHONE = ComponentName("com.saicmotor.btphone", "com.saicmotor.btphone.view.activity.BTPhoneMainActivity")
+    /** Stock phone app of old SDK firmwares (found on SWI68 and SWI133, #88). */
+    val BT_CALL = ComponentName("com.saicmotor.hmi.btcall", "com.saicmotor.hmi.btcall.BtCallActivity")
 
     /** Last app opening by MG4Dash (elapsedRealtime): the SAIC climate screen opened on purpose stays in front. */
     @Volatile var openedAt = 0L

@@ -106,7 +106,7 @@ class SocBar @JvmOverloads constructor(context: Context, attrs: AttributeSet? = 
             s.paint.color = s.tick
             c.drawRect(x(start) - d, top - 3 * d, x(start) + d, bottom + 3 * d, s.paint)
             // Start % bubble, alone (#29); tighter when the view is low (full home)
-            val label = "${Math.round(start)} %"
+            val label = "${Math.round(start)}"
             // Twice as large (#29): 22 sp, reduced only if room is short
             val room = (h - bottom) / d
             if (room >= 36) bubble(c, x(start), bottom + 3 * d, label, 22f, s.panel, s.title, null, below = true)

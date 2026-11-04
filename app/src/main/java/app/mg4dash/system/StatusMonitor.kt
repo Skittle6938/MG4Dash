@@ -36,9 +36,12 @@ object StatusMonitor {
         val btOn: Boolean, val btConnected: Boolean, val btName: String?,
         val wifiOn: Boolean, val wifiConnected: Boolean, val wifiName: String?,
         val hotspotOn: Boolean, val signalLevel: Int?, val signalMode: Int, val usbCount: Int,
+        /** Wi-Fi strength, 0 to 3 (#86). */
+        val wifiLevel: Int,
     )
 
     const val SIGNAL_MAX = 4
+    private const val WIFI_LEVELS = 4
     private const val CSQ_MAX = 31
 
     /** Call off the main thread: T-box service and storage. */
@@ -65,7 +68,10 @@ object StatusMonitor {
         val usb = try {
             storage?.storageVolumes?.count { it.isRemovable && it.state == android.os.Environment.MEDIA_MOUNTED } ?: 0
         } catch (_: Exception) { 0 }
-        return Connections(s.btOn, s.btConnected, btName, s.wifiOn, s.wifiConnected, ssid, ap, level, mode.coerceIn(0, 4), usb)
+        val wifiLevel = try {
+            WifiManager.calculateSignalLevel(wm?.connectionInfo?.rssi ?: -127, WIFI_LEVELS)
+        } catch (_: Exception) { 0 }
+        return Connections(s.btOn, s.btConnected, btName, s.wifiOn, s.wifiConnected, ssid, ap, level, mode.coerceIn(0, 4), usb, wifiLevel)
     }
 
     fun hasInternet(context: Context): Boolean {

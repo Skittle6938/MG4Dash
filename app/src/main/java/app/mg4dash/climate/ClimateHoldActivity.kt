@@ -104,7 +104,7 @@ class ClimateHoldActivity : AppCompatActivity() {
         message = kit.text(getString(R.string.dm_message), 32f).apply { maxLines = 3; setLineSpacing(0f, 1.15f) }
         right.addView(message, kit.lp(-1, -2, t = 24))
         val bottom = kit.row()
-        battery = kit.text("", 34f).apply { maxLines = 2 }
+        battery = kit.text("", 34f).apply { maxLines = 3 }
         bottom.addView(battery, kit.lp(0, -2, 1f))
         bottom.addView(kit.toggleTile(getString(R.string.dm_hold_stop)) {}.apply {
             textSize = 24f
@@ -228,10 +228,20 @@ class ClimateHoldActivity : AppCompatActivity() {
                 }
             }
             val head = getString(R.string.dm_battery, "$soc %")
-            if (parts.isEmpty()) head else android.text.SpannableStringBuilder(head + "\n").apply {
-                val st = length; append(parts.joinToString("  ·  "))
-                setSpan(android.text.style.RelativeSizeSpan(0.75f), st, length, 0)
-                setSpan(android.text.style.ForegroundColorSpan(kit.color(R.color.text_sub)), st, length, 0)
+            android.text.SpannableStringBuilder(head).apply {
+                if (parts.isNotEmpty()) {
+                    append("\n")
+                    val st = length; append(parts.joinToString("  ·  "))
+                    setSpan(android.text.style.RelativeSizeSpan(0.75f), st, length, 0)
+                    setSpan(android.text.style.ForegroundColorSpan(kit.color(R.color.text_sub)), st, length, 0)
+                }
+                // 12 V battery (#90), in red below 12 V
+                app.mg4dash.car.CarProps.battery12V()?.let { v ->
+                    append("\n")
+                    val st = length; append(getString(R.string.dm_aux_battery, String.format(java.util.Locale.getDefault(), "%.1f", v)))
+                    setSpan(android.text.style.RelativeSizeSpan(0.75f), st, length, 0)
+                    setSpan(android.text.style.ForegroundColorSpan(kit.color(if (v < 12f) R.color.accent_danger else R.color.text_sub)), st, length, 0)
+                }
             }
         } ?: ""
     }

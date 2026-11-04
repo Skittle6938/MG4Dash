@@ -184,7 +184,7 @@ class PhoneActivity : PageActivity() {
         header.addView(kit.text(getString(R.string.ph_stock), 19f, R.color.text_sub).apply {
             setPadding(kit.dp(16), kit.dp(12), kit.dp(16), kit.dp(12))
             setBackgroundResource(R.drawable.bg_button)
-            setOnClickListener { Apps.open(this@PhoneActivity, Apps.BT_PHONE, "SAIC") }
+            setOnClickListener { Apps.open(this@PhoneActivity, if (Apps.available(this@PhoneActivity, Apps.BT_PHONE)) Apps.BT_PHONE else Apps.BT_CALL, "SAIC") }
         })
 
         // ── Recent ──
