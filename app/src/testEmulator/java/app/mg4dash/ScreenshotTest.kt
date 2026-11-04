@@ -47,6 +47,12 @@ class ScreenshotTest {
         shoot(MainActivity::class.java, "home_consumption_full.png")
     }
 
+    @Test fun homeConsumptionMap() {
+        org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE)
+            .edit().putInt("home_widget", 2).putInt("home_style", 2).commit()
+        shoot(MainActivity::class.java, "home_consumption_map.png")
+    }
+
     @Test fun homeBottomBar() {
         org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE)
             .edit().putBoolean("vertical_dock", false).commit()
