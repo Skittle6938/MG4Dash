@@ -619,6 +619,11 @@
     <string name="conn_hotspot">Hotspot</string>
     <string name="conn_signal">Mobile network</string>
     <string name="conn_phone">Phone</string>
+    <string name="conn_icons_title">Bar icons</string>
+    <string name="conn_icon_battery">Phone battery</string>
+    <string name="conn_icon_net">Phone network</string>
+    <string name="conn_icon_car_net">Car network</string>
+    <string name="conn_icons_note">The panel keeps showing everything.</string>
     <string name="conn_usb">USB</string>
     <string name="conn_on">On</string>
     <string name="conn_off">Off</string>

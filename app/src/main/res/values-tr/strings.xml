@@ -619,6 +619,11 @@
     <string name="conn_hotspot">Erişim noktası</string>
     <string name="conn_signal">Mobil ağ</string>
     <string name="conn_phone">Telefon</string>
+    <string name="conn_icons_title">Çubuk simgeleri</string>
+    <string name="conn_icon_battery">Telefon bataryası</string>
+    <string name="conn_icon_net">Telefon ağı</string>
+    <string name="conn_icon_car_net">Araç ağı</string>
+    <string name="conn_icons_note">Panel her şeyi göstermeye devam eder.</string>
     <string name="conn_usb">USB</string>
     <string name="conn_on">Açık</string>
     <string name="conn_off">Kapalı</string>

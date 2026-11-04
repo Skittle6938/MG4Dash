@@ -619,6 +619,11 @@
     <string name="conn_hotspot">Point d\'accès</string>
     <string name="conn_signal">Réseau mobile</string>
     <string name="conn_phone">Téléphone</string>
+    <string name="conn_icons_title">Icônes de la barre</string>
+    <string name="conn_icon_battery">Batterie du téléphone</string>
+    <string name="conn_icon_net">Réseau du téléphone</string>
+    <string name="conn_icon_car_net">Réseau de la voiture</string>
+    <string name="conn_icons_note">Le panneau garde tout, quel que soit ce choix.</string>
     <string name="conn_usb">USB</string>
     <string name="conn_on">Activé</string>
     <string name="conn_off">Coupé</string>

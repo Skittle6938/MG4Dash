@@ -187,6 +187,10 @@ class Prefs(context: Context) {
         set(v) = sp.edit().putString("connection_off", v).apply()
 
     /** Connection icons on the weather card (#86). */
+    /** Connection icons hidden from the bar, chosen by a long press on it (#86); the phone's network by default. */
+    var hiddenConnectionIcons: Set<String>
+        get() = sp.getStringSet("conn_icons_hidden", setOf("phone_net")) ?: emptySet()
+        set(v) = sp.edit().putStringSet("conn_icons_hidden", v).apply()
     var connectionIcons: Boolean
         get() = sp.getBoolean("connection_icons", true)
         set(v) = sp.edit().putBoolean("connection_icons", v).apply()

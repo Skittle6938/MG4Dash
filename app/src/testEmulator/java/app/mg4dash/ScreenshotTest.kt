@@ -33,6 +33,13 @@ class ScreenshotTest {
             .edit().putBoolean("vertical_dock", true).commit()
     }
 
+    /** Connection icons with the phone's network shown: framed with its battery (#86). */
+    @Test fun homeConnectionsPhoneNet() {
+        org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE)
+            .edit().putStringSet("conn_icons_hidden", emptySet()).commit()
+        shoot(MainActivity::class.java, "home_connections_phone_net.png")
+    }
+
     /** Consumption widget in the map slot, Full layout. */
     @Test fun homeConsumptionFull() {
         org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE)

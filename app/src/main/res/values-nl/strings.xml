@@ -619,6 +619,11 @@
     <string name="conn_hotspot">Hotspot</string>
     <string name="conn_signal">Mobiel netwerk</string>
     <string name="conn_phone">Telefoon</string>
+    <string name="conn_icons_title">Pictogrammen van de balk</string>
+    <string name="conn_icon_battery">Telefoonaccu</string>
+    <string name="conn_icon_net">Telefoonnetwerk</string>
+    <string name="conn_icon_car_net">Autonetwerk</string>
+    <string name="conn_icons_note">Het paneel blijft alles tonen.</string>
     <string name="conn_usb">USB</string>
     <string name="conn_on">Aan</string>
     <string name="conn_off">Uit</string>
