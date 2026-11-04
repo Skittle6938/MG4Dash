@@ -729,10 +729,18 @@ class MainActivity : AppCompatActivity() {
         applyMapButtons()
         // Map → Consumption → Shortcuts → Map (issue #6: consumption in the map widget)
         b.widgetToggle.setOnClickListener {
-            // Shortcuts page removable from the rotation (#38): map → consumption → map
-            prefs.homeWidget = when (effectiveWidget()) { 0 -> 2; 2 -> if (prefs.shortcutsPage) 1 else 0; else -> 0 }
-            applyHomeWidget()
+            cycleHomeWidget(1)
         }
+        // One finger swipes between the pages, like the other widgets; not in full screen, or over an app
+        // embedded in the map, which receives the touches
+        app.mg4dash.ui.SwipeBox.wrap(b.mapCard) { cycleHomeWidget(it) }.active = { hiddenForMap == null && mapAppView?.visibility != View.VISIBLE }
+        applyHomeWidget()
+    }
+
+    /** Shortcuts page removable from the rotation (#38): map → consumption → map. */
+    private fun cycleHomeWidget(dir: Int) {
+        val pages = if (prefs.shortcutsPage) listOf(0, 2, 1) else listOf(0, 2)
+        prefs.homeWidget = pages[Math.floorMod(pages.indexOf(effectiveWidget()).coerceAtLeast(0) + dir, pages.size)]
         applyHomeWidget()
     }
 
@@ -846,6 +854,7 @@ class MainActivity : AppCompatActivity() {
             hiddenForMap?.forEach { (v, vis) -> v.visibility = vis }
             hiddenForMap = null
         }
+        mapCard.oneFingerPan = on
         b.mapFullscreen.setImageResource(if (on) R.drawable.ic_fullscreen_exit else R.drawable.ic_fullscreen)
         mapAppFull?.setImageResource(if (on) R.drawable.ic_fullscreen_exit else R.drawable.ic_fullscreen)
         // App that sets its size at launch (wireless CarPlay MG4CPlay / DiPlay: the video stayed at

@@ -19,13 +19,19 @@ class SwipeBox(
 ) : FrameLayout(context) {
     /** Horizontal swipe handled separately (e.g. previous / next track), otherwise [onSwipe]. */
     var onHorizontal: ((Int) -> Unit)? = null
+    /** False: touches all go to the content (map in full screen, app embedded in the map). */
+    var active: () -> Boolean = { true }
+    /** A second finger is down: it is a gesture for the content, such as moving the map. */
+    private var multi = false
     private var downX = 0f; private var downY = 0f; private var dir = 0; private var axisH = false
     private val slop = 60 * resources.displayMetrics.density / 2
 
     override fun onInterceptTouchEvent(ev: MotionEvent): Boolean {
+        if (!active()) return false
         when (ev.actionMasked) {
-            MotionEvent.ACTION_DOWN -> { downX = ev.x; downY = ev.y; dir = 0 }
-            MotionEvent.ACTION_MOVE -> {
+            MotionEvent.ACTION_DOWN -> { downX = ev.x; downY = ev.y; dir = 0; multi = false }
+            MotionEvent.ACTION_POINTER_DOWN -> { multi = true; dir = 0 }
+            MotionEvent.ACTION_MOVE -> if (!multi) {
                 val dx = ev.x - downX; val dy = ev.y - downY
                 if ((horizontal || onHorizontal != null) && Math.abs(dx) > slop && Math.abs(dx) > 2 * Math.abs(dy)) { dir = if (dx < 0) 1 else -1; axisH = true }
                 else if (vertical && Math.abs(dy) > slop && Math.abs(dy) > 2 * Math.abs(dx)) { dir = if (dy < 0) 1 else -1; axisH = false }

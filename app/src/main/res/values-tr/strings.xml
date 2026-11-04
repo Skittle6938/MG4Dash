@@ -593,7 +593,8 @@
     <string name="tu_energy_1">KERS bölümüne dokun: rejenerasyon seviyesi; uzun bas: tek pedal sürüş</string>
     <string name="tu_energy_2">CHARGE düğmesi: şarj ve V2L</string>
     <string name="tu_map_t">Harita</string>
-    <string name="tu_map_1">Sağ üstteki düğme: harita → tüketim → kısayollar</string>
+    <string name="tu_map_1">Kaydırma veya sağ üstteki düğme: harita → tüketim → kısayollar</string>
+    <string name="tu_map_3">İki parmak: haritayı taşı ve yakınlaştır (tam ekranda tek parmak)</string>
     <string name="tu_map_2">Haritaya uzun bas: harita kartında başka bir uygulama</string>
     <string name="tu_media_t">Müzik</string>
     <string name="tu_media_1">Yukarı / aşağı kaydır: sonraki kaynak; sola / sağa: önceki / sonraki parça</string>

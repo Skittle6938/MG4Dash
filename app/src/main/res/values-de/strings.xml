@@ -593,7 +593,8 @@
     <string name="tu_energy_1">KERS-Segment tippen: Rekuperationsstufe; lang drücken: One-Pedal-Fahren</string>
     <string name="tu_energy_2">Taste CHARGE: Laden und V2L</string>
     <string name="tu_map_t">Karte</string>
-    <string name="tu_map_1">Taste oben rechts: Karte → Verbrauch → Verknüpfungen</string>
+    <string name="tu_map_1">Wischen oder Taste oben rechts: Karte → Verbrauch → Verknüpfungen</string>
+    <string name="tu_map_3">Zwei Finger: Karte bewegen und zoomen (im Vollbild ein Finger)</string>
     <string name="tu_map_2">Karte lang drücken: andere App in der Kartenkarte</string>
     <string name="tu_media_t">Musik</string>
     <string name="tu_media_1">Nach oben / unten wischen: nächste Quelle; links / rechts: vorheriger / nächster Titel</string>

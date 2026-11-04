@@ -593,7 +593,8 @@
     <string name="tu_energy_1">Tocca un segmento KERS: livello di rigenerazione; pressione lunga: guida a un pedale</string>
     <string name="tu_energy_2">Pulsante CHARGE: ricarica e V2L</string>
     <string name="tu_map_t">Mappa</string>
-    <string name="tu_map_1">Pulsante in alto a destra: mappa → consumo → scorciatoie</string>
+    <string name="tu_map_1">Scorrimento o pulsante in alto a destra: mappa → consumi → scorciatoie</string>
+    <string name="tu_map_3">Due dita: spostare e ingrandire la mappa (un dito a schermo intero)</string>
     <string name="tu_map_2">Pressione lunga sulla mappa: un\'altra app nella scheda mappa</string>
     <string name="tu_media_t">Musica</string>
     <string name="tu_media_1">Scorri su / giù: sorgente successiva; sinistra / destra: brano precedente / successivo</string>

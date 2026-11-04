@@ -593,7 +593,8 @@
     <string name="tu_energy_1">Tik op een KERS-segment: regeneratieniveau; lang drukken: rijden met één pedaal</string>
     <string name="tu_energy_2">Knop CHARGE: laden en V2L</string>
     <string name="tu_map_t">Kaart</string>
-    <string name="tu_map_1">Knop rechtsboven: kaart → verbruik → snelkoppelingen</string>
+    <string name="tu_map_1">Vegen of knop rechtsboven: kaart → verbruik → snelkoppelingen</string>
+    <string name="tu_map_3">Twee vingers: kaart verplaatsen en zoomen (één vinger op volledig scherm)</string>
     <string name="tu_map_2">Kaart lang drukken: een andere app in de kaartkaart</string>
     <string name="tu_media_t">Muziek</string>
     <string name="tu_media_1">Veeg omhoog / omlaag: volgende bron; links / rechts: vorig / volgend nummer</string>

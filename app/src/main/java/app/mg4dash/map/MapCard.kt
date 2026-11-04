@@ -30,6 +30,9 @@ class MapCard(private val context: Context, holder: ViewGroup) {
     private var preview: android.view.View? = null
     private var follow = true
     private var lastTouch = 0L
+    /** One finger moves the map: in full screen; as a widget, it swipes between the pages. */
+    var oneFingerPan = false
+
     /** Touch on the map (brings back the hidden buttons, #15). */
     var onTouch: (() -> Unit)? = null
     /** Long press on the map: choose an app to show in its place (#41). */
@@ -89,6 +92,8 @@ class MapCard(private val context: Context, holder: ViewGroup) {
             })
             m.setOnTouchListener { _, ev ->
                 longPress.onTouchEvent(ev)
+                // Widget: one finger is for the swipe between its pages, two fingers move and zoom the map
+                if (ev.actionMasked == MotionEvent.ACTION_MOVE && ev.pointerCount == 1 && !oneFingerPan) return@setOnTouchListener true
                 when (ev.actionMasked) {
                     MotionEvent.ACTION_DOWN -> { downX = ev.x; downY = ev.y; onTouch?.invoke() }
                     MotionEvent.ACTION_MOVE -> if (Math.hypot((ev.x - downX).toDouble(), (ev.y - downY).toDouble()) > 24) {

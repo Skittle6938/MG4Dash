@@ -593,7 +593,8 @@
     <string name="tu_energy_1">Toca un segmento KERS: nivel de regeneración; pulsación larga: conducción con un pedal</string>
     <string name="tu_energy_2">Botón CHARGE: carga y V2L</string>
     <string name="tu_map_t">Mapa</string>
-    <string name="tu_map_1">Botón arriba a la derecha: mapa → consumo → accesos directos</string>
+    <string name="tu_map_1">Deslizar o botón arriba a la derecha: mapa → consumo → accesos directos</string>
+    <string name="tu_map_3">Dos dedos: mover y ampliar el mapa (un dedo a pantalla completa)</string>
     <string name="tu_map_2">Pulsación larga en el mapa: otra app en la tarjeta del mapa</string>
     <string name="tu_media_t">Música</string>
     <string name="tu_media_1">Desliza arriba / abajo: siguiente fuente; izquierda / derecha: pista anterior / siguiente</string>
