@@ -325,23 +325,21 @@ class ConnectionRow(private val activity: Activity) : LinearLayout(activity) {
             set(v) { if (field != v) { field = v; invalidate() } }
         private val on = Themes.color(context, R.color.accent_action)
         private val off = Themes.color(context, R.color.text_disabled)
-        private val paint = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG).apply { strokeCap = android.graphics.Paint.Cap.ROUND }
-        private val box = android.graphics.RectF()
+        private val paint = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG)
+        /** Pieces of ic_wifi, the panel's icon (#18): tip, then the two arcs, lit according to the level. */
+        private val parts = listOf(
+            "M9,17l3,3 3,-3c-1.65,-1.66 -4.34,-1.66 -6,0z",
+            "M5,13l2,2c2.76,-2.76 7.24,-2.76 10,0l2,-2C15.14,9.14 8.87,9.14 5,13z",
+            "M1,9l2,2c4.97,-4.97 13.03,-4.97 18,0l2,-2C16.93,2.93 7.08,2.93 1,9z",
+        ).map { androidx.core.graphics.PathParser.createPathFromPathData(it) }
 
         override fun onDraw(canvas: android.graphics.Canvas) {
-            val cx = width / 2f
-            val cy = height * 0.84f
-            val step = height * 0.25f
-            paint.style = android.graphics.Paint.Style.FILL
-            paint.color = if (level >= 0) on else off
-            canvas.drawCircle(cx, cy, height * 0.08f, paint)
-            paint.style = android.graphics.Paint.Style.STROKE
-            paint.strokeWidth = height * 0.11f
-            for (i in 1..3) {
-                val r = step * i
+            val s = minOf(width, height) / 24f
+            canvas.translate((width - 24 * s) / 2f, (height - 24 * s) / 2f)
+            canvas.scale(s, s)
+            parts.forEachIndexed { i, part ->
                 paint.color = if (level >= i) on else off
-                box.set(cx - r, cy - r, cx + r, cy + r)
-                canvas.drawArc(box, 225f, 90f, false, paint)
+                canvas.drawPath(part, paint)
             }
         }
     }
