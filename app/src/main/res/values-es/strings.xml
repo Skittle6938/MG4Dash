@@ -619,6 +619,11 @@
     <string name="conn_hotspot">Punto de acceso</string>
     <string name="conn_signal">Red móvil</string>
     <string name="conn_phone">Teléfono</string>
+    <string name="conn_icons_title">Iconos de la barra</string>
+    <string name="conn_icon_battery">Batería del teléfono</string>
+    <string name="conn_icon_net">Red del teléfono</string>
+    <string name="conn_icon_car_net">Red del coche</string>
+    <string name="conn_icons_note">El panel sigue mostrándolo todo.</string>
     <string name="conn_usb">USB</string>
     <string name="conn_on">Activado</string>
     <string name="conn_off">Desactivado</string>
