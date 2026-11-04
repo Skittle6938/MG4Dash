@@ -265,11 +265,22 @@ class ConnectionRow(private val activity: Activity) : LinearLayout(activity) {
         }
     }
 
+    /** Android's Wi-Fi hotspot page, with its switch (#18); otherwise the page before it. */
+    private fun openHotspot() {
+        val flags = Intent.FLAG_ACTIVITY_NEW_TASK
+        try {
+            activity.startActivity(Intent().setClassName("com.android.settings", "com.android.settings.SubSettings")
+                .putExtra(":settings:show_fragment", "com.android.settings.wifi.tether.WifiTetherSettings").addFlags(flags))
+        } catch (_: Exception) {
+            activity.startActivity(Intent().setClassName("com.android.settings", TETHER_SETTINGS).addFlags(flags))
+        }
+    }
+
     private fun openSettings(action: String) {
         if (action == PHONE_PAGE) { activity.startActivity(Intent(activity, app.mg4dash.pages.PhoneActivity::class.java)); return }
         try {
-            val intent = if (action == TETHER_SETTINGS) Intent().setClassName("com.android.settings", TETHER_SETTINGS) else Intent(action)
-            activity.startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+            if (action == TETHER_SETTINGS) { openHotspot(); return }
+            activity.startActivity(Intent(action).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
         } catch (_: Exception) {
             if (action == TETHER_SETTINGS) openSettings(WIFI_SETTINGS)
             else Apps.open(activity, Apps.SETTINGS, activity.getString(R.string.dock_settings))
