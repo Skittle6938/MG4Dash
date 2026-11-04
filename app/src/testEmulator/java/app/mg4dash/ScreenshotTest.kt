@@ -33,6 +33,13 @@ class ScreenshotTest {
             .edit().putBoolean("vertical_dock", true).commit()
     }
 
+    /** Consumption widget in the map slot, Full layout. */
+    @Test fun homeConsumptionFull() {
+        org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE)
+            .edit().putInt("home_widget", 2).commit()
+        shoot(MainActivity::class.java, "home_consumption_full.png")
+    }
+
     @Test fun homeBottomBar() {
         org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE)
             .edit().putBoolean("vertical_dock", false).commit()

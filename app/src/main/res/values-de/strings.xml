@@ -147,7 +147,6 @@
     <string name="en_climate">Klimaanlage</string>
     <string name="en_accessories">Zubehör</string>
     <string name="en_battery_heat">Batterieheizung</string>
-    <string name="en_regen">+ %1$s kWh durch Bremsen zurückgewonnen</string>
     <string name="en_regen_short">rekup.</string>
     <string name="cc_ago">vor %1$s</string>
     <string name="cc_now">jetzt</string>
@@ -400,7 +399,6 @@
     <string name="sr_plug">Stecker nicht richtig verbunden</string>
     <string name="sr_voltage">Spannung passt nicht</string>
     <string name="sr_other">andere Ursache</string>
-    <string name="en_regen_km">+ %1$s %2$s Reichweite seit dem Laden zurückgewonnen</string>
     <string name="st_rd_state">Radio Dash: %1$s</string>
     <string name="st_rd_none">nicht installiert</string>
     <string name="st_rd_unknown">installiert (Version unbekannt)</string>

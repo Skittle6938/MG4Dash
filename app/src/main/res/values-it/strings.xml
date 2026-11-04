@@ -147,7 +147,6 @@
     <string name="en_climate">Climatizzazione</string>
     <string name="en_accessories">Accessori</string>
     <string name="en_battery_heat">Riscaldamento batteria</string>
-    <string name="en_regen">+ %1$s kWh recuperati in frenata</string>
     <string name="en_regen_short">recup.</string>
     <string name="cc_ago">%1$s fa</string>
     <string name="cc_now">adesso</string>
@@ -400,7 +399,6 @@
     <string name="sr_plug">presa non collegata bene</string>
     <string name="sr_voltage">tensione incompatibile</string>
     <string name="sr_other">altra causa</string>
-    <string name="en_regen_km">+ %1$s %2$s di autonomia recuperati dalla ricarica</string>
     <string name="st_rd_state">Radio Dash: %1$s</string>
     <string name="st_rd_none">non installata</string>
     <string name="st_rd_unknown">installata (versione sconosciuta)</string>

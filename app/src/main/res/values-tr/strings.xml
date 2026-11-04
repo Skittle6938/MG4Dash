@@ -147,7 +147,6 @@
     <string name="en_climate">Klima</string>
     <string name="en_accessories">Aksesuarlar</string>
     <string name="en_battery_heat">Batarya ısıtma</string>
-    <string name="en_regen">+ %1$s kWh frenle geri kazanıldı</string>
     <string name="en_regen_short">rejen</string>
     <string name="cc_ago">%1$s önce</string>
     <string name="cc_now">şimdi</string>
@@ -400,7 +399,6 @@
     <string name="sr_plug">fiş düzgün takılmamış</string>
     <string name="sr_voltage">voltaj uyumsuzluğu</string>
     <string name="sr_other">başka bir neden</string>
-    <string name="en_regen_km">son şarjdan beri + %1$s %2$s menzil geri kazanıldı</string>
     <string name="st_rd_state">Radio Dash: %1$s</string>
     <string name="st_rd_none">yüklü değil</string>
     <string name="st_rd_unknown">yüklü (sürüm bilinmiyor)</string>

@@ -147,7 +147,6 @@
     <string name="en_climate">Climate control</string>
     <string name="en_accessories">Accessories</string>
     <string name="en_battery_heat">Battery heating</string>
-    <string name="en_regen">+ %1$s kWh recovered by braking</string>
     <string name="en_regen_short">regen</string>
     <string name="cc_ago">%1$s ago</string>
     <string name="cc_now">now</string>
@@ -400,7 +399,6 @@
     <string name="sr_plug">plug not properly connected</string>
     <string name="sr_voltage">voltage mismatch</string>
     <string name="sr_other">other cause</string>
-    <string name="en_regen_km">+ %1$s %2$s of range recovered since the last charge</string>
     <string name="st_rd_state">Radio Dash: %1$s</string>
     <string name="st_rd_none">not installed</string>
     <string name="st_rd_unknown">installed (version unknown)</string>
