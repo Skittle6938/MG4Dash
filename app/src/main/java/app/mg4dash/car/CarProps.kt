@@ -32,6 +32,7 @@ object CarProps {
     const val ONBD_CHRG_AC_VOL = 560002109       // on-board charger: AC input voltage (V)
     const val REGEN_RNG_AFT_CHRG = 559980964     // range recovered by braking since the charge (km)
     const val BMS_PACK_VOL = 560002054           // battery pack voltage (V, float)
+    const val BAT_VOL = 291518514                // 12 V battery voltage (V, float), stock Vehicle status page
     const val BMS_PACK_CRNT = 560002055          // battery pack current (A, float)
     /** Steering wheel button function (0x21407b14): 0 = central screen, 1 = driver's display, 2 = climate (quick climate window open). */
     const val SWC_FUNCTION = 557873940
@@ -148,6 +149,13 @@ object CarProps {
     }
 
     /** Float read on a specific area (e.g. 0x1000000, global area of battery measurements). */
+    /** 12 V battery voltage (#90), or null if this firmware does not give a plausible value. */
+    fun battery12V(): Float? {
+        if (BuildConfig.MOCK) return 12.6f
+        val v = readFloatArea(BAT_VOL, 0x1000000) ?: readFloatArea(BAT_VOL, 0)
+        return v?.takeIf { it in 8f..17f }
+    }
+
     fun readFloatArea(id: Int, area: Int): Float? {
         if (BuildConfig.MOCK) return null
         val m = cpm ?: return null

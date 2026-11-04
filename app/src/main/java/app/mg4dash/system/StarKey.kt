@@ -77,6 +77,7 @@ object StarKey {
                     }
                     return
                 }
+                if (code == JOY_OK && down && !long) MediaHub.wheelPlayPressed()
                 if (code == JOY_LEFT || code == JOY_RIGHT) {
                     // From the press: the command goes to the app without waiting for the release
                     if (down && !long) { MediaHub.wheelPressed(code == JOY_RIGHT); if (MediaHub.wheelReleased(code == JOY_RIGHT)) return }
