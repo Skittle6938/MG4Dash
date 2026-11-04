@@ -50,11 +50,16 @@ object TempCalibration {
         durRow(R.string.ac_cycle_on, { prefs.acCycleOnSec }) { prefs.acCycleOnSec = it }
         durRow(R.string.ac_cycle_off, { prefs.acCycleOffSec }) { prefs.acCycleOffSec = it }
         refresh()
-        AlertDialog.Builder(activity)
+        val dlg = AlertDialog.Builder(activity)
             .setTitle(R.string.temp_cal_title)
             .setView(box)
             .setPositiveButton(android.R.string.ok, null)
             .setNeutralButton(R.string.temp_cal_reset) { _, _ -> step(-prefs.tempOffset) }
-            .show().also { app.mg4dash.ui.Dialogs.fix(it) }
+            .create()
+        // Full screen kept (#34): shown without taking focus, same screen settings as the page, then focus given back
+        dlg.window?.setFlags(android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE, android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE)
+        dlg.show(); app.mg4dash.ui.Dialogs.fix(dlg)
+        dlg.window?.decorView?.systemUiVisibility = activity.window.decorView.systemUiVisibility
+        dlg.window?.clearFlags(android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE)
     }
 }
