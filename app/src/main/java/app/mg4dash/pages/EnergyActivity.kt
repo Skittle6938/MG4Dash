@@ -16,7 +16,6 @@ import app.mg4dash.system.Apps
 import app.mg4dash.system.Prefs
 import app.mg4dash.ui.LineChart
 import app.mg4dash.ui.PageActivity
-import app.mg4dash.ui.SegmentedGauge
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -37,7 +36,7 @@ class EnergyActivity : PageActivity() {
     private lateinit var soc: TextView
     private lateinit var range: TextView
     private lateinit var status: TextView
-    private lateinit var socGauge: SegmentedGauge
+    private lateinit var socGauge: app.mg4dash.ui.SocBar
     private lateinit var power: TextView
     private lateinit var action: TextView
     private lateinit var limitNote: TextView
@@ -106,8 +105,8 @@ class EnergyActivity : PageActivity() {
         side.addView(range); side.addView(status, kit.lp(-2, -2, t = 6))
         top.addView(side, kit.lp(0, -2, 1f, l = 22))
         c1.addView(top, kit.lp(-1, -2, t = 6))
-        socGauge = SegmentedGauge(this).apply { segments = 20 }
-        c1.addView(socGauge, kit.lp(-1, kit.dp(14), t = 12))
+        socGauge = app.mg4dash.ui.SocBar(this).apply { currentBubble = false }   // the large % is just above
+        c1.addView(socGauge, kit.lp(-1, kit.dp(52), t = 4))
         power = kit.text("", 18f, R.color.text_sub)
         c1.addView(power, kit.lp(-1, -2, t = 8))
         action = kit.toggleTile("—") { onMainAction() }.apply { textSize = 20f }
@@ -386,8 +385,13 @@ class EnergyActivity : PageActivity() {
         range.text = s.rangeKm?.let { app.mg4dash.system.Units.distText(this, it.toFloat()) } ?: "—"
         status.text = VehicleState.chargeStatusLabel(s.chargeStatus)
         val pct = s.batteryPercent
-        socGauge.onColor = kit.color(when { pct == null -> R.color.text_disabled; pct <= 15 -> R.color.accent_danger; pct <= 30 -> R.color.accent_heat; else -> R.color.accent_energy })
-        socGauge.value = pct?.let { (it + 4) / 5 } ?: 0
+        socGauge.soc = pct?.toFloat() ?: 0f
+        socGauge.charging = VehicleState.isCharging(s.chargeStatus)
+        // Same bar as the home widget; no trip start marker with the cable plugged in
+        socGauge.tripStart = if (VehicleState.isPlugged(s.chargeStatus)) null else app.mg4dash.energy.EnergyMonitor.tripStartSoc.value?.toFloat()
+        // The room under the bar is only for the trip start bubble
+        val barHeight = kit.dp(if (VehicleState.isPlugged(s.chargeStatus)) 28 else 52)
+        if (socGauge.layoutParams.height != barHeight) socGauge.layoutParams = socGauge.layoutParams.apply { height = barHeight }
         val discharge = VehicleState.isDischargeMode(s.chargeStatus)
         status.setTextColor(kit.color(when {
             discharge -> R.color.accent_heat
