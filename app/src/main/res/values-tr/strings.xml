@@ -629,6 +629,7 @@
     <string name="conn_off">Kapalı</string>
     <string name="conn_not_connected">Bağlı değil</string>
     <string name="conn_no_network">Ağ yok</string>
+    <string name="conn_ap_clients">%1$d cihaz</string>
     <string name="conn_usb_count">%1$d bağlı</string>
     <string name="en_time_note">Tarihe göre ve yumuşatılmış · ortalama (kesikli)</string>
     <string name="st_sound_trigger">Başlangıç Sesi</string>

@@ -629,6 +629,7 @@
     <string name="conn_off">Disattivato</string>
     <string name="conn_not_connected">Non connesso</string>
     <string name="conn_no_network">Nessuna rete</string>
+    <string name="conn_ap_clients">%1$d dispositivo/i</string>
     <string name="conn_usb_count">%1$d collegato/i</string>
     <string name="en_time_note">Per data e livellata · media (tratteggiata)</string>
     <string name="st_sound_trigger">Audio all\'avvio</string>

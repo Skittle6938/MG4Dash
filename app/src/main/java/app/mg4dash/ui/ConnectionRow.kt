@@ -90,6 +90,7 @@ class ConnectionRow(private val activity: Activity) : LinearLayout(activity) {
         fun tint(v: ImageView, on: Boolean) = v.putTint(color(if (on) R.color.accent_action else R.color.text_disabled))
         tint(bt, c.btConnected); tint(hotspot, c.hotspotOn); tint(usb, c.usbCount > 0)
         wifi.level = if (c.wifiConnected) c.wifiLevel else -1
+        hotspot.putImage(if (c.hotspotClients > 1) R.drawable.ic_conn_hotspot_multi else R.drawable.ic_conn_hotspot)
         phoneBattery.level = c.phone?.battery ?: 0
         phoneSignal.level = c.phone?.signal ?: 0
         applyChoice()
@@ -212,7 +213,8 @@ class ConnectionRow(private val activity: Activity) : LinearLayout(activity) {
         row(R.drawable.ic_bluetooth, c.btConnected, R.string.conn_bt, if (!c.btOn) off else c.btName ?: none, BLUETOOTH_SETTINGS)
         row(R.drawable.ic_wifi, c.wifiConnected, R.string.conn_wifi, if (!c.wifiOn) off else c.wifiName ?: none, WIFI_SETTINGS)
         // No stock setting opens the hotspot page directly: Android's own page (#86), Wi-Fi settings if it does not open
-        row(R.drawable.ic_conn_hotspot, c.hotspotOn, R.string.conn_hotspot, activity.getString(if (c.hotspotOn) R.string.conn_on else R.string.conn_off), TETHER_SETTINGS)
+        row(R.drawable.ic_conn_hotspot, c.hotspotOn, R.string.conn_hotspot, activity.getString(if (c.hotspotOn) R.string.conn_on else R.string.conn_off) +
+            (if (c.hotspotOn && c.hotspotClients > 0) " · " + activity.getString(R.string.conn_ap_clients, c.hotspotClients) else ""), TETHER_SETTINGS)
         c.signalLevel?.let { level ->
             val text = if (level == 0) activity.getString(R.string.conn_no_network)
                 else "${if (c.signalMode >= 2) "${c.signalMode}G · " else ""}$level/${StatusMonitor.SIGNAL_MAX}"
