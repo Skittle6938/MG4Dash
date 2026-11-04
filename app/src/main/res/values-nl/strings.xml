@@ -585,6 +585,7 @@
     <string name="tu_bar_3">Voertuig: dubbel tikken = deuren vergrendelen / ontgrendelen, lang drukken = ESC uit / aan</string>
     <string name="tu_bar_4">Start: lang drukken = alle apps</string>
     <string name="tu_bar_5">Android Auto: lang drukken = app kiezen (Android Auto, CarPlay of een andere), dubbeltikken = telefoonverbinding verbreken / herstellen</string>
+    <string name="tu_bar_6">Twee vingers vanaf de bovenkant van het scherm omlaag vegen: Android Auto openen, als een telefoon is verbonden</string>
     <string name="tu_climate_t">Klimaat</string>
     <string name="tu_climate_1">A/C lang drukken: A/C met tussenpozen (tik op A/C om te stoppen)</string>
     <string name="tu_climate_2">Temperatuur lang drukken: kalibratie; aan/uit lang drukken: klimaat aan na het uitstappen (kamperen)</string>

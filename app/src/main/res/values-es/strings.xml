@@ -585,6 +585,7 @@
     <string name="tu_bar_3">Vehículo: doble toque = bloquear / desbloquear puertas, pulsación larga = ESC off / on</string>
     <string name="tu_bar_4">Inicio: pulsación larga = todas las apps</string>
     <string name="tu_bar_5">Android Auto: pulsación larga = elegir la app (Android Auto, CarPlay u otra), doble toque = cortar / restablecer la conexión del teléfono</string>
+    <string name="tu_bar_6">Dos dedos deslizados desde arriba de la pantalla: abrir Android Auto, con un teléfono conectado</string>
     <string name="tu_climate_t">Climatización</string>
     <string name="tu_climate_1">Pulsación larga en A/C: A/C intermitente (toca A/C para pararlo)</string>
     <string name="tu_climate_2">Pulsación larga en la temperatura: calibración; en encendido: mantener el clima al salir del coche (camping)</string>
