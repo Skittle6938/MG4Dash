@@ -297,6 +297,7 @@ A short tour of the main gestures opens after a first install (*Skip* closes it 
 - Steering wheel * button: 360 camera on / off
 - Swipe the map card: map → consumption → shortcuts; move and zoom the map with two fingers (one finger in full screen)
 - Long press the connection icons: choose which ones show
+- Two fingers sliding down from the top of the screen: open Android Auto when a phone is connected
 - Swipe the weather card: hourly ↔ daily forecast
 - Tap a segment of the KERS gauge: regeneration level; long press: one-pedal driving
 - Button at the top right of the map: map → consumption → shortcuts; long press a shortcut to edit it

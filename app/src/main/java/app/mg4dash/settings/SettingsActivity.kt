@@ -31,6 +31,11 @@ import java.util.Locale
  * Contains Valet / Service mode: the SAIC launcher becomes the default home again.
  */
 class SettingsActivity : AppCompatActivity() {
+    private val twoFingerPull by lazy { app.mg4dash.ui.TwoFingerPull(this) }
+
+    override fun dispatchTouchEvent(ev: android.view.MotionEvent): Boolean =
+        twoFingerPull.onTouch(ev) { super.dispatchTouchEvent(it) } || super.dispatchTouchEvent(ev)
+
 
     private lateinit var prefs: Prefs
     private lateinit var homeState: TextView
