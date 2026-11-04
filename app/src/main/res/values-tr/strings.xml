@@ -458,6 +458,7 @@
     <string name="dm_left">kaldı</string>
     <string name="dm_since">etkinleştirmeden beri</string>
     <string name="dm_battery">Batarya %1$s</string>
+    <string name="dm_aux_battery">Yardımcı batarya: %1$s V</string>
     <string name="dm_to_20">%%20\'ye %1$s</string>
     <string name="dm_hold_stop">Durdurmak için basılı tutun</string>
     <string name="dm_state_done">BİTTİ · ARAÇ KAPATILDI</string>

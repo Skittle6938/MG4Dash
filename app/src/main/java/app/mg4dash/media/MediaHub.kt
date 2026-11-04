@@ -1239,12 +1239,29 @@ object MediaHub {
         // After a restart, the car announces Bluetooth (or USB) as the source but has not
         // reactivated it: "play" has no effect until the source changes (#36). If nothing
         // plays after 2 s, ask the car for the source again, then playback.
-        if (!playing && c.packageName != RADIO) main.postDelayed({
-            val now = current?.takeIf { it.packageName == c.packageName } ?: return@postDelayed
-            if (isPlaying(now) || !activateSource(c.packageName)) return@postDelayed
-            Log.i(TAG, "play had no effect on ${c.packageName}: source requested again")
-            main.postDelayed({ current?.takeIf { it.packageName == c.packageName && !isPlaying(it) }?.transportControls?.play() }, 1500)
+        if (!playing && c.packageName != RADIO) retryPlayIfSilent(c.packageName)
+    }
+
+    private fun retryPlayIfSilent(pkg: String) {
+        main.postDelayed({
+            val now = current?.takeIf { it.packageName == pkg } ?: return@postDelayed
+            if (isPlaying(now) || !activateSource(pkg)) return@postDelayed
+            Log.i(TAG, "play had no effect on $pkg: source requested again")
+            main.postDelayed({ current?.takeIf { it.packageName == pkg && !isPlaying(it) }?.transportControls?.play() }, 1500)
         }, 2000)
+    }
+
+    /**
+     * Wheel play button (#78): the stock launcher sends "play", which has no effect after a restart until
+     * the source changes, like the on-screen button above. Only while the source has not played since
+     * MG4Dash started: later, the late Bluetooth state (#36) would turn a pause into a restart.
+     */
+    fun wheelPlayPressed() {
+        if (BuildConfig.MOCK) return
+        val c = current ?: return
+        if (c.packageName == RADIO || c.packageName !in CAR_SOURCES) return
+        if (playingAt.containsKey(c.packageName) || isPlaying(c)) return
+        retryPlayIfSilent(c.packageName)
     }
 
     fun next() {

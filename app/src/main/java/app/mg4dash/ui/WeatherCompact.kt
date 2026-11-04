@@ -42,6 +42,9 @@ class WeatherCompact(context: Context) : LinearLayout(context) {
     private val forecast = LinearLayout(context).apply { orientation = HORIZONTAL }
     private val right = LinearLayout(context)
 
+    /** Bottom bar (#88): smaller weather and forecast, the wind / rain line was cut. */
+    var tight = false
+
     init {
         orientation = VERTICAL
         top.apply { orientation = HORIZONTAL; gravity = Gravity.CENTER_VERTICAL }
@@ -54,10 +57,9 @@ class WeatherCompact(context: Context) : LinearLayout(context) {
         left.addView(sub2, LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT).apply { topMargin = (2 * d).toInt() })
         top.addView(left, LayoutParams(0, LayoutParams.WRAP_CONTENT, 1f))
         right.apply { orientation = VERTICAL; gravity = Gravity.END }
-        right.addView(date); right.addView(time)
-        cityLine.addView(city)
+        right.addView(date); right.addView(time); right.addView(city)
         top.addView(right, LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT))
-        // City and connection icons at the very top right (#86)
+        // Connection icons at the very top right (#86), the city under the clock (#18)
         addView(cityLine, LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT))
         addView(top, LayoutParams(LayoutParams.MATCH_PARENT, 0, 1f))
         addView(forecast, LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT))
@@ -67,7 +69,7 @@ class WeatherCompact(context: Context) : LinearLayout(context) {
     /** Left margin of the content, under the city: room for the fog light button. */
     fun setLeftInset(px: Int) = top.setPadding(px, 0, 0, 0)
 
-    /** Connection icons (#86): to the right of the city. */
+    /** Connection icons (#86), at the top right. */
     fun addConnections(row: android.view.View) = cityLine.addView(row)
 
     private fun setTempMargin(px: Int) {
@@ -107,11 +109,15 @@ class WeatherCompact(context: Context) : LinearLayout(context) {
         icon.visibility = VISIBLE
         setTempMargin((10 * d).toInt())
         // Icon and temperature at the time's height; the block moves up for the wind / rain line (#34)
-        temp.setTextSize(TypedValue.COMPLEX_UNIT_SP, 50f)
-        time.setTextSize(TypedValue.COMPLEX_UNIT_SP, 50f)
+        val mainSp = if (tight) 44f else 50f
+        temp.setTextSize(TypedValue.COMPLEX_UNIT_SP, mainSp)
+        time.setTextSize(TypedValue.COMPLEX_UNIT_SP, mainSp)
+        (icon.layoutParams as LayoutParams).let { lp ->
+            val s = ((if (tight) 44 else 50) * d).toInt()
+            if (lp.width != s) { lp.width = s; lp.height = s; icon.layoutParams = lp }
+        }
         top.gravity = Gravity.TOP
-        // Date and time a little lower: some air under the connection icons
-        right.setPadding(0, (RIGHT_TOP_DP * d).toInt(), 0, 0)
+        right.setPadding(0, 0, 0, 0)
         icon.setImageResource(WeatherRepo.icon(w.code))
         icon.setColorFilter(c(WeatherRepo.iconColor(w.code)))
         temp.text = "${w.tempC}°"
@@ -130,13 +136,13 @@ class WeatherCompact(context: Context) : LinearLayout(context) {
         forecast.removeAllViews()
         items.forEach { (label, code, value) ->
             val cell = LinearLayout(context).apply { orientation = VERTICAL; gravity = Gravity.CENTER }
-            cell.addView(tv(16f, R.color.text_title).apply { text = label; gravity = Gravity.CENTER })
+            cell.addView(tv(if (tight) 14f else 16f, R.color.text_title).apply { text = label; gravity = Gravity.CENTER })
+            val iconPx = ((if (tight) 22 else 26) * d).toInt()
             cell.addView(ImageView(context).apply { setImageResource(WeatherRepo.icon(code)); setColorFilter(c(WeatherRepo.iconColor(code))) },
-                LayoutParams((26 * d).toInt(), (26 * d).toInt()).apply { topMargin = (2 * d).toInt(); bottomMargin = (2 * d).toInt() })
-            cell.addView(tv(19f, R.color.text_value).apply { text = value; gravity = Gravity.CENTER })
+                LayoutParams(iconPx, iconPx).apply { topMargin = ((if (tight) 1 else 2) * d).toInt(); bottomMargin = ((if (tight) 1 else 2) * d).toInt() })
+            cell.addView(tv(if (tight) 17f else 19f, R.color.text_value).apply { text = value; gravity = Gravity.CENTER })
             forecast.addView(cell, LayoutParams(0, LayoutParams.WRAP_CONTENT, 1f))
         }
     }
 
-    private companion object { const val RIGHT_TOP_DP = 12 }
 }

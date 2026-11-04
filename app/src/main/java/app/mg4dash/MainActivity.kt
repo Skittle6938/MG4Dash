@@ -101,6 +101,7 @@ class MainActivity : AppCompatActivity() {
         builtCardPower = cardPower
         if (cardPower) buildPowerEnergyCard()
         else if (!mapLayout && !simpleMode && !Dock.vertical(this)) compactEnergyCard()
+        if (!mapLayout && !simpleMode && !Dock.vertical(this)) compactClimateCard(b.climateCard)
         // Vertical swipe (issue #6): music card = next / previous source;
         // bottom widget (Full layout) = next / previous page
         // Up / down: source; left / right: next / previous track, like the buttons
@@ -275,10 +276,21 @@ class MainActivity : AppCompatActivity() {
             .forEach { b.mapCard.removeView(it) }
     }
 
+    /** Bottom bar (#88): the climate card is shorter, its buttons were cut at the bottom. */
+    private fun compactClimateCard(v: View) {
+        val d = resources.displayMetrics.density
+        (v.layoutParams as? LinearLayout.LayoutParams)?.let { lp ->
+            if (lp.height == (68 * d).toInt()) lp.height = (60 * d).toInt()
+            if (lp.height == (48 * d).toInt()) lp.height = (42 * d).toInt()
+        }
+        if (v is android.view.ViewGroup) for (i in 0 until v.childCount) compactClimateCard(v.getChildAt(i))
+    }
+
     /** Widget-style weather (issue #6), Full and Map layouts: swipe = hourly / daily forecast. */
     private fun useCompactWeather(leftInset: Int) {
         val wc = app.mg4dash.ui.WeatherCompact(this)
         wc.setLeftInset(leftInset)
+        wc.tight = !Dock.vertical(this)
         b.weatherCard.removeAllViews()
         b.weatherCard.addView(wc, LinearLayout.LayoutParams(-1, -1))
         weatherCompact = wc
