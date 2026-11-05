@@ -191,6 +191,10 @@ class Prefs(context: Context) {
     var hiddenConnectionIcons: Set<String>
         get() = sp.getStringSet("conn_icons_hidden", setOf("phone_net")) ?: emptySet()
         set(v) = sp.edit().putStringSet("conn_icons_hidden", v).apply()
+    /** USB ports shown in the bar (#86): none until the user asks. */
+    var shownUsbPorts: Set<String>
+        get() = sp.getStringSet("conn_usb_shown", emptySet()) ?: emptySet()
+        set(v) = sp.edit().putStringSet("conn_usb_shown", v).apply()
     var connectionIcons: Boolean
         get() = sp.getBoolean("connection_icons", true)
         set(v) = sp.edit().putBoolean("connection_icons", v).apply()

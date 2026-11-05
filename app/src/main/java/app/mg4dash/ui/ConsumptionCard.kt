@@ -60,11 +60,13 @@ class ConsumptionCard(context: Context) : LinearLayout(context) {
         addView(LinearLayout(context).apply {
             orientation = HORIZONTAL; gravity = Gravity.BOTTOM
             addView(total, LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT))
+            // On the big figure's baseline, through the values' line
             addView(LinearLayout(context).apply {
                 orientation = VERTICAL
                 addView(regenLabel)
                 addView(regen)
-            }, LayoutParams(0, LayoutParams.WRAP_CONTENT, 1f).apply { leftMargin = (14 * d).toInt(); bottomMargin = (9 * d).toInt() })
+                baselineAlignedChildIndex = 1
+            }, LayoutParams(0, LayoutParams.WRAP_CONTENT, 1f).apply { leftMargin = (14 * d).toInt() })
             addView(distance)
         }, LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT).apply { topMargin = (10 * d).toInt() })
         addView(legend, LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT).apply { topMargin = (6 * d).toInt() })
@@ -82,7 +84,7 @@ class ConsumptionCard(context: Context) : LinearLayout(context) {
         // Regeneration next to the total (#44), in green, small unit; nothing if it is zero
         total.text = if (!ok) "—" else smallUnit(String.format(Locale.getDefault(), "%.1f kWh", t.outKwh))
         val hasRegen = ok && t.regenKwh >= 0.05f
-        regen.text = if (hasRegen) regenValues(context, t.regenKwh, if (period == 0) carRegenKm() else regenKmEstimate(t)) else ""
+        regen.text = if (hasRegen) regenValues(context, t.regenKwh, regenKm(t)) else ""
         regenLabel.visibility = if (hasRegen) VISIBLE else INVISIBLE
         distance.text = if (t.km > 0) smallUnit(app.mg4dash.system.Units.distText(context, t.km.toFloat())) else ""
         fillLegend(context, legend, t)
@@ -92,9 +94,6 @@ class ConsumptionCard(context: Context) : LinearLayout(context) {
         note.text = n
     }
 
-    private fun carRegenKm(): Float? =
-        if (app.mg4dash.BuildConfig.MOCK) 50.9f else app.mg4dash.car.CarProps.getFloat(app.mg4dash.car.CarProps.REGEN_RNG_AFT_CHRG)
-
     /** Half size unit after the last space ("1.6 kWh", "12 km"). */
     private fun smallUnit(t: String): CharSequence {
         val i = t.lastIndexOf(' ').takeIf { it > 0 } ?: return t
@@ -102,15 +101,13 @@ class ConsumptionCard(context: Context) : LinearLayout(context) {
     }
 
     companion object {
-        /** Range the recovered energy gave back at the period's consumption; the car only counts it since the last charge. */
-        fun regenKmEstimate(t: EnergyMonitor.Totals): Float? {
-            val net = t.outKwh - t.regenKwh
-            return if (t.km >= 2 && net > 0f) t.regenKwh * t.km / net else null
-        }
+        /** Part of the distance powered by the recovered energy, its share of what left the battery (#44, see the README). */
+        fun regenKm(t: EnergyMonitor.Totals): Float? =
+            if (t.km >= 2 && t.outKwh > 0f) t.regenKwh / t.outKwh * t.km else null
 
-        /** "−3.2 kWh   50.9 km": energy deducted from the total, km it allowed (not added to the range, #44); no km if unknown or out of range. */
+        /** "−3.2 kWh   ~19.5 km": energy deducted from the total, km it powered (not added to the range, #44); no km if unknown or out of range. */
         fun regenValues(c: android.content.Context, kwh: Float, km: Float?): String {
-            val kmText = km?.takeIf { it > 0.05f && it < 2000f }?.let { "   " + app.mg4dash.system.Units.distText(c, it, 1) } ?: ""
+            val kmText = km?.takeIf { it > 0.05f && it < 2000f }?.let { "   ~" + app.mg4dash.system.Units.distText(c, it, 1) } ?: ""
             return String.format(Locale.getDefault(), "−%.1f kWh", kwh) + kmText
         }
 
@@ -152,16 +149,17 @@ class ConsumptionCard(context: Context) : LinearLayout(context) {
          */
         fun fill(c: android.content.Context, chart: LineChart, period: Int, stacked: Boolean = false): Pair<Int, String> {
             val curves = app.mg4dash.energy.ConsumptionCurve.curves.value
-            chart.cap = if (stacked) app.mg4dash.system.Units.stackValue(c, CURVE_CAP) else null
+            chart.scaleTops = if (stacked) CURVE_TOPS.map { app.mg4dash.system.Units.stackValue(c, it) } else null
             // Stacked chart: in kWh per 100 km or 100 miles, the only unit whose items add up
             val v = curves.of(period).map { if (stacked) app.mg4dash.system.Units.stackValue(c, it) else app.mg4dash.system.Units.cons(c, it) }
-            if (stacked && showStack(c, chart, curves, period, v)) {
+            val mean = if (stacked) periodMean(c, period) ?: v.average().toFloat() else v.average().toFloat()
+            if (stacked && showStack(c, chart, curves, period, v, mean)) {
                 return v.size to if (period == 2) c.getString(R.string.en_trips_note, v.size)
                     else c.getString(if (period == 0 && curves.chargeTimes.size == v.size) R.string.en_time_note else R.string.en_curve_note)
             }
             val line = app.mg4dash.energy.ConsumptionCurve.timeLine(curves.timesOf(period), v)
             if (line.size >= 2) {
-                chart.showTimeline(line, v.average().toFloat())
+                chart.showTimeline(line, mean)
                 return v.size to if (period == 2) c.getString(R.string.en_trips_note, v.size) else c.getString(R.string.en_time_note)
             }
             chart.values = if (period == 2) v else v.smoothed()
@@ -169,7 +167,7 @@ class ConsumptionCard(context: Context) : LinearLayout(context) {
         }
 
         /** Stacked chart (Energy page), bottom to top: the steady items first, so their size can be read, driving last (#44); points without composition form a grey layer. */
-        private fun showStack(c: android.content.Context, chart: LineChart, curves: app.mg4dash.energy.ConsumptionCurve.Curves, period: Int, v: List<Float>): Boolean {
+        private fun showStack(c: android.content.Context, chart: LineChart, curves: app.mg4dash.energy.ConsumptionCurve.Curves, period: Int, v: List<Float>, mean: Float): Boolean {
             val mixes = curves.mixOf(period)
             if (v.size < 2 || mixes.size != v.size || mixes.all { it == null }) return false
             val colors = listOf(Themes.color(c, R.color.text_sub), Themes.color(c, R.color.accent_cold), Themes.color(c, R.color.accent_heat),
@@ -180,15 +178,22 @@ class ConsumptionCard(context: Context) : LinearLayout(context) {
             if (times.size == v.size) {
                 val lines = parts.map { app.mg4dash.energy.ConsumptionCurve.timeLine(times, it) }
                 if (lines[0].size < 2) return false
-                chart.showLayers(lines[0].map { it.first }, lines.mapIndexed { k, l -> LineChart.Layer(colors[k], l.map { it.second }) }, v.average().toFloat())
+                chart.showLayers(lines[0].map { it.first }, lines.mapIndexed { k, l -> LineChart.Layer(colors[k], l.map { it.second }) }, mean)
             } else {
-                chart.showLayers(null, parts.mapIndexed { k, l -> LineChart.Layer(colors[k], l.smoothed().atMost(50)) }, v.average().toFloat())
+                chart.showLayers(null, parts.mapIndexed { k, l -> LineChart.Layer(colors[k], l.smoothed().atMost(50)) }, mean)
             }
             return true
         }
 
-        /** Top of the curve in kWh/100 km: a peak no longer flattens everything else (#44). */
-        private const val CURVE_CAP = 30f
+        /** Tops of the curve in kWh/100 km: a peak no longer flattens everything else (#44). */
+        private val CURVE_TOPS = listOf(20f, 30f)
+
+        /** Real average of the period (#44): energy out of the battery, minus regeneration, over the distance. The points are only for the picture. */
+        private fun periodMean(c: android.content.Context, period: Int): Float? {
+            val t = EnergyMonitor.totals(period)
+            val net = t.outKwh - t.regenKwh
+            return if (t.km >= 2 && net > 0f) app.mg4dash.system.Units.stackValue(c, net / t.km * 100f) else null
+        }
 
         /** Compact legend: colour, item and share of each, driving with regeneration deducted. */
         private fun fillLegend(c: android.content.Context, legend: LinearLayout, t: EnergyMonitor.Totals) {

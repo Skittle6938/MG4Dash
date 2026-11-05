@@ -81,7 +81,7 @@ Swipe or tap it to switch between its pages:
 ## Map card
 
 - **Map**: follows the car, north up or heading up (tap the recenter button again), default zoom 14 to 18 and colours (auto, light, dark) in Settings › Home. The zoom and full screen buttons hide after a few seconds. Without data connection the map stays as long as the area is in the tile cache, then the card switches to consumption (can be turned off).
-- **Consumption**: the button at the top right switches map → consumption → shortcuts. Period menu: since the last charge, current trip (one point per km, one every 2 minutes when stopped; since the last charge and the last 12 months are placed by date and smoothed, from the energy measured by MG4Dash) or last 12 months (one point per trip). The dashed line is the average, with its value.
+- **Consumption**: a swipe switches map → consumption → shortcuts. Period menu: since the last charge, current trip (one point per km, one every 2 minutes when stopped; since the last charge and the last 12 months are placed by date and smoothed, from the energy measured by MG4Dash) or last 12 months (one point per trip). The dashed line is the average, with its value: energy out of the battery minus regeneration, over the distance. **Regen** shows the energy recovered and the part of the distance it powered: recovered energy ÷ energy out of the battery × distance. With 30.7 kWh out, 12.1 kWh recovered and 149 km, that is 39 % of the energy, so about 59 km of the 149 km. These km are already part of the distance, they don't add to the range.
 - **Shortcuts**: 3 rows of apps or Home Assistant actions (scripts, automations, scenes, gate, garage door…). Tap an empty slot or long press a slot to change it; the Home Assistant address and token are set in Settings › Connections. The shortcuts page can be turned off.
 - **Full screen**: the button below the zoom enlarges the map over the whole screen; any bar button brings it back.
 
@@ -298,11 +298,11 @@ A short tour of the main gestures opens after a first install (*Skip* closes it 
 - Long press play / pause: Sound page
 - Steering wheel * button: 360 camera on / off
 - Swipe the map card: map → consumption → shortcuts; move and zoom the map with two fingers (one finger in full screen)
-- Long press the connection icons: choose which ones show
+- Long press the connection icons: choose which ones show, including USB-A and USB-C, which are off by default
 - Two fingers sliding down from the top of the screen: open Android Auto when a phone is connected
 - Swipe the weather card: hourly ↔ daily forecast
 - Tap a segment of the KERS gauge: regeneration level; long press: one-pedal driving
-- Button at the top right of the map: map → consumption → shortcuts; long press a shortcut to edit it
+- Long press a shortcut: edit it; with an app shown in the map card, its button at the top right: map → consumption → shortcuts
 - Long press the map: show another app in the map card
 - Fan minus at the lowest speed: climate off
 - Map "recenter" button: resume following the car; press again to switch between north up and car heading up (green)

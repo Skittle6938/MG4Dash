@@ -42,7 +42,29 @@ object StatusMonitor {
         val phone: BtAudio.PhoneIndicators? = null,
         /** Devices connected to the hotspot, as the stock status bar counts them (#86). */
         val hotspotClients: Int = 0,
+        /** Stick mounted on each port (#86): USB-A is the stock "USB2", USB-C its "USB1". */
+        val usbA: Boolean = false, val usbC: Boolean = false,
     )
+
+    /**
+     * Stick on USB-A, on USB-C: read like the stock status bar (UsbDeviceController), from the USB controller
+     * in the disk's system path. If a mounted stick matches neither, it counts on USB-C.
+     */
+    private fun usbPorts(storage: android.os.storage.StorageManager?, mounted: Int): Pair<Boolean, Boolean> {
+        var a = false; var c = false
+        try {
+            (storage?.javaClass?.getMethod("getVolumes")?.invoke(storage) as? List<*>)?.forEach { v ->
+                if (v == null || v.javaClass.getMethod("getState").invoke(v) != VOLUME_MOUNTED) return@forEach
+                val disk = v.javaClass.getMethod("getDisk").invoke(v) ?: return@forEach
+                val path = disk.javaClass.getField("sysPath").get(disk) as? String ?: return@forEach
+                if (USB_C_CONTROLLER in path) c = true else if (USB_A_CONTROLLER in path) a = true
+            }
+        } catch (e: Exception) { Log.w("Status", "USB ports: ${e.message}") }
+        return a to (c || (!a && mounted > 0))
+    }
+    private const val VOLUME_MOUNTED = 2
+    private const val USB_C_CONTROLLER = "11271000.usb"
+    private const val USB_A_CONTROLLER = "112c1000.usb"
 
     const val SIGNAL_MAX = 4
     private const val WIFI_LEVELS = 4
@@ -99,7 +121,8 @@ object StatusMonitor {
         val wifiLevel = try {
             WifiManager.calculateSignalLevel(wm?.connectionInfo?.rssi ?: -127, WIFI_LEVELS)
         } catch (_: Exception) { 0 }
-        return Connections(s.btOn, s.btConnected, btName, s.wifiOn, s.wifiConnected, ssid, ap, level, mode.coerceIn(0, 4), usb, wifiLevel, BtAudio.phoneIndicators(context), if (ap) watchHotspotClients(wm) else 0)
+        val (usbA, usbC) = usbPorts(storage, usb)
+        return Connections(s.btOn, s.btConnected, btName, s.wifiOn, s.wifiConnected, ssid, ap, level, mode.coerceIn(0, 4), usb, wifiLevel, BtAudio.phoneIndicators(context), if (ap) watchHotspotClients(wm) else 0, usbA, usbC)
     }
 
     fun hasInternet(context: Context): Boolean {

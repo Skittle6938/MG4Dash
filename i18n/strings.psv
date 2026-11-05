@@ -593,7 +593,7 @@ tu_energy_t|Energy|Énergie|Energie|Energía|Energia|Energie|Enerji
 tu_energy_1|Tap a KERS segment: regeneration level; long press: one-pedal driving|Toucher un segment KERS : niveau de régénération ; appui long : pédale unique|KERS-Segment tippen: Rekuperationsstufe; lang drücken: One-Pedal-Fahren|Toca un segmento KERS: nivel de regeneración; pulsación larga: conducción con un pedal|Tocca un segmento KERS: livello di rigenerazione; pressione lunga: guida a un pedale|Tik op een KERS-segment: regeneratieniveau; lang drukken: rijden met één pedaal|KERS bölümüne dokun: rejenerasyon seviyesi; uzun bas: tek pedal sürüş
 tu_energy_2|CHARGE button: charging and V2L|Bouton CHARGE : recharge et V2L|Taste CHARGE: Laden und V2L|Botón CHARGE: carga y V2L|Pulsante CHARGE: ricarica e V2L|Knop CHARGE: laden en V2L|CHARGE düğmesi: şarj ve V2L
 tu_map_t|Map|Carte|Karte|Mapa|Mappa|Kaart|Harita
-tu_map_1|Swipe or button at the top right: map → consumption → shortcuts|Balayage ou bouton en haut à droite : carte → consommation → raccourcis|Wischen oder Taste oben rechts: Karte → Verbrauch → Verknüpfungen|Deslizar o botón arriba a la derecha: mapa → consumo → accesos directos|Scorrimento o pulsante in alto a destra: mappa → consumi → scorciatoie|Vegen of knop rechtsboven: kaart → verbruik → snelkoppelingen|Kaydırma veya sağ üstteki düğme: harita → tüketim → kısayollar
+tu_map_1|Swipe: map → consumption → shortcuts|Balayage : carte → consommation → raccourcis|Wischen: Karte → Verbrauch → Verknüpfungen|Deslizar: mapa → consumo → accesos directos|Scorrimento: mappa → consumi → scorciatoie|Vegen: kaart → verbruik → snelkoppelingen|Kaydırma: harita → tüketim → kısayollar
 tu_map_3|Two fingers: move and zoom the map (one finger in full screen)|Deux doigts : déplacer et zoomer la carte (un doigt en plein écran)|Zwei Finger: Karte bewegen und zoomen (im Vollbild ein Finger)|Dos dedos: mover y ampliar el mapa (un dedo a pantalla completa)|Due dita: spostare e ingrandire la mappa (un dito a schermo intero)|Twee vingers: kaart verplaatsen en zoomen (één vinger op volledig scherm)|İki parmak: haritayı taşı ve yakınlaştır (tam ekranda tek parmak)
 tu_map_2|Long press the map: show another app in the map card|Appui long sur la carte : une autre appli dans la carte|Karte lang drücken: andere App in der Kartenkarte|Pulsación larga en el mapa: otra app en la tarjeta del mapa|Pressione lunga sulla mappa: un'altra app nella scheda mappa|Kaart lang drukken: een andere app in de kaartkaart|Haritaya uzun bas: harita kartında başka bir uygulama
 tu_media_t|Music|Musique|Musik|Música|Musica|Muziek|Müzik
@@ -625,6 +625,9 @@ conn_icon_net|Phone network|Réseau du téléphone|Telefonnetz|Red del teléfono
 conn_icon_car_net|Car network|Réseau de la voiture|Fahrzeugnetz|Red del coche|Rete dell'auto|Autonetwerk|Araç ağı
 conn_icons_note|The panel keeps showing everything.|Le panneau garde tout, quel que soit ce choix.|Die Übersicht zeigt weiterhin alles.|El panel sigue mostrándolo todo.|Il pannello continua a mostrare tutto.|Het paneel blijft alles tonen.|Panel her şeyi göstermeye devam eder.
 conn_usb|USB|USB|USB|USB|USB|USB|USB
+conn_usb_a|USB-A|USB-A|USB-A|USB-A|USB-A|USB-A|USB-A
+conn_usb_c|USB-C|USB-C|USB-C|USB-C|USB-C|USB-C|USB-C
+conn_usb_mounted|Stick connected|Clé connectée|Stick verbunden|Memoria conectada|Chiavetta collegata|Stick verbonden|Bellek bağlı
 conn_on|On|Activé|An|Activado|Attivato|Aan|Açık
 conn_off|Off|Coupé|Aus|Desactivado|Disattivato|Uit|Kapalı
 conn_not_connected|Not connected|Non connecté|Nicht verbunden|No conectado|Non connesso|Niet verbonden|Bağlı değil
