@@ -420,6 +420,8 @@
     <string name="st_mode_auto_short">Auto</string>
     <string name="st_map_zoom">Standard-Kartenzoom</string>
     <string name="st_map_theme">Kartenfarben</string>
+    <string name="st_own_keyboard">MG4Dash-Tastatur</string>
+    <string name="st_own_keyboard_desc">Volle Breite und große Tasten in den Textfeldern von MG4Dash. Aus: Android-Tastatur</string>
     <string name="st_map_auto_hide">Zoom- und Vollbildtasten der Karte ausblenden</string>
     <string name="st_map_auto_hide_desc">Sie erscheinen beim Berühren der Karte für einige Sekunden; die Richtungstaste bleibt</string>
     <string name="st_map_offline_switch">Ohne Verbindung zum Energie-Widget wechseln</string>

@@ -274,6 +274,7 @@ object Shortcuts {
         val list = android.widget.ListView(activity).apply { this.adapter = adapter }
         val search = android.widget.EditText(activity).apply {
             hint = activity.getString(R.string.sc_search)
+            setTextColor(kit.color(R.color.text_value))
             setSingleLine()
             setTextSize(TypedValue.COMPLEX_UNIT_SP, 20f)
         }
@@ -297,6 +298,10 @@ object Shortcuts {
         })
         list.setOnItemClickListener { _, _, pos, _ -> dialog.dismiss(); onPick(shown[pos]) }
         dialog.show(); app.mg4dash.ui.Dialogs.fix(dialog)
+        // Dialog and keyboard both fit on the screen with a shorter list
+        app.mg4dash.ui.CarKeyboard.attachInDialog(search, dialog, box) { open ->
+            list.layoutParams = list.layoutParams.apply { height = kit.dp(if (open) 150 else 420) }
+        }
     }
 
     /** Service called according to the entity's domain. */

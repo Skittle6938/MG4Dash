@@ -420,6 +420,8 @@
     <string name="st_mode_auto_short">Auto</string>
     <string name="st_map_zoom">Default map zoom</string>
     <string name="st_map_theme">Map colours</string>
+    <string name="st_own_keyboard">MG4Dash keyboard</string>
+    <string name="st_own_keyboard_desc">Full width with large keys, in MG4Dash\'s text fields. Off: Android\'s keyboard</string>
     <string name="st_map_auto_hide">Hide the map zoom and full screen buttons</string>
     <string name="st_map_auto_hide_desc">They show for a few seconds when you touch the map; the heading button stays</string>
     <string name="st_map_offline_switch">Switch to the energy widget when offline</string>

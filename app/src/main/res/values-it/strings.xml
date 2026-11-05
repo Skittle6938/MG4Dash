@@ -420,6 +420,8 @@
     <string name="st_mode_auto_short">Auto</string>
     <string name="st_map_zoom">Zoom predefinito della mappa</string>
     <string name="st_map_theme">Colori della mappa</string>
+    <string name="st_own_keyboard">Tastiera MG4Dash</string>
+    <string name="st_own_keyboard_desc">Larghezza intera e tasti grandi, nei campi di MG4Dash. Disattivata: tastiera di Android</string>
     <string name="st_map_auto_hide">Nascondi i pulsanti zoom e schermo intero della mappa</string>
     <string name="st_map_auto_hide_desc">Compaiono per qualche secondo toccando la mappa; il pulsante della direzione resta</string>
     <string name="st_map_offline_switch">Passa al widget energia offline</string>

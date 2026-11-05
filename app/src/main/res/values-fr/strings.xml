@@ -420,6 +420,8 @@
     <string name="st_mode_auto_short">Auto</string>
     <string name="st_map_zoom">Zoom de la carte par défaut</string>
     <string name="st_map_theme">Couleurs de la carte</string>
+    <string name="st_own_keyboard">Clavier MG4Dash</string>
+    <string name="st_own_keyboard_desc">Toute la largeur et grandes touches, dans les champs de MG4Dash. Désactivé : clavier d\'Android</string>
     <string name="st_map_auto_hide">Masquer les boutons zoom et plein écran de la carte</string>
     <string name="st_map_auto_hide_desc">Ils apparaissent quelques secondes au toucher de la carte ; le bouton de cap reste</string>
     <string name="st_map_offline_switch">Passer au widget énergie hors ligne</string>

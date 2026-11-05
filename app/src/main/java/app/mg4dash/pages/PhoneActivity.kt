@@ -207,7 +207,12 @@ class PhoneActivity : PageActivity() {
         contactAdapter = EntryAdapter(showType = false)
         contactEmpty = kit.text("", 18f, R.color.text_title).apply { maxLines = 3 }
         book.addView(contactEmpty, kit.lp(-1, -2, t = 10))
-        book.addView(list(contactAdapter), kit.lp(-1, 0, 1f, t = 6))
+        val contactList = list(contactAdapter).apply { clipToPadding = false }
+        book.addView(contactList, kit.lp(-1, 0, 1f, t = 6))
+        // The list's end stays reachable above the keyboard
+        app.mg4dash.ui.CarKeyboard.attach(search) { open ->
+            contactList.setPadding(0, 0, 0, if (open) kit.dp(app.mg4dash.ui.CarKeyboard.HEIGHT_DP) else 0)
+        }
         search.addTextChangedListener(object : android.text.TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, a: Int, b: Int, c: Int) {}
             override fun onTextChanged(s: CharSequence?, a: Int, b: Int, c: Int) {}
