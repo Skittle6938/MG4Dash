@@ -262,7 +262,7 @@ class SimpleHome(private val a: AppCompatActivity) {
         texts.addView(mediaArtist, kit.lp(-1, -2, t = 6))
         info.addView(texts, kit.lp(0, -2, 1f, l = 16))
         info.setOnClickListener {
-            if (MediaHub.openCarPlayNowPlaying()) return@setOnClickListener
+            if (MediaHub.openCarPlayNowPlaying() || MediaHub.openServiceMediaApp()) return@setOnClickListener
             val owner = MediaHub.ownerComponent()
             if (owner != null) Apps.open(a, owner, "Media") else Apps.open(a, Apps.RADIO, "Radio")
         }

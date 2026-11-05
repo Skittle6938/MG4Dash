@@ -666,7 +666,7 @@ class MainActivity : AppCompatActivity() {
         listOf(b.srcRadio, b.srcMedia, b.srcAa).forEach { it.visibility = View.GONE }
         app.mg4dash.ui.SourceMenu.attach(this, b.mediaSource)
         b.mediaInfo.setOnClickListener {
-            if (MediaHub.openCarPlayNowPlaying()) return@setOnClickListener
+            if (MediaHub.openCarPlayNowPlaying() || MediaHub.openServiceMediaApp()) return@setOnClickListener
             val owner = MediaHub.ownerComponent()
             if (owner != null) Apps.open(this, owner, "Media") else Apps.open(this, Apps.RADIO, "Radio")
         }

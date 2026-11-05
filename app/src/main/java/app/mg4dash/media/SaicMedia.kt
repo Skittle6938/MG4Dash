@@ -97,6 +97,15 @@ object SaicMedia {
         return Track(name, artist, r.readString().orEmpty().trim())
     }
 
+    /** Stock music app on the right tab, with the stock launcher's intent: its "module" extra is "bt" or "usb". */
+    fun openMusicApp(context: Context, usb: Boolean): Boolean = try {
+        context.startActivity(Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_HOME)
+            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            .setClassName(HMI_PKG, "$HMI_PKG.ui.activity.MusicActivity")
+            .putExtra("module", if (usb) "usb" else "bt"))
+        true
+    } catch (e: Exception) { Log.w(TAG, "opening the music app: ${e.message}"); false }
+
     fun btPlay(): Boolean = bt.call(BT_PLAY) { it.readInt() != 0 } ?: false
     fun btPause(): Boolean = bt.call(BT_PAUSE) { it.readInt() != 0 } ?: false
     /** False if the service has nothing to play yet (list not loaded by the stock music app). */
