@@ -241,6 +241,10 @@ class Prefs(context: Context) {
         set(v) = sp.edit().putInt("charge_limit", v).apply()
 
     /** Hides the SAIC side bar and banner (immersive mode). */
+    /** MG4Dash's own full width keyboard in its text fields, instead of Android's (#93). */
+    var ownKeyboard: Boolean
+        get() = sp.getBoolean("own_keyboard", true)
+        set(v) = sp.edit().putBoolean("own_keyboard", v).apply()
     var fullscreen: Boolean
         get() = sp.getBoolean("fullscreen", true)
         set(v) = sp.edit().putBoolean("fullscreen", v).apply()

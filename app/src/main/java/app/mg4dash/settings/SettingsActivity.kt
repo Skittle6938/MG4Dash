@@ -115,6 +115,7 @@ class SettingsActivity : AppCompatActivity() {
         }
         toggle(style, R.string.st_wide_bar, R.string.st_wide_bar_desc, { prefs.wideBar }) { prefs.wideBar = it; recreate() }
         toggle(style, R.string.st_fullscreen, null, { prefs.fullscreen }) { prefs.fullscreen = it; Fullscreen.apply(this) }
+        toggle(style, R.string.st_own_keyboard, R.string.st_own_keyboard_desc, { prefs.ownKeyboard }) { prefs.ownKeyboard = it }
         toggle(style, R.string.st_energy_card_power, R.string.st_energy_card_power_desc, { prefs.energyCardPower }) { prefs.energyCardPower = it }
         toggle(style, R.string.st_power_va, R.string.st_power_va_desc, { prefs.powerVa }) { prefs.powerVa = it }
         toggle(style, R.string.st_stack_auto, null, { prefs.stackAuto }) { prefs.stackAuto = it }
@@ -764,6 +765,7 @@ class SettingsActivity : AppCompatActivity() {
     private fun ask(title: String, initial: String, secret: Boolean, number: Boolean = false, onOk: (String) -> Unit) {
         val input = android.widget.EditText(this).apply {
             setText(initial); setSingleLine()
+            setTextColor(color(R.color.text_value))
             inputType = if (number) android.text.InputType.TYPE_CLASS_NUMBER or android.text.InputType.TYPE_NUMBER_FLAG_DECIMAL
             else android.text.InputType.TYPE_CLASS_TEXT or
                 (if (secret) android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD else android.text.InputType.TYPE_TEXT_VARIATION_URI)
@@ -784,7 +786,10 @@ class SettingsActivity : AppCompatActivity() {
             .setTitle(title).setView(box)
             .setPositiveButton(android.R.string.ok) { _, _ -> onOk(input.text.toString()) }
             .setNegativeButton(R.string.cancel, null)
-            .show().also { app.mg4dash.ui.Dialogs.fix(it) }
+            .show().also { d ->
+                app.mg4dash.ui.Dialogs.fix(d)
+                app.mg4dash.ui.CarKeyboard.attachInDialog(input, d, box, onDone = { d.getButton(android.app.AlertDialog.BUTTON_POSITIVE).performClick() })
+            }
     }
 
     /**

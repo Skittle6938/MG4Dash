@@ -196,6 +196,10 @@ object Dock {
      */
     private const val BAR_DP = 72
 
+    /** Left free for the bar by a full width overlay: the bar and its margins, or the screen margin with the dock. */
+    fun keyboardMarginDp(context: android.content.Context): Int =
+        if (vertical(context)) (if (Prefs(context).wideBar) BAR_DP * 2 else BAR_DP) + 24 else 16
+
     /**
      * Discreet Wi-Fi indicator next to the Vehicle icon (#67): shown when the head unit is linked to an
      * access point (phone hotspot…), reread every 5 s while the bar is shown.

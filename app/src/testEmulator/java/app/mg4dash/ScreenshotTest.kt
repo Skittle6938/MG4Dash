@@ -314,6 +314,15 @@ class ScreenshotTest {
     }
 
     @Test fun phone() = shoot(app.mg4dash.pages.PhoneActivity::class.java, "phone.png")
+    /** Mock-up of the full width keyboard over the phone page (#93). */
+    @Test @Config(qualifiers = "fr-w1920dp-h720dp-land-mdpi") fun phoneKeyboard() {
+        org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE).edit().putInt("theme_mode", 1).commit()
+        val act = Robolectric.buildActivity(app.mg4dash.pages.PhoneActivity::class.java).setup().get()
+        repeat(5) { shadowOf(Looper.getMainLooper()).idleFor(200, TimeUnit.MILLISECONDS) }
+        val content = act.findViewById<android.widget.FrameLayout>(android.R.id.content)
+        content.addView(app.mg4dash.ui.CarKeyboard(act, "fr"), android.widget.FrameLayout.LayoutParams(1808, -2, android.view.Gravity.BOTTOM or android.view.Gravity.RIGHT).apply { rightMargin = 16; bottomMargin = 10 })
+        save(act.window.decorView, "phone_keyboard.png")
+    }
 
     @Test fun compatReport() {
         val activity = Robolectric.buildActivity(SettingsActivity::class.java).setup().get()
