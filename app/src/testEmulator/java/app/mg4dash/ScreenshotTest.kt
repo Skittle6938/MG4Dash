@@ -314,6 +314,19 @@ class ScreenshotTest {
     }
 
     @Test fun phone() = shoot(app.mg4dash.pages.PhoneActivity::class.java, "phone.png")
+    /** List with a search field and the keyboard open (#93): everything fits on the screen, with several lines. */
+    @Test @Config(qualifiers = "fr-w1920dp-h720dp-land-mdpi") fun searchListKeyboard() {
+        org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE).edit().putInt("theme_mode", 2).commit()
+        val act = Robolectric.buildActivity(app.mg4dash.pages.PhoneActivity::class.java).setup().get()
+        app.mg4dash.shortcuts.Shortcuts.searchList(act, "Action Home Assistant", (1..12).map { "Example action $it  ·  script.example_action_$it" }) {}
+        repeat(3) { shadowOf(Looper.getMainLooper()).idleFor(200, TimeUnit.MILLISECONDS) }
+        val root = org.robolectric.shadows.ShadowDialog.getLatestDialog().window!!.decorView
+        root.measure(View.MeasureSpec.makeMeasureSpec(1888, View.MeasureSpec.EXACTLY), View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED))
+        println("search list dialog height: ${root.measuredHeight}")
+        org.junit.Assert.assertTrue("height ${root.measuredHeight}", root.measuredHeight <= 720)
+        save(root, "search_list_keyboard.png")
+    }
+
     /** Mock-up of the full width keyboard over the phone page (#93). */
     @Test @Config(qualifiers = "fr-w1920dp-h720dp-land-mdpi") fun phoneKeyboard() {
         org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE).edit().putInt("theme_mode", 1).commit()
