@@ -1167,7 +1167,7 @@ object MediaHub {
             SaicMedia.usbPlay().also { ok ->
                 if (!ok) main.post {
                     Log.i(TAG, "USB not ready: opening the stock music app")
-                    ctx.packageManager.getLaunchIntentForPackage(SaicMedia.HMI_PKG)?.let { ctx.startActivity(it.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)) }
+                    SaicMedia.openMusicApp(ctx, usb = true)
                 }
             }
         } else io.launch { if (!SaicMedia.btPlay()) Log.w(TAG, "Bluetooth play refused") }
@@ -1493,6 +1493,15 @@ object MediaHub {
         val ok = c.dispatchMediaButtonEvent(KeyEvent(t, t, KeyEvent.ACTION_DOWN, code, 0)) and
             c.dispatchMediaButtonEvent(KeyEvent(t, t, KeyEvent.ACTION_UP, code, 0))
         Log.i(TAG, "media key $code → ${c.packageName}: $ok")
+    }
+
+    /** Old SDK Bluetooth or USB shown: opens the stock music app on its tab (#80); false in any other case. */
+    fun openServiceMediaApp(): Boolean {
+        val ctx = appContext ?: return false
+        if (!serviceMedia || radioShown) return false
+        val usb = usbShown
+        if (!usb && current?.packageName != "com.android.bluetooth") return false
+        return SaicMedia.openMusicApp(ctx, usb)
     }
 
     /** Component to open when touching the media card. */
