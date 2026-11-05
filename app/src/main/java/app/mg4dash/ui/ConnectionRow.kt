@@ -32,13 +32,7 @@ class ConnectionRow(private val activity: Activity) : LinearLayout(activity) {
     private val phoneSignal = SignalBars(activity).also { phoneGroup.addView(it, LayoutParams(dp(ICON_DP), dp(ICON_DP - 6)).apply { leftMargin = dp(8) }) }
     private val bt = icon(R.drawable.ic_bluetooth, 16)
     private val wifi = WifiArcs(activity).also { addView(it, LayoutParams(dp(28), dp(ICON_DP - 2)).apply { leftMargin = dp(GAP_DP) }) }
-    private val hotspot = icon(R.drawable.ic_conn_hotspot)
-    /** Devices on the hotspot, from 2 (#86). */
-    private val hotspotCount = TextView(activity).apply {
-        setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
-        setTypeface(typeface, android.graphics.Typeface.BOLD)
-        includeFontPadding = false
-    }.also { addView(it, LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT).apply { leftMargin = dp(2) }) }
+    private val hotspot = HotspotIcon(activity).also { addView(it, LayoutParams(dp(ICON_DP), dp(ICON_DP)).apply { leftMargin = dp(GAP_DP) }) }
     private val signal = SignalBars(activity).also { addView(it, LayoutParams(dp(ICON_DP + 4), dp(ICON_DP - 3)).apply { leftMargin = dp(GAP_DP) }) }
     private val usbA = UsbPort(activity, "A").also { addView(it, LayoutParams(dp(30), dp(ICON_DP)).apply { leftMargin = dp(GAP_DP) }) }
     private val usbC = UsbPort(activity, "C").also { addView(it, LayoutParams(dp(30), dp(ICON_DP)).apply { leftMargin = dp(GAP_DP) }) }
@@ -98,9 +92,8 @@ class ConnectionRow(private val activity: Activity) : LinearLayout(activity) {
         tint(bt, c.btConnected)
         usbA.on = c.usbA; usbC.on = c.usbC
         // On with no device: lit less than with one, as the stock icon only shows then (#86)
-        hotspot.putTint(color(when { !c.hotspotOn -> R.color.text_disabled; c.hotspotClients > 0 -> R.color.accent_action; else -> R.color.text_sub }))
-        hotspotCount.text = c.hotspotClients.toString()
-        hotspotCount.setTextColor(color(R.color.accent_action))
+        hotspot.tint = color(when { !c.hotspotOn -> R.color.text_disabled; c.hotspotClients > 0 -> R.color.accent_action; else -> R.color.text_sub })
+        hotspot.clients = c.hotspotClients
         wifi.level = if (c.wifiConnected) c.wifiLevel else -1
         phoneBattery.level = c.phone?.battery ?: 0
         phoneSignal.level = phoneBars(c.phone?.signal)
@@ -120,7 +113,6 @@ class ConnectionRow(private val activity: Activity) : LinearLayout(activity) {
         set(phoneBattery, KEY_PHONE_BATTERY, c?.phone?.battery != null)
         set(phoneSignal, KEY_PHONE_NET, c?.phone?.signal != null)
         set(bt, KEY_BT); set(wifi, KEY_WIFI); set(hotspot, KEY_HOTSPOT)
-        hotspotCount.visibility = if (hotspot.visibility == View.VISIBLE && (c?.hotspotClients ?: 0) > 1) View.VISIBLE else View.GONE
         // USB ports: off until asked for (#86), not in the list of hidden icons
         val shownPorts = app.mg4dash.system.Prefs(activity).shownUsbPorts
         usbA.visibility = if (KEY_USB_A in shownPorts) View.VISIBLE else View.GONE
@@ -360,6 +352,28 @@ class ConnectionRow(private val activity: Activity) : LinearLayout(activity) {
             parts.forEachIndexed { i, part ->
                 paint.color = if (level >= i) on else off
                 canvas.drawPath(part, paint)
+            }
+        }
+    }
+
+    /** Hotspot (#86): from 2 devices, the symbol moves down and their number sits above it, in the same width. */
+    private class HotspotIcon(context: android.content.Context) : View(context) {
+        var tint = 0
+            set(v) { if (field != v) { field = v; invalidate() } }
+        var clients = 0
+            set(v) { if (field != v) { field = v; invalidate() } }
+        private val symbol = androidx.core.content.ContextCompat.getDrawable(context, R.drawable.ic_conn_hotspot)!!.mutate()
+        private val paint = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG).apply { isFakeBoldText = true; textAlign = android.graphics.Paint.Align.CENTER }
+
+        override fun onDraw(canvas: android.graphics.Canvas) {
+            val several = clients > 1
+            val down = if (several) (height * 0.2f).toInt() else 0
+            symbol.setTint(tint)
+            symbol.setBounds(0, down, height, height + down)
+            symbol.draw(canvas)
+            if (several) {
+                paint.color = tint; paint.textSize = height * 0.46f
+                canvas.drawText(clients.toString(), width / 2f, height * 0.34f, paint)
             }
         }
     }
