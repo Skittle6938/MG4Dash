@@ -30,12 +30,12 @@ class ConnectionRow(private val activity: Activity) : LinearLayout(activity) {
         .also { addView(it, LayoutParams(LayoutParams.WRAP_CONTENT, dp(ICON_DP + 4)).apply { leftMargin = dp(GAP_DP) }) }
     private val phoneBattery = BatteryIcon(activity).also { phoneGroup.addView(it, LayoutParams(dp(30), dp(15))) }
     private val phoneSignal = SignalBars(activity).also { phoneGroup.addView(it, LayoutParams(dp(ICON_DP), dp(ICON_DP - 6)).apply { leftMargin = dp(8) }) }
-    private val bt = icon(R.drawable.ic_bluetooth, 16)
-    private val wifi = WifiArcs(activity).also { addView(it, LayoutParams(dp(28), dp(ICON_DP - 2)).apply { leftMargin = dp(GAP_DP) }) }
-    private val hotspot = HotspotIcon(activity).also { addView(it, LayoutParams(dp(ICON_DP), dp(ICON_DP)).apply { leftMargin = dp(GAP_DP) }) }
+    private val bt = icon(R.drawable.ic_bluetooth, 18)
+    private val wifi = WifiArcs(activity).also { addView(it, LayoutParams(dp(31), dp(ICON_DP + GROW_DP - 2)).apply { leftMargin = dp(GAP_DP) }) }
+    private val hotspot = HotspotIcon(activity).also { addView(it, LayoutParams(dp(ICON_DP + GROW_DP), dp(ICON_DP + GROW_DP)).apply { leftMargin = dp(GAP_DP) }) }
     private val signal = SignalBars(activity).also { addView(it, LayoutParams(dp(ICON_DP + 4), dp(ICON_DP - 3)).apply { leftMargin = dp(GAP_DP) }) }
-    private val usbA = UsbPort(activity, "A").also { addView(it, LayoutParams(dp(30), dp(ICON_DP)).apply { leftMargin = dp(GAP_DP) }) }
-    private val usbC = UsbPort(activity, "C").also { addView(it, LayoutParams(dp(30), dp(ICON_DP)).apply { leftMargin = dp(GAP_DP) }) }
+    private val usbA = UsbPort(activity, "A").also { addView(it, LayoutParams(dp(33), dp(ICON_DP + GROW_DP)).apply { leftMargin = dp(GAP_DP) }) }
+    private val usbC = UsbPort(activity, "C").also { addView(it, LayoutParams(dp(33), dp(ICON_DP + GROW_DP)).apply { leftMargin = dp(GAP_DP) }) }
     private var last: StatusMonitor.Connections? = null
     private var panelClosedAt = 0L
     private var panel: PopupWindow? = null
@@ -72,7 +72,7 @@ class ConnectionRow(private val activity: Activity) : LinearLayout(activity) {
         setImageResource(res)
         scaleType = ImageView.ScaleType.CENTER_CROP
         putTint(color(R.color.text_disabled))
-        addView(this, LayoutParams(dp(w), dp(ICON_DP)).apply { leftMargin = dp(GAP_DP) })
+        addView(this, LayoutParams(dp(w), dp(ICON_DP + GROW_DP)).apply { leftMargin = dp(GAP_DP) })
     }
 
     override fun onAttachedToWindow() {
@@ -428,6 +428,8 @@ class ConnectionRow(private val activity: Activity) : LinearLayout(activity) {
         const val REFRESH_MS = 5_000L
         const val REOPEN_GUARD_MS = 400L
         const val ICON_DP = 26
+        /** Added to the icons beside the network bars, whose "4G" makes them taller (#18). */
+        const val GROW_DP = 3
         const val PHONE_LEVELS = 5
         const val KEY_PHONE_BATTERY = "phone_battery"
         const val KEY_PHONE_NET = "phone_net"
