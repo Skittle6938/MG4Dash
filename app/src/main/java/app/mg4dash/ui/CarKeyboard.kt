@@ -181,23 +181,32 @@ class CarKeyboard(
 
         /**
          * Same for a dialog's field. A popup does not sit where asked over a dialog, so the keyboard goes inside
-         * the dialog, at the end of [box], and the dialog takes the screen's width. Call it once the dialog is shown.
-         * OK runs [onDone], or only closes the keyboard without it.
+         * the dialog, which takes the screen's width: two thirds of [box] on the driver's side, its content in the rest.
+         * Call it once the dialog is shown. OK runs [onDone], or only closes the keyboard without it.
          */
-        fun attachInDialog(field: EditText, dialog: Dialog, box: LinearLayout, onDone: (() -> Unit)? = null, onVisible: (Boolean) -> Unit = {}) {
+        fun attachInDialog(field: EditText, dialog: Dialog, box: LinearLayout, onDone: (() -> Unit)? = null) {
             val context = field.context
             if (!Prefs(context).ownKeyboard) return
             field.showSoftInputOnFocus = false
             var keyboard: CarKeyboard? = null
-            fun visible(on: Boolean) { keyboard?.visibility = if (on) View.VISIBLE else View.GONE; onVisible(on) }
+            fun visible(on: Boolean) { keyboard?.visibility = if (on) View.VISIBLE else View.GONE }
             keyboard = forField(field) { if (onDone != null) onDone() else visible(false) }
-            box.addView(keyboard, LayoutParams(-1, -2).apply { topMargin = (8 * context.resources.displayMetrics.density).toInt() })
+            val content = LinearLayout(context).apply { orientation = VERTICAL }
+            (0 until box.childCount).map { box.getChildAt(it) }.also { box.removeAllViews() }.forEach { content.addView(it) }
+            box.orientation = HORIZONTAL
+            val gap = (16 * context.resources.displayMetrics.density).toInt()
+            val keyboardParams = LayoutParams(0, -2, 2f).apply { gravity = Gravity.BOTTOM }
+            if (Dock.rightSide(context)) {
+                box.addView(content, LayoutParams(0, -1, 1f).apply { rightMargin = gap })
+                box.addView(keyboard, keyboardParams)
+            } else {
+                box.addView(keyboard, keyboardParams)
+                box.addView(content, LayoutParams(0, -1, 1f).apply { leftMargin = gap })
+            }
             field.setOnTouchListener { _, e -> if (e.action == MotionEvent.ACTION_UP) visible(true); false }
             dialog.window?.setLayout(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT)
-            // The keyboard needs the height: the car's bars stay hidden, as on the page below
-            (context as? android.app.Activity)?.let { 
-                dialog.window?.decorView?.systemUiVisibility = it.window.decorView.systemUiVisibility and View.SYSTEM_UI_FLAG_LAYOUT_STABLE.inv()
-            }
+            // The keyboard needs the height
+            Dialogs.hideBars(dialog)
             field.requestFocus()
             visible(true)
         }
@@ -234,16 +243,15 @@ class CarKeyboard(
             // The real width: the one Android gives apps is narrower than this screen
             val real = android.util.DisplayMetrics()
             (context.getSystemService(Context.WINDOW_SERVICE) as android.view.WindowManager).defaultDisplay.getRealMetrics(real)
-            val screen = real.widthPixels
-            val margin = (16 * density).toInt()
-            // Beside the vertical bar, over the horizontal dock
+            val end = real.widthPixels * 2 / 3
+            // Two thirds of the screen on the driver's side, along the vertical bar or from the screen's margin
             val side = (Dock.keyboardMarginDp(context) * density).toInt()
-            val rightBar = Dock.vertical(context) && Dock.rightSide(context)
+            val right = Dock.rightSide(context)
             val keyboard = forField(field) { hide() }
-            window = PopupWindow(keyboard, screen - side - margin, LinearLayout.LayoutParams.WRAP_CONTENT).apply {
+            window = PopupWindow(keyboard, end - side, LinearLayout.LayoutParams.WRAP_CONTENT).apply {
                 isFocusable = false; isOutsideTouchable = false; isClippingEnabled = false
                 setBackgroundDrawable(ColorDrawable(0))
-                showAtLocation(field, Gravity.BOTTOM or Gravity.LEFT, if (rightBar) margin else side, (10 * density).toInt())
+                showAtLocation(field, Gravity.BOTTOM or Gravity.LEFT, if (right) real.widthPixels - end else side, (10 * density).toInt())
             }
             field.viewTreeObserver.addOnWindowFocusChangeListener(focusWatch)
             field.addOnAttachStateChangeListener(detachWatch)
