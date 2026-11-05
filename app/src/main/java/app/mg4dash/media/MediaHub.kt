@@ -572,6 +572,9 @@ object MediaHub {
     const val RADIO_DAB = "com.saicmotor.radio#dab"
     const val RADIO_FM = "com.saicmotor.radio#fm"
     private const val ACTION_NEXT_BAND = "__ACTION_NEXT_SOURCE__"
+    /** Radio Dash only, announced by this flag in its session extras: goes straight to the band in the "band" extra. */
+    private const val ACTION_SET_BAND = "__ACTION_SET_BAND__"
+    private const val FLAG_SET_BAND = "radiodash.set_band"
     private const val BAND_RETRY_MS = 800L
     private val radioDashInstalled by lazy { appContext?.let { app.mg4dash.system.RadioDashUpdater.installed(it) } == true }
     /** Wanted band, until the radio gets there. */
@@ -606,8 +609,9 @@ object MediaHub {
     }
 
     /**
-     * The radio can only move to the next band (command of its session): advance to the wanted
+     * The stock radio can only move to the next band (command of its session): advance to the wanted
      * band, rereading each time. It also counts AM where that tab exists, hence 3 tries.
+     * Radio Dash can be asked for the band directly, which cannot overshoot it (#80).
      */
     private fun reachBand(target: String, tries: Int, delayMs: Long = BAND_RETRY_MS) {
         main.postDelayed({
@@ -620,7 +624,11 @@ object MediaHub {
                 if (c != null && !isPlaying(c)) c.transportControls.play()
                 publish()
             } else {
-                c.transportControls.sendCustomAction(ACTION_NEXT_BAND, null)
+                if (c.extras?.getBoolean(FLAG_SET_BAND) == true) {
+                    c.transportControls.sendCustomAction(ACTION_SET_BAND, android.os.Bundle().apply {
+                        putString("band", if (target == RADIO_DAB) "DAB" else "FM")
+                    })
+                } else c.transportControls.sendCustomAction(ACTION_NEXT_BAND, null)
                 reachBand(target, tries - 1)
             }
         }, delayMs)
