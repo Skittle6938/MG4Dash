@@ -323,11 +323,11 @@ class ConnectionRow(private val activity: Activity) : LinearLayout(activity) {
             paint.style = android.graphics.Paint.Style.FILL
             canvas.drawRect(body, height * 0.3f, width.toFloat(), height * 0.7f, paint)
             val inset = stroke * 1.6f
-            val seg = (body - 2 * inset) / PHONE_LEVELS
-            for (i in 0 until PHONE_LEVELS) {
-                paint.color = if (i < level) col else off
-                canvas.drawRect(inset + i * seg + seg * 0.1f, inset, inset + (i + 1) * seg - seg * 0.1f, height - inset, paint)
-            }
+            // Continuous level: separate segments are unreadable at this size
+            paint.color = off
+            canvas.drawRect(inset, inset, body - inset, height - inset, paint)
+            paint.color = col
+            canvas.drawRect(inset, inset, inset + (body - 2 * inset) * level / PHONE_LEVELS, height - inset, paint)
         }
     }
 
