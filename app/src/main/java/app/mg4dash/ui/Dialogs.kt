@@ -19,6 +19,9 @@ object Dialogs {
     fun fullHeight(d: Dialog) {
         d.window?.setLayout(android.view.ViewGroup.LayoutParams.MATCH_PARENT, android.view.ViewGroup.LayoutParams.MATCH_PARENT)
         hideBars(d)
+        // At the top of the screen, the title must clear MG's fog light button (x 20 → 76 dp)
+        val id = d.context.resources.getIdentifier("alertTitle", "id", "android")
+        d.findViewById<TextView>(id)?.apply { setPadding((64 * resources.displayMetrics.density).toInt(), paddingTop, paddingRight, paddingBottom) }
     }
 
     @Suppress("DEPRECATION")
