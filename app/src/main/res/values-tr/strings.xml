@@ -594,7 +594,7 @@
     <string name="tu_energy_1">KERS bölümüne dokun: rejenerasyon seviyesi; uzun bas: tek pedal sürüş</string>
     <string name="tu_energy_2">CHARGE düğmesi: şarj ve V2L</string>
     <string name="tu_map_t">Harita</string>
-    <string name="tu_map_1">Kaydırma veya sağ üstteki düğme: harita → tüketim → kısayollar</string>
+    <string name="tu_map_1">Kaydırma: harita → tüketim → kısayollar</string>
     <string name="tu_map_3">İki parmak: haritayı taşı ve yakınlaştır (tam ekranda tek parmak)</string>
     <string name="tu_map_2">Haritaya uzun bas: harita kartında başka bir uygulama</string>
     <string name="tu_media_t">Müzik</string>
@@ -626,6 +626,9 @@
     <string name="conn_icon_car_net">Araç ağı</string>
     <string name="conn_icons_note">Panel her şeyi göstermeye devam eder.</string>
     <string name="conn_usb">USB</string>
+    <string name="conn_usb_a">USB-A</string>
+    <string name="conn_usb_c">USB-C</string>
+    <string name="conn_usb_mounted">Bellek bağlı</string>
     <string name="conn_on">Açık</string>
     <string name="conn_off">Kapalı</string>
     <string name="conn_not_connected">Bağlı değil</string>

@@ -594,7 +594,7 @@
     <string name="tu_energy_1">Tik op een KERS-segment: regeneratieniveau; lang drukken: rijden met één pedaal</string>
     <string name="tu_energy_2">Knop CHARGE: laden en V2L</string>
     <string name="tu_map_t">Kaart</string>
-    <string name="tu_map_1">Vegen of knop rechtsboven: kaart → verbruik → snelkoppelingen</string>
+    <string name="tu_map_1">Vegen: kaart → verbruik → snelkoppelingen</string>
     <string name="tu_map_3">Twee vingers: kaart verplaatsen en zoomen (één vinger op volledig scherm)</string>
     <string name="tu_map_2">Kaart lang drukken: een andere app in de kaartkaart</string>
     <string name="tu_media_t">Muziek</string>
@@ -626,6 +626,9 @@
     <string name="conn_icon_car_net">Autonetwerk</string>
     <string name="conn_icons_note">Het paneel blijft alles tonen.</string>
     <string name="conn_usb">USB</string>
+    <string name="conn_usb_a">USB-A</string>
+    <string name="conn_usb_c">USB-C</string>
+    <string name="conn_usb_mounted">Stick verbonden</string>
     <string name="conn_on">Aan</string>
     <string name="conn_off">Uit</string>
     <string name="conn_not_connected">Niet verbonden</string>

@@ -53,6 +53,13 @@ class ScreenshotTest {
         shoot(MainActivity::class.java, "home_consumption_map.png")
     }
 
+    /** USB ports in the bar: A then C, here with a stick on C only (#86). */
+    @Test fun homeUsbPorts() {
+        org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE)
+            .edit().putInt("home_widget", 2).putInt("home_style", 2).putStringSet("conn_usb_shown", setOf("usb_a", "usb_c")).commit()
+        shoot(MainActivity::class.java, "home_usb_ports.png")
+    }
+
     @Test fun homeBottomBar() {
         org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE)
             .edit().putBoolean("vertical_dock", false).commit()

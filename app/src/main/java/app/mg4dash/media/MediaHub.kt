@@ -1050,6 +1050,11 @@ object MediaHub {
             androidAuto = androidAutoAvailable(),
         )
         _now.value = np
+        // CarPlay (#94): what its session really gives, to tell a car limit from a reading problem
+        if (carPlay && isAndroidAuto(c.packageName)) {
+            val seen = "state ${st?.state}, title ${title.isNotBlank()}, cover ${bmp != null}"
+            if (seen != carPlayLogged) { carPlayLogged = seen; Log.i(TAG, "CarPlay: $seen") }
+        }
         val artUri = md?.getString(MediaMetadata.METADATA_KEY_ALBUM_ART_URI)
             ?: md?.getString(MediaMetadata.METADATA_KEY_ART_URI)
         val key = "$title|$artist"
@@ -1381,6 +1386,7 @@ object MediaHub {
      * keys, those of the wheel, go to the active session.
      */
     @Volatile private var carPlay = false
+    private var carPlayLogged: String? = null
 
     /**
      * allgo's CarPlay service (ICarPlayService, found in AllgoCarplay_EH32):
