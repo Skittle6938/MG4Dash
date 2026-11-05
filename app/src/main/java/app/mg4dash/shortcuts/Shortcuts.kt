@@ -298,9 +298,11 @@ object Shortcuts {
         })
         list.setOnItemClickListener { _, _, pos, _ -> dialog.dismiss(); onPick(shown[pos]) }
         dialog.show(); app.mg4dash.ui.Dialogs.fix(dialog)
-        // Dialog and keyboard both fit on the screen with a shorter list
+        // Dialog and keyboard only fit on the screen with a shorter list and without the title
+        val titleBar = dialog.findViewById<android.view.View>(activity.resources.getIdentifier("topPanel", "id", "android"))
         app.mg4dash.ui.CarKeyboard.attachInDialog(search, dialog, box) { open ->
             list.layoutParams = list.layoutParams.apply { height = kit.dp(if (open) 150 else 420) }
+            titleBar?.visibility = if (open) android.view.View.GONE else android.view.View.VISIBLE
         }
     }
 
