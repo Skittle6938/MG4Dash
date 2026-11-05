@@ -270,16 +270,25 @@ object Shortcuts {
             .replace(Regex("\\p{M}+"), "").lowercase()
         val keys = labels.map { norm(it) }
         var shown = labels.indices.toList()
-        val adapter = android.widget.ArrayAdapter<String>(activity, android.R.layout.simple_list_item_1, labels.toMutableList())
+        // Close lines: as many as possible stay visible above the keyboard (#93)
+        val adapter = object : android.widget.ArrayAdapter<String>(activity, android.R.layout.simple_list_item_1, labels.toMutableList()) {
+            override fun getView(position: Int, convertView: android.view.View?, parent: android.view.ViewGroup): android.view.View =
+                (super.getView(position, convertView, parent) as android.widget.TextView).apply {
+                    minimumHeight = 0; minHeight = 0
+                    setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f)
+                    setPadding(kit.dp(8), kit.dp(7), kit.dp(8), kit.dp(7))
+                }
+        }
         val list = android.widget.ListView(activity).apply { this.adapter = adapter }
         val search = android.widget.EditText(activity).apply {
             hint = activity.getString(R.string.sc_search)
-            setTextColor(kit.color(R.color.text_value))
+            setTextColor(kit.color(R.color.text_value)); setHintTextColor(kit.color(R.color.text_title))
             setSingleLine()
             setTextSize(TypedValue.COMPLEX_UNIT_SP, 20f)
+            setPadding(kit.dp(8), kit.dp(4), kit.dp(8), kit.dp(8))
         }
         val box = kit.column().apply {
-            setPadding(kit.dp(20), kit.dp(8), kit.dp(20), 0)
+            setPadding(kit.dp(20), 0, kit.dp(20), 0)
             addView(search, LinearLayout.LayoutParams(-1, -2))
             addView(list, LinearLayout.LayoutParams(-1, kit.dp(420)))
         }
@@ -298,11 +307,10 @@ object Shortcuts {
         })
         list.setOnItemClickListener { _, _, pos, _ -> dialog.dismiss(); onPick(shown[pos]) }
         dialog.show(); app.mg4dash.ui.Dialogs.fix(dialog)
-        // Dialog and keyboard only fit on the screen with a shorter list and without the title
-        val titleBar = dialog.findViewById<android.view.View>(activity.resources.getIdentifier("topPanel", "id", "android"))
+        app.mg4dash.ui.Dialogs.compact(dialog)
+        // Dialog and keyboard only fit on the screen with a shorter list
         app.mg4dash.ui.CarKeyboard.attachInDialog(search, dialog, box) { open ->
-            list.layoutParams = list.layoutParams.apply { height = kit.dp(if (open) 150 else 420) }
-            titleBar?.visibility = if (open) android.view.View.GONE else android.view.View.VISIBLE
+            list.layoutParams = list.layoutParams.apply { height = kit.dp(if (open) 220 else 420) }
         }
     }
 

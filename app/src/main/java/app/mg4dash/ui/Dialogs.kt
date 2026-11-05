@@ -14,4 +14,22 @@ object Dialogs {
         if (id != 0) d.findViewById<TextView>(id)?.setTextColor(Themes.color(d.context, R.color.text_value))
         return d
     }
+
+    /** Smaller title and buttons with less space around them, for a dialog whose content needs the height. */
+    fun compact(d: android.app.AlertDialog) {
+        val density = d.context.resources.displayMetrics.density
+        fun dp(v: Int) = (v * density).toInt()
+        fun view(name: String) = d.findViewById<android.view.View>(d.context.resources.getIdentifier(name, "id", "android"))
+        view("topPanel")?.minimumHeight = 0
+        view("title_template")?.setPadding(dp(24), dp(10), dp(24), dp(2))
+        (view("alertTitle") as? TextView)?.textSize = 20f
+        (view("buttonPanel") as? android.widget.ScrollView)?.setPadding(0, 0, 0, 0)
+        listOf(android.app.AlertDialog.BUTTON_POSITIVE, android.app.AlertDialog.BUTTON_NEGATIVE).forEach { which ->
+            d.getButton(which)?.apply {
+                textSize = 15f; minimumHeight = 0; minHeight = 0
+                setPadding(dp(16), dp(8), dp(16), dp(8))
+                (parent as? android.view.ViewGroup)?.setPadding(dp(8), 0, dp(8), dp(4))
+            }
+        }
+    }
 }
