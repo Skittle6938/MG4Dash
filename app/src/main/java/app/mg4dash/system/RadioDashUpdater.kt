@@ -34,8 +34,16 @@ object RadioDashUpdater {
         res.getIdentifier("rd_ic_home", "drawable", PKG) != 0
     } catch (_: Exception) { false }
 
-    /** Version installed from MG4Dash (null if unknown: installed by ADB or USB stick). */
-    fun installedVersion(context: Context): String? = Prefs(context).raw.getString("radio_dash_version", null)
+    /**
+     * Version declared by Radio Dash in its manifest, however it was installed (it keeps the stock radio's
+     * versionName). Older versions do not declare it: the one installed from MG4Dash, null if unknown.
+     */
+    fun installedVersion(context: Context): String? = declaredVersion(context) ?: Prefs(context).raw.getString("radio_dash_version", null)
+
+    private fun declaredVersion(context: Context): String? = try {
+        context.packageManager.getApplicationInfo(PKG, android.content.pm.PackageManager.GET_META_DATA)
+            .metaData?.get("radiodash.version")?.toString()
+    } catch (_: Exception) { null }
 
     /** Latest Radio Dash release; pre-releases included if MG4Dash's "beta versions" option is ticked. */
     fun latest(beta: Boolean): Updater.Release? = Updater.latest(beta, api = API)
