@@ -260,6 +260,9 @@ object Shortcuts {
         }
     }
 
+    /** Title, search field, buttons and margins of [searchList]: the list takes the rest of the screen. */
+    private const val SEARCH_LIST_CHROME_DP = 200
+
     /**
      * List with a search field filtering as you type (ignoring accents
      * and case; several words = all must appear). Returns the original index.
@@ -290,7 +293,8 @@ object Shortcuts {
         val box = kit.column().apply {
             setPadding(kit.dp(20), 0, kit.dp(20), 0)
             addView(search, LinearLayout.LayoutParams(-1, -2))
-            addView(list, LinearLayout.LayoutParams(-1, 0, 1f))
+            // An explicit height: the head unit's dialog layout does not give a weight the free space
+            addView(list, LinearLayout.LayoutParams(-1, activity.resources.displayMetrics.heightPixels - kit.dp(SEARCH_LIST_CHROME_DP)))
         }
         val dialog = AlertDialog.Builder(activity)
             .setTitle(title).setView(box)
