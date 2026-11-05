@@ -34,7 +34,8 @@ class ConnectionRow(private val activity: Activity) : LinearLayout(activity) {
     private val wifi = WifiArcs(activity).also { addView(it, LayoutParams(dp(28), dp(ICON_DP - 2)).apply { leftMargin = dp(GAP_DP) }) }
     private val hotspot = icon(R.drawable.ic_conn_hotspot)
     private val signal = SignalBars(activity).also { addView(it, LayoutParams(dp(ICON_DP + 4), dp(ICON_DP - 3)).apply { leftMargin = dp(GAP_DP) }) }
-    private val usb = icon(R.drawable.ic_conn_usb, 18)
+    private val usbA = UsbPort(activity, "A").also { addView(it, LayoutParams(dp(30), dp(ICON_DP)).apply { leftMargin = dp(GAP_DP) }) }
+    private val usbC = UsbPort(activity, "C").also { addView(it, LayoutParams(dp(30), dp(ICON_DP)).apply { leftMargin = dp(GAP_DP) }) }
     private var last: StatusMonitor.Connections? = null
     private var panelClosedAt = 0L
     private var panel: PopupWindow? = null
@@ -76,7 +77,7 @@ class ConnectionRow(private val activity: Activity) : LinearLayout(activity) {
 
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
-        if (app.mg4dash.BuildConfig.MOCK) show(StatusMonitor.Connections(true, true, "Phone", true, true, "Home", false, 3, 4, 1, 2, app.mg4dash.system.BtAudio.PhoneIndicators(4, 2, "Operator")))
+        if (app.mg4dash.BuildConfig.MOCK) show(StatusMonitor.Connections(true, true, "Phone", true, true, "Home", false, 3, 4, 1, 2, app.mg4dash.system.BtAudio.PhoneIndicators(4, 2, "Operator"), usbC = true))
         else post(refresh)
     }
 
@@ -88,7 +89,10 @@ class ConnectionRow(private val activity: Activity) : LinearLayout(activity) {
     private fun show(c: StatusMonitor.Connections) {
         last = c
         fun tint(v: ImageView, on: Boolean) = v.putTint(color(if (on) R.color.accent_action else R.color.text_disabled))
-        tint(bt, c.btConnected); tint(hotspot, c.hotspotOn); tint(usb, c.usbCount > 0)
+        tint(bt, c.btConnected)
+        usbA.on = c.usbA; usbC.on = c.usbC
+        // On with no device: lit less than with one, as the stock icon only shows then (#86)
+        hotspot.putTint(color(when { !c.hotspotOn -> R.color.text_disabled; c.hotspotClients > 0 -> R.color.accent_action; else -> R.color.text_sub }))
         wifi.level = if (c.wifiConnected) c.wifiLevel else -1
         hotspot.putImage(if (c.hotspotClients > 1) R.drawable.ic_conn_hotspot_multi else R.drawable.ic_conn_hotspot)
         phoneBattery.level = c.phone?.battery ?: 0
@@ -108,7 +112,11 @@ class ConnectionRow(private val activity: Activity) : LinearLayout(activity) {
         fun set(v: View, key: String, hasData: Boolean = true) { v.visibility = if (key in hidden || !hasData) View.GONE else View.VISIBLE }
         set(phoneBattery, KEY_PHONE_BATTERY, c?.phone?.battery != null)
         set(phoneSignal, KEY_PHONE_NET, c?.phone?.signal != null)
-        set(bt, KEY_BT); set(wifi, KEY_WIFI); set(hotspot, KEY_HOTSPOT); set(usb, KEY_USB)
+        set(bt, KEY_BT); set(wifi, KEY_WIFI); set(hotspot, KEY_HOTSPOT)
+        // USB ports: off until asked for (#86), not in the list of hidden icons
+        val shownPorts = app.mg4dash.system.Prefs(activity).shownUsbPorts
+        usbA.visibility = if (KEY_USB_A in shownPorts) View.VISIBLE else View.GONE
+        usbC.visibility = if (KEY_USB_C in shownPorts) View.VISIBLE else View.GONE
         set(signal, KEY_CAR_NET, c?.signalLevel != null)
         val framed = phoneSignal.visibility == View.VISIBLE
         val anyPhone = framed || phoneBattery.visibility == View.VISIBLE
@@ -133,7 +141,7 @@ class ConnectionRow(private val activity: Activity) : LinearLayout(activity) {
             setPadding(dp(8), 0, 0, dp(6))
         })
         listOf(KEY_PHONE_BATTERY to R.string.conn_icon_battery, KEY_PHONE_NET to R.string.conn_icon_net, KEY_BT to R.string.conn_bt, KEY_WIFI to R.string.conn_wifi,
-            KEY_HOTSPOT to R.string.conn_hotspot, KEY_CAR_NET to R.string.conn_icon_car_net, KEY_USB to R.string.conn_usb).forEach { (key, name) ->
+            KEY_HOTSPOT to R.string.conn_hotspot, KEY_CAR_NET to R.string.conn_icon_car_net, KEY_USB_A to R.string.conn_usb_a, KEY_USB_C to R.string.conn_usb_c).forEach { (key, name) ->
             box.addView(LinearLayout(activity).apply {
                 orientation = HORIZONTAL
                 gravity = Gravity.CENTER_VERTICAL
@@ -148,13 +156,14 @@ class ConnectionRow(private val activity: Activity) : LinearLayout(activity) {
                     setBackgroundResource(R.drawable.bg_chip)
                     setTextColor(androidx.core.content.ContextCompat.getColorStateList(activity, R.color.chip_text))
                     fun paint() {
-                        val on = key !in prefs.hiddenConnectionIcons
+                        val on = if (key in USB_KEYS) key in prefs.shownUsbPorts else key !in prefs.hiddenConnectionIcons
                         setText(if (on) R.string.yes else R.string.no)
                         isSelected = on
                     }
                     paint()
                     setOnClickListener {
-                        prefs.hiddenConnectionIcons = prefs.hiddenConnectionIcons.toMutableSet().apply { if (!add(key)) remove(key) }
+                        if (key in USB_KEYS) prefs.shownUsbPorts = prefs.shownUsbPorts.toMutableSet().apply { if (!add(key)) remove(key) }
+                        else prefs.hiddenConnectionIcons = prefs.hiddenConnectionIcons.toMutableSet().apply { if (!add(key)) remove(key) }
                         paint(); applyChoice()
                     }
                 }, LayoutParams(dp(100), dp(50)))
@@ -231,7 +240,8 @@ class ConnectionRow(private val activity: Activity) : LinearLayout(activity) {
                 p.signal?.let { s -> r.addView(SignalBars(activity).apply { level = phoneBars(s) }, r.childCount - 1, LayoutParams(dp(28), dp(24)).apply { leftMargin = dp(12) }) }
             }, LayoutParams(-1, dp(60)).apply { topMargin = dp(4) })
         }
-        row(R.drawable.ic_conn_usb, c.usbCount > 0, R.string.conn_usb, if (c.usbCount > 0) activity.getString(R.string.conn_usb_count, c.usbCount) else none, null)
+        row(R.drawable.ic_conn_usb, c.usbA, R.string.conn_usb_a, activity.getString(if (c.usbA) R.string.conn_usb_mounted else R.string.conn_not_connected), null)
+        row(R.drawable.ic_conn_usb, c.usbC, R.string.conn_usb_c, activity.getString(if (c.usbC) R.string.conn_usb_mounted else R.string.conn_not_connected), null)
         popup.setBackgroundDrawable(android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT))
         box.measure(MeasureSpec.makeMeasureSpec(popup.width, MeasureSpec.EXACTLY), MeasureSpec.UNSPECIFIED)
         popup.height = box.measuredHeight + dp(6)
@@ -346,6 +356,25 @@ class ConnectionRow(private val activity: Activity) : LinearLayout(activity) {
         }
     }
 
+    /** One USB port (#86): the USB symbol and its letter, lit when a stick is mounted on it. */
+    private class UsbPort(context: android.content.Context, private val letter: String) : View(context) {
+        var on = false
+            set(v) { if (field != v) { field = v; invalidate() } }
+        private val lit = Themes.color(context, R.color.accent_action)
+        private val off = Themes.color(context, R.color.text_disabled)
+        private val symbol = androidx.core.content.ContextCompat.getDrawable(context, R.drawable.ic_conn_usb)!!.mutate()
+        private val paint = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG).apply { isFakeBoldText = true; textAlign = android.graphics.Paint.Align.RIGHT }
+
+        override fun onDraw(canvas: android.graphics.Canvas) {
+            val col = if (on) lit else off
+            symbol.setTint(col)
+            symbol.setBounds(0, 0, height, height)
+            symbol.draw(canvas)
+            paint.color = col; paint.textSize = height * 0.5f
+            canvas.drawText(letter, width.toFloat(), height * 0.9f, paint)
+        }
+    }
+
     /** Mobile network bars, as on a phone: lit according to the level, the others greyed. */
     private class SignalBars(context: android.content.Context, private val n: Int = StatusMonitor.SIGNAL_MAX) : View(context) {
         var level = 0
@@ -384,7 +413,9 @@ class ConnectionRow(private val activity: Activity) : LinearLayout(activity) {
         const val KEY_WIFI = "wifi"
         const val KEY_HOTSPOT = "hotspot"
         const val KEY_CAR_NET = "car_net"
-        const val KEY_USB = "usb"
+        const val KEY_USB_A = "usb_a"
+        const val KEY_USB_C = "usb_c"
+        val USB_KEYS = setOf(KEY_USB_A, KEY_USB_C)
         const val PHONE_PAGE = "phone_page"
         const val GAP_DP = 12
         const val BLUETOOTH_SETTINGS = android.provider.Settings.ACTION_BLUETOOTH_SETTINGS

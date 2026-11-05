@@ -594,7 +594,7 @@
     <string name="tu_energy_1">Tap a KERS segment: regeneration level; long press: one-pedal driving</string>
     <string name="tu_energy_2">CHARGE button: charging and V2L</string>
     <string name="tu_map_t">Map</string>
-    <string name="tu_map_1">Swipe or button at the top right: map → consumption → shortcuts</string>
+    <string name="tu_map_1">Swipe: map → consumption → shortcuts</string>
     <string name="tu_map_3">Two fingers: move and zoom the map (one finger in full screen)</string>
     <string name="tu_map_2">Long press the map: show another app in the map card</string>
     <string name="tu_media_t">Music</string>
@@ -626,6 +626,9 @@
     <string name="conn_icon_car_net">Car network</string>
     <string name="conn_icons_note">The panel keeps showing everything.</string>
     <string name="conn_usb">USB</string>
+    <string name="conn_usb_a">USB-A</string>
+    <string name="conn_usb_c">USB-C</string>
+    <string name="conn_usb_mounted">Stick connected</string>
     <string name="conn_on">On</string>
     <string name="conn_off">Off</string>
     <string name="conn_not_connected">Not connected</string>

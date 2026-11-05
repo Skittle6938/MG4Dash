@@ -65,7 +65,6 @@ class EnergyActivity : PageActivity() {
     private lateinit var regenLabel: TextView
     private lateinit var regen: TextView
     /** Range recovered since the last charge (km, from the car); the other periods are estimated. */
-    private var regenKm: Float? = null
     private lateinit var chart: LineChart
     private lateinit var chartNote: TextView
 
@@ -237,7 +236,7 @@ class EnergyActivity : PageActivity() {
     private data class Props(
         val target: Int?, val current: Int?, val reser: Int?, val st: Pair<Int?, Int?>, val sp: Pair<Int?, Int?>,
         val v2l: Int?, val volt: Float?, val amp: Float?, val cons: FloatArray, val heat: Int? = null,
-        val stopReason: Int? = null, val acVolt: Float? = null, val acAmp: Float? = null, val regenKm: Float? = null,
+        val stopReason: Int? = null, val acVolt: Float? = null, val acAmp: Float? = null,
     )
 
     private fun refreshProps() {
@@ -261,7 +260,6 @@ class EnergyActivity : PageActivity() {
                     CarProps.getInt(CarProps.DRVNG_PTC_HEAT),
                     CarProps.getInt(CarProps.BMS_CHRG_SP_RSN),
                     CarProps.getFloat(CarProps.ONBD_CHRG_AC_VOL), CarProps.getFloat(CarProps.ONBD_CHRG_AC_CRNT),
-                    CarProps.getFloat(CarProps.REGEN_RNG_AFT_CHRG),
                 )
             }
             renderProps(p)
@@ -321,7 +319,6 @@ class EnergyActivity : PageActivity() {
             stopReasonLabel(p.stopReason)?.takeIf { VehicleState.isPlugged(s.chargeStatus) && !VehicleState.isCharging(s.chargeStatus) }
                 ?.let { getString(R.string.en_stop_reason, it) },
         ).joinToString(" · ")
-        regenKm = p.regenKm
         // SAIC counters at zero on the car: consumption measured by MG4Dash (EnergyMonitor)
         val t = EnergyMonitor.totals(period)
         renderConsumption(if (t.outKwh > 0f) floatArrayOf(t.outKwh, t.climKwh, t.accKwh, t.regenKwh, t.heatKwh) else p.cons)
@@ -370,7 +367,7 @@ class EnergyActivity : PageActivity() {
             legend.addView(r, kit.lp(-1, -2, t = 6))
         }
         regen.text = if (rgn > 0f) app.mg4dash.ui.ConsumptionCard.regenValues(this, rgn,
-            if (period == 0) regenKm else app.mg4dash.ui.ConsumptionCard.regenKmEstimate(EnergyMonitor.totals(period))) else ""
+            app.mg4dash.ui.ConsumptionCard.regenKm(EnergyMonitor.totals(period))) else ""
         regenLabel.visibility = if (rgn > 0f) android.view.View.VISIBLE else android.view.View.INVISIBLE
     }
 

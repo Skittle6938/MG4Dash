@@ -1012,7 +1012,7 @@ class MainActivity : AppCompatActivity() {
             mapAppView = null; mapAppCn = null; mapAppFull = null
         }
         app.mg4dash.ui.EmbeddedApp.immersive(this, cn?.packageName)
-        if (cn == null) return
+        if (cn == null) { b.widgetToggle.visibility = View.GONE; return }
         if (mapAppView == null) {
             // Brought back to the map's size only a few seconds after the actual launch
             // (at car start, the virtual display sometimes takes more than 10 s to be ready)
@@ -1055,7 +1055,8 @@ class MainActivity : AppCompatActivity() {
         }
         mapAppView?.visibility = if (show) View.VISIBLE else View.GONE
         mapAppFull?.visibility = if (show) View.VISIBLE else View.GONE
-        if (show) showMapAppButtons() else { b.widgetToggle.removeCallbacks(fadeMapAppButtons); b.widgetToggle.alpha = 1f; b.widgetToggle.visibility = View.VISIBLE }
+        // The button only stays over an embedded app, which takes the swipes (#44); the map's pages use the gesture
+        if (show) showMapAppButtons() else { b.widgetToggle.removeCallbacks(fadeMapAppButtons); b.widgetToggle.alpha = 1f; b.widgetToggle.visibility = View.GONE }
     }
 
     private fun renderShortcuts() {
