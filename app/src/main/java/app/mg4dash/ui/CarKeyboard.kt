@@ -197,11 +197,11 @@ class CarKeyboard(
             val gap = (16 * context.resources.displayMetrics.density).toInt()
             val keyboardParams = LayoutParams(0, -2, 2f).apply { gravity = Gravity.BOTTOM }
             if (Dock.rightSide(context)) {
-                box.addView(content, LayoutParams(0, -1, 1f).apply { rightMargin = gap })
+                box.addView(content, LayoutParams(0, -2, 1f).apply { rightMargin = gap })
                 box.addView(keyboard, keyboardParams)
             } else {
                 box.addView(keyboard, keyboardParams)
-                box.addView(content, LayoutParams(0, -1, 1f).apply { leftMargin = gap })
+                box.addView(content, LayoutParams(0, -2, 1f).apply { leftMargin = gap })
             }
             field.setOnTouchListener { _, e -> if (e.action == MotionEvent.ACTION_UP) visible(true); false }
             dialog.window?.setLayout(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT)
