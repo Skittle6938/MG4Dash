@@ -42,29 +42,31 @@ object StatusMonitor {
         val phone: BtAudio.PhoneIndicators? = null,
         /** Devices connected to the hotspot, as the stock status bar counts them (#86). */
         val hotspotClients: Int = 0,
-        /** Stick mounted on each port (#86): USB-A is the stock "USB2", USB-C its "USB1". */
+        /** Stick mounted on each port (#86): USB-A is the stock "USB1", except on SWI165 where it is "USB2". */
         val usbA: Boolean = false, val usbC: Boolean = false,
     )
 
     /**
      * Stick on USB-A, on USB-C: read like the stock status bar (UsbDeviceController), from the USB controller
-     * in the disk's system path. If a mounted stick matches neither, it counts on USB-C.
+     * in the disk's system path. If a mounted stick matches neither, it counts on the stock USB1.
      */
     private fun usbPorts(storage: android.os.storage.StorageManager?, mounted: Int): Pair<Boolean, Boolean> {
-        var a = false; var c = false
+        var usb1 = false; var usb2 = false
         try {
             (storage?.javaClass?.getMethod("getVolumes")?.invoke(storage) as? List<*>)?.forEach { v ->
                 if (v == null || v.javaClass.getMethod("getState").invoke(v) != VOLUME_MOUNTED) return@forEach
                 val disk = v.javaClass.getMethod("getDisk").invoke(v) ?: return@forEach
                 val path = disk.javaClass.getField("sysPath").get(disk) as? String ?: return@forEach
-                if (USB_C_CONTROLLER in path) c = true else if (USB_A_CONTROLLER in path) a = true
+                if (USB1_CONTROLLER in path) usb1 = true else if (USB2_CONTROLLER in path) usb2 = true
             }
         } catch (e: Exception) { Log.w("Status", "USB ports: ${e.message}") }
-        return a to (c || (!a && mounted > 0))
+        if (!usb2 && mounted > 0) usb1 = true
+        // Seen on two cars: USB1 is the USB-A socket on SWI69, the USB-C one on SWI165 (to confirm)
+        return if (Firmware.gen == Firmware.Gen.SWI165) usb2 to usb1 else usb1 to usb2
     }
     private const val VOLUME_MOUNTED = 2
-    private const val USB_C_CONTROLLER = "11271000.usb"
-    private const val USB_A_CONTROLLER = "112c1000.usb"
+    private const val USB1_CONTROLLER = "11271000.usb"
+    private const val USB2_CONTROLLER = "112c1000.usb"
 
     const val SIGNAL_MAX = 4
     private const val WIFI_LEVELS = 4
