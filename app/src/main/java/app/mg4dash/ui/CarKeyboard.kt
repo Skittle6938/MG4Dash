@@ -204,7 +204,7 @@ class CarKeyboard(
                 box.addView(content, LayoutParams(0, -2, 1f).apply { leftMargin = gap })
             }
             field.setOnTouchListener { _, e -> if (e.action == MotionEvent.ACTION_UP) visible(true); false }
-            dialog.window?.setLayout(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT)
+            dialog.window?.let { it.setLayout(LayoutParams.MATCH_PARENT, it.attributes.height) }
             // The keyboard needs the height
             Dialogs.hideBars(dialog)
             field.requestFocus()
