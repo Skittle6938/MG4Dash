@@ -33,6 +33,12 @@ class ConnectionRow(private val activity: Activity) : LinearLayout(activity) {
     private val bt = icon(R.drawable.ic_bluetooth, 16)
     private val wifi = WifiArcs(activity).also { addView(it, LayoutParams(dp(28), dp(ICON_DP - 2)).apply { leftMargin = dp(GAP_DP) }) }
     private val hotspot = icon(R.drawable.ic_conn_hotspot)
+    /** Devices on the hotspot, from 2 (#86). */
+    private val hotspotCount = TextView(activity).apply {
+        setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
+        setTypeface(typeface, android.graphics.Typeface.BOLD)
+        includeFontPadding = false
+    }.also { addView(it, LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT).apply { leftMargin = dp(2) }) }
     private val signal = SignalBars(activity).also { addView(it, LayoutParams(dp(ICON_DP + 4), dp(ICON_DP - 3)).apply { leftMargin = dp(GAP_DP) }) }
     private val usbA = UsbPort(activity, "A").also { addView(it, LayoutParams(dp(30), dp(ICON_DP)).apply { leftMargin = dp(GAP_DP) }) }
     private val usbC = UsbPort(activity, "C").also { addView(it, LayoutParams(dp(30), dp(ICON_DP)).apply { leftMargin = dp(GAP_DP) }) }
@@ -93,8 +99,9 @@ class ConnectionRow(private val activity: Activity) : LinearLayout(activity) {
         usbA.on = c.usbA; usbC.on = c.usbC
         // On with no device: lit less than with one, as the stock icon only shows then (#86)
         hotspot.putTint(color(when { !c.hotspotOn -> R.color.text_disabled; c.hotspotClients > 0 -> R.color.accent_action; else -> R.color.text_sub }))
+        hotspotCount.text = c.hotspotClients.toString()
+        hotspotCount.setTextColor(color(R.color.accent_action))
         wifi.level = if (c.wifiConnected) c.wifiLevel else -1
-        hotspot.putImage(if (c.hotspotClients > 1) R.drawable.ic_conn_hotspot_multi else R.drawable.ic_conn_hotspot)
         phoneBattery.level = c.phone?.battery ?: 0
         phoneSignal.level = phoneBars(c.phone?.signal)
         applyChoice()
@@ -113,6 +120,7 @@ class ConnectionRow(private val activity: Activity) : LinearLayout(activity) {
         set(phoneBattery, KEY_PHONE_BATTERY, c?.phone?.battery != null)
         set(phoneSignal, KEY_PHONE_NET, c?.phone?.signal != null)
         set(bt, KEY_BT); set(wifi, KEY_WIFI); set(hotspot, KEY_HOTSPOT)
+        hotspotCount.visibility = if (hotspot.visibility == View.VISIBLE && (c?.hotspotClients ?: 0) > 1) View.VISIBLE else View.GONE
         // USB ports: off until asked for (#86), not in the list of hidden icons
         val shownPorts = app.mg4dash.system.Prefs(activity).shownUsbPorts
         usbA.visibility = if (KEY_USB_A in shownPorts) View.VISIBLE else View.GONE
