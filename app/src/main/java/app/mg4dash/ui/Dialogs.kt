@@ -45,7 +45,16 @@ object Dialogs {
         fun view(name: String) = d.findViewById<android.view.View>(d.context.resources.getIdentifier(name, "id", "android"))
         view("topPanel")?.minimumHeight = 0
         view("title_template")?.setPadding(dp(24), dp(10), dp(24), dp(2))
-        (view("alertTitle") as? TextView)?.textSize = 20f
+        (view("alertTitle") as? TextView)?.let { title ->
+            title.textSize = 20f
+            // The head unit's layout has its own containers around the title, with their own space
+            var container = title.parent as? android.view.ViewGroup
+            repeat(2) {
+                container?.minimumHeight = 0
+                container?.setPadding(0, dp(4), 0, 0)
+                container = container?.parent as? android.view.ViewGroup
+            }
+        }
         (view("buttonPanel") as? android.widget.ScrollView)?.setPadding(0, 0, 0, 0)
         listOf(android.app.AlertDialog.BUTTON_POSITIVE, android.app.AlertDialog.BUTTON_NEGATIVE).forEach { which ->
             d.getButton(which)?.apply {
