@@ -204,7 +204,7 @@ object Shortcuts {
                 else apps[p - (if (extraFirst != null) 1 else 0)].activityInfo.let { onPick(ComponentName(it.packageName, it.name)) }
             }
             .setNegativeButton(R.string.cancel, null)
-            .show().also { app.mg4dash.ui.Dialogs.fix(it) }
+            .show().also { app.mg4dash.ui.Dialogs.fix(it); app.mg4dash.ui.Dialogs.fullHeight(it) }
     }
 
     // ─── Editing a slot ───
@@ -290,7 +290,7 @@ object Shortcuts {
         val box = kit.column().apply {
             setPadding(kit.dp(20), 0, kit.dp(20), 0)
             addView(search, LinearLayout.LayoutParams(-1, -2))
-            addView(list, LinearLayout.LayoutParams(-1, kit.dp(420)))
+            addView(list, LinearLayout.LayoutParams(-1, 0, 1f))
         }
         val dialog = AlertDialog.Builder(activity)
             .setTitle(title).setView(box)
@@ -308,10 +308,8 @@ object Shortcuts {
         list.setOnItemClickListener { _, _, pos, _ -> dialog.dismiss(); onPick(shown[pos]) }
         dialog.show(); app.mg4dash.ui.Dialogs.fix(dialog)
         app.mg4dash.ui.Dialogs.compact(dialog)
-        // Dialog and keyboard only fit on the screen with a shorter list
-        app.mg4dash.ui.CarKeyboard.attachInDialog(search, dialog, box) { open ->
-            list.layoutParams = list.layoutParams.apply { height = kit.dp(if (open) 220 else 420) }
-        }
+        app.mg4dash.ui.Dialogs.fullHeight(dialog)
+        app.mg4dash.ui.CarKeyboard.attachInDialog(search, dialog, box)
     }
 
     /** Service called according to the entity's domain. */
