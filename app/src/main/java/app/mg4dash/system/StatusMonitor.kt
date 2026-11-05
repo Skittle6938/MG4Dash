@@ -42,7 +42,7 @@ object StatusMonitor {
         val phone: BtAudio.PhoneIndicators? = null,
         /** Devices connected to the hotspot, as the stock status bar counts them (#86). */
         val hotspotClients: Int = 0,
-        /** Stick mounted on each port (#86): USB-A is the stock "USB1", except on SWI165 where it is "USB2". */
+        /** Stick mounted on each port (#86): USB-A is the stock "USB1", USB-C its "USB2" (seen on SWI69 and SWI165). */
         val usbA: Boolean = false, val usbC: Boolean = false,
     )
 
@@ -61,8 +61,7 @@ object StatusMonitor {
             }
         } catch (e: Exception) { Log.w("Status", "USB ports: ${e.message}") }
         if (!usb2 && mounted > 0) usb1 = true
-        // Seen on two cars: USB1 is the USB-A socket on SWI69, the USB-C one on SWI165 (to confirm)
-        return if (Firmware.gen == Firmware.Gen.SWI165) usb2 to usb1 else usb1 to usb2
+        return usb1 to usb2
     }
     private const val VOLUME_MOUNTED = 2
     private const val USB1_CONTROLLER = "11271000.usb"
