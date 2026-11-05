@@ -789,15 +789,15 @@ class MainActivity : AppCompatActivity() {
     }
 
     /**
-     * Option (#15): zoom +, zoom − and full screen hidden; the heading button stays, at the top under the
-     * widget switch. A touch on the map shows them for 6 s.
+     * Option (#15): zoom +, zoom − and full screen hidden; the heading button stays, in the top right corner.
+     * A touch on the map shows them for 6 s.
      */
     private fun applyMapButtons() {
         val hide = prefs.mapAutoHide && android.os.SystemClock.uptimeMillis() >= mapButtonsUntil
         listOf(b.mapZoomIn, b.mapZoomOut, b.mapFullscreen).forEach { it.visibility = if (hide) View.GONE else View.VISIBLE }
         (b.mapButtons.layoutParams as android.widget.FrameLayout.LayoutParams).let {
             it.gravity = if (hide) Gravity.TOP or Gravity.RIGHT else Gravity.RIGHT or Gravity.CENTER_VERTICAL
-            it.topMargin = if (hide) dp(14 + 56) else 0
+            it.topMargin = if (hide) dp(14) else 0
             b.mapButtons.layoutParams = it
         }
     }
