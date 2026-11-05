@@ -15,6 +15,19 @@ object Dialogs {
         return d
     }
 
+    /** A long list's dialog takes the whole screen, the car's bars staying hidden as on the page below. */
+    fun fullHeight(d: Dialog) {
+        d.window?.setLayout(android.view.ViewGroup.LayoutParams.MATCH_PARENT, android.view.ViewGroup.LayoutParams.MATCH_PARENT)
+        hideBars(d)
+    }
+
+    @Suppress("DEPRECATION")
+    fun hideBars(d: Dialog) {
+        (d.context as? android.app.Activity ?: d.ownerActivity)?.let {
+            d.window?.decorView?.systemUiVisibility = it.window.decorView.systemUiVisibility and android.view.View.SYSTEM_UI_FLAG_LAYOUT_STABLE.inv()
+        }
+    }
+
     /** Smaller title and buttons with less space around them, for a dialog whose content needs the height. */
     fun compact(d: android.app.AlertDialog) {
         val density = d.context.resources.displayMetrics.density

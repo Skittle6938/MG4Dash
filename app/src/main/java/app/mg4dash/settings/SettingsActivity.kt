@@ -574,7 +574,7 @@ class SettingsActivity : AppCompatActivity() {
                             }
                         }
                         .setNegativeButton(R.string.cancel, null)
-                        .show().also { app.mg4dash.ui.Dialogs.fix(it) }
+                        .show().also { app.mg4dash.ui.Dialogs.fix(it); app.mg4dash.ui.Dialogs.fullHeight(it) }
                 }
             }.start()
         }
