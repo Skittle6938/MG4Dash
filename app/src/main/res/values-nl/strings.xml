@@ -420,6 +420,8 @@
     <string name="st_mode_auto_short">Auto</string>
     <string name="st_map_zoom">Standaardzoom kaart</string>
     <string name="st_map_theme">Kaartkleuren</string>
+    <string name="st_own_keyboard">MG4Dash-toetsenbord</string>
+    <string name="st_own_keyboard_desc">Volledige breedte en grote toetsen, in de tekstvelden van MG4Dash. Uit: Android-toetsenbord</string>
     <string name="st_map_auto_hide">Zoom- en volledig-schermknoppen van de kaart verbergen</string>
     <string name="st_map_auto_hide_desc">Ze verschijnen een paar seconden als je de kaart aanraakt; de koersknop blijft</string>
     <string name="st_map_offline_switch">Naar de energiewidget wisselen zonder verbinding</string>
