@@ -294,7 +294,8 @@ object Shortcuts {
             setPadding(kit.dp(20), 0, kit.dp(20), 0)
             addView(search, LinearLayout.LayoutParams(-1, -2))
             // An explicit height: the head unit's dialog layout does not give a weight the free space
-            addView(list, LinearLayout.LayoutParams(-1, activity.resources.displayMetrics.heightPixels - kit.dp(SEARCH_LIST_CHROME_DP)))
+            val screen = android.util.DisplayMetrics().also { activity.windowManager.defaultDisplay.getRealMetrics(it) }
+            addView(list, LinearLayout.LayoutParams(-1, screen.heightPixels - kit.dp(SEARCH_LIST_CHROME_DP)))
         }
         val dialog = AlertDialog.Builder(activity)
             .setTitle(title).setView(box)

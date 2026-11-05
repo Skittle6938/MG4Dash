@@ -23,9 +23,16 @@ object Dialogs {
 
     @Suppress("DEPRECATION")
     fun hideBars(d: Dialog) {
-        (d.context as? android.app.Activity ?: d.ownerActivity)?.let {
+        activityOf(d.context)?.let {
             d.window?.decorView?.systemUiVisibility = it.window.decorView.systemUiVisibility and android.view.View.SYSTEM_UI_FLAG_LAYOUT_STABLE.inv()
         }
+    }
+
+    /** A dialog's context wraps the activity in its theme. */
+    private fun activityOf(context: android.content.Context?): android.app.Activity? = when (context) {
+        is android.app.Activity -> context
+        is android.content.ContextWrapper -> activityOf(context.baseContext)
+        else -> null
     }
 
     /** Smaller title and buttons with less space around them, for a dialog whose content needs the height. */
