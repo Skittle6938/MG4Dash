@@ -207,25 +207,57 @@ object Tutorial {
         override fun onLayout(changed: Boolean, l: Int, t: Int, r: Int, b: Int) {
             super.onLayout(changed, l, t, r, b)
             val v = target()
-            val bw = bubble.measuredWidth; val bh = bubble.measuredHeight
-            var bx = (width - bw) / 2; var by = (height - bh) / 2
             hole.setEmpty()
             if (v != null) {
                 val loc = IntArray(2); v.getLocationInWindow(loc)
                 val me = IntArray(2); getLocationInWindow(me)
                 val x = (loc[0] - me[0]).toFloat(); val y = (loc[1] - me[1]).toFloat()
                 hole.set(x - dp(6), y - dp(6), x + v.width + dp(6), y + v.height + dp(6))
-                // Bubble on the free side of the screen, at mid height of the card if possible
-                val gap = dp(110)
-                bx = if (hole.centerX() < width / 2f) (hole.right + gap).toInt() else (hole.left - gap - bw).toInt()
-                if (bx < dp(16) || bx + bw > width - dp(16)) {
-                    // No room beside it (wide card): above or below
-                    bx = (hole.centerX() - bw / 2f).toInt()
-                    by = if (hole.centerY() < height / 2f) (hole.bottom + gap).toInt() else (hole.top - gap - bh).toInt()
-                } else by = (hole.centerY() - bh / 2f).toInt()
-                bx = bx.coerceIn(dp(16), width - bw - dp(16)); by = by.coerceIn(dp(16), height - bh - dp(16))
             }
-            bubble.layout(bx, by, bx + bw, by + bh)
+            placeBubble()
+        }
+
+        /**
+         * The bubble never covers the highlighted view: beside it on the free side, otherwise above or
+         * below where there is more room, made wider when it would be too high (the bottom bar: the
+         * whole width, its lines on one line each).
+         */
+        private fun placeBubble() {
+            val margin = dp(16); val gap = dp(64)
+            val base = dp(if (STEPS[index].images.isEmpty()) 760 else 1000)
+            val maxH = height - 2 * margin
+            fun heightAt(w: Int): Int {
+                bubble.measure(View.MeasureSpec.makeMeasureSpec(w, View.MeasureSpec.EXACTLY), View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED))
+                return bubble.measuredHeight
+            }
+            fun put(x: Int, y: Int) = bubble.layout(x, y, x + bubble.measuredWidth, y + bubble.measuredHeight)
+            if (hole.isEmpty) {
+                val h = heightAt(base)
+                put((width - base) / 2, ((height - h) / 2).coerceAtLeast(margin)); return
+            }
+            // Widths tried in a room: the usual one, wider, the whole room (never too narrow to read)
+            fun widths(room: Int) = listOf(base, dp(1100), room).map { minOf(it, room) }.filter { it >= dp(520) }.distinct()
+            // Beside, on the free side, at mid height of the view if possible
+            val left = (hole.left - gap - margin).toInt(); val right = (width - hole.right - gap - margin).toInt()
+            for (w in widths(maxOf(left, right))) {
+                val h = heightAt(w)
+                if (h > maxH) continue
+                put(if (right >= left) (hole.right + gap).toInt() else (hole.left - gap - w).toInt(),
+                    (hole.centerY() - h / 2f).toInt().coerceIn(margin, height - h - margin))
+                return
+            }
+            // Above or below (wide view: the bottom bar, a wide place)
+            val above = (hole.top - gap - margin).toInt(); val below = (height - hole.bottom - gap - margin).toInt()
+            for (w in widths(width - 2 * margin)) {
+                val h = heightAt(w)
+                if (h > maxOf(above, below)) continue
+                put((hole.centerX() - w / 2f).toInt().coerceIn(margin, width - w - margin),
+                    if (above >= below) (hole.top - gap - h).toInt() else (hole.bottom + gap).toInt())
+                return
+            }
+            // No room anywhere: centred, the whole width
+            val h = heightAt(width - 2 * margin)
+            put(margin, ((height - h) / 2).coerceAtLeast(margin))
         }
 
         override fun dispatchDraw(canvas: Canvas) {
