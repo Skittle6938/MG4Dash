@@ -576,6 +576,8 @@ object MediaHub {
     private const val ACTION_SET_BAND = "__ACTION_SET_BAND__"
     private const val FLAG_SET_BAND = "radiodash.set_band"
     private const val BAND_RETRY_MS = 800L
+    /** Radio Dash's requests, every [BAND_RETRY_MS]: about 6 s, the radio starting after another source can take that long. */
+    private const val DIRECT_BAND_TRIES = 8
     private val radioDashInstalled by lazy { appContext?.let { app.mg4dash.system.RadioDashUpdater.installed(it) } == true }
     /** Wanted band, until the radio gets there. */
     @Volatile private var bandTarget: String? = null
@@ -611,25 +613,31 @@ object MediaHub {
     /**
      * The stock radio can only move to the next band (command of its session): advance to the wanted
      * band, rereading each time. It also counts AM where that tab exists, hence 3 tries.
-     * Radio Dash can be asked for the band directly, which cannot overshoot it (#80).
+     * Radio Dash can be asked for the band directly, which cannot overshoot it (#80): asked again for longer,
+     * as the radio starting from another source could put its last band back over the first requests.
+     * Each try is in the log, with the command sent, to tell the two cases apart.
      */
-    private fun reachBand(target: String, tries: Int, delayMs: Long = BAND_RETRY_MS) {
+    private fun reachBand(target: String, done: Int = 0, delayMs: Long = BAND_RETRY_MS) {
         main.postDelayed({
             if (bandTarget != target) return@postDelayed
             val c = browserControllers[RADIO]
             val band = currentBandSource()
-            if (band == target || c == null || tries == 0) {
-                Log.i(TAG, "radio band: $band, wanted $target")
+            val direct = c?.extras?.getBoolean(FLAG_SET_BAND) == true
+            val how = if (direct) "set band" else "next band"
+            if (band == target || c == null || done >= (if (direct) DIRECT_BAND_TRIES else 3)) {
+                Log.i(TAG, "radio band: $band, wanted $target" + (if (c == null) " (no radio session)" else " ($done × $how)"))
                 bandTarget = null
                 if (c != null && !isPlaying(c)) c.transportControls.play()
                 publish()
             } else {
-                if (c.extras?.getBoolean(FLAG_SET_BAND) == true) {
+                if (done == 0) Log.i(TAG, "radio session extras: ${c.extras?.keySet()}")
+                Log.i(TAG, "radio band: $band, wanted $target, try ${done + 1}: $how")
+                if (direct) {
                     c.transportControls.sendCustomAction(ACTION_SET_BAND, android.os.Bundle().apply {
                         putString("band", if (target == RADIO_DAB) "DAB" else "FM")
                     })
                 } else c.transportControls.sendCustomAction(ACTION_NEXT_BAND, null)
-                reachBand(target, tries - 1)
+                reachBand(target, done + 1)
             }
         }, delayMs)
     }
@@ -661,7 +669,7 @@ object MediaHub {
             // Indicator right away, without waiting for the radio to confirm the band
             publish()
             // Already on the radio: no source change to the car, go directly to the band
-            if (current?.packageName == RADIO) reachBand(next, 3, 0) else { switchTo(RADIO); reachBand(next, 3) }
+            if (current?.packageName == RADIO) reachBand(next, 0, 0) else { switchTo(RADIO); reachBand(next) }
             return
         }
         Log.i(TAG, "source picked: $next")

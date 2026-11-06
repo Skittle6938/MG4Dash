@@ -946,7 +946,13 @@ class SettingsActivity : AppCompatActivity() {
             .setNeutralButton(R.string.st_refresh, null)
             .setPositiveButton(R.string.st_close, null)
             .show().also { app.mg4dash.ui.Dialogs.fix(it) }
-        d.getButton(AlertDialog.BUTTON_NEUTRAL).setOnClickListener { view.text = Log.snapshot().joinToString("\n") }
+        // Radio Dash's lines among ours (#80): read from logcat, which takes a moment
+        fun withRadio() = Thread {
+            val radio = Log.radioLines()
+            if (radio.isNotEmpty()) runOnUiThread { if (d.isShowing) view.text = Log.snapshot(radio).joinToString("\n") }
+        }.start()
+        withRadio()
+        d.getButton(AlertDialog.BUTTON_NEUTRAL).setOnClickListener { view.text = Log.snapshot().joinToString("\n"); withRadio() }
     }
 
     /** GitHub release notes (Markdown) as readable text. */
