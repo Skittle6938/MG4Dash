@@ -62,6 +62,19 @@ By default the energy card shows the battery, the range bar, the average consump
 
 Settings › Home › *Live power in the energy card* replaces the drive mode and KERS with a live power bar, kW and the average consumption; the charge / V2L line only shows when plugged in (the trip start marker then hides so the range stays aligned with the %). *Voltage and current under the power bar* (off by default) adds the battery voltage with its trip minimum and the current with its trip maximum.
 
+A tap on the consumption (bottom right) changes it, and the range above the battery bar follows it. A small logo in front of both says which one is shown, and its name shows for 2 s after each tap:
+
+| Logo | Consumption | Range |
+|---|---|---|
+| lightning bolt | since the last charge | charge level × estimated battery health × new usable capacity (Vehicle page, your own value included) ÷ consumption |
+| route | current trip (as before) | same |
+| live | last km | same, it moves a lot from one km to the next |
+| car | the car's recent consumption (SAIC) | the car's own range |
+
+A consumption not known yet (a trip under 2 km, for example) is skipped, and while it is unknown the range is the car's, with the car logo. The choice is kept. A tap anywhere else on the card still opens the Energy page.
+
+![A tap on the consumption of the power card: its logo before it and before the range, its name for 2 s](docs/screenshots/home_energy_card_power_sources.png?v=25)
+
 | Live power, plugged in | Live power with voltage and current, driving |
 |---|---|
 | ![Live power in the energy card](docs/screenshots/home_energy_card_power.png?v=25) | ![Live power with voltage and current](docs/screenshots/home_energy_card_power_driving.png?v=25) |

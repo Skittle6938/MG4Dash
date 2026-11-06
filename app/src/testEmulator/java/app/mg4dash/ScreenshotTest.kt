@@ -426,6 +426,29 @@ class ScreenshotTest {
         save(act.window.decorView, "home_energy_card_power_driving.png")
     }
 
+    /** Tap on the power card's kWh/100 (#29): next consumption, its logo before it and before the range, its name for 2 s. */
+    @Test fun homeEnergyCardPowerSources() {
+        org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE).edit()
+            .putInt("theme_mode", 1).putBoolean("energy_card_power", true).putBoolean("power_va", true).putInt("power_cons_source", 1).commit()
+        val act = Robolectric.buildActivity(MainActivity::class.java).setup().get()
+        val sf = app.mg4dash.car.CarBridge::class.java.getDeclaredField("_state").apply { isAccessible = true }
+        @Suppress("UNCHECKED_CAST")
+        val flow = sf.get(app.mg4dash.car.CarBridge) as kotlinx.coroutines.flow.MutableStateFlow<app.mg4dash.car.VehicleState>
+        flow.value = flow.value.copy(chargeStatus = 0)
+        repeat(5) { shadowOf(Looper.getMainLooper()).idleFor(200, TimeUnit.MILLISECONDS) }
+        save(act.window.decorView, "power_cons_0.png")
+        val avg = MainActivity::class.java.getDeclaredField("powerAvg").apply { isAccessible = true }.get(act) as android.widget.TextView
+        val seen = mutableListOf<Int>()
+        for (n in 1..4) {
+            avg.performClick()
+            repeat(2) { shadowOf(Looper.getMainLooper()).idleFor(150, TimeUnit.MILLISECONDS) }
+            seen += app.mg4dash.system.Prefs(act).consSource
+            save(act.window.decorView, "power_cons_$n.png")
+        }
+        // The car's is always in the loop; the others only once known
+        org.junit.Assert.assertTrue(seen.toString(), 3 in seen && 1 in seen)
+    }
+
     @Test fun homeMapEnergyCardPower() {
         org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE).edit()
             .putInt("theme_mode", 1).putInt("home_style", 2).putInt("stack_page", 0).putBoolean("energy_card_power", true).commit()

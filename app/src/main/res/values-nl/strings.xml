@@ -438,6 +438,9 @@
     <string name="st_rd_newer_radio">de radio van deze auto is nieuwer dan Radio Dash, dat hem niet kan vervangen</string>
     <string name="st_rd_other_key">de radio van deze auto is met een andere sleutel ondertekend: Radio Dash kan hem niet vervangen</string>
     <string name="en_trip">Huidige rit</string>
+    <string name="cs_last_km">Laatste km</string>
+    <string name="cs_car">SAIC</string>
+    <string name="cd_cons_source">Verbruik: %1$s, %2$s. Tik voor het volgende</string>
     <string name="en_last_year">Laatste 12 maanden</string>
     <string name="en_months_note">%1$d maanden, één punt per maand · gemiddelde %2$s (gestippeld)</string>
     <string name="en_months_wait">De curve vult zich maand na maand (minstens 20 km per maand).</string>

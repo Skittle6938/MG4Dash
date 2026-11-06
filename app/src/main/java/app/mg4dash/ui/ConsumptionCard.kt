@@ -143,21 +143,31 @@ class ConsumptionCard(context: Context) : LinearLayout(context) {
         duration.text = if (prefs.consumptionPeriod.coerceIn(0, 2) == 1 && start > 0) durationText(context, System.currentTimeMillis() - start) else ""
     }
 
-    /** "14.8 avg.   22.6 last km": the average in the dashed line's colour, the last km in orange (#44). */
+    /**
+     * "14.8 | 22.6": the average in the dashed line's colour, the last km in orange, without words (#44);
+     * TalkBack still reads "avg." and "last km".
+     */
     private fun figuresText(points: Int): CharSequence {
-        if (points < 2) return ""
+        if (points < 2) { figures.contentDescription = null; return "" }
         val out = android.text.SpannableStringBuilder()
+        val spoken = mutableListOf<String>()
         fun add(value: Float, label: Int, colorRes: Int) {
-            if (out.isNotEmpty()) out.append("    ")
+            if (out.isNotEmpty()) {
+                val at = out.length
+                out.append("  |  ")
+                out.setSpan(android.text.style.ForegroundColorSpan(c(R.color.text_disabled)), at, out.length, 0)
+            }
             val at = out.length
-            out.append(String.format(Locale.getDefault(), "%.1f", value))
+            val v = String.format(Locale.getDefault(), "%.1f", value)
+            out.append(v)
             out.setSpan(android.text.style.ForegroundColorSpan(c(colorRes)), at, out.length, 0)
             out.setSpan(android.text.style.RelativeSizeSpan(1.4f), at, out.length, 0)
             out.setSpan(android.text.style.StyleSpan(android.graphics.Typeface.BOLD), at, out.length, 0)
-            out.append(" ").append(context.getString(label))
+            spoken += "$v ${context.getString(label)}"
         }
         add(chart.averageValue, R.string.cc_avg, R.color.accent_action)
         lastKm(context)?.let { add(it, R.string.cc_last_km, R.color.accent_heat) }
+        figures.contentDescription = spoken.joinToString(", ")
         return out
     }
 
