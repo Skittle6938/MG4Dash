@@ -5,7 +5,6 @@ import android.app.AlertDialog
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Color
-import android.net.Uri
 import android.os.Build
 import android.util.TypedValue
 import android.widget.ImageView
@@ -123,7 +122,7 @@ object Compat {
         }
     } catch (_: Exception) { null }
 
-    /** Report + QR code; "Open" also tries the car's browser, if there is one. */
+    /** Report + QR code; "Open" shows the GitHub page (MG4Dash Web on the car, otherwise the browser). */
     fun show(a: Activity) {
         val text = report(a)
         val url = issueUrl(text).let { u ->
@@ -146,11 +145,8 @@ object Compat {
         AlertDialog.Builder(a)
             .setTitle(R.string.st_compat_report).setView(box)
             .setPositiveButton(R.string.st_close, null)
-            .setNeutralButton(R.string.st_compat_open) { _, _ ->
-                try { a.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url))) } catch (_: Exception) {
-                    app.mg4dash.ui.Toasts.show(a, R.string.st_compat_no_browser, long = true)
-                }
-            }
+            // In MG4Dash Web on the car: its browser refuses pages on some head units (#95)
+            .setNeutralButton(R.string.st_compat_open) { _, _ -> app.mg4dash.system.WebViewer.open(a, url) }
             .show().also { app.mg4dash.ui.Dialogs.fix(it) }
     }
 }
