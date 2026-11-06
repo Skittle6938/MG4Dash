@@ -20,7 +20,7 @@
         android:baselineAligned="false"
         android:orientation="horizontal">
 
-        <!-- ─── Column 1: Climate + Energy ─── -->
+        <!-- ─── Column 1: Climate + Energy (the places of each layout are built by MainActivity, #97) ─── -->
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="match_parent"
@@ -395,7 +395,7 @@
             </LinearLayout>
         </LinearLayout>
 
-        <!-- ─── Column 2: Position + Weather ─── -->
+        <!-- ─── Column 2: Map ─── -->
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="match_parent"
@@ -516,120 +516,10 @@
                     android:text="© OpenStreetMap"
                     android:textColor="?attr/mgTextTitle"
                     android:textSize="13sp" />
-
-                <!-- Shortcuts (apps, Home Assistant), in place of the map if chosen -->
-                <LinearLayout
-                    android:id="@+id/shortcutsHolder"
-                    style="@style/Panel"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:background="@null"
-                    android:elevation="0dp"
-                    android:orientation="vertical"
-                    android:visibility="gone" />
-
-                <!-- Bascule carte ↔ raccourcis -->
-                <ImageButton
-                    android:id="@+id/widgetToggle"
-                    style="@style/RoundButton"
-                    android:layout_gravity="top|right"
-                    android:layout_margin="14dp"
-                    android:contentDescription="@string/cd_widget_toggle"
-                    android:src="@drawable/ic_apps" />
             </FrameLayout>
-
-            <LinearLayout
-                android:id="@+id/weatherCard"
-                style="@style/Panel"
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_marginTop="@dimen/gap"
-                android:layout_weight="40"
-                android:background="@drawable/bg_aa_tile_idle"
-                android:clickable="true"
-                android:focusable="true"
-                android:orientation="vertical">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal">
-
-                    <TextView
-                        style="@style/CardTitle"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="@string/title_weather" />
-
-                    <TextView
-                        android:id="@+id/weatherPlace"
-                        style="@style/Sub"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textSize="19sp"
-                        tools:text="Paris" />
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="0dp"
-                    android:layout_weight="1"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal">
-
-                    <ImageView
-                        android:id="@+id/weatherIcon"
-                        android:layout_width="80dp"
-                        android:layout_height="80dp"
-                        android:src="@drawable/ic_cloud"
-                        android:tint="?attr/mgTextValue" />
-
-                    <TextView
-                        android:id="@+id/weatherTemp"
-                        style="@style/ValueBig"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginLeft="14dp"
-                        android:textSize="62sp"
-                        tools:text="14°" />
-
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginLeft="18dp"
-                        android:layout_weight="1"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:id="@+id/weatherLabel"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:maxLines="1"
-                            android:textColor="?attr/mgTextValue"
-                            android:textSize="25sp"
-                            tools:text="Partiellement nuageux" />
-
-                        <TextView
-                            android:id="@+id/weatherDetails"
-                            style="@style/Sub"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="4dp"
-                            android:textSize="20sp"
-                            tools:text="Ressenti 12° · Vent 18 km/h · 72 %" />
-                    </LinearLayout>
-                </LinearLayout>
-
-                <LinearLayout
-                    android:id="@+id/weatherHours"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal" />
-            </LinearLayout>
         </LinearLayout>
 
-        <!-- ─── Column 3: Media + secondary widget ─── -->
+        <!-- ─── Column 3: Media ─── -->
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="match_parent"
@@ -827,51 +717,6 @@
                         </LinearLayout>
                     </LinearLayout>
                 </LinearLayout>
-            </LinearLayout>
-
-            <!-- Configurable secondary widget: touch to change (trip energy / power / phone) -->
-            <LinearLayout
-                android:id="@+id/secondaryCard"
-                style="@style/Panel"
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_marginTop="@dimen/gap"
-                android:layout_weight="40"
-                android:background="@drawable/bg_aa_tile_idle"
-                android:clickable="true"
-                android:focusable="true"
-                android:orientation="vertical">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal">
-
-                    <TextView
-                        android:id="@+id/secondaryTitle"
-                        style="@style/CardTitle"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="@string/sw_energy" />
-
-                    <TextView
-                        android:id="@+id/secondaryDots"
-                        style="@style/Sub"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:letterSpacing="0.3"
-                        android:textSize="17sp"
-                        tools:text="● ○ ○" />
-                </LinearLayout>
-
-                <LinearLayout
-                    android:id="@+id/secondaryGrid"
-                    android:layout_width="match_parent"
-                    android:layout_height="0dp"
-                    android:layout_weight="1"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal" />
             </LinearLayout>
         </LinearLayout>
     </LinearLayout>

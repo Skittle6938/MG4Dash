@@ -69,8 +69,12 @@ class WeatherCompact(context: Context) : LinearLayout(context) {
     /** Left margin of the content, under the city: room for the fog light button. */
     fun setLeftInset(px: Int) = top.setPadding(px, 0, 0, 0)
 
-    /** Connection icons (#86), at the top right. */
-    fun addConnections(row: android.view.View) = cityLine.addView(row)
+    /** Connection icons (#86), at the top right; they move with the weather card shown (#97). */
+    fun addConnections(row: android.view.View) {
+        if (row.parent === cityLine) return
+        (row.parent as? android.view.ViewGroup)?.removeView(row)
+        cityLine.addView(row)
+    }
 
     private fun setTempMargin(px: Int) {
         (temp.layoutParams as LayoutParams).let { if (it.leftMargin != px) { it.leftMargin = px; temp.layoutParams = it } }

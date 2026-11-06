@@ -82,21 +82,27 @@ Swipe or tap it to switch between its pages:
 
 - **Map**: follows the car, north up or heading up (tap the recenter button again), default zoom 14 to 18 and colours (auto, light, dark) in Settings › Home. The zoom and full screen buttons hide after a few seconds. Without data connection the map stays as long as the area is in the tile cache, then the card switches to consumption (can be turned off).
 - **Consumption**: a swipe switches map → consumption → shortcuts. Period menu: since the last charge, current trip (one point per km, one every 2 minutes when stopped; since the last charge and the last 12 months are placed by date and smoothed, from the energy measured by MG4Dash) or last 12 months (one point per trip). The dashed line is the average: energy out of the battery minus regeneration, over the distance. Its value is on the chart's title line, in blue, with the consumption of the last km in orange (useful on a long climb); on the current trip, its duration shows in the top right corner. **Regen** shows the energy recovered and the part of the distance it powered: recovered energy ÷ energy out of the battery × distance. With 30.7 kWh out, 12.1 kWh recovered and 149 km, that is 39 % of the energy, so about 59 km of the 149 km. These km are already part of the distance, they don't add to the range.
-- **Shortcuts**: 3 rows of apps or Home Assistant actions (scripts, automations, scenes, gate, garage door…). Tap an empty slot or long press a slot to change it; the Home Assistant address and token are set in Settings › Connections. A Home Assistant shortcut shows its live state under its name (a garage door drawn open and in orange when open, blue when closed, grey when unavailable): a cover, lock, switch or light shows its own state, and *Displayed state* in the shortcut's menu picks another entity, such as the door sensor of a garage opened by a script, or none. The shortcuts page can be turned off.
+- **Shortcuts**: 3 rows of apps or Home Assistant actions (scripts, automations, scenes, gate, garage door…). Tap an empty slot or long press a slot to change it; the Home Assistant address and token are set in Settings › Connections. A Home Assistant shortcut shows its live state under its name (a garage door drawn open and in orange when open, blue when closed, grey when unavailable): a cover, lock, switch or light shows its own state, and *Displayed state* in the shortcut's menu picks another entity, such as the door sensor of a garage opened by a script, or none.
 - **Web app** (off by default): a web page of your choice in the card, for example a Home Assistant dashboard. Turn it on and enter its address in the edit mode (below). The page takes the touches; the button at the top right changes card, it fades after 5 s and comes back on a touch. On the car, the page is shown by *MG4Dash Web*, a small separate app embedded in MG4Dash, which installs it by itself the first time the card is shown: Android refuses web pages to an app with the system rights, which MG4Dash has.
 - **Full screen**: the button below the zoom enlarges the map over the whole screen; any bar button brings it back.
 
-### Choosing the cards
+### Choosing and moving the cards
 
-Pinch the home screen with two fingers, as on Samsung or Pixel home screens, or use Settings › Home › *Edit the cards*: each widget that goes through cards shows them over itself, and a touch shows or removes one; at least one stays. The home screen follows at once, Done closes the edit mode. The pinch is left to the map for its zoom, and to a web page or an app shown in the map card.
+Pinch the home screen with two fingers, as on Samsung or Pixel home screens, or use Settings › Home › *Edit the cards*. Each place of the home screen shows over itself what it can hold, and the home screen follows at once:
 
-| Layout | Widgets and their cards |
+- A **medium place** (the top row of the Full layout, the bottom row of the Map layout) shows the climate, the media, or cards in turn: pick *Climate*, *Media* or *Cards*. The climate and the media are in one place each, and never alternate with cards; picked in another place, they swap with what was there.
+- In a place of **cards**, touch a card to show it there or to remove it. A card is in one place at a time: taken from another place, it leaves it (a small drawing of the places shows where it is). Each place keeps at least one card. A swipe, or the button at the top right over a web page or an app, goes to the next card of the place.
+- A **smaller place** gets a compact version: the consumption without its totals line and legend (as in the Full layout), the map without its zoom buttons, the shortcuts on one row. The climate and the media don't fit there.
+- **Default** puts the home screen of the layout back as it was at first, after a confirmation. **Done** closes the edit mode.
+
+The Full and Map layouts each keep their own choice; the Simple layout has no cards to choose. The pinch is left to the map for its zoom, and to a web page or an app shown in a card.
+
+| Layout | Default places, from left to right (· between places) |
 |---|---|
-| Full | weather (by hour, by day), bottom right widget (trip, power, phone), map widget (map, consumption, shortcuts, web app) |
-| Map | weather (by hour, by day), energy widget (energy, trip, power, phone), map widget (map, consumption, shortcuts, web app) |
-| Simple | no cards to choose |
+| Full | top: climate · map, consumption, shortcuts · media; bottom: energy · weather by hour, by day · trip, power, phone |
+| Map | top: weather by hour, by day · energy, trip, power, phone; right: map, consumption, shortcuts; bottom: climate · media |
 
-In the map widget, the edit mode also sets the app shown instead of the map and the web app's address. The Power card is left out when *Live power in the energy card* is on.
+In a place with the map, the edit mode also sets the app shown instead of the map; with the web app, its address. The Power card is left out when *Live power in the energy card* is on.
 
 | Consumption | Shortcuts |
 |---|---|
@@ -188,7 +194,7 @@ Five tabs along the top; the last one used opens next time. Each on / off option
 
 | Tab | Options |
 |---|---|
-| Home | home layout (Full, Simple, Map), widgets' cards (edit mode), audio source and playback at startup, menu bar (bottom or vertical, side), wide side bar, connection icons, full screen (hides the SAIC side bar and banner), live power in the energy card, voltage and current under the power bar, map stack back to the battery when plugged in, map zoom and colours, hide the map buttons, shortcuts page, switch to the energy widget when offline |
+| Home | home layout (Full, Simple, Map), places and cards of the home screen (edit mode), audio source and playback at startup, menu bar (bottom or vertical, side), wide side bar, connection icons, full screen (hides the SAIC side bar and banner), live power in the energy card, voltage and current under the power bar, map stack back to the battery when plugged in, map zoom and colours, hide the map buttons, switch to the energy widget when offline |
 | Look | light / dark / auto, night after sunset, smooth light / dark switch, clock 24 h or 12 h (no AM / PM), panel outline, background, button colour, full-throttle special |
 | Vehicle | units, tyre pressure unit, heated seats and steering wheel, Keep climate on, keep MG4Dash in front of the SAIC climate screen (old firmwares), startup sound (audio file from a USB stick or internal storage, 30 s and 20 MB at most, with its own volume), battery capacity when new, current capacity and health, battery model, MG4 XPower |
 | Connections | weather (fallback city or current position), Home Assistant (address, token, test) |
