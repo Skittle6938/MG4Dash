@@ -664,7 +664,7 @@
     <string name="tu_map_t">Carte</string>
     <string name="tu_map_1">Glisser à gauche / droite : carte suivante du widget (consommation, raccourcis…)</string>
     <string name="tu_map_3">Deux doigts : déplacer et zoomer la carte (un doigt en plein écran)</string>
-    <string name="tu_map_2">Appui long sur la carte : une autre appli dans la carte</string>
+    <string name="tu_map_2">Pincer l\'accueil, puis Carte : une autre appli dans la carte</string>
     <string name="tu_media_t">Musique</string>
     <string name="tu_media_1">Glisser haut / bas : source suivante ; gauche / droite : morceau précédent / suivant</string>
     <string name="tu_media_2">Toucher le nom de la source : menu des sources ; toucher l\'image : ouvrir l\'appli</string>

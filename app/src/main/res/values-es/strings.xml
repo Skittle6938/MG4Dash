@@ -664,7 +664,7 @@
     <string name="tu_map_t">Mapa</string>
     <string name="tu_map_1">Deslizar a izquierda / derecha: siguiente tarjeta del widget (consumo, accesos directos…)</string>
     <string name="tu_map_3">Dos dedos: mover y ampliar el mapa (un dedo a pantalla completa)</string>
-    <string name="tu_map_2">Pulsación larga en el mapa: otra app en la tarjeta del mapa</string>
+    <string name="tu_map_2">Pellizca la pantalla de inicio y luego Mapa: otra app en la tarjeta del mapa</string>
     <string name="tu_media_t">Música</string>
     <string name="tu_media_1">Desliza arriba / abajo: siguiente fuente; izquierda / derecha: pista anterior / siguiente</string>
     <string name="tu_media_2">Toca el nombre de la fuente: menú de fuentes; toca la imagen: abrir la app</string>

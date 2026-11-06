@@ -664,7 +664,7 @@
     <string name="tu_map_t">Map</string>
     <string name="tu_map_1">Swipe left / right: next card of the widget (consumption, shortcuts…)</string>
     <string name="tu_map_3">Two fingers: move and zoom the map (one finger in full screen)</string>
-    <string name="tu_map_2">Long press the map: show another app in the map card</string>
+    <string name="tu_map_2">Pinch the home screen, then Map: show another app in the map card</string>
     <string name="tu_media_t">Music</string>
     <string name="tu_media_1">Swipe up / down: next source; left / right: previous / next track</string>
     <string name="tu_media_2">Tap the source name: source menu; tap the picture: open the source\'s app</string>
