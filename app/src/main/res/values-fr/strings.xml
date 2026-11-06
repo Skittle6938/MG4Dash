@@ -745,6 +745,7 @@
     <string name="du_net_4g">4G</string>
     <string name="du_net_wifi">Wi-Fi</string>
     <string name="du_note_wifi">4G : le réseau de la voiture. Wi-Fi : quand la voiture est connectée à une box ou un téléphone. Le quota et l\'alerte ne comptent que la 4G, et les autres applis de la voiture ne sont pas comptées.</string>
+    <string name="du_biggest">%1$s le %2$s, surtout %3$s</string>
     <string name="aa_title">ANDROID AUTO</string>
     <string name="aa_ready">Téléphone connecté · Appuyer pour ouvrir</string>
     <string name="aa_waiting">Branchez votre téléphone en USB</string>
