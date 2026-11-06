@@ -470,6 +470,19 @@ class ScreenshotTest {
         shoot(MainActivity::class.java, "home_map_layout_shortcuts.png")
     }
 
+    /** Live state of the Home Assistant shortcuts (#97): garage open, gate without state, scene without state. */
+    @Test @Config(qualifiers = "fr-w1920dp-h720dp-land-mdpi") fun homeMapLayoutShortcutsState() {
+        org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE).edit()
+            .putInt("home_style", 2).putInt("home_widget", 1)
+            .putString("sc_0", "ha|script.portail|Portail").putString("sc_1", "ha|cover.garage_door|Garage")
+            .putString("sc_2", "ha|light.allee|Allée").putString("sc_3", "ha|lock.entree|Entrée")
+            .putString("sc_8", "ha|scene.arriving_home|Arrivée").apply()
+        app.mg4dash.shortcuts.HaLive.seedForTest("cover.garage_door", "open")
+        app.mg4dash.shortcuts.HaLive.seedForTest("light.allee", "off")
+        app.mg4dash.shortcuts.HaLive.seedForTest("lock.entree", "unavailable")
+        shoot(MainActivity::class.java, "home_map_layout_shortcuts_state.png")
+    }
+
     @Test fun vehicleSoh() {
         val now = System.currentTimeMillis()
         org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE).edit()

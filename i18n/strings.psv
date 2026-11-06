@@ -260,6 +260,23 @@ ha_not_configured|Set up Home Assistant in MG4Dash settings first (long press on
 ha_error|Home Assistant unreachable: check the address, the token and the connection.|Home Assistant injoignable : vérifiez l'adresse, le jeton et la connexion.|Home Assistant nicht erreichbar: Adresse, Token und Verbindung prüfen.|Home Assistant no accesible: compruebe la dirección, el token y la conexión.|Home Assistant non raggiungibile: verifica indirizzo, token e connessione.|Home Assistant onbereikbaar: controleer adres, token en verbinding.|Home Assistant'a ulaşılamıyor: adresi, tokenı ve bağlantıyı kontrol edin.
 ha_sent|%1$s: sent|%1$s : envoyé|%1$s: gesendet|%1$s: enviado|%1$s: inviato|%1$s: verzonden|%1$s: gönderildi
 ha_error_action|%1$s: failed|%1$s : échec|%1$s: fehlgeschlagen|%1$s: error|%1$s: errore|%1$s: mislukt|%1$s: başarısız
+sc_state|Displayed state|État affiché|Angezeigter Status|Estado mostrado|Stato mostrato|Getoonde status|Gösterilen durum
+sc_state_auto|Automatic (the action's own state)|Automatique (l'état de l'action)|Automatisch (Status der Aktion)|Automático (estado de la acción)|Automatico (stato dell'azione)|Automatisch (status van de actie)|Otomatik (eylemin durumu)
+sc_state_none|No state|Aucun état|Kein Status|Sin estado|Nessuno stato|Geen status|Durum yok
+ha_open|Open|Ouvert|Offen|Abierto|Aperto|Open|Açık
+ha_closed|Closed|Fermé|Geschlossen|Cerrado|Chiuso|Gesloten|Kapalı
+ha_opening|Opening…|Ouverture…|Öffnet…|Abriendo…|In apertura…|Opent…|Açılıyor…
+ha_closing|Closing…|Fermeture…|Schließt…|Cerrando…|In chiusura…|Sluit…|Kapanıyor…
+ha_on|On|Allumé|An|Encendido|Acceso|Aan|Açık
+ha_off|Off|Éteint|Aus|Apagado|Spento|Uit|Kapalı
+ha_locked|Locked|Verrouillé|Verriegelt|Bloqueado|Bloccato|Vergrendeld|Kilitli
+ha_unlocked|Unlocked|Déverrouillé|Entriegelt|Desbloqueado|Sbloccato|Ontgrendeld|Kilit açık
+ha_locking|Locking…|Verrouillage…|Verriegelt…|Bloqueando…|Blocco…|Vergrendelen…|Kilitleniyor…
+ha_unlocking|Unlocking…|Déverrouillage…|Entriegelt…|Desbloqueando…|Sblocco…|Ontgrendelen…|Kilit açılıyor…
+ha_active|Active|Actif|Aktiv|Activo|Attivo|Actief|Etkin
+ha_inactive|Inactive|Inactif|Inaktiv|Inactivo|Inattivo|Inactief|Devre dışı
+ha_unavailable|Unavailable|Indisponible|Nicht verfügbar|No disponible|Non disponibile|Niet beschikbaar|Kullanılamıyor
+ha_offline|Offline|Hors ligne|Offline|Sin conexión|Offline|Offline|Çevrimdışı
 dock_aa_pick|Button shortcut|Raccourci du bouton|Tastenbelegung|Acceso del botón|Scorciatoia del pulsante|Snelkoppeling van de knop|Düğme kısayolu
 dock_aa_stock|Android Auto (original)|Android Auto (d'origine)|Android Auto (original)|Android Auto (original)|Android Auto (originale)|Android Auto (origineel)|Android Auto (orijinal)
 st_ha_url|Address: %1$s|Adresse : %1$s|Adresse: %1$s|Dirección: %1$s|Indirizzo: %1$s|Adres: %1$s|Adres: %1$s

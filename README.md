@@ -82,7 +82,7 @@ Swipe or tap it to switch between its pages:
 
 - **Map**: follows the car, north up or heading up (tap the recenter button again), default zoom 14 to 18 and colours (auto, light, dark) in Settings › Home. The zoom and full screen buttons hide after a few seconds. Without data connection the map stays as long as the area is in the tile cache, then the card switches to consumption (can be turned off).
 - **Consumption**: a swipe switches map → consumption → shortcuts. Period menu: since the last charge, current trip (one point per km, one every 2 minutes when stopped; since the last charge and the last 12 months are placed by date and smoothed, from the energy measured by MG4Dash) or last 12 months (one point per trip). The dashed line is the average, with its value: energy out of the battery minus regeneration, over the distance. **Regen** shows the energy recovered and the part of the distance it powered: recovered energy ÷ energy out of the battery × distance. With 30.7 kWh out, 12.1 kWh recovered and 149 km, that is 39 % of the energy, so about 59 km of the 149 km. These km are already part of the distance, they don't add to the range.
-- **Shortcuts**: 3 rows of apps or Home Assistant actions (scripts, automations, scenes, gate, garage door…). Tap an empty slot or long press a slot to change it; the Home Assistant address and token are set in Settings › Connections. The shortcuts page can be turned off.
+- **Shortcuts**: 3 rows of apps or Home Assistant actions (scripts, automations, scenes, gate, garage door…). Tap an empty slot or long press a slot to change it; the Home Assistant address and token are set in Settings › Connections. A Home Assistant shortcut shows its live state under its name (a garage door drawn open and in orange when open, blue when closed, grey when unavailable): a cover, lock, switch or light shows its own state, and *Displayed state* in the shortcut's menu picks another entity, such as the door sensor of a garage opened by a script, or none. The shortcuts page can be turned off.
 - **Full screen**: the button below the zoom enlarges the map over the whole screen; any bar button brings it back.
 
 | Consumption | Shortcuts |
@@ -224,6 +224,7 @@ Features a firmware does not expose are hidden instead of failing (for example t
   - `media/MediaHub.kt`: active player and audio sources (the car's and other apps'), automatic source, steering wheel for apps
   - `map/NavRepo.kt`: turn-by-turn data broadcast by DiAuto / Headunit Revived
   - `shortcuts/Shortcuts.kt`: shortcut grid and Home Assistant REST calls
+  - `shortcuts/HaLive.kt`: live state of the Home Assistant shortcuts, read while they are on screen
   - `weather/WeatherRepo.kt`: Open-Meteo weather
   - `system/HomeSwitcher.kt`: maintenance mode (gives the home screen back to the SAIC launcher)
   - `LauncherApp.kt`: crash guard, after 3 crashes in 3 minutes the SAIC launcher becomes the home screen again
