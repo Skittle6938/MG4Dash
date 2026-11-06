@@ -171,11 +171,15 @@ class CarKeyboard(
             else -> ""
         }
 
-        /** Replaces Android's keyboard on a page's field, if the option is on (the default). [onVisible] lets the page make room. */
-        fun attach(field: EditText, onVisible: (Boolean) -> Unit = {}) {
+        /**
+         * Replaces Android's keyboard on a page's field, if the option is on (the default). [onVisible] lets the page make room.
+         * [span] gives the keyboard's left and right edges on screen, e.g. those of two cards (#93); without it, or if it
+         * returns null, the keyboard takes two thirds of the screen on the driver's side.
+         */
+        fun attach(field: EditText, span: (() -> IntArray?)? = null, onVisible: (Boolean) -> Unit = {}) {
             if (!Prefs(field.context).ownKeyboard) return
             field.showSoftInputOnFocus = false
-            val popup = Popup(field, onVisible)
+            val popup = Popup(field, span, onVisible)
             field.setOnTouchListener { _, e -> if (e.action == MotionEvent.ACTION_UP) field.post { popup.show() }; false }
         }
 
@@ -211,6 +215,14 @@ class CarKeyboard(
             visible(true)
         }
 
+        /** Left edge of [first] and right edge of [last] on screen, for [attach]'s span; null before they are laid out. */
+        fun spanOf(first: View, last: View): IntArray? {
+            if (first.width == 0 || last.width == 0) return null
+            val a = IntArray(2).also { first.getLocationOnScreen(it) }
+            val b = IntArray(2).also { last.getLocationOnScreen(it) }
+            return intArrayOf(minOf(a[0], b[0]), maxOf(a[0] + first.width, b[0] + last.width))
+        }
+
         private fun forField(field: EditText, onDone: () -> Unit) = CarKeyboard(
             field.context, field.context.resources.configuration.locales[0].language,
             numeric = field.inputType and InputType.TYPE_MASK_CLASS == InputType.TYPE_CLASS_NUMBER,
@@ -228,7 +240,7 @@ class CarKeyboard(
         )
     }
 
-    private class Popup(private val field: EditText, private val onVisible: (Boolean) -> Unit) {
+    private class Popup(private val field: EditText, private val span: (() -> IntArray?)?, private val onVisible: (Boolean) -> Unit) {
         private val context = field.context
         private var window: PopupWindow? = null
         private val focusWatch = ViewTreeObserver.OnWindowFocusChangeListener { focused -> if (!focused) hide() }
@@ -247,11 +259,14 @@ class CarKeyboard(
             // Two thirds of the screen on the driver's side, along the vertical bar or from the screen's margin
             val side = (Dock.keyboardMarginDp(context) * density).toInt()
             val right = Dock.rightSide(context)
+            val edges = span?.invoke()?.takeIf { it.size == 2 && it[1] - it[0] > 0 }
+            val left = edges?.get(0) ?: if (right) real.widthPixels - end else side
+            val width = edges?.let { it[1] - it[0] } ?: (end - side)
             val keyboard = forField(field) { hide() }
-            window = PopupWindow(keyboard, end - side, LinearLayout.LayoutParams.WRAP_CONTENT).apply {
+            window = PopupWindow(keyboard, width, LinearLayout.LayoutParams.WRAP_CONTENT).apply {
                 isFocusable = false; isOutsideTouchable = false; isClippingEnabled = false
                 setBackgroundDrawable(ColorDrawable(0))
-                showAtLocation(field, Gravity.BOTTOM or Gravity.LEFT, if (right) real.widthPixels - end else side, (10 * density).toInt())
+                showAtLocation(field, Gravity.BOTTOM or Gravity.LEFT, left, (10 * density).toInt())
             }
             field.viewTreeObserver.addOnWindowFocusChangeListener(focusWatch)
             field.addOnAttachStateChangeListener(detachWatch)

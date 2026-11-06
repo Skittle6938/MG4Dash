@@ -330,7 +330,17 @@ class ScreenshotTest {
         val act = Robolectric.buildActivity(app.mg4dash.pages.PhoneActivity::class.java).setup().get()
         repeat(5) { shadowOf(Looper.getMainLooper()).idleFor(200, TimeUnit.MILLISECONDS) }
         val content = act.findViewById<android.widget.FrameLayout>(android.R.id.content)
-        content.addView(app.mg4dash.ui.CarKeyboard(act, "fr"), android.widget.FrameLayout.LayoutParams(1184, -2, android.view.Gravity.BOTTOM or android.view.Gravity.LEFT).apply { leftMargin = 96; bottomMargin = 10 })
+        // Over the Recent and Contacts cards, edge to edge, as on the car
+        fun fields(v: android.view.View): List<android.widget.EditText> = when (v) {
+            is android.widget.EditText -> listOf(v)
+            is android.view.ViewGroup -> (0 until v.childCount).flatMap { fields(v.getChildAt(it)) }
+            else -> emptyList()
+        }
+        val book = fields(content).first().parent as android.view.View
+        val recent = (book.parent as android.view.ViewGroup).getChildAt(0)
+        val origin = IntArray(2).also { content.getLocationOnScreen(it) }
+        val span = app.mg4dash.ui.CarKeyboard.spanOf(recent, book) ?: intArrayOf(96, 96 + 1184)
+        content.addView(app.mg4dash.ui.CarKeyboard(act, "fr"), android.widget.FrameLayout.LayoutParams(span[1] - span[0], -2, android.view.Gravity.BOTTOM or android.view.Gravity.LEFT).apply { leftMargin = span[0] - origin[0]; bottomMargin = 10 })
         save(act.window.decorView, "phone_keyboard.png")
     }
 
