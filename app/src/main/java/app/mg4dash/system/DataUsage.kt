@@ -299,7 +299,7 @@ object DataUsage {
         val loc = java.util.Locale.getDefault()
         return when {
             bytes >= 1_000_000_000L -> context.getString(R.string.du_gb, String.format(loc, if (bytes >= 10_000_000_000L) "%.1f" else "%.2f", bytes / 1e9))
-            bytes >= 10_000_000L -> context.getString(R.string.du_mb, String.format(loc, "%d", bytes / 1_000_000L))
+            bytes >= 10_000_000L -> context.getString(R.string.du_mb, String.format(loc, "%d", Math.round(bytes / 1e6)))
             else -> context.getString(R.string.du_mb, String.format(loc, "%.1f", bytes / 1e6))
         }
     }

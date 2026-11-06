@@ -745,6 +745,7 @@
     <string name="du_net_4g">4G</string>
     <string name="du_net_wifi">Wi-Fi</string>
     <string name="du_note_wifi">4G: la red del coche. Wi-Fi: cuando el coche está conectado a un router o un teléfono. La cuota y la alerta solo cuentan el 4G, y las demás apps del coche no se cuentan.</string>
+    <string name="du_biggest">%1$s el %2$s, sobre todo %3$s</string>
     <string name="aa_title">ANDROID AUTO</string>
     <string name="aa_ready">Teléfono conectado · Pulse para abrir</string>
     <string name="aa_waiting">Conecte su teléfono por USB</string>
