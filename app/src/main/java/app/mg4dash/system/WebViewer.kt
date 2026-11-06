@@ -24,7 +24,7 @@ object WebViewer {
     val component = ComponentName(PKG, "$PKG.WebActivity")
     private val page = ComponentName(PKG, "$PKG.PageActivity")
     /** Version of the embedded app (versionCode of web/build.gradle.kts). */
-    private const val BUNDLED_VERSION = 9L
+    private const val BUNDLED_VERSION = 10L
     private const val ASSET = "web.apk"
 
     /**
