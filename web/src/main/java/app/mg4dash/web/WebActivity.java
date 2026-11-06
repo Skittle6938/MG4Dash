@@ -37,7 +37,7 @@ import android.widget.TextView;
  * cover the home screen; MG4Dash starts it again in the new card.
  * MG4Dash's keyboard (#98): the page says when one of its fields is touched or left, MG4Dash then shows its
  * keyboard over home and sends each key, typed here in the field. Android's keyboard no longer opens.
- * The card hidden, the page goes on (sound, live values) without drawing.
+ * The card hidden, the page goes on (sound, live values) without drawing nor decoding the image of its videos.
  * [PageActivity]: the same page in full screen, with a close button (compatibility report, #95: the
  * car's browser refuses pages on some head units).
  */
@@ -71,17 +71,17 @@ public class WebActivity extends Activity {
     /** MG4Dash was told that a field is touched (its keyboard is open). */
     private boolean fieldOpen;
     private boolean listening;
+    /** The card is hidden (MG4Dash said so). */
+    private boolean hidden;
+    private boolean started;
 
     /** From MG4Dash: the keys of its keyboard, and whether the card is shown. */
     private final BroadcastReceiver fromCard = new BroadcastReceiver() {
         @Override
         public void onReceive(Context c, Intent i) {
             if (web == null) return;
-            if (SHOWN.equals(i.getAction())) {
-                // Hidden: Chromium stops drawing, the page goes on (sound, live values)
-                web.setVisibility(i.getBooleanExtra("shown", true) ? View.VISIBLE : View.INVISIBLE);
-                return;
-            }
+            if (SHOWN.equals(i.getAction())) { shown(i.getBooleanExtra("shown", true)); return; }
+            if (keyboardFor == null) return;
             String text = i.getStringExtra("text");
             if (text != null) type(text);
             String key = i.getStringExtra("key");
@@ -146,13 +146,16 @@ public class WebActivity extends Activity {
 
             // As early as possible in the page, before its player chooses a format
             @Override
-            public void onProgressChanged(WebView view, int progress) { softFormats(); }
+            public void onProgressChanged(WebView view, int progress) { pageScripts(); }
         });
         keyboardFor = inCardOnly() ? i.getStringExtra(EXTRA_KEYBOARD) : null;
         if (keyboardFor != null) {
             // Android's keyboard never opens over the page: MG4Dash's types in it
             getWindow().addFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
             web.addJavascriptInterface(new Fields(), "MG4DashFields");
+        }
+        // In the card: MG4Dash says when it is shown or hidden, whether its keyboard is used or not
+        if (inCardOnly()) {
             IntentFilter f = new IntentFilter(KEY);
             f.addAction(SHOWN);
             registerReceiver(fromCard, f, TALK, null);
@@ -182,12 +185,12 @@ public class WebActivity extends Activity {
 
             // The script that watches the fields, as soon as the page shows, and again at its end
             @Override
-            public void onPageCommitVisible(WebView view, String url) { softFormats(); watchFields(); }
+            public void onPageCommitVisible(WebView view, String url) { pageScripts(); watchFields(); }
 
             @Override
             public void onPageFinished(WebView view, String url) {
                 if (!failed) message.setVisibility(View.GONE);
-                softFormats();
+                pageScripts();
                 watchFields();
             }
         });
@@ -202,6 +205,8 @@ public class WebActivity extends Activity {
         message.setOnClickListener(v -> { if (failed) { String u = loaded; loaded = null; load(u); } });
 
         root.addView(web, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        // Full screen and back: the videos' highest quality follows
+        web.addOnLayoutChangeListener((v, l, t, r, b, ol, ot, or, ob) -> { if (r - l != or - ol) maxHeight(); });
         root.addView(message, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
         if (!inCardOnly()) addClose(root, bg, i.getIntExtra(EXTRA_FG, Color.LTGRAY));
         setContentView(root);
@@ -290,30 +295,74 @@ public class WebActivity extends Activity {
         }
     }
 
+    /**
+     * Also a highest quality, for the processor: 360p in the card, 480p wider (full screen), from
+     * window.__mg4dashMaxH, for the "width=…; height=…" asked by YouTube and mediaCapabilities.
+     */
     private static final String NO_HW_ONLY_JS = "(function () {"
         + "if (window.__mg4dashSoftVideo) return;"
         + "window.__mg4dashSoftVideo = true;"
         + "var no = /avc[13]|hev1|hvc1|mp4v|av01/i;"
+        + "var big = function (w, h) { w = +w || 0; h = +h || 0; return w > 0 && h > 0 && Math.min(w, h) > (window.__mg4dashMaxH || 480); };"
+        + "var dim = function (t, k) { var m = new RegExp(k + '\\\\s*=\\\\s*(\\\\d+)', 'i').exec(t); return m ? m[1] : 0; };"
+        + "var refused = function (t) { t = String(t || ''); return no.test(t) || big(dim(t, 'width'), dim(t, 'height')); };"
         + "if (window.MediaSource && MediaSource.isTypeSupported) {"
         + "  var is = MediaSource.isTypeSupported.bind(MediaSource);"
-        + "  MediaSource.isTypeSupported = function (t) { return no.test(t) ? false : is(t); };"
+        + "  MediaSource.isTypeSupported = function (t) { return refused(t) ? false : is(t); };"
         + "}"
         + "var can = HTMLMediaElement.prototype.canPlayType;"
-        + "HTMLMediaElement.prototype.canPlayType = function (t) { return no.test(t) ? '' : can.call(this, t); };"
+        + "HTMLMediaElement.prototype.canPlayType = function (t) { return no.test(String(t || '')) ? '' : can.call(this, t); };"
         + "var mc = navigator.mediaCapabilities;"
         + "if (mc && mc.decodingInfo) {"
         + "  var info = mc.decodingInfo.bind(mc);"
         + "  mc.decodingInfo = function (c) {"
-        + "    if (c && c.video && no.test(c.video.contentType || ''))"
+        + "    var v = c && c.video;"
+        + "    if (v && (no.test(v.contentType || '') || big(v.width, v.height)))"
         + "      return Promise.resolve({ supported: false, smooth: false, powerEfficient: false });"
         + "    return info(c);"
         + "  };"
         + "}"
         + "})();";
 
-    /** Only when Chromium decodes the videos itself: otherwise H.264 at least gives the sound. */
-    private void softFormats() {
-        if (softVideo && web != null) web.evaluateJavascript(NO_HW_ONLY_JS, null);
+    /**
+     * The card hidden, Chromium is told so too (WebView.onPause), and stops decoding the image of the videos,
+     * the sound going on. The page is still told that it is seen: YouTube's mobile site pauses its videos once
+     * hidden, and dashboards stop their live values.
+     */
+    private static final String SEEN_JS = "(function () {"
+        + "if (window.__mg4dashSeen) return;"
+        + "window.__mg4dashSeen = true;"
+        + "var seen = function (name, value) {"
+        + "  try { Object.defineProperty(Document.prototype, name, { configurable: true, get: function () { return value; } }); } catch (e) {}"
+        + "};"
+        + "seen('hidden', false); seen('webkitHidden', false);"
+        + "seen('visibilityState', 'visible'); seen('webkitVisibilityState', 'visible');"
+        + "var stop = function (e) { e.stopImmediatePropagation(); };"
+        + "window.addEventListener('visibilitychange', stop, true);"
+        + "window.addEventListener('webkitvisibilitychange', stop, true);"
+        + "})();";
+
+    /** Scripts of each page, as early as it allows, before its player chooses a format. */
+    private void pageScripts() {
+        if (web == null) return;
+        // Only when Chromium decodes the videos itself: otherwise H.264 at least gives the sound
+        if (softVideo) web.evaluateJavascript("window.__mg4dashMaxH = " + maxHeightNow() + ";" + NO_HW_ONLY_JS, null);
+        if (inCardOnly()) web.evaluateJavascript(SEEN_JS, null);
+    }
+
+    private int maxHeightNow() { return web != null && web.getWidth() > 1000 ? 480 : 360; }
+
+    private void maxHeight() {
+        if (softVideo && web != null) web.evaluateJavascript("window.__mg4dashMaxH = " + maxHeightNow(), null);
+    }
+
+    /** From MG4Dash: hidden, the page goes on (sound, live values) without drawing nor decoding the videos' image. */
+    private void shown(boolean on) {
+        hidden = !on;
+        web.setVisibility(on ? View.VISIBLE : View.INVISIBLE);
+        if (video != null) video.setVisibility(on ? View.VISIBLE : View.INVISIBLE);
+        if (!started) return;
+        if (on) web.onResume(); else web.onPause();
     }
 
     private void watchFields() {
@@ -382,11 +431,13 @@ public class WebActivity extends Activity {
     @Override
     protected void onStart() {
         super.onStart();
-        if (web != null) web.onResume();
+        started = true;
+        if (web != null && !hidden) web.onResume();
     }
 
     @Override
     protected void onStop() {
+        started = false;
         if (web != null) web.onPause();
         field(false, "text");
         super.onStop();
