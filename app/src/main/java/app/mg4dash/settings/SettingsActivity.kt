@@ -507,7 +507,7 @@ class SettingsActivity : AppCompatActivity() {
         row(alert, button(getString(R.string.du_reset), R.color.accent_danger) {
             AlertDialog.Builder(this).setMessage(R.string.du_reset_confirm)
                 .setPositiveButton(R.string.du_reset) { _, _ -> DataUsage.reset(this) }
-                .setNegativeButton(android.R.string.cancel, null).show().also { app.mg4dash.ui.Dialogs.fix(it) }
+                .setNegativeButton(android.R.string.cancel, null).show().also { app.mg4dash.ui.Dialogs.fix(it); app.mg4dash.ui.Dialogs.hideBars(it) }
         })
 
         val dayFormat = java.text.SimpleDateFormat("EEEE d MMMM", Locale.getDefault())
@@ -524,7 +524,7 @@ class SettingsActivity : AppCompatActivity() {
                     .setMessage(lines)
                     .setPositiveButton(R.string.st_close, null)
                     .setOnDismissListener { chart.selected = -1 }
-                    .show().also { app.mg4dash.ui.Dialogs.fix(it) }
+                    .show().also { app.mg4dash.ui.Dialogs.fix(it); app.mg4dash.ui.Dialogs.hideBars(it) }
             }
         }
         val render: (DataUsage.Snapshot) -> Unit = { s ->
