@@ -172,6 +172,8 @@ class PhoneActivity : PageActivity() {
     private lateinit var contactEmpty: TextView
     private lateinit var dialed: TextView
     private var contacts: List<Entry> = emptyList()
+    private lateinit var recentCard: View
+    private lateinit var padCard: View
 
     override fun buildBody() {
         deviceLabel = kit.text("", 18f, R.color.text_sub)
@@ -189,6 +191,7 @@ class PhoneActivity : PageActivity() {
 
         // ── Recent ──
         val recent = kit.panel(getString(R.string.ph_recent))
+        recentCard = recent
         recentAdapter = EntryAdapter(showType = true)
         recentEmpty = kit.text(getString(R.string.ph_no_phone), 18f, R.color.text_title).apply { maxLines = 3 }
         recent.addView(recentEmpty, kit.lp(-1, -2, t = 14))
@@ -209,8 +212,12 @@ class PhoneActivity : PageActivity() {
         book.addView(contactEmpty, kit.lp(-1, -2, t = 10))
         val contactList = list(contactAdapter).apply { clipToPadding = false }
         book.addView(contactList, kit.lp(-1, 0, 1f, t = 6))
-        // The list's end stays reachable above the keyboard
-        app.mg4dash.ui.CarKeyboard.attach(search) { open ->
+        // The keyboard covers the two cards on the driver's side, edge to edge (#93),
+        // and the list's end stays reachable above it
+        app.mg4dash.ui.CarKeyboard.attach(search, span = {
+            if (app.mg4dash.ui.Dock.rightSide(this)) app.mg4dash.ui.CarKeyboard.spanOf(book, padCard)
+            else app.mg4dash.ui.CarKeyboard.spanOf(recentCard, book)
+        }) { open ->
             contactList.setPadding(0, 0, 0, if (open) kit.dp(app.mg4dash.ui.CarKeyboard.HEIGHT_DP) else 0)
         }
         search.addTextChangedListener(object : android.text.TextWatcher {
@@ -221,6 +228,7 @@ class PhoneActivity : PageActivity() {
 
         // ── Clavier ──
         val pad = kit.panel(getString(R.string.ph_keypad))
+        padCard = pad
         dialed = kit.text("", 40f, light = true).apply { gravity = Gravity.CENTER; ellipsize = android.text.TextUtils.TruncateAt.START }
         val dRow = kit.row()
         dRow.addView(dialed, kit.lp(0, kit.dp(64), 1f))
