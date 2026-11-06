@@ -150,6 +150,9 @@ cc_ago|%1$s ago|il y a %1$s|vor %1$s|hace %1$s|%1$s fa|%1$s geleden|%1$s önce
 cc_now|now|maintenant|jetzt|ahora|adesso|nu|şimdi
 cc_min|%1$d min|%1$d min|%1$d Min.|%1$d min|%1$d min|%1$d min|%1$d dk
 cc_hours|%1$d h|%1$d h|%1$d Std.|%1$d h|%1$d h|%1$d u|%1$d sa
+cc_dur_hm|%1$d h %2$02d|%1$d h %2$02d|%1$d Std. %2$02d|%1$d h %2$02d|%1$d h %2$02d|%1$d u %2$02d|%1$d sa %2$02d
+cc_avg|avg.|moy.|Ø|media|media|gem.|ort.
+cc_last_km|last km|dernier km|letzter km|último km|ultimo km|laatste km|son km
 cc_days|%1$d d|%1$d j|%1$d T.|%1$d d|%1$d g|%1$d d|%1$d g
 cc_weeks|%1$d wk|%1$d sem.|%1$d Wo.|%1$d sem.|%1$d sett.|%1$d wk|%1$d hf
 cc_months|%1$d mo|%1$d mois|%1$d Mon.|%1$d meses|%1$d mesi|%1$d mnd|%1$d ay

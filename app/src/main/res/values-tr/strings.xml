@@ -152,6 +152,9 @@
     <string name="cc_now">şimdi</string>
     <string name="cc_min">%1$d dk</string>
     <string name="cc_hours">%1$d sa</string>
+    <string name="cc_dur_hm">%1$d sa %2$02d</string>
+    <string name="cc_avg">ort.</string>
+    <string name="cc_last_km">son km</string>
     <string name="cc_days">%1$d g</string>
     <string name="cc_weeks">%1$d hf</string>
     <string name="cc_months">%1$d ay</string>

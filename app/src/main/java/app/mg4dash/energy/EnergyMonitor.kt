@@ -57,6 +57,9 @@ object EnergyMonitor {
     /** Battery % at the start of the current trip (range bar marker, issue #29). */
     private val _tripStartSoc = MutableStateFlow<Int?>(null)
     val tripStartSoc: StateFlow<Int?> = _tripStartSoc
+    /** Time (ms) the current trip started: its duration on the consumption card (#44); 0 before the first pass. */
+    @Volatile var tripStartedAt = 0L; private set
+    internal fun tripStartForTest(at: Long) { tripStartedAt = at }
     /** Trip number, increased at each new start (reset of min V / max A, #29). */
     @Volatile var tripSeq = 0; private set
     private val _lastYear = MutableStateFlow(Totals())
@@ -171,6 +174,7 @@ object EnergyMonitor {
                     if (km != null) startKm = km
                     _sinceStart.value = Totals()
                     _tripStartSoc.value = soc
+                    tripStartedAt = now
                     tripSeq++
                 }
                 if (_tripStartSoc.value == null && soc != null) {
@@ -185,7 +189,7 @@ object EnergyMonitor {
                         sp.edit().putInt("em_c_km0", chargeKm)
                             .putFloat("em_c_out", 0f).putFloat("em_c_rgn", 0f).putFloat("em_c_clim", 0f).putFloat("em_c_acc", 0f).putFloat("em_c_heat", 0f).apply()
                     }
-                    1 -> { _sinceStart.value = Totals(); if (km != null) startKm = km }
+                    1 -> { _sinceStart.value = Totals(); if (km != null) startKm = km; tripStartedAt = now }
                     2 -> { Log.i(TAG, "12-month totals cleared from the screen"); months.clear(); pendingKm = 0; publishMonths(); saveMonths() }
                 }
                 // Charge: the % goes up at least RECHARGE_PCT points above the lowest of the

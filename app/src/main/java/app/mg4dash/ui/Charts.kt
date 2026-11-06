@@ -129,6 +129,11 @@ class LineChart @JvmOverloads constructor(context: Context, attrs: AttributeSet?
     private var positions: List<Float>? = null
     /** Average of all values received, not of the points kept (rounded slices, not all equal). */
     private var average = 0f
+    /** The average's value, as drawn by the dashed line. */
+    val averageValue: Float get() = average
+    /** Bubble with the average's value at the end of the dashed line; off when the value is shown elsewhere (#44). */
+    var averageBubble = true
+        set(v) { if (field != v) { field = v; invalidate() } }
     /** Text shown without a curve: 1 point per km, or per trip over 12 months (#44). */
     var emptyText: Int = app.mg4dash.R.string.chart_empty
         set(v) { if (field != v) { field = v; invalidate() } }
@@ -270,6 +275,7 @@ class LineChart @JvmOverloads constructor(context: Context, attrs: AttributeSet?
         val avg = average
         val ay = y(avg)
         canvas.drawPath(Path().apply { moveTo(left, ay); lineTo(right, ay) }, avgPaint)
+        if (!averageBubble) return
         val txt = String.format(Locale.getDefault(), "%.1f", avg)
         val tw = avgText.measureText(txt)
         val padH = 7 * d; val h = avgText.textSize + 6 * d

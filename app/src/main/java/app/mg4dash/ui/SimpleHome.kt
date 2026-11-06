@@ -334,7 +334,7 @@ class SimpleHome(private val a: AppCompatActivity) {
             tile.removeAllViews()
             val icon = ImageView(a)
             val label = kit.text("", 24f, R.color.text_value).apply { gravity = Gravity.CENTER }
-            val state = kit.text("", 19f, R.color.text_sub).apply { gravity = Gravity.CENTER; maxLines = 1; visibility = android.view.View.GONE }
+            val state = kit.text("", 19f, R.color.text_sub).apply { gravity = Gravity.CENTER; maxLines = 1; visibility = android.view.View.INVISIBLE }
             when (s) {
                 Shortcuts.Slot.Empty -> {
                     icon.setImageResource(R.drawable.ic_plus); icon.setColorFilter(kit.color(R.color.text_title))
@@ -351,6 +351,7 @@ class SimpleHome(private val a: AppCompatActivity) {
             }
             tile.addView(icon, LinearLayout.LayoutParams(kit.dp(64), kit.dp(64)))
             if (label.text.isNotEmpty()) tile.addView(label, kit.lp(-2, -2, t = 4))
+            // Kept on every tile (#97): the tiles stay level
             tile.addView(state, kit.lp(-2, -2))
             tile.setOnClickListener {
                 when (s) {

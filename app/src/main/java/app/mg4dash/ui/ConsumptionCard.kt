@@ -36,6 +36,13 @@ class ConsumptionCard(context: Context) : LinearLayout(context) {
     /** A touch opens the Energy page, like the battery widget. */
     private fun openEnergy() = context.startActivity(android.content.Intent(context, app.mg4dash.pages.EnergyActivity::class.java))
     private val note = tv(15f, R.color.text_sub)
+    /** Duration of the current trip, without seconds, in the top right corner (#44); only for the trip. */
+    private val duration = tv(19f, R.color.text_value).apply { gravity = Gravity.END }
+    /** Average and last km, in colour, on the chart's title line instead of bubbles on the curve (#44). */
+    private val figures = tv(15f, R.color.text_sub).apply { gravity = Gravity.END }
+    private val tick = object : Runnable {
+        override fun run() { showDuration(); postDelayed(this, 30_000) }
+    }
 
     private val prefs = app.mg4dash.system.Prefs(context)
     private val periodLabels = listOf(R.string.en_since_charge, R.string.en_trip, R.string.en_last_year).map { context.getString(it) }
@@ -56,7 +63,11 @@ class ConsumptionCard(context: Context) : LinearLayout(context) {
         setPadding((20 * d).toInt(), (16 * d).toInt(), (20 * d).toInt(), (16 * d).toInt())
         // Title hidden with the "Hide titles" option (the space stays, so nothing shifts)
         // Period ("Since the charge ▾"): a touch opens the choice, like the radio source choice
-        addView(periodTv, LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT))
+        addView(LinearLayout(context).apply {
+            orientation = HORIZONTAL; gravity = Gravity.CENTER_VERTICAL
+            addView(periodTv, LayoutParams(0, LayoutParams.WRAP_CONTENT, 1f))
+            addView(duration, LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT))
+        }, LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT))
         addView(LinearLayout(context).apply {
             orientation = HORIZONTAL; gravity = Gravity.BOTTOM
             addView(total, LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT))
@@ -70,8 +81,13 @@ class ConsumptionCard(context: Context) : LinearLayout(context) {
             addView(distance)
         }, LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT).apply { topMargin = (10 * d).toInt() })
         addView(legend, LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT).apply { topMargin = (6 * d).toInt() })
-        addView(tv(15f, R.color.text_title).apply { text = context.getString(R.string.en_recent, app.mg4dash.system.Units.stackUnit(context)); letterSpacing = 0.1f },
-            LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT).apply { topMargin = (10 * d).toInt() })
+        addView(LinearLayout(context).apply {
+            orientation = HORIZONTAL; gravity = Gravity.BOTTOM
+            addView(tv(15f, R.color.text_title).apply { text = context.getString(R.string.en_recent, app.mg4dash.system.Units.stackUnit(context)); letterSpacing = 0.1f },
+                LayoutParams(0, LayoutParams.WRAP_CONTENT, 1f))
+            addView(figures, LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT))
+        }, LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT).apply { topMargin = (10 * d).toInt() })
+        chart.averageBubble = false
         addView(chart, LayoutParams(LayoutParams.MATCH_PARENT, 0, 1f))
         addView(note)
     }
@@ -92,6 +108,34 @@ class ConsumptionCard(context: Context) : LinearLayout(context) {
         axis(context, period, points).let { (a, b) -> chart.startLabel = a; chart.endLabel = b }
         chart.emptyText = if (period == 2) R.string.chart_empty_trips else R.string.chart_empty
         note.text = n
+        figures.text = figuresText(points)
+        showDuration()
+    }
+
+    override fun onAttachedToWindow() { super.onAttachedToWindow(); removeCallbacks(tick); post(tick) }
+    override fun onDetachedFromWindow() { removeCallbacks(tick); super.onDetachedFromWindow() }
+
+    private fun showDuration() {
+        val start = EnergyMonitor.tripStartedAt
+        duration.text = if (prefs.consumptionPeriod.coerceIn(0, 2) == 1 && start > 0) durationText(context, System.currentTimeMillis() - start) else ""
+    }
+
+    /** "14.8 avg.   22.6 last km": the average in the dashed line's colour, the last km in orange (#44). */
+    private fun figuresText(points: Int): CharSequence {
+        if (points < 2) return ""
+        val out = android.text.SpannableStringBuilder()
+        fun add(value: Float, label: Int, colorRes: Int) {
+            if (out.isNotEmpty()) out.append("    ")
+            val at = out.length
+            out.append(String.format(Locale.getDefault(), "%.1f", value))
+            out.setSpan(android.text.style.ForegroundColorSpan(c(colorRes)), at, out.length, 0)
+            out.setSpan(android.text.style.RelativeSizeSpan(1.4f), at, out.length, 0)
+            out.setSpan(android.text.style.StyleSpan(android.graphics.Typeface.BOLD), at, out.length, 0)
+            out.append(" ").append(context.getString(label))
+        }
+        add(chart.averageValue, R.string.cc_avg, R.color.accent_action)
+        lastKm(context)?.let { add(it, R.string.cc_last_km, R.color.accent_heat) }
+        return out
     }
 
     /** Half size unit after the last space ("1.6 kWh", "12 km"). */
@@ -101,6 +145,16 @@ class ConsumptionCard(context: Context) : LinearLayout(context) {
     }
 
     companion object {
+        /** Consumption of the last km of the current trip, in the chart's unit; null without a trip point (#44). */
+        fun lastKm(c: android.content.Context): Float? =
+            app.mg4dash.energy.ConsumptionCurve.curves.value.trip.lastOrNull()?.let { app.mg4dash.system.Units.stackValue(c, it) }
+
+        /** "1 h 12" or "25 min" (#44). */
+        fun durationText(c: android.content.Context, ms: Long): String {
+            val min = (ms / 60_000L).coerceAtLeast(0).toInt()
+            return if (min < 60) c.getString(R.string.cc_min, min) else c.getString(R.string.cc_dur_hm, min / 60, min % 60)
+        }
+
         /** Part of the distance powered by the recovered energy, its share of what left the battery (#44, see the README). */
         fun regenKm(t: EnergyMonitor.Totals): Float? =
             if (t.km >= 2 && t.outKwh > 0f) t.regenKwh / t.outKwh * t.km else null
