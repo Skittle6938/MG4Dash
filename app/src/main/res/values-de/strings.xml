@@ -543,6 +543,8 @@
     <string name="wc_web_error">Seite nicht erreichbar. Zum erneuten Versuch antippen.</string>
     <string name="wc_web_loading">Wird geladen…</string>
     <string name="wc_web_unsupported">Dieses Gerät hat keine Web-Ansicht.</string>
+    <string name="wc_web_installing">MG4Dash Web, die Anzeige für Webseiten, wird installiert…</string>
+    <string name="wc_web_install_failed">MG4Dash Web konnte nicht installiert werden. Zum erneuten Versuch antippen.</string>
     <string name="wc_none_simple">Das Layout Einfach hat keine Karten zur Auswahl.</string>
     <string name="st_edit_cards">Karten der Widgets</string>
     <string name="st_edit_cards_desc">Die Karten wählen, die jedes Widget zeigt, auch eine Web-App im Karten-Widget. Abkürzung: Startbildschirm mit zwei Fingern zusammenziehen.</string>

@@ -543,6 +543,8 @@
     <string name="wc_web_error">Page inaccessible. Touchez pour réessayer.</string>
     <string name="wc_web_loading">Chargement…</string>
     <string name="wc_web_unsupported">Cet écran n\'a pas de navigateur web intégré.</string>
+    <string name="wc_web_installing">Installation de MG4Dash Web, l\'afficheur de pages web…</string>
+    <string name="wc_web_install_failed">MG4Dash Web n\'a pas pu être installé. Touchez pour réessayer.</string>
     <string name="wc_none_simple">La disposition Simple n\'a pas de cartes à choisir.</string>
     <string name="st_edit_cards">Cartes des widgets</string>
     <string name="st_edit_cards_desc">Choisir les cartes que fait défiler chaque widget, dont une web app dans le widget carte. Raccourci : pincer l\'accueil avec deux doigts.</string>

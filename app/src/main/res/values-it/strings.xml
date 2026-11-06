@@ -543,6 +543,8 @@
     <string name="wc_web_error">Pagina non raggiungibile. Tocca per riprovare.</string>
     <string name="wc_web_loading">Caricamento…</string>
     <string name="wc_web_unsupported">Questa unità non ha una vista web.</string>
+    <string name="wc_web_installing">Installazione di MG4Dash Web, il visualizzatore di pagine web…</string>
+    <string name="wc_web_install_failed">Impossibile installare MG4Dash Web. Tocca per riprovare.</string>
     <string name="wc_none_simple">Il layout Semplice non ha schede da scegliere.</string>
     <string name="st_edit_cards">Schede dei widget</string>
     <string name="st_edit_cards_desc">Scegliere le schede di ogni widget, anche una web app nel widget mappa. Scorciatoia: pizzicare la schermata home con due dita.</string>
