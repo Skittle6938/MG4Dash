@@ -102,6 +102,8 @@ The Full and Map layouts each keep their own choice; the Simple layout has no ca
 | Full | top: climate · map, consumption, shortcuts · media; bottom: energy · weather by hour, by day · trip, power, phone |
 | Map | top: weather by hour, by day · energy, trip, power, phone; right: map, consumption, shortcuts; bottom: climate · media |
 
+![Edit mode of the Full layout](docs/screenshots/edit_cards_full.png?v=25)
+
 In a place with the map, the edit mode also sets the app shown instead of the map; with the web app, its address. The Power card is left out when *Live power in the energy card* is on.
 
 | Consumption | Shortcuts |
