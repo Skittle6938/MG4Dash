@@ -720,8 +720,8 @@
     <string name="du_unavailable">Bu radyonun ağ sayaçları okunamıyor: 4G verisi sayılamıyor.</string>
     <string name="du_daily">GÜN GÜN</string>
     <string name="du_daily_desc">Ortalama %1$s / gün · en yüksek gün %2$s · bir çubuğa dokunun: o günün ayrıntısı</string>
-    <string name="du_daily_empty">Aracın 4G\'sinde henüz bir şey kullanılmadı. MG4Dash veri kullandığında her gün burada görünür.</string>
-    <string name="du_day_none">O gün aracın 4G\'sinde bir şey kullanılmadı.</string>
+    <string name="du_daily_empty">Henüz bir şey kullanılmadı. MG4Dash veri kullandığında her gün burada görünür.</string>
+    <string name="du_day_none">O gün bir şey kullanılmadı.</string>
     <string name="du_day_line">%1$s: %2$s</string>
     <string name="du_alert_panel">UYARI</string>
     <string name="du_threshold">Uyarı eşiği</string>
@@ -741,6 +741,10 @@
     <string name="du_alert_once">Bu mesaj ancak toplam eşiğin altına düşüp yeniden aştığında tekrar gelir.</string>
     <string name="du_alert_detail">Ayrıntıyı gör</string>
     <string name="du_updates_wait">Güncellemeler yalnızca Wi-Fi\'da: aracı bir Wi-Fi\'a bağlayın veya seçeneği Ayarlar › 4G verisi\'nden kapatın.</string>
+    <string name="du_detail">Ayrıntı</string>
+    <string name="du_net_4g">4G</string>
+    <string name="du_net_wifi">Wi-Fi</string>
+    <string name="du_note_wifi">4G: aracın ağı. Wi-Fi: araç bir modeme veya telefona bağlıyken. Kota ve uyarı yalnızca 4G\'yi sayar, aracın diğer uygulamaları sayılmaz.</string>
     <string name="aa_title">ANDROID AUTO</string>
     <string name="aa_ready">Telefon bağlı · Açmak için dokunun</string>
     <string name="aa_waiting">Telefonunuzu USB ile bağlayın</string>

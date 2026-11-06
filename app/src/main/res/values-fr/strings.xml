@@ -720,8 +720,8 @@
     <string name="du_unavailable">Les compteurs réseau de cet autoradio sont illisibles : les données 4G ne peuvent pas être comptées.</string>
     <string name="du_daily">JOUR PAR JOUR</string>
     <string name="du_daily_desc">Moyenne %1$s / jour · plus gros jour %2$s · appui sur une barre : le détail du jour</string>
-    <string name="du_daily_empty">Rien d\'utilisé sur la 4G de la voiture pour l\'instant. Chaque jour apparaît ici dès que MG4Dash y utilise des données.</string>
-    <string name="du_day_none">Rien d\'utilisé sur la 4G de la voiture ce jour-là.</string>
+    <string name="du_daily_empty">Rien d\'utilisé pour l\'instant. Chaque jour apparaît ici dès que MG4Dash utilise des données.</string>
+    <string name="du_day_none">Rien d\'utilisé ce jour-là.</string>
     <string name="du_day_line">%1$s : %2$s</string>
     <string name="du_alert_panel">ALERTE</string>
     <string name="du_threshold">Seuil d\'alerte</string>
@@ -741,6 +741,10 @@
     <string name="du_alert_once">Ce message ne revient que si le total repasse sous le seuil puis le dépasse à nouveau.</string>
     <string name="du_alert_detail">Voir le détail</string>
     <string name="du_updates_wait">Mises à jour seulement en Wi-Fi : connectez la voiture à un Wi-Fi, ou désactivez l\'option dans Réglages › Données 4G.</string>
+    <string name="du_detail">Détail</string>
+    <string name="du_net_4g">4G</string>
+    <string name="du_net_wifi">Wi-Fi</string>
+    <string name="du_note_wifi">4G : le réseau de la voiture. Wi-Fi : quand la voiture est connectée à une box ou un téléphone. Le quota et l\'alerte ne comptent que la 4G, et les autres applis de la voiture ne sont pas comptées.</string>
     <string name="aa_title">ANDROID AUTO</string>
     <string name="aa_ready">Téléphone connecté · Appuyer pour ouvrir</string>
     <string name="aa_waiting">Branchez votre téléphone en USB</string>
