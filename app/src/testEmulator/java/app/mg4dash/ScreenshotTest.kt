@@ -483,6 +483,40 @@ class ScreenshotTest {
         shoot(MainActivity::class.java, "home_map_layout_shortcuts_state.png")
     }
 
+    /** Cards' edit mode (#97), opened by a pinch: Map layout, web app on. */
+    @Test @Config(qualifiers = "fr-w1920dp-h720dp-land-mdpi") fun editCardsMapLayout() {
+        org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE).edit()
+            .putInt("home_style", 2).putString("wc_map", "map,consumption,shortcuts,web").putString("web_url", "http://homeassistant.local:8123/mg4").apply()
+        editCards("edit_cards_map.png")
+    }
+
+    /** Same in the Full layout: weather, bottom right widget and map widget. */
+    @Test @Config(qualifiers = "fr-w1920dp-h720dp-land-mdpi") fun editCardsFullLayout() {
+        org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE).edit()
+            .putInt("home_style", 0).apply()
+        editCards("edit_cards_full.png")
+    }
+
+    /** Web app card without an address yet (#97). */
+    @Test @Config(qualifiers = "fr-w1920dp-h720dp-land-mdpi") fun webCardNoAddress() {
+        org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE).edit()
+            .putInt("home_style", 2).putString("wc_map", "map,consumption,shortcuts,web").putInt("home_widget", 3).apply()
+        shoot(MainActivity::class.java, "home_map_layout_web.png")
+    }
+
+    private fun editCards(name: String) {
+        val sp = org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE)
+        if (!sp.contains("theme_mode")) sp.edit().putInt("theme_mode", 1).commit()
+        val activity = Robolectric.buildActivity(MainActivity::class.java).setup().get()
+        repeat(5) { shadowOf(Looper.getMainLooper()).idleFor(200, TimeUnit.MILLISECONDS) }
+        // Laid out first: the edit mode places its boxes over the widgets
+        save(activity.window.decorView, "tmp_$name")
+        activity.editCards()
+        repeat(3) { shadowOf(Looper.getMainLooper()).idleFor(200, TimeUnit.MILLISECONDS) }
+        save(activity.window.decorView, name)
+        File("build/screenshots/tmp_$name").delete()
+    }
+
     @Test fun vehicleSoh() {
         val now = System.currentTimeMillis()
         org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE).edit()
