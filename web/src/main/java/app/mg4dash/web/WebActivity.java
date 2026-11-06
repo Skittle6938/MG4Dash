@@ -172,7 +172,7 @@ public class WebActivity extends Activity {
 
             @Override
             public void onPageStarted(WebView view, String url, android.graphics.Bitmap favicon) {
-                field(false, false);
+                field(false, "text");
             }
 
             // The script that watches the fields, as soon as the page shows, and again at its end
@@ -222,17 +222,19 @@ public class WebActivity extends Activity {
         + "  while (a && a.shadowRoot && a.shadowRoot.activeElement) a = a.shadowRoot.activeElement;"
         + "  return a;"
         + "}"
-        + "function numeric(e) {"
+        + "function kind(e) {"
         + "  var m = (e.getAttribute('inputmode') || '').toLowerCase();"
-        + "  return e.type === 'number' || m === 'numeric' || m === 'decimal';"
+        + "  if (e.type === 'number' || m === 'numeric' || m === 'decimal') return 'number';"
+        + "  return e.type === 'tel' || m === 'tel' ? 'tel' : 'text';"
         + "}"
         + "var tapped = 0;"
-        + "function show() { var e = active(); if (editable(e)) MG4DashFields.field(true, numeric(e)); }"
-        + "document.addEventListener('pointerdown', function () { tapped = Date.now(); }, true);"
-        + "document.addEventListener('click', function () { setTimeout(show, 0); }, true);"
+        + "function show() { var e = active(); if (editable(e)) MG4DashFields.field(true, kind(e)); }"
+        // Only the driver's touches: a click by the page's script (a search sent) does not open it again
+        + "document.addEventListener('pointerdown', function (ev) { if (ev.isTrusted) tapped = Date.now(); }, true);"
+        + "document.addEventListener('click', function (ev) { if (ev.isTrusted) setTimeout(show, 0); }, true);"
         + "document.addEventListener('focusin', function () { if (Date.now() - tapped < 1000) show(); }, true);"
         + "document.addEventListener('focusout', function () {"
-        + "  setTimeout(function () { if (!editable(active())) MG4DashFields.field(false, false); }, 100);"
+        + "  setTimeout(function () { if (!editable(active())) MG4DashFields.field(false, 'text'); }, 100);"
         + "}, true);"
         + "function value(e, v) {"
         + "  var d = Object.getOwnPropertyDescriptor(Object.getPrototypeOf(e), 'value');"
@@ -266,14 +268,17 @@ public class WebActivity extends Activity {
     /** Called by the page's script, on Chromium's thread. */
     private final class Fields {
         @JavascriptInterface
-        public void field(boolean on, boolean numeric) { runOnUiThread(() -> WebActivity.this.field(on, numeric)); }
+        public void field(boolean on, String kind) { runOnUiThread(() -> WebActivity.this.field(on, kind)); }
     }
 
-    /** A field touched (MG4Dash opens its keyboard) or left (MG4Dash closes it). */
-    private void field(boolean on, boolean numeric) {
+    /**
+     * A field touched (MG4Dash opens its keyboard: [kind] "number" for digits only, "tel" for numbers and
+     * symbols first, otherwise "text") or left (MG4Dash closes it).
+     */
+    private void field(boolean on, String kind) {
         if (keyboardFor == null || (!on && !fieldOpen)) return;
         fieldOpen = on;
-        tell(new Intent(FIELD).putExtra("on", on).putExtra("numeric", numeric));
+        tell(new Intent(FIELD).putExtra("on", on).putExtra("kind", kind));
     }
 
     private void tell(Intent i) {
@@ -328,7 +333,7 @@ public class WebActivity extends Activity {
     @Override
     protected void onStop() {
         if (web != null) web.onPause();
-        field(false, false);
+        field(false, "text");
         super.onStop();
     }
 
