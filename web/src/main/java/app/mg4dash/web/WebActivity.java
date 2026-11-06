@@ -71,6 +71,9 @@ public class WebActivity extends Activity {
     /** MG4Dash was told that a field is touched (its keyboard is open). */
     private boolean fieldOpen;
     private boolean listening;
+    /** The card is hidden (MG4Dash said so); the WebView was paused for it (no video tracks). */
+    private boolean hidden, pausedHidden;
+    private boolean started;
 
     /** From MG4Dash: the keys of its keyboard, and whether the card is shown. */
     private final BroadcastReceiver fromCard = new BroadcastReceiver() {
@@ -297,8 +300,16 @@ public class WebActivity extends Activity {
                     add.invoke(line, "enable-blink-features=AudioVideoTracks");
                 }
                 videoTracks = true;
+                Object v = cmd.getMethod("getSwitchValue", String.class).invoke(line, "enable-blink-features");
+                Log.i(TAG, "blink features: " + v);
             } catch (Throwable e) {
                 Log.w(TAG, "no video tracks: " + e);
+            }
+            // Hidden without the tracks: the paused WebView keeps playing (sound), Chromium dropping the image itself
+            try {
+                add.invoke(line, "disable-media-suspend");
+            } catch (Throwable e) {
+                Log.w(TAG, "media suspend: " + e);
             }
         } catch (Throwable e) {
             Log.w(TAG, "videos still by the hardware decoders: " + e);
@@ -336,15 +347,15 @@ public class WebActivity extends Activity {
 
     /**
      * The card hidden, the videos' image track is unselected (videoTracks), so Chromium stops decoding it, the
-     * sound going on; selected again once shown. WebView.onPause would stop the sound too: YouTube paused.
-     * Returns the number of tracks switched.
+     * sound going on; selected again once shown. Returns the number of tracks switched, then what was found.
      */
     private static final String TRACKS_JS = "(function () {"
         + "if (window.__mg4dashVideoShown) return;"
         + "window.__mg4dashVideoShown = function (on) {"
-        + "  var n = 0, vs = document.querySelectorAll('video');"
+        + "  var n = 0, found = [], vs = document.querySelectorAll('video');"
         + "  for (var i = 0; i < vs.length; i++) {"
         + "    var v = vs[i], t = v.videoTracks;"
+        + "    found.push(t ? t.length + (t.length && t[0].selected ? '+' : '') : 'none');"
         + "    if (!t) continue;"
         + "    if (!on) {"
         + "      for (var j = 0; j < t.length; j++) if (t[j].selected) { t[j].selected = false; v.__mg4dashOff = j; n++; }"
@@ -353,9 +364,30 @@ public class WebActivity extends Activity {
         + "      v.__mg4dashOff = undefined;"
         + "    }"
         + "  }"
-        + "  return n;"
+        + "  return n + ' api=' + ('videoTracks' in HTMLMediaElement.prototype) + ' videos=' + vs.length + ' tracks=' + found.join(',');"
         + "};"
         + "})();";
+
+    /**
+     * Without the tracks, the WebView is paused instead: Chromium, told the page is hidden, stops decoding the
+     * image itself after a few seconds, the sound going on (no media suspend). The page is still told it is seen:
+     * YouTube's mobile site pauses once hidden, and dashboards stop their live values.
+     */
+    private static final String SEEN_JS = "(function () {"
+        + "if (window.__mg4dashSeen) return;"
+        + "window.__mg4dashSeen = true;"
+        + "var seen = function (name, value) {"
+        + "  try { Object.defineProperty(Document.prototype, name, { configurable: true, get: function () { return value; } }); } catch (e) {}"
+        + "};"
+        + "seen('hidden', false); seen('webkitHidden', false);"
+        + "seen('visibilityState', 'visible'); seen('webkitVisibilityState', 'visible');"
+        + "var stop = function (e) { e.stopImmediatePropagation(); };"
+        + "window.addEventListener('visibilitychange', stop, true);"
+        + "window.addEventListener('webkitvisibilitychange', stop, true);"
+        + "})();";
+
+    /** Out of sight (MG4Dash no longer shown, another app over it): the page's sound stops, as before. */
+    private static final String PAUSE_JS = "document.querySelectorAll('video, audio').forEach(function (m) { try { m.pause(); } catch (e) {} });";
 
     /** Scripts of each page, as early as it allows, before its player chooses a format. */
     private void pageScripts() {
@@ -363,6 +395,7 @@ public class WebActivity extends Activity {
         // Only when Chromium decodes the videos itself: otherwise H.264 at least gives the sound
         if (softVideo) web.evaluateJavascript("window.__mg4dashMaxH = " + maxHeightNow() + ";" + NO_HW_ONLY_JS, null);
         if (videoTracks && inCardOnly()) web.evaluateJavascript(TRACKS_JS, null);
+        if (softVideo && inCardOnly()) web.evaluateJavascript(SEEN_JS, null);
     }
 
     private int maxHeightNow() { return web != null && web.getWidth() > 1000 ? 480 : 360; }
@@ -373,10 +406,27 @@ public class WebActivity extends Activity {
 
     /** From MG4Dash: hidden, the page goes on (sound, live values) without drawing nor decoding the videos' image. */
     private void shown(boolean on) {
+        hidden = !on;
         web.setVisibility(on ? View.VISIBLE : View.INVISIBLE);
         if (video != null) video.setVisibility(on ? View.VISIBLE : View.INVISIBLE);
-        if (videoTracks) web.evaluateJavascript("window.__mg4dashVideoShown ? __mg4dashVideoShown(" + on + ") : -1",
-            n -> Log.i(TAG, "card " + (on ? "shown" : "hidden") + ": video tracks switched " + n));
+        if (on && pausedHidden) {
+            pausedHidden = false;
+            if (started) web.onResume();
+            Log.i(TAG, "card shown: WebView resumed");
+        }
+        if (!softVideo) return;
+        String js = videoTracks ? "window.__mg4dashVideoShown ? __mg4dashVideoShown(" + on + ") : '-1'" : "'-1'";
+        web.evaluateJavascript(js, r -> {
+            Log.i(TAG, "card " + (on ? "shown" : "hidden") + ": video tracks switched " + r);
+            int n;
+            try { n = Integer.parseInt(r.replace("\"", "").trim().split(" ")[0]); } catch (Exception e) { n = -1; }
+            // No track switched: the paused WebView then (still hidden, and the activity started)
+            if (!on && n <= 0 && hidden && started && !pausedHidden) {
+                pausedHidden = true;
+                web.onPause();
+                Log.i(TAG, "card hidden: WebView paused");
+            }
+        });
     }
 
     private void watchFields() {
@@ -445,12 +495,18 @@ public class WebActivity extends Activity {
     @Override
     protected void onStart() {
         super.onStart();
-        if (web != null) web.onResume();
+        started = true;
+        if (web != null && !pausedHidden) web.onResume();
     }
 
     @Override
     protected void onStop() {
-        if (web != null) web.onPause();
+        started = false;
+        if (web != null) {
+            // Media are no longer suspended by Chromium (for the hidden card): out of sight, they stop here
+            if (softVideo && inCardOnly()) web.evaluateJavascript(PAUSE_JS, null);
+            web.onPause();
+        }
         field(false, "text");
         super.onStop();
     }
