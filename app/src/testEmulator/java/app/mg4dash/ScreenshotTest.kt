@@ -148,16 +148,16 @@ class ScreenshotTest {
 
     /** Settings in tabs (mockup): one render per tab, in French. */
     @Test @Config(qualifiers = "fr-w1920dp-h720dp-land-mdpi") fun settingsTabs() {
-        for (t in 0..4) {
-            org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE).edit().putInt("settings_tab", t).commit()
+        for (t in 0..5) {
+            org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE).edit().putBoolean("settings_tabs_v2", true).putInt("settings_tab", t).commit()
             shoot(SettingsActivity::class.java, "settings_tab$t.png")
         }
     }
 
     /** Settings tabs in English, for the README. */
     @Test fun settingsTabsEn() {
-        for (t in 0..4) {
-            org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE).edit().putInt("settings_tab", t).commit()
+        for (t in 0..5) {
+            org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE).edit().putBoolean("settings_tabs_v2", true).putInt("settings_tab", t).commit()
             shoot(SettingsActivity::class.java, "settings_en_tab$t.png")
         }
     }

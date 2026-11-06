@@ -75,6 +75,7 @@ class LauncherApp : Application() {
             app.mg4dash.energy.V2lAuto.start(this)
         }
         WeatherRepo.start(this)
+        app.mg4dash.system.DataUsage.start(this)
         app.mg4dash.ui.Themes.publish(this)
         startThemeWatch()
     }

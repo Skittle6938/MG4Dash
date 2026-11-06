@@ -63,7 +63,8 @@ class MapCard(private val context: Context, holder: ViewGroup) {
             conf.osmdroidBasePath = File(context.filesDir, "osmdroid")
             conf.osmdroidTileCache = File(context.cacheDir, "osmdroid-tiles")
             conf.tileFileSystemCacheMaxBytes = 200L * 1024 * 1024
-            val m = MapView(context).apply {
+            // Tiles counted in the 4G data counter (map)
+            val m = MapView(context, TaggedTileProvider(context.applicationContext)).apply {
                 setTileSource(TileSourceFactory.MAPNIK)
                 setMultiTouchControls(true)
                 zoomController.setVisibility(CustomZoomButtonsController.Visibility.NEVER)

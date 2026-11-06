@@ -50,6 +50,8 @@ object UpdatePrompt {
             return
         }
         if (checked || !StatusMonitor.hasInternet(activity)) return
+        // "Updates on Wi-Fi only" (4G data): the check waits for a return to home on Wi-Fi
+        if (app.mg4dash.system.DataUsage.updatesBlocked(activity)) return
         checked = true
         val owner = activity as? LifecycleOwner ?: return
         owner.lifecycleScope.launch {

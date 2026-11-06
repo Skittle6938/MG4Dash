@@ -141,7 +141,8 @@ object WeatherRepo {
     private const val PROBE_MS = 2 * 60 * 1000L
 
     /** Real internet access: HEAD request with no content to the weather service (≈ 1 KB). */
-    private fun probe(): Boolean = try {
+    private fun probe(): Boolean = app.mg4dash.system.DataUsage.tag(app.mg4dash.system.DataUsage.Use.WEATHER) { probeUntagged() }
+    private fun probeUntagged(): Boolean = try {
         val c = URL("https://api.open-meteo.com/").openConnection() as HttpURLConnection
         c.requestMethod = "HEAD"; c.connectTimeout = 8000; c.readTimeout = 8000; c.instanceFollowRedirects = false
         try { c.responseCode > 0 } finally { c.disconnect() }
@@ -231,7 +232,7 @@ object WeatherRepo {
     // interface, and the request itself is the only reliable test.
     private fun refresh(context: Context): Boolean {
         busy = true
-        try { return doRefresh(context) } finally { busy = false }
+        try { return app.mg4dash.system.DataUsage.tag(app.mg4dash.system.DataUsage.Use.WEATHER) { doRefresh(context) } } finally { busy = false }
     }
 
     private fun doRefresh(context: Context): Boolean {
@@ -270,7 +271,8 @@ object WeatherRepo {
      * new request only after 5 km or on language change (issue #6: show the city
      * rather than "Current position"). Null offline or on failure.
      */
-    private fun cityName(context: Context, lat: Double, lon: Double): String? {
+    private fun cityName(context: Context, lat: Double, lon: Double): String? = app.mg4dash.system.DataUsage.tag(app.mg4dash.system.DataUsage.Use.WEATHER) { cityNameUntagged(context, lat, lon) }
+    private fun cityNameUntagged(context: Context, lat: Double, lon: Double): String? {
         val sp = Prefs(context).raw
         val lang = Locale.getDefault().language
         val cLat = sp.getFloat("city_lat", 0f).toDouble(); val cLon = sp.getFloat("city_lon", 0f).toDouble()
