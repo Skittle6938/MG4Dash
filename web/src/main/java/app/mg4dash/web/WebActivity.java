@@ -71,9 +71,6 @@ public class WebActivity extends Activity {
     /** MG4Dash was told that a field is touched (its keyboard is open). */
     private boolean fieldOpen;
     private boolean listening;
-    /** The card is hidden (MG4Dash said so). */
-    private boolean hidden;
-    private boolean started;
 
     /** From MG4Dash: the keys of its keyboard, and whether the card is shown. */
     private final BroadcastReceiver fromCard = new BroadcastReceiver() {
@@ -279,6 +276,7 @@ public class WebActivity extends Activity {
      * told that H.264 (and HEVC, AV1) cannot be played: YouTube and others send VP9.
      */
     private static boolean softVideo;
+    private static boolean videoTracks;
 
     private static void softwareVideo() {
         if (softVideo) return;
@@ -287,9 +285,21 @@ public class WebActivity extends Activity {
             ClassLoader cl = WebView.getWebViewClassLoader();
             Class<?> cmd = Class.forName("org.chromium.base.CommandLine", true, cl);
             Object line = cmd.getMethod("getInstance").invoke(null);
-            cmd.getMethod("appendSwitch", String.class).invoke(line, "disable-accelerated-video-decode");
+            java.lang.reflect.Method add = cmd.getMethod("appendSwitch", String.class);
+            add.invoke(line, "disable-accelerated-video-decode");
             softVideo = true;
             Log.i(TAG, "videos decoded by Chromium");
+            // The page's videoTracks, to switch the image off while the card is hidden; read as --name=value at the start
+            try {
+                try {
+                    cmd.getMethod("appendSwitchWithValue", String.class, String.class).invoke(line, "enable-blink-features", "AudioVideoTracks");
+                } catch (NoSuchMethodException e) {
+                    add.invoke(line, "enable-blink-features=AudioVideoTracks");
+                }
+                videoTracks = true;
+            } catch (Throwable e) {
+                Log.w(TAG, "no video tracks: " + e);
+            }
         } catch (Throwable e) {
             Log.w(TAG, "videos still by the hardware decoders: " + e);
         }
@@ -325,21 +335,26 @@ public class WebActivity extends Activity {
         + "})();";
 
     /**
-     * The card hidden, Chromium is told so too (WebView.onPause), and stops decoding the image of the videos,
-     * the sound going on. The page is still told that it is seen: YouTube's mobile site pauses its videos once
-     * hidden, and dashboards stop their live values.
+     * The card hidden, the videos' image track is unselected (videoTracks), so Chromium stops decoding it, the
+     * sound going on; selected again once shown. WebView.onPause would stop the sound too: YouTube paused.
+     * Returns the number of tracks switched.
      */
-    private static final String SEEN_JS = "(function () {"
-        + "if (window.__mg4dashSeen) return;"
-        + "window.__mg4dashSeen = true;"
-        + "var seen = function (name, value) {"
-        + "  try { Object.defineProperty(Document.prototype, name, { configurable: true, get: function () { return value; } }); } catch (e) {}"
+    private static final String TRACKS_JS = "(function () {"
+        + "if (window.__mg4dashVideoShown) return;"
+        + "window.__mg4dashVideoShown = function (on) {"
+        + "  var n = 0, vs = document.querySelectorAll('video');"
+        + "  for (var i = 0; i < vs.length; i++) {"
+        + "    var v = vs[i], t = v.videoTracks;"
+        + "    if (!t) continue;"
+        + "    if (!on) {"
+        + "      for (var j = 0; j < t.length; j++) if (t[j].selected) { t[j].selected = false; v.__mg4dashOff = j; n++; }"
+        + "    } else if (typeof v.__mg4dashOff === 'number') {"
+        + "      if (t[v.__mg4dashOff]) { t[v.__mg4dashOff].selected = true; n++; }"
+        + "      v.__mg4dashOff = undefined;"
+        + "    }"
+        + "  }"
+        + "  return n;"
         + "};"
-        + "seen('hidden', false); seen('webkitHidden', false);"
-        + "seen('visibilityState', 'visible'); seen('webkitVisibilityState', 'visible');"
-        + "var stop = function (e) { e.stopImmediatePropagation(); };"
-        + "window.addEventListener('visibilitychange', stop, true);"
-        + "window.addEventListener('webkitvisibilitychange', stop, true);"
         + "})();";
 
     /** Scripts of each page, as early as it allows, before its player chooses a format. */
@@ -347,7 +362,7 @@ public class WebActivity extends Activity {
         if (web == null) return;
         // Only when Chromium decodes the videos itself: otherwise H.264 at least gives the sound
         if (softVideo) web.evaluateJavascript("window.__mg4dashMaxH = " + maxHeightNow() + ";" + NO_HW_ONLY_JS, null);
-        if (inCardOnly()) web.evaluateJavascript(SEEN_JS, null);
+        if (videoTracks && inCardOnly()) web.evaluateJavascript(TRACKS_JS, null);
     }
 
     private int maxHeightNow() { return web != null && web.getWidth() > 1000 ? 480 : 360; }
@@ -358,11 +373,10 @@ public class WebActivity extends Activity {
 
     /** From MG4Dash: hidden, the page goes on (sound, live values) without drawing nor decoding the videos' image. */
     private void shown(boolean on) {
-        hidden = !on;
         web.setVisibility(on ? View.VISIBLE : View.INVISIBLE);
         if (video != null) video.setVisibility(on ? View.VISIBLE : View.INVISIBLE);
-        if (!started) return;
-        if (on) web.onResume(); else web.onPause();
+        if (videoTracks) web.evaluateJavascript("window.__mg4dashVideoShown ? __mg4dashVideoShown(" + on + ") : -1",
+            n -> Log.i(TAG, "card " + (on ? "shown" : "hidden") + ": video tracks switched " + n));
     }
 
     private void watchFields() {
@@ -431,13 +445,11 @@ public class WebActivity extends Activity {
     @Override
     protected void onStart() {
         super.onStart();
-        started = true;
-        if (web != null && !hidden) web.onResume();
+        if (web != null) web.onResume();
     }
 
     @Override
     protected void onStop() {
-        started = false;
         if (web != null) web.onPause();
         field(false, "text");
         super.onStop();
