@@ -49,6 +49,8 @@ public class WebActivity extends Activity {
     private TextView message;
     private String loaded;
     private boolean failed;
+    /** Size of the virtual display the page was last drawn for (dp), to see the card go full screen. */
+    private int shownW, shownH;
 
     @SuppressLint("SetJavaScriptEnabled")
     @Override
@@ -65,7 +67,9 @@ public class WebActivity extends Activity {
                 if (inCardOnly() && onMainScreen()) {
                     Log.i(TAG, "moved to the main screen: closed");
                     finish();
+                    return;
                 }
+                resized(config);
             }
         };
         root.setBackgroundColor(bg);
@@ -138,7 +142,29 @@ public class WebActivity extends Activity {
         if (!inCardOnly()) addClose(root, bg, i.getIntExtra(EXTRA_FG, Color.LTGRAY));
         setContentView(root);
         immersive();
+        Configuration c = getResources().getConfiguration();
+        shownW = c.screenWidthDp; shownH = c.screenHeightDp;
         load(i.getStringExtra(EXTRA_URL));
+    }
+
+    /**
+     * Card in full screen and back (#98): the virtual display, the window and the WebView take the new size,
+     * but Chromium 66 kept drawing its last frame at the old one, frozen, the rest black. Taken out of the
+     * view tree and put back, it draws again at the new size, without reloading the page (the video goes on).
+     */
+    private void resized(Configuration config) {
+        if (web == null || (config.screenWidthDp == shownW && config.screenHeightDp == shownH)) return;
+        Log.i(TAG, "size " + shownW + "x" + shownH + " -> " + config.screenWidthDp + "x" + config.screenHeightDp + ": WebView reattached");
+        shownW = config.screenWidthDp; shownH = config.screenHeightDp;
+        root.post(() -> {
+            if (web == null) return;
+            int at = root.indexOfChild(web);
+            if (at < 0) return;
+            root.removeViewAt(at);
+            root.addView(web, at, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+            web.requestLayout();
+            web.invalidate();
+        });
     }
 
     @Override
