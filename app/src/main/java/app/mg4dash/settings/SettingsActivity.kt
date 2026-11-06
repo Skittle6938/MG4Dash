@@ -19,6 +19,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import app.mg4dash.BuildConfig
 import app.mg4dash.R
+import app.mg4dash.system.DataUsage
 import app.mg4dash.system.HomeSwitcher
 import app.mg4dash.system.Log
 import app.mg4dash.system.Prefs
@@ -94,6 +95,7 @@ class SettingsActivity : AppCompatActivity() {
         val (lookL, lookR) = tab(R.string.st_tab_look)
         val (carL, carR) = tab(R.string.st_tab_car)
         val (netL, netR) = tab(R.string.st_tab_net)
+        val (dataL, dataR) = tab(R.string.du_tab)
         val (sysL, sysR) = tab(R.string.st_tab_system)
         // Same dock (or vertical bar) as the other pages
         val dock = LinearLayout(this)
@@ -300,6 +302,7 @@ class SettingsActivity : AppCompatActivity() {
             }
         }
         row(upd, button(getString(R.string.st_update_check), R.color.accent_action) {
+            if (app.mg4dash.system.DataUsage.updatesBlocked(this)) { updState.text = getString(R.string.du_updates_wait); return@button }
             updState.text = getString(R.string.st_update_checking)
             lifecycleScope.launch {
                 var failed = false
@@ -419,8 +422,138 @@ class SettingsActivity : AppCompatActivity() {
         row(diag, button(getString(R.string.st_copy_sysui)) { copySystemUi() })
         text(diag, getString(R.string.st_copy_sysui_desc), 14f, R.color.text_title)
 
+        // ════ 4G data tab ════
+        dataTab(dataL, dataR)
+
         refreshHome()
-        showTab(prefs.raw.getInt("settings_tab", 0).coerceIn(0, tabViews.size - 1))
+        // The 4G data tab comes before System (1.7.3): a saved System tab stays System
+        if (!prefs.raw.contains("settings_tabs_v2")) {
+            val t = prefs.raw.getInt("settings_tab", 0)
+            prefs.raw.edit().putBoolean("settings_tabs_v2", true).putInt("settings_tab", if (t >= TAB_DATA) t + 1 else t).apply()
+        }
+        val asked = intent.getIntExtra(EXTRA_TAB, -1)
+        showTab((if (asked >= 0) asked else prefs.raw.getInt("settings_tab", 0)).coerceIn(0, tabViews.size - 1))
+    }
+
+    companion object {
+        /** Tab to open (index), e.g. [TAB_DATA] from the 4G data alert. */
+        const val EXTRA_TAB = "tab"
+        const val TAB_DATA = 4
+    }
+
+    // ── 4G data: total over 30 days, by use, day by day, alert ──
+    private var dataListener: ((DataUsage.Snapshot) -> Unit)? = null
+
+    private fun dataTab(left: LinearLayout, right: LinearLayout) {
+        val total = panel(left, getString(R.string.du_panel_total))
+        val big = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.BOTTOM }
+        val amount = TextView(this).apply {
+            setTextColor(color(R.color.text_value)); setTextSize(TypedValue.COMPLEX_UNIT_SP, 40f)
+            typeface = Typeface.create("sans-serif-medium", Typeface.NORMAL); includeFontPadding = false
+        }
+        big.addView(amount)
+        big.addView(TextView(this).apply {
+            text = getString(R.string.du_used_of, DataUsage.formatRound(this@SettingsActivity, DataUsage.MG_LIMIT))
+            setTextColor(color(R.color.text_sub)); setTextSize(TypedValue.COMPLEX_UNIT_SP, 20f); setPadding(dp(12), 0, 0, dp(3))
+        })
+        total.addView(big, LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(10) })
+        val quota = app.mg4dash.ui.QuotaBar(this)
+        total.addView(quota, LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(8) })
+        val shares = DataUsage.Use.values().map { u ->
+            val line = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL }
+            line.addView(TextView(this).apply {
+                text = getString(u.label); setTextColor(color(R.color.text_sub)); setTextSize(TypedValue.COMPLEX_UNIT_SP, 17f); maxLines = 1
+            }, LinearLayout.LayoutParams(dp(180), -2))
+            val useColor = color(u.colorRes)
+            val bar = app.mg4dash.ui.ShareBar(this).also { it.color = useColor }
+            line.addView(bar, LinearLayout.LayoutParams(0, dp(24), 1f))
+            val value = TextView(this).apply {
+                setTextColor(color(R.color.text_value)); setTextSize(TypedValue.COMPLEX_UNIT_SP, 17f); gravity = Gravity.END; maxLines = 1
+            }
+            line.addView(value, LinearLayout.LayoutParams(dp(110), -2))
+            total.addView(line, LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(6) })
+            Triple(u, bar, value)
+        }
+        text(total, getString(R.string.du_note), 15f, R.color.text_title).apply { (layoutParams as LinearLayout.LayoutParams).topMargin = dp(8) }
+        val unavailable = text(total, getString(R.string.du_unavailable), 16f, R.color.accent_heat).apply { visibility = View.GONE }
+
+        // Day by day
+        val daily = panel(right, getString(R.string.du_daily))
+        val dailyDesc = text(daily, "", 15f, R.color.text_title)
+        val chart = app.mg4dash.ui.DailyBars(this)
+        daily.addView(chart, LinearLayout.LayoutParams(-1, dp(230)).apply { topMargin = dp(8) })
+        val legend = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL }
+        DataUsage.Use.values().forEach { u ->
+            val useColor = color(u.colorRes)
+            legend.addView(View(this).apply {
+                background = android.graphics.drawable.GradientDrawable().apply { cornerRadius = dp(3).toFloat(); setColor(useColor) }
+            }, LinearLayout.LayoutParams(dp(14), dp(14)).apply { rightMargin = dp(8) })
+            legend.addView(TextView(this).apply {
+                text = getString(u.label); setTextColor(color(R.color.text_sub)); setTextSize(TypedValue.COMPLEX_UNIT_SP, 15f); maxLines = 1
+            }, LinearLayout.LayoutParams(-2, -2).apply { rightMargin = dp(18) })
+        }
+        daily.addView(android.widget.HorizontalScrollView(this).apply { isHorizontalScrollBarEnabled = false; addView(legend) },
+            LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(10) })
+
+        // Alert
+        val alert = panel(right, getString(R.string.du_alert_panel))
+        val thresholds = DataUsage.THRESHOLDS
+        dropdown(alert, getString(R.string.du_threshold), thresholds.map { DataUsage.formatRound(this, it) },
+            { thresholds.indexOf(DataUsage.threshold(this)).let { if (it < 0) thresholds.indexOf(DataUsage.DEFAULT_THRESHOLD) else it } }) {
+            DataUsage.setThreshold(this, thresholds[it]); quota.threshold = thresholds[it]
+        }
+        toggle(alert, R.string.du_popup, null, { DataUsage.popup(this) }) { DataUsage.setPopup(this, it) }
+        toggle(alert, R.string.du_wifi_updates, R.string.du_wifi_updates_desc, { DataUsage.updatesWifiOnly(this) }) { DataUsage.setUpdatesWifiOnly(this, it) }
+        row(alert, button(getString(R.string.du_reset), R.color.accent_danger) {
+            AlertDialog.Builder(this).setMessage(R.string.du_reset_confirm)
+                .setPositiveButton(R.string.du_reset) { _, _ -> DataUsage.reset(this) }
+                .setNegativeButton(android.R.string.cancel, null).show().also { app.mg4dash.ui.Dialogs.fix(it) }
+        })
+
+        val dayFormat = java.text.SimpleDateFormat("EEEE d MMMM", Locale.getDefault())
+        val shortFormat = java.text.SimpleDateFormat("d MMM", Locale.getDefault())
+        var shown: DataUsage.Snapshot? = null
+        chart.onDayTap = { i ->
+            shown?.days?.getOrNull(i)?.let { day ->
+                chart.selected = i
+                val lines = DataUsage.Use.values().filter { day.bytes[it.ordinal] > 0 }
+                    .joinToString("\n") { getString(R.string.du_day_line, getString(it.label), DataUsage.format(this, day.bytes[it.ordinal])) }
+                    .ifEmpty { getString(R.string.du_day_none) }
+                AlertDialog.Builder(this)
+                    .setTitle(dayFormat.format(DataUsage.calendarOf(day.date).time).replaceFirstChar { it.uppercase() } + " · " + DataUsage.format(this, day.total))
+                    .setMessage(lines)
+                    .setPositiveButton(R.string.st_close, null)
+                    .setOnDismissListener { chart.selected = -1 }
+                    .show().also { app.mg4dash.ui.Dialogs.fix(it) }
+            }
+        }
+        val render: (DataUsage.Snapshot) -> Unit = { s ->
+            shown = s
+            amount.text = DataUsage.format(this, s.total)
+            quota.used = s.total; quota.threshold = DataUsage.threshold(this)
+            val max = DataUsage.Use.values().maxOf { s.of(it) }.coerceAtLeast(1L)
+            shares.forEach { (u, bar, value) ->
+                val b = s.of(u)
+                bar.fraction = b.toFloat() / max
+                value.text = DataUsage.format(this, b)
+            }
+            unavailable.visibility = if (s.available) View.GONE else View.VISIBLE
+            chart.days = s.days
+            val biggest = s.days.maxByOrNull { it.total }
+            dailyDesc.text = if (biggest == null || biggest.total <= 0) getString(R.string.du_daily_empty) else {
+                val use = DataUsage.Use.values().maxByOrNull { biggest.bytes[it.ordinal] }!!
+                getString(R.string.du_daily_desc, DataUsage.format(this, s.total / DataUsage.DAYS),
+                    DataUsage.format(this, biggest.total) + " (" + getString(use.label) + ", " + shortFormat.format(DataUsage.calendarOf(biggest.date).time) + ")")
+            }
+        }
+        dataListener = render
+        DataUsage.listen(render)
+        DataUsage.refreshSoon(this)
+    }
+
+    override fun onDestroy() {
+        dataListener?.let { DataUsage.unlisten(it) }
+        super.onDestroy()
     }
 
     /** Auto mode: day / night switch also while the settings are open. */
@@ -501,6 +634,7 @@ class SettingsActivity : AppCompatActivity() {
         showState()
         text(parent, getString(R.string.st_rd_desc), 16f, R.color.text_title)
         row(parent, button(getString(R.string.st_rd_check), R.color.accent_action) {
+            if (app.mg4dash.system.DataUsage.updatesBlocked(this)) { state.text = getString(R.string.du_updates_wait); return@button }
             state.text = getString(R.string.st_update_checking)
             lifecycleScope.launch {
                 val r = withContext(Dispatchers.IO) { try { R2.latest(prefs.updateBeta) } catch (e: Exception) { Log.w("Update", "Radio Dash: ${e.message}"); null } }

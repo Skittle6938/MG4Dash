@@ -42,7 +42,8 @@ object Updater {
     /** Latest non-beta release, even older than the last ten pre-releases. Network: off the main thread. */
     fun latestStable(): Release? = parse(JSONObject(get(API_STABLE)))
 
-    private fun get(api: String): String {
+    private fun get(api: String): String = DataUsage.tag(DataUsage.Use.UPDATES) { getUntagged(api) }
+    private fun getUntagged(api: String): String {
         val c = URL(api).openConnection() as HttpURLConnection
         try {
             c.connectTimeout = 8000; c.readTimeout = 15000
@@ -124,7 +125,9 @@ object Updater {
     fun end() { busy.set(false) }
 
     /** Downloads the APK; [progress] receives 0..100. Network: off the main thread. */
-    fun download(context: Context, r: Release, fileName: String = "update.apk", progress: (Int) -> Unit): File {
+    fun download(context: Context, r: Release, fileName: String = "update.apk", progress: (Int) -> Unit): File =
+        DataUsage.tag(DataUsage.Use.UPDATES) { downloadUntagged(context, r, fileName, progress) }
+    private fun downloadUntagged(context: Context, r: Release, fileName: String, progress: (Int) -> Unit): File {
         val dir = context.getExternalFilesDir(null) ?: context.filesDir
         val out = File(dir, fileName)
         var url = URL(r.url)
