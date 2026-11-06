@@ -24,8 +24,19 @@ object WebViewer {
     val component = ComponentName(PKG, "$PKG.WebActivity")
     private val page = ComponentName(PKG, "$PKG.PageActivity")
     /** Version of the embedded app (versionCode of web/build.gradle.kts). */
-    private const val BUNDLED_VERSION = 4L
+    private const val BUNDLED_VERSION = 5L
     private const val ASSET = "web.apk"
+
+    /**
+     * Between the card and its page (#98), through broadcasts sent and received only by holders of [TALK], a
+     * signature permission of MG4Dash Web (and by the system, as MG4Dash on the car): MG4Dash Web says when it
+     * starts and when one of the page's fields is touched or left ([FIELD]); MG4Dash sends the keys of its
+     * keyboard ([KEY]) and whether the card is shown ([SHOWN]).
+     */
+    const val TALK = "$PKG.permission.TALK"
+    const val FIELD = "$PKG.FIELD"
+    const val KEY = "$PKG.KEY"
+    const val SHOWN = "$PKG.SHOWN"
     private const val ACTION_RESULT = "app.mg4dash.WEB_VIEWER_INSTALLED"
 
     /** This process cannot show a WebView itself: system (car version) or root uid. */
@@ -66,6 +77,8 @@ object WebViewer {
         .putExtra("error", context.getString(app.mg4dash.R.string.wc_web_error))
         .putExtra("close", context.getString(app.mg4dash.R.string.st_close))
         .putExtra("immersive", Prefs(context).fullscreen)
+        // MG4Dash's keyboard in the page's fields: where MG4Dash Web says that one is touched (#98)
+        .putExtra("keyboard", if (Prefs(context).ownKeyboard) context.packageName else null)
         // A new page each time: the card's virtual display is new, the old one is gone
         .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NO_ANIMATION)
 
@@ -89,6 +102,16 @@ object WebViewer {
         app.mg4dash.ui.Toasts.show(activity, app.mg4dash.R.string.wc_web_installing)
         install(activity) { ok -> if (ok) start() else browser() }
     }
+
+    /** To the page: [text] typed, or a [key] ("backspace", "clear", "done"). */
+    fun key(context: Context, text: String? = null, key: String? = null) = tell(context, Intent(KEY).putExtra("text", text).putExtra("key", key))
+
+    /** To the page: the card is shown, or hidden (the page goes on without drawing). */
+    fun shown(context: Context, on: Boolean) = tell(context, Intent(SHOWN).putExtra("shown", on))
+
+    private fun tell(context: Context, i: Intent) = try {
+        context.sendBroadcast(i.setPackage(PKG).addFlags(Intent.FLAG_RECEIVER_FOREGROUND), TALK)
+    } catch (e: Exception) { Log.w(TAG, "${i.action}: ${e.message}") }
 
     /** Installs the embedded app (off the main thread); [done] on the main thread, true if installed. */
     fun install(context: Context, done: (Boolean) -> Unit) {

@@ -7,6 +7,10 @@
     <!-- The car's position for the page (#98), granted by MG4Dash when it installs this app -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <!-- Talk with MG4Dash (its keyboard in the page's fields, the card shown or hidden, #98): only apps signed
+         with the same key, and the system, which MG4Dash is on the car -->
+    <permission android:name="app.mg4dash.web.permission.TALK" android:protectionLevel="signature" />
+    <uses-permission android:name="app.mg4dash.web.permission.TALK" />
 
     <!-- Cleartext allowed: Home Assistant is often reached at http://homeassistant.local:8123 -->
     <application

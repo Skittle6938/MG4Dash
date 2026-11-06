@@ -250,6 +250,7 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         // Web app (#97): the page itself is only loaded when shown
         val web = app.mg4dash.ui.WebCard(this).also { webCard = it }
         web.fullButton.setOnClickListener { setMapFullscreen(hiddenForMap == null, web = true) }
+        web.keyboardSpan = { webKeyboardSpan(it) }
         web.visibility = View.GONE
         panels[Card.WEB] = frame(web)
         panels[Card.ENERGY] = b.energyCard
@@ -289,6 +290,24 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
     }
 
     private fun frameOf(card: Card): SlotFrame? = frames.values.firstOrNull { card in it.cards }
+
+    /**
+     * MG4Dash's keyboard for the web app's page (#98): over the two columns on the driver's side, as on the phone
+     * page, or over the two others if the card is in the way, so that the field stays in sight. The card above
+     * the keyboard, in full screen or in the middle column: the driver's side.
+     */
+    private fun webKeyboardSpan(card: View): IntArray? {
+        val cols = (0 until columnsRow.childCount).map { columnsRow.getChildAt(it) }
+        if (cols.size != 3 || cols.any { it.visibility != View.VISIBLE || it.width == 0 }) return null
+        val right = Dock.rightSide(this)
+        val driver = if (right) app.mg4dash.ui.CarKeyboard.spanOf(cols[1], cols[2]) else app.mg4dash.ui.CarKeyboard.spanOf(cols[0], cols[1])
+        val other = if (right) app.mg4dash.ui.CarKeyboard.spanOf(cols[0], cols[1]) else app.mg4dash.ui.CarKeyboard.spanOf(cols[1], cols[2])
+        val at = IntArray(2).also { card.getLocationOnScreen(it) }
+        val real = android.util.DisplayMetrics().also { windowManager.defaultDisplay.getRealMetrics(it) }
+        val top = real.heightPixels - dp(app.mg4dash.ui.CarKeyboard.HEIGHT_DP + 10)
+        fun covers(s: IntArray?) = s != null && at[0] < s[1] && at[0] + card.width > s[0]
+        return if (at[1] + card.height <= top || !covers(driver) || covers(other)) driver else other
+    }
 
     /**
      * Gesture tour (#97): each step points at the place its widget has now. The trip, power and phone
@@ -581,8 +600,14 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         // (the map's full screen is no longer left here: the bar does it when opening a page, and
         // a rebuild (theme) or the map app taking over must not leave it)
         if (!simpleMode) mapCard.onPause()
-        webCard?.pause()
+        webCard?.pauseHome()
         handler.removeCallbacksAndMessages(null)
+    }
+
+    /** Home no longer in sight (a page, another app): the keyboard over it for the web app's page goes too. */
+    override fun onStop() {
+        webCard?.closeKeyboard()
+        super.onStop()
     }
 
     /** HOME pressed while already home: nothing is recreated, the map goes back to its widget size. */
