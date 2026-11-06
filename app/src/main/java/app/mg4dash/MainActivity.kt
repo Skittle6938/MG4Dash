@@ -249,6 +249,7 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         panels[Card.SHORTCUTS] = frame(shortcutsHolder)
         // Web app (#97): the page itself is only loaded when shown
         val web = app.mg4dash.ui.WebCard(this).also { webCard = it }
+        web.fullButton.setOnClickListener { setMapFullscreen(hiddenForMap == null, web = true) }
         web.visibility = View.GONE
         panels[Card.WEB] = frame(web)
         panels[Card.ENERGY] = b.energyCard
@@ -409,8 +410,11 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         showFrame(f)
     }
 
-    /** A place's own swipes: not over the full screen map, nor a page or an app, which take the touches. */
-    private fun slotSwipes(f: SlotFrame) = f.cards.size >= 2 && hiddenForMap == null && !covering(f)
+    /**
+     * A place's own swipes: not in full screen, nor over an app, which takes the touches. Over a web page,
+     * as over the map (#98): one finger changes card, two fingers move and zoom the page.
+     */
+    private fun slotSwipes(f: SlotFrame) = f.cards.size >= 2 && hiddenForMap == null && (f.shown == Card.WEB || !covering(f))
 
     /** A web page or an app fills the card and takes its touches (#41, #97). */
     private fun covering(f: SlotFrame) = f.shown == Card.WEB || f.shown == Card.MAP && mapAppView?.visibility == View.VISIBLE
@@ -423,6 +427,7 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
     }
 
     private fun mapAppFullOver(f: SlotFrame) = mapAppFull?.takeIf { f.shown == Card.MAP && mapAppView?.visibility == View.VISIBLE }
+        ?: webCard?.fullButton?.takeIf { f.shown == Card.WEB }
 
     private fun revealToggle(f: SlotFrame) {
         if (!covering(f)) return
@@ -1032,14 +1037,16 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
      * Full screen map (issue #4): the other widgets disappear, the bar (vertical or bottom)
      * stays. HOME, a bar button or the same button bring the map back to its widget size.
      */
-    private fun setMapFullscreen(on: Boolean) {
+    private fun setMapFullscreen(on: Boolean, web: Boolean = false) {
         if (simpleMode || on == (hiddenForMap != null)) return
-        if (on && !isShown(Card.MAP)) return
+        // The web page (#98) from its button, otherwise the map
+        val from: View = if (web) panels[Card.WEB] ?: return else b.mapCard
+        if (on && !isShown(if (web) Card.WEB else Card.MAP)) return
         if (on) {
-            // Walk up from the map to the column row, hiding everything around it but the button to change card
+            // Walk up from the card to the column row, hiding everything around it but the button to change card
             val hidden = mutableListOf<Pair<View, Int>>()
             val margins = mutableListOf<Pair<android.view.ViewGroup.MarginLayoutParams, Int>>()
-            var child: View = b.mapCard
+            var child: View = from
             while (child !== columnsRow) {
                 val parent = child.parent as? android.view.ViewGroup ?: break
                 for (i in 0 until parent.childCount) {
@@ -1063,6 +1070,7 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         mapCard.oneFingerPan = on
         b.mapFullscreen.setImageResource(if (on) R.drawable.ic_fullscreen_exit else R.drawable.ic_fullscreen)
         mapAppFull?.setImageResource(if (on) R.drawable.ic_fullscreen_exit else R.drawable.ic_fullscreen)
+        webCard?.setFullscreenIcon(on)
         // App that sets its size at launch (wireless CarPlay MG4CPlay / DiPlay: the video stayed at
         // the map's size in full screen, #52): relaunch it at the new size
         if (mapAppCn?.let { relaunchOnResize(it.packageName) } == true) b.mapCard.post { rebuildMapApp() }

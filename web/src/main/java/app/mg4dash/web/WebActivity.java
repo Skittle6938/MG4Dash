@@ -12,6 +12,8 @@ import android.view.Display;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.GeolocationPermissions;
+import android.webkit.WebChromeClient;
 import android.webkit.WebResourceError;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
@@ -40,6 +42,10 @@ public class WebActivity extends Activity {
     static final String EXTRA_CLOSE = "close";
 
     private WebView web;
+    private FrameLayout root;
+    /** Full screen video of the page, over it (#98). */
+    private View video;
+    private WebChromeClient.CustomViewCallback videoDone;
     private TextView message;
     private String loaded;
     private boolean failed;
@@ -51,7 +57,7 @@ public class WebActivity extends Activity {
         if (inCardOnly() && onMainScreen()) { finish(); return; }
         Intent i = getIntent();
         int bg = i.getIntExtra(EXTRA_BG, Color.BLACK);
-        FrameLayout root = new FrameLayout(this) {
+        root = new FrameLayout(this) {
             @Override
             protected void onConfigurationChanged(Configuration config) {
                 // A move to another screen comes as a configuration change (View.onMovedToDisplay is hidden)
@@ -74,7 +80,28 @@ public class WebActivity extends Activity {
         s.setMediaPlaybackRequiresUserGesture(true);
         s.setAllowFileAccess(false);
         s.setAllowContentAccess(false);
+        s.setGeolocationEnabled(true);
         web.setBackgroundColor(bg);
+        web.setWebChromeClient(new WebChromeClient() {
+            // The car's position, for maps and dashboards (#98)
+            @Override
+            public void onGeolocationPermissionsShowPrompt(String origin, GeolocationPermissions.Callback callback) {
+                callback.invoke(origin, true, false);
+            }
+
+            // Video in full screen (YouTube…): without its view, only the sound remained (#98)
+            @Override
+            public void onShowCustomView(View view, CustomViewCallback callback) {
+                hideVideo();
+                video = view;
+                videoDone = callback;
+                view.setBackgroundColor(Color.BLACK);
+                root.addView(view, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+            }
+
+            @Override
+            public void onHideCustomView() { hideVideo(); }
+        });
         web.setWebViewClient(new WebViewClient() {
             // Web links stay in the card; other schemes (intent:, tel:, market:…) are ignored
             @Override
@@ -145,9 +172,18 @@ public class WebActivity extends Activity {
         super.onDestroy();
     }
 
-    /** Back: the previous page; the full screen page then closes (in the card, it stays). */
+    private void hideVideo() {
+        if (video == null) return;
+        root.removeView(video);
+        video = null;
+        if (videoDone != null) videoDone.onCustomViewHidden();
+        videoDone = null;
+    }
+
+    /** Back: the full screen video, the previous page; the full screen page then closes (in the card, it stays). */
     @Override
     public void onBackPressed() {
+        if (video != null) { hideVideo(); return; }
         if (web != null && web.canGoBack()) web.goBack();
         else if (!inCardOnly()) finish();
     }

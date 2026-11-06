@@ -24,7 +24,7 @@ object WebViewer {
     val component = ComponentName(PKG, "$PKG.WebActivity")
     private val page = ComponentName(PKG, "$PKG.PageActivity")
     /** Version of the embedded app (versionCode of web/build.gradle.kts). */
-    private const val BUNDLED_VERSION = 2L
+    private const val BUNDLED_VERSION = 3L
     private const val ASSET = "web.apk"
     private const val ACTION_RESULT = "app.mg4dash.WEB_VIEWER_INSTALLED"
 
@@ -37,6 +37,23 @@ object WebViewer {
 
     /** Installed and at least as recent as the embedded one. */
     fun ready(context: Context): Boolean = installedVersion(context) >= BUNDLED_VERSION
+
+    private val LOCATION = listOf(android.Manifest.permission.ACCESS_FINE_LOCATION, android.Manifest.permission.ACCESS_COARSE_LOCATION)
+
+    /**
+     * The car's position for the page (#98): MG4Dash, a system app, grants it itself, as the page
+     * cannot ask for it in the card. Hidden API, through reflection; nothing if refused.
+     */
+    fun grantLocation(context: Context) {
+        val pm = context.packageManager
+        LOCATION.filter { pm.checkPermission(it, PKG) != android.content.pm.PackageManager.PERMISSION_GRANTED }.forEach { p ->
+            try {
+                pm.javaClass.getMethod("grantRuntimePermission", String::class.java, String::class.java, android.os.UserHandle::class.java)
+                    .invoke(pm, PKG, p, android.os.Process.myUserHandle())
+                Log.i(TAG, "granted $p")
+            } catch (e: Exception) { Log.w(TAG, "grant $p: ${e.cause?.message ?: e.message}") }
+        }
+    }
 
     /** The embedded app exists (car version). */
     fun bundled(context: Context): Boolean = try { context.assets.open(ASSET).close(); true } catch (_: Exception) { false }

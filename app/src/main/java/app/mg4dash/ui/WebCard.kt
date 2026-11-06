@@ -35,10 +35,26 @@ class WebCard(private val activity: android.app.Activity) : FrameLayout(activity
         setOnClickListener { loaded = null; show() }
     }
 
+    /** Full screen, as for the map (#98); shown and faded with the button to change card. */
+    val fullButton = android.widget.ImageButton(context).apply {
+        setBackgroundResource(R.drawable.bg_button); scaleType = android.widget.ImageView.ScaleType.FIT_CENTER
+        val pad = (14 * resources.displayMetrics.density).toInt(); setPadding(pad, pad, pad, pad)
+        setColorFilter(Themes.color(context, R.color.text_value)); contentDescription = context.getString(R.string.cd_map_fullscreen)
+        setImageResource(R.drawable.ic_fullscreen)
+        visibility = View.GONE
+    }
+
     init {
         setBackgroundColor(Themes.color(context, R.color.bg_top))
         addView(message, LayoutParams(-1, -1))
+        val d = resources.displayMetrics.density
+        val size = resources.getDimensionPixelSize(R.dimen.touch_min)
+        addView(fullButton, LayoutParams(size, size, Gravity.TOP or Gravity.END).apply {
+            topMargin = (14 * d).toInt() + size + (10 * d).toInt(); rightMargin = (14 * d).toInt()
+        })
     }
+
+    fun setFullscreenIcon(on: Boolean) = fullButton.setImageResource(if (on) R.drawable.ic_fullscreen_exit else R.drawable.ic_fullscreen)
 
     @SuppressLint("SetJavaScriptEnabled")
     private fun webView(): android.webkit.WebView? = web ?: try {
@@ -50,6 +66,12 @@ class WebCard(private val activity: android.app.Activity) : FrameLayout(activity
             settings.loadWithOverviewMode = true
             settings.mediaPlaybackRequiresUserGesture = true
             setBackgroundColor(Themes.color(context, R.color.bg_top))
+            settings.setGeolocationEnabled(true)
+            webChromeClient = object : android.webkit.WebChromeClient() {
+                override fun onGeolocationPermissionsShowPrompt(origin: String?, callback: android.webkit.GeolocationPermissions.Callback?) {
+                    callback?.invoke(origin, true, false)
+                }
+            }
             webViewClient = object : android.webkit.WebViewClient() {
                 // Links stay in the card
                 override fun shouldOverrideUrlLoading(view: android.webkit.WebView, request: android.webkit.WebResourceRequest) = false
@@ -62,7 +84,7 @@ class WebCard(private val activity: android.app.Activity) : FrameLayout(activity
                     if (message.visibility != View.VISIBLE || message.text == context.getString(R.string.wc_web_loading)) message.visibility = View.GONE
                 }
             }
-        }.also { web = it; addView(it, 0, LayoutParams(-1, -1)) }
+        }.also { web = it; addView(it, 0, LayoutParams(-1, -1)); fullButton.bringToFront() }
     } catch (e: Throwable) {
         // No WebView on this head unit (missing or disabled provider)
         Log.w(TAG, "WebView: ${e.message}"); null
@@ -102,6 +124,7 @@ class WebCard(private val activity: android.app.Activity) : FrameLayout(activity
             return
         }
         if (appView != null && appUrl == url) return
+        WebViewer.grantLocation(context)
         removeApp()
         showMessage(context.getString(R.string.wc_web_loading))
         val v = EmbeddedApp.create(activity, WebViewer.component,
@@ -110,6 +133,7 @@ class WebCard(private val activity: android.app.Activity) : FrameLayout(activity
             ?: run { showMessage(context.getString(R.string.wc_web_unsupported)); return }
         addView(v, 0, LayoutParams(-1, -1))
         appView = v; appUrl = url
+        fullButton.bringToFront()
     }
 
     /** The embedded page goes with its virtual display (MG4Dash Web is stopped first). */
