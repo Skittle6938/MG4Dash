@@ -152,6 +152,9 @@
     <string name="cc_now">jetzt</string>
     <string name="cc_min">%1$d Min.</string>
     <string name="cc_hours">%1$d Std.</string>
+    <string name="cc_dur_hm">%1$d Std. %2$02d</string>
+    <string name="cc_avg">Ø</string>
+    <string name="cc_last_km">letzter km</string>
     <string name="cc_days">%1$d T.</string>
     <string name="cc_weeks">%1$d Wo.</string>
     <string name="cc_months">%1$d Mon.</string>
