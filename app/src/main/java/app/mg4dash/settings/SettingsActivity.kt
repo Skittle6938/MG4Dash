@@ -578,7 +578,7 @@ class SettingsActivity : AppCompatActivity() {
                 val bytes = biggest.of(g, w)
                 val use = DataUsage.Use.values().maxByOrNull { bytes[it.ordinal] }!!
                 getString(R.string.du_daily_desc, DataUsage.format(this, shownTotal / DataUsage.DAYS),
-                    DataUsage.format(this, bytes.sum()) + " (" + getString(use.label) + ", " + shortFormat.format(DataUsage.calendarOf(biggest.date).time) + ")")
+                    getString(R.string.du_biggest, DataUsage.format(this, bytes.sum()), shortFormat.format(DataUsage.calendarOf(biggest.date).time), getString(use.label)))
             }
         }
         rerender = { shown?.let(render) }
