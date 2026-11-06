@@ -9,8 +9,8 @@ import java.io.File
 
 /**
  * Update of Radio Dash (modified SAIC radio app, published on GitHub) from MG4Dash.
- * Radio Dash replaces com.saicmotor.radio and is only built for the radio of the SWI69 firmware:
- * the button only appears on this firmware, with this version of the stock radio app.
+ * Radio Dash replaces com.saicmotor.radio. It is built from the SWI69 radio and offered on every firmware
+ * whose radio Android lets it replace ([blocker]); the firmwares already tested are named in Settings.
  * As with "adb shell pm install -r -f", installation goes through PackageInstaller (system uid);
  * Android checks the signature. The new radio only applies after a restart of the central screen.
  */
@@ -18,15 +18,28 @@ object RadioDashUpdater {
     private const val TAG = "RadioDashUpdate"
     const val PKG = "com.saicmotor.radio"
     private const val API = "https://api.github.com/repos/Skittle6938/MG4-Radio-Dash/releases?per_page=10"
-    /** Version of the stock radio app on which Radio Dash is built (and which it keeps). */
-    private const val RADIO_VERSION = "A9_Radio_V1.0.0.115"
+    /** Firmwares on which Radio Dash has been tested, named in Settings. */
+    const val TESTED_ON = "SWI69, SWI68 R67"
 
-    /** Firmware and radio app compatible with Radio Dash. */
-    fun compatible(context: Context): Boolean = Firmware.gen == Firmware.Gen.SWI69 && radioVersion(context) == RADIO_VERSION
+    /** versionCode of Radio Dash, the one of the stock radio it is built from. */
+    private const val RADIO_DASH_CODE = 2L
 
-    private fun radioVersion(context: Context): String? = try {
-        context.packageManager.getPackageInfo(PKG, 0).versionName
-    } catch (_: Exception) { null }
+    /**
+     * Why Android would refuse Radio Dash on this car (string resource), null if nothing is known against it:
+     * a newer stock radio (no downgrade), or a radio signed with another key than MG4Dash's platform key.
+     */
+    @Suppress("DEPRECATION")
+    fun blocker(context: Context): Int? {
+        if (installed(context)) return null
+        val pm = context.packageManager
+        val radio = try { pm.getPackageInfo(PKG, android.content.pm.PackageManager.GET_SIGNATURES) } catch (_: Exception) { return null }
+        if (radio.longVersionCode > RADIO_DASH_CODE) return app.mg4dash.R.string.st_rd_newer_radio
+        val own = try { pm.getPackageInfo(context.packageName, android.content.pm.PackageManager.GET_SIGNATURES).signatures } catch (_: Exception) { null }
+        val theirs = radio.signatures
+        // Unknown on either side: let Android decide
+        if (own.isNullOrEmpty() || theirs.isNullOrEmpty()) return null
+        return if (own.map { it.toCharsString() }.toSet() == theirs.map { it.toCharsString() }.toSet()) null else app.mg4dash.R.string.st_rd_other_key
+    }
 
     /** Radio Dash is installed (its dock icons are in the radio app). */
     fun installed(context: Context): Boolean = try {

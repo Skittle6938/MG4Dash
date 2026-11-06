@@ -428,6 +428,15 @@
     <string name="st_rd_uptodate">Radio Dash up-to-date (%1$s)</string>
     <string name="st_rd_installing">Radio Dash installeren…</string>
     <string name="st_rd_done">Radio Dash is geïnstalleerd. Herstart het scherm (Home ongeveer 20 s ingedrukt houden) om het te gebruiken.</string>
+    <string name="st_upd_current">%1$s · up-to-date</string>
+    <string name="st_upd_new">%1$s · %2$s beschikbaar</string>
+    <string name="st_upd_none_new">niet geïnstalleerd · %1$s beschikbaar</string>
+    <string name="st_upd_install_ver">%1$s installeren</string>
+    <string name="st_upd_note">De MG4Dash-update herstart het scherm aan het eind. Radio Dash werkt na een herstart van het middenscherm (Home ongeveer 20 s ingedrukt houden) en is getest op %1$s.</string>
+    <string name="st_update_auto">Automatisch controleren: %1$s</string>
+    <string name="st_update_auto_desc">MG4Dash en Radio Dash, één keer per week, of elke dag met bètaversies.</string>
+    <string name="st_rd_newer_radio">de radio van deze auto is nieuwer dan Radio Dash, dat hem niet kan vervangen</string>
+    <string name="st_rd_other_key">de radio van deze auto is met een andere sleutel ondertekend: Radio Dash kan hem niet vervangen</string>
     <string name="en_trip">Huidige rit</string>
     <string name="en_last_year">Laatste 12 maanden</string>
     <string name="en_months_note">%1$d maanden, één punt per maand · gemiddelde %2$s (gestippeld)</string>
@@ -441,7 +450,7 @@
     <string name="st_map_zoom">Standaardzoom kaart</string>
     <string name="st_map_theme">Kaartkleuren</string>
     <string name="st_own_keyboard">MG4Dash-toetsenbord</string>
-    <string name="st_own_keyboard_desc">Volledige breedte en grote toetsen, in de tekstvelden van MG4Dash. Uit: Android-toetsenbord</string>
+    <string name="st_own_keyboard_desc">Grote toetsen op twee derde van het scherm, aan de bestuurderskant, in de tekstvelden van MG4Dash. Uit: Android-toetsenbord</string>
     <string name="st_map_auto_hide">Zoom- en volledig-schermknoppen van de kaart verbergen</string>
     <string name="st_map_auto_hide_desc">Ze verschijnen een paar seconden als je de kaart aanraakt; de koersknop blijft</string>
     <string name="st_map_offline_switch">Naar de energiewidget wisselen zonder verbinding</string>

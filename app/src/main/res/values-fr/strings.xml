@@ -428,6 +428,15 @@
     <string name="st_rd_uptodate">Radio Dash à jour (%1$s)</string>
     <string name="st_rd_installing">Installation de Radio Dash…</string>
     <string name="st_rd_done">Radio Dash est installée. Redémarre l\'écran central (appui long sur Home environ 20 s) pour l\'utiliser.</string>
+    <string name="st_upd_current">%1$s · à jour</string>
+    <string name="st_upd_new">%1$s · %2$s disponible</string>
+    <string name="st_upd_none_new">non installée · %1$s disponible</string>
+    <string name="st_upd_install_ver">Installer la %1$s</string>
+    <string name="st_upd_note">La mise à jour de MG4Dash redémarre l\'écran à la fin. Radio Dash s\'applique après un redémarrage de l\'écran central (appui long sur Accueil environ 20 s) et est testée sur %1$s.</string>
+    <string name="st_update_auto">Vérification automatique : %1$s</string>
+    <string name="st_update_auto_desc">MG4Dash et Radio Dash, une fois par semaine, ou chaque jour avec les versions bêta.</string>
+    <string name="st_rd_newer_radio">la radio de cette voiture est plus récente que Radio Dash, qui ne peut pas la remplacer</string>
+    <string name="st_rd_other_key">la radio de cette voiture est signée avec une autre clé : Radio Dash ne peut pas la remplacer</string>
     <string name="en_trip">Trajet en cours</string>
     <string name="en_last_year">12 derniers mois</string>
     <string name="en_months_note">%1$d mois, un point par mois · moyenne %2$s (pointillés)</string>
@@ -441,7 +450,7 @@
     <string name="st_map_zoom">Zoom de la carte par défaut</string>
     <string name="st_map_theme">Couleurs de la carte</string>
     <string name="st_own_keyboard">Clavier MG4Dash</string>
-    <string name="st_own_keyboard_desc">Toute la largeur et grandes touches, dans les champs de MG4Dash. Désactivé : clavier d\'Android</string>
+    <string name="st_own_keyboard_desc">Grandes touches sur les deux tiers de l\'écran, côté conducteur, dans les champs de MG4Dash. Désactivé : clavier d\'Android</string>
     <string name="st_map_auto_hide">Masquer les boutons zoom et plein écran de la carte</string>
     <string name="st_map_auto_hide_desc">Ils apparaissent quelques secondes au toucher de la carte ; le bouton de cap reste</string>
     <string name="st_map_offline_switch">Passer au widget énergie hors ligne</string>
