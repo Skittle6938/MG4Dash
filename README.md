@@ -83,7 +83,7 @@ Swipe or tap it to switch between its pages:
 - **Map**: follows the car, north up or heading up (tap the recenter button again), default zoom 14 to 18 and colours (auto, light, dark) in Settings › Home. The zoom and full screen buttons hide after a few seconds. Without data connection the map stays as long as the area is in the tile cache, then the card switches to consumption (can be turned off).
 - **Consumption**: a swipe switches map → consumption → shortcuts. Period menu: since the last charge, current trip (one point per km, one every 2 minutes when stopped; since the last charge and the last 12 months are placed by date and smoothed, from the energy measured by MG4Dash) or last 12 months (one point per trip). The dashed line is the average: energy out of the battery minus regeneration, over the distance. Its value is on the chart's title line, in blue, with the consumption of the last km in orange (useful on a long climb); on the current trip, its duration shows in the top right corner. **Regen** shows the energy recovered and the part of the distance it powered: recovered energy ÷ energy out of the battery × distance. With 30.7 kWh out, 12.1 kWh recovered and 149 km, that is 39 % of the energy, so about 59 km of the 149 km. These km are already part of the distance, they don't add to the range.
 - **Shortcuts**: 3 rows of apps or Home Assistant actions (scripts, automations, scenes, gate, garage door…). Tap an empty slot or long press a slot to change it; the Home Assistant address and token are set in Settings › Connections. A Home Assistant shortcut shows its live state under its name (a garage door drawn open and in orange when open, blue when closed, grey when unavailable): a cover, lock, switch or light shows its own state, and *Displayed state* in the shortcut's menu picks another entity, such as the door sensor of a garage opened by a script, or none. The shortcuts page can be turned off.
-- **Web app** (off by default): a web page of your choice in the card, for example a Home Assistant dashboard. Turn it on and enter its address in the edit mode (below). The page takes the touches; the button at the top right changes card, it fades after 5 s and comes back on a touch.
+- **Web app** (off by default): a web page of your choice in the card, for example a Home Assistant dashboard. Turn it on and enter its address in the edit mode (below). The page takes the touches; the button at the top right changes card, it fades after 5 s and comes back on a touch. On the car, the page is shown by *MG4Dash Web*, a small separate app embedded in MG4Dash, which installs it by itself the first time the card is shown: Android refuses web pages to an app with the system rights, which MG4Dash has.
 - **Full screen**: the button below the zoom enlarges the map over the whole screen; any bar button brings it back.
 
 ### Choosing the cards
@@ -238,11 +238,14 @@ Features a firmware does not expose are hidden instead of failing (for example t
   - `map/NavRepo.kt`: turn-by-turn data broadcast by DiAuto / Headunit Revived
   - `shortcuts/Shortcuts.kt`: shortcut grid and Home Assistant REST calls
   - `shortcuts/HaLive.kt`: live state of the Home Assistant shortcuts, read while they are on screen
+  - `ui/WebCard.kt`, `system/WebViewer.kt`: web app card of the map widget, and MG4Dash Web, which shows its page on the car
   - `weather/WeatherRepo.kt`: Open-Meteo weather
   - `system/HomeSwitcher.kt`: maintenance mode (gives the home screen back to the SAIC launcher)
   - `LauncherApp.kt`: crash guard, after 3 crashes in 3 minutes the SAIC launcher becomes the home screen again
 - `app/src/car/`: car manifest (`sharedUserId=android.uid.system`)
 - `app/src/emulator/`: build without the system uid, with simulated data
+- `rescue/`: MG4Dash Rescue, the safety net (system uid), embedded as `app/src/car/assets/rescue.apk`
+- `web/`: MG4Dash Web, the page of the web app card (own uid, Android refuses WebView to the system uid), embedded as `app/src/car/assets/web.apk`
 - `i18n/`: translations (`strings.psv`) and the generator of the `values-*/strings.xml` files
 - `keys/`: AOSP platform test certificate (public, the same one the car uses)
 
@@ -262,6 +265,8 @@ $u = "https://android.googlesource.com/platform/build/+/refs/tags/android-9.0.0_
 .\gradlew.bat testEmulatorDebugUnitTest   # screenshots 1920×720 → app\build\screenshots\
 py -3 i18n\gen.py                         # regenerate the translations after editing i18n\strings.psv
 ```
+
+`rescue/` and `web/` are built apart (`.\gradlew.bat :web:assembleRelease`), signed with the platform key like `sign_platform.ps1` does, and their APK is committed in `app/src/car/assets/`; raise the version in `system/Rescue.kt` or `system/WebViewer.kt` with the one of the module, so that MG4Dash installs the new one.
 
 ## Install on the car
 

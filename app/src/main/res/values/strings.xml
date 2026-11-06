@@ -543,6 +543,8 @@
     <string name="wc_web_error">Page out of reach. Touch to try again.</string>
     <string name="wc_web_loading">Loading…</string>
     <string name="wc_web_unsupported">This head unit has no web view.</string>
+    <string name="wc_web_installing">Installing MG4Dash Web, the web page viewer…</string>
+    <string name="wc_web_install_failed">MG4Dash Web could not be installed. Touch to try again.</string>
     <string name="wc_none_simple">The Simple layout has no cards to choose.</string>
     <string name="st_edit_cards">Widgets\' cards</string>
     <string name="st_edit_cards_desc">Choose the cards each widget goes through, including a web app in the map widget. Shortcut: pinch the home screen with two fingers.</string>
