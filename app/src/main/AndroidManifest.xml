@@ -33,6 +33,8 @@
     <uses-permission android:name="android.permission.WRITE_SECURE_SETTINGS" />
     <uses-permission android:name="android.permission.REORDER_TASKS" />
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+    <!-- Talk with MG4Dash Web, the Web app card's page (keyboard, card shown or hidden, #98) -->
+    <uses-permission android:name="app.mg4dash.web.permission.TALK" />
 
     <application
         android:name=".LauncherApp"

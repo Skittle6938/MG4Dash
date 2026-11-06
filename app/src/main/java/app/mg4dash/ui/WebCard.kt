@@ -18,7 +18,9 @@ import app.mg4dash.system.WebViewer
  * Loaded when shown, paused when hidden. Without an address, or if the page does not load, a message
  * says so; a touch on it loads the page again.
  * Car version (system uid, refused by WebView): the page is shown by MG4Dash Web, a small separate app
- * embedded in the card like an app ([WebViewer]), installed the first time the card is shown.
+ * embedded in the card like an app ([WebViewer]), installed the first time the card is shown. Hidden, its page
+ * goes on (sound, live values) without drawing. A touch on one of its fields opens MG4Dash's keyboard over
+ * home, whose keys go to the page.
  */
 class WebCard(private val activity: android.app.Activity) : FrameLayout(activity) {
     private val prefs = Prefs(context)
@@ -28,6 +30,23 @@ class WebCard(private val activity: android.app.Activity) : FrameLayout(activity
     private var appView: android.view.ViewGroup? = null
     private var appUrl: String? = null
     private var installing = false
+    /** Car version: MG4Dash's keyboard open for a field of the page, numeric or not, and what closes it. */
+    private var keyboard: (() -> Unit)? = null
+    private var keyboardNumeric = false
+    /** Where the keyboard goes over home (its left and right edges on screen), null for two thirds on the driver's side. */
+    var keyboardSpan: ((View) -> IntArray?)? = null
+    /** Car version: MG4Dash Web starts, or a field of its page is touched or left. */
+    private val fields = object : android.content.BroadcastReceiver() {
+        override fun onReceive(c: Context, i: android.content.Intent) {
+            if (appView == null) return
+            when {
+                i.getBooleanExtra("ready", false) -> WebViewer.shown(context, shownNow())
+                i.getBooleanExtra("on", false) && shownNow() -> openKeyboard(i.getBooleanExtra("numeric", false))
+                else -> closeKeyboard()
+            }
+        }
+    }
+    private var listening = false
     private val message = TextView(context).apply {
         setTextColor(Themes.color(context, R.color.text_sub)); setTextSize(TypedValue.COMPLEX_UNIT_SP, 20f)
         gravity = Gravity.CENTER
@@ -123,21 +142,29 @@ class WebCard(private val activity: android.app.Activity) : FrameLayout(activity
             }
             return
         }
-        if (appView != null && appUrl == url) return
+        if (appView != null && appUrl == url) { WebViewer.shown(context, true); return }
         WebViewer.grantLocation(context)
         removeApp()
         showMessage(context.getString(R.string.wc_web_loading))
+        var created: View? = null
         val v = EmbeddedApp.create(activity, WebViewer.component,
             WebViewer.intent(context, url, Themes.color(context, R.color.bg_top), Themes.color(context, R.color.text_sub)),
-            stopOnRelease = true) { message.visibility = View.GONE }
-            ?: run { showMessage(context.getString(R.string.wc_web_unsupported)); return }
-        addView(v, 0, LayoutParams(-1, -1))
+            stopOnRelease = true, newSurfaceOnGrow = true) {
+            created?.layoutParams = LayoutParams(-1, -1)
+            message.visibility = View.GONE
+        } ?: run { showMessage(context.getString(R.string.wc_web_unsupported)); return }
+        // Created at the screen's width, then brought back to the card once started, as the map's app: Android 9
+        // gives the layers of a virtual display twice its largest side at creation, and never more; created at
+        // the card's size, the page was cut off in full screen (#98)
+        addView(v, 0, LayoutParams(resources.displayMetrics.widthPixels, -1))
+        created = v
         appView = v; appUrl = url
         fullButton.bringToFront()
     }
 
     /** The embedded page goes with its virtual display (MG4Dash Web is stopped first). */
     private fun removeApp() {
+        closeKeyboard()
         appView?.let { removeView(it) }
         appView = null; appUrl = null
     }
@@ -148,8 +175,57 @@ class WebCard(private val activity: android.app.Activity) : FrameLayout(activity
      */
     fun reset() { removeApp(); loaded = null }
 
-    /** Hidden: the page stops its timers and videos. */
-    fun pause() { web?.onPause() }
+    /** Hidden: the page stops its timers and videos; in MG4Dash Web, it goes on without drawing (sound kept). */
+    fun pause() {
+        web?.onPause()
+        closeKeyboard()
+        if (appView != null) WebViewer.shown(context, false)
+    }
+
+    /**
+     * Home paused, which happens as soon as MG4Dash Web's page is touched (it takes the focus): only the page in
+     * MG4Dash pauses. MG4Dash Web's one stays in sight and goes on, with the keyboard open for it.
+     */
+    fun pauseHome() { web?.onPause() }
+
+    private fun shownNow() = visibility == View.VISIBLE && isShown
+
+    /** A field of the page is touched: MG4Dash's keyboard over home, numeric for a number. */
+    private fun openKeyboard(numeric: Boolean) {
+        if (keyboard != null && keyboardNumeric == numeric) return
+        closeKeyboard()
+        keyboardNumeric = numeric
+        keyboard = CarKeyboard.over(this, numeric, span = { keyboardSpan?.invoke(this) },
+            // A touch on the page (another field, the caret) keeps it open
+            keepOn = { x, y -> IntArray(2).also { getLocationOnScreen(it) }.let { x >= it[0] && x < it[0] + width && y >= it[1] && y < it[1] + height } },
+            onText = { WebViewer.key(context, text = it) },
+            onBackspace = { WebViewer.key(context, key = "backspace") },
+            onClear = { WebViewer.key(context, key = "clear") },
+            onDone = { WebViewer.key(context, key = "done") },
+            onClosed = { keyboard = null })
+    }
+
+    fun closeKeyboard() { keyboard?.invoke(); keyboard = null }
+
+    override fun onAttachedToWindow() {
+        super.onAttachedToWindow()
+        if (WebViewer.needed() && !listening) {
+            listening = true
+            context.registerReceiver(fields, android.content.IntentFilter(WebViewer.FIELD), WebViewer.TALK, null)
+        }
+    }
+
+    override fun onDetachedFromWindow() {
+        closeKeyboard()
+        if (listening) { listening = false; try { context.unregisterReceiver(fields) } catch (_: Exception) {} }
+        super.onDetachedFromWindow()
+    }
+
+    /** Full screen and back: the keyboard was placed for the old size. */
+    override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
+        super.onSizeChanged(w, h, oldw, oldh)
+        if (oldw != 0) closeKeyboard()
+    }
 
     companion object { private const val TAG = "WebCard" }
 }

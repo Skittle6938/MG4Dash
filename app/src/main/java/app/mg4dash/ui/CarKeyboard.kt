@@ -23,7 +23,7 @@ import app.mg4dash.system.Prefs
 
 /**
  * MG4Dash's own keyboard (#93): full width, large keys, the theme's colours. Android's keyboard does not fill
- * this screen. It only serves MG4Dash's text fields, through [attach]. Keys show capitals and type lower case
+ * this screen. It serves MG4Dash's text fields, through [attach], and the Web app card's page ([over]). Keys show capitals and type lower case
  * letters unless shift is on; a long press on a letter offers its accents in the top row.
  */
 class CarKeyboard(
@@ -179,8 +179,26 @@ class CarKeyboard(
         fun attach(field: EditText, span: (() -> IntArray?)? = null, onVisible: (Boolean) -> Unit = {}) {
             if (!Prefs(field.context).ownKeyboard) return
             field.showSoftInputOnFocus = false
-            val popup = Popup(field, span, onVisible)
+            val popup = Popup(field, span, onVisible) { hide -> forField(field, hide) }
             field.setOnTouchListener { _, e -> if (e.action == MotionEvent.ACTION_UP) field.post { popup.show() }; false }
+        }
+
+        /**
+         * The keyboard for a field MG4Dash does not own: a page of the Web app card, in MG4Dash Web (#98). Over
+         * [anchor]'s window, placed as by [attach]; each key goes to [onText], [onBackspace], [onClear], and OK to
+         * [onDone], which closes it. A touch outside it closes it too, unless [keepOn] says the touch is on the page.
+         * [onClosed]: closed, by OK, a touch or the returned function.
+         */
+        fun over(anchor: View, numeric: Boolean, span: (() -> IntArray?)?, keepOn: (Float, Float) -> Boolean,
+                 onText: (String) -> Unit, onBackspace: () -> Unit, onClear: () -> Unit, onDone: () -> Unit,
+                 onClosed: () -> Unit): () -> Unit {
+            val context = anchor.context
+            val popup = Popup(anchor, span, onVisible = { if (!it) onClosed() }, keepOn = keepOn) { hide ->
+                CarKeyboard(context, context.resources.configuration.locales[0].language, numeric,
+                    onText, onBackspace, onClear, onDone = { onDone(); hide() })
+            }
+            popup.show()
+            return { popup.hide() }
         }
 
         /**
@@ -240,8 +258,13 @@ class CarKeyboard(
         )
     }
 
-    private class Popup(private val field: EditText, private val span: (() -> IntArray?)?, private val onVisible: (Boolean) -> Unit) {
-        private val context = field.context
+    /**
+     * [keepOn]: a field of another window (Web app): the focus goes there, so it is not watched, and a touch outside
+     * the keyboard closes it, unless [keepOn] is true for its place on screen. Otherwise [anchor] is MG4Dash's field.
+     */
+    private class Popup(private val anchor: View, private val span: (() -> IntArray?)?, private val onVisible: (Boolean) -> Unit,
+                        private val keepOn: ((Float, Float) -> Boolean)? = null, private val make: (hide: () -> Unit) -> CarKeyboard) {
+        private val context = anchor.context
         private var window: PopupWindow? = null
         private val focusWatch = ViewTreeObserver.OnWindowFocusChangeListener { focused -> if (!focused) hide() }
         private val detachWatch = object : View.OnAttachStateChangeListener {
@@ -250,7 +273,7 @@ class CarKeyboard(
         }
 
         fun show() {
-            if (window != null || !field.isAttachedToWindow) return
+            if (window != null || !anchor.isAttachedToWindow) return
             val density = context.resources.displayMetrics.density
             // The real width: the one Android gives apps is narrower than this screen
             val real = android.util.DisplayMetrics()
@@ -262,23 +285,31 @@ class CarKeyboard(
             val edges = span?.invoke()?.takeIf { it.size == 2 && it[1] - it[0] > 0 }
             val left = edges?.get(0) ?: if (right) real.widthPixels - end else side
             val width = edges?.let { it[1] - it[0] } ?: (end - side)
-            val keyboard = forField(field) { hide() }
+            val keyboard = make { hide() }
             window = PopupWindow(keyboard, width, LinearLayout.LayoutParams.WRAP_CONTENT).apply {
-                isFocusable = false; isOutsideTouchable = false; isClippingEnabled = false
+                isFocusable = false; isClippingEnabled = false
                 setBackgroundDrawable(ColorDrawable(0))
-                showAtLocation(field, Gravity.BOTTOM or Gravity.LEFT, left, (10 * density).toInt())
+                isOutsideTouchable = keepOn != null
+                keepOn?.let { keep ->
+                    setTouchInterceptor { _, e ->
+                        if (e.action != MotionEvent.ACTION_OUTSIDE) return@setTouchInterceptor false
+                        if (!keep(e.rawX, e.rawY)) hide()
+                        true
+                    }
+                }
+                showAtLocation(anchor, Gravity.BOTTOM or Gravity.LEFT, left, (10 * density).toInt())
             }
-            field.viewTreeObserver.addOnWindowFocusChangeListener(focusWatch)
-            field.addOnAttachStateChangeListener(detachWatch)
-            field.requestFocus()
+            if (keepOn == null) anchor.viewTreeObserver.addOnWindowFocusChangeListener(focusWatch)
+            anchor.addOnAttachStateChangeListener(detachWatch)
+            if (keepOn == null) anchor.requestFocus()
             onVisible(true)
         }
 
         fun hide() {
             val w = window ?: return
             window = null
-            if (field.viewTreeObserver.isAlive) field.viewTreeObserver.removeOnWindowFocusChangeListener(focusWatch)
-            field.removeOnAttachStateChangeListener(detachWatch)
+            if (anchor.viewTreeObserver.isAlive) anchor.viewTreeObserver.removeOnWindowFocusChangeListener(focusWatch)
+            anchor.removeOnAttachStateChangeListener(detachWatch)
             w.dismiss()
             onVisible(false)
         }

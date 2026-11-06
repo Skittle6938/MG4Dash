@@ -453,7 +453,7 @@
     <string name="st_map_zoom">Varsayılan harita yakınlaştırması</string>
     <string name="st_map_theme">Harita renkleri</string>
     <string name="st_own_keyboard">MG4Dash klavyesi</string>
-    <string name="st_own_keyboard_desc">Sürücü tarafında ekranın üçte ikisinde büyük tuşlar, MG4Dash metin alanlarında. Kapalı: Android klavyesi</string>
+    <string name="st_own_keyboard_desc">Sürücü tarafında ekranın üçte ikisinde büyük tuşlar, MG4Dash metin alanlarında ve Web uygulaması kartının sayfasında. Kapalı: Android klavyesi</string>
     <string name="st_map_auto_hide">Harita yakınlaştırma ve tam ekran düğmelerini gizle</string>
     <string name="st_map_auto_hide_desc">Haritaya dokunduğunuzda birkaç saniye görünürler; yön düğmesi kalır</string>
     <string name="st_map_offline_switch">Çevrimdışıyken enerji pencere öğesine geç</string>

@@ -2,7 +2,10 @@ package app.mg4dash.web;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.res.Configuration;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -10,8 +13,12 @@ import android.util.Log;
 import android.util.TypedValue;
 import android.view.Display;
 import android.view.Gravity;
+import android.view.KeyCharacterMap;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
+import android.webkit.JavascriptInterface;
 import android.webkit.GeolocationPermissions;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceError;
@@ -28,6 +35,9 @@ import android.widget.TextView;
  * screen choice as extras: the page then takes the touches as any app shown in the card.
  * Moved to the main screen (MG4Dash's home rebuilt, its virtual display gone), it closes so as not to
  * cover the home screen; MG4Dash starts it again in the new card.
+ * MG4Dash's keyboard (#98): the page says when one of its fields is touched or left, MG4Dash then shows its
+ * keyboard over home and sends each key, typed here in the field. Android's keyboard no longer opens.
+ * The card hidden, the page goes on (sound, live values) without drawing.
  * [PageActivity]: the same page in full screen, with a close button (compatibility report, #95: the
  * car's browser refuses pages on some head units).
  */
@@ -40,6 +50,13 @@ public class WebActivity extends Activity {
     static final String EXTRA_ERROR = "error";
     static final String EXTRA_IMMERSIVE = "immersive";
     static final String EXTRA_CLOSE = "close";
+    /** MG4Dash's package when its keyboard types in the page's fields, otherwise absent (Android's keyboard). */
+    static final String EXTRA_KEYBOARD = "keyboard";
+    /** With MG4Dash (WebViewer): only holders of this permission, MG4Dash Web and the system, send or receive. */
+    private static final String TALK = "app.mg4dash.web.permission.TALK";
+    private static final String FIELD = "app.mg4dash.web.FIELD";
+    private static final String KEY = "app.mg4dash.web.KEY";
+    private static final String SHOWN = "app.mg4dash.web.SHOWN";
 
     private WebView web;
     private FrameLayout root;
@@ -49,8 +66,30 @@ public class WebActivity extends Activity {
     private TextView message;
     private String loaded;
     private boolean failed;
-    /** Size of the virtual display the page was last drawn for (dp), to see the card go full screen. */
-    private int shownW, shownH;
+    /** Package of MG4Dash, whose keyboard types in the fields; null: Android's keyboard. */
+    private String keyboardFor;
+    /** MG4Dash was told that a field is touched (its keyboard is open). */
+    private boolean fieldOpen;
+    private boolean listening;
+
+    /** From MG4Dash: the keys of its keyboard, and whether the card is shown. */
+    private final BroadcastReceiver fromCard = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context c, Intent i) {
+            if (web == null) return;
+            if (SHOWN.equals(i.getAction())) {
+                // Hidden: Chromium stops drawing, the page goes on (sound, live values)
+                web.setVisibility(i.getBooleanExtra("shown", true) ? View.VISIBLE : View.INVISIBLE);
+                return;
+            }
+            String text = i.getStringExtra("text");
+            if (text != null) type(text);
+            String key = i.getStringExtra("key");
+            if ("backspace".equals(key)) press(KeyEvent.KEYCODE_DEL);
+            else if ("done".equals(key)) press(KeyEvent.KEYCODE_ENTER);
+            else if ("clear".equals(key)) web.evaluateJavascript("window.__mg4dashClear && __mg4dashClear()", null);
+        }
+    };
 
     @SuppressLint("SetJavaScriptEnabled")
     @Override
@@ -67,9 +106,7 @@ public class WebActivity extends Activity {
                 if (inCardOnly() && onMainScreen()) {
                     Log.i(TAG, "moved to the main screen: closed");
                     finish();
-                    return;
                 }
-                resized(config);
             }
         };
         root.setBackgroundColor(bg);
@@ -106,6 +143,17 @@ public class WebActivity extends Activity {
             @Override
             public void onHideCustomView() { hideVideo(); }
         });
+        keyboardFor = inCardOnly() ? i.getStringExtra(EXTRA_KEYBOARD) : null;
+        if (keyboardFor != null) {
+            // Android's keyboard never opens over the page: MG4Dash's types in it
+            getWindow().addFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
+            web.addJavascriptInterface(new Fields(), "MG4DashFields");
+            IntentFilter f = new IntentFilter(KEY);
+            f.addAction(SHOWN);
+            registerReceiver(fromCard, f, TALK, null);
+            listening = true;
+            tell(new Intent(FIELD).putExtra("ready", true));
+        }
         web.setWebViewClient(new WebViewClient() {
             // Web links stay in the card; other schemes (intent:, tel:, market:…) are ignored
             @Override
@@ -123,8 +171,18 @@ public class WebActivity extends Activity {
             }
 
             @Override
+            public void onPageStarted(WebView view, String url, android.graphics.Bitmap favicon) {
+                field(false, false);
+            }
+
+            // The script that watches the fields, as soon as the page shows, and again at its end
+            @Override
+            public void onPageCommitVisible(WebView view, String url) { watchFields(); }
+
+            @Override
             public void onPageFinished(WebView view, String url) {
                 if (!failed) message.setVisibility(View.GONE);
+                watchFields();
             }
         });
 
@@ -142,29 +200,105 @@ public class WebActivity extends Activity {
         if (!inCardOnly()) addClose(root, bg, i.getIntExtra(EXTRA_FG, Color.LTGRAY));
         setContentView(root);
         immersive();
-        Configuration c = getResources().getConfiguration();
-        shownW = c.screenWidthDp; shownH = c.screenHeightDp;
         load(i.getStringExtra(EXTRA_URL));
     }
 
     /**
-     * Card in full screen and back (#98): the virtual display, the window and the WebView take the new size,
-     * but Chromium 66 kept drawing its last frame at the old one, frozen, the rest black. Taken out of the
-     * view tree and put back, it draws again at the new size, without reloading the page (the video goes on).
+     * Watches the page's fields (main frame, shadow DOM included): a touch on one, or the focus moved to
+     * another one, tells MG4Dash; leaving them too. A window that loses the focus (a key of MG4Dash's
+     * keyboard) keeps its field: nothing said then. Also types what Android's virtual keyboard map does not
+     * have (accents, €) and clears a field.
      */
-    private void resized(Configuration config) {
-        if (web == null || (config.screenWidthDp == shownW && config.screenHeightDp == shownH)) return;
-        Log.i(TAG, "size " + shownW + "x" + shownH + " -> " + config.screenWidthDp + "x" + config.screenHeightDp + ": WebView reattached");
-        shownW = config.screenWidthDp; shownH = config.screenHeightDp;
-        root.post(() -> {
-            if (web == null) return;
-            int at = root.indexOfChild(web);
-            if (at < 0) return;
-            root.removeViewAt(at);
-            root.addView(web, at, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-            web.requestLayout();
-            web.invalidate();
-        });
+    private static final String FIELDS_JS = "(function () {"
+        + "if (window.__mg4dashType || !window.MG4DashFields) return;"
+        + "var TEXT = /^(|text|search|email|url|tel|password|number)$/;"
+        + "function editable(e) {"
+        + "  if (!e || e.disabled || e.readOnly) return false;"
+        + "  if (e.isContentEditable || e.tagName === 'TEXTAREA') return true;"
+        + "  return e.tagName === 'INPUT' && TEXT.test((e.getAttribute('type') || '').toLowerCase());"
+        + "}"
+        + "function active() {"
+        + "  var a = document.activeElement;"
+        + "  while (a && a.shadowRoot && a.shadowRoot.activeElement) a = a.shadowRoot.activeElement;"
+        + "  return a;"
+        + "}"
+        + "function numeric(e) {"
+        + "  var m = (e.getAttribute('inputmode') || '').toLowerCase();"
+        + "  return e.type === 'number' || m === 'numeric' || m === 'decimal';"
+        + "}"
+        + "var tapped = 0;"
+        + "function show() { var e = active(); if (editable(e)) MG4DashFields.field(true, numeric(e)); }"
+        + "document.addEventListener('pointerdown', function () { tapped = Date.now(); }, true);"
+        + "document.addEventListener('click', function () { setTimeout(show, 0); }, true);"
+        + "document.addEventListener('focusin', function () { if (Date.now() - tapped < 1000) show(); }, true);"
+        + "document.addEventListener('focusout', function () {"
+        + "  setTimeout(function () { if (!editable(active())) MG4DashFields.field(false, false); }, 100);"
+        + "}, true);"
+        + "function value(e, v) {"
+        + "  var d = Object.getOwnPropertyDescriptor(Object.getPrototypeOf(e), 'value');"
+        + "  if (d && d.set) d.set.call(e, v); else e.value = v;"
+        + "}"
+        + "function changed(e, type, data) {"
+        + "  e.dispatchEvent(new InputEvent('input', { bubbles: true, composed: true, inputType: type, data: data }));"
+        + "}"
+        + "window.__mg4dashType = function (s) {"
+        + "  var e = active();"
+        + "  if (!editable(e)) return;"
+        + "  if (e.isContentEditable) { document.execCommand('insertText', false, s); return; }"
+        + "  var at = null;"
+        + "  try { at = e.selectionStart; } catch (x) {}"
+        + "  if (typeof at === 'number') e.setRangeText(s, at, e.selectionEnd, 'end'); else value(e, e.value + s);"
+        + "  changed(e, 'insertText', s);"
+        + "};"
+        + "window.__mg4dashClear = function () {"
+        + "  var e = active();"
+        + "  if (!editable(e)) return;"
+        + "  if (e.isContentEditable) { document.execCommand('selectAll'); document.execCommand('delete'); return; }"
+        + "  value(e, '');"
+        + "  changed(e, 'deleteContentBackward', null);"
+        + "};"
+        + "})();";
+
+    private void watchFields() {
+        if (keyboardFor != null && web != null) web.evaluateJavascript(FIELDS_JS, null);
+    }
+
+    /** Called by the page's script, on Chromium's thread. */
+    private final class Fields {
+        @JavascriptInterface
+        public void field(boolean on, boolean numeric) { runOnUiThread(() -> WebActivity.this.field(on, numeric)); }
+    }
+
+    /** A field touched (MG4Dash opens its keyboard) or left (MG4Dash closes it). */
+    private void field(boolean on, boolean numeric) {
+        if (keyboardFor == null || (!on && !fieldOpen)) return;
+        fieldOpen = on;
+        tell(new Intent(FIELD).putExtra("on", on).putExtra("numeric", numeric));
+    }
+
+    private void tell(Intent i) {
+        try {
+            sendBroadcast(i.setPackage(keyboardFor).addFlags(Intent.FLAG_RECEIVER_FOREGROUND), TALK);
+        } catch (Exception e) { Log.w(TAG, "to MG4Dash: " + e.getMessage()); }
+    }
+
+    /**
+     * A key of MG4Dash's keyboard, as from a hardware keyboard: the page gets its usual events and the
+     * browser types it. What the virtual keyboard map does not have goes through the page's script.
+     */
+    private void type(String text) {
+        KeyEvent[] events = KeyCharacterMap.load(KeyCharacterMap.VIRTUAL_KEYBOARD).getEvents(text.toCharArray());
+        if (events == null) {
+            web.evaluateJavascript("window.__mg4dashType && __mg4dashType(" + org.json.JSONObject.quote(text) + ")", null);
+            return;
+        }
+        for (KeyEvent e : events) web.dispatchKeyEvent(e);
+    }
+
+    private void press(int code) {
+        long now = android.os.SystemClock.uptimeMillis();
+        web.dispatchKeyEvent(new KeyEvent(now, now, KeyEvent.ACTION_DOWN, code, 0));
+        web.dispatchKeyEvent(new KeyEvent(now, now, KeyEvent.ACTION_UP, code, 0));
     }
 
     @Override
@@ -178,18 +312,32 @@ public class WebActivity extends Activity {
     protected void onResume() {
         super.onResume();
         if (inCardOnly() && onMainScreen()) { finish(); return; }
-        if (web != null) web.onResume();
         immersive();
     }
 
+    /**
+     * Paused only (a touch on MG4Dash's home takes the focus back), the page stays in sight and goes on:
+     * it only pauses once no longer seen.
+     */
     @Override
-    protected void onPause() {
+    protected void onStart() {
+        super.onStart();
+        if (web != null) web.onResume();
+    }
+
+    @Override
+    protected void onStop() {
         if (web != null) web.onPause();
-        super.onPause();
+        field(false, false);
+        super.onStop();
     }
 
     @Override
     protected void onDestroy() {
+        if (listening) {
+            listening = false;
+            try { unregisterReceiver(fromCard); } catch (Exception ignored) {}
+        }
         if (web != null) {
             web.stopLoading();
             web.destroy();
