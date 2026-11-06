@@ -95,6 +95,10 @@ object CardsEditor {
                         append("\n").append(context.getString(label))
                     }
                     setTextSize(TypedValue.COMPLEX_UNIT_SP, 13f); setPadding(dp(2), dp(10), dp(2), dp(10))
+                    // A long word (Predefinito, Por defecto) is smaller rather than cut by the round button
+                    val room = (dock?.width ?: dp(72)) - dp(8) - dp(10)
+                    val word = paint.measureText(context.getString(label))
+                    if (word > room) setTextSize(TypedValue.COMPLEX_UNIT_PX, maxOf(textSize * room / word, 9 * resources.displayMetrics.scaledDensity))
                 } else {
                     text = context.getString(label); setTextSize(TypedValue.COMPLEX_UNIT_SP, 22f); setPadding(dp(34), dp(12), dp(34), dp(12))
                 }
