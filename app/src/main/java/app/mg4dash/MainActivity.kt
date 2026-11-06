@@ -1503,6 +1503,15 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         row.addView(powerExtra, LinearLayout.LayoutParams(0, -2, 1f))
         row.addView(powerAvg, LinearLayout.LayoutParams(-2, -2))
         card.addView(row, at + 1, LinearLayout.LayoutParams(-1, -2).apply { topMargin = (6 * d).toInt() })
+        // Touch zone larger than the consumption's text (#29): the card's bottom right corner, up to the
+        // power scale and over the end of the V / A line; the rest of the card still opens the Energy page
+        card.addOnLayoutChangeListener { _, _, _, _, _, _, _, _, _ ->
+            val a = powerAvg ?: return@addOnLayoutChangeListener
+            if (a.width == 0) return@addOnLayoutChangeListener
+            val r = android.graphics.Rect(); a.getDrawingRect(r); card.offsetDescendantRectToMyCoords(a, r)
+            r.left -= (48 * d).toInt(); r.top -= (30 * d).toInt(); r.right = card.width; r.bottom = card.height
+            if (r != consTouch) { consTouch = android.graphics.Rect(r); card.touchDelegate = android.view.TouchDelegate(r, a) }
+        }
         // V / A optional (#29): without them, kW and average consumption take the space and grow
         val va = prefs.powerVa
         if (!va) { powerExtra?.visibility = View.INVISIBLE; powerValue?.setTextSize(TypedValue.COMPLEX_UNIT_SP, 30f); powerAvg?.setTextSize(TypedValue.COMPLEX_UNIT_SP, 30f) }
@@ -1644,6 +1653,8 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
     }
 
     private var consPill: TextView? = null
+    /** Touch zone of the consumption, in the energy card. */
+    private var consTouch: android.graphics.Rect? = null
 
     /** Name of the consumption, with its logo, for 2 s above the kWh/100: the logos are learnt without a legend. */
     private fun showConsPill(src: ConsSource) {
