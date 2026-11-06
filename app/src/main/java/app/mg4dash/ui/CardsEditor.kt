@@ -62,7 +62,7 @@ object CardsEditor {
                     text = context.getString(R.string.wc_hint); setTextColor(Color.WHITE); setTextSize(TypedValue.COMPLEX_UNIT_SP, 19f)
                     gravity = Gravity.CENTER; setPadding(dp(18), dp(10), dp(18), dp(10))
                     background = GradientDrawable().apply { cornerRadius = dp(22).toFloat(); setColor(0xE6141B29.toInt()) }
-                })
+                }, LinearLayout.LayoutParams(-2, -2))   // a plain addView would stretch it to the Done button's width and cut it
                 addView(TextView(context).apply {
                     text = context.getString(R.string.wc_done); setTextColor(Color.WHITE); setTextSize(TypedValue.COMPLEX_UNIT_SP, 24f)
                     gravity = Gravity.CENTER; setPadding(dp(48), dp(16), dp(48), dp(16))
