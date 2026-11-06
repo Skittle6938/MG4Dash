@@ -113,6 +113,17 @@ class SettingsActivity : AppCompatActivity() {
             if (it > 0) prefs.barSide = it - 1
             app.mg4dash.ui.Themes.publish(this); recreate()
         }
+        // Widgets' cards (#97): the same edit mode as a pinch on the home screen
+        if (prefs.homeStyle != 1) {
+            text(style, getString(R.string.st_edit_cards), 20f, R.color.text_value)
+            text(style, getString(R.string.st_edit_cards_desc), 16f, R.color.text_title)
+            row(style, button(getString(R.string.st_edit_cards_btn), R.color.accent_action) {
+                startActivity(android.content.Intent(this, app.mg4dash.MainActivity::class.java)
+                    .putExtra(app.mg4dash.ui.CardsEditor.EXTRA_EDIT, true)
+                    .addFlags(android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP or android.content.Intent.FLAG_ACTIVITY_SINGLE_TOP))
+                finish()
+            })
+        }
         toggle(style, R.string.st_wide_bar, R.string.st_wide_bar_desc, { prefs.wideBar }) { prefs.wideBar = it; recreate() }
         toggle(style, R.string.st_fullscreen, null, { prefs.fullscreen }) { prefs.fullscreen = it; Fullscreen.apply(this) }
         toggle(style, R.string.st_own_keyboard, R.string.st_own_keyboard_desc, { prefs.ownKeyboard }) { prefs.ownKeyboard = it }

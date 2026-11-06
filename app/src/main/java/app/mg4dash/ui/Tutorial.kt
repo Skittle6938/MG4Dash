@@ -49,6 +49,8 @@ object Tutorial {
         Step(R.id.mapCard, R.string.tu_map_t, listOf(R.string.tu_map_1, R.string.tu_map_3, R.string.tu_map_2)),
         Step(R.id.mediaCard, R.string.tu_media_t, listOf(R.string.tu_media_1, R.string.tu_media_2, R.string.tu_media_3), swipes = "VH"),
         Step(R.id.secondaryCard, R.string.tu_widget_t, listOf(R.string.tu_widget_1, R.string.tu_widget_2), swipes = "H"),
+        // Edit mode of the cards (#97): pinch the home screen
+        Step(null, R.string.tu_cards_t, listOf(R.string.tu_cards_1, R.string.tu_cards_2)),
         Step(null, R.string.tu_end_t, listOf(R.string.tu_end_1)),
     )
 

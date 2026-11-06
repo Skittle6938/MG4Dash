@@ -72,6 +72,10 @@ class Prefs(context: Context) {
     var shortcutsPage: Boolean
         get() = sp.getBoolean("shortcuts_page", true)
         set(v) = sp.edit().putBoolean("shortcuts_page", v).apply()
+    /** Address of the map widget's web app card (#97); empty = not set. */
+    var webUrl: String
+        get() = sp.getString("web_url", "") ?: ""
+        set(v) = sp.edit().putString("web_url", v.trim()).apply()
     /** App shown in the map widget instead of the map (#41, trial); null = OSM map. */
     var mapApp: String?
         get() = sp.getString("map_app", null)
