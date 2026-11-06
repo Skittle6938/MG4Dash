@@ -519,7 +519,9 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
     private fun fadeToggle(f: SlotFrame) {
         (listOfNotNull(f.toggle.takeIf { it.visibility == View.VISIBLE }, mapAppFullOver(f), f.handle.takeIf { it.visibility == View.VISIBLE }) +
             f.edges.map { it.first }.filter { it.visibility == View.VISIBLE })
-            .forEach { v -> v.animate().alpha(0f).setDuration(400).withEndAction { v.visibility = View.INVISIBLE }.start() }
+            // The handle stays there, only transparent: faded, a touch on it went to the page (YouTube's Shorts
+            // under it), and the double tap for full screen needed a third
+            .forEach { v -> v.animate().alpha(0f).setDuration(400).withEndAction { if (v !== f.handle) v.visibility = View.INVISIBLE }.start() }
     }
 
     /**
