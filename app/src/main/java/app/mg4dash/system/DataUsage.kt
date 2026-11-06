@@ -116,6 +116,11 @@ object DataUsage {
 
     private fun poll(context: Context) {
         val s = try { read(context) } catch (e: Throwable) { Log.w(TAG, "reading: ${e.message}"); null } ?: return
+        // In the log when the total changes by 1 MB or more (or the counters' state)
+        val prev = last
+        if (prev == null || prev.available != s.available || Math.abs(prev.total - s.total) >= 1_000_000L)
+            Log.i(TAG, "4G, $DAYS days: ${s.total / 1000} kB, today ${s.days.last().total / 1000} kB " +
+                Use.values().joinToString(" ", "(", ")") { "${it.name.lowercase()} ${s.of(it) / 1000}" } + if (s.available) "" else ", counters unavailable")
         last = s
         if (Looper.myLooper() == Looper.getMainLooper()) listeners.forEach { it(s) } else main.post { listeners.forEach { it(s) } }
         checkAlert(context)
