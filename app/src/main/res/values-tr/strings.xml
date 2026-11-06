@@ -635,7 +635,8 @@
     <string name="tu_layouts_1">Ayarlar › Ana ekran\'dan seç: Tam, Basit (büyük paneller) veya Harita (büyük harita)</string>
     <string name="tu_layouts_2">Ayrıca: yan çubuk veya alt çubuk; Görünüm\'de: açık, koyu veya otomatik, renkler</string>
     <string name="tu_bar_t">Yan çubuk</string>
-    <string name="tu_bar_1">Ayarlar: dokun = MG4Dash, uzun bas = araç, çift dokun = Wi-Fi</string>
+    <string name="tu_bar_bottom_t">Alt çubuk</string>
+    <string name="tu_bar_1">Ayarlar: dokun = MG4Dash, uzun bas = araç</string>
     <string name="tu_bar_2">Enerji: çift dokun = ekran kapalı, uzun bas = aracı kapat (sürüşte asla)</string>
     <string name="tu_bar_3">Araç: çift dokun = kapıları kilitle / aç, uzun bas = ESC kapalı / açık</string>
     <string name="tu_bar_4">Ana ekran: uzun bas = tüm uygulamalar</string>
@@ -649,15 +650,15 @@
     <string name="tu_energy_1">KERS bölümüne dokun: rejenerasyon seviyesi; uzun bas: tek pedal sürüş</string>
     <string name="tu_energy_2">CHARGE düğmesi: şarj ve V2L</string>
     <string name="tu_map_t">Harita</string>
-    <string name="tu_map_1">Kaydırma: harita → tüketim → kısayollar</string>
+    <string name="tu_map_1">Sola / sağa kaydır: widget\'ın sonraki kartı (tüketim, kısayollar…)</string>
     <string name="tu_map_3">İki parmak: haritayı taşı ve yakınlaştır (tam ekranda tek parmak)</string>
     <string name="tu_map_2">Haritaya uzun bas: harita kartında başka bir uygulama</string>
     <string name="tu_media_t">Müzik</string>
     <string name="tu_media_1">Yukarı / aşağı kaydır: sonraki kaynak; sola / sağa: önceki / sonraki parça</string>
     <string name="tu_media_2">Kaynak adına dokun: kaynak menüsü; resme dokun: uygulamayı aç</string>
     <string name="tu_media_3">Oynat / duraklat\'a uzun bas: Ses sayfası</string>
-    <string name="tu_widget_t">Sağ alt widget</string>
-    <string name="tu_widget_1">Dokun veya kaydır: sonraki sayfa (enerji, güç, telefon)</string>
+    <string name="tu_widget_t">Birden fazla kartlı widget\'lar</string>
+    <string name="tu_widget_1">Sola / sağa kaydır: sonraki kart (yolculuk, güç, telefon, saatlik veya günlük hava…); yolculuk, güç ve telefon kartlarında dokunmak yeter</string>
     <string name="tu_widget_2">Telefon kısayoluna uzun bas: değiştir veya 2 ila 8 kısayol seç</string>
     <string name="tu_end_t">Bu kadar!</string>
     <string name="tu_end_1">Bu turu Ayarlar › Sistem\'de tekrar görebilirsiniz.</string>

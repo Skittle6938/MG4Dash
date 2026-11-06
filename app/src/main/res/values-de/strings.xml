@@ -635,7 +635,8 @@
     <string name="tu_layouts_1">Auswahl unter Einstellungen › Startseite: Vollständig, Schlicht (große Felder) oder Karte (große Karte)</string>
     <string name="tu_layouts_2">Außerdem: Seitenleiste oder untere Leiste; unter Aussehen: hell, dunkel oder automatisch, Farben</string>
     <string name="tu_bar_t">Seitenleiste</string>
-    <string name="tu_bar_1">Einstellungen: tippen = MG4Dash, lang drücken = Fahrzeug, doppelt tippen = WLAN</string>
+    <string name="tu_bar_bottom_t">Untere Leiste</string>
+    <string name="tu_bar_1">Einstellungen: tippen = MG4Dash, lang drücken = Fahrzeug</string>
     <string name="tu_bar_2">Energie: doppelt tippen = Bildschirm aus, lang drücken = Auto ausschalten (nie während der Fahrt)</string>
     <string name="tu_bar_3">Fahrzeug: doppelt tippen = Türen ver- / entriegeln, lang drücken = ESC aus / an</string>
     <string name="tu_bar_4">Start: lang drücken = alle Apps</string>
@@ -649,15 +650,15 @@
     <string name="tu_energy_1">KERS-Segment tippen: Rekuperationsstufe; lang drücken: One-Pedal-Fahren</string>
     <string name="tu_energy_2">Taste CHARGE: Laden und V2L</string>
     <string name="tu_map_t">Karte</string>
-    <string name="tu_map_1">Wischen: Karte → Verbrauch → Verknüpfungen</string>
+    <string name="tu_map_1">Nach links / rechts wischen: nächste Karte des Widgets (Verbrauch, Verknüpfungen…)</string>
     <string name="tu_map_3">Zwei Finger: Karte bewegen und zoomen (im Vollbild ein Finger)</string>
     <string name="tu_map_2">Karte lang drücken: andere App in der Kartenkarte</string>
     <string name="tu_media_t">Musik</string>
     <string name="tu_media_1">Nach oben / unten wischen: nächste Quelle; links / rechts: vorheriger / nächster Titel</string>
     <string name="tu_media_2">Quellennamen tippen: Quellenmenü; Bild tippen: App der Quelle öffnen</string>
     <string name="tu_media_3">Wiedergabe / Pause lang drücken: Seite Klang</string>
-    <string name="tu_widget_t">Widget unten rechts</string>
-    <string name="tu_widget_1">Tippen oder wischen: nächste Seite (Energie, Leistung, Telefon)</string>
+    <string name="tu_widget_t">Widgets mit mehreren Karten</string>
+    <string name="tu_widget_1">Nach links / rechts wischen: nächste Karte (Fahrt, Leistung, Telefon, Wetter stündlich oder täglich…); bei Fahrt, Leistung und Telefon reicht Tippen</string>
     <string name="tu_widget_2">Telefonverknüpfung lang drücken: ändern oder 2 bis 8 Verknüpfungen wählen</string>
     <string name="tu_end_t">Das war\'s!</string>
     <string name="tu_end_1">Diese Tour finden Sie wieder unter Einstellungen › System.</string>

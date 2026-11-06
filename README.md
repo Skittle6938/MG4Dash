@@ -316,7 +316,7 @@ The gesture tour shows the same two buttons.
 
 A short tour of the main gestures opens after a first install (*Skip* closes it for good); see it again in Settings › System › *Show the gesture tour*.
 
-- "Settings" in the dock or the vertical bar: tap for the launcher settings, long press for the car settings; double tap it in the vertical bar: Wi-Fi
+- "Settings" in the dock or the vertical bar: tap for the launcher settings, long press for the car settings
 - Long press "Home" in the dock: list of installed apps
 - Long press the clock in the dock: clock or Wi-Fi settings button
 - Vertical bar: double tap Energy turns the screen off, long press Energy switches the car off (never while moving); double tap Vehicle locks / unlocks the doors, long press Vehicle turns ESC off / on

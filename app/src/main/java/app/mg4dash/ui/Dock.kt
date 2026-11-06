@@ -172,7 +172,8 @@ object Dock {
         root.removeAllViews()
         root.orientation = LinearLayout.HORIZONTAL
         root.clipToPadding = false   // the bar overlaps the screen margin a little (#38)
-        val bar = LinearLayout(activity)
+        // The dock's id: the gesture tour points at the bar in use (the bottom dock leaves the screen)
+        val bar = LinearLayout(activity).apply { id = R.id.dock }
         val right = rightSide(activity)
         val content = LinearLayout(activity).apply { orientation = LinearLayout.VERTICAL }
         children.forEach { content.addView(it) }   // each child keeps its parameters (weight, margins)
@@ -191,8 +192,7 @@ object Dock {
      * Vertical bar on the left (option; issue #6): icons only, under MG's fog light
      * button which overlays the top left and so seems to be part of it.
      * Order: Settings, Android Auto / CarPlay (grey), Phone, Energy, Vehicle, Home.
-     * Settings: touch = launcher settings, long press = car settings,
-     * double toucher = Wi-Fi.
+     * Settings: touch = launcher settings, long press = car settings.
      */
     private const val BAR_DP = 72
 
@@ -321,10 +321,9 @@ object Dock {
      */
     private fun pageGestures(activity: Activity, cell: android.view.View, icon: ImageView, item: Item, current: Page, selected: Boolean): Boolean {
         val listener: android.view.GestureDetector.SimpleOnGestureListener = when (item.label) {
-            // Simple touch (after the double touch delay) / double touch / long press
+            // Touch / long press (the double touch for Wi-Fi is gone: the connection icons and their banner do it)
             R.string.dock_settings -> object : android.view.GestureDetector.SimpleOnGestureListener() {
-                override fun onSingleTapConfirmed(e: android.view.MotionEvent): Boolean { open(activity, item, current); return true }
-                override fun onDoubleTap(e: android.view.MotionEvent): Boolean { openWifi(activity); return true }
+                override fun onSingleTapUp(e: android.view.MotionEvent): Boolean { open(activity, item, current); return true }
                 override fun onLongPress(e: android.view.MotionEvent) { Apps.open(activity, Apps.SETTINGS, activity.getString(R.string.dock_settings)) }
                 override fun onDown(e: android.view.MotionEvent) = true
             }

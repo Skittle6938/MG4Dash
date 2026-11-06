@@ -49,7 +49,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.util.Locale
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
 
     private lateinit var b: ActivityMainBinding
     private lateinit var prefs: Prefs
@@ -288,6 +288,25 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun frameOf(card: Card): SlotFrame? = frames.values.firstOrNull { card in it.cards }
+
+    /**
+     * Gesture tour (#97): each step points at the place its widget has now. The trip, power and phone
+     * step goes to their place if it has several cards, otherwise to another place with several (not the map's).
+     */
+    override fun tutorialView(id: Int): View? {
+        if (simpleMode) return null
+        fun place(f: SlotFrame?) = f?.box
+        return when (id) {
+            R.id.climateCard -> place(frames.values.firstOrNull { it.fill == HomeSlots.Fill.Climate })
+            R.id.mediaCard -> place(frames.values.firstOrNull { it.fill == HomeSlots.Fill.Media })
+            R.id.energyCard -> place(frameOf(Card.ENERGY))
+            R.id.mapCard -> place(frameOf(Card.MAP))
+            R.id.secondaryCard -> place(listOf(Card.TRIP, Card.POWER, Card.PHONE).firstNotNullOfOrNull { c -> frameOf(c)?.takeIf { it.cards.size > 1 } }
+                ?: frames.values.firstOrNull { it.cards.size > 1 && Card.MAP !in it.cards } ?: frames.values.firstOrNull { it.cards.size > 1 })
+            else -> null
+        }
+    }
+
     private fun isShown(card: Card) = frameOf(card)?.shown == card
 
     /** Power shown in the energy card (#29): no Power card. */
