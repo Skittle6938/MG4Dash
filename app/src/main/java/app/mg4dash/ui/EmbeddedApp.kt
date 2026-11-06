@@ -17,8 +17,13 @@ import app.mg4dash.system.Log
 object EmbeddedApp {
     private const val TAG = "MapApp"
 
-    /** [launch]: intent to start instead of the app's launcher one (the web app's page, #97). */
-    fun create(activity: Activity, cn: ComponentName, launch: Intent? = null, onStarted: (() -> Unit)? = null): ViewGroup? = try {
+    /**
+     * [launch]: intent to start instead of the app's launcher one (the web app's page, #97).
+     * [stopOnRelease]: the app is stopped before its virtual display goes, instead of being moved by
+     * Android to the main screen, over home (MG4Dash Web: a black screen for a second at each home rebuild).
+     */
+    fun create(activity: Activity, cn: ComponentName, launch: Intent? = null, stopOnRelease: Boolean = false,
+               onStarted: (() -> Unit)? = null): ViewGroup? = try {
         val cls = Class.forName("android.app.ActivityView")
         val view = cls.getConstructor(Context::class.java).newInstance(activity) as ViewGroup
         val start = cls.getMethod("startActivity", Intent::class.java)
@@ -46,7 +51,10 @@ object EmbeddedApp {
         }
         view.addOnAttachStateChangeListener(object : View.OnAttachStateChangeListener {
             override fun onViewAttachedToWindow(v: View) = tryStart(0)
-            override fun onViewDetachedFromWindow(v: View) = release(v)
+            override fun onViewDetachedFromWindow(v: View) {
+                if (stopOnRelease) forceStop(activity, cn.packageName)
+                release(v)
+            }
         })
         Log.i(TAG, "ActivityView available")
         view
@@ -83,6 +91,14 @@ object EmbeddedApp {
             vd.resize(v.width, v.height, dpi)
             Log.i(TAG, "virtual display resized: ${v.width}×${v.height}")
         } catch (e: Throwable) { Log.w(TAG, "resize: ${e.message}") }
+    }
+
+    private fun forceStop(context: Context, pkg: String) {
+        try {
+            val am = context.getSystemService(Context.ACTIVITY_SERVICE) as android.app.ActivityManager
+            am.javaClass.getMethod("forceStopPackage", String::class.java).invoke(am, pkg)
+            Log.i(TAG, "$pkg stopped before its virtual display is released")
+        } catch (e: Throwable) { Log.w(TAG, "force stop $pkg: ${e.cause?.message ?: e.message}") }
     }
 
     fun release(v: View) {

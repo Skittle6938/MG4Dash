@@ -14,15 +14,17 @@ import java.io.File
  * MG4Dash Web (web/ module), the page of the "Web app" card (#97). Android refuses WebView to an app
  * with the system uid ("WebView is not allowed in privileged processes"), which the car version is:
  * the page is shown by this small separate app, with its own uid, embedded in the card like an app.
- * Embedded in the assets of the car version and installed by MG4Dash the first time the card is
- * shown (or when the embedded one is newer), as MG4Dash Rescue.
+ * Embedded in the assets of the car version and installed by MG4Dash the first time it is needed
+ * (or when the embedded one is newer), as MG4Dash Rescue. It also opens the compatibility report in
+ * full screen (#95): the car's browser refuses pages on some head units.
  */
 object WebViewer {
     private const val TAG = "WebViewer"
     const val PKG = "app.mg4dash.web"
     val component = ComponentName(PKG, "$PKG.WebActivity")
+    private val page = ComponentName(PKG, "$PKG.PageActivity")
     /** Version of the embedded app (versionCode of web/build.gradle.kts). */
-    private const val BUNDLED_VERSION = 1L
+    private const val BUNDLED_VERSION = 2L
     private const val ASSET = "web.apk"
     private const val ACTION_RESULT = "app.mg4dash.WEB_VIEWER_INSTALLED"
 
@@ -45,9 +47,31 @@ object WebViewer {
         .putExtra("bg", bg).putExtra("fg", fg)
         .putExtra("loading", context.getString(app.mg4dash.R.string.wc_web_loading))
         .putExtra("error", context.getString(app.mg4dash.R.string.wc_web_error))
+        .putExtra("close", context.getString(app.mg4dash.R.string.st_close))
         .putExtra("immersive", Prefs(context).fullscreen)
         // A new page each time: the card's virtual display is new, the old one is gone
         .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NO_ANIMATION)
+
+    /**
+     * [url] in full screen (compatibility report, #95): in MG4Dash Web on the car, installed first if
+     * needed, as the car's browser refuses pages on some head units; otherwise in the browser.
+     */
+    fun open(activity: android.app.Activity, url: String) {
+        fun browser() = try {
+            activity.startActivity(Intent(Intent.ACTION_VIEW, android.net.Uri.parse(url)))
+        } catch (_: Exception) {
+            app.mg4dash.ui.Toasts.show(activity, app.mg4dash.R.string.st_compat_no_browser, long = true)
+        }
+        if (!needed() || !bundled(activity)) { browser(); return }
+        fun start() = try {
+            val ui = app.mg4dash.ui.Themes
+            activity.startActivity(intent(activity, url, ui.color(activity, app.mg4dash.R.color.bg_top), ui.color(activity, app.mg4dash.R.color.text_sub))
+                .setComponent(page).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+        } catch (e: Exception) { Log.w(TAG, "page: ${e.message}"); browser() }
+        if (ready(activity)) { start(); return }
+        app.mg4dash.ui.Toasts.show(activity, app.mg4dash.R.string.wc_web_installing)
+        install(activity) { ok -> if (ok) start() else browser() }
+    }
 
     /** Installs the embedded app (off the main thread); [done] on the main thread, true if installed. */
     fun install(context: Context, done: (Boolean) -> Unit) {

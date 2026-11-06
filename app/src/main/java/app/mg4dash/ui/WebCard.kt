@@ -105,13 +105,14 @@ class WebCard(private val activity: android.app.Activity) : FrameLayout(activity
         removeApp()
         showMessage(context.getString(R.string.wc_web_loading))
         val v = EmbeddedApp.create(activity, WebViewer.component,
-            WebViewer.intent(context, url, Themes.color(context, R.color.bg_top), Themes.color(context, R.color.text_sub))) { message.visibility = View.GONE }
+            WebViewer.intent(context, url, Themes.color(context, R.color.bg_top), Themes.color(context, R.color.text_sub)),
+            stopOnRelease = true) { message.visibility = View.GONE }
             ?: run { showMessage(context.getString(R.string.wc_web_unsupported)); return }
         addView(v, 0, LayoutParams(-1, -1))
         appView = v; appUrl = url
     }
 
-    /** The embedded page goes with its virtual display (MG4Dash Web then closes by itself). */
+    /** The embedded page goes with its virtual display (MG4Dash Web is stopped first). */
     private fun removeApp() {
         appView?.let { removeView(it) }
         appView = null; appUrl = null

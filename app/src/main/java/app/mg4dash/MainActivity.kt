@@ -958,7 +958,9 @@ class MainActivity : AppCompatActivity() {
 
     private fun showMapAppButtons() {
         if (!mapCovered()) return
-        listOfNotNull(b.widgetToggle, mapAppFull?.takeIf { mapAppView?.visibility == View.VISIBLE })
+        // A single card on: no switch button to bring back
+        val toggle = b.widgetToggle.takeIf { app.mg4dash.ui.WidgetCards.pages(prefs, app.mg4dash.ui.WidgetCards.Widget.MAP).size >= 2 }
+        listOfNotNull(toggle, mapAppFull?.takeIf { mapAppView?.visibility == View.VISIBLE })
             .forEach { v -> v.animate().cancel(); v.alpha = 1f; v.visibility = View.VISIBLE }
         b.widgetToggle.removeCallbacks(fadeMapAppButtons)
         b.widgetToggle.postDelayed(fadeMapAppButtons, 5000)
@@ -1008,6 +1010,14 @@ class MainActivity : AppCompatActivity() {
         app.mg4dash.ui.CardsEditor.show(this, targets, mapApp) { applyCards() }
     }
 
+    /**
+     * A touch on the app or the page brings the buttons back. Faded, they appear after this touch, which
+     * stays for the app or the page: it opened the card switch instead of the page's button under it.
+     */
+    private fun revealMapAppButtons() {
+        if (b.widgetToggle.visibility == View.VISIBLE) showMapAppButtons() else b.mapCard.post { showMapAppButtons() }
+    }
+
     /** The cards on changed: each widget shows a card on, the dots and buttons follow. */
     private fun applyCards() {
         applyHomeWidget()
@@ -1020,14 +1030,14 @@ class MainActivity : AppCompatActivity() {
         if (!simpleMode && !app.mg4dash.ui.CardsEditor.isOpen(this) && pinchToEdit.onTouch(ev) { super.dispatchTouchEvent(it) }) return true
         if (webCard?.visibility == View.VISIBLE && ev.actionMasked == android.view.MotionEvent.ACTION_DOWN) {
             val r = android.graphics.Rect(); b.mapCard.getGlobalVisibleRect(r)
-            if (r.contains(ev.rawX.toInt(), ev.rawY.toInt())) showMapAppButtons()
+            if (r.contains(ev.rawX.toInt(), ev.rawY.toInt())) revealMapAppButtons()
         }
         if (mapAppView?.visibility == View.VISIBLE) {
             when (ev.actionMasked) {
                 android.view.MotionEvent.ACTION_DOWN -> {
                     val r = android.graphics.Rect(); b.mapCard.getGlobalVisibleRect(r)
                     if (r.contains(ev.rawX.toInt(), ev.rawY.toInt())) {
-                        showMapAppButtons()
+                        revealMapAppButtons()
                         mapAppPressX = ev.rawX; mapAppPressY = ev.rawY
                         b.mapCard.postDelayed(mapAppLongPress, android.view.ViewConfiguration.getLongPressTimeout() + 300L)
                     }

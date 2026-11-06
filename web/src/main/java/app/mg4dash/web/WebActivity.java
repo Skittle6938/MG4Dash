@@ -26,6 +26,8 @@ import android.widget.TextView;
  * screen choice as extras: the page then takes the touches as any app shown in the card.
  * Moved to the main screen (MG4Dash's home rebuilt, its virtual display gone), it closes so as not to
  * cover the home screen; MG4Dash starts it again in the new card.
+ * [PageActivity]: the same page in full screen, with a close button (compatibility report, #95: the
+ * car's browser refuses pages on some head units).
  */
 public class WebActivity extends Activity {
     private static final String TAG = "MG4DashWeb";
@@ -35,6 +37,7 @@ public class WebActivity extends Activity {
     static final String EXTRA_LOADING = "loading";
     static final String EXTRA_ERROR = "error";
     static final String EXTRA_IMMERSIVE = "immersive";
+    static final String EXTRA_CLOSE = "close";
 
     private WebView web;
     private TextView message;
@@ -45,7 +48,7 @@ public class WebActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (onMainScreen()) { finish(); return; }
+        if (inCardOnly() && onMainScreen()) { finish(); return; }
         Intent i = getIntent();
         int bg = i.getIntExtra(EXTRA_BG, Color.BLACK);
         FrameLayout root = new FrameLayout(this) {
@@ -53,7 +56,7 @@ public class WebActivity extends Activity {
             protected void onConfigurationChanged(Configuration config) {
                 // A move to another screen comes as a configuration change (View.onMovedToDisplay is hidden)
                 super.onConfigurationChanged(config);
-                if (onMainScreen()) {
+                if (inCardOnly() && onMainScreen()) {
                     Log.i(TAG, "moved to the main screen: closed");
                     finish();
                 }
@@ -105,6 +108,7 @@ public class WebActivity extends Activity {
 
         root.addView(web, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
         root.addView(message, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        if (!inCardOnly()) addClose(root, bg, i.getIntExtra(EXTRA_FG, Color.LTGRAY));
         setContentView(root);
         immersive();
         load(i.getStringExtra(EXTRA_URL));
@@ -120,7 +124,7 @@ public class WebActivity extends Activity {
     @Override
     protected void onResume() {
         super.onResume();
-        if (onMainScreen()) { finish(); return; }
+        if (inCardOnly() && onMainScreen()) { finish(); return; }
         if (web != null) web.onResume();
         immersive();
     }
@@ -139,6 +143,39 @@ public class WebActivity extends Activity {
             web = null;
         }
         super.onDestroy();
+    }
+
+    /** Back: the previous page; the full screen page then closes (in the card, it stays). */
+    @Override
+    public void onBackPressed() {
+        if (web != null && web.canGoBack()) web.goBack();
+        else if (!inCardOnly()) finish();
+    }
+
+    /** Shown in MG4Dash's card only (closes on the main screen); [PageActivity] is the full screen page. */
+    boolean inCardOnly() { return true; }
+
+    /** Round close button at the top right, over the page. */
+    private void addClose(FrameLayout root, int bg, int fg) {
+        float d = getResources().getDisplayMetrics().density;
+        TextView close = new TextView(this);
+        close.setText("\u2715");
+        close.setTextColor(fg);
+        close.setTextSize(TypedValue.COMPLEX_UNIT_SP, 30f);
+        close.setGravity(Gravity.CENTER);
+        android.graphics.drawable.GradientDrawable round = new android.graphics.drawable.GradientDrawable();
+        round.setShape(android.graphics.drawable.GradientDrawable.OVAL);
+        round.setColor((bg & 0x00FFFFFF) | 0xE0000000);
+        round.setStroke((int) (2 * d), (fg & 0x00FFFFFF) | 0x60000000);
+        close.setBackground(round);
+        String label = getIntent().getStringExtra(EXTRA_CLOSE);
+        close.setContentDescription(label != null ? label : "Close");
+        close.setOnClickListener(v -> finish());
+        int size = (int) (72 * d), margin = (int) (16 * d);
+        FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(size, size, Gravity.TOP | Gravity.END);
+        lp.topMargin = margin;
+        lp.rightMargin = margin;
+        root.addView(close, lp);
     }
 
     private void load(String url) {
