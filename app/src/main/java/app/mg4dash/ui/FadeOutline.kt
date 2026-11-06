@@ -40,31 +40,37 @@ class FadeOutline(private val d: Float, color: Int, private val fade: Boolean = 
     companion object {
         private const val RADIUS = 14f
 
+        /** Tag of a panel filled to its edges (the map, a web page): rounded corners, the outline drawn over it. */
+        const val FRONT = "fade_outline_front"
+
         /**
          * Applies the style to the panels (bg_panel background with the panels' elevation) once
-         * layout is done; the (narrow) vertical bar is left as it is. The map
-         * receives the same rounded corners and the same outline.
+         * layout is done; the (narrow) vertical bar is left as it is. The map and the web page
+         * receive the same rounded corners and the same outline, drawn over them.
+         * [more]: home cards left out of the screen for now (#97), styled for when they are placed.
          */
-        fun applyTo(root: View) {
+        fun applyTo(root: View, more: Collection<View> = emptyList()) {
             root.post {
                 val d = root.resources.displayMetrics.density
                 val color = Themes.color(root.context, R.color.text_sub)
                 val fade = app.mg4dash.system.Prefs(root.context).panelFade
+                fun style(v: View) {
+                    v.background = FadeOutline(d, color, fade); v.elevation = 0f
+                    if (v.tag == FRONT) {
+                        v.outlineProvider = object : ViewOutlineProvider() {
+                            override fun getOutline(v: View, o: android.graphics.Outline) { o.setRoundRect(0, 0, v.width, v.height, RADIUS * d) }
+                        }
+                        v.clipToOutline = true
+                        v.foreground = FadeOutline(d, color, fade)
+                    }
+                }
                 fun walk(v: View) {
                     // Not the guidance banner: already shown when home is rebuilt during a trip, it lost its background
-                    if (v !is NavBanner && v.elevation >= 5.5f * d && v.background != null && v.width > 120 * d) {
-                        v.background = FadeOutline(d, color, fade); v.elevation = 0f
-                    }
+                    if (v !is NavBanner && v.elevation >= 5.5f * d && v.background != null && v.width > 120 * d) style(v)
                     if (v is ViewGroup) for (i in 0 until v.childCount) walk(v.getChildAt(i))
                 }
                 walk(root)
-                root.findViewById<View>(R.id.mapCard)?.let { m ->
-                    m.outlineProvider = object : ViewOutlineProvider() {
-                        override fun getOutline(v: View, o: android.graphics.Outline) { o.setRoundRect(0, 0, v.width, v.height, RADIUS * d) }
-                    }
-                    m.clipToOutline = true
-                    m.foreground = FadeOutline(d, color, fade)
-                }
+                more.filter { !it.isAttachedToWindow && it.elevation >= 5.5f * d && it.background != null }.forEach { style(it) }
             }
         }
     }

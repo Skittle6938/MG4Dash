@@ -118,6 +118,12 @@ class WebCard(private val activity: android.app.Activity) : FrameLayout(activity
         appView = null; appUrl = null
     }
 
+    /**
+     * The card changes place (#97): MG4Dash Web goes with the old frame's virtual display, so it is
+     * stopped now and started again where the card is shown next.
+     */
+    fun reset() { removeApp(); loaded = null }
+
     /** Hidden: the page stops its timers and videos. */
     fun pause() { web?.onPause() }
 

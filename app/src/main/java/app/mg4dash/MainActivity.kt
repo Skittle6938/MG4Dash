@@ -1,7 +1,8 @@
 package app.mg4dash
 
 import app.mg4dash.ui.CardsEditor
-import app.mg4dash.ui.WidgetCards
+import app.mg4dash.ui.HomeSlots
+import app.mg4dash.ui.HomeSlots.Card
 import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
@@ -92,37 +93,28 @@ class MainActivity : AppCompatActivity() {
         registerReceiver(callChanged, android.content.IntentFilter("android.bluetooth.headsetclient.profile.action.AG_CALL_CHANGED"))
         b = ActivityMainBinding.inflate(layoutInflater)
         setContentView(b.root)
-        app.mg4dash.ui.FadeOutline.applyTo(b.root)
         b.fanGauge.segments = VehicleState.FAN_MAX
         b.kersGauge.segments = 4
         b.kersGauge.onColor = color(R.color.accent_energy)
         // Touch a segment = regeneration level; long press = one-pedal driving
         b.kersGauge.onSegmentTap = { CarBridge.setRegenLevel(it) }
         b.kersGauge.onLongTap = { CarBridge.toggleOnePedal() }
-        if (prefs.homeStyle == 2) applyMapLayout()
+        mapLayout = prefs.homeStyle == 2
+        slotLayout = if (mapLayout) HomeSlots.Layout.MAP else HomeSlots.Layout.FULL
         builtCardPower = cardPower
         if (cardPower) buildPowerEnergyCard()
-        else if (!mapLayout && !simpleMode && !Dock.vertical(this)) compactEnergyCard()
-        if (!mapLayout && !simpleMode && !Dock.vertical(this)) compactClimateCard(b.climateCard)
-        // Vertical swipe (issue #6): music card = next / previous source;
-        // bottom widget (Full layout) = next / previous page
-        // Up / down: source; left / right: next / previous track, like the buttons
-        app.mg4dash.ui.SwipeBox.wrap(b.mediaCard, vertical = true, horizontal = false) { MediaHub.cycleSource(it) }
-            .onHorizontal = { if (it > 0) MediaHub.next() else MediaHub.previous() }
-        if (!mapLayout) {
-            useCompactWeather(0)
-            if (prefs.hideTitles) hideFullTitles()
-        }
-        if (!mapLayout) app.mg4dash.ui.SwipeBox.wrap(b.secondaryCard) { dir ->
-            cancelBoost()
-            prefs.secondaryWidget = nextSecondary(prefs.secondaryWidget, dir)
-            renderSecondary(); lifecycleScope.launch { updatePower() }
-        }
+        else if (!mapLayout && !Dock.vertical(this)) compactEnergyCard()
+        if (!mapLayout && !Dock.vertical(this)) compactClimateCard(b.climateCard)
+        // Places of the layout (#97), then the cards that go in them
+        buildSlots()
+        buildPanels()
+        layoutLook()
+        app.mg4dash.ui.FadeOutline.applyTo(b.root, panels.values + climatePanel + b.mediaCard)
         mapCard = MapCard(this, b.mapHolder)
         navBanner = app.mg4dash.ui.NavBanner(this)
         val nd = resources.displayMetrics.density
         b.mapCard.addView(navBanner, android.widget.FrameLayout.LayoutParams((440 * nd).toInt(), -2, Gravity.TOP or Gravity.START).apply {
-            leftMargin = (12 * nd).toInt(); topMargin = ((if (mapLayout) 76 else 12) * nd).toInt()
+            leftMargin = (12 * nd).toInt(); topMargin = (12 * nd).toInt()
         })
         buildDock()
         setupConnections()
@@ -130,6 +122,7 @@ class MainActivity : AppCompatActivity() {
         wireMedia()
         mediaStyle = app.mg4dash.ui.MediaStyle.apply(this, b)
         wireCards()
+        applySlots()
         observe()
         warmUpStockLauncherIfNeeded()
         // Map (or map app) in full screen before a rebuild (day / night theme…):
@@ -168,115 +161,330 @@ class MainActivity : AppCompatActivity() {
         super.onDestroy()
     }
 
+    // ── Places of the home screen (#97) ──────────────────────────────────────
+
     /**
-     * "Map" layout (a user's proposal, issue #6): same widgets, other place.
-     * Left: weather (small) above climate (large); centre: energy (small) above
-     * music (large); right: the map at full height. The rows are inverted
-     * (small on top, large at the bottom) so each widget keeps its size.
+     * The layout's places (HomeSlots): each one shows the climate, the media or cards in turn, chosen
+     * in the edit mode. Full: three medium places on top, three small ones below. Map (a user's proposal,
+     * issue #6): small places on top, medium ones below, the map at full height on the right.
      */
-    private fun applyMapLayout() {
-        mapLayout = true
-        val left = b.climateCard.parent as LinearLayout
-        val center = b.mapCard.parent as LinearLayout
-        val right = b.mediaCard.parent as LinearLayout
-        listOf(b.climateCard, b.energyCard, b.mapCard, b.weatherCard, b.mediaCard, b.secondaryCard)
-            .forEach { (it.parent as? android.view.ViewGroup)?.removeView(it) }
-        val gap = resources.getDimensionPixelSize(R.dimen.gap)
-        fun lp(weight: Float, top: Int) = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0, weight).apply { topMargin = top }
-        // Stack: energy and bottom widget together, swipe to go from one page to the other
-        val box = app.mg4dash.ui.SwipeBox(this) { dir -> cancelBoost(); showStackPage(nextStack(prefs.stackPage, dir)) }
-        box.addView(b.energyCard, android.widget.FrameLayout.LayoutParams(-1, -1))
-        box.addView(b.secondaryCard, android.widget.FrameLayout.LayoutParams(-1, -1))
-        // No page dots on the stack: they did not fall in the same place from one page to the next.
-        b.secondaryDots.visibility = View.GONE
-        left.addView(b.weatherCard, lp(40f, 0)); left.addView(b.climateCard, lp(60f, gap))
-        center.addView(box, lp(40f, 0)); center.addView(b.mediaCard, lp(60f, gap))
-        right.addView(b.mapCard, lp(100f, 0))
-        // Bottom of the Climate and Media cards aligned with the vertical bar and the map (#38): the outline
-        // fades downwards, their buttons mark the edge
-        val dd = resources.displayMetrics.density
-        // (only with the faded outline; with the full outline, the frame keeps its margin)
-        if (prefs.panelFade) listOf(b.climateCard, b.mediaCard).forEach { it.setPadding(it.paddingLeft, it.paddingTop, it.paddingRight, (2 * dd).toInt()) }
-        // MG's fog light button overlaps the top left: the margin moves from the
-        // Climate title (going down) to the Weather title (going up).
-        val fogSafe = (64 * resources.displayMetrics.density).toInt()
-        ((b.climateCard.getChildAt(0) as LinearLayout).getChildAt(0).layoutParams as LinearLayout.LayoutParams).leftMargin = 0
-        ((b.weatherPlace.parent as LinearLayout).getChildAt(0).layoutParams as LinearLayout.LayoutParams).leftMargin = fogSafe
-        // Widget-style weather (issue #6): replaces the Weather card's content; the top left
-        // stays free for the fog light button; swipe = hourly / daily forecast.
-        // Map: speed / heading / altitude at the top left, in place of the "Position" title (issue #6)
-        (0 until b.mapCard.childCount).map { b.mapCard.getChildAt(it) }
-            .filter { it is TextView && it.text?.toString() == getString(R.string.title_position) }
-            .forEach { b.mapCard.removeView(it) }   // removed: applyHomeWidget shows the map's children again
-        ((b.mapSpeed.parent as View).layoutParams as android.widget.FrameLayout.LayoutParams).gravity = Gravity.TOP or Gravity.START
-        useCompactWeather(if (Dock.vertical(this)) 0 else fogSafe)
-        showStackPage(prefs.stackPage)
-        // No titles (option): less busy; the stack dots and useful info stay
-        if (prefs.hideTitles) {
-            b.climHeader.visibility = View.GONE
-            listOf((b.energyCard.getChildAt(0) as LinearLayout).getChildAt(0),
-                b.secondaryTitle).forEach { it.visibility = View.INVISIBLE }
+    private lateinit var slotLayout: HomeSlots.Layout
+    private val frames = LinkedHashMap<String, SlotFrame>()
+    /** View of each card; the climate and the media apart. */
+    private val panels = HashMap<Card, View>()
+    private lateinit var climatePanel: View
+    private lateinit var mediaPanel: View
+    /** Row of the three columns: the full screen map hides everything else up to it. */
+    private lateinit var columnsRow: LinearLayout
+    private lateinit var consumption: app.mg4dash.ui.ConsumptionCard
+    private lateinit var shortcutsHolder: LinearLayout
+
+    /** Trip energy, power and phone cards: same frame, title, page dots and content. */
+    private class Secondary(val title: TextView, val dots: TextView, val grid: LinearLayout)
+    private val secondary = HashMap<Card, Secondary>()
+    private val weathers = LinkedHashMap<Card, app.mg4dash.ui.WeatherCompact>()
+
+    /** A place on screen: its frame (swipes), its button to change card over a web page or an app, and what it shows. */
+    private inner class SlotFrame(val slot: HomeSlots.Slot) {
+        val box = app.mg4dash.ui.SwipeBox(this@MainActivity) { dir -> swipeSlot(this, dir) }
+        val toggle = android.widget.ImageButton(this@MainActivity, null, 0, R.style.RoundButton).apply {
+            contentDescription = getString(R.string.cd_widget_toggle); visibility = View.GONE
+        }
+        var fill: HomeSlots.Fill = HomeSlots.Fill.Cards(emptyList())
+        /** Cards shown here in turn (the power left out when it is in the energy card). */
+        var cards: List<Card> = emptyList()
+        var current: Card? = null
+        /** Shown for a while instead: consumption while the map is offline, power at full power. */
+        var instead: Card? = null
+        val shown: Card? get() = instead ?: current
+        /** Over a page or an app, the button fades after 5 s. */
+        val fade = Runnable { fadeToggle(this) }
+
+        init {
+            val size = resources.getDimensionPixelSize(R.dimen.touch_min)
+            box.addView(toggle, android.widget.FrameLayout.LayoutParams(size, size, Gravity.TOP or Gravity.END).apply {
+                topMargin = dp(14); rightMargin = dp(14)
+            })
+            box.active = { slotSwipes(this) }
+            toggle.setOnClickListener { swipeSlot(this, 1) }
+            // Long press over the map's app: another app (#41)
+            toggle.setOnLongClickListener { if (shown == Card.MAP) { pickMapApp(); true } else false }
         }
     }
 
-
-
-
-    private var lastPlugged: Boolean? = null
-    private var navBanner: app.mg4dash.ui.NavBanner? = null
-    private var stackDotViews: List<TextView> = emptyList()
-
-    private var builtCardPower = false
-
-    /** "Power" energy card (#29): the Power page is no longer in the scrolling widget. */
-    private val cardPower: Boolean get() = prefs.energyCardPower && !simpleMode
-
-    /** Bottom widget's pages on (#97), the Power page left out when it is in the energy card. */
-    private val bottomSkip: Set<Int> get() = if (cardPower) setOf(1) else emptySet()
-    private val stackSkip: Set<Int> get() = if (cardPower) setOf(2) else emptySet()
-
-    private fun nextSecondary(cur: Int, dir: Int): Int =
-        app.mg4dash.ui.WidgetCards.next(prefs, app.mg4dash.ui.WidgetCards.Widget.BOTTOM, cur.coerceIn(0, 2), dir, bottomSkip)
-
-    private fun nextStack(cur: Int, dir: Int): Int =
-        app.mg4dash.ui.WidgetCards.next(prefs, app.mg4dash.ui.WidgetCards.Widget.STACK, cur, dir, stackSkip)
-
-    /** Stack page: 0 = energy, 1..3 = trip energy, power, phone; only the cards on (#97), unless [force] (full power animation). */
-    private fun showStackPage(page: Int, force: Boolean = false) {
-        val p = if (force) page else app.mg4dash.ui.WidgetCards.valid(prefs, app.mg4dash.ui.WidgetCards.Widget.STACK, if (cardPower && page == 2) 0 else page, stackSkip)
-        prefs.stackPage = p
-        b.energyCard.visibility = if (p == 0) View.VISIBLE else View.INVISIBLE
-        b.secondaryCard.visibility = if (p == 0) View.INVISIBLE else View.VISIBLE
-        if (p > 0) { prefs.secondaryWidget = p - 1; renderSecondary(); lifecycleScope.launch { updatePower() } }
-        val pages = app.mg4dash.ui.WidgetCards.pages(prefs, app.mg4dash.ui.WidgetCards.Widget.STACK).filter { it !in stackSkip }
-        val dots = if (pages.size > 1) pages.joinToString(" ") { if (it == p) "●" else "○" } else ""
-        stackDotViews.forEach { it.text = dots }
+    /** The places of the layout, in its three columns (their cards come later). */
+    private fun buildSlots() {
+        columnsRow = b.climateCard.parent.parent as LinearLayout
+        val cols = (0 until columnsRow.childCount).map { columnsRow.getChildAt(it) as LinearLayout }
+        cols.forEach { it.removeAllViews() }
+        val gap = resources.getDimensionPixelSize(R.dimen.gap)
+        slotLayout.columns.forEachIndexed { ci, slots ->
+            slots.forEachIndexed { i, slot ->
+                val f = SlotFrame(slot)
+                frames[slot.id] = f
+                cols[ci].addView(f.box, LinearLayout.LayoutParams(-1, 0, slot.weight).apply { if (i > 0) topMargin = gap })
+            }
+        }
     }
 
-    /** Title of the bottom widget / stack pages. */
-    private fun stackTitle(tv: TextView, base: String) { tv.text = base }
-
-    /** Auto stack: when the car has just been plugged in, go back to the battery. */
-    private fun stackAuto(s: VehicleState) {
-        val plugged = VehicleState.isPlugged(s.chargeStatus)
-        if (mapLayout && prefs.stackAuto && plugged && lastPlugged == false) showStackPage(0)
-        lastPlugged = plugged
+    /** One view per card, placed later in its place; a card left out keeps its view, out of the screen. */
+    private fun buildPanels() {
+        climatePanel = b.climateCard
+        // Media: vertical swipe = source (issue #6), left / right = next / previous track, like the buttons
+        mediaPanel = app.mg4dash.ui.SwipeBox(this, vertical = true, horizontal = false) { MediaHub.cycleSource(it) }.apply {
+            onHorizontal = { if (it > 0) MediaHub.next() else MediaHub.previous() }
+            addView(b.mediaCard, android.widget.FrameLayout.LayoutParams(-1, -1))
+        }
+        fun frame(content: View, front: Boolean = false) = (layoutInflater.inflate(R.layout.card_frame, null, false) as android.widget.FrameLayout).apply {
+            addView(content, android.widget.FrameLayout.LayoutParams(-1, -1))
+            if (front) tag = app.mg4dash.ui.FadeOutline.FRONT
+        }
+        b.mapCard.tag = app.mg4dash.ui.FadeOutline.FRONT
+        panels[Card.MAP] = b.mapCard
+        consumption = app.mg4dash.ui.ConsumptionCard(this)
+        panels[Card.CONSUMPTION] = frame(consumption)
+        shortcutsHolder = LinearLayout(this, null, 0, R.style.Panel).apply { orientation = LinearLayout.VERTICAL; background = null; elevation = 0f }
+        panels[Card.SHORTCUTS] = frame(shortcutsHolder)
+        // Web app (#97): the page itself is only loaded when shown
+        val web = app.mg4dash.ui.WebCard(this).also { webCard = it }
+        web.visibility = View.GONE
+        panels[Card.WEB] = frame(web, front = true)
+        panels[Card.ENERGY] = b.energyCard
+        mapOf(Card.TRIP to R.string.sw_energy, Card.POWER to R.string.sw_power, Card.PHONE to R.string.sw_phone).forEach { (card, title) ->
+            val v = layoutInflater.inflate(R.layout.card_secondary, null, false)
+            if (card != Card.TRIP) v.id = View.NO_ID   // the tutorial points at the trip card
+            val s = Secondary(v.findViewById(R.id.secondaryTitle), v.findViewById(R.id.secondaryDots), v.findViewById(R.id.secondaryGrid))
+            s.title.text = getString(title)
+            secondary[card] = s
+            // A touch: the next card of its place
+            v.setOnClickListener { frameOf(card)?.let { swipeSlot(it, 1) } }
+            panels[card] = v
+        }
+        // Widget-style weather (issue #6): forecast by hour or by day, the date, time and connections with it
+        listOf(Card.HOURLY, Card.DAILY).forEach { card ->
+            val tile = layoutInflater.inflate(R.layout.card_tile, null, false) as LinearLayout
+            val wc = app.mg4dash.ui.WeatherCompact(this).apply { tight = !Dock.vertical(this@MainActivity) }
+            tile.addView(wc, LinearLayout.LayoutParams(-1, -1))
+            tile.setOnClickListener { WeatherRepo.refreshNow(this) }
+            weathers[card] = wc
+            panels[card] = tile
+        }
     }
 
-    private var weatherCompact: app.mg4dash.ui.WeatherCompact? = null
-
-    /**
-     * Full layout without titles (option): hide the card titles (the space stays, so as not to
-     * shift the widgets); useful header info (city, dots, buttons) stays visible.
-     */
-    private fun hideFullTitles() {
-        b.climHeader.visibility = if (Dock.vertical(this)) View.GONE else View.INVISIBLE
-        listOf((b.energyCard.getChildAt(0) as LinearLayout).getChildAt(0),
-            (b.weatherPlace.parent as LinearLayout).getChildAt(0),
-            b.secondaryTitle).forEach { it.visibility = View.INVISIBLE }
+    /** Titles hidden (less busy, always), and the Map layout's finish. */
+    private fun layoutLook() {
+        b.climHeader.visibility = if (mapLayout || Dock.vertical(this)) View.GONE else View.INVISIBLE
+        (b.energyCard.getChildAt(0) as LinearLayout).getChildAt(0).visibility = View.INVISIBLE
+        secondary.values.forEach { it.title.visibility = View.INVISIBLE }
+        // Map: speed, heading and altitude in place of the "Position" title (issue #6)
         (0 until b.mapCard.childCount).map { b.mapCard.getChildAt(it) }
             .filter { it is TextView && it.text?.toString() == getString(R.string.title_position) }
             .forEach { b.mapCard.removeView(it) }
+        // Bottom of the Climate and Media cards aligned with the vertical bar and the map (#38): the outline
+        // fades downwards, their buttons mark the edge (only with the faded outline)
+        if (mapLayout && prefs.panelFade) listOf(b.climateCard, b.mediaCard).forEach { it.setPadding(it.paddingLeft, it.paddingTop, it.paddingRight, dp(2)) }
+    }
+
+    private fun frameOf(card: Card): SlotFrame? = frames.values.firstOrNull { card in it.cards }
+    private fun isShown(card: Card) = frameOf(card)?.shown == card
+
+    /** Power shown in the energy card (#29): no Power card. */
+    private fun unavailable(): Set<Card> = if (cardPower) setOf(Card.POWER) else emptySet()
+
+    /** What each place shows: at start, and at once after each change in the edit mode. */
+    private fun applySlots() {
+        setMapFullscreen(false)
+        val out = unavailable()
+        val config = HomeSlots.load(prefs, slotLayout, out)
+        HomeSlots.save(prefs, config)
+        frames.values.forEach { f ->
+            f.fill = config.fill(f.slot.id)
+            f.cards = config.cards(f.slot.id).filter { it !in out }
+            f.instead = null
+        }
+        val want = HashMap<View, SlotFrame>()
+        frames.values.forEach { f ->
+            when (f.fill) {
+                HomeSlots.Fill.Climate -> want[climatePanel] = f
+                HomeSlots.Fill.Media -> want[mediaPanel] = f
+                is HomeSlots.Fill.Cards -> f.cards.forEach { c -> panels[c]?.let { want[it] = f } }
+            }
+        }
+        // An app or a page embedded in a card that changes place goes with its old frame: started again in the new one
+        if (b.mapCard.parent !== want[b.mapCard]?.box) dropMapApp()
+        panels[Card.WEB]?.let { if (it.parent !== want[it]?.box) webCard?.reset() }
+        (panels.values + climatePanel + mediaPanel).forEach { v ->
+            val target = want[v]?.box
+            if (v.parent !== target) {
+                (v.parent as? android.view.ViewGroup)?.removeView(v)
+                target?.addView(v, 0, android.widget.FrameLayout.LayoutParams(-1, -1))
+            }
+        }
+        frames.values.forEach { f ->
+            f.toggle.bringToFront()
+            f.current = HomeSlots.current(prefs, slotLayout, f.slot.id, f.cards)
+        }
+        // Smaller versions in a small place: consumption, map without + and −, one row of shortcuts
+        consumption.compact = frameOf(Card.CONSUMPTION)?.slot?.size == HomeSlots.Size.SMALL
+        applyMapButtons()
+        placeMapInfo()
+        applyFog()
+        frames.values.forEach { showFrame(it) }
+        // Cards left out: nothing of theirs runs
+        Card.entries.filter { frameOf(it) == null }.forEach { cardShown(it, false) }
+    }
+
+    /** Shows [f]'s card (or the climate, the media), and runs what the cards shown or hidden need. */
+    private fun showFrame(f: SlotFrame) {
+        f.instead = insteadOf(f)
+        val shown = f.shown
+        f.cards.forEach { c -> panels[c]?.visibility = if (c == shown) View.VISIBLE else View.INVISIBLE }
+        if (f.fill == HomeSlots.Fill.Climate) climatePanel.visibility = View.VISIBLE
+        if (f.fill == HomeSlots.Fill.Media) mediaPanel.visibility = View.VISIBLE
+        f.cards.forEach { cardShown(it, it == shown) }
+        // Page dots of the trip, power and phone cards (Full layout, as before), only among themselves:
+        // elsewhere they would not fall in the same place from one card to the next
+        val dots = !mapLayout && f.cards.size > 1 && f.cards.all { it == Card.TRIP || it == Card.POWER || it == Card.PHONE }
+        f.cards.forEach { c -> secondary[c]?.dots?.text = if (dots) f.cards.joinToString(" ") { if (it == shown) "●" else "○" } else "" }
+        updateToggle(f)
+        placeConnections()
+    }
+
+    /** Consumption instead of the map with no connection and no tiles (#15), the power at full power (#29). */
+    private fun insteadOf(f: SlotFrame): Card? = when {
+        fxBoost && boostFrame === f -> Card.POWER
+        f.current == Card.MAP && Card.CONSUMPTION in f.cards && prefs.mapOfflineSwitch && offline() &&
+            !mapCard.hasCachedTiles(LocationRepo.location.value) -> Card.CONSUMPTION
+        else -> null
+    }
+
+    /** A card shown or hidden: what it starts or stops. */
+    private fun cardShown(card: Card, on: Boolean) {
+        when (card) {
+            Card.MAP -> {
+                if (!on) setMapFullscreen(false)
+                applyMapApp(on)
+                navBanner?.show(app.mg4dash.map.NavRepo.nav.value?.takeIf { on })
+                if (on) renderLocation(LocationRepo.location.value, CarBridge.state.value)
+            }
+            Card.CONSUMPTION -> if (on) consumption.show()
+            Card.SHORTCUTS -> if (on) renderShortcuts()
+            Card.WEB -> webCard?.let { w -> w.visibility = if (on) View.VISIBLE else View.GONE; if (on) w.show() else w.pause() }
+            Card.ENERGY -> {}
+            Card.TRIP -> if (on) renderTripEnergy()
+            Card.POWER -> if (on) { if (!powerBuilt) buildPower(); ensurePowerFx(); lifecycleScope.launch { updatePower() } } else if (!cardPower) dropPowerFx()
+            Card.PHONE -> if (on) renderPhoneFavs()
+            Card.HOURLY, Card.DAILY -> if (on) renderWeather(WeatherRepo.shown.value, CarBridge.state.value)
+        }
+    }
+
+    /** Swipe or touch on a place: its next card, kept for the next time. */
+    private fun swipeSlot(f: SlotFrame, dir: Int) {
+        if (f.cards.size < 2) return
+        cancelBoost(f)   // the driver changes card: no going back after the full power
+        val next = HomeSlots.next(f.cards, f.shown, dir) ?: return
+        f.current = next
+        HomeSlots.setCurrent(prefs, slotLayout, f.slot.id, next)
+        showFrame(f)
+    }
+
+    /** A place's own swipes: not over the full screen map, nor a page or an app, which take the touches. */
+    private fun slotSwipes(f: SlotFrame) = f.cards.size >= 2 && hiddenForMap == null && !covering(f)
+
+    /** A web page or an app fills the card and takes its touches (#41, #97). */
+    private fun covering(f: SlotFrame) = f.shown == Card.WEB || f.shown == Card.MAP && mapAppView?.visibility == View.VISIBLE
+
+    /** Over a page or an app, the button to change card, which announces the next one; fades after 5 s. */
+    private fun updateToggle(f: SlotFrame) {
+        f.toggle.setImageResource((HomeSlots.next(f.cards, f.shown, 1) ?: Card.MAP).icon)
+        if (f.cards.size >= 2 && covering(f)) revealToggle(f)
+        else { f.toggle.removeCallbacks(f.fade); f.toggle.animate().cancel(); f.toggle.alpha = 1f; f.toggle.visibility = View.GONE }
+    }
+
+    private fun mapAppFullOver(f: SlotFrame) = mapAppFull?.takeIf { f.shown == Card.MAP && mapAppView?.visibility == View.VISIBLE }
+
+    private fun revealToggle(f: SlotFrame) {
+        if (!covering(f)) return
+        listOfNotNull(f.toggle.takeIf { f.cards.size >= 2 }, mapAppFullOver(f))
+            .forEach { v -> v.animate().cancel(); v.alpha = 1f; v.visibility = View.VISIBLE }
+        f.toggle.removeCallbacks(f.fade)
+        f.toggle.postDelayed(f.fade, 5000)
+    }
+
+    private fun fadeToggle(f: SlotFrame) {
+        listOfNotNull(f.toggle.takeIf { it.visibility == View.VISIBLE }, mapAppFullOver(f))
+            .forEach { v -> v.animate().alpha(0f).setDuration(400).withEndAction { v.visibility = View.INVISIBLE }.start() }
+    }
+
+    /**
+     * A touch on the app or the page brings the buttons back. Faded, they appear after this touch, which
+     * stays for the app or the page: it opened the card switch instead of the page's button under it.
+     */
+    private fun revealOnTouch(f: SlotFrame) {
+        if (f.toggle.visibility == View.VISIBLE) revealToggle(f) else f.box.post { revealToggle(f) }
+    }
+
+    /**
+     * MG's fog light button covers the top left corner (#38): what the top left place shows leaves room
+     * for it, unless the vertical bar is there.
+     */
+    private fun applyFog() {
+        val tl = frames["tl"]
+        val fog = if (Dock.vertical(this)) 0 else dp(64)
+        ((b.climateCard.getChildAt(0) as LinearLayout).getChildAt(0).layoutParams as LinearLayout.LayoutParams).leftMargin =
+            if (tl?.fill == HomeSlots.Fill.Climate) fog else 0
+        weathers.forEach { (c, w) -> w.setLeftInset(if (tl != null && c in tl.cards) fog else 0) }
+        fun pad(v: View, on: Boolean) {
+            val base = basePad.getOrPut(v) { v.paddingLeft }
+            v.setPadding(if (on) maxOf(base, fog) else base, v.paddingTop, v.paddingRight, v.paddingBottom)
+        }
+        listOf(Card.ENERGY, Card.TRIP, Card.POWER, Card.PHONE, Card.CONSUMPTION, Card.SHORTCUTS, Card.WEB).forEach { c ->
+            panels[c]?.let { pad(it, tl != null && c in tl.cards) }
+        }
+        pad(b.mediaCard, tl?.fill == HomeSlots.Fill.Media)
+    }
+    private val basePad = HashMap<View, Int>()
+
+    /** Speed and guidance banner of the map: at the top left on the tall map of the Map layout (#6), otherwise at the bottom left. */
+    private fun placeMapInfo() {
+        val f = frameOf(Card.MAP)
+        val top = mapLayout && f?.slot?.size == HomeSlots.Size.TALL
+        val pill = b.mapSpeed.parent as View
+        (pill.layoutParams as android.widget.FrameLayout.LayoutParams).gravity = if (top) Gravity.TOP or Gravity.START else Gravity.BOTTOM or Gravity.LEFT
+        pill.requestLayout()
+        navBanner?.let { nb ->
+            (nb.layoutParams as? android.widget.FrameLayout.LayoutParams)?.let { lp ->
+                lp.topMargin = dp(if (top) 76 else 12)
+                lp.leftMargin = if (f != null && f === frames["tl"] && !Dock.vertical(this)) dp(64) else dp(12)
+                nb.layoutParams = lp
+            }
+        }
+    }
+
+    /** Every 5 s: the map gives way to consumption with no connection, the trip and consumption cards follow. */
+    private fun refreshCards() {
+        frames.values.forEach { f -> if (insteadOf(f) != f.instead) showFrame(f) }
+        if (isShown(Card.TRIP)) renderTripEnergy()
+        if (isShown(Card.CONSUMPTION)) consumption.show()
+    }
+
+    private var lastPlugged: Boolean? = null
+    private var navBanner: app.mg4dash.ui.NavBanner? = null
+
+    private var builtCardPower = false
+
+    /** "Power" energy card (#29): the Power card is no longer among the cards. */
+    private val cardPower: Boolean get() = prefs.energyCardPower && !simpleMode
+
+    /** Auto stack: when the car has just been plugged in, the energy card comes back in its place. */
+    private fun stackAuto(s: VehicleState) {
+        val plugged = VehicleState.isPlugged(s.chargeStatus)
+        if (prefs.stackAuto && plugged && lastPlugged == false) frameOf(Card.ENERGY)?.takeIf { it.cards.size > 1 }?.let { f ->
+            f.current = Card.ENERGY
+            HomeSlots.setCurrent(prefs, slotLayout, f.slot.id, Card.ENERGY)
+            showFrame(f)
+        }
+        lastPlugged = plugged
     }
 
     /** Bottom bar (#88): the climate card is shorter, its buttons were cut at the bottom. */
@@ -289,30 +497,21 @@ class MainActivity : AppCompatActivity() {
         if (v is android.view.ViewGroup) for (i in 0 until v.childCount) compactClimateCard(v.getChildAt(i))
     }
 
-    /** Widget-style weather (issue #6), Full and Map layouts: swipe = hourly / daily forecast. */
-    private fun useCompactWeather(leftInset: Int) {
-        val wc = app.mg4dash.ui.WeatherCompact(this)
-        wc.setLeftInset(leftInset)
-        wc.tight = !Dock.vertical(this)
-        b.weatherCard.removeAllViews()
-        b.weatherCard.addView(wc, LinearLayout.LayoutParams(-1, -1))
-        weatherCompact = wc
-        app.mg4dash.ui.SwipeBox.wrap(b.weatherCard) { flipWeather(it) }
-    }
-
-    private fun flipWeather(dir: Int) {
-        prefs.weatherPage = app.mg4dash.ui.WidgetCards.next(prefs, app.mg4dash.ui.WidgetCards.Widget.WEATHER, prefs.weatherPage, dir)
-        renderWeather(WeatherRepo.shown.value, CarBridge.state.value)
-    }
-
     private var builtConnections = false
+    private var connections: View? = null
 
-    /** Connection icons (#86): at the top right of the weather, to the right of the city. */
+    /** Connection icons (#86): at the top right of the weather, to the right of the city; they follow the weather card shown. */
     private fun setupConnections() {
         builtConnections = prefs.connectionIcons
         if (!builtConnections) return
-        val row = app.mg4dash.ui.ConnectionRow(this)
-        weatherCompact?.addConnections(row)
+        connections = app.mg4dash.ui.ConnectionRow(this)
+        placeConnections()
+    }
+
+    private fun placeConnections() {
+        val row = connections ?: return
+        val card = listOf(Card.HOURLY, Card.DAILY).firstOrNull { isShown(it) } ?: if (row.parent == null) Card.HOURLY else return
+        weathers[card]?.addConnections(row)
     }
 
     /** Called by the dock when the clock / Wi-Fi slot changes. */
@@ -327,12 +526,12 @@ class MainActivity : AppCompatActivity() {
             prefs.connectionIcons != builtConnections ||
             app.mg4dash.ui.Themes.signature(this) != themeSig) { app.mg4dash.ui.Themes.recreateSmooth(this); return }
         // Map app uninstalled in the meantime (#54): back to the OpenStreetMap map
-        mapAppCn?.let { if (!mapAppInstalled(it)) applyHomeWidget() }
+        mapAppCn?.let { if (!mapAppInstalled(it)) refreshMap() }
         app.mg4dash.ui.UpdatePrompt.maybeShow(this)
         if (simpleMode) { simple?.onResume(); Fullscreen.apply(this); return }
         mapCard.onResume()
-        if (webCard?.visibility == View.VISIBLE) webCard?.show()
-        if (prefs.homeWidget == 1) renderShortcuts()
+        if (isShown(Card.WEB)) webCard?.show()
+        if (isShown(Card.SHORTCUTS)) renderShortcuts()
         Fullscreen.apply(this)
     }
 
@@ -372,7 +571,7 @@ class MainActivity : AppCompatActivity() {
     // ── Carte ────────────────────────────────────────────────────────────────
 
     private fun renderLocation(loc: Location?, s: VehicleState) {
-        b.mapEmpty.visibility = if (effectiveWidget() == 0 && (loc == null || !mapCard.available)) View.VISIBLE else View.GONE
+        b.mapEmpty.visibility = if (isShown(Card.MAP) && (loc == null || !mapCard.available)) View.VISIBLE else View.GONE
         if (!mapCard.available) b.mapEmpty.text = getString(R.string.map_unavailable)
         val speed = s.speedKmh?.takeIf { it >= 0f } ?: loc?.takeIf { it.hasSpeed() }?.speed?.times(3.6f)
         b.mapSpeed.put(speed?.let { app.mg4dash.system.Units.speedText(this, it) } ?: "— ${app.mg4dash.system.Units.speedUnit(this)}")
@@ -389,11 +588,9 @@ class MainActivity : AppCompatActivity() {
         // Vertical bar (option, all screens): the fog light button sits on it,
         // the top left widgets no longer need to leave room for it.
         if (Dock.vertical(this)) {
-            ((b.climateCard.parent as View).parent as View).let { row ->
+            columnsRow.let { row ->
                 (row.layoutParams as LinearLayout.LayoutParams).bottomMargin = 0
             }
-            ((b.climateCard.getChildAt(0) as LinearLayout).getChildAt(0).layoutParams as LinearLayout.LayoutParams).leftMargin = 0
-            ((b.weatherPlace.parent as LinearLayout).getChildAt(0).layoutParams as LinearLayout.LayoutParams).leftMargin = 0
         }
         Dock.mount(this, b.root as LinearLayout, b.dock, Dock.Page.HOME)
         builtVertical = Dock.vertical(this)
@@ -705,24 +902,14 @@ class MainActivity : AppCompatActivity() {
     // ── Weather ──────────────────────────────────────────────────────────────
 
     private fun renderWeather(w: WeatherRepo.Weather?, s: VehicleState) {
-        weatherCompact?.show(w, s.outsideTemp, prefs.weatherCity,
-            app.mg4dash.ui.WidgetCards.valid(prefs, app.mg4dash.ui.WidgetCards.Widget.WEATHER, prefs.weatherPage))
+        weathers.forEach { (card, wc) -> wc.show(w, s.outsideTemp, prefs.weatherCity, if (card == Card.DAILY) 1 else 0) }
     }
 
-    // ── Widget secondaire ────────────────────────────────────────────────────
+    // ── Cards ────────────────────────────────────────────────────────────────
 
     private fun wireCards() {
         b.energyCard.setOnClickListener { startActivity(Intent(this, EnergyActivity::class.java)) }
         b.chargeAction.setOnClickListener { onChargeAction() }
-        b.weatherCard.setOnClickListener { WeatherRepo.refreshNow(this) }
-        b.secondaryCard.setOnClickListener {
-            // Map layout: a touch moves the stack forward (energy → trip → power → phone)
-            cancelBoost()
-            if (mapLayout) { showStackPage(nextStack(prefs.stackPage, 1)); return@setOnClickListener }
-            prefs.secondaryWidget = nextSecondary(prefs.secondaryWidget, 1)
-            renderSecondary()
-            lifecycleScope.launch { updatePower() }
-        }
         // Hidden buttons (#15): each press restarts the 6 s display
         b.mapZoomIn.setOnClickListener { extendMapButtons(); mapCard.zoom(1) }
         b.mapZoomOut.setOnClickListener { extendMapButtons(); mapCard.zoom(-1) }
@@ -730,24 +917,9 @@ class MainActivity : AppCompatActivity() {
         b.mapCenter.setOnClickListener { extendMapButtons(); mapCard.recenter(LocationRepo.location.value); tintMapCenter() }
         tintMapCenter()
         mapCard.onTouch = { showMapButtons() }
-        // Long press on the map (or its top right button): another app in its place (#41)
+        // Long press on the map (or the button over its app): another app in its place (#41)
         mapCard.onLongPress = { pickMapApp() }
-        b.widgetToggle.setOnLongClickListener { pickMapApp(); true }
         applyMapButtons()
-        // Map → Consumption → Shortcuts → Map (issue #6: consumption in the map widget)
-        b.widgetToggle.setOnClickListener {
-            cycleHomeWidget(1)
-        }
-        // One finger swipes between the pages, like the other widgets; not in full screen, or over an app
-        // embedded in the map, which receives the touches
-        app.mg4dash.ui.SwipeBox.wrap(b.mapCard) { cycleHomeWidget(it) }.active = { hiddenForMap == null && !mapCovered() }
-        applyHomeWidget()
-    }
-
-    /** Map widget's cards on (#38, #97): map → consumption → shortcuts → web app, those chosen in the edit mode. */
-    private fun cycleHomeWidget(dir: Int) {
-        prefs.homeWidget = app.mg4dash.ui.WidgetCards.next(prefs, app.mg4dash.ui.WidgetCards.Widget.MAP, effectiveWidget(), dir)
-        applyHomeWidget()
     }
 
     // ── Map or shortcuts ─────────────────────────────────────────────────────
@@ -800,7 +972,10 @@ class MainActivity : AppCompatActivity() {
      */
     private fun applyMapButtons() {
         val hide = prefs.mapAutoHide && android.os.SystemClock.uptimeMillis() >= mapButtonsUntil
-        listOf(b.mapZoomIn, b.mapZoomOut, b.mapFullscreen).forEach { it.visibility = if (hide) View.GONE else View.VISIBLE }
+        // Map in a small place (#97): no + and −, it zooms with two fingers; heading and full screen stay
+        val small = frameOf(Card.MAP)?.slot?.size == HomeSlots.Size.SMALL
+        listOf(b.mapZoomIn, b.mapZoomOut).forEach { it.visibility = if (hide || small) View.GONE else View.VISIBLE }
+        b.mapFullscreen.visibility = if (hide) View.GONE else View.VISIBLE
         (b.mapButtons.layoutParams as android.widget.FrameLayout.LayoutParams).let {
             it.gravity = if (hide) Gravity.TOP or Gravity.RIGHT else Gravity.RIGHT or Gravity.CENTER_VERTICAL
             it.topMargin = if (hide) dp(14) else 0
@@ -813,9 +988,6 @@ class MainActivity : AppCompatActivity() {
         b.mapCenter.setColorFilter(color(if (mapCard.headingUp) R.color.accent_energy else R.color.accent_action))
     }
 
-    private var consumptionCard: app.mg4dash.ui.ConsumptionCard? = null
-    private var lastWidgetMode = -1
-
     /** Without a data connection, the map (online tiles) gives way to consumption. */
     private fun offline(): Boolean {
         // Same signal as the weather widget (#15): no weather, or last request failed;
@@ -825,14 +997,10 @@ class MainActivity : AppCompatActivity() {
             !app.mg4dash.system.StatusMonitor.hasInternet(this) && System.currentTimeMillis() - w.updatedAt > 3600_000L
     }
 
-    /** 0 = map, 1 = shortcuts, 2 = consumption, 3 = web app; only a card on (#97). */
-    private fun effectiveWidget(): Int = app.mg4dash.ui.WidgetCards.valid(prefs, app.mg4dash.ui.WidgetCards.Widget.MAP, prefs.homeWidget).let {
-        if (it == 0 && prefs.mapOfflineSwitch && offline() && !mapCard.hasCachedTiles(LocationRepo.location.value) &&
-            app.mg4dash.ui.WidgetCards.isOn(prefs, app.mg4dash.ui.WidgetCards.Widget.MAP, app.mg4dash.ui.WidgetCards.Card.CONSUMPTION)) 2 else it
-    }
-
     /** Views hidden by the full screen map, with their previous visibility (null: map as a widget). */
     private var hiddenForMap: List<Pair<View, Int>>? = null
+    /** Gaps above the map's place, taken off in full screen. */
+    private var fullMargins: List<Pair<android.view.ViewGroup.MarginLayoutParams, Int>> = emptyList()
 
     /** Called by the bar: each of its buttons brings the map back to its widget size. */
     fun exitMapFullscreen() = setMapFullscreen(false)
@@ -843,23 +1011,31 @@ class MainActivity : AppCompatActivity() {
      */
     private fun setMapFullscreen(on: Boolean) {
         if (simpleMode || on == (hiddenForMap != null)) return
+        if (on && !isShown(Card.MAP)) return
         if (on) {
-            // Walk up from the map to the column row, hiding everything around it
-            val row = (b.climateCard.parent as View).parent as android.view.ViewGroup
+            // Walk up from the map to the column row, hiding everything around it but the button to change card
             val hidden = mutableListOf<Pair<View, Int>>()
+            val margins = mutableListOf<Pair<android.view.ViewGroup.MarginLayoutParams, Int>>()
             var child: View = b.mapCard
-            while (child !== row) {
+            while (child !== columnsRow) {
                 val parent = child.parent as? android.view.ViewGroup ?: break
                 for (i in 0 until parent.childCount) {
                     val v = parent.getChildAt(i)
-                    if (v !== child && v.visibility != View.GONE) { hidden += v to v.visibility; v.visibility = View.GONE }
+                    if (v !== child && v.visibility != View.GONE && frames.values.none { it.toggle === v }) { hidden += v to v.visibility; v.visibility = View.GONE }
                 }
+                // A place lower down its column: no gap above it in full screen
+                val lp = child.layoutParams as? android.view.ViewGroup.MarginLayoutParams
+                if (lp != null && lp.topMargin != 0) { margins += lp to lp.topMargin; lp.topMargin = 0; child.layoutParams = lp }
                 child = parent
             }
             hiddenForMap = hidden
+            fullMargins = margins
         } else {
             hiddenForMap?.forEach { (v, vis) -> v.visibility = vis }
             hiddenForMap = null
+            fullMargins.forEach { (lp, m) -> lp.topMargin = m }
+            fullMargins = emptyList()
+            columnsRow.requestLayout()
         }
         mapCard.oneFingerPan = on
         b.mapFullscreen.setImageResource(if (on) R.drawable.ic_fullscreen_exit else R.drawable.ic_fullscreen)
@@ -872,52 +1048,24 @@ class MainActivity : AppCompatActivity() {
     private fun relaunchOnResize(pkg: String) = pkg.startsWith("com.shihab.diplay")
 
     private fun rebuildMapApp() {
+        dropMapApp()
+        applyMapApp(isShown(Card.MAP))
+        frameOf(Card.MAP)?.let { updateToggle(it) }
+    }
+
+    /** The map's app leaves (its virtual display with it); [applyMapApp] starts it again. */
+    private fun dropMapApp() {
         mapAppView?.let { app.mg4dash.ui.EmbeddedApp.release(it); b.mapCard.removeView(it) }
         mapAppFull?.let { b.mapCard.removeView(it) }
         mapAppView = null; mapAppCn = null; mapAppFull = null
-        applyMapApp(effectiveWidget() == 0)
     }
 
-    private fun applyHomeWidget() {
-        val mode = effectiveWidget()
-        if (mode != 0) setMapFullscreen(false)
-        val consumption = mode == 2
-        val cc = consumptionCard ?: app.mg4dash.ui.ConsumptionCard(this).also {
-            consumptionCard = it
-            b.mapCard.addView(it, b.mapCard.indexOfChild(b.widgetToggle), android.widget.FrameLayout.LayoutParams(-1, -1))
-        }
-        cc.visibility = if (consumption) View.VISIBLE else View.GONE
-        if (consumption) cc.show()
-        // Web app (#97): created the first time it is shown
-        val web = mode == 3
-        val wc = webCard ?: if (web) app.mg4dash.ui.WebCard(this).also {
-            webCard = it
-            b.mapCard.addView(it, b.mapCard.indexOfChild(b.widgetToggle), android.widget.FrameLayout.LayoutParams(-1, -1))
-        } else null
-        wc?.visibility = if (web) View.VISIBLE else View.GONE
-        if (web) wc?.show() else wc?.pause()
-        val shortcuts = mode == 1
-        // The map and its controls disappear behind the shortcuts (and vice versa).
-        for (i in 0 until b.mapCard.childCount) {
-            val v = b.mapCard.getChildAt(i)
-            if (v === b.widgetToggle || v === navBanner || v === cc || v === wc) continue
-            if (v === b.shortcutsHolder) v.visibility = if (shortcuts) View.VISIBLE else View.GONE
-            else v.visibility = if (shortcuts || consumption || web) View.INVISIBLE else View.VISIBLE
-        }
-        if (mode == 0) renderLocation(LocationRepo.location.value, CarBridge.state.value)
-        // The icon announces the next page; without a shortcuts page (#38), consumption goes back to the map
-        b.widgetToggle.setImageResource(when (app.mg4dash.ui.WidgetCards.next(prefs, app.mg4dash.ui.WidgetCards.Widget.MAP, mode, 1)) {
-            2 -> R.drawable.ic_bolt; 1 -> R.drawable.ic_apps; 3 -> R.drawable.ic_web; else -> R.drawable.ic_map })
-        navBanner?.show(app.mg4dash.map.NavRepo.nav.value?.takeIf { mode == 0 })
-        if (shortcuts) renderShortcuts()
-        applyMapApp(mode == 0)
-        // Over the web app, as over an app: the button to change card, fading after 5 s
-        if (web) showMapAppButtons()
-        // A single card: nothing to switch to
-        if (app.mg4dash.ui.WidgetCards.pages(prefs, app.mg4dash.ui.WidgetCards.Widget.MAP).size < 2) b.widgetToggle.visibility = View.GONE
+    /** Map app chosen, gone or failed: the map card follows. */
+    private fun refreshMap() {
+        frameOf(Card.MAP)?.let { showFrame(it) } ?: applyMapApp(false)
     }
 
-    /** Web app card of the map widget (#97). */
+    /** Web app card (#97). */
     private var webCard: app.mg4dash.ui.WebCard? = null
 
     /** App embedded in the map widget (#41, trial) and its component. */
@@ -927,7 +1075,7 @@ class MainActivity : AppCompatActivity() {
     private fun pickMapApp() {
         app.mg4dash.shortcuts.Shortcuts.pickApp(this, getString(R.string.map_app_pick), getString(R.string.map_app_osm)) { cn ->
             prefs.mapApp = cn?.flattenToString()
-            applyHomeWidget()
+            refreshMap()
         }
     }
 
@@ -945,28 +1093,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     /**
-     * App in the map: the switch and full screen buttons fade after 5 s so as not to
-     * hide the app; a touch anywhere on the map brings them back.
-     */
-    private val fadeMapAppButtons = Runnable {
-        listOfNotNull(b.widgetToggle, mapAppFull?.takeIf { mapAppView?.visibility == View.VISIBLE })
-            .forEach { v -> v.animate().alpha(0f).setDuration(400).withEndAction { v.visibility = View.INVISIBLE }.start() }
-    }
-
-    /** An app or the web app (#97) fills the map widget and takes its touches. */
-    private fun mapCovered() = mapAppView?.visibility == View.VISIBLE || webCard?.visibility == View.VISIBLE
-
-    private fun showMapAppButtons() {
-        if (!mapCovered()) return
-        // A single card on: no switch button to bring back
-        val toggle = b.widgetToggle.takeIf { app.mg4dash.ui.WidgetCards.pages(prefs, app.mg4dash.ui.WidgetCards.Widget.MAP).size >= 2 }
-        listOfNotNull(toggle, mapAppFull?.takeIf { mapAppView?.visibility == View.VISIBLE })
-            .forEach { v -> v.animate().cancel(); v.alpha = 1f; v.visibility = View.VISIBLE }
-        b.widgetToggle.removeCallbacks(fadeMapAppButtons)
-        b.widgetToggle.postDelayed(fadeMapAppButtons, 5000)
-    }
-
-    /**
      * Long press on an app embedded in the map: the app receives the touches and the map's long press
      * no longer got through; with an app that does not display (Camera), no way out (#66).
      * The long press is therefore detected here, before the app.
@@ -979,65 +1105,50 @@ class MainActivity : AppCompatActivity() {
 
     /**
      * Pinch on the home screen: edit mode of the cards (#97), except where the pinch zooms: the map,
-     * and an app or the web app in the map widget.
+     * and an app or a web page, wherever they are.
      */
     private val pinchToEdit by lazy {
         app.mg4dash.ui.PinchToEdit(this, excluded = { x, y ->
-            val at = IntArray(2).also { b.mapCard.getLocationInWindow(it) }
-            val inMap = x >= at[0] && x < at[0] + b.mapCard.width && y >= at[1] && y < at[1] + b.mapCard.height
-            inMap && (effectiveWidget() == 0 || mapCovered())
+            frames.values.any { f ->
+                val zooms = f.shown == Card.MAP || covering(f)
+                val at = IntArray(2).also { f.box.getLocationInWindow(it) }
+                zooms && x >= at[0] && x < at[0] + f.box.width && y >= at[1] && y < at[1] + f.box.height
+            }
         }) { editCards() }
     }
 
-    /** Edit mode of the widgets' cards (#97): the widgets of this layout that go through cards. */
+    /** Edit mode of the cards (#97): what each place of this layout shows. */
     fun editCards() {
         if (simpleMode) { app.mg4dash.ui.Toasts.show(this, R.string.wc_none_simple); return }
-        if (app.mg4dash.ui.CardsEditor.isOpen(this)) return
+        if (CardsEditor.isOpen(this)) return
         setMapFullscreen(false)
-        val targets = if (mapLayout) listOf(
-            CardsEditor.Target(WidgetCards.Widget.WEATHER, b.weatherCard),
-            CardsEditor.Target(WidgetCards.Widget.STACK, b.energyCard.parent as View, if (cardPower) setOf(WidgetCards.Card.POWER) else emptySet()),
-            CardsEditor.Target(WidgetCards.Widget.MAP, b.mapCard),
-        ) else listOf(
-            CardsEditor.Target(WidgetCards.Widget.WEATHER, b.weatherCard),
-            CardsEditor.Target(WidgetCards.Widget.BOTTOM, b.secondaryCard, if (cardPower) setOf(WidgetCards.Card.BOTTOM_POWER) else emptySet()),
-            CardsEditor.Target(WidgetCards.Widget.MAP, b.mapCard),
-        )
-        val mapApp = app.mg4dash.ui.CardsEditor.MapApp(
+        val mapApp = CardsEditor.MapApp(
             name = { prefs.mapApp?.let { android.content.ComponentName.unflattenFromString(it) }?.let { app.mg4dash.shortcuts.Shortcuts.appLabel(this, it) } ?: getString(R.string.map_app_osm) },
             pick = { done -> app.mg4dash.shortcuts.Shortcuts.pickApp(this, getString(R.string.map_app_pick), getString(R.string.map_app_osm)) { cn ->
                 prefs.mapApp = cn?.flattenToString(); done() } })
-        app.mg4dash.ui.CardsEditor.show(this, targets, mapApp) { applyCards() }
+        CardsEditor.show(this, slotLayout, frames.values.map { CardsEditor.Target(it.slot, it.box) }, unavailable(), dockView(), mapApp) { applySlots() }
     }
 
-    /**
-     * A touch on the app or the page brings the buttons back. Faded, they appear after this touch, which
-     * stays for the app or the page: it opened the card switch instead of the page's button under it.
-     */
-    private fun revealMapAppButtons() {
-        if (b.widgetToggle.visibility == View.VISIBLE) showMapAppButtons() else b.mapCard.post { showMapAppButtons() }
-    }
-
-    /** The cards on changed: each widget shows a card on, the dots and buttons follow. */
-    private fun applyCards() {
-        applyHomeWidget()
-        renderWeather(WeatherRepo.shown.value, CarBridge.state.value)
-        if (mapLayout) showStackPage(prefs.stackPage) else { renderSecondary(); lifecycleScope.launch { updatePower() } }
+    /** The bar (at the bottom, or the vertical one): the edit mode puts its buttons there. */
+    private fun dockView(): View? {
+        if (!Dock.vertical(this)) return b.dock
+        val root = b.root as android.view.ViewGroup
+        fun holds(v: View): Boolean { var p: android.view.ViewParent? = columnsRow; while (p != null) { if (p === v) return true; p = p.parent }; return false }
+        return (0 until root.childCount).map { root.getChildAt(it) }.firstOrNull { !holds(it) }
     }
 
     override fun dispatchTouchEvent(ev: android.view.MotionEvent): Boolean {
         if (twoFingerPull.onTouch(ev) { super.dispatchTouchEvent(it) }) return true
         if (!simpleMode && !app.mg4dash.ui.CardsEditor.isOpen(this) && pinchToEdit.onTouch(ev) { super.dispatchTouchEvent(it) }) return true
-        if (webCard?.visibility == View.VISIBLE && ev.actionMasked == android.view.MotionEvent.ACTION_DOWN) {
-            val r = android.graphics.Rect(); b.mapCard.getGlobalVisibleRect(r)
-            if (r.contains(ev.rawX.toInt(), ev.rawY.toInt())) revealMapAppButtons()
+        if (ev.actionMasked == android.view.MotionEvent.ACTION_DOWN) frames.values.filter { covering(it) }.forEach { f ->
+            val r = android.graphics.Rect(); f.box.getGlobalVisibleRect(r)
+            if (r.contains(ev.rawX.toInt(), ev.rawY.toInt())) revealOnTouch(f)
         }
         if (mapAppView?.visibility == View.VISIBLE) {
             when (ev.actionMasked) {
                 android.view.MotionEvent.ACTION_DOWN -> {
                     val r = android.graphics.Rect(); b.mapCard.getGlobalVisibleRect(r)
                     if (r.contains(ev.rawX.toInt(), ev.rawY.toInt())) {
-                        revealMapAppButtons()
                         mapAppPressX = ev.rawX; mapAppPressY = ev.rawY
                         b.mapCard.postDelayed(mapAppLongPress, android.view.ViewConfiguration.getLongPressTimeout() + 300L)
                     }
@@ -1070,7 +1181,7 @@ class MainActivity : AppCompatActivity() {
                 app.mg4dash.system.Log.i("MapApp", "${cn.packageName} not running in the map card: back to the map")
                 app.mg4dash.ui.Toasts.show(this, R.string.map_app_failed, long = true)
                 prefs.mapApp = null
-                applyHomeWidget()
+                refreshMap()
             }
         }, 6_000)
     }
@@ -1095,7 +1206,7 @@ class MainActivity : AppCompatActivity() {
             mapAppView = null; mapAppCn = null; mapAppFull = null
         }
         app.mg4dash.ui.EmbeddedApp.immersive(this, cn?.packageName)
-        if (cn == null) { b.widgetToggle.visibility = View.GONE; return }
+        if (cn == null) { frameOf(Card.MAP)?.let { updateToggle(it) }; return }
         if (mapAppView == null) {
             // Brought back to the map's size only a few seconds after the actual launch
             // (at car start, the virtual display sometimes takes more than 10 s to be ready)
@@ -1114,7 +1225,7 @@ class MainActivity : AppCompatActivity() {
             // the app's surface from its virtual display at creation; created at the size
             // of the map, the app then stayed cut off on the right in full screen
             val screenW = resources.displayMetrics.widthPixels
-            b.mapCard.addView(v, b.mapCard.indexOfChild(b.widgetToggle), android.widget.FrameLayout.LayoutParams(if (relaunches) -1 else screenW, -1))
+            b.mapCard.addView(v, android.widget.FrameLayout.LayoutParams(if (relaunches) -1 else screenW, -1))
             created = v
             mapAppView = v; mapAppCn = cn
             // Home rebuilt (day / night theme…): the old virtual display disappears and Android
@@ -1138,18 +1249,20 @@ class MainActivity : AppCompatActivity() {
         }
         mapAppView?.visibility = if (show) View.VISIBLE else View.GONE
         mapAppFull?.visibility = if (show) View.VISIBLE else View.GONE
-        // The button only stays over an embedded app, which takes the swipes (#44); the map's pages use the gesture
-        if (show) showMapAppButtons() else { b.widgetToggle.removeCallbacks(fadeMapAppButtons); b.widgetToggle.alpha = 1f; b.widgetToggle.visibility = View.GONE }
+        // The button to change card only stays over an embedded app, which takes the swipes (#44)
+        frameOf(Card.MAP)?.let { updateToggle(it) }
     }
 
     private fun renderShortcuts() {
-        app.mg4dash.shortcuts.Shortcuts.render(this, b.shortcutsHolder, shortcutsPage, if (mapLayout) 3 else 2) { p ->
+        // Rows of tiles by the size of the place (#97): 3 on the tall map of the Map layout, 1 in a small place
+        val rows = when (frameOf(Card.SHORTCUTS)?.slot?.size) { HomeSlots.Size.TALL -> 3; HomeSlots.Size.SMALL -> 1; else -> 2 }
+        app.mg4dash.shortcuts.Shortcuts.render(this, shortcutsHolder, shortcutsPage, rows) { p ->
             shortcutsPage = p; renderShortcuts()
         }
     }
 
-    // Bottom widget: trip energy, live power, phone (touch the widget to change)
-    private var builtMode = -1
+    // Trip energy, live power and phone cards (a touch: the next card of their place)
+    private var powerBuilt = false
     private var powerValue: TextView? = null
     private var powerLabel: TextView? = null
     private var powerAvg: TextView? = null
@@ -1157,48 +1270,40 @@ class MainActivity : AppCompatActivity() {
     private var powerFx: app.mg4dash.ui.PowerFx? = null
     private var xpowerHits = 0
 
-    /** Removes the full power animation from the map (other widget, or map rebuilt). */
+    /** Removes the full power animation (Power card hidden, or home rebuilt). */
     private fun dropPowerFx() {
         powerFx?.let { fxHost?.overlay?.remove(it); it.onBadge = null; it.stop() }
         powerFx = null; fxHost = null
     }
 
-    // Full power while the Power widget is not shown: show it for the time of the
-    // animation and peak, then go back to the previous widget (Full and Map layouts).
+    // Full power while the Power card is not shown: shown in its place for the time of the
+    // animation and peak, then back to the card shown before (Full and Map layouts).
     private var fxBoost = false
-    private var fxPrevStack = -1
+    private var boostFrame: SlotFrame? = null
     private var fxHost: View? = null
 
     private fun startBoost() {
         if (fxBoost) return
+        val f = frameOf(Card.POWER) ?: return
         fxBoost = true
-        app.mg4dash.system.Log.i("Power", "full power: Power widget shown during the animation")
-        if (mapLayout) { fxPrevStack = prefs.stackPage; showStackPage(2, force = true) } else renderSecondary()
+        boostFrame = f
+        app.mg4dash.system.Log.i("Power", "full power: Power card shown during the animation")
+        showFrame(f)
     }
 
     private fun endBoost() {
         if (!fxBoost) return
         fxBoost = false
-        if (mapLayout) { if (fxPrevStack >= 0 && fxPrevStack != 2) showStackPage(fxPrevStack) } else renderSecondary()
-        fxPrevStack = -1
+        val f = boostFrame
+        boostFrame = null
+        f?.let { showFrame(it) }
     }
 
-    /** The driver changes the widget: no going back. */
-    private fun cancelBoost() { fxBoost = false; fxPrevStack = -1 }
-
-    private fun renderSecondary() {
-        // Full layout: only the bottom widget's cards on (#97); the Map layout's stack chose its page already
-        val mode = if (fxBoost && !mapLayout) 1 else prefs.secondaryWidget.coerceIn(0, 2).let { if (cardPower && it == 1) 0 else it }
-            .let { if (mapLayout || fxBoost) it else app.mg4dash.ui.WidgetCards.valid(prefs, app.mg4dash.ui.WidgetCards.Widget.BOTTOM, it, bottomSkip) }
-        val bottomPages = app.mg4dash.ui.WidgetCards.pages(prefs, app.mg4dash.ui.WidgetCards.Widget.BOTTOM).filter { it !in bottomSkip }
-        b.secondaryDots.text = if (bottomPages.size > 1) bottomPages.joinToString(" ") { if (it == mode) "●" else "○" } else ""
-        if (mode != 1 && !cardPower) dropPowerFx()
-        when (mode) {
-            0 -> renderTripEnergy()
-            1 -> if (builtMode != 1) { buildPower(); builtMode = 1; lifecycleScope.launch { updatePower() } }
-            else -> if (builtMode != 2) renderPhoneFavs()
-        }
-        builtMode = mode
+    /** The driver changes the card of the Power card's place: no going back. */
+    private fun cancelBoost(f: SlotFrame) {
+        if (boostFrame !== f) return
+        fxBoost = false
+        boostFrame = null
     }
 
     private fun statColumn(title: String, value: String, valueSp: Float = 28f, valueColor: Int = color(R.color.text_value)) =
@@ -1220,12 +1325,11 @@ class MainActivity : AppCompatActivity() {
     private var tripShown: String? = null
 
     private fun renderTripEnergy() {
-        stackTitle(b.secondaryTitle, getString(R.string.sw_energy))
+        val g = secondary[Card.TRIP]?.grid ?: return
         val t = app.mg4dash.energy.EnergyMonitor.sinceStart.value
         val ok = t.outKwh > 0f
-        val g = b.secondaryGrid
         val key = "$ok ${t.driveKwh} ${t.climKwh} ${t.heatKwh} ${t.accKwh} ${t.outKwh}"
-        if (builtMode == 0 && key == tripShown && g.childCount > 0) return
+        if (key == tripShown && g.childCount > 0) return
         tripShown = key
         g.removeAllViews()
         g.orientation = LinearLayout.VERTICAL
@@ -1249,8 +1353,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun buildPower() {
-        stackTitle(b.secondaryTitle, getString(R.string.sw_power))
-        val g = b.secondaryGrid
+        val g = secondary[Card.POWER]?.grid ?: return
+        powerBuilt = true
         g.removeAllViews()
         g.orientation = LinearLayout.VERTICAL
         val d = resources.displayMetrics.density
@@ -1278,8 +1382,11 @@ class MainActivity : AppCompatActivity() {
             fontFeatureSettings = "tnum"
         }
         g.addView(powerExtra, LinearLayout.LayoutParams(-1, 0, 1f))
-        // Full power animation (settings): above the map, the peak replaces the voltage · current line
-        dropPowerFx()
+    }
+
+    /** Full power animation (settings) of the Power card: the peak replaces the voltage · current line. */
+    private fun ensurePowerFx() {
+        if (cardPower || powerFx != null) return
         powerFx = app.mg4dash.ui.PowerFx(this).also { fx ->
             fx.onBadge = { on ->
                 powerExtra?.animate()?.alpha(if (on) 0f else 1f)?.setDuration(250)?.start()
@@ -1439,11 +1546,11 @@ class MainActivity : AppCompatActivity() {
             app.mg4dash.system.Log.i("Power", "MG4 XPower detected (${kw} kW): max 320 kW, animation at 80 %")
             powerBar?.let { val keep = it.maxDrawKw; it.configureFor(prefs.batteryModel, true); it.maxDrawKw = maxOf(keep, it.maxDrawKw) }
         }
-        if (builtMode != 1 && !cardPower) {
+        if (!cardPower && !isShown(Card.POWER)) {
             val peak = app.mg4dash.ui.PowerBar.peakFor(prefs.batteryModel, prefs.xpower)
             if (prefs.powerFx == app.mg4dash.ui.PowerFx.NONE || plugged || kw == null || kw < peak * 0.8f) return
             startBoost()
-            if (builtMode != 1) return
+            if (!isShown(Card.POWER)) return
         }
         val regen = kw != null && kw < -0.05f && !plugged
         powerValue?.put(kw?.let { String.format(Locale.getDefault(), "%.1f kW", kotlin.math.abs(it)) } ?.let { if (cardPower) scaleUnit(it) else it } ?: "—")
@@ -1455,10 +1562,10 @@ class MainActivity : AppCompatActivity() {
             // Random: new draw as long as nothing plays, kept during the animation
             if (!fx.isActive) fx.style = app.mg4dash.ui.PowerFx.pick(prefs.powerFx)
             // Peak badge: only if the driver shows the Power widget themselves
-            fx.badgeAllowed = cardPower || (if (mapLayout) (if (fxPrevStack >= 0) fxPrevStack else prefs.stackPage) == 2 else prefs.secondaryWidget == 1)
+            fx.badgeAllowed = cardPower || !fxBoost && isShown(Card.POWER)
             // Across the screen: the rocket arrives from the left edge, lightning and flames cover the home screen
             val wide = fx.style != app.mg4dash.ui.PowerFx.NONE
-            val host: View = if (wide) window.decorView else if (cardPower) b.energyCard else b.secondaryCard
+            val host: View = if (wide) window.decorView else if (cardPower) b.energyCard else panels[Card.POWER] ?: b.root
             if (fxHost !== host) {
                 fxHost?.overlay?.remove(fx)
                 host.overlay.add(fx); fxHost = host
@@ -1516,8 +1623,7 @@ class MainActivity : AppCompatActivity() {
 
     /** Three favourite contacts, chosen from the phone book; touch = call, long press = change. */
     private fun renderPhoneFavs() {
-        stackTitle(b.secondaryTitle, getString(R.string.sw_phone))
-        val g = b.secondaryGrid
+        val g = secondary[Card.PHONE]?.grid ?: return
         g.removeAllViews()
         // 2 or 3 shortcuts on one line, 4, 6 or 8 on two lines; icon and name reduced on two lines
         val n = app.mg4dash.shortcuts.PhoneFavorites.count(prefs)
@@ -1525,7 +1631,7 @@ class MainActivity : AppCompatActivity() {
         val twoRows = n > 3
         g.orientation = if (twoRows) LinearLayout.VERTICAL else LinearLayout.HORIZONTAL
         val d = resources.displayMetrics.density
-        val refresh = { builtMode = -1; renderSecondary() }
+        val refresh = { renderPhoneFavs() }
         var line: LinearLayout? = null
         for (i in 0 until n) {
             val target = if (!twoRows) g else {
@@ -1581,8 +1687,8 @@ class MainActivity : AppCompatActivity() {
                 launch { WeatherRepo.shown.collect { renderWeather(it, CarBridge.state.value) } }
                 launch { LocationRepo.location.collect { renderLocation(it, CarBridge.state.value) } }
                 // DiAuto guidance: banner on the map (not on the shortcuts)
-                launch { app.mg4dash.energy.ConsumptionCurve.curves.collect { consumptionCard?.takeIf { it.visibility == View.VISIBLE }?.show() } }
-                launch { app.mg4dash.map.NavRepo.nav.collect { n -> navBanner?.show(n?.takeIf { effectiveWidget() == 0 }) } }
+                launch { app.mg4dash.energy.ConsumptionCurve.curves.collect { if (isShown(Card.CONSUMPTION)) consumption.show() } }
+                launch { app.mg4dash.map.NavRepo.nav.collect { n -> navBanner?.show(n?.takeIf { isShown(Card.MAP) }) } }
                 launch { while (true) { updatePower(); delay(1_000) } }
                 // Startup (#64): home is built with the last known theme; as soon as the car
                 // answers, the lights state is read and the theme changed at once, without waiting for the 5 s loop
@@ -1598,9 +1704,8 @@ class MainActivity : AppCompatActivity() {
                     while (true) {
                         if (isFinishing) return@launch
                         if (app.mg4dash.ui.Themes.signature(this@MainActivity) != themeSig && !app.mg4dash.ui.Themes.popupOpen(this@MainActivity)) { app.mg4dash.ui.Themes.publish(this@MainActivity); app.mg4dash.ui.Themes.recreateSmooth(this@MainActivity); return@launch }
-                        renderSecondary()
+                        refreshCards()
                         renderWeatherFallbackOnly()
-                        if (effectiveWidget() != lastWidgetMode || effectiveWidget() == 2) { lastWidgetMode = effectiveWidget(); applyHomeWidget() }
                         val recircNow = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
                             app.mg4dash.car.CarProps.readAny(354419976).let { v -> when (v) { "true", "1" -> true; "false", "0" -> false; else -> null } }
                         }
