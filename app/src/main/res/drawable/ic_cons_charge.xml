@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Consumption since the last charge (#29). Viewport cut at the drawing's bottom: on the numbers' baseline -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android" android:width="24dp" android:height="22dp" android:viewportWidth="24" android:viewportHeight="22">
+    <path android:fillColor="#FFFFFFFF" android:pathData="M7,2v11h3v9l7,-12h-4l4,-8z" />
+</vector>
