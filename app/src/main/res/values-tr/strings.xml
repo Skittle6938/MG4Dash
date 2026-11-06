@@ -438,6 +438,9 @@
     <string name="st_rd_newer_radio">bu aracın radyosu Radio Dash\'ten daha yeni, Radio Dash onun yerini alamaz</string>
     <string name="st_rd_other_key">bu aracın radyosu başka bir anahtarla imzalanmış: Radio Dash onun yerini alamaz</string>
     <string name="en_trip">Mevcut yolculuk</string>
+    <string name="cs_last_km">Son km</string>
+    <string name="cs_car">SAIC</string>
+    <string name="cd_cons_source">Tüketim: %1$s, %2$s. Sonraki için dokunun</string>
     <string name="en_last_year">Son 12 ay</string>
     <string name="en_months_note">%1$d ay, ay başına bir nokta · ortalama %2$s (kesikli)</string>
     <string name="en_months_wait">Eğri ay ay dolar (ayda en az 20 km).</string>

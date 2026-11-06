@@ -826,7 +826,8 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         val rangeText = s.rangeKm?.let { app.mg4dash.system.Units.distText(this, it.toFloat()) } ?: "— ${app.mg4dash.system.Units.distUnit(this)}"
         // Power card (#29): units half the size of the numbers
         b.battery.put(if (cardPower) halfUnit(batteryText) else batteryText)
-        b.range.put(if (cardPower) halfUnit(rangeText) else rangeText)
+        // Power card (#29): range from the consumption chosen with a tap on the kWh/100
+        b.range.put(if (cardPower) powerRange(s) else rangeText)
         b.consumption.put(avg?.let { app.mg4dash.system.Units.consText(this, it) } ?: "—")
         b.consAvgLabel.put(getString(if (app.mg4dash.system.Units.miles(this)) R.string.cons_avg_mi else R.string.cons_avg))
         b.driveMode.put(VehicleState.driveModeLabel(s.driveMode))
@@ -1493,7 +1494,10 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
             maxLines = 1
             setAutoSizeTextTypeUniformWithConfiguration(12, 22, 1, TypedValue.COMPLEX_UNIT_SP)
         }
-        powerAvg = tv(26f, R.color.text_value, Gravity.END)
+        powerAvg = tv(26f, R.color.text_value, Gravity.END).apply {
+            // A tap changes the consumption, and the range with it (#29); the rest of the card opens the Energy page
+            isClickable = true; setOnClickListener { nextConsSource() }
+        }
         powerLabel = null
         row.addView(powerValue, LinearLayout.LayoutParams(-2, -2))
         row.addView(powerExtra, LinearLayout.LayoutParams(0, -2, 1f))
@@ -1529,7 +1533,8 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         val pv = powerValue ?: return; val pa = powerAvg ?: return; val ex = powerExtra ?: return
         val unit = android.graphics.Paint(pv.paint).apply { textSize = (powerBar?.labelSp ?: 15f) * resources.displayMetrics.scaledDensity }
         val wv = (pv.paint.measureText("188.8") + unit.measureText(" kW")).toInt() + 2
-        val wa = (pa.paint.measureText("88.8") + unit.measureText(" kWh/100")).toInt() + 2
+        // With the logo of the consumption shown (#29)
+        val wa = (pa.textSize * CONS_ICON + pa.paint.measureText(" 88.8") + unit.measureText(" kWh/100")).toInt() + 2
         (pv.layoutParams as LinearLayout.LayoutParams).width = wv
         (pa.layoutParams as LinearLayout.LayoutParams).width = wa
         ex.setAutoSizeTextTypeWithDefaults(TextView.AUTO_SIZE_TEXT_TYPE_NONE)
@@ -1554,6 +1559,125 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         return android.text.SpannableString(t).apply { setSpan(android.text.style.RelativeSizeSpan(0.5f), i, t.length, 0) }
     }
 
+    // ── Consumption of the power card (#29) ──────────────────────────────────
+
+    /** Where the power card's kWh/100 comes from; the range is computed with it, except the car's own. */
+    private enum class ConsSource(val icon: Int, val label: Int) {
+        CHARGE(R.drawable.ic_cons_charge, R.string.en_since_charge),
+        TRIP(R.drawable.ic_cons_trip, R.string.en_trip),
+        LAST_KM(R.drawable.ic_cons_live, R.string.cs_last_km),
+        CAR(R.drawable.ic_cons_car, R.string.cs_car)
+    }
+
+    private val consSource get() = ConsSource.entries.getOrElse(prefs.consSource) { ConsSource.TRIP }
+
+    /** The car's recent consumption (kWh/100 km), read with the power. */
+    @Volatile private var carCons: Float? = if (BuildConfig.MOCK) 15.6f else null
+
+    /** kWh/100 km of [src]; null while unknown (trip under 2 km, no km driven yet). */
+    private fun consOf(src: ConsSource): Float? = when (src) {
+        ConsSource.CHARGE -> app.mg4dash.energy.EnergyMonitor.sinceCharge.value.per100
+        ConsSource.TRIP -> app.mg4dash.energy.EnergyMonitor.sinceStart.value.per100
+        ConsSource.LAST_KM -> app.mg4dash.energy.ConsumptionCurve.curves.value.trip.lastOrNull()
+        ConsSource.CAR -> carCons
+    }?.takeIf { it in 3f..60f }
+
+    private var sohAt = 0L
+    private var sohPercent: Float? = null
+
+    /** Energy left (kWh): charge level × estimated health × new usable capacity, as on the Vehicle page. */
+    private fun energyLeft(s: VehicleState): Float? {
+        val soc = s.socPrecise?.takeIf { v -> s.batteryPercent == null || kotlin.math.abs(v - s.batteryPercent) < 1.5f }
+            ?: s.batteryPercent?.toFloat() ?: return null
+        val now = android.os.SystemClock.uptimeMillis()
+        if (sohAt == 0L || now - sohAt > 60_000L) { sohAt = now; sohPercent = app.mg4dash.energy.BatteryCapacity.health(this)?.percent }
+        return soc / 100f * (sohPercent ?: 100f) / 100f * app.mg4dash.energy.BatteryCapacity.nominal(this)
+    }
+
+    /** Range of the power card: from the chosen consumption; the car's with SAIC, or while that consumption is unknown. */
+    private fun powerRange(s: VehicleState): CharSequence {
+        val src = consSource
+        val cons = consOf(src)?.takeIf { src != ConsSource.CAR }
+        val left = energyLeft(s)
+        val from = if (cons != null && left != null) src else ConsSource.CAR
+        val km = if (from == src && cons != null && left != null) left / cons * 100f else s.rangeKm?.toFloat()
+        val text = km?.let { app.mg4dash.system.Units.distText(this, it) } ?: "— ${app.mg4dash.system.Units.distUnit(this)}"
+        return withConsIcon(from, halfUnit(text), b.range.textSize, RANGE_ICON)
+    }
+
+    /** kWh/100 of the power card, after its logo; TalkBack says which consumption it is. */
+    private fun putPowerCons() {
+        val tv = powerAvg ?: return
+        val src = consSource
+        val text = consOf(src)?.let { "${app.mg4dash.system.Units.consText(this, it)} ${if (app.mg4dash.system.Units.miles(this)) "mi/kWh" else "kWh/100"}" }
+        tv.put(withConsIcon(src, text?.let { scaleUnit(it) } ?: "—", tv.textSize, CONS_ICON))
+        tv.contentDescription = getString(R.string.cd_cons_source, getString(src.label), text ?: "—")
+    }
+
+    private val consIcons = HashMap<Int, android.graphics.drawable.Drawable>()
+
+    /** [text] after the logo of [src], the logo's bottom on the numbers' baseline (its viewport ends at the drawing). */
+    private fun withConsIcon(src: ConsSource, text: CharSequence, textPx: Float, scale: Float): CharSequence {
+        val w = (textPx * scale).toInt().coerceAtLeast(1)
+        val d = consIcons.getOrPut(src.ordinal * 10_000 + w) {
+            ContextCompat.getDrawable(this, src.icon)!!.mutate().apply {
+                setBounds(0, 0, w, w * intrinsicHeight / intrinsicWidth)
+                setTint(color(R.color.text_sub))
+            }
+        }
+        // One character per logo: the text changes with the logo, even with the same numbers
+        return android.text.SpannableStringBuilder((0xE000 + src.ordinal).toChar().toString()).apply {
+            setSpan(android.text.style.ImageSpan(d, android.text.style.DynamicDrawableSpan.ALIGN_BASELINE), 0, 1, 0)
+            append(" ").append(text)
+        }
+    }
+
+    /** Tap on the kWh/100: next consumption, skipping those not known yet; the car's is always there. */
+    private fun nextConsSource() {
+        val all = ConsSource.entries
+        val from = consSource
+        val next = (1..all.size).map { all[(from.ordinal + it) % all.size] }.first { it == ConsSource.CAR || consOf(it) != null }
+        prefs.consSource = next.ordinal
+        putPowerCons()
+        b.range.put(powerRange(CarBridge.state.value))
+        showConsPill(next)
+    }
+
+    private var consPill: TextView? = null
+
+    /** Name of the consumption, with its logo, for 2 s above the kWh/100: the logos are learnt without a legend. */
+    private fun showConsPill(src: ConsSource) {
+        val card = b.energyCard; val anchor = powerAvg ?: return
+        val d = resources.displayMetrics.density
+        val pill = consPill ?: TextView(this).apply {
+            setTextColor(color(R.color.text_value)); setTextSize(TypedValue.COMPLEX_UNIT_SP, 17f)
+            typeface = android.graphics.Typeface.create("sans-serif-medium", android.graphics.Typeface.NORMAL)
+            gravity = Gravity.CENTER_VERTICAL; maxLines = 1
+            setPadding((10 * d).toInt(), 0, (14 * d).toInt(), 0)
+            compoundDrawablePadding = (7 * d).toInt()
+            background = android.graphics.drawable.GradientDrawable().apply {
+                cornerRadius = 17 * d; setColor(color(R.color.button_idle)); setStroke((1.5f * d).toInt(), color(R.color.panel_border))
+            }
+        }.also { consPill = it }
+        pill.animate().cancel()
+        card.overlay.remove(pill)
+        pill.text = getString(src.label)
+        val icon = ContextCompat.getDrawable(this, src.icon)!!.mutate().apply {
+            val w = (20 * d).toInt(); setBounds(0, 0, w, w * intrinsicHeight / intrinsicWidth); setTint(color(R.color.text_sub))
+        }
+        pill.setCompoundDrawables(icon, null, null, null)
+        pill.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.makeMeasureSpec((34 * d).toInt(), View.MeasureSpec.EXACTLY))
+        // Right edge with the kWh/100's, just above it
+        val r = android.graphics.Rect(); anchor.getDrawingRect(r); card.offsetDescendantRectToMyCoords(anchor, r)
+        val right = r.right.coerceAtMost(card.width); val bottom = r.top - (2 * d).toInt()
+        pill.layout(right - pill.measuredWidth, bottom - pill.measuredHeight, right, bottom)
+        card.overlay.add(pill)
+        pill.alpha = 0f
+        pill.animate().alpha(1f).setStartDelay(0).setDuration(150).withEndAction {
+            pill.animate().alpha(0f).setStartDelay(2000).setDuration(300).withEndAction { card.overlay.remove(pill) }.start()
+        }.start()
+    }
+
     /** Lowest voltage and highest current of the trip (#29), reset at each start. */
     private var minVolts: Float? = if (BuildConfig.MOCK) 325f else null
     private var maxAmps: Float? = if (BuildConfig.MOCK) 150.6f else null
@@ -1570,6 +1694,7 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
             val v = app.mg4dash.car.CarProps.getFloat(app.mg4dash.car.CarProps.BMS_PACK_VOL)
             val i = app.mg4dash.car.CarProps.getFloat(app.mg4dash.car.CarProps.BMS_PACK_CRNT)
             volts = v?.takeIf { it in 100f..900f }; amps = i
+            if (cardPower) carCons = app.mg4dash.car.CarProps.getFloat(app.mg4dash.car.CarProps.ELEC_CSUMP_PERKM)?.takeIf { it in 3f..60f }
             if (v != null && i != null && v in 100f..900f) v * i / 1000f else null
         }
         val plugged = VehicleState.isCharging(CarBridge.state.value.chargeStatus)
@@ -1613,7 +1738,8 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
             fx.update(if (plugged) 0f else kw ?: 0f, bar.peakKw * 0.8f, bar.peakKw)
         }
         val avg = app.mg4dash.energy.EnergyMonitor.sinceStart.value.per100
-        powerAvg?.put(avg?.let { "${app.mg4dash.system.Units.consText(this, it)} ${if (app.mg4dash.system.Units.miles(this)) "mi/kWh" else "kWh/100"}" }?.let { if (cardPower) scaleUnit(it) else it } ?: "—")
+        if (cardPower) putPowerCons()
+        else powerAvg?.put(avg?.let { "${app.mg4dash.system.Units.consText(this, it)} ${if (app.mg4dash.system.Units.miles(this)) "mi/kWh" else "kWh/100"}" } ?: "—")
         if (cardPower) powerExtra?.let { tv ->
             val trip = app.mg4dash.energy.EnergyMonitor.tripSeq
             if (trip != minMaxTrip) { if (minMaxTrip >= 0) { minVolts = null; maxAmps = null }; minMaxTrip = trip }
@@ -1788,6 +1914,9 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
     private fun dp(v: Int) = (v * resources.displayMetrics.density).toInt()
     private companion object {
         const val KEY_MAP_FULL = "map_full"
+        /** Width of the consumption's logo, in text sizes: before the kWh/100, before the km (#29). */
+        const val CONS_ICON = 0.8f
+        const val RANGE_ICON = 0.66f
         /** Map full screen to restore after a recreation (in addition to the saved state). */
         var mapFullOnRecreate = false
     }

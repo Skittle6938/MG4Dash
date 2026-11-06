@@ -227,6 +227,11 @@ class Prefs(context: Context) {
         get() = sp.getBoolean("energy_card_power", false)
         set(v) = sp.edit().putBoolean("energy_card_power", v).apply()
 
+    /** Consumption shown on the power card, and the range taken from it (#29): 0 last charge, 1 trip, 2 last km, 3 the car's. */
+    var consSource: Int
+        get() = sp.getInt("power_cons_source", 1)
+        set(v) = sp.edit().putInt("power_cons_source", v).apply()
+
     /** Secondary widget of the right column: 0 = trip, 1 = status, 2 = compact weather. */
     var secondaryWidget: Int
         get() = sp.getInt("secondary_widget", 0)

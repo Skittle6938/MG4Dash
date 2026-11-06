@@ -438,6 +438,9 @@
     <string name="st_rd_newer_radio">das Radio dieses Autos ist neuer als Radio Dash, das es nicht ersetzen kann</string>
     <string name="st_rd_other_key">das Radio dieses Autos ist mit einem anderen Schlüssel signiert: Radio Dash kann es nicht ersetzen</string>
     <string name="en_trip">Aktuelle Fahrt</string>
+    <string name="cs_last_km">Letzter km</string>
+    <string name="cs_car">SAIC</string>
+    <string name="cd_cons_source">Verbrauch: %1$s, %2$s. Tippen für den nächsten</string>
     <string name="en_last_year">Letzte 12 Monate</string>
     <string name="en_months_note">%1$d Monate, ein Punkt pro Monat · Durchschnitt %2$s (gestrichelt)</string>
     <string name="en_months_wait">Die Kurve füllt sich Monat für Monat (mindestens 20 km pro Monat).</string>
