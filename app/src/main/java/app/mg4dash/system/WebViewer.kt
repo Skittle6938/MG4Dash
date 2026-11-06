@@ -24,7 +24,7 @@ object WebViewer {
     val component = ComponentName(PKG, "$PKG.WebActivity")
     private val page = ComponentName(PKG, "$PKG.PageActivity")
     /** Version of the embedded app (versionCode of web/build.gradle.kts). */
-    private const val BUNDLED_VERSION = 3L
+    private const val BUNDLED_VERSION = 4L
     private const val ASSET = "web.apk"
     private const val ACTION_RESULT = "app.mg4dash.WEB_VIEWER_INSTALLED"
 
