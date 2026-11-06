@@ -20,5 +20,14 @@
             android:allowEmbedded="true"
             android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize|density|keyboard|keyboardHidden|navigation|uiMode|locale|layoutDirection|fontScale"
             android:theme="@android:style/Theme.Material.NoActionBar" />
+
+        <!-- Full screen page on the main screen (compatibility report, #95), in its own task -->
+        <activity
+            android:name=".PageActivity"
+            android:exported="true"
+            android:excludeFromRecents="true"
+            android:taskAffinity="app.mg4dash.web.page"
+            android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize|density|keyboard|keyboardHidden|navigation|uiMode|locale|layoutDirection|fontScale"
+            android:theme="@android:style/Theme.Material.NoActionBar" />
     </application>
 </manifest>

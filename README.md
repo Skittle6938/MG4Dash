@@ -216,7 +216,7 @@ All MG4 firmwares share the 1920 × 720 screen and the AOSP platform key, so the
 
 Features a firmware does not expose are hidden instead of failing (for example the charge limit, only shown where the car applies it itself: MG4Dash cannot stop the charge for the car, it is shut down when the car is locked). The stock home screen and the stock energy and settings apps are found automatically. Radio Dash only works on SWI69.
 
-**Help support your firmware**: open Settings › Compatibility › Run the test, then scan the QR code with your phone. It opens a pre-filled [compatibility issue](https://github.com/Skittle6938/MG4Dash/issues/new?template=compatibility.md) with a short report (versions, which services answer, a few car readings: no position, VIN or account). Nothing is sent automatically.
+**Help support your firmware**: open Settings › Compatibility › Run the test, then scan the QR code with your phone. It opens a pre-filled [compatibility issue](https://github.com/Skittle6938/MG4Dash/issues/new?template=compatibility.md) with a short report (versions, which services answer, a few car readings: no position, VIN or account). Nothing is sent automatically. *Open in browser* shows the same page on the head unit, in MG4Dash Web (the car's browser refuses pages on some head units, [#95](https://github.com/Skittle6938/MG4Dash/issues/95)).
 
 ## Project layout
 
@@ -238,14 +238,14 @@ Features a firmware does not expose are hidden instead of failing (for example t
   - `map/NavRepo.kt`: turn-by-turn data broadcast by DiAuto / Headunit Revived
   - `shortcuts/Shortcuts.kt`: shortcut grid and Home Assistant REST calls
   - `shortcuts/HaLive.kt`: live state of the Home Assistant shortcuts, read while they are on screen
-  - `ui/WebCard.kt`, `system/WebViewer.kt`: web app card of the map widget, and MG4Dash Web, which shows its page on the car
+  - `ui/WebCard.kt`, `system/WebViewer.kt`: web app card of the map widget, and MG4Dash Web, which shows its page and the compatibility report on the car
   - `weather/WeatherRepo.kt`: Open-Meteo weather
   - `system/HomeSwitcher.kt`: maintenance mode (gives the home screen back to the SAIC launcher)
   - `LauncherApp.kt`: crash guard, after 3 crashes in 3 minutes the SAIC launcher becomes the home screen again
 - `app/src/car/`: car manifest (`sharedUserId=android.uid.system`)
 - `app/src/emulator/`: build without the system uid, with simulated data
 - `rescue/`: MG4Dash Rescue, the safety net (system uid), embedded as `app/src/car/assets/rescue.apk`
-- `web/`: MG4Dash Web, the page of the web app card (own uid, Android refuses WebView to the system uid), embedded as `app/src/car/assets/web.apk`
+- `web/`: MG4Dash Web, the page of the web app card and the full screen compatibility report (own uid, Android refuses WebView to the system uid), embedded as `app/src/car/assets/web.apk`
 - `i18n/`: translations (`strings.psv`) and the generator of the `values-*/strings.xml` files
 - `keys/`: AOSP platform test certificate (public, the same one the car uses)
 
