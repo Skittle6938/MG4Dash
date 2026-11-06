@@ -210,6 +210,8 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
             background = android.graphics.drawable.InsetDrawable(pill, dp(20), dp(20), dp(20), dp(10))
             alpha = EDGE_ALPHA; visibility = View.GONE
             contentDescription = getString(R.string.cd_widget_toggle)
+            // Above the card's frame (elevation 6 dp), which otherwise takes the touches first: they went to the page
+            translationZ = dp(10).toFloat(); outlineProvider = null
         }
         private var handleX = 0f; private var handleY = 0f; private var handleTap = 0L
         var fill: HomeSlots.Fill = HomeSlots.Fill.Cards(emptyList())
