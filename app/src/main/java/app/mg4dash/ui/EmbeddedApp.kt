@@ -17,11 +17,12 @@ import app.mg4dash.system.Log
 object EmbeddedApp {
     private const val TAG = "MapApp"
 
-    fun create(activity: Activity, cn: ComponentName, onStarted: (() -> Unit)? = null): ViewGroup? = try {
+    /** [launch]: intent to start instead of the app's launcher one (the web app's page, #97). */
+    fun create(activity: Activity, cn: ComponentName, launch: Intent? = null, onStarted: (() -> Unit)? = null): ViewGroup? = try {
         val cls = Class.forName("android.app.ActivityView")
         val view = cls.getConstructor(Context::class.java).newInstance(activity) as ViewGroup
         val start = cls.getMethod("startActivity", Intent::class.java)
-        val intent = Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER).setComponent(cn)
+        val intent = (launch ?: Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER)).setComponent(cn)
             .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         // The virtual display only exists once the surface is created: retry until it is ready
         fun tryStart(n: Int) {

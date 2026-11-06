@@ -543,6 +543,8 @@
     <string name="wc_web_error">Sayfaya ulaşılamıyor. Tekrar denemek için dokunun.</string>
     <string name="wc_web_loading">Yükleniyor…</string>
     <string name="wc_web_unsupported">Bu ekranda web görünümü yok.</string>
+    <string name="wc_web_installing">Web sayfası görüntüleyici MG4Dash Web yükleniyor…</string>
+    <string name="wc_web_install_failed">MG4Dash Web yüklenemedi. Tekrar denemek için dokunun.</string>
     <string name="wc_none_simple">Basit düzende seçilecek kart yok.</string>
     <string name="st_edit_cards">Widget kartları</string>
     <string name="st_edit_cards_desc">Her widget\'ın göstereceği kartları seçin, harita widget\'ında bir web uygulaması dahil. Kısayol: ana ekranı iki parmakla kıstırın.</string>

@@ -22,3 +22,4 @@ dist/
 *.iml
 .kotlin/
 !app/src/car/assets/rescue.apk
+!app/src/car/assets/web.apk

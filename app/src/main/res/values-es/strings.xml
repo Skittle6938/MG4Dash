@@ -543,6 +543,8 @@
     <string name="wc_web_error">Página inaccesible. Toca para reintentar.</string>
     <string name="wc_web_loading">Cargando…</string>
     <string name="wc_web_unsupported">Esta unidad no tiene vista web.</string>
+    <string name="wc_web_installing">Instalando MG4Dash Web, el visor de páginas web…</string>
+    <string name="wc_web_install_failed">No se pudo instalar MG4Dash Web. Toca para reintentar.</string>
     <string name="wc_none_simple">El diseño Simple no tiene tarjetas que elegir.</string>
     <string name="st_edit_cards">Tarjetas de los widgets</string>
     <string name="st_edit_cards_desc">Elegir las tarjetas que muestra cada widget, incluida una web app en el widget del mapa. Atajo: pellizcar la pantalla de inicio con dos dedos.</string>

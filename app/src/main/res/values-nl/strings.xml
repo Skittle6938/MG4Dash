@@ -543,6 +543,8 @@
     <string name="wc_web_error">Pagina onbereikbaar. Tik om opnieuw te proberen.</string>
     <string name="wc_web_loading">Laden…</string>
     <string name="wc_web_unsupported">Dit scherm heeft geen webweergave.</string>
+    <string name="wc_web_installing">MG4Dash Web, de weergave voor webpagina\'s, wordt geïnstalleerd…</string>
+    <string name="wc_web_install_failed">MG4Dash Web kon niet worden geïnstalleerd. Tik om opnieuw te proberen.</string>
     <string name="wc_none_simple">De indeling Eenvoudig heeft geen kaarten om te kiezen.</string>
     <string name="st_edit_cards">Kaarten van de widgets</string>
     <string name="st_edit_cards_desc">De kaarten kiezen die elke widget toont, ook een web-app in de kaartwidget. Snelkoppeling: het startscherm met twee vingers samenknijpen.</string>
