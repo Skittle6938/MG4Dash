@@ -34,11 +34,13 @@ class CarKeyboard(
     private val onBackspace: () -> Unit = {},
     private val onClear: () -> Unit = {},
     private val onDone: () -> Unit = {},
+    /** Opens on the numbers and symbols (a phone number in a web page: +, *, #). */
+    startOnSymbols: Boolean = false,
 ) : LinearLayout(context) {
     private enum class Shift { OFF, ONCE, LOCK }
 
     private val letters = lettersFor(language)
-    private var symbols = false
+    private var symbols = startOnSymbols
     private var shift = Shift.OFF
     private var accentsOf: Char? = null
 
@@ -185,17 +187,18 @@ class CarKeyboard(
 
         /**
          * The keyboard for a field MG4Dash does not own: a page of the Web app card, in MG4Dash Web (#98). Over
-         * [anchor]'s window, placed as by [attach]; each key goes to [onText], [onBackspace], [onClear], and OK to
+         * [anchor]'s window, placed as by [attach]; [numeric]: digits only, [symbols]: on the numbers and symbols
+         * first (a phone number). Each key goes to [onText], [onBackspace], [onClear], and OK to
          * [onDone], which closes it. A touch outside it closes it too, unless [keepOn] says the touch is on the page.
          * [onClosed]: closed, by OK, a touch or the returned function.
          */
-        fun over(anchor: View, numeric: Boolean, span: (() -> IntArray?)?, keepOn: (Float, Float) -> Boolean,
+        fun over(anchor: View, numeric: Boolean, symbols: Boolean, span: (() -> IntArray?)?, keepOn: (Float, Float) -> Boolean,
                  onText: (String) -> Unit, onBackspace: () -> Unit, onClear: () -> Unit, onDone: () -> Unit,
                  onClosed: () -> Unit): () -> Unit {
             val context = anchor.context
             val popup = Popup(anchor, span, onVisible = { if (!it) onClosed() }, keepOn = keepOn) { hide ->
                 CarKeyboard(context, context.resources.configuration.locales[0].language, numeric,
-                    onText, onBackspace, onClear, onDone = { onDone(); hide() })
+                    onText, onBackspace, onClear, onDone = { onDone(); hide() }, startOnSymbols = symbols)
             }
             popup.show()
             return { popup.hide() }

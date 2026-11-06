@@ -24,7 +24,7 @@ object WebViewer {
     val component = ComponentName(PKG, "$PKG.WebActivity")
     private val page = ComponentName(PKG, "$PKG.PageActivity")
     /** Version of the embedded app (versionCode of web/build.gradle.kts). */
-    private const val BUNDLED_VERSION = 5L
+    private const val BUNDLED_VERSION = 6L
     private const val ASSET = "web.apk"
 
     /**
@@ -109,8 +109,9 @@ object WebViewer {
     /** To the page: the card is shown, or hidden (the page goes on without drawing). */
     fun shown(context: Context, on: Boolean) = tell(context, Intent(SHOWN).putExtra("shown", on))
 
+    // To this user: from the system process, a plain sendBroadcast warns in the log at each call
     private fun tell(context: Context, i: Intent) = try {
-        context.sendBroadcast(i.setPackage(PKG).addFlags(Intent.FLAG_RECEIVER_FOREGROUND), TALK)
+        context.sendBroadcastAsUser(i.setPackage(PKG).addFlags(Intent.FLAG_RECEIVER_FOREGROUND), android.os.Process.myUserHandle(), TALK)
     } catch (e: Exception) { Log.w(TAG, "${i.action}: ${e.message}") }
 
     /** Installs the embedded app (off the main thread); [done] on the main thread, true if installed. */
