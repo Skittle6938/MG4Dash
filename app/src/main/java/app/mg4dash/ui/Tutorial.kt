@@ -30,8 +30,15 @@ object Tutorial {
     /** Step: view to highlight (null = none, bubble in the centre), title and gesture lines. */
     /** [swipes]: swipe gestures shown as animated arrows on the card ('H' left / right, 'V' up / down). */
     /** [homePanel]: the settings' "Home screen" panel reproduced in the bubble (its two buttons). */
+    /** [bottomTitle]: title when the bar is the bottom one. */
     private class Step(val target: Int?, val title: Int, val lines: List<Int>, val images: List<Pair<Int, Int>> = emptyList(),
-                       val swipes: String = "", val homePanel: Boolean = false)
+                       val swipes: String = "", val homePanel: Boolean = false, val bottomTitle: Int? = null)
+
+    /**
+     * Home whose widgets can change place (#97): the view a step points at, where it is now (the place of
+     * its card), or null to look it up by its id.
+     */
+    interface Places { fun tutorialView(id: Int): View? }
 
     private val STEPS = listOf(
         Step(null, R.string.tu_welcome_t, listOf(R.string.tu_welcome_1)),
@@ -43,11 +50,15 @@ object Tutorial {
             R.drawable.tu_layout_simple to R.string.st_style_simple,
             R.drawable.tu_layout_map to R.string.st_style_map,
         )),
-        Step(R.id.dock, R.string.tu_bar_t, listOf(R.string.tu_bar_1, R.string.tu_bar_2, R.string.tu_bar_3, R.string.tu_bar_4, R.string.tu_bar_5, R.string.tu_bar_6)),
+        // The bar in use: vertical (side) or at the bottom
+        Step(R.id.dock, R.string.tu_bar_t, listOf(R.string.tu_bar_1, R.string.tu_bar_2, R.string.tu_bar_3, R.string.tu_bar_4, R.string.tu_bar_5, R.string.tu_bar_6),
+            bottomTitle = R.string.tu_bar_bottom_t),
+        // The widgets where they are now (#97): each step points at its card's place
         Step(R.id.climateCard, R.string.tu_climate_t, listOf(R.string.tu_climate_1, R.string.tu_climate_2, R.string.tu_climate_3)),
         Step(R.id.energyCard, R.string.tu_energy_t, listOf(R.string.tu_energy_1, R.string.tu_energy_2)),
-        Step(R.id.mapCard, R.string.tu_map_t, listOf(R.string.tu_map_1, R.string.tu_map_3, R.string.tu_map_2)),
+        Step(R.id.mapCard, R.string.tu_map_t, listOf(R.string.tu_map_1, R.string.tu_map_3, R.string.tu_map_2), swipes = "H"),
         Step(R.id.mediaCard, R.string.tu_media_t, listOf(R.string.tu_media_1, R.string.tu_media_2, R.string.tu_media_3), swipes = "VH"),
+        // Any widget with several cards (the trip, power and phone one first)
         Step(R.id.secondaryCard, R.string.tu_widget_t, listOf(R.string.tu_widget_1, R.string.tu_widget_2), swipes = "H"),
         // Edit mode of the cards (#97): pinch the home screen
         Step(null, R.string.tu_cards_t, listOf(R.string.tu_cards_1, R.string.tu_cards_2)),
@@ -151,7 +162,8 @@ object Tutorial {
             bubble.background = GradientDrawable().apply {
                 cornerRadius = dp(20).toFloat(); setColor(Themes.color(context, R.color.bg_bottom)); setStroke(dp(2), accent)
             }
-            bubble.addView(text(context.getString(step.title), 34f, Themes.color(context, R.color.text_value), bold = true))
+            val title = step.bottomTitle?.takeIf { !Dock.vertical(context) } ?: step.title
+            bubble.addView(text(context.getString(title), 34f, Themes.color(context, R.color.text_value), bold = true))
             if (step.images.isNotEmpty()) {
                 val row = LinearLayout(context).apply { orientation = LinearLayout.HORIZONTAL }
                 step.images.forEachIndexed { i, (img, label) ->
@@ -184,22 +196,12 @@ object Tutorial {
             requestLayout(); invalidate()
         }
 
+        /** The vertical bar carries the dock's id too (Dock.mount): the bar in use is found either way. */
         private fun target(): View? {
             val id = STEPS[index].target ?: return null
-            activity.findViewById<View>(id)?.takeIf { it.isShown && it.width > 0 }?.let { return it }
-            // Vertical bar (default setting): no identifier, it is the narrow column next to the content
-            if (id != R.id.dock) return null
-            // Climate or map: the one placed (#97, the climate can give its place to cards)
-            var v: View? = activity.findViewById(R.id.climateCard) ?: activity.findViewById(R.id.mapCard)
-            while (v != null) {
-                val p = v.parent as? LinearLayout ?: return null
-                if (p.orientation == LinearLayout.HORIZONTAL && p.childCount >= 2) {
-                    val bar = listOf(p.getChildAt(0), p.getChildAt(p.childCount - 1)).firstOrNull { it.width in 1..dp(110) }
-                    if (bar != null) return bar
-                }
-                v = p
-            }
-            return null
+            fun View.visible() = takeIf { it.isShown && it.width > 0 }
+            (activity as? Places)?.tutorialView(id)?.visible()?.let { return it }
+            return activity.findViewById<View>(id)?.visible()
         }
 
         override fun onLayout(changed: Boolean, l: Int, t: Int, r: Int, b: Int) {
