@@ -190,6 +190,15 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         val toggle = android.widget.ImageButton(this@MainActivity, null, 0, R.style.RoundButton).apply {
             contentDescription = getString(R.string.cd_widget_toggle); visibility = View.GONE
         }
+        /** Over a web page, thin bars on its sides: where a swipe changes card (#98); shown and faded with the button. */
+        val edges = listOf(Gravity.START, Gravity.END).map { side ->
+            View(this@MainActivity).apply {
+                background = android.graphics.drawable.GradientDrawable().apply {
+                    cornerRadius = dp(2).toFloat(); setColor(app.mg4dash.ui.Themes.color(this@MainActivity, R.color.text_sub))
+                }
+                alpha = EDGE_ALPHA; visibility = View.GONE
+            } to side
+        }
         var fill: HomeSlots.Fill = HomeSlots.Fill.Cards(emptyList())
         /** Cards shown here in turn (the power left out when it is in the energy card). */
         var cards: List<Card> = emptyList()
@@ -205,7 +214,17 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
             box.addView(toggle, android.widget.FrameLayout.LayoutParams(size, size, Gravity.TOP or Gravity.END).apply {
                 topMargin = dp(14); rightMargin = dp(14)
             })
+            edges.forEach { (bar, side) ->
+                box.addView(bar, android.widget.FrameLayout.LayoutParams(dp(4), 0, side or Gravity.CENTER_VERTICAL).apply {
+                    leftMargin = dp(6); rightMargin = dp(6)
+                })
+            }
+            // Its height follows the place's: a third of it
+            box.addOnLayoutChangeListener { _, _, top, _, bottom, _, oldTop, _, oldBottom ->
+                if (bottom - top != oldBottom - oldTop) edges.forEach { (bar, _) -> bar.layoutParams = bar.layoutParams.apply { height = (bottom - top) / 3 } }
+            }
             box.active = { slotSwipes(this) }
+            box.edge = { if (shown == Card.WEB) dp(WEB_EDGE_DP) else 0 }
             toggle.setOnClickListener { swipeSlot(this, 1) }
             // Long press over the map's app: another app (#41)
             toggle.setOnLongClickListener { if (shown == Card.MAP) { pickMapApp(); true } else false }
@@ -430,8 +449,9 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
     }
 
     /**
-     * A place's own swipes: not in full screen, nor over an app, which takes the touches. Over a web page,
-     * as over the map (#98): one finger changes card, two fingers move and zoom the page.
+     * A place's own swipes: not in full screen, nor over an app, which takes the touches. Over a web page (#98),
+     * only a horizontal swipe from its left or right side changes card ([SwipeBox.edge]): elsewhere the page
+     * scrolls, zooms and takes the touches as in a browser.
      */
     private fun slotSwipes(f: SlotFrame) = f.cards.size >= 2 && hiddenForMap == null && (f.shown == Card.WEB || !covering(f))
 
@@ -443,6 +463,7 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         f.toggle.setImageResource((HomeSlots.next(f.cards, f.shown, 1) ?: Card.MAP).icon)
         if (f.cards.size >= 2 && covering(f)) revealToggle(f)
         else { f.toggle.removeCallbacks(f.fade); f.toggle.animate().cancel(); f.toggle.alpha = 1f; f.toggle.visibility = View.GONE }
+        if (!(f.cards.size >= 2 && f.shown == Card.WEB)) f.edges.forEach { (bar, _) -> bar.animate().cancel(); bar.alpha = EDGE_ALPHA; bar.visibility = View.GONE }
     }
 
     private fun mapAppFullOver(f: SlotFrame) = mapAppFull?.takeIf { f.shown == Card.MAP && mapAppView?.visibility == View.VISIBLE }
@@ -452,12 +473,15 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         if (!covering(f)) return
         listOfNotNull(f.toggle.takeIf { f.cards.size >= 2 }, mapAppFullOver(f))
             .forEach { v -> v.animate().cancel(); v.alpha = 1f; v.visibility = View.VISIBLE }
+        if (f.cards.size >= 2 && f.shown == Card.WEB && slotSwipes(f))
+            f.edges.forEach { (bar, _) -> bar.animate().cancel(); bar.alpha = EDGE_ALPHA; bar.visibility = View.VISIBLE }
         f.toggle.removeCallbacks(f.fade)
         f.toggle.postDelayed(f.fade, 5000)
     }
 
     private fun fadeToggle(f: SlotFrame) {
-        listOfNotNull(f.toggle.takeIf { it.visibility == View.VISIBLE }, mapAppFullOver(f))
+        (listOfNotNull(f.toggle.takeIf { it.visibility == View.VISIBLE }, mapAppFullOver(f)) +
+            f.edges.map { it.first }.filter { it.visibility == View.VISIBLE })
             .forEach { v -> v.animate().alpha(0f).setDuration(400).withEndAction { v.visibility = View.INVISIBLE }.start() }
     }
 
@@ -1955,5 +1979,8 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         const val RANGE_ICON = 0.66f
         /** Map full screen to restore after a recreation (in addition to the saved state). */
         var mapFullOnRecreate = false
+        /** Over a web page, the band of its left and right sides where a swipe changes card (#98), about 0.8 cm on the car. */
+        const val WEB_EDGE_DP = 48
+        const val EDGE_ALPHA = 0.5f
     }
 }
