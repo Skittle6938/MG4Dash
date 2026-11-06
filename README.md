@@ -83,7 +83,20 @@ Swipe or tap it to switch between its pages:
 - **Map**: follows the car, north up or heading up (tap the recenter button again), default zoom 14 to 18 and colours (auto, light, dark) in Settings › Home. The zoom and full screen buttons hide after a few seconds. Without data connection the map stays as long as the area is in the tile cache, then the card switches to consumption (can be turned off).
 - **Consumption**: a swipe switches map → consumption → shortcuts. Period menu: since the last charge, current trip (one point per km, one every 2 minutes when stopped; since the last charge and the last 12 months are placed by date and smoothed, from the energy measured by MG4Dash) or last 12 months (one point per trip). The dashed line is the average: energy out of the battery minus regeneration, over the distance. Its value is on the chart's title line, in blue, with the consumption of the last km in orange (useful on a long climb); on the current trip, its duration shows in the top right corner. **Regen** shows the energy recovered and the part of the distance it powered: recovered energy ÷ energy out of the battery × distance. With 30.7 kWh out, 12.1 kWh recovered and 149 km, that is 39 % of the energy, so about 59 km of the 149 km. These km are already part of the distance, they don't add to the range.
 - **Shortcuts**: 3 rows of apps or Home Assistant actions (scripts, automations, scenes, gate, garage door…). Tap an empty slot or long press a slot to change it; the Home Assistant address and token are set in Settings › Connections. A Home Assistant shortcut shows its live state under its name (a garage door drawn open and in orange when open, blue when closed, grey when unavailable): a cover, lock, switch or light shows its own state, and *Displayed state* in the shortcut's menu picks another entity, such as the door sensor of a garage opened by a script, or none. The shortcuts page can be turned off.
+- **Web app** (off by default): a web page of your choice in the card, for example a Home Assistant dashboard. Turn it on and enter its address in the edit mode (below). The page takes the touches; the button at the top right changes card, it fades after 5 s and comes back on a touch.
 - **Full screen**: the button below the zoom enlarges the map over the whole screen; any bar button brings it back.
+
+### Choosing the cards
+
+Pinch the home screen with two fingers, as on Samsung or Pixel home screens, or use Settings › Home › *Edit the cards*: each widget that goes through cards shows them over itself, and a touch shows or removes one; at least one stays. The home screen follows at once, Done closes the edit mode. The pinch is left to the map for its zoom, and to a web page or an app shown in the map card.
+
+| Layout | Widgets and their cards |
+|---|---|
+| Full | weather (by hour, by day), bottom right widget (trip, power, phone), map widget (map, consumption, shortcuts, web app) |
+| Map | weather (by hour, by day), energy widget (energy, trip, power, phone), map widget (map, consumption, shortcuts, web app) |
+| Simple | no cards to choose |
+
+In the map widget, the edit mode also sets the app shown instead of the map and the web app's address. The Power card is left out when *Live power in the energy card* is on.
 
 | Consumption | Shortcuts |
 |---|---|
@@ -175,7 +188,7 @@ Five tabs along the top; the last one used opens next time. Each on / off option
 
 | Tab | Options |
 |---|---|
-| Home | home layout (Full, Simple, Map), audio source and playback at startup, menu bar (bottom or vertical, side), wide side bar, connection icons, full screen (hides the SAIC side bar and banner), live power in the energy card, voltage and current under the power bar, map stack back to the battery when plugged in, map zoom and colours, hide the map buttons, shortcuts page, switch to the energy widget when offline |
+| Home | home layout (Full, Simple, Map), widgets' cards (edit mode), audio source and playback at startup, menu bar (bottom or vertical, side), wide side bar, connection icons, full screen (hides the SAIC side bar and banner), live power in the energy card, voltage and current under the power bar, map stack back to the battery when plugged in, map zoom and colours, hide the map buttons, shortcuts page, switch to the energy widget when offline |
 | Look | light / dark / auto, night after sunset, smooth light / dark switch, clock 24 h or 12 h (no AM / PM), panel outline, background, button colour, full-throttle special |
 | Vehicle | units, tyre pressure unit, heated seats and steering wheel, Keep climate on, keep MG4Dash in front of the SAIC climate screen (old firmwares), startup sound (audio file from a USB stick or internal storage, 30 s and 20 MB at most, with its own volume), battery capacity when new, current capacity and health, battery model, MG4 XPower |
 | Connections | weather (fallback city or current position), Home Assistant (address, token, test) |
@@ -300,7 +313,8 @@ A short tour of the main gestures opens after a first install (*Skip* closes it 
 - Long press the set temperature: temperature calibration; long press fan minus: lowest fan speed; long press A/C: intermittent A/C
 - Long press play / pause: Sound page
 - Steering wheel * button: 360 camera on / off
-- Swipe the map card: map → consumption → shortcuts; move and zoom the map with two fingers (one finger in full screen)
+- Swipe the map card: map → consumption → shortcuts → web app (the cards on); move and zoom the map with two fingers (one finger in full screen)
+- Pinch the home screen with two fingers: choose the cards of each widget (see [Choosing the cards](#choosing-the-cards))
 - Long press the connection icons: choose which ones show, including USB-A and USB-C, which are off by default
 - Two fingers sliding down from the top of the screen: open Android Auto when a phone is connected
 - Swipe the weather card: hourly ↔ daily forecast
