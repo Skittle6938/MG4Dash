@@ -17,6 +17,9 @@ import app.mg4dash.system.Log
 object EmbeddedApp {
     private const val TAG = "MapApp"
 
+    /** Attached views of apps stopped on release, by package: restarted after another view's stop. */
+    private val live = mutableMapOf<String, MutableSet<() -> Unit>>()
+
     /**
      * [launch]: intent to start instead of the app's launcher one (the web app's page, #97).
      * [stopOnRelease]: the app is stopped before its virtual display goes, instead of being moved by
@@ -49,10 +52,19 @@ object EmbeddedApp {
         view.addOnLayoutChangeListener { v, l, t, r, b, ol, ot, or, ob ->
             if (r - l != or - ol || b - t != ob - ot) v.post { resize(v) }
         }
+        val restart: () -> Unit = { tryStart(0) }
         view.addOnAttachStateChangeListener(object : View.OnAttachStateChangeListener {
-            override fun onViewAttachedToWindow(v: View) = tryStart(0)
+            override fun onViewAttachedToWindow(v: View) {
+                if (stopOnRelease) live.getOrPut(cn.packageName) { mutableSetOf() } += restart
+                tryStart(0)
+            }
             override fun onViewDetachedFromWindow(v: View) {
-                if (stopOnRelease) forceStop(activity, cn.packageName)
+                if (stopOnRelease) {
+                    // At a home rebuild the new view has already started the app: the stop kills it too, start it again there
+                    live[cn.packageName]?.remove(restart)
+                    forceStop(activity, cn.packageName)
+                    live[cn.packageName]?.forEach { it() }
+                }
                 release(v)
             }
         })
