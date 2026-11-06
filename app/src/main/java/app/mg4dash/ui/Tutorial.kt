@@ -230,7 +230,20 @@ object Tutorial {
                 bubble.measure(View.MeasureSpec.makeMeasureSpec(w, View.MeasureSpec.EXACTLY), View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED))
                 return bubble.measuredHeight
             }
-            fun put(x: Int, y: Int) = bubble.layout(x, y, x + bubble.measuredWidth, y + bubble.measuredHeight)
+            val fog = dp(Kit.FOG_SAFE_DP)
+            /**
+             * MG's fog light button, a system overlay at the top left (#38), covered the start of the title
+             * of a bubble placed in that corner: lower it under the button (as long as it stays above [maxY]),
+             * otherwise move it to the right of it.
+             */
+            fun put(x0: Int, y0: Int, maxY: Int = height - margin) {
+                var x = x0; var y = y0
+                val w = bubble.measuredWidth; val h = bubble.measuredHeight
+                if (x < fog && y < fog) {
+                    if (fog + h <= maxY) y = fog else if (fog + w <= width - margin) x = fog
+                }
+                bubble.layout(x, y, x + w, y + h)
+            }
             if (hole.isEmpty) {
                 val h = heightAt(base)
                 put((width - base) / 2, ((height - h) / 2).coerceAtLeast(margin)); return
@@ -252,7 +265,8 @@ object Tutorial {
                 val h = heightAt(w)
                 if (h > maxOf(above, below)) continue
                 put((hole.centerX() - w / 2f).toInt().coerceIn(margin, width - w - margin),
-                    if (above >= below) (hole.top - gap - h).toInt() else (hole.bottom + gap).toInt())
+                    if (above >= below) (hole.top - gap - h).toInt() else (hole.bottom + gap).toInt(),
+                    if (above >= below) (hole.top - dp(24)).toInt() else height - margin)
                 return
             }
             // No room anywhere: centred, the whole width
