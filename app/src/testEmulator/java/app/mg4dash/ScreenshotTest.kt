@@ -504,6 +504,15 @@ class ScreenshotTest {
         shoot(MainActivity::class.java, "home_map_layout_consumption.png")
     }
 
+    /** Current trip (#44): its duration in the top right corner, the average and the last km on the chart's title line. */
+    @Test fun homeMapLayoutConsumptionTrip() {
+        org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE).edit()
+            .putInt("home_style", 2).putInt("home_widget", 2).putInt("consumption_period", 1).apply()
+        app.mg4dash.energy.EnergyMonitor.tripStartForTest(System.currentTimeMillis() - 72 * 60_000L)
+        shoot(MainActivity::class.java, "home_map_layout_consumption_trip.png")
+        app.mg4dash.energy.EnergyMonitor.tripStartForTest(0L)
+    }
+
     @Test fun homeMapLayoutConsumptionYear() {
         org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE).edit()
             .putInt("home_style", 2).putInt("home_widget", 2).putInt("consumption_period", 2).apply()

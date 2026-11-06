@@ -101,7 +101,8 @@ object Shortcuts {
         }
         val icon = ImageView(activity)
         val label = kit.text("", 20f, R.color.text_value).apply { gravity = Gravity.CENTER; maxLines = 1 }
-        val state = kit.text("", 17f, R.color.text_sub).apply { gravity = Gravity.CENTER; maxLines = 1; visibility = View.GONE }
+        // State line kept on every tile, empty if there is none: icons and names stay level along a row
+        val state = kit.text("", 17f, R.color.text_sub).apply { gravity = Gravity.CENTER; maxLines = 1; visibility = View.INVISIBLE }
         when (slot) {
             Slot.Empty -> {
                 icon.setImageResource(R.drawable.ic_plus); icon.setColorFilter(kit.color(R.color.text_title))
@@ -133,12 +134,12 @@ object Shortcuts {
 
     /**
      * Icon of a Home Assistant tile, and the state under its label when it has one (#97): [state] stays
-     * gone without a state, and is kept (invisible) until the first answer so that the tile does not jump.
+     * invisible without a state, and until the first answer, so that the tile does not jump.
      */
     fun bindHaState(activity: Activity, prefs: Prefs, i: Int, slot: Slot.Ha, icon: ImageView, state: TextView) {
         val entity = HaLive.entityFor(prefs, i, slot)
         HaLive.style(activity, slot, null, icon, state)
-        if (entity == null) { state.visibility = View.GONE; return }
+        if (entity == null) return
         HaLive.watch(activity, entity, icon) { s -> HaLive.style(activity, slot, s, icon, state) }
     }
 
