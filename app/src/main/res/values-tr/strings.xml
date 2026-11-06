@@ -664,7 +664,7 @@
     <string name="tu_map_t">Harita</string>
     <string name="tu_map_1">Sola / sağa kaydır: widget\'ın sonraki kartı (tüketim, kısayollar…)</string>
     <string name="tu_map_3">İki parmak: haritayı taşı ve yakınlaştır (tam ekranda tek parmak)</string>
-    <string name="tu_map_2">Haritaya uzun bas: harita kartında başka bir uygulama</string>
+    <string name="tu_map_2">Ana ekranı iki parmakla sıkıştırın, sonra Harita: harita kartında başka bir uygulama</string>
     <string name="tu_media_t">Müzik</string>
     <string name="tu_media_1">Yukarı / aşağı kaydır: sonraki kaynak; sola / sağa: önceki / sonraki parça</string>
     <string name="tu_media_2">Kaynak adına dokun: kaynak menüsü; resme dokun: uygulamayı aç</string>
