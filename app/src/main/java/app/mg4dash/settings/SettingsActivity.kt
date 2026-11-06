@@ -281,8 +281,13 @@ class SettingsActivity : AppCompatActivity() {
 
         // ── Update from GitHub ──
         val upd = panel(sysR, getString(R.string.st_update))
-        val updState = text(upd, getString(R.string.st_update_installed, BuildConfig.VERSION_NAME), 18f, R.color.text_value)
-        text(upd, getString(R.string.st_update_desc), 16f, R.color.text_title)
+        val appNew = prefs.raw.getString("upd_new_app", null)?.takeIf { app.mg4dash.system.Updater.isNewer(it) }
+        val checked = prefs.raw.getLong("upd_checked_at", 0L) > 0L
+        val (updState, updButton) = updateLine(upd, "MG4Dash", when {
+            appNew != null -> getString(R.string.st_upd_new, BuildConfig.VERSION_NAME, appNew)
+            checked -> getString(R.string.st_upd_current, BuildConfig.VERSION_NAME)
+            else -> BuildConfig.VERSION_NAME
+        }, appNew)
         fun install(r: app.mg4dash.system.Updater.Release) {
             if (!app.mg4dash.system.Updater.begin()) { updState.text = getString(R.string.st_update_busy); return }
             lifecycleScope.launch {
@@ -301,13 +306,17 @@ class SettingsActivity : AppCompatActivity() {
                 }
             }
         }
-        row(upd, button(getString(R.string.st_update_check), R.color.accent_action) {
-            if (app.mg4dash.system.DataUsage.updatesBlocked(this)) { updState.text = getString(R.string.du_updates_wait); return@button }
+        updButton.setOnClickListener {
+            if (app.mg4dash.system.DataUsage.updatesBlocked(this)) { updState.text = getString(R.string.du_updates_wait); return@setOnClickListener }
             updState.text = getString(R.string.st_update_checking)
             lifecycleScope.launch {
                 var failed = false
                 val r = withContext(Dispatchers.IO) { try { app.mg4dash.system.Updater.latest(prefs.updateBeta) } catch (e: Exception) { Log.w("Update", "${e.message}"); failed = true; null } }
                 val newer = r?.takeIf { app.mg4dash.system.Updater.isNewer(it.version) }
+                if (!failed) app.mg4dash.ui.UpdatePrompt.remember(this@SettingsActivity, app = r?.version)
+                if (newer != null) {
+                    updButton.text = getString(R.string.st_upd_install_ver, newer.version)
+                }
                 updState.text = when {
                     failed -> getString(R.string.st_update_error)
                     newer != null -> getString(R.string.st_update_available, BuildConfig.VERSION_NAME, r.version)
@@ -338,10 +347,11 @@ class SettingsActivity : AppCompatActivity() {
                         .show().also { app.mg4dash.ui.Dialogs.fix(it) }
                 }
             }
-        })
-
-        toggle(upd, R.string.st_update_beta, null, { prefs.updateBeta }) { prefs.updateBeta = it }
+        }
         radioDashUpdate(upd)
+        text(upd, getString(R.string.st_upd_note, app.mg4dash.system.RadioDashUpdater.TESTED_ON), 15f, R.color.text_title)
+        toggle(upd, R.string.st_update_auto, R.string.st_update_auto_desc, { prefs.updateAuto }) { prefs.updateAuto = it }
+        toggle(upd, R.string.st_update_beta, null, { prefs.updateBeta }) { prefs.updateBeta = it }
 
         // ── Weather ──
         val weather = panel(netL, getString(R.string.title_weather))
@@ -660,25 +670,45 @@ class SettingsActivity : AppCompatActivity() {
             .setPositiveButton(R.string.st_close, null).show().also { app.mg4dash.ui.Dialogs.fix(it) }
     }
 
-    /** Radio Dash: only on the firmware and radio app it is built for. */
+    /** Name and state on the left, a single button on the right: Check, or Install when a newer version is known. */
+    private fun updateLine(parent: LinearLayout, name: String, state: String, newVersion: String?): Pair<TextView, Button> {
+        val line = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL }
+        val texts = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
+        text(texts, name, 18f, R.color.text_value)
+        val stateView = text(texts, state, 17f, R.color.text_title)
+        line.addView(texts, LinearLayout.LayoutParams(0, -2, 1f))
+        val b = button(if (newVersion != null) getString(R.string.st_upd_install_ver, newVersion) else getString(R.string.st_update_check),
+            R.color.accent_action) {}
+        line.addView(b, LinearLayout.LayoutParams(dp(300), dp(56)).apply { leftMargin = dp(16) })
+        parent.addView(line, LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(10) })
+        return stateView to b
+    }
+
+    /** Radio Dash: on every firmware, the firmwares already tested are named in the note below. */
     private fun radioDashUpdate(parent: LinearLayout) {
         val R2 = app.mg4dash.system.RadioDashUpdater
-        if (!R2.compatible(this)) return
-        val state = text(parent, "", 18f, R.color.text_value).apply { (layoutParams as LinearLayout.LayoutParams).topMargin = dp(14) }
-        fun showState() {
-            state.text = getString(R.string.st_rd_state, when {
-                !R2.installed(this) -> getString(R.string.st_rd_none)
-                else -> R2.installedVersion(this) ?: getString(R.string.st_rd_unknown)
-            })
+        val installed = R2.installed(this)
+        val cur = R2.installedVersion(this)
+        val rdNew = prefs.raw.getString("upd_new_rd", null)?.takeIf { !installed || cur == null || app.mg4dash.system.Updater.isNewer(it, cur) }
+        fun stateText() = when {
+            !installed && rdNew != null -> getString(R.string.st_upd_none_new, rdNew)
+            !installed -> getString(R.string.st_rd_none)
+            cur == null -> getString(R.string.st_rd_unknown)
+            rdNew != null -> getString(R.string.st_upd_new, cur, rdNew)
+            prefs.raw.getLong("upd_checked_at", 0L) > 0L -> getString(R.string.st_upd_current, cur)
+            else -> cur
         }
-        showState()
-        text(parent, getString(R.string.st_rd_desc), 16f, R.color.text_title)
-        row(parent, button(getString(R.string.st_rd_check), R.color.accent_action) {
-            if (app.mg4dash.system.DataUsage.updatesBlocked(this)) { state.text = getString(R.string.du_updates_wait); return@button }
+        val blocker = R2.blocker(this)
+        val (state, rdButton) = updateLine(parent, "Radio Dash", blocker?.let { getString(it) } ?: stateText(), rdNew.takeIf { blocker == null })
+        fun showState() { state.text = stateText() }
+        if (blocker != null) { rdButton.isEnabled = false; rdButton.alpha = 0.4f; return }
+        rdButton.setOnClickListener {
+            if (app.mg4dash.system.DataUsage.updatesBlocked(this)) { state.text = getString(R.string.du_updates_wait); return@setOnClickListener }
             state.text = getString(R.string.st_update_checking)
             lifecycleScope.launch {
                 val r = withContext(Dispatchers.IO) { try { R2.latest(prefs.updateBeta) } catch (e: Exception) { Log.w("Update", "Radio Dash: ${e.message}"); null } }
                 if (r == null) { state.text = getString(R.string.st_update_error); return@launch }
+                app.mg4dash.ui.UpdatePrompt.remember(this@SettingsActivity, rd = r.version)
                 val cur = R2.installedVersion(this@SettingsActivity)
                 if (cur != null && !app.mg4dash.system.Updater.isNewer(r.version, cur)) { state.text = getString(R.string.st_rd_uptodate, cur); return@launch }
                 showState()
@@ -711,7 +741,7 @@ class SettingsActivity : AppCompatActivity() {
                     .setNegativeButton(R.string.cancel, null)
                     .show().also { app.mg4dash.ui.Dialogs.fix(it) }
             }
-        })
+        }
     }
 
     /** Startup sound settings. */

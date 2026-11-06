@@ -204,9 +204,9 @@ Five tabs along the top; the last one used opens next time. Each on / off option
 
 ## Updates
 
-Settings › System › *Check* downloads the latest MG4Dash release from GitHub and installs it (internet connection needed). Turn on *Include beta versions* to also get the betas, numbered after the next release (1.7.2-beta0, 1.7.2-beta1…). When a new official release is out, MG4Dash also offers it at startup: *Update*, *Later* or *Don't notify me again for this release*.
+Settings › System shows one line for MG4Dash and one for Radio Dash, with the installed version and the latest one found. The button on the right says *Check*, or *Install* when a newer version is known; it checks GitHub again, shows the release notes and installs (internet connection needed). *Check automatically* (on by default) looks for new versions once a week, or every day with *Include beta versions* on; the betas are numbered after the next release (1.7.2-beta0, 1.7.2-beta1…). When a new official release is found, MG4Dash also offers it on the home screen: *Update*, *Later* or *Don't notify me again for this release*.
 
-**Radio Dash**: on SWI69 with the matching radio app, the same page installs the latest [Radio Dash](https://github.com/Skittle6938/MG4-Radio-Dash) (the radio redesigned in the MG4Dash style); restart the head unit afterwards by holding Home about 20 s. On SWI68 it is being tested by users and is not officially supported. When Radio Dash is installed, DAB and FM are two separate sources on the music card (Settings › Home, on by default).
+**Radio Dash**: the same page installs the latest [Radio Dash](https://github.com/Skittle6938/MG4-Radio-Dash) (the radio redesigned in the MG4Dash style) on any firmware whose stock radio it can replace, and says so when it can't (a newer stock radio, or one signed with another key). Tested on SWI69 and SWI68 R67. Restart the head unit afterwards by holding Home about 20 s. When Radio Dash is installed, DAB and FM are two separate sources on the music card (Settings › Home, on by default).
 
 ## Compatibility (beta)
 
