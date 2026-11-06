@@ -113,11 +113,36 @@ object EmbeddedApp {
     /**
      * Full screen and back (#98): on the car, the view's SurfaceView kept its layer at the old size. Larger, the
      * rest stayed black; smaller (brought back to the card after its creation at the screen's width), nothing
-     * showed after a change of address. Hidden for a moment, it gets a new one at the new size; the app goes
-     * on, its virtual display only off for that moment.
+     * showed after a change of address. Hidden for a moment, it gets a new one at the new size.
+     * ActivityView would turn its virtual display off meanwhile (no surface): the app was then stopped, and the
+     * image of Chromium's videos stayed black. Its callback is set aside for that moment, and the virtual
+     * display goes straight from the old surface to the new one, never off.
      */
     private fun newSurface(v: View) {
         val sv = (v as? ViewGroup)?.getChildAt(0) as? android.view.SurfaceView ?: return
+        val holder = sv.holder
+        val own = try {
+            v.javaClass.getDeclaredField("mSurfaceCallback").apply { isAccessible = true }.get(v) as? android.view.SurfaceHolder.Callback
+        } catch (e: Throwable) { null }
+        val vd = try {
+            v.javaClass.getDeclaredField("mVirtualDisplay").apply { isAccessible = true }.get(v) as? android.hardware.display.VirtualDisplay
+        } catch (e: Throwable) { null }
+        if (own != null && vd != null) {
+            holder.removeCallback(own)
+            holder.addCallback(object : android.view.SurfaceHolder.Callback {
+                override fun surfaceCreated(h: android.view.SurfaceHolder) {
+                    h.removeCallback(this)
+                    h.addCallback(own)
+                    // The same Surface object, refilled: set again only after null, back to back, before anyone sees it off
+                    vd.surface = null
+                    vd.surface = h.surface
+                    // The place the main screen leaves to the app's touches, as ActivityView does with a new surface
+                    try { v.javaClass.getDeclaredMethod("updateLocation").apply { isAccessible = true }.invoke(v) } catch (_: Throwable) {}
+                }
+                override fun surfaceChanged(h: android.view.SurfaceHolder, format: Int, w: Int, height: Int) {}
+                override fun surfaceDestroyed(h: android.view.SurfaceHolder) {}
+            })
+        } else Log.w(TAG, "new surface: ActivityView's callback not found, its virtual display goes off for a moment")
         sv.visibility = View.INVISIBLE
         sv.post { sv.visibility = View.VISIBLE }
         Log.i(TAG, "new surface at ${v.width}×${v.height}")
