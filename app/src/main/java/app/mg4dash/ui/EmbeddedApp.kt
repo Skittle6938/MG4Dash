@@ -24,9 +24,10 @@ object EmbeddedApp {
      * [launch]: intent to start instead of the app's launcher one (the web app's page, #97).
      * [stopOnRelease]: the app is stopped before its virtual display goes, instead of being moved by
      * Android to the main screen, over home (MG4Dash Web: a black screen for a second at each home rebuild).
+     * [newSurfaceOnGrow]: the view gets a new surface when it grows ([newSurface]).
      */
     fun create(activity: Activity, cn: ComponentName, launch: Intent? = null, stopOnRelease: Boolean = false,
-               onStarted: (() -> Unit)? = null): ViewGroup? = try {
+               newSurfaceOnGrow: Boolean = false, onStarted: (() -> Unit)? = null): ViewGroup? = try {
         val cls = Class.forName("android.app.ActivityView")
         val view = cls.getConstructor(Context::class.java).newInstance(activity) as ViewGroup
         val start = cls.getMethod("startActivity", Intent::class.java)
@@ -50,7 +51,10 @@ object EmbeddedApp {
         // Size changed (full screen): the app's virtual display follows the new size, otherwise
         // the app keeps the old width and the rest of the widget stays black
         view.addOnLayoutChangeListener { v, l, t, r, b, ol, ot, or, ob ->
-            if (r - l != or - ol || b - t != ob - ot) v.post { resize(v) }
+            if (r - l != or - ol || b - t != ob - ot) {
+                val grew = or > ol && ob > ot && (r - l > or - ol || b - t > ob - ot)
+                v.post { resize(v); if (grew && newSurfaceOnGrow) newSurface(v) }
+            }
         }
         val restart: () -> Unit = { tryStart(0) }
         view.addOnAttachStateChangeListener(object : View.OnAttachStateChangeListener {
@@ -103,6 +107,18 @@ object EmbeddedApp {
             vd.resize(v.width, v.height, dpi)
             Log.i(TAG, "virtual display resized: ${v.width}×${v.height}")
         } catch (e: Throwable) { Log.w(TAG, "resize: ${e.message}") }
+    }
+
+    /**
+     * Full screen (#98): on the car, the view's SurfaceView kept its layer at the old size, and the rest stayed
+     * black. Hidden for a moment, it gets a new one at the new size; the app goes on, its virtual display only
+     * off for that moment.
+     */
+    private fun newSurface(v: View) {
+        val sv = (v as? ViewGroup)?.getChildAt(0) as? android.view.SurfaceView ?: return
+        sv.visibility = View.INVISIBLE
+        sv.post { sv.visibility = View.VISIBLE }
+        Log.i(TAG, "new surface at ${v.width}×${v.height}")
     }
 
     private fun forceStop(context: Context, pkg: String) {
