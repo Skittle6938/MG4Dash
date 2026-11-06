@@ -142,6 +142,10 @@ public class WebActivity extends Activity {
 
             @Override
             public void onHideCustomView() { hideVideo(); }
+
+            // As early as possible in the page, before its player chooses a format
+            @Override
+            public void onProgressChanged(WebView view, int progress) { noVp9(); }
         });
         keyboardFor = inCardOnly() ? i.getStringExtra(EXTRA_KEYBOARD) : null;
         if (keyboardFor != null) {
@@ -177,11 +181,12 @@ public class WebActivity extends Activity {
 
             // The script that watches the fields, as soon as the page shows, and again at its end
             @Override
-            public void onPageCommitVisible(WebView view, String url) { watchFields(); }
+            public void onPageCommitVisible(WebView view, String url) { noVp9(); watchFields(); }
 
             @Override
             public void onPageFinished(WebView view, String url) {
                 if (!failed) message.setVisibility(View.GONE);
+                noVp9();
                 watchFields();
             }
         });
@@ -260,6 +265,36 @@ public class WebActivity extends Activity {
         + "  changed(e, 'deleteContentBackward', null);"
         + "};"
         + "})();";
+
+    /**
+     * Videos without image (#98): the car's VP9 hardware decoder starts, then gives no picture in Chromium 66,
+     * the sound alone playing. The page is told that VP9 (and AV1) cannot be played, so YouTube and others
+     * send H.264, which the car shows.
+     */
+    private static final String NO_VP9_JS = "(function () {"
+        + "if (window.__mg4dashNoVp9) return;"
+        + "window.__mg4dashNoVp9 = true;"
+        + "var no = /vp0?9|av01/i;"
+        + "if (window.MediaSource && MediaSource.isTypeSupported) {"
+        + "  var is = MediaSource.isTypeSupported.bind(MediaSource);"
+        + "  MediaSource.isTypeSupported = function (t) { return no.test(t) ? false : is(t); };"
+        + "}"
+        + "var can = HTMLMediaElement.prototype.canPlayType;"
+        + "HTMLMediaElement.prototype.canPlayType = function (t) { return no.test(t) ? '' : can.call(this, t); };"
+        + "var mc = navigator.mediaCapabilities;"
+        + "if (mc && mc.decodingInfo) {"
+        + "  var info = mc.decodingInfo.bind(mc);"
+        + "  mc.decodingInfo = function (c) {"
+        + "    if (c && c.video && no.test(c.video.contentType || ''))"
+        + "      return Promise.resolve({ supported: false, smooth: false, powerEfficient: false });"
+        + "    return info(c);"
+        + "  };"
+        + "}"
+        + "})();";
+
+    private void noVp9() {
+        if (web != null) web.evaluateJavascript(NO_VP9_JS, null);
+    }
 
     private void watchFields() {
         if (keyboardFor != null && web != null) web.evaluateJavascript(FIELDS_JS, null);
