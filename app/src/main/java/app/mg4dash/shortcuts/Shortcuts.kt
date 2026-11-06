@@ -62,7 +62,8 @@ object Shortcuts {
             is Slot.App -> "app|" + s.component.flattenToString()
             is Slot.Ha -> "ha|${s.entityId}|${s.label}"
         }
-        prefs.raw.edit().putString("sc_$i", v).apply()
+        // A new action starts with the automatic state (#97)
+        prefs.raw.edit().putString("sc_$i", v).remove("sc_state_$i").apply()
     }
 
     // ─── Vue ───
@@ -100,6 +101,7 @@ object Shortcuts {
         }
         val icon = ImageView(activity)
         val label = kit.text("", 20f, R.color.text_value).apply { gravity = Gravity.CENTER; maxLines = 1 }
+        val state = kit.text("", 17f, R.color.text_sub).apply { gravity = Gravity.CENTER; maxLines = 1; visibility = View.GONE }
         when (slot) {
             Slot.Empty -> {
                 icon.setImageResource(R.drawable.ic_plus); icon.setColorFilter(kit.color(R.color.text_title))
@@ -111,12 +113,13 @@ object Shortcuts {
                 label.text = appLabel(activity, slot.component)
             }
             is Slot.Ha -> {
-                icon.setImageResource(haIcon(slot.entityId, slot.label)); icon.setColorFilter(kit.color(R.color.accent_action))
                 label.text = slot.label
+                bindHaState(activity, prefs, i, slot, icon, state)
             }
         }
         cell.addView(icon, LinearLayout.LayoutParams(kit.dp(64), kit.dp(64)))
         cell.addView(label, kit.lp(-1, -2, t = 6))
+        cell.addView(state, kit.lp(-1, -2))
         cell.setOnClickListener {
             when (slot) {
                 Slot.Empty -> edit(activity, i, refresh)
@@ -126,6 +129,17 @@ object Shortcuts {
         }
         cell.setOnLongClickListener { edit(activity, i, refresh); true }
         return cell
+    }
+
+    /**
+     * Icon of a Home Assistant tile, and the state under its label when it has one (#97): [state] stays
+     * gone without a state, and is kept (invisible) until the first answer so that the tile does not jump.
+     */
+    fun bindHaState(activity: Activity, prefs: Prefs, i: Int, slot: Slot.Ha, icon: ImageView, state: TextView) {
+        val entity = HaLive.entityFor(prefs, i, slot)
+        HaLive.style(activity, slot, null, icon, state)
+        if (entity == null) { state.visibility = View.GONE; return }
+        HaLive.watch(activity, entity, icon) { s -> HaLive.style(activity, slot, s, icon, state) }
     }
 
     fun haIcon(entity: String, label: String): Int {
@@ -211,18 +225,21 @@ object Shortcuts {
 
     fun edit(activity: Activity, i: Int, refresh: () -> Unit) {
         val prefs = Prefs(activity)
-        val choices = arrayOf(
+        val ha = get(prefs, i) as? Slot.Ha
+        val choices = listOfNotNull(
             activity.getString(R.string.sc_app),
             activity.getString(R.string.sc_ha),
+            ha?.let { activity.getString(R.string.sc_state) },
             activity.getString(R.string.sc_clear),
-        )
+        ).toTypedArray()
         AlertDialog.Builder(activity)
             .setTitle(R.string.sc_edit)
             .setItems(choices) { _, w ->
-                when (w) {
-                    0 -> pickApp(activity, choices[0]) { cn -> if (cn != null) { set(prefs, i, Slot.App(cn)); refresh() } }
-                    1 -> pickHa(activity) { id, label -> set(prefs, i, Slot.Ha(id, label)); refresh() }
-                    2 -> { set(prefs, i, Slot.Empty); refresh() }
+                when (choices[w]) {
+                    choices[0] -> pickApp(activity, choices[0]) { cn -> if (cn != null) { set(prefs, i, Slot.App(cn)); refresh() } }
+                    choices[1] -> pickHa(activity) { id, label -> set(prefs, i, Slot.Ha(id, label)); refresh() }
+                    activity.getString(R.string.sc_clear) -> { set(prefs, i, Slot.Empty); refresh() }
+                    else -> if (ha != null) pickState(activity, i, ha, refresh)
                 }
             }
             .setNegativeButton(R.string.cancel, null)
@@ -230,6 +247,37 @@ object Shortcuts {
     }
 
     // ─── Home Assistant ───
+
+    /** "Displayed state" of a Home Assistant shortcut (#97): automatic, none, or any entity with a state. */
+    private fun pickState(activity: Activity, i: Int, slot: Slot.Ha, refresh: () -> Unit) {
+        val prefs = Prefs(activity)
+        thread {
+            val result = try {
+                val arr = JSONArray(request(prefs, "GET", "/api/states", null))
+                (0 until arr.length()).map { arr.getJSONObject(it) }
+                    .map { it.getString("entity_id") to (it.optJSONObject("attributes")?.optString("friendly_name") ?: "") }
+                    .filter { it.first.substringBefore('.') in HaLive.STATE_DOMAINS }
+                    .sortedWith(compareBy({ HaLive.STATE_DOMAINS.indexOf(it.first.substringBefore('.')) }, { it.second.lowercase() }))
+            } catch (e: Exception) {
+                Log.w(TAG, "Home Assistant: ${e.message}"); null
+            }
+            main.post {
+                if (activity.isFinishing) return@post
+                if (result == null) { app.mg4dash.ui.Toasts.show(activity, R.string.ha_error, long = true); return@post }
+                val auto = activity.getString(R.string.sc_state_auto)
+                val none = activity.getString(R.string.sc_state_none)
+                val labels = listOf(auto, none) + result.map { (id, name) -> if (name.isNotBlank()) "$name  ·  $id" else id }
+                searchList(activity, activity.getString(R.string.sc_state) + " · " + slot.label, labels) { w ->
+                    when (w) {
+                        0 -> HaLive.setChoice(prefs, i, null)
+                        1 -> HaLive.setNone(prefs, i)
+                        else -> HaLive.setChoice(prefs, i, result[w - 2].first)
+                    }
+                    refresh()
+                }
+            }
+        }
+    }
 
     private val HA_DOMAINS = listOf("script", "automation", "scene", "button", "input_button", "cover", "switch", "light", "lock", "input_boolean")
 
@@ -341,6 +389,7 @@ object Shortcuts {
             }
             main.post {
                 ToastsUi.show(app, app.getString(if (ok) R.string.ha_sent else R.string.ha_error_action, slot.label))
+                if (ok) HaLive.refreshSoon()
             }
         }
     }
@@ -354,7 +403,7 @@ object Shortcuts {
         }
     }
 
-    private fun request(prefs: Prefs, method: String, path: String, body: String?): String {
+    internal fun request(prefs: Prefs, method: String, path: String, body: String?): String {
         val c = URL(prefs.haUrl.trimEnd('/') + path).openConnection() as HttpURLConnection
         try {
             c.requestMethod = method

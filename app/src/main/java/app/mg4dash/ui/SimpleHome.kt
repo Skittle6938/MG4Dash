@@ -334,6 +334,7 @@ class SimpleHome(private val a: AppCompatActivity) {
             tile.removeAllViews()
             val icon = ImageView(a)
             val label = kit.text("", 24f, R.color.text_value).apply { gravity = Gravity.CENTER }
+            val state = kit.text("", 19f, R.color.text_sub).apply { gravity = Gravity.CENTER; maxLines = 1; visibility = android.view.View.GONE }
             when (s) {
                 Shortcuts.Slot.Empty -> {
                     icon.setImageResource(R.drawable.ic_plus); icon.setColorFilter(kit.color(R.color.text_title))
@@ -344,12 +345,13 @@ class SimpleHome(private val a: AppCompatActivity) {
                     label.text = Shortcuts.appLabel(a, s.component)
                 }
                 is Shortcuts.Slot.Ha -> {
-                    icon.setImageResource(Shortcuts.haIcon(s.entityId, s.label)); icon.setColorFilter(kit.color(R.color.accent_action))
                     label.text = s.label
+                    Shortcuts.bindHaState(a, prefs, slot, s, icon, state)
                 }
             }
             tile.addView(icon, LinearLayout.LayoutParams(kit.dp(64), kit.dp(64)))
             if (label.text.isNotEmpty()) tile.addView(label, kit.lp(-2, -2, t = 4))
+            tile.addView(state, kit.lp(-2, -2))
             tile.setOnClickListener {
                 when (s) {
                     Shortcuts.Slot.Empty -> Shortcuts.edit(a, slot) { renderShortcuts() }
