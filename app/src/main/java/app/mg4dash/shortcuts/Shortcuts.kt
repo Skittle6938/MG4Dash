@@ -405,7 +405,9 @@ object Shortcuts {
         }
     }
 
-    internal fun request(prefs: Prefs, method: String, path: String, body: String?): String {
+    internal fun request(prefs: Prefs, method: String, path: String, body: String?): String =
+        app.mg4dash.system.DataUsage.tag(app.mg4dash.system.DataUsage.Use.HA) { requestUntagged(prefs, method, path, body) }
+    private fun requestUntagged(prefs: Prefs, method: String, path: String, body: String?): String {
         val c = URL(prefs.haUrl.trimEnd('/') + path).openConnection() as HttpURLConnection
         try {
             c.requestMethod = method

@@ -549,6 +549,7 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         // Map app uninstalled in the meantime (#54): back to the OpenStreetMap map
         mapAppCn?.let { if (!mapAppInstalled(it)) refreshMap() }
         app.mg4dash.ui.UpdatePrompt.maybeShow(this)
+        app.mg4dash.ui.DataAlert.attach(this)
         if (simpleMode) { simple?.onResume(); Fullscreen.apply(this); return }
         mapCard.onResume()
         if (isShown(Card.WEB)) webCard?.show()
@@ -570,6 +571,7 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
 
     override fun onPause() {
         super.onPause()
+        app.mg4dash.ui.DataAlert.detach(this)
         CarBridge.setForeground(false)
         // (the map's full screen is no longer left here: the bar does it when opening a page, and
         // a rebuild (theme) or the map app taking over must not leave it)
