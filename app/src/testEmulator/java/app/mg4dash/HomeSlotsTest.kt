@@ -20,17 +20,17 @@ class HomeSlotsTest {
 
     @Test fun defaultsAreTheHomeScreenAsBefore() {
         val full = HomeSlots.load(prefs, Layout.FULL)
-        assertEquals("tl=climate;tc=map,consumption,shortcuts;tr=media;bl=energy;bc=hourly,daily;br=trip,power,phone", full.encode())
+        assertEquals("tl=climate;bl=energy;tc=map,consumption,shortcuts;bc=hourly,daily;tr=media;br=trip,power,phone", full.encode())
         val map = HomeSlots.load(prefs, Layout.MAP)
-        assertEquals("tl=hourly,daily;tc=energy,trip,power,phone;r=map,consumption,shortcuts;bl=climate;bc=media", map.encode())
+        assertEquals("tl=hourly,daily;bl=climate;tc=energy,trip,power,phone;bc=media;r=map,consumption,shortcuts", map.encode())
         assertNull(full.slotOf(Card.WEB))
     }
 
     @Test fun choicePerWidgetIsKept() {
         prefs.raw.edit().putString("wc_map", "map,web").putString("wc_weather", "daily").putString("wc_stack", "energy,phone")
             .putString("wc_bottom", "power").putBoolean("shortcuts_page", false).commit()
-        assertEquals("tl=daily;tc=energy,phone;r=map,web;bl=climate;bc=media", HomeSlots.load(prefs, Layout.MAP).encode())
-        assertEquals("tl=climate;tc=map,web;tr=media;bl=energy;bc=daily;br=power", HomeSlots.load(prefs, Layout.FULL).encode())
+        assertEquals("tl=daily;bl=climate;tc=energy,phone;bc=media;r=map,web", HomeSlots.load(prefs, Layout.MAP).encode())
+        assertEquals("tl=climate;bl=energy;tc=map,web;bc=daily;tr=media;br=power", HomeSlots.load(prefs, Layout.FULL).encode())
     }
 
     @Test fun shortcutsPageSettingIsKept() {
