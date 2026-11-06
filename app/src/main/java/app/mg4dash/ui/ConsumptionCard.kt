@@ -57,6 +57,26 @@ class ConsumptionCard(context: Context) : LinearLayout(context) {
             }
         }
 
+    /** Totals on the period's line in a small place (#97). */
+    private val summary = tv(24f, R.color.text_value).apply { visibility = GONE }
+    private lateinit var totalRow: View
+
+    /**
+     * Small place (#97): the totals move to the period's line, the breakdown and the note go,
+     * so the curve keeps its height.
+     */
+    var compact = false
+        set(v) {
+            if (field == v) return
+            field = v
+            totalRow.visibility = if (v) GONE else VISIBLE
+            legend.visibility = if (v) GONE else VISIBLE
+            note.visibility = if (v) GONE else VISIBLE
+            summary.visibility = if (v) VISIBLE else GONE
+            setPadding((20 * d).toInt(), ((if (v) 8 else 16) * d).toInt(), (20 * d).toInt(), ((if (v) 10 else 16) * d).toInt())
+            show()
+        }
+
     init {
         setOnClickListener { openEnergy() }
         orientation = VERTICAL
@@ -66,9 +86,10 @@ class ConsumptionCard(context: Context) : LinearLayout(context) {
         addView(LinearLayout(context).apply {
             orientation = HORIZONTAL; gravity = Gravity.CENTER_VERTICAL
             addView(periodTv, LayoutParams(0, LayoutParams.WRAP_CONTENT, 1f))
+            addView(summary, LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT).apply { rightMargin = (16 * d).toInt() })
             addView(duration, LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT))
         }, LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT))
-        addView(LinearLayout(context).apply {
+        totalRow = LinearLayout(context).apply {
             orientation = HORIZONTAL; gravity = Gravity.BOTTOM
             addView(total, LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT))
             // On the big figure's baseline, through the values' line
@@ -79,7 +100,8 @@ class ConsumptionCard(context: Context) : LinearLayout(context) {
                 baselineAlignedChildIndex = 1
             }, LayoutParams(0, LayoutParams.WRAP_CONTENT, 1f).apply { leftMargin = (14 * d).toInt() })
             addView(distance)
-        }, LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT).apply { topMargin = (10 * d).toInt() })
+        }
+        addView(totalRow, LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT).apply { topMargin = (10 * d).toInt() })
         addView(legend, LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT).apply { topMargin = (6 * d).toInt() })
         addView(LinearLayout(context).apply {
             orientation = HORIZONTAL; gravity = Gravity.BOTTOM
@@ -103,6 +125,7 @@ class ConsumptionCard(context: Context) : LinearLayout(context) {
         regen.text = if (hasRegen) regenValues(context, t.regenKwh, regenKm(t)) else ""
         regenLabel.visibility = if (hasRegen) VISIBLE else INVISIBLE
         distance.text = if (t.km > 0) smallUnit(app.mg4dash.system.Units.distText(context, t.km.toFloat())) else ""
+        summary.text = if (distance.text.isNullOrEmpty()) total.text else android.text.TextUtils.concat(total.text, "   ", distance.text)
         fillLegend(context, legend, t)
         val (points, n) = fill(context, chart, period, stacked = true)
         axis(context, period, points).let { (a, b) -> chart.startLabel = a; chart.endLabel = b }

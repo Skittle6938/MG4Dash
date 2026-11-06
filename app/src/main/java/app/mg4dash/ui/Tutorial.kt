@@ -189,7 +189,8 @@ object Tutorial {
             activity.findViewById<View>(id)?.takeIf { it.isShown && it.width > 0 }?.let { return it }
             // Vertical bar (default setting): no identifier, it is the narrow column next to the content
             if (id != R.id.dock) return null
-            var v: View? = activity.findViewById(R.id.climateCard)
+            // Climate or map: the one placed (#97, the climate can give its place to cards)
+            var v: View? = activity.findViewById(R.id.climateCard) ?: activity.findViewById(R.id.mapCard)
             while (v != null) {
                 val p = v.parent as? LinearLayout ?: return null
                 if (p.orientation == LinearLayout.HORIZONTAL && p.childCount >= 2) {
