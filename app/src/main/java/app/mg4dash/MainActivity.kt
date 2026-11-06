@@ -235,9 +235,11 @@ class MainActivity : AppCompatActivity() {
             onHorizontal = { if (it > 0) MediaHub.next() else MediaHub.previous() }
             addView(b.mediaCard, android.widget.FrameLayout.LayoutParams(-1, -1))
         }
-        fun frame(content: View, front: Boolean = false) = (layoutInflater.inflate(R.layout.card_frame, null, false) as android.widget.FrameLayout).apply {
+        // Filled to its edges, drawn like the map card (rounded corners, outline over it): as when
+        // these cards were pages of the map card
+        fun frame(content: View) = (layoutInflater.inflate(R.layout.card_frame, null, false) as android.widget.FrameLayout).apply {
             addView(content, android.widget.FrameLayout.LayoutParams(-1, -1))
-            if (front) tag = app.mg4dash.ui.FadeOutline.FRONT
+            tag = app.mg4dash.ui.FadeOutline.FRONT
         }
         b.mapCard.tag = app.mg4dash.ui.FadeOutline.FRONT
         panels[Card.MAP] = b.mapCard
@@ -248,7 +250,7 @@ class MainActivity : AppCompatActivity() {
         // Web app (#97): the page itself is only loaded when shown
         val web = app.mg4dash.ui.WebCard(this).also { webCard = it }
         web.visibility = View.GONE
-        panels[Card.WEB] = frame(web, front = true)
+        panels[Card.WEB] = frame(web)
         panels[Card.ENERGY] = b.energyCard
         mapOf(Card.TRIP to R.string.sw_energy, Card.POWER to R.string.sw_power, Card.PHONE to R.string.sw_phone).forEach { (card, title) ->
             val v = layoutInflater.inflate(R.layout.card_secondary, null, false)
