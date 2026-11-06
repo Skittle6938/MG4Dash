@@ -30,9 +30,9 @@ class WebCard(private val activity: android.app.Activity) : FrameLayout(activity
     private var appView: android.view.ViewGroup? = null
     private var appUrl: String? = null
     private var installing = false
-    /** Car version: MG4Dash's keyboard open for a field of the page, numeric or not, and what closes it. */
+    /** Car version: MG4Dash's keyboard open for a field of the page, the field's kind, and what closes it. */
     private var keyboard: (() -> Unit)? = null
-    private var keyboardNumeric = false
+    private var keyboardKind: String? = null
     /** Where the keyboard goes over home (its left and right edges on screen), null for two thirds on the driver's side. */
     var keyboardSpan: ((View) -> IntArray?)? = null
     /** Car version: MG4Dash Web starts, or a field of its page is touched or left. */
@@ -41,7 +41,7 @@ class WebCard(private val activity: android.app.Activity) : FrameLayout(activity
             if (appView == null) return
             when {
                 i.getBooleanExtra("ready", false) -> WebViewer.shown(context, shownNow())
-                i.getBooleanExtra("on", false) && shownNow() -> openKeyboard(i.getBooleanExtra("numeric", false))
+                i.getBooleanExtra("on", false) && shownNow() -> openKeyboard(i.getStringExtra("kind") ?: "text")
                 else -> closeKeyboard()
             }
         }
@@ -190,12 +190,12 @@ class WebCard(private val activity: android.app.Activity) : FrameLayout(activity
 
     private fun shownNow() = visibility == View.VISIBLE && isShown
 
-    /** A field of the page is touched: MG4Dash's keyboard over home, numeric for a number. */
-    private fun openKeyboard(numeric: Boolean) {
-        if (keyboard != null && keyboardNumeric == numeric) return
+    /** A field of the page is touched: MG4Dash's keyboard over home, digits for a number, numbers and symbols first for a phone. */
+    private fun openKeyboard(kind: String) {
+        if (keyboard != null && keyboardKind == kind) return
         closeKeyboard()
-        keyboardNumeric = numeric
-        keyboard = CarKeyboard.over(this, numeric, span = { keyboardSpan?.invoke(this) },
+        keyboardKind = kind
+        keyboard = CarKeyboard.over(this, numeric = kind == "number", symbols = kind == "tel", span = { keyboardSpan?.invoke(this) },
             // A touch on the page (another field, the caret) keeps it open
             keepOn = { x, y -> IntArray(2).also { getLocationOnScreen(it) }.let { x >= it[0] && x < it[0] + width && y >= it[1] && y < it[1] + height } },
             onText = { WebViewer.key(context, text = it) },
