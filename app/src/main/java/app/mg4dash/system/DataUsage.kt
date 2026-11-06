@@ -14,8 +14,8 @@ import java.util.Calendar
  * Data used by MG4Dash on the car's 4G, over the last 30 days, by use.
  *
  * The car's 4G is not a "mobile" network for Android: it goes through the T-box interface (tbox0),
- * that Android records as ETHERNET (metered, roaming). The Wi-Fi client (wlan0) is WIFI, so it is
- * left out by counting ETHERNET only.
+ * that Android records as ETHERNET (metered, roaming). The Wi-Fi client (wlan0) is WIFI: it is counted
+ * apart, shown on demand in the detail, and never in the quota or the alert.
  * MG4Dash runs with the system uid, shared by about 60 packages: its own traffic is found by the tag
  * that each use puts on its connections ([tag], TrafficStats). MG4Dash Web has its own uid.
  * Android's counters (NetworkStatsService, read through its hidden interface: the public API
@@ -44,15 +44,22 @@ object DataUsage {
     /** Scale of the quota bar: 1 GB, then 2, 5 and 10 GB when it is exceeded. */
     fun scale(bytes: Long): Long = longArrayOf(1, 2, 5, 10, 20).map { it * 1_000_000_000L }.firstOrNull { bytes <= it } ?: 50_000_000_000L
 
-    /** One day: its date (yyyymmdd) and the bytes of each use, in [Use] order. */
-    class Day(val date: Int, val bytes: LongArray) {
+    /** One day: its date (yyyymmdd) and the bytes of each use, in [Use] order, on the car's 4G and on Wi-Fi. */
+    class Day(val date: Int, val bytes: LongArray, val wifi: LongArray = LongArray(bytes.size)) {
+        /** 4G only (quota and alert). */
         val total: Long get() = bytes.sum()
+        /** Bytes of each use on the networks shown: 4G, Wi-Fi or both. */
+        fun of(g: Boolean, w: Boolean): LongArray = LongArray(bytes.size) { (if (g) bytes[it] else 0L) + (if (w) wifi[it] else 0L) }
+        fun sum(g: Boolean, w: Boolean): Long = of(g, w).sum()
     }
 
     /** The last 30 days, oldest first (today last). [available]: false if this head unit cannot be read. */
     class Snapshot(val days: List<Day>, val available: Boolean) {
+        /** 4G only (quota and alert). */
         val total: Long get() = days.sumOf { it.total }
         fun of(use: Use): Long = days.sumOf { it.bytes[use.ordinal] }
+        fun total(g: Boolean, w: Boolean): Long = days.sumOf { it.sum(g, w) }
+        fun of(use: Use, g: Boolean, w: Boolean): Long = days.sumOf { (if (g) it.bytes[use.ordinal] else 0L) + (if (w) it.wifi[use.ordinal] else 0L) }
     }
 
     // ── Tagging ──
@@ -76,6 +83,11 @@ object DataUsage {
     /** Updates (startup check, check and download) only on Wi-Fi. */
     fun updatesWifiOnly(context: Context): Boolean = sp(context).getBoolean("updates_wifi_only", false)
     fun setUpdatesWifiOnly(context: Context, v: Boolean) = sp(context).edit().putBoolean("updates_wifi_only", v).apply()
+
+    /** Networks shown in the detail (rows and day bars): the car's 4G (on by default) and the Wi-Fi client. */
+    fun show4g(context: Context): Boolean = sp(context).getBoolean("show_4g", true)
+    fun showWifi(context: Context): Boolean = sp(context).getBoolean("show_wifi", false)
+    fun setShown(context: Context, g: Boolean, w: Boolean) = sp(context).edit().putBoolean("show_4g", g).putBoolean("show_wifi", w).apply()
 
     /** True when the updates must wait for Wi-Fi now (option on and the car not on a Wi-Fi). */
     fun updatesBlocked(context: Context): Boolean = updatesWifiOnly(context) && !StatusMonitor.read(context).wifiConnected
@@ -120,7 +132,8 @@ object DataUsage {
         val prev = last
         if (prev == null || prev.available != s.available || Math.abs(prev.total - s.total) >= 1_000_000L)
             Log.i(TAG, "4G, $DAYS days: ${s.total / 1000} kB, today ${s.days.last().total / 1000} kB " +
-                Use.values().joinToString(" ", "(", ")") { "${it.name.lowercase()} ${s.of(it) / 1000}" } + if (s.available) "" else ", counters unavailable")
+                Use.values().joinToString(" ", "(", ")") { "${it.name.lowercase()} ${s.of(it) / 1000}" } +
+                ", Wi-Fi ${s.total(false, true) / 1000} kB" + if (s.available) "" else ", counters unavailable")
         last = s
         if (Looper.myLooper() == Looper.getMainLooper()) listeners.forEach { it(s) } else main.post { listeners.forEach { it(s) } }
         checkAlert(context)
@@ -143,18 +156,20 @@ object DataUsage {
                     val start = dayStart(today, -back)
                     val from = maxOf(start.timeInMillis, resetAt)
                     val to = dayStart(today, -back + 1).timeInMillis
-                    val bytes = LongArray(Use.values().size)
-                    if (from < to) for (u in Use.values()) {
-                        bytes[u.ordinal] = when {
-                            u.tag != 0 -> stats.bytes(android.os.Process.myUid(), u.tag, from, to)
-                            webUid >= 0 -> stats.bytes(webUid, 0, from, to)
-                            else -> 0L
+                    for ((prefix, net) in listOf("d" to stats.mobile, "w" to stats.wifi)) {
+                        val bytes = LongArray(Use.values().size)
+                        if (from < to) for (u in Use.values()) {
+                            bytes[u.ordinal] = when {
+                                u.tag != 0 -> stats.bytes(net, android.os.Process.myUid(), u.tag, from, to)
+                                webUid >= 0 -> stats.bytes(net, webUid, 0, from, to)
+                                else -> 0L
+                            }
                         }
+                        e.putString(prefix + ymd(start), bytes.joinToString(","))
                     }
-                    e.putString("d" + ymd(start), bytes.joinToString(","))
                 }
                 // Days older than the window: no longer needed
-                sp.all.keys.filter { it.startsWith("d") && (it.drop(1).toIntOrNull() ?: 0) < ymd(dates.first()) }.forEach { e.remove(it) }
+                sp.all.keys.filter { isDayKey(it) && (it.drop(1).toIntOrNull() ?: 0) < ymd(dates.first()) }.forEach { e.remove(it) }
                 e.apply()
             }
             true
@@ -162,11 +177,11 @@ object DataUsage {
             Log.w(TAG, "counters unavailable: ${t.javaClass.simpleName} ${t.message}")
             false
         }
-        val days = dates.map { c ->
-            val d = ymd(c)
-            val v = sp.getString("d$d", null)?.split(',')?.map { it.toLongOrNull() ?: 0L }
-            Day(d, LongArray(Use.values().size) { v?.getOrNull(it) ?: 0L })
+        fun stored(key: String): LongArray {
+            val v = sp.getString(key, null)?.split(',')?.map { it.toLongOrNull() ?: 0L }
+            return LongArray(Use.values().size) { v?.getOrNull(it) ?: 0L }
         }
+        val days = dates.map { c -> val d = ymd(c); Day(d, stored("d$d"), stored("w$d")) }
         return Snapshot(days, available)
     }
 
@@ -174,10 +189,13 @@ object DataUsage {
     fun reset(context: Context) {
         val sp = sp(context)
         val e = sp.edit().putLong("reset_at", System.currentTimeMillis()).putInt("alert_level", 0)
-        sp.all.keys.filter { it.startsWith("d") }.forEach { e.remove(it) }
+        sp.all.keys.filter { isDayKey(it) }.forEach { e.remove(it) }
         e.apply()
         refreshSoon(context)
     }
+
+    /** "d20261106" (4G) and "w20261106" (Wi-Fi). */
+    private fun isDayKey(k: String) = (k.startsWith("d") || k.startsWith("w")) && k.length == 9 && k.drop(1).all { it.isDigit() }
 
     private fun dayStart(today: Calendar, offset: Int): Calendar = (today.clone() as Calendar).apply {
         set(Calendar.HOUR_OF_DAY, 0); set(Calendar.MINUTE, 0); set(Calendar.SECOND, 0); set(Calendar.MILLISECOND, 0)
@@ -197,16 +215,18 @@ object DataUsage {
         val upd = when (i) { 6 -> 34; 13 -> 38; 22 -> 30; 27 -> 16; else -> 0 }
         return Day(date, longArrayOf(
             if (drive) ((2 + r.nextFloat() * 11) * mb).toLong() else 0L, upd * mb,
-            if (drive) ((0.5f + r.nextFloat() * 3) * mb).toLong() else 0L, 370_000L, 300_000L, 200_000L))
+            if (drive) ((0.5f + r.nextFloat() * 3) * mb).toLong() else 0L, 370_000L, 300_000L, 200_000L),
+            longArrayOf((r.nextFloat() * 4 * mb).toLong(), if (i % 9 == 4) 36 * mb else 0L, (r.nextFloat() * 6 * mb).toLong(), 200_000L, 900_000L, 100_000L))
     }
 
     /**
      * Android's network counters, through the hidden service interface (allowed to MG4Dash, signed with
-     * the platform key): ETHERNET template, i.e. the T-box.
+     * the platform key): ETHERNET template for the T-box's 4G, WIFI for the Wi-Fi client.
      */
     private class Stats(context: Context) : java.io.Closeable {
         private val session: Any
-        private val template: Any
+        val mobile: Any
+        val wifi: Any
         private val history: java.lang.reflect.Method
         private val values: java.lang.reflect.Method
 
@@ -217,7 +237,8 @@ object DataUsage {
             session = Class.forName("android.net.INetworkStatsService")
                 .getMethod("openSessionForUsageStats", Int::class.javaPrimitiveType, String::class.java).invoke(svc, 1, context.packageName)!!
             val tc = Class.forName("android.net.NetworkTemplate")
-            template = tc.getMethod("buildTemplateEthernet").invoke(null)!!
+            mobile = tc.getMethod("buildTemplateEthernet").invoke(null)!!
+            wifi = tc.getMethod("buildTemplateWifiWildcard").invoke(null)!!
             val ip = Int::class.javaPrimitiveType
             history = Class.forName("android.net.INetworkStatsSession").getMethod("getHistoryForUid", tc, ip, ip, ip, ip)
             val lp = Long::class.javaPrimitiveType
@@ -225,8 +246,8 @@ object DataUsage {
                 .getMethod("getValues", lp, lp, Class.forName("android.net.NetworkStatsHistory\$Entry"))
         }
 
-        /** Received + sent bytes of [uid] with [tag] (0: all of the uid) between [from] and [to]. */
-        fun bytes(uid: Int, tag: Int, from: Long, to: Long): Long {
+        /** Received + sent bytes of [uid] with [tag] (0: all of the uid) between [from] and [to], on [template]. */
+        fun bytes(template: Any, uid: Int, tag: Int, from: Long, to: Long): Long {
             // set = SET_ALL (-1), fields = FIELD_ALL (-1)
             val h = history.invoke(session, template, uid, -1, tag, -1) ?: return 0L
             val e = values.invoke(h, from, to, null) ?: return 0L

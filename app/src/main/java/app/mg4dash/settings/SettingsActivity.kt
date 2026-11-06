@@ -459,6 +459,35 @@ class SettingsActivity : AppCompatActivity() {
         total.addView(big, LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(10) })
         val quota = app.mg4dash.ui.QuotaBar(this)
         total.addView(quota, LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(8) })
+        // Detail: on the car's 4G, the Wi-Fi client, or both (the quota above stays 4G only)
+        var g = DataUsage.show4g(this); var w = DataUsage.showWifi(this)
+        if (!g && !w) g = true
+        val netRow = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL }
+        netRow.addView(TextView(this).apply {
+            text = getString(R.string.du_detail); setTextColor(color(R.color.text_value)); setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f)
+        }, LinearLayout.LayoutParams(-2, -2).apply { rightMargin = dp(16) })
+        val kit = app.mg4dash.ui.Kit(this)
+        lateinit var chip4g: TextView
+        lateinit var chipWifi: TextView
+        var rerender: () -> Unit = {}
+        fun pick(new4g: Boolean, newWifi: Boolean) {
+            if (!new4g && !newWifi) return   // always one network shown
+            g = new4g; w = newWifi
+            DataUsage.setShown(this, g, w)
+            chip4g.isSelected = g; chipWifi.isSelected = w
+            rerender()
+        }
+        chip4g = kit.toggleTile(getString(R.string.du_net_4g)) { pick(!g, w) }.apply { setPadding(dp(22), 0, dp(22), 0); isSelected = g }
+        chipWifi = kit.toggleTile(getString(R.string.du_net_wifi)) { pick(g, !w) }.apply { setPadding(dp(22), 0, dp(22), 0); isSelected = w }
+        netRow.addView(chip4g, LinearLayout.LayoutParams(-2, dp(48)))
+        netRow.addView(chipWifi, LinearLayout.LayoutParams(-2, dp(48)).apply { leftMargin = dp(8) })
+        netRow.addView(View(this), LinearLayout.LayoutParams(0, 1, 1f))
+        val detailTotal = TextView(this).apply {
+            setTextColor(color(R.color.text_value)); setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f)
+            typeface = Typeface.create("sans-serif-medium", Typeface.NORMAL)
+        }
+        netRow.addView(detailTotal)
+        total.addView(netRow, LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(6) })
         val shares = DataUsage.Use.values().map { u ->
             val line = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL }
             line.addView(TextView(this).apply {
@@ -474,7 +503,7 @@ class SettingsActivity : AppCompatActivity() {
             total.addView(line, LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(6) })
             Triple(u, bar, value)
         }
-        text(total, getString(R.string.du_note), 15f, R.color.text_title).apply { (layoutParams as LinearLayout.LayoutParams).topMargin = dp(8) }
+        val note = text(total, "", 15f, R.color.text_title).apply { (layoutParams as LinearLayout.LayoutParams).topMargin = dp(8) }
         val unavailable = text(total, getString(R.string.du_unavailable), 16f, R.color.accent_heat).apply { visibility = View.GONE }
 
         // Day by day
@@ -516,11 +545,12 @@ class SettingsActivity : AppCompatActivity() {
         chart.onDayTap = { i ->
             shown?.days?.getOrNull(i)?.let { day ->
                 chart.selected = i
-                val lines = DataUsage.Use.values().filter { day.bytes[it.ordinal] > 0 }
-                    .joinToString("\n") { getString(R.string.du_day_line, getString(it.label), DataUsage.format(this, day.bytes[it.ordinal])) }
+                val bytes = day.of(g, w)
+                val lines = DataUsage.Use.values().filter { bytes[it.ordinal] > 0 }
+                    .joinToString("\n") { getString(R.string.du_day_line, getString(it.label), DataUsage.format(this, bytes[it.ordinal])) }
                     .ifEmpty { getString(R.string.du_day_none) }
                 AlertDialog.Builder(this)
-                    .setTitle(dayFormat.format(DataUsage.calendarOf(day.date).time).replaceFirstChar { it.uppercase() } + " · " + DataUsage.format(this, day.total))
+                    .setTitle(dayFormat.format(DataUsage.calendarOf(day.date).time).replaceFirstChar { it.uppercase() } + " · " + netName(g, w) + " · " + DataUsage.format(this, bytes.sum()))
                     .setMessage(lines)
                     .setPositiveButton(R.string.st_close, null)
                     .setOnDismissListener { chart.selected = -1 }
@@ -531,25 +561,35 @@ class SettingsActivity : AppCompatActivity() {
             shown = s
             amount.text = DataUsage.format(this, s.total)
             quota.used = s.total; quota.threshold = DataUsage.threshold(this)
-            val max = DataUsage.Use.values().maxOf { s.of(it) }.coerceAtLeast(1L)
+            val max = DataUsage.Use.values().maxOf { s.of(it, g, w) }.coerceAtLeast(1L)
             shares.forEach { (u, bar, value) ->
-                val b = s.of(u)
+                val b = s.of(u, g, w)
                 bar.fraction = b.toFloat() / max
                 value.text = DataUsage.format(this, b)
             }
+            val shownTotal = s.total(g, w)
+            detailTotal.text = DataUsage.format(this, shownTotal)
+            note.text = getString(if (w) R.string.du_note_wifi else R.string.du_note)
             unavailable.visibility = if (s.available) View.GONE else View.VISIBLE
+            chart.net4g = g; chart.netWifi = w
             chart.days = s.days
-            val biggest = s.days.maxByOrNull { it.total }
-            dailyDesc.text = if (biggest == null || biggest.total <= 0) getString(R.string.du_daily_empty) else {
-                val use = DataUsage.Use.values().maxByOrNull { biggest.bytes[it.ordinal] }!!
-                getString(R.string.du_daily_desc, DataUsage.format(this, s.total / DataUsage.DAYS),
-                    DataUsage.format(this, biggest.total) + " (" + getString(use.label) + ", " + shortFormat.format(DataUsage.calendarOf(biggest.date).time) + ")")
+            val biggest = s.days.maxByOrNull { it.sum(g, w) }
+            dailyDesc.text = if (biggest == null || biggest.sum(g, w) <= 0) getString(R.string.du_daily_empty) else {
+                val bytes = biggest.of(g, w)
+                val use = DataUsage.Use.values().maxByOrNull { bytes[it.ordinal] }!!
+                getString(R.string.du_daily_desc, DataUsage.format(this, shownTotal / DataUsage.DAYS),
+                    DataUsage.format(this, bytes.sum()) + " (" + getString(use.label) + ", " + shortFormat.format(DataUsage.calendarOf(biggest.date).time) + ")")
             }
         }
+        rerender = { shown?.let(render) }
         dataListener = render
         DataUsage.listen(render)
         DataUsage.refreshSoon(this)
     }
+
+    /** "4G", "Wi-Fi" or "4G + Wi-Fi". */
+    private fun netName(g: Boolean, w: Boolean): String = listOfNotNull(
+        getString(R.string.du_net_4g).takeIf { g }, getString(R.string.du_net_wifi).takeIf { w }).joinToString(" + ")
 
     override fun onDestroy() {
         dataListener?.let { DataUsage.unlisten(it) }
