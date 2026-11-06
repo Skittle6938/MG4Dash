@@ -649,7 +649,7 @@ class ScreenshotTest {
         org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE).edit().putInt("theme_mode", 1).commit()
         val activity = Robolectric.buildActivity(MainActivity::class.java).setup().get()
         repeat(3) { shadowOf(Looper.getMainLooper()).idleFor(200, TimeUnit.MILLISECONDS) }
-        app.mg4dash.ui.Tutorial.show(activity, 6)
+        app.mg4dash.ui.Tutorial.show(activity, 7)
         val dir = File("build/screenshots").apply { mkdirs() }
         val fps = 20; val frames = 132
         java.io.DataOutputStream(File(dir, "tuto_swipe.rgb").outputStream().buffered()).use { out ->
@@ -668,10 +668,24 @@ class ScreenshotTest {
         org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE).edit().putInt("theme_mode", 1).commit()
         val activity = Robolectric.buildActivity(MainActivity::class.java).setup().get()
         repeat(3) { shadowOf(Looper.getMainLooper()).idleFor(200, TimeUnit.MILLISECONDS) }
-        for (step in 0 until 9) {
+        for (step in 0 until 11) {
             app.mg4dash.ui.Tutorial.show(activity, step)
             repeat(2) { shadowOf(Looper.getMainLooper()).idleFor(200, TimeUnit.MILLISECONDS) }
             save(activity.window.decorView, "tutorial_$step.png")
+        }
+    }
+
+    /** Gesture tour with the bottom bar and cards moved (#97): each step points at the bar in use and at the widgets where they are. */
+    @Test @Config(qualifiers = "fr-w1920dp-h720dp-land-mdpi") fun tutorialStepsMovedCards() {
+        org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE).edit().putInt("theme_mode", 1)
+            .putBoolean("vertical_dock", false)
+            .putString("slots_full", "tl=media;tc=map,consumption,trip;tr=climate;bl=energy,power;bc=hourly,daily;br=shortcuts,phone").commit()
+        val activity = Robolectric.buildActivity(MainActivity::class.java).setup().get()
+        repeat(3) { shadowOf(Looper.getMainLooper()).idleFor(200, TimeUnit.MILLISECONDS) }
+        for (step in 3 until 9) {
+            app.mg4dash.ui.Tutorial.show(activity, step)
+            repeat(2) { shadowOf(Looper.getMainLooper()).idleFor(200, TimeUnit.MILLISECONDS) }
+            save(activity.window.decorView, "tutorial_moved_$step.png")
         }
     }
 

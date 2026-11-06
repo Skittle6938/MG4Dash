@@ -635,7 +635,8 @@
     <string name="tu_layouts_1">Kies in Instellingen › Start: Volledig, Eenvoudig (grote panelen) of Kaart (grote kaart)</string>
     <string name="tu_layouts_2">Ook: zijbalk of onderbalk; bij Weergave: licht, donker of automatisch, kleuren</string>
     <string name="tu_bar_t">Zijbalk</string>
-    <string name="tu_bar_1">Instellingen: tikken = MG4Dash, lang drukken = auto, dubbel tikken = wifi</string>
+    <string name="tu_bar_bottom_t">Onderbalk</string>
+    <string name="tu_bar_1">Instellingen: tikken = MG4Dash, lang drukken = auto</string>
     <string name="tu_bar_2">Energie: dubbel tikken = scherm uit, lang drukken = auto uitzetten (nooit tijdens het rijden)</string>
     <string name="tu_bar_3">Voertuig: dubbel tikken = deuren vergrendelen / ontgrendelen, lang drukken = ESC uit / aan</string>
     <string name="tu_bar_4">Start: lang drukken = alle apps</string>
@@ -649,15 +650,15 @@
     <string name="tu_energy_1">Tik op een KERS-segment: regeneratieniveau; lang drukken: rijden met één pedaal</string>
     <string name="tu_energy_2">Knop CHARGE: laden en V2L</string>
     <string name="tu_map_t">Kaart</string>
-    <string name="tu_map_1">Vegen: kaart → verbruik → snelkoppelingen</string>
+    <string name="tu_map_1">Naar links / rechts vegen: volgende kaart van de widget (verbruik, snelkoppelingen…)</string>
     <string name="tu_map_3">Twee vingers: kaart verplaatsen en zoomen (één vinger op volledig scherm)</string>
     <string name="tu_map_2">Kaart lang drukken: een andere app in de kaartkaart</string>
     <string name="tu_media_t">Muziek</string>
     <string name="tu_media_1">Veeg omhoog / omlaag: volgende bron; links / rechts: vorig / volgend nummer</string>
     <string name="tu_media_2">Tik op de bronnaam: bronmenu; tik op de afbeelding: app openen</string>
     <string name="tu_media_3">Afspelen / pauze lang drukken: pagina Geluid</string>
-    <string name="tu_widget_t">Widget rechtsonder</string>
-    <string name="tu_widget_1">Tikken of vegen: volgende pagina (energie, vermogen, telefoon)</string>
+    <string name="tu_widget_t">Widgets met meerdere kaarten</string>
+    <string name="tu_widget_1">Naar links / rechts vegen: volgende kaart (rit, vermogen, telefoon, weer per uur of per dag…); bij rit, vermogen en telefoon volstaat een tik</string>
     <string name="tu_widget_2">Telefoonsnelkoppeling lang drukken: wijzigen of 2 tot 8 kiezen</string>
     <string name="tu_end_t">Dat was het!</string>
     <string name="tu_end_1">Je vindt deze rondleiding terug in Instellingen › Systeem.</string>

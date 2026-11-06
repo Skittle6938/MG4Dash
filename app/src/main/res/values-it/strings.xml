@@ -635,7 +635,8 @@
     <string name="tu_layouts_1">Sceglilo in Impostazioni › Home: Completa, Semplice (pannelli grandi) o Mappa (mappa grande)</string>
     <string name="tu_layouts_2">Inoltre: barra laterale o in basso; in Aspetto: chiaro, scuro o automatico, colori</string>
     <string name="tu_bar_t">Barra laterale</string>
-    <string name="tu_bar_1">Impostazioni: tocca = MG4Dash, pressione lunga = auto, doppio tocco = Wi-Fi</string>
+    <string name="tu_bar_bottom_t">Barra in basso</string>
+    <string name="tu_bar_1">Impostazioni: tocca = MG4Dash, pressione lunga = auto</string>
     <string name="tu_bar_2">Energia: doppio tocco = schermo spento, pressione lunga = spegni l\'auto (mai in marcia)</string>
     <string name="tu_bar_3">Veicolo: doppio tocco = blocca / sblocca le porte, pressione lunga = ESC off / on</string>
     <string name="tu_bar_4">Home: pressione lunga = tutte le app</string>
@@ -649,15 +650,15 @@
     <string name="tu_energy_1">Tocca un segmento KERS: livello di rigenerazione; pressione lunga: guida a un pedale</string>
     <string name="tu_energy_2">Pulsante CHARGE: ricarica e V2L</string>
     <string name="tu_map_t">Mappa</string>
-    <string name="tu_map_1">Scorrimento: mappa → consumi → scorciatoie</string>
+    <string name="tu_map_1">Scorri a sinistra / destra: scheda successiva del widget (consumi, scorciatoie…)</string>
     <string name="tu_map_3">Due dita: spostare e ingrandire la mappa (un dito a schermo intero)</string>
     <string name="tu_map_2">Pressione lunga sulla mappa: un\'altra app nella scheda mappa</string>
     <string name="tu_media_t">Musica</string>
     <string name="tu_media_1">Scorri su / giù: sorgente successiva; sinistra / destra: brano precedente / successivo</string>
     <string name="tu_media_2">Tocca il nome della sorgente: menu sorgenti; tocca l\'immagine: apri l\'app</string>
     <string name="tu_media_3">Pressione lunga su play / pausa: pagina Suono</string>
-    <string name="tu_widget_t">Widget in basso a destra</string>
-    <string name="tu_widget_1">Tocca o scorri: pagina successiva (energia, potenza, telefono)</string>
+    <string name="tu_widget_t">Widget con più schede</string>
+    <string name="tu_widget_1">Scorri a sinistra / destra: scheda successiva (viaggio, potenza, telefono, meteo per ora o per giorno…); su viaggio, potenza e telefono basta un tocco</string>
     <string name="tu_widget_2">Pressione lunga su una scorciatoia telefono: cambiarla o sceglierne da 2 a 8</string>
     <string name="tu_end_t">È tutto!</string>
     <string name="tu_end_1">Puoi rivedere questo tour in Impostazioni › Sistema.</string>
