@@ -1004,6 +1004,12 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         val small = frameOf(Card.MAP)?.slot?.size == HomeSlots.Size.SMALL
         listOf(b.mapZoomIn, b.mapZoomOut).forEach { it.visibility = if (hide || small) View.GONE else View.VISIBLE }
         b.mapFullscreen.visibility = if (hide) View.GONE else View.VISIBLE
+        // Without + above it, the recentre button keeps no gap of its own: hidden, its top is 14dp
+        // from the top like the info pill's, 14dp from the right edge (#15)
+        (b.mapCenter.layoutParams as android.widget.LinearLayout.LayoutParams).let {
+            it.topMargin = if (hide || small) 0 else dp(8)
+            b.mapCenter.layoutParams = it
+        }
         (b.mapButtons.layoutParams as android.widget.FrameLayout.LayoutParams).let {
             it.gravity = if (hide) Gravity.TOP or Gravity.RIGHT else Gravity.RIGHT or Gravity.CENTER_VERTICAL
             it.topMargin = if (hide) dp(14) else 0
