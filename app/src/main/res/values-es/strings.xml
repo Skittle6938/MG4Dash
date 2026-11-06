@@ -720,8 +720,8 @@
     <string name="du_unavailable">Los contadores de red de esta radio no se pueden leer: los datos 4G no se pueden contar.</string>
     <string name="du_daily">DÍA A DÍA</string>
     <string name="du_daily_desc">Media %1$s / día · día más alto %2$s · toque una barra: detalle del día</string>
-    <string name="du_daily_empty">Aún no se ha usado nada en el 4G del coche. Cada día aparece aquí en cuanto MG4Dash usa datos.</string>
-    <string name="du_day_none">Nada usado en el 4G del coche ese día.</string>
+    <string name="du_daily_empty">Aún no se ha usado nada. Cada día aparece aquí en cuanto MG4Dash usa datos.</string>
+    <string name="du_day_none">Nada usado ese día.</string>
     <string name="du_day_line">%1$s: %2$s</string>
     <string name="du_alert_panel">ALERTA</string>
     <string name="du_threshold">Umbral de alerta</string>
@@ -741,6 +741,10 @@
     <string name="du_alert_once">Este mensaje solo vuelve si el total baja del umbral y luego lo supera de nuevo.</string>
     <string name="du_alert_detail">Ver el detalle</string>
     <string name="du_updates_wait">Actualizaciones solo con Wi-Fi: conecte el coche a un Wi-Fi o desactive la opción en Ajustes › Datos 4G.</string>
+    <string name="du_detail">Detalle</string>
+    <string name="du_net_4g">4G</string>
+    <string name="du_net_wifi">Wi-Fi</string>
+    <string name="du_note_wifi">4G: la red del coche. Wi-Fi: cuando el coche está conectado a un router o un teléfono. La cuota y la alerta solo cuentan el 4G, y las demás apps del coche no se cuentan.</string>
     <string name="aa_title">ANDROID AUTO</string>
     <string name="aa_ready">Teléfono conectado · Pulse para abrir</string>
     <string name="aa_waiting">Conecte su teléfono por USB</string>

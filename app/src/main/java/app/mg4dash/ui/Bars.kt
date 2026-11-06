@@ -241,6 +241,9 @@ class ShareBar @JvmOverloads constructor(context: Context, attrs: AttributeSet? 
 class DailyBars @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) : View(context, attrs) {
     var days: List<app.mg4dash.system.DataUsage.Day> = emptyList(); set(v) { field = v; invalidate() }
     var selected = -1; set(v) { if (field != v) { field = v; invalidate() } }
+    /** Networks counted in the bars: the car's 4G, the Wi-Fi client, or both. */
+    var net4g = true; set(v) { if (field != v) { field = v; invalidate() } }
+    var netWifi = false; set(v) { if (field != v) { field = v; invalidate() } }
     var onDayTap: ((Int) -> Unit)? = null
     private val s = BarStyle(this)
     private val colors = app.mg4dash.system.DataUsage.Use.values().map { Themes.color(context, it.colorRes) }
@@ -277,7 +280,8 @@ class DailyBars @JvmOverloads constructor(context: Context, attrs: AttributeSet?
         val d = s.d
         val bottom = height - labelsH
         val top = 8 * d
-        val maxDay = days.maxOf { it.total }.coerceAtLeast(5_000_000L)
+        val values = days.map { it.of(net4g, netWifi) }
+        val maxDay = values.maxOf { it.sum() }.coerceAtLeast(5_000_000L)
         val st = step(maxDay)
         val max = maxOf(maxDay, st * ((maxDay + st - 1) / st)).toFloat()
         fun y(v: Long) = bottom - (bottom - top) * (v / max)
@@ -298,10 +302,11 @@ class DailyBars @JvmOverloads constructor(context: Context, attrs: AttributeSet?
         days.forEachIndexed { i, day ->
             val l = left + i * slot + gap / 2; val r = l + slot - gap
             var acc = 0L
-            val n = day.bytes.size
-            val lastSeg = (n - 1 downTo 0).firstOrNull { day.bytes[it] > 0 } ?: -1
+            val bytes = values[i]
+            val n = bytes.size
+            val lastSeg = (n - 1 downTo 0).firstOrNull { bytes[it] > 0 } ?: -1
             for (k in 0 until n) {
-                val b = day.bytes[k]; if (b <= 0) continue
+                val b = bytes[k]; if (b <= 0) continue
                 val y0 = y(acc); acc += b; val y1 = minOf(y(acc), y0 - 1.5f * d)
                 s.paint.color = colors[k]
                 if (i == selected || selected < 0) s.paint.alpha = 255 else s.paint.alpha = 110
