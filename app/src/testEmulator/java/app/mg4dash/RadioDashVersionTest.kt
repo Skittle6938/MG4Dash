@@ -8,6 +8,7 @@ import app.mg4dash.system.RadioDashUpdater
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test
+import app.mg4dash.R
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.RuntimeEnvironment
@@ -37,6 +38,22 @@ class RadioDashVersionTest {
         installRadio(null)
         remember("1.5.2")
         assertEquals("1.5.2", RadioDashUpdater.installedVersion(app))
+    }
+
+    @Test fun aNewerStockRadioBlocksTheInstall() {
+        shadowOf(app.packageManager).installPackage(PackageInfo().apply {
+            packageName = RadioDashUpdater.PKG; longVersionCode = 3
+            applicationInfo = ApplicationInfo().apply { packageName = RadioDashUpdater.PKG }
+        })
+        assertEquals(R.string.st_rd_newer_radio, RadioDashUpdater.blocker(app))
+    }
+
+    @Test fun theSameVersionCodeIsNotBlocked() {
+        shadowOf(app.packageManager).installPackage(PackageInfo().apply {
+            packageName = RadioDashUpdater.PKG; longVersionCode = 2
+            applicationInfo = ApplicationInfo().apply { packageName = RadioDashUpdater.PKG }
+        })
+        assertNull(RadioDashUpdater.blocker(app))
     }
 
     @Test fun unknownWithoutEither() {

@@ -428,6 +428,15 @@
     <string name="st_rd_uptodate">Radio Dash actualizada (%1$s)</string>
     <string name="st_rd_installing">Instalando Radio Dash…</string>
     <string name="st_rd_done">Radio Dash está instalada. Reinicia la pantalla (mantén Home unos 20 s) para usarla.</string>
+    <string name="st_upd_current">%1$s · al día</string>
+    <string name="st_upd_new">%1$s · %2$s disponible</string>
+    <string name="st_upd_none_new">no instalada · %1$s disponible</string>
+    <string name="st_upd_install_ver">Instalar la %1$s</string>
+    <string name="st_upd_note">La actualización de MG4Dash reinicia la pantalla al final. Radio Dash se aplica tras reiniciar la pantalla central (mantener Inicio unos 20 s) y está probada en %1$s.</string>
+    <string name="st_update_auto">Comprobar automáticamente: %1$s</string>
+    <string name="st_update_auto_desc">MG4Dash y Radio Dash, una vez por semana, o cada día con las versiones beta.</string>
+    <string name="st_rd_newer_radio">la radio de este coche es más reciente que Radio Dash, que no puede sustituirla</string>
+    <string name="st_rd_other_key">la radio de este coche está firmada con otra clave: Radio Dash no puede sustituirla</string>
     <string name="en_trip">Trayecto actual</string>
     <string name="en_last_year">Últimos 12 meses</string>
     <string name="en_months_note">%1$d meses, un punto por mes · media %2$s (discontinua)</string>
@@ -441,7 +450,7 @@
     <string name="st_map_zoom">Zoom del mapa por defecto</string>
     <string name="st_map_theme">Colores del mapa</string>
     <string name="st_own_keyboard">Teclado de MG4Dash</string>
-    <string name="st_own_keyboard_desc">Ancho completo y teclas grandes, en los campos de MG4Dash. Desactivado: teclado de Android</string>
+    <string name="st_own_keyboard_desc">Teclas grandes en dos tercios de la pantalla, del lado del conductor, en los campos de MG4Dash. Desactivado: teclado de Android</string>
     <string name="st_map_auto_hide">Ocultar los botones de zoom y pantalla completa del mapa</string>
     <string name="st_map_auto_hide_desc">Aparecen unos segundos al tocar el mapa; el botón de rumbo se queda</string>
     <string name="st_map_offline_switch">Cambiar al widget de energía sin conexión</string>

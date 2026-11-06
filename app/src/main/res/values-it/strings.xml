@@ -428,6 +428,15 @@
     <string name="st_rd_uptodate">Radio Dash aggiornata (%1$s)</string>
     <string name="st_rd_installing">Installazione di Radio Dash…</string>
     <string name="st_rd_done">Radio Dash è installata. Riavvia lo schermo (tieni premuto Home circa 20 s) per usarla.</string>
+    <string name="st_upd_current">%1$s · aggiornata</string>
+    <string name="st_upd_new">%1$s · %2$s disponibile</string>
+    <string name="st_upd_none_new">non installata · %1$s disponibile</string>
+    <string name="st_upd_install_ver">Installa la %1$s</string>
+    <string name="st_upd_note">L\'aggiornamento di MG4Dash riavvia lo schermo alla fine. Radio Dash si applica dopo il riavvio dello schermo centrale (tenere premuto Home circa 20 s) ed è provata su %1$s.</string>
+    <string name="st_update_auto">Controllo automatico: %1$s</string>
+    <string name="st_update_auto_desc">MG4Dash e Radio Dash, una volta a settimana, o ogni giorno con le versioni beta.</string>
+    <string name="st_rd_newer_radio">la radio di quest\'auto è più recente di Radio Dash, che non può sostituirla</string>
+    <string name="st_rd_other_key">la radio di quest\'auto è firmata con un\'altra chiave: Radio Dash non può sostituirla</string>
     <string name="en_trip">Viaggio in corso</string>
     <string name="en_last_year">Ultimi 12 mesi</string>
     <string name="en_months_note">%1$d mesi, un punto al mese · media %2$s (tratteggiata)</string>
@@ -441,7 +450,7 @@
     <string name="st_map_zoom">Zoom predefinito della mappa</string>
     <string name="st_map_theme">Colori della mappa</string>
     <string name="st_own_keyboard">Tastiera MG4Dash</string>
-    <string name="st_own_keyboard_desc">Larghezza intera e tasti grandi, nei campi di MG4Dash. Disattivata: tastiera di Android</string>
+    <string name="st_own_keyboard_desc">Tasti grandi su due terzi dello schermo, dal lato del conducente, nei campi di MG4Dash. Disattivata: tastiera di Android</string>
     <string name="st_map_auto_hide">Nascondi i pulsanti zoom e schermo intero della mappa</string>
     <string name="st_map_auto_hide_desc">Compaiono per qualche secondo toccando la mappa; il pulsante della direzione resta</string>
     <string name="st_map_offline_switch">Passa al widget energia offline</string>

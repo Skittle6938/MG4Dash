@@ -154,6 +154,14 @@ class ScreenshotTest {
         }
     }
 
+    /** Mock-up of the update panel (System tab): MG4Dash with a newer version known, Radio Dash not installed. */
+    @Test @Config(qualifiers = "fr-w1920dp-h720dp-land-mdpi") fun settingsUpdatesMock() {
+        org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE).edit()
+            .putBoolean("settings_tabs_v2", true).putInt("settings_tab", 5)
+            .putString("upd_new_app", "1.7.2-beta99").putString("upd_new_rd", "1.6.2-beta.1").putLong("upd_checked_at", 1L).commit()
+        shoot(SettingsActivity::class.java, "settings_updates_mock.png")
+    }
+
     /** Settings tabs in English, for the README. */
     @Test fun settingsTabsEn() {
         for (t in 0..5) {

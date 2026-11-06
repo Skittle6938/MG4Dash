@@ -26,8 +26,8 @@ import kotlinx.coroutines.withContext
 /**
  * At startup, offers the latest non-beta release if it is newer than the installed
  * version: "Do not notify about this release", "Later" or "Update".
- * A single check per app start, as soon as a network is available; errors
- * are silent. The popup is a view placed in the home window (not a Dialog):
+ * Checked at most once a week (once a day with betas), as soon as a network is available, unless
+ * the automatic check is turned off; errors are silent. The versions found are kept for Settings. The popup is a view placed in the home window (not a Dialog):
  * the activity keeps focus, so immersive mode stays active and neither the side bar nor the
  * SAIC banner reappear.
  * Home is rebuilt when the theme goes from light to dark: the offer (and the
@@ -52,9 +52,19 @@ object UpdatePrompt {
         if (checked || !StatusMonitor.hasInternet(activity)) return
         // "Updates on Wi-Fi only" (4G data): the check waits for a return to home on Wi-Fi
         if (app.mg4dash.system.DataUsage.updatesBlocked(activity)) return
+        val prefs = Prefs(activity)
+        if (!prefs.updateAuto) return
+        val every = if (prefs.updateBeta) DAY_MS else 7 * DAY_MS
+        if (System.currentTimeMillis() - prefs.raw.getLong(CHECKED_AT, 0L) < every) return
         checked = true
         val owner = activity as? LifecycleOwner ?: return
         owner.lifecycleScope.launch {
+            withContext(Dispatchers.IO) {
+                val mine = try { Updater.latest(prefs.updateBeta) } catch (e: Exception) { Log.w(TAG, "periodic check: ${e.message}"); return@withContext }
+                val rd = try { app.mg4dash.system.RadioDashUpdater.latest(prefs.updateBeta) } catch (e: Exception) { null }
+                remember(activity, mine?.version, rd?.version)
+                Log.i(TAG, "periodic check: MG4Dash ${mine?.version}, Radio Dash ${rd?.version}")
+            }
             val r = withContext(Dispatchers.IO) {
                 try { Updater.latestStable() } catch (e: Exception) { Log.w(TAG, "startup check: ${e.message}"); null }
             } ?: return@launch
@@ -64,6 +74,17 @@ object UpdatePrompt {
             show(activity, r)
             Log.i(TAG, "release ${r.version} offered at startup")
         }
+    }
+
+    private const val CHECKED_AT = "upd_checked_at"
+    private const val DAY_MS = 24 * 60 * 60 * 1000L
+
+    /** Latest versions found (null: not looked up this time), shown on the lines of Settings › System. */
+    fun remember(context: android.content.Context, app: String? = null, rd: String? = null) {
+        val e = Prefs(context).raw.edit().putLong(CHECKED_AT, System.currentTimeMillis())
+        app?.let { e.putString("upd_new_app", it) }
+        rd?.let { e.putString("upd_new_rd", it) }
+        e.apply()
     }
 
     private fun show(activity: Activity, r: Updater.Release) {

@@ -312,6 +312,11 @@ class Prefs(context: Context) {
         get() = sp.getBoolean("map_heading_up", false)
         set(v) = sp.edit().putBoolean("map_heading_up", v).apply()
 
+    /** MG4Dash and Radio Dash checked in the background, every week (every day with betas). */
+    var updateAuto: Boolean
+        get() = sp.getBoolean("update_auto", true)
+        set(v) = sp.edit().putBoolean("update_auto", v).apply()
+
     /** Update: also offer beta versions (GitHub pre-releases). */
     var updateBeta: Boolean
         get() = sp.getBoolean("update_beta", true)

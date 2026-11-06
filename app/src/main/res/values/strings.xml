@@ -428,6 +428,15 @@
     <string name="st_rd_uptodate">Radio Dash up to date (%1$s)</string>
     <string name="st_rd_installing">Installing Radio Dash…</string>
     <string name="st_rd_done">Radio Dash is installed. Restart the head unit (hold Home about 20 s) to use it.</string>
+    <string name="st_upd_current">%1$s · up to date</string>
+    <string name="st_upd_new">%1$s · %2$s available</string>
+    <string name="st_upd_none_new">not installed · %1$s available</string>
+    <string name="st_upd_install_ver">Install %1$s</string>
+    <string name="st_upd_note">MG4Dash restarts the screen at the end of its update. Radio Dash applies after restarting the head unit (hold Home about 20 s) and is tested on %1$s.</string>
+    <string name="st_update_auto">Check automatically: %1$s</string>
+    <string name="st_update_auto_desc">MG4Dash and Radio Dash, once a week, or every day with beta versions included.</string>
+    <string name="st_rd_newer_radio">this car\'s radio is newer than Radio Dash, which can\'t replace it</string>
+    <string name="st_rd_other_key">this car\'s radio is signed with another key: Radio Dash can\'t replace it</string>
     <string name="en_trip">Current trip</string>
     <string name="en_last_year">Last 12 months</string>
     <string name="en_months_note">%1$d months, one point per month · average %2$s (dashed)</string>
@@ -441,7 +450,7 @@
     <string name="st_map_zoom">Default map zoom</string>
     <string name="st_map_theme">Map colours</string>
     <string name="st_own_keyboard">MG4Dash keyboard</string>
-    <string name="st_own_keyboard_desc">Full width with large keys, in MG4Dash\'s text fields. Off: Android\'s keyboard</string>
+    <string name="st_own_keyboard_desc">Large keys on two thirds of the screen, on the driver\'s side, in MG4Dash\'s text fields. Off: Android\'s keyboard</string>
     <string name="st_map_auto_hide">Hide the map zoom and full screen buttons</string>
     <string name="st_map_auto_hide_desc">They show for a few seconds when you touch the map; the heading button stays</string>
     <string name="st_map_offline_switch">Switch to the energy widget when offline</string>

@@ -428,6 +428,15 @@
     <string name="st_rd_uptodate">Radio Dash güncel (%1$s)</string>
     <string name="st_rd_installing">Radio Dash yükleniyor…</string>
     <string name="st_rd_done">Radio Dash yüklendi. Kullanmak için multimedya ünitesini yeniden başlatın (Home\'a yaklaşık 20 sn basılı tutun).</string>
+    <string name="st_upd_current">%1$s · güncel</string>
+    <string name="st_upd_new">%1$s · %2$s mevcut</string>
+    <string name="st_upd_none_new">yüklü değil · %1$s mevcut</string>
+    <string name="st_upd_install_ver">%1$s yükle</string>
+    <string name="st_upd_note">MG4Dash güncellemesi sonunda ekranı yeniden başlatır. Radio Dash, orta ekran yeniden başlatıldıktan sonra geçerli olur (Ana Sayfa\'ya yaklaşık 20 sn basılı tutun) ve %1$s üzerinde test edildi.</string>
+    <string name="st_update_auto">Otomatik kontrol: %1$s</string>
+    <string name="st_update_auto_desc">MG4Dash ve Radio Dash, haftada bir, beta sürümleriyle her gün.</string>
+    <string name="st_rd_newer_radio">bu aracın radyosu Radio Dash\'ten daha yeni, Radio Dash onun yerini alamaz</string>
+    <string name="st_rd_other_key">bu aracın radyosu başka bir anahtarla imzalanmış: Radio Dash onun yerini alamaz</string>
     <string name="en_trip">Mevcut yolculuk</string>
     <string name="en_last_year">Son 12 ay</string>
     <string name="en_months_note">%1$d ay, ay başına bir nokta · ortalama %2$s (kesikli)</string>
@@ -441,7 +450,7 @@
     <string name="st_map_zoom">Varsayılan harita yakınlaştırması</string>
     <string name="st_map_theme">Harita renkleri</string>
     <string name="st_own_keyboard">MG4Dash klavyesi</string>
-    <string name="st_own_keyboard_desc">Tam genişlik ve büyük tuşlar, MG4Dash metin alanlarında. Kapalı: Android klavyesi</string>
+    <string name="st_own_keyboard_desc">Sürücü tarafında ekranın üçte ikisinde büyük tuşlar, MG4Dash metin alanlarında. Kapalı: Android klavyesi</string>
     <string name="st_map_auto_hide">Harita yakınlaştırma ve tam ekran düğmelerini gizle</string>
     <string name="st_map_auto_hide_desc">Haritaya dokunduğunuzda birkaç saniye görünürler; yön düğmesi kalır</string>
     <string name="st_map_offline_switch">Çevrimdışıyken enerji pencere öğesine geç</string>
