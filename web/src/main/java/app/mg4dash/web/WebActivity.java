@@ -50,9 +50,10 @@ public class WebActivity extends Activity {
         int bg = i.getIntExtra(EXTRA_BG, Color.BLACK);
         FrameLayout root = new FrameLayout(this) {
             @Override
-            public void onMovedToDisplay(int displayId, Configuration config) {
-                super.onMovedToDisplay(displayId, config);
-                if (displayId == Display.DEFAULT_DISPLAY) {
+            protected void onConfigurationChanged(Configuration config) {
+                // A move to another screen comes as a configuration change (View.onMovedToDisplay is hidden)
+                super.onConfigurationChanged(config);
+                if (onMainScreen()) {
                     Log.i(TAG, "moved to the main screen: closed");
                     finish();
                 }
