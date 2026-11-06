@@ -199,6 +199,19 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
                 alpha = EDGE_ALPHA; visibility = View.GONE
             } to side
         }
+        /**
+         * Over a web page, a handle at the bottom (#98): swiped, it changes card; touched twice, full screen and
+         * back. On the handle only: the page's own double tap (YouTube's 10 s jump, a map's zoom) stays the page's.
+         */
+        val handle = View(this@MainActivity).apply {
+            val pill = android.graphics.drawable.GradientDrawable().apply {
+                cornerRadius = dp(3).toFloat(); setColor(app.mg4dash.ui.Themes.color(this@MainActivity, R.color.text_sub))
+            }
+            background = android.graphics.drawable.InsetDrawable(pill, dp(20), dp(20), dp(20), dp(10))
+            alpha = EDGE_ALPHA; visibility = View.GONE
+            contentDescription = getString(R.string.cd_widget_toggle)
+        }
+        private var handleX = 0f; private var handleY = 0f; private var handleTap = 0L
         var fill: HomeSlots.Fill = HomeSlots.Fill.Cards(emptyList())
         /** Cards shown here in turn (the power left out when it is in the energy card). */
         var cards: List<Card> = emptyList()
@@ -222,6 +235,25 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
             // Its height follows the place's: a third of it
             box.addOnLayoutChangeListener { _, _, top, _, bottom, _, oldTop, _, oldBottom ->
                 if (bottom - top != oldBottom - oldTop) edges.forEach { (bar, _) -> bar.layoutParams = bar.layoutParams.apply { height = (bottom - top) / 3 } }
+            }
+            box.addView(handle, android.widget.FrameLayout.LayoutParams(dp(140), dp(36), Gravity.BOTTOM or Gravity.CENTER_HORIZONTAL))
+            handle.setOnTouchListener { _, ev ->
+                when (ev.actionMasked) {
+                    android.view.MotionEvent.ACTION_DOWN -> { handleX = ev.rawX; handleY = ev.rawY; revealToggle(this) }
+                    android.view.MotionEvent.ACTION_UP -> {
+                        val dx = ev.rawX - handleX; val dy = ev.rawY - handleY; val slop = dp(24)
+                        if (Math.abs(dx) > slop && Math.abs(dx) > 2 * Math.abs(dy)) {
+                            handleTap = 0L
+                            if (slotSwipes(this)) swipeSlot(this, if (dx < 0) 1 else -1)
+                        } else if (Math.abs(dx) < slop && Math.abs(dy) < slop) {
+                            if (ev.eventTime - handleTap < android.view.ViewConfiguration.getDoubleTapTimeout()) {
+                                handleTap = 0L
+                                setMapFullscreen(hiddenForMap == null, web = true)
+                            } else handleTap = ev.eventTime
+                        }
+                    }
+                }
+                true
             }
             box.active = { slotSwipes(this) }
             box.edge = { if (shown == Card.WEB) dp(WEB_EDGE_DP) else 0 }
@@ -464,6 +496,8 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         if (f.cards.size >= 2 && covering(f)) revealToggle(f)
         else { f.toggle.removeCallbacks(f.fade); f.toggle.animate().cancel(); f.toggle.alpha = 1f; f.toggle.visibility = View.GONE }
         if (!(f.cards.size >= 2 && f.shown == Card.WEB)) f.edges.forEach { (bar, _) -> bar.animate().cancel(); bar.alpha = EDGE_ALPHA; bar.visibility = View.GONE }
+        if (f.shown != Card.WEB) f.handle.run { animate().cancel(); alpha = EDGE_ALPHA; visibility = View.GONE }
+        else if (f.cards.size < 2) revealToggle(f)
     }
 
     private fun mapAppFullOver(f: SlotFrame) = mapAppFull?.takeIf { f.shown == Card.MAP && mapAppView?.visibility == View.VISIBLE }
@@ -475,12 +509,13 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
             .forEach { v -> v.animate().cancel(); v.alpha = 1f; v.visibility = View.VISIBLE }
         if (f.cards.size >= 2 && f.shown == Card.WEB && slotSwipes(f))
             f.edges.forEach { (bar, _) -> bar.animate().cancel(); bar.alpha = EDGE_ALPHA; bar.visibility = View.VISIBLE }
+        if (f.shown == Card.WEB) f.handle.run { animate().cancel(); alpha = EDGE_ALPHA; visibility = View.VISIBLE }
         f.toggle.removeCallbacks(f.fade)
         f.toggle.postDelayed(f.fade, 5000)
     }
 
     private fun fadeToggle(f: SlotFrame) {
-        (listOfNotNull(f.toggle.takeIf { it.visibility == View.VISIBLE }, mapAppFullOver(f)) +
+        (listOfNotNull(f.toggle.takeIf { it.visibility == View.VISIBLE }, mapAppFullOver(f), f.handle.takeIf { it.visibility == View.VISIBLE }) +
             f.edges.map { it.first }.filter { it.visibility == View.VISIBLE })
             .forEach { v -> v.animate().alpha(0f).setDuration(400).withEndAction { v.visibility = View.INVISIBLE }.start() }
     }
@@ -1107,7 +1142,7 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
                 val parent = child.parent as? android.view.ViewGroup ?: break
                 for (i in 0 until parent.childCount) {
                     val v = parent.getChildAt(i)
-                    if (v !== child && v.visibility != View.GONE && frames.values.none { it.toggle === v }) { hidden += v to v.visibility; v.visibility = View.GONE }
+                    if (v !== child && v.visibility != View.GONE && frames.values.none { it.toggle === v || it.handle === v }) { hidden += v to v.visibility; v.visibility = View.GONE }
                 }
                 // A place lower down its column: no gap above it in full screen
                 val lp = child.layoutParams as? android.view.ViewGroup.MarginLayoutParams
