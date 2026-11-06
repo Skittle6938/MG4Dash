@@ -165,7 +165,7 @@ While the head unit starts, a short MG4Dash animation replaces Android's "Phone 
 
 Five tabs along the top; the last one used opens next time. Each on / off option is a single button that lights up when it is on. Dialogs and messages follow the MG4Dash theme.
 
-**Keyboard**: text fields in MG4Dash use its own keyboard with large keys, on two thirds of the screen on the driver's side (AZERTY in French, QWERTZ in German, QWERTY otherwise). Long press a letter for its accents, long press shift to keep it on, long press the delete key to clear the field. Settings › Look › *MG4Dash keyboard* goes back to Android's keyboard. Other apps keep their keyboard.
+**Keyboard**: text fields in MG4Dash use its own keyboard with large keys, over the two cards on the driver's side on the phone page, and on two thirds of the screen elsewhere (AZERTY in French, QWERTZ in German, QWERTY otherwise). Long press a letter for its accents, long press shift to keep it on, long press the delete key to clear the field. Settings › Look › *MG4Dash keyboard* goes back to Android's keyboard. Other apps keep their keyboard.
 
 | Home | Look |
 |---|---|
