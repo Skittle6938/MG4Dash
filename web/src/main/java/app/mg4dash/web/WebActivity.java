@@ -111,6 +111,7 @@ public class WebActivity extends Activity {
         };
         root.setBackgroundColor(bg);
 
+        softwareVideo();
         web = new WebView(this);
         WebSettings s = web.getSettings();
         s.setJavaScriptEnabled(true);
@@ -145,7 +146,7 @@ public class WebActivity extends Activity {
 
             // As early as possible in the page, before its player chooses a format
             @Override
-            public void onProgressChanged(WebView view, int progress) { noVp9(); }
+            public void onProgressChanged(WebView view, int progress) { softFormats(); }
         });
         keyboardFor = inCardOnly() ? i.getStringExtra(EXTRA_KEYBOARD) : null;
         if (keyboardFor != null) {
@@ -181,12 +182,12 @@ public class WebActivity extends Activity {
 
             // The script that watches the fields, as soon as the page shows, and again at its end
             @Override
-            public void onPageCommitVisible(WebView view, String url) { noVp9(); watchFields(); }
+            public void onPageCommitVisible(WebView view, String url) { softFormats(); watchFields(); }
 
             @Override
             public void onPageFinished(WebView view, String url) {
                 if (!failed) message.setVisibility(View.GONE);
-                noVp9();
+                softFormats();
                 watchFields();
             }
         });
@@ -267,14 +268,32 @@ public class WebActivity extends Activity {
         + "})();";
 
     /**
-     * Videos without image (#98): the car's VP9 hardware decoder starts, then gives no picture in Chromium 66,
-     * the sound alone playing. The page is told that VP9 (and AV1) cannot be played, so YouTube and others
-     * send H.264, which the car shows.
+     * Videos without image (#98): on the car, the hardware decoders (MTK, VP9 as H.264) give Chromium 66 no
+     * picture, in the card as on the main screen, the sound alone playing. Chromium is told before its start to
+     * decode the videos itself: VP9 by libvpx shows. It has no H.264 of its own on Android, so the pages are
+     * told that H.264 (and HEVC, AV1) cannot be played: YouTube and others send VP9.
      */
-    private static final String NO_VP9_JS = "(function () {"
-        + "if (window.__mg4dashNoVp9) return;"
-        + "window.__mg4dashNoVp9 = true;"
-        + "var no = /vp0?9|av01/i;"
+    private static boolean softVideo;
+
+    private static void softwareVideo() {
+        if (softVideo) return;
+        try {
+            // Makes WebView's provider without starting Chromium: its command line is still Java's, copied at the start
+            ClassLoader cl = WebView.getWebViewClassLoader();
+            Class<?> cmd = Class.forName("org.chromium.base.CommandLine", true, cl);
+            Object line = cmd.getMethod("getInstance").invoke(null);
+            cmd.getMethod("appendSwitch", String.class).invoke(line, "disable-accelerated-video-decode");
+            softVideo = true;
+            Log.i(TAG, "videos decoded by Chromium");
+        } catch (Throwable e) {
+            Log.w(TAG, "videos still by the hardware decoders: " + e);
+        }
+    }
+
+    private static final String NO_HW_ONLY_JS = "(function () {"
+        + "if (window.__mg4dashSoftVideo) return;"
+        + "window.__mg4dashSoftVideo = true;"
+        + "var no = /avc[13]|hev1|hvc1|mp4v|av01/i;"
         + "if (window.MediaSource && MediaSource.isTypeSupported) {"
         + "  var is = MediaSource.isTypeSupported.bind(MediaSource);"
         + "  MediaSource.isTypeSupported = function (t) { return no.test(t) ? false : is(t); };"
@@ -292,8 +311,9 @@ public class WebActivity extends Activity {
         + "}"
         + "})();";
 
-    private void noVp9() {
-        if (web != null) web.evaluateJavascript(NO_VP9_JS, null);
+    /** Only when Chromium decodes the videos itself: otherwise H.264 at least gives the sound. */
+    private void softFormats() {
+        if (softVideo && web != null) web.evaluateJavascript(NO_HW_ONLY_JS, null);
     }
 
     private void watchFields() {
