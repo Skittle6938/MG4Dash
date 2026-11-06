@@ -149,7 +149,7 @@ class WebCard(private val activity: android.app.Activity) : FrameLayout(activity
         var created: View? = null
         val v = EmbeddedApp.create(activity, WebViewer.component,
             WebViewer.intent(context, url, Themes.color(context, R.color.bg_top), Themes.color(context, R.color.text_sub)),
-            stopOnRelease = true, newSurfaceOnGrow = true) {
+            stopOnRelease = true, newSurfaceOnResize = true) {
             created?.layoutParams = LayoutParams(-1, -1)
             message.visibility = View.GONE
         } ?: run { showMessage(context.getString(R.string.wc_web_unsupported)); return }
