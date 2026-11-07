@@ -43,12 +43,30 @@ object EnergyMonitor {
         val accKwh: Float = 0f,
         val km: Int = 0,
         val heatKwh: Float = 0f,     // battery heating (estimated)
+        /** Distance to the tenth of a km (odometer + fraction from the speed, #29); -1 without speed. */
+        val dist: Float = -1f,
     ) {
         val driveKwh: Float get() = (outKwh - climKwh - accKwh - heatKwh).coerceAtLeast(0f)
         val netKwh: Float get() = (outKwh - regenKwh).coerceAtLeast(0f)
-        /** Net kWh/100 km (regeneration deducted), from 2 km. */
-        val per100: Float? get() = if (km >= 2 && netKwh > 0.1f) (netKwh / km * 100f).takeIf { it in 3f..60f } else null
+        /** Distance driven (km): to the tenth with the speed, whole km from the odometer otherwise. */
+        val distKm: Float get() = if (dist >= 0f) dist else km.toFloat()
+        /**
+         * Net kWh/100 km (regeneration deducted): from 0.5 km with the precise distance, 2 km with whole km
+         * only (at 2.9 km counted as 2, up to a third too much).
+         */
+        val per100: Float? get() {
+            val d = distKm
+            val enough = if (dist >= 0f) d >= MIN_PRECISE_KM && netKwh > 0.02f else km >= 2 && netKwh > 0.1f
+            return if (enough) (netKwh / d * 100f).takeIf { it in 3f..60f } else null
+        }
     }
+
+    /** Distance from which a consumption is shown with the precise distance (owner's choice, #29). */
+    const val MIN_PRECISE_KM = 0.5f
+
+    private val _lastKm = MutableStateFlow<Float?>(null)
+    /** kWh/100 over about the last km driven, sliding (#29); null before 0.5 km in the trip. */
+    val lastKm: StateFlow<Float?> = _lastKm
 
     private val _sinceCharge = MutableStateFlow(Totals())
     val sinceCharge: StateFlow<Totals> = _sinceCharge
@@ -107,6 +125,7 @@ object EnergyMonitor {
         if (BuildConfig.MOCK) {
             _sinceCharge.value = Totals(18.4f, 3.2f, 2.1f, 0.9f, 112, heatKwh = 1.2f)
             _sinceStart.value = Totals(3.6f, 0.7f, 0.5f, 0.2f, 21, heatKwh = 0.4f)
+            _lastKm.value = 15.2f
             val demo = listOf(19.8f, 19.1f, 17.6f, 16.0f, 15.1f, 14.4f, 14.2f, 14.6f, 15.3f, 16.4f, 17.9f, 19.2f)
             _months.value = demo.mapIndexed { i, v -> "2025-%02d".format(i + 1) to Totals(v * 10f, 1.5f, 1.2f, 0.4f, 1000).let { it.copy(outKwh = v * 10f + it.regenKwh) } }
             _lastYear.value = sum(_months.value.map { it.second })
@@ -154,6 +173,14 @@ object EnergyMonitor {
             var ptcCheckedAt = -60_000L
             var ptcOn = false
             fun put(k: String, v: Float) { learned[k] = v }
+            // Precise distance (#29): odometer km plus the fraction driven since its last km, from the speed
+            val distance = Distance()
+            // Read back: its anchor, or before 1.7.2 beta 28 the odometer at the charge (whole km)
+            val chargeDist = sp.getInt("em_c_akm", -1).let { a ->
+                if (a >= 0) Distance.Period(a, sp.getFloat("em_c_ad", 0f)) else Distance.Period(chargeKm, 0f)
+            }
+            val tripDist = Distance.Period()
+            val window = SlidingKm()
             while (true) {
                 delay(1000)
                 val now = System.currentTimeMillis()
@@ -169,9 +196,12 @@ object EnergyMonitor {
                     monthKm = km
                 }
 
+                distance.step(km, s.speedKmh, dt, chargeDist, tripDist)
+
                 // New start: long pause (car in standby) or first pass
                 if (dt > SLEEP_GAP_MS || startKm < 0) {
                     if (km != null) startKm = km
+                    tripDist.restart(); window.clear(); _lastKm.value = null
                     _sinceStart.value = Totals()
                     _tripStartSoc.value = soc
                     tripStartedAt = now
@@ -186,10 +216,11 @@ object EnergyMonitor {
                         Log.i(TAG, "since-charge totals cleared from the screen")
                         _sinceCharge.value = Totals()
                         if (km != null) chargeKm = km
-                        sp.edit().putInt("em_c_km0", chargeKm)
+                        chargeDist.restart()
+                        sp.edit().putInt("em_c_km0", chargeKm).putInt("em_c_akm", -1)
                             .putFloat("em_c_out", 0f).putFloat("em_c_rgn", 0f).putFloat("em_c_clim", 0f).putFloat("em_c_acc", 0f).putFloat("em_c_heat", 0f).apply()
                     }
-                    1 -> { _sinceStart.value = Totals(); if (km != null) startKm = km; tripStartedAt = now }
+                    1 -> { _sinceStart.value = Totals(); if (km != null) startKm = km; tripDist.restart(); window.clear(); _lastKm.value = null; tripStartedAt = now }
                     2 -> { Log.i(TAG, "12-month totals cleared from the screen"); months.clear(); pendingKm = 0; publishMonths(); saveMonths() }
                 }
                 // Charge: the % goes up at least RECHARGE_PCT points above the lowest of the
@@ -210,11 +241,12 @@ object EnergyMonitor {
                             "for ${c.km} km): reset" else "new since-charge period ($lowSoc → $soc %)")
                         _sinceCharge.value = Totals()
                         chargeKm = km ?: -1
+                        chargeDist.restart()
                         lowSoc = soc
                         // Reset counters saved at once with the start km: before 1.1.8,
                         // they were only saved at the next save (30 s, skipped with the car plugged in), and
                         // MG4Dash stopped in between reloaded the old kWh with the new km.
-                        sp.edit().putInt("em_c_km0", chargeKm).putInt("em_c_soc0", soc).putInt("em_c_low", soc)
+                        sp.edit().putInt("em_c_km0", chargeKm).putInt("em_c_akm", -1).putInt("em_c_soc0", soc).putInt("em_c_low", soc)
                             .putFloat("em_c_out", 0f).putFloat("em_c_rgn", 0f).putFloat("em_c_clim", 0f).putFloat("em_c_acc", 0f).putFloat("em_c_heat", 0f).apply()
                     } else if (lowSoc < 0 || soc < lowSoc) {
                         lowSoc = soc; sp.edit().putInt("em_c_low", soc).apply()
@@ -300,13 +332,18 @@ object EnergyMonitor {
                 } else if (!stopped) {
                     regen = -p * h
                 }
-                fun add(t: Totals, k: Int?, k0: Int) = t.copy(
-                    outKwh = t.outKwh + out / 1000f, regenKwh = t.regenKwh + regen / 1000f,
-                    climKwh = t.climKwh + clim / 1000f, accKwh = t.accKwh + acc / 1000f, heatKwh = t.heatKwh + heat / 1000f,
-                    km = if (k != null && k0 >= 0) (k - k0).coerceAtLeast(0) else t.km,
-                )
-                _sinceCharge.value = add(_sinceCharge.value, km, chargeKm)
-                _sinceStart.value = add(_sinceStart.value, km, startKm)
+                fun add(t: Totals, k: Int?, k0: Int, d: Distance.Period): Totals {
+                    val whole = if (k != null && k0 >= 0) (k - k0).coerceAtLeast(0) else t.km
+                    return t.copy(
+                        outKwh = t.outKwh + out / 1000f, regenKwh = t.regenKwh + regen / 1000f,
+                        climKwh = t.climKwh + clim / 1000f, accKwh = t.accKwh + acc / 1000f, heatKwh = t.heatKwh + heat / 1000f,
+                        km = whole,
+                        dist = if (distance.speedKnown && k != null) d.km(k, distance.fraction, whole) else -1f,
+                    )
+                }
+                _sinceCharge.value = add(_sinceCharge.value, km, chargeKm, chargeDist)
+                _sinceStart.value = add(_sinceStart.value, km, startKm, tripDist)
+                _sinceStart.value.let { t -> _lastKm.value = window.add(t.distKm, t.netKwh) }
                 val mk = monthKey(now)
                 val m = months[mk] ?: Totals()
                 // System time not yet set (2019 at wake-up): unknown month, km kept for later
@@ -324,6 +361,7 @@ object EnergyMonitor {
                     val c = _sinceCharge.value
                     val e = sp.edit()
                     learned.forEach { (k, v) -> e.putFloat(k, v) }
+                    e.putInt("em_c_akm", chargeDist.anchorKm).putFloat("em_c_ad", chargeDist.anchorDist)
                     e.putFloat("em_c_out", c.outKwh).putFloat("em_c_rgn", c.regenKwh)
                         .putFloat("em_c_clim", c.climKwh).putFloat("em_c_acc", c.accKwh).putFloat("em_c_heat", c.heatKwh)
                     e.apply()
@@ -364,4 +402,66 @@ object EnergyMonitor {
     }
 
     private fun ema(old: Float, new: Float, k: Float) = old + (new - old) * k
+
+    /**
+     * Distance to the tenth of a km (#29): the odometer only counts whole km, so the kWh/100 climbed between two km
+     * then fell back, and at the start of a trip a km could be missing out of 2. The fraction driven since the
+     * odometer's last km comes from the speed and starts again at each new km: the odometer stays the reference
+     * over the distance, the speed only fills the km in progress.
+     */
+    internal class Distance {
+        /** km driven since the odometer's last km (speed integrated), at most 1. */
+        var fraction = 0f; private set
+        /** The car gives its speed (not on old firmwares): otherwise whole km only. */
+        var speedKnown = false; private set
+        private var odo = -1
+
+        /**
+         * One period (since the charge, the trip). Until the odometer's first km after its start, its distance is
+         * the speed's; then the km at that moment and the distance driven before it make its anchor.
+         */
+        class Period(var anchorKm: Int = -1, var anchorDist: Float = 0f) {
+            internal var before = 0f
+            fun restart() { anchorKm = -1; anchorDist = 0f; before = 0f }
+            /** Distance at the odometer's [k] plus [fraction]; [whole] (odometer only) if it would be further off. */
+            fun km(k: Int, fraction: Float, whole: Int): Float {
+                if (anchorKm < 0) return before
+                val d = anchorDist + (k - anchorKm) + fraction
+                // Kept within a km of the odometer's count (anchor read back after a restart, odometer late)
+                return d.coerceIn((whole - 1).coerceAtLeast(0).toFloat(), whole + 1f)
+            }
+        }
+
+        fun step(km: Int?, speedKmh: Float?, dtMs: Long, vararg periods: Period) {
+            speedKnown = speedKmh != null
+            val d = if (speedKmh != null && speedKmh > 0f) speedKmh * dtMs.coerceIn(0L, 5_000L) / 3_600_000f else 0f
+            if (km != null && odo >= 0 && km != odo) {
+                fraction = 0f
+                periods.forEach { if (it.anchorKm < 0) { it.anchorKm = km; it.anchorDist = (it.before + d).coerceIn(0f, 1f) } }
+            } else {
+                fraction = (fraction + d).coerceAtMost(0.99f)
+                periods.forEach { if (it.anchorKm < 0) it.before += d }
+            }
+            if (km != null) odo = km
+        }
+    }
+
+    /** kWh/100 over about the last km (#29): distance and energy of the trip kept every 10 m, the oldest dropped. */
+    internal class SlidingKm(private val span: Float = 1f) {
+        private val points = ArrayDeque<Pair<Float, Float>>()
+        fun clear() = points.clear()
+        /** Adds the trip's [km] and net [kwh]; the consumption over the last [span] km, from 0.5 km. */
+        fun add(km: Float, kwh: Float): Float? {
+            if (points.isEmpty() || km - points.last().first >= 0.01f || km < points.last().first) {
+                if (points.isNotEmpty() && km < points.last().first) points.clear()
+                points.addLast(km to kwh)
+            }
+            // Keep one point just beyond the span: the window always covers it whole
+            while (points.size > 2 && km - points[1].first >= span) points.removeFirst()
+            val (k0, e0) = points.first()
+            val d = km - k0
+            if (d < MIN_PRECISE_KM) return null
+            return ((kwh - e0) / d * 100f).takeIf { it in 0f..80f }
+        }
+    }
 }

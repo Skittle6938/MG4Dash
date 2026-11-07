@@ -122,7 +122,7 @@ class ConsumptionCard(context: Context) : LinearLayout(context) {
         val hasRegen = ok && t.regenKwh >= 0.05f
         regen.text = if (hasRegen) regenValues(context, t.regenKwh, regenKm(t)) else ""
         regenLabel.visibility = if (hasRegen) VISIBLE else INVISIBLE
-        distance.text = if (t.km > 0) smallUnit(app.mg4dash.system.Units.distText(context, t.km.toFloat())) else ""
+        distance.text = if (t.distKm >= 1f) smallUnit(app.mg4dash.system.Units.distText(context, t.distKm)) else ""
         summary.text = if (distance.text.isNullOrEmpty()) total.text else android.text.TextUtils.concat(total.text, "   ", distance.text)
         fillLegend(context, legend, t)
         val (points, n) = fill(context, chart, period, stacked = true)
@@ -188,7 +188,7 @@ class ConsumptionCard(context: Context) : LinearLayout(context) {
 
         /** Part of the distance powered by the recovered energy, its share of what left the battery (#44, see the README). */
         fun regenKm(t: EnergyMonitor.Totals): Float? =
-            if (t.km >= 2 && t.outKwh > 0f) t.regenKwh / t.outKwh * t.km else null
+            if (t.distKm >= 2f && t.outKwh > 0f) t.regenKwh / t.outKwh * t.distKm else null
 
         /** "−3.2 kWh   ~19.5 km": energy deducted from the total, km it powered (not added to the range, #44); no km if unknown or out of range. */
         fun regenValues(c: android.content.Context, kwh: Float, km: Float?): String {
@@ -276,8 +276,8 @@ class ConsumptionCard(context: Context) : LinearLayout(context) {
         /** Real average of the period (#44): energy out of the battery, minus regeneration, over the distance. The points are only for the picture. */
         private fun periodMean(c: android.content.Context, period: Int): Float? {
             val t = EnergyMonitor.totals(period)
-            val net = t.outKwh - t.regenKwh
-            return if (t.km >= 2 && net > 0f) app.mg4dash.system.Units.stackValue(c, net / t.km * 100f) else null
+            // Same average as the energy card's, with the distance to the tenth of a km (#29)
+            return t.per100?.let { app.mg4dash.system.Units.stackValue(c, it) }
         }
 
         /** Compact legend: colour, item and share of each, driving with regeneration deducted. */

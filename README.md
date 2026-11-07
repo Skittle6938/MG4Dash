@@ -68,10 +68,10 @@ A tap on the right half of the card (the consumption or the range) changes the c
 |---|---|---|
 | lightning bolt | since the last charge | charge level × estimated battery health × new usable capacity (Vehicle page, your own value included) ÷ consumption |
 | route | current trip (as before) | same |
-| live | last km | same, it moves a lot from one km to the next |
+| live | about the last km, sliding | same, it moves more than the others |
 | car | the consumption the car's range assumes: energy left (as above) ÷ the car's range | the car's own range |
 
-A consumption not known yet (a trip under 2 km, for example) is skipped, and while it is unknown the range is the car's, with the car logo. The choice is kept. The Energy page opens from its button on the bar, not from the cards, to avoid opening it by mistake.
+Every consumption can be chosen from the start. One not known yet (under 0.5 km) shows "—" with its logo, and the range is the car's, with the car logo, until it is known. The choice is kept. The values are read again every 10 s, the car's at once. The energy is measured every second (battery voltage × current, regeneration deducted); the distance is the odometer's km plus the part of the current km driven, from the speed, so to the tenth of a km without drifting from the odometer (whole km only on firmwares without the speed, then from 2 km). The Energy page opens from its button on the bar, not from the cards, to avoid opening it by mistake.
 
 ![A tap on the consumption of the power card: its logo before it and before the range, its name for 2 s](docs/screenshots/home_energy_card_power_sources.png?v=25)
 
