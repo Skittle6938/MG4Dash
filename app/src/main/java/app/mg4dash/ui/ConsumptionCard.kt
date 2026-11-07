@@ -108,6 +108,7 @@ class ConsumptionCard(context: Context) : LinearLayout(context) {
             addView(figures, LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT))
         }, LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT).apply { topMargin = (10 * d).toInt() })
         chart.averageBubble = false
+        chart.averageColor = c(R.color.text_sub)
         addView(chart, LayoutParams(LayoutParams.MATCH_PARENT, 0, 1f))
         addView(note)
     }
@@ -130,6 +131,8 @@ class ConsumptionCard(context: Context) : LinearLayout(context) {
         chart.emptyText = if (period == 2) R.string.chart_empty_trips else R.string.chart_empty
         note.text = n
         figures.text = figuresText(points)
+        // Dot of the last km at the curve's end, not on the 12 months (one point per trip)
+        chart.lastDotColor = if (period != 2 && points >= 2 && lastKm(context) != null) c(R.color.text_sub) else null
         showDuration()
     }
 
@@ -142,29 +145,27 @@ class ConsumptionCard(context: Context) : LinearLayout(context) {
     }
 
     /**
-     * "14.8 | 22.6": the average in the dashed line's colour, the last km in orange, without words (#44);
-     * TalkBack still reads "avg." and "last km".
+     * "- - - 14.8   ● 22.6" (#44): the figures in white, without colour; a grey dash before the average
+     * (as its line) and a grey dot before the last km (as on the curve's end). TalkBack still reads "avg." and "last km".
      */
     private fun figuresText(points: Int): CharSequence {
         if (points < 2) { figures.contentDescription = null; return "" }
         val out = android.text.SpannableStringBuilder()
         val spoken = mutableListOf<String>()
-        fun add(value: Float, label: Int, colorRes: Int) {
-            if (out.isNotEmpty()) {
-                val at = out.length
-                out.append("  |  ")
-                out.setSpan(android.text.style.ForegroundColorSpan(c(R.color.text_disabled)), at, out.length, 0)
-            }
-            val at = out.length
+        fun add(marker: String, value: Float, label: Int) {
+            if (out.isNotEmpty()) out.append("    ")
+            var at = out.length
+            out.append(marker).append(" ")
+            out.setSpan(android.text.style.ForegroundColorSpan(c(R.color.text_sub)), at, out.length, 0)
+            at = out.length
             val v = String.format(Locale.getDefault(), "%.1f", value)
             out.append(v)
-            out.setSpan(android.text.style.ForegroundColorSpan(c(colorRes)), at, out.length, 0)
-            out.setSpan(android.text.style.RelativeSizeSpan(1.4f), at, out.length, 0)
-            out.setSpan(android.text.style.StyleSpan(android.graphics.Typeface.BOLD), at, out.length, 0)
+            out.setSpan(android.text.style.ForegroundColorSpan(c(R.color.text_value)), at, out.length, 0)
+            out.setSpan(android.text.style.RelativeSizeSpan(1.25f), at, out.length, 0)
             spoken += "$v ${context.getString(label)}"
         }
-        add(chart.averageValue, R.string.cc_avg, R.color.accent_action)
-        lastKm(context)?.let { add(it, R.string.cc_last_km, R.color.accent_heat) }
+        add("- - -", chart.averageValue, R.string.cc_avg)
+        lastKm(context)?.let { add("●", it, R.string.cc_last_km) }
         figures.contentDescription = spoken.joinToString(", ")
         return out
     }
