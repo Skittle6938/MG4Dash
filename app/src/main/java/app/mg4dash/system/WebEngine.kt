@@ -23,11 +23,15 @@ object WebEngine {
     const val PKG = "com.android.webview"
     const val VERSION = "138.0.7204.63"
     private const val VERSION_CODE = 720406301L
-    /** LineageOS's prebuilt WebView for arm64 at a pinned commit (Git LFS file). */
-    private const val URL = "https://media.githubusercontent.com/media/LineageOS/android_external_chromium-webview_prebuilt_arm64/LINEAGE_COMMIT/webview.apk"
-    const val SIZE = 243562802L
-    /** SHA-256 of that file, checked before signing it. */
-    private const val SHA256 = "LINEAGE_SHA256"
+    /**
+     * LineageOS's prebuilt WebView for arm64 at commit f6f994f9912b26d1dffd100f6de959f9dfd31414 of
+     * android_external_chromium-webview_prebuilt_arm64: a Git LFS file kept by LineageOS's own LFS server (GitHub has
+     * only the pointer), whose batch API gives a download link valid for a minute.
+     */
+    private const val LFS_BATCH = "https://review.lineageos.org/LineageOS/android_external_chromium-webview_prebuilt_arm64.git/info/lfs/objects/batch"
+    const val SIZE = 243509357L
+    /** SHA-256 of that file (its LFS object id), checked before signing it. */
+    private const val SHA256 = "446ead71292578830d99e690fd8dded73bc63d85df80f0cfba37762ccb330326"
     private const val KEY = "webengine/testkey.pk8"
     private const val CERT = "webengine/testkey.x509.pem"
     /** AOSP's test key, which signs the car's WebView. */
@@ -79,6 +83,24 @@ object WebEngine {
 
     private fun hex(b: ByteArray) = b.joinToString("") { "%02x".format(it) }
 
+    /** The file's download link, asked of LineageOS's LFS server. */
+    private fun lfsUrl(): String {
+        val c = java.net.URL(LFS_BATCH).openConnection() as java.net.HttpURLConnection
+        try {
+            c.requestMethod = "POST"; c.doOutput = true
+            c.connectTimeout = 8000; c.readTimeout = 30000
+            c.setRequestProperty("Accept", "application/vnd.git-lfs+json")
+            c.setRequestProperty("Content-Type", "application/vnd.git-lfs+json")
+            c.setRequestProperty("User-Agent", "MG4Dash")
+            val body = org.json.JSONObject().put("operation", "download").put("transfers", org.json.JSONArray().put("basic"))
+                .put("objects", org.json.JSONArray().put(org.json.JSONObject().put("oid", SHA256).put("size", SIZE)))
+            c.outputStream.use { it.write(body.toString().toByteArray()) }
+            if (c.responseCode != 200) throw IllegalStateException("LFS HTTP ${c.responseCode}")
+            val json = org.json.JSONObject(c.inputStream.bufferedReader().use { it.readText() })
+            return json.getJSONArray("objects").getJSONObject(0).getJSONObject("actions").getJSONObject("download").getString("href")
+        } finally { c.disconnect() }
+    }
+
     /** What [install] is doing, for the settings' line. */
     enum class Step { DOWNLOAD, SIGN, INSTALL }
 
@@ -95,7 +117,8 @@ object WebEngine {
             val signed = File(dir, "webview.apk")
             fun clean() { raw.delete(); signed.delete() }
             try {
-                Updater.download(app, Updater.Release(VERSION, URL, SIZE, ""), raw.name) { progress(Step.DOWNLOAD, it) }
+                val url = DataUsage.tag(DataUsage.Use.UPDATES) { lfsUrl() }
+                Updater.download(app, Updater.Release(VERSION, url, SIZE, ""), raw.name) { progress(Step.DOWNLOAD, it) }
                 val sum = MessageDigest.getInstance("SHA-256").let { md ->
                     raw.inputStream().use { i -> val buf = ByteArray(1 shl 16); while (true) { val n = i.read(buf); if (n < 0) break; md.update(buf, 0, n) } }
                     hex(md.digest())
