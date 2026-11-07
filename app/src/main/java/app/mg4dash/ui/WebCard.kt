@@ -84,7 +84,7 @@ class WebCard(private val activity: android.app.Activity) : FrameLayout(activity
                     showMessage(context.getString(R.string.wc_web_error))
                 }
                 override fun onPageFinished(view: android.webkit.WebView, url: String?) {
-                    if (message.visibility != View.VISIBLE || message.text == context.getString(R.string.wc_web_loading)) message.visibility = View.GONE
+                    if (message.visibility != View.VISIBLE || message.text.endsWith(context.getString(R.string.wc_web_loading))) message.visibility = View.GONE
                 }
             }
         }.also { web = it; addView(it, 0, LayoutParams(-1, -1)) }
@@ -92,6 +92,9 @@ class WebCard(private val activity: android.app.Activity) : FrameLayout(activity
         // No WebView on this head unit (missing or disabled provider)
         Log.w(TAG, "WebView: ${e.message}"); null
     }
+
+    /** "Loading…" under the site's name, which says which address of the list comes (#98). */
+    private fun loading(url: String) = name(url) + "\n" + context.getString(R.string.wc_web_loading)
 
     private fun showMessage(t: String) { message.text = t; message.visibility = View.VISIBLE; message.bringToFront() }
 
@@ -105,7 +108,7 @@ class WebCard(private val activity: android.app.Activity) : FrameLayout(activity
         w.onResume()
         if (url != loaded) {
             loaded = url
-            showMessage(context.getString(R.string.wc_web_loading))
+            showMessage(loading(url))
             w.loadUrl(url)
         }
     }
@@ -129,7 +132,7 @@ class WebCard(private val activity: android.app.Activity) : FrameLayout(activity
         if (appView != null && appUrl == url) { WebViewer.shown(context, true); return }
         WebViewer.grantLocation(context)
         removeApp()
-        showMessage(context.getString(R.string.wc_web_loading))
+        showMessage(loading(url))
         var created: View? = null
         val v = EmbeddedApp.create(activity, WebViewer.component,
             WebViewer.intent(context, url, Themes.color(context, R.color.bg_top), Themes.color(context, R.color.text_sub)),
@@ -225,8 +228,6 @@ class WebCard(private val activity: android.app.Activity) : FrameLayout(activity
         prefs.webUrl = url
         Log.i(TAG, "next web app: ${name(url)}")
         show()
-        // Its name in the card while it loads (a toast fell over the media card)
-        if (message.visibility == View.VISIBLE) message.text = name(url) + "\n" + message.text
         return true
     }
 
