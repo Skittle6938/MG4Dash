@@ -639,6 +639,8 @@
     <string name="st_start_source_desc">Otomatik: hâlâ kullanılabilen son seçilen kaynağa geçer ve yeniden göründüğünde ona döner (telefon yeniden bağlandı, USB bellek…).</string>
     <string name="st_radio_bands">Radio Dash: DAB ve FM iki ayrı kaynak</string>
     <string name="st_radio_bands_desc">Geçiş yapmak için müzik kartını kaydırın veya kaynak menüsünü kullanın.</string>
+    <string name="st_radio_am">Radio Dash: AM bandı</string>
+    <string name="st_radio_am_desc">Aracın radyosunda varsa Radio Dash\'te AM sekmesini gösterir ve AM\'yi bant değişimine ekler. Az test edildi, varsayılan olarak kapalı.</string>
     <string name="st_start_playback">Başlangıçta oynatma</string>
     <string name="st_play_resume">Araç kapatıldığındaki gibi</string>
     <string name="st_play_pause">Her zaman duraklatılmış</string>

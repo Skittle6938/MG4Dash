@@ -114,6 +114,11 @@ class Prefs(context: Context) {
         get() = sp.getBoolean("radio_dash_bands", true)
         set(v) = sp.edit().putBoolean("radio_dash_bands", v).apply()
 
+    /** Radio Dash: AM band (tab, band change) on cars whose radio has it (Radio Dash #2), off by default. */
+    var radioDashAm: Boolean
+        get() = sp.getBoolean("radio_dash_am", false)
+        set(v) = sp.edit().putBoolean("radio_dash_am", v).apply()
+
     /** V2L discharge started on plugging in the adapter (#82), off by default. */
     var v2lAuto: Boolean
         get() = sp.getBoolean("v2l_auto", false)
