@@ -74,6 +74,8 @@ public class WebActivity extends Activity {
     /** The WebView is paused for the hidden card (MG4Dash said so). */
     private boolean pausedHidden;
     private boolean started;
+    /** The page's sound as a player of the head unit (#98), in the card. */
+    private WebMedia media;
 
     /** From MG4Dash: the keys of its keyboard, and whether the card is shown. */
     private final BroadcastReceiver fromCard = new BroadcastReceiver() {
@@ -156,6 +158,8 @@ public class WebActivity extends Activity {
         }
         // In the card: MG4Dash says when it is shown or hidden, whether its keyboard is used or not
         if (inCardOnly()) {
+            media = new WebMedia(this, web);
+            web.addJavascriptInterface(media.bridge(), "MG4DashMedia");
             IntentFilter f = new IntentFilter(KEY);
             f.addAction(SHOWN);
             registerReceiver(fromCard, f, TALK, null);
@@ -359,6 +363,7 @@ public class WebActivity extends Activity {
         // Only when Chromium decodes the videos itself: otherwise H.264 at least gives the sound
         if (softVideo) web.evaluateJavascript("window.__mg4dashMaxH = " + maxHeightNow() + ";" + NO_HW_ONLY_JS, null);
         if (softVideo && inCardOnly()) web.evaluateJavascript(SEEN_JS, null);
+        if (media != null) web.evaluateJavascript(WebMedia.JS, null);
     }
 
     private int maxHeightNow() { return web != null && web.getWidth() > 1000 ? 480 : 360; }
@@ -467,6 +472,7 @@ public class WebActivity extends Activity {
             listening = false;
             try { unregisterReceiver(fromCard); } catch (Exception ignored) {}
         }
+        if (media != null) { media.release(); media = null; }
         if (web != null) {
             web.stopLoading();
             web.destroy();
