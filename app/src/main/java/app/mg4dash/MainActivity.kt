@@ -122,7 +122,7 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         mediaStyle = app.mg4dash.ui.MediaStyle.apply(this, b)
         wireCards()
         applySlots()
-        // Web app detached over home before (#99): detached again once the cards are laid out
+        // Web app detached over home before: detached again once the cards are laid out
         if (prefs.webFloat && prefs.webFloating && HomeSlots.load(prefs, slotLayout, unavailable()).slotOf(Card.WEB) != null) detachWhenLaidOut(0)
         observe()
         warmUpStockLauncherIfNeeded()
@@ -328,7 +328,7 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         HomeSlots.save(prefs, config)
         frames.values.forEach { f ->
             f.fill = config.fill(f.slot.id)
-            // The web app detached over home (#99): its place goes on with its other cards
+            // The web app detached over home: its place goes on with its other cards
             f.cards = config.cards(f.slot.id).filter { it !in out && !(it == Card.WEB && floatWeb != null) }
             f.instead = null
         }
@@ -524,7 +524,7 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
                 } else if (Math.abs(dx) < slop && Math.abs(dy) < slop) {
                     if (tapFrame === f && ev.eventTime - tapAt < android.view.ViewConfiguration.getDoubleTapTimeout()) {
                         tapFrame = null; handler.removeCallbacks(wakeTapped)
-                        // Web app: detached over home instead, if chosen in the edit mode (#99)
+                        // Web app: detached over home instead, if chosen in the edit mode
                         if (f.shown == Card.WEB && prefs.webFloat) detachWeb()
                         else setMapFullscreen(hiddenForMap == null, web = f.shown == Card.WEB)
                     } else {
@@ -1213,7 +1213,7 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
     /** Web app card (#97). */
     private var webCard: app.mg4dash.ui.WebCard? = null
 
-    // ── Web app detached over home (#99, trial) ──────────────────────────────
+    // ── Web app detached over home (trial) ──────────────────────────────
 
     /** The web app's window, while detached from its card ("Detached window" chosen for a double tap in the edit mode). */
     private var floatWeb: app.mg4dash.ui.FloatWindow? = null
@@ -1232,7 +1232,7 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
     }
 
     /**
-     * Double tap on the web app (#99): its panel leaves the card for a window over home, which can be moved and
+     * Double tap on the web app: its panel leaves the card for a window over home, which can be moved and
      * resized ([app.mg4dash.ui.FloatWindow]); its place shows its other cards meanwhile. The page starts again in the
      * window, as when the card changes place.
      */
@@ -1318,7 +1318,7 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
     }
 
     override fun dispatchTouchEvent(ev: android.view.MotionEvent): Boolean {
-        // The web app's window over home (#99): at rest its gestures, awake straight to its page
+        // The web app's window over home: at rest its gestures, awake straight to its page
         floatWeb?.let { if (!app.mg4dash.ui.CardsEditor.isOpen(this)) { if (it.onTouch(ev)) return true; if (it.through) return super.dispatchTouchEvent(ev) } }
         if (twoFingerPull.onTouch(ev) { super.dispatchTouchEvent(it) }) return true
         if (!simpleMode && !app.mg4dash.ui.CardsEditor.isOpen(this) && pinchToEdit.onTouch(ev) { super.dispatchTouchEvent(it) }) return true

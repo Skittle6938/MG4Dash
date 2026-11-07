@@ -18,7 +18,7 @@ import app.mg4dash.system.Log
 import app.mg4dash.system.Prefs
 
 /**
- * Web app detached from its card (#99, trial), instead of the fixed full screen when chosen in the edit mode:
+ * Web app detached from its card (trial), instead of the fixed full screen when chosen in the edit mode:
  * the card's panel floats over home, in a layer of the activity's own window (no overlay window, no permission).
  * At rest, its touches are taken here and the page sees none of them:
  * - a corner pulled at once resizes it, the opposite corner fixed and the ratio kept; the middle of an edge, its
