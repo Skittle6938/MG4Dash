@@ -164,7 +164,6 @@ class SettingsActivity : AppCompatActivity() {
         val map = panel(homeR, getString(R.string.st_style_map).uppercase())
         dropdown(map, getString(R.string.st_map_zoom), listOf("14", "15", "16", "17", "18"), { prefs.mapZoom - 14 }) { prefs.mapZoom = 14 + it }
         dropdown(map, getString(R.string.st_map_theme), listOf(R.string.st_mode_auto, R.string.st_mode_light, R.string.st_mode_dark).map { getString(it) }, { prefs.mapTheme }) { prefs.mapTheme = it }
-        toggle(map, R.string.st_map_auto_hide, R.string.st_map_auto_hide_desc, { prefs.mapAutoHide }) { prefs.mapAutoHide = it }
         toggle(map, R.string.st_map_offline_switch, R.string.st_map_offline_switch_desc, { prefs.mapOfflineSwitch }) { prefs.mapOfflineSwitch = it }
 
         // ════ Vehicle tab: units, equipment, climate, and startup sound ════

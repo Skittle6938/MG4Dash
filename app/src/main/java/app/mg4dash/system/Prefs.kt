@@ -76,6 +76,10 @@ class Prefs(context: Context) {
     var webUrl: String
         get() = sp.getString("web_url", "") ?: ""
         set(v) = sp.edit().putString("web_url", v.trim()).apply()
+    /** A web page or an app in a card stays awake this long after its last touch, then rests (#98). */
+    var webWakeSeconds: Int
+        get() = sp.getInt("web_wake_s", 10)
+        set(v) = sp.edit().putInt("web_wake_s", v).apply()
     /** App shown in the map widget instead of the map (#41, trial); null = OSM map. */
     var mapApp: String?
         get() = sp.getString("map_app", null)

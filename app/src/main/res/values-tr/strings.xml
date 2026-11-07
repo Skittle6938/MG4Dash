@@ -550,6 +550,8 @@
     <string name="wc_reset_confirm">Bu düzenin ana ekranı ilk hâline döndürülsün mü?</string>
     <string name="wc_map_app">Harita:</string>
     <string name="wc_web_address">Web adresi</string>
+    <string name="wc_wake">Sayfa etkin:</string>
+    <string name="wc_wake_s">%1$d s</string>
     <string name="wc_web_set">girilecek</string>
     <string name="wc_web_none">Henüz adres yok: ana ekranı iki parmakla kıstırın, sonra Web adresi\'ne dokunun.</string>
     <string name="wc_web_error">Sayfaya ulaşılamıyor. Tekrar denemek için dokunun.</string>
