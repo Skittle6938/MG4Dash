@@ -139,6 +139,7 @@
     <string name="en_since_charge">Dalla ricarica</string>
     <string name="en_since_start">Dall\'avvio</string>
     <string name="en_recent">CONSUMO RECENTE (%1$s)</string>
+    <string name="cc_curve_title">CONSUMO (%1$s)</string>
     <string name="en_power">Potenza %1$s kW</string>
     <string name="en_ends_in">termina tra %1$d h %2$02d</string>
     <string name="en_no_limit" formatted="false">Nessun limite: ricarica fino al 100 %.</string>

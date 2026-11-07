@@ -139,6 +139,7 @@
     <string name="en_since_charge">Depuis la recharge</string>
     <string name="en_since_start">Depuis le démarrage</string>
     <string name="en_recent">CONSO RÉCENTE (%1$s)</string>
+    <string name="cc_curve_title">CONSOMMATION (%1$s)</string>
     <string name="en_power">Puissance %1$s kW</string>
     <string name="en_ends_in">fin dans %1$d h %2$02d</string>
     <string name="en_no_limit" formatted="false">Pas de limite : charge jusqu\'à 100 %.</string>
