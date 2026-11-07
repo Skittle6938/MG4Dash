@@ -84,10 +84,11 @@ class LauncherApp : Application() {
         // Auto theme for Radio Dash: the home screen only republishes the theme while displayed; when
         // the radio was in front, lights coming on were therefore never passed on.
         val h = android.os.Handler(android.os.Looper.getMainLooper())
-        var lastSig = app.mg4dash.ui.Themes.signature(this)
+        // The bar's width and side too (Radio Dash #2): the side may only be known once the car answers
+        var lastSig = app.mg4dash.ui.Themes.signature(this) to app.mg4dash.ui.Themes.published(this)
         h.postDelayed(object : Runnable {
             override fun run() {
-                val sig = app.mg4dash.ui.Themes.signature(this@LauncherApp)
+                val sig = app.mg4dash.ui.Themes.signature(this@LauncherApp) to app.mg4dash.ui.Themes.published(this@LauncherApp)
                 if (sig != lastSig) { lastSig = sig; app.mg4dash.ui.Themes.publish(this@LauncherApp) }
                 h.postDelayed(this, 5_000)
             }
