@@ -222,7 +222,7 @@ class FloatWindow(
         handler.removeCallbacks(sleep)
         if (awake != on) {
             awake = on
-            holder.foreground = if (on) FadeOutline.Awake(d, accent, dp(3).toFloat()) else null
+            holder.foreground = if (on) FadeOutline.Awake(d, accent, dp(3).toFloat(), corner()) else null
             chrome.invalidate()
             Log.i(TAG, if (on) "awake" else "at rest")
         }
@@ -234,7 +234,7 @@ class FloatWindow(
     /** Docked: its card's outline, lit while the page is awake (the card's own is under the page, out of sight). */
     fun dockOutline(on: Boolean) {
         if (floating) return
-        holder.foreground = if (on) FadeOutline.Awake(d, accent, dp(3).toFloat()) else null
+        holder.foreground = if (on) FadeOutline.Awake(d, accent, dp(3).toFloat(), corner()) else null
     }
 
     // ── Touches ──────────────────────────────────────────────────────────────

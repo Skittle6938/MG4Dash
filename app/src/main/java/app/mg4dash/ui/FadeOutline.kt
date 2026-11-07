@@ -39,15 +39,16 @@ class FadeOutline(private val d: Float, color: Int, private val fade: Boolean = 
 
     /**
      * Frame of a page or an app awake (#98): the same corners as the card's clip, its outer edge on the card's edge
-     * (a GradientDrawable at radius_panel, 20 dp, stood off the card's 14 dp corners).
+     * (a GradientDrawable at radius_panel, 20 dp, stood off the card's 14 dp corners). [radius]: the corner of what it is
+     * drawn over, the panels' by default; the detached window's is larger, by its frame, and its corners were cut off.
      */
-    class Awake(private val d: Float, color: Int, width: Float) : Drawable() {
+    class Awake(private val d: Float, color: Int, width: Float, private val radius: Float = RADIUS * d) : Drawable() {
         private val p = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.STROKE; strokeWidth = width; this.color = color }
         private val rect = RectF()
         override fun draw(c: Canvas) {
             val h = p.strokeWidth / 2
             rect.set(bounds.left + h, bounds.top + h, bounds.right - h, bounds.bottom - h)
-            val r = (RADIUS * d - h).coerceAtLeast(0f)
+            val r = (radius - h).coerceAtLeast(0f)
             c.drawRoundRect(rect, r, r, p)
         }
         override fun setAlpha(a: Int) {}
