@@ -127,9 +127,33 @@ object Updater {
     /** Downloads the APK; [progress] receives 0..100. Network: off the main thread. */
     fun download(context: Context, r: Release, fileName: String = "update.apk", progress: (Int) -> Unit): File =
         DataUsage.tag(DataUsage.Use.UPDATES) { downloadUntagged(context, r, fileName, progress) }
+    /**
+     * A cut (the car's Wi-Fi changing access point, a tunnel) no longer loses what came (#98): up to 6 tries, 5 s
+     * apart then longer, each one asking GitHub for the rest only (Range), from the release's address again since
+     * the address it sends to only lasts a few minutes.
+     */
     private fun downloadUntagged(context: Context, r: Release, fileName: String, progress: (Int) -> Unit): File {
         val dir = context.getExternalFilesDir(null) ?: context.filesDir
         val out = File(dir, fileName)
+        out.delete()
+        var tries = 0
+        while (true) {
+            try {
+                fetch(r, out, progress)
+                break
+            } catch (e: java.io.IOException) {
+                if (++tries >= 6) throw e
+                Log.w(TAG, "download cut at ${out.length()} bytes (${e.message}), try ${tries + 1} in ${5 * tries} s")
+                Thread.sleep(5000L * tries)
+            }
+        }
+        Log.i(TAG, "downloaded ${r.version} (${out.length()} bytes)")
+        return out
+    }
+
+    /** What is missing of [out] (all of it the first time), added at its end. */
+    private fun fetch(r: Release, out: File, progress: (Int) -> Unit) {
+        val have = out.length()
         var url = URL(r.url)
         var c: HttpURLConnection
         var hops = 0
@@ -138,16 +162,19 @@ object Updater {
             c.instanceFollowRedirects = false
             c.connectTimeout = 8000; c.readTimeout = 30000
             c.setRequestProperty("User-Agent", "MG4Dash")
+            if (have > 0) c.setRequestProperty("Range", "bytes=$have-")
             val code = c.responseCode
             if (code in 300..399 && hops < 5) { url = URL(url, c.getHeaderField("Location")); c.disconnect(); hops++; continue }
-            if (code != 200) throw IllegalStateException("HTTP $code")
+            if (code != 200 && code != 206) throw IllegalStateException("HTTP $code")
             break
         }
         try {
-            val total = c.contentLengthLong.takeIf { it > 0 } ?: r.size
-            var done = 0L
+            // 200: the server sends everything again, the file starts over
+            val append = c.responseCode == 206
+            var done = if (append) have else 0L
+            val total = if (append) done + c.contentLengthLong.coerceAtLeast(0) else c.contentLengthLong.takeIf { it > 0 } ?: r.size
             c.inputStream.use { input ->
-                out.outputStream().use { o ->
+                java.io.FileOutputStream(out, append).use { o ->
                     val buf = ByteArray(64 * 1024)
                     while (true) {
                         val n = input.read(buf); if (n < 0) break
@@ -156,9 +183,8 @@ object Updater {
                     }
                 }
             }
+            if (total > 0 && done < total) throw java.io.IOException("ended at $done of $total bytes")
         } finally { c.disconnect() }
-        Log.i(TAG, "downloaded ${r.version} (${out.length()} bytes)")
-        return out
     }
 
     /** Installs the downloaded APK; MG4Dash is stopped then relaunched by Android. */
