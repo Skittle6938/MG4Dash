@@ -223,6 +223,36 @@ class ScreenshotTest {
         File(dir, name).outputStream().use { bmp.compress(Bitmap.CompressFormat.PNG, 100, it) }
     }
 
+    /** Map in full screen beside the vertical bar (#98): same top and bottom as the bar, put back after. */
+    @Test fun mapFullscreenBarLeft() = fullscreenBar(1, "home_full_bar_left.png")
+    @Test fun mapFullscreenBarRight() = fullscreenBar(2, "home_full_bar_right.png")
+    private fun fullscreenBar(side: Int, name: String) {
+        org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE).edit()
+            .putInt("theme_mode", 1).putInt("bar_side", side).commit()
+        val act = Robolectric.buildActivity(MainActivity::class.java).setup().get()
+        repeat(3) { shadowOf(Looper.getMainLooper()).idleFor(200, TimeUnit.MILLISECONDS) }
+        val root = act.window.decorView
+        fun lay() { save(root, name) }
+        lay()
+        val bar = act.findViewById<View>(R.id.dock)
+        val card = act.findViewById<View>(R.id.mapCard)
+        fun top(v: View) = IntArray(2).also { v.getLocationInWindow(it) }[1]
+        val padding = act.findViewById<ViewGroup>(android.R.id.content).getChildAt(0).let { it.paddingTop to it.paddingBottom }
+        val full = MainActivity::class.java.getDeclaredMethod("setMapFullscreen", Boolean::class.javaPrimitiveType, Boolean::class.javaPrimitiveType).apply { isAccessible = true }
+        full.invoke(act, true, false)
+        repeat(2) { shadowOf(Looper.getMainLooper()).idleFor(200, TimeUnit.MILLISECONDS) }
+        lay()
+        org.junit.Assert.assertEquals("top", top(bar), top(card))
+        org.junit.Assert.assertEquals("bottom", top(bar) + bar.height, top(card) + card.height)
+        full.invoke(act, false, false)
+        repeat(2) { shadowOf(Looper.getMainLooper()).idleFor(200, TimeUnit.MILLISECONDS) }
+        val back = act.findViewById<ViewGroup>(android.R.id.content).getChildAt(0).let { it.paddingTop to it.paddingBottom }
+        org.junit.Assert.assertEquals("margins put back", padding, back)
+        full.invoke(act, true, false)
+        repeat(2) { shadowOf(Looper.getMainLooper()).idleFor(200, TimeUnit.MILLISECONDS) }
+        save(root, name)
+    }
+
     /** README screenshot: a third party app in the map (demonstration drawing, Map layout). */
     @Test fun homeMapAppPlanner() = mapApp({ FakePlannerView(it) }, "home_map_app_planner.png")
     @Test fun homeMapAppGuidance() = mapApp({ FakeGuidanceView(it) }, "home_map_app_guidance.png")
