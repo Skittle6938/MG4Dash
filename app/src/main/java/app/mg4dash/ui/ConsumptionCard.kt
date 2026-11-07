@@ -48,11 +48,8 @@ class ConsumptionCard(context: Context) : LinearLayout(context) {
             // Taller touch zone for the period's choice
             setPadding(0, (14 * d).toInt(), (24 * d).toInt(), (14 * d).toInt())
             isClickable = true
-            setOnClickListener { v ->
-                (context as? android.app.Activity)?.let { a ->
-                    SourceMenu.choose(a, v, periodLabels, prefs.consumptionPeriod) { prefs.consumptionPeriod = it; show() }
-                }
-            }
+            // A tap goes to the next period (#44): only 3, a menu was one step too many
+            setOnClickListener { prefs.consumptionPeriod = (prefs.consumptionPeriod.coerceIn(0, 2) + 1) % 3; show() }
         }
 
     /** Totals on the period's line in a small place (#97). */
@@ -80,7 +77,7 @@ class ConsumptionCard(context: Context) : LinearLayout(context) {
         orientation = VERTICAL
         setPadding((20 * d).toInt(), (16 * d).toInt(), (20 * d).toInt(), (16 * d).toInt())
         // Title hidden with the "Hide titles" option (the space stays, so nothing shifts)
-        // Period ("Since the charge ▾"): a touch opens the choice, like the radio source choice
+        // Period ("Since the charge"): a tap goes to the next one (#44)
         addView(LinearLayout(context).apply {
             orientation = HORIZONTAL; gravity = Gravity.CENTER_VERTICAL
             addView(periodTv, LayoutParams(0, LayoutParams.WRAP_CONTENT, 1f))
@@ -115,7 +112,7 @@ class ConsumptionCard(context: Context) : LinearLayout(context) {
 
     fun show() {
         val period = prefs.consumptionPeriod.coerceIn(0, 2)
-        periodTv.text = periodLabels[period] + "  ▾"
+        periodTv.text = periodLabels[period]
         val t = EnergyMonitor.totals(period)
         val ok = t.outKwh > 0f
         // Regeneration next to the total (#44), in green, small unit; nothing if it is zero
