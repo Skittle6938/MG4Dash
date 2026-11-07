@@ -558,6 +558,9 @@
     <string name="wc_web_count">%1$d Adressen</string>
     <string name="wc_wake">Seite wach:</string>
     <string name="wc_wake_s">%1$d s</string>
+    <string name="wc_double_tap">Doppeltippen auf die Seite</string>
+    <string name="wc_dt_full">Vollbild</string>
+    <string name="wc_dt_float">Losgelöstes Fenster</string>
     <string name="wc_web_set">eingeben</string>
     <string name="wc_web_none">Noch keine Adresse: Startbildschirm zusammenziehen, dann Webadresse antippen.</string>
     <string name="wc_web_error">Seite nicht erreichbar. Zum erneuten Versuch antippen.</string>
@@ -673,6 +676,7 @@
     <string name="tu_map_1">Nach links / rechts wischen: nächste Karte des Widgets (Verbrauch, Verknüpfungen…)</string>
     <string name="tu_map_3">Zwei Finger: Karte bewegen und zoomen (im Vollbild ein Finger)</string>
     <string name="tu_map_2">Startbildschirm zusammenziehen, dann Karte: andere App in der Kartenkarte</string>
+    <string name="tu_map_4">Web-App: Ein Doppeltippen kann sie als Fenster lösen (Wahl im Bearbeitungsmodus); lang drücken und ziehen zum Verschieben, an einer Ecke ziehen oder zusammenziehen zum Ändern der Größe, Doppeltippen zum Zurücklegen</string>
     <string name="tu_media_t">Musik</string>
     <string name="tu_media_1">Nach oben / unten wischen: nächste Quelle; links / rechts: vorheriger / nächster Titel</string>
     <string name="tu_media_2">Quellennamen tippen: Quellenmenü; Bild tippen: App der Quelle öffnen</string>

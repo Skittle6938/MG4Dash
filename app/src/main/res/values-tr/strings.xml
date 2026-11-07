@@ -558,6 +558,9 @@
     <string name="wc_web_count">%1$d adres</string>
     <string name="wc_wake">Sayfa etkin:</string>
     <string name="wc_wake_s">%1$d s</string>
+    <string name="wc_double_tap">Sayfaya çift dokunma</string>
+    <string name="wc_dt_full">Tam ekran</string>
+    <string name="wc_dt_float">Ayrık pencere</string>
     <string name="wc_web_set">girilecek</string>
     <string name="wc_web_none">Henüz adres yok: ana ekranı iki parmakla kıstırın, sonra Web adresi\'ne dokunun.</string>
     <string name="wc_web_error">Sayfaya ulaşılamıyor. Tekrar denemek için dokunun.</string>
@@ -673,6 +676,7 @@
     <string name="tu_map_1">Sola / sağa kaydır: widget\'ın sonraki kartı (tüketim, kısayollar…)</string>
     <string name="tu_map_3">İki parmak: haritayı taşı ve yakınlaştır (tam ekranda tek parmak)</string>
     <string name="tu_map_2">Ana ekranı iki parmakla sıkıştırın, sonra Harita: harita kartında başka bir uygulama</string>
+    <string name="tu_map_4">Web uygulaması: çift dokunma onu pencere olarak ayırabilir (düzenleme modunda seçim); taşımak için uzun basıp kaydırın, boyutlandırmak için bir köşeyi çekin veya sıkıştırın, geri koymak için çift dokunun</string>
     <string name="tu_media_t">Müzik</string>
     <string name="tu_media_1">Yukarı / aşağı kaydır: sonraki kaynak; sola / sağa: önceki / sonraki parça</string>
     <string name="tu_media_2">Kaynak adına dokun: kaynak menüsü; resme dokun: uygulamayı aç</string>

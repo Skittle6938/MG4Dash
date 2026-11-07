@@ -558,6 +558,9 @@
     <string name="wc_web_count">%1$d addresses</string>
     <string name="wc_wake">Page awake:</string>
     <string name="wc_wake_s">%1$d s</string>
+    <string name="wc_double_tap">Double tap on the page</string>
+    <string name="wc_dt_full">Full screen</string>
+    <string name="wc_dt_float">Detached window</string>
     <string name="wc_web_set">to enter</string>
     <string name="wc_web_none">No address yet: pinch the home screen, then touch Web address.</string>
     <string name="wc_web_error">Page out of reach. Touch to try again.</string>
@@ -673,6 +676,7 @@
     <string name="tu_map_1">Swipe left / right: next card of the widget (consumption, shortcuts…)</string>
     <string name="tu_map_3">Two fingers: move and zoom the map (one finger in full screen)</string>
     <string name="tu_map_2">Pinch the home screen, then Map: show another app in the map card</string>
+    <string name="tu_map_4">Web app: a double tap can detach it as a window (choice in the edit mode); long press and slide to move it, pull a corner or pinch it to resize it, double tap to put it back</string>
     <string name="tu_media_t">Music</string>
     <string name="tu_media_1">Swipe up / down: next source; left / right: previous / next track</string>
     <string name="tu_media_2">Tap the source name: source menu; tap the picture: open the source\'s app</string>
