@@ -676,6 +676,7 @@
     <string name="tu_map_1">Scorri a sinistra / destra: scheda successiva del widget (consumi, scorciatoie…)</string>
     <string name="tu_map_3">Due dita: spostare e ingrandire la mappa (un dito a schermo intero)</string>
     <string name="tu_map_2">Pizzica la schermata Home, poi Mappa: un\'altra app nella scheda mappa</string>
+    <string name="tu_map_4">Web app: un doppio tocco può staccarla in una finestra (scelta nella modalità modifica); pressione lunga e trascina per spostarla, tira un angolo o pizzica per ridimensionarla, doppio tocco per rimetterla</string>
     <string name="tu_media_t">Musica</string>
     <string name="tu_media_1">Scorri su / giù: sorgente successiva; sinistra / destra: brano precedente / successivo</string>
     <string name="tu_media_2">Tocca il nome della sorgente: menu sorgenti; tocca l\'immagine: apri l\'app</string>

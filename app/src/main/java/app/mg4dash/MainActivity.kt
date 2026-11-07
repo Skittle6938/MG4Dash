@@ -1243,7 +1243,6 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         val panel = webPanel ?: return
         val w = webCard ?: return
         val want = prefs.webFloat && !simpleMode
-        w.surfaceBelow = want
         if (want && floatWeb == null) {
             w.reset()
             floatWeb = app.mg4dash.ui.FloatWindow(this, panel, webHole, bounds = { cardsArea() }, onAttach = { attachWeb() },
