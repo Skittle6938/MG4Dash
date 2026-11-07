@@ -550,6 +550,8 @@
     <string name="wc_reset_confirm">¿Volver a dejar la pantalla de inicio de este diseño como al principio?</string>
     <string name="wc_map_app">Mapa:</string>
     <string name="wc_web_address">Dirección web</string>
+    <string name="wc_wake">Página activa:</string>
+    <string name="wc_wake_s">%1$d s</string>
     <string name="wc_web_set">por introducir</string>
     <string name="wc_web_none">Aún no hay dirección: pellizca la pantalla de inicio y toca Dirección web.</string>
     <string name="wc_web_error">Página inaccesible. Toca para reintentar.</string>

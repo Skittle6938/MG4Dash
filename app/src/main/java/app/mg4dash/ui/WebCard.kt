@@ -14,7 +14,7 @@ import app.mg4dash.system.WebViewer
 
 /**
  * "Web app" card of the map widget (#97), off by default: a web page chosen in the edit mode, e.g. a
- * Home Assistant dashboard. The page takes the touches; the band above it changes card, as over an app.
+ * Home Assistant dashboard. At rest, it is swiped like the other cards; a touch wakes it, it then takes the touches.
  * Loaded when shown, paused when hidden. Without an address, or if the page does not load, a message
  * says so; a touch on it loads the page again.
  * Car version (system uid, refused by WebView): the page is shown by MG4Dash Web, a small separate app
@@ -189,6 +189,9 @@ class WebCard(private val activity: android.app.Activity) : FrameLayout(activity
     }
 
     fun closeKeyboard() { keyboard?.invoke(); keyboard = null }
+
+    /** Its keyboard open: the page stays awake while typing (#98). */
+    val typing get() = keyboard != null
 
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()

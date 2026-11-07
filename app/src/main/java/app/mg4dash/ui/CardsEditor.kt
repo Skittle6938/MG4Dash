@@ -203,6 +203,13 @@ object CardsEditor {
             }
             if (Card.WEB in cards.cards)
                 column.addView(link(context.getString(R.string.wc_web_address), prefs.webUrl.ifBlank { context.getString(R.string.wc_web_set) }) { editUrl() })
+            // How long a web page or the map's app stays awake after a touch (#98)
+            if (Card.WEB in cards.cards || Card.MAP in cards.cards && prefs.mapApp != null)
+                column.addView(link(context.getString(R.string.wc_wake), context.getString(R.string.wc_wake_s, prefs.webWakeSeconds)) {
+                    val steps = listOf(5, 10, 20, 30, 60)
+                    prefs.webWakeSeconds = steps[(steps.indexOf(prefs.webWakeSeconds) + 1) % steps.size]
+                    render()
+                })
             // Small places: more chips than room, they scroll
             box.addView(ScrollView(context).apply { isVerticalScrollBarEnabled = false; addView(column) },
                 LinearLayout.LayoutParams(-1, 0, 1f).apply { topMargin = dp(if (t.slot.size == HomeSlots.Size.MEDIUM) 10 else 2) })
