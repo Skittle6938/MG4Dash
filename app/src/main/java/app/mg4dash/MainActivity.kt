@@ -1578,13 +1578,25 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
     /** The car's recent consumption (kWh/100 km), read with the power. */
     @Volatile private var carCons: Float? = if (BuildConfig.MOCK) 15.6f else null
 
-    /** kWh/100 km of [src]; null while unknown (trip under 2 km, no km driven yet). */
-    private fun consOf(src: ConsSource): Float? = when (src) {
+    /** kWh/100 km of [src] now; null while unknown (under 0.5 km, no km driven yet). */
+    private fun consNow(src: ConsSource): Float? = when (src) {
         ConsSource.CHARGE -> app.mg4dash.energy.EnergyMonitor.sinceCharge.value.per100
         ConsSource.TRIP -> app.mg4dash.energy.EnergyMonitor.sinceStart.value.per100
-        ConsSource.LAST_KM -> app.mg4dash.energy.ConsumptionCurve.curves.value.trip.lastOrNull()
+        ConsSource.LAST_KM -> app.mg4dash.energy.EnergyMonitor.lastKm.value
         ConsSource.CAR -> carImpliedCons() ?: carCons
     }?.takeIf { it in 3f..60f }
+
+    /** Shown values (#29): read again every 10 s, the car's (SAIC) at once; a value appearing shows at once. */
+    private val consShown = HashMap<ConsSource, Pair<Long, Float?>>()
+
+    /** kWh/100 km of [src] as shown on the card, and the range with it. */
+    private fun consOf(src: ConsSource): Float? {
+        if (src == ConsSource.CAR) return consNow(src)
+        val now = android.os.SystemClock.elapsedRealtime()
+        val held = consShown[src]
+        if (held != null && held.second != null && now - held.first < CONS_REFRESH_MS) return held.second
+        return consNow(src).also { consShown[src] = now to it }
+    }
 
     /**
      * The car's consumption: the one its range assumes, energy left ÷ range announced by the car, so that the
@@ -1647,11 +1659,13 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         }
     }
 
-    /** Tap on the kWh/100: next consumption, skipping those not known yet; the car's is always there. */
+    /**
+     * Tap on the kWh/100: next consumption, known or not yet (#29). While unknown, "—" with its logo and the car's
+     * range; its value and range come by themselves once known.
+     */
     private fun nextConsSource() {
         val all = ConsSource.entries
-        val from = consSource
-        val next = (1..all.size).map { all[(from.ordinal + it) % all.size] }.first { it == ConsSource.CAR || consOf(it) != null }
+        val next = all[(consSource.ordinal + 1) % all.size]
         prefs.consSource = next.ordinal
         putPowerCons()
         b.range.put(powerRange(CarBridge.state.value))
@@ -1934,6 +1948,8 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         /** Width of the consumption's logo, in text sizes: before the kWh/100, before the km (#29). */
         const val CONS_ICON = 0.8f
         const val RANGE_ICON = 0.66f
+        /** The card's kWh/100 read again every 10 s, as the owner of #29 asked: steady while driving. */
+        const val CONS_REFRESH_MS = 10_000L
         /** Map full screen to restore after a recreation (in addition to the saved state). */
         var mapFullOnRecreate = false
     }
