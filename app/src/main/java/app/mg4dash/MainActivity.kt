@@ -477,9 +477,11 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
                 restFrame = null
                 if (restMulti) return true
                 val dx = ev.rawX - restX; val dy = ev.rawY - restY; val slop = dp(24)
-                if (Math.abs(dx) > slop && Math.abs(dx) > Math.abs(dy)) {
+                // As on the other cards: left or up = next card, right or down = previous
+                if (Math.abs(dx) > slop || Math.abs(dy) > slop) {
                     tapFrame = null; handler.removeCallbacks(wakeTapped)
-                    if (f.cards.size >= 2 && hiddenForMap == null) swipeSlot(f, if (dx < 0) 1 else -1)
+                    val dir = if (Math.abs(dx) > Math.abs(dy)) (if (dx < 0) 1 else -1) else (if (dy < 0) 1 else -1)
+                    if (f.cards.size >= 2 && hiddenForMap == null) swipeSlot(f, dir)
                 } else if (Math.abs(dx) < slop && Math.abs(dy) < slop) {
                     if (tapFrame === f && ev.eventTime - tapAt < android.view.ViewConfiguration.getDoubleTapTimeout()) {
                         tapFrame = null; handler.removeCallbacks(wakeTapped)
