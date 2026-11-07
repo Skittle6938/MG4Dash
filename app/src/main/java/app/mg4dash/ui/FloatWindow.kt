@@ -81,6 +81,14 @@ class FloatWindow(
         private set
     var awake = false
         private set
+    /** The handles, shown while the window is touched at rest and a moment after (out of the way of the page). */
+    private var handlesShown = false
+    private val hideHandles = Runnable { handlesShown = false; chrome.invalidate() }
+    private fun showHandles(forMs: Long? = null) {
+        handler.removeCallbacks(hideHandles)
+        handlesShown = true; chrome.invalidate()
+        if (forMs != null) handler.postDelayed(hideHandles, forMs)
+    }
 
     private val handler = android.os.Handler(android.os.Looper.getMainLooper())
     private val sleep = Runnable { if (keepAwake()) setAwake(true) else setAwake(false) }
@@ -128,6 +136,7 @@ class FloatWindow(
         if (on) {
             holder.visibility = View.VISIBLE
             place(saved() ?: initial())
+            showHandles(HANDLES_MS)
             Log.i(TAG, "detached at $rect")
         } else {
             followDock()
@@ -269,6 +278,7 @@ class FloatWindow(
                 if (!rect.contains(x.toInt(), y.toInt())) return false
                 if (awake) { setAwake(true); through = true; return false }
                 downX = x; downY = y; start.set(rect)
+                showHandles()
                 val c = dp(64); val e = dp(44)
                 val left = x - rect.left < c; val right = rect.right - x < c
                 val top = y - rect.top < c; val bottom = rect.bottom - y < c
@@ -327,6 +337,7 @@ class FloatWindow(
                 val still = local(ev).let { Math.abs(it[0] - downX) <= dp(16) && Math.abs(it[1] - downY) <= dp(16) }
                 val m = if (mode == Mode.RESIZE && still) { hideGhost(); Mode.PENDING } else mode
                 mode = Mode.NONE
+                if (m != Mode.NONE) showHandles(HANDLES_MS)
                 chrome.invalidate()
                 when (m) {
                     Mode.NONE -> return false
@@ -348,6 +359,7 @@ class FloatWindow(
             MotionEvent.ACTION_CANCEL -> {
                 handler.removeCallbacks(lifted)
                 val m = mode; mode = Mode.NONE; hideGhost(); chrome.invalidate()
+                if (m != Mode.NONE) showHandles(HANDLES_MS)
                 return m != Mode.NONE
             }
             else -> return mode != Mode.NONE
@@ -414,7 +426,7 @@ class FloatWindow(
         private val arc = RectF()
 
         override fun onDraw(c: Canvas) {
-            if (awake) return
+            if (awake || !handlesShown) return
             handle.alpha = if (mode == Mode.NONE) 150 else 255
             val w = width.toFloat(); val h = height.toFloat(); val i = frame / 2f; val l = 30 * d; val e = 32 * d
             // Corners, rounded as the window's (its radius, taken in by half the frame)
@@ -451,5 +463,9 @@ class FloatWindow(
         }
     }
 
-    companion object { private const val TAG = "FloatWeb" }
+    companion object {
+        private const val TAG = "FloatWeb"
+        /** How long the handles stay after the window was last touched. */
+        private const val HANDLES_MS = 2500L
+    }
 }
