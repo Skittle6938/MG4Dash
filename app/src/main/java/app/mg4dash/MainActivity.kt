@@ -1549,8 +1549,19 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         ConsSource.CHARGE -> app.mg4dash.energy.EnergyMonitor.sinceCharge.value.per100
         ConsSource.TRIP -> app.mg4dash.energy.EnergyMonitor.sinceStart.value.per100
         ConsSource.LAST_KM -> app.mg4dash.energy.ConsumptionCurve.curves.value.trip.lastOrNull()
-        ConsSource.CAR -> carCons
+        ConsSource.CAR -> carImpliedCons() ?: carCons
     }?.takeIf { it in 3f..60f }
+
+    /**
+     * The car's consumption: the one its range assumes, energy left ÷ range announced by the car, so that the
+     * SAIC logo's kWh/100 and km agree. Its own "recent consumption" property is only kept while either is unknown.
+     */
+    private fun carImpliedCons(): Float? {
+        val s = CarBridge.state.value
+        val km = s.rangeKm?.takeIf { it > 5 } ?: return null
+        val left = energyLeft(s) ?: return null
+        return left / km * 100f
+    }
 
     private var sohAt = 0L
     private var sohPercent: Float? = null
