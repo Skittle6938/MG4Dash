@@ -11,7 +11,6 @@ import android.location.Location
 import app.mg4dash.map.LocationRepo
 import app.mg4dash.map.MapCard
 import app.mg4dash.pages.ClimateActivity
-import app.mg4dash.pages.EnergyActivity
 import app.mg4dash.pages.PhoneActivity
 import app.mg4dash.pages.VehicleActivity
 import app.mg4dash.ui.Fullscreen
