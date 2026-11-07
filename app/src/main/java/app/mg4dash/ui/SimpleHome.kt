@@ -21,7 +21,6 @@ import app.mg4dash.car.CarBridge
 import app.mg4dash.car.VehicleState
 import app.mg4dash.media.MediaHub
 import app.mg4dash.pages.ClimateActivity
-import app.mg4dash.pages.EnergyActivity
 import app.mg4dash.shortcuts.Shortcuts
 import app.mg4dash.system.Apps
 import app.mg4dash.system.Prefs
@@ -234,7 +233,7 @@ class SimpleHome(private val a: AppCompatActivity) {
         p.addView(chargeState, kit.lp(-1, -2, t = 10))
         chargeAction = kit.toggleTile(a.getString(R.string.charge_btn)) { onChargeAction() }.apply { textSize = 24f }
         p.addView(chargeAction, kit.lp(-1, kit.dp(72), t = 10))
-        p.setOnClickListener { a.startActivity(Intent(a, EnergyActivity::class.java)) }
+        // No Energy page on a tap, as on the other layouts: the bar has its button
         return p
     }
 

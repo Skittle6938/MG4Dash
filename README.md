@@ -140,7 +140,7 @@ Settings › Home › Home layout: **Full** (default), **Map** or **Simple**. *M
 | Map layout | Simple layout |
 |---|---|
 | ![Map layout](docs/screenshots/home_map_layout.png?v=25) | ![Simple layout](docs/screenshots/home_simple.png?v=25) |
-| Weather with date and time, climate, a stack (energy, trip energy, live power, phone; swipe to change, back to the battery when plugged in) above the media, and the map over the whole right column. | Fewer buttons and bigger text: climate, battery and media panels, two shortcuts and today's weather. Tap a panel to open its page. |
+| Weather with date and time, climate, a stack (energy, trip energy, live power, phone; swipe to change, back to the battery when plugged in) above the media, and the map over the whole right column. | Fewer buttons and bigger text: climate, battery and media panels, two shortcuts and today's weather. Tap the climate panel to open its page; the Energy page opens from the bar. |
 | **Bottom dock** | **Right-hand drive** |
 | ![Bottom dock](docs/screenshots/home_bottom_bar.png?v=25) | ![Vertical bar on the right](docs/screenshots/home_right_hand.png?v=25) |
 | *Horizontal at the bottom*: dock with clock and date (long press the clock: clock or Wi-Fi settings). | On right-hand drive cars (detected), the vertical bar goes on the right, next to the driver; it can also be forced to either side. |
