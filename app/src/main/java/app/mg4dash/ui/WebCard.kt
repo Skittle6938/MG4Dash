@@ -254,7 +254,7 @@ class WebCard(private val activity: android.app.Activity) : FrameLayout(activity
         val w = android.widget.PopupWindow(v, -2, -2).apply {
             isFocusable = false; isTouchable = false; isClippingEnabled = false
             setBackgroundDrawable(android.graphics.drawable.ColorDrawable(0))
-            showAtLocation(this@WebCard, Gravity.TOP or Gravity.LEFT, at[0] + (width - v.measuredWidth) / 2, at[1] + (height - v.measuredHeight) / 2)
+            showAtLocation(this@WebCard, Gravity.TOP or Gravity.LEFT, at[0] + (this@WebCard.width - v.measuredWidth) / 2, at[1] + (this@WebCard.height - v.measuredHeight) / 2)
         }
         shownLabel = w
         postDelayed({ if (shownLabel === w) { w.dismiss(); shownLabel = null } }, 2000)
