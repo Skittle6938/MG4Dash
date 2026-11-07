@@ -1076,14 +1076,25 @@ class SettingsActivity : AppCompatActivity() {
      */
     private fun webEngine(parent: LinearLayout) {
         val we = app.mg4dash.system.WebEngine
+        if (!we.installed(this) && !we.possible(this)) return
+        // Built again after an install or a revert, from the engine then in use
+        val box = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
+        parent.addView(box, LinearLayout.LayoutParams(-1, -2))
+        webEngineRows(box, null)
+    }
+
+    private fun webEngineRows(box: LinearLayout, message: String?) {
+        val we = app.mg4dash.system.WebEngine
+        box.removeAllViews()
         val on = we.installed(this)
-        if (!on && !we.possible(this)) return
-        val state = text(parent, getString(R.string.st_web_engine, we.current(this) ?: "?"), 18f, R.color.text_value)
-        text(parent, getString(if (on) R.string.st_web_engine_on else R.string.st_web_engine_desc, we.VERSION, we.SIZE / 1_000_000), 15f, R.color.text_title)
+        val state = text(box, message ?: getString(R.string.st_web_engine, we.current(this) ?: "?"), 18f, R.color.text_value)
+        text(box, getString(if (on) R.string.st_web_engine_on else R.string.st_web_engine_desc, we.VERSION, we.SIZE / 1_000_000), 15f, R.color.text_title)
         var busy = false
         fun finished(ok: Boolean) {
             busy = false
-            state.text = if (ok) getString(R.string.st_web_engine_done) else getString(R.string.st_update_error)
+            if (!ok) { state.text = getString(R.string.st_update_error); return }
+            // Installed: says so; taken off: the engine line shows the car's own again
+            webEngineRows(box, if (we.installed(this)) getString(R.string.st_web_engine_done) else null)
         }
         val b = button(getString(if (on) R.string.st_web_engine_revert else R.string.st_web_engine_install, we.VERSION)) {
             if (busy) return@button
@@ -1108,7 +1119,7 @@ class SettingsActivity : AppCompatActivity() {
                 }
                 .setNegativeButton(R.string.cancel, null).show().also { app.mg4dash.ui.Dialogs.fix(it) }
         }
-        row(parent, b)
+        row(box, b)
     }
 
     private fun panel(parent: LinearLayout, title: String, fill: Boolean = false): LinearLayout {
