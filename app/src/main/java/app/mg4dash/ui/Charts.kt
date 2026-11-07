@@ -92,8 +92,8 @@ class RingChart @JvmOverloads constructor(context: Context, attrs: AttributeSet?
 }
 
 /** Consumption curve (kWh/100 km) with a gradient area and average line. */
-/** Smoothed curve (#44): each point = average of itself and its neighbour on each side (3 points). */
-fun List<Float>.smoothed(): List<Float> = indices.map { i -> subList(maxOf(0, i - 1), minOf(size, i + 2)).average().toFloat() }
+/** Smoothed curve (#44): each point = average of itself and its 2 neighbours on each side (5 points; 3 was too jagged once placed by km). */
+fun List<Float>.smoothed(): List<Float> = indices.map { i -> subList(maxOf(0, i - 2), minOf(size, i + 3)).average().toFloat() }
 
 private const val MAX_POINTS = 50
 
