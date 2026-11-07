@@ -553,6 +553,7 @@
     <string name="wc_web_apps">Web apps</string>
     <string name="wc_web_apps_hint">Toca una dirección para mostrarla en la tarjeta · ✕ para borrarla</string>
     <string name="wc_web_add">Añadir una dirección</string>
+    <string name="wc_web_back">Atrás</string>
     <string name="wc_web_count">%1$d direcciones</string>
     <string name="wc_wake">Página activa:</string>
     <string name="wc_wake_s">%1$d s</string>

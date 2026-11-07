@@ -199,6 +199,64 @@ class WebCard(private val activity: android.app.Activity) : FrameLayout(activity
     /** Its keyboard open: the page stays awake while typing (#98). */
     val typing get() = keyboard != null
 
+    /** The page's previous one (#98): in MG4Dash Web, its video first if one fills the page. */
+    fun back() {
+        if (appView != null) { WebViewer.key(context, key = "back"); return }
+        web?.let { if (it.canGoBack()) it.goBack() }
+    }
+
+    /**
+     * Long press on the card (#98): a small menu with Back (the page's previous one) and the addresses
+     * entered in the edit mode, a touch on one showing it at once.
+     */
+    fun menu() {
+        val d = resources.displayMetrics.density
+        fun dp(v: Int) = (v * d).toInt()
+        val accent = Themes.color(context, R.color.accent_action)
+        val sub = Themes.color(context, R.color.text_sub)
+        val urls = prefs.webUrls
+        val shown = prefs.webUrl
+        var dialog: android.app.Dialog? = null
+        val list = android.widget.LinearLayout(context).apply { orientation = android.widget.LinearLayout.VERTICAL; setPadding(dp(24), dp(16), dp(24), dp(8)) }
+        fun row(mark: String, title: String, detail: String?, on: Boolean, click: () -> Unit) {
+            val r = android.widget.LinearLayout(context).apply {
+                orientation = android.widget.LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL
+                minimumHeight = dp(72); setPadding(dp(18), dp(6), dp(18), dp(6))
+                background = android.graphics.drawable.GradientDrawable().apply {
+                    cornerRadius = dp(18).toFloat()
+                    setColor(if (on) (accent and 0x00FFFFFF) or 0x40000000 else Themes.color(context, R.color.bg_top))
+                    if (on) setStroke(dp(2), accent)
+                }
+                setOnClickListener { dialog?.dismiss(); click() }
+            }
+            r.addView(TextView(context).apply {
+                text = mark; setTextColor(if (on || detail == null) accent else sub); setTextSize(TypedValue.COMPLEX_UNIT_SP, 26f)
+                setPadding(0, 0, dp(18), 0)
+            })
+            r.addView(android.widget.LinearLayout(context).apply {
+                orientation = android.widget.LinearLayout.VERTICAL
+                addView(TextView(context).apply { text = title; setTextColor(Themes.color(context, R.color.text_title)); setTextSize(TypedValue.COMPLEX_UNIT_SP, 21f); maxLines = 1 })
+                if (detail != null) addView(TextView(context).apply {
+                    text = detail; setTextColor(sub); setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f); maxLines = 1; ellipsize = android.text.TextUtils.TruncateAt.MIDDLE
+                })
+            }, android.widget.LinearLayout.LayoutParams(0, -2, 1f))
+            list.addView(r, android.widget.LinearLayout.LayoutParams(-1, -2).apply { bottomMargin = dp(10) })
+        }
+        row("←", context.getString(R.string.wc_web_back), null, false) { back() }
+        urls.forEach { url ->
+            row(if (url == shown) "◉" else "○", name(url), url, url == shown) {
+                if (url == shown) return@row
+                prefs.webUrl = url
+                Log.i(TAG, "menu: ${name(url)}")
+                show()
+            }
+        }
+        dialog = android.app.AlertDialog.Builder(activity)
+            .setView(android.widget.ScrollView(context).apply { isVerticalScrollBarEnabled = false; addView(list) })
+            .show().also { Dialogs.hideBars(it) }
+        dialog.window?.setLayout(dp(560), -2)
+    }
+
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
         if (WebViewer.needed() && !listening) {
