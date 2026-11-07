@@ -1057,6 +1057,38 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
     private var hiddenForMap: List<Pair<View, Int>>? = null
     /** Gaps above the map's place, taken off in full screen. */
     private var fullMargins: List<Pair<android.view.ViewGroup.MarginLayoutParams, Int>> = emptyList()
+    /** Screen margins and bar margins before full screen (top, bottom), put back after. */
+    private var barAlign: IntArray? = null
+
+    /**
+     * Full screen with the vertical bar (#98): the card takes the bar's height, same top and same bottom
+     * (on the left, the bar rises a little higher, under MG's fog light button). The screen margin shrinks
+     * by the difference and the bar's margin grows as much, so the bar stays where it is.
+     */
+    private fun alignToBar() {
+        val bar = findViewById<View>(R.id.dock) ?: return
+        val root = b.root
+        if (!Dock.vertical(this) || bar.height == 0 || columnsRow.height == 0) return
+        val blp = bar.layoutParams as? LinearLayout.LayoutParams ?: return
+        val a = IntArray(2).also { bar.getLocationInWindow(it) }[1]
+        val r = IntArray(2).also { columnsRow.getLocationInWindow(it) }[1]
+        val up = (r - a).coerceIn(0, root.paddingTop)
+        val down = ((a + bar.height) - (r + columnsRow.height)).coerceIn(0, root.paddingBottom)
+        if (up == 0 && down == 0) return
+        barAlign = intArrayOf(root.paddingTop, root.paddingBottom, blp.topMargin, blp.bottomMargin)
+        root.setPadding(root.paddingLeft, root.paddingTop - up, root.paddingRight, root.paddingBottom - down)
+        blp.topMargin += up; blp.bottomMargin += down
+        bar.layoutParams = blp
+    }
+
+    private fun unalignFromBar() {
+        val m = barAlign ?: return
+        barAlign = null
+        val root = b.root
+        root.setPadding(root.paddingLeft, m[0], root.paddingRight, m[1])
+        val bar = findViewById<View>(R.id.dock) ?: return
+        (bar.layoutParams as? LinearLayout.LayoutParams)?.let { it.topMargin = m[2]; it.bottomMargin = m[3]; bar.layoutParams = it }
+    }
 
     /** Called by the bar: each of its buttons brings the map back to its widget size. */
     fun exitMapFullscreen() = setMapFullscreen(false)
@@ -1088,11 +1120,13 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
             }
             hiddenForMap = hidden
             fullMargins = margins
+            alignToBar()
         } else {
             hiddenForMap?.forEach { (v, vis) -> v.visibility = vis }
             hiddenForMap = null
             fullMargins.forEach { (lp, m) -> lp.topMargin = m }
             fullMargins = emptyList()
+            unalignFromBar()
             columnsRow.requestLayout()
         }
         mapCard.oneFingerPan = on
