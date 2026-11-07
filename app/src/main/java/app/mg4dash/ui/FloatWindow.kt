@@ -91,6 +91,11 @@ class FloatWindow(
     fun open() {
         (panel.parent as? ViewGroup)?.removeView(panel)
         holder.addView(panel, FrameLayout.LayoutParams(-1, -1))
+        // The page's own rounded corners, inside the frame when detached (the window's clip only rounds its outer edge)
+        panel.outlineProvider = object : android.view.ViewOutlineProvider() {
+            override fun getOutline(v: View, o: android.graphics.Outline) { o.setRoundRect(0, 0, v.width, v.height, FadeOutline.RADIUS * d) }
+        }
+        panel.clipToOutline = true
         holder.addView(chrome, FrameLayout.LayoutParams(-1, -1))
         layer.addView(holder, FrameLayout.LayoutParams(0, 0))
         layer.addView(ghost, FrameLayout.LayoutParams(0, 0))
