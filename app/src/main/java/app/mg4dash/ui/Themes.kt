@@ -237,11 +237,20 @@ object Themes {
 
     private const val FULL_HEIGHT_DP = 720
 
+    /**
+     * What Radio Dash reads: background, accent, light, vertical bar, 0, wide bar, bar on the right
+     * (the last two for its own bar, Radio Dash #2).
+     */
+    fun published(context: Context): String {
+        val p = Prefs(context)
+        return "${p.themeBackground},${p.themeAccent},${if (isLight(context)) 1 else 0},${if (p.verticalDock) 1 else 0},0," +
+            "${if (p.wideBar) 1 else 0},${if (Dock.rightSide(context)) 1 else 0}"
+    }
+
     /** Publishes the theme for Radio Dash (system uid required; no effect otherwise). */
     fun publish(context: Context) {
-        val p = Prefs(context)
         try {
-            Settings.Global.putString(context.contentResolver, GLOBAL_KEY, "${p.themeBackground},${p.themeAccent},${if (isLight(context)) 1 else 0},${if (p.verticalDock) 1 else 0},0")
+            Settings.Global.putString(context.contentResolver, GLOBAL_KEY, published(context))
         } catch (e: Exception) {
             Log.w("Theme", "publishing for Radio Dash failed: ${e.message}")
         }
