@@ -930,9 +930,9 @@ object MediaHub {
         pauseOthersOnStart(candidates)
         val source = effectiveSource(candidates)
         // Wheel button on an app's player (#98): the stock launcher sends it to the radio for a moment, the
-        // card stays on the app meanwhile
+        // card stays on the app meanwhile (1 s)
         val nowUp = android.os.SystemClock.uptimeMillis()
-        val held = (wheelFrom?.takeIf { nowUp - wheelAt < 3_000 } ?: recentBack())
+        val held = (wheelFrom?.takeIf { nowUp - wheelAt < 1_000 } ?: wheelBack?.takeIf { nowUp - wheelBackAt < 1_000 })
             ?.takeIf { pkg -> candidates.any { it.packageName == pkg } || browserControllers[pkg] != null }
         // Old SDK radio: no controller, it is shown from the car's source, the
         // choice on the card, or because it plays while no other player does.
