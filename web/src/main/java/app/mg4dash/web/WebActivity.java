@@ -598,10 +598,14 @@ public class WebActivity extends Activity {
         String path = u.getPath() == null ? "" : u.getPath();
         boolean maps = host.startsWith("maps.google.") || host.equals("maps.app.goo.gl")
             || (host.matches("(www\\.)?google\\.[a-z.]+") && path.startsWith("/maps"));
-        String want = maps ? desktop(mobileAgent) : mobileAgent;
+        // On the way to Google Maps, Google's own pages (cookie consent, sign-in) keep the computer's agent: asked
+        // as a phone there, it sends back to the mobile site, which only offers the app (#98)
+        boolean google = host.matches("([a-z]+\\.)?google\\.[a-z.]+") || host.endsWith(".gstatic.com");
+        boolean computer = !mobileAgent.equals(s.getUserAgentString());
+        String want = maps || (google && computer) ? desktop(mobileAgent) : mobileAgent;
         if (want.equals(s.getUserAgentString())) return false;
         s.setUserAgentString(want);
-        Log.i(TAG, "user agent: " + (maps ? "computer" : "phone"));
+        Log.i(TAG, "user agent: " + (want.equals(mobileAgent) ? "phone" : "computer"));
         return true;
     }
 
