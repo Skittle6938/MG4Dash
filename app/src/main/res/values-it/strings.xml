@@ -550,6 +550,10 @@
     <string name="wc_reset_confirm">Rimettere la schermata home di questo layout com\'era all\'inizio?</string>
     <string name="wc_map_app">Mappa:</string>
     <string name="wc_web_address">Indirizzo web</string>
+    <string name="wc_web_apps">Web app</string>
+    <string name="wc_web_apps_hint">Tocca un indirizzo per mostrarlo nella scheda · ✕ per eliminarlo · scorri la scheda a riposo in alto o in basso per cambiare</string>
+    <string name="wc_web_add">Aggiungi un indirizzo</string>
+    <string name="wc_web_count">%1$d indirizzi</string>
     <string name="wc_wake">Pagina attiva:</string>
     <string name="wc_wake_s">%1$d s</string>
     <string name="wc_web_set">da inserire</string>

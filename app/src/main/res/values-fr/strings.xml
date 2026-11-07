@@ -550,6 +550,10 @@
     <string name="wc_reset_confirm">Remettre l\'accueil de cette disposition comme à l\'origine ?</string>
     <string name="wc_map_app">Carte :</string>
     <string name="wc_web_address">Adresse web</string>
+    <string name="wc_web_apps">Web apps</string>
+    <string name="wc_web_apps_hint">Touchez une adresse pour l\'afficher dans la carte · ✕ pour la supprimer · glissez la carte au repos vers le haut ou le bas pour changer</string>
+    <string name="wc_web_add">Ajouter une adresse</string>
+    <string name="wc_web_count">%1$d adresses</string>
     <string name="wc_wake">Page réveillée :</string>
     <string name="wc_wake_s">%1$d s</string>
     <string name="wc_web_set">à saisir</string>

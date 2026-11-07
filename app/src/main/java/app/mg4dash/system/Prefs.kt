@@ -76,6 +76,14 @@ class Prefs(context: Context) {
     var webUrl: String
         get() = sp.getString("web_url", "") ?: ""
         set(v) = sp.edit().putString("web_url", v.trim()).apply()
+    /** Addresses of the web app card (#98), in their order; the one shown is [webUrl]. */
+    var webUrls: List<String>
+        get() {
+            val one = listOfNotNull(webUrl.ifBlank { null })
+            val raw = sp.getString("web_urls", null) ?: return one
+            return try { org.json.JSONArray(raw).let { a -> (0 until a.length()).map { a.getString(it) }.filter { it.isNotBlank() } } } catch (_: Exception) { one }
+        }
+        set(v) = sp.edit().putString("web_urls", org.json.JSONArray(v.filter { it.isNotBlank() }.distinct()).toString()).apply()
     /** A web page or an app in a card stays awake this long after its last touch, then rests (#98). */
     var webWakeSeconds: Int
         get() = sp.getInt("web_wake_s", 10)
