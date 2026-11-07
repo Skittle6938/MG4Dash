@@ -145,6 +145,9 @@ class WebCard(private val activity: android.app.Activity) : FrameLayout(activity
         appView = v; appUrl = url
     }
 
+    /** Full screen and back (#98): the page's layer follows the card's new place. */
+    fun moved() { appView?.let { EmbeddedApp.moved(it) } }
+
     /** The embedded page goes with its virtual display (MG4Dash Web is stopped first). */
     private fun removeApp() {
         closeKeyboard()
