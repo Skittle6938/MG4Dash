@@ -928,9 +928,14 @@ object MediaHub {
         val playing = candidates.firstOrNull { it.playbackState?.state == PlaybackState.STATE_PLAYING }
         pauseOthersOnStart(candidates)
         val source = effectiveSource(candidates)
+        // Wheel button on an app's player (#98): the stock launcher sends it to the radio for a moment, the
+        // card stays on the app meanwhile
+        val nowUp = android.os.SystemClock.uptimeMillis()
+        val held = (wheelFrom?.takeIf { nowUp - wheelAt < 3_000 } ?: recentBack())
+            ?.takeIf { pkg -> candidates.any { it.packageName == pkg } || browserControllers[pkg] != null }
         // Old SDK radio: no controller, it is shown from the car's source, the
         // choice on the card, or because it plays while no other player does.
-        val showRadio = legacyRadio && SaicRadio.ready && when (pinnedPkg) {
+        val showRadio = held == null && legacyRadio && SaicRadio.ready && when (pinnedPkg) {
             RADIO -> true
             null -> source == RADIO || (source == null && playing == null && SaicRadio.last?.playing == true)
             else -> false
@@ -938,7 +943,7 @@ object MediaHub {
         if (showRadio != radioShown) Log.i(TAG, "player shown: ${if (showRadio) "radio (SAIC service)" else "media session"}")
         radioShown = showRadio
         // Old SDK USB (#80): no controller either, shown from the same signals as the radio
-        val showUsb = !showRadio && serviceMedia && SaicMedia.ready && USB in availableSources() && when (pinnedPkg) {
+        val showUsb = held == null && !showRadio && serviceMedia && SaicMedia.ready && USB in availableSources() && when (pinnedPkg) {
             USB -> true
             null -> source == USB || (source == null && playing == null && SaicMedia.last?.playing == true)
             else -> false
@@ -956,7 +961,8 @@ object MediaHub {
         }
         val pinned = pinnedPkg?.let { bestFor(it) }
         val fromSource = source?.let { bestFor(it) }
-        val chosen = pinned
+        val chosen = held?.let { bestFor(it) }
+            ?: pinned
             ?: fromSource
             ?: playing
             ?: current?.takeIf { cur -> candidates.any { it.sessionToken == cur.sessionToken } }
