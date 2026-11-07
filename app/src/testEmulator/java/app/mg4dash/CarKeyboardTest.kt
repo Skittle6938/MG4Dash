@@ -44,10 +44,12 @@ class CarKeyboardTest {
     }
 
     @Test fun lettersAreLowerCaseAndShiftAppliesOnce() {
-        key("A").performClick()
+        key("a").performClick()
         key("⇧").performClick()
+        assertEquals("A", keys()[0].text.toString())
         key("B").performClick()
-        key("C").performClick()
+        assertEquals("a", keys()[0].text.toString())
+        key("c").performClick()
         assertEquals("aBc", typed.toString())
     }
 
@@ -55,23 +57,24 @@ class CarKeyboardTest {
         key("⇧").performLongClick()
         key("A").performClick()
         key("B").performClick()
+        assertEquals("A", keys()[0].text.toString())
         key("⇪").performClick()
-        key("C").performClick()
+        key("c").performClick()
         assertEquals("ABc", typed.toString())
     }
 
     @Test fun longPressOffersAccentsThenComesBack() {
-        key("E").performLongClick()
-        key("É").performClick()
+        key("e").performLongClick()
+        key("é").performClick()
         assertEquals("é", typed.toString())
-        assertEquals("A", keys()[0].text.toString())
+        assertEquals("a", keys()[0].text.toString())
     }
 
     @Test fun accentRowCanBeClosedWithoutTyping() {
-        key("E").performLongClick()
+        key("e").performLongClick()
         key("✕").performClick()
         assertEquals("", typed.toString())
-        assertEquals("A", keys()[0].text.toString())
+        assertEquals("a", keys()[0].text.toString())
     }
 
     @Test fun symbolsLayerAndBack() {
@@ -79,7 +82,7 @@ class CarKeyboardTest {
         key("7").performClick()
         key("@").performClick()
         key("ABC").performClick()
-        key("A").performClick()
+        key("a").performClick()
         assertEquals("7@a", typed.toString())
     }
 
