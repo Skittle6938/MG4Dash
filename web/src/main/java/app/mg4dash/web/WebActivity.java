@@ -287,7 +287,7 @@ public class WebActivity extends Activity {
         + "})();";
 
     /**
-     * Videos without image (#98): on the car, the hardware decoders (MTK, VP9 as H.264) give Chromium 66 no
+     * Videos without image (#98): on the car, the hardware decoders (MTK, VP9 as H.264) give Chromium (66, and 138 too) no
      * picture, in the card as on the main screen, the sound alone playing. Chromium is told before its start to
      * decode the videos itself: VP9 by libvpx shows. It has no H.264 of its own on Android, so the pages are
      * told that H.264 (and HEVC, AV1) cannot be played: YouTube and others send VP9.
@@ -299,20 +299,64 @@ public class WebActivity extends Activity {
         try {
             // Makes WebView's provider without starting Chromium: its command line is still Java's, copied at the start
             ClassLoader cl = WebView.getWebViewClassLoader();
-            Class<?> cmd = Class.forName("org.chromium.base.CommandLine", true, cl);
-            Object line = cmd.getMethod("getInstance").invoke(null);
-            java.lang.reflect.Method add = cmd.getMethod("appendSwitch", String.class);
-            add.invoke(line, "disable-accelerated-video-decode");
+            Switches line = switches(cl);
+            line.add("disable-accelerated-video-decode");
+            if (!line.has("disable-accelerated-video-decode")) throw new IllegalStateException("switch not kept");
             softVideo = true;
-            Log.i(TAG, "videos decoded by Chromium");
+            Log.i(TAG, "videos decoded by Chromium (" + line.name + ")");
             // The card hidden, the paused WebView keeps playing (sound), Chromium dropping the image itself
             try {
-                add.invoke(line, "disable-media-suspend");
+                line.add("disable-media-suspend");
             } catch (Throwable e) {
                 Log.w(TAG, "media suspend: " + e);
             }
         } catch (Throwable e) {
             Log.w(TAG, "videos still by the hardware decoders: " + e);
+        }
+    }
+
+    /** Chromium's command line in Java, before its start: add a switch, and tell whether it has one. */
+    private static final class Switches {
+        final String name;
+        private final Object line;
+        private final java.lang.reflect.Method add, has;
+        private final boolean withValue;
+
+        Switches(String name, Object line, java.lang.reflect.Method add, java.lang.reflect.Method has, boolean withValue) {
+            this.name = name; this.line = line; this.add = add; this.has = has; this.withValue = withValue;
+        }
+
+        void add(String s) throws Exception { if (withValue) add.invoke(line, s, ""); else add.invoke(line, s); }
+
+        boolean has(String s) throws Exception { return (Boolean) has.invoke(line, s); }
+    }
+
+    /** Chromium 138 (MG4Dash-WebView's build, #98): its CommandLine renamed by the build, WV.ad. */
+    private static final long RECENT_ENGINE = 720406301L;
+
+    /**
+     * Chromium 66 keeps org.chromium.base.CommandLine. Chromium 138 has it renamed (WV.ad: its single instance in
+     * the static field d, a(name, value) to add a switch, c(name) whether it has one): only for that exact version,
+     * the names changing with each build, and checked by their types. On the car, Chromium 138 too has the hardware
+     * decoders (OMX.MTK.VIDEO.DECODER.VP9) give web pages a black, still picture.
+     */
+    private static Switches switches(ClassLoader cl) throws Exception {
+        try {
+            Class<?> cmd = Class.forName("org.chromium.base.CommandLine", true, cl);
+            return new Switches("CommandLine", cmd.getMethod("getInstance").invoke(null),
+                cmd.getMethod("appendSwitch", String.class), cmd.getMethod("hasSwitch", String.class), false);
+        } catch (ClassNotFoundException e) {
+            android.content.pm.PackageInfo p = WebView.getCurrentWebViewPackage();
+            long code = p == null ? 0 : (android.os.Build.VERSION.SDK_INT >= 28 ? p.getLongVersionCode() : p.versionCode);
+            if (code != RECENT_ENGINE) throw new ClassNotFoundException("CommandLine, WebView " + code);
+            Class<?> cmd = Class.forName("WV.ad", true, cl);
+            java.lang.reflect.Field one = cmd.getDeclaredField("d");
+            if (one.getType() != cmd || !java.lang.reflect.Modifier.isStatic(one.getModifiers())) throw new NoSuchFieldException("WV.ad.d");
+            java.lang.reflect.Method add = cmd.getDeclaredMethod("a", String.class, String.class);
+            java.lang.reflect.Method has = cmd.getDeclaredMethod("c", String.class);
+            if (has.getReturnType() != boolean.class) throw new NoSuchMethodException("WV.ad.c");
+            one.setAccessible(true); add.setAccessible(true); has.setAccessible(true);
+            return new Switches("WV.ad", one.get(null), add, has, true);
         }
     }
 
