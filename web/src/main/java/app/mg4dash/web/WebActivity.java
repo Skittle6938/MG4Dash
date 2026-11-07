@@ -219,7 +219,7 @@ public class WebActivity extends Activity {
         message.setOnClickListener(v -> { if (failed) { String u = loaded; loaded = null; load(u); } });
 
         root.addView(web, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-        // Full screen and back: YouTube's quality follows, 720p in full screen, 240p in the card
+        // Full screen and back: YouTube's quality follows, 480p in full screen, 240p in the card
         web.addOnLayoutChangeListener((v, l, t, r, b, ol, ot, or, ob) -> { if (r - l != or - ol) quality(); });
         root.addView(message, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
         if (!inCardOnly()) addClose(root, bg, i.getIntExtra(EXTRA_FG, Color.LTGRAY));
@@ -317,7 +317,7 @@ public class WebActivity extends Activity {
     }
 
     /**
-     * Also a highest quality, for the processor: 720p, from window.__mg4dashMaxH, for the "width=…; height=…"
+     * Also a highest quality, for the processor: 480p, from window.__mg4dashMaxH, for the "width=…; height=…"
      * asked by YouTube and mediaCapabilities. The same in the card as in full screen: the player keeps the formats
      * it was told of at its start, so a video started small and then enlarged stayed in 144p, blurred.
      */
@@ -380,8 +380,9 @@ public class WebActivity extends Activity {
         if (media != null) web.evaluateJavascript(WebMedia.JS, null);
     }
 
-    private static final int MAX_HEIGHT = 720;
-    /** YouTube's quality chosen at the start: 480p, smooth for the processor; 720p can be chosen in its menu. */
+    /** 480p at most (#98): the car's processor is not powerful enough for more. */
+    private static final int MAX_HEIGHT = 480;
+    /** YouTube's quality chosen at the start: 480p, the highest allowed. */
     private static final int START_HEIGHT = 480;
 
     /**
@@ -399,7 +400,7 @@ public class WebActivity extends Activity {
         + "})();";
 
     /**
-     * YouTube's quality by the card's size: "hd720" in full screen (the card nearly as wide as the screen), "small"
+     * YouTube's quality by the card's size: "large" (480p) in full screen (the card nearly as wide as the screen), "small"
      * (240p) in the card, through its player's own functions. Set again at each video's start, which chooses its own.
      */
     private static final String QUALITY_JS = "(function () {"
@@ -419,7 +420,7 @@ public class WebActivity extends Activity {
     private void quality() {
         if (web == null) return;
         boolean full = web.getWidth() >= getResources().getDisplayMetrics().widthPixels * 0.8f;
-        web.evaluateJavascript("window.__mg4dashQuality = '" + (full ? "hd720" : "small") + "';" + QUALITY_JS, null);
+        web.evaluateJavascript("window.__mg4dashQuality = '" + (full ? "large" : "small") + "';" + QUALITY_JS, null);
     }
 
     /** From MG4Dash: hidden, the page goes on (sound, live values) without drawing nor decoding the videos' image. */
