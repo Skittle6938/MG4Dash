@@ -558,6 +558,9 @@
     <string name="wc_web_count">%1$d Adressen</string>
     <string name="wc_wake">Seite wach:</string>
     <string name="wc_wake_s">%1$d s</string>
+    <string name="wc_double_tap">Doppeltippen auf die Seite</string>
+    <string name="wc_dt_full">Vollbild</string>
+    <string name="wc_dt_float">Losgelöstes Fenster</string>
     <string name="wc_web_set">eingeben</string>
     <string name="wc_web_none">Noch keine Adresse: Startbildschirm zusammenziehen, dann Webadresse antippen.</string>
     <string name="wc_web_error">Seite nicht erreichbar. Zum erneuten Versuch antippen.</string>

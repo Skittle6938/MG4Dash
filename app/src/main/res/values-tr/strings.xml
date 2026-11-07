@@ -558,6 +558,9 @@
     <string name="wc_web_count">%1$d adres</string>
     <string name="wc_wake">Sayfa etkin:</string>
     <string name="wc_wake_s">%1$d s</string>
+    <string name="wc_double_tap">Sayfaya çift dokunma</string>
+    <string name="wc_dt_full">Tam ekran</string>
+    <string name="wc_dt_float">Ayrık pencere</string>
     <string name="wc_web_set">girilecek</string>
     <string name="wc_web_none">Henüz adres yok: ana ekranı iki parmakla kıstırın, sonra Web adresi\'ne dokunun.</string>
     <string name="wc_web_error">Sayfaya ulaşılamıyor. Tekrar denemek için dokunun.</string>
