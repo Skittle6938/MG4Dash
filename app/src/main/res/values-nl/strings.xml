@@ -139,6 +139,7 @@
     <string name="en_since_charge">Sinds laden</string>
     <string name="en_since_start">Sinds start</string>
     <string name="en_recent">RECENT VERBRUIK (%1$s)</string>
+    <string name="cc_curve_title">VERBRUIK (%1$s)</string>
     <string name="en_power">Vermogen %1$s kW</string>
     <string name="en_ends_in">klaar over %1$d u %2$02d</string>
     <string name="en_no_limit" formatted="false">Geen limiet: laadt tot 100 %.</string>

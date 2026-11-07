@@ -27,7 +27,10 @@ class ConsumptionCard(context: Context) : LinearLayout(context) {
     private val regenLabel = tv(13f, R.color.text_sub).apply { text = context.getString(R.string.en_regen_short).uppercase(); letterSpacing = 0.1f; includeFontPadding = false }
     private val regen = tv(20f, R.color.accent_energy).apply { setTextColor(Themes.energy(context)); includeFontPadding = false }
     private val legend = LinearLayout(context).apply { orientation = HORIZONTAL; gravity = Gravity.CENTER_VERTICAL }
+    /** A tap anywhere on the card goes to the next period (#44): only 3, a menu was one step too many. */
+    private val nextPeriod = OnClickListener { prefs.consumptionPeriod = (prefs.consumptionPeriod.coerceIn(0, 2) + 1) % 3; show() }
     private val chart = LineChart(context).apply {
+        setOnClickListener(nextPeriod)
         // Long press on the curve: erase it (#44)
         setOnLongClickListener { v -> (context as? android.app.Activity)?.let { confirmClear(it, v, prefs.consumptionPeriod.coerceIn(0, 2)) }; true }
     }
@@ -48,8 +51,7 @@ class ConsumptionCard(context: Context) : LinearLayout(context) {
             // Taller touch zone for the period's choice
             setPadding(0, (14 * d).toInt(), (24 * d).toInt(), (14 * d).toInt())
             isClickable = true
-            // A tap goes to the next period (#44): only 3, a menu was one step too many
-            setOnClickListener { prefs.consumptionPeriod = (prefs.consumptionPeriod.coerceIn(0, 2) + 1) % 3; show() }
+            setOnClickListener(nextPeriod)
         }
 
     /** Totals on the period's line in a small place (#97). */
@@ -75,6 +77,7 @@ class ConsumptionCard(context: Context) : LinearLayout(context) {
     init {
         // No Energy page on a tap (the bar has its button): it opened by mistake when aiming at the period
         orientation = VERTICAL
+        setOnClickListener(nextPeriod)
         setPadding((20 * d).toInt(), (16 * d).toInt(), (20 * d).toInt(), (16 * d).toInt())
         // Title hidden with the "Hide titles" option (the space stays, so nothing shifts)
         // Period ("Since the charge"): a tap goes to the next one (#44)
@@ -100,7 +103,7 @@ class ConsumptionCard(context: Context) : LinearLayout(context) {
         addView(legend, LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT).apply { topMargin = (6 * d).toInt() })
         addView(LinearLayout(context).apply {
             orientation = HORIZONTAL; gravity = Gravity.BOTTOM
-            addView(tv(15f, R.color.text_title).apply { text = context.getString(R.string.en_recent, app.mg4dash.system.Units.stackUnit(context)); letterSpacing = 0.1f },
+            addView(tv(15f, R.color.text_title).apply { text = context.getString(R.string.cc_curve_title, app.mg4dash.system.Units.stackUnit(context)); letterSpacing = 0.1f },
                 LayoutParams(0, LayoutParams.WRAP_CONTENT, 1f))
             addView(figures, LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT))
         }, LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT).apply { topMargin = (10 * d).toInt() })

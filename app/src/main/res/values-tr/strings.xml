@@ -139,6 +139,7 @@
     <string name="en_since_charge">Son şarjdan beri</string>
     <string name="en_since_start">Çalıştırmadan beri</string>
     <string name="en_recent">SON TÜKETİM (%1$s)</string>
+    <string name="cc_curve_title">TÜKETİM (%1$s)</string>
     <string name="en_power">Güç %1$s kW</string>
     <string name="en_ends_in">%1$d sa %2$02d içinde biter</string>
     <string name="en_no_limit" formatted="false">Sınır yok: %100\'e kadar şarj eder.</string>
