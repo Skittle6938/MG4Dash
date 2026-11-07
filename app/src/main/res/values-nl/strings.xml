@@ -550,6 +550,10 @@
     <string name="wc_reset_confirm">Het startscherm van deze indeling terugzetten zoals in het begin?</string>
     <string name="wc_map_app">Kaart:</string>
     <string name="wc_web_address">Webadres</string>
+    <string name="wc_web_apps">Web-apps</string>
+    <string name="wc_web_apps_hint">Tik op een adres om het in de kaart te tonen · ✕ om het te wissen · veeg de kaart in rust omhoog of omlaag om te wisselen</string>
+    <string name="wc_web_add">Adres toevoegen</string>
+    <string name="wc_web_count">%1$d adressen</string>
     <string name="wc_wake">Pagina actief:</string>
     <string name="wc_wake_s">%1$d s</string>
     <string name="wc_web_set">invullen</string>

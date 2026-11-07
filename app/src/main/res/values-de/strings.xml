@@ -550,6 +550,10 @@
     <string name="wc_reset_confirm">Den Startbildschirm dieses Layouts wieder wie anfangs einrichten?</string>
     <string name="wc_map_app">Karte:</string>
     <string name="wc_web_address">Webadresse</string>
+    <string name="wc_web_apps">Web-Apps</string>
+    <string name="wc_web_apps_hint">Adresse antippen, um sie in der Karte zu zeigen · ✕ zum Löschen · Karte in Ruhe nach oben oder unten wischen zum Wechseln</string>
+    <string name="wc_web_add">Adresse hinzufügen</string>
+    <string name="wc_web_count">%1$d Adressen</string>
     <string name="wc_wake">Seite wach:</string>
     <string name="wc_wake_s">%1$d s</string>
     <string name="wc_web_set">eingeben</string>
