@@ -63,11 +63,14 @@ class FloatWindow(
     /** Over home's cards, the size of the window; lets the touches it does not take go through. */
     private val layer = FrameLayout(activity).apply { clipChildren = false; clipToPadding = false }
     private val holder = FrameLayout(activity).apply {
-        // Rounded as the cards, for its shadow over home
+        // Rounded as the cards (its shadow over home, the page's corners clipped)
         outlineProvider = object : android.view.ViewOutlineProvider() {
-            override fun getOutline(v: View, o: android.graphics.Outline) { o.setRoundRect(0, 0, v.width, v.height, FadeOutline.RADIUS * d); o.alpha = 1f }
+            override fun getOutline(v: View, o: android.graphics.Outline) { o.setRoundRect(0, 0, v.width, v.height, corner()); o.alpha = 1f }
         }
+        clipToOutline = true
     }
+    /** The window's corner radius: the cards' one, plus the frame's width when detached. */
+    private fun corner() = FadeOutline.RADIUS * d + if (floating) frame else 0
     private val chrome = Chrome()
     private val ghost = Ghost()
 
@@ -138,6 +141,7 @@ class FloatWindow(
         if (!floating) panel.setPadding(dock.paddingLeft, panel.paddingTop, panel.paddingRight, panel.paddingBottom)
         else panel.setPadding(0, panel.paddingTop, panel.paddingRight, panel.paddingBottom)
         chrome.visibility = if (floating) View.VISIBLE else View.GONE
+        holder.invalidateOutline()
     }
 
     private fun rectOf(v: View): Rect {
@@ -401,16 +405,26 @@ class FloatWindow(
     /** Corner and edge handles (white, as the rest of the app), at rest only. */
     private inner class Chrome : View(activity) {
         private val handle = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.STROKE; strokeWidth = 5 * d; strokeCap = Paint.Cap.ROUND; color = 0xFFFFFFFF.toInt() }
+        private val path = android.graphics.Path()
+        private val arc = RectF()
 
         override fun onDraw(c: Canvas) {
             if (awake) return
             handle.alpha = if (mode == Mode.NONE) 150 else 255
             val w = width.toFloat(); val h = height.toFloat(); val i = frame / 2f; val l = 30 * d; val e = 32 * d
-            // Corners
-            c.drawLine(i, i + l, i, i, handle); c.drawLine(i, i, i + l, i, handle)
-            c.drawLine(w - i - l, i, w - i, i, handle); c.drawLine(w - i, i, w - i, i + l, handle)
-            c.drawLine(i, h - i - l, i, h - i, handle); c.drawLine(i, h - i, i + l, h - i, handle)
-            c.drawLine(w - i - l, h - i, w - i, h - i, handle); c.drawLine(w - i, h - i, w - i, h - i - l, handle)
+            // Corners, rounded as the window's (its radius, taken in by half the frame)
+            val r = (corner() - i).coerceAtLeast(1f); val t = (l - r).coerceAtLeast(6 * d)
+            path.reset()
+            for ((x, y, start) in listOf(Triple(i, i, 180f), Triple(w - i - 2 * r, i, 270f), Triple(w - i - 2 * r, h - i - 2 * r, 0f), Triple(i, h - i - 2 * r, 90f))) {
+                arc.set(x, y, x + 2 * r, y + 2 * r)
+                path.addArc(arc, start, 90f)
+            }
+            c.drawPath(path, handle)
+            // Short straight tails after each arc, along the edges
+            c.drawLine(i, i + r, i, i + r + t, handle); c.drawLine(i + r, i, i + r + t, i, handle)
+            c.drawLine(w - i - r - t, i, w - i - r, i, handle); c.drawLine(w - i, i + r, w - i, i + r + t, handle)
+            c.drawLine(w - i, h - i - r - t, w - i, h - i - r, handle); c.drawLine(w - i - r - t, h - i, w - i - r, h - i, handle)
+            c.drawLine(i + r, h - i, i + r + t, h - i, handle); c.drawLine(i, h - i - r - t, i, h - i - r, handle)
             // Edges
             c.drawLine(i, h / 2 - e, i, h / 2 + e, handle); c.drawLine(w - i, h / 2 - e, w - i, h / 2 + e, handle)
             c.drawLine(w / 2 - e, i, w / 2 + e, i, handle); c.drawLine(w / 2 - e, h - i, w / 2 + e, h - i, handle)
