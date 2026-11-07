@@ -558,6 +558,9 @@
     <string name="wc_web_count">%1$d direcciones</string>
     <string name="wc_wake">Página activa:</string>
     <string name="wc_wake_s">%1$d s</string>
+    <string name="wc_double_tap">Doble toque en la página</string>
+    <string name="wc_dt_full">Pantalla completa</string>
+    <string name="wc_dt_float">Ventana separada</string>
     <string name="wc_web_set">por introducir</string>
     <string name="wc_web_none">Aún no hay dirección: pellizca la pantalla de inicio y toca Dirección web.</string>
     <string name="wc_web_error">Página inaccesible. Toca para reintentar.</string>

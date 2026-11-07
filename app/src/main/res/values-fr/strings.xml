@@ -558,6 +558,9 @@
     <string name="wc_web_count">%1$d adresses</string>
     <string name="wc_wake">Page réveillée :</string>
     <string name="wc_wake_s">%1$d s</string>
+    <string name="wc_double_tap">Double tap sur la page</string>
+    <string name="wc_dt_full">Plein écran fixe</string>
+    <string name="wc_dt_float">Fenêtre détachée</string>
     <string name="wc_web_set">à saisir</string>
     <string name="wc_web_none">Pas encore d\'adresse : pincez l\'accueil puis touchez Adresse web.</string>
     <string name="wc_web_error">Page inaccessible. Touchez pour réessayer.</string>

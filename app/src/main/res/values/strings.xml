@@ -558,6 +558,9 @@
     <string name="wc_web_count">%1$d addresses</string>
     <string name="wc_wake">Page awake:</string>
     <string name="wc_wake_s">%1$d s</string>
+    <string name="wc_double_tap">Double tap on the page</string>
+    <string name="wc_dt_full">Full screen</string>
+    <string name="wc_dt_float">Detached window</string>
     <string name="wc_web_set">to enter</string>
     <string name="wc_web_none">No address yet: pinch the home screen, then touch Web address.</string>
     <string name="wc_web_error">Page out of reach. Touch to try again.</string>
