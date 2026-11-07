@@ -178,8 +178,6 @@ public class WebActivity extends Activity {
             public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
                 String scheme = request.getUrl().getScheme();
                 if (!"http".equalsIgnoreCase(scheme) && !"https".equalsIgnoreCase(scheme)) return true;
-                // Google Maps reached from another page: asked again as a computer, otherwise it sends to its app
-                if (request.isForMainFrame() && agentFor(request.getUrl().toString())) { view.loadUrl(request.getUrl().toString()); return true; }
                 return false;
             }
 
@@ -582,40 +580,7 @@ public class WebActivity extends Activity {
         loaded = url;
         failed = false;
         showMessage(text(EXTRA_LOADING, "Loading…"));
-        agentFor(url);
         web.loadUrl(url);
-    }
-
-    /** The WebView's own user agent (a phone's). */
-    private String mobileAgent;
-
-    /**
-     * Google Maps' mobile site only offers its app (whose links are ignored here): it is asked as a computer, its
-     * full site then staying in the page. The same Chromium version, without "Android", "Mobile" and "wv".
-     * True when the agent changed (the address is to be loaded again).
-     */
-    private boolean agentFor(String url) {
-        WebSettings s = web.getSettings();
-        if (mobileAgent == null) mobileAgent = s.getUserAgentString();
-        android.net.Uri u = android.net.Uri.parse(url);
-        String host = u.getHost() == null ? "" : u.getHost().toLowerCase(java.util.Locale.ROOT);
-        String path = u.getPath() == null ? "" : u.getPath();
-        boolean maps = host.startsWith("maps.google.") || host.equals("maps.app.goo.gl")
-            || (host.matches("(www\\.)?google\\.[a-z.]+") && path.startsWith("/maps"));
-        // On the way to Google Maps, Google's own pages (cookie consent, sign-in) keep the computer's agent: asked
-        // as a phone there, it sends back to the mobile site, which only offers the app (#98)
-        boolean google = host.matches("([a-z]+\\.)?google\\.[a-z.]+") || host.endsWith(".gstatic.com");
-        boolean computer = !mobileAgent.equals(s.getUserAgentString());
-        String want = maps || (google && computer) ? desktop(mobileAgent) : mobileAgent;
-        if (want.equals(s.getUserAgentString())) return false;
-        s.setUserAgentString(want);
-        Log.i(TAG, "user agent: " + (want.equals(mobileAgent) ? "phone" : "computer"));
-        return true;
-    }
-
-    private static String desktop(String agent) {
-        return agent.replaceAll("\\(Linux; Android[^)]*\\)", "(X11; Linux x86_64)")
-            .replace(" Mobile Safari/", " Safari/").replace("; wv", "").replaceAll("Version/[\\d.]+ ", "");
     }
 
     private void showMessage(String t) {
