@@ -504,9 +504,14 @@ object MediaHub {
     /** true / false: next / previous (station to restore); null: volume (nothing to restore). */
     @Volatile private var wheelForward: Boolean? = null
 
+    /** App given back its source after a wheel button, and when: a second press soon after, while the radio still had it, went to the radio (#98). */
+    @Volatile private var wheelBack: String? = null
+    @Volatile private var wheelBackAt = 0L
+    private fun recentBack() = wheelBack?.takeIf { android.os.SystemClock.uptimeMillis() - wheelBackAt < 3_000 }
+
     fun wheelPressed(forward: Boolean?) {
-        if (!otherAppShown()) return
-        wheelFrom = current?.packageName
+        val app = current?.packageName?.takeIf { otherAppShown() } ?: recentBack() ?: return
+        wheelFrom = app
         wheelAt = android.os.SystemClock.uptimeMillis()
         wheelForward = forward
         // The card stays on the app during the brief passage through the radio
@@ -519,7 +524,7 @@ object MediaHub {
      */
     fun wheelReleased(forward: Boolean): Boolean {
         val pkg = wheelFrom?.takeIf { android.os.SystemClock.uptimeMillis() - wheelAt < 2_000 }
-            ?: current?.packageName?.takeIf { otherAppShown() } ?: return false
+            ?: current?.packageName?.takeIf { otherAppShown() } ?: recentBack() ?: return false
         val c = browserControllers[pkg] ?: lastCandidates.firstOrNull { it.packageName == pkg } ?: return true
         if (forward) c.transportControls.skipToNext() else c.transportControls.skipToPrevious()
         return true
@@ -673,7 +678,7 @@ object MediaHub {
             return
         }
         Log.i(TAG, "source picked: $next")
-        wheelFrom = null // user's choice: no automatic return to the app
+        wheelFrom = null; wheelBack = null // user's choice: no automatic return to the app
         promptFrom = null
         // Leaving another app's player (DiAuto, SimpMusic…): the car has no source to take from it
         // and some apps carry on despite the loss of focus, hence two musics at once
@@ -774,6 +779,7 @@ object MediaHub {
                         val back = wheelFrom?.takeIf { src == RADIO && android.os.SystemClock.uptimeMillis() - wheelAt < 2_000 }
                         if (back != null) {
                             wheelFrom = null
+                            wheelBack = back; wheelBackAt = android.os.SystemClock.uptimeMillis()
                             Log.i(TAG, "steering wheel key sent to the radio by the stock launcher: back to $back")
                             sourcePkg = src
                             val fwd = wheelForward
