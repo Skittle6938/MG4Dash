@@ -209,8 +209,6 @@ public class WebActivity extends Activity {
         message.setOnClickListener(v -> { if (failed) { String u = loaded; loaded = null; load(u); } });
 
         root.addView(web, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-        // Full screen and back: the videos' highest quality follows
-        web.addOnLayoutChangeListener((v, l, t, r, b, ol, ot, or, ob) -> { if (r - l != or - ol) maxHeight(); });
         root.addView(message, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
         if (!inCardOnly()) addClose(root, bg, i.getIntExtra(EXTRA_FG, Color.LTGRAY));
         setContentView(root);
@@ -307,8 +305,9 @@ public class WebActivity extends Activity {
     }
 
     /**
-     * Also a highest quality, for the processor: 360p in the card, 480p wider (full screen), from
-     * window.__mg4dashMaxH, for the "width=…; height=…" asked by YouTube and mediaCapabilities.
+     * Also a highest quality, for the processor: 480p, from window.__mg4dashMaxH, for the "width=…; height=…"
+     * asked by YouTube and mediaCapabilities. The same in the card as in full screen: the player keeps the formats
+     * it was told of at its start, so a video started small and then enlarged stayed in 144p, blurred.
      */
     private static final String NO_HW_ONLY_JS = "(function () {"
         + "if (window.__mg4dashSoftVideo) return;"
@@ -361,16 +360,26 @@ public class WebActivity extends Activity {
     private void pageScripts() {
         if (web == null) return;
         // Only when Chromium decodes the videos itself: otherwise H.264 at least gives the sound
-        if (softVideo) web.evaluateJavascript("window.__mg4dashMaxH = " + maxHeightNow() + ";" + NO_HW_ONLY_JS, null);
+        if (softVideo) web.evaluateJavascript("window.__mg4dashMaxH = " + MAX_HEIGHT + ";" + NO_HW_ONLY_JS + YT_QUALITY_JS, null);
         if (softVideo && inCardOnly()) web.evaluateJavascript(SEEN_JS, null);
         if (media != null) web.evaluateJavascript(WebMedia.JS, null);
     }
 
-    private int maxHeightNow() { return web != null && web.getWidth() > 1000 ? 480 : 360; }
+    private static final int MAX_HEIGHT = 480;
 
-    private void maxHeight() {
-        if (softVideo && web != null) web.evaluateJavascript("window.__mg4dashMaxH = " + maxHeightNow(), null);
-    }
+    /**
+     * YouTube: its quality chosen once at 480p (its own setting, kept by the page), unless the driver chose
+     * another: in auto, a small player started at 144p and did not come up once enlarged.
+     */
+    private static final String YT_QUALITY_JS = "(function () {"
+        + "if (!/(^|\\.)youtube\\.com$/.test(location.hostname)) return;"
+        + "try {"
+        + "  var k = 'yt-player-quality', now = Date.now(), v = localStorage.getItem(k);"
+        + "  if (v) { var o = JSON.parse(v); if (o && o.expiration > now) return; }"
+        + "  localStorage.setItem(k, JSON.stringify({ data: JSON.stringify({ quality: " + MAX_HEIGHT + ", previousQuality: 144 }),"
+        + "    expiration: now + 30 * 24 * 3600 * 1000, creation: now }));"
+        + "} catch (e) {}"
+        + "})();";
 
     /** From MG4Dash: hidden, the page goes on (sound, live values) without drawing nor decoding the videos' image. */
     private void shown(boolean on) {
