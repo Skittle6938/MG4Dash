@@ -83,6 +83,12 @@ public class WebActivity extends Activity {
         public void onReceive(Context c, Intent i) {
             if (web == null) return;
             if (SHOWN.equals(i.getAction())) { shown(i.getBooleanExtra("shown", true)); return; }
+            // The card's menu (long press, #98): the page's previous one, its video first if one fills it
+            if ("back".equals(i.getStringExtra("key"))) {
+                if (video != null) hideVideo();
+                else if (web.canGoBack()) web.goBack();
+                return;
+            }
             if (keyboardFor == null) return;
             String text = i.getStringExtra("text");
             if (text != null) type(text);

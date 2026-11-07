@@ -553,6 +553,7 @@
     <string name="wc_web_apps">Web apps</string>
     <string name="wc_web_apps_hint">Touch an address to show it in the card · ✕ to delete it</string>
     <string name="wc_web_add">Add an address</string>
+    <string name="wc_web_back">Back</string>
     <string name="wc_web_count">%1$d addresses</string>
     <string name="wc_wake">Page awake:</string>
     <string name="wc_wake_s">%1$d s</string>

@@ -553,6 +553,7 @@
     <string name="wc_web_apps">Web apps</string>
     <string name="wc_web_apps_hint">Touchez une adresse pour l\'afficher dans la carte · ✕ pour la supprimer</string>
     <string name="wc_web_add">Ajouter une adresse</string>
+    <string name="wc_web_back">Retour</string>
     <string name="wc_web_count">%1$d adresses</string>
     <string name="wc_wake">Page réveillée :</string>
     <string name="wc_wake_s">%1$d s</string>
