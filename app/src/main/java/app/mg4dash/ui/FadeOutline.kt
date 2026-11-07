@@ -37,8 +37,27 @@ class FadeOutline(private val d: Float, color: Int, private val fade: Boolean = 
     override fun setColorFilter(cf: ColorFilter?) {}
     @Suppress("OVERRIDE_DEPRECATION") override fun getOpacity() = PixelFormat.TRANSLUCENT
 
+    /**
+     * Frame of a page or an app awake (#98): the same corners as the card's clip, its outer edge on the card's edge
+     * (a GradientDrawable at radius_panel, 20 dp, stood off the card's 14 dp corners).
+     */
+    class Awake(private val d: Float, color: Int, width: Float) : Drawable() {
+        private val p = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.STROKE; strokeWidth = width; this.color = color }
+        private val rect = RectF()
+        override fun draw(c: Canvas) {
+            val h = p.strokeWidth / 2
+            rect.set(bounds.left + h, bounds.top + h, bounds.right - h, bounds.bottom - h)
+            val r = (RADIUS * d - h).coerceAtLeast(0f)
+            c.drawRoundRect(rect, r, r, p)
+        }
+        override fun setAlpha(a: Int) {}
+        override fun setColorFilter(cf: ColorFilter?) {}
+        @Suppress("OVERRIDE_DEPRECATION") override fun getOpacity() = PixelFormat.TRANSLUCENT
+    }
+
     companion object {
-        private const val RADIUS = 14f
+        /** Corner radius of the panels filled to their edges, in dp (the map, a web page): their clip and outline. */
+        const val RADIUS = 14f
 
         /** Tag of a panel filled to its edges (the map, a web page): rounded corners, the outline drawn over it. */
         const val FRONT = "fade_outline_front"
