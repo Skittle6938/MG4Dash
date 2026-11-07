@@ -770,13 +770,12 @@
     <string name="unit_kwh100">kWh/100</string>
     <string name="no_data">—</string>
     <string name="st_web_engine">Web-engine: Chromium %1$s</string>
-    <string name="st_web_engine_desc">Een recente, Chromium %1$s, opent de sites van nu in de web-app-kaart (ABRP, Waze, OpenStreetMap…). Download van %2$d MB bij LineageOS, liefst via wifi, daarna hier ondertekend en geïnstalleerd (een paar minuten). De originele kan terug.</string>
+    <string name="st_web_engine_desc">Een recente, Chromium %1$s, opent de sites van nu in de web-app-kaart (ABRP, Waze, OpenStreetMap…). Download van %2$d MB van GitHub (MG4Dash-WebView), liefst via wifi, daarna hier geïnstalleerd. De originele kan terug.</string>
     <string name="st_web_engine_on">Recente engine geïnstalleerd (Chromium %1$s), over de originele.</string>
     <string name="st_web_engine_install">Chromium %1$s installeren</string>
     <string name="st_web_engine_revert">Terug naar de originele engine</string>
-    <string name="st_web_engine_confirm">Chromium %1$s (%2$d MB) bij LineageOS downloaden, ondertekenen en installeren als web-engine van de auto?</string>
+    <string name="st_web_engine_confirm">Chromium %1$s (%2$d MB) downloaden en installeren als web-engine van de auto?</string>
     <string name="st_web_engine_revert_confirm">De originele web-engine (Chromium 66) terugzetten? Recente sites openen dan niet meer in de web-app-kaart.</string>
     <string name="st_web_engine_revert_ok">Terugzetten</string>
-    <string name="st_web_engine_signing">Ondertekenen… (een à twee minuten)</string>
     <string name="st_web_engine_done">Klaar: de web-app-kaart gebruikt de nieuwe engine.</string>
 </resources>
