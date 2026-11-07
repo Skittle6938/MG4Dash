@@ -365,7 +365,9 @@ public class WebActivity extends Activity {
     private void pageScripts() {
         if (web == null) return;
         // Only when Chromium decodes the videos itself: otherwise H.264 at least gives the sound
-        if (softVideo) web.evaluateJavascript("window.__mg4dashMaxH = " + MAX_HEIGHT + ";" + NO_HW_ONLY_JS + YT_QUALITY_JS, null);
+        if (softVideo) web.evaluateJavascript("window.__mg4dashMaxH = " + MAX_HEIGHT + ";" + NO_HW_ONLY_JS, null);
+        // YouTube's quality, whoever decodes (a newer WebView, without Chromium's command line, keeps the hardware decoders)
+        web.evaluateJavascript(YT_QUALITY_JS, null);
         if (softVideo && inCardOnly()) web.evaluateJavascript(SEEN_JS, null);
         quality();
         if (media != null) web.evaluateJavascript(WebMedia.JS, null);
@@ -408,7 +410,7 @@ public class WebActivity extends Activity {
         + "})();";
 
     private void quality() {
-        if (web == null || !softVideo) return;
+        if (web == null) return;
         boolean full = web.getWidth() >= getResources().getDisplayMetrics().widthPixels * 0.8f;
         web.evaluateJavascript("window.__mg4dashQuality = '" + (full ? "hd720" : "small") + "';" + QUALITY_JS, null);
     }
