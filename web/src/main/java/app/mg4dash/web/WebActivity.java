@@ -305,7 +305,7 @@ public class WebActivity extends Activity {
     }
 
     /**
-     * Also a highest quality, for the processor: 480p, from window.__mg4dashMaxH, for the "width=…; height=…"
+     * Also a highest quality, for the processor: 720p, from window.__mg4dashMaxH, for the "width=…; height=…"
      * asked by YouTube and mediaCapabilities. The same in the card as in full screen: the player keeps the formats
      * it was told of at its start, so a video started small and then enlarged stayed in 144p, blurred.
      */
@@ -365,7 +365,9 @@ public class WebActivity extends Activity {
         if (media != null) web.evaluateJavascript(WebMedia.JS, null);
     }
 
-    private static final int MAX_HEIGHT = 480;
+    private static final int MAX_HEIGHT = 720;
+    /** YouTube's quality chosen at the start: 480p, smooth for the processor; 720p can be chosen in its menu. */
+    private static final int START_HEIGHT = 480;
 
     /**
      * YouTube: its quality chosen once at 480p (its own setting, kept by the page), unless the driver chose
@@ -376,7 +378,7 @@ public class WebActivity extends Activity {
         + "try {"
         + "  var k = 'yt-player-quality', now = Date.now(), v = localStorage.getItem(k);"
         + "  if (v) { var o = JSON.parse(v); if (o && o.expiration > now) return; }"
-        + "  localStorage.setItem(k, JSON.stringify({ data: JSON.stringify({ quality: " + MAX_HEIGHT + ", previousQuality: 144 }),"
+        + "  localStorage.setItem(k, JSON.stringify({ data: JSON.stringify({ quality: " + START_HEIGHT + ", previousQuality: 144 }),"
         + "    expiration: now + 30 * 24 * 3600 * 1000, creation: now }));"
         + "} catch (e) {}"
         + "})();";
