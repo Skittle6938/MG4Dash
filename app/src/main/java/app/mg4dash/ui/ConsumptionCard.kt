@@ -30,11 +30,8 @@ class ConsumptionCard(context: Context) : LinearLayout(context) {
     private val chart = LineChart(context).apply {
         // Long press on the curve: erase it (#44)
         setOnLongClickListener { v -> (context as? android.app.Activity)?.let { confirmClear(it, v, prefs.consumptionPeriod.coerceIn(0, 2)) }; true }
-        setOnClickListener { openEnergy() }
     }
 
-    /** A touch opens the Energy page, like the battery widget. */
-    private fun openEnergy() = context.startActivity(android.content.Intent(context, app.mg4dash.pages.EnergyActivity::class.java))
     private val note = tv(15f, R.color.text_sub)
     /** Duration of the current trip, without seconds, in the top right corner (#44); only for the trip. */
     private val duration = tv(19f, R.color.text_value).apply { gravity = Gravity.END }
@@ -48,7 +45,8 @@ class ConsumptionCard(context: Context) : LinearLayout(context) {
     private val periodLabels = listOf(R.string.en_since_charge, R.string.en_trip, R.string.en_last_year).map { context.getString(it) }
     private val periodTv: TextView =
         tv(19f, R.color.text_value).apply {
-            setPadding(0, (6 * d).toInt(), (24 * d).toInt(), (6 * d).toInt())
+            // Taller touch zone for the period's choice
+            setPadding(0, (14 * d).toInt(), (24 * d).toInt(), (14 * d).toInt())
             isClickable = true
             setOnClickListener { v ->
                 (context as? android.app.Activity)?.let { a ->
@@ -78,7 +76,7 @@ class ConsumptionCard(context: Context) : LinearLayout(context) {
         }
 
     init {
-        setOnClickListener { openEnergy() }
+        // No Energy page on a tap (the bar has its button): it opened by mistake when aiming at the period
         orientation = VERTICAL
         setPadding((20 * d).toInt(), (16 * d).toInt(), (20 * d).toInt(), (16 * d).toInt())
         // Title hidden with the "Hide titles" option (the space stays, so nothing shifts)
