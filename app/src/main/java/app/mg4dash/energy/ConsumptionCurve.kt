@@ -50,8 +50,12 @@ object ConsumptionCurve {
         val tripsMix: List<Mix?> = emptyList(),
     ) {
         fun mixOf(period: Int) = when (period) { 1 -> tripMix; 2 -> tripsMix; else -> chargeMix }
-        /** Times of the period's points, if it has any. */
-        fun timesOf(period: Int) = when (period) { 2 -> tripTimes; 0 -> chargeTimes; else -> emptyList() }
+        /**
+         * Times of the period's points, to place them by date: only the 12 months (one point per trip).
+         * Since the charge is placed by km like the trip (#44): by date, the pauses between trips took
+         * the width and the curve no longer looked like the average per km. The times are still recorded.
+         */
+        fun timesOf(period: Int) = if (period == 2) tripTimes else emptyList()
         /** Curve of the chosen period: 0 = since the charge, 1 = trip, 2 = 12 months. */
         fun of(period: Int) = when (period) { 1 -> trip; 2 -> trips; else -> charge }
     }
