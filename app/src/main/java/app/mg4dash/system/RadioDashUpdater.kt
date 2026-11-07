@@ -42,7 +42,7 @@ object RadioDashUpdater {
     }
 
     /** Radio Dash is installed (its dock icons are in the radio app). */
-    fun installed(context: Context): Boolean = try {
+    fun installed(context: Context): Boolean = declaredVersion(context) != null || try {
         val res = context.packageManager.getResourcesForApplication(PKG)
         res.getIdentifier("rd_ic_home", "drawable", PKG) != 0
     } catch (_: Exception) { false }
