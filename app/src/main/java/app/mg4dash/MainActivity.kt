@@ -667,7 +667,6 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
     override fun onPause() {
         super.onPause()
         setAwake(null)
-        floatWeb?.rest()
         app.mg4dash.ui.DataAlert.detach(this)
         CarBridge.setForeground(false)
         // (the map's full screen is no longer left here: the bar does it when opening a page, and
@@ -679,6 +678,8 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
 
     /** Home no longer in sight (a page, another app): the keyboard over it for the web app's page goes too. */
     override fun onStop() {
+        // The detached window rests only when home is out of sight: home pauses as soon as its page is touched
+        floatWeb?.rest()
         webCard?.closeKeyboard()
         super.onStop()
     }
