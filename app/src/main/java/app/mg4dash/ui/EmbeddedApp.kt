@@ -118,6 +118,18 @@ object EmbeddedApp {
      * image of Chromium's videos stayed black. Its callback is set aside for that moment, and the virtual
      * display goes straight from the old surface to the new one, never off.
      */
+    /**
+     * The card moved without changing size, or just after (full screen beside the vertical bar, #98: its top goes up to
+     * the bar's): on the car, the layer stayed at the old place, the page's top lower than the bar's. A new surface
+     * puts it where the view is now.
+     */
+    fun moved(v: View) {
+        if (!v.isAttachedToWindow || v.width <= 0 || v.height <= 0) return
+        val at = IntArray(2).also { v.getLocationOnScreen(it) }
+        Log.i(TAG, "moved to ${at[0]},${at[1]} (${v.width}×${v.height})")
+        newSurface(v)
+    }
+
     private fun newSurface(v: View) {
         val sv = (v as? ViewGroup)?.getChildAt(0) as? android.view.SurfaceView ?: return
         val holder = sv.holder

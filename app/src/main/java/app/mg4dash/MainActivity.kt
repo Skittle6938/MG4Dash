@@ -1059,6 +1059,8 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
     private var fullMargins: List<Pair<android.view.ViewGroup.MarginLayoutParams, Int>> = emptyList()
     /** Screen margins and bar margins before full screen (top, bottom), put back after. */
     private var barAlign: IntArray? = null
+    /** The card's place changed with the bar's alignment, for the embedded page's layer. */
+    private var barMoved = false
 
     /**
      * Full screen with the vertical bar (#98): the card takes the bar's height, same top and same bottom
@@ -1074,7 +1076,9 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         val r = IntArray(2).also { columnsRow.getLocationInWindow(it) }[1]
         val up = (r - a).coerceIn(0, root.paddingTop)
         val down = ((a + bar.height) - (r + columnsRow.height)).coerceIn(0, root.paddingBottom)
+        app.mg4dash.system.Log.i("FullScreen", "bar $a..${a + bar.height}, cards $r..${r + columnsRow.height}: up $up, down $down")
         if (up == 0 && down == 0) return
+        barMoved = true
         barAlign = intArrayOf(root.paddingTop, root.paddingBottom, blp.topMargin, blp.bottomMargin)
         root.setPadding(root.paddingLeft, root.paddingTop - up, root.paddingRight, root.paddingBottom - down)
         blp.topMargin += up; blp.bottomMargin += down
@@ -1084,6 +1088,7 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
     private fun unalignFromBar() {
         val m = barAlign ?: return
         barAlign = null
+        barMoved = true
         val root = b.root
         root.setPadding(root.paddingLeft, m[0], root.paddingRight, m[1])
         val bar = findViewById<View>(R.id.dock) ?: return
@@ -1130,6 +1135,14 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
             columnsRow.requestLayout()
         }
         mapCard.oneFingerPan = on
+        // The card's top moves with the bar's (#98): an embedded page or app gets its layer again at the new place,
+        // once the new size's surface is made (on the car, the layer stayed lower than the bar's top)
+        if (barMoved) {
+            barMoved = false
+            b.root.postDelayed({
+                if (web) webCard?.moved() else mapAppView?.let { app.mg4dash.ui.EmbeddedApp.moved(it) }
+            }, 600)
+        }
         // App that sets its size at launch (wireless CarPlay MG4CPlay / DiPlay: the video stayed at
         // the map's size in full screen, #52): relaunch it at the new size
         if (mapAppCn?.let { relaunchOnResize(it.packageName) } == true) b.mapCard.post { rebuildMapApp() }
