@@ -213,9 +213,9 @@ class ConsumptionCard(context: Context) : LinearLayout(context) {
         fun axis(c: android.content.Context, period: Int, points: Int): Pair<String?, String?> {
             if (points < 2) return null to null
             val curves = app.mg4dash.energy.ConsumptionCurve.curves.value
-            val dated = curves.chargeTimes.firstOrNull().takeIf { period == 0 }
-            val start = if (period == 2 || dated != null) {
-                val at = dated ?: curves.firstTripAt ?: return null to null
+            // By date only on 12 months; the trip and since the charge are by km (#44)
+            val start = if (period == 2) {
+                val at = curves.firstTripAt ?: return null to null
                 val min = ((System.currentTimeMillis() - at) / 60_000L).coerceAtLeast(1)
                 val (res, n) = when {
                     min < 60 -> R.string.cc_min to min
@@ -231,7 +231,7 @@ class ConsumptionCard(context: Context) : LinearLayout(context) {
 
         /**
          * Fills the period's chart and returns (number of original points, legend) (#44): trip by km,
-         * smoothed over 3 points; charge and 12 months by date. Charge points from before dates stay by km.
+         * smoothed over 3 points; trip and since the charge by km, 12 months by date (#44).
          */
         fun fill(c: android.content.Context, chart: LineChart, period: Int, stacked: Boolean = false): Pair<Int, String> {
             val curves = app.mg4dash.energy.ConsumptionCurve.curves.value
@@ -241,7 +241,7 @@ class ConsumptionCard(context: Context) : LinearLayout(context) {
             val mean = if (stacked) periodMean(c, period) ?: v.average().toFloat() else v.average().toFloat()
             if (stacked && showStack(c, chart, curves, period, v, mean)) {
                 return v.size to if (period == 2) c.getString(R.string.en_trips_note, v.size)
-                    else c.getString(if (period == 0 && curves.chargeTimes.size == v.size) R.string.en_time_note else R.string.en_curve_note)
+                    else c.getString(R.string.en_curve_note)
             }
             val line = app.mg4dash.energy.ConsumptionCurve.timeLine(curves.timesOf(period), v)
             if (line.size >= 2) {
