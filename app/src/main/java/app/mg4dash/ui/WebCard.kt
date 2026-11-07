@@ -33,11 +33,6 @@ class WebCard(private val activity: android.app.Activity) : FrameLayout(activity
     /** Car version: MG4Dash's keyboard open for a field of the page, the field's kind, and what closes it. */
     private var keyboard: (() -> Unit)? = null
     private var keyboardKind: String? = null
-    /**
-     * The page's layer under home's window instead of over it (the detached window, trial): what home draws over it
-     * then shows (the card's rounded corners, the window's handles). As before by default.
-     */
-    var surfaceBelow = false
     /** Where the keyboard goes over home (its left and right edges on screen), null for two thirds on the driver's side. */
     var keyboardSpan: ((View) -> IntArray?)? = null
     /** Car version: MG4Dash Web starts, or a field of its page is touched or left. */
@@ -145,13 +140,6 @@ class WebCard(private val activity: android.app.Activity) : FrameLayout(activity
             created?.layoutParams = LayoutParams(-1, -1)
             message.visibility = View.GONE
         } ?: run { showMessage(context.getString(R.string.wc_web_unsupported)); return }
-        if (surfaceBelow) (v.getChildAt(0) as? android.view.SurfaceView)?.let { sv ->
-            // Trial of the layer's place (YouTube's image was gone under home's window, sound only): "top" as before,
-            // "media" just under the window, "below" under it as the media; set by adb (debug.mg4dash.web_z)
-            val z = zMode()
-            Log.i(TAG, "page's layer: $z")
-            when (z) { "media" -> sv.setZOrderMediaOverlay(true); "below" -> sv.setZOrderOnTop(false); else -> {} }
-        }
         // Created at the screen's width, then brought back to the card once started, as the map's app: Android 9
         // gives the layers of a virtual display twice its largest side at creation, and never more; created at
         // the card's size, the page was cut off in full screen (#98)
@@ -291,13 +279,6 @@ class WebCard(private val activity: android.app.Activity) : FrameLayout(activity
 
     companion object {
         private const val TAG = "WebCard"
-
-        @android.annotation.SuppressLint("PrivateApi")
-        private fun zMode(): String = try {
-            val sp = Class.forName("android.os.SystemProperties")
-            (sp.getMethod("get", String::class.java, String::class.java).invoke(null, "debug.mg4dash.web_z", "") as? String)
-                ?.takeIf { it.isNotBlank() } ?: "top"
-        } catch (_: Exception) { "top" }
 
         /** A short name for an address: its site without "www." (with its path's first part for Google Maps and the like). */
         fun name(url: String): String {
