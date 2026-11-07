@@ -228,7 +228,36 @@ class WebCard(private val activity: android.app.Activity) : FrameLayout(activity
         prefs.webUrl = url
         Log.i(TAG, "next web app: ${name(url)}")
         show()
+        if (appView != null) label(name(url))
         return true
+    }
+
+    private var shownLabel: android.widget.PopupWindow? = null
+
+    /**
+     * The site's name over the card for 2 s (#98), in its own small window: the embedded page's surface, even empty,
+     * is drawn over the card's own views, its "Loading…" with them.
+     */
+    private fun label(text: String) {
+        shownLabel?.dismiss()
+        if (!isAttachedToWindow || width == 0) return
+        val d = resources.displayMetrics.density
+        val v = TextView(context).apply {
+            this.text = text; setTextColor(Themes.color(context, R.color.text_title)); setTextSize(TypedValue.COMPLEX_UNIT_SP, 24f)
+            setPadding((24 * d).toInt(), (12 * d).toInt(), (24 * d).toInt(), (12 * d).toInt())
+            background = android.graphics.drawable.GradientDrawable().apply {
+                cornerRadius = 24 * d; setColor((Themes.color(context, R.color.bg_top) and 0x00FFFFFF) or 0xE6000000.toInt())
+            }
+        }
+        v.measure(MeasureSpec.UNSPECIFIED, MeasureSpec.UNSPECIFIED)
+        val at = IntArray(2).also { getLocationInWindow(it) }
+        val w = android.widget.PopupWindow(v, -2, -2).apply {
+            isFocusable = false; isTouchable = false; isClippingEnabled = false
+            setBackgroundDrawable(android.graphics.drawable.ColorDrawable(0))
+            showAtLocation(this@WebCard, Gravity.TOP or Gravity.LEFT, at[0] + (width - v.measuredWidth) / 2, at[1] + (height - v.measuredHeight) / 2)
+        }
+        shownLabel = w
+        postDelayed({ if (shownLabel === w) { w.dismiss(); shownLabel = null } }, 2000)
     }
 
     companion object {
