@@ -202,7 +202,7 @@ object CardsEditor {
                 column.addView(link(context.getString(R.string.wc_map_app), m.name()) { m.pick { render(); onChange() } })
             }
             if (Card.WEB in cards.cards)
-                column.addView(link(context.getString(R.string.wc_web_address), prefs.webUrl.ifBlank { context.getString(R.string.wc_web_set) }) { editUrl() })
+                column.addView(link(context.getString(R.string.wc_web_address), webSummary()) { editUrls() })
             // How long a web page or the map's app stays awake after a touch (#98)
             if (Card.WEB in cards.cards || Card.MAP in cards.cards && prefs.mapApp != null)
                 column.addView(wakeRow())
@@ -273,10 +273,89 @@ object CardsEditor {
             addView(arrow("›", 1))
         }
 
-        /** Address of the web app, with MG4Dash's keyboard. */
-        private fun editUrl() {
+        /** The address shown, and how many there are. */
+        private fun webSummary(): String {
+            val n = prefs.webUrls.size
+            val shown = prefs.webUrl.ifBlank { return context.getString(R.string.wc_web_set) }
+            return if (n > 1) WebCard.name(shown) + " · " + context.getString(R.string.wc_web_count, n) else shown
+        }
+
+        /**
+         * The web app's addresses (#98): a touch shows one in the card, ✕ deletes it, the last row adds one.
+         * Kept on OK only.
+         */
+        private fun editUrls() {
+            val urls = prefs.webUrls.toMutableList()
+            var shown = prefs.webUrl.takeIf { it in urls } ?: urls.firstOrNull() ?: ""
+            val list = LinearLayout(context).apply { orientation = LinearLayout.VERTICAL }
+            val box = LinearLayout(context).apply {
+                orientation = LinearLayout.VERTICAL; setPadding(dp(24), dp(4), dp(24), 0)
+                addView(TextView(context).apply {
+                    text = context.getString(R.string.wc_web_apps_hint); setTextColor(sub); setTextSize(TypedValue.COMPLEX_UNIT_SP, 17f)
+                    setPadding(0, 0, 0, dp(12))
+                })
+                addView(ScrollView(context).apply { isVerticalScrollBarEnabled = false; addView(list) }, LinearLayout.LayoutParams(-1, 0, 1f))
+            }
+            fun fill() {
+                list.removeAllViews()
+                urls.forEach { url ->
+                    val on = url == shown
+                    val row = LinearLayout(context).apply {
+                        orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL
+                        minimumHeight = dp(72); setPadding(dp(18), dp(6), dp(8), dp(6))
+                        background = GradientDrawable().apply {
+                            cornerRadius = dp(18).toFloat()
+                            setColor(if (on) (accent and 0x00FFFFFF) or 0x40000000 else Themes.color(context, R.color.bg_top))
+                            if (on) setStroke(dp(2), accent)
+                        }
+                        setOnClickListener { shown = url; fill() }
+                    }
+                    row.addView(TextView(context).apply {
+                        text = if (on) "◉" else "○"; setTextColor(if (on) accent else sub); setTextSize(TypedValue.COMPLEX_UNIT_SP, 26f)
+                        setPadding(0, 0, dp(18), 0)
+                    })
+                    row.addView(LinearLayout(context).apply {
+                        orientation = LinearLayout.VERTICAL
+                        addView(TextView(context).apply { text = WebCard.name(url); setTextColor(Themes.color(context, R.color.text_title)); setTextSize(TypedValue.COMPLEX_UNIT_SP, 21f); maxLines = 1 })
+                        addView(TextView(context).apply { text = url; setTextColor(sub); setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f); maxLines = 1; ellipsize = TextUtils.TruncateAt.MIDDLE })
+                    }, LinearLayout.LayoutParams(0, -2, 1f))
+                    row.addView(TextView(context).apply {
+                        text = "✕"; setTextColor(sub); setTextSize(TypedValue.COMPLEX_UNIT_SP, 24f); gravity = Gravity.CENTER
+                        contentDescription = "✕"
+                        background = GradientDrawable().apply { shape = GradientDrawable.OVAL; setColor((sub and 0x00FFFFFF) or 0x30000000) }
+                        setOnClickListener {
+                            urls.remove(url)
+                            if (shown == url) shown = urls.firstOrNull() ?: ""
+                            fill()
+                        }
+                    }, LinearLayout.LayoutParams(dp(60), dp(60)))
+                    list.addView(row, LinearLayout.LayoutParams(-1, -2).apply { bottomMargin = dp(10) })
+                }
+                list.addView(TextView(context).apply {
+                    text = "＋  " + context.getString(R.string.wc_web_add); setTextColor(accent); setTextSize(TypedValue.COMPLEX_UNIT_SP, 20f)
+                    gravity = Gravity.CENTER_VERTICAL; minHeight = dp(68); setPadding(dp(20), 0, dp(20), 0)
+                    background = GradientDrawable().apply { cornerRadius = dp(18).toFloat(); setStroke(dp(2), (sub and 0x00FFFFFF) or 0x80000000.toInt(), dp(8).toFloat(), dp(6).toFloat()) }
+                    setOnClickListener {
+                        editUrl("") { v -> if (v.isNotEmpty()) { if (v !in urls) urls += v; shown = v; fill() } }
+                    }
+                }, LinearLayout.LayoutParams(-1, -2))
+            }
+            fill()
+            android.app.AlertDialog.Builder(activity)
+                .setTitle(R.string.wc_web_apps).setView(box)
+                .setPositiveButton(android.R.string.ok) { _, _ ->
+                    prefs.webUrls = urls
+                    prefs.webUrl = shown
+                    render(); onChange()
+                }
+                .setNegativeButton(R.string.cancel, null)
+                .show().also { Dialogs.fix(it) }
+        }
+
+        /** An address of the web app, with MG4Dash's keyboard; [done] gets it ("" when left empty). */
+        private fun editUrl(initial: String, done: (String) -> Unit) {
             val input = android.widget.EditText(context).apply {
-                setText(prefs.webUrl.ifBlank { "http://" }); setSingleLine()
+                setText(initial.ifBlank { "http://" }); setSingleLine()
                 inputType = android.text.InputType.TYPE_CLASS_TEXT or android.text.InputType.TYPE_TEXT_VARIATION_URI
                 setSelection(text.length)
             }
@@ -285,8 +364,7 @@ object CardsEditor {
                 .setTitle(R.string.wc_web_address).setView(box)
                 .setPositiveButton(android.R.string.ok) { _, _ ->
                     val v = input.text.toString().trim()
-                    prefs.webUrl = if (v == "http://" || v == "https://") "" else if (v.isNotEmpty() && !v.contains("://")) "http://$v" else v
-                    render(); onChange()
+                    done(if (v == "http://" || v == "https://") "" else if (v.isNotEmpty() && !v.contains("://")) "http://$v" else v)
                 }
                 .setNegativeButton(R.string.cancel, null)
                 .show().also { dlg ->

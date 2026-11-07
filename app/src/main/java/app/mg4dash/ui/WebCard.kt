@@ -216,5 +216,27 @@ class WebCard(private val activity: android.app.Activity) : FrameLayout(activity
         if (oldw != 0) closeKeyboard()
     }
 
-    companion object { private const val TAG = "WebCard" }
+    /** The next (or previous) address of the list (#98), shown now; false with fewer than two. */
+    fun next(dir: Int): Boolean {
+        val urls = prefs.webUrls
+        if (urls.size < 2) return false
+        val at = urls.indexOf(prefs.webUrl).coerceAtLeast(0)
+        val url = urls[((at + dir) % urls.size + urls.size) % urls.size]
+        prefs.webUrl = url
+        Log.i(TAG, "next web app: ${name(url)}")
+        show()
+        return true
+    }
+
+    companion object {
+        private const val TAG = "WebCard"
+
+        /** A short name for an address: its site without "www." (with its path's first part for Google Maps and the like). */
+        fun name(url: String): String {
+            val u = try { android.net.Uri.parse(url) } catch (_: Exception) { null }
+            val host = u?.host?.removePrefix("www.")?.removePrefix("m.") ?: return url
+            val first = u.pathSegments.firstOrNull()?.takeIf { it.isNotBlank() && it.length <= 12 && host.startsWith("google.") }
+            return if (first != null) "$host/$first" else host
+        }
+    }
 }
