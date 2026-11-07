@@ -134,6 +134,12 @@ class LineChart @JvmOverloads constructor(context: Context, attrs: AttributeSet?
     /** Bubble with the average's value at the end of the dashed line; off when the value is shown elsewhere (#44). */
     var averageBubble = true
         set(v) { if (field != v) { field = v; invalidate() } }
+    /** Colour of the dashed average line; null: the theme's button colour (#44). */
+    var averageColor: Int? = null
+        set(v) { if (field != v) { field = v; invalidate() } }
+    /** Colour of a dot on the curve's last point (the last km, #44); null: no dot. */
+    var lastDotColor: Int? = null
+        set(v) { if (field != v) { field = v; invalidate() } }
     /** Text shown without a curve: 1 point per km, or per trip over 12 months (#44). */
     var emptyText: Int = app.mg4dash.R.string.chart_empty
         set(v) { if (field != v) { field = v; invalidate() } }
@@ -274,7 +280,13 @@ class LineChart @JvmOverloads constructor(context: Context, attrs: AttributeSet?
         // with a label of its value at the right end
         val avg = average
         val ay = y(avg)
+        averageColor?.let { avgPaint.color = it }
         canvas.drawPath(Path().apply { moveTo(left, ay); lineTo(right, ay) }, avgPaint)
+        // Last km: a dot on the curve's right end, inside the view
+        lastDotColor?.let { col ->
+            dot.color = col
+            canvas.drawCircle(last - 5 * d, y(values.last()), 5 * d, dot)
+        }
         if (!averageBubble) return
         val txt = String.format(Locale.getDefault(), "%.1f", avg)
         val tw = avgText.measureText(txt)
@@ -288,6 +300,7 @@ class LineChart @JvmOverloads constructor(context: Context, attrs: AttributeSet?
         canvas.drawText(txt, (bx0 + bx1) / 2, by0 + h / 2 - (avgText.descent() + avgText.ascent()) / 2, avgText)
     }
 
+    private val dot = Paint(Paint.ANTI_ALIAS_FLAG)
     private val bubble = android.graphics.RectF()
     private val avgFill = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = app.mg4dash.ui.Themes.color(context, R.color.accent_action) }
     private val avgText = Paint(Paint.ANTI_ALIAS_FLAG).apply {
