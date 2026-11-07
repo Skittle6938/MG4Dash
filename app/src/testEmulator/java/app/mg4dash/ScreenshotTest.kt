@@ -475,7 +475,7 @@ class ScreenshotTest {
             seen += app.mg4dash.system.Prefs(act).consSource
             save(act.window.decorView, "power_cons_$n.png")
         }
-        // The car's is always in the loop; the others only once known
+        // Every consumption is in the loop, known or not yet (#29)
         org.junit.Assert.assertTrue(seen.toString(), 3 in seen && 1 in seen)
     }
 
