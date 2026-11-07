@@ -205,6 +205,9 @@ public class WebActivity extends Activity {
                 if (!failed) message.setVisibility(View.GONE);
                 pageScripts();
                 watchFields();
+                // A choice on cookies (consent pages) kept on disk at once: MG4Dash stops this app when the card
+                // changes address, before Chromium's own write, every 30 s (#98)
+                android.webkit.CookieManager.getInstance().flush();
             }
         });
 
@@ -510,6 +513,7 @@ public class WebActivity extends Activity {
             // Media are no longer suspended by Chromium (for the hidden card): out of sight, they stop here
             if (softVideo && inCardOnly()) web.evaluateJavascript(PAUSE_JS, null);
             web.onPause();
+            android.webkit.CookieManager.getInstance().flush();
         }
         field(false, "text");
         super.onStop();
