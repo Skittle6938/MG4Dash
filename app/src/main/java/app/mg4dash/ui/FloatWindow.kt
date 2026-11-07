@@ -18,15 +18,19 @@ import app.mg4dash.system.Log
 import app.mg4dash.system.Prefs
 
 /**
- * Web app detached from its card (trial), instead of the fixed full screen when chosen in the edit mode:
- * the card's panel floats over home, in a layer of the activity's own window (no overlay window, no permission).
- * At rest, its touches are taken here and the page sees none of them:
+ * Web app that can leave its card (trial), instead of the fixed full screen when "Detached window" is chosen in the
+ * edit mode. With that choice its panel always lives in a layer of the activity's own window (no overlay window, no
+ * permission), over home: docked, it sits exactly over a placeholder [dock] that takes its place in the card; detached,
+ * it floats with its own place and size. Going from one to the other only moves the panel, never takes it off the
+ * window: the page goes on, loaded (taken off and put back, MG4Dash Web was started again, ~10 s of black on the car).
+ * Detached and at rest, its touches are taken here and the page sees none of them:
  * - a corner pulled at once resizes it, the opposite corner fixed and the ratio kept; the middle of an edge, its
  *   width or its height alone;
  * - a long press then a slide moves it; a long press let go without moving opens the page's menu;
  * - two fingers resize it too: slanted the ratio is kept, flat the width alone, upright the height alone;
  * - a touch wakes it (outline lit, the page takes the touches) until left alone for the time of the edit mode;
  *   a double tap puts it back in its card (no buttons nor title bar over the page).
+ * The handles are drawn on a thin frame around the page: the embedded page's layer covers whatever is drawn over it.
  * During a gesture only a dashed outline follows the finger: the window takes its place and size when it is let
  * go, the embedded page's virtual display and layer being redone once (each frame would be too heavy on the head
  * unit, and on the car the layer does not follow a view moving live, #98).
@@ -37,6 +41,8 @@ class FloatWindow(
     private val activity: Activity,
     /** The panel shown in the window (the web app's card). */
     val panel: View,
+    /** Its placeholder in the card, which it covers while docked. */
+    private val dock: View,
     /** Where the window may go, in the window's coordinates (the cards' area, the bar left free). */
     private val bounds: () -> Rect,
     private val onAttach: () -> Unit,
@@ -51,11 +57,12 @@ class FloatWindow(
     private fun dp(v: Int) = (v * d).toInt()
     private val content = activity.findViewById<ViewGroup>(android.R.id.content)
     private val accent = Themes.color(activity, R.color.accent_action)
+    /** Width of the frame around the page when detached, where the handles are. */
+    private val frame = dp(12)
 
-    /** Over everything of home, the size of the window; lets the touches it does not take go through. */
+    /** Over home's cards, the size of the window; lets the touches it does not take go through. */
     private val layer = FrameLayout(activity).apply { clipChildren = false; clipToPadding = false }
     private val holder = FrameLayout(activity).apply {
-        elevation = dp(16).toFloat()
         // Rounded as the cards, for its shadow over home
         outlineProvider = object : android.view.ViewOutlineProvider() {
             override fun getOutline(v: View, o: android.graphics.Outline) { o.setRoundRect(0, 0, v.width, v.height, FadeOutline.RADIUS * d); o.alpha = 1f }
@@ -66,12 +73,18 @@ class FloatWindow(
 
     /** The window's place and size, in the layer's (= the window's) coordinates. */
     private val rect = Rect()
+    /** Detached from its card. */
+    var floating = false
+        private set
     var awake = false
         private set
 
     private val handler = android.os.Handler(android.os.Looper.getMainLooper())
     private val sleep = Runnable { if (keepAwake()) setAwake(true) else setAwake(false) }
+    /** Docked: follows its placeholder at each layout (another card, another place, full screen of the map…). */
+    private val follow = android.view.ViewTreeObserver.OnGlobalLayoutListener { if (!floating) followDock() }
 
+    /** Docked over its placeholder; the panel is taken off its old parent this once. */
     fun open() {
         (panel.parent as? ViewGroup)?.removeView(panel)
         holder.addView(panel, FrameLayout.LayoutParams(-1, -1))
@@ -79,17 +92,71 @@ class FloatWindow(
         layer.addView(holder, FrameLayout.LayoutParams(0, 0))
         layer.addView(ghost, FrameLayout.LayoutParams(0, 0))
         ghost.visibility = View.GONE
-        content.addView(layer, FrameLayout.LayoutParams(-1, -1))
-        place(saved() ?: initial())
-        Log.i(TAG, "detached at $rect")
+        // Just above home's screen: what comes later over it (edit mode, tutorial, alerts) stays above the page
+        content.addView(layer, (0 until content.childCount).firstOrNull { content.getChildAt(it) !== layer }?.let { it + 1 } ?: -1,
+            FrameLayout.LayoutParams(-1, -1))
+        content.viewTreeObserver.addOnGlobalLayoutListener(follow)
+        look()
+        holder.visibility = View.INVISIBLE
+        Log.i(TAG, "web app hosted over home")
     }
 
-    /** The panel leaves the window (back to its card), the layer goes. */
+    /** The panel leaves the layer (back to a card as before), the layer goes. */
     fun close() {
         handler.removeCallbacksAndMessages(null)
+        content.viewTreeObserver.removeOnGlobalLayoutListener(follow)
         holder.removeView(panel)
+        panel.setPadding(0, panel.paddingTop, panel.paddingRight, panel.paddingBottom)
         content.removeView(layer)
-        Log.i(TAG, "attached again")
+        Log.i(TAG, "web app back in the cards")
+    }
+
+    /** Detached at its kept place (or a first one), or docked again over its placeholder. */
+    fun setFloating(on: Boolean) {
+        if (on == floating) return
+        floating = on
+        setAwake(false)
+        look()
+        if (on) {
+            holder.visibility = View.VISIBLE
+            place(saved() ?: initial())
+            Log.i(TAG, "detached at $rect")
+        } else {
+            followDock()
+            Log.i(TAG, "attached again")
+        }
+    }
+
+    /** Docked: no frame, flat, as a card; detached: a frame with its handles, a shadow over home. */
+    private fun look() {
+        val f = if (floating) frame else 0
+        (panel.layoutParams as FrameLayout.LayoutParams).apply { setMargins(f, f, f, f) }.also { panel.layoutParams = it }
+        holder.elevation = if (floating) dp(16).toFloat() else 0f
+        holder.background = if (floating) android.graphics.drawable.GradientDrawable().apply {
+            cornerRadius = FadeOutline.RADIUS * d + frame; setColor(Themes.color(activity, R.color.bg_bottom))
+        } else null
+        if (!floating) panel.setPadding(dock.paddingLeft, panel.paddingTop, panel.paddingRight, panel.paddingBottom)
+        else panel.setPadding(0, panel.paddingTop, panel.paddingRight, panel.paddingBottom)
+        chrome.visibility = if (floating) View.VISIBLE else View.GONE
+    }
+
+    private fun rectOf(v: View): Rect {
+        val a = IntArray(2).also { v.getLocationInWindow(it) }
+        val c = IntArray(2).also { layer.getLocationInWindow(it) }
+        return Rect(a[0] - c[0], a[1] - c[1], a[0] - c[0] + v.width, a[1] - c[1] + v.height)
+    }
+
+    /** Over its placeholder, shown when it is (hidden behind another card, or with no place, it is hidden too). */
+    private fun followDock() {
+        val shown = dock.isAttachedToWindow && dock.isShown && dock.width > 0 && dock.height > 0
+        if (shown) {
+            val r = rectOf(dock)
+            if (r != rect) place(r)
+            // Room for MG's fog light button in the top left place (#38), as the card had
+            if (panel.paddingLeft != dock.paddingLeft) panel.setPadding(dock.paddingLeft, panel.paddingTop, panel.paddingRight, panel.paddingBottom)
+        }
+        val v = if (shown) View.VISIBLE else View.INVISIBLE
+        if (holder.visibility != v) holder.visibility = v
     }
 
     private fun saved(): Rect? = prefs.webFloatRect?.let { Rect(it[0], it[1], it[0] + it[2], it[1] + it[3]) }?.let { fit(it) }
@@ -128,7 +195,7 @@ class FloatWindow(
         rect.set(r)
         (holder.layoutParams as FrameLayout.LayoutParams).apply { width = r.width(); height = r.height(); leftMargin = r.left; topMargin = r.top }
             .also { holder.layoutParams = it }
-        prefs.webFloatRect = intArrayOf(r.left, r.top, r.width(), r.height())
+        if (floating) prefs.webFloatRect = intArrayOf(r.left, r.top, r.width(), r.height())
         // Resized, the embedded app follows by itself (EmbeddedApp: new size, new surface); moved only, its layer is redone here
         if (moved && !resized) holder.postDelayed({ onMoved() }, 300)
     }
@@ -145,6 +212,12 @@ class FloatWindow(
     }
 
     fun rest() = setAwake(false)
+
+    /** Docked: its card's outline, lit while the page is awake (the card's own is under the page, out of sight). */
+    fun dockOutline(on: Boolean) {
+        if (floating) return
+        holder.foreground = if (on) FadeOutline.Awake(d, accent, dp(3).toFloat()) else null
+    }
 
     // ── Touches ──────────────────────────────────────────────────────────────
 
@@ -183,6 +256,7 @@ class FloatWindow(
             MotionEvent.ACTION_DOWN -> {
                 val (x, y) = local(ev).let { it[0] to it[1] }
                 mode = Mode.NONE; through = false
+                if (!floating) return false
                 if (!rect.contains(x.toInt(), y.toInt())) return false
                 if (awake) { setAwake(true); through = true; return false }
                 downX = x; downY = y; start.set(rect)
@@ -331,7 +405,7 @@ class FloatWindow(
         override fun onDraw(c: Canvas) {
             if (awake) return
             handle.alpha = if (mode == Mode.NONE) 150 else 255
-            val w = width.toFloat(); val h = height.toFloat(); val i = 3 * d; val l = 30 * d; val e = 32 * d
+            val w = width.toFloat(); val h = height.toFloat(); val i = frame / 2f; val l = 30 * d; val e = 32 * d
             // Corners
             c.drawLine(i, i + l, i, i, handle); c.drawLine(i, i, i + l, i, handle)
             c.drawLine(w - i - l, i, w - i, i, handle); c.drawLine(w - i, i, w - i, i + l, handle)
