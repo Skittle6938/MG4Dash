@@ -23,8 +23,8 @@ import app.mg4dash.system.Prefs
 
 /**
  * MG4Dash's own keyboard (#93): full width, large keys, the theme's colours. Android's keyboard does not fill
- * this screen. It serves MG4Dash's text fields, through [attach], and the Web app card's page ([over]). Keys show capitals and type lower case
- * letters unless shift is on; a long press on a letter offers its accents in the top row.
+ * this screen. It serves MG4Dash's text fields, through [attach], and the Web app card's page ([over]). Letter keys show and type lower case
+ * letters, and capitals while shift is on; a long press on a letter offers its accents in the top row.
  */
 class CarKeyboard(
     context: Context,
@@ -93,20 +93,23 @@ class CarKeyboard(
     private fun LinearLayout.char(c: Char) = key(c.toString(), 1f) { onText(c.toString()) }
 
     private fun LinearLayout.letter(c: Char) {
-        val v = key(c.uppercaseChar().toString(), 1f) { type(c) }
+        val v = key(cased(c), 1f) { type(c) }
         if (accents(c).isNotEmpty()) v.setOnLongClickListener { accentsOf = c; rebuild(); true }
     }
 
     /** The row of a long pressed letter: its accents, then a key to go back to the letters. */
     private fun LinearLayout.accentKeys(c: Char) {
         val choices = accents(c)
-        choices.forEach { a -> key(a.uppercase(), 1f) { accentsOf = null; type(a); rebuild() } }
+        choices.forEach { a -> key(cased(a), 1f) { accentsOf = null; type(a); rebuild() } }
         repeat(ROW_KEYS - 1 - choices.length) { addKey(View(context).apply { isClickable = true }, 1f).background = null }
         key("✕", 1f) { accentsOf = null; rebuild() }
     }
 
+    /** What a letter key shows and types: the letter as shift makes it. */
+    private fun cased(c: Char) = if (shift == Shift.OFF) c.toString() else c.uppercase()
+
     private fun type(c: Char) {
-        onText(if (shift == Shift.OFF) c.toString() else c.uppercase())
+        onText(cased(c))
         if (shift == Shift.ONCE) { shift = Shift.OFF; rebuild() }
     }
 
