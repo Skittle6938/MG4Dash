@@ -551,7 +551,7 @@
     <string name="wc_map_app">Mapa:</string>
     <string name="wc_web_address">Dirección web</string>
     <string name="wc_web_apps">Web apps</string>
-    <string name="wc_web_apps_hint">Toca una dirección para mostrarla en la tarjeta · ✕ para borrarla · desliza la tarjeta en reposo arriba o abajo para cambiar</string>
+    <string name="wc_web_apps_hint">Toca una dirección para mostrarla en la tarjeta · ✕ para borrarla</string>
     <string name="wc_web_add">Añadir una dirección</string>
     <string name="wc_web_count">%1$d direcciones</string>
     <string name="wc_wake">Página activa:</string>
