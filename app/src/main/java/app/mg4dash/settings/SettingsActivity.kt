@@ -348,8 +348,9 @@ class SettingsActivity : AppCompatActivity() {
             }
         }
         radioDashUpdate(upd)
-        webEngine(upd)
-        text(upd, getString(R.string.st_upd_note, app.mg4dash.system.RadioDashUpdater.TESTED_ON), 15f, R.color.text_title)
+        val engineShown = webEngine(upd)
+        text(upd, getString(R.string.st_upd_note, app.mg4dash.system.RadioDashUpdater.TESTED_ON) +
+            (if (engineShown) " " + getString(R.string.st_web_engine_note) else ""), 15f, R.color.text_title)
         toggle(upd, R.string.st_update_auto, R.string.st_update_auto_desc, { prefs.updateAuto }) { prefs.updateAuto = it }
         toggle(upd, R.string.st_update_beta, null, { prefs.updateBeta }) { prefs.updateBeta = it }
 
@@ -1074,37 +1075,42 @@ class SettingsActivity : AppCompatActivity() {
      * Recent web engine (#98): the car's WebView or Chromium 138 for the web app card, downloaded from the
      * MG4Dash-WebView repository; the way back to the car's own. Only on head units that can take it.
      */
-    private fun webEngine(parent: LinearLayout) {
+    private fun webEngine(parent: LinearLayout): Boolean {
         val we = app.mg4dash.system.WebEngine
-        if (!we.installed(this) && !we.possible(this)) return
+        if (!we.installed(this) && !we.possible(this)) return false
         // Built again after an install or a revert, from the engine then in use
         val box = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
         parent.addView(box, LinearLayout.LayoutParams(-1, -2))
         webEngineRows(box, null)
+        return true
     }
 
+    /** One line like MG4Dash's and Radio Dash's: name and state on the left, one button on the right. */
     private fun webEngineRows(box: LinearLayout, message: String?) {
         val we = app.mg4dash.system.WebEngine
         box.removeAllViews()
         val on = we.installed(this)
-        val state = text(box, message ?: getString(R.string.st_web_engine, we.current(this) ?: "?"), 18f, R.color.text_value)
-        text(box, getString(if (on) R.string.st_web_engine_on else R.string.st_web_engine_desc, we.VERSION, we.SIZE / 1_000_000), 15f, R.color.text_title)
+        fun major(v: String?) = v?.substringBefore('.') ?: "?"
+        val (state, b) = updateLine(box, getString(R.string.st_web_engine_name), message ?: if (on)
+            getString(R.string.st_web_engine_state_on, major(we.current(this)))
+        else getString(R.string.st_web_engine_state_orig, major(we.current(this)), major(we.VERSION), we.SIZE / 1_000_000), null)
+        b.text = if (on) getString(R.string.st_web_engine_revert) else getString(R.string.st_upd_install_ver, major(we.VERSION))
         var busy = false
         fun finished(ok: Boolean) {
             busy = false
             if (!ok) { state.text = getString(R.string.st_update_error); return }
-            // Installed: says so; taken off: the engine line shows the car's own again
+            // Installed: says so; taken off: the line shows the car's own engine again
             webEngineRows(box, if (we.installed(this)) getString(R.string.st_web_engine_done) else null)
         }
-        val b = button(getString(if (on) R.string.st_web_engine_revert else R.string.st_web_engine_install, we.VERSION)) {
-            if (busy) return@button
+        b.setOnClickListener {
+            if (busy) return@setOnClickListener
             if (on) {
                 AlertDialog.Builder(this).setMessage(R.string.st_web_engine_revert_confirm)
                     .setPositiveButton(R.string.st_web_engine_revert_ok) { _, _ -> busy = true; we.revert(this) { finished(it) } }
                     .setNegativeButton(R.string.cancel, null).show().also { app.mg4dash.ui.Dialogs.fix(it); app.mg4dash.ui.Dialogs.hideBars(it) }
-                return@button
+                return@setOnClickListener
             }
-            if (app.mg4dash.system.DataUsage.updatesBlocked(this)) { state.text = getString(R.string.du_updates_wait); return@button }
+            if (app.mg4dash.system.DataUsage.updatesBlocked(this)) { state.text = getString(R.string.du_updates_wait); return@setOnClickListener }
             AlertDialog.Builder(this).setMessage(getString(R.string.st_web_engine_confirm, we.VERSION, we.SIZE / 1_000_000))
                 .setPositiveButton(R.string.st_update_install) { _, _ ->
                     busy = true
@@ -1119,7 +1125,6 @@ class SettingsActivity : AppCompatActivity() {
                 }
                 .setNegativeButton(R.string.cancel, null).show().also { app.mg4dash.ui.Dialogs.fix(it); app.mg4dash.ui.Dialogs.hideBars(it) }
         }
-        row(box, b)
     }
 
     private fun panel(parent: LinearLayout, title: String, fill: Boolean = false): LinearLayout {

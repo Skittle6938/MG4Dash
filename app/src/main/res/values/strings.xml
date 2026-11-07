@@ -771,11 +771,11 @@
     <string name="aa_waiting">Connect your phone via USB</string>
     <string name="unit_kwh100">kWh/100</string>
     <string name="no_data">—</string>
-    <string name="st_web_engine">Web engine: Chromium %1$s</string>
-    <string name="st_web_engine_desc">A recent one, Chromium %1$s, opens today\'s sites in the web app card (ABRP, Waze, OpenStreetMap…). Download of %2$d MB from GitHub (MG4Dash-WebView), best over Wi-Fi, then installed here. The car\'s own one can be put back.</string>
-    <string name="st_web_engine_on">Recent engine installed (Chromium %1$s), over the car\'s own one.</string>
-    <string name="st_web_engine_install">Install Chromium %1$s</string>
-    <string name="st_web_engine_revert">Back to the car\'s engine</string>
+    <string name="st_web_engine_revert">Back to the original</string>
+    <string name="st_web_engine_name">Web engine (web app card)</string>
+    <string name="st_web_engine_state_orig">Chromium %1$s, the car\'s own · Chromium %2$s available (%3$d MB)</string>
+    <string name="st_web_engine_state_on">Chromium %1$s, recent · installed over the car\'s own</string>
+    <string name="st_web_engine_note">The recent web engine opens today\'s sites in the web app card (ABRP, Waze…), best over Wi-Fi; the car\'s own can be put back.</string>
     <string name="st_web_engine_confirm">Download Chromium %1$s (%2$d MB) and install it as the car\'s web engine?</string>
     <string name="st_web_engine_revert_confirm">Put back the car\'s own web engine (Chromium 66)? Recent sites will no longer open in the web app card.</string>
     <string name="st_web_engine_revert_ok">Put back</string>

@@ -771,11 +771,11 @@
     <string name="aa_waiting">Telefonunuzu USB ile bağlayın</string>
     <string name="unit_kwh100">kWh/100</string>
     <string name="no_data">—</string>
-    <string name="st_web_engine">Web motoru: Chromium %1$s</string>
-    <string name="st_web_engine_desc">Yeni bir motor, Chromium %1$s, web uygulaması kartında güncel siteleri açar (ABRP, Waze, OpenStreetMap…). GitHub\'dan (MG4Dash-WebView) %2$d MB indirme, tercihen Wi-Fi ile, ardından burada kurulur. Orijinali geri yüklenebilir.</string>
-    <string name="st_web_engine_on">Yeni motor kurulu (Chromium %1$s), orijinalinin üzerine.</string>
-    <string name="st_web_engine_install">Chromium %1$s kur</string>
-    <string name="st_web_engine_revert">Orijinal motora dön</string>
+    <string name="st_web_engine_revert">Orijinale dön</string>
+    <string name="st_web_engine_name">Web motoru (Web uygulaması kartı)</string>
+    <string name="st_web_engine_state_orig">Chromium %1$s, orijinal · Chromium %2$s mevcut (%3$d MB)</string>
+    <string name="st_web_engine_state_on">Chromium %1$s, yeni · orijinalin üzerine kuruldu</string>
+    <string name="st_web_engine_note">Yeni web motoru güncel siteleri Web uygulaması kartında açar (ABRP, Waze…), tercihen Wi-Fi ile; orijinal geri yüklenebilir.</string>
     <string name="st_web_engine_confirm">Chromium %1$s (%2$d MB) indirilip aracın web motoru olarak kurulsun mu?</string>
     <string name="st_web_engine_revert_confirm">Orijinal web motoru (Chromium 66) geri yüklensin mi? Güncel siteler web uygulaması kartında artık açılmaz.</string>
     <string name="st_web_engine_revert_ok">Geri yükle</string>

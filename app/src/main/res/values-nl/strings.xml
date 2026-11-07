@@ -771,11 +771,11 @@
     <string name="aa_waiting">Sluit je telefoon aan via USB</string>
     <string name="unit_kwh100">kWh/100</string>
     <string name="no_data">—</string>
-    <string name="st_web_engine">Web-engine: Chromium %1$s</string>
-    <string name="st_web_engine_desc">Een recente, Chromium %1$s, opent de sites van nu in de web-app-kaart (ABRP, Waze, OpenStreetMap…). Download van %2$d MB van GitHub (MG4Dash-WebView), liefst via wifi, daarna hier geïnstalleerd. De originele kan terug.</string>
-    <string name="st_web_engine_on">Recente engine geïnstalleerd (Chromium %1$s), over de originele.</string>
-    <string name="st_web_engine_install">Chromium %1$s installeren</string>
-    <string name="st_web_engine_revert">Terug naar de originele engine</string>
+    <string name="st_web_engine_revert">Terug naar origineel</string>
+    <string name="st_web_engine_name">Webengine (web-app-kaart)</string>
+    <string name="st_web_engine_state_orig">Chromium %1$s, origineel · Chromium %2$s beschikbaar (%3$d MB)</string>
+    <string name="st_web_engine_state_on">Chromium %1$s, recent · over de originele geïnstalleerd</string>
+    <string name="st_web_engine_note">De recente webengine opent de sites van nu in de web-app-kaart (ABRP, Waze…), liefst via wifi; de originele kan worden teruggezet.</string>
     <string name="st_web_engine_confirm">Chromium %1$s (%2$d MB) downloaden en installeren als web-engine van de auto?</string>
     <string name="st_web_engine_revert_confirm">De originele web-engine (Chromium 66) terugzetten? Recente sites openen dan niet meer in de web-app-kaart.</string>
     <string name="st_web_engine_revert_ok">Terugzetten</string>
