@@ -553,6 +553,7 @@
     <string name="wc_web_apps">Web uygulamaları</string>
     <string name="wc_web_apps_hint">Kartta göstermek için bir adrese dokunun · silmek için ✕</string>
     <string name="wc_web_add">Adres ekle</string>
+    <string name="wc_web_back">Geri</string>
     <string name="wc_web_count">%1$d adres</string>
     <string name="wc_wake">Sayfa etkin:</string>
     <string name="wc_wake_s">%1$d s</string>

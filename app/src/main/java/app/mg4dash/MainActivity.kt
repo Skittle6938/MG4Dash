@@ -458,6 +458,45 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         return r.contains(ev.rawX.toInt(), ev.rawY.toInt())
     }
 
+    // Long press on the web app, at rest or awake (#98): a small menu with Back and the addresses of the edit mode.
+    private var pressFrame: SlotFrame? = null
+    private var pressX = 0f; private var pressY = 0f
+    /** The menu opened: the rest of the gesture goes nowhere. */
+    private var pressTaken = false
+    private val longPressed = Runnable {
+        val f = pressFrame ?: return@Runnable
+        pressFrame = null
+        if (f.shown != Card.WEB || app.mg4dash.ui.CardsEditor.isOpen(this)) return@Runnable
+        pressTaken = true
+        // At rest no tap must follow; awake, the page lets go of the touch it had
+        tapFrame = null; handler.removeCallbacks(wakeTapped); restFrame = null
+        val now = android.os.SystemClock.uptimeMillis()
+        android.view.MotionEvent.obtain(now, now, android.view.MotionEvent.ACTION_CANCEL, pressX, pressY, 0).also { super.dispatchTouchEvent(it); it.recycle() }
+        app.mg4dash.system.Log.i("Rest", "web app menu")
+        webCard?.menu()
+    }
+
+    /** True while a long press opened the menu, up to the end of its gesture. */
+    private fun longPress(ev: android.view.MotionEvent): Boolean {
+        when (ev.actionMasked) {
+            android.view.MotionEvent.ACTION_DOWN -> {
+                pressTaken = false
+                handler.removeCallbacks(longPressed)
+                pressFrame = frames.values.firstOrNull { it.shown == Card.WEB && inBox(it, ev) }
+                pressX = ev.rawX; pressY = ev.rawY
+                if (pressFrame != null) handler.postDelayed(longPressed, android.view.ViewConfiguration.getLongPressTimeout().toLong())
+            }
+            android.view.MotionEvent.ACTION_MOVE -> if (pressFrame != null) {
+                val slop = dp(16)
+                if (Math.abs(ev.rawX - pressX) > slop || Math.abs(ev.rawY - pressY) > slop) { pressFrame = null; handler.removeCallbacks(longPressed) }
+            }
+            android.view.MotionEvent.ACTION_POINTER_DOWN, android.view.MotionEvent.ACTION_UP, android.view.MotionEvent.ACTION_CANCEL -> {
+                pressFrame = null; handler.removeCallbacks(longPressed)
+            }
+        }
+        return pressTaken.also { if (ev.actionMasked == android.view.MotionEvent.ACTION_UP || ev.actionMasked == android.view.MotionEvent.ACTION_CANCEL) pressTaken = false }
+    }
+
     /** Touches on a page or an app at rest: true when taken here, the page seeing none of them. */
     private fun restTouch(ev: android.view.MotionEvent): Boolean {
         if (ev.actionMasked == android.view.MotionEvent.ACTION_DOWN) {
@@ -1223,6 +1262,7 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
     override fun dispatchTouchEvent(ev: android.view.MotionEvent): Boolean {
         if (twoFingerPull.onTouch(ev) { super.dispatchTouchEvent(it) }) return true
         if (!simpleMode && !app.mg4dash.ui.CardsEditor.isOpen(this) && pinchToEdit.onTouch(ev) { super.dispatchTouchEvent(it) }) return true
+        if (!app.mg4dash.ui.CardsEditor.isOpen(this) && longPress(ev)) return true
         if (!app.mg4dash.ui.CardsEditor.isOpen(this) && restTouch(ev)) return true
         return super.dispatchTouchEvent(ev)
     }
