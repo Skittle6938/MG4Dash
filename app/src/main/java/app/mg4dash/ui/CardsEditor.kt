@@ -205,11 +205,7 @@ object CardsEditor {
                 column.addView(link(context.getString(R.string.wc_web_address), prefs.webUrl.ifBlank { context.getString(R.string.wc_web_set) }) { editUrl() })
             // How long a web page or the map's app stays awake after a touch (#98)
             if (Card.WEB in cards.cards || Card.MAP in cards.cards && prefs.mapApp != null)
-                column.addView(link(context.getString(R.string.wc_wake), context.getString(R.string.wc_wake_s, prefs.webWakeSeconds)) {
-                    val steps = listOf(5, 10, 20, 30, 60)
-                    prefs.webWakeSeconds = steps[(steps.indexOf(prefs.webWakeSeconds) + 1) % steps.size]
-                    render()
-                })
+                column.addView(wakeRow())
             // Small places: more chips than room, they scroll
             box.addView(ScrollView(context).apply { isVerticalScrollBarEnabled = false; addView(column) },
                 LinearLayout.LayoutParams(-1, 0, 1f).apply { topMargin = dp(if (t.slot.size == HomeSlots.Size.MEDIUM) 10 else 2) })
@@ -253,6 +249,28 @@ object CardsEditor {
             maxLines = 1; ellipsize = TextUtils.TruncateAt.MIDDLE
             setPadding(dp(4), dp(12), dp(4), dp(4))
             setOnClickListener { onClick() }
+        }
+
+        /** "Page awake: ‹ 10 s ›", the arrows one second less or more (1 to 120 s). */
+        private fun wakeRow() = LinearLayout(context).apply {
+            orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL
+            setPadding(dp(4), dp(4), dp(4), 0)
+            val value = TextView(context).apply {
+                setTextColor(accent); setTextSize(TypedValue.COMPLEX_UNIT_SP, 19f); gravity = Gravity.CENTER
+                text = context.getString(R.string.wc_wake_s, prefs.webWakeSeconds)
+            }
+            fun arrow(glyph: String, step: Int) = TextView(context).apply {
+                text = glyph; setTextColor(accent); setTextSize(TypedValue.COMPLEX_UNIT_SP, 26f); gravity = Gravity.CENTER
+                minWidth = dp(56); minHeight = dp(50)
+                setOnClickListener {
+                    prefs.webWakeSeconds = (prefs.webWakeSeconds + step).coerceIn(1, 120)
+                    value.text = context.getString(R.string.wc_wake_s, prefs.webWakeSeconds)
+                }
+            }
+            addView(TextView(context).apply { text = context.getString(R.string.wc_wake); setTextColor(sub); setTextSize(TypedValue.COMPLEX_UNIT_SP, 19f) })
+            addView(arrow("‹", -1))
+            addView(value, LinearLayout.LayoutParams(dp(64), -2))
+            addView(arrow("›", 1))
         }
 
         /** Address of the web app, with MG4Dash's keyboard. */
