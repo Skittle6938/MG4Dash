@@ -88,11 +88,11 @@ class Prefs(context: Context) {
     var webWakeSeconds: Int
         get() = sp.getInt("web_wake_s", 10)
         set(v) = sp.edit().putInt("web_wake_s", v).apply()
-    /** Double tap on the web app (#99, trial): false = the fixed full screen (as before), true = a window detached over home. */
+    /** Double tap on the web app (trial): false = the fixed full screen (as before), true = a window detached over home. */
     var webFloat: Boolean
         get() = sp.getBoolean("web_float", false)
         set(v) = sp.edit().putBoolean("web_float", v).apply()
-    /** The web app's window detached over home (#99): it stays so after a rebuild or a new start. */
+    /** The web app's window detached over home: it stays so after a rebuild or a new start. */
     var webFloating: Boolean
         get() = sp.getBoolean("web_floating", false)
         set(v) = sp.edit().putBoolean("web_floating", v).apply()

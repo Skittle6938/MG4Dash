@@ -252,7 +252,7 @@ object CardsEditor {
             setOnClickListener { onClick() }
         }
 
-        /** Double tap on the web app (#99, trial): the fixed full screen (as before) or a window detached over home. */
+        /** Double tap on the web app (trial): the fixed full screen (as before) or a window detached over home. */
         private fun doubleTapRow() = LinearLayout(context).apply {
             orientation = LinearLayout.VERTICAL
             setPadding(dp(4), dp(12), dp(4), 0)
