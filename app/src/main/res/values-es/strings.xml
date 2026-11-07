@@ -770,13 +770,12 @@
     <string name="unit_kwh100">kWh/100</string>
     <string name="no_data">—</string>
     <string name="st_web_engine">Motor web: Chromium %1$s</string>
-    <string name="st_web_engine_desc">Uno reciente, Chromium %1$s, abre los sitios actuales en la tarjeta Web app (ABRP, Waze, OpenStreetMap…). Descarga de %2$d MB desde LineageOS, mejor por Wi-Fi, luego firmado e instalado aquí (unos minutos). Se puede volver al original.</string>
+    <string name="st_web_engine_desc">Uno reciente, Chromium %1$s, abre los sitios actuales en la tarjeta Web app (ABRP, Waze, OpenStreetMap…). Descarga de %2$d MB desde GitHub (MG4Dash-WebView), mejor por Wi-Fi, luego instalado aquí. Se puede volver al original.</string>
     <string name="st_web_engine_on">Motor reciente instalado (Chromium %1$s), sobre el original.</string>
     <string name="st_web_engine_install">Instalar Chromium %1$s</string>
     <string name="st_web_engine_revert">Volver al motor original</string>
-    <string name="st_web_engine_confirm">¿Descargar Chromium %1$s (%2$d MB) desde LineageOS, firmarlo e instalarlo como motor web del coche?</string>
+    <string name="st_web_engine_confirm">¿Descargar Chromium %1$s (%2$d MB) e instalarlo como motor web del coche?</string>
     <string name="st_web_engine_revert_confirm">¿Volver al motor web original (Chromium 66)? Los sitios recientes ya no se abrirán en la tarjeta Web app.</string>
     <string name="st_web_engine_revert_ok">Volver</string>
-    <string name="st_web_engine_signing">Firmando… (uno o dos minutos)</string>
     <string name="st_web_engine_done">Hecho: la tarjeta Web app usa el nuevo motor.</string>
 </resources>

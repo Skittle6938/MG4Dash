@@ -1071,8 +1071,8 @@ class SettingsActivity : AppCompatActivity() {
     }
 
     /**
-     * Recent web engine (#98): the car's WebView or Chromium 138 for the web app card, installed from LineageOS and
-     * signed here; the way back to the car's own. Only on head units that can take it.
+     * Recent web engine (#98): the car's WebView or Chromium 138 for the web app card, downloaded from the
+     * MG4Dash-WebView repository; the way back to the car's own. Only on head units that can take it.
      */
     private fun webEngine(parent: LinearLayout) {
         val we = app.mg4dash.system.WebEngine
@@ -1101,7 +1101,6 @@ class SettingsActivity : AppCompatActivity() {
                         runOnUiThread {
                             state.text = when (step) {
                                 app.mg4dash.system.WebEngine.Step.DOWNLOAD -> getString(R.string.st_update_downloading, pct)
-                                app.mg4dash.system.WebEngine.Step.SIGN -> getString(R.string.st_web_engine_signing)
                                 app.mg4dash.system.WebEngine.Step.INSTALL -> getString(R.string.st_update_installing)
                             }
                         }
