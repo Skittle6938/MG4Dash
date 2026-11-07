@@ -446,10 +446,7 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         handler.removeCallbacks(sleep)
         if (awake !== f) {
             awake?.box?.foreground = null
-            f?.box?.foreground = android.graphics.drawable.GradientDrawable().apply {
-                cornerRadius = resources.getDimension(R.dimen.radius_panel)
-                setStroke(dp(3), color(R.color.accent_action))
-            }
+            f?.box?.foreground = app.mg4dash.ui.FadeOutline.Awake(resources.displayMetrics.density, color(R.color.accent_action), dp(3).toFloat())
             awake = f
             app.mg4dash.system.Log.i("Rest", if (f == null) "page or app at rest" else "${f.shown} awake")
         }
