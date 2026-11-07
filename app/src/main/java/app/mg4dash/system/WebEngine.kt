@@ -26,7 +26,7 @@ object WebEngine {
     private const val URL = "https://github.com/Skittle6938/MG4Dash-WebView/releases/download/138.0.7204.63/webview-138.0.7204.63-aosp-testkey.apk"
     const val SIZE = 243562802L
     /** SHA-256 of that file, checked before installing it. */
-    private const val SHA256 = "SIGNED_SHA256"
+    private const val SHA256 = "d057f4921330fe59853eb79a9f4d4e9f980c1c0cf65651dbfbd9bf09f0b59c3c"
     /** AOSP's test key, which signs the car's WebView. */
     private const val TESTKEY = "a40da80a59d170caa950cf15c18c454d47a39b26989d8b640ecd745ba71bf5dc"
     private const val ACTION_RESULT = "app.mg4dash.WEB_ENGINE_RESULT"
