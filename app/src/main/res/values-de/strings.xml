@@ -551,7 +551,7 @@
     <string name="wc_map_app">Karte:</string>
     <string name="wc_web_address">Webadresse</string>
     <string name="wc_web_apps">Web-Apps</string>
-    <string name="wc_web_apps_hint">Adresse antippen, um sie in der Karte zu zeigen · ✕ zum Löschen · Karte in Ruhe nach oben oder unten wischen zum Wechseln</string>
+    <string name="wc_web_apps_hint">Adresse antippen, um sie in der Karte zu zeigen · ✕ zum Löschen</string>
     <string name="wc_web_add">Adresse hinzufügen</string>
     <string name="wc_web_count">%1$d Adressen</string>
     <string name="wc_wake">Seite wach:</string>

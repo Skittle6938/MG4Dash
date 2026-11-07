@@ -551,7 +551,7 @@
     <string name="wc_map_app">Harita:</string>
     <string name="wc_web_address">Web adresi</string>
     <string name="wc_web_apps">Web uygulamaları</string>
-    <string name="wc_web_apps_hint">Kartta göstermek için bir adrese dokunun · silmek için ✕ · değiştirmek için dinlenen kartı yukarı veya aşağı kaydırın</string>
+    <string name="wc_web_apps_hint">Kartta göstermek için bir adrese dokunun · silmek için ✕</string>
     <string name="wc_web_add">Adres ekle</string>
     <string name="wc_web_count">%1$d adres</string>
     <string name="wc_wake">Sayfa etkin:</string>
