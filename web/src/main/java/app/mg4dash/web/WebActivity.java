@@ -209,6 +209,8 @@ public class WebActivity extends Activity {
         message.setOnClickListener(v -> { if (failed) { String u = loaded; loaded = null; load(u); } });
 
         root.addView(web, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        // Full screen and back: YouTube's quality follows, 720p in full screen, 240p in the card
+        web.addOnLayoutChangeListener((v, l, t, r, b, ol, ot, or, ob) -> { if (r - l != or - ol) quality(); });
         root.addView(message, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
         if (!inCardOnly()) addClose(root, bg, i.getIntExtra(EXTRA_FG, Color.LTGRAY));
         setContentView(root);
@@ -362,6 +364,7 @@ public class WebActivity extends Activity {
         // Only when Chromium decodes the videos itself: otherwise H.264 at least gives the sound
         if (softVideo) web.evaluateJavascript("window.__mg4dashMaxH = " + MAX_HEIGHT + ";" + NO_HW_ONLY_JS + YT_QUALITY_JS, null);
         if (softVideo && inCardOnly()) web.evaluateJavascript(SEEN_JS, null);
+        quality();
         if (media != null) web.evaluateJavascript(WebMedia.JS, null);
     }
 
@@ -382,6 +385,30 @@ public class WebActivity extends Activity {
         + "    expiration: now + 30 * 24 * 3600 * 1000, creation: now }));"
         + "} catch (e) {}"
         + "})();";
+
+    /**
+     * YouTube's quality by the card's size: "hd720" in full screen (the card nearly as wide as the screen), "small"
+     * (240p) in the card, through its player's own functions. Set again at each video's start, which chooses its own.
+     */
+    private static final String QUALITY_JS = "(function () {"
+        + "if (!/(^|\\.)youtube\\.com$/.test(location.hostname)) return;"
+        + "function set() {"
+        + "  var p = document.getElementById('movie_player'), q = window.__mg4dashQuality;"
+        + "  if (!p || !q) return;"
+        + "  try { if (p.setPlaybackQualityRange) p.setPlaybackQualityRange(q, q); if (p.setPlaybackQuality) p.setPlaybackQuality(q); } catch (e) {}"
+        + "}"
+        + "if (!window.__mg4dashQualitySet) {"
+        + "  window.__mg4dashQualitySet = set;"
+        + "  document.addEventListener('playing', function () { setTimeout(set, 300); }, true);"
+        + "}"
+        + "set();"
+        + "})();";
+
+    private void quality() {
+        if (web == null || !softVideo) return;
+        boolean full = web.getWidth() >= getResources().getDisplayMetrics().widthPixels * 0.8f;
+        web.evaluateJavascript("window.__mg4dashQuality = '" + (full ? "hd720" : "small") + "';" + QUALITY_JS, null);
+    }
 
     /** From MG4Dash: hidden, the page goes on (sound, live values) without drawing nor decoding the videos' image. */
     private void shown(boolean on) {
