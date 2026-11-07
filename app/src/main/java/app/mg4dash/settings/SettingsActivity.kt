@@ -1101,7 +1101,7 @@ class SettingsActivity : AppCompatActivity() {
             if (on) {
                 AlertDialog.Builder(this).setMessage(R.string.st_web_engine_revert_confirm)
                     .setPositiveButton(R.string.st_web_engine_revert_ok) { _, _ -> busy = true; we.revert(this) { finished(it) } }
-                    .setNegativeButton(R.string.cancel, null).show().also { app.mg4dash.ui.Dialogs.fix(it) }
+                    .setNegativeButton(R.string.cancel, null).show().also { app.mg4dash.ui.Dialogs.fix(it); app.mg4dash.ui.Dialogs.hideBars(it) }
                 return@button
             }
             if (app.mg4dash.system.DataUsage.updatesBlocked(this)) { state.text = getString(R.string.du_updates_wait); return@button }
@@ -1117,7 +1117,7 @@ class SettingsActivity : AppCompatActivity() {
                         }
                     }) { finished(it) }
                 }
-                .setNegativeButton(R.string.cancel, null).show().also { app.mg4dash.ui.Dialogs.fix(it) }
+                .setNegativeButton(R.string.cancel, null).show().also { app.mg4dash.ui.Dialogs.fix(it); app.mg4dash.ui.Dialogs.hideBars(it) }
         }
         row(box, b)
     }
