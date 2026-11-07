@@ -69,7 +69,7 @@ A tap on the right half of the card (the consumption or the range) changes the c
 | lightning bolt | since the last charge | charge level × estimated battery health × new usable capacity (Vehicle page, your own value included) ÷ consumption |
 | route | current trip (as before) | same |
 | live | last km | same, it moves a lot from one km to the next |
-| car | the car's recent consumption (SAIC) | the car's own range |
+| car | the consumption the car's range assumes: energy left (as above) ÷ the car's range | the car's own range |
 
 A consumption not known yet (a trip under 2 km, for example) is skipped, and while it is unknown the range is the car's, with the car logo. The choice is kept. The Energy page opens from its button on the bar, not from the cards, to avoid opening it by mistake.
 
