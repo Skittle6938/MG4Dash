@@ -992,7 +992,7 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
     // ── Cards ────────────────────────────────────────────────────────────────
 
     private fun wireCards() {
-        b.energyCard.setOnClickListener { startActivity(Intent(this, EnergyActivity::class.java)) }
+        // No Energy page on a tap (the bar has its button): it opened by mistake when aiming at the card's own touches
         b.chargeAction.setOnClickListener { onChargeAction() }
         // Hidden buttons (#15): each press restarts the 6 s display
         b.mapCenter.setOnClickListener { mapCard.recenter(LocationRepo.location.value); tintMapCenter() }
@@ -1458,7 +1458,7 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
             setAutoSizeTextTypeUniformWithConfiguration(12, 22, 1, TypedValue.COMPLEX_UNIT_SP)
         }
         powerAvg = tv(26f, R.color.text_value, Gravity.END).apply {
-            // A tap changes the consumption, and the range with it (#29); the rest of the card opens the Energy page
+            // A tap changes the consumption, and the range with it (#29)
             isClickable = true; setOnClickListener { nextConsSource() }
         }
         powerLabel = null
@@ -1466,13 +1466,12 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         row.addView(powerExtra, LinearLayout.LayoutParams(0, -2, 1f))
         row.addView(powerAvg, LinearLayout.LayoutParams(-2, -2))
         card.addView(row, at + 1, LinearLayout.LayoutParams(-1, -2).apply { topMargin = (6 * d).toInt() })
-        // Touch zone larger than the consumption's text (#29): the card's bottom right corner, up to the
-        // power scale and over the end of the V / A line; the rest of the card still opens the Energy page
+        // Touch zone larger than the consumption's text: the whole right half of the card, the range above
+        // included, as both change together (#29); the left half does nothing
         card.addOnLayoutChangeListener { _, _, _, _, _, _, _, _, _ ->
             val a = powerAvg ?: return@addOnLayoutChangeListener
             if (a.width == 0) return@addOnLayoutChangeListener
-            val r = android.graphics.Rect(); a.getDrawingRect(r); card.offsetDescendantRectToMyCoords(a, r)
-            r.left -= (48 * d).toInt(); r.top -= (30 * d).toInt(); r.right = card.width; r.bottom = card.height
+            val r = android.graphics.Rect(card.width / 2, 0, card.width, card.height)
             if (r != consTouch) { consTouch = android.graphics.Rect(r); card.touchDelegate = android.view.TouchDelegate(r, a) }
         }
         // V / A optional (#29): without them, kW and average consumption take the space and grow
