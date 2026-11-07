@@ -67,7 +67,7 @@ class SettingsActivity : AppCompatActivity() {
         // Tabs (setting themes) in the banner, next to the title
         val tabBar = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL }
         top.addView(tabBar, LinearLayout.LayoutParams(-2, dp(52)).apply { rightMargin = dp(16) })
-        top.addView(button(getString(R.string.st_close), R.color.accent_action) { finish() }, LinearLayout.LayoutParams(dp(160), dp(52)))
+        top.addView(button(getString(R.string.st_close)) { finish() }, LinearLayout.LayoutParams(dp(160), dp(52)))
         root.addView(top, LinearLayout.LayoutParams(-1, -2).apply { bottomMargin = dp(12) })
         val pages = android.widget.FrameLayout(this)
         root.addView(pages, LinearLayout.LayoutParams(-1, 0, 1f))
@@ -119,7 +119,7 @@ class SettingsActivity : AppCompatActivity() {
         if (prefs.homeStyle != 1) {
             text(style, getString(R.string.st_edit_cards), 20f, R.color.text_value)
             text(style, getString(R.string.st_edit_cards_desc), 16f, R.color.text_title)
-            row(style, button(getString(R.string.st_edit_cards_btn), R.color.accent_action) {
+            row(style, button(getString(R.string.st_edit_cards_btn)) {
                 startActivity(android.content.Intent(this, app.mg4dash.MainActivity::class.java)
                     .putExtra(app.mg4dash.ui.CardsEditor.EXTRA_EDIT, true)
                     .addFlags(android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP or android.content.Intent.FLAG_ACTIVITY_SINGLE_TOP))
@@ -273,8 +273,8 @@ class SettingsActivity : AppCompatActivity() {
         homeState = text(valet, "", 19f, R.color.text_sub)
         text(valet, getString(R.string.st_home_desc), 16f, R.color.text_title)
         row(valet,
-            button(getString(R.string.st_replace), R.color.accent_action) { confirmReplace() },
-            button(getString(R.string.st_valet), R.color.accent_heat) { confirmValet() },
+            button(getString(R.string.st_replace)) { confirmReplace() },
+            button(getString(R.string.st_valet)) { confirmValet() },
         )
         text(valet, getString(R.string.st_adb), 14f, R.color.text_title)
 
@@ -404,7 +404,7 @@ class SettingsActivity : AppCompatActivity() {
             button(getString(R.string.st_ha_set_token)) {
                 ask(getString(R.string.st_ha_set_token), "", secret = true) { prefs.haToken = it; showHa() }
             },
-            button(getString(R.string.st_ha_test), R.color.accent_action) {
+            button(getString(R.string.st_ha_test)) {
                 app.mg4dash.shortcuts.Shortcuts.testHa(this) { ok ->
                     app.mg4dash.ui.Toasts.show(this, if (ok) R.string.st_ha_ok else R.string.ha_error, long = true)
                 }
@@ -544,7 +544,7 @@ class SettingsActivity : AppCompatActivity() {
         }
         toggle(alert, R.string.du_popup, null, { DataUsage.popup(this) }) { DataUsage.setPopup(this, it) }
         toggle(alert, R.string.du_wifi_updates, R.string.du_wifi_updates_desc, { DataUsage.updatesWifiOnly(this) }) { DataUsage.setUpdatesWifiOnly(this, it) }
-        row(alert, button(getString(R.string.du_reset), R.color.accent_danger) {
+        row(alert, button(getString(R.string.du_reset)) {
             AlertDialog.Builder(this).setMessage(R.string.du_reset_confirm)
                 .setPositiveButton(R.string.du_reset) { _, _ -> DataUsage.reset(this) }
                 .setNegativeButton(android.R.string.cancel, null).show().also { app.mg4dash.ui.Dialogs.fix(it); app.mg4dash.ui.Dialogs.hideBars(it) }
@@ -678,8 +678,7 @@ class SettingsActivity : AppCompatActivity() {
         text(texts, name, 18f, R.color.text_value)
         val stateView = text(texts, state, 17f, R.color.text_title)
         line.addView(texts, LinearLayout.LayoutParams(0, -2, 1f))
-        val b = button(if (newVersion != null) getString(R.string.st_upd_install_ver, newVersion) else getString(R.string.st_update_check),
-            R.color.accent_action) {}
+        val b = button(if (newVersion != null) getString(R.string.st_upd_install_ver, newVersion) else getString(R.string.st_update_check)) {}
         line.addView(b, LinearLayout.LayoutParams(dp(300), dp(56)).apply { leftMargin = dp(16) })
         parent.addView(line, LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(10) })
         return stateView to b
@@ -1148,9 +1147,10 @@ class SettingsActivity : AppCompatActivity() {
             setPadding(0, dp(6), 0, dp(2))
         }.also { parent.addView(it) }
 
-    private fun button(label: String, accentRes: Int = R.color.text_value, onClick: () -> Unit): Button =
+    private fun button(label: String, onClick: () -> Unit): Button =
         Button(this).apply {
-            text = label; isAllCaps = false; setTextColor(color(accentRes)); setTextSize(TypedValue.COMPLEX_UNIT_SP, 19f)
+            // White text on every button, the close one too: no accent colour in the settings (#98)
+            text = label; isAllCaps = false; setTextColor(color(R.color.text_value)); setTextSize(TypedValue.COMPLEX_UNIT_SP, 19f)
             setBackgroundResource(R.drawable.bg_button); minHeight = dp(56); setPadding(dp(20), 0, dp(20), 0)
             stateListAnimator = null; elevation = 0f   // no relief or shadow (Material style), like the other buttons
             setOnClickListener { onClick() }
