@@ -141,6 +141,10 @@ class SettingsActivity : AppCompatActivity() {
         // Only for those with Radio Dash: DAB and FM as two home sources
         if (app.mg4dash.system.RadioDashUpdater.installed(this))
             toggle(src, R.string.st_radio_bands, R.string.st_radio_bands_desc, { prefs.radioDashBands }) { prefs.radioDashBands = it }
+        // AM band in Radio Dash (Radio Dash #2): off by default; only on firmwares whose radio can have it
+        // (SWI69 and its family have no AM)
+        if (app.mg4dash.system.RadioDashUpdater.installed(this) && app.mg4dash.system.Firmware.family != app.mg4dash.system.Firmware.Family.A9)
+            toggle(src, R.string.st_radio_am, R.string.st_radio_am_desc, { prefs.radioDashAm }) { prefs.radioDashAm = it; app.mg4dash.ui.Themes.publish(this) }
         // Play at startup (replaces Radio Dash's automatic resume)
         dropdown(src, getString(R.string.st_start_playback),
             listOf(getString(R.string.st_play_resume), getString(R.string.st_play_pause), getString(R.string.st_play_play)), { prefs.startPlayback }) { prefs.startPlayback = it }

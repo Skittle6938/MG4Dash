@@ -639,6 +639,8 @@
     <string name="st_start_source_desc">Automatisch: neemt de laatst gekozen bron die nog beschikbaar is en keert ernaar terug zodra die terug is (telefoon opnieuw verbonden, USB-stick…).</string>
     <string name="st_radio_bands">Radio Dash: DAB en FM als twee bronnen</string>
     <string name="st_radio_bands_desc">Veeg over de muziekkaart of gebruik het bronnenmenu om te wisselen.</string>
+    <string name="st_radio_am">Radio Dash: AM-band</string>
+    <string name="st_radio_am_desc">Toont het AM-tabblad in Radio Dash en voegt AM toe aan het wisselen van band, als de autoradio het heeft. Weinig getest, standaard uit.</string>
     <string name="st_start_playback">Afspelen bij het starten</string>
     <string name="st_play_resume">Zoals bij het uitzetten</string>
     <string name="st_play_pause">Altijd gepauzeerd</string>

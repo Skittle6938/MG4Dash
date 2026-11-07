@@ -239,12 +239,12 @@ object Themes {
 
     /**
      * What Radio Dash reads: background, accent, light, vertical bar, 0, wide bar, bar on the right
-     * (the last two for its own bar, Radio Dash #2).
+     * (the last two for its own bar, Radio Dash #2), AM band allowed (Radio Dash #2, off by default).
      */
     fun published(context: Context): String {
         val p = Prefs(context)
         return "${p.themeBackground},${p.themeAccent},${if (isLight(context)) 1 else 0},${if (p.verticalDock) 1 else 0},0," +
-            "${if (p.wideBar) 1 else 0},${if (Dock.rightSide(context)) 1 else 0}"
+            "${if (p.wideBar) 1 else 0},${if (Dock.rightSide(context)) 1 else 0},${if (p.radioDashAm) 1 else 0}"
     }
 
     /** Publishes the theme for Radio Dash (system uid required; no effect otherwise). */
