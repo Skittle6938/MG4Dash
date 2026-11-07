@@ -769,4 +769,14 @@
     <string name="aa_waiting">Branchez votre téléphone en USB</string>
     <string name="unit_kwh100">kWh/100</string>
     <string name="no_data">—</string>
+    <string name="st_web_engine">Moteur web : Chromium %1$s</string>
+    <string name="st_web_engine_desc">Un moteur récent, Chromium %1$s, ouvre les sites d\'aujourd\'hui dans la carte Web app (ABRP, Waze, OpenStreetMap…). Téléchargement de %2$d Mo chez LineageOS, de préférence en Wi-Fi, puis signature et installation ici (quelques minutes). Celui d\'origine peut être remis.</string>
+    <string name="st_web_engine_on">Moteur récent installé (Chromium %1$s), par-dessus celui d\'origine.</string>
+    <string name="st_web_engine_install">Installer Chromium %1$s</string>
+    <string name="st_web_engine_revert">Remettre le moteur d\'origine</string>
+    <string name="st_web_engine_confirm">Télécharger Chromium %1$s (%2$d Mo) chez LineageOS, le signer et l\'installer comme moteur web de la voiture ?</string>
+    <string name="st_web_engine_revert_confirm">Remettre le moteur web d\'origine (Chromium 66) ? Les sites récents ne s\'ouvriront plus dans la carte Web app.</string>
+    <string name="st_web_engine_revert_ok">Remettre</string>
+    <string name="st_web_engine_signing">Signature… (une à deux minutes)</string>
+    <string name="st_web_engine_done">Terminé : la carte Web app utilise le nouveau moteur.</string>
 </resources>

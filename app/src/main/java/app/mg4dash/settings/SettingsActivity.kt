@@ -348,6 +348,7 @@ class SettingsActivity : AppCompatActivity() {
             }
         }
         radioDashUpdate(upd)
+        webEngine(upd)
         text(upd, getString(R.string.st_upd_note, app.mg4dash.system.RadioDashUpdater.TESTED_ON), 15f, R.color.text_title)
         toggle(upd, R.string.st_update_auto, R.string.st_update_auto_desc, { prefs.updateAuto }) { prefs.updateAuto = it }
         toggle(upd, R.string.st_update_beta, null, { prefs.updateBeta }) { prefs.updateBeta = it }
@@ -1067,6 +1068,48 @@ class SettingsActivity : AppCompatActivity() {
                 else app.mg4dash.ui.Toasts.show(this, R.string.st_copy_sysui_fail, long = true)
             }
         }.start()
+    }
+
+    /**
+     * Recent web engine (#98): the car's WebView or Chromium 138 for the web app card, installed from LineageOS and
+     * signed here; the way back to the car's own. Only on head units that can take it.
+     */
+    private fun webEngine(parent: LinearLayout) {
+        val we = app.mg4dash.system.WebEngine
+        val on = we.installed(this)
+        if (!on && !we.possible(this)) return
+        val state = text(parent, getString(R.string.st_web_engine, we.current(this) ?: "?"), 18f, R.color.text_value)
+        text(parent, getString(if (on) R.string.st_web_engine_on else R.string.st_web_engine_desc, we.VERSION, we.SIZE / 1_000_000), 15f, R.color.text_title)
+        var busy = false
+        fun finished(ok: Boolean) {
+            busy = false
+            state.text = if (ok) getString(R.string.st_web_engine_done) else getString(R.string.st_update_error)
+        }
+        val b = button(getString(if (on) R.string.st_web_engine_revert else R.string.st_web_engine_install, we.VERSION)) {
+            if (busy) return@button
+            if (on) {
+                AlertDialog.Builder(this).setMessage(R.string.st_web_engine_revert_confirm)
+                    .setPositiveButton(R.string.st_web_engine_revert_ok) { _, _ -> busy = true; we.revert(this) { finished(it) } }
+                    .setNegativeButton(R.string.cancel, null).show().also { app.mg4dash.ui.Dialogs.fix(it) }
+                return@button
+            }
+            if (app.mg4dash.system.DataUsage.updatesBlocked(this)) { state.text = getString(R.string.du_updates_wait); return@button }
+            AlertDialog.Builder(this).setMessage(getString(R.string.st_web_engine_confirm, we.VERSION, we.SIZE / 1_000_000))
+                .setPositiveButton(R.string.st_update_install) { _, _ ->
+                    busy = true
+                    we.install(this, { step, pct ->
+                        runOnUiThread {
+                            state.text = when (step) {
+                                app.mg4dash.system.WebEngine.Step.DOWNLOAD -> getString(R.string.st_update_downloading, pct)
+                                app.mg4dash.system.WebEngine.Step.SIGN -> getString(R.string.st_web_engine_signing)
+                                app.mg4dash.system.WebEngine.Step.INSTALL -> getString(R.string.st_update_installing)
+                            }
+                        }
+                    }) { finished(it) }
+                }
+                .setNegativeButton(R.string.cancel, null).show().also { app.mg4dash.ui.Dialogs.fix(it) }
+        }
+        row(parent, b)
     }
 
     private fun panel(parent: LinearLayout, title: String, fill: Boolean = false): LinearLayout {

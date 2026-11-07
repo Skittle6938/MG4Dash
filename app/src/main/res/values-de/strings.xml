@@ -769,4 +769,14 @@
     <string name="aa_waiting">Telefon per USB verbinden</string>
     <string name="unit_kwh100">kWh/100</string>
     <string name="no_data">—</string>
+    <string name="st_web_engine">Web-Engine: Chromium %1$s</string>
+    <string name="st_web_engine_desc">Eine neuere, Chromium %1$s, öffnet heutige Seiten in der Web-App-Karte (ABRP, Waze, OpenStreetMap…). Download von %2$d MB bei LineageOS, am besten über WLAN, dann hier signiert und installiert (einige Minuten). Die ursprüngliche lässt sich zurückholen.</string>
+    <string name="st_web_engine_on">Neuere Engine installiert (Chromium %1$s), über der ursprünglichen.</string>
+    <string name="st_web_engine_install">Chromium %1$s installieren</string>
+    <string name="st_web_engine_revert">Ursprüngliche Engine zurück</string>
+    <string name="st_web_engine_confirm">Chromium %1$s (%2$d MB) bei LineageOS herunterladen, signieren und als Web-Engine des Autos installieren?</string>
+    <string name="st_web_engine_revert_confirm">Ursprüngliche Web-Engine (Chromium 66) zurückholen? Neuere Seiten öffnen sich dann nicht mehr in der Web-App-Karte.</string>
+    <string name="st_web_engine_revert_ok">Zurück</string>
+    <string name="st_web_engine_signing">Signieren… (ein bis zwei Minuten)</string>
+    <string name="st_web_engine_done">Fertig: Die Web-App-Karte nutzt die neue Engine.</string>
 </resources>
