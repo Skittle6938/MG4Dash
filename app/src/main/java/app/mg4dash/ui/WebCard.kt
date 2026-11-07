@@ -225,6 +225,8 @@ class WebCard(private val activity: android.app.Activity) : FrameLayout(activity
         prefs.webUrl = url
         Log.i(TAG, "next web app: ${name(url)}")
         show()
+        // Its name in the card while it loads (a toast fell over the media card)
+        if (message.visibility == View.VISIBLE) message.text = name(url) + "\n" + message.text
         return true
     }
 
