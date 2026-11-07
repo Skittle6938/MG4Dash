@@ -481,9 +481,8 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
                     tapFrame = null; handler.removeCallbacks(wakeTapped)
                     val dir = if (Math.abs(dx) > Math.abs(dy)) (if (dx < 0) 1 else -1) else (if (dy < 0) 1 else -1)
                     // Web app: up or down = its next or previous address (#98), left or right = the next card
-                    if (f.shown == Card.WEB && Math.abs(dy) > Math.abs(dx) && webCard?.next(dir) == true) {
-                        android.widget.Toast.makeText(this, app.mg4dash.ui.WebCard.name(prefs.webUrl), android.widget.Toast.LENGTH_SHORT).show()
-                    } else if (f.cards.size >= 2 && hiddenForMap == null) swipeSlot(f, dir)
+                    val webNext = f.shown == Card.WEB && Math.abs(dy) > Math.abs(dx) && webCard?.next(dir) == true
+                    if (!webNext && f.cards.size >= 2 && hiddenForMap == null) swipeSlot(f, dir)
                 } else if (Math.abs(dx) < slop && Math.abs(dy) < slop) {
                     if (tapFrame === f && ev.eventTime - tapAt < android.view.ViewConfiguration.getDoubleTapTimeout()) {
                         tapFrame = null; handler.removeCallbacks(wakeTapped)

@@ -349,7 +349,7 @@ object CardsEditor {
                     render(); onChange()
                 }
                 .setNegativeButton(R.string.cancel, null)
-                .show().also { Dialogs.fix(it) }
+                .show().also { Dialogs.fix(it); Dialogs.hideBars(it) }
         }
 
         /** An address of the web app, with MG4Dash's keyboard; [done] gets it ("" when left empty). */
