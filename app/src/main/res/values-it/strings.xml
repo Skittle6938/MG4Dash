@@ -558,6 +558,9 @@
     <string name="wc_web_count">%1$d indirizzi</string>
     <string name="wc_wake">Pagina attiva:</string>
     <string name="wc_wake_s">%1$d s</string>
+    <string name="wc_double_tap">Doppio tocco sulla pagina</string>
+    <string name="wc_dt_full">Schermo intero</string>
+    <string name="wc_dt_float">Finestra staccata</string>
     <string name="wc_web_set">da inserire</string>
     <string name="wc_web_none">Nessun indirizzo: pizzica la schermata home e tocca Indirizzo web.</string>
     <string name="wc_web_error">Pagina non raggiungibile. Tocca per riprovare.</string>

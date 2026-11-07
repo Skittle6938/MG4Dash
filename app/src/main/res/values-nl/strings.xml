@@ -558,6 +558,9 @@
     <string name="wc_web_count">%1$d adressen</string>
     <string name="wc_wake">Pagina actief:</string>
     <string name="wc_wake_s">%1$d s</string>
+    <string name="wc_double_tap">Dubbeltik op de pagina</string>
+    <string name="wc_dt_full">Volledig scherm</string>
+    <string name="wc_dt_float">Los venster</string>
     <string name="wc_web_set">invullen</string>
     <string name="wc_web_none">Nog geen adres: knijp het startscherm samen en tik op Webadres.</string>
     <string name="wc_web_error">Pagina onbereikbaar. Tik om opnieuw te proberen.</string>

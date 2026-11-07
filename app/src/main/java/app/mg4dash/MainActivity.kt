@@ -122,6 +122,8 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         mediaStyle = app.mg4dash.ui.MediaStyle.apply(this, b)
         wireCards()
         applySlots()
+        // Web app detached over home before (#99): detached again once the cards are laid out
+        if (prefs.webFloat && prefs.webFloating && HomeSlots.load(prefs, slotLayout, unavailable()).slotOf(Card.WEB) != null) detachWhenLaidOut(0)
         observe()
         warmUpStockLauncherIfNeeded()
         // Map (or map app) in full screen before a rebuild (day / night theme…):
@@ -326,7 +328,8 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         HomeSlots.save(prefs, config)
         frames.values.forEach { f ->
             f.fill = config.fill(f.slot.id)
-            f.cards = config.cards(f.slot.id).filter { it !in out }
+            // The web app detached over home (#99): its place goes on with its other cards
+            f.cards = config.cards(f.slot.id).filter { it !in out && !(it == Card.WEB && floatWeb != null) }
             f.instead = null
         }
         val want = HashMap<View, SlotFrame>()
@@ -339,8 +342,9 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         }
         // An app or a page embedded in a card that changes place goes with its old frame: started again in the new one
         if (b.mapCard.parent !== want[b.mapCard]?.box) dropMapApp()
-        panels[Card.WEB]?.let { if (it.parent !== want[it]?.box) webCard?.reset() }
+        panels[Card.WEB]?.let { if (floatWeb == null && it.parent !== want[it]?.box) webCard?.reset() }
         (panels.values + climatePanel + mediaPanel).forEach { v ->
+            if (floatWeb != null && v === panels[Card.WEB]) return@forEach
             val target = want[v]?.box
             if (v.parent !== target) {
                 (v.parent as? android.view.ViewGroup)?.removeView(v)
@@ -357,7 +361,7 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         applyFog()
         frames.values.forEach { showFrame(it) }
         // Cards left out: nothing of theirs runs
-        Card.entries.filter { frameOf(it) == null }.forEach { cardShown(it, false) }
+        Card.entries.filter { frameOf(it) == null && !(it == Card.WEB && floatWeb != null) }.forEach { cardShown(it, false) }
     }
 
     /** Shows [f]'s card (or the climate, the media), and runs what the cards shown or hidden need. */
@@ -520,7 +524,9 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
                 } else if (Math.abs(dx) < slop && Math.abs(dy) < slop) {
                     if (tapFrame === f && ev.eventTime - tapAt < android.view.ViewConfiguration.getDoubleTapTimeout()) {
                         tapFrame = null; handler.removeCallbacks(wakeTapped)
-                        setMapFullscreen(hiddenForMap == null, web = f.shown == Card.WEB)
+                        // Web app: detached over home instead, if chosen in the edit mode (#99)
+                        if (f.shown == Card.WEB && prefs.webFloat) detachWeb()
+                        else setMapFullscreen(hiddenForMap == null, web = f.shown == Card.WEB)
                     } else {
                         tapFrame = f; tapAt = ev.eventTime
                         handler.removeCallbacks(wakeTapped)
@@ -640,7 +646,7 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         app.mg4dash.ui.DataAlert.attach(this)
         if (simpleMode) { simple?.onResume(); Fullscreen.apply(this); return }
         mapCard.onResume()
-        if (isShown(Card.WEB)) webCard?.show()
+        if (isShown(Card.WEB) || floatWeb != null) webCard?.show()
         if (isShown(Card.SHORTCUTS)) renderShortcuts()
         Fullscreen.apply(this)
     }
@@ -660,6 +666,7 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
     override fun onPause() {
         super.onPause()
         setAwake(null)
+        floatWeb?.rest()
         app.mg4dash.ui.DataAlert.detach(this)
         CarBridge.setForeground(false)
         // (the map's full screen is no longer left here: the bar does it when opening a page, and
@@ -1206,6 +1213,56 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
     /** Web app card (#97). */
     private var webCard: app.mg4dash.ui.WebCard? = null
 
+    // ── Web app detached over home (#99, trial) ──────────────────────────────
+
+    /** The web app's window, while detached from its card ("Detached window" chosen for a double tap in the edit mode). */
+    private var floatWeb: app.mg4dash.ui.FloatWindow? = null
+
+    /** The cards' area, in the content's coordinates: where the window may go, the bar left free. */
+    private fun cardsArea(): android.graphics.Rect {
+        val content = findViewById<View>(android.R.id.content)
+        val a = IntArray(2).also { columnsRow.getLocationInWindow(it) }
+        val c = IntArray(2).also { content.getLocationInWindow(it) }
+        val l = a[0] - c[0]; val t = a[1] - c[1]
+        return android.graphics.Rect(l, t, l + columnsRow.width, t + columnsRow.height)
+    }
+
+    private fun detachWhenLaidOut(n: Int) {
+        columnsRow.postDelayed({ if (columnsRow.width > 0 && columnsRow.height > 0) detachWeb() else if (n < 20) detachWhenLaidOut(n + 1) }, if (n == 0) 0L else 250L)
+    }
+
+    /**
+     * Double tap on the web app (#99): its panel leaves the card for a window over home, which can be moved and
+     * resized ([app.mg4dash.ui.FloatWindow]); its place shows its other cards meanwhile. The page starts again in the
+     * window, as when the card changes place.
+     */
+    private fun detachWeb() {
+        if (floatWeb != null || simpleMode || CardsEditor.isOpen(this)) return
+        val panel = panels[Card.WEB] ?: return
+        val w = webCard ?: return
+        setMapFullscreen(false)
+        setAwake(null)
+        w.reset()
+        floatWeb = app.mg4dash.ui.FloatWindow(this, panel, bounds = { cardsArea() }, onAttach = { attachWeb() },
+            onMenu = { w.menu() }, onMoved = { w.moved() }, keepAwake = { w.typing }).also { it.open() }
+        prefs.webFloating = true
+        applySlots()
+        panel.visibility = View.VISIBLE
+        w.visibility = View.VISIBLE
+        w.show()
+    }
+
+    /** Back in its card (double tap on the window, the edit mode): shown there; its window's place is kept. */
+    private fun attachWeb() {
+        val fw = floatWeb ?: return
+        floatWeb = null
+        prefs.webFloating = false
+        webCard?.reset()
+        fw.close()
+        HomeSlots.load(prefs, slotLayout, unavailable()).slotOf(Card.WEB)?.let { HomeSlots.setCurrent(prefs, slotLayout, it, Card.WEB) }
+        applySlots()
+    }
+
     /** App embedded in the map widget (#41, trial) and its component. */
     private var mapAppView: android.view.ViewGroup? = null
     private var mapAppCn: android.content.ComponentName? = null
@@ -1244,6 +1301,7 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         if (simpleMode) { app.mg4dash.ui.Toasts.show(this, R.string.wc_none_simple); return }
         if (CardsEditor.isOpen(this)) return
         setMapFullscreen(false)
+        attachWeb()
         val mapApp = CardsEditor.MapApp(
             name = { prefs.mapApp?.let { android.content.ComponentName.unflattenFromString(it) }?.let { app.mg4dash.shortcuts.Shortcuts.appLabel(this, it) } ?: getString(R.string.map_app_osm) },
             pick = { done -> app.mg4dash.shortcuts.Shortcuts.pickApp(this, getString(R.string.map_app_pick), getString(R.string.map_app_osm)) { cn ->
@@ -1260,6 +1318,8 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
     }
 
     override fun dispatchTouchEvent(ev: android.view.MotionEvent): Boolean {
+        // The web app's window over home (#99): at rest its gestures, awake straight to its page
+        floatWeb?.let { if (!app.mg4dash.ui.CardsEditor.isOpen(this)) { if (it.onTouch(ev)) return true; if (it.through) return super.dispatchTouchEvent(ev) } }
         if (twoFingerPull.onTouch(ev) { super.dispatchTouchEvent(it) }) return true
         if (!simpleMode && !app.mg4dash.ui.CardsEditor.isOpen(this) && pinchToEdit.onTouch(ev) { super.dispatchTouchEvent(it) }) return true
         if (!app.mg4dash.ui.CardsEditor.isOpen(this) && longPress(ev)) return true
