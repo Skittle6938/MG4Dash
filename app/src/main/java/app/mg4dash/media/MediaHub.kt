@@ -787,7 +787,8 @@ object MediaHub {
                             sourcePkg = src
                             val fwd = wheelForward
                             val replay = wheelPlaying
-                            val giveBack = { switchTo(back); if (replay) resumeApp(back) }
+                            // switchTo forgets the wheel's app (a user's choice): kept here, for a second press and the card
+                            val giveBack = { switchTo(back); wheelBack = back; wheelBackAt = android.os.SystemClock.uptimeMillis(); if (replay) resumeApp(back) }
                             if (fwd != null) undoRadioSkip(fwd) { giveBack() } else main.post { giveBack() }
                             return@newProxyInstance null
                         }
