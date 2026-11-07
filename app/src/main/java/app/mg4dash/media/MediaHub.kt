@@ -506,12 +506,15 @@ object MediaHub {
 
     /** App given back its source after a wheel button, and when: a second press soon after, while the radio still had it, went to the radio (#98). */
     @Volatile private var wheelBack: String? = null
+    /** The app was playing at the press: given back its source, it plays again (#98). */
+    @Volatile private var wheelPlaying = false
     @Volatile private var wheelBackAt = 0L
     private fun recentBack() = wheelBack?.takeIf { android.os.SystemClock.uptimeMillis() - wheelBackAt < 3_000 }
 
     fun wheelPressed(forward: Boolean?) {
         val app = current?.packageName?.takeIf { otherAppShown() } ?: recentBack() ?: return
         wheelFrom = app
+        if (current?.packageName == app) wheelPlaying = current?.let { isPlaying(it) } == true
         wheelAt = android.os.SystemClock.uptimeMillis()
         wheelForward = forward
         // The card stays on the app during the brief passage through the radio
@@ -783,7 +786,9 @@ object MediaHub {
                             Log.i(TAG, "steering wheel key sent to the radio by the stock launcher: back to $back")
                             sourcePkg = src
                             val fwd = wheelForward
-                            if (fwd != null) undoRadioSkip(fwd) { switchTo(back) } else main.post { switchTo(back) }
+                            val replay = wheelPlaying
+                            val giveBack = { switchTo(back); if (replay) resumeApp(back) }
+                            if (fwd != null) undoRadioSkip(fwd) { giveBack() } else main.post { giveBack() }
                             return@newProxyInstance null
                         }
                         main.post {
@@ -1246,6 +1251,20 @@ object MediaHub {
         if (rc != null) { if (forward) rc.transportControls.skipToPrevious() else rc.transportControls.skipToNext() }
         else io.launch { if (forward) SaicRadio.previous() else SaicRadio.next() }
         main.postDelayed(then, 200)
+    }
+
+    /**
+     * The app the radio took the sound from (a wheel button through the stock launcher) plays again: some
+     * take their audio focus back themselves, others (the web app's page) stay paused and the radio
+     * kept the sound, from the second press on (#98).
+     */
+    private fun resumeApp(pkg: String) {
+        main.postDelayed({
+            val c = (lastCandidates.filter { it.packageName == pkg } + listOfNotNull(browserControllers[pkg])).firstOrNull() ?: return@postDelayed
+            if (isPlaying(c)) return@postDelayed
+            Log.i(TAG, "$pkg paused by the radio's passage: play")
+            c.transportControls.play()
+        }, 250)
     }
 
     /** Pauses the radio: through its session, otherwise through its service. */
