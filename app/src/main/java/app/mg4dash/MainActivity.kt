@@ -240,7 +240,7 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         val web = app.mg4dash.ui.WebCard(this).also { webCard = it }
         web.keyboardSpan = { webKeyboardSpan(it) }
         web.visibility = View.GONE
-        panels[Card.WEB] = frame(web)
+        panels[Card.WEB] = frame(web).also { webPanel = it }
         panels[Card.ENERGY] = b.energyCard
         mapOf(Card.TRIP to R.string.sw_energy, Card.POWER to R.string.sw_power, Card.PHONE to R.string.sw_phone).forEach { (card, title) ->
             val v = layoutInflater.inflate(R.layout.card_secondary, null, false)
@@ -326,10 +326,11 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         val out = unavailable()
         val config = HomeSlots.load(prefs, slotLayout, out)
         HomeSlots.save(prefs, config)
+        hostWeb()
         frames.values.forEach { f ->
             f.fill = config.fill(f.slot.id)
             // The web app detached over home: its place goes on with its other cards
-            f.cards = config.cards(f.slot.id).filter { it !in out && !(it == Card.WEB && floatWeb != null) }
+            f.cards = config.cards(f.slot.id).filter { it !in out && !(it == Card.WEB && webDetached) }
             f.instead = null
         }
         val want = HashMap<View, SlotFrame>()
@@ -344,7 +345,6 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         if (b.mapCard.parent !== want[b.mapCard]?.box) dropMapApp()
         panels[Card.WEB]?.let { if (floatWeb == null && it.parent !== want[it]?.box) webCard?.reset() }
         (panels.values + climatePanel + mediaPanel).forEach { v ->
-            if (floatWeb != null && v === panels[Card.WEB]) return@forEach
             val target = want[v]?.box
             if (v.parent !== target) {
                 (v.parent as? android.view.ViewGroup)?.removeView(v)
@@ -361,7 +361,7 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         applyFog()
         frames.values.forEach { showFrame(it) }
         // Cards left out: nothing of theirs runs
-        Card.entries.filter { frameOf(it) == null && !(it == Card.WEB && floatWeb != null) }.forEach { cardShown(it, false) }
+        Card.entries.filter { frameOf(it) == null && !(it == Card.WEB && webDetached) }.forEach { cardShown(it, false) }
     }
 
     /** Shows [f]'s card (or the climate, the media), and runs what the cards shown or hidden need. */
@@ -452,6 +452,7 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
             awake?.box?.foreground = null
             f?.box?.foreground = app.mg4dash.ui.FadeOutline.Awake(resources.displayMetrics.density, color(R.color.accent_action), dp(3).toFloat())
             awake = f
+            floatWeb?.dockOutline(f?.shown == Card.WEB)
             app.mg4dash.system.Log.i("Rest", if (f == null) "page or app at rest" else "${f.shown} awake")
         }
         if (f != null) handler.postDelayed(sleep, prefs.webWakeSeconds * 1000L)
@@ -525,7 +526,7 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
                     if (tapFrame === f && ev.eventTime - tapAt < android.view.ViewConfiguration.getDoubleTapTimeout()) {
                         tapFrame = null; handler.removeCallbacks(wakeTapped)
                         // Web app: detached over home instead, if chosen in the edit mode
-                        if (f.shown == Card.WEB && prefs.webFloat) detachWeb()
+                        if (f.shown == Card.WEB && floatWeb != null) detachWeb()
                         else setMapFullscreen(hiddenForMap == null, web = f.shown == Card.WEB)
                     } else {
                         tapFrame = f; tapAt = ev.eventTime
@@ -646,7 +647,7 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         app.mg4dash.ui.DataAlert.attach(this)
         if (simpleMode) { simple?.onResume(); Fullscreen.apply(this); return }
         mapCard.onResume()
-        if (isShown(Card.WEB) || floatWeb != null) webCard?.show()
+        if (isShown(Card.WEB) || webDetached) webCard?.show()
         if (isShown(Card.SHORTCUTS)) renderShortcuts()
         Fullscreen.apply(this)
     }
@@ -1215,8 +1216,12 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
 
     // ── Web app detached over home (trial) ──────────────────────────────
 
-    /** The web app's window, while detached from its card ("Detached window" chosen for a double tap in the edit mode). */
+    /** The web app's panel itself, and its placeholder in a card while it lives over home ("Detached window" chosen). */
+    private var webPanel: View? = null
+    private val webHole by lazy { android.widget.FrameLayout(this) }
+    /** "Detached window" chosen for a double tap in the edit mode: the web app's panel over home, docked or detached. */
     private var floatWeb: app.mg4dash.ui.FloatWindow? = null
+    private val webDetached get() = floatWeb?.floating == true
 
     /** The cards' area, in the content's coordinates: where the window may go, the bar left free. */
     private fun cardsArea(): android.graphics.Rect {
@@ -1227,38 +1232,52 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         return android.graphics.Rect(l, t, l + columnsRow.width, t + columnsRow.height)
     }
 
+    /**
+     * The web app's panel where the edit mode's choice wants it: in its card (fixed full screen, as before), or over home
+     * ([app.mg4dash.ui.FloatWindow]) with a placeholder in its card, so that detaching it and putting it back never
+     * takes the page off the window (it went on loading again, ~10 s of black on the car). The page starts again
+     * only when the choice changes.
+     */
+    private fun hostWeb() {
+        val panel = webPanel ?: return
+        val w = webCard ?: return
+        val want = prefs.webFloat && !simpleMode
+        if (want && floatWeb == null) {
+            w.reset()
+            floatWeb = app.mg4dash.ui.FloatWindow(this, panel, webHole, bounds = { cardsArea() }, onAttach = { attachWeb() },
+                onMenu = { w.menu() }, onMoved = { w.moved() }, keepAwake = { w.typing }).also { it.open() }
+            panels[Card.WEB] = webHole
+        } else if (!want && floatWeb != null) {
+            w.reset()
+            floatWeb?.close(); floatWeb = null
+            prefs.webFloating = false
+            (webHole.parent as? android.view.ViewGroup)?.removeView(webHole)
+            panels[Card.WEB] = panel
+        }
+    }
+
     private fun detachWhenLaidOut(n: Int) {
         columnsRow.postDelayed({ if (columnsRow.width > 0 && columnsRow.height > 0) detachWeb() else if (n < 20) detachWhenLaidOut(n + 1) }, if (n == 0) 0L else 250L)
     }
 
-    /**
-     * Double tap on the web app: its panel leaves the card for a window over home, which can be moved and
-     * resized ([app.mg4dash.ui.FloatWindow]); its place shows its other cards meanwhile. The page starts again in the
-     * window, as when the card changes place.
-     */
+    /** Double tap on the web app: it leaves its card for a window over home; its place shows its other cards meanwhile. */
     private fun detachWeb() {
-        if (floatWeb != null || simpleMode || CardsEditor.isOpen(this)) return
-        val panel = panels[Card.WEB] ?: return
-        val w = webCard ?: return
+        val fw = floatWeb ?: return
+        if (fw.floating || CardsEditor.isOpen(this)) return
         setMapFullscreen(false)
         setAwake(null)
-        w.reset()
-        floatWeb = app.mg4dash.ui.FloatWindow(this, panel, bounds = { cardsArea() }, onAttach = { attachWeb() },
-            onMenu = { w.menu() }, onMoved = { w.moved() }, keepAwake = { w.typing }).also { it.open() }
         prefs.webFloating = true
+        fw.setFloating(true)
         applySlots()
-        panel.visibility = View.VISIBLE
-        w.visibility = View.VISIBLE
-        w.show()
+        webCard?.let { it.visibility = View.VISIBLE; it.show() }
     }
 
-    /** Back in its card (double tap on the window, the edit mode): shown there; its window's place is kept. */
+    /** Back in its card (double tap on the window, the edit mode), shown there; its window's place is kept. */
     private fun attachWeb() {
         val fw = floatWeb ?: return
-        floatWeb = null
+        if (!fw.floating) return
         prefs.webFloating = false
-        webCard?.reset()
-        fw.close()
+        fw.setFloating(false)
         HomeSlots.load(prefs, slotLayout, unavailable()).slotOf(Card.WEB)?.let { HomeSlots.setCurrent(prefs, slotLayout, it, Card.WEB) }
         applySlots()
     }
