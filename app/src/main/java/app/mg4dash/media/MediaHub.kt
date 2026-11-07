@@ -220,7 +220,13 @@ object MediaHub {
         // acted (#36). 1 s is enough (owner's request): the loss comes from the connection state, not from flickering.
         val curGone = goneSince[cur]?.let { now - it >= 1_000 } == true
         val order = fallbackOrder(mode, p)
-        if (curGone) { Log.i(TAG, "$cur gone: mode $mode, order $order, available $avail"); order.firstOrNull { it != cur && it in avail && !(it == AA_MBS && carPlay) }?.let { autoSwitch(it, "$cur gone", play = _now.value.playing) }; return }
+        // CarPlay or Android Auto took the phone's audio (#99): its Bluetooth source going away is expected, and
+        // picking the radio then started it over CarPlay's music
+        val toProjection = curGone && cur == BT && (projecting || carPlay && AA_MBS in avail)
+        if (toProjection && !goneToProjectionLogged) { goneToProjectionLogged = true; Log.i(TAG, "$cur gone: the phone's projection has the audio, no automatic source") }
+        if (!curGone) goneToProjectionLogged = false
+        if (toProjection) return
+        if (curGone && !toProjection) { Log.i(TAG, "$cur gone: mode $mode, order $order, available $avail"); order.firstOrNull { it != cur && it in avail && !(it == AA_MBS && carPlay) }?.let { autoSwitch(it, "$cur gone", play = _now.value.playing) }; return }
         if (mode == 1) return
         if (mode >= 2) {
             if (startDone) return
@@ -410,6 +416,7 @@ object MediaHub {
         if (want != playing) playPauseRaw()
     }
 
+    private var goneToProjectionLogged = false
     private var autoTarget: String? = null
     private var autoTries = 0
 
@@ -1178,10 +1185,19 @@ object MediaHub {
      * Stock radio of old firmwares, driven through its service. Radio Dash installed in its place (#80) is
      * another app, with a standard playback service: it then goes through the SWI69 path.
      */
-    private val legacyRadio: Boolean by lazy {
-        app.mg4dash.system.Firmware.family == app.mg4dash.system.Firmware.Family.LEGACY &&
-            appContext?.let { app.mg4dash.system.RadioDashUpdater.installed(it) } != true
-    }
+    private val legacyRadio: Boolean
+        get() {
+            if (app.mg4dash.system.Firmware.family != app.mg4dash.system.Firmware.Family.LEGACY) return false
+            // Read again every minute: Radio Dash may be installed while MG4Dash runs (#99)
+            val now = android.os.SystemClock.uptimeMillis()
+            if (now - radioDashCheckedAt > 60_000L || radioDashCheckedAt == 0L) {
+                radioDashCheckedAt = now
+                radioDash = appContext?.let { app.mg4dash.system.RadioDashUpdater.installed(it) } == true
+            }
+            return !radioDash
+        }
+    @Volatile private var radioDash = false
+    @Volatile private var radioDashCheckedAt = 0L
     @Volatile private var radioShown = false
     @Volatile private var usbShown = false
     private const val USB = "com.saicmotor.media"
