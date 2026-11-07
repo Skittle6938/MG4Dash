@@ -33,10 +33,8 @@ class MapCard(private val context: Context, holder: ViewGroup) {
     /** One finger moves the map: in full screen; as a widget, it swipes between the pages. */
     var oneFingerPan = false
 
-    /** Touch on the map (brings back the hidden buttons, #15). */
-    var onTouch: (() -> Unit)? = null
-    /** Long press on the map: choose an app to show in its place (#41). */
-    var onLongPress: (() -> Unit)? = null
+    /** Double tap on the map: full screen and back (#98), instead of osmdroid's zoom. */
+    var onDoubleTap: (() -> Unit)? = null
     /** Wanted zoom level: following uses it, otherwise each position cancelled the zoom in progress. */
     private var zoomLevel = app.mg4dash.system.Prefs(context).mapZoom.coerceIn(14, 18).toDouble()
     /** Map oriented to the car's heading (otherwise north up); second press on "recentre". */
@@ -88,15 +86,21 @@ class MapCard(private val context: Context, holder: ViewGroup) {
             // Following only stops on a real finger move (scroll events from the
             // animation cut following while driving), and resumes by itself after 20 s.
             var downX = 0f; var downY = 0f
-            val longPress = android.view.GestureDetector(context, object : android.view.GestureDetector.SimpleOnGestureListener() {
-                override fun onLongPress(e: MotionEvent) { onLongPress?.invoke() }
+            // The double tap's second touch, kept from osmdroid (its zoom) up to its end
+            var doubled = false
+            val taps = android.view.GestureDetector(context, object : android.view.GestureDetector.SimpleOnGestureListener() {
+                override fun onDoubleTap(e: MotionEvent): Boolean { if (onDoubleTap == null) return false; doubled = true; onDoubleTap?.invoke(); return true }
             })
             m.setOnTouchListener { _, ev ->
-                longPress.onTouchEvent(ev)
+                taps.onTouchEvent(ev)
+                if (doubled) {
+                    if (ev.actionMasked == MotionEvent.ACTION_UP || ev.actionMasked == MotionEvent.ACTION_CANCEL) doubled = false
+                    return@setOnTouchListener true
+                }
                 // Widget: one finger is for the swipe between its pages, two fingers move and zoom the map
                 if (ev.actionMasked == MotionEvent.ACTION_MOVE && ev.pointerCount == 1 && !oneFingerPan) return@setOnTouchListener true
                 when (ev.actionMasked) {
-                    MotionEvent.ACTION_DOWN -> { downX = ev.x; downY = ev.y; onTouch?.invoke() }
+                    MotionEvent.ACTION_DOWN -> { downX = ev.x; downY = ev.y }
                     MotionEvent.ACTION_MOVE -> if (Math.hypot((ev.x - downX).toDouble(), (ev.y - downY).toDouble()) > 24) {
                         follow = false; lastTouch = System.currentTimeMillis()
                     }

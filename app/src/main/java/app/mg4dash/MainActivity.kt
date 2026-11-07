@@ -184,31 +184,9 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
     private val secondary = HashMap<Card, Secondary>()
     private val weathers = LinkedHashMap<Card, app.mg4dash.ui.WeatherCompact>()
 
-    /** A place on screen: its frame (swipes), its band over a web page or an app, and what it shows. */
+    /** A place on screen: its frame (swipes, and the outline of a web page or an app awake) and what it shows. */
     private inner class SlotFrame(val slot: HomeSlots.Slot) {
         val box = app.mg4dash.ui.SwipeBox(this@MainActivity) { dir -> swipeSlot(this, dir) }
-        /**
-         * Over a web page or an app, a band above it (#98): swiped with one finger, it changes card; touched
-         * twice, full screen and back. Out of the page, which is moved down under it: a touch on a view over
-         * the page went to the page. Its buttons: the next card, full screen.
-         */
-        val band = android.widget.FrameLayout(this@MainActivity).apply {
-            setBackgroundResource(R.drawable.bg_panel); visibility = View.GONE
-            addView(View(this@MainActivity).apply {
-                background = android.graphics.drawable.GradientDrawable().apply {
-                    cornerRadius = dp(2).toFloat(); setColor(app.mg4dash.ui.Themes.color(this@MainActivity, R.color.text_sub))
-                }
-                alpha = 0.6f
-            }, android.widget.FrameLayout.LayoutParams(dp(44), dp(4), Gravity.CENTER))
-        }
-        private fun bandButton(cd: Int) = android.widget.ImageButton(this@MainActivity).apply {
-            background = null; scaleType = android.widget.ImageView.ScaleType.FIT_CENTER
-            setPadding(dp(16), dp(5), dp(16), dp(5))
-            setColorFilter(color(R.color.text_value)); contentDescription = getString(cd)
-        }
-        val bandNext = bandButton(R.string.cd_widget_toggle)
-        val bandFull = bandButton(R.string.cd_map_fullscreen)
-        private var bandX = 0f; private var bandY = 0f; private var bandTap = 0L
         var fill: HomeSlots.Fill = HomeSlots.Fill.Cards(emptyList())
         /** Cards shown here in turn (the power left out when it is in the energy card). */
         var cards: List<Card> = emptyList()
@@ -218,31 +196,7 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         val shown: Card? get() = instead ?: current
 
         init {
-            box.addView(band, android.widget.FrameLayout.LayoutParams(-1, dp(BAND_DP), Gravity.TOP))
-            band.addView(bandFull, android.widget.FrameLayout.LayoutParams(dp(56), -1, Gravity.END))
-            band.addView(bandNext, android.widget.FrameLayout.LayoutParams(dp(56), -1, Gravity.END).apply { rightMargin = dp(56) })
-            bandNext.setOnClickListener { swipeSlot(this, 1) }
-            bandFull.setOnClickListener { setMapFullscreen(hiddenForMap == null, web = shown == Card.WEB) }
-            band.setOnTouchListener { _, ev ->
-                when (ev.actionMasked) {
-                    android.view.MotionEvent.ACTION_DOWN -> { bandX = ev.rawX; bandY = ev.rawY }
-                    android.view.MotionEvent.ACTION_UP -> {
-                        val dx = ev.rawX - bandX; val dy = ev.rawY - bandY; val slop = dp(24)
-                        if (Math.abs(dx) > slop && Math.abs(dx) > Math.abs(dy)) {
-                            bandTap = 0L
-                            if (cards.size >= 2 && hiddenForMap == null) swipeSlot(this, if (dx < 0) 1 else -1)
-                        } else if (Math.abs(dx) < slop && Math.abs(dy) < slop) {
-                            if (ev.eventTime - bandTap < android.view.ViewConfiguration.getDoubleTapTimeout()) {
-                                bandTap = 0L
-                                setMapFullscreen(hiddenForMap == null, web = shown == Card.WEB)
-                            } else bandTap = ev.eventTime
-                        }
-                    }
-                }
-                true
-            }
             box.active = { slotSwipes(this) }
-            box.edge = { if (shown == Card.WEB) dp(WEB_EDGE_DP) else 0 }
         }
     }
 
@@ -395,7 +349,6 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
             }
         }
         frames.values.forEach { f ->
-            f.band.bringToFront()
             f.current = HomeSlots.current(prefs, slotLayout, f.slot.id, f.cards)
         }
         // Smaller versions in a small place: consumption, map without + and −, one row of shortcuts
@@ -462,29 +415,85 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         showFrame(f)
     }
 
-    /**
-     * A place's own swipes: not in full screen, nor over an app, which takes the touches (its band does). Over a
-     * web page (#98), its band and a horizontal swipe from its left or right side change card ([SwipeBox.edge]): elsewhere the page
-     * scrolls, zooms and takes the touches as in a browser.
-     */
-    private fun slotSwipes(f: SlotFrame) = f.cards.size >= 2 && hiddenForMap == null && (f.shown == Card.WEB || !covering(f))
+    /** A place's own swipes: not in full screen, nor over a web page or an app (at rest, [restTouch] takes them). */
+    private fun slotSwipes(f: SlotFrame) = f.cards.size >= 2 && hiddenForMap == null && !covering(f)
 
     /** A web page or an app fills the card and takes its touches (#41, #97). */
     private fun covering(f: SlotFrame) = f.shown == Card.WEB || f.shown == Card.MAP && mapAppView?.visibility == View.VISIBLE
 
-    /** Over a page or an app, the band above it (#98), whose button announces the next card; the page under it. */
+    /** The page or the app of [f] gone (another card shown): it is at rest again. */
     private fun updateToggle(f: SlotFrame) {
-        val on = covering(f)
-        f.band.visibility = if (on) View.VISIBLE else View.GONE
-        f.bandNext.visibility = if (f.cards.size >= 2 && hiddenForMap == null) View.VISIBLE else View.GONE
-        f.bandNext.setImageResource((HomeSlots.next(f.cards, f.shown, 1) ?: Card.MAP).icon)
-        f.bandFull.setImageResource(if (hiddenForMap != null) R.drawable.ic_fullscreen_exit else R.drawable.ic_fullscreen)
-        f.cards.forEach { c ->
-            val v = panels[c] ?: return@forEach
-            val lp = v.layoutParams as? android.view.ViewGroup.MarginLayoutParams ?: return@forEach
-            val top = if (on && c == f.shown) dp(BAND_DP) + dp(BAND_GAP_DP) else 0
-            if (lp.topMargin != top) { lp.topMargin = top; v.layoutParams = lp }
+        if (awake === f && !covering(f)) setAwake(null)
+    }
+
+    // ── Web page or app at rest (#98) ────────────────────────────────────────
+    //
+    // At rest, a web page or an app in a card is handled like the other cards: a one-finger swipe changes
+    // card, a double tap goes full screen and back; the page sees none of it. A touch wakes it: it then takes
+    // the touches as in a browser, its outline lit, until it is left alone for the time set in the edit mode.
+
+    /** Card whose page or app is awake (one at a time). */
+    private var awake: SlotFrame? = null
+    private val sleep = Runnable { if (awake?.shown == Card.WEB && webCard?.typing == true) awake?.let { setAwake(it) } else setAwake(null) }
+    /** Gesture started at rest on this card, followed up to its end. */
+    private var restFrame: SlotFrame? = null
+    private var restX = 0f; private var restY = 0f; private var restMulti = false
+    /** First touch of a possible double tap, and the wake it delays. */
+    private var tapFrame: SlotFrame? = null
+    private var tapAt = 0L
+    private val wakeTapped = Runnable { tapFrame?.let { if (covering(it)) setAwake(it) }; tapFrame = null }
+
+    private fun setAwake(f: SlotFrame?) {
+        handler.removeCallbacks(sleep)
+        if (awake !== f) {
+            awake?.box?.foreground = null
+            f?.box?.foreground = android.graphics.drawable.GradientDrawable().apply {
+                cornerRadius = resources.getDimension(R.dimen.radius_panel)
+                setStroke(dp(3), color(R.color.accent_action))
+            }
+            awake = f
+            app.mg4dash.system.Log.i("Rest", if (f == null) "page or app at rest" else "${f.shown} awake")
         }
+        if (f != null) handler.postDelayed(sleep, prefs.webWakeSeconds * 1000L)
+    }
+
+    private fun inBox(f: SlotFrame, ev: android.view.MotionEvent): Boolean {
+        val r = android.graphics.Rect(); f.box.getGlobalVisibleRect(r)
+        return r.contains(ev.rawX.toInt(), ev.rawY.toInt())
+    }
+
+    /** Touches on a page or an app at rest: true when taken here, the page seeing none of them. */
+    private fun restTouch(ev: android.view.MotionEvent): Boolean {
+        if (ev.actionMasked == android.view.MotionEvent.ACTION_DOWN) {
+            restFrame = frames.values.firstOrNull { covering(it) && it !== awake && inBox(it, ev) }
+            restX = ev.rawX; restY = ev.rawY; restMulti = false
+            // Awake: each touch keeps it awake
+            awake?.let { if (inBox(it, ev)) setAwake(it) }
+        }
+        val f = restFrame ?: return false
+        when (ev.actionMasked) {
+            android.view.MotionEvent.ACTION_POINTER_DOWN -> restMulti = true
+            android.view.MotionEvent.ACTION_UP -> {
+                restFrame = null
+                if (restMulti) return true
+                val dx = ev.rawX - restX; val dy = ev.rawY - restY; val slop = dp(24)
+                if (Math.abs(dx) > slop && Math.abs(dx) > Math.abs(dy)) {
+                    tapFrame = null; handler.removeCallbacks(wakeTapped)
+                    if (f.cards.size >= 2 && hiddenForMap == null) swipeSlot(f, if (dx < 0) 1 else -1)
+                } else if (Math.abs(dx) < slop && Math.abs(dy) < slop) {
+                    if (tapFrame === f && ev.eventTime - tapAt < android.view.ViewConfiguration.getDoubleTapTimeout()) {
+                        tapFrame = null; handler.removeCallbacks(wakeTapped)
+                        setMapFullscreen(hiddenForMap == null, web = f.shown == Card.WEB)
+                    } else {
+                        tapFrame = f; tapAt = ev.eventTime
+                        handler.removeCallbacks(wakeTapped)
+                        handler.postDelayed(wakeTapped, android.view.ViewConfiguration.getDoubleTapTimeout().toLong())
+                    }
+                }
+            }
+            android.view.MotionEvent.ACTION_CANCEL -> restFrame = null
+        }
+        return true
     }
 
     /**
@@ -613,6 +622,7 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
 
     override fun onPause() {
         super.onPause()
+        setAwake(null)
         app.mg4dash.ui.DataAlert.detach(this)
         CarBridge.setForeground(false)
         // (the map's full screen is no longer left here: the bar does it when opening a page, and
@@ -983,12 +993,10 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         b.energyCard.setOnClickListener { startActivity(Intent(this, EnergyActivity::class.java)) }
         b.chargeAction.setOnClickListener { onChargeAction() }
         // Hidden buttons (#15): each press restarts the 6 s display
-        b.mapZoomIn.setOnClickListener { extendMapButtons(); mapCard.zoom(1) }
-        b.mapZoomOut.setOnClickListener { extendMapButtons(); mapCard.zoom(-1) }
-        b.mapFullscreen.setOnClickListener { extendMapButtons(); setMapFullscreen(hiddenForMap == null) }
-        b.mapCenter.setOnClickListener { extendMapButtons(); mapCard.recenter(LocationRepo.location.value); tintMapCenter() }
+        b.mapCenter.setOnClickListener { mapCard.recenter(LocationRepo.location.value); tintMapCenter() }
         tintMapCenter()
-        mapCard.onTouch = { showMapButtons() }
+        // Double tap: full screen and back (#98), as over a web page or an app; no more zoom or full screen buttons
+        mapCard.onDoubleTap = { setMapFullscreen(hiddenForMap == null) }
         applyMapButtons()
     }
 
@@ -1021,41 +1029,12 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         }
     }
 
-    /** End of the display of the map's hidden buttons (uptime), after a touch. */
-    private var mapButtonsUntil = 0L
-    private val hideMapButtons = Runnable { applyMapButtons() }
-
-    /** Press on a map button while they are shown: restart for 6 s. */
-    private fun extendMapButtons() { if (android.os.SystemClock.uptimeMillis() < mapButtonsUntil) showMapButtons() }
-
-    private fun showMapButtons() {
-        if (!prefs.mapAutoHide) return
-        mapButtonsUntil = android.os.SystemClock.uptimeMillis() + 6000
-        applyMapButtons()
-        b.mapButtons.removeCallbacks(hideMapButtons)
-        b.mapButtons.postDelayed(hideMapButtons, 6100)
-    }
-
-    /**
-     * Option (#15): zoom +, zoom − and full screen hidden; the heading button stays, in the top right corner.
-     * A touch on the map shows them for 6 s.
-     */
+    /** The heading button alone, in the top right corner (#98): the map zooms with two fingers, a double tap is full screen. */
     private fun applyMapButtons() {
-        val hide = prefs.mapAutoHide && android.os.SystemClock.uptimeMillis() >= mapButtonsUntil
-        // Map in a small place (#97): no + and −, it zooms with two fingers; heading and full screen stay
-        val small = frameOf(Card.MAP)?.slot?.size == HomeSlots.Size.SMALL
-        listOf(b.mapZoomIn, b.mapZoomOut).forEach { it.visibility = if (hide || small) View.GONE else View.VISIBLE }
-        b.mapFullscreen.visibility = if (hide) View.GONE else View.VISIBLE
-        // Without + above it, the recentre button keeps no gap of its own: hidden, its top is 14dp
-        // from the top like the info pill's, 14dp from the right edge (#15)
-        (b.mapCenter.layoutParams as android.widget.LinearLayout.LayoutParams).let {
-            it.topMargin = if (hide || small) 0 else dp(8)
-            b.mapCenter.layoutParams = it
-        }
+        listOf(b.mapZoomIn, b.mapZoomOut, b.mapFullscreen).forEach { it.visibility = View.GONE }
+        (b.mapCenter.layoutParams as android.widget.LinearLayout.LayoutParams).let { it.topMargin = 0; b.mapCenter.layoutParams = it }
         (b.mapButtons.layoutParams as android.widget.FrameLayout.LayoutParams).let {
-            it.gravity = if (hide) Gravity.TOP or Gravity.RIGHT else Gravity.RIGHT or Gravity.CENTER_VERTICAL
-            it.topMargin = if (hide) dp(14) else 0
-            b.mapButtons.layoutParams = it
+            it.gravity = Gravity.TOP or Gravity.RIGHT; it.topMargin = dp(14); b.mapButtons.layoutParams = it
         }
     }
 
@@ -1087,11 +1066,11 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
      */
     private fun setMapFullscreen(on: Boolean, web: Boolean = false) {
         if (simpleMode || on == (hiddenForMap != null)) return
-        // The web page (#98) from its button, otherwise the map
+        // The web page (#98), otherwise the map (or its app)
         val from: View = if (web) panels[Card.WEB] ?: return else b.mapCard
         if (on && !isShown(if (web) Card.WEB else Card.MAP)) return
         if (on) {
-            // Walk up from the card to the column row, hiding everything around it but the button to change card
+            // Walk up from the card to the column row, hiding everything around it
             val hidden = mutableListOf<Pair<View, Int>>()
             val margins = mutableListOf<Pair<android.view.ViewGroup.MarginLayoutParams, Int>>()
             var child: View = from
@@ -1099,11 +1078,11 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
                 val parent = child.parent as? android.view.ViewGroup ?: break
                 for (i in 0 until parent.childCount) {
                     val v = parent.getChildAt(i)
-                    if (v !== child && v.visibility != View.GONE && frames.values.none { it.band === v }) { hidden += v to v.visibility; v.visibility = View.GONE }
+                    if (v !== child && v.visibility != View.GONE) { hidden += v to v.visibility; v.visibility = View.GONE }
                 }
                 // A place lower down its column: no gap above it in full screen
                 val lp = child.layoutParams as? android.view.ViewGroup.MarginLayoutParams
-                if (child !== from && lp != null && lp.topMargin != 0) { margins += lp to lp.topMargin; lp.topMargin = 0; child.layoutParams = lp }
+                if (lp != null && lp.topMargin != 0) { margins += lp to lp.topMargin; lp.topMargin = 0; child.layoutParams = lp }
                 child = parent
             }
             hiddenForMap = hidden
@@ -1116,8 +1095,6 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
             columnsRow.requestLayout()
         }
         mapCard.oneFingerPan = on
-        b.mapFullscreen.setImageResource(if (on) R.drawable.ic_fullscreen_exit else R.drawable.ic_fullscreen)
-        frames.values.forEach { updateToggle(it) }
         // App that sets its size at launch (wireless CarPlay MG4CPlay / DiPlay: the video stayed at
         // the map's size in full screen, #52): relaunch it at the new size
         if (mapAppCn?.let { relaunchOnResize(it.packageName) } == true) b.mapCard.post { rebuildMapApp() }
@@ -1201,6 +1178,7 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
     override fun dispatchTouchEvent(ev: android.view.MotionEvent): Boolean {
         if (twoFingerPull.onTouch(ev) { super.dispatchTouchEvent(it) }) return true
         if (!simpleMode && !app.mg4dash.ui.CardsEditor.isOpen(this) && pinchToEdit.onTouch(ev) { super.dispatchTouchEvent(it) }) return true
+        if (!app.mg4dash.ui.CardsEditor.isOpen(this) && restTouch(ev)) return true
         return super.dispatchTouchEvent(ev)
     }
 
@@ -1270,7 +1248,7 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
             for (delay in longArrayOf(800, 1800, 3000, 4500)) v.postDelayed({ reclaimFromApp(cn.packageName) }, delay)
         }
         mapAppView?.visibility = if (show) View.VISIBLE else View.GONE
-        // The band over an embedded app, which takes the swipes (#44)
+        // At rest, the swipes over an embedded app change card (#44)
         frameOf(Card.MAP)?.let { updateToggle(it) }
     }
 
@@ -1913,9 +1891,5 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         const val RANGE_ICON = 0.66f
         /** Map full screen to restore after a recreation (in addition to the saved state). */
         var mapFullOnRecreate = false
-        /** Over a web page, the band of its left and right sides where a swipe changes card (#98), about 0.8 cm on the car. */
-        const val WEB_EDGE_DP = 48
-        const val BAND_DP = 32
-        const val BAND_GAP_DP = 4
     }
 }

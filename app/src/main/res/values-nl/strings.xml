@@ -550,6 +550,8 @@
     <string name="wc_reset_confirm">Het startscherm van deze indeling terugzetten zoals in het begin?</string>
     <string name="wc_map_app">Kaart:</string>
     <string name="wc_web_address">Webadres</string>
+    <string name="wc_wake">Pagina actief:</string>
+    <string name="wc_wake_s">%1$d s</string>
     <string name="wc_web_set">invullen</string>
     <string name="wc_web_none">Nog geen adres: knijp het startscherm samen en tik op Webadres.</string>
     <string name="wc_web_error">Pagina onbereikbaar. Tik om opnieuw te proberen.</string>
