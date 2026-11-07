@@ -770,13 +770,12 @@
     <string name="unit_kwh100">kWh/100</string>
     <string name="no_data">—</string>
     <string name="st_web_engine">Web motoru: Chromium %1$s</string>
-    <string name="st_web_engine_desc">Yeni bir motor, Chromium %1$s, web uygulaması kartında güncel siteleri açar (ABRP, Waze, OpenStreetMap…). LineageOS\'tan %2$d MB indirme, tercihen Wi-Fi ile, ardından burada imzalanıp kurulur (birkaç dakika). Orijinali geri yüklenebilir.</string>
+    <string name="st_web_engine_desc">Yeni bir motor, Chromium %1$s, web uygulaması kartında güncel siteleri açar (ABRP, Waze, OpenStreetMap…). GitHub\'dan (MG4Dash-WebView) %2$d MB indirme, tercihen Wi-Fi ile, ardından burada kurulur. Orijinali geri yüklenebilir.</string>
     <string name="st_web_engine_on">Yeni motor kurulu (Chromium %1$s), orijinalinin üzerine.</string>
     <string name="st_web_engine_install">Chromium %1$s kur</string>
     <string name="st_web_engine_revert">Orijinal motora dön</string>
-    <string name="st_web_engine_confirm">Chromium %1$s (%2$d MB) LineageOS\'tan indirilip imzalansın ve aracın web motoru olarak kurulsun mu?</string>
+    <string name="st_web_engine_confirm">Chromium %1$s (%2$d MB) indirilip aracın web motoru olarak kurulsun mu?</string>
     <string name="st_web_engine_revert_confirm">Orijinal web motoru (Chromium 66) geri yüklensin mi? Güncel siteler web uygulaması kartında artık açılmaz.</string>
     <string name="st_web_engine_revert_ok">Geri yükle</string>
-    <string name="st_web_engine_signing">İmzalanıyor… (bir iki dakika)</string>
     <string name="st_web_engine_done">Tamam: web uygulaması kartı yeni motoru kullanıyor.</string>
 </resources>

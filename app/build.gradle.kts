@@ -68,8 +68,6 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.6")
     implementation("org.osmdroid:osmdroid-android:6.1.20")
     implementation("com.google.zxing:core:3.5.3")
-    // Signs the recent web engine on the car with AOSP's public test key (#98, WebEngine)
-    implementation("com.android.tools.build:apksig:8.5.2")
 
     testImplementation("junit:junit:4.13.2")
     testImplementation("org.robolectric:robolectric:4.14.1")
