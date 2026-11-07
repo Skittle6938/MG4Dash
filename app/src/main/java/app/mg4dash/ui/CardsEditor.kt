@@ -203,6 +203,7 @@ object CardsEditor {
             }
             if (Card.WEB in cards.cards)
                 column.addView(link(context.getString(R.string.wc_web_address), webSummary()) { editUrls() })
+            if (Card.WEB in cards.cards) column.addView(doubleTapRow())
             // How long a web page or the map's app stays awake after a touch (#98)
             if (Card.WEB in cards.cards || Card.MAP in cards.cards && prefs.mapApp != null)
                 column.addView(wakeRow())
@@ -249,6 +250,18 @@ object CardsEditor {
             maxLines = 1; ellipsize = TextUtils.TruncateAt.MIDDLE
             setPadding(dp(4), dp(12), dp(4), dp(4))
             setOnClickListener { onClick() }
+        }
+
+        /** Double tap on the web app (trial): the fixed full screen (as before) or a window detached over home. */
+        private fun doubleTapRow() = LinearLayout(context).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(dp(4), dp(12), dp(4), 0)
+            addView(TextView(context).apply { text = context.getString(R.string.wc_double_tap); setTextColor(sub); setTextSize(TypedValue.COMPLEX_UNIT_SP, 19f) })
+            val row = FlowRow(context, dp(8))
+            listOf(false to R.string.wc_dt_full, true to R.string.wc_dt_float).forEach { (float, label) ->
+                row.addView(chip(context.getString(label), prefs.webFloat == float, null) { prefs.webFloat = float; render() })
+            }
+            addView(row, LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(8) })
         }
 
         /** "Page awake: ‹ 10 s ›", the arrows one second less or more (1 to 120 s). */

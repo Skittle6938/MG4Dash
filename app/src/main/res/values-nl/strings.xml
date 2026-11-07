@@ -558,6 +558,9 @@
     <string name="wc_web_count">%1$d adressen</string>
     <string name="wc_wake">Pagina actief:</string>
     <string name="wc_wake_s">%1$d s</string>
+    <string name="wc_double_tap">Dubbeltik op de pagina</string>
+    <string name="wc_dt_full">Volledig scherm</string>
+    <string name="wc_dt_float">Los venster</string>
     <string name="wc_web_set">invullen</string>
     <string name="wc_web_none">Nog geen adres: knijp het startscherm samen en tik op Webadres.</string>
     <string name="wc_web_error">Pagina onbereikbaar. Tik om opnieuw te proberen.</string>
@@ -673,6 +676,7 @@
     <string name="tu_map_1">Naar links / rechts vegen: volgende kaart van de widget (verbruik, snelkoppelingen…)</string>
     <string name="tu_map_3">Twee vingers: kaart verplaatsen en zoomen (één vinger op volledig scherm)</string>
     <string name="tu_map_2">Knijp in het startscherm, dan Kaart: een andere app in de kaartkaart</string>
+    <string name="tu_map_4">Web-app: een dubbeltik kan hem losmaken als venster (keuze in de bewerkmodus); lang drukken en schuiven om hem te verplaatsen, aan een hoek trekken of knijpen om het formaat te wijzigen, dubbeltik om hem terug te zetten</string>
     <string name="tu_media_t">Muziek</string>
     <string name="tu_media_1">Veeg omhoog / omlaag: volgende bron; links / rechts: vorig / volgend nummer</string>
     <string name="tu_media_2">Tik op de bronnaam: bronmenu; tik op de afbeelding: app openen</string>

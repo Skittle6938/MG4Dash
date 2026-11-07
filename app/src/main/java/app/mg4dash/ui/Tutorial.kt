@@ -56,7 +56,7 @@ object Tutorial {
         // The widgets where they are now (#97): each step points at its card's place
         Step(R.id.climateCard, R.string.tu_climate_t, listOf(R.string.tu_climate_1, R.string.tu_climate_2, R.string.tu_climate_3)),
         Step(R.id.energyCard, R.string.tu_energy_t, listOf(R.string.tu_energy_1, R.string.tu_energy_2)),
-        Step(R.id.mapCard, R.string.tu_map_t, listOf(R.string.tu_map_1, R.string.tu_map_3, R.string.tu_map_2), swipes = "H"),
+        Step(R.id.mapCard, R.string.tu_map_t, listOf(R.string.tu_map_1, R.string.tu_map_3, R.string.tu_map_2, R.string.tu_map_4), swipes = "H"),
         Step(R.id.mediaCard, R.string.tu_media_t, listOf(R.string.tu_media_1, R.string.tu_media_2, R.string.tu_media_3), swipes = "VH"),
         // Any widget with several cards (the trip, power and phone one first)
         Step(R.id.secondaryCard, R.string.tu_widget_t, listOf(R.string.tu_widget_1, R.string.tu_widget_2), swipes = "H"),

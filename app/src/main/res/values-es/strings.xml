@@ -558,6 +558,9 @@
     <string name="wc_web_count">%1$d direcciones</string>
     <string name="wc_wake">Página activa:</string>
     <string name="wc_wake_s">%1$d s</string>
+    <string name="wc_double_tap">Doble toque en la página</string>
+    <string name="wc_dt_full">Pantalla completa</string>
+    <string name="wc_dt_float">Ventana separada</string>
     <string name="wc_web_set">por introducir</string>
     <string name="wc_web_none">Aún no hay dirección: pellizca la pantalla de inicio y toca Dirección web.</string>
     <string name="wc_web_error">Página inaccesible. Toca para reintentar.</string>
@@ -673,6 +676,7 @@
     <string name="tu_map_1">Deslizar a izquierda / derecha: siguiente tarjeta del widget (consumo, accesos directos…)</string>
     <string name="tu_map_3">Dos dedos: mover y ampliar el mapa (un dedo a pantalla completa)</string>
     <string name="tu_map_2">Pellizca la pantalla de inicio y luego Mapa: otra app en la tarjeta del mapa</string>
+    <string name="tu_map_4">Web app: un doble toque puede separarla en una ventana (opción en el modo de edición); pulsación larga y deslizar para moverla, tirar de una esquina o pellizcar para cambiar su tamaño, doble toque para devolverla</string>
     <string name="tu_media_t">Música</string>
     <string name="tu_media_1">Desliza arriba / abajo: siguiente fuente; izquierda / derecha: pista anterior / siguiente</string>
     <string name="tu_media_2">Toca el nombre de la fuente: menú de fuentes; toca la imagen: abrir la app</string>
