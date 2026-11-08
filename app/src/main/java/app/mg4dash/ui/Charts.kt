@@ -140,6 +140,9 @@ class LineChart @JvmOverloads constructor(context: Context, attrs: AttributeSet?
     /** Colour of a dot on the curve's last point (the last km, #44); null: no dot. */
     var lastDotColor: Int? = null
         set(v) { if (field != v) { field = v; invalidate() } }
+    /** Height of that dot (the last km's value); null: the curve's last point. */
+    var lastDotValue: Float? = null
+        set(v) { if (field != v) { field = v; invalidate() } }
     /** Text shown without a curve: 1 point per km, or per trip over 12 months (#44). */
     var emptyText: Int = app.mg4dash.R.string.chart_empty
         set(v) { if (field != v) { field = v; invalidate() } }
@@ -285,7 +288,7 @@ class LineChart @JvmOverloads constructor(context: Context, attrs: AttributeSet?
         // Last km: a dot on the curve's right end, inside the view
         lastDotColor?.let { col ->
             dot.color = col
-            canvas.drawCircle(last - 5 * d, y(values.last()), 5 * d, dot)
+            canvas.drawCircle(last - 5 * d, y(lastDotValue ?: values.last()), 5 * d, dot)
         }
         if (!averageBubble) return
         val txt = String.format(Locale.getDefault(), "%.1f", avg)

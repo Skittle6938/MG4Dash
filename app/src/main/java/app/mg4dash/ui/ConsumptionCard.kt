@@ -133,6 +133,8 @@ class ConsumptionCard(context: Context) : LinearLayout(context) {
         figures.text = figuresText(points)
         // Dot of the last km at the curve's end, not on the 12 months (one point per trip)
         chart.lastDotColor = if (period != 2 && points >= 2 && lastKm(context) != null) c(R.color.text_sub) else null
+        // The dot at the figure's height, so they always agree (the curve's end is smoothed over 5 points)
+        chart.lastDotValue = lastKm(context)
         showDuration()
     }
 
@@ -178,9 +180,13 @@ class ConsumptionCard(context: Context) : LinearLayout(context) {
     }
 
     companion object {
-        /** Consumption of the last km of the current trip, in the chart's unit; null without a trip point (#44). */
+        /**
+         * Consumption of the last km of the current trip, in the chart's unit (#44): the sliding km, read
+         * again every 10 s, instead of the curve's last point that only changed once per km; null without a trip.
+         */
         fun lastKm(c: android.content.Context): Float? =
-            app.mg4dash.energy.ConsumptionCurve.curves.value.trip.lastOrNull()?.let { app.mg4dash.system.Units.stackValue(c, it) }
+            (app.mg4dash.energy.EnergyMonitor.lastKm.value ?: app.mg4dash.energy.ConsumptionCurve.curves.value.trip.lastOrNull())
+                ?.let { app.mg4dash.system.Units.stackValue(c, it) }
 
         /** "1 h 12" or "25 min" (#44). */
         fun durationText(c: android.content.Context, ms: Long): String {
