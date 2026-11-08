@@ -17,11 +17,13 @@ jobs:
           distribution: temurin
           java-version: "17"
       - name: Build and test
-        run: chmod +x gradlew && ./gradlew --no-daemon -q testEmulatorDebugUnitTest assembleEmulatorDebug
+        run: chmod +x gradlew && ./gradlew --no-daemon -q testEmulatorDebugUnitTest :rescue:testDebugUnitTest assembleEmulatorDebug
       - name: Upload unit test report
         if: failure()
         uses: actions/upload-artifact@v4
         with:
           name: unit-test-report
-          path: app/build/reports/tests/testEmulatorDebugUnitTest
+          path: |
+            app/build/reports/tests/testEmulatorDebugUnitTest
+            rescue/build/reports/tests/testDebugUnitTest
           if-no-files-found: ignore
