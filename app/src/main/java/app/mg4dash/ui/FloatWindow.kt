@@ -55,6 +55,8 @@ class FloatWindow(
     private val onMoved: () -> Unit,
     /** Awake and typing in the page: it stays awake. */
     private val keepAwake: () -> Boolean,
+    /** Home's cards on screen (and the bar): the window's edges settle on theirs (#98). */
+    private val cards: () -> List<View> = { emptyList() },
 ) {
     private val prefs = Prefs(activity)
     private val d = activity.resources.displayMetrics.density
@@ -137,7 +139,8 @@ class FloatWindow(
         look()
         if (on) {
             holder.visibility = View.VISIBLE
-            place(saved() ?: initial())
+            // A kept place nearly on a card (300 against 298): set on it, the card's outline no longer shows
+            place(settled(saved() ?: initial(), stretch = true))
             Log.i(TAG, "detached at $rect")
         } else {
             followDock()
@@ -261,6 +264,12 @@ class FloatWindow(
         val dx = when { Math.abs(r.left - b.left) < s -> b.left - r.left; Math.abs(b.right - r.right) < s -> b.right - r.right; else -> 0 }
         val dy = when { Math.abs(r.top - b.top) < s -> b.top - r.top; Math.abs(b.bottom - r.bottom) < s -> b.bottom - r.bottom; else -> 0 }
         return Rect(r).apply { offset(dx, dy) }
+    }
+
+    /** [r] settled on the edges of the cards on screen (#98), then kept within the cards' area. */
+    private fun settled(r: Rect, stretch: Boolean): Rect {
+        val edges = cards().filter { it.isShown && it.width > 0 && it.height > 0 }.map { rectOf(it) }
+        return fit(settle(r, edges, dp(SETTLE_DP), stretch))
     }
 
     private fun place(r: Rect) {
@@ -416,7 +425,11 @@ class FloatWindow(
                             handler.postDelayed(wakeTapped, ViewConfiguration.getDoubleTapTimeout().toLong())
                         }
                     }
-                    Mode.DRAG, Mode.RESIZE, Mode.PINCH -> { val r = Rect(ghostRect); hideGhost(); place(r) }
+                    Mode.DRAG, Mode.RESIZE, Mode.PINCH -> {
+                        // Moved, or resized with its ratio kept: only its place settles; an edge or a flat pinch: its size too
+                        val stretch = m == Mode.RESIZE && (hx == 0 || hy == 0) || m == Mode.PINCH && pinch != Pinch.BOTH
+                        val r = settled(Rect(ghostRect), stretch); hideGhost(); place(r)
+                    }
                     else -> hideGhost()
                 }
                 return true
@@ -529,5 +542,26 @@ class FloatWindow(
 
     companion object {
         private const val TAG = "FloatWeb"
+        /** A window's edge this close to a card's edge goes on it. */
+        private const val SETTLE_DP = 12
+
+        /**
+         * [r] set on the nearest edges of [cards] within [tol] (#98). Its place first: on each axis, the edge closest to
+         * a card's edge moves the whole window there, its size kept. With [stretch], each edge left still near a card's
+         * edge then goes on it too, changing its size (an edge pulled alone, not a corner keeping the ratio).
+         */
+        internal fun settle(r: Rect, cards: List<Rect>, tol: Int, stretch: Boolean): Rect {
+            val xs = cards.flatMap { listOf(it.left, it.right) }
+            val ys = cards.flatMap { listOf(it.top, it.bottom) }
+            fun near(v: Int, lines: List<Int>) = lines.filter { Math.abs(it - v) <= tol }.minByOrNull { Math.abs(it - v) }
+            fun shift(a: Int, b: Int, lines: List<Int>) =
+                listOfNotNull(near(a, lines)?.minus(a), near(b, lines)?.minus(b)).minByOrNull { Math.abs(it) } ?: 0
+            val out = Rect(r).apply { offset(shift(r.left, r.right, xs), shift(r.top, r.bottom, ys)) }
+            if (stretch) {
+                near(out.left, xs)?.let { out.left = it }; near(out.right, xs)?.let { out.right = it }
+                near(out.top, ys)?.let { out.top = it }; near(out.bottom, ys)?.let { out.bottom = it }
+            }
+            return out
+        }
     }
 }
