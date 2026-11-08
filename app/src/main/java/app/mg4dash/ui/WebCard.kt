@@ -211,53 +211,29 @@ class WebCard(private val activity: android.app.Activity) : FrameLayout(activity
      * "Move / resize", under Back.
      */
     fun menu(onMove: (() -> Unit)? = null) {
-        val d = resources.displayMetrics.density
-        fun dp(v: Int) = (v * d).toInt()
-        val accent = Themes.color(context, R.color.accent_action)
-        val sub = Themes.color(context, R.color.text_sub)
-        val urls = prefs.webUrls
         val shown = prefs.webUrl
-        var dialog: android.app.Dialog? = null
-        val list = android.widget.LinearLayout(context).apply { orientation = android.widget.LinearLayout.VERTICAL; setPadding(dp(24), dp(16), dp(24), dp(8)) }
-        fun row(mark: String, title: String, detail: String?, on: Boolean, click: () -> Unit) {
-            val r = android.widget.LinearLayout(context).apply {
-                orientation = android.widget.LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL
-                minimumHeight = dp(72); setPadding(dp(18), dp(6), dp(18), dp(6))
-                background = android.graphics.drawable.GradientDrawable().apply {
-                    cornerRadius = dp(18).toFloat()
-                    setColor(if (on) (accent and 0x00FFFFFF) or 0x40000000 else Themes.color(context, R.color.bg_top))
-                    if (on) setStroke(dp(2), accent)
-                }
-                setOnClickListener { dialog?.dismiss(); click() }
-            }
-            r.addView(TextView(context).apply {
-                text = mark; setTextColor(if (on || detail == null) accent else sub); setTextSize(TypedValue.COMPLEX_UNIT_SP, 26f)
-                setPadding(0, 0, dp(18), 0)
-            })
-            r.addView(android.widget.LinearLayout(context).apply {
-                orientation = android.widget.LinearLayout.VERTICAL
-                addView(TextView(context).apply { text = title; setTextColor(Themes.color(context, R.color.text_title)); setTextSize(TypedValue.COMPLEX_UNIT_SP, 21f); maxLines = 1 })
-                if (detail != null) addView(TextView(context).apply {
-                    text = detail; setTextColor(sub); setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f); maxLines = 1; ellipsize = android.text.TextUtils.TruncateAt.MIDDLE
-                })
-            }, android.widget.LinearLayout.LayoutParams(0, -2, 1f))
-            list.addView(r, android.widget.LinearLayout.LayoutParams(-1, -2).apply { bottomMargin = dp(10) })
-        }
-        row("←", context.getString(R.string.wc_web_back), null, false) { back() }
-        if (onMove != null) row("✥", context.getString(R.string.wc_web_move), null, false) { onMove() }
-        urls.forEach { url ->
-            row(if (url == shown) "◉" else "○", name(url), url, url == shown) {
+        val rows = mutableListOf(CardMenu.Row("←", context.getString(R.string.wc_web_back), null, false) { back() })
+        if (onMove != null) rows += CardMenu.Row("✥", context.getString(R.string.wc_web_move), null, false) { onMove() }
+        prefs.webUrls.forEach { url ->
+            rows += CardMenu.Row(if (url == shown) "◉" else "○", name(url), url, url == shown) {
                 // The address shown touched again: its page starts again from that address (#98)
-                if (url == shown) { Log.i(TAG, "menu: ${name(url)} again"); reset(); show(); return@row }
+                if (url == shown) { Log.i(TAG, "menu: ${name(url)} again"); reset(); show(); return@Row }
                 prefs.webUrl = url
                 Log.i(TAG, "menu: ${name(url)}")
                 show()
             }
         }
-        dialog = android.app.AlertDialog.Builder(activity)
-            .setView(android.widget.ScrollView(context).apply { isVerticalScrollBarEnabled = false; addView(list) })
-            .show().also { Dialogs.hideBars(it) }
-        dialog.window?.setLayout(dp(560), -2)
+        // Another address, entered as in the edit mode, added to the list and shown at once
+        rows += CardMenu.Row("＋", context.getString(R.string.wc_other_address), null, false) {
+            CardsEditor.askUrl(activity, "") { url ->
+                if (url.isEmpty()) return@askUrl
+                prefs.webUrls = prefs.webUrls.filter { it != url } + url
+                prefs.webUrl = url
+                Log.i(TAG, "menu: ${name(url)} added")
+                show()
+            }
+        }
+        CardMenu.show(activity, rows)
     }
 
     override fun onAttachedToWindow() {

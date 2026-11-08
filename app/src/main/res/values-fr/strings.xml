@@ -557,6 +557,8 @@
     <string name="wc_web_back">Retour</string>
     <string name="wc_web_move">Déplacer / redimensionner</string>
     <string name="wc_web_move_hint">Glissez pour déplacer, tirez un coin ou un bord pour redimensionner, puis OK</string>
+    <string name="wc_other_app">Autre application…</string>
+    <string name="wc_other_address">Autre adresse…</string>
     <string name="wc_web_count">%1$d adresses</string>
     <string name="wc_wake">Page réveillée :</string>
     <string name="wc_wake_s">%1$d s</string>

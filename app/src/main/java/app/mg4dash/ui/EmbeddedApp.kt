@@ -81,6 +81,24 @@ object EmbeddedApp {
     }
 
     /**
+     * Back key to the app of [v] (#98, the card's menu): through the input forwarder of its virtual display, as
+     * ActivityView sends it the touches (Android 9). False when it could not be sent.
+     */
+    fun back(v: View): Boolean = try {
+        val f = Class.forName("android.app.ActivityView").getDeclaredField("mInputForwarder").apply { isAccessible = true }
+        val fwd = f.get(v) ?: throw IllegalStateException("no input forwarder yet")
+        val send = fwd.javaClass.getMethod("forward", android.view.InputEvent::class.java)
+        val t = android.os.SystemClock.uptimeMillis()
+        for (action in intArrayOf(android.view.KeyEvent.ACTION_DOWN, android.view.KeyEvent.ACTION_UP))
+            send.invoke(fwd, android.view.KeyEvent(t, t, action, android.view.KeyEvent.KEYCODE_BACK, 0))
+        Log.i(TAG, "back key sent to the embedded app")
+        true
+    } catch (e: Throwable) {
+        Log.w(TAG, "back key to the embedded app: ${e.javaClass.simpleName} ${e.message}")
+        false
+    }
+
+    /**
      * Full screen: when touching the embedded app, its window takes control, and as it
      * does not ask for immersive mode, the SAIC bars reappeared. The system setting
      * "policy_control" forces immersive mode for this app (and MG4Dash); removed with no app.

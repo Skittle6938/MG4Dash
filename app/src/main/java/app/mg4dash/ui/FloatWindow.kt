@@ -57,6 +57,11 @@ class FloatWindow(
     private val keepAwake: () -> Boolean,
     /** Home's cards on screen (and the bar): the window's edges settle on theirs (#98). */
     private val cards: () -> List<View> = { emptyList() },
+    /** Its kept place and size (left, top, width, height), one per window: the web app's, the map's. */
+    private val savedRect: () -> IntArray? = { Prefs(activity).webFloatRect },
+    private val keepRect: (IntArray) -> Unit = { Prefs(activity).webFloatRect = it },
+    /** Touched while detached: it comes in front of the other window. */
+    private val onTouched: () -> Unit = {},
 ) {
     private val prefs = Prefs(activity)
     private val d = activity.resources.displayMetrics.density
@@ -237,7 +242,7 @@ class FloatWindow(
         if (holder.visibility != v) holder.visibility = v
     }
 
-    private fun saved(): Rect? = prefs.webFloatRect?.let { Rect(it[0], it[1], it[0] + it[2], it[1] + it[3]) }?.let { fit(it) }
+    private fun saved(): Rect? = savedRect()?.let { Rect(it[0], it[1], it[0] + it[2], it[1] + it[3]) }?.let { fit(it) }
 
     /** First time: 60 % of the cards' width, 16:9 if it fits, in the middle. */
     private fun initial(): Rect {
@@ -279,7 +284,7 @@ class FloatWindow(
         rect.set(r)
         (holder.layoutParams as FrameLayout.LayoutParams).apply { width = r.width(); height = r.height(); leftMargin = r.left; topMargin = r.top }
             .also { holder.layoutParams = it }
-        if (floating) prefs.webFloatRect = intArrayOf(r.left, r.top, r.width(), r.height())
+        if (floating) keepRect(intArrayOf(r.left, r.top, r.width(), r.height()))
         if (moving) holder.post { placeHint() }
         // Resized, the embedded app follows by itself (EmbeddedApp: new size, new surface); moved only, its layer is redone here
         if (moved && !resized) holder.postDelayed({ onMoved() }, 300)
@@ -297,6 +302,12 @@ class FloatWindow(
     }
 
     fun rest() = setAwake(false)
+
+    /** The window itself, for the other window to settle on its edges. */
+    val frameView: View get() = holder
+
+    /** In front of the other detached window (the last touched one); behind it otherwise. */
+    fun front(on: Boolean) { layer.translationZ = if (on) d else 0f }
 
     /** Docked: its card's outline, lit while the page is awake (the card's own is under the page, out of sight). */
     fun dockOutline(on: Boolean) {
@@ -351,6 +362,7 @@ class FloatWindow(
                     val near = Rect(rect).apply { inset(-dp(GRAB_DP), -dp(GRAB_DP)) }
                     if (!near.contains(x.toInt(), y.toInt())) { mode = Mode.IGNORE; return true }
                 }
+                onTouched()
                 if (awake) { setAwake(true); through = true; return false }
                 downX = x; downY = y; start.set(rect)
                 if (!moving) {
