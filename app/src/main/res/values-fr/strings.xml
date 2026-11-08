@@ -575,7 +575,7 @@
     <string name="wc_web_install_failed">MG4Dash Web n\'a pas pu être installé. Touchez pour réessayer.</string>
     <string name="wc_none_simple">La disposition Simple n\'a pas de cartes à choisir.</string>
     <string name="st_edit_cards">Cartes des widgets</string>
-    <string name="st_edit_cards_desc">Choisir les cartes que fait dÃ©filer chaque widget, dont la carte Application (la carte OpenStreetMap ou une autre appli) et une web app. Raccourci : pincer l\'accueil avec deux doigts.</string>
+    <string name="st_edit_cards_desc">Choisir les cartes que fait défiler chaque widget, dont la carte Application (la carte OpenStreetMap ou une autre appli) et une web app. Raccourci : pincer l\'accueil avec deux doigts.</string>
     <string name="st_edit_cards_btn">Modifier les cartes</string>
     <string name="tu_cards_t">Choisir et déplacer les cartes</string>
     <string name="tu_cards_1">Pincez l\'accueil avec deux doigts : chaque emplacement montre les cartes qu\'il peut faire défiler ; un emplacement moyen peut aussi montrer la climatisation ou le média</string>
@@ -589,7 +589,7 @@
     <string name="map_app_pick">Appli dans la carte Application</string>
     <string name="map_app_osm">Carte OpenStreetMap (par défaut)</string>
     <string name="map_app_unavailable">Ce firmware ne permet pas d\'afficher une autre appli dans la carte Application</string>
-    <string name="map_app_failed">Cette appli ne peut pas s\'afficher dans la carte Application : retour Ã  la carte OpenStreetMap</string>
+    <string name="map_app_failed">Cette appli ne peut pas s\'afficher dans la carte Application : retour à la carte OpenStreetMap</string>
     <string name="title_sound">SON</string>
     <string name="vh_sound">Son  ›</string>
     <string name="snd_field">RÉPARTITION DU SON</string>
@@ -682,7 +682,7 @@
     <string name="tu_map_t">Carte</string>
     <string name="tu_map_1">Glisser à gauche / droite : carte suivante du widget (consommation, raccourcis…)</string>
     <string name="tu_map_3">Deux doigts : déplacer et zoomer la carte (un doigt en plein écran)</string>
-    <string name="tu_map_2">Pincer l\'accueil, puis Application : une autre appli Ã  la place de la carte</string>
+    <string name="tu_map_2">Pincer l\'accueil, puis Application : une autre appli à la place de la carte</string>
     <string name="tu_map_4">Web app : un double tap peut la détacher en fenêtre (choix dans le mode édition) ; appui long puis glisser pour la déplacer, tirer un coin ou pincer pour la redimensionner, double tap pour la remettre</string>
     <string name="tu_media_t">Musique</string>
     <string name="tu_media_1">Glisser haut / bas : source suivante ; gauche / droite : morceau précédent / suivant</string>
