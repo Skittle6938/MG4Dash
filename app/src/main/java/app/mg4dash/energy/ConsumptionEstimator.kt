@@ -91,7 +91,7 @@ object ConsumptionEstimator {
         }
     }
 
-    private fun estimate(km: Int, socDrop: Int, capacityKwh: Float): Float? {
+    internal fun estimate(km: Int, socDrop: Int, capacityKwh: Float): Float? {
         if (km < MIN_KM || socDrop < MIN_SOC_DROP) return null
         val value = socDrop / 100f * capacityKwh / km * 100f
         return value.takeIf { it in 5f..60f }

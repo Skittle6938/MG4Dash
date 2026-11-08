@@ -37,22 +37,27 @@ object Firmware {
         cached?.let { return it }
         val v = prop("ro.build.mt2712.version") ?: prop("ro.build.version.incremental")
         raw = v
-        val g = when {
-            v == null -> Gen.UNKNOWN
-            v.startsWith("SWI173") -> Gen.SWI173
-            v.startsWith("SWI165") -> Gen.SWI165
-            v.startsWith("SWI133") -> Gen.SWI133
-            v.startsWith("SWI132") -> Gen.SWI132   // avant SWI131 / SWI13x
-            v.startsWith("SWI131") -> Gen.SWI131
-            v.startsWith("SWI68") -> Gen.SWI68
-            v.startsWith("SWI69") -> Gen.SWI69
-            else -> Gen.UNKNOWN
-        }
+        val g = parse(v)
         cached = g
         return g
     }
 
-    val family: Family get() = when (gen) {
+    /** Generation from the firmware string; SWI132 is tested before SWI131 (and SWI13x). */
+    internal fun parse(v: String?): Gen = when {
+        v == null -> Gen.UNKNOWN
+        v.startsWith("SWI173") -> Gen.SWI173
+        v.startsWith("SWI165") -> Gen.SWI165
+        v.startsWith("SWI133") -> Gen.SWI133
+        v.startsWith("SWI132") -> Gen.SWI132   // avant SWI131 / SWI13x
+        v.startsWith("SWI131") -> Gen.SWI131
+        v.startsWith("SWI68") -> Gen.SWI68
+        v.startsWith("SWI69") -> Gen.SWI69
+        else -> Gen.UNKNOWN
+    }
+
+    val family: Family get() = familyOf(gen)
+
+    internal fun familyOf(gen: Gen): Family = when (gen) {
         Gen.SWI69, Gen.SWI131, Gen.SWI132, Gen.SWI173 -> Family.A9
         Gen.SWI68, Gen.SWI165, Gen.SWI133 -> Family.LEGACY
         Gen.UNKNOWN -> Family.UNKNOWN

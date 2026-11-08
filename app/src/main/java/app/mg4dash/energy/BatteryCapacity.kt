@@ -62,7 +62,7 @@ object BatteryCapacity {
         Prefs(context).raw.edit().putString("cap_samples", arr.toString()).apply()
     }
 
-    private fun weighted(list: List<Sample>): Float? {
+    internal fun weighted(list: List<Sample>): Float? {
         val w = list.sumOf { it.drop }
         return if (w == 0) null else list.sumOf { (it.kwh * it.drop).toDouble() }.toFloat() / w
     }
@@ -129,7 +129,7 @@ object BatteryCapacity {
         return Progress(accDrop.coerceAtLeast(0f), prov, accKm.coerceAtLeast(0f))
     }
 
-    private fun valid(netKwh: Float, socDrop: Float): Float? {
+    internal fun valid(netKwh: Float, socDrop: Float): Float? {
         if (socDrop < MIN_DROP || netKwh < 3f) return null
         return (netKwh / socDrop * 100f).takeIf { it in 30f..100f }
     }
