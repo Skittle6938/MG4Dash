@@ -423,8 +423,11 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
     /** A place's own swipes: not in full screen, nor over a web page or an app (at rest, [restTouch] takes them). */
     private fun slotSwipes(f: SlotFrame) = f.cards.size >= 2 && hiddenForMap == null && !covering(f)
 
-    /** A web page or an app fills the card and takes its touches (#41, #97). */
-    private fun covering(f: SlotFrame) = f.shown == Card.WEB || f.shown == Card.MAP && mapAppView?.visibility == View.VISIBLE
+    /**
+     * A web page or an app fills the card and takes its touches (#41, #97). The App card in its window over home
+     * (#98) too, even on the map: its view is in the window, out of its place's swipes, so it rests as an app.
+     */
+    private fun covering(f: SlotFrame) = f.shown == Card.WEB || f.shown == Card.MAP && (mapAppView?.visibility == View.VISIBLE || floatMap != null)
 
     /** The page or the app of [f] gone (another card shown): it is at rest again. */
     private fun updateToggle(f: SlotFrame) {
@@ -455,6 +458,8 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
             f?.box?.foreground = app.mg4dash.ui.FadeOutline.Awake(resources.displayMetrics.density, color(R.color.accent_action), dp(3).toFloat())
             awake = f
             floatWeb?.dockOutline(f?.shown == Card.WEB)
+            // The App card's window in its card (#98): its outline lit as the web app's, and the map moved with one finger while awake
+            floatMap?.takeIf { !it.floating }?.let { fm -> fm.dockOutline(f?.shown == Card.MAP); mapCard.oneFingerPan = f?.shown == Card.MAP }
             app.mg4dash.system.Log.i("Rest", if (f == null) "page or app at rest" else "${f.shown} awake")
         }
         if (f != null) handler.postDelayed(sleep, prefs.webWakeSeconds * 1000L)
