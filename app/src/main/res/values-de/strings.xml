@@ -575,7 +575,7 @@
     <string name="wc_web_install_failed">MG4Dash Web konnte nicht installiert werden. Zum erneuten Versuch antippen.</string>
     <string name="wc_none_simple">Das Layout Einfach hat keine Karten zur Auswahl.</string>
     <string name="st_edit_cards">Karten der Widgets</string>
-    <string name="st_edit_cards_desc">Die Karten wÃ¤hlen, die jedes Widget zeigt, etwa die App-Karte (die Karte oder eine andere App) und eine Web-App. AbkÃ¼rzung: Startbildschirm mit zwei Fingern zusammenziehen.</string>
+    <string name="st_edit_cards_desc">Die Karten wählen, die jedes Widget zeigt, etwa die App-Karte (die Karte oder eine andere App) und eine Web-App. Abkürzung: Startbildschirm mit zwei Fingern zusammenziehen.</string>
     <string name="st_edit_cards_btn">Karten bearbeiten</string>
     <string name="tu_cards_t">Karten wählen und verschieben</string>
     <string name="tu_cards_1">Startbildschirm mit zwei Fingern zusammenziehen: Jeder Platz zeigt seine Karten; ein mittlerer Platz kann auch Klima oder Medien zeigen</string>
@@ -589,7 +589,7 @@
     <string name="map_app_pick">App in der App-Karte</string>
     <string name="map_app_osm">OpenStreetMap-Karte (Standard)</string>
     <string name="map_app_unavailable">Diese Firmware kann keine andere App in der App-Karte anzeigen</string>
-    <string name="map_app_failed">Diese App kann nicht in der App-Karte angezeigt werden: zurÃ¼ck zur Karte</string>
+    <string name="map_app_failed">Diese App kann nicht in der App-Karte angezeigt werden: zurück zur Karte</string>
     <string name="title_sound">KLANG</string>
     <string name="vh_sound">Klang  ›</string>
     <string name="snd_field">KLANGVERTEILUNG</string>

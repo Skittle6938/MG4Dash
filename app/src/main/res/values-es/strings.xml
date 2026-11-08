@@ -530,7 +530,7 @@
     <string name="weather_rain">Lluvia %1$d %%</string>
     <string name="st_energy_card_power">Potencia en directo en la tarjeta de energía</string>
     <string name="st_energy_card_power_desc">Barra de potencia, kW y media en lugar del modo de conducción y el KERS; la línea de carga / V2L aparece con el cable enchufado y la página Potencia sale del widget inferior.</string>
-    <string name="wc_map">AplicaciÃ³n</string>
+    <string name="wc_map">Aplicación</string>
     <string name="wc_consumption">Consumo</string>
     <string name="wc_shortcuts">Accesos directos</string>
     <string name="wc_web">Web app</string>
@@ -549,7 +549,7 @@
     <string name="wc_keep_one_there">Es la única tarjeta de su lugar: añade antes otra allí</string>
     <string name="wc_reset">Por defecto</string>
     <string name="wc_reset_confirm">¿Volver a dejar la pantalla de inicio de este diseño como al principio?</string>
-    <string name="wc_map_app">AplicaciÃ³n:</string>
+    <string name="wc_map_app">Aplicación:</string>
     <string name="wc_web_address">Dirección web</string>
     <string name="wc_web_apps">Web apps</string>
     <string name="wc_web_apps_hint">Toca una dirección para mostrarla en la tarjeta · ✕ para borrarla</string>
@@ -563,7 +563,7 @@
     <string name="wc_wake">Página activa:</string>
     <string name="wc_wake_s">%1$d s</string>
     <string name="wc_double_tap">Doble toque en la página</string>
-    <string name="wc_double_tap_app">Doble toque en la aplicaciÃ³n</string>
+    <string name="wc_double_tap_app">Doble toque en la aplicación</string>
     <string name="wc_dt_full">Pantalla completa</string>
     <string name="wc_dt_float">Ventana separada</string>
     <string name="wc_web_set">por introducir</string>
@@ -575,7 +575,7 @@
     <string name="wc_web_install_failed">No se pudo instalar MG4Dash Web. Toca para reintentar.</string>
     <string name="wc_none_simple">El diseño Simple no tiene tarjetas que elegir.</string>
     <string name="st_edit_cards">Tarjetas de los widgets</string>
-    <string name="st_edit_cards_desc">Elegir las tarjetas que muestra cada widget, como la tarjeta AplicaciÃ³n (el mapa u otra app) y una web app. Atajo: pellizcar la pantalla de inicio con dos dedos.</string>
+    <string name="st_edit_cards_desc">Elegir las tarjetas que muestra cada widget, como la tarjeta Aplicación (el mapa u otra app) y una web app. Atajo: pellizcar la pantalla de inicio con dos dedos.</string>
     <string name="st_edit_cards_btn">Editar las tarjetas</string>
     <string name="tu_cards_t">Elegir y mover las tarjetas</string>
     <string name="tu_cards_1">Pellizca la pantalla de inicio con dos dedos: cada lugar muestra sus tarjetas; un lugar mediano también puede mostrar la climatización o el multimedia</string>
@@ -586,10 +586,10 @@
     <string name="st_clock_12">12 h (sin AM / PM)</string>
     <string name="st_panel_fade">Difuminado (estilo cuadro)</string>
     <string name="st_panel_full">Completo</string>
-    <string name="map_app_pick">App en la tarjeta AplicaciÃ³n</string>
+    <string name="map_app_pick">App en la tarjeta Aplicación</string>
     <string name="map_app_osm">Mapa OpenStreetMap (predeterminado)</string>
-    <string name="map_app_unavailable">Este firmware no puede mostrar otra app en la tarjeta AplicaciÃ³n</string>
-    <string name="map_app_failed">Esta app no se puede mostrar en la tarjeta AplicaciÃ³n: vuelta al mapa</string>
+    <string name="map_app_unavailable">Este firmware no puede mostrar otra app en la tarjeta Aplicación</string>
+    <string name="map_app_failed">Esta app no se puede mostrar en la tarjeta Aplicación: vuelta al mapa</string>
     <string name="title_sound">SONIDO</string>
     <string name="vh_sound">Sonido  ›</string>
     <string name="snd_field">DISTRIBUCIÓN DEL SONIDO</string>
@@ -682,7 +682,7 @@
     <string name="tu_map_t">Mapa</string>
     <string name="tu_map_1">Deslizar a izquierda / derecha: siguiente tarjeta del widget (consumo, accesos directos…)</string>
     <string name="tu_map_3">Dos dedos: mover y ampliar el mapa (un dedo a pantalla completa)</string>
-    <string name="tu_map_2">Pellizca la pantalla de inicio y luego AplicaciÃ³n: otra app en lugar del mapa</string>
+    <string name="tu_map_2">Pellizca la pantalla de inicio y luego Aplicación: otra app en lugar del mapa</string>
     <string name="tu_map_4">Web app: un doble toque puede separarla en una ventana (opción en el modo de edición); pulsación larga y deslizar para moverla, tirar de una esquina o pellizcar para cambiar su tamaño, doble toque para devolverla</string>
     <string name="tu_media_t">Música</string>
     <string name="tu_media_1">Desliza arriba / abajo: siguiente fuente; izquierda / derecha: pista anterior / siguiente</string>

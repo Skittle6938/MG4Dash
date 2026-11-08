@@ -563,7 +563,7 @@
     <string name="wc_wake">Sayfa etkin:</string>
     <string name="wc_wake_s">%1$d s</string>
     <string name="wc_double_tap">Sayfaya çift dokunma</string>
-    <string name="wc_double_tap_app">Uygulamaya Ã§ift dokunma</string>
+    <string name="wc_double_tap_app">Uygulamaya çift dokunma</string>
     <string name="wc_dt_full">Tam ekran</string>
     <string name="wc_dt_float">Ayrık pencere</string>
     <string name="wc_web_set">girilecek</string>
@@ -575,7 +575,7 @@
     <string name="wc_web_install_failed">MG4Dash Web yüklenemedi. Tekrar denemek için dokunun.</string>
     <string name="wc_none_simple">Basit düzende seçilecek kart yok.</string>
     <string name="st_edit_cards">Widget kartları</string>
-    <string name="st_edit_cards_desc">Her widget\'Ä±n gÃ¶stereceÄŸi kartlarÄ± seÃ§in, Ã¶rneÄŸin Uygulama kartÄ± (harita veya baÅŸka bir uygulama) ve bir web uygulamasÄ±. KÄ±sayol: ana ekranÄ± iki parmakla kÄ±stÄ±rÄ±n.</string>
+    <string name="st_edit_cards_desc">Her widget\'ın göstereceği kartları seçin, örneğin Uygulama kartı (harita veya başka bir uygulama) ve bir web uygulaması. Kısayol: ana ekranı iki parmakla kıstırın.</string>
     <string name="st_edit_cards_btn">Kartları düzenle</string>
     <string name="tu_cards_t">Kartları seçin ve taşıyın</string>
     <string name="tu_cards_1">Ana ekranı iki parmakla kıstırın: her yer kendi kartlarını gösterir; orta boy bir yer klima veya medyayı da gösterebilir</string>
@@ -586,10 +586,10 @@
     <string name="st_clock_12">12 sa (ÖÖ / ÖS olmadan)</string>
     <string name="st_panel_fade">Solan (gösterge paneli tarzı)</string>
     <string name="st_panel_full">Tam</string>
-    <string name="map_app_pick">Uygulama kartÄ±ndaki uygulama</string>
+    <string name="map_app_pick">Uygulama kartındaki uygulama</string>
     <string name="map_app_osm">OpenStreetMap haritası (varsayılan)</string>
-    <string name="map_app_unavailable">Bu yazÄ±lÄ±m Uygulama kartÄ±nda baÅŸka bir uygulama gÃ¶steremiyor</string>
-    <string name="map_app_failed">Bu uygulama Uygulama kartÄ±nda gÃ¶sterilemiyor: haritaya dÃ¶nÃ¼lÃ¼yor</string>
+    <string name="map_app_unavailable">Bu yazılım Uygulama kartında başka bir uygulama gösteremiyor</string>
+    <string name="map_app_failed">Bu uygulama Uygulama kartında gösterilemiyor: haritaya dönülüyor</string>
     <string name="title_sound">SES</string>
     <string name="vh_sound">Ses  ›</string>
     <string name="snd_field">SES DAĞILIMI</string>
@@ -682,7 +682,7 @@
     <string name="tu_map_t">Harita</string>
     <string name="tu_map_1">Sola / sağa kaydır: widget\'ın sonraki kartı (tüketim, kısayollar…)</string>
     <string name="tu_map_3">İki parmak: haritayı taşı ve yakınlaştır (tam ekranda tek parmak)</string>
-    <string name="tu_map_2">Ana ekranÄ± iki parmakla sÄ±kÄ±ÅŸtÄ±rÄ±n, sonra Uygulama: harita yerine baÅŸka bir uygulama</string>
+    <string name="tu_map_2">Ana ekranı iki parmakla sıkıştırın, sonra Uygulama: harita yerine başka bir uygulama</string>
     <string name="tu_map_4">Web uygulaması: çift dokunma onu pencere olarak ayırabilir (düzenleme modunda seçim); taşımak için uzun basıp kaydırın, boyutlandırmak için bir köşeyi çekin veya sıkıştırın, geri koymak için çift dokunun</string>
     <string name="tu_media_t">Müzik</string>
     <string name="tu_media_1">Yukarı / aşağı kaydır: sonraki kaynak; sola / sağa: önceki / sonraki parça</string>
