@@ -44,14 +44,14 @@ class MapRestTest {
         }
         fun check(round: String) {
             assertNull("$round: at rest first", awake.get(act))
-            val window = (field("floatMap").get(act) as app.mg4dash.ui.FloatWindow).frameView
+            val window = field("floatMap").get(act) as app.mg4dash.ui.FloatWindow
             tapOnTheCard()
             assertNotNull("$round: a touch wakes it", awake.get(act))
             // The accent outline as on the web app, on its window (the card's own is under it)
-            assertNotNull("$round: outline lit", window.foreground)
+            org.junit.Assert.assertTrue("$round: outline lit", window.outlineLit)
             idle(2500)
             assertNull("$round: at rest after the delay", awake.get(act))
-            assertNull("$round: outline off", window.foreground)
+            org.junit.Assert.assertFalse("$round: outline off", window.outlineLit)
         }
         check("in its card")
         // There and back in its window over home

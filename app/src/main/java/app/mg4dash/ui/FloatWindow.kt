@@ -83,6 +83,8 @@ class FloatWindow(
     /** The window's corner radius: the cards' one, plus the frame's width when detached. */
     private fun corner() = FadeOutline.RADIUS * d + if (floating) frame else 0
     private val chrome = Chrome()
+    /** The awake accent outline (#98), in a layer of its own above everything in the window; touches go through. */
+    private val glow = View(activity).apply { isClickable = false; isFocusable = false; outlineProvider = null; translationZ = 64 * d }
     private val ghost = Ghost()
 
     /** The window's place and size, in the layer's (= the window's) coordinates. */
@@ -112,6 +114,8 @@ class FloatWindow(
         }
         panel.clipToOutline = true
         holder.addView(chrome, FrameLayout.LayoutParams(-1, -1))
+        // Last and highest: over the page and over a card with its own elevation (the App card's), never under it
+        holder.addView(glow, FrameLayout.LayoutParams(-1, -1))
         layer.addView(holder, FrameLayout.LayoutParams(0, 0))
         layer.addView(ghost, FrameLayout.LayoutParams(0, 0))
         ghost.visibility = View.GONE
@@ -294,7 +298,7 @@ class FloatWindow(
         handler.removeCallbacks(sleep)
         if (awake != on) {
             awake = on
-            holder.foreground = if (on) FadeOutline.Awake(d, accent, dp(3).toFloat(), corner()) else null
+            glow.background = if (on) FadeOutline.Awake(d, accent, dp(3).toFloat(), corner()) else null
             chrome.invalidate()
             Log.i(TAG, if (on) "awake" else "at rest")
         }
@@ -306,13 +310,16 @@ class FloatWindow(
     /** The window itself, for the other window to settle on its edges. */
     val frameView: View get() = holder
 
+    /** The awake outline is shown. */
+    val outlineLit: Boolean get() = glow.background != null
+
     /** In front of the other detached window (the last touched one); behind it otherwise. */
     fun front(on: Boolean) { layer.translationZ = if (on) d else 0f }
 
     /** Docked: its card's outline, lit while the page is awake (the card's own is under the page, out of sight). */
     fun dockOutline(on: Boolean) {
         if (floating) return
-        holder.foreground = if (on) FadeOutline.Awake(d, accent, dp(3).toFloat(), corner()) else null
+        glow.background = if (on) FadeOutline.Awake(d, accent, dp(3).toFloat(), corner()) else null
     }
 
     // ── Touches ──────────────────────────────────────────────────────────────
