@@ -557,6 +557,23 @@ class ScreenshotTest {
         editCards("edit_cards_full.png")
     }
 
+    /** Web address dialog in the light theme (#97): the field's text dark, MG4Dash's keyboard with its larger letters. */
+    @Test @Config(qualifiers = "fr-w1920dp-h720dp-land-mdpi") fun webAddressLight() {
+        org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE).edit()
+            .putInt("theme_mode", 2).commit()
+        val act = Robolectric.buildActivity(MainActivity::class.java).setup().get()
+        repeat(3) { shadowOf(Looper.getMainLooper()).idleFor(200, TimeUnit.MILLISECONDS) }
+        val input = android.widget.EditText(act).apply { setText("http://homeassistant.local:8123"); setSingleLine() }
+        val box = android.widget.LinearLayout(act).apply { orientation = android.widget.LinearLayout.VERTICAL; setPadding(24, 8, 24, 0); addView(input) }
+        val dlg = android.app.AlertDialog.Builder(act).setTitle(R.string.wc_web_address).setView(box)
+            .setPositiveButton(android.R.string.ok, null).setNegativeButton(R.string.cancel, null).show()
+        app.mg4dash.ui.Dialogs.fix(dlg)
+        app.mg4dash.ui.CarKeyboard.attachInDialog(input, dlg, box)
+        repeat(3) { shadowOf(Looper.getMainLooper()).idleFor(200, TimeUnit.MILLISECONDS) }
+        org.junit.Assert.assertEquals(app.mg4dash.ui.Themes.color(act, R.color.text_title), input.currentTextColor)
+        save(dlg.window!!.decorView, "web_address_light.png")
+    }
+
     /** Web app card without an address yet (#97). */
     @Test @Config(qualifiers = "fr-w1920dp-h720dp-land-mdpi") fun webCardNoAddress() {
         org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE).edit()
