@@ -258,7 +258,7 @@ object CardsEditor {
         private fun doubleTapRow(map: Boolean) = LinearLayout(context).apply {
             orientation = LinearLayout.VERTICAL
             setPadding(dp(4), dp(12), dp(4), 0)
-            addView(TextView(context).apply { text = context.getString(R.string.wc_double_tap); setTextColor(sub); setTextSize(TypedValue.COMPLEX_UNIT_SP, 19f) })
+            addView(TextView(context).apply { text = context.getString(if (map) R.string.wc_double_tap_app else R.string.wc_double_tap); setTextColor(sub); setTextSize(TypedValue.COMPLEX_UNIT_SP, 19f) })
             val row = FlowRow(context, dp(8))
             listOf(false to R.string.wc_dt_full, true to R.string.wc_dt_float).forEach { (float, label) ->
                 val on = if (map) prefs.mapFloat == float else prefs.webFloat == float

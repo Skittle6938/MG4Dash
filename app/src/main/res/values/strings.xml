@@ -530,7 +530,7 @@
     <string name="weather_rain">Rain %1$d %%</string>
     <string name="st_energy_card_power">Live power in the energy card</string>
     <string name="st_energy_card_power_desc">Power bar, kW and average instead of the drive mode and KERS; the charge / V2L line shows when plugged in, and the Live power page leaves the bottom widget.</string>
-    <string name="wc_map">Map</string>
+    <string name="wc_map">App</string>
     <string name="wc_consumption">Consumption</string>
     <string name="wc_shortcuts">Shortcuts</string>
     <string name="wc_web">Web app</string>
@@ -549,7 +549,7 @@
     <string name="wc_keep_one_there">It is the only card of its place: add another one there first</string>
     <string name="wc_reset">Default</string>
     <string name="wc_reset_confirm">Put the home screen of this layout back as it was at first?</string>
-    <string name="wc_map_app">Map:</string>
+    <string name="wc_map_app">App:</string>
     <string name="wc_web_address">Web address</string>
     <string name="wc_web_apps">Web apps</string>
     <string name="wc_web_apps_hint">Touch an address to show it in the card · ✕ to delete it</string>
@@ -563,6 +563,7 @@
     <string name="wc_wake">Page awake:</string>
     <string name="wc_wake_s">%1$d s</string>
     <string name="wc_double_tap">Double tap on the page</string>
+    <string name="wc_double_tap_app">Double tap on the app</string>
     <string name="wc_dt_full">Full screen</string>
     <string name="wc_dt_float">Detached window</string>
     <string name="wc_web_set">to enter</string>
@@ -574,7 +575,7 @@
     <string name="wc_web_install_failed">MG4Dash Web could not be installed. Touch to try again.</string>
     <string name="wc_none_simple">The Simple layout has no cards to choose.</string>
     <string name="st_edit_cards">Widgets\' cards</string>
-    <string name="st_edit_cards_desc">Choose the cards each widget goes through, including a web app in the map widget. Shortcut: pinch the home screen with two fingers.</string>
+    <string name="st_edit_cards_desc">Choose the cards each widget goes through, such as the App card (the map or another app) and a web app. Shortcut: pinch the home screen with two fingers.</string>
     <string name="st_edit_cards_btn">Edit the cards</string>
     <string name="tu_cards_t">Choose and move the cards</string>
     <string name="tu_cards_1">Pinch the home screen with two fingers: each place shows the cards it can go through; a medium place can also show the climate or the media</string>
@@ -585,10 +586,10 @@
     <string name="st_clock_12">12 h (no AM / PM)</string>
     <string name="st_panel_fade">Fading (dashboard style)</string>
     <string name="st_panel_full">Full</string>
-    <string name="map_app_pick">App in the map card (test)</string>
+    <string name="map_app_pick">App in the App card</string>
     <string name="map_app_osm">OpenStreetMap map (default)</string>
-    <string name="map_app_unavailable">This firmware can\'t show another app in the map card</string>
-    <string name="map_app_failed">This app can\'t be shown in the map card: back to the map</string>
+    <string name="map_app_unavailable">This firmware can\'t show another app in the App card</string>
+    <string name="map_app_failed">This app can\'t be shown in the App card: back to the map</string>
     <string name="title_sound">SOUND</string>
     <string name="vh_sound">Sound  ›</string>
     <string name="snd_field">SOUND DISTRIBUTION</string>
@@ -681,7 +682,7 @@
     <string name="tu_map_t">Map</string>
     <string name="tu_map_1">Swipe left / right: next card of the widget (consumption, shortcuts…)</string>
     <string name="tu_map_3">Two fingers: move and zoom the map (one finger in full screen)</string>
-    <string name="tu_map_2">Pinch the home screen, then Map: show another app in the map card</string>
+    <string name="tu_map_2">Pinch the home screen, then App: another app instead of the map</string>
     <string name="tu_map_4">Web app: a double tap can detach it as a window (choice in the edit mode); long press and slide to move it, pull a corner or pinch it to resize it, double tap to put it back</string>
     <string name="tu_media_t">Music</string>
     <string name="tu_media_1">Swipe up / down: next source; left / right: previous / next track</string>
