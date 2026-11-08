@@ -23,14 +23,18 @@ import app.mg4dash.system.Prefs
  * permission), over home: docked, it sits exactly over a placeholder [dock] that takes its place in the card; detached,
  * it floats with its own place and size. Going from one to the other only moves the panel, never takes it off the
  * window: the page goes on, loaded (taken off and put back, MG4Dash Web was started again, ~10 s of black on the car).
- * Detached and at rest, its touches are taken here and the page sees none of them:
- * - a corner pulled at once resizes it, the opposite corner fixed and the ratio kept; the middle of an edge, its
- *   width or its height alone;
- * - a long press then a slide moves it; a long press let go without moving opens the page's menu;
- * - two fingers resize it too: slanted the ratio is kept, flat the width alone, upright the height alone;
+ * Detached and at rest it has no border (the page's corners as the cards'), and its touches are taken here, the page
+ * seeing none of them:
  * - a touch wakes it (outline lit, the page takes the touches) until left alone for the time of the edit mode;
- *   a double tap puts it back in its card (no buttons nor title bar over the page).
- * The handles are drawn on a thin frame around the page: the embedded page's layer covers whatever is drawn over it.
+ *   a double tap puts it back in its card (no buttons nor title bar over the page);
+ * - a long press opens the page's menu, whose "Move / resize" puts it in the move mode (#98).
+ * In the move mode, a frame with its handles shows around the page, with a hint and OK under it:
+ * - a corner pulled resizes it, the opposite corner fixed and the ratio kept; the middle of an edge, its
+ *   width or its height alone;
+ * - a slide elsewhere moves it; two fingers resize it too: slanted the ratio is kept, flat the width alone, upright
+ *   the height alone;
+ * - OK, or a touch outside it, ends the mode.
+ * The handles are drawn on that frame: the embedded page's layer covers whatever is drawn over it.
  * During a gesture only a dashed outline follows the finger: the window takes its place and size when it is let
  * go, the embedded page's virtual display and layer being redone once (each frame would be too heavy on the head
  * unit, and on the car the layer does not follow a view moving live, #98).
@@ -57,8 +61,8 @@ class FloatWindow(
     private fun dp(v: Int) = (v * d).toInt()
     private val content = activity.findViewById<ViewGroup>(android.R.id.content)
     private val accent = Themes.color(activity, R.color.accent_action)
-    /** Width of the frame around the page when detached, where the handles are. */
-    private val frame = dp(12)
+    /** Width of the frame around the page in the move mode, where the handles are; none at rest. */
+    private val frame get() = if (moving) dp(12) else 0
 
     /** Over home's cards, the size of the window; lets the touches it does not take go through. */
     private val layer = FrameLayout(activity).apply { clipChildren = false; clipToPadding = false }
@@ -81,14 +85,10 @@ class FloatWindow(
         private set
     var awake = false
         private set
-    /** The handles, shown while the window is touched at rest and a moment after (out of the way of the page). */
-    private var handlesShown = false
-    private val hideHandles = Runnable { handlesShown = false; chrome.invalidate() }
-    private fun showHandles(forMs: Long? = null) {
-        handler.removeCallbacks(hideHandles)
-        handlesShown = true; chrome.invalidate()
-        if (forMs != null) handler.postDelayed(hideHandles, forMs)
-    }
+    /** Move mode (#98): the frame, its handles and the hint with OK are shown, the touches move and resize it. */
+    var moving = false
+        private set
+    private var hint: View? = null
 
     private val handler = android.os.Handler(android.os.Looper.getMainLooper())
     private val sleep = Runnable { if (keepAwake()) setAwake(true) else setAwake(false) }
@@ -120,6 +120,7 @@ class FloatWindow(
     /** The panel leaves the layer (back to a card as before), the layer goes. */
     fun close() {
         handler.removeCallbacksAndMessages(null)
+        moving = false; hint = null
         content.viewTreeObserver.removeOnGlobalLayoutListener(follow)
         holder.removeView(panel)
         panel.setPadding(0, panel.paddingTop, panel.paddingRight, panel.paddingBottom)
@@ -130,13 +131,13 @@ class FloatWindow(
     /** Detached at its kept place (or a first one), or docked again over its placeholder. */
     fun setFloating(on: Boolean) {
         if (on == floating) return
+        if (!on) stopMoving()
         floating = on
         setAwake(false)
         look()
         if (on) {
             holder.visibility = View.VISIBLE
             place(saved() ?: initial())
-            showHandles(HANDLES_MS)
             Log.i(TAG, "detached at $rect")
         } else {
             followDock()
@@ -144,18 +145,73 @@ class FloatWindow(
         }
     }
 
-    /** Docked: no frame, flat, as a card; detached: a frame with its handles, a shadow over home. */
+    /** Docked: flat, as a card; detached: a shadow over home, and in the move mode a frame with its handles. */
     private fun look() {
         val f = if (floating) frame else 0
         (panel.layoutParams as FrameLayout.LayoutParams).apply { setMargins(f, f, f, f) }.also { panel.layoutParams = it }
         holder.elevation = if (floating) dp(16).toFloat() else 0f
-        holder.background = if (floating) android.graphics.drawable.GradientDrawable().apply {
+        holder.background = if (floating && moving) android.graphics.drawable.GradientDrawable().apply {
             cornerRadius = FadeOutline.RADIUS * d + frame; setColor(Themes.color(activity, R.color.bg_bottom))
         } else null
         if (!floating) panel.setPadding(dock.paddingLeft, panel.paddingTop, panel.paddingRight, panel.paddingBottom)
         else panel.setPadding(0, panel.paddingTop, panel.paddingRight, panel.paddingBottom)
-        chrome.visibility = if (floating) View.VISIBLE else View.GONE
+        chrome.visibility = if (floating && moving) View.VISIBLE else View.GONE
         holder.invalidateOutline()
+    }
+
+    /** Move mode, from the page's menu (#98): frame, handles, and the hint with OK under the window. */
+    fun startMoving() {
+        if (!floating || moving) return
+        moving = true
+        setAwake(false)
+        look()
+        val box = android.widget.LinearLayout(activity).apply {
+            orientation = android.widget.LinearLayout.HORIZONTAL; gravity = android.view.Gravity.CENTER_VERTICAL
+            setPadding(dp(24), dp(6), dp(6), dp(6))
+            background = android.graphics.drawable.GradientDrawable().apply { cornerRadius = dp(28).toFloat(); setColor(Themes.color(activity, R.color.bg_bottom)) }
+            elevation = dp(20).toFloat()
+            addView(android.widget.TextView(activity).apply {
+                text = activity.getString(R.string.wc_web_move_hint); setTextColor(Themes.color(activity, R.color.text_sub))
+                setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, 18f)
+            })
+            addView(android.widget.TextView(activity).apply {
+                text = activity.getString(android.R.string.ok); setTextColor(Themes.color(activity, R.color.text_title))
+                setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, 20f); typeface = android.graphics.Typeface.DEFAULT_BOLD
+                gravity = android.view.Gravity.CENTER; minWidth = dp(96); minHeight = dp(52)
+                setBackgroundResource(R.drawable.bg_button)
+                setOnClickListener { stopMoving() }
+            }, android.widget.LinearLayout.LayoutParams(-2, -2).apply { leftMargin = dp(18) })
+        }
+        layer.addView(box, FrameLayout.LayoutParams(-2, -2))
+        hint = box
+        placeHint()
+        Log.i(TAG, "move mode")
+    }
+
+    /** End of the move mode: back to the window without border. */
+    fun stopMoving() {
+        if (!moving) return
+        moving = false
+        hint?.let { layer.removeView(it) }; hint = null
+        hideGhost()
+        look()
+        Log.i(TAG, "move mode ended at $rect")
+    }
+
+    /** The hint under the window, or above it when there is no room, within the cards' area. */
+    private fun placeHint() {
+        val h = hint ?: return
+        h.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED)
+        val b = bounds(); val gap = dp(12)
+        val top = if (rect.bottom + gap + h.measuredHeight <= b.bottom) rect.bottom + gap else (rect.top - gap - h.measuredHeight).coerceAtLeast(b.top)
+        val left = (rect.centerX() - h.measuredWidth / 2).coerceIn(b.left, (b.right - h.measuredWidth).coerceAtLeast(b.left))
+        (h.layoutParams as FrameLayout.LayoutParams).apply { leftMargin = left; topMargin = top }.also { h.layoutParams = it }
+    }
+
+    private fun onHint(ev: MotionEvent): Boolean {
+        val h = hint ?: return false
+        val (x, y) = local(ev).let { it[0].toInt() to it[1].toInt() }
+        return x >= h.left && x < h.right && y >= h.top && y < h.bottom
     }
 
     private fun rectOf(v: View): Rect {
@@ -214,6 +270,7 @@ class FloatWindow(
         (holder.layoutParams as FrameLayout.LayoutParams).apply { width = r.width(); height = r.height(); leftMargin = r.left; topMargin = r.top }
             .also { holder.layoutParams = it }
         if (floating) prefs.webFloatRect = intArrayOf(r.left, r.top, r.width(), r.height())
+        if (moving) holder.post { placeHint() }
         // Resized, the embedded app follows by itself (EmbeddedApp: new size, new surface); moved only, its layer is redone here
         if (moved && !resized) holder.postDelayed({ onMoved() }, 300)
     }
@@ -251,11 +308,11 @@ class FloatWindow(
     private var span0X = 1f; private var span0Y = 1f; private var span0 = 1f
     private var tapAt = 0L
     private val wakeTapped = Runnable { setAwake(true) }
+    /** Long press at rest: the page's menu opens when it is let go (a slide after it does nothing). */
     private val lifted = Runnable {
         if (mode != Mode.PENDING) return@Runnable
         mode = Mode.LIFTED
         holder.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
-        showGhost(rect)
     }
 
     private fun local(ev: MotionEvent, i: Int = 0): FloatArray {
@@ -275,10 +332,17 @@ class FloatWindow(
                 val (x, y) = local(ev).let { it[0] to it[1] }
                 mode = Mode.NONE; through = false
                 if (!floating) return false
-                if (!rect.contains(x.toInt(), y.toInt())) return false
+                if (!rect.contains(x.toInt(), y.toInt())) {
+                    if (!moving || onHint(ev)) return false
+                    // Move mode: a touch outside the window ends it, and goes no further
+                    stopMoving(); mode = Mode.IGNORE; return true
+                }
                 if (awake) { setAwake(true); through = true; return false }
                 downX = x; downY = y; start.set(rect)
-                showHandles()
+                if (!moving) {
+                    mode = Mode.PENDING; handler.postDelayed(lifted, ViewConfiguration.getLongPressTimeout().toLong())
+                    return true
+                }
                 val c = dp(64); val e = dp(44)
                 val left = x - rect.left < c; val right = rect.right - x < c
                 val top = y - rect.top < c; val bottom = rect.bottom - y < c
@@ -286,14 +350,15 @@ class FloatWindow(
                     (left || right) && (top || bottom) -> { mode = Mode.RESIZE; hx = if (left) -1 else 1; hy = if (top) -1 else 1; showGhost(rect) }
                     x - rect.left < e || rect.right - x < e -> { mode = Mode.RESIZE; hx = if (x - rect.left < e) -1 else 1; hy = 0; showGhost(rect) }
                     y - rect.top < e || rect.bottom - y < e -> { mode = Mode.RESIZE; hx = 0; hy = if (y - rect.top < e) -1 else 1; showGhost(rect) }
-                    else -> { mode = Mode.PENDING; handler.postDelayed(lifted, ViewConfiguration.getLongPressTimeout().toLong()) }
+                    // Anywhere else in the move mode: a slide moves it, without a long press
+                    else -> mode = Mode.LIFTED
                 }
                 chrome.invalidate()
                 return true
             }
             MotionEvent.ACTION_POINTER_DOWN -> {
                 if (mode == Mode.NONE) return false
-                if (ev.pointerCount == 2 && mode in setOf(Mode.PENDING, Mode.LIFTED, Mode.RESIZE)) {
+                if (moving && ev.pointerCount == 2 && mode in setOf(Mode.LIFTED, Mode.RESIZE)) {
                     handler.removeCallbacks(lifted)
                     val a = local(ev, 0); val b = local(ev, 1)
                     span0X = Math.abs(a[0] - b[0]).coerceAtLeast(1f); span0Y = Math.abs(a[1] - b[1]).coerceAtLeast(1f)
@@ -311,7 +376,7 @@ class FloatWindow(
                 val slop = dp(16)
                 when (mode) {
                     Mode.PENDING -> if (Math.abs(dx) > slop || Math.abs(dy) > slop) { handler.removeCallbacks(lifted); mode = Mode.IGNORE; chrome.invalidate() }
-                    Mode.LIFTED -> if (Math.abs(dx) > slop || Math.abs(dy) > slop) mode = Mode.DRAG
+                    Mode.LIFTED -> if (Math.abs(dx) > slop || Math.abs(dy) > slop) mode = if (moving) Mode.DRAG else Mode.IGNORE
                     else -> {}
                 }
                 when (mode) {
@@ -335,12 +400,13 @@ class FloatWindow(
                 handler.removeCallbacks(lifted)
                 // A handle only touched, not pulled: a touch like anywhere else on the window
                 val still = local(ev).let { Math.abs(it[0] - downX) <= dp(16) && Math.abs(it[1] - downY) <= dp(16) }
-                val m = if (mode == Mode.RESIZE && still) { hideGhost(); Mode.PENDING } else mode
+                val m = if (mode == Mode.RESIZE && still) { hideGhost(); Mode.IGNORE } else mode
                 mode = Mode.NONE
-                if (m != Mode.NONE) showHandles(HANDLES_MS)
                 chrome.invalidate()
                 when (m) {
                     Mode.NONE -> return false
+                    // Move mode: a touch without a slide does nothing (OK or a touch outside ends it)
+                    Mode.LIFTED -> if (!moving) { hideGhost(); onMenu() }
                     Mode.PENDING -> {
                         // A double tap puts it back in its card; a single touch wakes it
                         if (ev.eventTime - tapAt < ViewConfiguration.getDoubleTapTimeout()) {
@@ -350,7 +416,6 @@ class FloatWindow(
                             handler.postDelayed(wakeTapped, ViewConfiguration.getDoubleTapTimeout().toLong())
                         }
                     }
-                    Mode.LIFTED -> { hideGhost(); onMenu() }
                     Mode.DRAG, Mode.RESIZE, Mode.PINCH -> { val r = Rect(ghostRect); hideGhost(); place(r) }
                     else -> hideGhost()
                 }
@@ -359,7 +424,6 @@ class FloatWindow(
             MotionEvent.ACTION_CANCEL -> {
                 handler.removeCallbacks(lifted)
                 val m = mode; mode = Mode.NONE; hideGhost(); chrome.invalidate()
-                if (m != Mode.NONE) showHandles(HANDLES_MS)
                 return m != Mode.NONE
             }
             else -> return mode != Mode.NONE
@@ -419,15 +483,15 @@ class FloatWindow(
 
     // ── Drawing ──────────────────────────────────────────────────────────────
 
-    /** Corner and edge handles (white, as the rest of the app), at rest only. */
+    /** Corner and edge handles (white, as the rest of the app), in the move mode only. */
     private inner class Chrome : View(activity) {
         private val handle = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.STROKE; strokeWidth = 5 * d; strokeCap = Paint.Cap.ROUND; color = 0xFFFFFFFF.toInt() }
         private val path = android.graphics.Path()
         private val arc = RectF()
 
         override fun onDraw(c: Canvas) {
-            if (awake || !handlesShown) return
-            handle.alpha = if (mode == Mode.NONE) 150 else 255
+            if (awake || !moving) return
+            handle.alpha = if (mode == Mode.NONE) 200 else 255
             val w = width.toFloat(); val h = height.toFloat(); val i = frame / 2f; val l = 30 * d; val e = 32 * d
             // Corners, rounded as the window's (its radius, taken in by half the frame)
             val r = (corner() - i).coerceAtLeast(1f); val t = (l - r).coerceAtLeast(6 * d)
@@ -465,7 +529,5 @@ class FloatWindow(
 
     companion object {
         private const val TAG = "FloatWeb"
-        /** How long the handles stay after the window was last touched. */
-        private const val HANDLES_MS = 2500L
     }
 }

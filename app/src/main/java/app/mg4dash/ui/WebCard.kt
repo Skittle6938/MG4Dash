@@ -207,9 +207,10 @@ class WebCard(private val activity: android.app.Activity) : FrameLayout(activity
 
     /**
      * Long press on the card (#98): a small menu with Back (the page's previous one) and the addresses
-     * entered in the edit mode, a touch on one showing it at once.
+     * entered in the edit mode, a touch on one showing it at once. [onMove]: the detached window's
+     * "Move / resize", under Back.
      */
-    fun menu() {
+    fun menu(onMove: (() -> Unit)? = null) {
         val d = resources.displayMetrics.density
         fun dp(v: Int) = (v * d).toInt()
         val accent = Themes.color(context, R.color.accent_action)
@@ -243,6 +244,7 @@ class WebCard(private val activity: android.app.Activity) : FrameLayout(activity
             list.addView(r, android.widget.LinearLayout.LayoutParams(-1, -2).apply { bottomMargin = dp(10) })
         }
         row("←", context.getString(R.string.wc_web_back), null, false) { back() }
+        if (onMove != null) row("✥", context.getString(R.string.wc_web_move), null, false) { onMove() }
         urls.forEach { url ->
             row(if (url == shown) "◉" else "○", name(url), url, url == shown) {
                 if (url == shown) return@row

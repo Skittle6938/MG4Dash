@@ -557,6 +557,26 @@ class ScreenshotTest {
         editCards("edit_cards_full.png")
     }
 
+    /** Detached web app window (#98): no border at rest; "Move / resize" shows its frame, handles and the hint with OK. */
+    @Test @Config(qualifiers = "fr-w1920dp-h720dp-land-mdpi") fun webWindowDetached() {
+        org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE).edit()
+            .putInt("theme_mode", 1).putInt("home_style", 2).putString("wc_map", "map,consumption,shortcuts,web").putInt("home_widget", 3)
+            .putString("web_url", "http://homeassistant.local:8123").putBoolean("web_float", true).putBoolean("web_floating", true)
+            .putString("web_float_rect", "640,140,880,470").commit()
+        val act = Robolectric.buildActivity(MainActivity::class.java).setup().get()
+        repeat(6) { shadowOf(Looper.getMainLooper()).idleFor(200, TimeUnit.MILLISECONDS) }
+        val fw = MainActivity::class.java.getDeclaredField("floatWeb").apply { isAccessible = true }.get(act) as app.mg4dash.ui.FloatWindow
+        org.junit.Assert.assertTrue("detached", fw.floating)
+        save(act.window.decorView, "web_window_rest.png")
+        fw.startMoving()
+        repeat(3) { shadowOf(Looper.getMainLooper()).idleFor(200, TimeUnit.MILLISECONDS) }
+        org.junit.Assert.assertTrue(fw.moving)
+        save(act.window.decorView, "web_window_moving.png")
+        fw.stopMoving()
+        repeat(2) { shadowOf(Looper.getMainLooper()).idleFor(200, TimeUnit.MILLISECONDS) }
+        org.junit.Assert.assertFalse(fw.moving)
+    }
+
     /** Web address dialog in the light theme (#97): the field's text dark, MG4Dash's keyboard with its larger letters. */
     @Test @Config(qualifiers = "fr-w1920dp-h720dp-land-mdpi") fun webAddressLight() {
         org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE).edit()
