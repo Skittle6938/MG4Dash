@@ -580,6 +580,16 @@
     <string name="tu_cards_t">Choisir et déplacer les cartes</string>
     <string name="tu_cards_1">Pincez l\'accueil avec deux doigts : chaque emplacement montre les cartes qu\'il peut faire défiler ; un emplacement moyen peut aussi montrer la climatisation ou le média</string>
     <string name="tu_cards_2">Touchez une carte pour l\'afficher ou la retirer ; prise ailleurs, elle change de place. Par défaut remet tout comme à l\'origine</string>
+    <string name="tu_float_t">Fenêtres détachées</string>
+    <string name="tu_float_1">La web app et la carte Application (la carte OpenStreetMap ou son appli) peuvent quitter leur widget : pincez l\'accueil, touchez leur emplacement, puis Double tap › Fenêtre détachée</string>
+    <string name="tu_float_2">Ensuite, un double tap dessus la détache en fenêtre au-dessus de l\'accueil ; un double tap sur la fenêtre la remet dans son widget</string>
+    <string name="tu_float_3">Au repos, la fenêtre prend vos gestes, pas la page : touchez-la une fois pour la réveiller (contour allumé), puis utilisez la page ou l\'appli</string>
+    <string name="tu_float_4">Appui long sur la fenêtre : son menu (Retour, Déplacer / redimensionner, ce qu\'elle affiche)</string>
+    <string name="tu_move_t">Déplacer et redimensionner une fenêtre</string>
+    <string name="tu_move_1">Appui long sur la fenêtre › Déplacer / redimensionner : un cadre avec ses poignées apparaît, et OK dessous</string>
+    <string name="tu_move_2">Glissez à l\'intérieur pour la déplacer ; tirez un coin pour la redimensionner sans la déformer, le milieu d\'un bord pour sa largeur ou sa hauteur seule</string>
+    <string name="tu_move_3">Ou deux doigts : en diagonale = toute la taille, côte à côte = la largeur, l\'un au-dessus de l\'autre = la hauteur</string>
+    <string name="tu_move_4">Seul OK termine le mode ; les bords se calent sur les cartes, et la place et la taille sont gardées pour la prochaine fois</string>
     <string name="st_panel_outline">Contour des panneaux de l\'accueil</string>
     <string name="st_clock">Horloge</string>
     <string name="st_clock_24">24 h</string>
@@ -683,7 +693,7 @@
     <string name="tu_map_1">Glisser à gauche / droite : carte suivante du widget (consommation, raccourcis…)</string>
     <string name="tu_map_3">Deux doigts : déplacer et zoomer la carte (un doigt en plein écran)</string>
     <string name="tu_map_2">Pincer l\'accueil, puis Application : une autre appli à la place de la carte</string>
-    <string name="tu_map_4">Web app : un double tap peut la détacher en fenêtre (choix dans le mode édition) ; appui long puis glisser pour la déplacer, tirer un coin ou pincer pour la redimensionner, double tap pour la remettre</string>
+    <string name="tu_map_4">Double tap : plein écran et retour, ou fenêtre détachée (voir plus loin)</string>
     <string name="tu_media_t">Musique</string>
     <string name="tu_media_1">Glisser haut / bas : source suivante ; gauche / droite : morceau précédent / suivant</string>
     <string name="tu_media_2">Toucher le nom de la source : menu des sources ; toucher l\'image : ouvrir l\'appli</string>

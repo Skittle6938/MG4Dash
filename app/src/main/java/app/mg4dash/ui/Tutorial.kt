@@ -31,8 +31,13 @@ object Tutorial {
     /** [swipes]: swipe gestures shown as animated arrows on the card ('H' left / right, 'V' up / down). */
     /** [homePanel]: the settings' "Home screen" panel reproduced in the bubble (its two buttons). */
     /** [bottomTitle]: title when the bar is the bottom one. */
+    /** [wide]: a wider bubble, for long lines (the detached windows' steps). */
     private class Step(val target: Int?, val title: Int, val lines: List<Int>, val images: List<Pair<Int, Int>> = emptyList(),
-                       val swipes: String = "", val homePanel: Boolean = false, val bottomTitle: Int? = null)
+                       val swipes: String = "", val homePanel: Boolean = false, val bottomTitle: Int? = null,
+                       val wide: Boolean = false) {
+        /** Width of the bubble, in dp: wider for the layout miniatures and the long lines. */
+        val width get() = if (images.isEmpty() && !wide) 760 else 1000
+    }
 
     /**
      * Home whose widgets can change place (#97): the view a step points at, where it is now (the place of
@@ -62,6 +67,10 @@ object Tutorial {
         Step(R.id.secondaryCard, R.string.tu_widget_t, listOf(R.string.tu_widget_1, R.string.tu_widget_2), swipes = "H"),
         // Edit mode of the cards (#97): pinch the home screen
         Step(null, R.string.tu_cards_t, listOf(R.string.tu_cards_1, R.string.tu_cards_2)),
+        // Web app and App card detached as a window over home (#98): how to detach it, wake it, put it back...
+        Step(null, R.string.tu_float_t, listOf(R.string.tu_float_1, R.string.tu_float_2, R.string.tu_float_3, R.string.tu_float_4), wide = true),
+        // ... then move and resize it (long press › Move / resize)
+        Step(null, R.string.tu_move_t, listOf(R.string.tu_move_1, R.string.tu_move_2, R.string.tu_move_3, R.string.tu_move_4), wide = true),
         Step(null, R.string.tu_end_t, listOf(R.string.tu_end_1)),
     )
 
@@ -156,7 +165,7 @@ object Tutorial {
             val step = STEPS[index]
             bubble.removeAllViews()
             // Fixed width bubble (text), wider for the layout miniatures
-            bubble.layoutParams = (bubble.layoutParams as LayoutParams).apply { width = dp(if (step.images.isEmpty()) 760 else 1000) }
+            bubble.layoutParams = (bubble.layoutParams as LayoutParams).apply { width = dp(step.width) }
             bubble.orientation = LinearLayout.VERTICAL
             bubble.setPadding(dp(28), dp(24), dp(28), dp(20))
             bubble.background = GradientDrawable().apply {
@@ -224,7 +233,7 @@ object Tutorial {
          */
         private fun placeBubble() {
             val margin = dp(16); val gap = dp(64)
-            val base = dp(if (STEPS[index].images.isEmpty()) 760 else 1000)
+            val base = dp(STEPS[index].width)
             val maxH = height - 2 * margin
             fun heightAt(w: Int): Int {
                 bubble.measure(View.MeasureSpec.makeMeasureSpec(w, View.MeasureSpec.EXACTLY), View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED))

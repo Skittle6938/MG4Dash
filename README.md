@@ -9,6 +9,9 @@ Languages: English (default), French, German, Spanish, Italian, Dutch and Turkis
 
 Current version: **1.7.1** ([releases](https://github.com/Skittle6938/MG4Dash/releases)). Betas (1.7.2-beta…) can be installed from the app, see [Updates](#updates).
 
+> [!TIP]
+> **After a stable update, run the gesture tour again** (Settings › System › *Show the gesture tour*). Each release adds gestures that are not always easy to guess, such as detaching the web app or the App card as a window over home (double tap), moving and resizing it (long press › *Move / resize*), or pinching the home screen to choose the cards. The tour shows them in a few steps.
+
 > Screenshots are rendered on a PC with simulated data and the **default settings** unless stated otherwise; the map excerpt is a fixed view of Paris (OpenStreetMap).
 
 **Contents**: [Home screen](#home-screen) · [Media player](#media-player) · [Energy card](#energy-card) · [Bottom-right widget](#bottom-right-widget) · [App card](#app-card) · [Other layouts](#other-home-layouts) · [Themes](#themes-and-day--night) · [Pages](#pages) · [Settings](#settings) · [Updates](#updates) · [Compatibility](#compatibility-beta) · [Install](#install-on-the-car) · [Replace / restore the SAIC home](#home-screen-replace-and-go-back) · [Gestures](#gestures)
@@ -331,7 +334,7 @@ The gesture tour shows the same two buttons.
 
 ## Gestures
 
-A short tour of the main gestures opens after a first install (*Skip* closes it for good); see it again in Settings › System › *Show the gesture tour*.
+A short tour of the main gestures opens after a first install (*Skip* closes it for good); see it again in Settings › System › *Show the gesture tour*. It is worth running again after each stable update, to discover what is new. Two of its steps explain the detached windows: how to turn them on in the edit mode, detach a window and put it back with a double tap, wake it with a touch, open its menu with a long press, then move and resize it (a corner, an edge or two fingers, then OK).
 
 - "Settings" in the dock or the vertical bar: tap for the launcher settings, long press for the car settings
 - Long press "Home" in the dock: list of installed apps

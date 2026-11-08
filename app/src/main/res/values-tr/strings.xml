@@ -580,6 +580,16 @@
     <string name="tu_cards_t">Kartları seçin ve taşıyın</string>
     <string name="tu_cards_1">Ana ekranı iki parmakla kıstırın: her yer kendi kartlarını gösterir; orta boy bir yer klima veya medyayı da gösterebilir</string>
     <string name="tu_cards_2">Göstermek veya kaldırmak için bir karta dokunun; başka yerden alınırsa yer değiştirir. Varsayılan her şeyi ilk hâline döndürür</string>
+    <string name="tu_float_t">Ayrık pencereler</string>
+    <string name="tu_float_1">Web uygulaması ve Uygulama kartı (harita veya uygulaması) yerinden çıkabilir: ana ekranı sıkıştırın, yerlerine dokunun, ardından Çift dokunma › Ayrık pencere</string>
+    <string name="tu_float_2">Sonra çift dokunma onu ana ekranın üzerinde pencere olarak ayırır; pencereye çift dokunma onu kartına geri koyar</string>
+    <string name="tu_float_3">Beklemede hareketlerinizi sayfa değil pencere alır: uyandırmak için bir kez dokunun (kenar yanar), sonra sayfayı veya uygulamayı kullanın</string>
+    <string name="tu_float_4">Pencereye uzun basın: menüsü (Geri, Taşı / yeniden boyutlandır, gösterdiği içerik)</string>
+    <string name="tu_move_t">Pencereyi taşıyın ve boyutlandırın</string>
+    <string name="tu_move_1">Pencereye uzun basın › Taşı / yeniden boyutlandır: tutamaçlı bir çerçeve ve altında Tamam görünür</string>
+    <string name="tu_move_2">Taşımak için içinde kaydırın; oranı koruyarak boyutlandırmak için bir köşeyi, yalnızca genişlik veya yükseklik için bir kenarın ortasını çekin</string>
+    <string name="tu_move_3">Ya da iki parmak: çapraz = tüm boyut, yan yana = genişlik, üst üste = yükseklik</string>
+    <string name="tu_move_4">Modu yalnızca Tamam bitirir; kenarlar kartlara oturur, yer ve boyut bir dahaki sefere saklanır</string>
     <string name="st_panel_outline">Ana ekran panel çerçevesi</string>
     <string name="st_clock">Saat</string>
     <string name="st_clock_24">24 sa</string>
@@ -683,7 +693,7 @@
     <string name="tu_map_1">Sola / sağa kaydır: widget\'ın sonraki kartı (tüketim, kısayollar…)</string>
     <string name="tu_map_3">İki parmak: haritayı taşı ve yakınlaştır (tam ekranda tek parmak)</string>
     <string name="tu_map_2">Ana ekranı iki parmakla sıkıştırın, sonra Uygulama: harita yerine başka bir uygulama</string>
-    <string name="tu_map_4">Web uygulaması: çift dokunma onu pencere olarak ayırabilir (düzenleme modunda seçim); taşımak için uzun basıp kaydırın, boyutlandırmak için bir köşeyi çekin veya sıkıştırın, geri koymak için çift dokunun</string>
+    <string name="tu_map_4">Çift dokunma: tam ekran ve geri, ya da ayrık pencere (ileride bakın)</string>
     <string name="tu_media_t">Müzik</string>
     <string name="tu_media_1">Yukarı / aşağı kaydır: sonraki kaynak; sola / sağa: önceki / sonraki parça</string>
     <string name="tu_media_2">Kaynak adına dokun: kaynak menüsü; resme dokun: uygulamayı aç</string>

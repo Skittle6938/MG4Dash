@@ -580,6 +580,16 @@
     <string name="tu_cards_t">Elegir y mover las tarjetas</string>
     <string name="tu_cards_1">Pellizca la pantalla de inicio con dos dedos: cada lugar muestra sus tarjetas; un lugar mediano también puede mostrar la climatización o el multimedia</string>
     <string name="tu_cards_2">Toca una tarjeta para mostrarla o quitarla; tomada de otro sitio, cambia de lugar. Por defecto lo deja todo como al principio</string>
+    <string name="tu_float_t">Ventanas separadas</string>
+    <string name="tu_float_1">La web app y la tarjeta Aplicación (el mapa o su app) pueden salir de su sitio: pellizca la pantalla de inicio, toca su lugar y luego Doble toque › Ventana separada</string>
+    <string name="tu_float_2">Después, un doble toque la separa como ventana sobre el inicio; un doble toque en la ventana la devuelve a su tarjeta</string>
+    <string name="tu_float_3">En reposo, la ventana recibe tus gestos, no la página: tócala una vez para despertarla (contorno encendido) y usa la página o la app</string>
+    <string name="tu_float_4">Pulsación larga en la ventana: su menú (Atrás, Mover / cambiar tamaño, lo que muestra)</string>
+    <string name="tu_move_t">Mover y redimensionar una ventana</string>
+    <string name="tu_move_1">Pulsación larga en la ventana › Mover / cambiar tamaño: aparece un marco con tiradores y Aceptar debajo</string>
+    <string name="tu_move_2">Desliza dentro para moverla; tira de una esquina para cambiar su tamaño sin deformarla, del centro de un borde para solo el ancho o el alto</string>
+    <string name="tu_move_3">O dos dedos: en diagonal = todo el tamaño, uno al lado del otro = el ancho, uno encima del otro = el alto</string>
+    <string name="tu_move_4">Solo Aceptar termina el modo; los bordes se ajustan a las tarjetas, y el lugar y el tamaño se guardan para la próxima vez</string>
     <string name="st_panel_outline">Contorno de los paneles de inicio</string>
     <string name="st_clock">Reloj</string>
     <string name="st_clock_24">24 h</string>
@@ -683,7 +693,7 @@
     <string name="tu_map_1">Deslizar a izquierda / derecha: siguiente tarjeta del widget (consumo, accesos directos…)</string>
     <string name="tu_map_3">Dos dedos: mover y ampliar el mapa (un dedo a pantalla completa)</string>
     <string name="tu_map_2">Pellizca la pantalla de inicio y luego Aplicación: otra app en lugar del mapa</string>
-    <string name="tu_map_4">Web app: un doble toque puede separarla en una ventana (opción en el modo de edición); pulsación larga y deslizar para moverla, tirar de una esquina o pellizcar para cambiar su tamaño, doble toque para devolverla</string>
+    <string name="tu_map_4">Doble toque: pantalla completa y vuelta, o una ventana separada (ver más adelante)</string>
     <string name="tu_media_t">Música</string>
     <string name="tu_media_1">Desliza arriba / abajo: siguiente fuente; izquierda / derecha: pista anterior / siguiente</string>
     <string name="tu_media_2">Toca el nombre de la fuente: menú de fuentes; toca la imagen: abrir la app</string>

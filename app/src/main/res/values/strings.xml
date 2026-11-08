@@ -580,6 +580,16 @@
     <string name="tu_cards_t">Choose and move the cards</string>
     <string name="tu_cards_1">Pinch the home screen with two fingers: each place shows the cards it can go through; a medium place can also show the climate or the media</string>
     <string name="tu_cards_2">Touch a card to show or remove it; taken from elsewhere, it changes place. Default puts everything back as at first</string>
+    <string name="tu_float_t">Detached windows</string>
+    <string name="tu_float_1">The web app and the App card (the map or its app) can leave their place: pinch the home screen, touch their place, then Double tap › Detached window</string>
+    <string name="tu_float_2">Then a double tap on it detaches it as a window over home; a double tap on the window puts it back in its card</string>
+    <string name="tu_float_3">At rest the window takes your gestures, not the page: touch it once to wake it (lit outline), then use the page or the app</string>
+    <string name="tu_float_4">Long press the window: its menu (Back, Move / resize, what it shows)</string>
+    <string name="tu_move_t">Move and resize a window</string>
+    <string name="tu_move_1">Long press the window › Move / resize: a frame with handles shows, with OK under it</string>
+    <string name="tu_move_2">Slide inside to move it; pull a corner to resize it with its ratio kept, the middle of an edge for its width or its height alone</string>
+    <string name="tu_move_3">Or two fingers: diagonal = the whole size, side by side = the width, one above the other = the height</string>
+    <string name="tu_move_4">Only OK ends the mode; the edges settle on the cards, and the place and size are kept for next time</string>
     <string name="st_panel_outline">Home panel outline</string>
     <string name="st_clock">Clock</string>
     <string name="st_clock_24">24 h</string>
@@ -683,7 +693,7 @@
     <string name="tu_map_1">Swipe left / right: next card of the widget (consumption, shortcuts…)</string>
     <string name="tu_map_3">Two fingers: move and zoom the map (one finger in full screen)</string>
     <string name="tu_map_2">Pinch the home screen, then App: another app instead of the map</string>
-    <string name="tu_map_4">Web app: a double tap can detach it as a window (choice in the edit mode); long press and slide to move it, pull a corner or pinch it to resize it, double tap to put it back</string>
+    <string name="tu_map_4">Double tap: full screen and back, or a detached window (see further on)</string>
     <string name="tu_media_t">Music</string>
     <string name="tu_media_1">Swipe up / down: next source; left / right: previous / next track</string>
     <string name="tu_media_2">Tap the source name: source menu; tap the picture: open the source\'s app</string>
