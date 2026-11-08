@@ -556,7 +556,7 @@
     <string name="wc_web_add">Añadir una dirección</string>
     <string name="wc_web_back">Atrás</string>
     <string name="wc_web_move">Mover / cambiar tamaño</string>
-    <string name="wc_web_move_hint">Desliza para mover, tira de una esquina o un borde para cambiar el tamaño</string>
+    <string name="wc_web_move_hint">Desliza para mover, tira de una esquina o un borde para cambiar el tamaño, luego OK</string>
     <string name="wc_web_count">%1$d direcciones</string>
     <string name="wc_wake">Página activa:</string>
     <string name="wc_wake_s">%1$d s</string>

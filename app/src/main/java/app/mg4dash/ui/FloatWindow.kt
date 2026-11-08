@@ -33,7 +33,7 @@ import app.mg4dash.system.Prefs
  *   width or its height alone;
  * - a slide elsewhere moves it; two fingers resize it too: slanted the ratio is kept, flat the width alone, upright
  *   the height alone;
- * - OK, or a touch outside it, ends the mode.
+ * - only OK ends the mode; a touch just past an edge takes that edge, farther it does nothing.
  * The handles are drawn on that frame: the embedded page's layer covers whatever is drawn over it.
  * During a gesture only a dashed outline follows the finger: the window takes its place and size when it is let
  * go, the embedded page's virtual display and layer being redone once (each frame would be too heavy on the head
@@ -346,8 +346,10 @@ class FloatWindow(
                 if (moving && onHint(ev)) return false
                 if (!rect.contains(x.toInt(), y.toInt())) {
                     if (!moving) return false
-                    // Move mode: a touch outside the window ends it, and goes no further
-                    stopMoving(); mode = Mode.IGNORE; return true
+                    // Move mode: only OK ends it (#98). A touch just past an edge still takes that edge or corner,
+                    // for a precise resize; farther it does nothing, and the cards under it see none of it
+                    val near = Rect(rect).apply { inset(-dp(GRAB_DP), -dp(GRAB_DP)) }
+                    if (!near.contains(x.toInt(), y.toInt())) { mode = Mode.IGNORE; return true }
                 }
                 if (awake) { setAwake(true); through = true; return false }
                 downX = x; downY = y; start.set(rect)
@@ -417,7 +419,7 @@ class FloatWindow(
                 chrome.invalidate()
                 when (m) {
                     Mode.NONE -> return false
-                    // Move mode: a touch without a slide does nothing (OK or a touch outside ends it)
+                    // Move mode: a touch without a slide does nothing (only OK ends it)
                     Mode.LIFTED -> if (!moving) { hideGhost(); onMenu() }
                     Mode.PENDING -> {
                         // A double tap puts it back in its card; a single touch wakes it
@@ -558,6 +560,9 @@ class FloatWindow(
             val left = (r.centerX() - w / 2).coerceIn(0, (width - w).coerceAtLeast(0))
             return android.graphics.Point(left, top)
         }
+
+        /** In the move mode, a touch this far past the window's edge still takes that edge. */
+        private const val GRAB_DP = 32
 
         /** A window's edge this close to a card's edge goes on it. */
         private const val SETTLE_DP = 12
