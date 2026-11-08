@@ -1726,7 +1726,8 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         val now = android.os.SystemClock.elapsedRealtime()
         val held = consShown[src]
         if (held != null && held.second != null && now - held.first < CONS_REFRESH_MS) return held.second
-        return consNow(src).also { consShown[src] = now to it }
+        // Within ±0.5 kWh/100 of the one shown, the shown one stays, and the range computed from it (#29)
+        return app.mg4dash.energy.ConsHold.held(held?.second, consNow(src)).also { consShown[src] = now to it }
     }
 
     /**
