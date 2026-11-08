@@ -18,6 +18,12 @@ jobs:
           java-version: "17"
       - name: Build and test
         run: chmod +x gradlew && ./gradlew --no-daemon -q testEmulatorDebugUnitTest :rescue:testDebugUnitTest assembleEmulatorDebug
+      - name: Failed tests
+        if: failure()
+        run: |
+          for f in app/build/test-results/*/TEST-*.xml rescue/build/test-results/*/TEST-*.xml; do
+            [ -f "$f" ] && grep -q "<failure" "$f" && { echo "== $f"; grep -A12 "<failure" "$f" | head -60; }
+          done || true
       - name: Upload unit test report
         if: failure()
         uses: actions/upload-artifact@v4
