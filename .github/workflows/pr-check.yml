@@ -1,6 +1,8 @@
-# Contrôle des PR : compilation et tests de la version émulateur (aussi lançable à la main).
+# Compilation et tests unitaires de la version émulateur : à chaque push sur main, sur les PR, et à la main.
 name: PR check
 on:
+  push:
+    branches: [main]
   pull_request:
   workflow_dispatch:
 permissions:
@@ -16,3 +18,10 @@ jobs:
           java-version: "17"
       - name: Build and test
         run: chmod +x gradlew && ./gradlew --no-daemon -q testEmulatorDebugUnitTest assembleEmulatorDebug
+      - name: Upload unit test report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: unit-test-report
+          path: app/build/reports/tests/testEmulatorDebugUnitTest
+          if-no-files-found: ignore
