@@ -165,7 +165,8 @@ class ConsumptionCard(context: Context) : LinearLayout(context) {
             spoken += "$v ${context.getString(label)}"
         }
         add("- - -", chart.averageValue, R.string.cc_avg)
-        lastKm(context)?.let { add("●", it, R.string.cc_last_km) }
+        // No last km on 12 months (#44): one point per trip, the last km would belong to none of them
+        if (prefs.consumptionPeriod.coerceIn(0, 2) != 2) lastKm(context)?.let { add("●", it, R.string.cc_last_km) }
         figures.contentDescription = spoken.joinToString(", ")
         return out
     }
