@@ -556,7 +556,7 @@
     <string name="wc_web_add">Aggiungi un indirizzo</string>
     <string name="wc_web_back">Indietro</string>
     <string name="wc_web_move">Sposta / ridimensiona</string>
-    <string name="wc_web_move_hint">Trascina per spostare, tira un angolo o un bordo per ridimensionare</string>
+    <string name="wc_web_move_hint">Trascina per spostare, tira un angolo o un bordo per ridimensionare, poi OK</string>
     <string name="wc_web_count">%1$d indirizzi</string>
     <string name="wc_wake">Pagina attiva:</string>
     <string name="wc_wake_s">%1$d s</string>

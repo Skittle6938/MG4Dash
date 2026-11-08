@@ -572,6 +572,12 @@ class ScreenshotTest {
         repeat(3) { shadowOf(Looper.getMainLooper()).idleFor(200, TimeUnit.MILLISECONDS) }
         org.junit.Assert.assertTrue(fw.moving)
         save(act.window.decorView, "web_window_moving.png")
+        // A touch far outside the window no longer ends the mode: only OK does (#98)
+        val t0 = android.os.SystemClock.uptimeMillis()
+        act.dispatchTouchEvent(android.view.MotionEvent.obtain(t0, t0, android.view.MotionEvent.ACTION_DOWN, 300f, 80f, 0))
+        act.dispatchTouchEvent(android.view.MotionEvent.obtain(t0, t0 + 80, android.view.MotionEvent.ACTION_UP, 300f, 80f, 0))
+        repeat(2) { shadowOf(Looper.getMainLooper()).idleFor(200, TimeUnit.MILLISECONDS) }
+        org.junit.Assert.assertTrue("still moving after a touch outside", fw.moving)
         fw.stopMoving()
         repeat(2) { shadowOf(Looper.getMainLooper()).idleFor(200, TimeUnit.MILLISECONDS) }
         org.junit.Assert.assertFalse(fw.moving)
