@@ -137,7 +137,7 @@ class CarKeyboard(
     private fun LinearLayout.key(label: String, weight: Float, sp: Float = 26f, accent: Boolean = false, onClick: () -> Unit): TextView =
         TextView(context).apply {
             text = label; gravity = Gravity.CENTER
-            setTextSize(TypedValue.COMPLEX_UNIT_SP, sp)
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, sp * TEXT_SCALE)
             typeface = Typeface.create("sans-serif-medium", Typeface.NORMAL)
             setTextColor(Themes.color(context, if (accent) R.color.accent_action else R.color.text_value))
             setOnClickListener { onClick() }
@@ -153,6 +153,8 @@ class CarKeyboard(
         private const val KEY_DP = 66
         private const val GAP_DP = 8
         private const val ROW_KEYS = 10
+        /** Labels 22 % larger than first drawn, in the same keys (#97). */
+        private const val TEXT_SCALE = 1.22f
         /** Height of the letters layer: four rows and the padding. */
         const val HEIGHT_DP = 4 * (KEY_DP + GAP_DP) + 16
 
@@ -214,6 +216,9 @@ class CarKeyboard(
          */
         fun attachInDialog(field: EditText, dialog: Dialog, box: LinearLayout, onDone: (() -> Unit)? = null) {
             val context = field.context
+            // The field's text follows MG4Dash's theme: the app's own text colour stayed white on the light dialog (#97)
+            field.setTextColor(Themes.color(context, R.color.text_title))
+            field.setHintTextColor(Themes.color(context, R.color.text_sub))
             if (!Prefs(context).ownKeyboard) return
             field.showSoftInputOnFocus = false
             var keyboard: CarKeyboard? = null
