@@ -11,7 +11,7 @@ Current version: **1.7.1** ([releases](https://github.com/Skittle6938/MG4Dash/re
 
 > Screenshots are rendered on a PC with simulated data and the **default settings** unless stated otherwise; the map excerpt is a fixed view of Paris (OpenStreetMap).
 
-**Contents**: [Home screen](#home-screen) · [Media player](#media-player) · [Energy card](#energy-card) · [Bottom-right widget](#bottom-right-widget) · [Map card](#map-card) · [Other layouts](#other-home-layouts) · [Themes](#themes-and-day--night) · [Pages](#pages) · [Settings](#settings) · [Updates](#updates) · [Compatibility](#compatibility-beta) · [Install](#install-on-the-car) · [Replace / restore the SAIC home](#home-screen-replace-and-go-back) · [Gestures](#gestures)
+**Contents**: [Home screen](#home-screen) · [Media player](#media-player) · [Energy card](#energy-card) · [Bottom-right widget](#bottom-right-widget) · [App card](#app-card) · [Other layouts](#other-home-layouts) · [Themes](#themes-and-day--night) · [Pages](#pages) · [Settings](#settings) · [Updates](#updates) · [Compatibility](#compatibility-beta) · [Install](#install-on-the-car) · [Replace / restore the SAIC home](#home-screen-replace-and-go-back) · [Gestures](#gestures)
 
 ## Home screen
 
@@ -26,7 +26,7 @@ The default home screen (*Full* layout, vertical bar on the left). From left to 
   - Long press the temperature to calibrate the displayed set point (−5° to +5°, display only).
   - Long press the power button for [Keep climate on](#keep-climate-on).
 - **Energy card**: battery % to the tenth, range, average consumption, drive mode, KERS gauge (tap a segment for the regeneration level, long press for one-pedal driving) and the Charge / V2L button. See [Energy card](#energy-card).
-- **Map card**: OpenStreetMap map following the car, with speed, heading and altitude. See [Map card](#map-card).
+- **App card**: OpenStreetMap map following the car, with speed, heading and altitude. See [App card](#app-card).
 - **Weather card**: Open-Meteo forecast for the car's position, hourly or daily (swipe). When a refresh fails (no data connection) the last forecast stays for up to 3 hours.
 - **Connection icons**: on the weather card, Bluetooth, Wi-Fi, hotspot, mobile network bars and USB, as on the stock banner (the bars need a readable T-box, so not on old firmwares). Touch them for the details and links to the Bluetooth and Wi-Fi settings. On by default, in Settings › Home; with the Simple layout or with the option off, the Wi-Fi badge stays on the bar.
 - **Media card**: see [Media player](#media-player).
@@ -91,7 +91,7 @@ Swipe or tap it to switch between its pages:
 |---|---|
 | ![Live power](docs/screenshots/home_widget_power.png?v=25) | ![Phone favourites](docs/screenshots/home_widget_phone.png?v=25) |
 
-## Map card
+## App card
 
 - **Map**: follows the car, north up or heading up (tap the recenter button again), default zoom 14 to 18 and colours (auto, light, dark) in Settings › Home. Only the recenter button is shown: two fingers zoom, a double tap goes full screen and back. Without data connection the map stays as long as the area is in the tile cache, then the card switches to consumption (can be turned off).
 - **Consumption**: a swipe switches map → consumption → shortcuts. A tap anywhere on the card goes to the next period: since the last charge, current trip or last 12 months. The current trip has one point per km (one every 2 minutes when stopped); since the last charge, the points of its trips are placed by km in the same way, so the stops between trips take no width; the last 12 months have one point per trip. The curves come from the energy measured by MG4Dash and are smoothed over 5 points. The dashed line is the average: energy out of the battery minus regeneration, over the distance. Its value is on the chart's title line, in white with a grey dash, beside the consumption of the last km, in white with a grey dot (useful on a long climb); on the current trip, its duration shows in the top right corner. **Regen** shows the energy recovered and the part of the distance it powered: recovered energy ÷ energy out of the battery × distance. With 30.7 kWh out, 12.1 kWh recovered and 149 km, that is 39 % of the energy, so about 59 km of the 149 km. These km are already part of the distance, they don't add to the range.
@@ -124,11 +124,11 @@ In a place with the map, the edit mode also sets the app shown instead of the ma
 |---|---|
 | ![Consumption](docs/screenshots/home_map_layout_consumption.png?v=25) | ![Shortcuts](docs/screenshots/home_map_layout_shortcuts.png?v=25) |
 
-**Another app in the map card**: pinch the home screen, then touch *Map* to show another installed app inside the card instead of the map, for example an EV route planner such as ABRP or a navigation app such as Waze. It runs live and rests and wakes like the web app: at rest, swipe it for the next card or touch it twice to enlarge it (it stays full screen through day / night changes until you press Home or touch it twice again); touch it once to use it. Pick "OpenStreetMap map" in the same list to go back. *The apps below are drawn for the example.*
+**Another app in the App card**: pinch the home screen, then touch *Map* to show another installed app inside the card instead of the map, for example an EV route planner such as ABRP or a navigation app such as Waze. It runs live and rests and wakes like the web app: at rest, swipe it for the next card or touch it twice to enlarge it (it stays full screen through day / night changes until you press Home or touch it twice again); touch it once to use it. Pick "OpenStreetMap map" in the same list to go back. *The apps below are drawn for the example.*
 
 | | |
 |---|---|
-| ![EV route planner in the map card](docs/screenshots/home_map_app_planner.png?v=25) | ![Navigation app in the map card](docs/screenshots/home_map_app_guidance.png?v=25) |
+| ![EV route planner in the App card](docs/screenshots/home_map_app_planner.png?v=25) | ![Navigation app in the App card](docs/screenshots/home_map_app_guidance.png?v=25) |
 
 **Turn-by-turn**: with [DiAuto MG4+](https://github.com/Skittle6938/DiAuto-MG4) (or another Headunit Revived-based Android Auto app that broadcasts `com.andrerinas.headunitrevived.NAVIGATION_UPDATE`), the next manoeuvre is shown over the map: arrow, distance, street, time and distance left, arrival time. The stock Android Auto app does not receive this information.
 
@@ -342,14 +342,14 @@ A short tour of the main gestures opens after a first install (*Skip* closes it 
 - Long press the set temperature: temperature calibration; long press fan minus: lowest fan speed; long press A/C: intermittent A/C
 - Long press play / pause: Sound page
 - Steering wheel * button: 360 camera on / off
-- Swipe the map card: map → consumption → shortcuts → web app (the cards on); move and zoom the map with two fingers (one finger in full screen); double tap the map for full screen and back; over the web app or an app at rest, the same, and a touch wakes it; long press the web app: Back and its list of addresses; with the detached window on, double tap the web app to detach it or put it back, long press and slide to move it, pull a corner or a side or pinch it to resize it
+- Swipe the App card: map → consumption → shortcuts → web app (the cards on); move and zoom the map with two fingers (one finger in full screen); double tap the map for full screen and back; over the web app or an app at rest, the same, and a touch wakes it; long press the web app: Back and its list of addresses; with the detached window on, double tap the web app to detach it or put it back, long press and slide to move it, pull a corner or a side or pinch it to resize it
 - Pinch the home screen with two fingers: choose the cards of each widget (see [Choosing the cards](#choosing-the-cards))
 - Long press the connection icons: choose which ones show, including USB-A and USB-C, which are off by default
 - Two fingers sliding down from the top of the screen: open Android Auto when a phone is connected
 - Swipe the weather card: hourly ↔ daily forecast
 - Tap a segment of the KERS gauge: regeneration level; long press: one-pedal driving
 - Long press a shortcut: edit it
-- Long press the map: show another app in the map card
+- Long press the map: show another app in the App card
 - Fan minus at the lowest speed: climate off
 - Map "recenter" button: resume following the car; press again to switch between north up and car heading up (green)
 

@@ -530,7 +530,7 @@
     <string name="weather_rain">Regen %1$d %%</string>
     <string name="st_energy_card_power">Live vermogen in de energiekaart</string>
     <string name="st_energy_card_power_desc">Vermogensbalk, kW en gemiddelde in plaats van rijmodus en KERS; de laad- / V2L-regel verschijnt met kabel aangesloten en de pagina Vermogen verlaat de onderste widget.</string>
-    <string name="wc_map">Kaart</string>
+    <string name="wc_map">App</string>
     <string name="wc_consumption">Verbruik</string>
     <string name="wc_shortcuts">Snelkoppelingen</string>
     <string name="wc_web">Web-app</string>
@@ -549,7 +549,7 @@
     <string name="wc_keep_one_there">Het is de enige kaart op haar plek: voeg daar eerst een andere toe</string>
     <string name="wc_reset">Standaard</string>
     <string name="wc_reset_confirm">Het startscherm van deze indeling terugzetten zoals in het begin?</string>
-    <string name="wc_map_app">Kaart:</string>
+    <string name="wc_map_app">App:</string>
     <string name="wc_web_address">Webadres</string>
     <string name="wc_web_apps">Web-apps</string>
     <string name="wc_web_apps_hint">Tik op een adres om het in de kaart te tonen · ✕ om het te wissen</string>
@@ -563,6 +563,7 @@
     <string name="wc_wake">Pagina actief:</string>
     <string name="wc_wake_s">%1$d s</string>
     <string name="wc_double_tap">Dubbeltik op de pagina</string>
+    <string name="wc_double_tap_app">Dubbeltik op de app</string>
     <string name="wc_dt_full">Volledig scherm</string>
     <string name="wc_dt_float">Los venster</string>
     <string name="wc_web_set">invullen</string>
@@ -574,7 +575,7 @@
     <string name="wc_web_install_failed">MG4Dash Web kon niet worden geïnstalleerd. Tik om opnieuw te proberen.</string>
     <string name="wc_none_simple">De indeling Eenvoudig heeft geen kaarten om te kiezen.</string>
     <string name="st_edit_cards">Kaarten van de widgets</string>
-    <string name="st_edit_cards_desc">De kaarten kiezen die elke widget toont, ook een web-app in de kaartwidget. Snelkoppeling: het startscherm met twee vingers samenknijpen.</string>
+    <string name="st_edit_cards_desc">De kaarten kiezen die elke widget toont, zoals de app-kaart (de kaart of een andere app) en een web-app. Snelkoppeling: het startscherm met twee vingers samenknijpen.</string>
     <string name="st_edit_cards_btn">Kaarten bewerken</string>
     <string name="tu_cards_t">Kaarten kiezen en verplaatsen</string>
     <string name="tu_cards_1">Knijp het startscherm met twee vingers samen: elke plek toont haar kaarten; een middelgrote plek kan ook klimaat of media tonen</string>
@@ -585,10 +586,10 @@
     <string name="st_clock_12">12 u (zonder AM / PM)</string>
     <string name="st_panel_fade">Vervagend (dashboardstijl)</string>
     <string name="st_panel_full">Volledig</string>
-    <string name="map_app_pick">App in de kaartkaart (test)</string>
+    <string name="map_app_pick">App in de app-kaart</string>
     <string name="map_app_osm">OpenStreetMap-kaart (standaard)</string>
-    <string name="map_app_unavailable">Deze firmware kan geen andere app in de kaartkaart tonen</string>
-    <string name="map_app_failed">Deze app kan niet in de kaartkaart worden getoond: terug naar de kaart</string>
+    <string name="map_app_unavailable">Deze firmware kan geen andere app in de app-kaart tonen</string>
+    <string name="map_app_failed">Deze app kan niet in de app-kaart worden getoond: terug naar de kaart</string>
     <string name="title_sound">GELUID</string>
     <string name="vh_sound">Geluid  ›</string>
     <string name="snd_field">GELUIDSVERDELING</string>
@@ -681,7 +682,7 @@
     <string name="tu_map_t">Kaart</string>
     <string name="tu_map_1">Naar links / rechts vegen: volgende kaart van de widget (verbruik, snelkoppelingen…)</string>
     <string name="tu_map_3">Twee vingers: kaart verplaatsen en zoomen (één vinger op volledig scherm)</string>
-    <string name="tu_map_2">Knijp in het startscherm, dan Kaart: een andere app in de kaartkaart</string>
+    <string name="tu_map_2">Knijp in het startscherm, dan App: een andere app in plaats van de kaart</string>
     <string name="tu_map_4">Web-app: een dubbeltik kan hem losmaken als venster (keuze in de bewerkmodus); lang drukken en schuiven om hem te verplaatsen, aan een hoek trekken of knijpen om het formaat te wijzigen, dubbeltik om hem terug te zetten</string>
     <string name="tu_media_t">Muziek</string>
     <string name="tu_media_1">Veeg omhoog / omlaag: volgende bron; links / rechts: vorig / volgend nummer</string>

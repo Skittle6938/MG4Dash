@@ -530,7 +530,7 @@
     <string name="weather_rain">Regen %1$d %%</string>
     <string name="st_energy_card_power">Live-Leistung in der Energiekarte</string>
     <string name="st_energy_card_power_desc">Leistungsbalken, kW und Durchschnitt statt Fahrmodus und KERS; die Lade- / V2L-Zeile erscheint bei eingestecktem Kabel, die Leistungsseite verlässt das untere Widget.</string>
-    <string name="wc_map">Karte</string>
+    <string name="wc_map">App</string>
     <string name="wc_consumption">Verbrauch</string>
     <string name="wc_shortcuts">Verknüpfungen</string>
     <string name="wc_web">Web-App</string>
@@ -549,7 +549,7 @@
     <string name="wc_keep_one_there">Es ist die einzige Karte an ihrem Platz: dort zuerst eine andere hinzufügen</string>
     <string name="wc_reset">Standard</string>
     <string name="wc_reset_confirm">Den Startbildschirm dieses Layouts wieder wie anfangs einrichten?</string>
-    <string name="wc_map_app">Karte:</string>
+    <string name="wc_map_app">App:</string>
     <string name="wc_web_address">Webadresse</string>
     <string name="wc_web_apps">Web-Apps</string>
     <string name="wc_web_apps_hint">Adresse antippen, um sie in der Karte zu zeigen · ✕ zum Löschen</string>
@@ -563,6 +563,7 @@
     <string name="wc_wake">Seite wach:</string>
     <string name="wc_wake_s">%1$d s</string>
     <string name="wc_double_tap">Doppeltippen auf die Seite</string>
+    <string name="wc_double_tap_app">Doppeltippen auf die App</string>
     <string name="wc_dt_full">Vollbild</string>
     <string name="wc_dt_float">Losgelöstes Fenster</string>
     <string name="wc_web_set">eingeben</string>
@@ -574,7 +575,7 @@
     <string name="wc_web_install_failed">MG4Dash Web konnte nicht installiert werden. Zum erneuten Versuch antippen.</string>
     <string name="wc_none_simple">Das Layout Einfach hat keine Karten zur Auswahl.</string>
     <string name="st_edit_cards">Karten der Widgets</string>
-    <string name="st_edit_cards_desc">Die Karten wählen, die jedes Widget zeigt, auch eine Web-App im Karten-Widget. Abkürzung: Startbildschirm mit zwei Fingern zusammenziehen.</string>
+    <string name="st_edit_cards_desc">Die Karten wÃ¤hlen, die jedes Widget zeigt, etwa die App-Karte (die Karte oder eine andere App) und eine Web-App. AbkÃ¼rzung: Startbildschirm mit zwei Fingern zusammenziehen.</string>
     <string name="st_edit_cards_btn">Karten bearbeiten</string>
     <string name="tu_cards_t">Karten wählen und verschieben</string>
     <string name="tu_cards_1">Startbildschirm mit zwei Fingern zusammenziehen: Jeder Platz zeigt seine Karten; ein mittlerer Platz kann auch Klima oder Medien zeigen</string>
@@ -585,10 +586,10 @@
     <string name="st_clock_12">12 h (ohne AM / PM)</string>
     <string name="st_panel_fade">Ausgeblendet (Kombiinstrument-Stil)</string>
     <string name="st_panel_full">Vollständig</string>
-    <string name="map_app_pick">App im Kartenfeld (Test)</string>
+    <string name="map_app_pick">App in der App-Karte</string>
     <string name="map_app_osm">OpenStreetMap-Karte (Standard)</string>
-    <string name="map_app_unavailable">Diese Firmware kann keine andere App im Kartenfeld anzeigen</string>
-    <string name="map_app_failed">Diese App kann nicht in der Kartenkarte angezeigt werden: zurück zur Karte</string>
+    <string name="map_app_unavailable">Diese Firmware kann keine andere App in der App-Karte anzeigen</string>
+    <string name="map_app_failed">Diese App kann nicht in der App-Karte angezeigt werden: zurÃ¼ck zur Karte</string>
     <string name="title_sound">KLANG</string>
     <string name="vh_sound">Klang  ›</string>
     <string name="snd_field">KLANGVERTEILUNG</string>
@@ -681,7 +682,7 @@
     <string name="tu_map_t">Karte</string>
     <string name="tu_map_1">Nach links / rechts wischen: nächste Karte des Widgets (Verbrauch, Verknüpfungen…)</string>
     <string name="tu_map_3">Zwei Finger: Karte bewegen und zoomen (im Vollbild ein Finger)</string>
-    <string name="tu_map_2">Startbildschirm zusammenziehen, dann Karte: andere App in der Kartenkarte</string>
+    <string name="tu_map_2">Startbildschirm zusammenziehen, dann App: eine andere App statt der Karte</string>
     <string name="tu_map_4">Web-App: Ein Doppeltippen kann sie als Fenster lösen (Wahl im Bearbeitungsmodus); lang drücken und ziehen zum Verschieben, an einer Ecke ziehen oder zusammenziehen zum Ändern der Größe, Doppeltippen zum Zurücklegen</string>
     <string name="tu_media_t">Musik</string>
     <string name="tu_media_1">Nach oben / unten wischen: nächste Quelle; links / rechts: vorheriger / nächster Titel</string>
