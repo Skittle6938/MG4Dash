@@ -98,12 +98,31 @@ class Prefs(context: Context) {
         set(v) = sp.edit().putBoolean("web_floating", v).apply()
     /** Its place and size (left, top, width, height in px), kept when it goes back to its card; null = not set yet. */
     var webFloatRect: IntArray?
-        get() = sp.getString("web_float_rect", null)?.split(",")?.mapNotNull { it.toIntOrNull() }?.takeIf { it.size == 4 && it[2] > 0 && it[3] > 0 }?.toIntArray()
+        get() = rect("web_float_rect")
         set(v) = sp.edit().putString("web_float_rect", v?.joinToString(",")).apply()
+    /** The same for the map card and the app shown in it (#98): double tap = a window detached over home. */
+    var mapFloat: Boolean
+        get() = sp.getBoolean("map_float", false)
+        set(v) = sp.edit().putBoolean("map_float", v).apply()
+    var mapFloating: Boolean
+        get() = sp.getBoolean("map_floating", false)
+        set(v) = sp.edit().putBoolean("map_floating", v).apply()
+    var mapFloatRect: IntArray?
+        get() = rect("map_float_rect")
+        set(v) = sp.edit().putString("map_float_rect", v?.joinToString(",")).apply()
+    private fun rect(key: String) =
+        sp.getString(key, null)?.split(",")?.mapNotNull { it.toIntOrNull() }?.takeIf { it.size == 4 && it[2] > 0 && it[3] > 0 }?.toIntArray()
     /** App shown in the map widget instead of the map (#41, trial); null = OSM map. */
     var mapApp: String?
         get() = sp.getString("map_app", null)
-        set(v) = sp.edit().putString("map_app", v).apply()
+        set(v) {
+            sp.edit().putString("map_app", v).apply()
+            if (v != null) mapAppsRecent = (listOf(v) + mapAppsRecent.filter { it != v }).take(3)
+        }
+    /** The last 3 apps chosen for the map card, newest first (#98): its long press menu offers them. */
+    var mapAppsRecent: List<String>
+        get() = (sp.getString("map_apps_recent", null) ?: mapApp ?: "").split('\n').filter { it.isNotBlank() }
+        set(v) = sp.edit().putString("map_apps_recent", v.joinToString("\n")).apply()
     /** New capacity entered by hand for the health calculation (#77); 0 = the model's default value. */
     var batteryNewKwh: Float
         get() = sp.getFloat("battery_new_kwh", 0f)

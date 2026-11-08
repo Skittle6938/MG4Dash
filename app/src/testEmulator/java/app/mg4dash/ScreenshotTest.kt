@@ -583,6 +583,41 @@ class ScreenshotTest {
         org.junit.Assert.assertFalse(fw.moving)
     }
 
+    /** Map card detached (#98), as the web app: at rest, in the move mode, both windows at once, and both menus. */
+    @Test @Config(qualifiers = "fr-w1920dp-h720dp-land-mdpi") fun mapWindowDetached() {
+        org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE).edit()
+            .putInt("theme_mode", 1).putInt("home_style", 2).putString("wc_map", "map,consumption,shortcuts,web").putInt("home_widget", 3)
+            .putString("web_url", "http://homeassistant.local:8123").putBoolean("web_float", true).putBoolean("web_floating", false)
+            .putString("web_float_rect", "1100,300,800,408")
+            .putBoolean("map_float", true).putBoolean("map_floating", true).putString("map_float_rect", "96,297,594,411").commit()
+        val act = Robolectric.buildActivity(MainActivity::class.java).setup().get()
+        repeat(6) { shadowOf(Looper.getMainLooper()).idleFor(200, TimeUnit.MILLISECONDS) }
+        fun field(name: String) = MainActivity::class.java.getDeclaredField(name).apply { isAccessible = true }.get(act)
+        val map = field("floatMap") as app.mg4dash.ui.FloatWindow
+        org.junit.Assert.assertTrue("map detached", map.floating)
+        save(act.window.decorView, "map_window_rest.png")
+        map.startMoving()
+        repeat(3) { shadowOf(Looper.getMainLooper()).idleFor(200, TimeUnit.MILLISECONDS) }
+        save(act.window.decorView, "map_window_moving.png")
+        map.stopMoving()
+        // The web app detached too: both windows over home
+        MainActivity::class.java.getDeclaredMethod("detachWeb").apply { isAccessible = true }.invoke(act)
+        repeat(4) { shadowOf(Looper.getMainLooper()).idleFor(200, TimeUnit.MILLISECONDS) }
+        val web = field("floatWeb") as app.mg4dash.ui.FloatWindow
+        org.junit.Assert.assertTrue("both detached", web.floating && map.floating)
+        save(act.window.decorView, "map_web_windows.png")
+        // The map card's menu, with Move / resize
+        org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE).edit()
+            .putString("map_apps_recent", "com.waze/.FreeMapAppActivity").commit()
+        MainActivity::class.java.getDeclaredMethod("mapMenu", Function0::class.java).apply { isAccessible = true }.invoke(act, { } as () -> Unit)
+        repeat(2) { shadowOf(Looper.getMainLooper()).idleFor(200, TimeUnit.MILLISECONDS) }
+        save(org.robolectric.shadows.ShadowDialog.getLatestDialog().window!!.decorView, "map_menu.png")
+        org.robolectric.shadows.ShadowDialog.getLatestDialog().dismiss()
+        (field("webCard") as app.mg4dash.ui.WebCard).menu(onMove = {})
+        repeat(2) { shadowOf(Looper.getMainLooper()).idleFor(200, TimeUnit.MILLISECONDS) }
+        save(org.robolectric.shadows.ShadowDialog.getLatestDialog().window!!.decorView, "web_menu.png")
+    }
+
     /** Window almost as tall as the screen (#98): the hint in its middle, and a touch on OK ends the move mode. */
     @Test @Config(qualifiers = "fr-w1920dp-h720dp-land-mdpi") fun webWindowTallOk() {
         org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE).edit()

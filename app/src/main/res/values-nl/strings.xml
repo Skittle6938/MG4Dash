@@ -557,6 +557,8 @@
     <string name="wc_web_back">Terug</string>
     <string name="wc_web_move">Verplaatsen / formaat wijzigen</string>
     <string name="wc_web_move_hint">Sleep om te verplaatsen, trek aan een hoek of rand om het formaat te wijzigen, daarna OK</string>
+    <string name="wc_other_app">Andere app…</string>
+    <string name="wc_other_address">Ander adres…</string>
     <string name="wc_web_count">%1$d adressen</string>
     <string name="wc_wake">Pagina actief:</string>
     <string name="wc_wake_s">%1$d s</string>

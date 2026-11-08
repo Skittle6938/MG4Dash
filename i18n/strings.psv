@@ -551,6 +551,8 @@ wc_map_app|Map:|Carte :|Karte:|Mapa:|Mappa:|Kaart:|Harita:
 wc_web_address|Web address|Adresse web|Webadresse|Dirección web|Indirizzo web|Webadres|Web adresi
 wc_web_move|Move / resize|Déplacer / redimensionner|Verschieben / Größe ändern|Mover / cambiar tamaño|Sposta / ridimensiona|Verplaatsen / formaat wijzigen|Taşı / yeniden boyutlandır
 wc_web_move_hint|Slide to move, pull a corner or an edge to resize, then OK|Glissez pour déplacer, tirez un coin ou un bord pour redimensionner, puis OK|Zum Verschieben ziehen, zum Ändern der Größe an einer Ecke oder Kante ziehen, dann OK|Desliza para mover, tira de una esquina o un borde para cambiar el tamaño, luego OK|Trascina per spostare, tira un angolo o un bordo per ridimensionare, poi OK|Sleep om te verplaatsen, trek aan een hoek of rand om het formaat te wijzigen, daarna OK|Taşımak için kaydırın, yeniden boyutlandırmak için bir köşeyi veya kenarı çekin, sonra OK
+wc_other_app|Other app…|Autre application…|Andere App…|Otra aplicación…|Altra app…|Andere app…|Başka uygulama…
+wc_other_address|Other address…|Autre adresse…|Andere Adresse…|Otra dirección…|Altro indirizzo…|Ander adres…|Başka adres…
 wc_double_tap|Double tap on the page|Double tap sur la page|Doppeltippen auf die Seite|Doble toque en la página|Doppio tocco sulla pagina|Dubbeltik op de pagina|Sayfaya çift dokunma
 wc_dt_full|Full screen|Plein écran fixe|Vollbild|Pantalla completa|Schermo intero|Volledig scherm|Tam ekran
 wc_dt_float|Detached window|Fenêtre détachée|Losgelöstes Fenster|Ventana separada|Finestra staccata|Los venster|Ayrık pencere

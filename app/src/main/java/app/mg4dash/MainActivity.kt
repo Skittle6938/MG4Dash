@@ -123,7 +123,8 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         wireCards()
         applySlots()
         // Web app detached over home before: detached again once the cards are laid out
-        if (prefs.webFloat && prefs.webFloating && HomeSlots.load(prefs, slotLayout, unavailable()).slotOf(Card.WEB) != null) detachWhenLaidOut(0)
+        if (prefs.webFloat && prefs.webFloating && HomeSlots.load(prefs, slotLayout, unavailable()).slotOf(Card.WEB) != null) detachWhenLaidOut(0) { detachWeb() }
+        if (prefs.mapFloat && prefs.mapFloating && HomeSlots.load(prefs, slotLayout, unavailable()).slotOf(Card.MAP) != null) detachWhenLaidOut(0) { detachMap() }
         observe()
         warmUpStockLauncherIfNeeded()
         // Map (or map app) in full screen before a rebuild (day / night theme…):
@@ -327,10 +328,11 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         val config = HomeSlots.load(prefs, slotLayout, out)
         HomeSlots.save(prefs, config)
         hostWeb()
+        hostMap()
         frames.values.forEach { f ->
             f.fill = config.fill(f.slot.id)
             // The web app detached over home: its place goes on with its other cards
-            f.cards = config.cards(f.slot.id).filter { it !in out && !(it == Card.WEB && webDetached) }
+            f.cards = config.cards(f.slot.id).filter { it !in out && !(it == Card.WEB && webDetached) && !(it == Card.MAP && mapDetached) }
             f.instead = null
         }
         val want = HashMap<View, SlotFrame>()
@@ -342,7 +344,7 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
             }
         }
         // An app or a page embedded in a card that changes place goes with its old frame: started again in the new one
-        if (b.mapCard.parent !== want[b.mapCard]?.box) dropMapApp()
+        if (floatMap == null && b.mapCard.parent !== want[b.mapCard]?.box) dropMapApp()
         panels[Card.WEB]?.let { if (floatWeb == null && it.parent !== want[it]?.box) webCard?.reset() }
         (panels.values + climatePanel + mediaPanel).forEach { v ->
             val target = want[v]?.box
@@ -361,7 +363,7 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         applyFog()
         frames.values.forEach { showFrame(it) }
         // Cards left out: nothing of theirs runs
-        Card.entries.filter { frameOf(it) == null && !(it == Card.WEB && webDetached) }.forEach { cardShown(it, false) }
+        Card.entries.filter { frameOf(it) == null && !(it == Card.WEB && webDetached) && !(it == Card.MAP && mapDetached) }.forEach { cardShown(it, false) }
     }
 
     /** Shows [f]'s card (or the climate, the media), and runs what the cards shown or hidden need. */
@@ -471,14 +473,14 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
     private val longPressed = Runnable {
         val f = pressFrame ?: return@Runnable
         pressFrame = null
-        if (f.shown != Card.WEB || app.mg4dash.ui.CardsEditor.isOpen(this)) return@Runnable
+        if (f.shown != Card.WEB && f.shown != Card.MAP || app.mg4dash.ui.CardsEditor.isOpen(this)) return@Runnable
         pressTaken = true
         // At rest no tap must follow; awake, the page lets go of the touch it had
         tapFrame = null; handler.removeCallbacks(wakeTapped); restFrame = null
         val now = android.os.SystemClock.uptimeMillis()
         android.view.MotionEvent.obtain(now, now, android.view.MotionEvent.ACTION_CANCEL, pressX, pressY, 0).also { super.dispatchTouchEvent(it); it.recycle() }
-        app.mg4dash.system.Log.i("Rest", "web app menu")
-        webCard?.menu()
+        app.mg4dash.system.Log.i("Rest", "${f.shown} menu")
+        if (f.shown == Card.WEB) webCard?.menu() else mapMenu(null)
     }
 
     /** True while a long press opened the menu, up to the end of its gesture. */
@@ -487,7 +489,7 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
             android.view.MotionEvent.ACTION_DOWN -> {
                 pressTaken = false
                 handler.removeCallbacks(longPressed)
-                pressFrame = frames.values.firstOrNull { it.shown == Card.WEB && inBox(it, ev) }
+                pressFrame = frames.values.firstOrNull { (it.shown == Card.WEB || it.shown == Card.MAP) && inBox(it, ev) }
                 pressX = ev.rawX; pressY = ev.rawY
                 if (pressFrame != null) handler.postDelayed(longPressed, android.view.ViewConfiguration.getLongPressTimeout().toLong())
             }
@@ -527,6 +529,7 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
                         tapFrame = null; handler.removeCallbacks(wakeTapped)
                         // Web app: detached over home instead, if chosen in the edit mode
                         if (f.shown == Card.WEB && floatWeb != null) detachWeb()
+                        else if (f.shown == Card.MAP && floatMap != null) detachMap()
                         else setMapFullscreen(hiddenForMap == null, web = f.shown == Card.WEB)
                     } else {
                         tapFrame = f; tapAt = ev.eventTime
@@ -1042,7 +1045,7 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         b.mapCenter.setOnClickListener { mapCard.recenter(LocationRepo.location.value); tintMapCenter() }
         tintMapCenter()
         // Double tap: full screen and back (#98), as over a web page or an app; no more zoom or full screen buttons
-        mapCard.onDoubleTap = { setMapFullscreen(hiddenForMap == null) }
+        mapCard.onDoubleTap = { if (floatMap != null) { if (mapDetached) attachMap() else detachMap() } else setMapFullscreen(hiddenForMap == null) }
         applyMapButtons()
     }
 
@@ -1150,7 +1153,7 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
     private fun setMapFullscreen(on: Boolean, web: Boolean = false) {
         if (simpleMode || on == (hiddenForMap != null)) return
         // The web page (#98), otherwise the map (or its app)
-        val from: View = if (web) panels[Card.WEB] ?: return else b.mapCard
+        val from: View = if (web) panels[Card.WEB] ?: return else panels[Card.MAP] ?: b.mapCard
         if (on && !isShown(if (web) Card.WEB else Card.MAP)) return
         if (on) {
             // Walk up from the card to the column row, hiding everything around it
@@ -1247,7 +1250,8 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
             w.reset()
             floatWeb = app.mg4dash.ui.FloatWindow(this, panel, webHole, bounds = { cardsArea() }, onAttach = { attachWeb() },
                 onMenu = { w.menu(onMove = { floatWeb?.startMoving() }) }, onMoved = { w.moved() }, keepAwake = { w.typing },
-                cards = { frames.values.map { it.box } + listOfNotNull(dockView()) }).also { it.open() }
+                cards = { frames.values.map { it.box } + listOfNotNull(dockView(), floatMap?.takeIf { it.floating }?.frameView) },
+                onTouched = { floatMap?.front(false); floatWeb?.front(true); webInFront = true }).also { it.open() }
             panels[Card.WEB] = webHole
         } else if (!want && floatWeb != null) {
             w.reset()
@@ -1258,8 +1262,8 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         }
     }
 
-    private fun detachWhenLaidOut(n: Int) {
-        columnsRow.postDelayed({ if (columnsRow.width > 0 && columnsRow.height > 0) detachWeb() else if (n < 20) detachWhenLaidOut(n + 1) }, if (n == 0) 0L else 250L)
+    private fun detachWhenLaidOut(n: Int, detach: () -> Unit) {
+        columnsRow.postDelayed({ if (columnsRow.width > 0 && columnsRow.height > 0) detach() else if (n < 20) detachWhenLaidOut(n + 1, detach) }, if (n == 0) 0L else 250L)
     }
 
     /** Double tap on the web app: it leaves its card for a window over home; its place shows its other cards meanwhile. */
@@ -1282,6 +1286,94 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         fw.setFloating(false)
         HomeSlots.load(prefs, slotLayout, unavailable()).slotOf(Card.WEB)?.let { HomeSlots.setCurrent(prefs, slotLayout, it, Card.WEB) }
         applySlots()
+    }
+
+    // ── Map card detached over home (#98), exactly as the web app ───────────
+
+    /** Its placeholder in a card while the map card lives over home ("Detached window" chosen for it). */
+    private val mapHole by lazy { android.widget.FrameLayout(this) }
+    private var floatMap: app.mg4dash.ui.FloatWindow? = null
+    private val mapDetached get() = floatMap?.floating == true
+    /** The web app's window was the last touched of the two (it is in front). */
+    private var webInFront = true
+
+    /** The map card (the map or the app shown in it) where the edit mode's choice wants it, as [hostWeb]. */
+    private fun hostMap() {
+        val want = prefs.mapFloat && !simpleMode
+        if (want && floatMap == null) {
+            dropMapApp()
+            floatMap = app.mg4dash.ui.FloatWindow(this, b.mapCard, mapHole, bounds = { cardsArea() }, onAttach = { attachMap() },
+                onMenu = { mapMenu { floatMap?.startMoving() } }, onMoved = { mapAppView?.let { app.mg4dash.ui.EmbeddedApp.moved(it) } },
+                keepAwake = { false },
+                cards = { frames.values.map { it.box } + listOfNotNull(dockView(), floatWeb?.takeIf { it.floating }?.frameView) },
+                savedRect = { prefs.mapFloatRect }, keepRect = { prefs.mapFloatRect = it },
+                onTouched = { floatWeb?.front(false); floatMap?.front(true); webInFront = false }).also { it.open() }
+            panels[Card.MAP] = mapHole
+        } else if (!want && floatMap != null) {
+            dropMapApp()
+            floatMap?.close(); floatMap = null
+            prefs.mapFloating = false
+            (mapHole.parent as? android.view.ViewGroup)?.removeView(mapHole)
+            panels[Card.MAP] = b.mapCard
+        }
+    }
+
+    /** Double tap on the map card: a window over home, as the web app; its place shows its other cards meanwhile. */
+    private fun detachMap() {
+        val fw = floatMap ?: return
+        if (fw.floating || CardsEditor.isOpen(this)) return
+        setMapFullscreen(false)
+        setAwake(null)
+        prefs.mapFloating = true
+        fw.setFloating(true)
+        applySlots()
+        mapCard.oneFingerPan = true
+        cardShown(Card.MAP, true)
+    }
+
+    /** Back in its card; its window's place is kept. */
+    private fun attachMap() {
+        val fw = floatMap ?: return
+        if (!fw.floating) return
+        prefs.mapFloating = false
+        fw.setFloating(false)
+        fw.front(false)
+        mapCard.oneFingerPan = false
+        HomeSlots.load(prefs, slotLayout, unavailable()).slotOf(Card.MAP)?.let { HomeSlots.setCurrent(prefs, slotLayout, it, Card.MAP) }
+        applySlots()
+    }
+
+    /**
+     * Long press on the map card (#98), as on the web app: Back (to the app shown), Move / resize when detached
+     * ([onMove]), then what it shows: the OpenStreetMap map or one of the last 3 apps chosen, the one shown ticked
+     * (touched again: it starts again), and Other app…, the edit mode's app picker.
+     */
+    private fun mapMenu(onMove: (() -> Unit)?) {
+        val cn = prefs.mapApp?.let { android.content.ComponentName.unflattenFromString(it) }
+        fun changed() { if (mapDetached) applyMapApp(true) else refreshMap() }
+        fun use(target: android.content.ComponentName?) {
+            app.mg4dash.system.Log.i("MapApp", "menu: ${target?.packageName ?: "OpenStreetMap"}")
+            prefs.mapApp = target?.flattenToString(); changed()
+        }
+        val rows = mutableListOf<app.mg4dash.ui.CardMenu.Row>()
+        val view = mapAppView
+        if (cn != null && view != null) rows += app.mg4dash.ui.CardMenu.Row("←", getString(R.string.wc_web_back), null, false) {
+            app.mg4dash.ui.EmbeddedApp.back(view)
+        }
+        if (onMove != null) rows += app.mg4dash.ui.CardMenu.Row("✥", getString(R.string.wc_web_move), null, false) { onMove() }
+        rows += app.mg4dash.ui.CardMenu.Row(if (cn == null) "◉" else "○", getString(R.string.map_app_osm), null, cn == null) {
+            if (cn == null) mapCard.recenter(LocationRepo.location.value) else use(null)
+        }
+        prefs.mapAppsRecent.mapNotNull { android.content.ComponentName.unflattenFromString(it) }.filter { mapAppInstalled(it) }.forEach { c ->
+            val on = c == cn
+            rows += app.mg4dash.ui.CardMenu.Row(if (on) "◉" else "○", app.mg4dash.shortcuts.Shortcuts.appLabel(this, c), null, on) {
+                if (on) { app.mg4dash.system.Log.i("MapApp", "menu: ${c.packageName} again"); rebuildMapApp() } else use(c)
+            }
+        }
+        rows += app.mg4dash.ui.CardMenu.Row("＋", getString(R.string.wc_other_app), null, false) {
+            app.mg4dash.shortcuts.Shortcuts.pickApp(this, getString(R.string.map_app_pick), getString(R.string.map_app_osm)) { picked -> use(picked) }
+        }
+        app.mg4dash.ui.CardMenu.show(this, rows)
     }
 
     /** App embedded in the map widget (#41, trial) and its component. */
@@ -1323,6 +1415,7 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         if (CardsEditor.isOpen(this)) return
         setMapFullscreen(false)
         attachWeb()
+        attachMap()
         val mapApp = CardsEditor.MapApp(
             name = { prefs.mapApp?.let { android.content.ComponentName.unflattenFromString(it) }?.let { app.mg4dash.shortcuts.Shortcuts.appLabel(this, it) } ?: getString(R.string.map_app_osm) },
             pick = { done -> app.mg4dash.shortcuts.Shortcuts.pickApp(this, getString(R.string.map_app_pick), getString(R.string.map_app_osm)) { cn ->
@@ -1339,8 +1432,13 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
     }
 
     override fun dispatchTouchEvent(ev: android.view.MotionEvent): Boolean {
-        // The web app's window over home: at rest its gestures, awake straight to its page
-        floatWeb?.let { if (!app.mg4dash.ui.CardsEditor.isOpen(this)) { if (it.onTouch(ev)) return true; if (it.through) return super.dispatchTouchEvent(ev) } }
+        // The windows over home (web app, map): at rest their gestures, awake straight to their page; the front one first
+        if (!app.mg4dash.ui.CardsEditor.isOpen(this)) {
+            for (fw in if (webInFront) listOfNotNull(floatWeb, floatMap) else listOfNotNull(floatMap, floatWeb)) {
+                if (fw.onTouch(ev)) return true
+                if (fw.through) return super.dispatchTouchEvent(ev)
+            }
+        }
         if (twoFingerPull.onTouch(ev) { super.dispatchTouchEvent(it) }) return true
         if (!simpleMode && !app.mg4dash.ui.CardsEditor.isOpen(this) && pinchToEdit.onTouch(ev) { super.dispatchTouchEvent(it) }) return true
         if (!app.mg4dash.ui.CardsEditor.isOpen(this) && longPress(ev)) return true

@@ -203,7 +203,9 @@ object CardsEditor {
             }
             if (Card.WEB in cards.cards)
                 column.addView(link(context.getString(R.string.wc_web_address), webSummary()) { editUrls() })
-            if (Card.WEB in cards.cards) column.addView(doubleTapRow())
+            if (Card.WEB in cards.cards) column.addView(doubleTapRow(map = false))
+            // The map card the same (#98): fixed full screen or a window over home
+            if (Card.MAP in cards.cards) column.addView(doubleTapRow(map = true))
             // How long a web page or the map's app stays awake after a touch (#98)
             if (Card.WEB in cards.cards || Card.MAP in cards.cards && prefs.mapApp != null)
                 column.addView(wakeRow())
@@ -252,14 +254,15 @@ object CardsEditor {
             setOnClickListener { onClick() }
         }
 
-        /** Double tap on the web app (trial): the fixed full screen (as before) or a window detached over home. */
-        private fun doubleTapRow() = LinearLayout(context).apply {
+        /** Double tap on the web app, or on the map card ([map]): the fixed full screen (as before) or a window detached over home. */
+        private fun doubleTapRow(map: Boolean) = LinearLayout(context).apply {
             orientation = LinearLayout.VERTICAL
             setPadding(dp(4), dp(12), dp(4), 0)
             addView(TextView(context).apply { text = context.getString(R.string.wc_double_tap); setTextColor(sub); setTextSize(TypedValue.COMPLEX_UNIT_SP, 19f) })
             val row = FlowRow(context, dp(8))
             listOf(false to R.string.wc_dt_full, true to R.string.wc_dt_float).forEach { (float, label) ->
-                row.addView(chip(context.getString(label), prefs.webFloat == float, null) { prefs.webFloat = float; render() })
+                val on = if (map) prefs.mapFloat == float else prefs.webFloat == float
+                row.addView(chip(context.getString(label), on, null) { if (map) prefs.mapFloat = float else prefs.webFloat = float; render(); onChange() })
             }
             addView(row, LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(8) })
         }
@@ -365,8 +368,13 @@ object CardsEditor {
                 .show().also { Dialogs.fix(it); Dialogs.hideBars(it) }
         }
 
-        /** An address of the web app, with MG4Dash's keyboard; [done] gets it ("" when left empty). */
-        private fun editUrl(initial: String, done: (String) -> Unit) {
+        private fun editUrl(initial: String, done: (String) -> Unit) = askUrl(activity, initial, done)
+    }
+
+    /** An address of the web app, with MG4Dash's keyboard; [done] gets it ("" when left empty). Also the web app's Other address… (#98). */
+    fun askUrl(activity: Activity, initial: String, done: (String) -> Unit) {
+            val context: android.content.Context = activity
+            fun dp(v: Int) = (v * activity.resources.displayMetrics.density).toInt()
             val input = android.widget.EditText(context).apply {
                 setText(initial.ifBlank { "http://" }); setSingleLine()
                 inputType = android.text.InputType.TYPE_CLASS_TEXT or android.text.InputType.TYPE_TEXT_VARIATION_URI
@@ -384,7 +392,6 @@ object CardsEditor {
                     Dialogs.fix(dlg)
                     CarKeyboard.attachInDialog(input, dlg, box, onDone = { dlg.getButton(android.app.AlertDialog.BUTTON_POSITIVE).performClick() })
                 }
-        }
     }
 
     /** The layout's places in miniature ([cells] from 0 to 1), the one at [at] filled: where a card is now. */
