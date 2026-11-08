@@ -25,3 +25,12 @@ jobs:
           name: unit-test-report
           path: app/build/reports/tests/testEmulatorDebugUnitTest
           if-no-files-found: ignore
+      - name: Test report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: unit-test-report
+          path: |
+            app/build/reports/tests/testEmulatorDebugUnitTest
+            app/build/test-results/testEmulatorDebugUnitTest
+          if-no-files-found: ignore
