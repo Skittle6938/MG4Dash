@@ -207,7 +207,7 @@ class WebCard(private val activity: android.app.Activity) : FrameLayout(activity
 
     /**
      * Long press on the card (#98): a small menu with Back (the page's previous one) and the addresses
-     * entered in the edit mode, a touch on one showing it at once. [onMove]: the detached window's
+     * entered in the edit mode, a touch on one showing it at once (the one shown: from its start again). [onMove]: the detached window's
      * "Move / resize", under Back.
      */
     fun menu(onMove: (() -> Unit)? = null) {
@@ -247,7 +247,8 @@ class WebCard(private val activity: android.app.Activity) : FrameLayout(activity
         if (onMove != null) row("✥", context.getString(R.string.wc_web_move), null, false) { onMove() }
         urls.forEach { url ->
             row(if (url == shown) "◉" else "○", name(url), url, url == shown) {
-                if (url == shown) return@row
+                // The address shown touched again: its page starts again from that address (#98)
+                if (url == shown) { Log.i(TAG, "menu: ${name(url)} again"); reset(); show(); return@row }
                 prefs.webUrl = url
                 Log.i(TAG, "menu: ${name(url)}")
                 show()
