@@ -173,6 +173,8 @@ class FloatWindow(
             setPadding(dp(24), dp(6), dp(6), dp(6))
             background = android.graphics.drawable.GradientDrawable().apply { cornerRadius = dp(28).toFloat(); setColor(Themes.color(activity, R.color.bg_bottom)) }
             elevation = dp(20).toFloat()
+            // Its touches stay on it: one beside OK neither reaches the page under it nor moves the window
+            isClickable = true
             addView(android.widget.TextView(activity).apply {
                 text = activity.getString(R.string.wc_web_move_hint); setTextColor(Themes.color(activity, R.color.text_sub))
                 setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, 18f)
@@ -201,14 +203,13 @@ class FloatWindow(
         Log.i(TAG, "move mode ended at $rect")
     }
 
-    /** The hint under the window, or above it when there is no room, within the cards' area. */
+    /** The hint under the window, else above it, else in its middle: never over its frame and handles (#98). */
     private fun placeHint() {
         val h = hint ?: return
         h.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED)
-        val b = bounds(); val gap = dp(12)
-        val top = if (rect.bottom + gap + h.measuredHeight <= b.bottom) rect.bottom + gap else (rect.top - gap - h.measuredHeight).coerceAtLeast(b.top)
-        val left = (rect.centerX() - h.measuredWidth / 2).coerceIn(b.left, (b.right - h.measuredWidth).coerceAtLeast(b.left))
-        (h.layoutParams as FrameLayout.LayoutParams).apply { leftMargin = left; topMargin = top }.also { h.layoutParams = it }
+        val at = hintPlace(rect, h.measuredWidth, h.measuredHeight, layer.width, layer.height, dp(12))
+        (h.layoutParams as FrameLayout.LayoutParams).apply { leftMargin = at.x; topMargin = at.y }.also { h.layoutParams = it }
+        h.bringToFront()
     }
 
     private fun onHint(ev: MotionEvent): Boolean {
@@ -341,8 +342,10 @@ class FloatWindow(
                 val (x, y) = local(ev).let { it[0] to it[1] }
                 mode = Mode.NONE; through = false
                 if (!floating) return false
+                // The hint and its OK first, even when it sits over the window: not a move (#98)
+                if (moving && onHint(ev)) return false
                 if (!rect.contains(x.toInt(), y.toInt())) {
-                    if (!moving || onHint(ev)) return false
+                    if (!moving) return false
                     // Move mode: a touch outside the window ends it, and goes no further
                     stopMoving(); mode = Mode.IGNORE; return true
                 }
@@ -542,6 +545,20 @@ class FloatWindow(
 
     companion object {
         private const val TAG = "FloatWeb"
+        /**
+         * Where the move mode's hint ([w] × [h]) goes for the window [r] in a [width] × [height] screen: under it, else
+         * above it, else in its middle (a window almost as tall as the screen), so never over its frame; centred on it.
+         */
+        internal fun hintPlace(r: Rect, w: Int, h: Int, width: Int, height: Int, gap: Int): android.graphics.Point {
+            val top = when {
+                r.bottom + gap + h <= height -> r.bottom + gap
+                r.top - gap - h >= 0 -> r.top - gap - h
+                else -> r.centerY() - h / 2
+            }
+            val left = (r.centerX() - w / 2).coerceIn(0, (width - w).coerceAtLeast(0))
+            return android.graphics.Point(left, top)
+        }
+
         /** A window's edge this close to a card's edge goes on it. */
         private const val SETTLE_DP = 12
 

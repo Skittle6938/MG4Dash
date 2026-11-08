@@ -577,6 +577,29 @@ class ScreenshotTest {
         org.junit.Assert.assertFalse(fw.moving)
     }
 
+    /** Window almost as tall as the screen (#98): the hint in its middle, and a touch on OK ends the move mode. */
+    @Test @Config(qualifiers = "fr-w1920dp-h720dp-land-mdpi") fun webWindowTallOk() {
+        org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE).edit()
+            .putInt("theme_mode", 1).putInt("home_style", 2).putString("wc_map", "map,consumption,shortcuts,web").putInt("home_widget", 3)
+            .putString("web_url", "http://homeassistant.local:8123").putBoolean("web_float", true).putBoolean("web_floating", true)
+            .putString("web_float_rect", "96,12,1810,696").commit()
+        val act = Robolectric.buildActivity(MainActivity::class.java).setup().get()
+        repeat(6) { shadowOf(Looper.getMainLooper()).idleFor(200, TimeUnit.MILLISECONDS) }
+        val fw = MainActivity::class.java.getDeclaredField("floatWeb").apply { isAccessible = true }.get(act) as app.mg4dash.ui.FloatWindow
+        fw.startMoving()
+        repeat(3) { shadowOf(Looper.getMainLooper()).idleFor(200, TimeUnit.MILLISECONDS) }
+        save(act.window.decorView, "web_window_moving_tall.png")
+        val hint = app.mg4dash.ui.FloatWindow::class.java.getDeclaredField("hint").apply { isAccessible = true }.get(fw) as android.view.ViewGroup
+        val ok = hint.getChildAt(1)
+        val at = IntArray(2).also { ok.getLocationInWindow(it) }
+        val x = at[0] + ok.width / 2f; val y = at[1] + ok.height / 2f
+        val t = android.os.SystemClock.uptimeMillis()
+        act.dispatchTouchEvent(android.view.MotionEvent.obtain(t, t, android.view.MotionEvent.ACTION_DOWN, x, y, 0))
+        act.dispatchTouchEvent(android.view.MotionEvent.obtain(t, t + 80, android.view.MotionEvent.ACTION_UP, x, y, 0))
+        repeat(2) { shadowOf(Looper.getMainLooper()).idleFor(200, TimeUnit.MILLISECONDS) }
+        org.junit.Assert.assertFalse("OK ends the move mode", fw.moving)
+    }
+
     /** Web address dialog in the light theme (#97): the field's text dark, MG4Dash's keyboard with its larger letters. */
     @Test @Config(qualifiers = "fr-w1920dp-h720dp-land-mdpi") fun webAddressLight() {
         org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE).edit()
