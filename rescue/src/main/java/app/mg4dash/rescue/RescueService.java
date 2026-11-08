@@ -39,8 +39,8 @@ public class RescueService extends Service {
     private static final String KEY_ALIVE = "mg4dash_alive";      // "boot count:elapsedRealtime"
     private static final String KEY_RESCUED = "mg4dash_rescued";  // "recompiled|stock:time"
     private static final long FIRST_CHECK_MS = 90_000;
-    private static final long RETRY_WAIT_MS = 60_000;
-    private static final int CRASH_LIMIT = 3;
+    static final long RETRY_WAIT_MS = 60_000;
+    static final int CRASH_LIMIT = 3;
 
     private volatile boolean running;
 
@@ -73,8 +73,9 @@ public class RescueService extends Service {
         startForeground(1, n);
     }
 
-    private void run(long delay) throws InterruptedException {
-        Thread.sleep(delay);
+    /** The check itself (on its own thread); package-private for the tests, which run it without the waits. */
+    void run(long delay) throws InterruptedException {
+        pause(delay);
         PackageManager pm = getPackageManager();
         ComponentName stock = findStock(pm);
         boolean dashInstalled = installed(pm, DASH);
@@ -97,9 +98,9 @@ public class RescueService extends Service {
         Log.w(TAG, "MG4Dash did not start: recompiling and relaunching it");
         try {
             pm.setApplicationEnabledSetting(DASH, PackageManager.COMPONENT_ENABLED_STATE_DISABLED, 0);
-            Thread.sleep(1000);
+            pause(1000);
             forceStop(DASH);
-            Thread.sleep(1000);
+            pause(1000);
             Log.i(TAG, "MG4Dash disabled, running: " + running(DASH));
             recompile(DASH);
         } finally {
@@ -116,7 +117,7 @@ public class RescueService extends Service {
         } catch (Exception e) {
             Log.w(TAG, "relaunch failed: " + e.getMessage());
         }
-        Thread.sleep(RETRY_WAIT_MS);
+        pause(RETRY_WAIT_MS);
         if (healthy(t0, wall0)) {
             Log.i(TAG, "MG4Dash started after recompiling");
             mark("recompiled");
@@ -130,7 +131,7 @@ public class RescueService extends Service {
      * MG4Dash healthy: sign of life during this boot (after [afterElapsed] if ≥ 0) and fewer than
      * [CRASH_LIMIT] crashes since [sinceWall] (0: since the head unit booted).
      */
-    private boolean healthy(long afterElapsed, long sinceWall) {
+    boolean healthy(long afterElapsed, long sinceWall) {
         boolean alive = false;
         String v = Settings.Global.getString(getContentResolver(), KEY_ALIVE);
         int boot = Settings.Global.getInt(getContentResolver(), Settings.Global.BOOT_COUNT, -1);
@@ -190,7 +191,7 @@ public class RescueService extends Service {
     }
 
     /** SAIC home of this firmware (disabled included), excluding the first boot wizard. */
-    private static ComponentName findStock(PackageManager pm) {
+    static ComponentName findStock(PackageManager pm) {
         Intent home = new Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_HOME);
         ComponentName best = null;
         int bestRank = 9;
@@ -257,6 +258,9 @@ public class RescueService extends Service {
             Log.w(TAG, "recompile failed: " + (t.getCause() != null ? t.getCause() : t));
         }
     }
+
+    /** Waits [ms]: the boot, the stop, MG4Dash's relaunch. Replaced in the tests. */
+    void pause(long ms) throws InterruptedException { Thread.sleep(ms); }
 
     @Override
     public IBinder onBind(Intent intent) { return null; }
