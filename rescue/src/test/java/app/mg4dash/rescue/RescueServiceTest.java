@@ -104,11 +104,20 @@ public class RescueServiceTest {
         Settings.Global.putString(cr, "mg4dash_alive", boot + ":" + SystemClock.elapsedRealtime());
     }
 
-    private void crash(String process) {
-        org.robolectric.shadows.ShadowSystemClock.advanceBy(Duration.ofSeconds(1));
+    private int seq;
+
+    /**
+     * A crash of [process] in Android's crash log, before MG4Dash's relaunch, or after it with [afterRelaunch]
+     * (called from onRelaunch). Each at its own time: the crash log refuses two entries at the same millisecond.
+     */
+    private void crash(String process, boolean afterRelaunch) {
+        long now = System.currentTimeMillis();
+        long at = afterRelaunch ? now + 1 + seq++ : now - 1000 - seq++;
         String text = "Process: " + process + "\nFlags: 0x0\n\njava.lang.ClassNotFoundException: app.mg4dash.LauncherApp\n";
-        shadowOf(service.getSystemService(DropBoxManager.class)).addData("system_app_crash", System.currentTimeMillis(), text.getBytes(StandardCharsets.UTF_8));
+        shadowOf(service.getSystemService(DropBoxManager.class)).addData("system_app_crash", at, text.getBytes(StandardCharsets.UTF_8));
     }
+
+    private void crash(String process) { crash(process, false); }
 
     private String rescued() { return Settings.Global.getString(cr, "mg4dash_rescued"); }
     private boolean saicHomeEnabled() { return pm.getComponentEnabledSetting(SAIC_HOME) != PackageManager.COMPONENT_ENABLED_STATE_DISABLED; }
@@ -231,9 +240,9 @@ public class RescueServiceTest {
         assertTrue(rescued(), rescued().startsWith("stock:"));
         assertTrue(saicHomeEnabled());
         assertEquals(SAIC_HOME, preferredHome());
-        // MG4Dash relaunched first, then SAIC home opened
-        assertEquals(DASH_HOME, opened());
+        // SAIC home opened last, after MG4Dash's relaunch (the most recent comes first)
         assertEquals(SAIC_HOME, opened());
+        assertEquals(DASH_HOME, opened());
         // MG4Dash itself stays enabled (Service mode, reinstall)
         assertEquals(PackageManager.COMPONENT_ENABLED_STATE_DEFAULT, pm.getApplicationEnabledSetting(DASH));
     }
@@ -243,14 +252,14 @@ public class RescueServiceTest {
         dashIsHome();
         alive(BOOT);
         for (int i = 0; i < RescueService.CRASH_LIMIT; i++) crash(DASH);
-        service.onRelaunch = () -> { for (int i = 0; i < RescueService.CRASH_LIMIT; i++) crash(DASH); };
+        service.onRelaunch = () -> { for (int i = 0; i < RescueService.CRASH_LIMIT; i++) crash(DASH, true); };
         service.run(0);
         assertTrue(rescued(), rescued().startsWith("stock:"));
     }
 
     @Test public void crashingAgainAfterTheRelaunchBringsSaicHomeBack() throws Exception {
         dashIsHome();
-        service.onRelaunch = () -> { alive(BOOT); for (int i = 0; i < RescueService.CRASH_LIMIT; i++) crash(DASH); };
+        service.onRelaunch = () -> { alive(BOOT); for (int i = 0; i < RescueService.CRASH_LIMIT; i++) crash(DASH, true); };
         service.run(0);
         assertTrue(rescued(), rescued().startsWith("stock:"));
     }
