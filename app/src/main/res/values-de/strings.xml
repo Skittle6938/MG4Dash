@@ -580,6 +580,16 @@
     <string name="tu_cards_t">Karten wählen und verschieben</string>
     <string name="tu_cards_1">Startbildschirm mit zwei Fingern zusammenziehen: Jeder Platz zeigt seine Karten; ein mittlerer Platz kann auch Klima oder Medien zeigen</string>
     <string name="tu_cards_2">Karte antippen, um sie zu zeigen oder zu entfernen; von anderswo genommen, wechselt sie den Platz. Standard stellt alles wie anfangs wieder her</string>
+    <string name="tu_float_t">Losgelöste Fenster</string>
+    <string name="tu_float_1">Die Web-App und die App-Karte (die Karte oder ihre App) können ihren Platz verlassen: Startbildschirm zusammenziehen, ihren Platz antippen, dann Doppeltippen › Losgelöstes Fenster</string>
+    <string name="tu_float_2">Danach löst ein Doppeltippen sie als Fenster über dem Startbildschirm; ein Doppeltippen auf das Fenster setzt sie in ihre Karte zurück</string>
+    <string name="tu_float_3">In Ruhe nimmt das Fenster Ihre Gesten, nicht die Seite: einmal antippen weckt es (Rand leuchtet), dann Seite oder App bedienen</string>
+    <string name="tu_float_4">Fenster lang drücken: sein Menü (Zurück, Verschieben / Größe ändern, was es zeigt)</string>
+    <string name="tu_move_t">Fenster verschieben und Größe ändern</string>
+    <string name="tu_move_1">Fenster lang drücken › Verschieben / Größe ändern: ein Rahmen mit Griffen erscheint, darunter OK</string>
+    <string name="tu_move_2">Innen ziehen zum Verschieben; eine Ecke ziehen ändert die Größe im gleichen Seitenverhältnis, die Mitte einer Kante nur Breite oder Höhe</string>
+    <string name="tu_move_3">Oder zwei Finger: schräg = ganze Größe, nebeneinander = Breite, übereinander = Höhe</string>
+    <string name="tu_move_4">Nur OK beendet den Modus; die Ränder richten sich an den Karten aus, Platz und Größe bleiben für das nächste Mal</string>
     <string name="st_panel_outline">Rahmen der Startbildschirm-Kacheln</string>
     <string name="st_clock">Uhr</string>
     <string name="st_clock_24">24 h</string>
@@ -683,7 +693,7 @@
     <string name="tu_map_1">Nach links / rechts wischen: nächste Karte des Widgets (Verbrauch, Verknüpfungen…)</string>
     <string name="tu_map_3">Zwei Finger: Karte bewegen und zoomen (im Vollbild ein Finger)</string>
     <string name="tu_map_2">Startbildschirm zusammenziehen, dann App: eine andere App statt der Karte</string>
-    <string name="tu_map_4">Web-App: Ein Doppeltippen kann sie als Fenster lösen (Wahl im Bearbeitungsmodus); lang drücken und ziehen zum Verschieben, an einer Ecke ziehen oder zusammenziehen zum Ändern der Größe, Doppeltippen zum Zurücklegen</string>
+    <string name="tu_map_4">Doppeltippen: Vollbild und zurück, oder ein losgelöstes Fenster (siehe weiter unten)</string>
     <string name="tu_media_t">Musik</string>
     <string name="tu_media_1">Nach oben / unten wischen: nächste Quelle; links / rechts: vorheriger / nächster Titel</string>
     <string name="tu_media_2">Quellennamen tippen: Quellenmenü; Bild tippen: App der Quelle öffnen</string>
