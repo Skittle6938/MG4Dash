@@ -1246,7 +1246,7 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         if (want && floatWeb == null) {
             w.reset()
             floatWeb = app.mg4dash.ui.FloatWindow(this, panel, webHole, bounds = { cardsArea() }, onAttach = { attachWeb() },
-                onMenu = { w.menu() }, onMoved = { w.moved() }, keepAwake = { w.typing }).also { it.open() }
+                onMenu = { w.menu(onMove = { floatWeb?.startMoving() }) }, onMoved = { w.moved() }, keepAwake = { w.typing }).also { it.open() }
             panels[Card.WEB] = webHole
         } else if (!want && floatWeb != null) {
             w.reset()
