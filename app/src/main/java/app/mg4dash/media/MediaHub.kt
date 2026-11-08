@@ -1492,20 +1492,31 @@ object MediaHub {
      * key 1 to AllGo's RemoteUI service, which gives main audio back to the iPhone and restarts
      * playback (#36). Without the service, CarPlay's play / pause key as before.
      */
-    private fun selectProjectionSource() {
+    private fun selectProjectionSource(attempt: Int = 0) {
         val ctx = appContext ?: return
         // Projection play key, like the stock launcher. After the radio, CarPlay does not take
         // the audio back by itself, here or with the stock launcher (#36): AllGo limitation.
+        // The radio holding the sound (#99, SWI165): paused first, then CarPlay told to play, as the
+        // play button of the SAIC Bluetooth page does (the only way that gave the sound back there)
+        val fromRadio = sourcePkg == RADIO || radioShown
+        if (fromRadio) pauseRadio()
         Thread {
+            if (fromRadio) Thread.sleep(300)
             if (!app.mg4dash.system.Projection.mediaKey(ctx, app.mg4dash.system.Projection.KEY_SELECT_SOURCE))
                 systemMediaKey(KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE)
+            if (fromRadio) systemMediaKey(KeyEvent.KEYCODE_MEDIA_PLAY)
         }.start()
         // Log of #36: the car only gives audio back to CarPlay when CarPlay opens on screen;
         // note if the key was enough (no forced opening: refused, the CarPlay screen flickered)
         main.postDelayed({
-            Log.i(TAG, "CarPlay audio after source key: ${if (sourcePkg == AA_MBS) "taken" else "still on $sourcePkg"}")
+            val taken = sourcePkg == AA_MBS
+            Log.i(TAG, "CarPlay audio after source key: ${if (taken) "taken" else "still on $sourcePkg"}" + if (attempt > 0) " (again)" else "")
+            if (handoverRetry(taken, fromRadio, attempt) && pinnedPkg == AA_MBS) selectProjectionSource(attempt + 1)
         }, 2000)
     }
+
+    /** CarPlay asked for again once, only after the radio, while it still has not the sound (#99). */
+    internal fun handoverRetry(taken: Boolean, fromRadio: Boolean, attempt: Int) = !taken && fromRadio && attempt == 0
 
     /** Media key to CarPlay; without the service, system media key. */
     private fun systemMediaKey(code: Int) {
