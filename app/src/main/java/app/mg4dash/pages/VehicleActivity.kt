@@ -14,6 +14,7 @@ import app.mg4dash.energy.ConsumptionEstimator
 import app.mg4dash.system.Apps
 import app.mg4dash.ui.PageActivity
 import app.mg4dash.ui.SegmentedGauge
+import app.mg4dash.ui.TripText
 import java.util.Locale
 
 /**
@@ -108,13 +109,30 @@ class VehicleActivity : PageActivity() {
         mid.addView(tires, kit.lp(-1, 0, 1f, t = 12))
         lifecycleScope.launch {
             repeatOnLifecycle(androidx.lifecycle.Lifecycle.State.STARTED) {
-                while (true) { refreshTires(); renderSoh(); kotlinx.coroutines.delay(5_000) }
+                while (true) { refreshTires(); renderSoh(); renderTrips(); kotlinx.coroutines.delay(5_000) }
             }
         }
 
         // ── State ──
         val state = kit.panel(getString(R.string.vh_state))
         listOf(R.string.vh_battery, R.string.vh_range, R.string.vh_avg_cons, R.string.vh_odometer, R.string.vh_speed, R.string.vh_outside, R.string.vh_charge).forEach { addInfo(state, it) }
+        // Today's trips (#102): a touch opens the Trips page
+        state.addView(kit.divider(), kit.lp(-1, 1, t = 4))
+        val trips = kit.column().apply {
+            isClickable = true; isFocusable = true; setPadding(0, kit.dp(8), 0, kit.dp(8))
+            setOnClickListener { startActivity(android.content.Intent(this@VehicleActivity, TripsActivity::class.java)) }
+        }
+        val (todayRow, today) = kit.infoRow(getString(R.string.tr_today)).also { (r, _) -> r.setPadding(0, 0, 0, 0) }
+        (todayRow.getChildAt(0) as TextView).setTextColor(kit.color(R.color.text_value))
+        tripsToday = today
+        trips.addView(todayRow, kit.lp(-1, -2))
+        val lastRow = kit.row()
+        tripLast = kit.text("", 17f, R.color.text_sub)
+        tripLastKm = kit.text("", 17f, R.color.text_sub)
+        lastRow.addView(tripLast, kit.lp(0, -2, 1f)); lastRow.addView(tripLastKm)
+        trips.addView(lastRow, kit.lp(-1, -2, t = 6))
+        state.addView(trips, kit.lp(-1, -2))
+        renderTrips()
         // Battery health estimated by MG4Dash (measured capacity ÷ the model's original capacity)
         state.addView(kit.divider(), kit.lp(-1, 1, t = 4))
         addInfo(state, R.string.vh_soh)
@@ -138,6 +156,20 @@ class VehicleActivity : PageActivity() {
     }
 
     private lateinit var sohDetail: TextView
+    private lateinit var tripsToday: TextView
+    private lateinit var tripLast: TextView
+    private lateinit var tripLastKm: TextView
+
+    /** "Today 87 km · 4 trips ›" and the last trip (#102). */
+    private fun renderTrips(now: Long = System.currentTimeMillis()) {
+        if (!::tripsToday.isInitialized) return
+        val trips = app.mg4dash.energy.TripLog.trips.value
+        val day = app.mg4dash.energy.TripLog.today(trips, app.mg4dash.energy.TripLog.current.value, now)
+        tripsToday.text = "${TripText.dist(this, day.km)} · ${TripText.count(this, day.trips)} ›"
+        val last = trips.firstOrNull()
+        tripLast.text = last?.let { getString(R.string.tr_last, TripText.span(this, it)) } ?: getString(R.string.tr_none)
+        tripLastKm.text = last?.let { "${TripText.odoRange(this, it.startKm, it.endKm)} · ${TripText.dist(this, it.km)}" } ?: ""
+    }
 
     /** Health to the tenth and km covered by the measurement (the battery model is chosen in the settings). */
     private fun renderSoh() {

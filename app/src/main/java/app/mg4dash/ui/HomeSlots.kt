@@ -27,6 +27,8 @@ object HomeSlots {
         PHONE("phone", R.string.wc_phone, R.drawable.ic_phone),
         HOURLY("hourly", R.string.wc_hourly, R.drawable.ic_sun),
         DAILY("daily", R.string.wc_daily, R.drawable.ic_cloud),
+        /** The last trips (#102): only where the driver places it, never put in a place by itself. */
+        TRIPS("trips", R.string.wc_trips, R.drawable.ic_car),
     }
 
     /** What a place shows. */
@@ -172,7 +174,7 @@ object HomeSlots {
      */
     private fun take(config: Config, slot: String, unavailable: Set<Card>): Pair<Config, Card>? {
         val placed = config.placed()
-        Card.entries.filter { it !in placed && it !in unavailable }.sortedBy { if (it == Card.WEB) 1 else 0 }.firstOrNull()?.let { return config to it }
+        Card.entries.filter { it !in placed && it !in unavailable && it != Card.TRIPS }.sortedBy { if (it == Card.WEB) 1 else 0 }.firstOrNull()?.let { return config to it }
         val from = config.layout.slots.map { it.id }.filter { it != slot }
             .maxByOrNull { id -> config.cards(id).count { it !in unavailable } } ?: return null
         val shown = config.cards(from).filter { it !in unavailable }

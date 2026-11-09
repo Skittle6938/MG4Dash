@@ -555,6 +555,37 @@ wc_other_app|Other app…|Autre application…|Andere App…|Otra aplicación…
 wc_other_address|Other address…|Autre adresse…|Andere Adresse…|Otra dirección…|Altro indirizzo…|Ander adres…|Başka adres…
 wc_add_page|Add this page|Ajouter cette page|Diese Seite hinzufügen|Añadir esta página|Aggiungi questa pagina|Deze pagina toevoegen|Bu sayfayı ekle
 wc_page_added|Address added|Adresse ajoutée|Adresse hinzugefügt|Dirección añadida|Indirizzo aggiunto|Adres toegevoegd|Adres eklendi
+wc_trips|Recent trips|Derniers trajets|Letzte Fahrten|Últimos trayectos|Ultimi viaggi|Laatste ritten|Son yolculuklar
+title_trips|TRIPS|TRAJETS|FAHRTEN|TRAYECTOS|VIAGGI|RITTEN|YOLCULUKLAR
+tr_now|In progress · since %s|En cours · depuis %s|Läuft · seit %s|En curso · desde %s|In corso · dalle %s|Bezig · sinds %s|Sürüyor · başlangıç %s
+tr_none|No trip yet|Aucun trajet pour l'instant|Noch keine Fahrt|Aún no hay trayectos|Ancora nessun viaggio|Nog geen ritten|Henüz yolculuk yok
+tr_today|Today|Aujourd'hui|Heute|Hoy|Oggi|Vandaag|Bugün
+tr_yesterday|Yesterday|Hier|Gestern|Ayer|Ieri|Gisteren|Dün
+tr_one|1 trip|1 trajet|1 Fahrt|1 trayecto|1 viaggio|1 rit|1 yolculuk
+tr_many|%d trips|%d trajets|%d Fahrten|%d trayectos|%d viaggi|%d ritten|%d yolculuk
+tr_since_km|Since %s|Depuis %s|Seit %s|Desde %s|Da %s|Sinds %s|Başlangıç %s
+tr_previous|Previous · %s|Précédent · %s|Vorherige · %s|Anterior · %s|Precedente · %s|Vorige · %s|Önceki · %s
+tr_last|Last trip %s|Dernier trajet %s|Letzte Fahrt %s|Último trayecto %s|Ultimo viaggio %s|Laatste rit %s|Son yolculuk %s
+tr_duration|%1$d h %2$02d|%1$d h %2$02d|%1$d h %2$02d|%1$d h %2$02d|%1$d h %2$02d|%1$d u %2$02d|%1$d sa %2$02d
+tr_driving|%s of driving|%s de conduite|%s Fahrzeit|%s de conducción|%s di guida|%s rijden|%s sürüş
+tr_first_odo|Odometer at the first start|Odomètre au premier départ|Kilometerstand bei der ersten Abfahrt|Cuentakilómetros en la primera salida|Contachilometri alla prima partenza|Kilometerstand bij het eerste vertrek|İlk çıkıştaki kilometre
+tr_odo_now|Odometer now|Odomètre maintenant|Kilometerstand jetzt|Cuentakilómetros ahora|Contachilometri ora|Kilometerstand nu|Şu anki kilometre
+tr_reading|Manual reading|Relevé manuel|Manuelle Erfassung|Registro manual|Rilevazione manuale|Handmatige registratie|Manuel kayıt
+tr_reading_hint|For a service (ride-hailing, deliveries): start it at the beginning, stop it at the end. It goes on if the car turns off between two jobs.|Pour un service (VTC, livraisons) : démarrez-le au début, arrêtez-le à la fin. Il continue si la voiture s'éteint entre deux courses.|Für einen Dienst (Fahrdienst, Lieferungen): am Anfang starten, am Ende stoppen. Sie läuft weiter, wenn das Auto zwischen zwei Fahrten ausgeschaltet wird.|Para un servicio (VTC, repartos): inícielo al principio y deténgalo al final. Continúa si el coche se apaga entre dos servicios.|Per un servizio (NCC, consegne): avviala all'inizio e fermala alla fine. Continua se l'auto si spegne tra due corse.|Voor een dienst (taxi, bezorging): start bij het begin, stop aan het einde. Ze loopt door als de auto tussen twee ritten uitgaat.|Bir hizmet için (araç paylaşımı, teslimat): başta başlatın, sonda durdurun. Araç iki iş arasında kapansa da devam eder.
+tr_reading_start|Start a reading|Démarrer un relevé|Erfassung starten|Iniciar un registro|Avvia una rilevazione|Registratie starten|Kaydı başlat
+tr_reading_stop|Stop the reading|Arrêter le relevé|Erfassung stoppen|Detener el registro|Ferma la rilevazione|Registratie stoppen|Kaydı durdur
+tr_reading_running|Running since %s|En cours depuis %s|Läuft seit %s|En curso desde %s|In corso dalle %s|Bezig sinds %s|Sürüyor · başlangıç %s
+tr_col_day|Day|Jour|Tag|Día|Giorno|Dag|Gün
+tr_col_time|Start – end|Départ – arrivée|Abfahrt – Ankunft|Salida – llegada|Partenza – arrivo|Vertrek – aankomst|Çıkış – varış
+tr_col_odo|Odometer|Odomètre|Kilometerstand|Cuentakilómetros|Contachilometri|Kilometerstand|Kilometre
+tr_col_dist|Distance|Distance|Strecke|Distancia|Distanza|Afstand|Mesafe
+tr_col_duration|Duration|Durée|Dauer|Duración|Durata|Duur|Süre
+tr_col_cons|Consumption|Conso|Verbrauch|Consumo|Consumo|Verbruik|Tüketim
+tr_col_batt|Battery|Batterie|Akku|Batería|Batteria|Accu|Batarya
+tr_ongoing|in progress|en cours|läuft|en curso|in corso|bezig|sürüyor
+tr_clear|Clear|Effacer|Löschen|Borrar|Cancella|Wissen|Temizle
+tr_clear_confirm|Clear the list of trips?|Effacer la liste des trajets ?|Fahrtenliste löschen?|¿Borrar la lista de trayectos?|Cancellare l'elenco dei viaggi?|De lijst met ritten wissen?|Yolculuk listesi temizlensin mi?
+tr_note|A trip runs from turning the car on to its standby. The last 50 are kept.|Un trajet va de l'allumage à la mise en veille de la voiture. Les 50 derniers sont gardés.|Eine Fahrt reicht vom Einschalten bis zum Standby des Autos. Die letzten 50 werden behalten.|Un trayecto va del encendido a la suspensión del coche. Se guardan los 50 últimos.|Un viaggio va dall'accensione allo standby dell'auto. Vengono conservati gli ultimi 50.|Een rit loopt van het aanzetten tot de stand-by van de auto. De laatste 50 worden bewaard.|Bir yolculuk, aracın açılmasından bekleme moduna geçmesine kadar sürer. Son 50 tanesi saklanır.
 wc_double_tap|Double tap on the page|Double tap sur la page|Doppeltippen auf die Seite|Doble toque en la página|Doppio tocco sulla pagina|Dubbeltik op de pagina|Sayfaya çift dokunma
 wc_double_tap_app|Double tap on the app|Double tap sur l'application|Doppeltippen auf die App|Doble toque en la aplicación|Doppio tocco sull'app|Dubbeltik op de app|Uygulamaya çift dokunma
 wc_dt_full|Full screen|Plein écran fixe|Vollbild|Pantalla completa|Schermo intero|Volledig scherm|Tam ekran

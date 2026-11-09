@@ -181,6 +181,11 @@ object EnergyMonitor {
             }
             val tripDist = Distance.Period()
             val window = SlidingKm()
+            // Trips card (#102): the trips kept, and the one in progress saved every 10 s
+            TripLog.load(sp)
+            var tripTick = last
+            var tripSoc: Int? = null
+            var tripSave = 0
             while (true) {
                 delay(1000)
                 val now = System.currentTimeMillis()
@@ -200,6 +205,9 @@ object EnergyMonitor {
 
                 // New start: long pause (car in standby) or first pass
                 if (dt > SLEEP_GAP_MS || startKm < 0) {
+                    // The trip before it goes to the list (also after a restart of MG4Dash during it)
+                    TripLog.closeCurrent(sp)
+                    tripTick = tick; tripSoc = soc
                     if (km != null) startKm = km
                     tripDist.restart(); window.clear(); _lastKm.value = null
                     _sinceStart.value = Totals()
@@ -344,6 +352,13 @@ object EnergyMonitor {
                 _sinceCharge.value = add(_sinceCharge.value, km, chargeKm, chargeDist)
                 _sinceStart.value = add(_sinceStart.value, km, startKm, tripDist)
                 _sinceStart.value.let { t -> _lastKm.value = window.add(t.distKm, t.netKwh) }
+                if (tripSoc == null) tripSoc = soc
+                if (++tripSave >= 10 && km != null && startKm >= 0) {
+                    tripSave = 0
+                    // Its start from the internal clock: the system time can be wrong just after a wake-up
+                    val t = _sinceStart.value
+                    TripLog.saveCurrent(sp, TripLog.Trip(now - (tick - tripTick), now, startKm, km, t.distKm, t.netKwh, tripSoc, soc))
+                }
                 val mk = monthKey(now)
                 val m = months[mk] ?: Totals()
                 // System time not yet set (2019 at wake-up): unknown month, km kept for later
