@@ -101,21 +101,40 @@ object EmbeddedApp {
     /**
      * Full screen: when touching the embedded app, its window takes control, and as it
      * does not ask for immersive mode, the SAIC bars reappeared. The system setting
-     * "policy_control" forces immersive mode for this app (and MG4Dash); removed with no app.
+     * "policy_control" forces immersive mode for this app (and MG4Dash).
+     * CarPlay is always in it (#1): the stock CarPlay app only hides the bars once its window has the focus, and
+     * until then the status bar showed in its theme's indigo for a few frames.
      */
     fun immersive(context: Context, pkg: String?) {
-        val want = if (pkg != null && app.mg4dash.system.Prefs(context).fullscreen) "immersive.full=${context.packageName},$pkg" else null
+        lastPkg = pkg
+        val carPlay = app.mg4dash.system.Apps.available(context, app.mg4dash.system.Apps.CARPLAY)
+        val want = policy(context.packageName, pkg?.takeIf { app.mg4dash.system.Prefs(context).fullscreen }, carPlay)
         try {
             val cr = context.contentResolver
             val cur = android.provider.Settings.Global.getString(cr, "policy_control")
             // Only touch a value set by us (or empty)
-            if (cur != null && cur.isNotEmpty() && !cur.startsWith("immersive.full=${context.packageName},")) return
+            if (!ours(cur, context.packageName)) return
             if (cur != want) {
                 android.provider.Settings.Global.putString(cr, "policy_control", want)
                 Log.i(TAG, "policy_control → ${want ?: "(empty)"}")
             }
         } catch (e: Throwable) { Log.w(TAG, "policy_control: ${e.message}") }
     }
+
+    /** The embedded app given last: the value is set again at each return to home. */
+    @Volatile var lastPkg: String? = null; private set
+
+    /** "immersive.full=" MG4Dash and the embedded app (full screen chosen), and CarPlay; null with neither. */
+    internal fun policy(own: String, embedded: String?, carPlay: Boolean): String? {
+        val apps = (if (embedded != null) listOf(own, embedded) else emptyList()) + if (carPlay) listOf(CARPLAY_PKG) else emptyList()
+        return if (apps.isEmpty()) null else "immersive.full=" + apps.joinToString(",")
+    }
+
+    /** Empty, or set by MG4Dash (with an embedded app, or CarPlay alone). */
+    internal fun ours(cur: String?, own: String) = cur.isNullOrEmpty() || cur.startsWith("immersive.full=$own,") ||
+        cur == "immersive.full=$CARPLAY_PKG"
+
+    private val CARPLAY_PKG = app.mg4dash.system.Apps.CARPLAY.packageName
 
     private fun resize(v: View) {
         if (v.width <= 0 || v.height <= 0) return
