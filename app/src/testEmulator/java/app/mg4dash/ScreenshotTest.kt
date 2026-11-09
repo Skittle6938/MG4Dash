@@ -136,6 +136,70 @@ class ScreenshotTest {
         corner("corners_map_detached_awake.png")
     }
 
+    /** Sample trips (#102), today from 8:02, at the simulated car's odometer (18,344 km). */
+    private fun seedTrips(): android.content.SharedPreferences {
+        val sp = org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE)
+        val now = System.currentTimeMillis()
+        val day = app.mg4dash.energy.TripLog.dayStart(now)
+        fun t(dayOffset: Int, h: Int, m: Int, minutes: Int, km0: Int, km: Float, per100: Float, soc0: Int, soc1: Int): app.mg4dash.energy.TripLog.Trip {
+            val start = day + dayOffset * 86_400_000L + (h * 60 + m) * 60_000L
+            return app.mg4dash.energy.TripLog.Trip(start, start + minutes * 60_000L, km0, km0 + Math.round(km), km, km * per100 / 100f, soc0, soc1)
+        }
+        app.mg4dash.energy.TripLog.clear(sp)
+        listOf(
+            t(-2, 9, 15, 16, 18079, 9.3f, 18.0f, 99, 97), t(-2, 14, 20, 102, 18088, 121.7f, 17.3f, 97, 68),
+            t(-1, 7, 51, 42, 18210, 26.0f, 14.1f, 68, 62), t(-1, 18, 30, 34, 18236, 20.8f, 16.4f, 62, 57),
+            t(0, 8, 2, 55, 18257, 22.1f, 15.2f, 99, 94), t(0, 10, 40, 41, 18279, 21.0f, 14.9f, 94, 88), t(0, 13, 12, 46, 18300, 29.4f, 13.7f, 88, 81),
+        ).forEach { app.mg4dash.energy.TripLog.add(sp, it) }
+        app.mg4dash.energy.TripLog.saveCurrent(sp, t(0, 16, 5, 19, 18329, 13.2f, 15.9f, 81, 78))
+        app.mg4dash.energy.TripLog.startReading(sp, day + (8 * 60 + 2) * 60_000L, 18261)
+        return sp
+    }
+
+    /** Places the Paris position (simulated). */
+    private fun paris() {
+        val repo = app.mg4dash.map.LocationRepo
+        @Suppress("UNCHECKED_CAST")
+        (repo::class.java.getDeclaredField("_location").apply { isAccessible = true }.get(repo) as kotlinx.coroutines.flow.MutableStateFlow<android.location.Location?>).value =
+            android.location.Location("gps").apply { latitude = 48.8566; longitude = 2.3522; accuracy = 5f }
+    }
+
+    /** The Trips card (#102) in the top middle place, without page dots. */
+    @Test @Config(qualifiers = "fr-w1920dp-h720dp-land-mdpi") fun tripsCard() {
+        org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE).edit()
+            .putInt("theme_mode", 1).putInt("home_style", 0)
+            .putString("slots_full", "tl=climate;tc=trips;tr=media;bl=energy;bc=hourly,daily;br=consumption").commit()
+        paris()
+        val act = Robolectric.buildActivity(MainActivity::class.java).setup().get()
+        repeat(5) { shadowOf(Looper.getMainLooper()).idleFor(200, TimeUnit.MILLISECONDS) }
+        // After the energy monitor's first pass (which closes the trip it found): the sample trips
+        seedTrips()
+        (MainActivity::class.java.getDeclaredField("trips").apply { isAccessible = true }.get(act) as app.mg4dash.ui.TripsCard).show()
+        save(act.window.decorView, "trips_card_real.png")
+    }
+
+    /** Today's trips on the Vehicle page (#102). */
+    @Test @Config(qualifiers = "fr-w1920dp-h720dp-land-mdpi") fun tripsLine() {
+        org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE).edit().putInt("theme_mode", 1).commit()
+        seedTrips()
+        val act = Robolectric.buildActivity(app.mg4dash.pages.VehicleActivity::class.java).setup().get()
+        repeat(5) { shadowOf(Looper.getMainLooper()).idleFor(200, TimeUnit.MILLISECONDS) }
+        seedTrips()
+        app.mg4dash.pages.VehicleActivity::class.java.getDeclaredMethod("renderTrips", Long::class.javaPrimitiveType).apply { isAccessible = true }.invoke(act, System.currentTimeMillis())
+        save(act.window.decorView, "trips_line_real.png")
+    }
+
+    /** The Trips page (#102): today, the manual reading, the list. */
+    @Test @Config(qualifiers = "fr-w1920dp-h720dp-land-mdpi") fun tripsPage() {
+        org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE).edit().putInt("theme_mode", 1).commit()
+        seedTrips()
+        val act = Robolectric.buildActivity(app.mg4dash.pages.TripsActivity::class.java).setup().get()
+        repeat(5) { shadowOf(Looper.getMainLooper()).idleFor(200, TimeUnit.MILLISECONDS) }
+        seedTrips()
+        app.mg4dash.pages.TripsActivity::class.java.getDeclaredMethod("refresh", Long::class.javaPrimitiveType).apply { isAccessible = true }.invoke(act, System.currentTimeMillis())
+        save(act.window.decorView, "trips_page_real.png")
+    }
+
     /** Simulation of MG's fog light button (56 dp at x = 20 dp, #38) placed on the bar. */
     @Test fun homeFogSim() {
         org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE)

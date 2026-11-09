@@ -100,6 +100,11 @@
         </activity>
 
         <activity
+            android:name=".pages.TripsActivity"
+            android:exported="false"
+            android:screenOrientation="landscape"
+            android:theme="@style/Theme.MG4Launcher" />
+        <activity
             android:name=".pages.SoundActivity"
             android:exported="false"
             android:screenOrientation="landscape"

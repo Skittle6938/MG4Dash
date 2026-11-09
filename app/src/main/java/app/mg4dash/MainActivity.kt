@@ -179,6 +179,7 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
     /** Row of the three columns: the full screen map hides everything else up to it. */
     private lateinit var columnsRow: LinearLayout
     private lateinit var consumption: app.mg4dash.ui.ConsumptionCard
+    private lateinit var trips: app.mg4dash.ui.TripsCard
     private lateinit var shortcutsHolder: LinearLayout
 
     /** Trip energy, power and phone cards: same frame, title, page dots and content. */
@@ -240,6 +241,9 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         panels[Card.CONSUMPTION] = frame(consumption)
         shortcutsHolder = LinearLayout(this, null, 0, R.style.Panel).apply { orientation = LinearLayout.VERTICAL; background = null; elevation = 0f }
         panels[Card.SHORTCUTS] = frame(shortcutsHolder)
+        // The last trips (#102), in a place only if the driver put it there
+        trips = app.mg4dash.ui.TripsCard(this)
+        panels[Card.TRIPS] = frame(trips)
         // Web app (#97): the page itself is only loaded when shown
         val web = app.mg4dash.ui.WebCard(this).also { webCard = it }
         web.keyboardSpan = { webKeyboardSpan(it) }
@@ -361,6 +365,7 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         }
         // Smaller versions in a small place: consumption, map without + and −, one row of shortcuts
         consumption.compact = frameOf(Card.CONSUMPTION)?.slot?.size == HomeSlots.Size.SMALL
+        trips.compact = frameOf(Card.TRIPS)?.slot?.size == HomeSlots.Size.SMALL
         applyMapButtons()
         placeMapInfo()
         applyFog()
@@ -406,6 +411,7 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
             }
             Card.CONSUMPTION -> if (on) consumption.show()
             Card.SHORTCUTS -> if (on) renderShortcuts()
+            Card.TRIPS -> if (on) trips.show()
             Card.WEB -> webCard?.let { w -> w.visibility = if (on) View.VISIBLE else View.GONE; if (on) w.show() else w.pause() }
             Card.ENERGY -> {}
             Card.TRIP -> if (on) renderTripEnergy()
@@ -567,7 +573,7 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
             val base = basePad.getOrPut(v) { v.paddingLeft }
             v.setPadding(if (on) maxOf(base, fog) else base, v.paddingTop, v.paddingRight, v.paddingBottom)
         }
-        listOf(Card.ENERGY, Card.TRIP, Card.POWER, Card.PHONE, Card.CONSUMPTION, Card.SHORTCUTS, Card.WEB).forEach { c ->
+        listOf(Card.ENERGY, Card.TRIP, Card.POWER, Card.PHONE, Card.CONSUMPTION, Card.SHORTCUTS, Card.WEB, Card.TRIPS).forEach { c ->
             panels[c]?.let { pad(it, tl != null && c in tl.cards) }
         }
         pad(b.mediaCard, tl?.fill == HomeSlots.Fill.Media)
@@ -595,6 +601,7 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         frames.values.forEach { f -> if (insteadOf(f) != f.instead) showFrame(f) }
         if (isShown(Card.TRIP)) renderTripEnergy()
         if (isShown(Card.CONSUMPTION)) consumption.show()
+        if (isShown(Card.TRIPS)) trips.show()
     }
 
     private var lastPlugged: Boolean? = null
