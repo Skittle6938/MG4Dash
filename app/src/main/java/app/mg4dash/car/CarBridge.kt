@@ -350,7 +350,7 @@ object CarBridge {
             fcwBrakeMode = v?.let { safe { it.fcwAutoBrakeMode } } ?: s.fcwBrakeMode,
             overSpeedSound = v?.let { safe { it.overSpeedSoundMode } } ?: s.overSpeedSound,
             speedLimitSound = v?.let { safe { it.speedLimitSoundMode } } ?: s.speedLimitSound,
-            odometerKm = g?.let { safe { it.totalMileage } }?.takeIf { it > 0 } ?: s.odometerKm,
+            odometerKm = odometer(g?.let { safe { it.totalMileage } }, s.odometerKm),
             speedKmh = g?.let { safe { it.latestSpeed } } ?: s.speedKmh,
         )
         // Tenth of % (BMS): read separately, on all access routes
@@ -394,7 +394,9 @@ object CarBridge {
             batteryPercent = if (noEv) soc ?: s.batteryPercent else s.batteryPercent ?: soc,
             rangeKm = if (noEv) range ?: s.rangeKm else s.rangeKm ?: range,
             chargeStatus = if (ev == null) status else s.chargeStatus,
-            odometerKm = s.odometerKm ?: i(0x21401566)?.takeIf { it > 0 },
+            // Reread on each pass (#102): before, the first value stayed shown without a general service
+            // (SWI165), the km stopped and the average kWh/100 climbed
+            odometerKm = odometer(i(0x21401566), s.odometerKm),
             driveMode = if (vs == null) dm ?: s.driveMode else s.driveMode ?: dm,
             // Without a settings service (SWI68, #19), the property is reread on each pass: before, the
             // first value stayed shown and a regeneration change did not show.
@@ -414,6 +416,9 @@ object CarBridge {
             onePedal = fresh(i(0x2140a193)?.takeIf { it in 0..1 } ?: i(0x2140a191)?.let { if (it == 6) 1 else null }, s.onePedal),
         )
     }
+
+    /** Odometer [read] now (service or property), never below the [current] one: a late source does not take km back (#102). */
+    internal fun odometer(read: Int?, current: Int?): Int? = read?.takeIf { it > 0 && (current == null || it >= current) } ?: current
 
     // ── Commandes clim ────────────────────────────────────────────────────────
     // Run off the main thread, then a quick reread so the UI follows the real state.
