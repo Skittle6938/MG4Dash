@@ -104,7 +104,8 @@ public class RescueServiceTest {
         Settings.Global.putString(cr, "mg4dash_alive", boot + ":" + SystemClock.elapsedRealtime());
     }
 
-    private int seq;
+    /** Last times given to a crash before / after the relaunch: each new one strictly further out. */
+    private long lastBefore = Long.MAX_VALUE, lastAfter = Long.MIN_VALUE;
 
     /**
      * A crash of [process] in Android's crash log, before MG4Dash's relaunch, or after it with [afterRelaunch]
@@ -112,7 +113,9 @@ public class RescueServiceTest {
      */
     private void crash(String process, boolean afterRelaunch) {
         long now = System.currentTimeMillis();
-        long at = afterRelaunch ? now + 1 + seq++ : now - 1000 - seq++;
+        // Strictly decreasing before the relaunch, strictly increasing after it, even when the clock moves by
+        // exactly 1 ms between two calls (now - 1000 - seq used to collide then)
+        long at = afterRelaunch ? (lastAfter = Math.max(now + 1, lastAfter + 1)) : (lastBefore = Math.min(now - 1000, lastBefore - 1));
         String text = "Process: " + process + "\nFlags: 0x0\n\njava.lang.ClassNotFoundException: app.mg4dash.LauncherApp\n";
         shadowOf(service.getSystemService(DropBoxManager.class)).addData("system_app_crash", at, text.getBytes(StandardCharsets.UTF_8));
     }
