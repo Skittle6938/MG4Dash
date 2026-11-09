@@ -233,6 +233,12 @@ class FloatWindow(
         return Rect(a[0] - c[0], a[1] - c[1], a[0] - c[0] + v.width, a[1] - c[1] + v.height)
     }
 
+    /**
+     * Its card shown or hidden (a swipe, #15): docked, it follows its placeholder now. Its visibility changes without
+     * any layout, so waiting for one left the card empty until a touch.
+     */
+    fun sync() { if (!floating) followDock() }
+
     /** Over its placeholder, shown when it is (hidden behind another card, or with no place, it is hidden too). */
     private fun followDock() {
         val shown = dock.isAttachedToWindow && dock.isShown && dock.width > 0 && dock.height > 0
@@ -559,7 +565,7 @@ class FloatWindow(
         init { elevation = dp(20).toFloat() }
         override fun onDraw(c: Canvas) {
             rf.set(2 * d, 2 * d, width - 2 * d, height - 2 * d)
-            val rad = FadeOutline.RADIUS * d
+            val rad = FadeOutline.inset(FadeOutline.RADIUS * d, 2 * d)
             c.drawRoundRect(rf, rad, rad, fill); c.drawRoundRect(rf, rad, rad, stroke)
         }
     }

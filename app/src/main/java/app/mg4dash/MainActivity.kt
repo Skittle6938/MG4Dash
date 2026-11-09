@@ -232,6 +232,9 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
             tag = app.mg4dash.ui.FadeOutline.FRONT
         }
         b.mapCard.tag = app.mg4dash.ui.FadeOutline.FRONT
+        // The map's own clip at the cards' corners: rounder (20 dp), it showed under the card's outline and differed
+        // from its detached window (#15)
+        b.mapHolder.radiusDp = app.mg4dash.ui.FadeOutline.RADIUS
         panels[Card.MAP] = b.mapCard
         consumption = app.mg4dash.ui.ConsumptionCard(this)
         panels[Card.CONSUMPTION] = frame(consumption)
@@ -374,6 +377,8 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         if (f.fill == HomeSlots.Fill.Climate) climatePanel.visibility = View.VISIBLE
         if (f.fill == HomeSlots.Fill.Media) mediaPanel.visibility = View.VISIBLE
         f.cards.forEach { cardShown(it, it == shown) }
+        // A window docked in this place shows or hides with its card at once (#15)
+        floatMap?.sync(); floatWeb?.sync()
         // Page dots of the trip, power and phone cards (Full layout, as before), only among themselves:
         // elsewhere they would not fall in the same place from one card to the next
         val dots = !mapLayout && f.cards.size > 1 && f.cards.all { it == Card.TRIP || it == Card.POWER || it == Card.PHONE }
@@ -2006,7 +2011,7 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
             if (fxHost !== host) {
                 fxHost?.overlay?.remove(fx)
                 host.overlay.add(fx); fxHost = host
-                fx.corner = if (wide) 0f else resources.getDimension(R.dimen.radius_panel)
+                fx.corner = if (wide) 0f else app.mg4dash.ui.FadeOutline.radius(this)
                 fx.attach(host, bar, under)
                 fx.shake = b.root
             }

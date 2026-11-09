@@ -11,7 +11,10 @@ import android.widget.FrameLayout
 class RoundedFrame @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, radiusDp: Float = 20f,
 ) : FrameLayout(context, attrs) {
-    private val radius = resources.displayMetrics.density * radiusDp
+    /** Corner radius, in dp: the cards' one ([FadeOutline.RADIUS]) for what fills a card (#15). */
+    var radiusDp = radiusDp
+        set(v) { field = v; invalidateOutline() }
+    private val radius get() = resources.displayMetrics.density * radiusDp
 
     init {
         outlineProvider = object : ViewOutlineProvider() {
