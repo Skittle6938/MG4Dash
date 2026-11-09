@@ -96,6 +96,46 @@ class ScreenshotTest {
     @Test @Config(qualifiers = "tr-w1920dp-h720dp-land-mdpi") fun energyTurkish() = shoot(app.mg4dash.pages.EnergyActivity::class.java, "energy_tr.png")
     @Test @Config(qualifiers = "tr-w1920dp-h720dp-land-mdpi") fun climateTurkish() = shoot(ClimateActivity::class.java, "climate_tr.png")
 
+    /**
+     * The cards' corners (#15), position in Paris: the App card in its card at rest, detached at rest, detached awake.
+     * Each with its top left corner enlarged 6 times, under the screen.
+     */
+    @Test fun mapCorners() {
+        org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE).edit()
+            .putInt("theme_mode", 1).putInt("home_style", 2).putString("wc_map", "map,consumption,shortcuts,web").putInt("home_widget", 0)
+            .putBoolean("map_float", true).putBoolean("map_floating", false).commit()
+        val repo = app.mg4dash.map.LocationRepo
+        @Suppress("UNCHECKED_CAST")
+        (repo::class.java.getDeclaredField("_location").apply { isAccessible = true }.get(repo) as kotlinx.coroutines.flow.MutableStateFlow<android.location.Location?>).value =
+            android.location.Location("gps").apply { latitude = 48.8566; longitude = 2.3522; accuracy = 5f }
+        val act = Robolectric.buildActivity(MainActivity::class.java).setup().get()
+        fun idle() = repeat(5) { shadowOf(Looper.getMainLooper()).idleFor(200, TimeUnit.MILLISECONDS) }
+        idle()
+        val root = act.window.decorView
+        fun method(name: String) = MainActivity::class.java.getDeclaredMethod(name).apply { isAccessible = true }
+        val fw = MainActivity::class.java.getDeclaredField("floatMap").apply { isAccessible = true }.get(act) as app.mg4dash.ui.FloatWindow
+        fun corner(name: String) {
+            save(root, name)
+            val f = File("build/screenshots", name)
+            val shot = android.graphics.BitmapFactory.decodeFile(f.path)
+            root.measure(View.MeasureSpec.makeMeasureSpec(1920, View.MeasureSpec.EXACTLY), View.MeasureSpec.makeMeasureSpec(720, View.MeasureSpec.EXACTLY))
+            root.layout(0, 0, 1920, 720)
+            val at = IntArray(2).also { fw.frameView.getLocationInWindow(it) }
+            val zoom = 6; val side = 90
+            val out = Bitmap.createBitmap(1920, 720 + side * zoom, Bitmap.Config.ARGB_8888)
+            val c = Canvas(out); c.drawColor(0xFF000000.toInt()); c.drawBitmap(shot, 0f, 0f, null)
+            val x0 = (at[0] - 50).coerceIn(0, 1920 - side); val y0 = (at[1] - 12).coerceIn(0, 720 - side)
+            c.drawBitmap(Bitmap.createScaledBitmap(Bitmap.createBitmap(shot, x0, y0, side, side), side * zoom, side * zoom, false), 0f, 720f, null)
+            f.outputStream().use { out.compress(Bitmap.CompressFormat.PNG, 100, it) }
+        }
+        corner("corners_map_card_rest.png")
+        method("detachMap").invoke(act); idle()
+        corner("corners_map_detached_rest.png")
+        app.mg4dash.ui.FloatWindow::class.java.getDeclaredMethod("setAwake", Boolean::class.javaPrimitiveType).apply { isAccessible = true }.invoke(fw, true)
+        idle()
+        corner("corners_map_detached_awake.png")
+    }
+
     /** Simulation of MG's fog light button (56 dp at x = 20 dp, #38) placed on the bar. */
     @Test fun homeFogSim() {
         org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE)

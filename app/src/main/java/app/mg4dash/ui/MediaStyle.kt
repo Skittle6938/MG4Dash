@@ -59,9 +59,9 @@ class MediaStyle private constructor(
         for (i in 0 until card.childCount) if (card.getChildAt(i) !== info) card.getChildAt(i).visibility = View.GONE
         (info.layoutParams as LinearLayout.LayoutParams).apply { topMargin = 0; height = 0; weight = 1f }
         info.orientation = LinearLayout.HORIZONTAL
-        // The player covers the whole panel, frame included; its slightly less rounded corners (19 dp vs 20)
-        // also cover the frame's, which stuck out under a dark image
-        frame = RoundedFrame(a, radiusDp = 19f)
+        // The player covers the whole panel, frame included, at the cards' corners (#15): the panel's outline,
+        // taken in by its width, stays under it, even under a dark image
+        frame = RoundedFrame(a, radiusDp = FadeOutline.RADIUS)
         picture = ImageView(a).apply { scaleType = ImageView.ScaleType.FIT_END }
         frame.addView(picture, FrameLayout.LayoutParams(-1, -1))
         fade = View(a)

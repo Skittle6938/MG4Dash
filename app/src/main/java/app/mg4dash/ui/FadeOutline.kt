@@ -30,7 +30,9 @@ class FadeOutline(private val d: Float, color: Int, private val fade: Boolean = 
             floatArrayOf(0f, 0.55f, 1f), Shader.TileMode.CLAMP)
         val h = p.strokeWidth
         rect.set(b.left + h, b.top + h, b.right - h, b.bottom - h)
-        c.drawRoundRect(rect, RADIUS * d, RADIUS * d, p)
+        // Taken in by its inset: its curve follows the card's corner (the clip of a map, a page, a detached window)
+        val r = inset(RADIUS * d, h)
+        c.drawRoundRect(rect, r, r, p)
     }
 
     override fun setAlpha(a: Int) {}
@@ -38,9 +40,9 @@ class FadeOutline(private val d: Float, color: Int, private val fade: Boolean = 
     @Suppress("OVERRIDE_DEPRECATION") override fun getOpacity() = PixelFormat.TRANSLUCENT
 
     /**
-     * Frame of a page or an app awake (#98): the same corners as the card's clip, its outer edge on the card's edge
-     * (a GradientDrawable at radius_panel, 20 dp, stood off the card's 14 dp corners). [radius]: the corner of what it is
-     * drawn over, the panels' by default; the detached window's is larger, by its frame, and its corners were cut off.
+     * Frame of a page or an app awake (#98): the same corners as the card's clip, its outer edge on the card's edge.
+     * [radius]: the corner of what it is drawn over, the cards' by default; a detached window's in the move mode is
+     * larger, by its frame.
      */
     class Awake(private val d: Float, color: Int, width: Float, private val radius: Float = RADIUS * d) : Drawable() {
         private val p = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.STROKE; strokeWidth = width; this.color = color }
@@ -48,7 +50,7 @@ class FadeOutline(private val d: Float, color: Int, private val fade: Boolean = 
         override fun draw(c: Canvas) {
             val h = p.strokeWidth / 2
             rect.set(bounds.left + h, bounds.top + h, bounds.right - h, bounds.bottom - h)
-            val r = (radius - h).coerceAtLeast(0f)
+            val r = inset(radius, h)
             c.drawRoundRect(rect, r, r, p)
         }
         override fun setAlpha(a: Int) {}
@@ -57,8 +59,17 @@ class FadeOutline(private val d: Float, color: Int, private val fade: Boolean = 
     }
 
     companion object {
-        /** Corner radius of the panels filled to their edges, in dp (the map, a web page): their clip and outline. */
+        /**
+         * Corner radius of every card, in dp, the one used everywhere (#15): the panels' outline, the clip of the map,
+         * a page or an app, the player, the detached windows at rest and awake, their accent outline.
+         */
         const val RADIUS = 14f
+
+        /** [RADIUS] in pixels. */
+        fun radius(c: android.content.Context) = RADIUS * c.resources.displayMetrics.density
+
+        /** Radius of a line drawn [by] px inside a corner of radius [r]: the same curve, concentric. */
+        fun inset(r: Float, by: Float) = (r - by).coerceAtLeast(0f)
 
         /** Tag of a panel filled to its edges (the map, a web page): rounded corners, the outline drawn over it. */
         const val FRONT = "fade_outline_front"
