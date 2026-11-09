@@ -1829,9 +1829,18 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         val now = android.os.SystemClock.elapsedRealtime()
         val held = consShown[src]
         if (held != null && held.second != null && now - held.first < CONS_REFRESH_MS) return held.second
-        // Within ±0.5 kWh/100 of the one shown, the shown one stays, and the range computed from it (#29)
-        return app.mg4dash.energy.ConsHold.held(held?.second, consNow(src)).also { consShown[src] = now to it }
+        // Within ±0.5 kWh/100 of the one shown, the shown one stays, and the range computed from it (#29),
+        // but for 1 min at most: then the fresh one shows even if closer
+        val since = consSince[src] ?: now
+        val fresh = consNow(src)
+        return app.mg4dash.energy.ConsHold.held(held?.second, fresh, now - since).also {
+            if (it == fresh) consSince[src] = now
+            consShown[src] = now to it
+        }
     }
+
+    /** When each shown value last changed (#29), for [app.mg4dash.energy.ConsHold.MAX_HOLD_MS]. */
+    private val consSince = HashMap<ConsSource, Long>()
 
     /**
      * The car's consumption: the one its range assumes, energy left ÷ range announced by the car, so that the
