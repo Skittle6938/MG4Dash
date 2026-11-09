@@ -559,6 +559,8 @@
     <string name="wc_web_move_hint">Trascina per spostare, tira un angolo o un bordo per ridimensionare, poi OK</string>
     <string name="wc_other_app">Altra app…</string>
     <string name="wc_other_address">Altro indirizzo…</string>
+    <string name="wc_add_page">Aggiungi questa pagina</string>
+    <string name="wc_page_added">Indirizzo aggiunto</string>
     <string name="wc_web_count">%1$d indirizzi</string>
     <string name="wc_wake">Pagina attiva:</string>
     <string name="wc_wake_s">%1$d s</string>

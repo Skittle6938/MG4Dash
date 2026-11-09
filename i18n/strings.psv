@@ -553,6 +553,8 @@ wc_web_move|Move / resize|Déplacer / redimensionner|Verschieben / Größe ände
 wc_web_move_hint|Slide to move, pull a corner or an edge to resize, then OK|Glissez pour déplacer, tirez un coin ou un bord pour redimensionner, puis OK|Zum Verschieben ziehen, zum Ändern der Größe an einer Ecke oder Kante ziehen, dann OK|Desliza para mover, tira de una esquina o un borde para cambiar el tamaño, luego OK|Trascina per spostare, tira un angolo o un bordo per ridimensionare, poi OK|Sleep om te verplaatsen, trek aan een hoek of rand om het formaat te wijzigen, daarna OK|Taşımak için kaydırın, yeniden boyutlandırmak için bir köşeyi veya kenarı çekin, sonra OK
 wc_other_app|Other app…|Autre application…|Andere App…|Otra aplicación…|Altra app…|Andere app…|Başka uygulama…
 wc_other_address|Other address…|Autre adresse…|Andere Adresse…|Otra dirección…|Altro indirizzo…|Ander adres…|Başka adres…
+wc_add_page|Add this page|Ajouter cette page|Diese Seite hinzufügen|Añadir esta página|Aggiungi questa pagina|Deze pagina toevoegen|Bu sayfayı ekle
+wc_page_added|Address added|Adresse ajoutée|Adresse hinzugefügt|Dirección añadida|Indirizzo aggiunto|Adres toegevoegd|Adres eklendi
 wc_double_tap|Double tap on the page|Double tap sur la page|Doppeltippen auf die Seite|Doble toque en la página|Doppio tocco sulla pagina|Dubbeltik op de pagina|Sayfaya çift dokunma
 wc_double_tap_app|Double tap on the app|Double tap sur l'application|Doppeltippen auf die App|Doble toque en la aplicación|Doppio tocco sull'app|Dubbeltik op de app|Uygulamaya çift dokunma
 wc_dt_full|Full screen|Plein écran fixe|Vollbild|Pantalla completa|Schermo intero|Volledig scherm|Tam ekran

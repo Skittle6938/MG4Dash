@@ -24,7 +24,7 @@ object WebViewer {
     val component = ComponentName(PKG, "$PKG.WebActivity")
     private val page = ComponentName(PKG, "$PKG.PageActivity")
     /** Version of the embedded app (versionCode of web/build.gradle.kts). */
-    private const val BUNDLED_VERSION = 23L
+    private const val BUNDLED_VERSION = 24L
     private const val ASSET = "web.apk"
 
     /**
@@ -37,6 +37,8 @@ object WebViewer {
     const val FIELD = "$PKG.FIELD"
     const val KEY = "$PKG.KEY"
     const val SHOWN = "$PKG.SHOWN"
+    /** From MG4Dash Web: the address of the page shown (#98, the menu's Add this page). */
+    const val PAGE = "$PKG.PAGE"
     private const val ACTION_RESULT = "app.mg4dash.WEB_VIEWER_INSTALLED"
 
     /** This process cannot show a WebView itself: system (car version) or root uid. */
@@ -71,7 +73,7 @@ object WebViewer {
 
     /** Intent of the page: address, card colours, translated messages, full screen choice. */
     fun intent(context: Context, url: String, bg: Int, fg: Int): Intent = Intent(Intent.ACTION_VIEW)
-        .putExtra("url", url)
+        .putExtra("url", url).putExtra("owner", context.packageName)
         .putExtra("bg", bg).putExtra("fg", fg)
         .putExtra("loading", context.getString(app.mg4dash.R.string.wc_web_loading))
         .putExtra("error", context.getString(app.mg4dash.R.string.wc_web_error))

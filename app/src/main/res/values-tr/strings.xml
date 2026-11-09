@@ -559,6 +559,8 @@
     <string name="wc_web_move_hint">Taşımak için kaydırın, yeniden boyutlandırmak için bir köşeyi veya kenarı çekin, sonra OK</string>
     <string name="wc_other_app">Başka uygulama…</string>
     <string name="wc_other_address">Başka adres…</string>
+    <string name="wc_add_page">Bu sayfayı ekle</string>
+    <string name="wc_page_added">Adres eklendi</string>
     <string name="wc_web_count">%1$d adres</string>
     <string name="wc_wake">Sayfa etkin:</string>
     <string name="wc_wake_s">%1$d s</string>
