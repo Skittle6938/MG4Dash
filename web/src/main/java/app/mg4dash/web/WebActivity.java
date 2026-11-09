@@ -57,6 +57,10 @@ public class WebActivity extends Activity {
     private static final String FIELD = "app.mg4dash.web.FIELD";
     private static final String KEY = "app.mg4dash.web.KEY";
     private static final String SHOWN = "app.mg4dash.web.SHOWN";
+    /** To MG4Dash: the address of the page shown, after each load or move inside the page (its menu's "Add this page", #98). */
+    private static final String PAGE = "app.mg4dash.web.PAGE";
+    /** MG4Dash's package, told the page's address whatever the keyboard. */
+    static final String EXTRA_OWNER = "owner";
 
     private WebView web;
     private FrameLayout root;
@@ -198,8 +202,13 @@ public class WebActivity extends Activity {
             @Override
             public void onPageCommitVisible(WebView view, String url) { pageScripts(); watchFields(); }
 
+            // A move inside the page (a YouTube video, a dashboard's tab) changes its address without a new load
+            @Override
+            public void doUpdateVisitedHistory(WebView view, String url, boolean isReload) { page(url); }
+
             @Override
             public void onPageFinished(WebView view, String url) {
+                page(url);
                 if (!failed) message.setVisibility(View.GONE);
                 pageScripts();
                 watchFields();
@@ -497,6 +506,15 @@ public class WebActivity extends Activity {
         if (keyboardFor == null || (!on && !fieldOpen)) return;
         fieldOpen = on;
         tell(new Intent(FIELD).putExtra("on", on).putExtra("kind", kind));
+    }
+
+    /** The address of the page shown, to MG4Dash in the card (#98). */
+    private void page(String url) {
+        String owner = getIntent().getStringExtra(EXTRA_OWNER);
+        if (owner == null || !inCardOnly() || url == null || !url.startsWith("http")) return;
+        try {
+            sendBroadcast(new Intent(PAGE).putExtra("url", url).setPackage(owner).addFlags(Intent.FLAG_RECEIVER_FOREGROUND), TALK);
+        } catch (Exception e) { Log.w(TAG, "page to MG4Dash: " + e.getMessage()); }
     }
 
     private void tell(Intent i) {

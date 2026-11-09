@@ -39,6 +39,7 @@ class WebCard(private val activity: android.app.Activity) : FrameLayout(activity
     private val fields = object : android.content.BroadcastReceiver() {
         override fun onReceive(c: Context, i: android.content.Intent) {
             if (appView == null) return
+            if (i.action == WebViewer.PAGE) { page = i.getStringExtra("url") ?: page; return }
             when {
                 i.getBooleanExtra("ready", false) -> WebViewer.shown(context, shownNow())
                 i.getBooleanExtra("on", false) && shownNow() -> openKeyboard(i.getStringExtra("kind") ?: "text")
@@ -47,6 +48,8 @@ class WebCard(private val activity: android.app.Activity) : FrameLayout(activity
         }
     }
     private var listening = false
+    /** The address of the page shown now, after the links followed in it; null before a page shows (#98). */
+    private var page: String? = null
     private val message = TextView(context).apply {
         setTextColor(Themes.color(context, R.color.text_sub)); setTextSize(TypedValue.COMPLEX_UNIT_SP, 20f)
         gravity = Gravity.CENTER
@@ -83,7 +86,9 @@ class WebCard(private val activity: android.app.Activity) : FrameLayout(activity
                     Log.w(TAG, "page: ${error.description}")
                     showMessage(context.getString(R.string.wc_web_error))
                 }
+                override fun doUpdateVisitedHistory(view: android.webkit.WebView, url: String?, isReload: Boolean) { if (url != null) page = url }
                 override fun onPageFinished(view: android.webkit.WebView, url: String?) {
+                    if (url != null) page = url
                     if (message.visibility != View.VISIBLE || message.text.endsWith(context.getString(R.string.wc_web_loading))) message.visibility = View.GONE
                 }
             }
@@ -107,7 +112,7 @@ class WebCard(private val activity: android.app.Activity) : FrameLayout(activity
         w.visibility = View.VISIBLE
         w.onResume()
         if (url != loaded) {
-            loaded = url
+            loaded = url; page = null
             showMessage(loading(url))
             w.loadUrl(url)
         }
@@ -155,7 +160,7 @@ class WebCard(private val activity: android.app.Activity) : FrameLayout(activity
     private fun removeApp() {
         closeKeyboard()
         appView?.let { removeView(it) }
-        appView = null; appUrl = null
+        appView = null; appUrl = null; page = null
     }
 
     /**
@@ -223,6 +228,14 @@ class WebCard(private val activity: android.app.Activity) : FrameLayout(activity
                 show()
             }
         }
+        // The page shown now (after links followed in it), added to the list as it is, if it is not there yet
+        pageToAdd(prefs.webUrls, page)?.let { url ->
+            rows += CardMenu.Row("＋", context.getString(R.string.wc_add_page), url, false) {
+                prefs.webUrls = prefs.webUrls + url
+                Log.i(TAG, "menu: ${name(url)} page added")
+                Toasts.show(context, R.string.wc_page_added)
+            }
+        }
         // Another address, entered as in the edit mode, added to the list and shown at once
         rows += CardMenu.Row("＋", context.getString(R.string.wc_other_address), null, false) {
             CardsEditor.askUrl(activity, "") { url ->
@@ -240,7 +253,7 @@ class WebCard(private val activity: android.app.Activity) : FrameLayout(activity
         super.onAttachedToWindow()
         if (WebViewer.needed() && !listening) {
             listening = true
-            context.registerReceiver(fields, android.content.IntentFilter(WebViewer.FIELD), WebViewer.TALK, null)
+            context.registerReceiver(fields, android.content.IntentFilter(WebViewer.FIELD).apply { addAction(WebViewer.PAGE) }, WebViewer.TALK, null)
         }
     }
 
@@ -258,6 +271,10 @@ class WebCard(private val activity: android.app.Activity) : FrameLayout(activity
 
     companion object {
         private const val TAG = "WebCard"
+
+        /** The page shown, to offer in the menu's "Add this page" (#98): a web address not in [urls] yet, else null. */
+        internal fun pageToAdd(urls: List<String>, page: String?): String? =
+            page?.trim()?.takeIf { (it.startsWith("http://") || it.startsWith("https://")) && it !in urls }
 
         /** A short name for an address: its site without "www." (with its path's first part for Google Maps and the like). */
         fun name(url: String): String {
