@@ -16,6 +16,9 @@ jobs:
         with:
           distribution: temurin
           java-version: "17"
+      # Garde en cache la distribution Gradle du wrapper et les dépendances : plus de téléchargement
+      # de services.gradle.org à chaque passage (échec « timeout (10000ms) » du 9 novembre)
+      - uses: gradle/actions/setup-gradle@v4
       - name: Build and test
         run: chmod +x gradlew && ./gradlew --no-daemon -q testEmulatorDebugUnitTest :rescue:testDebugUnitTest assembleEmulatorDebug
       - name: Failed tests
