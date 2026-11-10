@@ -75,8 +75,6 @@ public class WebActivity extends Activity {
     /** MG4Dash was told that a field is touched (its keyboard is open). */
     private boolean fieldOpen;
     private boolean listening;
-    /** The WebView is paused for the hidden card (MG4Dash said so). */
-    private boolean pausedHidden;
     private boolean started;
     /** The page's sound as a player of the head unit (#98), in the card. */
     private WebMedia media;
@@ -476,16 +474,14 @@ public class WebActivity extends Activity {
         web.evaluateJavascript("window.__mg4dashQuality = '" + (full ? "large" : "small") + "';" + QUALITY_JS, null);
     }
 
-    /** From MG4Dash: hidden, the page goes on (sound, live values) without drawing nor decoding the videos' image. */
+    /**
+     * From MG4Dash: hidden (another card shown), the page goes on without drawing: a video's sound keeps playing, as
+     * before the videos were decoded by Chromium (pausing the WebView then cut it until the card came back).
+     */
     private void shown(boolean on) {
         web.setVisibility(on ? View.VISIBLE : View.INVISIBLE);
         if (video != null) video.setVisibility(on ? View.VISIBLE : View.INVISIBLE);
-        // Paused only when Chromium no longer suspends the media (switch taken with the videos' decoding)
-        if (!softVideo || on == !pausedHidden) return;
-        pausedHidden = !on;
-        if (!started) return;
-        if (on) web.onResume(); else web.onPause();
-        Log.i(TAG, on ? "card shown: WebView resumed" : "card hidden: WebView paused");
+        Log.i(TAG, on ? "card shown" : "card hidden: the page goes on, its sound kept");
     }
 
     private void watchFields() {
@@ -564,7 +560,7 @@ public class WebActivity extends Activity {
     protected void onStart() {
         super.onStart();
         started = true;
-        if (web != null && !pausedHidden) web.onResume();
+        if (web != null) web.onResume();
     }
 
     @Override
