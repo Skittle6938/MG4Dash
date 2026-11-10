@@ -654,8 +654,6 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
     override fun onResume() {
         super.onResume()
         CarBridge.setForeground(true)
-        // CarPlay without the bars from its first frame (#1), even with no app in the map card
-        app.mg4dash.ui.EmbeddedApp.immersive(this, app.mg4dash.ui.EmbeddedApp.lastPkg ?: prefs.mapApp?.let { android.content.ComponentName.unflattenFromString(it)?.packageName })
         // MG4Dash had not started and the rescue app stepped in: say so once
         app.mg4dash.system.Rescue.notice?.let { app.mg4dash.system.Rescue.notice = null; app.mg4dash.ui.Toasts.show(this, it, long = true) }
         // Home layout changed in the settings: rebuild the screen
