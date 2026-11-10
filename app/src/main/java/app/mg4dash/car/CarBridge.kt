@@ -26,7 +26,7 @@ import kotlinx.coroutines.sync.withLock
  * States are read by polling rather than callbacks: less AIDL code
  * to maintain, and recovery is automatic if a SAIC service restarts.
  * Climate commands follow choice 2A: one toggle per press, the display follows the reading.
- * Nothing is written to the drive mode or regeneration: read only.
+ * Driving settings (drive mode, regeneration, Custom mode, driving aids) go through [DriveSettings].
  */
 object CarBridge {
     private const val TAG = "Car"
@@ -47,6 +47,7 @@ object CarBridge {
     @Volatile private var hvac: HvacService? = null
     @Volatile private var ev: EvService? = null
     @Volatile private var vs: VehicleSettingService? = null
+    @Volatile private var vsBinder: IBinder? = null
     @Volatile private var general: GeneralService? = null
     @Volatile private var bound = false
 
@@ -64,6 +65,8 @@ object CarBridge {
         // the stock launcher's SAIC. Unknown firmware: try both.
         if (Firmware.family != Firmware.Family.LEGACY) bind()
         if (Firmware.family != Firmware.Family.A9) LegacyCar.init(context)
+        DriveSettings.init(context)
+        DriveSettings.a9Binder = { vsBinder }
         Log.i(TAG, "firmware ${Firmware.version} (${Firmware.gen}, family ${Firmware.family})")
         scope.launch { pollLoop() }
         watchSaicClimate(context.applicationContext)
@@ -194,7 +197,7 @@ object CarBridge {
     private fun resolveClients() {
         if (hvac?.alive != true) hvac = query(CODE_HVAC)?.let { HvacService(it) }
         if (ev?.alive != true) ev = query(CODE_EV)?.let { EvService(it) }
-        if (vs?.alive != true) vs = query(CODE_VS)?.let { VehicleSettingService(it) }
+        if (vs?.alive != true) { vsBinder = query(CODE_VS); vs = vsBinder?.let { VehicleSettingService(it) } }
         if (general?.alive != true) {
             general = query(CODE_GENERAL)?.let { GeneralService(it) }
             // At startup, screen back on: if MG4Dash had turned it off then was relaunched, nothing else turns it on
@@ -339,15 +342,7 @@ object CarBridge {
             chargeCtrl = e?.let { safe { it.chargeCtrlStatus } } ?: s.chargeCtrl,
             dischargeCtrl = e?.let { safe { it.disChargeCtrl } } ?: s.dischargeCtrl,
             dischargeRemainMin = e?.let { safe { it.disChargingRemainTime } } ?: s.dischargeRemainMin,
-            driveMode = v?.let { safe { it.drivingMode } } ?: s.driveMode,
-            regenLevel = v?.let { safe { it.regenerativeLevel } } ?: s.regenLevel,
-            onePedal = v?.let { safe { it.signalPedalState } } ?: s.onePedal,
-            steeringMode = v?.let { safe { it.steeringMode } } ?: s.steeringMode,
-            brakePedalMode = v?.let { safe { it.brakePedalMode } } ?: s.brakePedalMode,
             enduranceMode = v?.let { safe { it.enduranceMode } } ?: s.enduranceMode,
-            lasMode = v?.let { safe { it.lasMode } } ?: s.lasMode,
-            fcwState = v?.let { safe { it.fcwState } } ?: s.fcwState,
-            fcwBrakeMode = v?.let { safe { it.fcwAutoBrakeMode } } ?: s.fcwBrakeMode,
             overSpeedSound = v?.let { safe { it.overSpeedSoundMode } } ?: s.overSpeedSound,
             speedLimitSound = v?.let { safe { it.speedLimitSoundMode } } ?: s.speedLimitSound,
             odometerKm = odometer(g?.let { safe { it.totalMileage } }, s.odometerKm),
@@ -361,6 +356,7 @@ object CarBridge {
         if (e == null || v == null || g == null) refreshFromProps()
         if (e == null && Firmware.family != Firmware.Family.A9) _state.value = LegacyCar.readCharging(_state.value)
         if (v == null && Firmware.family == Firmware.Family.LEGACY) _state.value = LegacyCar.readDriving(_state.value)
+        if (!BuildConfig.MOCK) refreshDrive()
     }
 
     /**
@@ -380,10 +376,6 @@ object CarBridge {
         val dc = i(0x2140f43f)?.takeIf { it != 0 && it != 1023 } != null
         val ac = i(0x2140f43e)?.takeIf { it != 0 && it != 1023 } != null
         val status = when { raw != null && raw in 1..15 -> raw; dc || ac -> 7; else -> 0 }
-        // Drive mode (property) → A9 scale (2 eco, 3 normal, 4 sport, 6 snow, 7 custom).
-        // SWI68 gives this scale directly (stock Settings app: 6, 2, 3, 4, 7); the table
-        // 0 snow / 1 eco stays for firmwares using it. The values do not overlap.
-        val dm = when (val m = i(0x2140a17c)) { 2, 3, 4, 6, 7 -> m; 0 -> 6; 1 -> 2; else -> null }
         // Without an EV service, the properties are the only source: reread on each pass
         // (before, the first value read stayed shown: % and range frozen, issue #13).
         val noEv = ev == null
@@ -397,13 +389,6 @@ object CarBridge {
             // Reread on each pass (#102): before, the first value stayed shown without a general service
             // (SWI165), the km stopped and the average kWh/100 climbed
             odometerKm = odometer(i(0x21401566), s.odometerKm),
-            driveMode = if (vs == null) dm ?: s.driveMode else s.driveMode ?: dm,
-            // Without a settings service (SWI68, #19), the property is reread on each pass: before, the
-            // first value stayed shown and a regeneration change did not show.
-            regenLevel = fresh(i(0x2140a191)?.takeIf { it in 0..7 }, s.regenLevel),
-            // Driving aids (found on SWI69: same scales as the settings service)
-            lasMode = fresh(i(0x2140a104)?.takeIf { it in 1..5 }, s.lasMode),
-            fcwState = fresh(i(0x2140a108)?.takeIf { it in 1..2 }, s.fcwState),
             overSpeedSound = fresh(i(0x2140a16c)?.takeIf { it in 0..1 }, s.overSpeedSound),
             // Speed limit beep without a settings service (SWI165, #37). Steering, brake pedal
             // and Range+ do not exist on these cars (meaningless values): lines hidden.
@@ -413,7 +398,6 @@ object CarBridge {
             speedKmh = if (general != null) s.speedKmh else
                 (CarProps.readFloatArea(0x11600207, 0x1000000) ?: CarProps.readFloatArea(0x11600207, 0))
                     ?.takeIf { !it.isNaN() }?.let { Math.abs(it) }?.takeIf { it < 300f } ?: s.speedKmh,
-            onePedal = fresh(i(0x2140a193)?.takeIf { it in 0..1 } ?: i(0x2140a191)?.let { if (it == 6) 1 else null }, s.onePedal),
         )
     }
 
@@ -673,39 +657,62 @@ object CarBridge {
     private const val VEHICLE_ESP = 289421317       // 0x11403805: ESC command (setDrivingEpsMode of the MG menu)
     private const val TCS_OPNG_MD = 289421343       // 0x1140381f: 1 = ESC active, 0 = off (fallback)
 
-    // ── Regeneration: touched from the KERS gauge (home, Vehicle page) ──
+    // ── Driving settings (Driving card, KERS gauge): MG4Control's commands, see DriveSettings ──
 
-    /** Regeneration level 0..3; one-pedal driving is turned off first if active. */
-    fun setRegenLevel(level: Int) {
-        if (BuildConfig.MOCK) { _state.value = _state.value.copy(regenLevel = level, onePedal = 0); return }
+    /** Rereads the driving settings; a setting that stops answering keeps its last value. */
+    private fun refreshDrive() {
+        val s = _state.value
+        val r = DriveSettings.read(s)
+        _state.value = s.copy(
+            driveMode = r.driveMode ?: s.driveMode, regenLevel = r.regenLevel ?: s.regenLevel, onePedal = r.onePedal ?: s.onePedal,
+            steeringMode = r.steeringMode ?: s.steeringMode, brakePedalMode = r.brakePedalMode ?: s.brakePedalMode,
+            lasMode = r.lasMode ?: s.lasMode, fcwState = r.fcwState ?: s.fcwState, fcwBrakeMode = r.fcwBrakeMode ?: s.fcwBrakeMode,
+        )
+    }
+
+    /** A driving setting command, off the main thread, then two rereads. Never refused while driving (owner's choice). */
+    private fun drive(label: String, mock: (VehicleState) -> VehicleState, action: () -> Boolean) {
+        if (BuildConfig.MOCK) { _state.value = mock(_state.value); return }
         scope.launch {
-            val v = vs
-            try {
-                if (_state.value.onePedal == 1) {
-                    if (v != null) v.setSignalPedalState(0) else CarProps.setInt(0x2140a193, 0, "one pedal")
-                    delay(300)
-                }
-                if (v != null) { v.setRegenerativeLevel(level); Log.i(TAG, "SET regen = $level") }
-                else CarProps.setInt(0x2140a191, level, "regen")
-            } catch (e: Exception) { Log.w(TAG, "SET regen: ${e.message}") }
-            delay(500); refreshEnergy()
-            delay(1500); refreshEnergy()
+            val ok = try { action() } catch (e: Exception) { Log.w(TAG, "SET $label: ${e.message}"); false }
+            Log.i(TAG, "SET $label → $ok")
+            delay(500); refreshDrive()
+            delay(1500); refreshDrive()
         }
     }
 
+    /** Drive mode: 6 snow, 2 eco, 3 normal, 4 sport, 7 custom. */
+    fun setDriveMode(mode: Int) = drive("drive mode $mode", { it.copy(driveMode = mode) }) { DriveSettings.setDriveMode(mode) }
+
+    /** Regeneration level 0..3; one-pedal driving is turned off first (MG4Control's setRegenLevel). */
+    fun setRegenLevel(level: Int) = drive("regen $level", { it.copy(regenLevel = level, onePedal = 0) }) { DriveSettings.setRegenLevel(level) }
+
+    /** One-pedal driving on, as MG4Control's "One Pedal" regeneration level. */
+    fun setOnePedal() = drive("one pedal", { it.copy(onePedal = 1) }) { DriveSettings.setRegenLevel(DriveSettings.REGEN_ONE_PEDAL) }
+
     /** One-pedal driving: toggle (long press on the KERS gauge). */
     fun toggleOnePedal() {
-        val target = if (_state.value.onePedal == 1) 0 else 1
-        if (BuildConfig.MOCK) { _state.value = _state.value.copy(onePedal = target); return }
-        scope.launch {
-            try {
-                val v = vs
-                if (v != null) { v.setSignalPedalState(target); Log.i(TAG, "SET one pedal = $target") }
-                else CarProps.setInt(0x2140a193, target, "one pedal")
-            } catch (e: Exception) { Log.w(TAG, "SET one pedal: ${e.message}") }
-            delay(500); refreshEnergy()
-            delay(1500); refreshEnergy()
-        }
+        val on = _state.value.onePedal != 1
+        drive("one pedal $on", { it.copy(onePedal = if (on) 1 else 0) }) { DriveSettings.setOnePedal(on) }
+    }
+
+    /** Custom mode steering, [index] 0 comfort, 1 normal, 2 sport. */
+    fun setSteering(index: Int) = drive("steering $index", { it.copy(steeringMode = DriveSettings.customValue(DriveSettings.Custom.STEERING, index)) }) {
+        DriveSettings.setCustom(DriveSettings.Custom.STEERING, index)
+    }
+
+    /** Custom mode brake pedal, [index] 0 comfort, 1 normal, 2 sport. */
+    fun setBrakePedal(index: Int) = drive("brake pedal $index", { it.copy(brakePedalMode = DriveSettings.customValue(DriveSettings.Custom.PEDAL, index)) }) {
+        DriveSettings.setCustom(DriveSettings.Custom.PEDAL, index)
+    }
+
+    /** Lane keeping: 1 off, 2 warning, 3 assist, 5 emergency. */
+    fun setLaneMode(mode: Int) = drive("lane keeping $mode", { it.copy(lasMode = mode) }) { DriveSettings.setLaneMode(mode) }
+
+    /** Front collision: 0 off, 1 warning, 2 warning + braking. */
+    fun setFcw(choice: Int) {
+        val cur = _state.value.fcwState
+        drive("front collision $choice", { if (choice == 0) it.copy(fcwState = 1) else it.copy(fcwState = 2, fcwBrakeMode = choice) }) { DriveSettings.setFcw(choice, cur) }
     }
 
     fun startCharge() = evCommand("startCharge") { it.chargeCtrl(1) }

@@ -201,21 +201,20 @@ object LegacyCar {
     @Volatile private var setting: Any? = null
     @Volatile private var settingInit = false
 
-    private fun vsInt(name: String): Int? {
+    /** The SDK's VehicleSettingManager, connected on first use; also used by [DriveSettings]. */
+    internal fun settingManager(): Any? {
         if (setting == null && !settingInit) { val ctx = appContext ?: return null; settingInit = true; setting = sdkManager(ctx, SETTING_CLASS) { setting = it } }
-        val c = setting ?: return null
+        return setting
+    }
+
+    private fun vsInt(name: String): Int? {
+        val c = settingManager() ?: return null
         return try { c.javaClass.getMethod(name).invoke(c) as? Int } catch (_: Exception) { null }
     }
 
-    /** Steering and pedal only in Custom mode (7), like the stock screen; otherwise hidden. */
-    fun readDriving(s: VehicleState): VehicleState {
-        val custom = s.driveMode == 7
-        return s.copy(
-            steeringMode = if (custom) vsInt("getSteeringLevel")?.takeIf { it in 1..3 } else null,
-            brakePedalMode = if (custom) vsInt("getBrakePedalLevel")?.takeIf { it in 0..2 } else null,
-            enduranceMode = vsInt("getLongerEndurance")?.takeIf { it in 0..1 },
-        )
-    }
+    /** Range+ (the driving settings themselves are read by [DriveSettings]). */
+    fun readDriving(s: VehicleState): VehicleState =
+        s.copy(enduranceMode = vsInt("getLongerEndurance")?.takeIf { it in 0..1 })
 
     // ── ESC: VehicleControlManager of the same SDK (SWI68/165, methods found by MG4Control) ──
     // Read 1 = active, 0 or 2 = off; writing is a toggle (1), like the stock switch.
