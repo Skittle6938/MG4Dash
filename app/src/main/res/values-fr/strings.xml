@@ -776,6 +776,8 @@
     <string name="st_sound_trigger">Son au démarrage</string>
     <string name="st_sound_trigger_desc">Choisissez un fichier audio sur une clé USB ou dans la mémoire interne. Il est copié dans l’application et reste disponible après le retrait de la clé.</string>
     <string name="st_sound_boot_trigger">Lire au démarrage</string>
+    <string name="st_sound_wait">Attendre la fin du son de démarrage</string>
+    <string name="st_sound_wait_desc">La source audio démarre (ou reste en pause) une fois le son terminé</string>
     <string name="st_sound_pick_file">Choisir un fichier audio</string>
     <string name="st_sound_no_file">Aucun son sélectionné</string>
     <string name="st_sound_file_too_large">Les fichiers audio ne doivent pas dépasser 20 Mo</string>

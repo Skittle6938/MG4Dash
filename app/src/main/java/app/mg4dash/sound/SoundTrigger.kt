@@ -36,11 +36,24 @@ object SoundTrigger {
     private var bootTriggered = false
     @Volatile private var appCtx: Context? = null
 
+    /** A startup sound is to play at this start (on, with a file): the sources wait for its end (#36). */
+    @Volatile var bootSoundExpected = false; private set
+    /** End of the startup sound (uptime), 0 before it starts; set to its real end when it stops. */
+    @Volatile var bootSoundUntil = 0L; private set
+    private var bootPlaying = false
+
+    /** The startup sound is to play or playing at [now] (uptime). */
+    fun bootSoundBusy(now: Long = android.os.SystemClock.uptimeMillis()) = bootSoundExpected && (bootSoundUntil == 0L || now < bootSoundUntil)
+
+    /** The startup sound played or is playing, and ended less than [ms] ago. */
+    fun bootSoundRecent(ms: Long, now: Long = android.os.SystemClock.uptimeMillis()) = bootSoundExpected && (bootSoundUntil == 0L || now < bootSoundUntil + ms)
+
     /** Trigger startup playback when the main interface opens. */
     fun onBootOrAppStart(context: Context) {
         val ctx = context.applicationContext.also { appCtx = it }
         if (bootTriggered) return
         bootTriggered = true
+        bootSoundExpected = SoundTriggerSettings.isBootTriggerEnabled(ctx) && !SoundTriggerSettings.getSelectedSoundPath(ctx).isNullOrEmpty()
 
         threadHandler.post {
             restoreInterruptedCarVolume(ctx)
@@ -53,7 +66,7 @@ object SoundTrigger {
                 return@post
             }
             Log.i(TAG, "Triggering instant start sound: $soundPath")
-            playSoundFile(ctx, File(soundPath), isTest = false)
+            playSoundFile(ctx, File(soundPath), isTest = false) { if (bootSoundUntil == 0L) bootSoundUntil = android.os.SystemClock.uptimeMillis() }
         }
     }
 
@@ -117,6 +130,7 @@ object SoundTrigger {
             try {
                 player.start()
                 isPlaying = true
+                if (!isTest && bootSoundExpected && bootSoundUntil == 0L) { bootPlaying = true; bootSoundUntil = android.os.SystemClock.uptimeMillis() + duration }
                 timeoutRunnable = Runnable {
                     stopPlayback("timeout")
                     onComplete?.let { Handler(context.mainLooper).post(it) }
@@ -143,6 +157,7 @@ object SoundTrigger {
 
         val wasPlaying = isPlaying
         isPlaying = false
+        if (bootPlaying) { bootPlaying = false; bootSoundUntil = minOf(bootSoundUntil, android.os.SystemClock.uptimeMillis()) }
 
         mediaPlayer?.let { p ->
             runCatching { if (p.isPlaying) p.stop() }

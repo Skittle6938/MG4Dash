@@ -251,6 +251,11 @@ class Prefs(context: Context) {
         get() = sp.getBoolean("connection_icons", true)
         set(v) = sp.edit().putBoolean("connection_icons", v).apply()
 
+    /** The startup source and playback wait for the end of the startup sound (#36), on by default. */
+    var waitStartSound: Boolean
+        get() = sp.getBoolean("wait_start_sound", true)
+        set(v) = sp.edit().putBoolean("wait_start_sound", v).apply()
+
     /** Play at car start: 0 as when stopped (default), 1 always paused, 2 always playing. */
     var startPlayback: Int
         get() = sp.getInt("start_playback", 0)

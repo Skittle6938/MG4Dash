@@ -757,6 +757,8 @@ class SettingsActivity : AppCompatActivity() {
             { app.mg4dash.sound.SoundTriggerSettings.isBootTriggerEnabled(this) },
             { app.mg4dash.sound.SoundTriggerSettings.setBootTriggerEnabled(this, it) }
         )
+        // The startup source and playback after the sound (#36)
+        toggle(parent, R.string.st_sound_wait, R.string.st_sound_wait_desc, { prefs.waitStartSound }) { prefs.waitStartSound = it }
 
         // Select and import an audio file.
         val selectedPath = app.mg4dash.sound.SoundTriggerSettings.getSelectedSoundPath(this)
