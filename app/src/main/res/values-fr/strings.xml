@@ -561,6 +561,13 @@
     <string name="wc_other_address">Autre adresse…</string>
     <string name="wc_add_page">Ajouter cette page</string>
     <string name="wc_page_added">Adresse ajoutée</string>
+    <string name="wc_urls_import">Importer depuis la clé USB</string>
+    <string name="wc_urls_import_desc">mg4dash_url.txt, une adresse par ligne</string>
+    <string name="wc_urls_export">Exporter sur la clé USB</string>
+    <string name="wc_urls_imported">Adresses ajoutées depuis la clé USB : %d</string>
+    <string name="wc_urls_import_none">Aucun fichier mg4dash_url.txt à la racine d\'une clé USB</string>
+    <string name="wc_urls_exported">Enregistré sur la clé USB : %s</string>
+    <string name="wc_urls_no_usb">Aucune clé USB où écrire</string>
     <string name="wc_trips">Derniers trajets</string>
     <string name="title_trips">TRAJETS</string>
     <string name="tr_now">En cours · depuis %s</string>

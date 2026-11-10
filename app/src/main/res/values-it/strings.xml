@@ -561,6 +561,13 @@
     <string name="wc_other_address">Altro indirizzo…</string>
     <string name="wc_add_page">Aggiungi questa pagina</string>
     <string name="wc_page_added">Indirizzo aggiunto</string>
+    <string name="wc_urls_import">Importa dalla chiavetta USB</string>
+    <string name="wc_urls_import_desc">mg4dash_url.txt, un indirizzo per riga</string>
+    <string name="wc_urls_export">Esporta sulla chiavetta USB</string>
+    <string name="wc_urls_imported">Indirizzi aggiunti dalla chiavetta USB: %d</string>
+    <string name="wc_urls_import_none">Nessun mg4dash_url.txt nella radice di una chiavetta USB</string>
+    <string name="wc_urls_exported">Salvato sulla chiavetta USB: %s</string>
+    <string name="wc_urls_no_usb">Nessuna chiavetta USB su cui scrivere</string>
     <string name="wc_trips">Ultimi viaggi</string>
     <string name="title_trips">VIAGGI</string>
     <string name="tr_now">In corso · dalle %s</string>

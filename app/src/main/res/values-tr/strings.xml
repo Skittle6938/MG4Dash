@@ -561,6 +561,13 @@
     <string name="wc_other_address">Başka adres…</string>
     <string name="wc_add_page">Bu sayfayı ekle</string>
     <string name="wc_page_added">Adres eklendi</string>
+    <string name="wc_urls_import">USB bellekten içe aktar</string>
+    <string name="wc_urls_import_desc">mg4dash_url.txt, her satıra bir adres</string>
+    <string name="wc_urls_export">USB belleğe dışa aktar</string>
+    <string name="wc_urls_imported">USB bellekten eklenen adresler: %d</string>
+    <string name="wc_urls_import_none">Bir USB belleğin kökünde mg4dash_url.txt yok</string>
+    <string name="wc_urls_exported">USB belleğe kaydedildi: %s</string>
+    <string name="wc_urls_no_usb">Yazılacak USB bellek yok</string>
     <string name="wc_trips">Son yolculuklar</string>
     <string name="title_trips">YOLCULUKLAR</string>
     <string name="tr_now">Sürüyor · başlangıç %s</string>
