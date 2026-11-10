@@ -654,6 +654,8 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
     override fun onResume() {
         super.onResume()
         CarBridge.setForeground(true)
+        // The SAIC status bar back over CarPlay for those who had 1.7.3 beta 2 (#104)
+        app.mg4dash.ui.EmbeddedApp.clearCarPlay(this)
         // MG4Dash had not started and the rescue app stepped in: say so once
         app.mg4dash.system.Rescue.notice?.let { app.mg4dash.system.Rescue.notice = null; app.mg4dash.ui.Toasts.show(this, it, long = true) }
         // Home layout changed in the settings: rebuild the screen
