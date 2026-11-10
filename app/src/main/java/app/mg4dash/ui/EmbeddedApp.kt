@@ -108,13 +108,42 @@ object EmbeddedApp {
         try {
             val cr = context.contentResolver
             val cur = android.provider.Settings.Global.getString(cr, "policy_control")
-            // Only touch a value set by us (or empty)
-            if (cur != null && cur.isNotEmpty() && !cur.startsWith("immersive.full=${context.packageName},")) return
+            // Only touch a value set by us (or empty), CarPlay alone included (left by 1.7.3 beta 2, #104)
+            if (cur != null && cur.isNotEmpty() && !cur.startsWith("immersive.full=${context.packageName},") && cur != "immersive.full=$CARPLAY") return
             if (cur != want) {
                 android.provider.Settings.Global.putString(cr, "policy_control", want)
                 Log.i(TAG, "policy_control → ${want ?: "(empty)"}")
             }
         } catch (e: Throwable) { Log.w(TAG, "policy_control: ${e.message}") }
+    }
+
+    private const val CARPLAY = "com.allgo.carplay.service"
+
+    /**
+     * 1.7.3 beta 2 put CarPlay in "policy_control" (#1), which hid the SAIC status bar over it, and beta 3 no
+     * longer took that value for its own: it stayed, even after a restart (#104). Cleared at each return to home:
+     * CarPlay taken out, the embedded app kept.
+     */
+    fun clearCarPlay(context: Context) {
+        try {
+            val cr = context.contentResolver
+            val cur = android.provider.Settings.Global.getString(cr, "policy_control")
+            val (change, next) = withoutCarPlay(cur, context.packageName)
+            if (!change) return
+            android.provider.Settings.Global.putString(cr, "policy_control", next)
+            Log.i(TAG, "policy_control: CarPlay taken out ($cur → ${next ?: "(empty)"})")
+        } catch (e: Throwable) { Log.w(TAG, "policy_control: ${e.message}") }
+    }
+
+    /** Whether [cur] is one of MG4Dash's values with CarPlay in it, and the value without it (null: empty). */
+    internal fun withoutCarPlay(cur: String?, own: String): Pair<Boolean, String?> {
+        val prefix = "immersive.full="
+        if (cur == null || !cur.startsWith(prefix)) return false to cur
+        val apps = cur.removePrefix(prefix).split(',').map { it.trim() }.filter { it.isNotEmpty() }
+        if (CARPLAY !in apps || !(apps.first() == own || apps == listOf(CARPLAY))) return false to cur
+        val rest = apps - CARPLAY
+        // MG4Dash alone has nothing to force: as with no embedded app
+        return true to (if (rest.size < 2) null else prefix + rest.joinToString(","))
     }
 
     private fun resize(v: View) {
