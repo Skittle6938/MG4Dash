@@ -38,10 +38,9 @@ object UpdatePrompt {
     private var checked = false
     /** Release offered and not yet dismissed; null once answered "Later" / "Do not notify". */
     private var pending: Updater.Release? = null
-    /** Status text of the running download (null: not started), and the window showing it. */
-    private var progress: String? = null
+    /** The window showing the offer, and what follows the update's state in it. */
     private var shownIn: java.lang.ref.WeakReference<Activity>? = null
-    private var onProgress: ((String?) -> Unit)? = null
+    private var watch: kotlinx.coroutines.Job? = null
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
 
     fun maybeShow(activity: Activity) {
@@ -110,7 +109,7 @@ object UpdatePrompt {
             }, LinearLayout.LayoutParams(-1, 0, 1f).apply { topMargin = kit.dp(4) })
         }
 
-        fun close() { pending = null; onProgress = null; root.removeView(scrim); Fullscreen.apply(activity) }
+        fun close() { pending = null; watch?.cancel(); watch = null; root.removeView(scrim); Fullscreen.apply(activity) }
         fun button(label: Int, colorRes: Int, onClick: () -> Unit) = Button(activity).apply {
             setText(label); isAllCaps = false; setTextColor(kit.color(colorRes)); setTextSize(TypedValue.COMPLEX_UNIT_SP, 19f)
             setBackgroundResource(R.drawable.bg_button); minHeight = kit.dp(56); setPadding(kit.dp(20), 0, kit.dp(20), 0)
@@ -123,32 +122,26 @@ object UpdatePrompt {
         lateinit var now: Button
         skip = button(R.string.upd_skip, R.color.text_sub) { Prefs(activity).updateSkipped = r.version; close() }
         later = button(R.string.upd_later, R.color.text_value) { close() }
-        // Download status shown in the current window (it continues if home is rebuilt)
-        fun render(text: String?) {
-            val busy = text != null && text != activity.getString(R.string.st_update_error)
-            if (text != null) state.text = text
-            skip.isEnabled = !busy; later.isEnabled = !busy; now.isEnabled = !busy
+        // Progress bar under the status, while it downloads and installs
+        val bar = android.widget.ProgressBar(activity, null, android.R.attr.progressBarStyleHorizontal).apply {
+            max = 100; visibility = android.view.View.GONE
+            progressTintList = android.content.res.ColorStateList.valueOf(kit.color(R.color.text_value))
+        }
+        panel.addView(bar, LinearLayout.LayoutParams(-1, kit.dp(8)).apply { bottomMargin = kit.dp(8) })
+        // The update's state shown in the current window (it goes on if home is rebuilt)
+        fun render(s: Updater.State) {
+            Updater.stateText(activity, s)?.let { state.text = it }
+            bar.visibility = if (s.busy) android.view.View.VISIBLE else android.view.View.GONE
+            bar.isIndeterminate = s !is Updater.State.Downloading
+            if (s is Updater.State.Downloading) bar.progress = s.pct
+            skip.isEnabled = !s.busy; later.isEnabled = !s.busy; now.isEnabled = !s.busy
+            if (s is Updater.State.Failed) now.setText(R.string.upd_try_again)
         }
         now = button(R.string.upd_now, R.color.accent_action) {
-            val app = activity.applicationContext
-            fun report(t: String) { progress = t; onProgress?.invoke(t) }
-            if (!Updater.begin()) { report(app.getString(R.string.st_update_busy)); return@button }
-            report(app.getString(R.string.st_update_downloading, 0))
-            scope.launch {
-                try {
-                    val apk = withContext(Dispatchers.IO) {
-                        Updater.download(app, r) { pct -> scope.launch { report(app.getString(R.string.st_update_downloading, pct)) } }
-                    }
-                    report(app.getString(R.string.st_update_installing))
-                    withContext(Dispatchers.IO) { Updater.install(app, apk) }
-                } catch (e: Exception) {
-                    Log.w(TAG, "failed: ${e.message}")
-                    Updater.end()
-                    report(app.getString(R.string.st_update_error))
-                }
-            }
+            if (!Updater.start(activity, (Updater.state.value as? Updater.State.Failed)?.release ?: r)) state.text = activity.getString(R.string.st_update_busy)
         }
-        onProgress = { render(it) }
+        watch?.cancel()
+        watch = scope.launch { Updater.state.collect { if (shownIn?.get() === activity) render(it) } }
         listOf(skip, later, now).forEachIndexed { i, v -> buttons.addView(v, kit.lp(0, -1, 1f, l = if (i > 0) 10 else 0)) }
         panel.addView(buttons, LinearLayout.LayoutParams(-1, -2).apply { topMargin = kit.dp(16) })
 
@@ -156,6 +149,6 @@ object UpdatePrompt {
         val h = if (notes.isEmpty()) -2 else minOf(kit.dp(560), (activity.resources.displayMetrics.heightPixels * 0.85f).toInt())
         scrim.addView(panel, FrameLayout.LayoutParams(kit.dp(900), h, Gravity.CENTER))
         root.addView(scrim, FrameLayout.LayoutParams(-1, -1))
-        render(progress)
+        render(Updater.state.value)
     }
 }

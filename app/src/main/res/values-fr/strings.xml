@@ -347,6 +347,14 @@
     <string name="st_update_confirm">Télécharger et installer MG4Dash %1$s ? L\'écran va redémarrer.</string>
     <string name="st_update_downloading">Téléchargement… %1$d %%</string>
     <string name="st_update_installing">Installation… l\'écran va redémarrer</string>
+    <string name="upd_connecting">Connexion à GitHub…</string>
+    <string name="upd_retry">Connexion coupée : essai %1$d sur %2$d dans %3$d s…</string>
+    <string name="upd_err_no_answer">Pas de réponse de GitHub : vérifiez la connexion internet, puis réessayez.</string>
+    <string name="upd_err_stalled">Connexion coupée à %1$s Mo sur %2$s : réessayez, ça reprend de là.</string>
+    <string name="upd_err_slow">Connexion trop lente (%1$s Mo sur %2$s en 3 minutes) : réessayez plus tard ou sur un autre réseau.</string>
+    <string name="upd_err_no_wifi">Le Wi-Fi n\'a pas d\'accès internet (mises à jour en Wi-Fi seulement).</string>
+    <string name="upd_err_install">L\'installation n\'a pas abouti : réessayez.</string>
+    <string name="upd_try_again">Réessayer</string>
     <string name="ph_sync">Synchroniser</string>
     <string name="ph_sync_started">Synchronisation lancée : contacts et appels vont apparaître dans quelques instants.</string>
     <string name="src_aa">AA</string>

@@ -347,6 +347,14 @@
     <string name="st_update_confirm">MG4Dash %1$s herunterladen und installieren? Der Bildschirm startet neu.</string>
     <string name="st_update_downloading">Download… %1$d %%</string>
     <string name="st_update_installing">Installation… der Bildschirm startet neu</string>
+    <string name="upd_connecting">Verbindung mit GitHub…</string>
+    <string name="upd_retry">Verbindung unterbrochen: Versuch %1$d von %2$d in %3$d s…</string>
+    <string name="upd_err_no_answer">Keine Antwort von GitHub: Internetverbindung prüfen und erneut versuchen.</string>
+    <string name="upd_err_stalled">Verbindung bei %1$s von %2$s MB unterbrochen: erneut versuchen, es geht dort weiter.</string>
+    <string name="upd_err_slow">Verbindung zu langsam (%1$s von %2$s MB in 3 Minuten): später oder in einem anderen Netz erneut versuchen.</string>
+    <string name="upd_err_no_wifi">Das WLAN hat keinen funktionierenden Internetzugang (Updates nur über WLAN).</string>
+    <string name="upd_err_install">Die Installation ist fehlgeschlagen: erneut versuchen.</string>
+    <string name="upd_try_again">Erneut versuchen</string>
     <string name="ph_sync">Synchronisieren</string>
     <string name="ph_sync_started">Synchronisierung gestartet: Kontakte und Anrufe erscheinen gleich.</string>
     <string name="src_aa">AA</string>
