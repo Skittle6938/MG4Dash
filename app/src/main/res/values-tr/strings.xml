@@ -348,6 +348,7 @@
     <string name="st_update_downloading">İndiriliyor… %%%1$d</string>
     <string name="st_update_installing">Yükleniyor… ekran yeniden başlayacak</string>
     <string name="upd_connecting">GitHub\'a bağlanılıyor…</string>
+    <string name="upd_waiting_network">Ağ bekleniyor…</string>
     <string name="upd_retry">Bağlantı kesildi: %3$d sn içinde deneme %1$d / %2$d…</string>
     <string name="upd_err_no_answer">GitHub yanıt vermiyor: internet bağlantısını kontrol edip yeniden deneyin.</string>
     <string name="upd_err_stalled">Bağlantı %1$s / %2$s MB\'ta kesildi: yeniden deneyin, oradan devam eder.</string>
@@ -584,6 +585,7 @@
     <string name="dv_all">Tümü  ›</string>
     <string name="dv_custom_only">Custom modunda</string>
     <string name="dv_unavailable">kullanılamıyor</string>
+    <string name="dv_not_confirmed">Araç bu ayarı onaylamadı</string>
     <string name="ly_title">Yerleşim</string>
     <string name="ly_full">Tam</string>
     <string name="ly_map_right">Harita sağda</string>

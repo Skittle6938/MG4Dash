@@ -348,6 +348,7 @@
     <string name="st_update_downloading">Downloaden… %1$d %%</string>
     <string name="st_update_installing">Installeren… het scherm herstart</string>
     <string name="upd_connecting">Verbinden met GitHub…</string>
+    <string name="upd_waiting_network">Wachten op het netwerk…</string>
     <string name="upd_retry">Verbinding verbroken: poging %1$d van %2$d over %3$d s…</string>
     <string name="upd_err_no_answer">Geen antwoord van GitHub: controleer de internetverbinding en probeer opnieuw.</string>
     <string name="upd_err_stalled">Verbinding verbroken bij %1$s van %2$s MB: probeer opnieuw, het gaat daar verder.</string>
@@ -584,6 +585,7 @@
     <string name="dv_all">Alles  ›</string>
     <string name="dv_custom_only">in Custom-modus</string>
     <string name="dv_unavailable">niet beschikbaar</string>
+    <string name="dv_not_confirmed">De auto heeft deze instelling niet bevestigd</string>
     <string name="ly_title">Indeling</string>
     <string name="ly_full">Volledig</string>
     <string name="ly_map_right">Kaart rechts</string>

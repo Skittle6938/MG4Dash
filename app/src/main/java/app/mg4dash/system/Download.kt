@@ -22,7 +22,10 @@ import java.net.URL
  * - IPv4 addresses first, 3 s each: GitHub's file server also has IPv6 ones, and on a Wi-Fi announcing an IPv6
  *   that does not get through, Android 9 waited 8 s on each before the IPv4 (a minute or more without a byte);
  * - given up after 20 s without a byte or 3 minutes in all, with a clear reason; a cut resumes where it stopped
- *   (Range), up to 6 tries; the file is written aside and renamed once complete.
+ *   (Range), up to 6 tries; the file is written aside and renamed once complete;
+ * - the network chosen again at each try: one that went away (ENONET) is replaced at once by the current one, or
+ *   once by no binding at all, without counting a try; with no validated network, the next try starts as soon as
+ *   Android validates one instead of after a fixed wait.
  */
 object Download {
     private const val TAG = "Update"
@@ -35,13 +38,15 @@ object Download {
     class Failure(val reason: Reason, val done: Long = 0, val total: Long = 0, cause: Throwable? = null) :
         IOException("$reason at $done of $total bytes", cause)
 
-    enum class Reason { NO_ANSWER, STALLED, TOO_SLOW, NO_WIFI, HTTP }
+    enum class Reason { NO_ANSWER, STALLED, TOO_SLOW, NO_WIFI, HTTP, NETWORK_GONE }
 
     /** The wait between two tries (shortened by the tests). */
     internal var sleep: (Long) -> Unit = { Thread.sleep(it) }
 
     /** What the download does now: the screens show it. */
     sealed class Step {
+        /** No network with a working internet: waiting for one. */
+        data object Waiting : Step()
         /** Connecting (try [attempt] of [TRIES]); [waitS] seconds before it, after a cut. */
         data class Connecting(val attempt: Int, val waitS: Int = 0) : Step()
         data class Receiving(val done: Long, val total: Long) : Step() {
@@ -58,27 +63,57 @@ object Download {
     /** Another try fits in the time left (3 minutes from [startedAt]). */
     internal fun tryFits(attempt: Int, startedAt: Long, now: Long): Boolean = attempt <= TRIES && now + waitBefore(attempt) - startedAt < TOTAL_MS
 
+    /** A network to try: [net] null for Android's default, not bound; [validated]: its internet checked by Android. */
+    internal class Pick(val net: Network?, val label: String, val validated: Boolean)
+
     /**
-     * The network to use: a validated Wi-Fi, else a validated other one (none with Wi-Fi only), else Android's
-     * default (null). [wifiOnly] with a Wi-Fi that is not validated: [Reason.NO_WIFI].
+     * The networks of a try, in order (owner's choice): a connected Wi-Fi first, validated or not yet (the head unit's
+     * check can lag or fail behind a hotspot), then the mobile one (not with "Updates on Wi-Fi only"), then Android's
+     * default without binding. Validated ones first within each kind.
      */
-    internal fun choose(nets: List<Pair<Network, NetworkCapabilities>>, wifiOnly: Boolean): Network? {
-        val ok = nets.filter { (_, c) -> c.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) && c.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED) }
-        ok.firstOrNull { (_, c) -> c.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) }?.let { return it.first }
-        if (wifiOnly) {
-            if (nets.any { (_, c) -> c.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) }) throw Failure(Reason.NO_WIFI)
-            return null
-        }
-        return ok.firstOrNull()?.first
+    internal fun order(nets: List<Pair<Network, NetworkCapabilities>>, wifiOnly: Boolean, label: (Network, Boolean) -> String = { n, w -> (if (w) "Wi-Fi #" else "mobile #") + n }): List<Pick> {
+        fun ok(c: NetworkCapabilities) = c.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
+        val online = nets.filter { (_, c) -> c.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) }.sortedBy { (_, c) -> if (ok(c)) 0 else 1 }
+        val wifi = online.filter { (_, c) -> c.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) }
+        val other = online.filter { (_, c) -> !c.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) }
+        // Wi-Fi only: never the default either (it would go out on the 4G)
+        if (wifiOnly) { if (wifi.isEmpty()) throw Failure(Reason.NO_WIFI); return wifi.map { (n, c) -> Pick(n, label(n, true), ok(c)) } }
+        return (wifi.map { (n, c) -> Pick(n, label(n, true), ok(c)) } + other.map { (n, c) -> Pick(n, label(n, false), ok(c)) }) +
+            Pick(null, "default (not bound)", false)
     }
 
-    private fun network(context: Context): Network? {
-        val cm = context.getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager ?: return null
+    /** The networks now, chosen again at each try (replaced by the tests). */
+    internal var networks: (Context) -> List<Pick> = { current(it) }
+
+    /** Waits up to [ms] for a network with a validated internet; true as soon as there is one (replaced by the tests). */
+    internal var awaitValidated: (Context, Long) -> Boolean = { c, ms -> waitForNetwork(c, ms) }
+
+    /** One try over one network (replaced by the tests). */
+    internal var attempt: (Network?, URL, File, Long, Long, (Step) -> Unit) -> Unit = { n, u, f, size, at, st -> once(n, u, f, size, at, st) }
+
+    /** Wait for a network before the first try, when there is none but Android's default. */
+    internal const val FIRST_WAIT_MS = 5_000L
+
+    private fun current(context: Context): List<Pick> {
+        val cm = context.getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager ?: return listOf(Pick(null, "default (not bound)", false))
         @Suppress("DEPRECATION")
         val nets = try { cm.allNetworks.mapNotNull { n -> cm.getNetworkCapabilities(n)?.let { n to it } } } catch (_: Exception) { emptyList() }
-        val n = choose(nets, DataUsage.updatesWifiOnly(context))
-        Log.i(TAG, "download network: ${n?.let { cm.getNetworkCapabilities(it)?.let { c -> if (c.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)) "Wi-Fi" else "mobile" } } ?: "default"}")
-        return n
+        return order(nets, DataUsage.updatesWifiOnly(context))
+    }
+
+    private fun waitForNetwork(context: Context, ms: Long): Boolean {
+        if (ms <= 0) return false
+        val cm = context.getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager ?: run { sleep(ms); return false }
+        val seen = java.util.concurrent.CountDownLatch(1)
+        val cb = object : ConnectivityManager.NetworkCallback() {
+            override fun onCapabilitiesChanged(n: Network, c: NetworkCapabilities) {
+                if (c.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) && c.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)) seen.countDown()
+            }
+        }
+        try {
+            cm.registerNetworkCallback(android.net.NetworkRequest.Builder().addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET).build(), cb)
+        } catch (_: Exception) { sleep(ms); return false }
+        return try { seen.await(ms, java.util.concurrent.TimeUnit.MILLISECONDS) } finally { try { cm.unregisterNetworkCallback(cb) } catch (_: Exception) {} }
     }
 
     /** [url] into [out], what is missing of it only; [step] follows it. Network: off the main thread. */
@@ -89,24 +124,52 @@ object Download {
         val of = File(out.parentFile, out.name + ".url")
         if (!part.exists() || (try { of.readText() } catch (_: Exception) { "" }) != url) { part.delete(); of.writeText(url) }
         val startedAt = android.os.SystemClock.elapsedRealtime()
-        val net = network(context)
-        var attempt = 1
+        fun left() = TOTAL_MS - (android.os.SystemClock.elapsedRealtime() - startedAt)
+        var picks = networks(context)
+        if (picks.none { it.net != null }) {
+            // Only Android's default: a moment for a network to come up first
+            step(Step.Waiting)
+            if (awaitValidated(context, minOf(FIRST_WAIT_MS, left()))) picks = networks(context)
+        }
+        var tryNo = 1
         while (true) {
-            step(Step.Connecting(attempt))
-            try {
-                once(net, URL(url), part, sizeHint, startedAt, step)
-                break
-            } catch (e: IOException) {
-                val f = e as? Failure ?: Failure(Reason.STALLED, part.length(), sizeHint, e)
-                if (f.reason == Reason.HTTP || f.reason == Reason.NO_WIFI || f.reason == Reason.TOO_SLOW) throw f
-                val now = android.os.SystemClock.elapsedRealtime()
-                if (!tryFits(attempt + 1, startedAt, now)) throw if (attempt + 1 > TRIES) f else Failure(Reason.TOO_SLOW, part.length(), sizeHint, e)
-                attempt++
-                val wait = waitBefore(attempt)
-                Log.w(TAG, "download cut at ${part.length()} bytes (${e.message}), try $attempt in ${wait / 1000} s")
-                step(Step.Connecting(attempt, (wait / 1000).toInt()))
+            step(Step.Connecting(tryNo))
+            var last: Failure? = null
+            var done = false
+            for (p in picks) {
+                val before = part.length()
+                Log.i(TAG, "download try $tryNo on ${p.label}${if (p.net != null && !p.validated) " (not validated)" else ""}")
+                try {
+                    attempt(p.net, URL(url), part, sizeHint, startedAt, step)
+                    done = true; break
+                } catch (e: IOException) {
+                    val f = e as? Failure ?: Failure(Reason.STALLED, part.length(), sizeHint, e)
+                    if (f.reason == Reason.HTTP || f.reason == Reason.NO_WIFI || f.reason == Reason.TOO_SLOW) throw f
+                    last = f
+                    // Nothing came over this network (no answer, or gone): the next one at once; a cut after some bytes is a try
+                    if (part.length() > before || (f.reason != Reason.NO_ANSWER && f.reason != Reason.NETWORK_GONE)) break
+                    Log.w(TAG, "${p.label}: ${f.reason} (${f.cause?.message ?: f.message}), next network")
+                    if (left() <= 0) break
+                }
+            }
+            if (done) break
+            val f = last ?: Failure(Reason.NO_ANSWER)
+            if (left() <= 0) throw Failure(Reason.TOO_SLOW, part.length(), sizeHint, f)
+            if (!tryFits(tryNo + 1, startedAt, android.os.SystemClock.elapsedRealtime())) throw if (tryNo + 1 > TRIES) f else Failure(Reason.TOO_SLOW, part.length(), sizeHint, f)
+            tryNo++
+            val wait = waitBefore(tryNo)
+            picks = networks(context)
+            if (picks.none { it.validated }) {
+                // No working internet now: the next try as soon as Android validates a network, the usual wait at most
+                Log.w(TAG, "download cut at ${part.length()} bytes (${f.message}), try $tryNo when a network is back (${wait / 1000} s at most)")
+                step(Step.Waiting)
+                awaitValidated(context, minOf(wait, left()))
+            } else {
+                Log.w(TAG, "download cut at ${part.length()} bytes (${f.message}), try $tryNo in ${wait / 1000} s")
+                step(Step.Connecting(tryNo, (wait / 1000).toInt()))
                 sleep(wait)
             }
+            picks = networks(context)
         }
         if (!part.renameTo(out)) { part.copyTo(out, overwrite = true); part.delete() }
     }
@@ -163,8 +226,13 @@ object Download {
         var sock: Socket? = null
         for (a in addrs) {
             val s = Socket()
+            // Bound to a network that has just gone (ENONET): another network is chosen, see fetch
+            try { net?.bindSocket(s) } catch (e: IOException) {
+                Log.w(TAG, "$host: network $net gone: ${e.message}")
+                try { s.close() } catch (_: Exception) {}
+                throw Failure(Reason.NETWORK_GONE, cause = e)
+            }
             try {
-                net?.bindSocket(s)
                 android.net.TrafficStats.tagSocket(s)
                 s.connect(InetSocketAddress(a, port), CONNECT_MS)
                 sock = s; break

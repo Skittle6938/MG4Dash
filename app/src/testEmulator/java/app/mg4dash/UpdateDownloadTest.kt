@@ -2,6 +2,7 @@ package app.mg4dash
 
 import android.net.NetworkCapabilities
 import app.mg4dash.system.Download
+import app.mg4dash.system.Download.Pick
 import app.mg4dash.system.Updater
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
@@ -36,15 +37,78 @@ class UpdateDownloadTest {
         if (validated) s.addCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
     }
 
-    @Test fun validatedNetworkChosen() {
-        val wifi = ShadowNetwork.newInstance(1); val mobile = ShadowNetwork.newInstance(2)
-        assertSame("a working Wi-Fi first", wifi, Download.choose(listOf(mobile to caps(false, true), wifi to caps(true, true)), wifiOnly = false))
-        assertSame("a Wi-Fi client without internet: the 4G", mobile, Download.choose(listOf(wifi to caps(true, false), mobile to caps(false, true)), wifiOnly = false))
-        assertNull("nothing validated: Android's default", Download.choose(listOf(wifi to caps(true, false)), wifiOnly = false))
-        val noWifi = try { Download.choose(listOf(wifi to caps(true, false), mobile to caps(false, true)), wifiOnly = true); null } catch (e: Download.Failure) { e.reason }
-        assertEquals("Wi-Fi only, its internet not working: said so", Download.Reason.NO_WIFI, noWifi)
+    @Test fun wifiFirstEvenNotValidatedThenMobileThenDefault() {
+        val wifi = ShadowNetwork.newInstance(1); val mobile = ShadowNetwork.newInstance(2); val wifi2 = ShadowNetwork.newInstance(3)
+        fun nets(vararg p: Pick) = p.map { it.net }
+        val o = Download.order(listOf(mobile to caps(false, true), wifi to caps(true, false), wifi2 to caps(true, true)), wifiOnly = false)
+        assertEquals("connected Wi-Fi first (validated ones first), then 4G, then the default", listOf(wifi2, wifi, mobile, null), o.map { it.net })
+        assertEquals(listOf(true, false, true, false), o.map { it.validated })
+        assertEquals("no Wi-Fi: 4G then default", listOf(mobile, null), Download.order(listOf(mobile to caps(false, false)), wifiOnly = false).map { it.net })
+        assertEquals("Wi-Fi only: the Wi-Fi alone, even not validated", listOf(wifi), Download.order(listOf(wifi to caps(true, false), mobile to caps(false, true)), wifiOnly = true).map { it.net })
+        val noWifi = try { Download.order(listOf(mobile to caps(false, true)), wifiOnly = true); null } catch (e: Download.Failure) { e.reason }
+        assertEquals("Wi-Fi only without a Wi-Fi: said so", Download.Reason.NO_WIFI, noWifi)
     }
 
+    private val defaults = Triple(Download.networks, Download.awaitValidated, Download.attempt)
+    @org.junit.After fun restore() { Download.networks = defaults.first; Download.awaitValidated = defaults.second; Download.attempt = defaults.third; Download.sleep = { Thread.sleep(it) } }
+
+    private fun out() = java.io.File(RuntimeEnvironment.getApplication().cacheDir, "t.apk").also { it.delete(); java.io.File(it.path + ".part").delete() }
+
+    @Test fun aNetworkGoneIsReplacedAtOnceWithoutATry() {
+        val wifi = ShadowNetwork.newInstance(106); val mobile = ShadowNetwork.newInstance(107)
+        val used = mutableListOf<android.net.Network?>()
+        var waits = 0
+        Download.sleep = { waits++ }
+        Download.networks = { listOf(Download.Pick(wifi, "Wi-Fi #106", true), Download.Pick(mobile, "mobile #107", true), Download.Pick(null, "default", false)) }
+        Download.attempt = { n, _, part, _, _, _ ->
+            used += n
+            if (n === wifi) throw Download.Failure(Download.Reason.NETWORK_GONE, cause = java.net.SocketException("ENONET"))
+            part.writeText("ok")
+        }
+        val steps = mutableListOf<Download.Step>()
+        Download.fetch(RuntimeEnvironment.getApplication(), "https://example.org/a.apk", out(), 2) { steps += it }
+        assertEquals("the Wi-Fi gone: the 4G right away", listOf(wifi, mobile), used)
+        assertEquals("no wait, no second try", 0, waits)
+        assertTrue(steps.none { it is Download.Step.Connecting && it.attempt > 1 })
+    }
+
+    @Test fun wifiNotAnsweringFallsBackToMobileThenDefault() {
+        val wifi = ShadowNetwork.newInstance(1); val mobile = ShadowNetwork.newInstance(2)
+        val used = mutableListOf<android.net.Network?>()
+        Download.sleep = {}
+        Download.networks = { listOf(Download.Pick(wifi, "Wi-Fi #1", false), Download.Pick(mobile, "mobile #2", true), Download.Pick(null, "default", false)) }
+        Download.attempt = { n, _, part, _, _, _ ->
+            used += n
+            if (n != null) throw Download.Failure(Download.Reason.NO_ANSWER)
+            part.writeText("ok")
+        }
+        Download.fetch(RuntimeEnvironment.getApplication(), "https://example.org/b.apk", out(), 2) {}
+        assertEquals(listOf(wifi, mobile, null), used)
+    }
+
+    @Test fun noNetworkWaitsForOneInsteadOfAFixedWait() {
+        val wifi = ShadowNetwork.newInstance(5)
+        var back = false
+        var slept = 0
+        val waited = mutableListOf<Long>()
+        Download.sleep = { slept++ }
+        // Nothing but the default at first; the Wi-Fi comes back while waiting
+        Download.networks = { if (back) listOf(Download.Pick(wifi, "Wi-Fi #5", true), Download.Pick(null, "default", false)) else listOf(Download.Pick(null, "default", false)) }
+        Download.awaitValidated = { _, ms -> waited += ms; back = waited.size >= 2; back }
+        var tries = 0
+        Download.attempt = { n, _, part, _, _, _ ->
+            tries++
+            if (n == null) throw Download.Failure(Download.Reason.NO_ANSWER)
+            part.writeText("ok")
+        }
+        val steps = mutableListOf<Download.Step>()
+        Download.fetch(RuntimeEnvironment.getApplication(), "https://example.org/c.apk", out(), 2) { steps += it }
+        assertEquals("waited before the first try, then for the network to come back", listOf(Download.FIRST_WAIT_MS, Download.waitBefore(2)), waited)
+        assertEquals("no fixed wait", 0, slept)
+        assertTrue("said in the update's screen", Download.Step.Waiting in steps)
+        assertEquals(2, tries)
+        assertEquals(RuntimeEnvironment.getApplication().getString(R.string.upd_waiting_network), Updater.stateText(RuntimeEnvironment.getApplication(), Updater.State.Waiting))
+    }
     @Test fun boundedWaits() {
         assertEquals(5_000L, Download.waitBefore(2)); assertEquals(25_000L, Download.waitBefore(6))
         assertTrue(Download.tryFits(2, startedAt = 0, now = 10_000))
@@ -60,6 +124,7 @@ class UpdateDownloadTest {
 
     @Test fun oneAtATimeThenAClearFailure() {
         Download.sleep = {}
+        Download.awaitValidated = { _, _ -> false }
         val app = RuntimeEnvironment.getApplication()
         // Nothing answers on this port: the download fails at once, with a reason, and can be tried again
         val r = Updater.Release("9.9.9", "http://127.0.0.1:9/MG4Dash.apk", 10_000_000, "")

@@ -348,6 +348,7 @@
     <string name="st_update_downloading">Download… %1$d %%</string>
     <string name="st_update_installing">Installazione… lo schermo si riavvierà</string>
     <string name="upd_connecting">Connessione a GitHub…</string>
+    <string name="upd_waiting_network">In attesa della rete…</string>
     <string name="upd_retry">Connessione interrotta: tentativo %1$d di %2$d tra %3$d s…</string>
     <string name="upd_err_no_answer">Nessuna risposta da GitHub: controlla la connessione internet e riprova.</string>
     <string name="upd_err_stalled">Connessione interrotta a %1$s di %2$s MB: riprova, riprende da lì.</string>
@@ -584,6 +585,7 @@
     <string name="dv_all">Tutto  ›</string>
     <string name="dv_custom_only">in modalità Custom</string>
     <string name="dv_unavailable">non disponibile</string>
+    <string name="dv_not_confirmed">L\'auto non ha confermato questa impostazione</string>
     <string name="ly_title">Disposizione</string>
     <string name="ly_full">Completa</string>
     <string name="ly_map_right">Mappa a destra</string>

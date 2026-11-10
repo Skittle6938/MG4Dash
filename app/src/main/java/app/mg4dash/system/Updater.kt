@@ -143,11 +143,13 @@ object Updater {
     sealed class State {
         object Idle : State()
         data class Connecting(val attempt: Int, val waitS: Int) : State()
+        /** No network with a working internet: the download goes on as soon as one is back. */
+        object Waiting : State()
         data class Downloading(val pct: Int, val done: Long, val total: Long) : State()
         object Installing : State()
         /** Stopped, with its reason; [release] can be tried again. */
         data class Failed(val message: String, val release: Release) : State()
-        val busy: Boolean get() = this is Connecting || this is Downloading || this is Installing
+        val busy: Boolean get() = this is Connecting || this is Waiting || this is Downloading || this is Installing
     }
 
     private val _state = kotlinx.coroutines.flow.MutableStateFlow<State>(State.Idle)
@@ -169,6 +171,7 @@ object Updater {
                 val apk = download(app, r, step = { s ->
                     _state.value = when (s) {
                         is Download.Step.Connecting -> State.Connecting(s.attempt, s.waitS)
+                        is Download.Step.Waiting -> State.Waiting
                         is Download.Step.Receiving -> State.Downloading(s.pct, s.done, s.total)
                     }
                 }) {}
@@ -193,7 +196,7 @@ object Updater {
         val f = e as? Download.Failure ?: (e.cause as? Download.Failure)
         fun mb(b: Long) = String.format(java.util.Locale.getDefault(), "%.1f", b / 1_000_000f)
         return when (f?.reason) {
-            Download.Reason.NO_ANSWER -> context.getString(app.mg4dash.R.string.upd_err_no_answer)
+            Download.Reason.NO_ANSWER, Download.Reason.NETWORK_GONE -> context.getString(app.mg4dash.R.string.upd_err_no_answer)
             Download.Reason.STALLED -> context.getString(app.mg4dash.R.string.upd_err_stalled, mb(f.done), mb(f.total))
             Download.Reason.TOO_SLOW -> context.getString(app.mg4dash.R.string.upd_err_slow, mb(f.done), mb(f.total))
             Download.Reason.NO_WIFI -> context.getString(app.mg4dash.R.string.upd_err_no_wifi)
@@ -206,6 +209,7 @@ object Updater {
         is State.Idle -> null
         is State.Connecting -> if (s.waitS > 0) context.getString(app.mg4dash.R.string.upd_retry, s.attempt, Download.TRIES, s.waitS)
             else context.getString(app.mg4dash.R.string.upd_connecting)
+        is State.Waiting -> context.getString(app.mg4dash.R.string.upd_waiting_network)
         is State.Downloading -> context.getString(app.mg4dash.R.string.st_update_downloading, s.pct)
         is State.Installing -> context.getString(app.mg4dash.R.string.st_update_installing)
         is State.Failed -> s.message

@@ -348,6 +348,7 @@
     <string name="st_update_downloading">Downloading… %1$d %%</string>
     <string name="st_update_installing">Installing… the screen will restart</string>
     <string name="upd_connecting">Connecting to GitHub…</string>
+    <string name="upd_waiting_network">Waiting for the network…</string>
     <string name="upd_retry">Connection cut: try %1$d of %2$d in %3$d s…</string>
     <string name="upd_err_no_answer">No answer from GitHub: check the internet connection, then try again.</string>
     <string name="upd_err_stalled">Connection cut at %1$s of %2$s MB: try again, it resumes from there.</string>
@@ -584,6 +585,7 @@
     <string name="dv_all">All  ›</string>
     <string name="dv_custom_only">in Custom mode</string>
     <string name="dv_unavailable">not available</string>
+    <string name="dv_not_confirmed">The car did not confirm this setting</string>
     <string name="ly_title">Layout</string>
     <string name="ly_full">Full</string>
     <string name="ly_map_right">Map on the right</string>

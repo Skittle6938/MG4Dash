@@ -348,6 +348,7 @@
     <string name="st_update_downloading">Descargando… %1$d %%</string>
     <string name="st_update_installing">Instalando… la pantalla se reiniciará</string>
     <string name="upd_connecting">Conectando con GitHub…</string>
+    <string name="upd_waiting_network">Esperando la red…</string>
     <string name="upd_retry">Conexión cortada: intento %1$d de %2$d en %3$d s…</string>
     <string name="upd_err_no_answer">GitHub no responde: compruebe la conexión a internet y vuelva a intentarlo.</string>
     <string name="upd_err_stalled">Conexión cortada en %1$s de %2$s MB: vuelva a intentarlo, sigue desde ahí.</string>
@@ -584,6 +585,7 @@
     <string name="dv_all">Todo  ›</string>
     <string name="dv_custom_only">en modo Custom</string>
     <string name="dv_unavailable">no disponible</string>
+    <string name="dv_not_confirmed">El coche no ha confirmado este ajuste</string>
     <string name="ly_title">Disposición</string>
     <string name="ly_full">Completa</string>
     <string name="ly_map_right">Mapa a la derecha</string>
