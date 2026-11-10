@@ -121,6 +121,9 @@ public class WebActivity extends Activity {
         };
         root.setBackgroundColor(bg);
 
+        // The page on the Wi-Fi first; a page that failed is loaded again when the network changes
+        WifiFirst.start(this);
+        WifiFirst.onChange = () -> { if (web != null && failed && loaded != null) load(loaded); };
         softwareVideo();
         web = new WebView(this);
         WebSettings s = web.getSettings();
@@ -189,6 +192,7 @@ public class WebActivity extends Activity {
                 Log.w(TAG, "page: " + error.getDescription());
                 failed = true;
                 showMessage(text(EXTRA_ERROR, "The page did not load. Touch to try again."));
+                WifiFirst.recheck();
             }
 
             @Override
