@@ -47,6 +47,25 @@ class TripCostTest {
         assertNull(TripLog.Trip.decode("0,1800000,100,120,20.0,4.0,90,85")!!.price)
     }
 
+    @Test fun previousTripsAndTodayCostOnTheCard() {
+        val ctx = RuntimeEnvironment.getApplication()
+        val sp = ctx.getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE)
+        sp.edit().clear().commit()
+        val now = System.currentTimeMillis()
+        TripLog.add(sp, TripLog.Trip(now - 3_600_000, now - 1_800_000, 100, 129, 29.4f, 4.03f, 88, 81, 0.25f))
+        TripLog.saveCurrent(sp, null)
+        val card = app.mg4dash.ui.TripsCard(org.robolectric.Robolectric.buildActivity(android.app.Activity::class.java).setup().get())
+        app.mg4dash.system.Prefs(ctx).kwhPrice = 0.25f
+        card.show(now)
+        fun texts(v: android.view.View): List<String> = if (v is android.widget.TextView) listOf(v.text.toString())
+            else if (v is android.view.ViewGroup) (0 until v.childCount).flatMap { texts(v.getChildAt(it)) } else emptyList()
+        val all = texts(card)
+        org.junit.Assert.assertTrue("previous trip with its cost: $all", all.any { it.contains("29,4") && it.contains("1,01") && !it.contains(" h ") })
+        org.junit.Assert.assertTrue("today with its cost too: $all", all.any { it.contains(" h ") && it.contains("1,01") })
+        app.mg4dash.system.Prefs(ctx).kwhPrice = 0f
+        card.show(now)
+        org.junit.Assert.assertTrue("no price, no cost", texts(card).none { it.contains("€") })
+    }
     @Test fun readingAddsItsTrips() {
         val r = TripLog.Reading(0, 100, 4_000_000, 140)
         val trips = listOf(trip(4f, 0.25f), TripLog.Trip(1_900_000, 3_600_000, 120, 140, 20f, 2f, 85, 80, 0.30f))

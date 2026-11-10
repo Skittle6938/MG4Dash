@@ -192,7 +192,7 @@ class ScreenshotTest {
         repeat(5) { shadowOf(Looper.getMainLooper()).idleFor(200, TimeUnit.MILLISECONDS) }
         seedTrips()
         (MainActivity::class.java.getDeclaredField("trips").apply { isAccessible = true }.get(home) as app.mg4dash.ui.TripsCard).show()
-        save(home.window.decorView, "trips_card_cost_real.png")
+        save(home.window.decorView, "trips_card_cost2_real.png")
         val page = Robolectric.buildActivity(app.mg4dash.pages.TripsActivity::class.java).setup().get()
         repeat(5) { shadowOf(Looper.getMainLooper()).idleFor(200, TimeUnit.MILLISECONDS) }
         seedTrips()
