@@ -108,16 +108,19 @@ class TripsCard(context: Context) : LinearLayout(context) {
             nowOdo.text = odo?.let { TripText.odo(c, it) } ?: ""
             nowKm.text = TripText.dist(c, 0f); nowDetail.text = ""
         }
+        val priced = TripText.price(c) != null
         prev.forEachIndexed { i, (l, r) ->
             val t = trips.getOrNull(i)
             l.text = t?.let { (if (i == 0) c.getString(R.string.tr_previous, TripText.span(c, it)) else TripText.span(c, it)) } ?: ""
-            r.text = t?.let { "${TripText.dist(c, it.km)} · ${TripText.consShort(c, it.per100)}" } ?: ""
+            // Its cost too, with a kWh price (at the price it was driven at)
+            r.text = t?.let { "${TripText.dist(c, it.km)} · ${TripText.consShort(c, it.per100)}" + (if (priced) " · " + TripText.money(it.cost) else "") } ?: ""
             prevRows[i].visibility = if (compact || t == null) GONE else VISIBLE
         }
         prevDivider.visibility = if (compact || trips.isEmpty()) GONE else VISIBLE
         val day = TripLog.today(trips, cur, now)
         todayLabel.text = "${c.getString(R.string.tr_today)} · ${TripText.count(c, day.trips)}"
-        todayValue.text = "${TripText.dist(c, day.km)} · ${TripText.duration(c, day.minutes)}"
+        todayValue.text = "${TripText.dist(c, day.km)} · ${TripText.duration(c, day.minutes)}" +
+            (if (priced) " · " + TripText.money(TripLog.costOf((listOfNotNull(cur) + trips).filter { it.start >= TripLog.dayStart(now) })) else "")
         todayFrom.text = day.firstKm?.let { c.getString(R.string.tr_since_km, TripText.odo(c, it)) } ?: ""
         val r = TripLog.reading(sp)?.takeIf { it.running }
         readingButton.text = if (r != null) "■  " + app.mg4dash.system.Units.distText(c, (r.km(odo) ?: 0).toFloat()) else "●  " + c.getString(R.string.tr_reading_row)
