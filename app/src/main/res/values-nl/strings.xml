@@ -347,6 +347,14 @@
     <string name="st_update_confirm">MG4Dash %1$s downloaden en installeren? Het scherm herstart.</string>
     <string name="st_update_downloading">Downloaden… %1$d %%</string>
     <string name="st_update_installing">Installeren… het scherm herstart</string>
+    <string name="upd_connecting">Verbinden met GitHub…</string>
+    <string name="upd_retry">Verbinding verbroken: poging %1$d van %2$d over %3$d s…</string>
+    <string name="upd_err_no_answer">Geen antwoord van GitHub: controleer de internetverbinding en probeer opnieuw.</string>
+    <string name="upd_err_stalled">Verbinding verbroken bij %1$s van %2$s MB: probeer opnieuw, het gaat daar verder.</string>
+    <string name="upd_err_slow">Verbinding te traag (%1$s van %2$s MB in 3 minuten): probeer later opnieuw of op een ander netwerk.</string>
+    <string name="upd_err_no_wifi">De wifi heeft geen werkend internet (updates alleen via wifi).</string>
+    <string name="upd_err_install">De installatie is mislukt: probeer opnieuw.</string>
+    <string name="upd_try_again">Opnieuw proberen</string>
     <string name="ph_sync">Synchroniseren</string>
     <string name="ph_sync_started">Synchronisatie gestart: contacten en oproepen verschijnen zo.</string>
     <string name="src_aa">AA</string>

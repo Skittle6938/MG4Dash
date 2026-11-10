@@ -62,7 +62,7 @@ object RadioDashUpdater {
     fun latest(beta: Boolean): Updater.Release? = Updater.latest(beta, api = API)
 
     fun download(context: Context, r: Updater.Release, progress: (Int) -> Unit): File =
-        Updater.download(context, r, "radio_dash.apk", progress)
+        Updater.download(context, r, "radio_dash.apk", progress = progress)
 
     fun install(context: Context, apk: File, version: String) {
         Prefs(context).raw.edit().putString("radio_dash_pending", version).apply()

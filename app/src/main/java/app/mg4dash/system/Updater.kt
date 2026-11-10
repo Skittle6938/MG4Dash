@@ -12,6 +12,7 @@ import org.json.JSONObject
 import java.io.File
 import java.net.HttpURLConnection
 import java.net.URL
+import kotlinx.coroutines.launch
 
 /**
  * MG4Dash update from GitHub releases (pre-releases included).
@@ -124,69 +125,91 @@ object Updater {
     /** End of a failed update (on success, MG4Dash restarts). */
     fun end() { busy.set(false) }
 
-    /** Downloads the APK; [progress] receives 0..100. Network: off the main thread. */
-    fun download(context: Context, r: Release, fileName: String = "update.apk", progress: (Int) -> Unit): File =
-        DataUsage.tag(DataUsage.Use.UPDATES) { downloadUntagged(context, r, fileName, progress) }
+    /** Downloads the APK; [progress] receives 0..100, [step] each try and each block. Network: off the main thread. */
+    fun download(context: Context, r: Release, fileName: String = "update.apk", step: (Download.Step) -> Unit = {}, progress: (Int) -> Unit): File =
+        DataUsage.tag(DataUsage.Use.UPDATES) {
+            val dir = context.getExternalFilesDir(null) ?: context.filesDir
+            val out = File(dir, fileName)
+            var last = -1
+            Download.fetch(context, r.url, out, r.size) { s ->
+                step(s)
+                if (s is Download.Step.Receiving && s.pct != last) { last = s.pct; progress(s.pct) }
+            }
+            Log.i(TAG, "downloaded ${r.version} (${out.length()} bytes)")
+            out
+        }
+
+    /** What MG4Dash's update does now, for Settings and the startup window (#update). */
+    sealed class State {
+        object Idle : State()
+        data class Connecting(val attempt: Int, val waitS: Int) : State()
+        data class Downloading(val pct: Int, val done: Long, val total: Long) : State()
+        object Installing : State()
+        /** Stopped, with its reason; [release] can be tried again. */
+        data class Failed(val message: String, val release: Release) : State()
+        val busy: Boolean get() = this is Connecting || this is Downloading || this is Installing
+    }
+
+    private val _state = kotlinx.coroutines.flow.MutableStateFlow<State>(State.Idle)
+    val state: kotlinx.coroutines.flow.StateFlow<State> = _state
+    private var installing: Release? = null
+    private val work = kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.SupervisorJob() + kotlinx.coroutines.Dispatchers.IO)
+
     /**
-     * A cut (the car's Wi-Fi changing access point, a tunnel) no longer loses what came (#98): up to 6 tries, 5 s
-     * apart then longer, each one asking GitHub for the rest only (Range), from the release's address again since
-     * the address it sends to only lasts a few minutes.
+     * Downloads and installs [r], whichever screen asked, out of its life: leaving Settings no longer stops it.
+     * false if one is already running (the screens show it instead).
      */
-    private fun downloadUntagged(context: Context, r: Release, fileName: String, progress: (Int) -> Unit): File {
-        val dir = context.getExternalFilesDir(null) ?: context.filesDir
-        val out = File(dir, fileName)
-        out.delete()
-        var tries = 0
-        while (true) {
+    fun start(context: Context, r: Release): Boolean {
+        if (!begin()) return false
+        val app = context.applicationContext
+        installing = r
+        _state.value = State.Connecting(1, 0)
+        work.launch {
             try {
-                fetch(r, out, progress)
-                break
-            } catch (e: java.io.IOException) {
-                if (++tries >= 6) throw e
-                Log.w(TAG, "download cut at ${out.length()} bytes (${e.message}), try ${tries + 1} in ${5 * tries} s")
-                Thread.sleep(5000L * tries)
-            }
-        }
-        Log.i(TAG, "downloaded ${r.version} (${out.length()} bytes)")
-        return out
-    }
-
-    /** What is missing of [out] (all of it the first time), added at its end. */
-    private fun fetch(r: Release, out: File, progress: (Int) -> Unit) {
-        val have = out.length()
-        var url = URL(r.url)
-        var c: HttpURLConnection
-        var hops = 0
-        while (true) {
-            c = url.openConnection() as HttpURLConnection
-            c.instanceFollowRedirects = false
-            c.connectTimeout = 8000; c.readTimeout = 30000
-            c.setRequestProperty("User-Agent", "MG4Dash")
-            if (have > 0) c.setRequestProperty("Range", "bytes=$have-")
-            val code = c.responseCode
-            if (code in 300..399 && hops < 5) { url = URL(url, c.getHeaderField("Location")); c.disconnect(); hops++; continue }
-            if (code != 200 && code != 206) throw IllegalStateException("HTTP $code")
-            break
-        }
-        try {
-            // 200: the server sends everything again, the file starts over
-            val append = c.responseCode == 206
-            var done = if (append) have else 0L
-            val total = if (append) done + c.contentLengthLong.coerceAtLeast(0) else c.contentLengthLong.takeIf { it > 0 } ?: r.size
-            c.inputStream.use { input ->
-                java.io.FileOutputStream(out, append).use { o ->
-                    val buf = ByteArray(64 * 1024)
-                    while (true) {
-                        val n = input.read(buf); if (n < 0) break
-                        o.write(buf, 0, n); done += n
-                        if (total > 0) progress((done * 100 / total).toInt())
+                val apk = download(app, r, step = { s ->
+                    _state.value = when (s) {
+                        is Download.Step.Connecting -> State.Connecting(s.attempt, s.waitS)
+                        is Download.Step.Receiving -> State.Downloading(s.pct, s.done, s.total)
                     }
-                }
+                }) {}
+                _state.value = State.Installing
+                install(app, apk)
+            } catch (e: Throwable) {
+                Log.w(TAG, "failed: ${e.message}")
+                fail(app, message(app, e))
             }
-            if (total > 0 && done < total) throw java.io.IOException("ended at $done of $total bytes")
-        } finally { c.disconnect() }
+        }
+        return true
     }
 
+    private fun fail(context: Context, message: String) {
+        val r = installing
+        end()
+        _state.value = if (r != null) State.Failed(message, r) else State.Idle
+    }
+
+    /** The reason shown to the driver. */
+    fun message(context: Context, e: Throwable): String {
+        val f = e as? Download.Failure ?: (e.cause as? Download.Failure)
+        fun mb(b: Long) = String.format(java.util.Locale.getDefault(), "%.1f", b / 1_000_000f)
+        return when (f?.reason) {
+            Download.Reason.NO_ANSWER -> context.getString(app.mg4dash.R.string.upd_err_no_answer)
+            Download.Reason.STALLED -> context.getString(app.mg4dash.R.string.upd_err_stalled, mb(f.done), mb(f.total))
+            Download.Reason.TOO_SLOW -> context.getString(app.mg4dash.R.string.upd_err_slow, mb(f.done), mb(f.total))
+            Download.Reason.NO_WIFI -> context.getString(app.mg4dash.R.string.upd_err_no_wifi)
+            else -> context.getString(app.mg4dash.R.string.st_update_error)
+        }
+    }
+
+    /** The state as a line of text. */
+    fun stateText(context: Context, s: State): String? = when (s) {
+        is State.Idle -> null
+        is State.Connecting -> if (s.waitS > 0) context.getString(app.mg4dash.R.string.upd_retry, s.attempt, Download.TRIES, s.waitS)
+            else context.getString(app.mg4dash.R.string.upd_connecting)
+        is State.Downloading -> context.getString(app.mg4dash.R.string.st_update_downloading, s.pct)
+        is State.Installing -> context.getString(app.mg4dash.R.string.st_update_installing)
+        is State.Failed -> s.message
+    }
     /** Installs the downloaded APK; MG4Dash is stopped then relaunched by Android. */
     fun install(context: Context, apk: File) {
         val pi = context.packageManager.packageInstaller
@@ -219,7 +242,7 @@ object Updater {
             val status = intent.getIntExtra(PackageInstaller.EXTRA_STATUS, -999)
             val msg = intent.getStringExtra(PackageInstaller.EXTRA_STATUS_MESSAGE)
             Log.i(TAG, "install result: $status $msg")
-            if (status != PackageInstaller.STATUS_SUCCESS) { end(); return }
+            if (status != PackageInstaller.STATUS_SUCCESS) { fail(context, context.getString(app.mg4dash.R.string.upd_err_install)); return }
             // No more recompilation here: as MG4Dash is often home, Android could relaunch it while
             // it rewrote its compiled code, which then stayed damaged (screen stuck at the next start,
             // reproduced on 31/10). The compilation done by the installation is enough; Rescue repairs otherwise.

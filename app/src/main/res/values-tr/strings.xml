@@ -347,6 +347,14 @@
     <string name="st_update_confirm">MG4Dash %1$s indirilip yüklensin mi? Ekran yeniden başlayacak.</string>
     <string name="st_update_downloading">İndiriliyor… %%%1$d</string>
     <string name="st_update_installing">Yükleniyor… ekran yeniden başlayacak</string>
+    <string name="upd_connecting">GitHub\'a bağlanılıyor…</string>
+    <string name="upd_retry">Bağlantı kesildi: %3$d sn içinde deneme %1$d / %2$d…</string>
+    <string name="upd_err_no_answer">GitHub yanıt vermiyor: internet bağlantısını kontrol edip yeniden deneyin.</string>
+    <string name="upd_err_stalled">Bağlantı %1$s / %2$s MB\'ta kesildi: yeniden deneyin, oradan devam eder.</string>
+    <string name="upd_err_slow">Bağlantı çok yavaş (3 dakikada %1$s / %2$s MB): daha sonra veya başka bir ağda yeniden deneyin.</string>
+    <string name="upd_err_no_wifi">Wi-Fi\'nin çalışan internet erişimi yok (güncellemeler yalnızca Wi-Fi ile).</string>
+    <string name="upd_err_install">Kurulum tamamlanmadı: yeniden deneyin.</string>
+    <string name="upd_try_again">Yeniden dene</string>
     <string name="ph_sync">Eşitle</string>
     <string name="ph_sync_started">Eşitleme başladı: kişiler ve aramalar birkaç dakika içinde görünecek.</string>
     <string name="src_aa">AA</string>

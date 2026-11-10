@@ -7,6 +7,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.launch
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import android.util.TypedValue
 import android.view.Gravity
 import android.view.View
@@ -291,25 +292,32 @@ class SettingsActivity : AppCompatActivity() {
             checked -> getString(R.string.st_upd_current, BuildConfig.VERSION_NAME)
             else -> BuildConfig.VERSION_NAME
         }, appNew)
-        fun install(r: app.mg4dash.system.Updater.Release) {
-            if (!app.mg4dash.system.Updater.begin()) { updState.text = getString(R.string.st_update_busy); return }
-            lifecycleScope.launch {
-                try {
-                    val apk = withContext(Dispatchers.IO) {
-                        app.mg4dash.system.Updater.download(this@SettingsActivity, r) { pct ->
-                            runOnUiThread { updState.text = getString(R.string.st_update_downloading, pct) }
-                        }
-                    }
-                    updState.text = getString(R.string.st_update_installing)
-                    withContext(Dispatchers.IO) { app.mg4dash.system.Updater.install(this@SettingsActivity, apk) }
-                } catch (e: Exception) {
-                    Log.w("Update", "failed: ${e.message}")
-                    app.mg4dash.system.Updater.end()
-                    updState.text = getString(R.string.st_update_error)
+        // Progress of the download and the installation, under the line (the task goes on out of this screen)
+        val updBar = android.widget.ProgressBar(this, null, android.R.attr.progressBarStyleHorizontal).apply {
+            max = 100; visibility = View.GONE
+            progressTintList = android.content.res.ColorStateList.valueOf(color(R.color.text_value))
+        }
+        upd.addView(updBar, LinearLayout.LayoutParams(-1, dp(8)).apply { topMargin = dp(8) })
+        val U = app.mg4dash.system.Updater
+        lifecycleScope.launch {
+            repeatOnLifecycle(androidx.lifecycle.Lifecycle.State.STARTED) {
+                U.state.collect { s ->
+                    U.stateText(this@SettingsActivity, s)?.let { updState.text = it }
+                    updBar.visibility = if (s.busy) View.VISIBLE else View.GONE
+                    updBar.isIndeterminate = s !is app.mg4dash.system.Updater.State.Downloading
+                    if (s is app.mg4dash.system.Updater.State.Downloading) updBar.progress = s.pct
+                    // Greyed while it runs; Try again after a failure
+                    updButton.isEnabled = !s.busy
+                    if (s is app.mg4dash.system.Updater.State.Failed) updButton.text = getString(R.string.upd_try_again)
                 }
             }
         }
+        fun install(r: app.mg4dash.system.Updater.Release) {
+            if (!U.start(this, r)) updState.text = getString(R.string.st_update_busy)
+        }
         updButton.setOnClickListener {
+            // After a failure: the same release again, at once
+            (U.state.value as? app.mg4dash.system.Updater.State.Failed)?.let { install(it.release); return@setOnClickListener }
             if (app.mg4dash.system.DataUsage.updatesBlocked(this)) { updState.text = getString(R.string.du_updates_wait); return@setOnClickListener }
             updState.text = getString(R.string.st_update_checking)
             lifecycleScope.launch {
