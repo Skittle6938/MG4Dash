@@ -607,6 +607,16 @@
     <string name="tr_clear">Clear</string>
     <string name="tr_clear_confirm">Clear the list of trips?</string>
     <string name="tr_note">A trip runs from turning the car on to its standby. The last 50 are kept.</string>
+    <string name="tr_col_cost">Cost</string>
+    <string name="st_kwh_price">Price of a kWh: %s</string>
+    <string name="st_kwh_price_none">not set</string>
+    <string name="st_kwh_price_title">Price of a kWh (empty: none)</string>
+    <string name="st_kwh_price_desc">Shows the cost of each trip and reading in the Trips page. Each trip keeps the price it was driven at.</string>
+    <string name="tr_filter_all">All</string>
+    <string name="tr_filter_trips">Trips</string>
+    <string name="tr_filter_readings">Readings</string>
+    <string name="tr_reading_row">Reading</string>
+    <string name="tr_clear_all_confirm">Clear the trips and the finished readings? A reading in progress goes on.</string>
     <string name="wc_web_count">%1$d addresses</string>
     <string name="wc_wake">Page awake:</string>
     <string name="wc_wake_s">%1$d s</string>

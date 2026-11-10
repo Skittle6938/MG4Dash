@@ -607,6 +607,16 @@
     <string name="tr_clear">Borrar</string>
     <string name="tr_clear_confirm">¿Borrar la lista de trayectos?</string>
     <string name="tr_note">Un trayecto va del encendido a la suspensión del coche. Se guardan los 50 últimos.</string>
+    <string name="tr_col_cost">Coste</string>
+    <string name="st_kwh_price">Precio del kWh: %s</string>
+    <string name="st_kwh_price_none">sin definir</string>
+    <string name="st_kwh_price_title">Precio del kWh (vacío: ninguno)</string>
+    <string name="st_kwh_price_desc">Muestra el coste de cada trayecto y registro en la página Trayectos. Cada trayecto conserva el precio del momento en que se hizo.</string>
+    <string name="tr_filter_all">Todo</string>
+    <string name="tr_filter_trips">Trayectos</string>
+    <string name="tr_filter_readings">Registros</string>
+    <string name="tr_reading_row">Registro</string>
+    <string name="tr_clear_all_confirm">¿Borrar los trayectos y los registros terminados? Un registro en curso continúa.</string>
     <string name="wc_web_count">%1$d direcciones</string>
     <string name="wc_wake">Página activa:</string>
     <string name="wc_wake_s">%1$d s</string>

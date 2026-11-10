@@ -357,7 +357,8 @@ object EnergyMonitor {
                     tripSave = 0
                     // Its start from the internal clock: the system time can be wrong just after a wake-up
                     val t = _sinceStart.value
-                    TripLog.saveCurrent(sp, TripLog.Trip(now - (tick - tripTick), now, startKm, km, t.distKm, t.netKwh, tripSoc, soc))
+                    TripLog.saveCurrent(sp, TripLog.Trip(now - (tick - tripTick), now, startKm, km, t.distKm, t.netKwh, tripSoc, soc,
+                        sp.getFloat("kwh_price", 0f).takeIf { it > 0f }))
                 }
                 val mk = monthKey(now)
                 val m = months[mk] ?: Totals()

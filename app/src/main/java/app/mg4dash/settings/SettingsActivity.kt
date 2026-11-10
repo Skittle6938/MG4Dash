@@ -267,6 +267,17 @@ class SettingsActivity : AppCompatActivity() {
                 .setNegativeButton(R.string.cancel, null)
                 .show().also { app.mg4dash.ui.Dialogs.fix(it) }
         }
+        // Price of a kWh (#102): the cost of each trip and reading in the Trips page; empty: none
+        lateinit var priceBtn: Button
+        fun priceLabel() = getString(R.string.st_kwh_price, if (prefs.kwhPrice > 0f) app.mg4dash.ui.TripText.money(prefs.kwhPrice) else getString(R.string.st_kwh_price_none))
+        priceBtn = button(priceLabel()) {
+            ask(getString(R.string.st_kwh_price_title), if (prefs.kwhPrice > 0f) prefs.kwhPrice.toString() else "", secret = false, number = true) { v ->
+                prefs.kwhPrice = v.replace(',', '.').trim().toFloatOrNull()?.takeIf { it > 0f && it < 100f } ?: 0f
+                priceBtn.text = priceLabel()
+            }
+        }
+        row(energy, priceBtn)
+        text(energy, getString(R.string.st_kwh_price_desc), 15f, R.color.text_title)
         toggle(energy, R.string.st_cc_stopped, R.string.st_cc_stopped_desc, { prefs.raw.getBoolean("cc_stopped", true) }) { prefs.raw.edit().putBoolean("cc_stopped", it).apply() }
         // Speed × temperature consumption map (in testing, off by default)
         powerFxSetting(panel(lookR, getString(R.string.sw_power)))

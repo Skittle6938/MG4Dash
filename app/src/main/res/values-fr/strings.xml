@@ -607,6 +607,16 @@
     <string name="tr_clear">Effacer</string>
     <string name="tr_clear_confirm">Effacer la liste des trajets ?</string>
     <string name="tr_note">Un trajet va de l\'allumage à la mise en veille de la voiture. Les 50 derniers sont gardés.</string>
+    <string name="tr_col_cost">Coût</string>
+    <string name="st_kwh_price">Prix du kWh : %s</string>
+    <string name="st_kwh_price_none">non renseigné</string>
+    <string name="st_kwh_price_title">Prix du kWh (vide : aucun)</string>
+    <string name="st_kwh_price_desc">Affiche le coût de chaque trajet et relevé dans la page Trajets. Chaque trajet garde le prix du moment où il a été fait.</string>
+    <string name="tr_filter_all">Tout</string>
+    <string name="tr_filter_trips">Trajets</string>
+    <string name="tr_filter_readings">Relevés</string>
+    <string name="tr_reading_row">Relevé</string>
+    <string name="tr_clear_all_confirm">Effacer les trajets et les relevés terminés ? Un relevé en cours continue.</string>
     <string name="wc_web_count">%1$d adresses</string>
     <string name="wc_wake">Page réveillée :</string>
     <string name="wc_wake_s">%1$d s</string>

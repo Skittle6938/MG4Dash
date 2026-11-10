@@ -30,6 +30,18 @@ object TripText {
     /** Short, without the unit: on the card's rows. */
     fun consShort(c: Context, per100: Float?) = per100?.let { Units.consText(c, it) } ?: "—"
 
+    /** "0,52 €": an amount in the system's currency (#102), or "—" when unknown. */
+    fun money(v: Float?): String = v?.let { m ->
+        val loc = Locale.getDefault()
+        java.text.NumberFormat.getCurrencyInstance(loc).apply {
+            // A language without its country has no currency (¤): the euro, as on the cars sold in Europe
+            if (loc.country.isEmpty()) currency = java.util.Currency.getInstance("EUR")
+        }.format(m.toDouble())
+    } ?: "—"
+
+    /** The kWh price set, or null (no cost shown anywhere). */
+    fun price(c: Context): Float? = app.mg4dash.system.Prefs(c).kwhPrice.takeIf { it > 0f }
+
     fun count(c: Context, n: Int) = if (n <= 1) c.getString(R.string.tr_one) else c.getString(R.string.tr_many, n)
 
     /** Today, yesterday, or the day (Sat 7 Nov). */

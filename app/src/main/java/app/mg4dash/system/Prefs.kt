@@ -251,6 +251,11 @@ class Prefs(context: Context) {
         get() = sp.getBoolean("connection_icons", true)
         set(v) = sp.edit().putBoolean("connection_icons", v).apply()
 
+    /** Price of a kWh (#102), 0 for none: the cost of each trip, kept with it. */
+    var kwhPrice: Float
+        get() = sp.getFloat("kwh_price", 0f)
+        set(v) = sp.edit().putFloat("kwh_price", v).apply()
+
     /** The startup source and playback wait for the end of the startup sound (#36), on by default. */
     var waitStartSound: Boolean
         get() = sp.getBoolean("wait_start_sound", true)
