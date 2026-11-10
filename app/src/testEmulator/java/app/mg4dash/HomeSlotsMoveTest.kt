@@ -23,17 +23,16 @@ import org.robolectric.RuntimeEnvironment
 class HomeSlotsMoveTest {
     private val prefs get() = Prefs(RuntimeEnvironment.getApplication())
 
-    /** A card in one place at most, every place of cards with one, climate and media once each in a medium place. */
+    /** A card in one place at most, every place of cards with one, the media once, alone, in a medium place. */
     private fun assertValid(c: HomeSlots.Config, unavailable: Set<Card> = emptySet()) {
         val all = c.layout.slots.flatMap { c.cards(it.id) }
         assertEquals("a card twice in $c", all.size, all.toSet().size)
         for (s in c.layout.slots) {
             val f = c.fill(s.id)
             if (f is Fill.Cards) assertTrue("place ${s.id} without a card in $c", f.cards.any { it !in unavailable })
-            else assertEquals("${s.id} in $c", HomeSlots.Size.MEDIUM, s.size)
-            if (f is Fill.Cards) assertEquals("cards in their order in ${s.id}", f.cards.sortedBy { it.ordinal }, f.cards)
+            else assertTrue("${s.id} in $c", HomeSlots.mediaFits(s.size))
+            if (f is Fill.Cards) f.cards.forEach { assertTrue("$it fits ${s.id}", HomeSlots.fits(it, s.size)) }
         }
-        assertTrue(c.fills.values.count { it == Fill.Climate } <= 1)
         assertTrue(c.fills.values.count { it == Fill.Media } <= 1)
     }
 
@@ -63,7 +62,7 @@ class HomeSlotsMoveTest {
     @Test fun everyKindEverywhereKeepsTheRules() {
         for (l in Layout.entries) {
             var c = HomeSlots.defaults(l)
-            for (kind in listOf(Kind.CARDS, Kind.MEDIA, Kind.CLIMATE, Kind.CARDS, Kind.CLIMATE)) for (slot in l.slots) {
+            for (kind in listOf(Kind.CARDS, Kind.MEDIA, Kind.CARDS, Kind.MEDIA)) for (slot in l.slots) {
                 val ch = HomeSlots.setKind(c, slot.id, kind)
                 if (ch.refused == null) c = ch.config
                 assertValid(c)
@@ -75,7 +74,7 @@ class HomeSlotsMoveTest {
         val c = HomeSlots.defaults(Layout.MAP)
         // The consumption leaves the map's place for the top left one
         val moved = HomeSlots.toggle(c, "tl", Card.CONSUMPTION).config
-        assertEquals(listOf(Card.CONSUMPTION, Card.HOURLY, Card.DAILY), moved.cards("tl"))
+        assertEquals("added last, in the order ticked", listOf(Card.HOURLY, Card.DAILY, Card.CONSUMPTION), moved.cards("tl"))
         assertEquals(listOf(Card.MAP, Card.SHORTCUTS), moved.cards("r"))
         assertEquals("tl", moved.slotOf(Card.CONSUMPTION))
     }
@@ -92,7 +91,7 @@ class HomeSlotsMoveTest {
     @Test fun climateOrMediaCannotGoToASmallOrTallPlace() {
         val full = HomeSlots.defaults(Layout.FULL)
         for (s in listOf("bl", "bc", "br")) {
-            assertEquals(full, HomeSlots.setKind(full, s, Kind.CLIMATE).config)
+            assertEquals(Refusal.TOO_BIG, HomeSlots.toggle(full, s, Card.CLIMATE).refused)
             assertEquals(full, HomeSlots.setKind(full, s, Kind.MEDIA).config)
         }
         // Stored by hand there: left out when read
@@ -102,12 +101,11 @@ class HomeSlotsMoveTest {
     }
 
     @Test fun climateLeftOutThenBack() {
-        val noClimate = HomeSlots.setKind(HomeSlots.defaults(Layout.FULL), "tl", Kind.CARDS).config
-        assertNull(noClimate.slotOf(Fill.Climate))
-        val back = HomeSlots.setKind(noClimate, "tr", Kind.CLIMATE).config
-        assertEquals("tr", back.slotOf(Fill.Climate))
-        // The media it replaced is left out
-        assertNull(back.slotOf(Fill.Media))
+        val withWeb = HomeSlots.toggle(HomeSlots.defaults(Layout.FULL), "tl", Card.WEB).config
+        val noClimate = HomeSlots.toggle(withWeb, "tl", Card.CLIMATE).config
+        assertNull(noClimate.slotOf(Card.CLIMATE))
+        val back = HomeSlots.toggle(noClimate, "tc", Card.CLIMATE).config
+        assertEquals("tc", back.slotOf(Card.CLIMATE))
         assertValid(back)
     }
 
@@ -115,7 +113,7 @@ class HomeSlotsMoveTest {
         // All cards placed one per place, the others not available now: none to give to a new place of cards
         val c = HomeSlots.decode(Layout.FULL, "tl=climate;tc=map;tr=media;bl=energy;bc=hourly;br=trip")
         val unavailable = setOf(Card.CONSUMPTION, Card.SHORTCUTS, Card.WEB, Card.POWER, Card.PHONE, Card.DAILY)
-        val ch = HomeSlots.setKind(c, "tl", Kind.CARDS, unavailable)
+        val ch = HomeSlots.setKind(c, "tr", Kind.CARDS, unavailable)
         assertEquals(Refusal.NO_CARD, ch.refused)
         assertEquals(c, ch.config)
     }
@@ -176,7 +174,6 @@ class HomeSlotsMoveTest {
     }
 
     @Test fun kindOfEachFill() {
-        assertEquals(Kind.CLIMATE, HomeSlots.kindOf(Fill.Climate))
         assertEquals(Kind.MEDIA, HomeSlots.kindOf(Fill.Media))
         assertEquals(Kind.CARDS, HomeSlots.kindOf(Fill.Cards(listOf(Card.MAP))))
     }

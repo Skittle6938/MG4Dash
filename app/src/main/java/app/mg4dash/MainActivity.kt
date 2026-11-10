@@ -246,6 +246,8 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
     /** One view per card, placed later in its place; a card left out keeps its view, out of the screen. */
     private fun buildPanels() {
         climatePanel = b.climateCard
+        // The climate (pinch mode v2): a card like the others, swiped with the other cards of its place
+        panels[Card.CLIMATE] = climatePanel
         // Media: vertical swipe = source (issue #6), left / right = next / previous track, like the buttons
         mediaPanel = app.mg4dash.ui.SwipeBox(this, vertical = true, horizontal = false) { MediaHub.cycleSource(it) }.apply {
             onHorizontal = { if (it > 0) MediaHub.next() else MediaHub.previous() }
@@ -341,7 +343,7 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         if (simpleMode) return null
         fun place(f: SlotFrame?) = f?.box
         return when (id) {
-            R.id.climateCard -> place(frames.values.firstOrNull { it.fill == HomeSlots.Fill.Climate })
+            R.id.climateCard -> place(frameOf(Card.CLIMATE))
             R.id.mediaCard -> place(frames.values.firstOrNull { it.fill == HomeSlots.Fill.Media })
             R.id.energyCard -> place(frameOf(Card.ENERGY))
             R.id.mapCard -> place(frameOf(Card.MAP))
@@ -373,7 +375,6 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         val want = HashMap<View, SlotFrame>()
         frames.values.forEach { f ->
             when (f.fill) {
-                HomeSlots.Fill.Climate -> want[climatePanel] = f
                 HomeSlots.Fill.Media -> want[mediaPanel] = f
                 is HomeSlots.Fill.Cards -> f.cards.forEach { c -> panels[c]?.let { want[it] = f } }
             }
@@ -381,7 +382,7 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         // An app or a page embedded in a card that changes place goes with its old frame: started again in the new one
         if (floatMap == null && b.mapCard.parent !== want[b.mapCard]?.box) dropMapApp()
         panels[Card.WEB]?.let { if (floatWeb == null && it.parent !== want[it]?.box) webCard?.reset() }
-        (panels.values + climatePanel + mediaPanel).forEach { v ->
+        (panels.values + mediaPanel).forEach { v ->
             val target = want[v]?.box
             if (v.parent !== target) {
                 (v.parent as? android.view.ViewGroup)?.removeView(v)
@@ -394,6 +395,8 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         // Smaller versions in a small place: consumption, map without + and −, one row of shortcuts
         consumption.compact = frameOf(Card.CONSUMPTION)?.slot?.size == HomeSlots.Size.SMALL
         trips.compact = frameOf(Card.TRIPS)?.slot?.size == HomeSlots.Size.SMALL
+        // Tall place: more previous trips, to fill its height (owner's choice)
+        trips.previous = if (frameOf(Card.TRIPS)?.slot?.size == HomeSlots.Size.TALL) 14 else 2
         driving.form = when (frameOf(Card.DRIVING)?.slot?.size) {
             HomeSlots.Size.SMALL -> app.mg4dash.ui.DrivingCard.Form.COMPACT
             HomeSlots.Size.TALL, HomeSlots.Size.LARGE -> app.mg4dash.ui.DrivingCard.Form.FULL
@@ -413,7 +416,6 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         f.instead = insteadOf(f)
         val shown = f.shown
         f.cards.forEach { c -> panels[c]?.visibility = if (c == shown) View.VISIBLE else View.INVISIBLE }
-        if (f.fill == HomeSlots.Fill.Climate) climatePanel.visibility = View.VISIBLE
         if (f.fill == HomeSlots.Fill.Media) mediaPanel.visibility = View.VISIBLE
         f.cards.forEach { cardShown(it, it == shown) }
         // A window docked in this place shows or hides with its card at once (#15)
@@ -453,6 +455,7 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
             Card.POWER -> if (on) { if (!powerBuilt) buildPower(); ensurePowerFx(); lifecycleScope.launch { updatePower() } } else if (!cardPower) dropPowerFx()
             Card.PHONE -> if (on) renderPhoneFavs()
             Card.HOURLY, Card.DAILY -> if (on) renderWeather(WeatherRepo.shown.value, CarBridge.state.value)
+            Card.CLIMATE -> if (on) renderClimate(CarBridge.state.value)
         }
     }
 
@@ -602,7 +605,7 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         val tl = frames["tl"]
         val fog = if (Dock.vertical(this)) 0 else dp(64)
         ((b.climateCard.getChildAt(0) as LinearLayout).getChildAt(0).layoutParams as LinearLayout.LayoutParams).leftMargin =
-            if (tl?.fill == HomeSlots.Fill.Climate) fog else 0
+            if (tl != null && Card.CLIMATE in tl.cards) fog else 0
         weathers.forEach { (c, w) -> w.setLeftInset(if (tl != null && c in tl.cards) fog else 0) }
         fun pad(v: View, on: Boolean) {
             val base = basePad.getOrPut(v) { v.paddingLeft }

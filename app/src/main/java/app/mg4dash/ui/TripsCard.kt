@@ -33,7 +33,7 @@ class TripsCard(context: Context) : LinearLayout(context) {
     private val nowOdo = tv(18f, R.color.text_sub)
     private val nowKm = tv(44f, R.color.text_value, light = true)
     private val nowDetail = tv(22f, R.color.text_value)
-    private val prev = List(2) { tv(19f, R.color.text_sub) to tv(19f, R.color.text_value) }
+    private val prev = List(MAX_PREVIOUS) { tv(19f, R.color.text_sub) to tv(19f, R.color.text_value) }
     private val prevRows = prev.map { (l, r) -> line(l, r) }
     private val prevDivider = divider()
     private val todayLabel = tv(21f, R.color.text_sub)
@@ -61,10 +61,20 @@ class TripsCard(context: Context) : LinearLayout(context) {
         set(v) {
             if (field == v) return
             field = v
-            prevRows.forEach { it.visibility = if (v) GONE else VISIBLE }
-            prevDivider.visibility = if (v) GONE else VISIBLE
             show()
         }
+
+    /** Previous trips listed: 2 in a medium place, more in a tall one to fill its height. */
+    var previous = 2
+        set(v) {
+            if (field == v) return
+            field = v.coerceIn(0, MAX_PREVIOUS)
+            show()
+        }
+
+    companion object {
+        const val MAX_PREVIOUS = 14
+    }
 
     init {
         orientation = VERTICAL
@@ -114,7 +124,7 @@ class TripsCard(context: Context) : LinearLayout(context) {
             l.text = t?.let { (if (i == 0) c.getString(R.string.tr_previous, TripText.span(c, it)) else TripText.span(c, it)) } ?: ""
             // Its cost too, with a kWh price (at the price it was driven at)
             r.text = t?.let { "${TripText.dist(c, it.km)} · ${TripText.consShort(c, it.per100)}" + (if (priced) " · " + TripText.money(it.cost) else "") } ?: ""
-            prevRows[i].visibility = if (compact || t == null) GONE else VISIBLE
+            prevRows[i].visibility = if (compact || i >= previous || t == null) GONE else VISIBLE
         }
         prevDivider.visibility = if (compact || trips.isEmpty()) GONE else VISIBLE
         val day = TripLog.today(trips, cur, now)

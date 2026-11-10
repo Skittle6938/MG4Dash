@@ -26,6 +26,8 @@ object HomeSlots {
 
     /** Cards, in the order they go by in a place. [icon]: on the button that changes card over a web page or an app. */
     enum class Card(val id: String, val label: Int, val icon: Int) {
+        /** The climate (pinch mode v2): a card like the others, swiped with the other cards of its place. */
+        CLIMATE("climate", R.string.wc_kind_climate, R.drawable.ic_fan),
         MAP("map", R.string.wc_map, R.drawable.ic_map),
         CONSUMPTION("consumption", R.string.wc_consumption, R.drawable.ic_bolt),
         SHORTCUTS("shortcuts", R.string.wc_shortcuts, R.drawable.ic_apps),
@@ -45,21 +47,32 @@ object HomeSlots {
         val big: Boolean get() = this == MAP || this == WEB || this == CONSUMPTION || this == SHORTCUTS || this == DRIVING
 
         /** Only placed by the driver, never put in an empty place by itself. */
-        val manual: Boolean get() = this == TRIPS || this == DRIVING
+        val manual: Boolean get() = this == TRIPS || this == DRIVING || this == CLIMATE
     }
 
-    /** [card] may go in a place of [size]. */
-    fun fits(card: Card, size: Size): Boolean = size.span == 1 || card.big
+    /**
+     * [card] may go in a place of [size] (owner's choice, 10 Nov 2026): the climate in a medium or tall place; the
+     * cards that fill a big place everywhere; the others in a small, medium or tall place. The other ones are not even
+     * offered there in the edit mode.
+     */
+    fun fits(card: Card, size: Size): Boolean = when {
+        card == Card.CLIMATE -> size == Size.MEDIUM || size == Size.TALL
+        card.big -> true
+        else -> size.span == 1
+    }
+
+    /** The media in a medium or tall place, alone: it uses the swipes for its sources and tracks. */
+    fun mediaFits(size: Size): Boolean = size == Size.MEDIUM || size == Size.TALL
 
     /** What a place shows. */
     sealed class Fill {
-        data object Climate : Fill()
+        /** The media, alone in its place. */
         data object Media : Fill()
         data class Cards(val cards: List<Card>) : Fill()
     }
 
-    /** Choice of a medium place in the edit mode. */
-    enum class Kind { CLIMATE, MEDIA, CARDS }
+    /** What a place holds: the media alone, or cards. */
+    enum class Kind { MEDIA, CARDS }
 
     /** A place: its id, its size and its share of its line (the column's height; in a layout of rows, its share of the row is its span). */
     class Slot(val id: String, val size: Size, val weight: Float = 100f)
@@ -153,7 +166,6 @@ object HomeSlots {
         fun with(slot: String, fill: Fill): Config = Config(layout, LinkedHashMap(fills).apply { put(slot, fill.ordered()) })
         fun encode(): String = layout.slots.joinToString(";") { s ->
             s.id + "=" + when (val f = fill(s.id)) {
-                Fill.Climate -> "climate"
                 Fill.Media -> "media"
                 is Fill.Cards -> f.cards.joinToString(",") { it.id }
             }
@@ -164,11 +176,12 @@ object HomeSlots {
     }
 
     /** Why a change was refused: the place would have no card left, here or where the card was. */
-    enum class Refusal { KEEP_ONE, ONLY_CARD_THERE, NO_CARD, TOO_BIG }
+    enum class Refusal { KEEP_ONE, ONLY_CARD_THERE, NO_CARD, TOO_BIG, MEDIA_ALONE }
 
     class Change(val config: Config, val refused: Refusal? = null)
 
-    private fun Fill.ordered(): Fill = if (this is Fill.Cards) Fill.Cards(cards.distinct().sortedBy { it.ordinal }) else this
+    /** Cards in the order they were ticked (the order they go by in their place), each once. */
+    private fun Fill.ordered(): Fill = if (this is Fill.Cards) Fill.Cards(cards.distinct()) else this
 
     /** The layout chosen; before the eight layouts (#38), the Map home style was the Map layout. */
     fun layoutOf(prefs: Prefs): Layout = Layout.of(prefs.homeLayout) ?: if (prefs.homeStyle == 2) Layout.MAP else Layout.FULL
@@ -205,16 +218,26 @@ object HomeSlots {
     fun decode(layout: Layout, s: String): Config {
         val parts = s.split(';').mapNotNull { p -> p.split('=', limit = 2).takeIf { it.size == 2 }?.let { it[0].trim() to it[1].trim() } }.toMap()
         val used = mutableSetOf<Card>()
-        var climate = false
+        val misplaced = mutableListOf<Card>()
         var media = false
         val fills = LinkedHashMap<String, Fill>()
         layout.slots.forEach { slot ->
             val v = parts[slot.id] ?: ""
             fills[slot.id] = when {
-                v == "climate" && slot.size == Size.MEDIUM && !climate -> { climate = true; Fill.Climate }
-                v == "media" && slot.size == Size.MEDIUM && !media -> { media = true; Fill.Media }
-                else -> Fill.Cards(v.split(',').mapNotNull { id -> Card.entries.firstOrNull { it.id == id } }.filter { fits(it, slot.size) && used.add(it) }).ordered()
+                v == "media" && mediaFits(slot.size) && !media -> { media = true; Fill.Media }
+                else -> {
+                    val cards = v.split(',').mapNotNull { id -> Card.entries.firstOrNull { it.id == id } }.filter { used.add(it) }
+                    misplaced += cards.filter { !fits(it, slot.size) }
+                    Fill.Cards(cards.filter { fits(it, slot.size) }).ordered()
+                }
             }
+        }
+        // A card stored where it no longer fits (#38, a layout from before): to the first place of cards that takes
+        // it, otherwise left out
+        misplaced.forEach { card ->
+            val to = layout.slots.firstOrNull { s -> fits(card, s.size) && fills[s.id] is Fill.Cards }
+            if (to != null) fills[to.id] = Fill.Cards((fills[to.id] as Fill.Cards).cards + card)
+            app.mg4dash.system.Log.i("Slots", "${card.id} does not fit its place in ${layout.key}: " + (to?.let { "moved to ${it.id}" } ?: "left out"))
         }
         return Config(layout, fills)
     }
@@ -279,7 +302,7 @@ object HomeSlots {
      * Refused if a place would have no card left.
      */
     fun toggle(config: Config, slot: String, card: Card, unavailable: Set<Card> = emptySet()): Change {
-        val here = config.fill(slot) as? Fill.Cards ?: return Change(config)
+        val here = config.fill(slot) as? Fill.Cards ?: return Change(config, Refusal.MEDIA_ALONE)
         if (card !in here.cards && !fits(card, config.layout.slot(slot)?.size ?: Size.SMALL)) return Change(config, Refusal.TOO_BIG)
         fun shown(cards: List<Card>) = cards.count { it !in unavailable }
         if (card in here.cards) {
@@ -296,18 +319,22 @@ object HomeSlots {
     }
 
     /**
-     * Medium place: climate, media or cards. The climate or the media swaps places with what was here;
-     * cards start with one (left out, or taken from the place that has the most).
+     * The media in [slot] ([Kind.MEDIA]), alone: the cards that were here go to the place the media leaves (left out
+     * if it was nowhere). Taken off ([Kind.CARDS]): the place starts with one card (left out, or taken from the place
+     * that has the most).
      */
     fun setKind(config: Config, slot: String, kind: Kind, unavailable: Set<Card> = emptySet()): Change {
-        if (config.layout.slot(slot)?.size != Size.MEDIUM) return Change(config)
+        val size = config.layout.slot(slot)?.size ?: return Change(config)
         val old = config.fill(slot)
-        val fill = when (kind) { Kind.CLIMATE -> Fill.Climate; Kind.MEDIA -> Fill.Media; Kind.CARDS -> null }
-        if (fill != null) {
-            if (old == fill) return Change(config)
+        if (kind == Kind.MEDIA) {
+            if (!mediaFits(size) || old == Fill.Media) return Change(config)
             var c = config
-            c.slotOf(fill)?.let { other -> c = c.with(other, old) }
-            return Change(c.with(slot, fill))
+            // The cards that were here go where the media was, those that fit there
+            c.slotOf(Fill.Media)?.let { from ->
+                val there = c.layout.slot(from)?.size ?: size
+                c = c.with(from, Fill.Cards((old as? Fill.Cards)?.cards.orEmpty().filter { fits(it, there) }))
+            }
+            return Change(fillEmpty(c.with(slot, Fill.Media), unavailable))
         }
         if (old is Fill.Cards) return Change(config)
         val empty = config.with(slot, Fill.Cards(emptyList()))
@@ -315,7 +342,7 @@ object HomeSlots {
         return Change(c.with(slot, Fill.Cards(listOf(card))))
     }
 
-    fun kindOf(fill: Fill): Kind = when (fill) { Fill.Climate -> Kind.CLIMATE; Fill.Media -> Kind.MEDIA; is Fill.Cards -> Kind.CARDS }
+    fun kindOf(fill: Fill): Kind = when (fill) { Fill.Media -> Kind.MEDIA; is Fill.Cards -> Kind.CARDS }
 
     private fun nowKey(layout: Layout, slot: String) = "slot_now_${layout.key}_$slot"
 

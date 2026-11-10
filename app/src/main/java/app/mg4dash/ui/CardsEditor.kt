@@ -186,6 +186,7 @@ object CardsEditor {
                 HomeSlots.Refusal.KEEP_ONE, HomeSlots.Refusal.NO_CARD -> Toasts.show(context, R.string.wc_keep_one)
                 HomeSlots.Refusal.ONLY_CARD_THERE -> Toasts.show(context, R.string.wc_keep_one_there, long = true)
                 HomeSlots.Refusal.TOO_BIG -> Toasts.show(context, R.string.wc_too_big, long = true)
+                HomeSlots.Refusal.MEDIA_ALONE -> Toasts.show(context, R.string.wc_media_alone)
                 null -> { HomeSlots.save(prefs, ch.config); render(); onChange() }
             }
         }
@@ -199,51 +200,41 @@ object CardsEditor {
             }
             val id = t.slot.id
             val here = c.fill(id)
-            // Medium place: the climate, the media, or cards
-            if (t.slot.size == HomeSlots.Size.MEDIUM) {
-                val kinds = FlowRow(context, dp(8))
-                listOf(HomeSlots.Kind.CLIMATE to R.string.wc_kind_climate, HomeSlots.Kind.MEDIA to R.string.wc_kind_media, HomeSlots.Kind.CARDS to R.string.wc_kind_cards)
-                    .forEach { (kind, label) ->
-                        val elsewhere = when (kind) {
-                            HomeSlots.Kind.CLIMATE -> c.slotOf(HomeSlots.Fill.Climate)
-                            HomeSlots.Kind.MEDIA -> c.slotOf(HomeSlots.Fill.Media)
-                            HomeSlots.Kind.CARDS -> null
-                        }?.takeIf { it != id }
-                        kinds.addView(chip(context.getString(label), HomeSlots.kindOf(here) == kind, elsewhere) {
-                            change(HomeSlots.setKind(config, id, kind, unavailable))
-                        })
-                    }
-                box.addView(kinds, LinearLayout.LayoutParams(-1, -2))
-            }
-            val cards = here as? HomeSlots.Fill.Cards ?: return
+            // Every widget this place can hold (pinch mode v2): ticked ones go by in turn, in the order ticked; the
+            // media is alone in its place (it uses the swipes for its sources and tracks)
+            val media = here == HomeSlots.Fill.Media
+            val cards = (here as? HomeSlots.Fill.Cards)?.cards.orEmpty()
             val column = LinearLayout(context).apply { orientation = LinearLayout.VERTICAL }
             val flow = FlowRow(context, dp(8))
-            Card.entries.filter { it !in unavailable }.forEach { card ->
-                val fits = HomeSlots.fits(card, t.slot.size)
-                flow.addView(chip(context.getString(card.label), card in cards.cards, c.slotOf(card)?.takeIf { it != id }, greyed = !fits) {
-                    change(HomeSlots.toggle(config, id, card, unavailable))
+            if (HomeSlots.mediaFits(t.slot.size)) flow.addView(chip(context.getString(R.string.wc_kind_media), media, c.slotOf(HomeSlots.Fill.Media)?.takeIf { it != id }) {
+                change(HomeSlots.setKind(config, id, if (media) HomeSlots.Kind.CARDS else HomeSlots.Kind.MEDIA, unavailable))
+            })
+            // Only the widgets that suit this place (owner's choice): the list stays short
+            Card.entries.filter { it !in unavailable && HomeSlots.fits(it, t.slot.size) }.forEach { card ->
+                flow.addView(chip(context.getString(card.label), card in cards, c.slotOf(card)?.takeIf { it != id }, greyed = media) {
+                    if (media) Toasts.show(context, R.string.wc_media_alone) else change(HomeSlots.toggle(config, id, card, unavailable))
                 })
             }
             column.addView(flow, LinearLayout.LayoutParams(-1, -2))
-            // Two columns wide: why some cards are greyed
-            if (t.slot.size.span > 1) column.addView(TextView(context).apply {
-                text = context.getString(R.string.wc_big_hint); setTextColor(sub); setTextSize(TypedValue.COMPLEX_UNIT_SP, 17f)
+            fun hint(text: Int) = column.addView(TextView(context).apply {
+                this.text = context.getString(text); setTextColor(sub); setTextSize(TypedValue.COMPLEX_UNIT_SP, 17f)
                 setPadding(dp(4), dp(10), dp(4), 0)
             })
-            if (Card.MAP in cards.cards) mapApp?.let { m ->
+            if (media) hint(R.string.wc_media_alone)
+            if (Card.MAP in cards) mapApp?.let { m ->
                 column.addView(link(context.getString(R.string.wc_map_app), m.name()) { m.pick { render(); onChange() } })
             }
-            if (Card.WEB in cards.cards)
+            if (Card.WEB in cards)
                 column.addView(link(context.getString(R.string.wc_web_address), webSummary()) { editUrls() })
-            if (Card.WEB in cards.cards) column.addView(doubleTapRow(map = false))
+            if (Card.WEB in cards) column.addView(doubleTapRow(map = false))
             // The map card the same (#98): fixed full screen or a window over home
-            if (Card.MAP in cards.cards) column.addView(doubleTapRow(map = true))
+            if (Card.MAP in cards) column.addView(doubleTapRow(map = true))
             // How long a web page or the map's app stays awake after a touch (#98)
-            if (Card.WEB in cards.cards || Card.MAP in cards.cards && prefs.mapApp != null)
+            if (Card.WEB in cards || Card.MAP in cards && prefs.mapApp != null)
                 column.addView(wakeRow())
             // Small places: more chips than room, they scroll
             box.addView(ScrollView(context).apply { isVerticalScrollBarEnabled = false; addView(column) },
-                LinearLayout.LayoutParams(-1, 0, 1f).apply { topMargin = dp(if (t.slot.size == HomeSlots.Size.MEDIUM) 10 else 2) })
+                LinearLayout.LayoutParams(-1, 0, 1f).apply { topMargin = dp(2) })
         }
 
         /**

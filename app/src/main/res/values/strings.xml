@@ -599,6 +599,7 @@
     <string name="ly_edit">Edit the layout and the widgets  ›</string>
     <string name="wc_too_big">Too small for a place this big: it is greyed here</string>
     <string name="wc_big_hint">Big place: App, Web app, Consumption, Shortcuts and Driving only</string>
+    <string name="wc_media_alone">The media takes the whole place (it uses the swipes for its sources and tracks)</string>
     <string name="title_trips">TRIPS</string>
     <string name="tr_now">In progress · since %s</string>
     <string name="tr_none">No trip yet</string>

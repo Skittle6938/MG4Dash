@@ -599,6 +599,7 @@
     <string name="ly_edit">Anordnung und Widgets bearbeiten  ›</string>
     <string name="wc_too_big">Zu klein für einen so großen Platz: hier ausgegraut</string>
     <string name="wc_big_hint">Großer Platz: nur App, Web-App, Verbrauch, Verknüpfungen und Fahren</string>
+    <string name="wc_media_alone">Die Medien belegen den ganzen Platz (sie nutzen das Wischen für Quellen und Titel)</string>
     <string name="title_trips">FAHRTEN</string>
     <string name="tr_now">Läuft · seit %s</string>
     <string name="tr_none">Noch keine Fahrt</string>

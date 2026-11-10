@@ -33,7 +33,7 @@ class HomeLayoutsTest {
             layout.slots.forEach { s ->
                 val f = c.fill(s.id)
                 if (f is Fill.Cards) assertTrue("${layout.key}/${s.id} has a card", f.cards.isNotEmpty())
-                else assertEquals("${layout.key}/${s.id}: climate and media in a medium place", Size.MEDIUM, s.size)
+                else assertTrue("${layout.key}/${s.id}: the media in a medium or tall place", HomeSlots.mediaFits(s.size))
                 f.let { it as? Fill.Cards }?.cards?.forEach { card -> assertTrue("${layout.key}/${s.id}: $card fits", HomeSlots.fits(card, s.size)) }
             }
             assertNull("${layout.key}: driving only where the driver puts it", c.slotOf(Card.DRIVING))
@@ -68,8 +68,30 @@ class HomeLayoutsTest {
         assertTrue(Card.DRIVING in ok.config.cards("g"))
         // A card stored in a place too big for it is left out there
         assertEquals(listOf(Card.MAP), HomeSlots.decode(Layout.BAND_TOP, "w=map,energy;tr=climate").cards("w"))
-        // In a small or medium place, everything goes
-        assertTrue(Card.entries.all { HomeSlots.fits(it, Size.SMALL) && HomeSlots.fits(it, Size.TALL) })
+        // In a small or tall place, everything goes but the climate (medium places only, as before)
+        assertTrue(Card.entries.filter { it != Card.CLIMATE }.all { HomeSlots.fits(it, Size.SMALL) && HomeSlots.fits(it, Size.TALL) })
+        assertTrue(HomeSlots.fits(Card.CLIMATE, Size.MEDIUM) && !HomeSlots.fits(Card.CLIMATE, Size.SMALL))
+    }
+
+    /** The owner's matrix (10 Nov 2026): what each size of place offers. */
+    @Test fun compatibilityMatrix() {
+        val all = Size.entries
+        fun only(card: Card, vararg sizes: Size) = all.forEach { s -> assertEquals("$card in $s", s in sizes, HomeSlots.fits(card, s)) }
+        only(Card.CLIMATE, Size.MEDIUM, Size.TALL)
+        listOf(Card.MAP, Card.WEB, Card.CONSUMPTION, Card.SHORTCUTS, Card.DRIVING).forEach { only(it, *all.toTypedArray()) }
+        listOf(Card.ENERGY, Card.TRIP, Card.POWER, Card.PHONE, Card.HOURLY, Card.DAILY, Card.TRIPS).forEach { only(it, Size.SMALL, Size.MEDIUM, Size.TALL) }
+        assertEquals(listOf(Size.MEDIUM, Size.TALL), all.filter { HomeSlots.mediaFits(it) })
+    }
+
+    @Test fun aCardStoredWhereItNoLongerFitsMovesOrIsLeftOut() {
+        // The energy stored in the big square: moved to the first place that takes it
+        val c = HomeSlots.decode(Layout.SQUARE_LEFT, "g=map,energy;tr=climate;br=trip")
+        assertEquals(listOf(Card.MAP), c.cards("g"))
+        assertEquals("tr", c.slotOf(Card.ENERGY))
+        // The media into the tall place: the cards there go where the media was, those that fit there
+        val moved = HomeSlots.setKind(HomeSlots.defaults(Layout.MAP_CENTER), "c", HomeSlots.Kind.MEDIA).config
+        assertEquals(Fill.Media, moved.fill("c"))
+        assertEquals(listOf(Card.MAP, Card.CONSUMPTION, Card.SHORTCUTS), moved.cards("tr"))
     }
 
     @Test fun layoutChosenAndOldMapStyleKept() {

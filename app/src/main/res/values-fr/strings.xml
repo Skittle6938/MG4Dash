@@ -599,6 +599,7 @@
     <string name="ly_edit">Modifier la disposition et les widgets  ›</string>
     <string name="wc_too_big">Trop petite pour une case aussi grande : grisée ici</string>
     <string name="wc_big_hint">Grande case : Application, Web app, Consommation, Raccourcis et Conduite seulement</string>
+    <string name="wc_media_alone">Le multimédia occupe toute la case (il utilise les balayages pour les sources et les morceaux)</string>
     <string name="title_trips">TRAJETS</string>
     <string name="tr_now">En cours · depuis %s</string>
     <string name="tr_none">Aucun trajet pour l\'instant</string>

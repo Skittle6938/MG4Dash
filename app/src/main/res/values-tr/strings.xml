@@ -599,6 +599,7 @@
     <string name="ly_edit">Yerleşimi ve widget\'ları düzenle  ›</string>
     <string name="wc_too_big">Bu kadar büyük bir alan için çok küçük: burada gri</string>
     <string name="wc_big_hint">Büyük alan: yalnızca Uygulama, Web uygulaması, Tüketim, Kısayollar ve Sürüş</string>
+    <string name="wc_media_alone">Medya tüm alanı kaplar (kaydırmaları kaynak ve parça için kullanır)</string>
     <string name="title_trips">YOLCULUKLAR</string>
     <string name="tr_now">Sürüyor · başlangıç %s</string>
     <string name="tr_none">Henüz yolculuk yok</string>
