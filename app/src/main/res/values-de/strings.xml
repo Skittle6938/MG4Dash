@@ -776,6 +776,8 @@
     <string name="st_sound_trigger">Startton</string>
     <string name="st_sound_trigger_desc">Wählen Sie eine Audiodatei vom USB-Stick oder aus dem internen Speicher. Sie wird in die App kopiert und bleibt auch nach dem Entfernen des Sticks verfügbar.</string>
     <string name="st_sound_boot_trigger">Bei Start abspielen</string>
+    <string name="st_sound_wait">Auf das Ende des Startklangs warten</string>
+    <string name="st_sound_wait_desc">Die Audioquelle startet (oder bleibt pausiert), sobald der Klang zu Ende ist</string>
     <string name="st_sound_pick_file">Audio auswählen</string>
     <string name="st_sound_no_file">Kein Ton ausgewählt</string>
     <string name="st_sound_file_too_large">Audiodateien dürfen höchstens 20 MB groß sein</string>

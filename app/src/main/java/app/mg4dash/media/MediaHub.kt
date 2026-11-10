@@ -123,6 +123,9 @@ object MediaHub {
      * it decides the player shown, the radio staying "playing" even when muted.
      */
     @Volatile private var sourcePkg: String? = null
+        set(v) { if (v != field && field != USB) sourceBeforeUsb = field; field = v }
+    /** The car's source before it went to USB: shown instead while the startup sound plays with no stick (#36). */
+    @Volatile private var sourceBeforeUsb: String? = null
 
     /** Source chosen by hand on the card (RADIO / USB-BT chips), until the car changes source. */
     @Volatile private var pinnedPkg: String? = null
@@ -137,6 +140,8 @@ object MediaHub {
 
     /** Real source: the car's, except an Android Auto switch due to guidance alone. */
     private fun effectiveSource(candidates: List<MediaController> = lastCandidates): String? {
+        // The startup sound played as media makes the car announce its USB player even with no stick (#36)
+        if (sourcePkg == USB && usbHeldBySound(app.mg4dash.sound.SoundTrigger.bootSoundRecent(2_000), USB in availableSources())) return sourceBeforeUsb
         if (sourcePkg != AA_MBS || !aaUnconfirmed) return sourcePkg
         val aaPlaying = candidates.any { isAndroidAuto(it.packageName) && it.playbackState?.state == PlaybackState.STATE_PLAYING }
         if (!aaPlaying) return sourceBeforeAa
@@ -232,7 +237,9 @@ object MediaHub {
             if (startDone) return
             val want = order.first()
             if (now - startedAt > 30_000 || want == cur) { startDone = true; return }
-            if (stable(want)) { startDone = true; autoSwitch(want, "startup source") }
+            // After the startup sound (#36), and playing only if that is the wanted state at startup
+            if (waitSound(p, now)) return
+            if (stable(want)) { startDone = true; autoSwitch(want, "startup source", play = startWanted(p)) }
             return
         }
         // An app took the source (Android Auto, CarPlay, DiAuto starting its music…): that is intended,
@@ -403,7 +410,17 @@ object MediaHub {
         }
         if (playbackApplied) return
         if (!carStart || now - startedAt > 40_000) { playbackApplied = true; return }
-        if (now - startedAt < 8_000 || now - autoSwitchAt < 4_000 || !_now.value.available) return
+        if (!_now.value.available) return
+        val left = handlesWheelKeys(_now.value.packageName) || handlesWheelKeys(sourcePkg)
+        val wanted = startWanted(p)
+        val wait = waitSound(p, now)
+        // Paused at startup, or during the startup sound (#36): at once, not after 8 s (the radio played meanwhile)
+        if (pauseAtOnce(playing, wanted, wait, left, now - startedAt)) {
+            Log.i(TAG, "startup playback: pause at once (${if (wait) "startup sound" else "setting"})")
+            playPauseRaw()
+            if (!wait) { playbackApplied = true; return }
+        }
+        if (wait || now - startedAt < 8_000 || now - autoSwitchAt < 4_000) return
         playbackApplied = true
         // DiAuto (wireless Android Auto): the phone decides to start the music ("start music
         // automatically" setting of its Android Auto app), MG4Dash does not touch it
@@ -411,10 +428,30 @@ object MediaHub {
             (sourcePkg == AA_MBS && projectionLive != true && lastCandidates.any { handlesWheelKeys(it.packageName) })) {
             Log.i(TAG, "startup playback: left to the phone (DiAuto)"); return
         }
-        val want = when (p.startPlayback) { 1 -> false; 2 -> true; else -> p.lastPlaying }
+        val want = wanted
         Log.i(TAG, "startup playback: ${if (want) "play" else "pause"} (setting ${p.startPlayback}, was playing ${p.lastPlaying})")
         if (want != playing) playPauseRaw()
     }
+
+    /** Playing wanted at car start: the setting, or as when the car stopped. */
+    private fun startWanted(p: app.mg4dash.system.Prefs) = when (p.startPlayback) { 1 -> false; 2 -> true; else -> p.lastPlaying }
+
+    /**
+     * The startup sound is playing, or ended less than 1 s ago (#36): the startup source and playback wait for it,
+     * 30 s at most. Without a startup sound, or with the setting off, nothing waits.
+     */
+    private fun waitSound(p: app.mg4dash.system.Prefs, now: Long) =
+        waitForSound(p.waitStartSound, app.mg4dash.sound.SoundTrigger.bootSoundRecent(1_000), now - startedAt)
+
+    /** Paused at startup (or during the startup sound): the source playing is paused at once, from 1 s, unless the phone decides (#36). */
+    internal fun pauseAtOnce(playing: Boolean, wanted: Boolean, wait: Boolean, leftToPhone: Boolean, sinceStartMs: Long) =
+        !leftToPhone && playing && (!wanted || wait) && sinceStartMs >= 1_000
+
+    /** USB announced while the startup sound plays (or just after) with no stick mounted: not shown (#36). */
+    internal fun usbHeldBySound(soundRecent: Boolean, usbMounted: Boolean) = soundRecent && !usbMounted
+
+    /** The startup source waits: setting on, sound playing or just ended, and less than 30 s since the start (#36). */
+    internal fun waitForSound(setting: Boolean, soundRecent: Boolean, sinceStartMs: Long) = setting && soundRecent && sinceStartMs < 30_000
 
     private var goneToProjectionLogged = false
     private var autoTarget: String? = null

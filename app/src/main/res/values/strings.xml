@@ -776,6 +776,8 @@
     <string name="st_sound_trigger">Startup Sound</string>
     <string name="st_sound_trigger_desc">Choose an audio file from a USB stick (or internal storage). It is copied into the app and stays available after the stick is removed.</string>
     <string name="st_sound_boot_trigger">Play at startup</string>
+    <string name="st_sound_wait">Wait for the end of the startup sound</string>
+    <string name="st_sound_wait_desc">The audio source starts (or stays paused) once the sound is over</string>
     <string name="st_sound_pick_file">Choose audio</string>
     <string name="st_sound_no_file">No sound file selected</string>
     <string name="st_sound_file_too_large">Audio files must be 20 MB or smaller</string>
