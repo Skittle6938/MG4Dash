@@ -658,61 +658,116 @@ object CarBridge {
     private const val TCS_OPNG_MD = 289421343       // 0x1140381f: 1 = ESC active, 0 = off (fallback)
 
     // ── Driving settings (Driving card, KERS gauge): MG4Control's commands, see DriveSettings ──
+    //
+    // A touch shows the choice at once, as pending: the command leaves in the background and the car's rereads
+    // do not take it back meanwhile. Confirmed by a reread, it settles; not confirmed within PENDING_MS, the
+    // value read comes back and [driveRefused] says so.
 
-    /** Rereads the driving settings; a setting that stops answering keeps its last value. */
-    private fun refreshDrive() {
-        val s = _state.value
-        val r = DriveSettings.read(s)
-        _state.value = s.copy(
-            driveMode = r.driveMode ?: s.driveMode, regenLevel = r.regenLevel ?: s.regenLevel, onePedal = r.onePedal ?: s.onePedal,
-            steeringMode = r.steeringMode ?: s.steeringMode, brakePedalMode = r.brakePedalMode ?: s.brakePedalMode,
-            lasMode = r.lasMode ?: s.lasMode, fcwState = r.fcwState ?: s.fcwState, fcwBrakeMode = r.fcwBrakeMode ?: s.fcwBrakeMode,
-        )
+    /** Pending choices: field → (value asked, time it is given up). */
+    private val pending = java.util.concurrent.ConcurrentHashMap<String, Pair<Int, Long>>()
+    private const val PENDING_MS = 4000L
+    private val _drivePending = MutableStateFlow<Set<String>>(emptySet())
+    /** Fields whose choice the car has not confirmed yet ("driveMode", "regenLevel"…). */
+    val drivePending: StateFlow<Set<String>> = _drivePending
+    private val _driveRefused = kotlinx.coroutines.flow.MutableSharedFlow<String>(extraBufferCapacity = 4)
+    /** A choice the car did not take (its label, for the log). */
+    val driveRefused: kotlinx.coroutines.flow.SharedFlow<String> = _driveRefused
+
+    private fun VehicleState.drive(field: String): Int? = when (field) {
+        "driveMode" -> driveMode; "regenLevel" -> regenLevel; "onePedal" -> onePedal; "steeringMode" -> steeringMode
+        "brakePedalMode" -> brakePedalMode; "lasMode" -> lasMode; "fcwState" -> fcwState; "fcwBrakeMode" -> fcwBrakeMode; else -> null
     }
 
-    /** A driving setting command, off the main thread, then two rereads. Never refused while driving (owner's choice). */
-    private fun drive(label: String, mock: (VehicleState) -> VehicleState, action: () -> Boolean) {
-        if (BuildConfig.MOCK) { _state.value = mock(_state.value); return }
+    private fun VehicleState.drive(field: String, v: Int?): VehicleState = when (field) {
+        "driveMode" -> copy(driveMode = v); "regenLevel" -> copy(regenLevel = v); "onePedal" -> copy(onePedal = v)
+        "steeringMode" -> copy(steeringMode = v); "brakePedalMode" -> copy(brakePedalMode = v); "lasMode" -> copy(lasMode = v)
+        "fcwState" -> copy(fcwState = v); "fcwBrakeMode" -> copy(fcwBrakeMode = v); else -> this
+    }
+
+    private val driveFields = listOf("driveMode", "regenLevel", "onePedal", "steeringMode", "brakePedalMode", "lasMode", "fcwState", "fcwBrakeMode")
+
+    /** Rereads the driving settings: a pending choice stays until confirmed or given up; a setting that stops answering keeps its last value. */
+    private fun refreshDrive() {
+        val (s, refused) = settle(_state.value, DriveSettings.read(_state.value), System.currentTimeMillis())
+        _state.value = s
+        _drivePending.value = pending.keys.toSet()
+        refused?.let { Log.w(TAG, "SET $it not confirmed by the car"); _driveRefused.tryEmit(it) }
+    }
+
+    /** [cur] after the car's [read] at [now]: pending choices kept, confirmed or given up; and a field given up, if any. */
+    internal fun settle(cur: VehicleState, read: VehicleState, now: Long): Pair<VehicleState, String?> {
+        var refused: String? = null
+        var s = cur
+        driveFields.forEach { f ->
+            val got = read.drive(f)
+            val p = pending[f]
+            s = when {
+                p == null -> s.drive(f, got ?: s.drive(f))
+                got == p.first -> { pending.remove(f); s.drive(f, got) }
+                now < p.second -> s.drive(f, p.first)
+                else -> { pending.remove(f); refused = f; s.drive(f, got ?: s.drive(f)) }
+            }
+        }
+        return s to refused
+    }
+
+    /** For the tests: a choice waiting for the car until [until]. */
+    internal fun setPending(field: String, value: Int, until: Long) { pending[field] = value to until; _drivePending.value = pending.keys.toSet() }
+    internal fun clearPending() { pending.clear(); _drivePending.value = emptySet() }
+
+    /**
+     * A driving setting command: [targets] shown at once, the command off the main thread, then rereads until the car
+     * confirms. Never refused while driving (owner's choice).
+     */
+    private fun drive(label: String, targets: Map<String, Int>, action: () -> Boolean) {
+        var s = _state.value
+        targets.forEach { (f, v) -> s = s.drive(f, v) }
+        _state.value = s
+        if (BuildConfig.MOCK) return
+        val until = System.currentTimeMillis() + PENDING_MS
+        targets.forEach { (f, v) -> pending[f] = v to until }
+        _drivePending.value = pending.keys.toSet()
         scope.launch {
             val ok = try { action() } catch (e: Exception) { Log.w(TAG, "SET $label: ${e.message}"); false }
             Log.i(TAG, "SET $label → $ok")
-            delay(500); refreshDrive()
-            delay(1500); refreshDrive()
+            for (wait in longArrayOf(600, 900, 1500, 1200)) { delay(wait); refreshDrive(); if (targets.keys.none { pending.containsKey(it) }) break }
         }
     }
 
     /** Drive mode: 6 snow, 2 eco, 3 normal, 4 sport, 7 custom. */
-    fun setDriveMode(mode: Int) = drive("drive mode $mode", { it.copy(driveMode = mode) }) { DriveSettings.setDriveMode(mode) }
+    fun setDriveMode(mode: Int) = drive("drive mode $mode", mapOf("driveMode" to mode)) { DriveSettings.setDriveMode(mode) }
 
     /** Regeneration level 0..3; one-pedal driving is turned off first (MG4Control's setRegenLevel). */
-    fun setRegenLevel(level: Int) = drive("regen $level", { it.copy(regenLevel = level, onePedal = 0) }) { DriveSettings.setRegenLevel(level) }
+    fun setRegenLevel(level: Int) = drive("regen $level", mapOf("regenLevel" to level, "onePedal" to 0)) { DriveSettings.setRegenLevel(level) }
 
     /** One-pedal driving on, as MG4Control's "One Pedal" regeneration level. */
-    fun setOnePedal() = drive("one pedal", { it.copy(onePedal = 1) }) { DriveSettings.setRegenLevel(DriveSettings.REGEN_ONE_PEDAL) }
+    fun setOnePedal() = drive("one pedal", mapOf("onePedal" to 1)) { DriveSettings.setRegenLevel(DriveSettings.REGEN_ONE_PEDAL) }
 
     /** One-pedal driving: toggle (long press on the KERS gauge). */
     fun toggleOnePedal() {
         val on = _state.value.onePedal != 1
-        drive("one pedal $on", { it.copy(onePedal = if (on) 1 else 0) }) { DriveSettings.setOnePedal(on) }
+        drive("one pedal $on", mapOf("onePedal" to if (on) 1 else 0)) { DriveSettings.setOnePedal(on) }
     }
 
     /** Custom mode steering, [index] 0 comfort, 1 normal, 2 sport. */
-    fun setSteering(index: Int) = drive("steering $index", { it.copy(steeringMode = DriveSettings.customValue(DriveSettings.Custom.STEERING, index)) }) {
-        DriveSettings.setCustom(DriveSettings.Custom.STEERING, index)
+    fun setSteering(index: Int) {
+        val v = DriveSettings.customValue(DriveSettings.Custom.STEERING, index) ?: return
+        drive("steering $index", mapOf("steeringMode" to v)) { DriveSettings.setCustom(DriveSettings.Custom.STEERING, index) }
     }
 
     /** Custom mode brake pedal, [index] 0 comfort, 1 normal, 2 sport. */
-    fun setBrakePedal(index: Int) = drive("brake pedal $index", { it.copy(brakePedalMode = DriveSettings.customValue(DriveSettings.Custom.PEDAL, index)) }) {
-        DriveSettings.setCustom(DriveSettings.Custom.PEDAL, index)
+    fun setBrakePedal(index: Int) {
+        val v = DriveSettings.customValue(DriveSettings.Custom.PEDAL, index) ?: return
+        drive("brake pedal $index", mapOf("brakePedalMode" to v)) { DriveSettings.setCustom(DriveSettings.Custom.PEDAL, index) }
     }
 
     /** Lane keeping: 1 off, 2 warning, 3 assist, 5 emergency. */
-    fun setLaneMode(mode: Int) = drive("lane keeping $mode", { it.copy(lasMode = mode) }) { DriveSettings.setLaneMode(mode) }
+    fun setLaneMode(mode: Int) = drive("lane keeping $mode", mapOf("lasMode" to mode)) { DriveSettings.setLaneMode(mode) }
 
     /** Front collision: 0 off, 1 warning, 2 warning + braking. */
     fun setFcw(choice: Int) {
         val cur = _state.value.fcwState
-        drive("front collision $choice", { if (choice == 0) it.copy(fcwState = 1) else it.copy(fcwState = 2, fcwBrakeMode = choice) }) { DriveSettings.setFcw(choice, cur) }
+        drive("front collision $choice", if (choice == 0) mapOf("fcwState" to 1) else mapOf("fcwState" to 2, "fcwBrakeMode" to choice)) { DriveSettings.setFcw(choice, cur) }
     }
 
     fun startCharge() = evCommand("startCharge") { it.chargeCtrl(1) }

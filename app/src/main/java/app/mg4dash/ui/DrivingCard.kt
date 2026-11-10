@@ -44,6 +44,9 @@ class DrivingCard(context: Context) : LinearLayout(context) {
     init {
         orientation = VERTICAL
         setPadding(dp(20), dp(16), dp(20), dp(16))
+        // The whole card takes the touch, as the other cards: a swipe starting between the buttons is then seen by its
+        // place (SwipeBox only sees a swipe while a child holds the touch), and still changes card
+        isClickable = true
         build()
     }
 
@@ -66,6 +69,9 @@ class DrivingCard(context: Context) : LinearLayout(context) {
         val chips = labels.mapIndexed { i, l ->
             tv(l, sp, R.color.text_value).apply {
                 gravity = Gravity.CENTER; isClickable = true
+                // Pressed at once, before the finger leaves
+                foreground = android.graphics.drawable.RippleDrawable(android.content.res.ColorStateList.valueOf(color(R.color.text_value) and 0x00FFFFFF or (0x40 shl 24)), null,
+                    GradientDrawable().apply { cornerRadius = dp(14).toFloat(); setColor(0xFF000000.toInt()) })
                 setOnClickListener { if (isEnabled) onPick(i) }
             }.also { r.addView(it, LayoutParams(0, dp(height), 1f).apply { if (i > 0) leftMargin = dp(8) }) }
         }
@@ -140,10 +146,15 @@ class DrivingCard(context: Context) : LinearLayout(context) {
 
     private fun column(vararg views: View) = LinearLayout(context).apply { orientation = VERTICAL; views.forEach { addView(it) } }
 
-    /** Paints a row: [sel] highlighted, greyed if not [enabled]. */
+
+    /**
+     * Paints a row: [sel] highlighted, greyed if not [enabled]. A choice the car has not confirmed yet: highlighted
+     * at once, lighter, with an outline, until the car's reread confirms it.
+     */
     private fun paint(key: String, sel: Int?, enabled: Boolean, note: String = "") {
         val r = rows[key] ?: return
         notes[key]?.text = note
+        val waiting = fields[key].orEmpty().any { it in CarBridge.drivePending.value }
         r.chips.forEachIndexed { i, c ->
             val on = enabled && i == sel
             c.isEnabled = enabled
@@ -151,9 +162,12 @@ class DrivingCard(context: Context) : LinearLayout(context) {
             c.typeface = Typeface.create(if (on) "sans-serif-medium" else "sans-serif", Typeface.NORMAL)
             c.background = GradientDrawable().apply {
                 cornerRadius = dp(14).toFloat()
-                setColor(color(if (on) R.color.text_value else R.color.button_idle))
-                if (!on) setStroke((1.5f * d).toInt().coerceAtLeast(1), color(if (enabled) R.color.text_disabled else R.color.panel_border))
+                val fill = color(if (on) R.color.text_value else R.color.button_idle)
+                setColor(if (on && waiting) fill and 0x00FFFFFF or (0x99 shl 24) else fill)
+                if (on && waiting) setStroke((2 * d).toInt(), color(R.color.text_value), dp(6).toFloat(), dp(4).toFloat())
+                else if (!on) setStroke((1.5f * d).toInt().coerceAtLeast(1), color(if (enabled) R.color.text_disabled else R.color.panel_border))
             }
+            c.tag = if (on && waiting) PENDING else null
         }
     }
 
@@ -176,6 +190,13 @@ class DrivingCard(context: Context) : LinearLayout(context) {
     }
 
     companion object {
+        /** Tag of a chip whose choice waits for the car's confirmation. */
+        const val PENDING = "pending"
+
+        /** Row → the vehicle fields it changes (a choice of these not confirmed yet is shown pending). */
+        private val fields = mapOf("mode" to listOf("driveMode"), "regen" to listOf("regenLevel", "onePedal"), "steering" to listOf("steeringMode"),
+            "pedal" to listOf("brakePedalMode"), "lane" to listOf("lasMode"), "fcw" to listOf("fcwState", "fcwBrakeMode"))
+
         /** The whole card in a window over home ("All ›" of a smaller place), following the car while open. */
         fun openAll(context: Context) {
             val card = DrivingCard(context).apply { form = Form.FULL }
@@ -197,6 +218,7 @@ class DrivingCard(context: Context) : LinearLayout(context) {
             dialog.setContentView(root)
             val scope = kotlinx.coroutines.MainScope()
             scope.launch { CarBridge.state.collect { card.show(it) } }
+            scope.launch { CarBridge.drivePending.collect { card.show() } }
             dialog.setOnDismissListener { scope.cancel() }
             dialog.show()
         }
