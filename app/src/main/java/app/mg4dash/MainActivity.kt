@@ -98,8 +98,9 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         // Touch a segment = regeneration level; long press = one-pedal driving
         b.kersGauge.onSegmentTap = { CarBridge.setRegenLevel(it) }
         b.kersGauge.onLongTap = { CarBridge.toggleOnePedal() }
-        mapLayout = prefs.homeStyle == 2
-        slotLayout = if (mapLayout) HomeSlots.Layout.MAP else HomeSlots.Layout.FULL
+        // Eight layouts (#38): the Full layout keeps its tightened cards, the others are built as the Map layout was
+        slotLayout = HomeSlots.layoutOf(prefs)
+        mapLayout = slotLayout != HomeSlots.Layout.FULL
         builtCardPower = cardPower
         if (cardPower) buildPowerEnergyCard()
         else if (!mapLayout && !Dock.vertical(this)) compactEnergyCard()
@@ -136,6 +137,8 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         else if (savedInstanceState == null) app.mg4dash.ui.Tutorial.showIfPending(this)
         // Cards' edit mode asked from Settings › Home (#97)
         if (savedInstanceState == null && intent?.getBooleanExtra(app.mg4dash.ui.CardsEditor.EXTRA_EDIT, false) == true) b.root.post { editCards() }
+        // Layout changed in the edit mode (#38): back in it over the new grid
+        if (CardsEditor.reopen) { CardsEditor.reopen = false; b.root.post { editCards() } }
 
         // Play the startup sound as soon as the app appears.
         if (savedInstanceState == null) {
@@ -180,6 +183,7 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
     private lateinit var columnsRow: LinearLayout
     private lateinit var consumption: app.mg4dash.ui.ConsumptionCard
     private lateinit var trips: app.mg4dash.ui.TripsCard
+    private lateinit var driving: app.mg4dash.ui.DrivingCard
     private lateinit var shortcutsHolder: LinearLayout
 
     /** Trip energy, power and phone cards: same frame, title, page dots and content. */
@@ -203,17 +207,38 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         }
     }
 
-    /** The places of the layout, in its three columns (their cards come later). */
+    /**
+     * The places of the layout (their cards come later), on the shared grid of three equal columns (#38): in columns,
+     * or in rows for the bands. A place two columns wide is one gap plus two shares wide, so that it lines up with
+     * two places side by side.
+     */
     private fun buildSlots() {
         columnsRow = b.climateCard.parent.parent as LinearLayout
-        val cols = (0 until columnsRow.childCount).map { columnsRow.getChildAt(it) as LinearLayout }
-        cols.forEach { it.removeAllViews() }
+        val lines = (0 until columnsRow.childCount).map { columnsRow.getChildAt(it) as LinearLayout }
+        lines.forEach { it.removeAllViews() }
         val gap = resources.getDimensionPixelSize(R.dimen.gap)
-        slotLayout.columns.forEachIndexed { ci, slots ->
-            slots.forEachIndexed { i, slot ->
+        val rows = slotLayout.rows
+        columnsRow.orientation = if (rows) LinearLayout.VERTICAL else LinearLayout.HORIZONTAL
+        lines.forEachIndexed { li, holder ->
+            val line = slotLayout.lines.getOrNull(li)
+            holder.visibility = if (line == null) View.GONE else View.VISIBLE
+            holder.orientation = if (rows) LinearLayout.HORIZONTAL else LinearLayout.VERTICAL
+            val lp = holder.layoutParams as LinearLayout.LayoutParams
+            if (rows) {
+                lp.width = -1; lp.height = 0; lp.weight = line?.weight ?: 0f
+                lp.leftMargin = 0; lp.rightMargin = 0; lp.topMargin = if (li > 0) gap else 0
+            } else {
+                val span = line?.span ?: 1
+                lp.width = (span - 1) * gap; lp.height = -1; lp.weight = span.toFloat(); lp.topMargin = 0
+                lp.leftMargin = if (li > 0) gap / 2 else 0
+                lp.rightMargin = if (li < slotLayout.lines.size - 1) gap - gap / 2 else 0
+            }
+            holder.layoutParams = lp
+            line?.slots?.forEachIndexed { i, slot ->
                 val f = SlotFrame(slot)
                 frames[slot.id] = f
-                cols[ci].addView(f.box, LinearLayout.LayoutParams(-1, 0, slot.weight).apply { if (i > 0) topMargin = gap })
+                holder.addView(f.box, if (rows) LinearLayout.LayoutParams((slot.size.span - 1) * gap, -1, slot.size.span.toFloat()).apply { if (i > 0) leftMargin = gap }
+                    else LinearLayout.LayoutParams(-1, 0, slot.weight).apply { if (i > 0) topMargin = gap })
             }
         }
     }
@@ -244,6 +269,9 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         // The last trips (#102), in a place only if the driver put it there
         trips = app.mg4dash.ui.TripsCard(this)
         panels[Card.TRIPS] = frame(trips)
+        // Driving settings (#38), also only where the driver put it
+        driving = app.mg4dash.ui.DrivingCard(this)
+        panels[Card.DRIVING] = frame(driving)
         // Web app (#97): the page itself is only loaded when shown
         val web = app.mg4dash.ui.WebCard(this).also { webCard = it }
         web.keyboardSpan = { webKeyboardSpan(it) }
@@ -366,6 +394,12 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         // Smaller versions in a small place: consumption, map without + and −, one row of shortcuts
         consumption.compact = frameOf(Card.CONSUMPTION)?.slot?.size == HomeSlots.Size.SMALL
         trips.compact = frameOf(Card.TRIPS)?.slot?.size == HomeSlots.Size.SMALL
+        driving.form = when (frameOf(Card.DRIVING)?.slot?.size) {
+            HomeSlots.Size.SMALL -> app.mg4dash.ui.DrivingCard.Form.COMPACT
+            HomeSlots.Size.TALL, HomeSlots.Size.LARGE -> app.mg4dash.ui.DrivingCard.Form.FULL
+            HomeSlots.Size.WIDE -> app.mg4dash.ui.DrivingCard.Form.WIDE
+            else -> app.mg4dash.ui.DrivingCard.Form.MEDIUM
+        }
         applyMapButtons()
         placeMapInfo()
         applyFog()
@@ -412,6 +446,7 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
             Card.CONSUMPTION -> if (on) consumption.show()
             Card.SHORTCUTS -> if (on) renderShortcuts()
             Card.TRIPS -> if (on) trips.show()
+            Card.DRIVING -> if (on) driving.show()
             Card.WEB -> webCard?.let { w -> w.visibility = if (on) View.VISIBLE else View.GONE; if (on) w.show() else w.pause() }
             Card.ENERGY -> {}
             Card.TRIP -> if (on) renderTripEnergy()
@@ -573,7 +608,7 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
             val base = basePad.getOrPut(v) { v.paddingLeft }
             v.setPadding(if (on) maxOf(base, fog) else base, v.paddingTop, v.paddingRight, v.paddingBottom)
         }
-        listOf(Card.ENERGY, Card.TRIP, Card.POWER, Card.PHONE, Card.CONSUMPTION, Card.SHORTCUTS, Card.WEB, Card.TRIPS).forEach { c ->
+        listOf(Card.ENERGY, Card.TRIP, Card.POWER, Card.PHONE, Card.CONSUMPTION, Card.SHORTCUTS, Card.WEB, Card.TRIPS, Card.DRIVING).forEach { c ->
             panels[c]?.let { pad(it, tl != null && c in tl.cards) }
         }
         pad(b.mediaCard, tl?.fill == HomeSlots.Fill.Media)
@@ -583,7 +618,7 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
     /** Speed and guidance banner of the map: at the top left on the tall map of the Map layout (#6), otherwise at the bottom left. */
     private fun placeMapInfo() {
         val f = frameOf(Card.MAP)
-        val top = mapLayout && f?.slot?.size == HomeSlots.Size.TALL
+        val top = mapLayout && f?.slot?.size.let { it == HomeSlots.Size.TALL || it == HomeSlots.Size.LARGE }
         val pill = b.mapSpeed.parent as View
         (pill.layoutParams as android.widget.FrameLayout.LayoutParams).gravity = if (top) Gravity.TOP or Gravity.START else Gravity.BOTTOM or Gravity.LEFT
         pill.requestLayout()
@@ -659,7 +694,7 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         // MG4Dash had not started and the rescue app stepped in: say so once
         app.mg4dash.system.Rescue.notice?.let { app.mg4dash.system.Rescue.notice = null; app.mg4dash.ui.Toasts.show(this, it, long = true) }
         // Home layout changed in the settings: rebuild the screen
-        if ((prefs.homeStyle == 1) != simpleMode || (prefs.homeStyle == 2) != mapLayout || Dock.vertical(this) != builtVertical || prefs.hideTitles != builtHideTitles ||
+        if ((prefs.homeStyle == 1) != simpleMode || (!simpleMode && HomeSlots.layoutOf(prefs) != slotLayout) || Dock.vertical(this) != builtVertical || prefs.hideTitles != builtHideTitles ||
             CarBridge.heatingShown(this) != builtHeating || (!simpleMode && cardPower != builtCardPower) ||
             prefs.connectionIcons != builtConnections ||
             app.mg4dash.ui.Themes.signature(this) != themeSig) { app.mg4dash.ui.Themes.recreateSmooth(this); return }
@@ -1124,6 +1159,8 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
     private var hiddenForMap: List<Pair<View, Int>>? = null
     /** Gaps above the map's place, taken off in full screen. */
     private var fullMargins: List<Pair<android.view.ViewGroup.MarginLayoutParams, Int>> = emptyList()
+    /** Gaps before a place along its row (the bands, #38), taken away in full screen. */
+    private val leftMargins = mutableListOf<Pair<android.view.ViewGroup.MarginLayoutParams, Int>>()
     /** Screen margins and bar margins before full screen (top, bottom), put back after. */
     private var barAlign: IntArray? = null
     /** The card's place changed with the bar's alignment, for the embedded page's layer. */
@@ -1185,9 +1222,10 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
                     val v = parent.getChildAt(i)
                     if (v !== child && v.visibility != View.GONE) { hidden += v to v.visibility; v.visibility = View.GONE }
                 }
-                // A place lower down its column: no gap above it in full screen
+                // A place lower down its column (or further along its row): no gap before it in full screen
                 val lp = child.layoutParams as? android.view.ViewGroup.MarginLayoutParams
                 if (lp != null && lp.topMargin != 0) { margins += lp to lp.topMargin; lp.topMargin = 0; child.layoutParams = lp }
+                if (lp != null && slotLayout.rows && lp.leftMargin != 0 && parent !== columnsRow) { leftMargins += lp to lp.leftMargin; lp.leftMargin = 0; child.layoutParams = lp }
                 child = parent
             }
             hiddenForMap = hidden
@@ -1198,6 +1236,8 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
             hiddenForMap = null
             fullMargins.forEach { (lp, m) -> lp.topMargin = m }
             fullMargins = emptyList()
+            leftMargins.forEach { (lp, m) -> lp.leftMargin = m }
+            leftMargins.clear()
             unalignFromBar()
             columnsRow.requestLayout()
         }
@@ -2131,7 +2171,7 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
                     CarBridge.state.collect { s ->
                         // Speed and odometer keep changing while driving, and these cards do not show them
                         val quiet = s.copy(speedKmh = null, odometerKm = null)
-                        if (quiet != shown) { shown = quiet; renderClimate(s); renderEnergy(s, ConsumptionEstimator.average.value); stackAuto(s) }
+                        if (quiet != shown) { shown = quiet; renderClimate(s); renderEnergy(s, ConsumptionEstimator.average.value); stackAuto(s); if (isShown(Card.DRIVING)) driving.show(s) }
                     }
                 }
                 launch { ConsumptionEstimator.average.collect { renderEnergy(CarBridge.state.value, it) } }

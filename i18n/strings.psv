@@ -571,6 +571,25 @@ wc_urls_import_none|No mg4dash_url.txt at the root of a USB stick|Aucun fichier 
 wc_urls_exported|Saved on the USB stick: %s|Enregistré sur la clé USB : %s|Auf dem USB-Stick gespeichert: %s|Guardado en la memoria USB: %s|Salvato sulla chiavetta USB: %s|Opgeslagen op de USB-stick: %s|USB belleğe kaydedildi: %s
 wc_urls_no_usb|No USB stick to write to|Aucune clé USB où écrire|Kein beschreibbarer USB-Stick|No hay memoria USB donde escribir|Nessuna chiavetta USB su cui scrivere|Geen USB-stick om naar te schrijven|Yazılacak USB bellek yok
 wc_trips|Recent trips|Derniers trajets|Letzte Fahrten|Últimos trayectos|Ultimi viaggi|Laatste ritten|Son yolculuklar
+wc_driving|Driving|Conduite|Fahren|Conducción|Guida|Rijden|Sürüş
+dv_mode|Mode|Mode|Modus|Modo|Modalità|Modus|Mod
+dv_regen|Regeneration|Régénération|Rekuperation|Regeneración|Rigenerazione|Regeneratie|Rejenerasyon
+dv_pedal|Pedal|Pédale|Pedal|Pedal|Pedale|Pedaal|Pedal
+dv_all|All  ›|Tout  ›|Alle  ›|Todo  ›|Tutto  ›|Alles  ›|Tümü  ›
+dv_custom_only|in Custom mode|en mode Custom|im Modus Custom|en modo Custom|in modalità Custom|in Custom-modus|Custom modunda
+dv_unavailable|not available|non disponible|nicht verfügbar|no disponible|non disponibile|niet beschikbaar|kullanılamıyor
+ly_title|Layout|Disposition|Anordnung|Disposición|Disposizione|Indeling|Yerleşim
+ly_full|Full|Complète|Vollständig|Completa|Completa|Volledig|Tam
+ly_map_right|Map on the right|Carte à droite|Karte rechts|Mapa a la derecha|Mappa a destra|Kaart rechts|Harita sağda
+ly_map_left|Map on the left|Carte à gauche|Karte links|Mapa a la izquierda|Mappa a sinistra|Kaart links|Harita solda
+ly_map_center|Map in the centre|Carte au centre|Karte in der Mitte|Mapa en el centro|Mappa al centro|Kaart in het midden|Harita ortada
+ly_square_left|Big square on the left|Grand carré à gauche|Großes Quadrat links|Cuadro grande a la izquierda|Quadrato grande a sinistra|Groot vierkant links|Büyük kare solda
+ly_square_right|Big square on the right|Grand carré à droite|Großes Quadrat rechts|Cuadro grande a la derecha|Quadrato grande a destra|Groot vierkant rechts|Büyük kare sağda
+ly_band_top|Band at the top|Bandeau en haut|Band oben|Banda arriba|Banda in alto|Band boven|Üstte bant
+ly_band_bottom|Band at the bottom|Bandeau en bas|Band unten|Banda abajo|Banda in basso|Band onder|Altta bant
+ly_edit|Edit the layout and the widgets  ›|Modifier la disposition et les widgets  ›|Anordnung und Widgets bearbeiten  ›|Editar la disposición y los widgets  ›|Modifica disposizione e widget  ›|Indeling en widgets bewerken  ›|Yerleşimi ve widget'ları düzenle  ›
+wc_too_big|Too small for a place this big: it is greyed here|Trop petite pour une case aussi grande : grisée ici|Zu klein für einen so großen Platz: hier ausgegraut|Demasiado pequeña para un espacio tan grande: atenuada aquí|Troppo piccola per uno spazio così grande: in grigio qui|Te klein voor zo'n grote plek: hier grijs|Bu kadar büyük bir alan için çok küçük: burada gri
+wc_big_hint|Big place: App, Web app, Consumption, Shortcuts and Driving only|Grande case : Application, Web app, Consommation, Raccourcis et Conduite seulement|Großer Platz: nur App, Web-App, Verbrauch, Verknüpfungen und Fahren|Espacio grande: solo Aplicación, Web app, Consumo, Accesos directos y Conducción|Spazio grande: solo App, Web app, Consumi, Scorciatoie e Guida|Grote plek: alleen App, Web-app, Verbruik, Snelkoppelingen en Rijden|Büyük alan: yalnızca Uygulama, Web uygulaması, Tüketim, Kısayollar ve Sürüş
 title_trips|TRIPS|TRAJETS|FAHRTEN|TRAYECTOS|VIAGGI|RITTEN|YOLCULUKLAR
 tr_now|In progress · since %s|En cours · depuis %s|Läuft · seit %s|En curso · desde %s|In corso · dalle %s|Bezig · sinds %s|Sürüyor · başlangıç %s
 tr_none|No trip yet|Aucun trajet pour l'instant|Noch keine Fahrt|Aún no hay trayectos|Ancora nessun viaggio|Nog geen ritten|Henüz yolculuk yok

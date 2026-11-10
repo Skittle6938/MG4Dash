@@ -13,7 +13,16 @@ import app.mg4dash.system.Prefs
  * Storage: "slots_<layout>" = "tl=climate;tc=map,consumption;…" and "slot_now_<layout>_<place>" = card shown.
  */
 object HomeSlots {
-    enum class Size { SMALL, MEDIUM, TALL }
+    /**
+     * Sizes of the shared grid (#38): three equal columns, 60 / 40 % of the height or the full height. SMALL ≈ 594 × 274,
+     * MEDIUM ≈ 594 × 410, TALL ≈ 595 × 696; LARGE (two columns, full height) ≈ 1189 × 696, WIDE (two columns, 60 %) ≈ 1197 × 410.
+     */
+    enum class Size {
+        SMALL, MEDIUM, TALL, LARGE, WIDE;
+
+        /** Columns it spans. */
+        val span: Int get() = if (this == LARGE || this == WIDE) 2 else 1
+    }
 
     /** Cards, in the order they go by in a place. [icon]: on the button that changes card over a web page or an app. */
     enum class Card(val id: String, val label: Int, val icon: Int) {
@@ -29,7 +38,18 @@ object HomeSlots {
         DAILY("daily", R.string.wc_daily, R.drawable.ic_cloud),
         /** The last trips (#102): only where the driver places it, never put in a place by itself. */
         TRIPS("trips", R.string.wc_trips, R.drawable.ic_car),
+        /** Driving settings (#38): only where the driver places it, as the last trips. */
+        DRIVING("driving", R.string.wc_driving, R.drawable.ic_car);
+
+        /** Fills a big place (two columns): the others would look lost in it, they are greyed there in the edit mode. */
+        val big: Boolean get() = this == MAP || this == WEB || this == CONSUMPTION || this == SHORTCUTS || this == DRIVING
+
+        /** Only placed by the driver, never put in an empty place by itself. */
+        val manual: Boolean get() = this == TRIPS || this == DRIVING
     }
+
+    /** [card] may go in a place of [size]. */
+    fun fits(card: Card, size: Size): Boolean = size.span == 1 || card.big
 
     /** What a place shows. */
     sealed class Fill {
@@ -41,25 +61,86 @@ object HomeSlots {
     /** Choice of a medium place in the edit mode. */
     enum class Kind { CLIMATE, MEDIA, CARDS }
 
-    /** A place: its id, its size and its share of the column's height. */
-    class Slot(val id: String, val size: Size, val weight: Float)
+    /** A place: its id, its size and its share of its line (the column's height; in a layout of rows, its share of the row is its span). */
+    class Slot(val id: String, val size: Size, val weight: Float = 100f)
 
-    /** [columns]: the places of each column, from top to bottom. */
-    enum class Layout(val key: String, val columns: List<List<Slot>>, val defaults: String) {
-        FULL("full", listOf(
-            listOf(Slot("tl", Size.MEDIUM, 60f), Slot("bl", Size.SMALL, 40f)),
-            listOf(Slot("tc", Size.MEDIUM, 60f), Slot("bc", Size.SMALL, 40f)),
-            listOf(Slot("tr", Size.MEDIUM, 60f), Slot("br", Size.SMALL, 40f)),
-        ), "tl=climate;tc=map,consumption,shortcuts;tr=media;bl=energy;bc=hourly,daily;br=trip,power,phone"),
+    /** A column (or a row of a layout of [Layout.rows]): its places, its share of the height for a row. */
+    class Line(val slots: List<Slot>, val weight: Float = 100f) {
+        /** Columns it spans (a column with the big square spans two). */
+        val span: Int get() = slots.maxOf { it.size.span }
+    }
+
+    private fun col(vararg s: Slot) = Line(s.toList())
+    private fun P(id: String) = Slot(id, Size.SMALL, 40f)
+    private fun M(id: String) = Slot(id, Size.MEDIUM, 60f)
+    private fun H(id: String) = Slot(id, Size.TALL)
+    private fun G(id: String) = Slot(id, Size.LARGE)
+
+    /**
+     * The eight layouts of the shared grid (#38, mockups v5). [lines]: columns from left to right, or rows from top to
+     * bottom when [rows] (the bands, whose wide place spans two columns of the row). [label]: its name in the menus.
+     */
+    enum class Layout(val key: String, val label: Int, val lines: List<Line>, val defaults: String, val rows: Boolean = false) {
+        FULL("full", R.string.ly_full, listOf(col(M("tl"), P("bl")), col(M("tc"), P("bc")), col(M("tr"), P("br"))),
+            "tl=climate;tc=map,consumption,shortcuts;tr=media;bl=energy;bc=hourly,daily;br=trip,power,phone"),
         /** Small places on top, medium ones at the bottom, the map at full height on the right (#6). */
-        MAP("map", listOf(
-            listOf(Slot("tl", Size.SMALL, 40f), Slot("bl", Size.MEDIUM, 60f)),
-            listOf(Slot("tc", Size.SMALL, 40f), Slot("bc", Size.MEDIUM, 60f)),
-            listOf(Slot("r", Size.TALL, 100f)),
-        ), "tl=hourly,daily;tc=energy,trip,power,phone;r=map,consumption,shortcuts;bl=climate;bc=media");
+        MAP("map", R.string.ly_map_right, listOf(col(P("tl"), M("bl")), col(P("tc"), M("bc")), col(H("r"))),
+            "tl=hourly,daily;tc=energy,trip,power,phone;r=map,consumption,shortcuts;bl=climate;bc=media"),
+        MAP_LEFT("map_left", R.string.ly_map_left, listOf(col(H("l")), col(P("tc"), M("bc")), col(P("tr"), M("br"))),
+            "l=map,consumption,shortcuts;tc=hourly,daily;tr=energy,trip,power,phone;bc=climate;br=media"),
+        MAP_CENTER("map_center", R.string.ly_map_center, listOf(col(P("tl"), M("bl")), col(H("c")), col(M("tr"), P("br"))),
+            "tl=hourly,daily;bl=climate;c=map,consumption,shortcuts;tr=media;br=energy,trip,power,phone"),
+        SQUARE_LEFT("square_left", R.string.ly_square_left, listOf(col(G("g")), col(M("tr"), P("br"))),
+            "g=map,consumption,shortcuts;tr=climate;br=energy,trip,power,phone,hourly,daily"),
+        SQUARE_RIGHT("square_right", R.string.ly_square_right, listOf(col(M("tl"), P("bl")), col(G("g"))),
+            "tl=climate;bl=energy,trip,power,phone,hourly,daily;g=map,consumption,shortcuts"),
+        BAND_TOP("band_top", R.string.ly_band_top, listOf(
+            Line(listOf(Slot("w", Size.WIDE, 2f), Slot("tr", Size.MEDIUM, 1f)), 60f),
+            Line(listOf(Slot("bl", Size.SMALL, 1f), Slot("bc", Size.SMALL, 1f), Slot("br", Size.SMALL, 1f)), 40f),
+        ), "w=map,consumption,shortcuts;tr=climate;bl=energy;bc=hourly,daily;br=trip,power,phone", rows = true),
+        BAND_BOTTOM("band_bottom", R.string.ly_band_bottom, listOf(
+            Line(listOf(Slot("tl", Size.SMALL, 1f), Slot("tc", Size.SMALL, 1f), Slot("tr", Size.SMALL, 1f)), 40f),
+            Line(listOf(Slot("bl", Size.MEDIUM, 1f), Slot("w", Size.WIDE, 2f)), 60f),
+        ), "tl=hourly,daily;tc=energy;tr=trip,power,phone;bl=climate;w=map,consumption,shortcuts", rows = true);
 
-        val slots: List<Slot> get() = columns.flatten()
+        val slots: List<Slot> get() = lines.flatMap { it.slots }
         fun slot(id: String): Slot? = slots.firstOrNull { it.id == id }
+
+        /**
+         * Each place in a 1 × 1 square ([gapX], [gapY]: the gap between places as a share of the width, the height):
+         * the drawing of the layout, the same grid as the home screen.
+         */
+        fun cells(gapX: Float, gapY: Float): Map<String, android.graphics.RectF> {
+            val out = LinkedHashMap<String, android.graphics.RectF>()
+            val unit = (1f - 2 * gapX) / 3
+            fun width(span: Int) = span * unit + (span - 1) * gapX
+            if (!rows) {
+                var x = 0f
+                lines.forEach { line ->
+                    val w = width(line.span)
+                    val total = line.slots.sumOf { it.weight.toDouble() }.toFloat()
+                    val room = 1f - gapY * (line.slots.size - 1)
+                    var y = 0f
+                    line.slots.forEach { s -> val h = room * s.weight / total; out[s.id] = android.graphics.RectF(x, y, x + w, y + h); y += h + gapY }
+                    x += w + gapX
+                }
+            } else {
+                val total = lines.sumOf { it.weight.toDouble() }.toFloat()
+                val room = 1f - gapY * (lines.size - 1)
+                var y = 0f
+                lines.forEach { line ->
+                    val h = room * line.weight / total
+                    var x = 0f
+                    line.slots.forEach { s -> val w = width(s.size.span); out[s.id] = android.graphics.RectF(x, y, x + w, y + h); x += w + gapX }
+                    y += h + gapY
+                }
+            }
+            return out
+        }
+
+        companion object {
+            fun of(key: String?): Layout? = entries.firstOrNull { it.key == key }
+        }
     }
 
     /** What each place of [layout] shows. */
@@ -83,13 +164,20 @@ object HomeSlots {
     }
 
     /** Why a change was refused: the place would have no card left, here or where the card was. */
-    enum class Refusal { KEEP_ONE, ONLY_CARD_THERE, NO_CARD }
+    enum class Refusal { KEEP_ONE, ONLY_CARD_THERE, NO_CARD, TOO_BIG }
 
     class Change(val config: Config, val refused: Refusal? = null)
 
     private fun Fill.ordered(): Fill = if (this is Fill.Cards) Fill.Cards(cards.distinct().sortedBy { it.ordinal }) else this
 
-    fun layoutOf(prefs: Prefs): Layout = if (prefs.homeStyle == 2) Layout.MAP else Layout.FULL
+    /** The layout chosen; before the eight layouts (#38), the Map home style was the Map layout. */
+    fun layoutOf(prefs: Prefs): Layout = Layout.of(prefs.homeLayout) ?: if (prefs.homeStyle == 2) Layout.MAP else Layout.FULL
+
+    /** Chooses [layout] (Settings › Home, the edit mode): the home screen leaves the Simple style. */
+    fun choose(prefs: Prefs, layout: Layout) {
+        prefs.homeLayout = layout.key
+        prefs.homeStyle = 0
+    }
 
     private fun key(layout: Layout) = "slots_" + layout.key
 
@@ -125,7 +213,7 @@ object HomeSlots {
             fills[slot.id] = when {
                 v == "climate" && slot.size == Size.MEDIUM && !climate -> { climate = true; Fill.Climate }
                 v == "media" && slot.size == Size.MEDIUM && !media -> { media = true; Fill.Media }
-                else -> Fill.Cards(v.split(',').mapNotNull { id -> Card.entries.firstOrNull { it.id == id } }.filter { used.add(it) }).ordered()
+                else -> Fill.Cards(v.split(',').mapNotNull { id -> Card.entries.firstOrNull { it.id == id } }.filter { fits(it, slot.size) && used.add(it) }).ordered()
             }
         }
         return Config(layout, fills)
@@ -136,6 +224,8 @@ object HomeSlots {
      * they were; the Energy card stays alone at the bottom left of the Full layout.
      */
     private fun legacy(prefs: Prefs, layout: Layout): Config {
+        // The six newer layouts (#38) came after: their defaults
+        if (layout != Layout.FULL && layout != Layout.MAP) return defaults(layout)
         fun stored(widget: String, all: List<String>, def: List<String>): List<String> {
             val s = prefs.raw.getString("wc_$widget", null) ?: return def
             return all.filter { it in s.split(',') }.ifEmpty { listOf(all.first()) }
@@ -174,12 +264,13 @@ object HomeSlots {
      */
     private fun take(config: Config, slot: String, unavailable: Set<Card>): Pair<Config, Card>? {
         val placed = config.placed()
-        Card.entries.filter { it !in placed && it !in unavailable && it != Card.TRIPS }.sortedBy { if (it == Card.WEB) 1 else 0 }.firstOrNull()?.let { return config to it }
+        val size = config.layout.slot(slot)?.size ?: Size.SMALL
+        Card.entries.filter { it !in placed && it !in unavailable && !it.manual && fits(it, size) }.sortedBy { if (it == Card.WEB) 1 else 0 }.firstOrNull()?.let { return config to it }
         val from = config.layout.slots.map { it.id }.filter { it != slot }
-            .maxByOrNull { id -> config.cards(id).count { it !in unavailable } } ?: return null
+            .maxByOrNull { id -> config.cards(id).count { it !in unavailable && fits(it, size) } } ?: return null
         val shown = config.cards(from).filter { it !in unavailable }
         if (shown.size < 2) return null
-        val card = shown.last()
+        val card = shown.lastOrNull { fits(it, size) } ?: return null
         return config.with(from, Fill.Cards(config.cards(from) - card)) to card
     }
 
@@ -189,6 +280,7 @@ object HomeSlots {
      */
     fun toggle(config: Config, slot: String, card: Card, unavailable: Set<Card> = emptySet()): Change {
         val here = config.fill(slot) as? Fill.Cards ?: return Change(config)
+        if (card !in here.cards && !fits(card, config.layout.slot(slot)?.size ?: Size.SMALL)) return Change(config, Refusal.TOO_BIG)
         fun shown(cards: List<Card>) = cards.count { it !in unavailable }
         if (card in here.cards) {
             if (shown(here.cards - card) == 0) return Change(config, Refusal.KEEP_ONE)

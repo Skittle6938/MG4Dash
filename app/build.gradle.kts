@@ -53,6 +53,8 @@ android {
 
     testOptions {
         unitTests.isIncludeAndroidResources = true
+        // The screenshot renders build many home screens: more than the default 512 MB
+        unitTests.all { it.maxHeapSize = "2g" }
     }
 
     lint {
