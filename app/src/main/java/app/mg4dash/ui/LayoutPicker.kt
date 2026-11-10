@@ -93,7 +93,7 @@ object LayoutPicker {
                     background = android.graphics.drawable.GradientDrawable().apply {
                         cornerRadius = dp(14).toFloat()
                         setColor(Themes.color(activity, if (layout == current) R.color.button_pressed else R.color.button_idle))
-                        if (layout == current) setStroke(dp(2), Themes.color(activity, R.color.text_value))
+                        if (layout == current) setStroke(dp(2), Themes.select(activity))   // the accent chosen in Settings › Look
                     }
                     setOnClickListener { popup.dismiss(); onPick(layout) }
                 }
@@ -124,7 +124,7 @@ object LayoutPicker {
     /** ✓ at the end of the chosen layout. */
     private fun tick(context: Context): Drawable = object : Drawable() {
         private val p = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = Themes.color(context, R.color.text_value); textSize = 24 * context.resources.displayMetrics.scaledDensity; textAlign = Paint.Align.CENTER
+            color = Themes.select(context); textSize = 24 * context.resources.displayMetrics.scaledDensity; textAlign = Paint.Align.CENTER
         }
         override fun draw(c: Canvas) { c.drawText("✓", bounds.exactCenterX(), bounds.exactCenterY() - (p.descent() + p.ascent()) / 2, p) }
         override fun getIntrinsicWidth() = (28 * context.resources.displayMetrics.density).toInt()

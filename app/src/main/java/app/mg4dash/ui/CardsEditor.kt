@@ -72,6 +72,10 @@ object CardsEditor {
         private val off = Themes.color(context, R.color.text_disabled)
         private val border = Themes.color(context, R.color.panel_border)
         private val ground = Themes.color(context, R.color.bg_top)
+        // The accent chosen in Settings › Look on the ticked widgets, the buttons and the frames; the rest neutral
+        private val accent = Themes.select(context)
+        /** A light touch of the accent (owner's choice): a tint, the outline and the text, as the Settings tabs. */
+        private val tint = accent and 0x00FFFFFF or (0x30 shl 24)
         private val boxes = mutableListOf<Pair<Target, LinearLayout>>()
         /** Layout, Default and Done, over the bar: in a row at the bottom, in a column on the vertical bar. */
         private val vertical = dock != null && dock.height > dock.width
@@ -93,10 +97,10 @@ object CardsEditor {
         private fun buildControls() {
             /** A rounded square: its drawing or symbol, the word under it; [filled]: Done. */
             fun button(symbol: String?, icon: Drawable?, label: Int, filled: Boolean, onClick: (View) -> Unit) = TextView(context).apply {
-                gravity = Gravity.CENTER; setTextColor(if (filled) idle else ink)
+                gravity = Gravity.CENTER; setTextColor(accent)
                 background = GradientDrawable().apply {
                     cornerRadius = dp(12).toFloat()
-                    if (filled) setColor(ink) else { setColor(idle); setStroke(dp(2), title) }
+                    setColor(if (filled) tint else idle); setStroke(dp(2), accent)
                 }
                 val small = vertical
                 text = if (symbol != null) android.text.SpannableStringBuilder(symbol).apply {
@@ -196,7 +200,7 @@ object CardsEditor {
             box.setPadding(dp(14), dp(10), dp(14), dp(10))
             box.background = GradientDrawable().apply {
                 cornerRadius = resources.getDimension(R.dimen.radius_panel)
-                setColor(ground and 0x00FFFFFF or (0xF0 shl 24)); setStroke(dp(2), title, dp(10).toFloat(), dp(7).toFloat())
+                setColor(ground and 0x00FFFFFF or (0xF0 shl 24)); setStroke(dp(2), accent, dp(10).toFloat(), dp(7).toFloat())
             }
             val id = t.slot.id
             val here = c.fill(id)
@@ -205,7 +209,7 @@ object CardsEditor {
             val media = here == HomeSlots.Fill.Media
             val cards = (here as? HomeSlots.Fill.Cards)?.cards.orEmpty()
             val column = LinearLayout(context).apply { orientation = LinearLayout.VERTICAL }
-            val flow = FlowRow(context, dp(8))
+            val flow = FlowRow(context, dp(6))
             if (HomeSlots.mediaFits(t.slot.size)) flow.addView(chip(context.getString(R.string.wc_kind_media), media, c.slotOf(HomeSlots.Fill.Media)?.takeIf { it != id }) {
                 change(HomeSlots.setKind(config, id, if (media) HomeSlots.Kind.CARDS else HomeSlots.Kind.MEDIA, unavailable))
             })
@@ -233,7 +237,11 @@ object CardsEditor {
             if (Card.WEB in cards || Card.MAP in cards && prefs.mapApp != null)
                 column.addView(wakeRow())
             // Small places: more chips than room, they scroll
-            box.addView(ScrollView(context).apply { isVerticalScrollBarEnabled = false; addView(column) },
+            // The options of the widgets ticked may go below the place: they scroll, the bar and a fade say so
+            box.addView(ScrollView(context).apply {
+                isVerticalScrollBarEnabled = true; isScrollbarFadingEnabled = false; isVerticalFadingEdgeEnabled = true; setFadingEdgeLength(dp(28))
+                addView(column)
+            },
                 LinearLayout.LayoutParams(-1, 0, 1f).apply { topMargin = dp(2) })
         }
 
@@ -243,13 +251,13 @@ object CardsEditor {
          */
         private fun chip(label: String, on: Boolean, elsewhere: String?, greyed: Boolean = false, onClick: () -> Unit) = TextView(context).apply {
             text = (if (on) "✓  " else "") + label
-            setTextSize(TypedValue.COMPLEX_UNIT_SP, 19f); maxLines = 1
-            setTextColor(if (on) idle else if (greyed) off else ink)
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f); maxLines = 1
+            setTextColor(if (on) accent else if (greyed) off else ink)
             gravity = Gravity.CENTER_VERTICAL
-            minHeight = dp(50); setPadding(dp(18), 0, dp(18), 0)
+            minHeight = dp(44); setPadding(dp(16), 0, dp(16), 0)
             background = GradientDrawable().apply {
                 cornerRadius = dp(25).toFloat()
-                if (on) setColor(ink) else setStroke(dp(2), if (greyed) border else title)
+                if (on) { setColor(tint); setStroke(dp(2), accent) } else setStroke(dp(2), if (greyed) border else title)
             }
             if (elsewhere != null) {
                 setCompoundDrawablesRelativeWithIntrinsicBounds(null, null, glyph(elsewhere), null)

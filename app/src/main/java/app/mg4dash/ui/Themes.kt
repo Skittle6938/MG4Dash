@@ -277,6 +277,9 @@ object Themes {
     fun energy(context: Context): Int =
         if (isLight(context)) ContextCompat.getColor(context, R.color.accent_energy_light) else color(context, R.color.accent_energy)
 
+    /** Text over [bg]: black on a light colour, white on a dark one. */
+    fun on(bg: Int): Int = if (androidx.core.graphics.ColorUtils.calculateLuminance(bg) > 0.45) 0xFF000000.toInt() else 0xFFFFFFFF.toInt()
+
     /** Selection colour (active chips) of the current theme. */
     fun select(context: Context): Int {
         val tv = TypedValue()
