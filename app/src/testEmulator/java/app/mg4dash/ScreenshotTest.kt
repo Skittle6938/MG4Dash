@@ -17,6 +17,7 @@ import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
 import java.io.File
 import java.util.concurrent.TimeUnit
+import app.mg4dash.ui.HomeSlots.Layout as HL
 
 /**
  * Full screen rendering of the screens on the MG4's panel (1920 × 720 dp, 160 dpi),
@@ -1331,6 +1332,112 @@ class ScreenshotTest {
             if (v is ViewGroup) for (i in 0 until v.childCount) walk(v.getChildAt(i), x - v.scrollX, y - v.scrollY)
         }
         walk(root, -root.left, -root.top)
+    }
+
+    // ── The eight layouts and the Driving card (#38), in build/screenshots/final/ ──
+
+    private var lastHome: org.robolectric.android.controller.ActivityController<MainActivity>? = null
+
+    @org.junit.After fun dropHome() { lastHome?.let { runCatching { it.pause().stop().destroy() } }; lastHome = null }
+
+    private fun layoutHome(layout: app.mg4dash.ui.HomeSlots.Layout, slots: String?, mode: Int, drive: Int = 3): MainActivity {
+        val e = org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE).edit()
+            .putInt("theme_mode", mode).putInt("home_style", 0).putString("home_layout", layout.key)
+        if (slots != null) e.putString("slots_" + layout.key, slots) else e.remove("slots_" + layout.key)
+        e.commit()
+        paris()
+        // One home at a time: the previous one destroyed, its memory freed
+        lastHome?.let { runCatching { it.pause().stop().destroy() } }
+        val ctl = Robolectric.buildActivity(MainActivity::class.java).setup()
+        lastHome = ctl
+        val act = ctl.get()
+        @Suppress("UNCHECKED_CAST")
+        val flow = app.mg4dash.car.CarBridge::class.java.getDeclaredField("_state").apply { isAccessible = true }.get(app.mg4dash.car.CarBridge) as kotlinx.coroutines.flow.MutableStateFlow<app.mg4dash.car.VehicleState>
+        flow.value = flow.value.copy(driveMode = drive, regenLevel = 3, onePedal = 0, steeringMode = 2, brakePedalMode = 1, lasMode = 3, fcwState = 2, fcwBrakeMode = 2)
+        repeat(5) { shadowOf(Looper.getMainLooper()).idleFor(200, TimeUnit.MILLISECONDS) }
+        return act
+    }
+
+    /** [root] with [over] (a popup's or a dialog's content) drawn over it at [x], [y]. */
+    private fun saveOver(root: View, over: View, x: Int, y: Int, w: Int, name: String) {
+        save(root, name)
+        val file = File("build/screenshots", name)
+        val bmp = android.graphics.BitmapFactory.decodeFile(file.path).copy(Bitmap.Config.ARGB_8888, true)
+        over.measure(View.MeasureSpec.makeMeasureSpec(w, View.MeasureSpec.EXACTLY), View.MeasureSpec.UNSPECIFIED)
+        over.layout(0, 0, over.measuredWidth, over.measuredHeight)
+        val c = Canvas(bmp); c.translate(x.toFloat(), y.toFloat()); over.draw(c)
+        file.outputStream().use { bmp.compress(Bitmap.CompressFormat.PNG, 100, it) }
+    }
+
+    @Test @Config(qualifiers = "fr-w1920dp-h720dp-land-mdpi") fun layoutsFinal() {
+        File("build/screenshots/final").mkdirs()
+        app.mg4dash.ui.HomeSlots.Layout.entries.forEachIndexed { i, layout ->
+            save(layoutHome(layout, null, 1).window.decorView, "final/layout_${i + 1}_${layout.key}_dark.png")
+        }
+        save(layoutHome(app.mg4dash.ui.HomeSlots.Layout.SQUARE_RIGHT, null, 2).window.decorView, "final/layout_5_square_right_light.png")
+    }
+
+    @Test @Config(qualifiers = "fr-w1920dp-h720dp-land-mdpi") fun drivingCardFinal() {
+        File("build/screenshots/final").mkdirs()
+        val places = listOf(
+            Triple("M", HL.FULL, "tl=climate;tc=driving;tr=media;bl=energy;bc=hourly,daily;br=trip,power,phone"),
+            Triple("P", HL.FULL, "tl=climate;tc=map,consumption,shortcuts;tr=media;bl=energy;bc=driving;br=trip,power,phone"),
+            Triple("H", HL.MAP_CENTER, "tl=hourly,daily;bl=climate;c=driving;tr=media;br=energy,trip,power,phone"),
+            Triple("G", HL.SQUARE_LEFT, "g=driving;tr=climate;br=energy,trip,power,phone,hourly,daily"),
+            Triple("L", HL.BAND_TOP, "w=driving;tr=climate;bl=energy;bc=hourly,daily;br=trip,power,phone"),
+        )
+        for (mode in listOf(1, 2)) for ((size, layout, slots) in places) {
+            val act = layoutHome(layout, slots, mode, drive = if (size == "G" || size == "H") 7 else 3)
+            save(act.window.decorView, "final/driving_${size}_${if (mode == 1) "dark" else "light"}.png")
+        }
+        // "Tout ›" of the medium card: the whole card in a window over home
+        for (mode in listOf(1, 2)) {
+            val act = layoutHome(HL.FULL, places[0].third, mode, drive = 7)
+            app.mg4dash.ui.DrivingCard.openAll(act)
+            repeat(2) { shadowOf(Looper.getMainLooper()).idleFor(200, TimeUnit.MILLISECONDS) }
+            val dlg = org.robolectric.shadows.ShadowDialog.getLatestDialog()
+            val panel = ((dlg.window!!.decorView as ViewGroup).findViewById<ViewGroup>(android.R.id.content).getChildAt(0) as ViewGroup).getChildAt(0)
+            saveOver(act.window.decorView, panel, (1920 - 1100) / 2, 40, 1100, "final/driving_all_${if (mode == 1) "dark" else "light"}.png")
+            dlg.dismiss()
+        }
+    }
+
+    @Test @Config(qualifiers = "fr-w1920dp-h720dp-land-mdpi") fun layoutEditorFinal() {
+        File("build/screenshots/final").mkdirs()
+        for ((mode, layout) in listOf(1 to HL.FULL, 2 to HL.FULL, 2 to HL.SQUARE_LEFT, 1 to HL.BAND_BOTTOM)) {
+            val act = layoutHome(layout, null, mode)
+            act.editCards()
+            repeat(3) { shadowOf(Looper.getMainLooper()).idleFor(200, TimeUnit.MILLISECONDS) }
+            save(act.window.decorView, "final/edit_${layout.key}_${if (mode == 1) "dark" else "light"}.png")
+        }
+        // Bottom bar: the hint and the three buttons over it, the layout menu opened above them
+        org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE).edit().putBoolean("vertical_dock", false).commit()
+        for (mode in listOf(2, 1)) {
+            val act = layoutHome(HL.MAP, null, mode)
+            act.editCards()
+            repeat(3) { shadowOf(Looper.getMainLooper()).idleFor(200, TimeUnit.MILLISECONDS) }
+            save(act.window.decorView, "final/edit_bottom_${if (mode == 1) "dark" else "light"}.png")
+            app.mg4dash.ui.LayoutPicker.show(act, act.window.decorView, HL.MAP) {}
+            val pop = org.robolectric.shadows.ShadowApplication.getInstance().latestPopupWindow
+            saveOver(act.window.decorView, pop.contentView, (1920 - 880) / 2, 150, 880, "final/edit_bottom_menu_${if (mode == 1) "dark" else "light"}.png")
+            pop.dismiss()
+        }
+    }
+
+    @Test @Config(qualifiers = "fr-w1920dp-h720dp-land-mdpi") fun layoutSettingsFinal() {
+        File("build/screenshots/final").mkdirs()
+        for (mode in listOf(1, 2)) {
+            org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE).edit()
+                .putInt("theme_mode", mode).putInt("home_style", 0).putString("home_layout", "map_center").remove("settings_tab").commit()
+            val act = Robolectric.buildActivity(SettingsActivity::class.java).setup().get()
+            repeat(5) { shadowOf(Looper.getMainLooper()).idleFor(200, TimeUnit.MILLISECONDS) }
+            save(act.window.decorView, "final/settings_${if (mode == 1) "dark" else "light"}.png")
+            val anchor = act.window.decorView
+            app.mg4dash.ui.LayoutPicker.show(act, anchor, app.mg4dash.ui.HomeSlots.Layout.MAP_CENTER) {}
+            val pop = org.robolectric.shadows.ShadowApplication.getInstance().latestPopupWindow
+            saveOver(act.window.decorView, pop.contentView, 470, 238, 880, "final/settings_menu_${if (mode == 1) "dark" else "light"}.png")
+            pop.dismiss()
+        }
     }
 
     private fun save(root: View, name: String) {

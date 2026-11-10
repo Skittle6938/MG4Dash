@@ -108,24 +108,37 @@ class SettingsActivity : AppCompatActivity() {
         // ════ Home tab: layout and map ════
         val style = panel(homeL, getString(R.string.st_style))
         text(style, getString(R.string.st_style_desc), 16f, R.color.text_title)
-        row(style, *styleButtons(listOf(R.string.st_style_full, R.string.st_style_simple, R.string.st_style_map), { prefs.homeStyle }) { prefs.homeStyle = it })
+        // Simple, or one of the eight layouts with its drawing (#38); the cards of each place in the edit mode
+        lateinit var paintStyle: () -> Unit
+        val (simpleBtn) = choiceButtons(listOf(getString(R.string.st_style_simple)), { if (prefs.homeStyle == 1) 0 else -1 }) { prefs.homeStyle = 1; paintStyle() }
+        val (layoutBtn) = choiceButtons(listOf(getString(R.string.ly_title) + "   ▾"), { if (prefs.homeStyle != 1) 0 else -1 }) {}
+        layoutBtn.setOnClickListener { v ->
+            app.mg4dash.ui.LayoutPicker.show(this, v, if (prefs.homeStyle == 1) null else app.mg4dash.ui.HomeSlots.layoutOf(prefs)) {
+                app.mg4dash.ui.HomeSlots.choose(prefs, it); paintStyle()
+            }
+        }
+        row(style, simpleBtn, layoutBtn)
+        val editBtn = button(getString(R.string.ly_edit)) {
+            startActivity(android.content.Intent(this, app.mg4dash.MainActivity::class.java)
+                .putExtra(app.mg4dash.ui.CardsEditor.EXTRA_EDIT, true)
+                .addFlags(android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP or android.content.Intent.FLAG_ACTIVITY_SINGLE_TOP))
+            finish()
+        }
+        row(style, editBtn)
+        paintStyle = {
+            simpleBtn.isSelected = prefs.homeStyle == 1
+            layoutBtn.isSelected = prefs.homeStyle != 1
+            layoutBtn.setCompoundDrawablesRelativeWithIntrinsicBounds(app.mg4dash.ui.LayoutPicker.glyph(this, app.mg4dash.ui.HomeSlots.layoutOf(prefs)), null, null, null)
+            layoutBtn.setPadding(dp(22), 0, dp(20), 0)
+            (editBtn.parent as View).visibility = if (prefs.homeStyle == 1) View.GONE else View.VISIBLE
+        }
+        paintStyle()
         // Menu bar: at the bottom, or vertical on the driver's side (read from the car), left or right (#75)
         dropdown(style, getString(R.string.st_bar), listOf(R.string.st_bar_bottom, R.string.st_bar_auto, R.string.st_bar_left, R.string.st_bar_right).map { getString(it) },
             { if (!prefs.verticalDock) 0 else 1 + prefs.barSide.coerceIn(0, 2) }) {
             prefs.verticalDock = it > 0
             if (it > 0) prefs.barSide = it - 1
             app.mg4dash.ui.Themes.publish(this); recreate()
-        }
-        // Widgets' cards (#97): the same edit mode as a pinch on the home screen
-        if (prefs.homeStyle != 1) {
-            text(style, getString(R.string.st_edit_cards), 20f, R.color.text_value)
-            text(style, getString(R.string.st_edit_cards_desc), 16f, R.color.text_title)
-            row(style, button(getString(R.string.st_edit_cards_btn)) {
-                startActivity(android.content.Intent(this, app.mg4dash.MainActivity::class.java)
-                    .putExtra(app.mg4dash.ui.CardsEditor.EXTRA_EDIT, true)
-                    .addFlags(android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP or android.content.Intent.FLAG_ACTIVITY_SINGLE_TOP))
-                finish()
-            })
         }
         toggle(style, R.string.st_wide_bar, R.string.st_wide_bar_desc, { prefs.wideBar }) { prefs.wideBar = it; recreate() }
         toggle(style, R.string.st_fullscreen, null, { prefs.fullscreen }) { prefs.fullscreen = it; Fullscreen.apply(this) }

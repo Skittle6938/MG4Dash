@@ -41,6 +41,9 @@ object CardsEditor {
     /** Home extra: open the edit mode (Settings › Home). */
     const val EXTRA_EDIT = "edit_cards"
 
+    /** A layout chosen in the edit mode: home is rebuilt, then the edit mode opens again. */
+    @Volatile var reopen = false
+
     fun isOpen(activity: Activity) = activity.findViewById<ViewGroup>(android.R.id.content).findViewWithTag<View>(TAG) != null
 
     /** [unavailable]: cards not offered now (the power, shown in the energy card); [dock]: the bar, where the buttons go. */
@@ -61,10 +64,16 @@ object CardsEditor {
         private val prefs = Prefs(activity)
         private val d = resources.displayMetrics.density
         private fun dp(v: Int) = (v * d).toInt()
-        private val accent = Themes.color(context, R.color.accent_action)
+        // Theme colours (#38, mockups v4): neutral, light in the light theme
+        private val ink = Themes.color(context, R.color.text_value)
         private val sub = Themes.color(context, R.color.text_sub)
+        private val title = Themes.color(context, R.color.text_title)
+        private val idle = Themes.color(context, R.color.button_idle)
+        private val off = Themes.color(context, R.color.text_disabled)
+        private val border = Themes.color(context, R.color.panel_border)
+        private val ground = Themes.color(context, R.color.bg_top)
         private val boxes = mutableListOf<Pair<Target, LinearLayout>>()
-        /** Default and Done, over the bar: in a row at the bottom, in a column on the vertical bar. */
+        /** Layout, Default and Done, over the bar: in a row at the bottom, in a column on the vertical bar. */
         private val vertical = dock != null && dock.height > dock.width
         private val controls = LinearLayout(context).apply {
             orientation = if (vertical) LinearLayout.VERTICAL else LinearLayout.HORIZONTAL
@@ -73,7 +82,7 @@ object CardsEditor {
         private val config: HomeSlots.Config get() = HomeSlots.load(prefs, layout, unavailable)
 
         init {
-            setBackgroundColor(0xC8000000.toInt())
+            setBackgroundColor(ground and 0x00FFFFFF or (0xD0 shl 24))
             isClickable = true   // home underneath receives nothing while editing
             targets.forEach { t -> LinearLayout(context).apply { orientation = LinearLayout.VERTICAL }.also { boxes += t to it; addView(it) } }
             buildControls()
@@ -82,47 +91,63 @@ object CardsEditor {
         }
 
         private fun buildControls() {
-            fun button(symbol: String, label: Int, filled: Boolean, onClick: (View) -> Unit) = TextView(context).apply {
-                gravity = Gravity.CENTER; setTextColor(Color.WHITE)
+            /** A rounded square: its drawing or symbol, the word under it; [filled]: Done. */
+            fun button(symbol: String?, icon: Drawable?, label: Int, filled: Boolean, onClick: (View) -> Unit) = TextView(context).apply {
+                gravity = Gravity.CENTER; setTextColor(if (filled) idle else ink)
                 background = GradientDrawable().apply {
-                    cornerRadius = dp(30).toFloat()
-                    if (filled) setColor(accent) else { setColor(0xE6141B29.toInt()); setStroke(dp(2), sub) }
+                    cornerRadius = dp(12).toFloat()
+                    if (filled) setColor(ink) else { setColor(idle); setStroke(dp(2), title) }
                 }
-                if (vertical) {
-                    // Narrow bar: the symbol, the word under it
-                    text = android.text.SpannableStringBuilder(symbol).apply {
-                        setSpan(android.text.style.RelativeSizeSpan(1.8f), 0, length, 0)
-                        append("\n").append(context.getString(label))
-                    }
-                    setTextSize(TypedValue.COMPLEX_UNIT_SP, 13f); setPadding(dp(2), dp(10), dp(2), dp(10))
-                    // A long word (Predefinito, Por defecto) is smaller rather than cut by the round button
+                val small = vertical
+                text = if (symbol != null) android.text.SpannableStringBuilder(symbol).apply {
+                    setSpan(android.text.style.RelativeSizeSpan(1.8f), 0, length, 0)
+                    append("\n").append(context.getString(label))
+                } else context.getString(label)
+                if (icon != null) { setCompoundDrawablesWithIntrinsicBounds(null, icon, null, null); compoundDrawablePadding = dp(4) }
+                setTextSize(TypedValue.COMPLEX_UNIT_SP, if (small) 12f else 15f)
+                setPadding(dp(4), dp(8), dp(4), dp(8))
+                if (small) {
+                    // A long word (Predefinito, Por defecto) is smaller rather than cut by the narrow bar
                     val room = (dock?.width ?: dp(72)) - dp(8) - dp(10)
                     val word = paint.measureText(context.getString(label))
                     if (word > room) setTextSize(TypedValue.COMPLEX_UNIT_PX, maxOf(textSize * room / word, 9 * resources.displayMetrics.scaledDensity))
-                } else {
-                    text = context.getString(label); setTextSize(TypedValue.COMPLEX_UNIT_SP, 22f); setPadding(dp(34), dp(12), dp(34), dp(12))
                 }
                 setOnClickListener { onClick(it) }
             }
-            val reset = button("↺", R.string.wc_reset, false) { v ->
+            val pick = button(null, LayoutPicker.glyph(context, layout, if (vertical) 34 else 42, if (vertical) 22 else 26), R.string.ly_title, false) { v ->
+                LayoutPicker.show(activity, v, layout, side = vertical) { chosen ->
+                    if (chosen == layout) return@show
+                    // Another grid of places: home is rebuilt with it, the edit mode opens again over it
+                    HomeSlots.choose(prefs, chosen)
+                    reopen = true
+                    close(activity)
+                    Themes.recreateSmooth(activity)
+                }
+            }
+            val reset = button("↺", null, R.string.wc_reset, false) { v ->
                 SourceMenu.confirm(activity, v, context.getString(R.string.wc_reset_confirm), context.getString(R.string.wc_reset)) {
                     HomeSlots.reset(prefs, layout); render(); onChange()
                 }
             }
-            val done = button("✓", R.string.wc_done, true) { close(activity); onChange() }
+            val done = button("✓", null, R.string.wc_done, true) { close(activity); onChange() }
             if (vertical) {
                 val w = (dock?.width ?: dp(72)) - dp(8)
                 controls.addView(done, LinearLayout.LayoutParams(w, -2))
-                controls.addView(reset, LinearLayout.LayoutParams(w, -2).apply { topMargin = dp(16) })
+                controls.addView(reset, LinearLayout.LayoutParams(w, -2).apply { topMargin = dp(14) })
+                controls.addView(pick, LinearLayout.LayoutParams(w, -2).apply { topMargin = dp(14) })
                 // No room for the hint on the bar: said once
                 Toasts.show(context, R.string.wc_hint, long = true)
             } else {
+                // The bar's own buttons hidden behind the hint and the buttons
+                controls.background = GradientDrawable().apply { cornerRadius = resources.getDimension(R.dimen.radius_panel); setColor(ground) }
+                controls.setPadding(dp(16), dp(4), dp(16), dp(4))
                 controls.addView(TextView(context).apply {
-                    text = context.getString(R.string.wc_hint); setTextColor(Color.WHITE); setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f)
+                    text = context.getString(R.string.wc_hint); setTextColor(ink); setTextSize(TypedValue.COMPLEX_UNIT_SP, 17f)
                     maxLines = 2
-                }, LinearLayout.LayoutParams(-2, -2).apply { rightMargin = dp(24) })
-                controls.addView(reset, LinearLayout.LayoutParams(-2, -2).apply { rightMargin = dp(14) })
-                controls.addView(done, LinearLayout.LayoutParams(-2, -2))
+                }, LinearLayout.LayoutParams(0, -2, 1f).apply { rightMargin = dp(24) })
+                listOf(pick, reset, done).forEachIndexed { i, b ->
+                    controls.addView(b, LinearLayout.LayoutParams(dp(118), -1).apply { if (i > 0) leftMargin = dp(14); topMargin = dp(2); bottomMargin = dp(2) })
+                }
             }
         }
 
@@ -160,6 +185,7 @@ object CardsEditor {
             when (ch.refused) {
                 HomeSlots.Refusal.KEEP_ONE, HomeSlots.Refusal.NO_CARD -> Toasts.show(context, R.string.wc_keep_one)
                 HomeSlots.Refusal.ONLY_CARD_THERE -> Toasts.show(context, R.string.wc_keep_one_there, long = true)
+                HomeSlots.Refusal.TOO_BIG -> Toasts.show(context, R.string.wc_too_big, long = true)
                 null -> { HomeSlots.save(prefs, ch.config); render(); onChange() }
             }
         }
@@ -169,7 +195,7 @@ object CardsEditor {
             box.setPadding(dp(14), dp(10), dp(14), dp(10))
             box.background = GradientDrawable().apply {
                 cornerRadius = resources.getDimension(R.dimen.radius_panel)
-                setColor(0xF00B1220.toInt()); setStroke(dp(3), accent, dp(10).toFloat(), dp(7).toFloat())
+                setColor(ground and 0x00FFFFFF or (0xF0 shl 24)); setStroke(dp(2), title, dp(10).toFloat(), dp(7).toFloat())
             }
             val id = t.slot.id
             val here = c.fill(id)
@@ -193,11 +219,17 @@ object CardsEditor {
             val column = LinearLayout(context).apply { orientation = LinearLayout.VERTICAL }
             val flow = FlowRow(context, dp(8))
             Card.entries.filter { it !in unavailable }.forEach { card ->
-                flow.addView(chip(context.getString(card.label), card in cards.cards, c.slotOf(card)?.takeIf { it != id }) {
+                val fits = HomeSlots.fits(card, t.slot.size)
+                flow.addView(chip(context.getString(card.label), card in cards.cards, c.slotOf(card)?.takeIf { it != id }, greyed = !fits) {
                     change(HomeSlots.toggle(config, id, card, unavailable))
                 })
             }
             column.addView(flow, LinearLayout.LayoutParams(-1, -2))
+            // Two columns wide: why some cards are greyed
+            if (t.slot.size.span > 1) column.addView(TextView(context).apply {
+                text = context.getString(R.string.wc_big_hint); setTextColor(sub); setTextSize(TypedValue.COMPLEX_UNIT_SP, 17f)
+                setPadding(dp(4), dp(10), dp(4), 0)
+            })
             if (Card.MAP in cards.cards) mapApp?.let { m ->
                 column.addView(link(context.getString(R.string.wc_map_app), m.name()) { m.pick { render(); onChange() } })
             }
@@ -214,16 +246,19 @@ object CardsEditor {
                 LinearLayout.LayoutParams(-1, 0, 1f).apply { topMargin = dp(if (t.slot.size == HomeSlots.Size.MEDIUM) 10 else 2) })
         }
 
-        /** On: ticked, filled; [elsewhere]: in another place, shown on a small map of the screen. */
-        private fun chip(label: String, on: Boolean, elsewhere: String?, onClick: () -> Unit) = TextView(context).apply {
+        /**
+         * On: ticked, filled; [elsewhere]: in another place, shown on a small map of the screen; [greyed]: too small
+         * for this place (a touch says why).
+         */
+        private fun chip(label: String, on: Boolean, elsewhere: String?, greyed: Boolean = false, onClick: () -> Unit) = TextView(context).apply {
             text = (if (on) "✓  " else "") + label
             setTextSize(TypedValue.COMPLEX_UNIT_SP, 19f); maxLines = 1
-            setTextColor(if (on) Color.WHITE else sub)
+            setTextColor(if (on) idle else if (greyed) off else ink)
             gravity = Gravity.CENTER_VERTICAL
             minHeight = dp(50); setPadding(dp(18), 0, dp(18), 0)
             background = GradientDrawable().apply {
                 cornerRadius = dp(25).toFloat()
-                if (on) setColor(accent) else setStroke(dp(2), Themes.color(context, R.color.text_title))
+                if (on) setColor(ink) else setStroke(dp(2), if (greyed) border else title)
             }
             if (elsewhere != null) {
                 setCompoundDrawablesRelativeWithIntrinsicBounds(null, null, glyph(elsewhere), null)
@@ -239,14 +274,14 @@ object CardsEditor {
             val cells = rects.map { r ->
                 RectF((r.left - all.left) / all.width(), (r.top - all.top) / all.height(), (r.right - all.left) / all.width(), (r.bottom - all.top) / all.height())
             }
-            return Glyph(cells, targets.indexOfFirst { it.slot.id == slot }, sub, accent, d)
+            return Glyph(cells, targets.indexOfFirst { it.slot.id == slot }, sub, ink, d)
         }
 
         private fun link(label: String, value: String, onClick: () -> Unit) = TextView(context).apply {
             val s = android.text.SpannableStringBuilder(label + "  ")
             val at = s.length
             s.append(value).append("  ›")
-            s.setSpan(android.text.style.ForegroundColorSpan(accent), at, s.length, 0)
+            s.setSpan(android.text.style.ForegroundColorSpan(ink), at, s.length, 0)
             text = s
             setTextColor(sub); setTextSize(TypedValue.COMPLEX_UNIT_SP, 19f)
             maxLines = 1; ellipsize = TextUtils.TruncateAt.MIDDLE
@@ -272,11 +307,11 @@ object CardsEditor {
             orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL
             setPadding(dp(4), dp(4), dp(4), 0)
             val value = TextView(context).apply {
-                setTextColor(accent); setTextSize(TypedValue.COMPLEX_UNIT_SP, 19f); gravity = Gravity.CENTER
+                setTextColor(ink); setTextSize(TypedValue.COMPLEX_UNIT_SP, 19f); gravity = Gravity.CENTER
                 text = context.getString(R.string.wc_wake_s, prefs.webWakeSeconds)
             }
             fun arrow(glyph: String, step: Int) = TextView(context).apply {
-                text = glyph; setTextColor(accent); setTextSize(TypedValue.COMPLEX_UNIT_SP, 26f); gravity = Gravity.CENTER
+                text = glyph; setTextColor(ink); setTextSize(TypedValue.COMPLEX_UNIT_SP, 26f); gravity = Gravity.CENTER
                 minWidth = dp(56); minHeight = dp(50)
                 setOnClickListener {
                     prefs.webWakeSeconds = (prefs.webWakeSeconds + step).coerceIn(1, 120)

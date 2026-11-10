@@ -399,6 +399,11 @@ class Prefs(context: Context) {
         get() = sp.getInt("home_style", 0)
         set(v) = sp.edit().putInt("home_style", v).apply()
 
+    /** Layout of the places (#38), a HomeSlots.Layout key; null: from [homeStyle] (2 = map on the right). */
+    var homeLayout: String?
+        get() = sp.getString("home_layout", null)
+        set(v) = sp.edit().putString("home_layout", v).apply()
+
     /** Theme: background (0 navy, 1 black, 2 charcoal, 3 dark green, 4 burgundy) and buttons (0 blue, 1 grey, 2 red, 3 green, 4 orange). */
     var themeBackground: Int
         get() = sp.getInt("theme_bg", 1)   // black by default
