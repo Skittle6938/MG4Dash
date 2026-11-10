@@ -1450,6 +1450,26 @@ class ScreenshotTest {
         }
     }
 
+    /** The accent chosen in Settings › Look on the edit mode, the Driving card and the layout menu: blue (0) and orange (4). */
+    @Test @Config(qualifiers = "fr-w1920dp-h720dp-land-mdpi") fun accentFinal() {
+        File("build/screenshots/accent").mkdirs()
+        val sp = org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE)
+        for (accent in listOf(0, 4)) for (mode in listOf(1, 2)) {
+            sp.edit().putInt("theme_accent", accent).putString("slot_now_full_tc", "driving").commit()
+            val tag = "${if (accent == 0) "blue" else "orange"}_${if (mode == 1) "dark" else "light"}"
+            val act = layoutHome(HL.FULL, "tl=climate;tc=driving,map;tr=media;bl=energy;bc=hourly,daily;br=trip,power,phone", mode, drive = 7)
+            save(act.window.decorView, "accent/driving_$tag.png")
+            act.editCards()
+            repeat(3) { shadowOf(Looper.getMainLooper()).idleFor(200, TimeUnit.MILLISECONDS) }
+            save(act.window.decorView, "accent/edit_$tag.png")
+            app.mg4dash.ui.LayoutPicker.show(act, act.window.decorView, HL.FULL) {}
+            val pop = org.robolectric.shadows.ShadowApplication.getInstance().latestPopupWindow
+            saveOver(act.window.decorView, pop.contentView, (1920 - 880) / 2, 150, 880, "accent/menu_$tag.png")
+            pop.dismiss()
+        }
+        sp.edit().remove("theme_accent").commit()
+    }
+
     @Test @Config(qualifiers = "fr-w1920dp-h720dp-land-mdpi") fun layoutSettingsFinal() {
         File("build/screenshots/final").mkdirs()
         for (mode in listOf(1, 2)) {

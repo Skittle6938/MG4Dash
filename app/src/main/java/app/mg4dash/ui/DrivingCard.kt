@@ -158,14 +158,17 @@ class DrivingCard(context: Context) : LinearLayout(context) {
         r.chips.forEachIndexed { i, c ->
             val on = enabled && i == sel
             c.isEnabled = enabled
-            c.setTextColor(color(if (!enabled) R.color.text_disabled else if (on) R.color.button_idle else R.color.text_value))
+            // The choice with a light touch of the accent chosen in Settings › Look (a tint, the outline and the
+            // text, as the Settings tabs); dashed while the car has not confirmed it; the others neutral
+            val accent = Themes.select(context)
+            c.setTextColor(if (!enabled) color(R.color.text_disabled) else if (on) accent else color(R.color.text_value))
             c.typeface = Typeface.create(if (on) "sans-serif-medium" else "sans-serif", Typeface.NORMAL)
             c.background = GradientDrawable().apply {
                 cornerRadius = dp(14).toFloat()
-                val fill = color(if (on) R.color.text_value else R.color.button_idle)
-                setColor(if (on && waiting) fill and 0x00FFFFFF or (0x99 shl 24) else fill)
-                if (on && waiting) setStroke((2 * d).toInt(), color(R.color.text_value), dp(6).toFloat(), dp(4).toFloat())
-                else if (!on) setStroke((1.5f * d).toInt().coerceAtLeast(1), color(if (enabled) R.color.text_disabled else R.color.panel_border))
+                setColor(if (on) accent and 0x00FFFFFF or ((if (waiting) 0x18 else 0x30) shl 24) else color(R.color.button_idle))
+                if (on && waiting) setStroke((2 * d).toInt(), accent, dp(6).toFloat(), dp(4).toFloat())
+                else if (on) setStroke((2 * d).toInt(), accent)
+                else setStroke((1.5f * d).toInt().coerceAtLeast(1), color(if (enabled) R.color.text_disabled else R.color.panel_border))
             }
             c.tag = if (on && waiting) PENDING else null
         }
