@@ -13,8 +13,8 @@ android {
         // Targets Android 9 like the rest of the system: no background restrictions
         // or runtime permissions to handle for an app with the system uid.
         targetSdk = 28
-        versionCode = 272
-        versionName = "1.7.3-beta4"
+        versionCode = 273
+        versionName = "1.7.3-beta5"
     }
 
     flavorDimensions += "target"
