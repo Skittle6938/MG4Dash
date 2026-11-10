@@ -146,7 +146,10 @@ object WeatherRepo {
         val c = URL("https://api.open-meteo.com/").openConnection() as HttpURLConnection
         c.requestMethod = "HEAD"; c.connectTimeout = 8000; c.readTimeout = 8000; c.instanceFollowRedirects = false
         try { c.responseCode > 0 } finally { c.disconnect() }
-    } catch (_: Exception) { false }
+    } catch (_: Exception) {
+        // Out of reach: the Wi-Fi checked again (MG4Dash back to the 4G if it no longer gets through)
+        app.mg4dash.system.WifiFirst.recheck(); false
+    }
     @Volatile private var missingCity = false
     private val wake = kotlinx.coroutines.channels.Channel<Unit>(kotlinx.coroutines.channels.Channel.CONFLATED)
 

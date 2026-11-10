@@ -254,6 +254,7 @@ object Shortcuts {
     private fun pickState(activity: Activity, i: Int, slot: Slot.Ha, refresh: () -> Unit) {
         val prefs = Prefs(activity)
         thread {
+            var noWifi = false
             val result = try {
                 val arr = JSONArray(request(prefs, "GET", "/api/states", null))
                 (0 until arr.length()).map { arr.getJSONObject(it) }
@@ -261,11 +262,12 @@ object Shortcuts {
                     .filter { it.first.substringBefore('.') in HaLive.STATE_DOMAINS }
                     .sortedWith(compareBy({ HaLive.STATE_DOMAINS.indexOf(it.first.substringBefore('.')) }, { it.second.lowercase() }))
             } catch (e: Exception) {
+                noWifi = e is app.mg4dash.system.WifiFirst.NoWifi
                 Log.w(TAG, "Home Assistant: ${e.message}"); null
             }
             main.post {
                 if (activity.isFinishing) return@post
-                if (result == null) { app.mg4dash.ui.Toasts.show(activity, R.string.ha_error, long = true); return@post }
+                if (result == null) { app.mg4dash.ui.Toasts.show(activity, if (noWifi) R.string.ha_no_wifi else R.string.ha_error, long = true); return@post }
                 val auto = activity.getString(R.string.sc_state_auto)
                 val none = activity.getString(R.string.sc_state_none)
                 val labels = listOf(auto, none) + result.map { (id, name) -> if (name.isNotBlank()) "$name  ·  $id" else id }
@@ -290,6 +292,7 @@ object Shortcuts {
             app.mg4dash.ui.Toasts.show(activity, R.string.ha_not_configured, long = true); return
         }
         thread {
+            var noWifi = false
             val result = try {
                 val arr = JSONArray(request(prefs, "GET", "/api/states", null))
                 (0 until arr.length()).map { arr.getJSONObject(it) }
@@ -297,11 +300,12 @@ object Shortcuts {
                     .filter { it.first.substringBefore('.') in HA_DOMAINS }
                     .sortedWith(compareBy({ HA_DOMAINS.indexOf(it.first.substringBefore('.')) }, { it.second.lowercase() }))
             } catch (e: Exception) {
+                noWifi = e is app.mg4dash.system.WifiFirst.NoWifi
                 Log.w(TAG, "Home Assistant: ${e.message}"); null
             }
             main.post {
                 if (activity.isFinishing) return@post
-                if (result == null) { app.mg4dash.ui.Toasts.show(activity, R.string.ha_error, long = true); return@post }
+                if (result == null) { app.mg4dash.ui.Toasts.show(activity, if (noWifi) R.string.ha_no_wifi else R.string.ha_error, long = true); return@post }
                 val labels = result.map { (id, name) -> if (name.isNotBlank()) "$name  ·  $id" else id }
                 searchList(activity, activity.getString(R.string.sc_ha), labels) { w ->
                     result[w].let { (id, name) -> onPick(id, name.ifBlank { id.substringAfter('.') }) }
@@ -383,14 +387,16 @@ object Shortcuts {
         val prefs = Prefs(activity)
         val app = activity.applicationContext
         thread {
+            var noWifi = false
             val ok = try {
                 request(prefs, "POST", "/api/services/" + service(slot.entityId), JSONObject().put("entity_id", slot.entityId).toString())
                 true
             } catch (e: Exception) {
+                noWifi = e is app.mg4dash.system.WifiFirst.NoWifi
                 Log.w(TAG, "action ${slot.entityId}: ${e.message}"); false
             }
             main.post {
-                ToastsUi.show(app, app.getString(if (ok) R.string.ha_sent else R.string.ha_error_action, slot.label))
+                ToastsUi.show(app, if (noWifi) app.getString(R.string.ha_no_wifi) else app.getString(if (ok) R.string.ha_sent else R.string.ha_error_action, slot.label))
                 if (ok) HaLive.refreshSoon()
             }
         }
@@ -408,7 +414,9 @@ object Shortcuts {
     internal fun request(prefs: Prefs, method: String, path: String, body: String?): String =
         app.mg4dash.system.DataUsage.tag(app.mg4dash.system.DataUsage.Use.HA) { requestUntagged(prefs, method, path, body) }
     private fun requestUntagged(prefs: Prefs, method: String, path: String, body: String?): String {
-        val c = URL(prefs.haUrl.trimEnd('/') + path).openConnection() as HttpURLConnection
+        // A Home Assistant at home only through the Wi-Fi; a public one through the network MG4Dash uses (the Wi-Fi first)
+        val url = URL(prefs.haUrl.trimEnd('/') + path)
+        val c = app.mg4dash.system.WifiFirst.open(url)
         try {
             c.requestMethod = method
             c.connectTimeout = 6000; c.readTimeout = 10000
@@ -418,6 +426,10 @@ object Shortcuts {
             val code = c.responseCode
             if (code !in 200..299) throw IllegalStateException("HTTP $code")
             return c.inputStream.bufferedReader().use { it.readText() }
+        } catch (e: java.io.IOException) {
+            // Out of reach: the Wi-Fi is checked again (back to the 4G if it no longer gets through)
+            if (!app.mg4dash.system.WifiFirst.isLocal(url.host)) app.mg4dash.system.WifiFirst.recheck()
+            throw e
         } finally { c.disconnect() }
     }
 }

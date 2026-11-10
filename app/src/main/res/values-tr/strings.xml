@@ -264,6 +264,7 @@
     <string name="sc_clear">Kaldır</string>
     <string name="ha_not_configured">Önce MG4Dash ayarlarında Home Assistant\'ı yapılandırın (Ayarlar\'a uzun basın).</string>
     <string name="ha_error">Home Assistant\'a ulaşılamıyor: adresi, tokenı ve bağlantıyı kontrol edin.</string>
+    <string name="ha_no_wifi">Home Assistant ev ağında: erişmek için Wi-Fi\'ye bağlanın</string>
     <string name="ha_sent">%1$s: gönderildi</string>
     <string name="ha_error_action">%1$s: başarısız</string>
     <string name="sc_state">Gösterilen durum</string>

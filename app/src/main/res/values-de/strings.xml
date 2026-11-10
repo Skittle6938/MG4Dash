@@ -264,6 +264,7 @@
     <string name="sc_clear">Entfernen</string>
     <string name="ha_not_configured">Richten Sie Home Assistant zuerst in den MG4Dash-Einstellungen ein (lange auf Einstellungen drücken).</string>
     <string name="ha_error">Home Assistant nicht erreichbar: Adresse, Token und Verbindung prüfen.</string>
+    <string name="ha_no_wifi">Home Assistant ist im Heimnetz: WLAN verbinden, um es zu erreichen</string>
     <string name="ha_sent">%1$s: gesendet</string>
     <string name="ha_error_action">%1$s: fehlgeschlagen</string>
     <string name="sc_state">Angezeigter Status</string>
