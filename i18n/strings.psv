@@ -555,6 +555,13 @@ wc_other_app|Other app…|Autre application…|Andere App…|Otra aplicación…
 wc_other_address|Other address…|Autre adresse…|Andere Adresse…|Otra dirección…|Altro indirizzo…|Ander adres…|Başka adres…
 wc_add_page|Add this page|Ajouter cette page|Diese Seite hinzufügen|Añadir esta página|Aggiungi questa pagina|Deze pagina toevoegen|Bu sayfayı ekle
 wc_page_added|Address added|Adresse ajoutée|Adresse hinzugefügt|Dirección añadida|Indirizzo aggiunto|Adres toegevoegd|Adres eklendi
+wc_urls_import|Import from the USB stick|Importer depuis la clé USB|Vom USB-Stick importieren|Importar desde la memoria USB|Importa dalla chiavetta USB|Importeren van USB-stick|USB bellekten içe aktar
+wc_urls_import_desc|mg4dash_url.txt, one address per line|mg4dash_url.txt, une adresse par ligne|mg4dash_url.txt, eine Adresse pro Zeile|mg4dash_url.txt, una dirección por línea|mg4dash_url.txt, un indirizzo per riga|mg4dash_url.txt, één adres per regel|mg4dash_url.txt, her satıra bir adres
+wc_urls_export|Export to the USB stick|Exporter sur la clé USB|Auf USB-Stick exportieren|Exportar a la memoria USB|Esporta sulla chiavetta USB|Exporteren naar USB-stick|USB belleğe dışa aktar
+wc_urls_imported|Addresses added from the USB stick: %d|Adresses ajoutées depuis la clé USB : %d|Vom USB-Stick hinzugefügte Adressen: %d|Direcciones añadidas desde la memoria USB: %d|Indirizzi aggiunti dalla chiavetta USB: %d|Adressen toegevoegd van de USB-stick: %d|USB bellekten eklenen adresler: %d
+wc_urls_import_none|No mg4dash_url.txt at the root of a USB stick|Aucun fichier mg4dash_url.txt à la racine d'une clé USB|Keine mg4dash_url.txt im Hauptverzeichnis eines USB-Sticks|No hay mg4dash_url.txt en la raíz de una memoria USB|Nessun mg4dash_url.txt nella radice di una chiavetta USB|Geen mg4dash_url.txt in de hoofdmap van een USB-stick|Bir USB belleğin kökünde mg4dash_url.txt yok
+wc_urls_exported|Saved on the USB stick: %s|Enregistré sur la clé USB : %s|Auf dem USB-Stick gespeichert: %s|Guardado en la memoria USB: %s|Salvato sulla chiavetta USB: %s|Opgeslagen op de USB-stick: %s|USB belleğe kaydedildi: %s
+wc_urls_no_usb|No USB stick to write to|Aucune clé USB où écrire|Kein beschreibbarer USB-Stick|No hay memoria USB donde escribir|Nessuna chiavetta USB su cui scrivere|Geen USB-stick om naar te schrijven|Yazılacak USB bellek yok
 wc_trips|Recent trips|Derniers trajets|Letzte Fahrten|Últimos trayectos|Ultimi viaggi|Laatste ritten|Son yolculuklar
 title_trips|TRIPS|TRAJETS|FAHRTEN|TRAYECTOS|VIAGGI|RITTEN|YOLCULUKLAR
 tr_now|In progress · since %s|En cours · depuis %s|Läuft · seit %s|En curso · desde %s|In corso · dalle %s|Bezig · sinds %s|Sürüyor · başlangıç %s

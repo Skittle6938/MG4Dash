@@ -216,37 +216,16 @@ class WebCard(private val activity: android.app.Activity) : FrameLayout(activity
      * "Move / resize", under Back.
      */
     fun menu(onMove: (() -> Unit)? = null) {
-        val shown = prefs.webUrl
         val rows = mutableListOf(CardMenu.Row("←", context.getString(R.string.wc_web_back), null, false) { back() })
         if (onMove != null) rows += CardMenu.Row("✥", context.getString(R.string.wc_web_move), null, false) { onMove() }
-        prefs.webUrls.forEach { url ->
-            rows += CardMenu.Row(if (url == shown) "◉" else "○", name(url), url, url == shown) {
-                // The address shown touched again: its page starts again from that address (#98)
-                if (url == shown) { Log.i(TAG, "menu: ${name(url)} again"); reset(); show(); return@Row }
-                prefs.webUrl = url
-                Log.i(TAG, "menu: ${name(url)}")
-                show()
-            }
-        }
-        // The page shown now (after links followed in it), added to the list as it is, if it is not there yet
-        pageToAdd(prefs.webUrls, page)?.let { url ->
-            rows += CardMenu.Row("＋", context.getString(R.string.wc_add_page), url, false) {
-                prefs.webUrls = prefs.webUrls + url
-                Log.i(TAG, "menu: ${name(url)} page added")
-                Toasts.show(context, R.string.wc_page_added)
-            }
-        }
-        // Another address, entered as in the edit mode, added to the list and shown at once
-        rows += CardMenu.Row("＋", context.getString(R.string.wc_other_address), null, false) {
-            CardsEditor.askUrl(activity, "") { url ->
-                if (url.isEmpty()) return@askUrl
-                prefs.webUrls = prefs.webUrls.filter { it != url } + url
-                prefs.webUrl = url
-                Log.i(TAG, "menu: ${name(url)} added")
-                show()
-            }
-        }
-        CardMenu.show(activity, rows)
+        // The same addresses' menu as the edit mode's, with Add this page (#98)
+        WebAddresses.show(activity, rows, page, onShow = { url ->
+            // The address shown touched again: its page starts again from that address (#98)
+            if (url == prefs.webUrl) { Log.i(TAG, "menu: ${name(url)} again"); reset(); show(); return@show }
+            prefs.webUrl = url
+            Log.i(TAG, "menu: ${name(url)}")
+            show()
+        }, onChange = { if (prefs.webUrl != (appUrl ?: loaded)) show() })
     }
 
     override fun onAttachedToWindow() {

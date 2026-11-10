@@ -296,76 +296,9 @@ object CardsEditor {
             return if (n > 1) WebCard.name(shown) + " · " + context.getString(R.string.wc_web_count, n) else shown
         }
 
-        /**
-         * The web app's addresses (#98): a touch shows one in the card, ✕ deletes it, the last row adds one.
-         * Kept on OK only.
-         */
+        /** The web app's addresses (#98): the same menu as the card's long press, without Add this page. */
         private fun editUrls() {
-            val urls = prefs.webUrls.toMutableList()
-            var shown = prefs.webUrl.takeIf { it in urls } ?: urls.firstOrNull() ?: ""
-            val list = LinearLayout(context).apply { orientation = LinearLayout.VERTICAL }
-            val box = LinearLayout(context).apply {
-                orientation = LinearLayout.VERTICAL; setPadding(dp(24), dp(4), dp(24), 0)
-                addView(TextView(context).apply {
-                    text = context.getString(R.string.wc_web_apps_hint); setTextColor(sub); setTextSize(TypedValue.COMPLEX_UNIT_SP, 17f)
-                    setPadding(0, 0, 0, dp(12))
-                })
-                addView(ScrollView(context).apply { isVerticalScrollBarEnabled = false; addView(list) }, LinearLayout.LayoutParams(-1, 0, 1f))
-            }
-            fun fill() {
-                list.removeAllViews()
-                urls.forEach { url ->
-                    val on = url == shown
-                    val row = LinearLayout(context).apply {
-                        orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL
-                        minimumHeight = dp(72); setPadding(dp(18), dp(6), dp(8), dp(6))
-                        background = GradientDrawable().apply {
-                            cornerRadius = dp(18).toFloat()
-                            setColor(if (on) (accent and 0x00FFFFFF) or 0x40000000 else Themes.color(context, R.color.bg_top))
-                            if (on) setStroke(dp(2), accent)
-                        }
-                        setOnClickListener { shown = url; fill() }
-                    }
-                    row.addView(TextView(context).apply {
-                        text = if (on) "◉" else "○"; setTextColor(if (on) accent else sub); setTextSize(TypedValue.COMPLEX_UNIT_SP, 26f)
-                        setPadding(0, 0, dp(18), 0)
-                    })
-                    row.addView(LinearLayout(context).apply {
-                        orientation = LinearLayout.VERTICAL
-                        addView(TextView(context).apply { text = WebCard.name(url); setTextColor(Themes.color(context, R.color.text_title)); setTextSize(TypedValue.COMPLEX_UNIT_SP, 21f); maxLines = 1 })
-                        addView(TextView(context).apply { text = url; setTextColor(sub); setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f); maxLines = 1; ellipsize = TextUtils.TruncateAt.MIDDLE })
-                    }, LinearLayout.LayoutParams(0, -2, 1f))
-                    row.addView(TextView(context).apply {
-                        text = "✕"; setTextColor(sub); setTextSize(TypedValue.COMPLEX_UNIT_SP, 24f); gravity = Gravity.CENTER
-                        contentDescription = "✕"
-                        background = GradientDrawable().apply { shape = GradientDrawable.OVAL; setColor((sub and 0x00FFFFFF) or 0x30000000) }
-                        setOnClickListener {
-                            urls.remove(url)
-                            if (shown == url) shown = urls.firstOrNull() ?: ""
-                            fill()
-                        }
-                    }, LinearLayout.LayoutParams(dp(60), dp(60)))
-                    list.addView(row, LinearLayout.LayoutParams(-1, -2).apply { bottomMargin = dp(10) })
-                }
-                list.addView(TextView(context).apply {
-                    text = "＋  " + context.getString(R.string.wc_web_add); setTextColor(accent); setTextSize(TypedValue.COMPLEX_UNIT_SP, 20f)
-                    gravity = Gravity.CENTER_VERTICAL; minHeight = dp(68); setPadding(dp(20), 0, dp(20), 0)
-                    background = GradientDrawable().apply { cornerRadius = dp(18).toFloat(); setStroke(dp(2), (sub and 0x00FFFFFF) or 0x80000000.toInt(), dp(8).toFloat(), dp(6).toFloat()) }
-                    setOnClickListener {
-                        editUrl("") { v -> if (v.isNotEmpty()) { if (v !in urls) urls += v; shown = v; fill() } }
-                    }
-                }, LinearLayout.LayoutParams(-1, -2))
-            }
-            fill()
-            android.app.AlertDialog.Builder(activity)
-                .setTitle(R.string.wc_web_apps).setView(box)
-                .setPositiveButton(android.R.string.ok) { _, _ ->
-                    prefs.webUrls = urls
-                    prefs.webUrl = shown
-                    render(); onChange()
-                }
-                .setNegativeButton(R.string.cancel, null)
-                .show().also { Dialogs.fix(it); Dialogs.hideBars(it) }
+            WebAddresses.show(activity, onShow = { url -> prefs.webUrl = url; render(); onChange() }, onChange = { render(); onChange() })
         }
 
         private fun editUrl(initial: String, done: (String) -> Unit) = askUrl(activity, initial, done)

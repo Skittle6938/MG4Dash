@@ -561,6 +561,13 @@
     <string name="wc_other_address">Ander adres…</string>
     <string name="wc_add_page">Deze pagina toevoegen</string>
     <string name="wc_page_added">Adres toegevoegd</string>
+    <string name="wc_urls_import">Importeren van USB-stick</string>
+    <string name="wc_urls_import_desc">mg4dash_url.txt, één adres per regel</string>
+    <string name="wc_urls_export">Exporteren naar USB-stick</string>
+    <string name="wc_urls_imported">Adressen toegevoegd van de USB-stick: %d</string>
+    <string name="wc_urls_import_none">Geen mg4dash_url.txt in de hoofdmap van een USB-stick</string>
+    <string name="wc_urls_exported">Opgeslagen op de USB-stick: %s</string>
+    <string name="wc_urls_no_usb">Geen USB-stick om naar te schrijven</string>
     <string name="wc_trips">Laatste ritten</string>
     <string name="title_trips">RITTEN</string>
     <string name="tr_now">Bezig · sinds %s</string>
