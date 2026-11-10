@@ -2175,6 +2175,9 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
                     }
                 }
                 launch { ConsumptionEstimator.average.collect { renderEnergy(CarBridge.state.value, it) } }
+                // Driving choices (#38): pending, then confirmed; one the car did not take is said, discreetly
+                launch { CarBridge.drivePending.collect { if (isShown(Card.DRIVING)) driving.show() } }
+                launch { CarBridge.driveRefused.collect { app.mg4dash.ui.Toasts.show(this@MainActivity, R.string.dv_not_confirmed) } }
                 launch { MediaHub.now.collect { renderMedia(it) } }
                 launch { WeatherRepo.shown.collect { renderWeather(it, CarBridge.state.value) } }
                 launch { LocationRepo.location.collect { renderLocation(it, CarBridge.state.value) } }
