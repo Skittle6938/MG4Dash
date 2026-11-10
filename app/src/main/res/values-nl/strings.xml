@@ -264,6 +264,7 @@
     <string name="sc_clear">Verwijderen</string>
     <string name="ha_not_configured">Stel eerst Home Assistant in bij de MG4Dash-instellingen (lang drukken op Instellingen).</string>
     <string name="ha_error">Home Assistant onbereikbaar: controleer adres, token en verbinding.</string>
+    <string name="ha_no_wifi">Home Assistant staat op het thuisnetwerk: verbind de wifi om het te bereiken</string>
     <string name="ha_sent">%1$s: verzonden</string>
     <string name="ha_error_action">%1$s: mislukt</string>
     <string name="sc_state">Getoonde status</string>

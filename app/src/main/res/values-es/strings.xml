@@ -264,6 +264,7 @@
     <string name="sc_clear">Quitar</string>
     <string name="ha_not_configured">Configure primero Home Assistant en los ajustes de MG4Dash (pulsación larga en Ajustes).</string>
     <string name="ha_error">Home Assistant no accesible: compruebe la dirección, el token y la conexión.</string>
+    <string name="ha_no_wifi">Home Assistant está en la red de casa: conecte el Wi-Fi para acceder</string>
     <string name="ha_sent">%1$s: enviado</string>
     <string name="ha_error_action">%1$s: error</string>
     <string name="sc_state">Estado mostrado</string>

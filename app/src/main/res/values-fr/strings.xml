@@ -264,6 +264,7 @@
     <string name="sc_clear">Supprimer</string>
     <string name="ha_not_configured">Configurez d\'abord Home Assistant dans les paramètres de MG4Dash (appui long sur Paramètres).</string>
     <string name="ha_error">Home Assistant injoignable : vérifiez l\'adresse, le jeton et la connexion.</string>
+    <string name="ha_no_wifi">Home Assistant est sur le réseau de la maison : connectez le Wi-Fi pour l\'atteindre</string>
     <string name="ha_sent">%1$s : envoyé</string>
     <string name="ha_error_action">%1$s : échec</string>
     <string name="sc_state">État affiché</string>

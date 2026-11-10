@@ -264,6 +264,7 @@
     <string name="sc_clear">Remove</string>
     <string name="ha_not_configured">Set up Home Assistant in MG4Dash settings first (long press on Settings).</string>
     <string name="ha_error">Home Assistant unreachable: check the address, the token and the connection.</string>
+    <string name="ha_no_wifi">Home Assistant is on the home network: connect the Wi-Fi to reach it</string>
     <string name="ha_sent">%1$s: sent</string>
     <string name="ha_error_action">%1$s: failed</string>
     <string name="sc_state">Displayed state</string>

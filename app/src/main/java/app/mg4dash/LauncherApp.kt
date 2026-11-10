@@ -74,6 +74,8 @@ class LauncherApp : Application() {
             app.mg4dash.system.LauncherLink.start(this)
             app.mg4dash.energy.V2lAuto.start(this)
         }
+        // MG4Dash's own traffic on the Wi-Fi first, before the weather and the map ask for anything
+        app.mg4dash.system.WifiFirst.start(this)
         WeatherRepo.start(this)
         app.mg4dash.system.DataUsage.start(this)
         app.mg4dash.ui.Themes.publish(this)
