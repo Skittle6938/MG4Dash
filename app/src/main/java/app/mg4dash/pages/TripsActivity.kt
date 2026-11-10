@@ -30,6 +30,10 @@ class TripsActivity : PageActivity() {
     private lateinit var readingButton: TextView
     private lateinit var list: LinearLayout
     private var odometer: Int? = null
+    private var filter = TripLog.Filter.ALL
+    private lateinit var head: LinearLayout
+    /** A kWh price is set: a Cost column, and the costs of today and of the reading (#102). */
+    private var priced = false
 
     override fun buildBody() {
         header.addView(kit.text(getString(R.string.tr_clear), 19f, R.color.text_sub).apply {
@@ -63,13 +67,22 @@ class TripsActivity : PageActivity() {
 
         // ── The list ──
         val right = kit.panel(getString(R.string.wc_trips).uppercase())
-        right.addView(row(listOf(R.string.tr_col_day, R.string.tr_col_time, R.string.tr_col_odo, R.string.tr_col_dist,
-            R.string.tr_col_duration, R.string.tr_col_cons, R.string.tr_col_batt).map { getString(it).uppercase() }, head = true), kit.lp(-1, -2, t = 10))
+        // All, the trips only or the manual readings only (#102)
+        var mark: (Int?) -> Unit = {}
+        val (filterRow, pickFilter) = kit.segmented(listOf(R.string.tr_filter_all, R.string.tr_filter_trips, R.string.tr_filter_readings).map { getString(it) }) { i ->
+            filter = TripLog.Filter.entries[i]; mark(i); refresh()
+        }
+        mark = pickFilter
+        right.addView(filterRow, kit.lp(-1, -2, t = 10))
+        // The columns' titles, the cost's with a kWh price only (#102)
+        head = kit.column()
+        right.addView(head, kit.lp(-1, -2, t = 10))
         right.addView(kit.divider(), kit.lp(-1, 1, t = 4))
         list = kit.column()
         right.addView(android.widget.ScrollView(this).apply { isVerticalScrollBarEnabled = false; addView(list) }, kit.lp(-1, 0, 1f))
         right.addView(kit.text(getString(R.string.tr_note), 16f, R.color.text_sub), kit.lp(-1, -2, t = 8))
         body.addView(right, kit.lp(0, -1, 70f, l = 6))
+        pickFilter(filter.ordinal)
 
         lifecycleScope.launch {
             repeatOnLifecycle(androidx.lifecycle.Lifecycle.State.STARTED) {
@@ -85,7 +98,7 @@ class TripsActivity : PageActivity() {
     }
 
     /** Column widths of the list, in shares of its width. */
-    private val weights = floatArrayOf(1.3f, 1.6f, 1.9f, 1.1f, 0.9f, 1.5f, 1.1f)
+    private val weights = floatArrayOf(1.3f, 1.6f, 1.9f, 1.1f, 0.9f, 1.5f, 1.1f, 1.0f)
 
     private fun row(cells: List<String>, head: Boolean = false) = LinearLayout(this).apply {
         orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL
@@ -99,6 +112,7 @@ class TripsActivity : PageActivity() {
     }
 
     private fun refresh(now: Long = System.currentTimeMillis()) {
+        if (!::list.isInitialized) return
         val trips = TripLog.load(sp)
         val cur = TripLog.current.value
         val day = TripLog.today(trips, cur, now)
@@ -106,24 +120,59 @@ class TripsActivity : PageActivity() {
         val km = trips.filter { it.start >= TripLog.dayStart(now) } + listOfNotNull(cur?.takeIf { it.start >= TripLog.dayStart(now) })
         val kwh = km.sumOf { it.kwh.toDouble() }.toFloat()
         val per100 = if (day.km >= 0.5f && kwh > 0.02f) kwh / day.km * 100f else null
-        todayDetail.text = "${TripText.count(this, day.trips)} · ${getString(R.string.tr_driving, TripText.duration(this, day.minutes))} · ${TripText.cons(this, per100)}"
+        priced = TripText.price(this) != null
+        head.removeAllViews()
+        head.addView(row((listOf(R.string.tr_col_day, R.string.tr_col_time, R.string.tr_col_odo, R.string.tr_col_dist,
+            R.string.tr_col_duration, R.string.tr_col_cons, R.string.tr_col_batt) + if (priced) listOf(R.string.tr_col_cost) else emptyList())
+            .map { getString(it).uppercase() }, head = true))
+        todayDetail.text = "${TripText.count(this, day.trips)} · ${getString(R.string.tr_driving, TripText.duration(this, day.minutes))} · ${TripText.cons(this, per100)}" +
+            if (priced) " · " + TripText.money(TripLog.costOf(km)) else ""
         firstOdo.text = day.firstKm?.let { TripText.odo(this, it) } ?: "—"
         nowOdo.text = odometer?.let { TripText.odo(this, it) } ?: "—"
         showReading()
         list.removeAllViews()
-        val rows = listOfNotNull(cur) + trips
+        val rows = TripLog.entries(trips, cur, TripLog.reading(sp), TripLog.readings(sp), now, filter)
         var lastDay: String? = null
-        rows.forEach { t ->
-            val dayText = TripText.day(this, t.start, now)
+        fun batt(a: Int?, b: Int?) = if (a != null && b != null) "$a → $b %" else "—"
+        rows.forEach { e ->
+            val dayText = TripText.day(this, e.end.coerceAtMost(now), now)
             if (lastDay != null && dayText != lastDay) list.addView(kit.divider())
             lastDay = dayText
-            val span = if (t === cur) "${TripText.time(this, t.start)} – ${getString(R.string.tr_ongoing)}" else TripText.span(this, t)
-            val batt = if (t.startSoc != null && t.endSoc != null) "${t.startSoc} → ${t.endSoc} %" else "—"
-            list.addView(row(listOf(dayText, span, TripText.odoRange(this, t.startKm, t.endKm), TripText.dist(this, t.km),
-                TripText.duration(this, t.minutes), TripText.cons(this, t.per100), batt)))
+            when (e) {
+                is TripLog.Entry.OfTrip -> {
+                    val t = e.trip
+                    val span = if (e.inProgress) "${TripText.time(this, t.start)} – ${getString(R.string.tr_ongoing)}" else TripText.span(this, t)
+                    list.addView(row(listOf(dayText, span, TripText.odoRange(this, t.startKm, t.endKm), TripText.dist(this, t.km),
+                        TripText.duration(this, t.minutes), TripText.cons(this, t.per100), batt(t.startSoc, t.endSoc)) + cost(t.cost)))
+                }
+                is TripLog.Entry.OfReading -> list.addView(readingRow(e, dayText, now))
+            }
         }
         if (rows.isEmpty()) list.addView(kit.text(getString(R.string.tr_none), 19f, R.color.text_sub), kit.lp(-1, -2, t = 14))
     }
+
+    /** A manual reading among the trips: "■ Reading · day" in bold, a white bar on its left, a lighter background (#102). */
+    private fun readingRow(e: TripLog.Entry.OfReading, dayText: String, now: Long): android.view.View {
+        val r = e.reading
+        val endKm = if (r.running) odometer ?: r.startKm else r.endKm
+        val span = "${TripText.time(this, r.start)} – ${if (r.running) getString(R.string.tr_ongoing) else TripText.time(this, r.end)}"
+        val km = (endKm - r.startKm).coerceAtLeast(0).toFloat()
+        val batt = if (e.startSoc != null && e.endSoc != null) "${e.startSoc} → ${e.endSoc} %" else "—"
+        val label = "■  " + getString(R.string.tr_reading_row) + if (dayText == getString(R.string.tr_today)) "" else " · $dayText"
+        return row(listOf(label, span, TripText.odoRange(this, r.startKm, endKm),
+            TripText.dist(this, km), TripText.duration(this, e.minutes), TripText.cons(this, e.per100), batt) + cost(e.cost)).apply {
+            tag = READING_TAG
+            background = android.graphics.drawable.LayerDrawable(arrayOf(
+                android.graphics.drawable.ColorDrawable(kit.color(R.color.button_idle)),
+                android.graphics.drawable.ColorDrawable(kit.color(R.color.text_value)),
+            )).apply { setLayerWidth(1, kit.dp(4)) }
+            setPadding(kit.dp(12), paddingTop, kit.dp(6), paddingBottom)
+            (getChildAt(0) as TextView).typeface = android.graphics.Typeface.create("sans-serif-medium", android.graphics.Typeface.NORMAL)
+        }
+    }
+
+    /** The Cost cell, with a kWh price only. */
+    private fun cost(v: Float?): List<String> = if (priced) listOf(TripText.money(v)) else emptyList()
 
     private fun showReading() {
         val r = TripLog.reading(sp)
@@ -131,7 +180,11 @@ class TripsActivity : PageActivity() {
         if (r == null) { readingState.text = ""; readingKm.text = ""; return }
         readingState.text = (if (r.running) getString(R.string.tr_reading_running, TripText.time(this, r.start))
             else "${TripText.day(this, r.start, System.currentTimeMillis())} · ${TripText.time(this, r.start)} – ${TripText.time(this, r.end)}") +
-            "   " + TripText.odoRange(this, r.startKm, if (r.running) odometer ?: r.startKm else r.endKm)
+            "   " + TripText.odoRange(this, r.startKm, if (r.running) odometer ?: r.startKm else r.endKm) +
+            (if (TripText.price(this) != null) {
+                val now = System.currentTimeMillis()
+                "   " + TripText.money(TripLog.covered(r, if (r.running) now else r.end, listOfNotNull(TripLog.current.value) + TripLog.trips.value).cost)
+            } else "")
         readingKm.text = r.km(odometer)?.let { app.mg4dash.system.Units.distText(this, it.toFloat()) } ?: ""
     }
 
@@ -140,15 +193,20 @@ class TripsActivity : PageActivity() {
         val now = System.currentTimeMillis()
         if (TripLog.reading(sp)?.running == true) TripLog.stopReading(sp, now, km) else TripLog.startReading(sp, now, km)
         app.mg4dash.system.Log.i("Trips", if (TripLog.reading(sp)?.running == true) "reading started at $km km" else "reading stopped at $km km")
-        showReading()
+        refresh()
     }
 
     private fun confirmClear() {
         android.app.AlertDialog.Builder(this)
-            .setMessage(R.string.tr_clear_confirm)
-            .setPositiveButton(R.string.tr_clear) { _, _ -> TripLog.clear(sp); refresh() }
+            .setMessage(R.string.tr_clear_all_confirm)
+            .setPositiveButton(R.string.tr_clear) { _, _ -> TripLog.clearAll(sp); refresh() }
             .setNegativeButton(android.R.string.cancel, null)
             .show().also { app.mg4dash.ui.Dialogs.hideBars(it) }
+    }
+
+    companion object {
+        /** Tag of a manual reading's row in the list. */
+        const val READING_TAG = "trip_reading"
     }
 
     override fun render(s: VehicleState) {

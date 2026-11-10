@@ -607,6 +607,16 @@
     <string name="tr_clear">Wissen</string>
     <string name="tr_clear_confirm">De lijst met ritten wissen?</string>
     <string name="tr_note">Een rit loopt van het aanzetten tot de stand-by van de auto. De laatste 50 worden bewaard.</string>
+    <string name="tr_col_cost">Kosten</string>
+    <string name="st_kwh_price">Prijs per kWh: %s</string>
+    <string name="st_kwh_price_none">niet ingesteld</string>
+    <string name="st_kwh_price_title">Prijs per kWh (leeg: geen)</string>
+    <string name="st_kwh_price_desc">Toont de kosten van elke rit en registratie op de pagina Ritten. Elke rit houdt de prijs van het moment waarop hij gereden is.</string>
+    <string name="tr_filter_all">Alles</string>
+    <string name="tr_filter_trips">Ritten</string>
+    <string name="tr_filter_readings">Registraties</string>
+    <string name="tr_reading_row">Registratie</string>
+    <string name="tr_clear_all_confirm">De ritten en de afgeronde registraties wissen? Een lopende registratie gaat door.</string>
     <string name="wc_web_count">%1$d adressen</string>
     <string name="wc_wake">Pagina actief:</string>
     <string name="wc_wake_s">%1$d s</string>

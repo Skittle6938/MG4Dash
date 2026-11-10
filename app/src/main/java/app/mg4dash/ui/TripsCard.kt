@@ -39,6 +39,22 @@ class TripsCard(context: Context) : LinearLayout(context) {
     private val todayLabel = tv(21f, R.color.text_sub)
     private val todayValue = tv(21f, R.color.text_value)
     private val todayFrom = tv(17f, R.color.text_sub)
+    private val sp get() = app.mg4dash.system.Prefs(context).raw
+    /**
+     * Manual reading from the card (#102): "● Reading" to start one, "■ 83 km" while it runs (white outline), a touch
+     * stops it; elsewhere a touch still opens the Trips page.
+     */
+    val readingButton = tv(19f, R.color.text_value).apply {
+        gravity = Gravity.CENTER_VERTICAL; setPadding(dp(18), dp(8), dp(18), dp(8))
+        isClickable = true
+        setOnClickListener {
+            val km = CarBridge.state.value.odometerKm ?: return@setOnClickListener
+            val now = System.currentTimeMillis()
+            if (TripLog.reading(sp)?.running == true) TripLog.stopReading(sp, now, km) else TripLog.startReading(sp, now, km)
+            app.mg4dash.system.Log.i("Trips", if (TripLog.reading(sp)?.running == true) "reading started at $km km (card)" else "reading stopped at $km km (card)")
+            show()
+        }
+    }
 
     /** Small place: the previous trips go, the trip in progress and today stay. */
     var compact = false
@@ -70,7 +86,11 @@ class TripsCard(context: Context) : LinearLayout(context) {
         prevRows.forEachIndexed { i, r -> addView(r, LayoutParams(-1, -2).apply { topMargin = if (i > 0) dp(8) else 0 }) }
         addView(prevDivider, LayoutParams(-1, 1).apply { topMargin = dp(12); bottomMargin = dp(10) })
         addView(line(todayLabel, todayValue), LayoutParams(-1, -2))
-        addView(todayFrom, LayoutParams(-1, -2).apply { topMargin = dp(8) })
+        addView(LinearLayout(context).apply {
+            orientation = HORIZONTAL; gravity = Gravity.CENTER_VERTICAL
+            addView(todayFrom, LayoutParams(0, LayoutParams.WRAP_CONTENT, 1f))
+            addView(readingButton)
+        }, LayoutParams(-1, -2).apply { topMargin = dp(8) })
     }
 
     fun show(now: Long = System.currentTimeMillis()) {
@@ -82,7 +102,7 @@ class TripsCard(context: Context) : LinearLayout(context) {
             nowLabel.text = c.getString(R.string.tr_now, TripText.time(c, cur.start))
             nowOdo.text = TripText.odoRange(c, cur.startKm, odo ?: cur.endKm)
             nowKm.text = TripText.dist(c, cur.km)
-            nowDetail.text = "${TripText.duration(c, cur.minutes)} · ${TripText.cons(c, cur.per100)}"
+            nowDetail.text = "${TripText.duration(c, cur.minutes)} · ${TripText.cons(c, cur.per100)}" + (TripText.price(c)?.let { p -> " · " + TripText.money(TripLog.cost(cur.kwh, p)) } ?: "")
         } else {
             nowLabel.text = c.getString(R.string.tr_none)
             nowOdo.text = odo?.let { TripText.odo(c, it) } ?: ""
@@ -99,5 +119,11 @@ class TripsCard(context: Context) : LinearLayout(context) {
         todayLabel.text = "${c.getString(R.string.tr_today)} · ${TripText.count(c, day.trips)}"
         todayValue.text = "${TripText.dist(c, day.km)} · ${TripText.duration(c, day.minutes)}"
         todayFrom.text = day.firstKm?.let { c.getString(R.string.tr_since_km, TripText.odo(c, it)) } ?: ""
+        val r = TripLog.reading(sp)?.takeIf { it.running }
+        readingButton.text = if (r != null) "■  " + app.mg4dash.system.Units.distText(c, (r.km(odo) ?: 0).toFloat()) else "●  " + c.getString(R.string.tr_reading_row)
+        readingButton.background = android.graphics.drawable.GradientDrawable().apply {
+            cornerRadius = dp(24).toFloat(); setColor(Themes.color(c, R.color.button_idle))
+            setStroke((1.5f * d).toInt().coerceAtLeast(1), Themes.color(c, if (r != null) R.color.text_value else R.color.panel_border))
+        }
     }
 }

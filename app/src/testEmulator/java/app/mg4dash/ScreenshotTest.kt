@@ -143,7 +143,7 @@ class ScreenshotTest {
         val day = app.mg4dash.energy.TripLog.dayStart(now)
         fun t(dayOffset: Int, h: Int, m: Int, minutes: Int, km0: Int, km: Float, per100: Float, soc0: Int, soc1: Int): app.mg4dash.energy.TripLog.Trip {
             val start = day + dayOffset * 86_400_000L + (h * 60 + m) * 60_000L
-            return app.mg4dash.energy.TripLog.Trip(start, start + minutes * 60_000L, km0, km0 + Math.round(km), km, km * per100 / 100f, soc0, soc1)
+            return app.mg4dash.energy.TripLog.Trip(start, start + minutes * 60_000L, km0, km0 + Math.round(km), km, km * per100 / 100f, soc0, soc1, 0.25f)
         }
         app.mg4dash.energy.TripLog.clear(sp)
         listOf(
@@ -152,7 +152,12 @@ class ScreenshotTest {
             t(0, 8, 2, 55, 18257, 22.1f, 15.2f, 99, 94), t(0, 10, 40, 41, 18279, 21.0f, 14.9f, 94, 88), t(0, 13, 12, 46, 18300, 29.4f, 13.7f, 88, 81),
         ).forEach { app.mg4dash.energy.TripLog.add(sp, it) }
         app.mg4dash.energy.TripLog.saveCurrent(sp, t(0, 16, 5, 19, 18329, 13.2f, 15.9f, 81, 78))
-        app.mg4dash.energy.TripLog.startReading(sp, day + (8 * 60 + 2) * 60_000L, 18261)
+        // Two finished readings, then one in progress since 8:00 (#102)
+        fun at(d: Int, h: Int, m: Int) = day + d * 86_400_000L + (h * 60 + m) * 60_000L
+        sp.edit().remove("trip_readings").commit()
+        app.mg4dash.energy.TripLog.startReading(sp, at(-2, 9, 10), 18079); app.mg4dash.energy.TripLog.stopReading(sp, at(-2, 16, 10), 18210)
+        app.mg4dash.energy.TripLog.startReading(sp, at(-1, 7, 45), 18210); app.mg4dash.energy.TripLog.stopReading(sp, at(-1, 19, 10), 18257)
+        app.mg4dash.energy.TripLog.startReading(sp, at(0, 8, 0), 18257)
         return sp
     }
 
@@ -175,9 +180,25 @@ class ScreenshotTest {
         // After the energy monitor's first pass (which closes the trip it found): the sample trips
         seedTrips()
         (MainActivity::class.java.getDeclaredField("trips").apply { isAccessible = true }.get(act) as app.mg4dash.ui.TripsCard).show()
-        save(act.window.decorView, "trips_card_real.png")
+        save(act.window.decorView, "trips_card_button_real.png")
     }
 
+    /** The Trips card and page with a kWh price of 0.25 € (#102): the costs. */
+    @Test @Config(qualifiers = "fr-w1920dp-h720dp-land-mdpi") fun tripsCost() {
+        org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE).edit()
+            .putInt("theme_mode", 1).putInt("home_style", 0).putFloat("kwh_price", 0.25f)
+            .putString("slots_full", "tl=climate;tc=trips;tr=media;bl=energy;bc=hourly,daily;br=consumption").commit()
+        val home = Robolectric.buildActivity(MainActivity::class.java).setup().get()
+        repeat(5) { shadowOf(Looper.getMainLooper()).idleFor(200, TimeUnit.MILLISECONDS) }
+        seedTrips()
+        (MainActivity::class.java.getDeclaredField("trips").apply { isAccessible = true }.get(home) as app.mg4dash.ui.TripsCard).show()
+        save(home.window.decorView, "trips_card_cost_real.png")
+        val page = Robolectric.buildActivity(app.mg4dash.pages.TripsActivity::class.java).setup().get()
+        repeat(5) { shadowOf(Looper.getMainLooper()).idleFor(200, TimeUnit.MILLISECONDS) }
+        seedTrips()
+        app.mg4dash.pages.TripsActivity::class.java.getDeclaredMethod("refresh", Long::class.javaPrimitiveType).apply { isAccessible = true }.invoke(page, System.currentTimeMillis())
+        save(page.window.decorView, "trips_page_cost_real.png")
+    }
     /** Today's trips on the Vehicle page (#102). */
     @Test @Config(qualifiers = "fr-w1920dp-h720dp-land-mdpi") fun tripsLine() {
         org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE).edit().putInt("theme_mode", 1).commit()
@@ -197,7 +218,7 @@ class ScreenshotTest {
         repeat(5) { shadowOf(Looper.getMainLooper()).idleFor(200, TimeUnit.MILLISECONDS) }
         seedTrips()
         app.mg4dash.pages.TripsActivity::class.java.getDeclaredMethod("refresh", Long::class.javaPrimitiveType).apply { isAccessible = true }.invoke(act, System.currentTimeMillis())
-        save(act.window.decorView, "trips_page_real.png")
+        save(act.window.decorView, "trips_page_readings_real.png")
     }
 
     /** Simulation of MG's fog light button (56 dp at x = 20 dp, #38) placed on the bar. */

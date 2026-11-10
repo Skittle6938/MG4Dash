@@ -21,21 +21,32 @@ object TripLog {
     data class Trip(
         val start: Long, val end: Long, val startKm: Int, val endKm: Int,
         val km: Float, val kwh: Float, val startSoc: Int? = null, val endSoc: Int? = null,
+        /** Price of a kWh when it was recorded (#102): a later price does not change it; null without a price. */
+        val price: Float? = null,
     ) {
         val minutes: Long get() = ((end - start) / 60_000L).coerceAtLeast(0L)
         /** kWh/100 from 0.5 km, as on the energy card; null below. */
         val per100: Float? get() = if (km >= 0.5f && kwh > 0.02f) (kwh / km * 100f).takeIf { it in 3f..60f } else null
+        /** What its kWh cost, at its price; null without a price or with no kWh known. */
+        val cost: Float? get() = cost(kwh, price)
 
-        fun encode() = listOf(start, end, startKm, endKm, km, kwh, startSoc ?: -1, endSoc ?: -1).joinToString(",")
+        fun encode() = listOf(start, end, startKm, endKm, km, kwh, startSoc ?: -1, endSoc ?: -1, price ?: -1f).joinToString(",")
 
         companion object {
             fun decode(s: String): Trip? = try {
                 val p = s.split(',')
                 Trip(p[0].toLong(), p[1].toLong(), p[2].toInt(), p[3].toInt(), p[4].toFloat(), p[5].toFloat(),
-                    p[6].toInt().takeIf { it >= 0 }, p[7].toInt().takeIf { it >= 0 })
+                    p[6].toInt().takeIf { it >= 0 }, p[7].toInt().takeIf { it >= 0 },
+                    p.getOrNull(8)?.toFloatOrNull()?.takeIf { it > 0f })
             } catch (_: Exception) { null }
         }
     }
+
+    /** [kwh] at [price], null without a price or below 0.02 kWh (nothing measured). */
+    fun cost(kwh: Float, price: Float?): Float? = if (price != null && price > 0f && kwh > 0.02f) kwh * price else null
+
+    /** Sum of the costs, null when none is known (a trip without kWh does not make it unknown). */
+    fun costOf(trips: List<Trip>): Float? = trips.mapNotNull { it.cost }.takeIf { it.isNotEmpty() }?.sum()
 
     private val _trips = MutableStateFlow<List<Trip>>(emptyList())
     /** The trips kept, the latest first (read back by [load]). */
@@ -94,8 +105,62 @@ object TripLog {
     }
 
     fun stopReading(sp: SharedPreferences, now: Long, km: Int) {
-        if (reading(sp)?.running != true) return
+        val r = reading(sp)?.takeIf { it.running } ?: return
         sp.edit().putLong("trip_rd_end", now).putInt("trip_rd_km1", km).apply()
+        // Into the history of readings, the latest first (#102)
+        val done = (listOf(Reading(r.start, r.startKm, now, km)) + readings(sp)).take(MAX)
+        sp.edit().putString(READINGS, done.joinToString(";") { "${it.start},${it.end},${it.startKm},${it.endKm}" }).apply()
+    }
+
+    private const val READINGS = "trip_readings"
+
+    /** The last 50 finished readings, the latest first. */
+    fun readings(sp: SharedPreferences): List<Reading> = sp.getString(READINGS, null)?.split(';')?.mapNotNull { s ->
+        try { s.split(',').let { p -> Reading(p[0].toLong(), p[2].toInt(), p[1].toLong(), p[3].toInt()) } } catch (_: Exception) { null }
+    } ?: emptyList()
+
+    /** Clear: the trips and the finished readings; a reading in progress goes on. */
+    fun clearAll(sp: SharedPreferences) {
+        clear(sp)
+        val e = sp.edit().remove(READINGS)
+        if (reading(sp)?.running == false) e.remove("trip_rd_t").remove("trip_rd_km").remove("trip_rd_end").remove("trip_rd_km1")
+        e.apply()
+    }
+
+    /** What the list shows: everything, the trips only or the readings only (#102). */
+    enum class Filter { ALL, TRIPS, READINGS }
+
+    /** A line of the Trips page's list: a trip, or a manual reading with what its trips used. */
+    sealed class Entry {
+        abstract val end: Long
+        data class OfTrip(val trip: Trip, val inProgress: Boolean) : Entry() { override val end get() = trip.end }
+        data class OfReading(val reading: Reading, val endAt: Long, val per100: Float?, val startSoc: Int?, val endSoc: Int?, val cost: Float? = null) : Entry() {
+            override val end get() = endAt
+            val minutes: Long get() = ((endAt - reading.start) / 60_000L).coerceAtLeast(0L)
+        }
+    }
+
+    /** [r]'s consumption and battery from the trips it covers (the one in progress included); [until]: its end, or now. */
+    internal fun covered(r: Reading, until: Long, trips: List<Trip>): Entry.OfReading {
+        val inside = trips.filter { it.start >= r.start - 60_000L && it.end <= until + 60_000L && it.km >= MIN_KM }.sortedBy { it.start }
+        val km = inside.sumOf { it.km.toDouble() }.toFloat(); val kwh = inside.sumOf { it.kwh.toDouble() }.toFloat()
+        val per100 = if (km >= 0.5f && kwh > 0.02f) (kwh / km * 100f).takeIf { it in 3f..60f } else null
+        return Entry.OfReading(r, until, per100, inside.firstOrNull()?.startSoc, inside.lastOrNull()?.endSoc, costOf(inside))
+    }
+
+    /**
+     * The list, the latest first by their end: the trips, the reading in progress at the top ([running], ending now),
+     * the finished readings among the trips at their end.
+     */
+    fun entries(trips: List<Trip>, current: Trip?, running: Reading?, readings: List<Reading>, now: Long, filter: Filter): List<Entry> {
+        val all = listOfNotNull(current) + trips
+        val t = if (filter == Filter.READINGS) emptyList() else
+            listOfNotNull(current?.let { Entry.OfTrip(it, true) }) + trips.map { Entry.OfTrip(it, false) }
+        val r = if (filter == Filter.TRIPS) emptyList() else
+            listOfNotNull(running?.takeIf { it.running }?.let { covered(it, now, all) }) + readings.map { covered(it, it.end, all) }
+        // The reading in progress first, then by end; a reading before the trips ending at the same minute
+        return (t + r).sortedWith(compareByDescending<Entry> { if (it is Entry.OfReading && it.reading.running) Long.MAX_VALUE else it.end }
+            .thenBy { if (it is Entry.OfReading) 0 else 1 })
     }
 
     /** Midnight (local time) of the day of [at]. */

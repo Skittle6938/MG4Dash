@@ -607,6 +607,16 @@
     <string name="tr_clear">Temizle</string>
     <string name="tr_clear_confirm">Yolculuk listesi temizlensin mi?</string>
     <string name="tr_note">Bir yolculuk, aracın açılmasından bekleme moduna geçmesine kadar sürer. Son 50 tanesi saklanır.</string>
+    <string name="tr_col_cost">Maliyet</string>
+    <string name="st_kwh_price">kWh fiyatı: %s</string>
+    <string name="st_kwh_price_none">ayarlanmadı</string>
+    <string name="st_kwh_price_title">kWh fiyatı (boş: yok)</string>
+    <string name="st_kwh_price_desc">Yolculuklar sayfasında her yolculuğun ve kaydın maliyetini gösterir. Her yolculuk yapıldığı andaki fiyatı korur.</string>
+    <string name="tr_filter_all">Tümü</string>
+    <string name="tr_filter_trips">Yolculuklar</string>
+    <string name="tr_filter_readings">Kayıtlar</string>
+    <string name="tr_reading_row">Kayıt</string>
+    <string name="tr_clear_all_confirm">Yolculuklar ve biten kayıtlar silinsin mi? Süren bir kayıt devam eder.</string>
     <string name="wc_web_count">%1$d adres</string>
     <string name="wc_wake">Sayfa etkin:</string>
     <string name="wc_wake_s">%1$d s</string>

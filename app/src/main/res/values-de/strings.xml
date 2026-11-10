@@ -607,6 +607,16 @@
     <string name="tr_clear">Löschen</string>
     <string name="tr_clear_confirm">Fahrtenliste löschen?</string>
     <string name="tr_note">Eine Fahrt reicht vom Einschalten bis zum Standby des Autos. Die letzten 50 werden behalten.</string>
+    <string name="tr_col_cost">Kosten</string>
+    <string name="st_kwh_price">Preis pro kWh: %s</string>
+    <string name="st_kwh_price_none">nicht festgelegt</string>
+    <string name="st_kwh_price_title">Preis pro kWh (leer: keiner)</string>
+    <string name="st_kwh_price_desc">Zeigt die Kosten jeder Fahrt und Erfassung auf der Seite Fahrten. Jede Fahrt behält den Preis zum Zeitpunkt der Fahrt.</string>
+    <string name="tr_filter_all">Alle</string>
+    <string name="tr_filter_trips">Fahrten</string>
+    <string name="tr_filter_readings">Erfassungen</string>
+    <string name="tr_reading_row">Erfassung</string>
+    <string name="tr_clear_all_confirm">Fahrten und beendete Erfassungen löschen? Eine laufende Erfassung geht weiter.</string>
     <string name="wc_web_count">%1$d Adressen</string>
     <string name="wc_wake">Seite wach:</string>
     <string name="wc_wake_s">%1$d s</string>

@@ -607,6 +607,16 @@
     <string name="tr_clear">Cancella</string>
     <string name="tr_clear_confirm">Cancellare l\'elenco dei viaggi?</string>
     <string name="tr_note">Un viaggio va dall\'accensione allo standby dell\'auto. Vengono conservati gli ultimi 50.</string>
+    <string name="tr_col_cost">Costo</string>
+    <string name="st_kwh_price">Prezzo del kWh: %s</string>
+    <string name="st_kwh_price_none">non impostato</string>
+    <string name="st_kwh_price_title">Prezzo del kWh (vuoto: nessuno)</string>
+    <string name="st_kwh_price_desc">Mostra il costo di ogni viaggio e rilevazione nella pagina Viaggi. Ogni viaggio mantiene il prezzo del momento in cui è stato fatto.</string>
+    <string name="tr_filter_all">Tutti</string>
+    <string name="tr_filter_trips">Viaggi</string>
+    <string name="tr_filter_readings">Rilevazioni</string>
+    <string name="tr_reading_row">Rilevazione</string>
+    <string name="tr_clear_all_confirm">Cancellare i viaggi e le rilevazioni terminate? Una rilevazione in corso continua.</string>
     <string name="wc_web_count">%1$d indirizzi</string>
     <string name="wc_wake">Pagina attiva:</string>
     <string name="wc_wake_s">%1$d s</string>
