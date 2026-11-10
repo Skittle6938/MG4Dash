@@ -1424,6 +1424,32 @@ class ScreenshotTest {
         }
     }
 
+    /** Pinch mode v2: every widget of each place, the media alone in its place, the options of the widgets ticked. */
+    @Test @Config(qualifiers = "fr-w1920dp-h720dp-land-mdpi") fun pinchV2() {
+        File("build/screenshots/pinch_v2").mkdirs()
+        val shots = listOf(
+            Triple(1, HL.FULL, null), Triple(2, HL.FULL, null),
+            // The climate swiped with the map in the middle place, the media alone on the right
+            Triple(2, HL.FULL, "tl=web,trips;tc=map,climate,consumption;tr=media;bl=energy;bc=hourly,daily;br=trip,power,phone"),
+            Triple(1, HL.MAP_CENTER, null),
+        )
+        // The last trips in the tall place: more trips listed
+        seedTrips()
+        for (mode in listOf(1, 2)) {
+            org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE).edit().putString("slot_now_map_center_c", "trips").commit()
+            val act = layoutHome(HL.MAP_CENTER, "tl=hourly,daily;bl=climate;c=trips,map;tr=media;br=energy,trip,power,phone", mode)
+            seedTrips()
+            (MainActivity::class.java.getDeclaredField("trips").apply { isAccessible = true }.get(act) as app.mg4dash.ui.TripsCard).show()
+            save(act.window.decorView, "pinch_v2/trips_tall_${if (mode == 1) "dark" else "light"}.png")
+        }
+        shots.forEachIndexed { i, (mode, layout, slots) ->
+            val act = layoutHome(layout, slots, mode)
+            act.editCards()
+            repeat(3) { shadowOf(Looper.getMainLooper()).idleFor(200, TimeUnit.MILLISECONDS) }
+            save(act.window.decorView, "pinch_v2/${i + 1}_${layout.key}_${if (mode == 1) "dark" else "light"}.png")
+        }
+    }
+
     @Test @Config(qualifiers = "fr-w1920dp-h720dp-land-mdpi") fun layoutSettingsFinal() {
         File("build/screenshots/final").mkdirs()
         for (mode in listOf(1, 2)) {

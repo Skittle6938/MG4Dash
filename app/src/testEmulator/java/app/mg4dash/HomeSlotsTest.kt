@@ -60,42 +60,48 @@ class HomeSlotsTest {
         assertNull(HomeSlots.toggle(noTrip, "tc", Card.PHONE).refused)
         // Alone there, it gets another card: the one left out
         val alone = HomeSlots.toggle(noTrip, "tc", Card.PHONE).config
-        assertEquals(listOf(Card.WEB, Card.POWER), HomeSlots.fillEmpty(alone, power).cards("br"))
+        assertEquals(listOf(Card.POWER, Card.WEB), HomeSlots.fillEmpty(alone, power).cards("br"))
     }
 
-    @Test fun climateAndMediaSwapPlaces() {
+    @Test fun mediaSwapsWithTheCardsOfItsNewPlace() {
         val c = HomeSlots.defaults(Layout.FULL)
-        val swapped = HomeSlots.setKind(c, "tc", Kind.CLIMATE).config
-        assertEquals(Fill.Climate, swapped.fill("tc"))
-        assertEquals(listOf(Card.MAP, Card.CONSUMPTION, Card.SHORTCUTS), swapped.cards("tl"))
-        val media = HomeSlots.setKind(swapped, "tc", Kind.MEDIA).config
-        assertEquals(Fill.Media, media.fill("tc"))
-        assertEquals(Fill.Climate, media.fill("tr"))
+        val moved = HomeSlots.setKind(c, "tc", Kind.MEDIA).config
+        assertEquals(Fill.Media, moved.fill("tc"))
+        assertEquals("the cards of its new place go where it was", listOf(Card.MAP, Card.CONSUMPTION, Card.SHORTCUTS), moved.cards("tr"))
+        assertEquals(listOf(Card.CLIMATE), moved.cards("tl"))
     }
 
-    @Test fun cardsInsteadOfTheClimateStartWithOneLeftOut() {
-        val c = HomeSlots.setKind(HomeSlots.defaults(Layout.FULL), "tl", Kind.CARDS).config
-        // Only the web app is left out by default: it is given, and the climate is no longer shown
-        assertEquals(listOf(Card.WEB), c.cards("tl"))
-        assertNull(c.slotOf(Fill.Climate))
-        // Nothing left out: taken from the place that has the most
-        val again = HomeSlots.setKind(c, "tr", Kind.CARDS).config
-        assertEquals(1, again.cards("tr").size)
-        assertEquals(10, again.placed().size)
+    @Test fun mediaAloneInItsPlace() {
+        val c = HomeSlots.defaults(Layout.FULL)
+        assertEquals(Refusal.MEDIA_ALONE, HomeSlots.toggle(c, "tr", Card.MAP).refused)
+        // Taken off: the place starts with the card left out (the web app)
+        val off = HomeSlots.setKind(c, "tr", Kind.CARDS).config
+        assertEquals(listOf(Card.WEB), off.cards("tr"))
+        assertNull(off.slotOf(Fill.Media))
     }
 
-    @Test fun smallPlacesTakeNoClimate() {
+    @Test fun climateIsACardSwipedWithTheOthersInTheOrderTicked() {
+        val c = HomeSlots.toggle(HomeSlots.defaults(Layout.FULL), "tl", Card.WEB).config
+        assertEquals(listOf(Card.CLIMATE, Card.WEB), c.cards("tl"))
+        val moved = HomeSlots.toggle(c, "tc", Card.CLIMATE).config
+        assertEquals("added last: shown after the others", listOf(Card.MAP, Card.CONSUMPTION, Card.SHORTCUTS, Card.CLIMATE), moved.cards("tc"))
+        assertEquals(listOf(Card.WEB), moved.cards("tl"))
+    }
+
+    @Test fun smallPlacesTakeNoClimateNorMedia() {
         val c = HomeSlots.defaults(Layout.MAP)
-        assertEquals(c, HomeSlots.setKind(c, "tl", Kind.CLIMATE).config)
-        assertEquals(c, HomeSlots.setKind(c, "r", Kind.MEDIA).config)
+        assertEquals(Refusal.TOO_BIG, HomeSlots.toggle(c, "tl", Card.CLIMATE).refused)
+        assertEquals(c, HomeSlots.setKind(c, "tl", Kind.MEDIA).config)
+        // A tall place takes the media (owner's choice)
+        assertEquals(Fill.Media, HomeSlots.setKind(c, "r", Kind.MEDIA).config.fill("r"))
     }
 
     @Test fun storedChoiceIsCleanedUp() {
         prefs.raw.edit().putString("slots_full", "tl=media;tc=map,map,trip;tr=media;bl=climate;bc=hourly;br=trip").commit()
         val c = HomeSlots.load(prefs, Layout.FULL)
         assertEquals(Fill.Media, c.fill("tl"))
-        // Media twice, climate in a small place, the trip twice: left out; empty places get a card
-        assertEquals(listOf(Card.MAP, Card.TRIP), c.cards("tc"))
+        // Media twice, the trip twice: left out; the climate stored in a small place moves to a medium one; empty places get a card
+        assertEquals(listOf(Card.MAP, Card.TRIP, Card.CLIMATE), c.cards("tc"))
         assertEquals(1, c.cards("tr").size)
         assertEquals(1, c.cards("bl").size)
         assertEquals(1, c.cards("br").size)

@@ -599,6 +599,7 @@
     <string name="ly_edit">Indeling en widgets bewerken  ›</string>
     <string name="wc_too_big">Te klein voor zo\'n grote plek: hier grijs</string>
     <string name="wc_big_hint">Grote plek: alleen App, Web-app, Verbruik, Snelkoppelingen en Rijden</string>
+    <string name="wc_media_alone">Media neemt de hele plek in (vegen wisselt bron en nummer)</string>
     <string name="title_trips">RITTEN</string>
     <string name="tr_now">Bezig · sinds %s</string>
     <string name="tr_none">Nog geen ritten</string>

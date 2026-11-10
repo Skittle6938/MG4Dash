@@ -599,6 +599,7 @@
     <string name="ly_edit">Modifica disposizione e widget  ›</string>
     <string name="wc_too_big">Troppo piccola per uno spazio così grande: in grigio qui</string>
     <string name="wc_big_hint">Spazio grande: solo App, Web app, Consumi, Scorciatoie e Guida</string>
+    <string name="wc_media_alone">Il multimediale occupa tutto lo spazio (usa gli scorrimenti per sorgenti e brani)</string>
     <string name="title_trips">VIAGGI</string>
     <string name="tr_now">In corso · dalle %s</string>
     <string name="tr_none">Ancora nessun viaggio</string>

@@ -599,6 +599,7 @@
     <string name="ly_edit">Editar la disposición y los widgets  ›</string>
     <string name="wc_too_big">Demasiado pequeña para un espacio tan grande: atenuada aquí</string>
     <string name="wc_big_hint">Espacio grande: solo Aplicación, Web app, Consumo, Accesos directos y Conducción</string>
+    <string name="wc_media_alone">El multimedia ocupa todo el espacio (usa los deslizamientos para fuentes y pistas)</string>
     <string name="title_trips">TRAYECTOS</string>
     <string name="tr_now">En curso · desde %s</string>
     <string name="tr_none">Aún no hay trayectos</string>
