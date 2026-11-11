@@ -218,7 +218,7 @@ class Prefs(context: Context) {
         get() = sp.getBoolean("xpower", false)
         set(v) = sp.edit().putBoolean("xpower", v).apply()
 
-    /** Full power animation of the Power widget: 0 = none, 1 = rocket, 2 = lightning, 3 = flames, 4 = random. */
+    /** Full power animation of the Power widget: 0 = none, 1 = rocket (removed, counts as random), 2 = lightning, 3 = flames, 4 = random, 5 = light speed. */
     var powerFx: Int
         get() = sp.getInt("power_fx", 4)
         set(v) = sp.edit().putInt("power_fx", v).apply()

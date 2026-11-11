@@ -87,7 +87,7 @@ Every consumption can be chosen from the start. One not known yet (under 0.5 km)
 Swipe or tap it to switch between its pages:
 
 - **Trip energy**: one bar and the share of driving, climate control and accessories since start-up (details on the Energy page).
-- **Live power**: kW drawn from or recovered into the battery every second, on a two-way bar from zero with a 10 s peak marker, the trip average, voltage and current. It hides a **full-throttle special**: floor it and lightning or flames fill the card, then the peak reached shows (Settings › Look › Live power). This page leaves the widget when *Live power in the energy card* is on.
+- **Live power**: kW drawn from or recovered into the battery every second, on a two-way bar from zero with a 10 s peak marker, the trip average, voltage and current. It hides a **full-throttle special**: floor it and lightning, flames or a jump to light speed (stars stretched into streaks, with a soft whoosh) fill the screen, then the peak reached shows (Settings › Look › Live power). This page leaves the widget when *Live power in the energy card* is on.
 - **Phone**: favourite contacts, 3 by default (tap to call, long press to change one or to pick 2, 3, 4, 6 or 8 shortcuts, on one or two rows; contacts already chosen are kept).
 
 | | |

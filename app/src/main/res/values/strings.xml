@@ -486,6 +486,7 @@
     <string name="fx_random">Random</string>
     <string name="fx_lightning">Lightning</string>
     <string name="fx_flames">Flames</string>
+    <string name="fx_hyperspace">Light speed</string>
     <string name="fx_peak">Peak %1$s kW · %2$s hp</string>
     <string name="st_xpower">MG4 XPower (320 kW)</string>
     <string name="st_xpower_desc">Recognised by itself as soon as more than 350 hp is measured: the car does not report its version. Sets the power scale and the threshold of the full-throttle special.</string>

@@ -486,6 +486,7 @@
     <string name="fx_random">Aleatoria</string>
     <string name="fx_lightning">Rayo</string>
     <string name="fx_flames">Llamas</string>
+    <string name="fx_hyperspace">Velocidad de la luz</string>
     <string name="fx_peak">Pico %1$s kW · %2$s CV</string>
     <string name="st_xpower">MG4 XPower (320 kW)</string>
     <string name="st_xpower_desc">Se reconoce sola en cuanto se miden más de 350 CV: el coche no indica su versión. Ajusta la escala de potencia y el umbral de la función especial a fondo.</string>
