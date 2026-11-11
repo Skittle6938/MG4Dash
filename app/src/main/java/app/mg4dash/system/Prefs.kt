@@ -256,20 +256,35 @@ class Prefs(context: Context) {
         get() = sp.getFloat("kwh_price", 0f)
         set(v) = sp.edit().putFloat("kwh_price", v).apply()
 
-    /** The startup source and playback wait for the end of the startup sound (#36), on by default. */
-    var waitStartSound: Boolean
-        get() = sp.getBoolean("wait_start_sound", true)
-        set(v) = sp.edit().putBoolean("wait_start_sound", v).apply()
 
     /** Play at car start: 0 as when stopped (default), 1 always paused, 2 always playing. */
     var startPlayback: Int
         get() = sp.getInt("start_playback", 0)
         set(v) = sp.edit().putInt("start_playback", v).apply()
 
-    /** Was music playing when the car stopped (for "as when stopped")? */
+    /** Last playback state seen (#36), recorded at each change, with its time ([lastPlayingAt], wall clock). */
     var lastPlaying: Boolean
         get() = sp.getBoolean("last_playing", true)
         set(v) = sp.edit().putBoolean("last_playing", v).apply()
+
+    var lastPlayingAt: Long
+        get() = sp.getLong("last_playing_at", 0L)
+        set(v) = sp.edit().putLong("last_playing_at", v).apply()
+
+    /** The state before the last change: kept when that change is the head unit's shutdown pause. */
+    var playingBefore: Boolean
+        get() = sp.getBoolean("playing_before", true)
+        set(v) = sp.edit().putBoolean("playing_before", v).apply()
+
+    /** The playback state frozen when the car left READY in P: -1 none, 0 paused, 1 playing (cleared at the next READY). */
+    var stopFrozen: Int
+        get() = sp.getInt("stop_frozen", -1)
+        set(v) = sp.edit().putInt("stop_frozen", v).apply()
+
+    /** "Alive" heartbeat (wall clock), every 5 s while MG4Dash runs: tells the shutdown pause apart without READY. */
+    var aliveAt: Long
+        get() = sp.getLong("alive_at", 0L)
+        set(v) = sp.edit().putLong("alive_at", v).apply()
 
     /** Sources chosen by the user, most recent first (automatic mode). */
     var sourceHistory: List<String>

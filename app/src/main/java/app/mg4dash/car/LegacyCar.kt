@@ -201,6 +201,17 @@ object LegacyCar {
     @Volatile private var setting: Any? = null
     @Volatile private var settingInit = false
 
+    // ── Vehicle condition (READY, gear): VehicleConditionManager of the same SDK (SWI68/165, as MG4Control) ──
+    private const val CONDITION_CLASS = "com.saicmotor.sdk.vehiclesettings.manager.VehicleConditionManager"
+    @Volatile private var condition: Any? = null
+    @Volatile private var conditionInit = false
+
+    /** The SDK's VehicleConditionManager, connected on first use; used by [ReadyState]. */
+    internal fun conditionManager(): Any? {
+        if (condition == null && !conditionInit) { val ctx = appContext ?: return null; conditionInit = true; condition = sdkManager(ctx, CONDITION_CLASS) { condition = it } }
+        return condition
+    }
+
     /** The SDK's VehicleSettingManager, connected on first use; also used by [DriveSettings]. */
     internal fun settingManager(): Any? {
         if (setting == null && !settingInit) { val ctx = appContext ?: return null; settingInit = true; setting = sdkManager(ctx, SETTING_CLASS) { setting = it } }

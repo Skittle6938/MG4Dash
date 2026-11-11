@@ -188,6 +188,9 @@ object CarBridge {
         return audioService
     }
 
+    /** Binder of the car state service (queryClient 0xb: gear, READY), for [ReadyState]. Off the main thread. */
+    internal fun carStateBinder(): IBinder? = query(0xb)
+
     private fun query(code: Int): IBinder? = try {
         adapter?.queryClient(code)
     } catch (e: Exception) {

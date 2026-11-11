@@ -817,8 +817,6 @@
     <string name="st_sound_trigger">Opstartgeluid</string>
     <string name="st_sound_trigger_desc">Kies een audiobestand van een USB-stick of uit de interne opslag. Het wordt naar de app gekopieerd en blijft beschikbaar nadat de stick is verwijderd.</string>
     <string name="st_sound_boot_trigger">Afspelen bij opstarten</string>
-    <string name="st_sound_wait">Wachten op het einde van het startgeluid</string>
-    <string name="st_sound_wait_desc">De audiobron start (of blijft gepauzeerd) zodra het geluid voorbij is</string>
     <string name="st_sound_pick_file">Audio kiezen</string>
     <string name="st_sound_no_file">Geen geluid geselecteerd</string>
     <string name="st_sound_file_too_large">Audiobestanden mogen maximaal 20 MB groot zijn</string>

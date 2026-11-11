@@ -817,8 +817,6 @@
     <string name="st_sound_trigger">Sonido de inicio</string>
     <string name="st_sound_trigger_desc">Elige un archivo de audio de una memoria USB o del almacenamiento interno. Se copia en la app y seguirá disponible al retirar la memoria.</string>
     <string name="st_sound_boot_trigger">Reproducir al inicio</string>
-    <string name="st_sound_wait">Esperar al final del sonido de inicio</string>
-    <string name="st_sound_wait_desc">La fuente de audio empieza (o sigue en pausa) cuando termina el sonido</string>
     <string name="st_sound_pick_file">Elegir audio</string>
     <string name="st_sound_no_file">Ningún sonido seleccionado</string>
     <string name="st_sound_file_too_large">Los archivos de audio deben ocupar 20 MB o menos</string>

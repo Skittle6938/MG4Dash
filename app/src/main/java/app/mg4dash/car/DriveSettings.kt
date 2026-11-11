@@ -204,7 +204,7 @@ object DriveSettings {
     private fun setCpm(id: Int, value: Int, label: String): Boolean = CarProps.setIntArea(id, AREA_GLOBAL, value, label)
 
     /** getIntPropertyVpm (l. 1390), -1 if unreadable. */
-    private fun vpmInt(id: Int): Int {
+    internal fun vpmInt(id: Int): Int {
         val v = vpm() ?: return -1
         return try { (v.javaClass.getMethod("getIntProperty", Int::class.java).invoke(v, id) as? Int) ?: -1 } catch (_: Exception) { -1 }
     }
