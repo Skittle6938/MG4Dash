@@ -31,13 +31,17 @@ object Updater {
     /** Latest published release (pre-releases included if [beta]), or null if none. Network: off the main thread. */
     fun latest(beta: Boolean = true, api: String = API): Release? {
         val arr = JSONArray(get(api))
+        // The highest version, not the first one: GitHub lists the same day's releases by tag name,
+        // so 1.7.3-beta9 came before 1.7.3-beta10 and beta 9 did not see beta 10
+        var best: Release? = null
         for (i in 0 until arr.length()) {
             val r = arr.getJSONObject(i)
             if (r.optBoolean("draft")) continue
             if (!beta && r.optBoolean("prerelease")) continue
-            parse(r)?.let { return it }
+            val rel = parse(r) ?: continue
+            if (best == null || isNewer(rel.version, best.version)) best = rel
         }
-        return null
+        return best
     }
 
     /** Latest non-beta release, even older than the last ten pre-releases. Network: off the main thread. */
