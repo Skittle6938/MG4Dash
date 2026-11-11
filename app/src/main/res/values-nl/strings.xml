@@ -228,6 +228,9 @@
     <string name="no">NEE</string>
     <string name="st_log">LOGBOEK</string>
     <string name="st_refresh">Vernieuwen</string>
+    <string name="st_log_export">Naar de USB-stick exporteren</string>
+    <string name="st_log_exported">✓  Logboek opgeslagen op de USB-stick: %1$s</string>
+    <string name="st_log_no_usb">Steek een USB-stick in om het logboek te exporteren</string>
     <string name="st_close">Sluiten</string>
     <string name="st_title">Instellingen · MG4Dash %1$s</string>
     <string name="st_replace_msg">MG4Dash opent bij het starten en met de Home-knop.\n\nEr wordt niets verwijderd: het originele SAIC-startscherm wordt alleen uitgeschakeld als startscherm en de andere functies van de auto blijven normaal werken.\n\nU kunt altijd terug met de Onderhoudsmodus, op dezelfde plek. Als MG4Dash een paar keer achter elkaar zou vastlopen, komt het originele startscherm vanzelf terug.</string>

@@ -99,15 +99,9 @@ object WebAddresses {
     /** The addresses of [file] added to [current] (not twice): the new ones. */
     internal fun merge(current: List<String>, file: List<String>): List<String> = file.filter { it !in current }
 
-    private fun stick(context: Context): File? {
-        val sm = context.getSystemService(Context.STORAGE_SERVICE) as android.os.storage.StorageManager
-        return sm.storageVolumes.filter { it.isRemovable && it.state == android.os.Environment.MEDIA_MOUNTED }
-            .firstNotNullOfOrNull { v -> try { v.javaClass.getMethod("getPathFile").invoke(v) as? File } catch (_: Throwable) { null } }
-    }
+    private fun stick(context: Context): File? = app.mg4dash.system.UsbExport.stick(context)
 
-    /** MG4Dash's own folder on the stick (Android/data/app.mg4dash/files), always writable, if the root is not. */
-    private fun ownFolder(context: Context, usb: File): File? =
-        context.getExternalFilesDirs(null).firstOrNull { it != null && it.absolutePath.startsWith(usb.absolutePath) }
+    private fun ownFolder(context: Context, usb: File): File? = app.mg4dash.system.UsbExport.ownFolder(context, usb)
 
     /** The addresses read on the stick and added to the list (the new ones), or null with no file (a toast says so). */
     fun importUsb(context: Context): List<String>? {
@@ -126,13 +120,9 @@ object WebAddresses {
 
     /** The list written to the stick's root (or MG4Dash's folder on it if the root is read only). */
     fun exportUsb(context: Context) {
-        val usb = stick(context) ?: run { Toasts.show(context, R.string.wc_urls_no_usb, long = true); return }
-        val text = format(Prefs(context).webUrls)
-        val out = listOfNotNull(File(usb, FILE), ownFolder(context, usb)?.let { File(it.apply { mkdirs() }, FILE) }).firstOrNull { f ->
-            try { f.writeText(text); true } catch (e: Exception) { Log.w(TAG, "export to ${f.absolutePath}: ${e.message}"); false }
-        }
-        if (out == null) { Toasts.show(context, R.string.wc_urls_no_usb, long = true); return }
-        Log.i(TAG, "addresses exported to ${out.absolutePath}")
-        Toasts.show(context, context.getString(R.string.wc_urls_exported, out.absolutePath.removePrefix(usb.absolutePath).trimStart('/')), long = true)
+        val path = app.mg4dash.system.UsbExport.write(context, FILE, format(Prefs(context).webUrls))
+        if (path == null) { Toasts.show(context, R.string.wc_urls_no_usb, long = true); return }
+        Log.i(TAG, "addresses exported to $path")
+        Toasts.show(context, context.getString(R.string.wc_urls_exported, path), long = true)
     }
 }
