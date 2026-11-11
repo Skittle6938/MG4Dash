@@ -4,13 +4,17 @@ package app.mg4dash.media
  * The car's startup audio sequence (#36), as a pure state machine: no Android call, an injected clock (the
  * [Input.now] of each step, in ms since MG4Dash started), so that every case is tested.
  *
- * 1. Power-on: nothing is touched, except a source playing while a pause is wanted: paused at once.
- * 2. MG4Dash's startup sound: no source switch and no play while it plays (30 s at most).
- * 3. 1 s after its end (at once with no sound, as soon as a source is there): the source is chosen.
+ * 1. Power-on: nothing is touched, except a source playing while a pause is wanted and no startup sound is set:
+ *    paused at once.
+ * 2. MG4Dash's startup sound: no command at all while it plays (no pause, no switch, no play: a pause sent then
+ *    went to the car's media player that carries the sound, and cut it, #36), 30 s at most.
+ * 3. 1 s after its end (at once when a pause is wanted, MG4Dash still holding the audio focus; at once with no
+ *    sound, as soon as a source is there): the source is chosen.
  *    Automatic: the first of the history, waited for 15 s, then the best one there, otherwise the radio.
  *    Fixed: that source, waited for 15 s, otherwise the radio. As the car: the source the car kept.
  * 4. Switch to it ([Action.Switch], the car's source-change command, without playing).
- * 5. 1.5 s later, the wanted state with an explicit command ([Action.Play] / [Action.Pause], never a toggle),
+ * 5. The wanted state with an explicit command ([Action.Play] / [Action.Pause], never a toggle): a pause at once
+ *    with the switch, a play 1.5 s later,
  *    except for a phone projection (DiAuto, wireless Android Auto), where the phone decides.
  * 6. Watched for 10 s: a source that changes state by itself (the radio resuming after the sound) gets the
  *    wanted state again. Anything the driver does stops the sequence at once, the driver's choice is kept.
@@ -18,7 +22,7 @@ package app.mg4dash.media
  */
 internal class StartupSequence(
     private val mode: Mode,
-    private val wantPlay: Boolean,
+    val wantPlay: Boolean,
     private val radio: String,
 ) {
     sealed class Mode {
@@ -44,6 +48,8 @@ internal class StartupSequence(
      */
     data class Input(
         val now: Long,
+        /** MG4Dash's startup sound is set for this start: nothing is sent before it ends. */
+        val soundExpected: Boolean = false,
         val soundBusy: Boolean = false,
         val soundEndAt: Long? = null,
         val available: List<String> = emptyList(),
@@ -83,10 +89,11 @@ internal class StartupSequence(
         val out = mutableListOf<Action>()
         when (phase) {
             Phase.SOUND -> {
-                pauseIfWanted(i, out)
+                if (!i.soundExpected) pauseIfWanted(i, out)
                 val soundOver = !i.soundBusy || i.now - start >= SOUND_MAX_MS
                 if (soundOver) {
-                    val ready = if (i.soundEndAt != null) i.now >= i.soundEndAt + AFTER_SOUND_MS
+                    // A pause wanted: at once, while MG4Dash still holds the audio focus (the radio cannot resume)
+                    val ready = if (i.soundEndAt != null) i.now >= i.soundEndAt + (if (wantPlay) AFTER_SOUND_MS else 0)
                         else i.available.isNotEmpty() || i.carSource != null
                     if (ready) { phase = Phase.CHOOSE; chooseAt = i.now; chooseOrWait(i, out) }
                 }
@@ -125,7 +132,11 @@ internal class StartupSequence(
             is Mode.Fixed -> if (mode.pkg in i.available) mode.pkg else if (waited) radio else null
             is Mode.Auto -> {
                 val pref = mode.order.firstOrNull()
-                if (pref != null && pref in i.available) pref
+                // The car already on the phone's projection (CarPlay, Android Auto, DiAuto): kept, not taken from it
+                // for a car source (#106: CarPlay lost its sound to the radio at each start)
+                val car = i.carSource
+                if (car != null && i.phoneDecides(car)) car
+                else if (pref != null && pref in i.available) pref
                 else if (waited || pref == null) mode.order.firstOrNull { it in i.available } ?: radio
                 else null
             }
@@ -133,12 +144,18 @@ internal class StartupSequence(
         target = t
         out += Action.Switch(t)
         phase = Phase.APPLY; switchedAt = i.now
+        // A pause: sent with the switch, not 1.5 s later (the source the car resumes would play meanwhile)
+        if (!wantPlay && !i.phoneDecides(t)) { apply(i, out, force = true, always = true); phase = Phase.WATCH; watchAt = i.now }
     }
 
-    /** The wanted state, explicitly: at once when [force], then only if the source changed state by itself. */
-    private fun apply(i: Input, out: MutableList<Action>, force: Boolean) {
-        if (i.playing == wantPlay) return
-        if (!force && i.now - lastCommandAt < COMMAND_GAP_MS) return
+    /**
+     * The wanted state, explicitly: at once when [force], then only if the source changed state by itself. [always]:
+     * even if the source shows the wanted state already (the pause sent with the switch: the car may start the new
+     * source after it). A pause is sent again sooner than a play: a source that resumes would be heard.
+     */
+    private fun apply(i: Input, out: MutableList<Action>, force: Boolean, always: Boolean = false) {
+        if (i.playing == wantPlay && !always) return
+        if (!force && i.now - lastCommandAt < (if (wantPlay) COMMAND_GAP_MS else PAUSE_GAP_MS)) return
         out += if (wantPlay) Action.Play else Action.Pause
         lastCommandAt = i.now
     }
@@ -156,6 +173,7 @@ internal class StartupSequence(
         const val SETTLE_MS = 1_500L
         const val WATCH_MS = 10_000L
         const val COMMAND_GAP_MS = 1_500L
+        const val PAUSE_GAP_MS = 500L
         /** Safety net: the sequence never lasts more than this. */
         const val MAX_MS = 90_000L
 

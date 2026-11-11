@@ -406,6 +406,8 @@ object MediaHub {
     internal fun isCarStart(elapsedMs: Long) = elapsedMs < 5 * 60_000
     private var seq: StartupSequence? = null
     private var stepping = false
+    /** MG4Dash's startup sound is set for this start (read when the sequence starts). */
+    private var soundConfigured = false
     /**
      * The driver's last action (uptime) seen by MG4Dash: its media buttons and swipes, the source menu and chips,
      * the wheel's buttons (StarKey), the Android Auto button. It ends the startup sequence at once.
@@ -429,6 +431,9 @@ object MediaHub {
             else -> StartupSequence.Mode.Fixed(fallbackOrder(p.startSource, p).first())
         }
         seq = StartupSequence(mode, want, RADIO)
+        // Read here: MG4Dash starts before its home screen triggers the sound, which would not be "expected" yet
+        soundConfigured = appContext?.let { app.mg4dash.sound.SoundTrigger.bootSoundConfigured(it) } == true
+        app.mg4dash.sound.SoundTrigger.holdFocusAfterBoot = soundConfigured && !want
         Log.i(TAG, "startup sequence: source $mode, ${if (want) "play" else "pause"} (setting ${p.startPlayback}, " +
             "last ${p.lastPlaying}, before ${p.playingBefore}, frozen at READY off ${p.stopFrozen})")
     }
@@ -464,7 +469,9 @@ object MediaHub {
             val shown = _now.value.packageName
             val input = StartupSequence.Input(
                 now = up - startedAt,
-                soundBusy = snd.bootSoundBusy(up),
+                soundExpected = soundConfigured || snd.bootSoundExpected,
+                // Set but not triggered yet (home not shown yet): it is to come
+                soundBusy = if (soundConfigured && !snd.bootSoundExpected) true else snd.bootSoundBusy(up),
                 soundEndAt = snd.bootSoundUntil.takeIf { snd.bootSoundExpected && it != 0L && up >= it }?.let { it - startedAt },
                 available = availableSources().filterNot { it == AA_MBS && carPlay },
                 carSource = effectiveSource(),
@@ -475,7 +482,11 @@ object MediaHub {
             for (a in s.step(input)) when (a) {
                 is StartupSequence.Action.Switch -> seqSwitch(a.pkg)
                 StartupSequence.Action.Play -> setPlaying(true, "startup")
-                StartupSequence.Action.Pause -> setPlaying(false, "startup")
+                StartupSequence.Action.Pause -> {
+                    setPlaying(false, "startup", s.target)
+                    // The pause sent: the audio focus kept after the sound goes back a moment later
+                    if (soundConfigured) main.postDelayed({ app.mg4dash.sound.SoundTrigger.releaseBootFocus() }, 1_000)
+                }
             }
             if (s.done) Log.i(TAG, "startup sequence over: ${s.endedBy} (source ${s.target})")
         } finally { stepping = false }
@@ -496,11 +507,14 @@ object MediaHub {
     }
 
     /** Explicit play or pause on the source shown (never a toggle: a toggle on a late state did the opposite, #36). */
-    private fun setPlaying(want: Boolean, why: String) {
-        Log.i(TAG, "$why: ${if (want) "play" else "pause"} on ${_now.value.packageName}")
-        if (usbShown) { usbCommand { if (want) SaicMedia.usbPlay() else SaicMedia.usbPause() }; return }
-        if (radioShown) { radioCommand { if (want) SaicRadio.play() else SaicRadio.pause() }; return }
-        val c = current ?: return
+    private fun setPlaying(want: Boolean, why: String, pkg: String? = null) {
+        // Sent with the switch: to the source switched to, not the one still shown
+        val c0 = pkg?.let { p -> browserControllers[p] ?: lastCandidates.firstOrNull { it.packageName == p } }
+        Log.i(TAG, "$why: ${if (want) "play" else "pause"} on ${c0?.packageName ?: _now.value.packageName}")
+        if (c0 == null && usbShown) { usbCommand { if (want) SaicMedia.usbPlay() else SaicMedia.usbPause() }; return }
+        if (c0 == null && radioShown) { radioCommand { if (want) SaicRadio.play() else SaicRadio.pause() }; return }
+        if (pkg == RADIO && legacyRadio) { radioCommand { if (want) SaicRadio.play() else SaicRadio.pause() }; return }
+        val c = c0 ?: current ?: return
         if (isAndroidAuto(c.packageName)) { aaControl(c, if (want) AA_PLAY else AA_PAUSE, if (want) KeyEvent.KEYCODE_MEDIA_PLAY else KeyEvent.KEYCODE_MEDIA_PAUSE); return }
         if (want) c.transportControls.play() else c.transportControls.pause()
         force(c.packageName, want)
