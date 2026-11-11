@@ -38,7 +38,7 @@ class StartupSequenceTest {
         val s = seq(play = true)
         val a = run(s, 0, 9_000) { t ->
             val busy = t < 5_000
-            Input(t, soundBusy = busy, soundEndAt = if (busy) null else 5_000, available = listOf(radio, bt), carSource = radio)
+            Input(t, soundExpected = true, soundBusy = busy, soundEndAt = if (busy) null else 5_000, available = listOf(radio, bt), carSource = radio)
         }
         assertTrue("nothing while the sound plays", a.none { it.first < 6_000 })
         assertEquals("the source 1 s after the sound", 6_000L to Action.Switch(bt), a.first())
@@ -47,17 +47,28 @@ class StartupSequenceTest {
 
     @Test fun startupSoundThirtySecondsAtMost() {
         val s = seq(play = false)
-        val a = run(s, 0, 31_000) { t -> Input(t, soundBusy = true, available = listOf(radio, bt), carSource = radio) }
-        assertEquals("on with the source after 30 s", 30_000L to Action.Switch(bt), a.single())
+        val a = run(s, 0, 31_000) { t -> Input(t, soundExpected = true, soundBusy = true, available = listOf(radio, bt), carSource = radio) }
+        assertEquals("on with the source after 30 s, and its pause", listOf(30_000L to Action.Switch(bt), 30_000L to Action.Pause), a)
     }
 
-    @Test fun pauseWantedSourcePlayingAtPowerOn() {
+    @Test fun pauseWantedSourcePlayingAtPowerOnWithoutASound() {
         val s = seq(play = false)
-        val a = s.step(Input(0, soundBusy = true, playing = true))
-        assertEquals("paused at once, during the sound, no 1 s delay", listOf(Action.Pause), a)
+        val a = s.step(Input(0, playing = true))
+        assertEquals("no startup sound: paused at once, no 1 s delay", listOf(Action.Pause), a)
         // Again only after a moment (the car takes the command): not one per step
-        assertTrue(s.step(Input(250, soundBusy = true, playing = true)).isEmpty())
-        assertEquals(listOf(Action.Pause), s.step(Input(1_500, soundBusy = true, playing = true)))
+        assertTrue(s.step(Input(250, playing = true)).isEmpty())
+        assertEquals(listOf(Action.Pause), s.step(Input(1_500, playing = true)))
+    }
+
+    /** #36, beta 9: a pause sent during the sound went to the car's media player carrying it, and cut the sound. */
+    @Test fun nothingAtAllWhileTheStartupSoundPlays() {
+        val s = seq(play = false)
+        // The car shows a player playing (its media player, carrying our sound): nothing is sent to it
+        val during = run(s, 0, 6_750) { t -> Input(t, soundExpected = true, soundBusy = true, available = listOf(radio, bt), carSource = radio, playing = true) }
+        assertTrue("no pause, no switch, no play during the sound", during.isEmpty())
+        // Sound over at 7 s, a pause wanted: the switch and the pause at once, while MG4Dash still holds the focus
+        val after = s.step(Input(7_000, soundExpected = true, soundEndAt = 7_000, available = listOf(radio, bt), carSource = radio, playing = false))
+        assertEquals(listOf(Action.Switch(bt), Action.Pause), after)
     }
 
     @Test fun preferredSourceMissing() {
@@ -87,7 +98,7 @@ class StartupSequenceTest {
         // Pause wanted: the radio resumes 3 s after the state was applied (the sound's focus given back)
         val s = seq(play = false)
         val a = run(s, 0, 13_000) { t -> Input(t, available = listOf(radio, bt), carSource = bt, playing = t in 4_500..5_000) }
-        assertEquals(listOf(0L to Action.Switch(bt), 4_500L to Action.Pause), a)
+        assertEquals("the pause with the switch, then again each time it resumes", listOf(0L to Action.Switch(bt), 0L to Action.Pause, 4_500L to Action.Pause, 5_000L to Action.Pause), a)
         // Play wanted: the source stops by itself, play again
         val p = seq(play = true)
         val b = run(p, 0, 13_000) { t -> Input(t, available = listOf(radio, bt), carSource = bt, playing = t > 1_500 && t !in 6_000..6_500) }
@@ -116,6 +127,14 @@ class StartupSequenceTest {
         u.step(Input(500, available = listOf(radio, bt), carSource = bt))
         u.step(Input(1_000, available = listOf(radio, bt), carSource = radio))
         assertEquals("source changed by the driver", u.endedBy)
+    }
+
+    /** #106: in Automatic, CarPlay (left out of the choice) the car already plays is not taken away for the radio. */
+    @Test fun projectionTheCarAlreadyHasIsKept() {
+        val s = seq(Mode.Auto(listOf(bt, radio)), play = true)
+        val a = run(s, 0, 3_000) { t -> Input(t, available = listOf(radio, bt), carSource = "carplay", phoneDecides = { it == "carplay" }) }
+        assertEquals(listOf(0L to Action.Switch("carplay")), a)
+        assertEquals("left to the phone", s.endedBy)
     }
 
     @Test fun projectionLeavesPlaybackToThePhone() {

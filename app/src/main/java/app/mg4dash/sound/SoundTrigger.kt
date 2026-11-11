@@ -19,6 +19,8 @@ import java.io.RandomAccessFile
 object SoundTrigger {
     private const val TAG = "SoundTrigger"
     private const val SAFETY_MARGIN_MS = 3_000L
+    /** Audio focus kept after the startup sound when a pause is wanted, at most. */
+    private const val HOLD_FOCUS_MS = 3_000L
 
     private val threadHandler by lazy {
         val ht = HandlerThread("mg4dash-sound").apply { start() }
@@ -41,6 +43,19 @@ object SoundTrigger {
     /** End of the startup sound (uptime), 0 before it starts; set to its real end when it stops. */
     @Volatile var bootSoundUntil = 0L; private set
     private var bootPlaying = false
+
+    /**
+     * A pause is wanted at this start (#36): the audio focus is kept up to 3 s after the startup sound, so that the
+     * radio does not resume by itself meanwhile; MediaHub gives it back ([releaseBootFocus]) once its pause is sent.
+     */
+    @Volatile var holdFocusAfterBoot = false
+
+    /** The startup sound is set (on, with a file): known before it is triggered, as at [onBootOrAppStart]. */
+    fun bootSoundConfigured(context: Context) =
+        SoundTriggerSettings.isBootTriggerEnabled(context) && !SoundTriggerSettings.getSelectedSoundPath(context).isNullOrEmpty()
+
+    /** The audio focus kept after the startup sound, given back now. */
+    fun releaseBootFocus() { threadHandler.post { if (!isPlaying) releaseAudioFocus() } }
 
     /** The startup sound is to play or playing at [now] (uptime). */
     fun bootSoundBusy(now: Long = android.os.SystemClock.uptimeMillis()) = bootSoundExpected && (bootSoundUntil == 0L || now < bootSoundUntil)
@@ -157,6 +172,7 @@ object SoundTrigger {
 
         val wasPlaying = isPlaying
         isPlaying = false
+        val wasBoot = bootPlaying
         if (bootPlaying) { bootPlaying = false; bootSoundUntil = minOf(bootSoundUntil, android.os.SystemClock.uptimeMillis()) }
 
         mediaPlayer?.let { p ->
@@ -166,7 +182,12 @@ object SoundTrigger {
         mediaPlayer = null
 
         restoreCarVolume()
-        releaseAudioFocus()
+        // A pause wanted at startup (#36): the focus is kept a moment, the radio would resume as soon as it is free
+        if (wasBoot && holdFocusAfterBoot) {
+            holdFocusAfterBoot = false
+            Log.i(TAG, "audio focus kept after the startup sound (pause wanted)")
+            threadHandler.postDelayed({ if (!isPlaying) releaseAudioFocus() }, HOLD_FOCUS_MS)
+        } else releaseAudioFocus()
         releaseWakeLock()
 
         if (wasPlaying) {
