@@ -108,6 +108,8 @@ object MediaHub {
             }, 1_000)
         }
         bindAndroidAuto()
+        app.mg4dash.car.ReadyState.init(context)
+        startSequence()
         watchProjection(context.applicationContext)
         watchAudioSource(context)
         reevaluate()
@@ -153,6 +155,7 @@ object MediaHub {
     /** Shows the given source without opening its app. */
     fun select(pkg: String) {
         if (BuildConfig.MOCK) return
+        userAction("source $pkg picked")
         remember(pkg); autoTarget = null
         pinnedPkg = pkg
         main.post { reevaluate() }
@@ -184,7 +187,6 @@ object MediaHub {
 
     @Volatile private var autoSwitchAt = 0L
     private val startedAt = android.os.SystemClock.uptimeMillis()
-    private var startDone = false
     /** Since when each source is available / missing (avoids following a flickering Bluetooth). */
     private val seenSince = mutableMapOf<String, Long>()
     private val goneSince = mutableMapOf<String, Long>()
@@ -207,7 +209,7 @@ object MediaHub {
             else { goneSince.getOrPut(pkg) { now }; seenSince.remove(pkg) }
         }
         fun stable(pkg: String) = (seenSince[pkg]?.let { now - it >= 5_000 } == true) && !(pkg == AA_MBS && carPlay)
-        trackPlayback(p, now)
+        recordPlayback(p)
         // Last time each car source was playing: used to restart after an announcement only what was playing
         for (pkg in CAR_SOURCES) if (browserControllers[pkg]?.let { isPlaying(it) } == true) playingAt[pkg] = now
         restoreAfterPrompt(now)
@@ -218,6 +220,9 @@ object MediaHub {
             (current?.packageName?.takeIf { otherAppShown() } ?: lastCandidates.firstOrNull { handlesWheelKeys(it.packageName) }?.packageName)
                 ?.let { sourcePkg = it }
         }
+        // The startup sequence (#36) chooses the source and the state: nothing else switches meanwhile
+        seqStep()
+        if (seq?.done == false) return
         val cur = sourcePkg ?: return
         if (now - autoSwitchAt < 10_000 || now - startedAt < 5_000) return
         // Car source gone (phone unplugged…) for 1 s: whatever the setting, switch,
@@ -231,25 +236,29 @@ object MediaHub {
         if (toProjection && !goneToProjectionLogged) { goneToProjectionLogged = true; Log.i(TAG, "$cur gone: the phone's projection has the audio, no automatic source") }
         if (!curGone) goneToProjectionLogged = false
         if (toProjection) return
-        if (curGone && !toProjection) { Log.i(TAG, "$cur gone: mode $mode, order $order, available $avail"); order.firstOrNull { it != cur && it in avail && !(it == AA_MBS && carPlay) }?.let { autoSwitch(it, "$cur gone", play = _now.value.playing) }; return }
-        if (mode == 1) return
-        if (mode >= 2) {
-            if (startDone) return
-            val want = order.first()
-            if (now - startedAt > 30_000 || want == cur) { startDone = true; return }
-            // After the startup sound (#36), and playing only if that is the wanted state at startup
-            if (waitSound(p, now)) return
-            if (stable(want)) { startDone = true; autoSwitch(want, "startup source", play = startWanted(p)) }
-            return
-        }
+        if (curGone && !toProjection) { Log.i(TAG, "$cur gone: mode $mode, order $order, available $avail"); replacement(order, cur, avail, carPlay)?.let { autoSwitch(it, "$cur gone", play = playingState()) }; return }
+        // As the car, or a fixed source: chosen once at startup (the sequence), then only replaced when lost
+        if (mode >= 1) return
         // An app took the source (Android Auto, CarPlay, DiAuto starting its music…): that is intended,
         // it is not taken back to return to the radio (DiAuto cut off as its music started)
         if (cur !in listOf(RADIO, "com.android.bluetooth", "com.saicmotor.media")) return
-        val target = order.firstOrNull { stable(it) && !(it == BT && projecting) } ?: return
-        if (target == cur) return
-        // Current source never chosen (empty history, first use): only left if it disappears
-        val curRank = order.indexOf(cur).let { if (it < 0) -1 else it }
-        if (order.indexOf(target) < curRank) autoSwitch(target, "$target back")
+        // A better-ranked source back (the phone over Bluetooth…): it takes over in the current state, paused stays paused
+        betterSource(order, cur) { stable(it) && !(it == BT && projecting) }?.let { autoSwitch(it, "$it back", play = playingState()) }
+    }
+
+    /** The source replacing [cur], lost: the first of [order] there, never CarPlay. */
+    internal fun replacement(order: List<String>, cur: String, avail: List<String>, carPlay: Boolean): String? =
+        order.firstOrNull { it != cur && it in avail && !(it == AA_MBS && carPlay) }
+
+    /**
+     * Automatic: a source ranked better than [cur] in [order] and [ready] (there for 5 s) takes over. A current
+     * source never chosen (empty history, first use) is only left if it disappears.
+     */
+    internal fun betterSource(order: List<String>, cur: String, ready: (String) -> Boolean): String? {
+        val target = order.firstOrNull(ready) ?: return null
+        if (target == cur) return null
+        val curRank = order.indexOf(cur)
+        return target.takeIf { curRank >= 0 && order.indexOf(it) < curRank }
     }
 
     private val CAR_SOURCES = listOf(RADIO, "com.android.bluetooth", "com.saicmotor.media")
@@ -381,83 +390,162 @@ object MediaHub {
      * move to the setting's replacement source, as for a car source that disappears.
      */
     fun connectionCut(pkg: String) = main.post {
+        userAction("Android Auto button")
         val p = prefs() ?: return@post
         if (sourcePkg != pkg && current?.packageName != pkg) return@post
         val avail = availableSources()
         fallbackOrder(p.startSource, p).firstOrNull { it != pkg && it in avail && !(it == AA_MBS && carPlay) }
-            ?.let { autoSwitch(it, "$pkg cut") }
+            ?.let { autoSwitch(it, "$pkg cut", play = playingState()) }
     }
 
-    // ── Play at startup (setting, replaces Radio Dash's automatic resume) ──
-    /** Car start: MG4Dash launched within 5 minutes of the head unit turning on. */
-    private val carStart = android.os.SystemClock.elapsedRealtime() < 5 * 60_000
-    private var playbackApplied = false
-    private var pausedSince = 0L
+    // ── Startup sequence (#36): source and playback at car start ──
+    /** Car start: MG4Dash launched within 5 minutes of the head unit turning on (a restart while driving: nothing). */
+    private val carStart = isCarStart(android.os.SystemClock.elapsedRealtime())
 
+    /** The head unit turned on less than 5 minutes ago: a car start, not MG4Dash restarted while driving. */
+    internal fun isCarStart(elapsedMs: Long) = elapsedMs < 5 * 60_000
+    private var seq: StartupSequence? = null
+    private var stepping = false
     /**
-     * Remembers if music is playing (a pause is only remembered after 30 s: when stopping, the car pauses everything
-     * just before switching off, which must not count), then applies the setting once, at
-     * startup, after the startup source (8 s), on the displayed source.
+     * The driver's last action (uptime) seen by MG4Dash: its media buttons and swipes, the source menu and chips,
+     * the wheel's buttons (StarKey), the Android Auto button. It ends the startup sequence at once.
      */
-    private fun trackPlayback(p: app.mg4dash.system.Prefs, now: Long) {
-        val playing = _now.value.playing && _now.value.available
-        if (playbackApplied || !carStart) {
-            if (playing) { pausedSince = 0L; if (!p.lastPlaying) p.lastPlaying = true }
-            else if (_now.value.available) {
-                if (pausedSince == 0L) pausedSince = now
-                else if (now - pausedSince >= 30_000 && p.lastPlaying) { p.lastPlaying = false; Log.i(TAG, "playback state remembered: paused") }
+    @Volatile private var userAt: Long? = null
+
+    /** Something the driver did: the startup sequence stops and keeps the driver's choice. */
+    private fun userAction(why: String) {
+        if (seq?.done != false) return
+        userAt = android.os.SystemClock.uptimeMillis()
+        Log.i(TAG, "startup sequence: driver's action ($why)")
+    }
+
+    private fun startSequence() {
+        val p = prefs() ?: return
+        if (!carStart || BuildConfig.MOCK) { Log.i(TAG, "no startup sequence (${if (BuildConfig.MOCK) "mock" else "MG4Dash restarted while the car was on"})"); return }
+        val want = startWanted(p)
+        val mode = when (p.startSource) {
+            0 -> StartupSequence.Mode.Auto(fallbackOrder(0, p))
+            1 -> StartupSequence.Mode.Car
+            else -> StartupSequence.Mode.Fixed(fallbackOrder(p.startSource, p).first())
+        }
+        seq = StartupSequence(mode, want, RADIO)
+        Log.i(TAG, "startup sequence: source $mode, ${if (want) "play" else "pause"} (setting ${p.startPlayback}, " +
+            "last ${p.lastPlaying}, before ${p.playingBefore}, frozen at READY off ${p.stopFrozen})")
+    }
+
+    /** Playing wanted at car start: the setting, or as when the car stopped ([StartupSequence.lastState]). */
+    private fun startWanted(p: app.mg4dash.system.Prefs) = when (p.startPlayback) {
+        1 -> false
+        2 -> true
+        else -> StartupSequence.lastState(p.stopFrozen.takeIf { it >= 0 }?.let { it == 1 }, p.lastPlaying, p.lastPlayingAt, p.playingBefore, p.aliveAt)
+    }
+
+    /** The source shown really plays (its player's state, not the one shown for a moment after a command). */
+    private fun realPlaying(): Boolean = when {
+        usbShown -> SaicMedia.last?.playing == true
+        radioShown -> SaicRadio.last?.playing == true
+        else -> current?.let { isPlaying(it) } == true
+    }
+
+    /** The playback state kept when the source changes by itself (a better source back, a source lost). */
+    private fun playingState(): Boolean = _now.value.available && realPlaying()
+
+    /** The phone decides the playback (DiAuto, wireless Android Auto): MG4Dash chooses the source only. */
+    private fun phoneDecides(pkg: String?): Boolean = isAndroidAuto(pkg) || handlesWheelKeys(pkg)
+
+    /** One step of the startup sequence, at each reread of the players and every second. */
+    private fun seqStep() {
+        val s = seq ?: return
+        if (s.done || stepping) return
+        stepping = true
+        try {
+            val up = android.os.SystemClock.uptimeMillis()
+            val snd = app.mg4dash.sound.SoundTrigger
+            val shown = _now.value.packageName
+            val input = StartupSequence.Input(
+                now = up - startedAt,
+                soundBusy = snd.bootSoundBusy(up),
+                soundEndAt = snd.bootSoundUntil.takeIf { snd.bootSoundExpected && it != 0L && up >= it }?.let { it - startedAt },
+                available = availableSources().filterNot { it == AA_MBS && carPlay },
+                carSource = effectiveSource(),
+                playing = _now.value.available && realPlaying() && !phoneDecides(shown) && !phoneDecides(sourcePkg),
+                userAt = userAt?.let { it - startedAt },
+                phoneDecides = { phoneDecides(it) || handlesWheelKeys(sourcePkg) },
+            )
+            for (a in s.step(input)) when (a) {
+                is StartupSequence.Action.Switch -> seqSwitch(a.pkg)
+                StartupSequence.Action.Play -> setPlaying(true, "startup")
+                StartupSequence.Action.Pause -> setPlaying(false, "startup")
             }
-        }
-        if (playbackApplied) return
-        if (!carStart || now - startedAt > 40_000) { playbackApplied = true; return }
-        if (!_now.value.available) return
-        val left = handlesWheelKeys(_now.value.packageName) || handlesWheelKeys(sourcePkg)
-        val wanted = startWanted(p)
-        val wait = waitSound(p, now)
-        // Paused at startup, or during the startup sound (#36): at once, not after 8 s (the radio played meanwhile)
-        if (pauseAtOnce(playing, wanted, wait, left, now - startedAt)) {
-            Log.i(TAG, "startup playback: pause at once (${if (wait) "startup sound" else "setting"})")
-            playPauseRaw()
-            if (!wait) { playbackApplied = true; return }
-        }
-        if (wait || now - startedAt < 8_000 || now - autoSwitchAt < 4_000) return
-        playbackApplied = true
-        // DiAuto (wireless Android Auto): the phone decides to start the music ("start music
-        // automatically" setting of its Android Auto app), MG4Dash does not touch it
-        if (handlesWheelKeys(_now.value.packageName) || handlesWheelKeys(sourcePkg) ||
-            (sourcePkg == AA_MBS && projectionLive != true && lastCandidates.any { handlesWheelKeys(it.packageName) })) {
-            Log.i(TAG, "startup playback: left to the phone (DiAuto)"); return
-        }
-        val want = wanted
-        Log.i(TAG, "startup playback: ${if (want) "play" else "pause"} (setting ${p.startPlayback}, was playing ${p.lastPlaying})")
-        if (want != playing) playPauseRaw()
+            if (s.done) Log.i(TAG, "startup sequence over: ${s.endedBy} (source ${s.target})")
+        } finally { stepping = false }
     }
 
-    /** Playing wanted at car start: the setting, or as when the car stopped. */
-    private fun startWanted(p: app.mg4dash.system.Prefs) = when (p.startPlayback) { 1 -> false; 2 -> true; else -> p.lastPlaying }
+    /**
+     * Startup source, without playing: the car's source-change command for a car source, sent even when the car
+     * already announces it, as the stock launcher does when a source is picked: after a start the car announces its
+     * last source without making it the active one, and the wheel's buttons did nothing until a touch on play (#36).
+     * Android Auto (CarPlay is never chosen): shown only, the phone plays. Another app (DiAuto): shown, the phone plays.
+     */
+    private fun seqSwitch(pkg: String) {
+        Log.i(TAG, "startup source: $pkg (car on ${effectiveSource()})")
+        pinnedPkg = pkg; autoTarget = null
+        autoSwitchAt = android.os.SystemClock.uptimeMillis()
+        main.post { reevaluate() }
+        if (pkg in CAR_SOURCES) activateSource(pkg)
+    }
+
+    /** Explicit play or pause on the source shown (never a toggle: a toggle on a late state did the opposite, #36). */
+    private fun setPlaying(want: Boolean, why: String) {
+        Log.i(TAG, "$why: ${if (want) "play" else "pause"} on ${_now.value.packageName}")
+        if (usbShown) { usbCommand { if (want) SaicMedia.usbPlay() else SaicMedia.usbPause() }; return }
+        if (radioShown) { radioCommand { if (want) SaicRadio.play() else SaicRadio.pause() }; return }
+        val c = current ?: return
+        if (isAndroidAuto(c.packageName)) { aaControl(c, if (want) AA_PLAY else AA_PAUSE, if (want) KeyEvent.KEYCODE_MEDIA_PLAY else KeyEvent.KEYCODE_MEDIA_PAUSE); return }
+        if (want) c.transportControls.play() else c.transportControls.pause()
+        force(c.packageName, want)
+    }
+
+    // ── The state at the last stop ("As at switch-off") ──
+    private var lastReady: Boolean? = null
+    private var aliveWrittenAt = 0L
+
+    /** Every playback change recorded at once, with its time (the old "a pause counts after 30 s" rule is gone). */
+    private fun recordPlayback(p: app.mg4dash.system.Prefs) {
+        if (!_now.value.available) return
+        val playing = realPlaying()
+        if (playing == p.lastPlaying) return
+        p.playingBefore = p.lastPlaying
+        p.lastPlaying = playing
+        p.lastPlayingAt = System.currentTimeMillis()
+    }
 
     /**
-     * The startup sound is playing, or ended less than 1 s ago (#36): the startup source and playback wait for it,
-     * 30 s at most. Without a startup sound, or with the setting off, nothing waits.
+     * Every second (off the main thread): READY read as MG4Control does ([app.mg4dash.car.ReadyState]). The car
+     * leaving READY in P freezes the playback state of that moment: the head unit's own pause when it switches off
+     * comes later and does not count. Back to READY: cleared. Without READY, the "alive" heartbeat every 5 s tells
+     * that pause apart at the next start ([StartupSequence.lastState]).
      */
-    private fun waitSound(p: app.mg4dash.system.Prefs, now: Long) =
-        waitForSound(p.waitStartSound, app.mg4dash.sound.SoundTrigger.bootSoundRecent(1_000), now - startedAt)
-
-    /** Paused at startup (or during the startup sound): the source playing is paused at once, from 1 s, unless the phone decides (#36). */
-    internal fun pauseAtOnce(playing: Boolean, wanted: Boolean, wait: Boolean, leftToPhone: Boolean, sinceStartMs: Long) =
-        !leftToPhone && playing && (!wanted || wait) && sinceStartMs >= 1_000
+    private fun watchStop(p: app.mg4dash.system.Prefs) {
+        val now = System.currentTimeMillis()
+        if (now - aliveWrittenAt >= 5_000) { aliveWrittenAt = now; p.aliveAt = now }
+        val r = try { app.mg4dash.car.ReadyState.ready() } catch (_: Exception) { null } ?: return
+        if (r && p.stopFrozen != -1) p.stopFrozen = -1
+        if (lastReady == true && !r && app.mg4dash.car.ReadyState.inPark() != false) {
+            p.stopFrozen = if (p.lastPlaying) 1 else 0
+            Log.i(TAG, "car out of READY in P: playback state kept as ${if (p.lastPlaying) "playing" else "paused"}")
+        }
+        lastReady = r
+    }
 
     /** USB announced while the startup sound plays (or just after) with no stick mounted: not shown (#36). */
     internal fun usbHeldBySound(soundRecent: Boolean, usbMounted: Boolean) = soundRecent && !usbMounted
-
-    /** The startup source waits: setting on, sound playing or just ended, and less than 30 s since the start (#36). */
-    internal fun waitForSound(setting: Boolean, soundRecent: Boolean, sinceStartMs: Long) = setting && soundRecent && sinceStartMs < 30_000
-
     private var goneToProjectionLogged = false
     private var autoTarget: String? = null
     private var autoTries = 0
 
-    private fun autoSwitch(pkg: String, why: String, play: Boolean = true) {
+    /** Source switched by MG4Dash (not at startup), then [play] or pause explicitly: the current state is kept. */
+    private fun autoSwitch(pkg: String, why: String, play: Boolean) {
         val now = android.os.SystemClock.uptimeMillis()
         // The car refuses the switch (silent source…): 3 tries at most, then wait 2 min
         if (pkg == autoTarget && autoTries >= 3 && now - autoSwitchAt < 120_000) return
@@ -467,9 +555,16 @@ object MediaHub {
         Log.i(TAG, "automatic source: $pkg ($why)")
         pinnedPkg = pkg
         main.post { reevaluate() }
-        if (pkg == AA_MBS) { browserControllers[AA_MBS]?.let { aaControl(it, AA_PLAY, KeyEvent.KEYCODE_MEDIA_PLAY) }; return }
+        // Android Auto: its play key is the only way to give it the sound; paused, it is only shown
+        if (pkg == AA_MBS) { if (play) browserControllers[AA_MBS]?.let { aaControl(it, AA_PLAY, KeyEvent.KEYCODE_MEDIA_PLAY) }; return }
         activateSource(pkg)
-        if (play) main.postDelayed({ browserControllers[pkg]?.takeIf { !isPlaying(it) }?.transportControls?.play() }, 1500)
+        // The car may start the new source by itself: the state kept, explicitly (paused stays paused, #36)
+        main.postDelayed({
+            browserControllers[pkg]?.let { c ->
+                if (play && !isPlaying(c)) c.transportControls.play()
+                else if (!play && isPlaying(c)) { Log.i(TAG, "$pkg started by itself: paused, as before"); c.transportControls.pause() }
+            }
+        }, 1500)
     }
 
     /** Player to discard: projection or Bluetooth with no phone connected. */
@@ -510,6 +605,7 @@ object MediaHub {
                         }, 1_500)
                     }
                 }
+                prefs()?.let { watchStop(it) }
                 main.post { autoSource() }
                 kotlinx.coroutines.delay(1_000)
             }
@@ -556,6 +652,7 @@ object MediaHub {
     private fun recentBack() = wheelBack?.takeIf { android.os.SystemClock.uptimeMillis() - wheelBackAt < 3_000 }
 
     fun wheelPressed(forward: Boolean?) {
+        if (forward != null) userAction("wheel ${if (forward) "next" else "previous"}")
         val app = current?.packageName?.takeIf { otherAppShown() } ?: recentBack() ?: return
         wheelFrom = app
         if (current?.packageName == app) wheelPlaying = current?.let { isPlaying(it) } == true
@@ -716,6 +813,7 @@ object MediaHub {
     /** Switches the car to this source and starts playback (swipe or source menu). */
     fun switchTo(next: String) {
         if (BuildConfig.MOCK) return
+        userAction("source $next")
         if (next == RADIO_DAB || next == RADIO_FM) {
             bandTarget = next
             // Indicator right away, without waiting for the radio to confirm the band
@@ -963,6 +1061,8 @@ object MediaHub {
      * 3) the radio, then Bluetooth, then USB (even if paused).
      */
     private fun reevaluate() {
+        // A player changed (state, source): the startup sequence looks at once, e.g. to pause a source that starts
+        if (seq?.done == false) main.post { prefs()?.let { recordPlayback(it) }; seqStep() }
         val active = try { manager?.getActiveSessions(null).orEmpty() } catch (_: SecurityException) { emptyList() }
         // No more phone projecting: the CarPlay / Android Auto player is no longer offered (#36)
         val candidates = (active + browserControllers.values).filter { !gone(it.packageName) }
@@ -1383,10 +1483,10 @@ object MediaHub {
         return f.second
     }
 
+    /** Play / pause of the card or the wheel (the driver's: toggles what the driver sees). */
     fun playPause() {
         if (BuildConfig.MOCK) { _now.value = _now.value.copy(playing = !_now.value.playing); return }
-        // User's explicit choice: kept as is for play at startup
-        prefs()?.lastPlaying = !_now.value.playing; pausedSince = 0L
+        userAction("play / pause")
         playPauseRaw()
     }
 
@@ -1438,6 +1538,7 @@ object MediaHub {
      */
     fun wheelPlayPressed() {
         if (BuildConfig.MOCK) return
+        userAction("wheel play")
         val c = current ?: return
         if (c.packageName == RADIO || c.packageName !in CAR_SOURCES) return
         if (playingAt.containsKey(c.packageName) || isPlaying(c)) return
@@ -1445,6 +1546,7 @@ object MediaHub {
     }
 
     fun next() {
+        userAction("next")
         if (radioShown) { radioCommand { SaicRadio.next() }; return }
         if (usbShown) { usbCommand { SaicMedia.usbNext() }; return }
         val c = current ?: return
@@ -1452,6 +1554,7 @@ object MediaHub {
     }
 
     fun previous() {
+        userAction("previous")
         if (radioShown) { radioCommand { SaicRadio.previous() }; return }
         if (usbShown) { usbCommand { SaicMedia.usbPrevious() }; return }
         val c = current ?: return
