@@ -486,6 +486,7 @@
     <string name="fx_random">Aléatoire</string>
     <string name="fx_lightning">Éclair</string>
     <string name="fx_flames">Flammes</string>
+    <string name="fx_hyperspace">Vitesse lumière</string>
     <string name="fx_peak">Pic %1$s kW · %2$s ch</string>
     <string name="st_xpower">MG4 XPower (320 kW)</string>
     <string name="st_xpower_desc">Reconnue d\'elle-même dès que plus de 350 ch sont mesurés : la voiture ne donne pas sa version. Règle l\'échelle de puissance et le seuil de la fonction pied au plancher.</string>

@@ -28,22 +28,28 @@ import kotlin.math.sin
 
 /**
  * "Full power" animation of the live Power widget: above 80 % of the model's maximum
- * power, lightning or flames, then the peak reached (kW and hp) shown
+ * power, lightning, flames or the jump to light speed, then the peak reached (kW and hp) shown
  * until 10 s after the last pass above the threshold. Drawn in the overlay of the
  * widget's card: over its content, without touching the layout.
  */
 class PowerFx(private val context: Context) : Drawable() {
     companion object {
         const val NONE = 0; const val LIGHTNING = 2; const val FLAMES = 3
-        /** Style played for a setting: random between lightning and flames; an old removed choice counts as "random". */
+        /** Jump to light speed: stars stretched into streaks from the screen's centre. Not 1: the old removed rocket. */
+        const val HYPERSPACE = 5
+        /** Style played for a setting: random between the three; an old removed choice counts as "random". */
         fun pick(setting: Int): Int = when (setting) {
-            NONE, LIGHTNING, FLAMES -> setting
-            else -> listOf(LIGHTNING, FLAMES).random()
+            NONE, LIGHTNING, FLAMES, HYPERSPACE -> setting
+            else -> listOf(LIGHTNING, FLAMES, HYPERSPACE).random()
         }
         /** Settings choice only: one of the three animations, drawn at each trigger. */
         const val RANDOM = 4
         const val HOLD_MS = 10_000L
         private const val FADE_MS = 700L
+        private const val MAX_STARS = 280
+        private const val CHARGE_MS = 300L
+        private const val FLASH_MS = 260L
+        private const val SHAKE_MS = 420L
         /** Horsepower (DIN hp) of a power in kW. */
         fun hp(kw: Float) = Math.round(kw * 1.35962f)
     }
@@ -56,7 +62,7 @@ class PowerFx(private val context: Context) : Drawable() {
     var onBadge: ((Boolean) -> Unit)? = null
     /** Edge rounding: that of the cards, 0 when the animation covers the whole screen. */
     var corner = 20 * context.resources.displayMetrics.density
-    /** View shaken during the rocket's arrival (the screen's content; the animation itself stays stable). */
+    /** View shaken at the jump to light speed (the screen's content; the animation itself stays stable). */
     var shake: View? = null
 
     private fun shakeBy(amp: Float) {
@@ -123,15 +129,20 @@ class PowerFx(private val context: Context) : Drawable() {
         badgeArea.set((u[0] - c[0]).toFloat(), (u[1] - c[1]).toFloat(), (u[0] - c[0] + under.width).toFloat(), (u[1] - c[1] + under.height).toFloat())
     }
 
+    /** Soft sound at the jump to light speed (off in the settings preview). */
+    var sound = true
+
     /** New measurement: triggers, restarts (new record) or lets the animation fall. */
     fun update(kw: Float, threshold: Float, peakKw: Float) {
         val now = SystemClock.uptimeMillis()
         if (style == NONE) { if (active) stop(); return }
+        pushing = kw >= threshold
         if (kw >= threshold) {
             heatTarget = 0.45f + 0.55f * ((kw - threshold) / (peakKw - threshold).coerceAtLeast(1f)).coerceIn(0f, 1f)
             if (!active) {
                 active = true; record = kw; shown = threshold; eventAt = now; lastAbove = now; lastFrame = 0L
-                clearParticles(); strike(now)
+                clearParticles(); jumpAt = now; strike(now)
+                if (style == HYPERSPACE) { light = Themes.isLight(context); if (sound) HyperSound.play(context) }
                 onBadge?.invoke(true)
             } else if (kw > record + 0.5f) {
                 record = kw; eventAt = now; strike(now)
@@ -177,6 +188,7 @@ class PowerFx(private val context: Context) : Drawable() {
         when (style) {
             LIGHTNING -> drawLightningScene(canvas, now, dt)
             FLAMES -> drawFlameScene(canvas, now, dt)
+            HYPERSPACE -> drawHyperScene(canvas, now, dt)
         }
         if (layer >= 0) canvas.restoreToCount(layer)
         canvas.restore()
@@ -388,12 +400,137 @@ class PowerFx(private val context: Context) : Drawable() {
         paint.color = 0xFFFFE082.toInt(); c.drawCircle(ix, cy + s * 0.4f, s * 0.38f, paint)
     }
 
+    // ── Light speed: dark veil, stars stretched into streaks from the centre, faster with the power ──
+
+    private var pushing = false
+    private var light = false
+    private var starN = 0
+    private val sx = FloatArray(MAX_STARS); private val sy = FloatArray(MAX_STARS); private val sz = FloatArray(MAX_STARS)
+    /** Streaks by depth (far, mid, near), drawn in one call each: x0, y0, x1, y1. */
+    private val lines = Array(3) { FloatArray(MAX_STARS * 4) }
+    private val lineN = IntArray(3)
+    private val widths = floatArrayOf(1.3f, 2.1f, 3.2f)
+    private val alphas = intArrayOf(130, 200, 255)
+    private var warp = 0f              // star speed, depth per second
+    private var veil = 0f              // dark veil, 0..1
+    private var flashAt = 0L
+    private var shaking = false
+
+    private fun spawnStar(i: Int, aspect: Float, far: Boolean) {
+        // Never in the middle: the streaks pass on the sides, the centre stays clear
+        var x: Float; var y: Float
+        do { x = (rnd.nextFloat() * 2f - 1f) * aspect; y = rnd.nextFloat() * 2f - 1f } while (x * x / (aspect * 0.5f) + y * y < 0.09f)
+        sx[i] = x; sy[i] = y
+        sz[i] = if (far) 0.75f + rnd.nextFloat() * 0.25f else 0.12f + rnd.nextFloat() * 0.88f
+    }
+
+    private fun drawHyperScene(c: Canvas, now: Long, dt: Float) {
+        val b = bounds
+        val w = b.width().toFloat(); val h = b.height().toFloat()
+        if (w <= 0f || h <= 0f) return
+        val cx = b.exactCenterX(); val cy = b.exactCenterY()
+        val aspect = w / h
+        val area = (b.width() / (600 * d)).coerceIn(1f, 4f)
+        val n = (70 * area).toInt().coerceAtMost(MAX_STARS)
+        if (starN != n) { for (i in starN until n) spawnStar(i, aspect, false); starN = n }
+        val sinceStart = now - jumpAt
+        // Speed: almost still while it charges (0.3 s), then the jump; follows the power, slows down on release
+        val target = when {
+            sinceStart < CHARGE_MS -> 0.04f
+            pushing -> 1.4f + 2.2f * heat
+            else -> 0.05f
+        }
+        val rate = if (target > warp) 3.5f else 1.6f
+        warp += (target - warp) * (1f - exp(-dt * rate))
+        // Veil: darker in light mode, to make the stars stand out over a white screen
+        val veilTarget = if (pushing || warp > 0.3f) 1f else 0f
+        veil += (veilTarget - veil) * (1f - exp(-dt * (if (veilTarget > veil) 8f else 1.6f)))
+        if (veil < 0.01f && !pushing) veil = 0f
+        if (veil > 0f) {
+            paint.shader = null; paint.style = Paint.Style.FILL
+            paint.color = 0xFF02040B.toInt(); paint.alpha = (veil * (if (light) 235 else 185)).toInt()
+            c.drawRect(b, paint)
+        }
+        // Jump: brief bluish flash and shake of the screen, also at each new record (smaller)
+        val flashT = now - flashAt
+        if (flashT in 0..FLASH_MS) {
+            val k = 1f - flashT.toFloat() / FLASH_MS
+            val big = flashAt == jumpAt + CHARGE_MS
+            paint.shader = null; paint.color = 0xFFDDE8FF.toInt(); paint.alpha = (k * k * (if (big) 110 else 55)).toInt()
+            c.drawRect(b, paint)
+        }
+        if (sinceStart >= CHARGE_MS && flashAt < jumpAt + CHARGE_MS) flashAt = jumpAt + CHARGE_MS
+        val shakeT = sinceStart - CHARGE_MS
+        if (shakeT in 0..SHAKE_MS) { shaking = true; shakeBy(5f * d * (1f - shakeT.toFloat() / SHAKE_MS)) }
+        else if (shaking) { shaking = false; shakeBy(0f) }
+        // Stars: projected from the centre; the streak joins the star to where it was a moment ago
+        if (veil > 0f) {
+            val f = 0.15f * h
+            val trail = (warp * 0.09f).coerceAtMost(0.6f)
+            val tw = 0.85f + 0.15f * sin(now / 90.0).toFloat()
+            lineN.fill(0)
+            for (i in 0 until starN) {
+                sz[i] -= warp * dt
+                val z = sz[i]
+                val px = cx + sx[i] / z * f; val py = cy + sy[i] / z * f
+                if (z < 0.03f || px < b.left - 20 * d || px > b.right + 20 * d || py < b.top - 20 * d || py > b.bottom + 20 * d) {
+                    spawnStar(i, aspect, true); continue
+                }
+                val zt = z + trail
+                var qx = cx + sx[i] / zt * f; var qy = cy + sy[i] / zt * f
+                // At rest, a dot: a tiny segment that the round cap turns into a point
+                if (kotlin.math.abs(px - qx) + kotlin.math.abs(py - qy) < 0.6f) { qx = px - 0.3f; qy = py - 0.3f }
+                val k = when { z < 0.35f -> 2; z < 0.65f -> 1; else -> 0 }
+                val o = lineN[k]; val arr = lines[k]
+                arr[o] = qx; arr[o + 1] = qy; arr[o + 2] = px; arr[o + 3] = py
+                lineN[k] = o + 4
+            }
+            stroke.shader = null
+            for (k in 1..2) if (lineN[k] > 0) {   // bluish halo of the closer streaks
+                stroke.color = cCold; stroke.alpha = (veil * 70).toInt(); stroke.strokeWidth = widths[k] * 3f * d
+                c.drawLines(lines[k], 0, lineN[k], stroke)
+            }
+            for (k in 0..2) if (lineN[k] > 0) {
+                stroke.color = if (k == 0) 0xFFCFDcFF.toInt() else 0xFFFFFFFF.toInt()
+                stroke.alpha = (veil * alphas[k] * (if (warp < 0.3f) tw else 1f)).toInt(); stroke.strokeWidth = widths[k] * d
+                c.drawLines(lines[k], 0, lineN[k], stroke)
+            }
+        }
+        sizeText()
+        val text = peakText()
+        val icon = textPaint.textSize * 0.9f
+        val (bw, bh) = badgeSize(text, icon)
+        val bx = badgeArea.centerX() - bw / 2f; val by = badgeArea.centerY()
+        drawBadge(c, bx, by, bw, bh, cCold, text, bx + bh * 0.45f + icon)
+        // Small shooting star in front of the text
+        val ix = bx + bh * 0.45f; val s = icon
+        stroke.color = cCold; stroke.strokeWidth = 2f * d
+        for (j in 0..2) {
+            stroke.alpha = 255 - j * 70
+            val yy = by + (j - 1) * s * 0.22f
+            c.drawLine(ix + s * (0.05f + j * 0.12f), yy, ix + s * 0.62f, yy, stroke)
+        }
+        val px = ix + s * 0.72f; val r4 = s * 0.2f
+        path.reset()
+        path.moveTo(px, by - r4 * 1.6f); path.lineTo(px + r4 * 0.4f, by - r4 * 0.4f); path.lineTo(px + r4 * 1.6f, by)
+        path.lineTo(px + r4 * 0.4f, by + r4 * 0.4f); path.lineTo(px, by + r4 * 1.6f); path.lineTo(px - r4 * 0.4f, by + r4 * 0.4f)
+        path.lineTo(px - r4 * 1.6f, by); path.lineTo(px - r4 * 0.4f, by - r4 * 0.4f); path.close()
+        paint.shader = null; paint.color = 0xFFFFFFFF.toInt(); paint.alpha = 255; c.drawPath(path, paint)
+    }
+
+    private var jumpAt = 0L
+
     private fun clearParticles() {
         flames.clear(); crackles.clear(); bolt.clear(); heat = 0f
+        starN = 0; warp = 0f; veil = 0f; flashAt = 0L
+        if (shaking) { shaking = false; shakeBy(0f) }
     }
 
     private fun strike(now: Long) {
         if (style == LIGHTNING) { bolt.clear(); boltSeed = -1 }
+        if (style == HYPERSPACE) {
+            if (now - jumpAt > CHARGE_MS) { flashAt = now; warp += 0.8f }   // new record: small flash, extra kick
+        }
     }
 
     override fun setAlpha(alpha: Int) {}
@@ -416,7 +553,7 @@ class PowerFxPreview(context: Context) : android.widget.LinearLayout(context) {
     private val under = android.widget.TextView(context).apply {
         setTextColor(Themes.color(context, R.color.text_sub)); textSize = 20f; gravity = android.view.Gravity.CENTER
     }
-    val fx = PowerFx(context)
+    val fx = PowerFx(context).apply { sound = false }
     private val handler = android.os.Handler(android.os.Looper.getMainLooper())
     private var start = 0L
 

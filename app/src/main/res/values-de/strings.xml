@@ -486,6 +486,7 @@
     <string name="fx_random">Zufällig</string>
     <string name="fx_lightning">Blitz</string>
     <string name="fx_flames">Flammen</string>
+    <string name="fx_hyperspace">Lichtgeschwindigkeit</string>
     <string name="fx_peak">Spitze %1$s kW · %2$s PS</string>
     <string name="st_xpower">MG4 XPower (320 kW)</string>
     <string name="st_xpower_desc">Wird automatisch erkannt, sobald mehr als 350 PS gemessen werden: das Auto meldet seine Version nicht. Legt die Leistungsskala und die Schwelle der Vollgas-Spezialfunktion fest.</string>

@@ -486,6 +486,7 @@
     <string name="fx_random">Willekeurig</string>
     <string name="fx_lightning">Bliksem</string>
     <string name="fx_flames">Vlammen</string>
+    <string name="fx_hyperspace">Lichtsnelheid</string>
     <string name="fx_peak">Piek %1$s kW · %2$s pk</string>
     <string name="st_xpower">MG4 XPower (320 kW)</string>
     <string name="st_xpower_desc">Wordt vanzelf herkend zodra meer dan 350 pk wordt gemeten: de auto meldt zijn versie niet. Bepaalt de vermogensschaal en de drempel van de speciale functie plankgas.</string>

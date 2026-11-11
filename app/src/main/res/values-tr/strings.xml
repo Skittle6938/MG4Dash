@@ -486,6 +486,7 @@
     <string name="fx_random">Rastgele</string>
     <string name="fx_lightning">Şimşek</string>
     <string name="fx_flames">Alevler</string>
+    <string name="fx_hyperspace">Işık hızı</string>
     <string name="fx_peak">Tepe %1$s kW · %2$s bg</string>
     <string name="st_xpower">MG4 XPower (320 kW)</string>
     <string name="st_xpower_desc">350 bg\'den fazlası ölçülür ölçülmez kendiliğinden tanınır: araç sürümünü bildirmez. Güç ölçeğini ve tam gaz sürprizinin eşiğini ayarlar.</string>

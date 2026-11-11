@@ -896,7 +896,7 @@ class SettingsActivity : AppCompatActivity() {
         // No preview: the surprise is for the road. Displayed order: random first (default).
         val fx = app.mg4dash.ui.PowerFx
         val choices = listOf(fx.RANDOM to R.string.fx_random, fx.LIGHTNING to R.string.fx_lightning,
-            fx.FLAMES to R.string.fx_flames, fx.NONE to R.string.fx_none).map { it.first to getString(it.second) }
+            fx.FLAMES to R.string.fx_flames, fx.HYPERSPACE to R.string.fx_hyperspace, fx.NONE to R.string.fx_none).map { it.first to getString(it.second) }
         lateinit var pick: Button
         // Drop-down list in the page itself: a popup window would bring back the system bars
         val list = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; visibility = View.GONE }

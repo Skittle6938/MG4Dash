@@ -486,6 +486,7 @@
     <string name="fx_random">Casuale</string>
     <string name="fx_lightning">Fulmine</string>
     <string name="fx_flames">Fiamme</string>
+    <string name="fx_hyperspace">Velocità della luce</string>
     <string name="fx_peak">Picco %1$s kW · %2$s CV</string>
     <string name="st_xpower">MG4 XPower (320 kW)</string>
     <string name="st_xpower_desc">Riconosciuta da sola appena si misurano più di 350 CV: l\'auto non indica la sua versione. Imposta la scala di potenza e la soglia della funzione speciale a tavoletta.</string>
