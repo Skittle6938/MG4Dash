@@ -976,19 +976,51 @@ class SettingsActivity : AppCompatActivity() {
             text = Log.snapshot().joinToString("\n")
             setPadding(dp(20), dp(8), dp(20), dp(8))
         }
+        // Under the log: the export's result, or why it cannot be done (#36)
+        val status = TextView(this).apply {
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, 17f); setPadding(dp(20), dp(10), dp(20), dp(4)); visibility = View.GONE
+        }
+        val title = getString(R.string.st_log) + " · MG4Dash ${BuildConfig.VERSION_NAME} · ${BuildConfig.FLAVOR}"
         val d = AlertDialog.Builder(this)
-            .setTitle(getString(R.string.st_log) + " · MG4Dash ${BuildConfig.VERSION_NAME} · ${BuildConfig.FLAVOR}")
-            .setView(ScrollView(this).apply { addView(view) })
+            .setTitle(title)
+            .setView(LinearLayout(this).apply {
+                orientation = LinearLayout.VERTICAL
+                addView(ScrollView(this@SettingsActivity).apply { addView(view) }, LinearLayout.LayoutParams(-1, 0, 1f))
+                addView(status)
+            })
             .setNeutralButton(R.string.st_refresh, null)
+            .setNegativeButton(R.string.st_log_export, null)
             .setPositiveButton(R.string.st_close, null)
             .show().also { app.mg4dash.ui.Dialogs.fix(it) }
+        var radioLines: List<Pair<Long, String>> = emptyList()
         // Radio Dash's lines among ours (#80): read from logcat, which takes a moment
         fun withRadio() = Thread {
             val radio = Log.radioLines()
+            radioLines = radio
             if (radio.isNotEmpty()) runOnUiThread { if (d.isShowing) view.text = Log.snapshot(radio).joinToString("\n") }
         }.start()
         withRadio()
-        d.getButton(AlertDialog.BUTTON_NEUTRAL).setOnClickListener { view.text = Log.snapshot().joinToString("\n"); withRadio() }
+        val export = d.getButton(AlertDialog.BUTTON_NEGATIVE)
+        val accent = app.mg4dash.ui.Themes.select(this)
+        /** The button follows the stick: greyed, with a line saying so, without one. */
+        fun paintExport() {
+            val stick = app.mg4dash.system.UsbExport.stick(this) != null
+            export.isEnabled = stick
+            export.setTextColor(if (stick) accent else color(R.color.text_disabled))
+            if (!stick) { status.visibility = View.VISIBLE; status.setTextColor(color(R.color.text_sub)); status.text = getString(R.string.st_log_no_usb) }
+            else if (status.text == getString(R.string.st_log_no_usb)) status.visibility = View.GONE
+        }
+        paintExport()
+        val watch = object : Runnable { override fun run() { if (!d.isShowing) return; paintExport(); view.postDelayed(this, 2_000) } }
+        view.postDelayed(watch, 2_000)
+        d.getButton(AlertDialog.BUTTON_NEUTRAL).setOnClickListener { view.text = Log.snapshot().joinToString("\n"); withRadio(); paintExport() }
+        export.setOnClickListener {
+            val text = LogExport.text(title, Compat.report(this), Log.snapshot(radioLines))
+            val path = app.mg4dash.system.UsbExport.write(this, LogExport.fileName(System.currentTimeMillis()), text)
+            status.visibility = View.VISIBLE
+            if (path != null) { status.setTextColor(accent); status.text = getString(R.string.st_log_exported, path) }
+            else paintExport()
+        }
     }
 
     /** GitHub release notes (Markdown) as readable text. */

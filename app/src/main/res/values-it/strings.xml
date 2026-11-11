@@ -228,6 +228,9 @@
     <string name="no">NO</string>
     <string name="st_log">REGISTRO</string>
     <string name="st_refresh">Aggiorna</string>
+    <string name="st_log_export">Esporta sulla chiavetta USB</string>
+    <string name="st_log_exported">✓  Registro salvato sulla chiavetta USB: %1$s</string>
+    <string name="st_log_no_usb">Inserisci una chiavetta USB per esportare il registro</string>
     <string name="st_close">Chiudi</string>
     <string name="st_title">Impostazioni · MG4Dash %1$s</string>
     <string name="st_replace_msg">MG4Dash si aprirà all\'avvio e con il tasto Home.\n\nNon viene disinstallato nulla: la home originale SAIC è semplicemente disattivata come schermata iniziale e le altre funzioni dell\'auto continuano a funzionare normalmente.\n\nPuoi tornare indietro in qualsiasi momento con la Modalità manutenzione, nello stesso punto. Se MG4Dash si bloccasse più volte di seguito, la home originale tornerebbe da sola.</string>

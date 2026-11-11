@@ -228,6 +228,9 @@
     <string name="no">NEIN</string>
     <string name="st_log">PROTOKOLL</string>
     <string name="st_refresh">Aktualisieren</string>
+    <string name="st_log_export">Auf den USB-Stick exportieren</string>
+    <string name="st_log_exported">✓  Protokoll auf dem USB-Stick gespeichert: %1$s</string>
+    <string name="st_log_no_usb">USB-Stick einstecken, um das Protokoll zu exportieren</string>
     <string name="st_close">Schließen</string>
     <string name="st_title">Einstellungen · MG4Dash %1$s</string>
     <string name="st_replace_msg">MG4Dash öffnet sich beim Start und mit der Home-Taste.\n\nNichts wird deinstalliert: Der Original-Startbildschirm von SAIC wird nur als Startbildschirm abgeschaltet, die anderen Funktionen des Autos arbeiten normal weiter.\n\nMit dem Wartungsmodus, an derselben Stelle, können Sie jederzeit zurück. Sollte MG4Dash mehrmals hintereinander abstürzen, käme der Original-Startbildschirm von selbst zurück.</string>

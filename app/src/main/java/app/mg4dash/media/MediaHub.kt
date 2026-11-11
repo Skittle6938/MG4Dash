@@ -1642,35 +1642,41 @@ object MediaHub {
     }
 
     /**
-     * Moves to the CarPlay source like the stock launcher (onSwitchCarPlayAASourceOnly):
-     * key 1 to AllGo's RemoteUI service, which gives main audio back to the iPhone and restarts
-     * playback (#36). Without the service, CarPlay's play / pause key as before.
+     * Moves to the CarPlay source like the stock launcher (onSwitchCarPlayAASourceOnly): key 1 to AllGo's RemoteUI
+     * service, which gives main audio back to the iPhone. The car then changes its source, which the SAIC media
+     * service sees: its top bar shows CarPlay's song (#106). Without the service, CarPlay's play / pause key as before.
+     *
+     * The #99 rescue (SWI165: the radio kept the sound): only if, 2 s later, the radio really still plays. Then the
+     * radio is paused and CarPlay told to play, as the play button of the SAIC Bluetooth page does. Never on doubt:
+     * that path is not seen by the SAIC media service (its bar stayed on the radio, #106), and its play key could
+     * pause a CarPlay already playing.
      */
     private fun selectProjectionSource(attempt: Int = 0) {
         val ctx = appContext ?: return
-        // Projection play key, like the stock launcher. After the radio, CarPlay does not take
-        // the audio back by itself, here or with the stock launcher (#36): AllGo limitation.
-        // The radio holding the sound (#99, SWI165): paused first, then CarPlay told to play, as the
-        // play button of the SAIC Bluetooth page does (the only way that gave the sound back there)
+        val rescue = attempt > 0
+        if (rescue) { Log.i(TAG, "CarPlay : secours #99 (la radio joue encore)"); pauseRadio() }
         val fromRadio = sourcePkg == RADIO || radioShown
-        if (fromRadio) pauseRadio()
         Thread {
-            if (fromRadio) Thread.sleep(300)
+            if (rescue) Thread.sleep(300)
             if (!app.mg4dash.system.Projection.mediaKey(ctx, app.mg4dash.system.Projection.KEY_SELECT_SOURCE))
                 systemMediaKey(KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE)
-            if (fromRadio) systemMediaKey(KeyEvent.KEYCODE_MEDIA_PLAY)
+            if (rescue) systemMediaKey(KeyEvent.KEYCODE_MEDIA_PLAY)
         }.start()
-        // Log of #36: the car only gives audio back to CarPlay when CarPlay opens on screen;
-        // note if the key was enough (no forced opening: refused, the CarPlay screen flickered)
         main.postDelayed({
             val taken = sourcePkg == AA_MBS
-            Log.i(TAG, "CarPlay audio after source key: ${if (taken) "taken" else "still on $sourcePkg"}" + if (attempt > 0) " (again)" else "")
-            if (handoverRetry(taken, fromRadio, attempt) && pinnedPkg == AA_MBS) selectProjectionSource(attempt + 1)
+            if (taken) Log.i(TAG, "CarPlay : source prise" + if (rescue) " (secours #99)" else "")
+            else Log.i(TAG, "CarPlay audio after source key: still on $sourcePkg" + if (rescue) " (after the rescue)" else "")
+            if (handoverRetry(taken, fromRadio, radioPlaying(), attempt) && pinnedPkg == AA_MBS) selectProjectionSource(attempt + 1)
         }, 2000)
     }
 
-    /** CarPlay asked for again once, only after the radio, while it still has not the sound (#99). */
-    internal fun handoverRetry(taken: Boolean, fromRadio: Boolean, attempt: Int) = !taken && fromRadio && attempt == 0
+    /** The radio really plays (its player's state); false when unknown. */
+    private fun radioPlaying(): Boolean =
+        if (legacyRadio) SaicRadio.last?.playing == true
+        else (browserControllers[RADIO] ?: lastCandidates.firstOrNull { it.packageName == RADIO })?.let { isPlaying(it) } == true
+
+    /** The #99 rescue, once: CarPlay has not the sound, it came from the radio and the radio really still plays. */
+    internal fun handoverRetry(taken: Boolean, fromRadio: Boolean, radioPlaying: Boolean, attempt: Int) = !taken && fromRadio && radioPlaying && attempt == 0
 
     /** Media key to CarPlay; without the service, system media key. */
     private fun systemMediaKey(code: Int) {

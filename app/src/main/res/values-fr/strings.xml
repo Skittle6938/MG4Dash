@@ -228,6 +228,9 @@
     <string name="no">NON</string>
     <string name="st_log">JOURNAL</string>
     <string name="st_refresh">Actualiser</string>
+    <string name="st_log_export">Exporter sur la clé USB</string>
+    <string name="st_log_exported">✓  Journal enregistré sur la clé USB : %1$s</string>
+    <string name="st_log_no_usb">Branchez une clé USB pour exporter le journal</string>
     <string name="st_close">Fermer</string>
     <string name="st_title">Réglages · MG4Dash %1$s</string>
     <string name="st_replace_msg">MG4Dash s\'ouvrira au démarrage et avec le bouton Accueil.\n\nRien n\'est désinstallé : l\'accueil SAIC d\'origine est simplement désactivé en tant qu\'écran d\'accueil, et les autres fonctions de la voiture continuent de marcher normalement.\n\nVous pouvez revenir en arrière à tout moment avec le mode Entretien, au même endroit. Si MG4Dash plantait plusieurs fois de suite, l\'accueil d\'origine reviendrait de lui-même.</string>

@@ -228,6 +228,9 @@
     <string name="no">HAYIR</string>
     <string name="st_log">GÜNLÜK</string>
     <string name="st_refresh">Yenile</string>
+    <string name="st_log_export">USB belleğe aktar</string>
+    <string name="st_log_exported">✓  Günlük USB belleğe kaydedildi: %1$s</string>
+    <string name="st_log_no_usb">Günlüğü aktarmak için bir USB bellek takın</string>
     <string name="st_close">Kapat</string>
     <string name="st_title">Ayarlar · MG4Dash %1$s</string>
     <string name="st_replace_msg">MG4Dash başlangıçta ve Ana ekran düğmesiyle açılacak.\n\nHiçbir şey kaldırılmaz: orijinal SAIC ana ekranı yalnızca ana ekran olarak kapatılır, aracın diğer işlevleri normal şekilde çalışmaya devam eder.\n\nAynı yerdeki Bakım modu ile istediğiniz zaman geri dönebilirsiniz. MG4Dash art arda birkaç kez çökerse orijinal ana ekran kendiliğinden geri gelir.</string>
