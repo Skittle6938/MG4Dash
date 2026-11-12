@@ -802,7 +802,7 @@ class SettingsActivity : AppCompatActivity() {
             else -> cur
         }
         val blocker = R2.blocker(this)
-        val (state, rdButton) = updateLine(parent, "Radio Dash", blocker?.let { getString(it) } ?: stateText(), rdNew.takeIf { blocker == null })
+        val (state, rdButton) = updateLine(parent, "MG4Radio", blocker?.let { getString(it) } ?: stateText(), rdNew.takeIf { blocker == null })
         fun showState() { state.text = stateText() }
         if (blocker != null) { rdButton.isEnabled = false; rdButton.alpha = 0.4f; return }
         rdButton.setOnClickListener {

@@ -49,15 +49,15 @@ The player (Full, Map and Simple layouts) works like the Android Auto player: th
 |---|---|
 | ![Bluetooth player](docs/screenshots/home_theme_charcoal_orange.png?v=25) | ![Android Auto player](docs/screenshots/home_light.png?v=25) |
 
-**Sources**: the source menu only lists the sources available right now: Bluetooth, USB and Android Auto / CarPlay appear when a phone or a USB key is connected, and other apps playing music (for example [DiAuto MG4+](https://github.com/Skittle6938/DiAuto-MG4) or SimpMusic) are offered too. Switching to an app sends it play, leaving it pauses it, and when an app starts playing the other apps are paused. DAB or FM is chosen in the radio app, as on the stock home screen.
+**Sources**: the source menu only lists the sources available right now: Bluetooth, USB and Android Auto / CarPlay appear when a phone or a USB key is connected, and other apps playing music (for example [MG4Link](https://github.com/Skittle6938/DiAuto-MG4) or SimpMusic) are offered too. Switching to an app sends it play, leaving it pauses it, and when an app starts playing the other apps are paused. DAB or FM is chosen in the radio app, as on the stock home screen.
 
 **Open Android Auto from anywhere**: with a phone connected, slide two fingers down from the top of the screen, on the home screen, a page or the settings. Without a phone, nothing happens. Moving the map with two fingers does not trigger it, as both fingers must start at the top.
 
-**Cut the phone connection**: double tap the Android Auto button (dock or vertical bar) to close the Android Auto / CarPlay session and keep it off; the icon turns red, even after a restart. The phone stays connected over Bluetooth for calls and music, and Bluetooth is offered in the sources (it is hidden while Android Auto, CarPlay or DiAuto is running). Double tap again: Android Auto comes back by itself, with the phone still plugged in. It works the same with [DiAuto MG4+](https://github.com/Skittle6938/DiAuto-MG4) chosen for the button (long press › Other app): its session is closed and it reconnects wirelessly on the next double tap. Music that was playing carries on over Bluetooth after a cut.
+**Cut the phone connection**: double tap the Android Auto button (dock or vertical bar) to close the Android Auto / CarPlay session and keep it off; the icon turns red, even after a restart. The phone stays connected over Bluetooth for calls and music, and Bluetooth is offered in the sources (it is hidden while Android Auto, CarPlay or MG4Link is running). Double tap again: Android Auto comes back by itself, with the phone still plugged in. It works the same with [MG4Link](https://github.com/Skittle6938/DiAuto-MG4) chosen for the button (long press › Other app): its session is closed and it reconnects wirelessly on the next double tap. Music that was playing carries on over Bluetooth after a cut.
 
 **Audio source at startup** (Settings › Home › Audio source): *Automatic* (default) remembers the sources you pick and goes back by itself to the last one still available, as soon as it returns (phone reconnected, USB key plugged in…); a source that disappears is replaced after 1 s. You can also leave it to the car (*Same as the car*) or always start on Radio, Bluetooth, USB or CarPlay / Android Auto. CarPlay is never picked automatically. *Playback at startup*: as when the car was switched off (default), always paused or always playing.
 
-**Steering wheel**: left / right change track on the source shown, apps included. The car does not know the apps (DiAuto, SimpMusic…) and still hands these buttons to its last own source, often the radio, which briefly takes the sound: MG4Dash puts the radio back on its station and returns to the app at once. While the wheel buttons control the driver's display or the quick climate window, MG4Dash ignores them.
+**Steering wheel**: left / right change track on the source shown, apps included. The car does not know the apps (MG4Link, SimpMusic…) and still hands these buttons to its last own source, often the radio, which briefly takes the sound: MG4Dash puts the radio back on its station and returns to the app at once. While the wheel buttons control the driver's display or the quick climate window, MG4Dash ignores them.
 
 ## Energy card
 
@@ -133,7 +133,7 @@ In a place with the App card, the edit mode also sets what it shows (the OpenStr
 |---|---|
 | ![EV route planner in the App card](docs/screenshots/home_map_app_planner.png?v=25) | ![Navigation app in the App card](docs/screenshots/home_map_app_guidance.png?v=25) |
 
-**Turn-by-turn**: with [DiAuto MG4+](https://github.com/Skittle6938/DiAuto-MG4) (or another Headunit Revived-based Android Auto app that broadcasts `com.andrerinas.headunitrevived.NAVIGATION_UPDATE`), the next manoeuvre is shown over the map: arrow, distance, street, time and distance left, arrival time. The stock Android Auto app does not receive this information.
+**Turn-by-turn**: with [MG4Link](https://github.com/Skittle6938/DiAuto-MG4) (or another Headunit Revived-based Android Auto app that broadcasts `com.andrerinas.headunitrevived.NAVIGATION_UPDATE`), the next manoeuvre is shown over the map: arrow, distance, street, time and distance left, arrival time. The stock Android Auto app does not receive this information.
 
 ![Navigation banner](docs/screenshots/home_map_layout_nav.png?v=25)
 
@@ -151,7 +151,7 @@ Settings › Home › Home layout: **Full** (default), **Map** or **Simple**. *M
 
 ## Themes and day / night
 
-Settings › Look: **Auto** (default, follows the car's lights), **Dark** or **Light**; 5 backgrounds and 5 button colours, applied to every page and to [Radio Dash](https://github.com/Skittle6938/MG4-Radio-Dash). Battery green, heating orange, cooling cyan and alert red keep their meaning.
+Settings › Look: **Auto** (default, follows the car's lights), **Dark** or **Light**; 5 backgrounds and 5 button colours, applied to every page and to [MG4Radio](https://github.com/Skittle6938/MG4-Radio-Dash). Battery green, heating orange, cooling cyan and alert red keep their meaning.
 
 - *Night after sunset* (on by default, Auto only): dark from sunset to sunrise at the car's position, even with the side lights off. Computed on the head unit, no network needed; today's times are shown under the option.
 - *Smooth light / dark switch* (on by default): the switch waits for 5 s of stable lights (no flicker under a bridge) and fades over 2 s. Off: it switches as soon as the lights change.
@@ -218,15 +218,15 @@ Five tabs along the top; the last one used opens next time. Each on / off option
 | Vehicle | units, tyre pressure unit, heated seats and steering wheel, Keep climate on, keep MG4Dash in front of the SAIC climate screen (old firmwares), startup sound (audio file from a USB stick or internal storage, 30 s and 20 MB at most, with its own volume), battery capacity when new, current capacity and health, battery model, MG4 XPower |
 | Connections | weather (fallback city or current position), Home Assistant (address, token, test) |
 | 4G data | the car's 4G data over the last 30 days, by use and day by day, the Wi-Fi client's too (4G and Wi-Fi buttons), the biggest day, and an optional monthly quota with an alert (4G only) |
-| System | replace the SAIC home, maintenance mode, updates (include betas, Radio Dash, recent web engine), diagnostics (compatibility test, log, energy data recorder: off by default, saved every 5 minutes to limit memory wear), gesture tour |
+| System | replace the SAIC home, maintenance mode, updates (include betas, MG4Radio, recent web engine), diagnostics (compatibility test, log, energy data recorder: off by default, saved every 5 minutes to limit memory wear), gesture tour |
 
 ## Updates
 
-Settings › System shows one line for MG4Dash and one for Radio Dash, with the installed version and the latest one found. The button on the right says *Check*, or *Install* when a newer version is known; it checks GitHub again, shows the release notes and installs (internet connection needed). *Check automatically* (on by default) looks for new versions once a week, or every day with *Include beta versions* on; the betas are numbered after the next release (1.7.2-beta0, 1.7.2-beta1…). When a new official release is found, MG4Dash also offers it on the home screen: *Update*, *Later* or *Don't notify me again for this release*. A download cut by the network (the car's Wi-Fi changing access point, a tunnel) goes on where it stopped instead of starting over.
+Settings › System shows one line for MG4Dash and one for MG4Radio, with the installed version and the latest one found. The button on the right says *Check*, or *Install* when a newer version is known; it checks GitHub again, shows the release notes and installs (internet connection needed). *Check automatically* (on by default) looks for new versions once a week, or every day with *Include beta versions* on; the betas are numbered after the next release (1.7.2-beta0, 1.7.2-beta1…). When a new official release is found, MG4Dash also offers it on the home screen: *Update*, *Later* or *Don't notify me again for this release*. A download cut by the network (the car's Wi-Fi changing access point, a tunnel) goes on where it stopped instead of starting over.
 
 **Recent web engine**: a third line, *Web engine (web app card)*, installs Chromium 138 over the car's own WebView (Chromium 66), so that today's sites open in the web app card (ABRP, Waze, OpenStreetMap…). It is a 243 MB download from GitHub ([MG4Dash-WebView](https://github.com/Skittle6938/MG4Dash-WebView)), best over Wi-Fi, checked then installed in a few seconds. *Back to the original* on the same line puts the car's own engine back; a site's data (cookies, sign-in) is lost when the engine changes either way. The line only shows on head units that can take it (Android 9, 64-bit, WebView signed with the AOSP test key).
 
-**Radio Dash**: the same page installs the latest [Radio Dash](https://github.com/Skittle6938/MG4-Radio-Dash) (the radio redesigned in the MG4Dash style) on any firmware whose stock radio it can replace, and says so when it can't (a newer stock radio, or one signed with another key). Tested on SWI69 and SWI68 R67. Restart the head unit afterwards by holding Home about 20 s. When Radio Dash is installed, DAB and FM are two separate sources on the music card (Settings › Home, on by default).
+**MG4Radio**: the same page installs the latest [MG4Radio](https://github.com/Skittle6938/MG4-Radio-Dash) (the radio redesigned in the MG4Dash style) on any firmware whose stock radio it can replace, and says so when it can't (a newer stock radio, or one signed with another key). Tested on SWI69 and SWI68 R67. Restart the head unit afterwards by holding Home about 20 s. When MG4Radio is installed, DAB and FM are two separate sources on the music card (Settings › Home, on by default).
 
 ## Compatibility (beta)
 
@@ -242,7 +242,7 @@ MG4Dash detects the head unit firmware at startup (`ro.build.mt2712.version`) an
 
 All MG4 firmwares share the 1920 × 720 screen and the AOSP platform key, so the same APK installs on every one of them.
 
-Features a firmware does not expose are hidden instead of failing (for example the charge limit, only shown where the car applies it itself: MG4Dash cannot stop the charge for the car, it is shut down when the car is locked). The stock home screen and the stock energy and settings apps are found automatically. Radio Dash only works on SWI69.
+Features a firmware does not expose are hidden instead of failing (for example the charge limit, only shown where the car applies it itself: MG4Dash cannot stop the charge for the car, it is shut down when the car is locked). The stock home screen and the stock energy and settings apps are found automatically. MG4Radio only works on SWI69.
 
 **Help support your firmware**: open Settings › Compatibility › Run the test, then scan the QR code with your phone. It opens a pre-filled [compatibility issue](https://github.com/Skittle6938/MG4Dash/issues/new?template=compatibility.md) with a short report (versions, which services answer, a few car readings: no position, VIN or account). Nothing is sent automatically. *Open in browser* shows the same page on the head unit, in MG4Dash Web (the car's browser refuses pages on some head units, [#95](https://github.com/Skittle6938/MG4Dash/issues/95)).
 
@@ -263,7 +263,7 @@ Features a firmware does not expose are hidden instead of failing (for example t
   - `system/BtAudio.kt`: Bluetooth music of the phone asked again when Android Auto stops
   - `energy/EnergyLogger.kt`: read-only CSV recorder of battery power, consumption counters and equipment states
   - `media/MediaHub.kt`: active player and audio sources (the car's and other apps'), automatic source, steering wheel for apps
-  - `map/NavRepo.kt`: turn-by-turn data broadcast by DiAuto / Headunit Revived
+  - `map/NavRepo.kt`: turn-by-turn data broadcast by MG4Link / Headunit Revived
   - `shortcuts/Shortcuts.kt`: shortcut grid and Home Assistant REST calls
   - `shortcuts/HaLive.kt`: live state of the Home Assistant shortcuts, read while they are on screen
   - `ui/WebCard.kt`, `system/WebViewer.kt`: web app card of the map widget, and MG4Dash Web, which shows its page and the compatibility report on the car

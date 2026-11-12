@@ -18,7 +18,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 object AirlinkUpdater {
     private const val TAG = "AirlinkUpdate"
     const val PKG = "com.allgo.app.androidauto"
-    const val NAME = "MG4-AA-Airlink"
+    const val NAME = "MG4Link"
     // GitHub redirects this address if the repository is renamed
     private const val API = "https://api.github.com/repos/Skittle6938/DiAuto-MG4/releases?per_page=20"
     /** Above AllGo's (1) and the former relay's (1008): the app is Airlink, not the stock AllGo. */
