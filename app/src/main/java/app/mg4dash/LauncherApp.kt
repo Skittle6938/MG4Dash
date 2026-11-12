@@ -79,6 +79,7 @@ class LauncherApp : Application() {
         WeatherRepo.start(this)
         app.mg4dash.system.DataUsage.start(this)
         app.mg4dash.ui.Themes.publish(this)
+        app.mg4dash.system.DataUsage.publishWifiOnly(this)
         startThemeWatch()
     }
 

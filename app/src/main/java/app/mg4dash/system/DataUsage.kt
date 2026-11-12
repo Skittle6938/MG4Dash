@@ -82,7 +82,19 @@ object DataUsage {
     fun setPopup(context: Context, v: Boolean) = sp(context).edit().putBoolean("popup", v).apply()
     /** Updates (startup check, check and download) only on Wi-Fi. */
     fun updatesWifiOnly(context: Context): Boolean = sp(context).getBoolean("updates_wifi_only", false)
-    fun setUpdatesWifiOnly(context: Context, v: Boolean) = sp(context).edit().putBoolean("updates_wifi_only", v).apply()
+    fun setUpdatesWifiOnly(context: Context, v: Boolean) { sp(context).edit().putBoolean("updates_wifi_only", v).apply(); publishWifiOnly(context) }
+
+    /** Key in Settings.Global read by MG4Link, so its own updates follow this option: "1" Wi-Fi only, "0" Wi-Fi then T-box. */
+    const val GLOBAL_WIFI_ONLY = "mg4dash_updates_wifi_only"
+
+    /** Publishes the option for MG4Link (system uid required; no effect otherwise). At each start and each change. */
+    fun publishWifiOnly(context: Context) {
+        try {
+            android.provider.Settings.Global.putString(context.contentResolver, GLOBAL_WIFI_ONLY, if (updatesWifiOnly(context)) "1" else "0")
+        } catch (e: Exception) {
+            Log.w("Update", "publishing Wi-Fi only for MG4Link failed: ${e.message}")
+        }
+    }
 
     /** Networks shown in the detail (rows and day bars): the car's 4G (on by default) and the Wi-Fi client. */
     fun show4g(context: Context): Boolean = sp(context).getBoolean("show_4g", true)
