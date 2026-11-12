@@ -47,9 +47,11 @@ object Updater {
     /** Latest non-beta release, even older than the last ten pre-releases. Network: off the main thread. */
     fun latestStable(): Release? = parse(JSONObject(get(API_STABLE)))
 
-    private fun get(api: String): String = DataUsage.tag(DataUsage.Use.UPDATES) { getUntagged(api) }
-    private fun getUntagged(api: String): String {
-        val c = URL(api).openConnection() as HttpURLConnection
+    private fun get(api: String): String = DataUsage.tag(DataUsage.Use.UPDATES) {
+        Download.firstWorking(app.mg4dash.Tr.app, "check ${URL(api).path.substringAfter("/repos/").substringBefore("/releases")}") { getUntagged(api, it) }
+    }
+    private fun getUntagged(api: String, net: android.net.Network?): String {
+        val c = (if (net != null) net.openConnection(URL(api)) else URL(api).openConnection()) as HttpURLConnection
         try {
             c.connectTimeout = 8000; c.readTimeout = 15000
             c.setRequestProperty("Accept", "application/vnd.github+json")
