@@ -231,6 +231,10 @@
     <string name="st_log_export">Exportar a la memoria USB</string>
     <string name="st_log_exported">✓  Registro guardado en la memoria USB: %1$s</string>
     <string name="st_log_no_usb">Conecte una memoria USB para exportar el registro</string>
+    <string name="st_log_eject">Expulsar la memoria USB</string>
+    <string name="st_log_ejecting">Expulsando la memoria USB…</string>
+    <string name="st_log_ejected">✓  Memoria USB expulsada, puede retirarla</string>
+    <string name="st_log_eject_failed">No se pudo expulsar la memoria USB: puede que una aplicación aún la esté usando. Vuelva a intentarlo en un momento.</string>
     <string name="st_close">Cerrar</string>
     <string name="st_title">Ajustes · MG4Dash %1$s</string>
     <string name="st_replace_msg">MG4Dash se abrirá al arrancar y con el botón Inicio.\n\nNo se desinstala nada: el inicio original de SAIC simplemente se desactiva como pantalla de inicio y las demás funciones del coche siguen funcionando con normalidad.\n\nPuede volver atrás en cualquier momento con el Modo mantenimiento, en el mismo lugar. Si MG4Dash fallara varias veces seguidas, el inicio original volvería solo.</string>

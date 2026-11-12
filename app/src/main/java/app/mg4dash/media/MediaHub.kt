@@ -408,6 +408,8 @@ object MediaHub {
     private var stepping = false
     /** MG4Dash's startup sound is set for this start (read when the sequence starts). */
     private var soundConfigured = false
+    /** The volume held at 0 during the startup pause (#36), until [PauseSilence.over]. */
+    private var silence: PauseSilence? = null
     /**
      * The driver's last action (uptime) seen by MG4Dash: its media buttons and swipes, the source menu and chips,
      * the wheel's buttons (StarKey), the Android Auto button. It ends the startup sequence at once.
@@ -480,12 +482,26 @@ object MediaHub {
                 phoneDecides = { phoneDecides(it) || handlesWheelKeys(sourcePkg) },
             )
             for (a in s.step(input)) when (a) {
-                is StartupSequence.Action.Switch -> seqSwitch(a.pkg)
+                is StartupSequence.Action.Switch -> {
+                    // A pause wanted: the volume at 0 until the source is really paused (#36, the radio heard a moment)
+                    if (!s.wantPlay && !phoneDecides(a.pkg) && a.pkg in CAR_SOURCES) appContext?.let {
+                        app.mg4dash.sound.SoundTrigger.silenceForPause(it)
+                        silence = PauseSilence(up, app.mg4dash.sound.SoundTrigger.SILENCE_MAX_MS)
+                    }
+                    seqSwitch(a.pkg)
+                }
                 StartupSequence.Action.Play -> setPlaying(true, "startup")
                 StartupSequence.Action.Pause -> {
                     setPlaying(false, "startup", s.target)
                     // The pause sent: the audio focus kept after the sound goes back a moment later
                     if (soundConfigured) main.postDelayed({ app.mg4dash.sound.SoundTrigger.releaseBootFocus() }, 1_000)
+                }
+            }
+            silence?.let { w ->
+                val playingNow = _now.value.available && realPlaying()
+                if (s.done || w.over(android.os.SystemClock.uptimeMillis(), playingNow)) {
+                    app.mg4dash.sound.SoundTrigger.endSilence(if (s.done) "sequence over" else if (playingNow) "time" else "paused")
+                    silence = null
                 }
             }
             if (s.done) Log.i(TAG, "startup sequence over: ${s.endedBy} (source ${s.target})")

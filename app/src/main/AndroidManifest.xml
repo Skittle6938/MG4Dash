@@ -15,6 +15,8 @@
     <uses-permission android:name="android.permission.DUMP" tools:ignore="ProtectedPermissions" />
     <!-- Copy of the system UI to the USB stick (#62): writing to removable storage, granted to the platform signature -->
     <uses-permission android:name="android.permission.WRITE_MEDIA_STORAGE" tools:ignore="ProtectedPermissions" />
+    <!-- Eject the USB stick from the log window (#106): unmounting a volume, granted to the platform signature -->
+    <uses-permission android:name="android.permission.MOUNT_UNMOUNT_FILESYSTEMS" tools:ignore="ProtectedPermissions" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <!-- Granted automatically to the system uid (car version) -->

@@ -1493,7 +1493,35 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         return (0 until root.childCount).map { root.getChildAt(it) }.firstOrNull { !holds(it) }
     }
 
+    /** A touch outside the page or app awake put it at rest: the rest of that gesture goes nowhere (#98). */
+    private var restingTouch = false
+
+    /**
+     * A touch anywhere outside the web page or the app awake (in its card, or its window over home) puts it at rest at
+     * once (#98), instead of waiting for the time set. That touch does nothing else: what is under it is not pressed,
+     * as a first tap outside a menu closes it. Not while typing in the page (its keyboard is outside it).
+     */
+    private fun outsideRest(ev: android.view.MotionEvent): Boolean {
+        if (ev.actionMasked == android.view.MotionEvent.ACTION_DOWN) {
+            restingTouch = false
+            if (webCard?.typing == true) return false
+            val awakeWindows = listOfNotNull(floatWeb, floatMap).filter { it.floating && it.awake && !it.moving }
+            val windows = awakeWindows.filterNot { it.holds(ev) }
+            val docked = awake?.takeIf { !inBox(it, ev) }
+            if (windows.isEmpty() && docked == null) return false
+            windows.forEach { it.rest() }
+            if (docked != null) setAwake(null)
+            app.mg4dash.system.Log.i("Rest", "touch outside: at rest")
+            // On the other page or app awake: that touch is its own, it goes on to it
+            restingTouch = awakeWindows.none { it.holds(ev) } && awake?.let { inBox(it, ev) } != true
+        }
+        if (!restingTouch) return false
+        if (ev.actionMasked == android.view.MotionEvent.ACTION_UP || ev.actionMasked == android.view.MotionEvent.ACTION_CANCEL) restingTouch = false
+        return true
+    }
+
     override fun dispatchTouchEvent(ev: android.view.MotionEvent): Boolean {
+        if (!app.mg4dash.ui.CardsEditor.isOpen(this) && outsideRest(ev)) return true
         // The windows over home (web app, map): at rest their gestures, awake straight to their page; the front one first
         if (!app.mg4dash.ui.CardsEditor.isOpen(this)) {
             for (fw in if (webInFront) listOfNotNull(floatWeb, floatMap) else listOfNotNull(floatMap, floatWeb)) {

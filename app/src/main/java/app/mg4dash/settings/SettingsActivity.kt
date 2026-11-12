@@ -1048,17 +1048,29 @@ class SettingsActivity : AppCompatActivity() {
             setTextSize(TypedValue.COMPLEX_UNIT_SP, 17f); setPadding(dp(20), dp(10), dp(20), dp(4)); visibility = View.GONE
         }
         val title = getString(R.string.st_log) + " · MG4Dash ${BuildConfig.VERSION_NAME} · ${BuildConfig.FLAVOR}"
+        val accent = app.mg4dash.ui.Themes.select(this)
+        // Our own row of buttons (#36, #106): Refresh on the left, Export and Eject in the middle, Close on the right
+        fun button(label: Int) = android.widget.Button(this, null, android.R.attr.borderlessButtonStyle).apply {
+            text = getString(label); isAllCaps = false; setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f); setTextColor(accent)
+            setPadding(dp(16), dp(8), dp(16), dp(8))
+        }
+        val refresh = button(R.string.st_refresh); val export = button(R.string.st_log_export)
+        val eject = button(R.string.st_log_eject); val close = button(R.string.st_close)
+        fun space() = View(this).apply { layoutParams = LinearLayout.LayoutParams(0, 1, 1f) }
+        val row = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL; setPadding(dp(8), dp(4), dp(8), dp(8))
+            addView(refresh); addView(space()); addView(export); addView(eject); addView(space()); addView(close)
+        }
         val d = AlertDialog.Builder(this)
             .setTitle(title)
             .setView(LinearLayout(this).apply {
                 orientation = LinearLayout.VERTICAL
                 addView(ScrollView(this@SettingsActivity).apply { addView(view) }, LinearLayout.LayoutParams(-1, 0, 1f))
                 addView(status)
+                addView(row, LinearLayout.LayoutParams(-1, -2))
             })
-            .setNeutralButton(R.string.st_refresh, null)
-            .setNegativeButton(R.string.st_log_export, null)
-            .setPositiveButton(R.string.st_close, null)
             .show().also { app.mg4dash.ui.Dialogs.fix(it) }
+        logDialog = d
         var radioLines: List<Pair<Long, String>> = emptyList()
         // Radio Dash's lines among ours (#80): read from logcat, which takes a moment
         fun withRadio() = Thread {
@@ -1067,28 +1079,45 @@ class SettingsActivity : AppCompatActivity() {
             if (radio.isNotEmpty()) runOnUiThread { if (d.isShowing) view.text = Log.snapshot(radio).joinToString("\n") }
         }.start()
         withRadio()
-        val export = d.getButton(AlertDialog.BUTTON_NEGATIVE)
-        val accent = app.mg4dash.ui.Themes.select(this)
-        /** The button follows the stick: greyed, with a line saying so, without one. */
-        fun paintExport() {
-            val stick = app.mg4dash.system.UsbExport.stick(this) != null
+        var ejecting = false
+        fun say(text: String, ok: Boolean) { status.visibility = View.VISIBLE; status.setTextColor(if (ok) accent else color(R.color.text_sub)); status.text = text }
+        /** The buttons follow the stick: Export greyed with a line saying so, Eject hidden, without one. */
+        fun paintStick() {
+            val stick = !ejecting && app.mg4dash.system.UsbExport.stick(this) != null
             export.isEnabled = stick
             export.setTextColor(if (stick) accent else color(R.color.text_disabled))
-            if (!stick) { status.visibility = View.VISIBLE; status.setTextColor(color(R.color.text_sub)); status.text = getString(R.string.st_log_no_usb) }
-            else if (status.text == getString(R.string.st_log_no_usb)) status.visibility = View.GONE
+            eject.visibility = if (stick || ejecting) View.VISIBLE else View.GONE
+            eject.isEnabled = !ejecting
+            eject.setTextColor(if (!ejecting) accent else color(R.color.text_disabled))
+            val noUsb = getString(R.string.st_log_no_usb)
+            if (!stick && !ejecting && status.text != getString(R.string.st_log_ejected)) say(noUsb, ok = false)
+            else if (stick && status.text == noUsb) status.visibility = View.GONE
         }
-        paintExport()
-        val watch = object : Runnable { override fun run() { if (!d.isShowing) return; paintExport(); view.postDelayed(this, 2_000) } }
+        paintStick()
+        val watch = object : Runnable { override fun run() { if (!d.isShowing) return; paintStick(); view.postDelayed(this, 2_000) } }
         view.postDelayed(watch, 2_000)
-        d.getButton(AlertDialog.BUTTON_NEUTRAL).setOnClickListener { view.text = Log.snapshot().joinToString("\n"); withRadio(); paintExport() }
+        refresh.setOnClickListener { view.text = Log.snapshot().joinToString("\n"); withRadio(); paintStick() }
+        close.setOnClickListener { d.dismiss() }
         export.setOnClickListener {
             val text = LogExport.text(title, Compat.report(this), Log.snapshot(radioLines))
             val path = app.mg4dash.system.UsbExport.write(this, LogExport.fileName(System.currentTimeMillis()), text)
-            status.visibility = View.VISIBLE
-            if (path != null) { status.setTextColor(accent); status.text = getString(R.string.st_log_exported, path) }
-            else paintExport()
+            if (path != null) say(getString(R.string.st_log_exported, path), ok = true) else paintStick()
+        }
+        eject.setOnClickListener {
+            ejecting = true; paintStick(); say(getString(R.string.st_log_ejecting), ok = false)
+            Thread {
+                val failed = app.mg4dash.system.UsbExport.eject(this)
+                runOnUiThread {
+                    ejecting = false
+                    if (failed == null) say(getString(R.string.st_log_ejected), ok = true) else say(getString(R.string.st_log_eject_failed), ok = false)
+                    paintStick()
+                }
+            }.start()
         }
     }
+
+    /** The log window shown (renders of the mockups). */
+    internal var logDialog: AlertDialog? = null
 
     /** GitHub release notes (Markdown) as readable text. */
     private fun onThemeChanged() {
