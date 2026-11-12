@@ -357,10 +357,14 @@ object MediaHub {
     /** DiAuto or an equivalent app (Headunit Revived) in session: its projection screen is open. */
     @Volatile private var appProjecting = false
 
+    /** Projection screen of DiAuto / Headunit Revived, and of MG4Link from its next version (renamed screen). */
+    internal fun isProjectionScreen(className: String) =
+        className.endsWith(".AapProjectionActivity") || className == "com.allgo.app.androidauto.ProjectionActivity"
+
     private fun appProjection(ctx: Context): Boolean = try {
         @Suppress("DEPRECATION")
         (ctx.getSystemService(Context.ACTIVITY_SERVICE) as android.app.ActivityManager).getRunningTasks(30).any { t ->
-            listOfNotNull(t.baseActivity, t.topActivity).any { it.className.endsWith(".AapProjectionActivity") }
+            listOfNotNull(t.baseActivity, t.topActivity).any { isProjectionScreen(it.className) }
         }
     } catch (_: Exception) { false }
 
