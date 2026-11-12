@@ -45,6 +45,10 @@ class UpdateDownloadTest {
         assertEquals(listOf(true, false, true, false), o.map { it.validated })
         assertEquals("no Wi-Fi: 4G then default", listOf(mobile, null), Download.order(listOf(mobile to caps(false, false)), wifiOnly = false).map { it.net })
         assertEquals("Wi-Fi only: the Wi-Fi alone, even not validated", listOf(wifi), Download.order(listOf(wifi to caps(true, false), mobile to caps(false, true)), wifiOnly = true).map { it.net })
+        assertEquals("Wi-Fi without the T-box listed: Wi-Fi, then the T-box asked, then the default", listOf(false, true, false),
+            Download.order(listOf(wifi to caps(true, true)), wifiOnly = false).map { it.tbox })
+        assertEquals("no network listed: the T-box asked first", listOf(true, false), Download.order(emptyList(), wifiOnly = false).map { it.tbox })
+        assertEquals("Wi-Fi only: never the T-box", listOf(false), Download.order(listOf(wifi to caps(true, true)), wifiOnly = true).map { it.tbox })
         val noWifi = try { Download.order(listOf(mobile to caps(false, true)), wifiOnly = true); null } catch (e: Download.Failure) { e.reason }
         assertEquals("Wi-Fi only without a Wi-Fi: said so", Download.Reason.NO_WIFI, noWifi)
     }

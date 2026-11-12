@@ -64,12 +64,16 @@ object Download {
     internal fun tryFits(attempt: Int, startedAt: Long, now: Long): Boolean = attempt <= TRIES && now + waitBefore(attempt) - startedAt < TOTAL_MS
 
     /** A network to try: [net] null for Android's default, not bound; [validated]: its internet checked by Android. */
-    internal class Pick(val net: Network?, val label: String, val validated: Boolean)
+    internal class Pick(val net: Network?, val label: String, val validated: Boolean, val tbox: Boolean = false)
+
+    /** The T-box asked of Android at the time of the try (see [Tbox]): Android does not list it while the Wi-Fi client is on. */
+    internal val TBOX = Pick(null, "T-box 4G (asked)", false, tbox = true)
 
     /**
      * The networks of a try, in order (owner's choice): a connected Wi-Fi first, validated or not yet (the head unit's
      * check can lag or fail behind a hotspot), then the mobile one (not with "Updates on Wi-Fi only"), then Android's
-     * default without binding. Validated ones first within each kind.
+     * default without binding. Validated ones first within each kind. With no mobile network listed, the T-box is
+     * asked of Android after the Wi-Fi (or first without one).
      */
     internal fun order(nets: List<Pair<Network, NetworkCapabilities>>, wifiOnly: Boolean, label: (Network, Boolean) -> String = { n, w -> (if (w) "Wi-Fi #" else "mobile #") + n }): List<Pick> {
         fun ok(c: NetworkCapabilities) = c.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
@@ -78,7 +82,8 @@ object Download {
         val other = online.filter { (_, c) -> !c.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) }
         // Wi-Fi only: never the default either (it would go out on the 4G)
         if (wifiOnly) { if (wifi.isEmpty()) throw Failure(Reason.NO_WIFI); return wifi.map { (n, c) -> Pick(n, label(n, true), ok(c)) } }
-        return (wifi.map { (n, c) -> Pick(n, label(n, true), ok(c)) } + other.map { (n, c) -> Pick(n, label(n, false), ok(c)) }) +
+        return wifi.map { (n, c) -> Pick(n, label(n, true), ok(c)) } +
+            (if (other.isEmpty()) listOf(TBOX) else other.map { (n, c) -> Pick(n, label(n, false), ok(c)) }) +
             Pick(null, "default (not bound)", false)
     }
 
@@ -126,7 +131,7 @@ object Download {
         val startedAt = android.os.SystemClock.elapsedRealtime()
         fun left() = TOTAL_MS - (android.os.SystemClock.elapsedRealtime() - startedAt)
         var picks = networks(context)
-        if (picks.none { it.net != null }) {
+        if (picks.none { it.net != null || it.tbox }) {
             // Only Android's default: a moment for a network to come up first
             step(Step.Waiting)
             if (awaitValidated(context, minOf(FIRST_WAIT_MS, left()))) picks = networks(context)
@@ -140,7 +145,7 @@ object Download {
                 val before = part.length()
                 Log.i(TAG, "download try $tryNo on ${p.label}${if (p.net != null && !p.validated) " (not validated)" else ""}")
                 try {
-                    attempt(p.net, URL(url), part, sizeHint, startedAt, step)
+                    over(context, p) { net -> attempt(net, URL(url), part, sizeHint, startedAt, step) }
                     done = true; break
                 } catch (e: IOException) {
                     val f = e as? Failure ?: Failure(Reason.STALLED, part.length(), sizeHint, e)
@@ -172,6 +177,35 @@ object Download {
             picks = networks(context)
         }
         if (!part.renameTo(out)) { part.copyTo(out, overwrite = true); part.delete() }
+    }
+
+    /** [block] over [p]'s network; for the T-box, asked of Android and released after. No T-box: [Reason.NO_ANSWER]. */
+    internal fun <T> over(context: Context, p: Pick, block: (Network?) -> T): T {
+        if (!p.tbox) return block(p.net)
+        val lease = tboxLease(context) ?: throw Failure(Reason.NO_ANSWER, cause = IOException("no T-box network"))
+        return try { block(lease.network) } finally { lease.close() }
+    }
+
+    /** The T-box on demand (replaced by the tests). */
+    internal var tboxLease: (Context) -> Tbox.Lease? = { Tbox.request(it) }
+
+    /**
+     * A short exchange (the update check) over the networks of [networks] in order, the next one when one fails:
+     * the Wi-Fi first, then the T-box (not with "Updates on Wi-Fi only"). The last failure if all fail.
+     */
+    fun <T> firstWorking(context: Context, what: String, block: (Network?) -> T): T {
+        var last: Exception? = null
+        for (p in networks(context)) {
+            try {
+                val r = over(context, p, block)
+                Log.i(TAG, "$what on ${p.label}")
+                return r
+            } catch (e: Exception) {
+                Log.w(TAG, "$what on ${p.label}: ${e.message}")
+                last = e
+            }
+        }
+        throw last ?: IOException("$what: no network")
     }
 
     /** One try: redirects followed (5 at most), the rest asked with Range, appended to [part]. */
