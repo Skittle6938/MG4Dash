@@ -249,6 +249,8 @@ object MediaHub {
         // An app took the source (Android Auto, CarPlay, DiAuto starting its music…): that is intended,
         // it is not taken back to return to the radio (DiAuto cut off as its music started)
         if (cur !in listOf(RADIO, "com.android.bluetooth", "com.saicmotor.media")) return
+        // The driver's choice under way (the car not switched yet): it is not a "better source back" to switch to once more (#36)
+        if (now - userPickAt < USER_PICK_MS) return
         // A better-ranked source back (the phone over Bluetooth…): it takes over in the current state, paused stays paused
         betterSource(order, cur) { stable(it) && !(it == BT && projecting) }?.let { autoSwitch(it, "$it back", play = playingState()) }
     }
@@ -578,6 +580,15 @@ object MediaHub {
     /** USB announced while the startup sound plays (or just after) with no stick mounted: not shown (#36). */
     internal fun usbHeldBySound(soundRecent: Boolean, usbMounted: Boolean) = soundRecent && !usbMounted
     private var goneToProjectionLogged = false
+    /** The driver's last source choice (swipe, menu) and when; given back once if the radio retakes the source (#36). */
+    @Volatile private var userPick: String? = null
+    @Volatile private var userPickAt = 0L
+    @Volatile private var userPickRetried = false
+    private const val USER_PICK_MS = 3_000L
+
+    /** The car's source back to the radio [sinceMs] after the driver chose another car source: the radio's late start. */
+    internal fun radioTakesBack(src: String?, pick: String?, sinceMs: Long, retried: Boolean) =
+        src == RADIO && pick != null && pick != RADIO && pick in CAR_SOURCES && sinceMs in 0 until USER_PICK_MS && !retried
     private var autoTarget: String? = null
     private var autoTries = 0
 
@@ -860,6 +871,7 @@ object MediaHub {
             return
         }
         Log.i(TAG, "source picked: $next")
+        userPick = next; userPickAt = android.os.SystemClock.uptimeMillis(); userPickRetried = false
         wheelFrom = null; wheelBack = null // user's choice: no automatic return to the app
         promptFrom = null
         // Leaving another app's player (DiAuto, SimpMusic…): the car has no source to take from it
@@ -972,6 +984,19 @@ object MediaHub {
                             return@newProxyInstance null
                         }
                         main.post {
+                            // The SAIC radio starts ~1 s after its command: left within that second, its late start took
+                            // the source back from the driver's choice (#36). Paused, and the choice sent once more
+                            val pick = userPick
+                            if (radioTakesBack(src, pick, android.os.SystemClock.uptimeMillis() - userPickAt, userPickRetried)) {
+                                userPickRetried = true
+                                Log.i(TAG, "the radio took the source back from $pick: paused, $pick again")
+                                pauseRadio()
+                                pinnedPkg = pick
+                                // The same choice again (switch and playback), once: not retried a second time
+                                main.postDelayed({ switchTo(pick!!); userPickRetried = true }, 300)
+                                reevaluate()
+                                return@post
+                            }
                             if (src == AA_MBS) {
                                 // The manual choice stays as long as Android Auto is not playing (guidance only)
                                 if (sourcePkg != AA_MBS) { aaUnconfirmed = true; sourceBeforeAa = sourcePkg }
