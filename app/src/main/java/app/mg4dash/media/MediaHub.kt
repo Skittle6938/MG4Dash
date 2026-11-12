@@ -92,7 +92,14 @@ object MediaHub {
             // No callback read on the USB side: reread the track every 2 s, like the old SDK radio.
             main.postDelayed(object : Runnable {
                 override fun run() {
-                    io.launch { val before = SaicMedia.last; SaicMedia.refresh(); if (SaicMedia.last != before) main.post { reevaluate() } }
+                    io.launch {
+                        val before = SaicMedia.last; SaicMedia.refresh()
+                        if (SaicMedia.last != before) main.post {
+                            // A stick plugged in under CarPlay (#106): selectProjectionSource pauses the USB player first
+                            if (usbTakesTheBar(before?.playing, SaicMedia.last?.playing, carPlay, pinnedPkg, sourcePkg)) selectProjectionSource()
+                            reevaluate()
+                        }
+                    }
                     main.postDelayed(this, 2_000)
                 }
             }, 1_000)
@@ -1672,19 +1679,46 @@ object MediaHub {
         val rescue = attempt > 0
         if (rescue) { Log.i(TAG, "CarPlay : secours #99 (la radio joue encore)"); pauseRadio() }
         val fromRadio = sourcePkg == RADIO || radioShown
+        // The car's USB player playing (a stick plugged in): it holds the SAIC top bar, CarPlay's key alone did not
+        // take it back (#106). Paused first, unless USB is the driver's source
+        val usbFirst = serviceMedia && SaicMedia.last?.playing == true && pinnedPkg != USB && sourcePkg != USB
         Thread {
+            if (usbFirst) { Log.i(TAG, "CarPlay : lecteur USB mis en pause"); SaicMedia.usbPause(); Thread.sleep(300) }
             if (rescue) Thread.sleep(300)
             if (!app.mg4dash.system.Projection.mediaKey(ctx, app.mg4dash.system.Projection.KEY_SELECT_SOURCE))
                 systemMediaKey(KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE)
             if (rescue) systemMediaKey(KeyEvent.KEYCODE_MEDIA_PLAY)
         }.start()
         main.postDelayed({
-            val taken = sourcePkg == AA_MBS
-            if (taken) Log.i(TAG, "CarPlay : source prise" + if (rescue) " (secours #99)" else "")
-            else Log.i(TAG, "CarPlay audio after source key: still on $sourcePkg" + if (rescue) " (after the rescue)" else "")
-            if (handoverRetry(taken, fromRadio, radioPlaying(), attempt) && pinnedPkg == AA_MBS) selectProjectionSource(attempt + 1)
+            io.launch {
+                // What the SAIC media service (its top bar) has as the current source, not the one MG4Dash follows
+                val saic = if (serviceMedia) SaicMedia.currentSource() else null
+                main.post {
+                    val taken = carPlayTaken(saic, sourcePkg)
+                    if (taken) Log.i(TAG, "CarPlay : source prise" + (saic?.let { " (SAIC $it)" } ?: "") + if (rescue) " (secours #99)" else "")
+                    else Log.i(TAG, "CarPlay audio after source key: still on ${saic?.let { "SAIC $it" } ?: sourcePkg}" + if (rescue) " (after the rescue)" else "")
+                    if (handoverRetry(taken, fromRadio, radioPlaying(), attempt) && pinnedPkg == AA_MBS) selectProjectionSource(attempt + 1)
+                }
+            }
         }, 2000)
     }
+
+    /**
+     * CarPlay has the car's source: the SAIC media service's current source is CarPlay's (50, 52), when it answers
+     * (old SDK firmwares, SWI165…); otherwise the source MG4Dash follows.
+     */
+    internal fun carPlayTaken(saicSource: Int?, followed: String?) =
+        if (saicSource != null) saicSource in CARPLAY_SOURCES else followed == AA_MBS
+
+    /** SAIC source types of CarPlay (its audio, and its Siri / navigation prompts). */
+    private val CARPLAY_SOURCES = setOf(50, 52)
+
+    /**
+     * #106: the car's USB player starts by itself (a stick plugged in) while CarPlay is the source: it takes the SAIC
+     * top bar from CarPlay. Never when USB is the driver's source. True: pause it and give the source back to CarPlay.
+     */
+    internal fun usbTakesTheBar(wasPlaying: Boolean?, playing: Boolean?, carPlay: Boolean, pinned: String?, source: String?) =
+        playing == true && wasPlaying != true && carPlay && pinned != USB && source != USB && (pinned == AA_MBS || source == AA_MBS)
 
     /** The radio really plays (its player's state); false when unknown. */
     private fun radioPlaying(): Boolean =

@@ -26,4 +26,29 @@ class CarPlayHandoverTest {
 
     /** Its play key could pause a CarPlay already playing: never on doubt. */
     @Test fun noRescueWhenTheRadioIsNotPlaying() = assertFalse(MediaHub.handoverRetry(taken = false, fromRadio = true, radioPlaying = false, attempt = 0))
+
+    /** "Source prise" from what the SAIC media service (its top bar) has, not the source MG4Dash follows (#106). */
+    @Test fun takenAsTheSaicMediaServiceHasIt() {
+        val aa = "com.allgo.remoteui.mediabrowserservice"
+        assertTrue(MediaHub.carPlayTaken(50, "com.saicmotor.media"))
+        assertTrue(MediaHub.carPlayTaken(52, null))
+        assertFalse("MG4Dash follows CarPlay, the bar still on USB", MediaHub.carPlayTaken(6, aa))
+        assertFalse(MediaHub.carPlayTaken(1, aa))
+        // The service does not answer (newer firmwares): the source followed
+        assertTrue(MediaHub.carPlayTaken(null, aa))
+        assertFalse(MediaHub.carPlayTaken(null, "com.saicmotor.radio"))
+    }
+
+    /** A stick plugged in under CarPlay: the USB player starting by itself is paused, never when USB is the driver's source. */
+    @Test fun usbPlayerPausedOnlyUnderCarPlay() {
+        val aa = "com.allgo.remoteui.mediabrowserservice"; val usb = "com.saicmotor.media"
+        assertTrue("stick plugged in, CarPlay the source", MediaHub.usbTakesTheBar(false, true, carPlay = true, pinned = aa, source = aa))
+        assertTrue("first reading after the start", MediaHub.usbTakesTheBar(null, true, carPlay = true, pinned = null, source = aa))
+        assertFalse("already playing: once per start of the player", MediaHub.usbTakesTheBar(true, true, carPlay = true, pinned = aa, source = aa))
+        assertFalse("not playing", MediaHub.usbTakesTheBar(false, false, carPlay = true, pinned = aa, source = aa))
+        assertFalse("USB chosen by the driver", MediaHub.usbTakesTheBar(false, true, carPlay = true, pinned = usb, source = aa))
+        assertFalse("USB the car's source", MediaHub.usbTakesTheBar(false, true, carPlay = true, pinned = aa, source = usb))
+        assertFalse("Android Auto, not CarPlay", MediaHub.usbTakesTheBar(false, true, carPlay = false, pinned = aa, source = aa))
+        assertFalse("CarPlay connected, another source", MediaHub.usbTakesTheBar(false, true, carPlay = true, pinned = "com.saicmotor.radio", source = "com.saicmotor.radio"))
+    }
 }
