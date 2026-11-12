@@ -37,6 +37,8 @@ class LauncherApp : Application() {
         Log.i("App", "start ${BuildConfig.VERSION_NAME} (${BuildConfig.FLAVOR})")
         // Separate safety net (MG4Dash Rescue): sign of life, and its installation if needed
         app.mg4dash.system.Rescue.start(this)
+        // A call placed or answered shrinks to the SAIC phone's floating card (#93, A9 phone app only)
+        if (!BuildConfig.MOCK) app.mg4dash.system.SaicPhone.watchCalls(this)
         // Consumption map removed (1/11): file and accelerometer settings deleted
         java.io.File(filesDir, "consumption_map.json").takeIf { it.exists() }?.let { it.delete(); Log.i("App", "old consumption map deleted") }
         java.io.File(applicationInfo.dataDir, "shared_prefs/accel_cal.xml").takeIf { it.exists() }?.delete()
