@@ -246,8 +246,52 @@ object CarBridge {
         holdFan?.let { (v, until) ->
             if (now > until || s.fanSpeed == v) holdFan = null else r = r.copy(fanSpeed = v)
         }
+        holdRecirc?.let { h -> heldRecirc(s.recirc, h, now).let { (shown, keep) -> if (!keep) holdRecirc = null; r = r.copy(recirc = shown) } }
+        holdDir?.let { h -> heldRecirc(s.fanDirection, h, now).let { (shown, keep) -> if (!keep) holdDir = null; r = r.copy(fanDirection = shown) } }
+        for ((f, h) in holds) {
+            val read = f.get(s)?.let { if (it) 1 else 0 }
+            val (shown, keep) = heldRecirc(read, h, now)
+            if (!keep) holds.remove(f)
+            r = f.set(r, shown?.let { it == 1 })
+        }
         return r
     }
+
+    /**
+     * Climate on / off buttons shown at once when touched (#34), held until the car reads the same or for
+     * [RECIRC_HOLD_MS], then the car's state again (back if it refused). A second quick touch starts from the display.
+     */
+    internal enum class Toggle(val get: (VehicleState) -> Boolean?, val set: (VehicleState, Boolean?) -> VehicleState) {
+        POWER({ it.hvacOn }, { s, v -> s.copy(hvacOn = v) }),
+        AC({ it.acOn }, { s, v -> s.copy(acOn = v) }),
+        AUTO({ it.autoOn }, { s, v -> s.copy(autoOn = v) }),
+        ECO({ it.ecoOn }, { s, v -> s.copy(ecoOn = v) }),
+        DEFROST_FRONT({ it.defrostFront }, { s, v -> s.copy(defrostFront = v) }),
+        DEFROST_REAR({ it.defrostRear }, { s, v -> s.copy(defrostRear = v) }),
+    }
+    private val holds = java.util.concurrent.ConcurrentHashMap<Toggle, Pair<Int, Long>>()
+    @Volatile private var holdDir: Pair<Int, Long>? = null
+
+    /** [t] shown as [on] at once and held (BuildConfig.MOCK applies it for real in MockCar). */
+    private fun showAtOnce(t: Toggle, on: Boolean) {
+        if (BuildConfig.MOCK) return
+        holds[t] = (if (on) 1 else 0) to System.currentTimeMillis() + RECIRC_HOLD_MS
+        _state.value = t.set(_state.value, on)
+    }
+
+    /** The recirculation mode chosen (#34): shown at once, until the car reads it or for [RECIRC_HOLD_MS]. */
+    @Volatile private var holdRecirc: Pair<Int, Long>? = null
+    private const val RECIRC_HOLD_MS = 4000L
+
+    /** What to show from the car's [read] and the mode [held] (mode, until) at [now]; true if still held. */
+    internal fun heldRecirc(read: Int?, held: Pair<Int, Long>, now: Long): Pair<Int?, Boolean> = when {
+        read == held.first -> read to false
+        now > held.second -> read to false
+        else -> held.first to true
+    }
+
+    /** Recirculation: the next mode after [shown] (outside 1 → recirculated 0 → auto 2 → outside). */
+    internal fun nextRecirc(shown: Int?): Int = when (shown) { 1 -> 0; 0 -> 2; else -> 1 }
 
     // ── Heated seats and steering wheel (climate properties, area 0x75, found by MG4Control) ──
     private const val SEAT_HEAT_L = 0x15402513
@@ -821,13 +865,15 @@ object CarBridge {
     private fun Boolean?.asInt(): Int? = this?.let { if (it) 1 else 0 }
     private fun toggleTarget(cur: Boolean?): Int = if (cur == true) 0 else 1
 
-    fun togglePower() = if (useLegacy) legacy("power") { LegacyCar.power(_state.value.hvacOn != true) } else cycleTo("power", toggleTarget(_state.value.hvacOn), 2,
-        { it.hvacPowerStatus.asInt() }, { it.switchHvacPowerStatus() })
-    fun toggleAc() = if (useLegacy) legacy("ac") { LegacyCar.ac(_state.value.acOn != true) } else cycleTo("ac", toggleTarget(_state.value.acOn), 2,
-        { it.acStatus.asInt() }, { it.switchACStatus() })
+    fun togglePower() { val on = _state.value.hvacOn != true; showAtOnce(Toggle.POWER, on); if (useLegacy) legacy("power") { LegacyCar.power(on) } else cycleTo("power", if (on) 1 else 0, 2,
+        { it.hvacPowerStatus.asInt() }, { it.switchHvacPowerStatus() }) }
+    fun toggleAc() { val on = _state.value.acOn != true; showAtOnce(Toggle.AC, on); if (useLegacy) legacy("ac") { LegacyCar.ac(on) } else cycleTo("ac", if (on) 1 else 0, 2,
+        { it.acStatus.asInt() }, { it.switchACStatus() }) }
     fun toggleAuto() {
-        if (_state.value.autoOn == true && _state.value.hvacOn == true) { leaveAuto(); return }
-        if (useLegacy) legacy("auto") { LegacyCar.auto(_state.value.autoOn != true) } else cycleTo("auto", toggleTarget(_state.value.autoOn), 2,
+        if (_state.value.autoOn == true && _state.value.hvacOn == true) { showAtOnce(Toggle.AUTO, false); leaveAuto(); return }
+        val on = _state.value.autoOn != true
+        showAtOnce(Toggle.AUTO, on)
+        if (useLegacy) legacy("auto") { LegacyCar.auto(on) } else cycleTo("auto", if (on) 1 else 0, 2,
             { it.autoStatus.asInt() }, { it.switchAutoStatus() })
     }
 
@@ -901,10 +947,10 @@ object CarBridge {
             }
         }
     }
-    fun toggleDefrostFront() = if (useLegacy) legacy("defrostFront") { LegacyCar.defrostFront(_state.value.defrostFront != true) } else cycleTo("defrostFront", toggleTarget(_state.value.defrostFront), 2,
-        { it.frontDefrostStatus.asInt() }, { it.switchFrontDefrostStatus() })
-    fun toggleDefrostRear() = if (useLegacy) legacy("defrostRear") { LegacyCar.defrostRear(_state.value.defrostRear != true) } else cycleTo("defrostRear", toggleTarget(_state.value.defrostRear), 2,
-        { it.rearDefrostStatus.asInt() }, { it.switchRearDefrostStatus() })
+    fun toggleDefrostFront() { val on = _state.value.defrostFront != true; showAtOnce(Toggle.DEFROST_FRONT, on); if (useLegacy) legacy("defrostFront") { LegacyCar.defrostFront(on) } else cycleTo("defrostFront", if (on) 1 else 0, 2,
+        { it.frontDefrostStatus.asInt() }, { it.switchFrontDefrostStatus() }) }
+    fun toggleDefrostRear() { val on = _state.value.defrostRear != true; showAtOnce(Toggle.DEFROST_REAR, on); if (useLegacy) legacy("defrostRear") { LegacyCar.defrostRear(on) } else cycleTo("defrostRear", if (on) 1 else 0, 2,
+        { it.rearDefrostStatus.asInt() }, { it.switchRearDefrostStatus() }) }
 
     /** Air flow in AUTO mode (#65): 0 = high, 1 = medium, 2 = low, like the stock climate setting. */
     fun setAutoAirVolume(level: Int) = hvacSetting("autoAirVolume=$level", { it.copy(autoAirVolume = level) },
@@ -921,8 +967,8 @@ object CarBridge {
         if (useLegacy) legacy(label, old) else command(label, action)
     }
 
-    fun toggleEco() = cycleTo("eco", toggleTarget(_state.value.ecoOn), 2,
-        { it.ecoStatus.asInt() }, { it.switchEcoStatus() })
+    fun toggleEco() { val on = _state.value.ecoOn != true; showAtOnce(Toggle.ECO, on); cycleTo("eco", if (on) 1 else 0, 2,
+        { it.ecoStatus.asInt() }, { it.switchEcoStatus() }) }
 
     /** Recirculation: recirculated (0) ↔ outside air (1); 3-state cycle, so 3 steps at most. */
     /**
@@ -931,11 +977,41 @@ object CarBridge {
      * the auto state through this button, two steps go back to the start state (no change).
      */
     fun toggleRecirc() {
-        val cur = _state.value.recirc
-        val (target, steps) = when (cur) { 1 -> 0 to 3; 0 -> 2 to 2; else -> 1 to 3 }
-        if (useLegacy) { legacy("recirc=$target") { LegacyCar.loop(target) }; return }
-        cycleTo("recirc", target, steps, { it.airCirculationStatus.takeIf { v -> v >= 0 } }, { it.switchAirCirculationStatus() })
+        // From the mode shown, not the car's (not reread yet after a quick previous tap, #34): shown at once and held
+        val target = nextRecirc(_state.value.recirc)
+        holdRecirc = target to System.currentTimeMillis() + RECIRC_HOLD_MS
+        recircTarget = target
+        if (BuildConfig.MOCK) { _state.value = _state.value.copy(recirc = target); return }
+        _state.value = _state.value.copy(recirc = target)
+        if (recircRunning.getAndSet(true)) return   // the steps under way go on to this last mode
+        ownCommandAt = android.os.SystemClock.elapsedRealtime()
+        scope.launch {
+            val front = if (useLegacy) ourFrontTask() else null
+            try {
+                cycleLock.withLock {
+                    // One step at a time, rereading the car, towards the last mode chosen; 3 steps go round the cycle
+                    var steps = 0
+                    while (true) {
+                        val want = recircTarget ?: break
+                        val h = hvac
+                        val cur = if (h != null) safe { h.airCirculationStatus }?.takeIf { it >= 0 } else LegacyCar.loopMode()
+                        if (cur == want) { Log.i(TAG, "SET recirc=$want reached ($steps step(s))"); break }
+                        if (cur == null) { Log.w(TAG, "SET recirc=$want: state unreadable"); break }
+                        if (steps >= 4) { Log.w(TAG, "SET recirc=$want NOT reached (read $cur)"); break }
+                        try { if (h != null) h.switchAirCirculationStatus() else LegacyCar.loopStep() } catch (e: Exception) { Log.w(TAG, "SET recirc: ${e.message}"); break }
+                        steps++
+                        delay(400)
+                    }
+                }
+            } finally { recircRunning.set(false) }
+            refreshHvac()
+            front?.let { keepFront(it) }
+        }
     }
+
+    /** The recirculation mode the steps under way go to: the last one chosen. */
+    @Volatile private var recircTarget: Int? = null
+    private val recircRunning = java.util.concurrent.atomic.AtomicBoolean(false)
 
     /**
      * Temperature in 1° steps: LO, 18 to 32, HI (limits measured by MG4Control on A9).
@@ -976,6 +1052,7 @@ object CarBridge {
     fun setFanDirection(value: Int) {
         if (value !in 0..6) return
         _state.value = _state.value.copy(fanDirection = value)
+        holdDir = value to System.currentTimeMillis() + RECIRC_HOLD_MS
         if (useLegacy) legacy("direction=$value") { LegacyCar.direction(value) }
         else command("direction=$value") { it.setFanDirection(value) }
     }

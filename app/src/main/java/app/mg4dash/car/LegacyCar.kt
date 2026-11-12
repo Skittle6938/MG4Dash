@@ -145,6 +145,12 @@ object LegacyCar {
     /** Recirculation: press moving one step (outside → inside → auto), reread on the property. */
     fun loop(target: Int) = cycle(PROP_LOOP_MODE, target, 3) { set("setLoopMode", 1) }
 
+    /** Recirculation mode read (0 inside, 1 outside, 2 auto), or null. */
+    fun loopMode(): Int? = prop(PROP_LOOP_MODE)
+
+    /** One recirculation step. */
+    fun loopStep() { set("setLoopMode", 1) }
+
     private fun cycle(id: Int, target: Int, max: Int, advance: () -> Unit): Boolean {
         repeat(max + 1) {
             val cur = prop(id) ?: return false
