@@ -129,6 +129,8 @@ class UpdateDownloadTest {
     @Test fun oneAtATimeThenAClearFailure() {
         Download.sleep = {}
         Download.awaitValidated = { _, _ -> false }
+        // No T-box here: Robolectric never answers the network request, which would wait 10 s a try.
+        Download.tboxLease = { null }
         val app = RuntimeEnvironment.getApplication()
         // Nothing answers on this port: the download fails at once, with a reason, and can be tried again
         val r = Updater.Release("9.9.9", "http://127.0.0.1:9/MG4Dash.apk", 10_000_000, "")
