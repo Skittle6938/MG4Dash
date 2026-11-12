@@ -57,6 +57,8 @@ object Compat {
             appendLine("Battery capacity: car=${app.mg4dash.energy.BatteryCapacity.fromCar() ?: "—"} measured=${app.mg4dash.energy.BatteryCapacity.estimate(a)?.let { "${"%.1f".format(java.util.Locale.US, it.first)} (${it.second} samples)" } ?: "—"}")
             appendLine("Shown: battery=${s.batteryPercent ?: "—"} range=${s.rangeKm ?: "—"} chargeStatus=${s.chargeStatus ?: "—"} chargeControl=${CarBridge.chargeControl}")
             appendLine("Climate: on=${s.hvacOn ?: "—"} temp=${s.driverTemp ?: "—"} fan=${s.fanSpeed ?: "—"} ac=${s.acOn ?: "—"} auto=${s.autoOn ?: "—"} recirc=${s.recirc ?: "—"} outside=${s.outsideTemp ?: "—"}")
+            // The car's own set point limits (#107, old SDK firmwares): LO / HI values and the fan's max
+            if (app.mg4dash.car.LegacyCar.limitsText != "—") appendLine("Climate limits: ${app.mg4dash.car.LegacyCar.limitsText}")
             // Equipment and commands to adapt by firmware (raw car values)
             fun hv(id: Int) = CarProps.readIntArea(id, 0x75)?.toString() ?: "—"
             val (seatCfg, wheelCfg) = CarBridge.heatingConfig()

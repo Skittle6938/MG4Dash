@@ -77,7 +77,11 @@ object EnergyMonitor {
     val tripStartSoc: StateFlow<Int?> = _tripStartSoc
     /** Time (ms) the current trip started: its duration on the consumption card (#44); 0 before the first pass. */
     @Volatile var tripStartedAt = 0L; private set
-    internal fun tripStartForTest(at: Long) { tripStartedAt = at }
+    /** The trip's start on Android's clock that does not jump (#107: the car's clock is often at 1 Jan 2019 at start-up, set from GPS later). */
+    @Volatile private var tripStartedTick = 0L
+    /** How long the trip has lasted; 0 before it starts. */
+    fun tripDurationMs(now: Long = android.os.SystemClock.elapsedRealtime()): Long = if (tripStartedAt > 0) (now - tripStartedTick).coerceAtLeast(0) else 0
+    internal fun tripStartForTest(at: Long) { tripStartedAt = at; tripStartedTick = android.os.SystemClock.elapsedRealtime() - (System.currentTimeMillis() - at) }
     /** Trip number, increased at each new start (reset of min V / max A, #29). */
     @Volatile var tripSeq = 0; private set
     private val _lastYear = MutableStateFlow(Totals())
@@ -212,7 +216,7 @@ object EnergyMonitor {
                     tripDist.restart(); window.clear(); _lastKm.value = null
                     _sinceStart.value = Totals()
                     _tripStartSoc.value = soc
-                    tripStartedAt = now
+                    tripStartedAt = now; tripStartedTick = tick
                     tripSeq++
                 }
                 if (_tripStartSoc.value == null && soc != null) {
@@ -228,7 +232,7 @@ object EnergyMonitor {
                         sp.edit().putInt("em_c_km0", chargeKm).putInt("em_c_akm", -1)
                             .putFloat("em_c_out", 0f).putFloat("em_c_rgn", 0f).putFloat("em_c_clim", 0f).putFloat("em_c_acc", 0f).putFloat("em_c_heat", 0f).apply()
                     }
-                    1 -> { _sinceStart.value = Totals(); if (km != null) startKm = km; tripDist.restart(); window.clear(); _lastKm.value = null; tripStartedAt = now }
+                    1 -> { _sinceStart.value = Totals(); if (km != null) startKm = km; tripDist.restart(); window.clear(); _lastKm.value = null; tripStartedAt = now; tripStartedTick = tick }
                     2 -> { Log.i(TAG, "12-month totals cleared from the screen"); months.clear(); pendingKm = 0; publishMonths(); saveMonths() }
                 }
                 // Charge: the % goes up at least RECHARGE_PCT points above the lowest of the

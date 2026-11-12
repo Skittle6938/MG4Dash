@@ -360,7 +360,7 @@ object CarBridge {
             acOn = safe { h.acStatus },
             autoOn = safe { h.autoStatus },
             recirc = safe { h.airCirculationStatus }?.takeIf { it >= 0 },
-            fanSpeed = safe { h.fanSpeed }?.takeIf { it >= 0 },
+            fanSpeed = safe { h.fanSpeed }?.let { LegacyCar.validFan(it, _state.value.fanSpeed) },
             fanDirection = safe { h.fanDirection }?.takeIf { it in 0..7 },
             driverTemp = safe { h.driverTemperature }?.takeIf { !it.isNaN() && it > 0f },
             outsideTemp = safe { h.outSideTemperature }?.takeIf { !it.isNaN() && it > -60f && it < 70f },
@@ -1021,11 +1021,11 @@ object CarBridge {
         val cur = _state.value.driverTemp ?: return
         val min = VehicleState.TEMP_MIN; val max = VehicleState.TEMP_MAX   // LO / HI
         val target = when {
-            direction > 0 && cur <= min -> 18f
-            direction < 0 && cur >= max -> 32f
+            direction > 0 && cur <= min -> VehicleState.tempFirst
+            direction < 0 && cur >= max -> VehicleState.tempLast
             direction > 0 -> (Math.floor(cur.toDouble()) + 1).toFloat()
             else -> (Math.ceil(cur.toDouble()) - 1).toFloat()
-        }.let { t -> if (t < 18f) min else if (t > 32f) max else t }
+        }.let { t -> if (t < VehicleState.tempFirst) min else if (t > VehicleState.tempLast) max else t }
         if (target == cur) return
         _state.value = _state.value.copy(driverTemp = target)   // immediate visual feedback
         holdTemp = target to System.currentTimeMillis() + HOLD_MS

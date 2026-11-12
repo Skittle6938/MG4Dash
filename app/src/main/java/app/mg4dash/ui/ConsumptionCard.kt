@@ -143,7 +143,7 @@ class ConsumptionCard(context: Context) : LinearLayout(context) {
 
     private fun showDuration() {
         val start = EnergyMonitor.tripStartedAt
-        duration.text = if (prefs.consumptionPeriod.coerceIn(0, 2) == 1 && start > 0) durationText(context, System.currentTimeMillis() - start) else ""
+        duration.text = if (prefs.consumptionPeriod.coerceIn(0, 2) == 1 && start > 0) durationText(context, EnergyMonitor.tripDurationMs()) else ""
     }
 
     /**
