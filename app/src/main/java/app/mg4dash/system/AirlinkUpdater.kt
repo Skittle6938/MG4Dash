@@ -20,7 +20,7 @@ object AirlinkUpdater {
     const val PKG = "com.allgo.app.androidauto"
     const val NAME = "MG4Link"
     // GitHub redirects this address if the repository is renamed
-    private const val API = "https://api.github.com/repos/Skittle6938/DiAuto-MG4/releases?per_page=20"
+    private const val API = "https://api.github.com/repos/Skittle6938/MG4Link/releases?per_page=20"
     /** Above AllGo's (1) and the former relay's (1008): the app is Airlink, not the stock AllGo. */
     private const val MIN_AIRLINK_CODE = 2000L
 
