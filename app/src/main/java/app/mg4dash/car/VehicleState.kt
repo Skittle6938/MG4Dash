@@ -63,8 +63,18 @@ data class VehicleState(
     val speedKmh: Float? = null,
 ) {
     companion object {
-        const val TEMP_MIN = 17.5f   // position LO
-        const val TEMP_MAX = 32.5f   // position HI
+        /**
+         * Set point of the LO and HI positions. SWI69 (A9): 17.5 / 32.5, the numbers 18 to 32. Old SDK firmwares give
+         * their own (#107, getMinTemp / getMaxTemp: LO and HI values): 17 / 33 on SWI68 R46, 15 / 31 (16 to 30) on R67,
+         * R73 and recent SWI165; read by LegacyCar at connection.
+         */
+        @Volatile var tempLo = 17.5f
+        @Volatile var tempHi = 32.5f
+        val TEMP_MIN: Float get() = tempLo   // position LO
+        val TEMP_MAX: Float get() = tempHi   // position HI
+        /** First and last numbered set point (18 and 32 on SWI69, 16 and 30 on SWI68 R67). */
+        val tempFirst: Float get() = Math.floor(tempLo.toDouble()).toFloat() + 1f
+        val tempLast: Float get() = Math.ceil(tempHi.toDouble()).toFloat() - 1f
         const val TEMP_STEP = 1f
         /** "78.4 %" if the tenth is available and consistent with the whole %, otherwise "78 %". */
         fun socLabel(s: VehicleState): String? {

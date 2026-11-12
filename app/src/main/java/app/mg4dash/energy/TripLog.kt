@@ -24,7 +24,8 @@ object TripLog {
         /** Price of a kWh when it was recorded (#102): a later price does not change it; null without a price. */
         val price: Float? = null,
     ) {
-        val minutes: Long get() = ((end - start) / 60_000L).coerceAtLeast(0L)
+        /** Its length; 0 if absurd (over a week: a start taken on the car's clock before it was set from GPS, #107). */
+        val minutes: Long get() = ((end - start) / 60_000L).let { if (it < 0L || it > 7 * 24 * 60L) 0L else it }
         /** kWh/100 from 0.5 km, as on the energy card; null below. */
         val per100: Float? get() = if (km >= 0.5f && kwh > 0.02f) (kwh / km * 100f).takeIf { it in 3f..60f } else null
         /** What its kWh cost, at its price; null without a price or with no kWh known. */

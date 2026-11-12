@@ -185,7 +185,7 @@ class ClimateActivity : PageActivity() {
             t == null -> 0
             t <= VehicleState.TEMP_MIN -> 1
             t >= VehicleState.TEMP_MAX -> 17
-            else -> (Math.round(t) - 16).coerceIn(1, 17)
+            else -> (Math.round(t) - Math.round(VehicleState.tempFirst) + 2).coerceIn(1, 17)
         }
         val autoOn = on && s.autoOn == true
         fanValue.text = when { !on -> "0"; autoOn -> "AUTO"; else -> s.fanSpeed?.toString() ?: "—" }

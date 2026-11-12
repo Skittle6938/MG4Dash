@@ -65,6 +65,29 @@ object LegacyCar {
         if (ac == null) ac = singleton()
     }
 
+    /** The car's own set point and fan limits read (#107), once connected. */
+    @Volatile private var limitsRead = false
+    /** For the Compatibility report: "LO 15, HI 31, fan 1..11 (car)" or the fallback used. */
+    @Volatile var limitsText = "—"; private set
+
+    /**
+     * The LO / HI set points of this car (#107): getMinTemp / getMaxTemp give the LO and HI values (17 / 33 on SWI68
+     * R46, 15 / 31 on R67, R73 and recent SWI165), the numbers shown in between. 17 / 33 if not answered.
+     */
+    private fun readLimits() {
+        if (limitsRead || ac == null) return
+        limitsRead = true
+        val (lo, hi) = tempLimits(int("getMinTemp"), int("getMaxTemp"))
+        VehicleState.tempLo = lo.toFloat(); VehicleState.tempHi = hi.toFloat()
+        val fanMax = int("getMaxAirVolume")
+        limitsText = "LO $lo, HI $hi (read ${int("getMinTemp")} / ${int("getMaxTemp")}), fan max ${fanMax ?: "—"}"
+        Log.i(TAG, "climate limits: $limitsText")
+    }
+
+    /** LO and HI from the car's getMinTemp / getMaxTemp, if plausible; otherwise 17 / 33. */
+    internal fun tempLimits(min: Int?, max: Int?): Pair<Int, Int> =
+        if (min != null && max != null && min in 10..20 && max in 28..40 && max - min >= 10) min to max else 17 to 33
+
     private fun int(name: String): Int? {
         val a = ac ?: return null
         return try { a.javaClass.getMethod(name).invoke(a) as? Int } catch (_: Exception) { null }
@@ -93,6 +116,7 @@ object LegacyCar {
     fun readHvac(s: VehicleState): VehicleState {
         if (ac == null) { initDone = false; connect() }
         if (ac == null) return s
+        readLimits()
         fun b(v: Int?) = v?.takeIf { it >= 0 }?.let { it == 1 }
         return s.copy(
             connected = true,
@@ -100,7 +124,8 @@ object LegacyCar {
             acOn = b(int("getAcSwitch")),
             autoOn = b(int("getAutoStatus")),
             recirc = prop(PROP_LOOP_MODE),
-            fanSpeed = int("getAirVolumeLevel")?.takeIf { it >= 0 },
+            // A level out of 1..11 (15 for a moment in AUTO, #107): the last valid one kept
+            fanSpeed = int("getAirVolumeLevel")?.let { validFan(it, s.fanSpeed) },
             fanDirection = (prop(PROP_BLOWER_DIRECTION) ?: int("getBlowerDirectionMode"))?.takeIf { it in 0..7 },
             driverTemp = int("getDrvTemp")?.takeIf { it in 10..40 }?.toFloat(),
             outsideTemp = float("getOutCarTemp")?.takeIf { !it.isNaN() && it > -60f && it < 70f } ?: s.outsideTemp,
@@ -144,6 +169,9 @@ object LegacyCar {
 
     /** Recirculation: press moving one step (outside → inside → auto), reread on the property. */
     fun loop(target: Int) = cycle(PROP_LOOP_MODE, target, 3) { set("setLoopMode", 1) }
+
+    /** Fan level read: kept when 0 (off) to [VehicleState.FAN_MAX]; otherwise the last valid one ([last]). */
+    internal fun validFan(read: Int, last: Int?): Int? = if (read in 0..VehicleState.FAN_MAX) read else last
 
     /** Recirculation mode read (0 inside, 1 outside, 2 auto), or null. */
     fun loopMode(): Int? = prop(PROP_LOOP_MODE)
