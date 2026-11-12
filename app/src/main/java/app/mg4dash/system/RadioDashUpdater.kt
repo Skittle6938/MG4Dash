@@ -17,7 +17,7 @@ import java.io.File
 object RadioDashUpdater {
     private const val TAG = "RadioDashUpdate"
     const val PKG = "com.saicmotor.radio"
-    private const val API = "https://api.github.com/repos/Skittle6938/MG4-Radio-Dash/releases?per_page=10"
+    private const val API = "https://api.github.com/repos/Skittle6938/MG4Radio/releases?per_page=10"
     /** Firmwares on which Radio Dash has been tested, named in Settings. */
     const val TESTED_ON = "SWI69, SWI68 R67"
 
