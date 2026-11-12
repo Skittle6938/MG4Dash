@@ -73,23 +73,35 @@ object SoundTrigger {
     fun silenceForPause(context: Context, maxMs: Long = SILENCE_MAX_MS) {
         val ctx = context.applicationContext.also { appCtx = it }
         threadHandler.post {
-            if (silenceBefore >= 0 || isPlaying) return@post
-            if (SoundTriggerSettings.getPendingVolumeRestore(ctx) != null) { Log.w(TAG, "silence: a volume restore is pending, volume left"); return@post }
-            val route = CarMediaVolume.route(ctx) ?: run { Log.w(TAG, "silence: no volume route"); return@post }
-            val before = CarMediaVolume.read(route)
-            if (before <= 0) return@post
-            if (!SoundTriggerSettings.savePendingVolumeRestore(ctx, route.channel.name, route.max, route.group, before, 0)) return@post
-            if (!CarMediaVolume.write(route, 0)) Log.w(TAG, "silence: volume 0 not verified")
-            silenceRoute = route; silenceBefore = before
-            Log.i(TAG, "silence until the pause: media volume $before → 0")
-            silenceEnd = Runnable { endSilenceNow("${maxMs / 1000} s at most") }.also { threadHandler.postDelayed(it, maxMs) }
+            if (silenceBefore >= 0) return@post
+            // The switch sent a moment before the startup sound's real end (its end is estimated from its length):
+            // done as soon as it stops, instead of being dropped (#36, Bluetooth heard before the pause)
+            if (isPlaying) { silenceAfterSound = maxMs; Log.i(TAG, "silence until the pause: once the startup sound ends"); return@post }
+            silenceNow(ctx, maxMs)
         }
+    }
+
+    /** A silence asked while the startup sound still played: its length, applied when the sound stops; 0 none. */
+    private var silenceAfterSound = 0L
+
+    private fun silenceNow(ctx: Context, maxMs: Long) {
+        if (SoundTriggerSettings.getPendingVolumeRestore(ctx) != null) { Log.w(TAG, "silence: a volume restore is pending, volume left"); return }
+        val route = CarMediaVolume.route(ctx) ?: run { Log.w(TAG, "silence: no volume route"); return }
+        val before = CarMediaVolume.read(route)
+        if (before <= 0) return
+        if (!SoundTriggerSettings.savePendingVolumeRestore(ctx, route.channel.name, route.max, route.group, before, 0)) return
+        if (!CarMediaVolume.write(route, 0)) Log.w(TAG, "silence: volume 0 not verified")
+        silenceRoute = route; silenceBefore = before
+        Log.i(TAG, "silence until the pause: media volume $before → 0")
+        silenceEnd = Runnable { endSilenceNow("${maxMs / 1000} s at most") }.also { threadHandler.postDelayed(it, maxMs) }
     }
 
     /** The source is paused (or the sequence is over): the volume of [silenceForPause] back. */
     fun endSilence(why: String) { threadHandler.post { endSilenceNow(why) } }
 
     private fun endSilenceNow(why: String) {
+        // Paused already before the sound's end: no silence to apply any more
+        silenceAfterSound = 0
         val route = silenceRoute ?: return
         silenceEnd?.let { threadHandler.removeCallbacks(it) }; silenceEnd = null
         val before = silenceBefore
@@ -230,6 +242,8 @@ object SoundTrigger {
         mediaPlayer = null
 
         restoreCarVolume()
+        // A silence asked during the sound's last moment (#36): now that the sound's own volume is back, at 0
+        if (silenceAfterSound > 0) { val ms = silenceAfterSound; silenceAfterSound = 0; appCtx?.let { silenceNow(it, ms) } }
         // A pause wanted at startup (#36): the focus is kept a moment, the radio would resume as soon as it is free
         if (wasBoot && holdFocusAfterBoot) {
             holdFocusAfterBoot = false
