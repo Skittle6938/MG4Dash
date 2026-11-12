@@ -26,6 +26,13 @@ class SaicPhoneTest {
         assertFalse("hung up", SaicPhone.shrinkWhen(CALL_STATE_OFFHOOK, CALL_STATE_IDLE))
     }
 
+    @Test fun phoneStateBroadcastRead() {
+        assertEquals(CALL_STATE_OFFHOOK, SaicPhone.stateOf(android.telephony.TelephonyManager.EXTRA_STATE_OFFHOOK))
+        assertEquals(CALL_STATE_RINGING, SaicPhone.stateOf(android.telephony.TelephonyManager.EXTRA_STATE_RINGING))
+        assertEquals(CALL_STATE_IDLE, SaicPhone.stateOf(android.telephony.TelephonyManager.EXTRA_STATE_IDLE))
+        assertEquals(null, SaicPhone.stateOf(null))
+    }
+
     @Test fun homeSendsTheStockLauncherCommandOnlyWithTheA9Phone() {
         val app = RuntimeEnvironment.getApplication()
         while (shadowOf(app).nextStartedService != null) { /* the app's own services, started at its launch */ }
@@ -41,5 +48,17 @@ class SaicPhoneTest {
             assertEquals("com.saicmotor.btphone/.service.PhoneService", i.component!!.flattenToShortString())
             assertTrue(i.getParcelableExtra<com.saicmotor.common.CommandParcelable>("command").toString().contains("mEvent=16416"))
         } finally { f.set(SaicPhone, null) }
+    }
+
+    /** A call placed or answered: the launcher's command (every A9 version) and the phone's own (not on SWI131 / SWI86). */
+    @Test fun callShrunkWithBothCommands() {
+        val app = RuntimeEnvironment.getApplication()
+        while (shadowOf(app).nextStartedService != null) { }
+        SaicPhone.shrinkCall(app)
+        val events = generateSequence { shadowOf(app).nextStartedService }
+            .map { it.getParcelableExtra<com.saicmotor.common.CommandParcelable>("command").toString() }.toList()
+        assertEquals(2, events.size)
+        assertTrue(events[0].contains("mEvent=16416") && events[0].contains("mTargetType=1"))
+        assertTrue(events[1].contains("mEvent=16423"))
     }
 }
