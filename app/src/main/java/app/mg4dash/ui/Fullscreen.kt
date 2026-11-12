@@ -27,6 +27,21 @@ object Fullscreen {
     }
 
     /**
+     * The bars hidden again whatever the insets say (#93): after the SAIC phone's call window, the side bar went away
+     * again but the top one stayed, while [restore] judged them hidden. Cleared, then the full screen applied anew.
+     */
+    @Suppress("DEPRECATION")
+    fun force(activity: Activity, why: String) {
+        if (!Prefs(activity).fullscreen) return
+        val decor = activity.window.decorView
+        val insets = decor.rootWindowInsets
+        app.mg4dash.system.Log.i("Bars", "$why: top ${insets?.systemWindowInsetTop}, side ${insets?.systemWindowInsetLeft}, " +
+            "flags ${Integer.toHexString(decor.systemUiVisibility)}, focus ${activity.hasWindowFocus()}: hidden again")
+        decor.systemUiVisibility = View.SYSTEM_UI_FLAG_VISIBLE
+        decor.post { apply(activity) }
+    }
+
+    /**
      * The car's call window brings the bars back, which then stayed over home:
      * rewriting the same settings has no effect, so leave them for a moment. Nothing to do if the bars are already hidden.
      */
