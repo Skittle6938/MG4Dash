@@ -90,6 +90,8 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
             return
         }
         registerReceiver(callChanged, android.content.IntentFilter("android.bluetooth.headsetclient.profile.action.AG_CALL_CHANGED"))
+        // The call shrunk to its card (#93): the bars its window brought back hidden at once, and once more 1 s later
+        app.mg4dash.system.SaicPhone.onShrunk = callShrunk
         b = ActivityMainBinding.inflate(layoutInflater)
         setContentView(b.root)
         b.fanGauge.segments = VehicleState.FAN_MAX
@@ -153,6 +155,13 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
     }
 
     private val restoreBars = Runnable { Fullscreen.restore(this) }
+    /** The call shrunk to its card (#93): the bars its window brought back hidden at once, and once more 1 s later. */
+    private val callShrunk: () -> Unit = {
+        runOnUiThread {
+            Fullscreen.force(this, "call shrunk")
+            window.decorView.postDelayed({ Fullscreen.force(this, "call shrunk + 1 s") }, 1_000)
+        }
+    }
     private val callChanged = object : android.content.BroadcastReceiver() {
         override fun onReceive(c: android.content.Context?, i: Intent?) {
             window.decorView.removeCallbacks(restoreBars)
@@ -162,6 +171,8 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
 
     override fun onDestroy() {
         try { unregisterReceiver(callChanged) } catch (_: Exception) {}
+        // Not the next home's, after a rebuild (its onCreate comes before this onDestroy)
+        if (app.mg4dash.system.SaicPhone.onShrunk === callShrunk) app.mg4dash.system.SaicPhone.onShrunk = null
         if (isChangingConfigurations && hiddenForMap != null) mapFullOnRecreate = true
         super.onDestroy()
     }

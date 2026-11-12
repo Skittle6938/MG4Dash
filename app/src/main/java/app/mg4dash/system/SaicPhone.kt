@@ -25,7 +25,11 @@ object SaicPhone {
     const val LAUNCHER_RESUME = 16416
     /** ModeConstants.MODE_COMMAND_SHRINK_BT_CALLWINDOW of the phone's PhoneService. */
     const val SHRINK_CALL_WINDOW = 16423
-    private const val SHRINK_DELAY_MS = 600L
+    /** The shrink as soon as the phone has opened its window (it only shrinks a window already shown), then once more. */
+    internal val SHRINK_DELAYS_MS = longArrayOf(150L, 600L)
+
+    /** MG4Dash's home, to hide the bars again once the call is shrunk (the phone's window brought them back). */
+    @Volatile var onShrunk: (() -> Unit)? = null
 
     @Volatile private var present: Boolean? = null
     private var listening = false
@@ -92,7 +96,7 @@ object SaicPhone {
         Log.i(TAG, "Appel : état ${name(lastState)} → ${name(state)} ($from)")
         lastState = state
         // A moment later: the phone shows its call window first
-        if (shrink) main.postDelayed({ shrinkCall(ctx) }, SHRINK_DELAY_MS)
+        if (shrink) SHRINK_DELAYS_MS.forEachIndexed { n, ms -> main.postDelayed({ shrinkCall(ctx, log = n == 0); onShrunk?.invoke() }, ms) }
     }
 
     /** EXTRA_STATE of the PHONE_STATE broadcast as a CALL_STATE_ value. */
@@ -111,9 +115,9 @@ object SaicPhone {
      * The call shrunk to the floating card: the launcher's command, handled by every A9 phone version, and the phone's
      * own one, which SWI131 R27 and SWI86 R14 do not have (ignored there).
      */
-    internal fun shrinkCall(context: Context) {
+    internal fun shrinkCall(context: Context, log: Boolean = true) {
         send(context, LAUNCHER_RESUME, type = 1, state = 0, log = null)
-        send(context, SHRINK_CALL_WINDOW, log = "Appel : réduit en carte flottante")
+        send(context, SHRINK_CALL_WINDOW, log = if (log) "Appel : réduit en carte flottante" else null)
     }
 
     /** A call placed or answered (off hook, not while it rings): shrunk once, when it gets there. */

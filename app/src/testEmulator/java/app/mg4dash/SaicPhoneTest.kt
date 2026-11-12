@@ -26,6 +26,13 @@ class SaicPhoneTest {
         assertFalse("hung up", SaicPhone.shrinkWhen(CALL_STATE_OFFHOOK, CALL_STATE_IDLE))
     }
 
+    /** The large window barely seen: shrunk 0.15 s after the call starts (it opens ~0.07 s after), then once more. */
+    @Test fun shrunkQuicklyThenOnceMore() {
+        assertEquals(2, SaicPhone.SHRINK_DELAYS_MS.size)
+        assertTrue(SaicPhone.SHRINK_DELAYS_MS[0] in 100L..200L)
+        assertTrue(SaicPhone.SHRINK_DELAYS_MS[1] > SaicPhone.SHRINK_DELAYS_MS[0])
+    }
+
     @Test fun phoneStateBroadcastRead() {
         assertEquals(CALL_STATE_OFFHOOK, SaicPhone.stateOf(android.telephony.TelephonyManager.EXTRA_STATE_OFFHOOK))
         assertEquals(CALL_STATE_RINGING, SaicPhone.stateOf(android.telephony.TelephonyManager.EXTRA_STATE_RINGING))
