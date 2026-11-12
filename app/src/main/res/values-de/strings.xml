@@ -886,4 +886,11 @@
     <string name="st_web_engine_revert_confirm">Ursprüngliche Web-Engine (Chromium 66) zurückholen? Neuere Seiten öffnen sich dann nicht mehr in der Web-App-Karte.</string>
     <string name="st_web_engine_revert_ok">Zurück</string>
     <string name="st_web_engine_done">Fertig: Die Web-App-Karte nutzt die neue Engine.</string>
+    <string name="st_aa_none">nicht installiert</string>
+    <string name="st_aa_busy">ein Update läuft bereits</string>
+    <string name="st_aa_available">MG4-AA-Airlink %1$s verfügbar</string>
+    <string name="st_aa_uptodate">MG4-AA-Airlink ist aktuell (%1$s)</string>
+    <string name="st_aa_installing">MG4-AA-Airlink wird installiert…</string>
+    <string name="st_aa_done">MG4-AA-Airlink ist aktualisiert. Android Auto verbindet sich von selbst wieder.</string>
+    <string name="st_aa_session_warning">Android Auto stoppt während der Installation etwa eine Minute.</string>
 </resources>

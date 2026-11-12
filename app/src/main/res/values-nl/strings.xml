@@ -886,4 +886,11 @@
     <string name="st_web_engine_revert_confirm">De originele web-engine (Chromium 66) terugzetten? Recente sites openen dan niet meer in de web-app-kaart.</string>
     <string name="st_web_engine_revert_ok">Terugzetten</string>
     <string name="st_web_engine_done">Klaar: de web-app-kaart gebruikt de nieuwe engine.</string>
+    <string name="st_aa_none">niet geïnstalleerd</string>
+    <string name="st_aa_busy">er loopt al een update</string>
+    <string name="st_aa_available">MG4-AA-Airlink %1$s beschikbaar</string>
+    <string name="st_aa_uptodate">MG4-AA-Airlink is actueel (%1$s)</string>
+    <string name="st_aa_installing">MG4-AA-Airlink wordt geïnstalleerd…</string>
+    <string name="st_aa_done">MG4-AA-Airlink is bijgewerkt. Android Auto maakt vanzelf weer verbinding.</string>
+    <string name="st_aa_session_warning">Android Auto stopt ongeveer een minuut tijdens de installatie.</string>
 </resources>

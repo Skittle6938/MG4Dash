@@ -886,4 +886,11 @@
     <string name="st_web_engine_revert_confirm">Put back the car\'s own web engine (Chromium 66)? Recent sites will no longer open in the web app card.</string>
     <string name="st_web_engine_revert_ok">Put back</string>
     <string name="st_web_engine_done">Done: the web app card uses the new engine.</string>
+    <string name="st_aa_none">not installed</string>
+    <string name="st_aa_busy">an update is already running</string>
+    <string name="st_aa_available">MG4-AA-Airlink %1$s available</string>
+    <string name="st_aa_uptodate">MG4-AA-Airlink up to date (%1$s)</string>
+    <string name="st_aa_installing">Installing MG4-AA-Airlink…</string>
+    <string name="st_aa_done">MG4-AA-Airlink is updated. Android Auto connects again by itself.</string>
+    <string name="st_aa_session_warning">Android Auto stops for about a minute while it installs.</string>
 </resources>
