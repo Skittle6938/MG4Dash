@@ -127,16 +127,16 @@ internal class StartupSequence(
 
     private fun chooseOrWait(i: Input, out: MutableList<Action>) {
         val waited = i.now - chooseAt >= PREFERRED_WAIT_MS
-        val t = when (mode) {
-            is Mode.Car -> i.carSource ?: if (waited) radio else null
+        // The car already on the phone's projection (CarPlay, Android Auto, MG4Link): kept in every mode, never taken
+        // from it for a car source, nor by the radio after the wait (#106: CarPlay lost the car's source to the radio
+        // at each start; a fixed CarPlay source, connected 20 to 45 s after the start, never counted as there)
+        val car = i.carSource
+        val t = if (car != null && i.phoneDecides(car)) car else when (mode) {
+            is Mode.Car -> car ?: if (waited) radio else null
             is Mode.Fixed -> if (mode.pkg in i.available) mode.pkg else if (waited) radio else null
             is Mode.Auto -> {
                 val pref = mode.order.firstOrNull()
-                // The car already on the phone's projection (CarPlay, Android Auto, DiAuto): kept, not taken from it
-                // for a car source (#106: CarPlay lost its sound to the radio at each start)
-                val car = i.carSource
-                if (car != null && i.phoneDecides(car)) car
-                else if (pref != null && pref in i.available) pref
+                if (pref != null && pref in i.available) pref
                 else if (waited || pref == null) mode.order.firstOrNull { it in i.available } ?: radio
                 else null
             }

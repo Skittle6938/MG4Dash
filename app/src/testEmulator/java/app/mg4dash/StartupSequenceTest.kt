@@ -137,6 +137,37 @@ class StartupSequenceTest {
         assertEquals("left to the phone", s.endedBy)
     }
 
+    /** #106: a projection the car plays is kept in every mode, and the radio after the wait never replaces it. */
+    @Test fun projectionTheCarPlaysIsKeptInEveryMode() {
+        val cp = "carplay"
+        fun input(t: Long, carSource: String?) = Input(t, available = listOf(radio, bt), carSource = carSource, phoneDecides = { it == cp })
+        for (mode in listOf(Mode.Auto(listOf(bt, radio)), Mode.Fixed(cp), Mode.Fixed(bt), Mode.Fixed(radio), Mode.Car)) {
+            for (play in listOf(true, false)) {
+                val s = seq(mode, play)
+                val a = run(s, 0, 20_000) { t -> input(t, cp) }
+                assertEquals("$mode, play $play: CarPlay kept, nothing else sent", listOf(0L to Action.Switch(cp)), a)
+                assertEquals("left to the phone", s.endedBy)
+            }
+        }
+    }
+
+    /** #106: a fixed CarPlay source (never "available" to MG4Dash) connects after the start: kept, the radio not switched to. */
+    @Test fun fixedCarPlayArrivingLateIsNotReplacedByTheRadio() {
+        val cp = "carplay"
+        val s = seq(Mode.Fixed(cp), play = false)
+        // The startup sound, then CarPlay plays 12 s after the sound's end, before the 15 s wait is over
+        val a = run(s, 0, 40_000) { t ->
+            Input(t, soundExpected = true, soundBusy = t < 6_000, soundEndAt = if (t < 6_000) null else 6_000,
+                available = listOf(radio, bt), carSource = if (t >= 18_000) cp else radio, phoneDecides = { it == cp })
+        }
+        assertTrue("never the radio", a.none { it.second == Action.Switch(radio) })
+        assertEquals(listOf(18_000L to Action.Switch(cp)), a)
+        // CarPlay there at the end of the wait too: the 15 s fallback keeps it
+        val w = seq(Mode.Fixed(cp), play = true)
+        val b = run(w, 0, 20_000) { t -> Input(t, available = listOf(radio), carSource = if (t >= 15_000) cp else null, phoneDecides = { it == cp }) }
+        assertEquals(listOf(15_000L to Action.Switch(cp)), b)
+    }
+
     @Test fun projectionLeavesPlaybackToThePhone() {
         val s = seq(Mode.Fixed("diauto"), play = true)
         val a = run(s, 0, 3_000) { t -> Input(t, available = listOf(radio, "diauto"), carSource = "diauto", phoneDecides = { it == "diauto" }) }
