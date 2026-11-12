@@ -13,7 +13,9 @@ import com.saicmotor.common.CommandParcelable
  * shrink to its floating card: each time the launcher comes back in front (Home), it sends the command
  * MODE_COMMAND_LAUNCHER_RESUME (16416, type 1). MG4Dash, as the home screen, sends it too, and also the phone's own
  * SHRINK_BT_CALLWINDOW (16423) once a call is placed or answered, so it is a floating card by default. While it
- * rings the large screen stays (to answer; the phone does not shrink then anyway). SWI68 / SWI165 (hmi.btcall): nothing.
+ * rings the large screen stays (to answer; the phone does not shrink then anyway). Any car with that phone app
+ * (SWI69, SWI131, SWI132, SWI86…), whatever its firmware name. SWI68 / SWI133 / SWI165 (hmi.btcall) have no floating
+ * card: their call screen shows the SystemUI call bar by itself when MG4Dash comes in front, nothing is sent there.
  */
 object SaicPhone {
     private const val TAG = "Phone"
@@ -39,24 +41,79 @@ object SaicPhone {
         if (applies(context)) send(context, LAUNCHER_RESUME, type = 1, state = 0, log = null)
     }
 
-    /** Follows the calls: once one is placed or answered, it shrinks to the floating card. */
+    /**
+     * Follows the calls: once one is placed or answered, it shrinks to the floating card. Through the system's
+     * PHONE_STATE broadcast, which Telecom sends for the car's Bluetooth calls too (a PhoneStateListener alone heard
+     * nothing of them on SWI69), and the listener as well; the same state from both counts once.
+     */
     fun watchCalls(context: Context) {
         val ctx = context.applicationContext
         if (listening || !applies(ctx)) return
-        val tm = ctx.getSystemService(Context.TELEPHONY_SERVICE) as? TelephonyManager ?: return
-        val main = android.os.Handler(android.os.Looper.getMainLooper())
+        listening = true
         try {
+            ctx.registerReceiver(object : android.content.BroadcastReceiver() {
+                override fun onReceive(c: Context?, i: Intent?) {
+                    callState(ctx, stateOf(i?.getStringExtra(TelephonyManager.EXTRA_STATE)) ?: return, "broadcast")
+                }
+            }, android.content.IntentFilter(TelephonyManager.ACTION_PHONE_STATE_CHANGED))
+        } catch (e: Exception) { Log.w(TAG, "call broadcast: ${e.message}") }
+        try {
+            val tm = ctx.getSystemService(Context.TELEPHONY_SERVICE) as? TelephonyManager ?: return
             @Suppress("DEPRECATION")
             tm.listen(object : PhoneStateListener() {
-                override fun onCallStateChanged(state: Int, number: String?) {
-                    val shrink = shrinkWhen(lastState, state)
-                    lastState = state
-                    // A moment later: the phone shows its call window first
-                    if (shrink) main.postDelayed({ send(ctx, SHRINK_CALL_WINDOW, log = "Appel : réduit en carte flottante") }, SHRINK_DELAY_MS)
-                }
+                override fun onCallStateChanged(state: Int, number: String?) = callState(ctx, state, "listener")
             }, PhoneStateListener.LISTEN_CALL_STATE)
-            listening = true
         } catch (e: Exception) { Log.w(TAG, "call state: ${e.message}") }
+        // Backup: Telecom asked every 2 s (in a call, ringing), should neither of them be heard
+        val telecom = ctx.getSystemService(Context.TELECOM_SERVICE) as? android.telecom.TelecomManager ?: return
+        val audio = ctx.getSystemService(Context.AUDIO_SERVICE) as? android.media.AudioManager
+        main.post(object : Runnable {
+            override fun run() {
+                try {
+                    @Suppress("MissingPermission")
+                    val state = when {
+                        !telecom.isInCall -> TelephonyManager.CALL_STATE_IDLE
+                        audio?.mode == android.media.AudioManager.MODE_RINGTONE -> TelephonyManager.CALL_STATE_RINGING
+                        else -> TelephonyManager.CALL_STATE_OFFHOOK
+                    }
+                    callState(ctx, state, "Telecom")
+                } catch (_: Exception) {}
+                main.postDelayed(this, 2_000)
+            }
+        })
+    }
+
+    private val main by lazy { android.os.Handler(android.os.Looper.getMainLooper()) }
+
+    /** A call state from the broadcast or the listener (main thread). */
+    private fun callState(ctx: Context, state: Int, from: String) {
+        if (state == lastState) return
+        val shrink = shrinkWhen(lastState, state)
+        Log.i(TAG, "Appel : état ${name(lastState)} → ${name(state)} ($from)")
+        lastState = state
+        // A moment later: the phone shows its call window first
+        if (shrink) main.postDelayed({ shrinkCall(ctx) }, SHRINK_DELAY_MS)
+    }
+
+    /** EXTRA_STATE of the PHONE_STATE broadcast as a CALL_STATE_ value. */
+    internal fun stateOf(extra: String?): Int? = when (extra) {
+        TelephonyManager.EXTRA_STATE_IDLE -> TelephonyManager.CALL_STATE_IDLE
+        TelephonyManager.EXTRA_STATE_RINGING -> TelephonyManager.CALL_STATE_RINGING
+        TelephonyManager.EXTRA_STATE_OFFHOOK -> TelephonyManager.CALL_STATE_OFFHOOK
+        else -> null
+    }
+
+    private fun name(state: Int) = when (state) {
+        TelephonyManager.CALL_STATE_RINGING -> "ringing"; TelephonyManager.CALL_STATE_OFFHOOK -> "off hook"; else -> "idle"
+    }
+
+    /**
+     * The call shrunk to the floating card: the launcher's command, handled by every A9 phone version, and the phone's
+     * own one, which SWI131 R27 and SWI86 R14 do not have (ignored there).
+     */
+    internal fun shrinkCall(context: Context) {
+        send(context, LAUNCHER_RESUME, type = 1, state = 0, log = null)
+        send(context, SHRINK_CALL_WINDOW, log = "Appel : réduit en carte flottante")
     }
 
     /** A call placed or answered (off hook, not while it rings): shrunk once, when it gets there. */
