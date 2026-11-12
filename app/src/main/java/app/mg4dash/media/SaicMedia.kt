@@ -29,6 +29,8 @@ object SaicMedia {
     private const val USB_NEXT = 26
     private const val USB_IS_PLAYING = 30
     private const val USB_CURRENT_MUSIC = 33
+    /** IPlayStatusBinderInterface.getCurrentMediaSource (transaction found in the SWI165 SystemUI's SAIC SDK). */
+    private const val STATUS_CURRENT_SOURCE = 9
 
     data class Track(val title: String, val artist: String, val album: String)
     data class UsbState(val track: Track?, val playing: Boolean)
@@ -71,13 +73,18 @@ object SaicMedia {
 
     private val bt = Link("$PKG.BT_MUSIC_ACTION", "com.saicmotor.sdk.media.IBtMusicBinderInterface")
     private val usb = Link("$PKG.MUSIC_PLAYER_ACTION", "com.saicmotor.sdk.media.IMusicPlayerBinderInterface")
+    /** Which source the media service has (IPlayStatusBinderInterface): what the SAIC top bar shows (#106). */
+    private val status = Link("$PKG.PLAY_STATUS_ACTION", "com.saicmotor.sdk.media.IPlayStatusBinderInterface")
 
     @Volatile var last: UsbState? = null
         private set
 
     val ready: Boolean get() = usb.binder?.isBinderAlive == true
 
-    fun connect(context: Context) { bt.connect(context); usb.connect(context) }
+    fun connect(context: Context) { bt.connect(context); usb.connect(context); status.connect(context) }
+
+    /** The media service's current source type (6 USB, 50 CarPlay…), as its top bar has it; null if it does not answer. */
+    fun currentSource(): Int? = status.call(STATUS_CURRENT_SOURCE) { it.readInt() }
 
     /** Current USB track and state; null if the service does not answer. */
     fun refresh(): UsbState? {
