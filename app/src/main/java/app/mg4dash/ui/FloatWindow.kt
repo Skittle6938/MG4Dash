@@ -313,6 +313,9 @@ class FloatWindow(
 
     fun rest() = setAwake(false)
 
+    /** The touch [ev] starts on the window. */
+    fun holds(ev: MotionEvent): Boolean = local(ev).let { rect.contains(it[0].toInt(), it[1].toInt()) }
+
     /** The window itself, for the other window to settle on its edges. */
     val frameView: View get() = holder
 
