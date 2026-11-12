@@ -886,4 +886,11 @@
     <string name="st_web_engine_revert_confirm">Remettre le moteur web d\'origine (Chromium 66) ? Les sites récents ne s\'ouvriront plus dans la carte Web app.</string>
     <string name="st_web_engine_revert_ok">Remettre</string>
     <string name="st_web_engine_done">Terminé : la carte Web app utilise le nouveau moteur.</string>
+    <string name="st_aa_none">non installé</string>
+    <string name="st_aa_busy">une mise à jour est déjà en cours</string>
+    <string name="st_aa_available">MG4-AA-Airlink %1$s disponible</string>
+    <string name="st_aa_uptodate">MG4-AA-Airlink à jour (%1$s)</string>
+    <string name="st_aa_installing">Installation de MG4-AA-Airlink…</string>
+    <string name="st_aa_done">MG4-AA-Airlink est à jour. Android Auto se reconnecte tout seul.</string>
+    <string name="st_aa_session_warning">Android Auto s\'arrête environ une minute pendant l\'installation.</string>
 </resources>

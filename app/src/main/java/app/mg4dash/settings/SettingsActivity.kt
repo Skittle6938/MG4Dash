@@ -384,6 +384,7 @@ class SettingsActivity : AppCompatActivity() {
             }
         }
         radioDashUpdate(upd)
+        airlinkUpdate(upd)
         val engineShown = webEngine(upd)
         text(upd, getString(R.string.st_upd_note, app.mg4dash.system.RadioDashUpdater.TESTED_ON) +
             (if (engineShown) " " + getString(R.string.st_web_engine_note) else ""), 15f, R.color.text_title)
@@ -718,6 +719,72 @@ class SettingsActivity : AppCompatActivity() {
         line.addView(b, LinearLayout.LayoutParams(dp(300), dp(56)).apply { leftMargin = dp(16) })
         parent.addView(line, LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(10) })
         return stateView to b
+    }
+
+    /**
+     * MG4-AA-Airlink (wireless Android Auto, formerly DiAuto MG4+): checked and updated from here when it is
+     * installed. One check or update at a time ([app.mg4dash.system.AirlinkUpdater.begin]).
+     */
+    private fun airlinkUpdate(parent: LinearLayout) {
+        val A = app.mg4dash.system.AirlinkUpdater
+        var cur = A.installedVersion(this)
+        var found: app.mg4dash.system.Updater.Release? = null
+        fun stateText() = when {
+            cur == null -> getString(R.string.st_aa_none)
+            A.running -> getString(R.string.st_aa_busy)
+            found != null && app.mg4dash.system.Updater.isNewer(found!!.version, cur!!) -> getString(R.string.st_upd_new, cur, found!!.version)
+            found != null -> getString(R.string.st_upd_current, cur)
+            else -> cur!!
+        }
+        val (state, button) = updateLine(parent, A.NAME, stateText(), null)
+        fun showState() { state.text = stateText() }
+        if (cur == null) { button.isEnabled = false; button.alpha = 0.4f; return }
+        button.setOnClickListener {
+            if (app.mg4dash.system.DataUsage.updatesBlocked(this)) { state.text = getString(R.string.du_updates_wait); return@setOnClickListener }
+            if (!A.begin()) { state.text = getString(R.string.st_aa_busy); return@setOnClickListener }
+            state.text = getString(R.string.st_update_checking)
+            lifecycleScope.launch {
+                val r = withContext(Dispatchers.IO) { try { A.latest(prefs.updateBeta) } catch (e: Exception) { Log.w("Update", "${A.NAME}: ${e.message}"); null } }
+                if (r == null) { A.end(); state.text = getString(R.string.st_update_error); return@launch }
+                found = r
+                cur = A.installedVersion(this@SettingsActivity) ?: cur
+                if (!app.mg4dash.system.Updater.isNewer(r.version, cur!!)) { A.end(); state.text = getString(R.string.st_aa_uptodate, cur); return@launch }
+                showState()
+                var started = false
+                AlertDialog.Builder(this@SettingsActivity)
+                    .setTitle(getString(R.string.st_aa_available, r.version))
+                    .setMessage(android.text.SpannableStringBuilder(app.mg4dash.system.Updater.dataWarning(this@SettingsActivity, r) + "\n" + getString(R.string.st_aa_session_warning)).apply {
+                        setSpan(android.text.style.ForegroundColorSpan(color(R.color.accent_heat)), 0, length, 0)
+                        append("\n\n").append(app.mg4dash.system.Updater.plainNotes(r.notes))
+                    })
+                    .setPositiveButton(R.string.st_update_install) { _, _ ->
+                        started = true
+                        lifecycleScope.launch {
+                            try {
+                                val apk = withContext(Dispatchers.IO) {
+                                    A.download(this@SettingsActivity, r) { pct -> runOnUiThread { state.text = getString(R.string.st_update_downloading, pct) } }
+                                }
+                                state.text = getString(R.string.st_aa_installing)
+                                A.listener = { ok -> runOnUiThread {
+                                    cur = A.installedVersion(this@SettingsActivity) ?: cur
+                                    showState()
+                                    if (!isFinishing) AlertDialog.Builder(this@SettingsActivity)
+                                        .setMessage(if (ok) R.string.st_aa_done else R.string.st_update_error)
+                                        .setPositiveButton(android.R.string.ok, null).show().also { app.mg4dash.ui.Dialogs.fix(it) }
+                                } }
+                                withContext(Dispatchers.IO) { A.install(this@SettingsActivity, apk, r.version) }
+                            } catch (e: Exception) {
+                                Log.w("Update", "${A.NAME}: ${e.message}")
+                                A.end()
+                                state.text = getString(R.string.st_update_error)
+                            }
+                        }
+                    }
+                    .setNegativeButton(R.string.cancel, null)
+                    .setOnDismissListener { if (!started) { A.end(); showState() } }
+                    .show().also { app.mg4dash.ui.Dialogs.fix(it) }
+            }
+        }
     }
 
     /** Radio Dash: on every firmware, the firmwares already tested are named in the note below. */

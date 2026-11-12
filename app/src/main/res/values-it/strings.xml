@@ -886,4 +886,11 @@
     <string name="st_web_engine_revert_confirm">Tornare al motore web originale (Chromium 66)? I siti recenti non si apriranno più nella scheda Web app.</string>
     <string name="st_web_engine_revert_ok">Ripristina</string>
     <string name="st_web_engine_done">Fatto: la scheda Web app usa il nuovo motore.</string>
+    <string name="st_aa_none">non installato</string>
+    <string name="st_aa_busy">un aggiornamento è già in corso</string>
+    <string name="st_aa_available">MG4-AA-Airlink %1$s disponibile</string>
+    <string name="st_aa_uptodate">MG4-AA-Airlink aggiornato (%1$s)</string>
+    <string name="st_aa_installing">Installazione di MG4-AA-Airlink…</string>
+    <string name="st_aa_done">MG4-AA-Airlink è aggiornato. Android Auto si ricollega da solo.</string>
+    <string name="st_aa_session_warning">Android Auto si ferma per circa un minuto durante l\'installazione.</string>
 </resources>

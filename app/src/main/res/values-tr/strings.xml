@@ -886,4 +886,11 @@
     <string name="st_web_engine_revert_confirm">Orijinal web motoru (Chromium 66) geri yüklensin mi? Güncel siteler web uygulaması kartında artık açılmaz.</string>
     <string name="st_web_engine_revert_ok">Geri yükle</string>
     <string name="st_web_engine_done">Tamam: web uygulaması kartı yeni motoru kullanıyor.</string>
+    <string name="st_aa_none">yüklü değil</string>
+    <string name="st_aa_busy">bir güncelleme zaten sürüyor</string>
+    <string name="st_aa_available">MG4-AA-Airlink %1$s mevcut</string>
+    <string name="st_aa_uptodate">MG4-AA-Airlink güncel (%1$s)</string>
+    <string name="st_aa_installing">MG4-AA-Airlink yükleniyor…</string>
+    <string name="st_aa_done">MG4-AA-Airlink güncellendi. Android Auto kendiliğinden yeniden bağlanır.</string>
+    <string name="st_aa_session_warning">Yükleme sırasında Android Auto yaklaşık bir dakika durur.</string>
 </resources>

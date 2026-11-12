@@ -886,4 +886,11 @@
     <string name="st_web_engine_revert_confirm">¿Volver al motor web original (Chromium 66)? Los sitios recientes ya no se abrirán en la tarjeta Web app.</string>
     <string name="st_web_engine_revert_ok">Volver</string>
     <string name="st_web_engine_done">Hecho: la tarjeta Web app usa el nuevo motor.</string>
+    <string name="st_aa_none">no instalado</string>
+    <string name="st_aa_busy">ya hay una actualización en curso</string>
+    <string name="st_aa_available">MG4-AA-Airlink %1$s disponible</string>
+    <string name="st_aa_uptodate">MG4-AA-Airlink al día (%1$s)</string>
+    <string name="st_aa_installing">Instalando MG4-AA-Airlink…</string>
+    <string name="st_aa_done">MG4-AA-Airlink está actualizado. Android Auto se vuelve a conectar solo.</string>
+    <string name="st_aa_session_warning">Android Auto se detiene un minuto aproximadamente durante la instalación.</string>
 </resources>
