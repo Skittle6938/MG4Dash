@@ -120,6 +120,7 @@
     <string name="cl_eco_link">ECO modunu izle</string>
     <string name="cl_stock">Orijinal klima ekranı  ›</string>
     <string name="cl_outside">Dış %1$d°</string>
+    <string name="cl_calibrating">Sınırlar ayarlanıyor…</string>
     <string name="en_stock">Orijinal Enerji uygulaması  ›</string>
     <string name="en_charging">ŞARJ</string>
     <string name="en_limit">ŞARJ SINIRI</string>

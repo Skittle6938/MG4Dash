@@ -61,6 +61,8 @@ data class VehicleState(
     // General (CarGeneralClient, code 1)
     val odometerKm: Int? = null,
     val speedKmh: Float? = null,
+    /** Set point limits test running (#107): the climate card says so. */
+    val calibrating: Boolean = false,
 ) {
     companion object {
         /**

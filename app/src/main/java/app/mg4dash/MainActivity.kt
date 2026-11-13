@@ -916,7 +916,8 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         b.climPower.putTint(color(if (on) R.color.accent_action else R.color.text_sub))
         b.temp.put(if (on || s.driverTemp != null) VehicleState.tempLabel(s.driverTemp) else getString(R.string.no_data))
         b.temp.setTextColor(color(if (on) R.color.text_value else R.color.text_disabled))
-        b.climOutside.put(s.outsideTemp?.let { getString(R.string.cl_outside, Math.round(it)) } ?: "")
+        b.climOutside.put(if (s.calibrating) getString(R.string.cl_calibrating)
+            else s.outsideTemp?.let { getString(R.string.cl_outside, Math.round(it)) } ?: "")
         // In AUTO mode the car reports a meaningless speed (often the maximum):
         // show "AUTO" and a greyed gauge rather than a misleading level.
         val auto = on && s.autoOn == true

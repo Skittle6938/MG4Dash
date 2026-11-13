@@ -120,6 +120,7 @@
     <string name="cl_eco_link">ECO-modus volgen</string>
     <string name="cl_stock">Origineel klimaatscherm  ›</string>
     <string name="cl_outside">Buiten %1$d°</string>
+    <string name="cl_calibrating">Grenzen kalibreren…</string>
     <string name="en_stock">Originele energie-app  ›</string>
     <string name="en_charging">LADEN</string>
     <string name="en_limit">LAADLIMIET</string>

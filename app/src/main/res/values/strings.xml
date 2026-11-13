@@ -120,6 +120,7 @@
     <string name="cl_eco_link">Follow ECO mode</string>
     <string name="cl_stock">Stock climate screen  ›</string>
     <string name="cl_outside">Outside %1$d°</string>
+    <string name="cl_calibrating">Calibrating limits…</string>
     <string name="en_stock">Stock Energy app  ›</string>
     <string name="en_charging">CHARGING</string>
     <string name="en_limit">CHARGE LIMIT</string>
