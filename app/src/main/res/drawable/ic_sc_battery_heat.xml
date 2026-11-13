@@ -1,26 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Shortcuts menu tile icon (line drawing, tinted by the code) -->
+<!-- Shortcuts menu tile icon (line drawing, tinted by the code): battery preheat, Marc's mockup B -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="24dp"
     android:height="24dp"
     android:viewportWidth="24"
     android:viewportHeight="24">
     <path
-        android:pathData="M5,8 h11 a2,2 0 0 1 2,2 v5 a2,2 0 0 1 -2,2 h-11 a2,2 0 0 1 -2,-2 v-5 a2,2 0 0 1 2,-2 z"
+        android:pathData="M3.4,10.5h13.4a1.9,1.9 0 0 1 1.9,1.9v6.7a1.9,1.9 0 0 1 -1.9,1.9h-13.4a1.9,1.9 0 0 1 -1.9,-1.9v-6.7a1.9,1.9 0 0 1 1.9,-1.9z"
         android:strokeColor="#FFFFFFFF"
         android:strokeWidth="1.8"
         android:strokeLineCap="round"
         android:strokeLineJoin="round"
         android:fillColor="#00000000" />
     <path
-        android:pathData="M18,11h2v3h-2"
+        android:pathData="M18.75,13.9v3.75h1.9v-3.75z"
         android:strokeColor="#FFFFFFFF"
         android:strokeWidth="1.8"
         android:strokeLineCap="round"
         android:strokeLineJoin="round"
         android:fillColor="#00000000" />
     <path
-        android:pathData="M8,4c-1,1 1,2 0,3M12,4c-1,1 1,2 0,3"
+        android:pathData="M6,8.25c-1.5,-1.5 1.5,-2.6 0,-5.25M10.1,8.25c-1.5,-1.5 1.5,-2.6 0,-5.25M14.25,8.25c-1.5,-1.5 1.5,-2.6 0,-5.25"
         android:strokeColor="#FFFFFFFF"
         android:strokeWidth="1.8"
         android:strokeLineCap="round"

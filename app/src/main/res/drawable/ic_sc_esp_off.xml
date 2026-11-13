@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Shortcuts menu tile icon: ESP off -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <group android:scaleX="0.8" android:scaleY="0.8" android:pivotX="0" android:pivotY="0">
+        <path android:pathData="M5.25,9.75l1.875,-4.5h9.75l1.875,4.5" android:strokeColor="#FFFFFFFF" android:strokeWidth="1.8" android:strokeLineCap="round" android:strokeLineJoin="round" android:fillColor="#00000000" />
+        <path android:pathData="M5.25,9.75h13.5a1.5,1.5 0 0 1 1.5,1.5v1.5a1.5,1.5 0 0 1 -1.5,1.5h-13.5a1.5,1.5 0 0 1 -1.5,-1.5v-1.5a1.5,1.5 0 0 1 1.5,-1.5z" android:strokeColor="#FFFFFFFF" android:strokeWidth="1.8" android:strokeLineCap="round" android:strokeLineJoin="round" android:fillColor="#00000000" />
+        <path android:pathData="M5.25,14.25v1.5M18.75,14.25v1.5" android:strokeColor="#FFFFFFFF" android:strokeWidth="1.8" android:strokeLineCap="round" android:strokeLineJoin="round" android:fillColor="#00000000" />
+        <path android:pathData="M7.5,16.5c-3,0.75 -3,1.9 0,2.6s3,1.9 0,3M16.5,16.5c-3,0.75 -3,1.9 0,2.6s3,1.9 0,3" android:strokeColor="#FFFFFFFF" android:strokeWidth="1.8" android:strokeLineCap="round" android:strokeLineJoin="round" android:fillColor="#00000000" />
+    </group>
+    <group>
+        <path android:pathData="M14.6,18.2a1.25,1.9 0 1,0 0.01,0z" android:strokeColor="#FFFFFFFF" android:strokeWidth="1.4" android:strokeLineCap="round" android:strokeLineJoin="round" android:fillColor="#00000000" />
+        <path android:pathData="M17.7,22.2V18.2h2M17.7,20.1h1.6" android:strokeColor="#FFFFFFFF" android:strokeWidth="1.4" android:strokeLineCap="round" android:strokeLineJoin="round" android:fillColor="#00000000" />
+        <path android:pathData="M21.1,22.2V18.2h2M21.1,20.1h1.6" android:strokeColor="#FFFFFFFF" android:strokeWidth="1.4" android:strokeLineCap="round" android:strokeLineJoin="round" android:fillColor="#00000000" />
+    </group>
+</vector>

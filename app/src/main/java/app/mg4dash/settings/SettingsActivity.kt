@@ -143,11 +143,11 @@ class SettingsActivity : AppCompatActivity() {
         toggle(style, R.string.st_wide_bar, R.string.st_wide_bar_desc, { prefs.wideBar }) { prefs.wideBar = it; recreate() }
         // Shortcuts menu pulled down from the top; also hides MG's fog light button (gives its corner back)
         toggle(style, R.string.st_shortcuts_menu, R.string.st_shortcuts_menu_desc, { prefs.shortcutsMenu }) {
-            prefs.shortcutsMenu = it; app.mg4dash.system.FogOverlay.settingChanged(this)
+            prefs.shortcutsMenu = it; app.mg4dash.system.FogOverlay.settingChanged(this); app.mg4dash.ui.ShortcutsPanel.GlobalStrip.update(this)
             app.mg4dash.ui.Toasts.show(this, getString(R.string.st_shortcuts_menu_restart), long = true)
             app.mg4dash.ui.Themes.publish(this); recreate()
         }
-        toggle(style, R.string.st_fullscreen, null, { prefs.fullscreen }) { prefs.fullscreen = it; Fullscreen.apply(this) }
+        toggle(style, R.string.st_fullscreen, null, { prefs.fullscreen }) { prefs.fullscreen = it; Fullscreen.apply(this); app.mg4dash.ui.ShortcutsPanel.GlobalStrip.update(this) }
         toggle(style, R.string.st_own_keyboard, R.string.st_own_keyboard_desc, { prefs.ownKeyboard }) { prefs.ownKeyboard = it }
         toggle(style, R.string.st_energy_card_power, R.string.st_energy_card_power_desc, { prefs.energyCardPower }) { prefs.energyCardPower = it }
         toggle(style, R.string.st_power_va, R.string.st_power_va_desc, { prefs.powerVa }) { prefs.powerVa = it }
@@ -312,6 +312,10 @@ class SettingsActivity : AppCompatActivity() {
             button(getString(R.string.st_valet)) { confirmValet() },
         )
         text(valet, getString(R.string.st_rescue_note), 14f, R.color.text_title)
+        // ADB over the USB port at each start (as the adbutil app), off by default
+        toggle(valet, R.string.st_adb_start, R.string.st_adb_start_desc, { prefs.adbAtStart }) {
+            prefs.adbAtStart = it; if (it) app.mg4dash.system.AdbSwitch.enable(this, "setting turned on")
+        }
 
         // ── Update from GitHub ──
         val upd = panel(sysR, getString(R.string.st_update))

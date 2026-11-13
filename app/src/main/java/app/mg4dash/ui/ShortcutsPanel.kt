@@ -23,6 +23,7 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import app.mg4dash.R
 import app.mg4dash.car.CarBridge
+import app.mg4dash.media.MediaHub
 import app.mg4dash.system.Log
 import app.mg4dash.system.Prefs
 import app.mg4dash.ui.ShortcutTiles.Tile
@@ -39,14 +40,21 @@ import app.mg4dash.ui.ShortcutTiles.Tile
 @SuppressLint("StaticFieldLeak")
 object ShortcutsPanel : Application.ActivityLifecycleCallbacks {
     private const val TAG = "Shortcuts"
-    /** Height of the top band where the gesture starts, in dp. */
-    private const val EDGE_DP = 56
+    /** Height of the top band where the gesture must start, in px (the strip's, everywhere: widgets start below). */
+    internal const val EDGE_PX = 12
+    /** A pull: at least this far down (dp), and clearly vertical (sideways less than half of it): a widget's swipe never opens it. */
+    private const val PULL_DP = 40
+
+    /** Is this move from the touch down a pull of the menu? One finger, clearly down. */
+    internal fun isPull(dx: Float, dy: Float, density: Float, pointers: Int): Boolean =
+        pointers == 1 && dy > PULL_DP * density && Math.abs(dx) < dy * 0.5f
+
     private const val COLS = 6
     private const val REFRESH_MS = 1_000L
     /** Screens without the menu (black screens, start). */
     private val EXCLUDED = setOf("ScreenOffActivity", "BootSplashActivity")
 
-    private var panel: Panel? = null
+    internal var panel: Panel? = null
     private val main = Handler(Looper.getMainLooper())
     /** Last states read, to show the panel at once (the car is read again in the background). */
     private val lastShown = HashMap<Tile, ShortcutTiles.Shown>()
@@ -62,7 +70,9 @@ object ShortcutsPanel : Application.ActivityLifecycleCallbacks {
         if (base !is Hook) w.callback = Hook(activity, base)
     }
 
-    override fun onActivityStopped(activity: Activity) { if (panel?.activity === activity) close(now = true) }
+    override fun onActivityStopped(activity: Activity) {
+        if (panel?.activity === activity) close(now = true)
+    }
     override fun onActivityDestroyed(activity: Activity) { if (panel?.activity === activity) close(now = true) }
     override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {}
     override fun onActivityResumed(activity: Activity) {}
@@ -72,7 +82,7 @@ object ShortcutsPanel : Application.ActivityLifecycleCallbacks {
     /** Closes the menu wherever it is (the car's camera came, the setting went off). */
     fun closeAll() = main.post { close(now = true) }
 
-    private fun close(now: Boolean) {
+    internal fun close(now: Boolean) {
         val p = panel ?: return
         if (now) { p.remove(); panel = null } else p.animateTo(0f) { p.remove(); if (panel === p) panel = null }
     }
@@ -80,7 +90,7 @@ object ShortcutsPanel : Application.ActivityLifecycleCallbacks {
     /** Watches the touches of an MG4Dash screen: a slide down from the top edge pulls the menu. */
     private class Hook(val activity: Activity, val base: Window.Callback) : Window.Callback by base {
         private val slop = ViewConfiguration.get(activity).scaledTouchSlop
-        private val edge = EDGE_DP * activity.resources.displayMetrics.density
+        private val density = activity.resources.displayMetrics.density
         private var downX = 0f
         private var downY = 0f
         private var candidate = false
@@ -93,20 +103,23 @@ object ShortcutsPanel : Application.ActivityLifecycleCallbacks {
             when (e.actionMasked) {
                 MotionEvent.ACTION_DOWN -> {
                     downX = e.rawX; downY = e.rawY; dragging = null
-                    candidate = (open == null && e.y <= edge && enabled(activity)) ||
+                    // From the top edge only (the strip's height): the cards and their swipes start below. In full screen
+                    // the strip itself pulls it, over MG4Dash too: the same gesture everywhere
+                    candidate = (open == null && e.y <= EDGE_PX && e.pointerCount == 1 && enabled(activity) && !GlobalStrip.wanted(activity)) ||
                         (open != null && open.dialogShown.not() && open.inSheet(e.rawX, e.rawY))
                 }
+                MotionEvent.ACTION_POINTER_DOWN -> if (dragging == null) candidate = false
                 MotionEvent.ACTION_MOVE -> {
                     val d = dragging
                     if (d != null) { d.setProgress(startProgress + (e.rawY - downY) / d.sheetHeight()); return true }
                     if (candidate) {
                         val dy = e.rawY - downY; val dx = e.rawX - downX
-                        val pulling = open == null && dy > slop * 2 && dy > Math.abs(dx) * 1.5f
+                        val pulling = open == null && isPull(dx, dy, density, e.pointerCount)
                         val pushing = open != null && dy < -slop * 2 && -dy > Math.abs(dx) * 1.5f
                         if (pulling || pushing) {
                             // The screen (or the tile) under the finger forgets this touch: no click
                             base.dispatchTouchEvent(MotionEvent.obtain(e).apply { action = MotionEvent.ACTION_CANCEL }.also { })
-                            val p = open ?: Panel(activity).also { panel = it; Log.i(TAG, "menu pulled") }
+                            val p = open ?: Panel(activity, activity, activity.window.decorView as ViewGroup).also { panel = it; Log.i(TAG, "menu pulled") }
                             dragging = p; startProgress = p.progress; downY = e.rawY
                             return true
                         }
@@ -128,25 +141,27 @@ object ShortcutsPanel : Application.ActivityLifecycleCallbacks {
         }
     }
 
-    /** The menu over [activity]'s screen: a shade, the panel of tiles, and a box for the aids or the switch off. */
-    private class Panel(val activity: Activity) {
-        private val kit = Kit(activity)
-        private val prefs = Prefs(activity)
+    /**
+     * The menu: a shade, the panel of tiles, and a box for the driving aids. Hosted in [decor]: an MG4Dash screen's
+     * window ([activity]) or a system window over every app (full screen, [GlobalStrip]).
+     */
+    internal class Panel(val ctx: Context, val activity: Activity?, private val decor: ViewGroup, private val onRemoved: () -> Unit = {}) {
+        private val kit = Kit(ctx)
+        private val prefs = Prefs(ctx)
         /** Theme colour; the panel and the tiles are made opaque (the theme's panels are see-through over the background). */
         private fun c(r: Int): Int = when (r) {
             R.color.panel -> panelBg
-            R.color.button_idle -> androidx.core.graphics.ColorUtils.compositeColors(Themes.color(activity, R.color.button_idle), panelBg)
-            else -> Themes.color(activity, r)
+            R.color.button_idle -> androidx.core.graphics.ColorUtils.compositeColors(Themes.color(ctx, R.color.button_idle), panelBg)
+            else -> Themes.color(ctx, r)
         }
         private val panelBg = androidx.core.graphics.ColorUtils.compositeColors(
-            Themes.color(activity, R.color.panel), Themes.color(activity, R.color.bg_top) or 0xFF000000.toInt()) or 0xFF000000.toInt()
-        private val decor = activity.window.decorView as ViewGroup
-        private val root = FrameLayout(activity)
-        private val shade = View(activity).apply { setBackgroundColor(0x73000000); alpha = 0f }
-        private val sheet = LinearLayout(activity).apply { orientation = LinearLayout.VERTICAL; isClickable = true }
-        private val grid = LinearLayout(activity).apply { orientation = LinearLayout.VERTICAL }
-        private val headTitle = TextView(activity)
-        private val headRight = TextView(activity)
+            Themes.color(ctx, R.color.panel), Themes.color(ctx, R.color.bg_top) or 0xFF000000.toInt()) or 0xFF000000.toInt()
+        private val root = FrameLayout(ctx)
+        private val shade = View(ctx).apply { setBackgroundColor(0x73000000); alpha = 0f }
+        private val sheet = LinearLayout(ctx).apply { orientation = LinearLayout.VERTICAL; isClickable = true }
+        private val grid = LinearLayout(ctx).apply { orientation = LinearLayout.VERTICAL }
+        private val headTitle = TextView(ctx)
+        private val headRight = TextView(ctx)
         private var box: View? = null
         val dialogShown get() = box != null
         var progress = 0f; private set
@@ -154,15 +169,15 @@ object ShortcutsPanel : Application.ActivityLifecycleCallbacks {
         private val tileViews = HashMap<Tile, TileView>()
 
         init {
-            val vertical = Dock.vertical(activity); val right = Dock.rightSide(activity)
-            val side = kit.dp(Dock.keyboardMarginDp(activity))
+            val vertical = Dock.vertical(ctx); val right = Dock.rightSide(ctx)
+            val side = kit.dp(Dock.keyboardMarginDp(ctx))
             sheet.background = GradientDrawable().apply {
                 setColor(c(R.color.panel)); setStroke(1, c(R.color.panel_border))
                 cornerRadii = kit.dp(28).toFloat().let { r -> floatArrayOf(0f, 0f, 0f, 0f, r, r, r, r) }
             }
             sheet.elevation = kit.dp(10).toFloat()
             sheet.setPadding(kit.dp(28), kit.dp(22), kit.dp(28), kit.dp(30))
-            val head = LinearLayout(activity).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL }
+            val head = LinearLayout(ctx).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL }
             headTitle.apply { setTextColor(c(R.color.text_sub)); setTextSize(TypedValue.COMPLEX_UNIT_SP, 20f); letterSpacing = 0.06f; isAllCaps = true }
             headRight.apply {
                 setTextColor(c(R.color.text_value)); setTextSize(TypedValue.COMPLEX_UNIT_SP, 21f); gravity = Gravity.CENTER
@@ -175,7 +190,7 @@ object ShortcutsPanel : Application.ActivityLifecycleCallbacks {
             sheet.addView(head, LinearLayout.LayoutParams(-1, kit.dp(52)).apply { bottomMargin = kit.dp(10); leftMargin = kit.dp(6) })
             sheet.addView(grid, LinearLayout.LayoutParams(-1, -2))
             // Handle: the panel can be slid back up
-            val handle = View(activity).apply {
+            val handle = View(ctx).apply {
                 background = GradientDrawable().apply { setColor(c(R.color.text_disabled)); cornerRadius = kit.dp(4).toFloat() }
             }
             sheet.addView(handle, LinearLayout.LayoutParams(kit.dp(90), kit.dp(7)).apply { gravity = Gravity.CENTER_HORIZONTAL; topMargin = kit.dp(4) })
@@ -226,6 +241,7 @@ object ShortcutsPanel : Application.ActivityLifecycleCallbacks {
         fun remove() {
             main.removeCallbacks(tick)
             try { decor.removeView(root) } catch (_: Exception) {}
+            onRemoved()
         }
 
         // ── Tiles ──
@@ -238,16 +254,16 @@ object ShortcutsPanel : Application.ActivityLifecycleCallbacks {
         }
 
         private fun render() {
-            headTitle.text = activity.getString(if (editing) R.string.sc_edit_title else R.string.sc_title)
-            headRight.text = activity.getString(R.string.sc_done)
+            headTitle.text = ctx.getString(if (editing) R.string.sc_edit_title else R.string.sc_title)
+            headRight.text = ctx.getString(R.string.sc_done)
             headRight.visibility = if (editing) View.VISIBLE else View.GONE
             grid.removeAllViews(); tileViews.clear()
             val chosen = ShortcutTiles.chosen(prefs)
             shownTiles().chunked(COLS).forEach { rowTiles ->
-                val row = LinearLayout(activity).apply { orientation = LinearLayout.HORIZONTAL }
+                val row = LinearLayout(ctx).apply { orientation = LinearLayout.HORIZONTAL }
                 for (i in 0 until COLS) {
                     val tile = rowTiles.getOrNull(i)
-                    val v: View = if (tile == null) View(activity) else TileView(tile).also { tv ->
+                    val v: View = if (tile == null) View(ctx) else TileView(tile).also { tv ->
                         tileViews[tile] = tv
                         tv.show(lastShown[tile])
                         if (editing) tv.alpha = if (tile in chosen) 1f else 0.35f
@@ -256,8 +272,8 @@ object ShortcutsPanel : Application.ActivityLifecycleCallbacks {
                 }
                 grid.addView(row, LinearLayout.LayoutParams(-1, -2).apply { bottomMargin = kit.dp(16) })
             }
-            if (editing) grid.addView(TextView(activity).apply {
-                text = activity.getString(R.string.sc_edit_hint); setTextColor(c(R.color.text_sub)); setTextSize(TypedValue.COMPLEX_UNIT_SP, 17f)
+            if (editing) grid.addView(TextView(ctx).apply {
+                text = ctx.getString(R.string.sc_edit_hint); setTextColor(c(R.color.text_sub)); setTextSize(TypedValue.COMPLEX_UNIT_SP, 17f)
             })
             if (progress > 0f) root.post { setProgress(progress) }
         }
@@ -273,11 +289,11 @@ object ShortcutsPanel : Application.ActivityLifecycleCallbacks {
             }
             when (tile) {
                 // A single touch switches the car off (Marc, 13/11), never while driving
-                Tile.POWER -> if (!CarBridge.powerOffCar()) Toasts.show(activity, R.string.power_off_driving) else close(now = false)
+                Tile.POWER -> if (!CarBridge.powerOffCar()) Toasts.show(ctx, R.string.power_off_driving) else close(now = false)
                 Tile.AIDS -> aidsBox()
                 else -> {
                     // The new state at once, as the climate buttons; the car's reading confirms it
-                    ShortcutTiles.act(activity, tile, lastShown[tile])?.let { now -> lastShown[tile] = now; tileViews[tile]?.show(now) }
+                    ShortcutTiles.act(ctx, tile, lastShown[tile])?.let { now -> lastShown[tile] = now; tileViews[tile]?.show(now) }
                     if (tile == Tile.SCREEN || tile == Tile.AA) close(now = false)
                     else { main.postDelayed({ refresh() }, 700); main.postDelayed({ refresh() }, 1_800) }
                 }
@@ -289,10 +305,10 @@ object ShortcutsPanel : Application.ActivityLifecycleCallbacks {
         }
 
         @SuppressLint("ViewConstructor")
-        private inner class TileView(val tile: Tile) : LinearLayout(activity) {
-            private val icon = ImageView(activity).apply { setImageResource(tile.icon) }
-            private val name = TextView(activity).apply { text = activity.getString(tile.label); setTextSize(TypedValue.COMPLEX_UNIT_SP, 20f); gravity = Gravity.CENTER; maxLines = 1 }
-            private val state = TextView(activity).apply { setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f); gravity = Gravity.CENTER; maxLines = 1 }
+        private inner class TileView(val tile: Tile) : LinearLayout(ctx) {
+            private val icon = ImageView(ctx).apply { setImageResource(tile.icon) }
+            private val name = TextView(ctx).apply { text = ctx.getString(tile.label); setTextSize(TypedValue.COMPLEX_UNIT_SP, 20f); gravity = Gravity.CENTER; maxLines = 1 }
+            private val state = TextView(ctx).apply { setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f); gravity = Gravity.CENTER; maxLines = 1 }
             private val bg = GradientDrawable().apply { cornerRadius = kit.dp(22).toFloat() }
 
             init {
@@ -312,7 +328,8 @@ object ShortcutsPanel : Application.ActivityLifecycleCallbacks {
                 val inv = s?.inverted == true
                 val fg = c(if (inv) R.color.panel else R.color.text_value)
                 bg.setColor(c(if (inv) R.color.text_value else R.color.button_idle))
-                icon.setColorFilter(fg); name.setTextColor(fg)
+                icon.setImageResource(ShortcutTiles.icon(tile, s)); icon.setColorFilter(fg); name.setTextColor(fg)
+                name.text = s?.label ?: ctx.getString(tile.label)
                 state.setTextColor(if (inv) fg else c(R.color.text_sub)); state.alpha = if (inv) 0.75f else 1f
                 state.text = s?.state ?: ""
                 // Not usable now (rear fog light with the lights off): greyed
@@ -329,7 +346,7 @@ object ShortcutsPanel : Application.ActivityLifecycleCallbacks {
             if (panel !== this) return
             val tiles = (ShortcutTiles.chosen(prefs) + Tile.values()).distinct()
             Thread {
-                val readCar = tiles.associateWith { t -> try { ShortcutTiles.read(activity, t) } catch (e: Exception) { Log.w(TAG, "${t.id}: ${e.message}"); ShortcutTiles.Shown("", false, false) } }
+                val readCar = tiles.associateWith { t -> try { ShortcutTiles.read(ctx, t) } catch (e: Exception) { Log.w(TAG, "${t.id}: ${e.message}"); ShortcutTiles.Shown("", false, false) } }
                 main.post {
                     // A state just touched stays shown until the car confirms it (or its hold ends)
                     val read = readCar.mapValues { (t, s) -> ShortcutTiles.shown(t, s) }
@@ -349,7 +366,7 @@ object ShortcutsPanel : Application.ActivityLifecycleCallbacks {
 
         /** The aids tile follows its list at once. */
         private fun aidsChanged(a: ShortcutTiles.Aids) {
-            val now = ShortcutTiles.aidsShown(activity, a)
+            val now = ShortcutTiles.aidsShown(ctx, a)
             lastShown[Tile.AIDS] = now; tileViews[Tile.AIDS]?.show(now)
         }
 
@@ -365,49 +382,52 @@ object ShortcutsPanel : Application.ActivityLifecycleCallbacks {
 
         private fun closeBox() { box?.let { root.removeView(it) }; box = null; aidsRefresh = null }
 
-        private fun boxTitle(text: Int) = TextView(activity).apply {
-            this.text = activity.getString(text); setTextColor(c(R.color.text_value)); setTextSize(TypedValue.COMPLEX_UNIT_SP, 28f)
+        private fun boxTitle(text: Int) = TextView(ctx).apply {
+            this.text = ctx.getString(text); setTextColor(c(R.color.text_value)); setTextSize(TypedValue.COMPLEX_UNIT_SP, 28f)
             typeface = Typeface.create("sans-serif-medium", Typeface.NORMAL)
         }
 
-        private fun boxButton(text: Int, onClick: () -> Unit) = TextView(activity).apply {
-            this.text = activity.getString(text); setTextColor(c(R.color.text_value)); setTextSize(TypedValue.COMPLEX_UNIT_SP, 22f); gravity = Gravity.CENTER
+        private fun boxButton(text: Int, onClick: () -> Unit) = TextView(ctx).apply {
+            this.text = ctx.getString(text); setTextColor(c(R.color.text_value)); setTextSize(TypedValue.COMPLEX_UNIT_SP, 22f); gravity = Gravity.CENTER
             background = GradientDrawable().apply { setColor(c(R.color.button_idle)); cornerRadius = kit.dp(18).toFloat() }
             setOnClickListener { onClick() }
         }
 
-        private fun buttons(vararg b: TextView) = LinearLayout(activity).apply {
+        private fun buttons(vararg b: TextView) = LinearLayout(ctx).apply {
             orientation = LinearLayout.HORIZONTAL
             b.forEachIndexed { i, v -> addView(v, LinearLayout.LayoutParams(0, kit.dp(70), 1f).apply { if (i > 0) leftMargin = kit.dp(16) }) }
         }
 
         private fun aidsBox() {
-            val box = LinearLayout(activity).apply { orientation = LinearLayout.VERTICAL }
+            val box = LinearLayout(ctx).apply { orientation = LinearLayout.VERTICAL }
             box.addView(boxTitle(R.string.sc_adas), LinearLayout.LayoutParams(-1, -2).apply { bottomMargin = kit.dp(8) })
             data class Row(val label: Int, val read: (ShortcutTiles.Aids) -> Boolean?, val with: (ShortcutTiles.Aids, Boolean) -> ShortcutTiles.Aids, val set: (Boolean) -> Unit)
             val rows = listOf(
-                Row(R.string.sc_lane, { it.lane }, { a, v -> a.copy(lane = v) }) { ShortcutTiles.setLane(activity, it) },
-                Row(R.string.sc_fcw, { it.fcw }, { a, v -> a.copy(fcw = v) }) { ShortcutTiles.setFcw(activity, it) },
+                Row(R.string.sc_lane, { it.lane }, { a, v -> a.copy(lane = v) }) { ShortcutTiles.setLane(ctx, it) },
+                Row(R.string.sc_fcw, { it.fcw }, { a, v -> a.copy(fcw = v) }) { ShortcutTiles.setFcw(ctx, it) },
                 Row(R.string.sc_udw, { it.udw }, { a, v -> a.copy(udw = v) }) { ShortcutTiles.setUdw(it) },
             )
             val switches = ArrayList<Pair<Row, Switch>>()
             var aids = ShortcutTiles.Aids(null, null, null)
             rows.forEach { r ->
-                val line = LinearLayout(activity).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL }
-                line.addView(TextView(activity).apply { text = activity.getString(r.label); setTextColor(c(R.color.text_value)); setTextSize(TypedValue.COMPLEX_UNIT_SP, 22f) },
+                val line = LinearLayout(ctx).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL }
+                line.addView(TextView(ctx).apply { text = ctx.getString(r.label); setTextColor(c(R.color.text_value)); setTextSize(TypedValue.COMPLEX_UNIT_SP, 22f) },
                     LinearLayout.LayoutParams(0, -2, 1f))
                 val sw = Switch()
                 line.addView(sw, LinearLayout.LayoutParams(kit.dp(64), kit.dp(36)))
                 // Shown at once; a quick second touch starts from the state shown
                 line.setOnClickListener { r.read(aids)?.let { on -> r.set(!on); sw.set(!on); aids = r.with(aids, !on); aidsChanged(aids) } }
                 box.addView(line, LinearLayout.LayoutParams(-1, kit.dp(64)))
-                box.addView(View(activity).apply { setBackgroundColor(c(R.color.panel_border)) }, LinearLayout.LayoutParams(-1, 1))
+                box.addView(View(ctx).apply { setBackgroundColor(c(R.color.panel_border)) }, LinearLayout.LayoutParams(-1, 1))
                 switches += r to sw
             }
             box.addView(buttons(boxButton(R.string.sc_all_off) {
                 switches.forEach { (r, sw) -> if (r.read(aids) == true) { r.set(false); sw.set(false); aids = r.with(aids, false) } }
                 aidsChanged(aids)
             }, boxButton(R.string.sc_close) { closeBox() }), LinearLayout.LayoutParams(-1, -2).apply { topMargin = kit.dp(24) })
+            // The box first: showing it closes the previous one, which also drops its refresh (the switches were
+            // then never read: all shown off, touches without effect)
+            showBox(box, 640)
             aidsRefresh = {
                 Thread {
                     val a = ShortcutTiles.aids(CarBridge.state.value)
@@ -418,12 +438,11 @@ object ShortcutsPanel : Application.ActivityLifecycleCallbacks {
                     }
                 }.start()
             }
-            showBox(box, 640)
             aidsRefresh?.invoke()
         }
 
         /** Neutral switch (no accent colour): the knob on the right and the track inverted when on. */
-        private inner class Switch : View(activity) {
+        private inner class Switch : View(ctx) {
             private var on = false
             private val paint = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG)
             fun set(v: Boolean) { on = v; invalidate() }
@@ -433,6 +452,226 @@ object ShortcutsPanel : Application.ActivityLifecycleCallbacks {
                 cv.drawRoundRect(0f, 0f, w, h, r, r, paint)
                 paint.color = c(if (on) R.color.panel else R.color.text_sub)
                 cv.drawCircle(if (on) w - r else r, r, r - kit.dp(4), paint)
+            }
+        }
+    }
+
+    /**
+     * Full screen with the shortcuts menu (Marc, 13/11): a strip a few pixels high, invisible, at the very top of the
+     * screen above every app (Android Auto, CarPlay, radio, camera, calls, MG4Dash itself), from which a slide down
+     * pulls the same menu, shown in a system window over the app in front. A touch on the strip without a slide does
+     * nothing. Added once the user is unlocked, kept while the setting and the full screen are on.
+     */
+    object GlobalStrip {
+        /** Strip height, in px of the panel. */
+        private const val STRIP_PX = EDGE_PX
+        /** TYPE_BOOT_PROGRESS: the highest layer an app can use here (35 on this firmware), added last so above. */
+        private const val TYPE = 2021
+        private var app: Context? = null
+        private var strip: View? = null
+
+        fun wanted(context: Context): Boolean = Prefs(context).let { it.shortcutsMenu && it.fullscreen }
+
+        /** Published for MG4Link (Settings.Global): 1 while the strip is there, so it pulls the menu itself over its projection. */
+        private const val STRIP_SETTING = "mg4dash_shortcuts_strip"
+        /** Sent by MG4Link (explicit, to MG4Dash): "phase" begin / move / end / cancel, "dy" = slide in px since the touch down. */
+        const val ACTION_PULL = "app.mg4dash.SHORTCUTS_PULL"
+        private var receiver: android.content.BroadcastReceiver? = null
+
+        /** At start (unlocked) and when the menu or full screen setting changes. */
+        fun update(context: Context) {
+            main.post {
+                val c = context.applicationContext
+                app = c
+                listen(c)
+                if (wanted(c)) add(c) else remove()
+                try { android.provider.Settings.Global.putInt(c.contentResolver, STRIP_SETTING, if (strip != null) 1 else 0) } catch (e: Exception) { Log.w(TAG, "strip setting: ${e.message}") }
+            }
+        }
+
+        /**
+         * MG4Link's projection in front: the strip lets touches through, so its own two and three finger gestures from the
+         * top stay whole; MG4Link sees a one finger slide down from the top itself and drives the menu by [ACTION_PULL].
+         */
+        private val watch = object : Runnable {
+            override fun run() {
+                val v = strip ?: return
+                touchable(!projectionInFront(v.context))
+                main.postDelayed(this, 400)
+            }
+        }
+
+        /**
+         * MG4Link's projection in front, and that MG4Link pulls the menu itself (meta-data mg4dash.shortcuts_pull in its
+         * manifest). The stock AllGo app or an older MG4Link (same package) does not: the strip stays as over other apps.
+         */
+        @Suppress("DEPRECATION")
+        private fun projectionInFront(c: Context): Boolean = try {
+            (c.getSystemService(Context.ACTIVITY_SERVICE) as android.app.ActivityManager).getRunningTasks(1).firstOrNull()?.topActivity
+                ?.let { it.packageName == MG4LINK && MediaHub.isProjectionScreen(it.className) && linkPulls(c) } == true
+        } catch (_: Exception) { false }
+
+        /** Read again when MG4Link is updated (its update time changes). */
+        private var linkChecked: Pair<Long, Boolean>? = null
+        private fun linkPulls(c: Context): Boolean = try {
+            val pm = c.packageManager
+            val updated = pm.getPackageInfo(MG4LINK, 0).lastUpdateTime
+            linkChecked?.takeIf { it.first == updated }?.second ?: (pm.getApplicationInfo(MG4LINK, android.content.pm.PackageManager.GET_META_DATA)
+                .metaData?.getBoolean("mg4dash.shortcuts_pull", false) == true).also { linkChecked = updated to it; Log.i(TAG, "MG4Link pulls the menu itself: $it") }
+        } catch (_: Exception) { false }
+        private const val MG4LINK = "com.allgo.app.androidauto"
+
+        private fun touchable(on: Boolean) {
+            val v = strip ?: return
+            val lp = v.layoutParams as? android.view.WindowManager.LayoutParams ?: return
+            val flag = android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
+            val want = if (on) lp.flags and flag.inv() else lp.flags or flag
+            if (want == lp.flags) return
+            lp.flags = want
+            try { wm(v.context).updateViewLayout(v, lp); Log.i(TAG, "strip ${if (on) "touchable" else "lets touches through (MG4Link's projection: it pulls the menu itself)"}") } catch (_: Throwable) {}
+        }
+
+        /** The menu driven by MG4Link's slide over its projection. */
+        private fun listen(c: Context) {
+            if (receiver != null) return
+            var dragging: Panel? = null
+            var startDy = 0f
+            val r = object : android.content.BroadcastReceiver() {
+                override fun onReceive(ctx: Context?, i: android.content.Intent?) {
+                    if (strip == null) return
+                    val dy = i?.getFloatExtra("dy", 0f) ?: 0f
+                    when (i?.getStringExtra("phase")) {
+                        "begin" -> if (panel == null) { val p = openPanel(c); panel = p; dragging = p; startDy = dy; Log.i(TAG, "menu pulled from MG4Link") }
+                        "move" -> dragging?.let { it.setProgress((dy - startDy) / it.sheetHeight()) }
+                        "end" -> { dragging?.let { it.setProgress((dy - startDy) / it.sheetHeight()); settle(it, 0f) }; dragging = null }
+                        "cancel" -> { if (dragging != null) close(now = true); dragging = null }
+                    }
+                }
+            }
+            try { c.registerReceiver(r, android.content.IntentFilter(ACTION_PULL)); receiver = r } catch (e: Exception) { Log.w(TAG, "pull receiver: ${e.message}") }
+        }
+
+        private fun wm(c: Context) = c.getSystemService(Context.WINDOW_SERVICE) as android.view.WindowManager
+
+        private fun add(c: Context) {
+            if (strip != null) return
+            try {
+                val v = StripView(c)
+                val lp = android.view.WindowManager.LayoutParams(
+                    android.view.WindowManager.LayoutParams.MATCH_PARENT, STRIP_PX, TYPE,
+                    android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL or
+                        android.view.WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or android.view.WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
+                    android.graphics.PixelFormat.TRANSLUCENT,
+                ).apply { gravity = Gravity.TOP or Gravity.START; x = 0; y = 0; windowAnimations = 0; title = "MG4Dash shortcuts strip" }
+                wm(c).addView(v, lp)
+                strip = v
+                Log.i(TAG, "strip added (${STRIP_PX} px, type $TYPE)")
+                main.post(watch)
+            } catch (e: Throwable) { Log.w(TAG, "strip: ${e.message}") }
+        }
+
+        private fun remove() {
+            val v = strip ?: return
+            try { wm(v.context).removeViewImmediate(v) } catch (_: Throwable) {}
+            strip = null
+            main.removeCallbacks(watch)
+            Log.i(TAG, "strip removed")
+        }
+
+        /** A system window for the menu, over the app in front; gone with the menu. */
+        private fun openPanel(c: Context): Panel {
+            val themed = Themes.themed(c)
+            val host = PanelWindow(themed)
+            val lp = android.view.WindowManager.LayoutParams(
+                android.view.WindowManager.LayoutParams.MATCH_PARENT, android.view.WindowManager.LayoutParams.MATCH_PARENT, TYPE,
+                android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or android.view.WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or
+                    android.view.WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
+                android.graphics.PixelFormat.TRANSLUCENT,
+            ).apply { gravity = Gravity.TOP or Gravity.START; windowAnimations = 0; title = "MG4Dash shortcuts" }
+            wm(c).addView(host, lp)
+            val p = Panel(themed, null, host) { try { wm(c).removeViewImmediate(host) } catch (_: Throwable) {}; Log.i(TAG, "global panel closed") }
+            host.panel = p
+            Log.i(TAG, "global panel open")
+            return p
+        }
+
+        /** Settles a drag: open past a third (pulling) or two thirds (sliding up), closed otherwise. */
+        private fun settle(p: Panel, started: Float) {
+            val keep = if (started < 0.5f) p.progress > 0.33f else p.progress > 0.67f
+            if (keep) p.animateTo(1f) {} else close(now = false)
+        }
+
+        /** The strip: a slide down pulls the menu, which follows the finger. */
+        @SuppressLint("ViewConstructor")
+        private class StripView(c: Context) : View(c) {
+            private val slop = ViewConfiguration.get(c).scaledTouchSlop
+            private var downX = 0f
+            private var downY = 0f
+            private var dragging: Panel? = null
+            /** More than one finger in this touch: the menu is not pulled. */
+            private var multi = false
+
+            @SuppressLint("ClickableViewAccessibility")
+            override fun onTouchEvent(e: MotionEvent): Boolean {
+                when (e.actionMasked) {
+                    MotionEvent.ACTION_DOWN -> { downX = e.rawX; downY = e.rawY; dragging = null; multi = false }
+                    // A second finger: an app's own multi-finger gesture (MG4Link: 2 fingers from the top, 3 fingers down),
+                    // never the menu; a menu already pulled goes back
+                    MotionEvent.ACTION_POINTER_DOWN -> {
+                        multi = true
+                        dragging?.let { Log.i(TAG, "strip: second finger, menu given up"); close(now = true) }
+                        dragging = null
+                    }
+                    MotionEvent.ACTION_MOVE -> {
+                        val d = dragging
+                        if (multi) return true
+                        if (d != null) d.setProgress((e.rawY - downY) / d.sheetHeight())
+                        else {
+                            val dy = e.rawY - downY; val dx = e.rawX - downX
+                            if (isPull(dx, dy, resources.displayMetrics.density, e.pointerCount) && panel == null) {
+                                val p = openPanel(context)
+                                panel = p; dragging = p; downY = e.rawY
+                            }
+                        }
+                    }
+                    MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> { if (!multi) dragging?.let { settle(it, 0f) }; dragging = null; multi = false }
+                }
+                return true
+            }
+        }
+
+        /** The menu's window: touches beside the panel close it (the shade), a slide up on the panel closes it too. */
+        @SuppressLint("ViewConstructor")
+        private class PanelWindow(c: Context) : FrameLayout(c) {
+            var panel: Panel? = null
+            private val slop = ViewConfiguration.get(c).scaledTouchSlop
+            private var downX = 0f
+            private var downY = 0f
+            private var candidate = false
+            private var dragging = false
+            private var started = 1f
+
+            override fun onInterceptTouchEvent(e: MotionEvent): Boolean {
+                val p = panel ?: return false
+                when (e.actionMasked) {
+                    MotionEvent.ACTION_DOWN -> { downX = e.rawX; downY = e.rawY; dragging = false; candidate = !p.dialogShown && p.inSheet(e.rawX, e.rawY) }
+                    MotionEvent.ACTION_MOVE -> if (candidate) {
+                        val dy = e.rawY - downY; val dx = e.rawX - downX
+                        if (dy < -slop * 2 && -dy > Math.abs(dx) * 1.5f) { dragging = true; started = p.progress; downY = e.rawY; return true }
+                    }
+                }
+                return false
+            }
+
+            @SuppressLint("ClickableViewAccessibility")
+            override fun onTouchEvent(e: MotionEvent): Boolean {
+                val p = panel ?: return false
+                if (!dragging) return super.onTouchEvent(e)
+                when (e.actionMasked) {
+                    MotionEvent.ACTION_MOVE -> p.setProgress(started + (e.rawY - downY) / p.sheetHeight())
+                    MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> { dragging = false; settle(p, started) }
+                }
+                return true
             }
         }
     }

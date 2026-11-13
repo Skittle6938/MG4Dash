@@ -44,6 +44,8 @@ object Shortcuts {
         object Empty : Slot()
         data class App(val component: ComponentName) : Slot()
         data class Ha(val entityId: String, val label: String) : Slot()
+        /** Turns ADB on, as the adbutil app (instead of launching it), with its state. */
+        object Adb : Slot()
     }
 
     fun get(prefs: Prefs, i: Int): Slot {
@@ -52,6 +54,7 @@ object Shortcuts {
         return when (p[0]) {
             "app" -> ComponentName.unflattenFromString(p.getOrElse(1) { "" })?.let { Slot.App(it) } ?: Slot.Empty
             "ha" -> if (p.size >= 3) Slot.Ha(p[1], p.drop(2).joinToString("|")) else Slot.Empty
+            "adb" -> Slot.Adb
             else -> Slot.Empty
         }
     }
@@ -61,6 +64,7 @@ object Shortcuts {
             Slot.Empty -> null
             is Slot.App -> "app|" + s.component.flattenToString()
             is Slot.Ha -> "ha|${s.entityId}|${s.label}"
+            Slot.Adb -> "adb"
         }
         // A new action starts with the automatic state (#97)
         prefs.raw.edit().putString("sc_$i", v).remove("sc_state_$i").apply()
@@ -118,6 +122,11 @@ object Shortcuts {
                 label.text = slot.label
                 bindHaState(activity, prefs, i, slot, icon, state)
             }
+            Slot.Adb -> {
+                icon.setImageResource(R.drawable.ic_sc_adb); icon.setColorFilter(kit.color(R.color.text_value))
+                label.text = activity.getString(R.string.sc_adb)
+                showAdb(activity, state, null)
+            }
         }
         cell.addView(icon, LinearLayout.LayoutParams(kit.dp(64), kit.dp(64)))
         cell.addView(label, kit.lp(-1, -2, t = 6))
@@ -127,6 +136,9 @@ object Shortcuts {
                 Slot.Empty -> edit(activity, i, refresh)
                 is Slot.App -> launch(activity, slot.component)
                 is Slot.Ha -> runHa(activity, slot)
+                // Same as the shortcuts menu's tile: on at once on screen, the reading confirms it
+                Slot.Adb -> app.mg4dash.ui.ShortcutTiles.act(activity, app.mg4dash.ui.ShortcutTiles.Tile.ADB, adbShown(activity))
+                    ?.let { showAdb(activity, state, it) }
             }
         }
         cell.setOnLongClickListener { edit(activity, i, refresh); true }
@@ -223,6 +235,26 @@ object Shortcuts {
             .show().also { app.mg4dash.ui.Dialogs.fix(it); app.mg4dash.ui.Dialogs.fullHeight(it) }
     }
 
+    /** ADB state under the tile: [now] shown at once, otherwise the reading (then again after a few seconds). */
+    fun showAdb(activity: Activity, state: TextView, now: app.mg4dash.ui.ShortcutTiles.Shown?) {
+        fun put(s: app.mg4dash.ui.ShortcutTiles.Shown) { state.text = s.state; state.visibility = View.VISIBLE }
+        if (now != null) put(now)
+        listOf(if (now == null) 0L else 1_500L, 4_000L).forEach { delay ->
+            state.postDelayed({
+                if (!state.isAttachedToWindow) return@postDelayed
+                thread {
+                    val s = app.mg4dash.ui.ShortcutTiles.shown(app.mg4dash.ui.ShortcutTiles.Tile.ADB,
+                        app.mg4dash.ui.ShortcutTiles.read(activity, app.mg4dash.ui.ShortcutTiles.Tile.ADB))
+                    main.post { if (state.isAttachedToWindow) put(s) }
+                }
+            }, delay)
+        }
+    }
+
+    fun adbShown(activity: Activity) = app.mg4dash.ui.ShortcutTiles.shown(app.mg4dash.ui.ShortcutTiles.Tile.ADB,
+        app.mg4dash.ui.ShortcutTiles.Shown(activity.getString(if (app.mg4dash.system.AdbSwitch.on(activity)) R.string.sc_on else R.string.sc_off),
+            app.mg4dash.system.AdbSwitch.on(activity)))
+
     // ─── Editing a slot ───
 
     fun edit(activity: Activity, i: Int, refresh: () -> Unit) {
@@ -231,6 +263,7 @@ object Shortcuts {
         val choices = listOfNotNull(
             activity.getString(R.string.sc_app),
             activity.getString(R.string.sc_ha),
+            activity.getString(R.string.sc_adb),
             ha?.let { activity.getString(R.string.sc_state) },
             activity.getString(R.string.sc_clear),
         ).toTypedArray()
@@ -241,6 +274,7 @@ object Shortcuts {
                     choices[0] -> pickApp(activity, choices[0]) { cn -> if (cn != null) { set(prefs, i, Slot.App(cn)); refresh() } }
                     choices[1] -> pickHa(activity) { id, label -> set(prefs, i, Slot.Ha(id, label)); refresh() }
                     activity.getString(R.string.sc_clear) -> { set(prefs, i, Slot.Empty); refresh() }
+                    activity.getString(R.string.sc_adb) -> { set(prefs, i, Slot.Adb); refresh() }
                     else -> if (ha != null) pickState(activity, i, ha, refresh)
                 }
             }

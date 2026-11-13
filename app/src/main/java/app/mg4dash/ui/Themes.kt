@@ -101,6 +101,18 @@ object Themes {
     /** Signature of the current theme: used to know if a screen must redraw. */
     fun signature(context: Context): Int = Prefs(context).let { it.themeBackground * 10 + it.themeAccent + (if (isLight(context)) 100 else 0) + (if (it.verticalDock) 1000 else 0) + (if (it.panelFade) 0 else 10000) + (if (it.wideBar) 100000 else 0) }
 
+    /** A context with MG4Dash's theme (background and buttons chosen), for windows outside the screens. */
+    fun themed(context: Context): Context {
+        val p = Prefs(context)
+        val light = isLight(context)
+        val bgs = if (light) BACKGROUNDS_LIGHT else BACKGROUNDS
+        val accs = if (light) ACCENTS_LIGHT else ACCENTS
+        return android.view.ContextThemeWrapper(context.applicationContext, R.style.Theme_MG4Launcher).apply {
+            theme.applyStyle(bgs.getOrElse(p.themeBackground) { bgs[0] }, true)
+            theme.applyStyle(accs.getOrElse(p.themeAccent) { accs[0] }, true)
+        }
+    }
+
     /** To call in onCreate, before setContentView; [dark] forces the dark theme. */
     fun apply(activity: Activity, dark: Boolean = false) {
         val p = Prefs(activity)
@@ -239,12 +251,14 @@ object Themes {
 
     /**
      * What Radio Dash reads: background, accent, light, vertical bar, 0, wide bar, bar on the right
-     * (the last two for its own bar, Radio Dash #2), AM band allowed (Radio Dash #2, off by default).
+     * (the last two for its own bar, Radio Dash #2), AM band allowed (Radio Dash #2, off by default), fog light button hidden by the shortcuts menu.
      */
     fun published(context: Context): String {
         val p = Prefs(context)
         return "${p.themeBackground},${p.themeAccent},${if (isLight(context)) 1 else 0},${if (p.verticalDock) 1 else 0},0," +
-            "${if (p.wideBar) 1 else 0},${if (Dock.rightSide(context)) 1 else 0},${if (p.radioDashAm) 1 else 0}"
+            "${if (p.wideBar) 1 else 0},${if (Dock.rightSide(context)) 1 else 0},${if (p.radioDashAm) 1 else 0}," +
+            // 9th: MG's fog light button hidden by the shortcuts menu (Radio Dash's left bar then takes the full height)
+            "${if (p.shortcutsMenu) 1 else 0}"
     }
 
     /** Publishes the theme for Radio Dash (system uid required; no effect otherwise). */

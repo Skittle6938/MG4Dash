@@ -347,6 +347,11 @@ class SimpleHome(private val a: AppCompatActivity) {
                     label.text = s.label
                     Shortcuts.bindHaState(a, prefs, slot, s, icon, state)
                 }
+                Shortcuts.Slot.Adb -> {
+                    icon.setImageResource(R.drawable.ic_sc_adb); icon.setColorFilter(kit.color(R.color.text_value))
+                    label.text = a.getString(R.string.sc_adb)
+                    Shortcuts.showAdb(a, state, null)
+                }
             }
             tile.addView(icon, LinearLayout.LayoutParams(kit.dp(64), kit.dp(64)))
             if (label.text.isNotEmpty()) tile.addView(label, kit.lp(-2, -2, t = 4))
@@ -357,6 +362,7 @@ class SimpleHome(private val a: AppCompatActivity) {
                     Shortcuts.Slot.Empty -> Shortcuts.edit(a, slot) { renderShortcuts() }
                     is Shortcuts.Slot.App -> Shortcuts.launch(a, s.component)
                     is Shortcuts.Slot.Ha -> Shortcuts.runHa(a, s)
+                    Shortcuts.Slot.Adb -> ShortcutTiles.act(a, ShortcutTiles.Tile.ADB, Shortcuts.adbShown(a))?.let { Shortcuts.showAdb(a, state, it) }
                 }
             }
             tile.setOnLongClickListener { Shortcuts.edit(a, slot) { renderShortcuts() }; true }

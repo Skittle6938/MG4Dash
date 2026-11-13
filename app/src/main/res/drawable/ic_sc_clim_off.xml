@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Shortcuts menu tile icon: climate off (fan crossed out, Marc's mockup B) -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path android:pathData="M10.5,12a1.5,1.5 0 1,0 3,0a1.5,1.5 0 1,0 -3,0" android:strokeColor="#FFFFFFFF" android:strokeWidth="1.8" android:strokeLineCap="round" android:strokeLineJoin="round" android:fillColor="#00000000" />
+    <path android:pathData="M12,10.5c-0.75,-3.75 1.5,-6 3.75,-5.25 1.5,0.75 0.75,3.75 -3.75,5.25M13.5,12c3.75,-0.75 6,1.5 5.25,3.75 -0.75,1.5 -3.75,0.75 -5.25,-3.75M12,13.5c0.75,3.75 -1.5,6 -3.75,5.25 -1.5,-0.75 -0.75,-3.75 3.75,-5.25M10.5,12c-3.75,0.75 -6,-1.5 -5.25,-3.75 0.75,-1.5 3.75,-0.75 5.25,3.75" android:strokeColor="#FFFFFFFF" android:strokeWidth="1.8" android:strokeLineCap="round" android:strokeLineJoin="round" android:fillColor="#00000000" />
+    <path android:pathData="M3,3L21,21" android:strokeColor="#FFFFFFFF" android:strokeWidth="1.8" android:strokeLineCap="round" android:strokeLineJoin="round" android:fillColor="#00000000" />
+</vector>

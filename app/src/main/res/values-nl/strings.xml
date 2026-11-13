@@ -931,6 +931,13 @@
     <string name="sc_unlocked">Ontgrendeld</string>
     <string name="sc_connected">Verbonden</string>
     <string name="sc_cut">Losgekoppeld</string>
+    <string name="sc_heating">Verwarming</string>
+    <string name="sc_cooling">Koeling</string>
+    <string name="sc_clim_state">%1$s · buiten %2$s</string>
+    <string name="sc_adb">ADB</string>
+    <string name="st_adb_start">ADB bij het starten</string>
+    <string name="st_adb_start_desc">Zet ADB via de USB-poort aan bij elke start van de auto, zoals de app adbutil.</string>
+    <string name="sc_adb_already">ADB staat al aan (uit bij de volgende start van de auto)</string>
     <string name="sc_lights_off">Lichten uit</string>
     <string name="sc_lights_needed">Zet de lichten aan (Auto of dimlicht)</string>
     <string name="sc_lane">Rijstrookassistent</string>

@@ -931,6 +931,13 @@
     <string name="sc_unlocked">Déverrouillées</string>
     <string name="sc_connected">Connecté</string>
     <string name="sc_cut">Coupé</string>
+    <string name="sc_heating">Chauffage</string>
+    <string name="sc_cooling">Clim</string>
+    <string name="sc_clim_state">%1$s · ext. %2$s</string>
+    <string name="sc_adb">ADB</string>
+    <string name="st_adb_start">Activer l’ADB au démarrage</string>
+    <string name="st_adb_start_desc">Active l’ADB par le port USB à chaque démarrage de la voiture, comme l’appli adbutil.</string>
+    <string name="sc_adb_already">ADB déjà activé (il se coupe au prochain démarrage de la voiture)</string>
     <string name="sc_lights_off">Feux éteints</string>
     <string name="sc_lights_needed">Allumez les feux (Auto ou croisement)</string>
     <string name="sc_lane">Maintien dans la voie</string>

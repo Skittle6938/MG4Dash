@@ -931,6 +931,13 @@
     <string name="sc_unlocked">Kilit açık</string>
     <string name="sc_connected">Bağlı</string>
     <string name="sc_cut">Kesildi</string>
+    <string name="sc_heating">Isıtma</string>
+    <string name="sc_cooling">Klima</string>
+    <string name="sc_clim_state">%1$s · dış %2$s</string>
+    <string name="sc_adb">ADB</string>
+    <string name="st_adb_start">Açılışta ADB</string>
+    <string name="st_adb_start_desc">Araç her açıldığında USB portundan ADB’yi açar, adbutil uygulaması gibi.</string>
+    <string name="sc_adb_already">ADB zaten açık (aracın bir sonraki açılışında kapanır)</string>
     <string name="sc_lights_off">Farlar kapalı</string>
     <string name="sc_lights_needed">Farları açın (Otomatik veya kısa far)</string>
     <string name="sc_lane">Şerit takip</string>

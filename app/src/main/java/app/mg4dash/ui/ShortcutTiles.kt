@@ -36,6 +36,7 @@ object ShortcutTiles {
         V2L("v2l", R.drawable.ic_sc_v2l, R.string.sc_v2l),
         SCREEN("screen", R.drawable.ic_sc_screen, R.string.sc_screen),
         AA("aa", R.drawable.ic_sc_aa, R.string.sc_aa),
+        ADB("adb", R.drawable.ic_sc_adb, R.string.sc_adb),
     }
 
     /** By default only the first row (Marc, 13/11): the users add the others. */
@@ -55,7 +56,9 @@ object ShortcutTiles {
     // ── States (read off the main thread) ──
 
     /** What a tile shows: its state line, inverted (on / unusual state) and whether the car answers for it. */
-    data class Shown(val state: String, val inverted: Boolean, val available: Boolean = true, val disabled: Boolean = false)
+    data class Shown(val state: String, val inverted: Boolean, val available: Boolean = true, val disabled: Boolean = false, val level: Int? = null,
+                     /** Name shown instead of the tile's own (climate: "Heating" or "Cooling"). */
+                     val label: String? = null)
 
     /**
      * Lights on as the car needs them for the rear fog light: SAIC's rule (SystemUI CarLampController.refreshData,
@@ -66,6 +69,12 @@ object ShortcutTiles {
         switchPos == null && dippedBeam == null -> null
         else -> switchPos == 1 || dippedBeam == true
     }
+    // Read as the theme reads the lights (CarProps.readAny: every type and area the car may use)
+    private fun lightInt(id: Int): Int? = CarProps.readAny(id).trim().toIntOrNull()
+    private fun lightBool(id: Int): Boolean? = when (CarProps.readAny(id).trim()) { "true", "1" -> true; "false", "0" -> false; else -> null }
+    private const val SIDE_LIGHTS = 557880099        // 0x21409323 VEH_SIDE_LGHT (3 = lights on, the theme's reading)
+    /** Lights on exactly as the theme sees them (Themes.rawNight): VEH_SIDE_LGHT not 0. */
+    private fun sideLightsOn(): Boolean = CarProps.readAny(SIDE_LIGHTS).let { it.isNotEmpty() && it != "0" && it != "false" }
     private const val LIGHT_SWITCH_POS = 557880119   // 0x21409337 LIGHT_SWITCH_POS_STS
     private const val DIPPED_BEAM = 555782944        // 0x21209320 DIPD_BEAM_LGHT (boolean)
     private const val REAR_FOG = 557880115   // 0x21409333 MASTER_LIGHT_REAR_FOG: read 0 off / 1 on; write 1 = press (stock SystemUI, CarLampController)
@@ -93,17 +102,19 @@ object ShortcutTiles {
         return when (tile) {
             Tile.FOG -> onOff(CarProps.getInt(REAR_FOG)?.let { if (it in 0..1) it == 1 else null }).let { s ->
                 // Lights off: greyed, a touch only says to turn them on (the car would refuse it)
-                if (s.available && !s.inverted && fogAllowed(CarProps.getInt(LIGHT_SWITCH_POS), CarProps.getBool(DIPPED_BEAM)) == false)
+                if (s.available && !s.inverted && fogAllowed(lightInt(LIGHT_SWITCH_POS), lightBool(DIPPED_BEAM)) == false &&
+                    // Lights seen on by the theme's reading (VEH_SIDE_LGHT 3): never greyed, the car decides
+                    !sideLightsOn())
                     Shown(t(R.string.sc_lights_off), false, disabled = true) else s
             }
             Tile.POWER -> Shown("", false)
             Tile.ESP -> CarBridge.escActive()?.let { Shown(t(if (it) R.string.sc_active else R.string.sc_inactive), !it) } ?: Shown("", false, false)
             Tile.AIDS -> aidsState(context, aids(s))
             Tile.DEFROST -> onOff(s.defrostRear)
-            Tile.MODE -> s.driveMode?.let { Shown(VehicleState.driveModeLabel(it), false) } ?: Shown("", false, false)
-            Tile.REGEN -> s.regenLevel?.let { Shown(VehicleState.regenLabel(it, s.onePedal), false) } ?: Shown("", false, false)
+            Tile.MODE -> s.driveMode?.let { Shown(VehicleState.driveModeLabel(it), false, level = it) } ?: Shown("", false, false)
+            Tile.REGEN -> s.regenLevel?.let { Shown(VehicleState.regenLabel(it, s.onePedal), false, level = it.takeIf { _ -> s.onePedal != 1 }) } ?: Shown("", false, false)
             Tile.ONE_PEDAL -> onOff(s.onePedal?.let { it == 1 })
-            Tile.CLIMATE -> onOff(s.hvacOn)
+            Tile.CLIMATE -> climate(context, s)
             // DRVNG_PTC_HEAT: read 0 = on, 1 = off (found on the car on 2026-10-15)
             Tile.BATTERY_HEAT -> onOff(CarProps.getInt(CarProps.DRVNG_PTC_HEAT)?.let { if (it in 0..1) it == 0 else null })
             Tile.WHEEL_HEAT -> onOff(s.wheelHeat?.let { it > 0 })
@@ -111,7 +122,33 @@ object ShortcutTiles {
             Tile.CHARGE_LOCK -> CarBridge.chargeLockLocked()?.let { Shown(t(if (it) R.string.sc_locked else R.string.sc_unlocked), it) } ?: Shown("", false, false)
             Tile.V2L -> if (!CarBridge.chargeControl) Shown("", false, false) else onOff(VehicleState.isDischarging(s))
             Tile.SCREEN -> Shown("", false)
+            Tile.ADB -> onOff(app.mg4dash.system.AdbSwitch.on(context))
             Tile.AA -> app.mg4dash.system.ConnectionToggle.isOff(context).let { Shown(t(if (it) R.string.sc_cut else R.string.sc_connected), it) }
+        }
+    }
+
+    /** Icon of [tile] for the state [s]: padlock open when unlocked, gauge needle on the drive mode (eco left, sport right). */
+    fun icon(tile: Tile, s: Shown?): Int {
+        // State unknown (not read yet, or not given by the car): the tile's usual icon
+        if (s == null || !s.available || s.state.isEmpty()) return tile.icon
+        val on = s.inverted
+        return when (tile) {
+            Tile.DOORS -> if (on) R.drawable.ic_sc_doors_open else tile.icon
+            Tile.MODE -> when (s.level) { 2 -> R.drawable.ic_sc_mode_eco; 3 -> R.drawable.ic_sc_mode_normal; 4 -> R.drawable.ic_sc_mode_sport; else -> tile.icon }
+            Tile.FOG -> if (on) tile.icon else R.drawable.ic_sc_fog_off
+            // ESP: inverted when it is off
+            Tile.ESP -> if (on) R.drawable.ic_sc_esp_off else tile.icon
+            Tile.CLIMATE -> when { !on -> R.drawable.ic_sc_clim_off; s.level == 1 -> R.drawable.ic_sc_clim_heat; else -> tile.icon }
+            Tile.AIDS -> if (s.level == 0) R.drawable.ic_sc_adas_off else tile.icon
+            Tile.DEFROST -> if (on) tile.icon else R.drawable.ic_sc_defrost_off
+            Tile.WHEEL_HEAT -> if (on) tile.icon else R.drawable.ic_sc_wheel_heat_off
+            Tile.BATTERY_HEAT -> if (on) tile.icon else R.drawable.ic_sc_battery_heat_off
+            Tile.REGEN -> when (s.level) { 0 -> R.drawable.ic_sc_regen_0; 1 -> R.drawable.ic_sc_regen_1; 2 -> R.drawable.ic_sc_regen_2; 3 -> R.drawable.ic_sc_regen_3; else -> tile.icon }
+            Tile.ONE_PEDAL -> if (on) R.drawable.ic_sc_one_pedal_on else tile.icon
+            Tile.CHARGE_LOCK -> if (on) tile.icon else R.drawable.ic_sc_charge_lock_open
+            Tile.V2L -> if (on) R.drawable.ic_sc_v2l_on else tile.icon
+            Tile.ADB -> if (on) R.drawable.ic_sc_adb_on else tile.icon
+            else -> tile.icon
         }
     }
 
@@ -176,7 +213,7 @@ object ShortcutTiles {
      * Touch on [tile] showing [shown]; returns the state to show at once (held until the car confirms it).
      * The aids (their list) and the switch off (refused while driving) are handled by the menu.
      */
-    fun act(activity: Activity, tile: Tile, shown: Shown?): Shown? {
+    fun act(activity: Context, tile: Tile, shown: Shown?): Shown? {
         val s = CarBridge.state.value
         Log.i(TAG, "tile ${tile.id} (state ${shown?.state})")
         if (shown?.disabled == true) {
@@ -191,12 +228,12 @@ object ShortcutTiles {
             Tile.MODE -> {
                 val target = nextDriveMode(modeTarget ?: s.driveMode)
                 modeTarget = target; main.removeCallbacks(sendMode); main.postDelayed(sendMode, SETTLE_MS)
-                return hold(tile, Shown(VehicleState.driveModeLabel(target), false))
+                return hold(tile, Shown(VehicleState.driveModeLabel(target), false, level = target))
             }
             Tile.REGEN -> {
                 val target = nextRegen(regenTarget ?: s.regenLevel?.takeIf { s.onePedal != 1 })
                 regenTarget = target; main.removeCallbacks(sendRegen); main.postDelayed(sendRegen, SETTLE_MS)
-                return hold(tile, Shown(VehicleState.regenLabel(target, 0), false))
+                return hold(tile, Shown(VehicleState.regenLabel(target, 0), false, level = target))
             }
             Tile.ONE_PEDAL -> CarBridge.toggleOnePedal()
             Tile.CLIMATE -> CarBridge.togglePower()
@@ -208,8 +245,11 @@ object ShortcutTiles {
             Tile.DOORS -> { val locked = shown?.let { !it.inverted } ?: return null; background { CarBridge.setDoors(!locked) } }
             Tile.CHARGE_LOCK -> { val locked = shown?.inverted ?: return null; CarBridge.setChargeLock(!locked) }
             Tile.V2L -> if (shown?.inverted ?: VehicleState.isDischarging(s)) CarBridge.stopV2L() else CarBridge.startV2L()
-            Tile.SCREEN -> activity.startActivity(Intent(activity, ScreenOffActivity::class.java))
+            Tile.SCREEN -> activity.startActivity(Intent(activity, ScreenOffActivity::class.java).apply { if (activity !is Activity) addFlags(Intent.FLAG_ACTIVITY_NEW_TASK) })
             Tile.AA -> app.mg4dash.system.ConnectionToggle.toggle(activity) { }
+            // ADB: on only (adbutil has no off either; the car's next start switches it off)
+            Tile.ADB -> if (shown?.inverted == true) { Toasts.show(activity, R.string.sc_adb_already); return null }
+                else app.mg4dash.system.AdbSwitch.enable(activity, "shortcuts menu")
             Tile.POWER, Tile.AIDS -> {}
         }
         return next?.let { hold(tile, it) }
@@ -223,11 +263,41 @@ object ShortcutTiles {
         fun t(r: Int) = context.getString(r)
         return when {
             k.isEmpty() -> Shown("", false, false)
-            k.all { it } -> Shown(t(R.string.sc_aids_on), false)
-            k.none { it } -> Shown(t(R.string.sc_aids_off), true)
-            else -> Shown(t(R.string.sc_aids_some), true)
+            k.all { it } -> Shown(t(R.string.sc_aids_on), false, level = 2)
+            k.none { it } -> Shown(t(R.string.sc_aids_off), true, level = 0)
+            else -> Shown(t(R.string.sc_aids_some), true, level = 1)
         }
     }
+
+    /** Last climate mode shown (true = cooling), kept within [CLIM_HYSTERESIS] so it does not flicker. */
+    @Volatile private var lastCooling: Boolean? = null
+    private const val CLIM_HYSTERESIS = 0.5f
+
+    /**
+     * Climate (Marc's mockup B): off = fan crossed out; on = snowflake ("Cooling") with the A/C on and a set point below
+     * the outside temperature, otherwise heat waves ("Heating"); with no valid outside temperature, snowflake with the
+     * A/C on. The state line: set point and outside temperature.
+     */
+    internal fun climate(context: Context, s: VehicleState): Shown {
+        val on = s.hvacOn ?: return Shown("", false, false)
+        fun t(r: Int) = context.getString(r)
+        if (!on) return Shown(t(R.string.sc_off), false, level = 0)
+        val out = s.outsideTemp?.takeIf { it > -60f && it < 70f }
+        val set = s.driverTemp
+        val cooling = coolingFor(s.acOn == true, set, out, lastCooling).also { lastCooling = it }
+        val state = if (set != null) context.getString(R.string.sc_clim_state, temp(set), out?.let { temp(it) } ?: "?") else ""
+        return Shown(state, true, level = if (cooling) 2 else 1, label = t(if (cooling) R.string.sc_cooling else R.string.sc_heating))
+    }
+
+    internal fun coolingFor(ac: Boolean, set: Float?, out: Float?, last: Boolean?): Boolean = when {
+        out == null || set == null -> ac
+        !ac -> false
+        last != null && Math.abs(set - out) < CLIM_HYSTERESIS -> last
+        else -> set < out
+    }
+
+    private fun temp(v: Float): String =
+        if (v % 1f == 0f) "${v.toInt()} °C" else String.format(java.util.Locale.getDefault(), "%.1f °C", v)
 
     /** Drive mode touched: eco → normal → sport → eco (snow and custom go to normal). */
     internal fun nextDriveMode(cur: Int?): Int = when (cur) { 2 -> 3; 3 -> 4; 4 -> 2; else -> 3 }

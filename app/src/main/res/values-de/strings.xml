@@ -931,6 +931,13 @@
     <string name="sc_unlocked">Entriegelt</string>
     <string name="sc_connected">Verbunden</string>
     <string name="sc_cut">Getrennt</string>
+    <string name="sc_heating">Heizung</string>
+    <string name="sc_cooling">Kühlung</string>
+    <string name="sc_clim_state">%1$s · außen %2$s</string>
+    <string name="sc_adb">ADB</string>
+    <string name="st_adb_start">ADB beim Start</string>
+    <string name="st_adb_start_desc">Schaltet ADB über den USB-Anschluss bei jedem Start des Autos ein, wie die App adbutil.</string>
+    <string name="sc_adb_already">ADB ist schon an (aus beim nächsten Start des Autos)</string>
     <string name="sc_lights_off">Licht aus</string>
     <string name="sc_lights_needed">Licht einschalten (Auto oder Abblendlicht)</string>
     <string name="sc_lane">Spurhalteassistent</string>
