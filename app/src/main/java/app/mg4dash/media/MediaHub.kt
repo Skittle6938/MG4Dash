@@ -1161,6 +1161,14 @@ object MediaHub {
     )
     private const val RADIO = "com.saicmotor.radio"
     private val ANALOG = Regex("^(FM|AM) [0-9.,]+$")
+
+    /** FM frequency in kHz of the radio's title ("FM 98.20", "FM 98,2"), -1 for AM or another title. */
+    internal fun analogKhz(title: String): Int {
+        val t = title.trim()
+        if (!ANALOG.matches(t) || !t.startsWith("FM")) return -1
+        val mhz = t.substring(3).replace(',', '.').toDoubleOrNull() ?: return -1
+        return Math.round(mhz * 1000).toInt()
+    }
     private val browserControllers = mutableMapOf<String, MediaController>()
     private val browsers = mutableMapOf<String, MediaBrowser>()
     private val watched = mutableSetOf<MediaSession.Token>()
@@ -1348,7 +1356,25 @@ object MediaHub {
         }
         try { context.applicationContext.registerReceiver(receiver, android.content.IntentFilter("app.mg4dash.RDS_TEXT")) }
         catch (e: Exception) { Log.w(TAG, "RDS text: ${e.message}") }
+        // RDS name (PS) of the FM station, with its frequency (kHz), sent by MG4Radio: the radio's media session only
+        // has the name known when tuning, nearly always empty since the PS comes a few seconds later
+        val names = object : android.content.BroadcastReceiver() {
+            override fun onReceive(c: Context, i: Intent) {
+                val khz = i.getIntExtra("frequency", -1)
+                val name = i.getStringExtra("name").orEmpty().trim()
+                if (khz <= 0 || name.length < 2) return
+                synchronized(rdsNames) { rdsNames.remove(khz); rdsNames[khz] = name; while (rdsNames.size > 60) rdsNames.remove(rdsNames.keys.first()) }
+                main.post { publish() }
+            }
+        }
+        try { context.applicationContext.registerReceiver(names, android.content.IntentFilter("app.mg4dash.RDS_NAME")) }
+        catch (e: Exception) { Log.w(TAG, "RDS name: ${e.message}") }
     }
+
+    /** RDS names heard, by FM frequency (kHz): the last one first shown when coming back to a station. */
+    private val rdsNames = LinkedHashMap<Int, String>()
+
+    private fun rdsNameFor(khz: Int): String = if (khz <= 0) "" else synchronized(rdsNames) { rdsNames[khz].orEmpty() }
 
     private fun publish() {
         if (radioShown) { publishRadio(); return }
@@ -1366,8 +1392,10 @@ object MediaHub {
         // sent by Radio Dash (the session only has frequency and name) is cleared on station change
         val analog = c.packageName == RADIO && ANALOG.matches(rawTitle.trim())
         if (rdsStation != rawTitle) { rdsStation = rawTitle; rdsText = "" }
-        val swap = analog && rawArtist.isNotBlank()
-        val title = if (swap) rawArtist.trim() else rawTitle
+        // Name not in the session (the radio only puts the one known when tuning): the one MG4Radio sent for that frequency
+        val name = if (!analog) "" else rawArtist.trim().ifBlank { rdsNameFor(analogKhz(rawTitle)) }
+        val swap = name.isNotBlank()
+        val title = if (swap) name else rawTitle
         val artist = if (swap) rawTitle.trim() else rawArtist
         val album = md?.getString(MediaMetadata.METADATA_KEY_ALBUM) ?: ""
         val bmp = (md?.getBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART)
@@ -1525,12 +1553,13 @@ object MediaHub {
     private fun publishRadio() {
         val st = SaicRadio.last
         val freq = st?.let { SaicRadio.frequencyLabel(it) }.orEmpty()
+        val name = st?.name?.takeIf { it.isNotBlank() } ?: st?.takeIf { it.band == SaicRadio.BAND_FM }?.let { rdsNameFor(it.frequencyKhz) }.orEmpty()
         _now.value = NowPlaying(
             available = true,
             packageName = RADIO,
             source = st?.let { SaicRadio.bandLabel(it.band) } ?: "RADIO",
-            title = st?.name?.takeIf { it.isNotBlank() } ?: freq,
-            artist = if (st?.name.isNullOrBlank()) "" else freq,
+            title = name.ifBlank { freq },
+            artist = if (name.isBlank()) "" else freq,
             playing = st?.playing == true,
             androidAuto = androidAutoAvailable(),
         )
