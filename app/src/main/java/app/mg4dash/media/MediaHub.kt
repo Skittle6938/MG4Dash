@@ -1485,13 +1485,13 @@ object MediaHub {
      * kept the sound, from the second press on (#98).
      */
     private fun resumeApp(pkg: String) {
-        // Once, 500 ms after the last press (#98): a burst of volume presses gives a single cut, not one per press
+        // Once, 0.9 s after the last press (#98, 0.5 s still cut a little): a burst of volume presses gives a single cut, not one per press
         main.removeCallbacks(resumeRun)
         resumePkg = pkg
         main.postDelayed(resumeRun, RESUME_AFTER_MS)
     }
 
-    private const val RESUME_AFTER_MS = 500L
+    private const val RESUME_AFTER_MS = 900L
     @Volatile private var resumePkg: String? = null
     private val resumeRun = Runnable {
         val pkg = resumePkg ?: return@Runnable
