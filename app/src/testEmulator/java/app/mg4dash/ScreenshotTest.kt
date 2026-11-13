@@ -288,11 +288,45 @@ class ScreenshotTest {
         shoot(SettingsActivity::class.java, "settings_updates_mock.png")
     }
 
-    /** System tab, checked and up to date: "MG4Dash up to date (version)" as the other apps; the rescue line. */
+    /** System tab, checked and up to date: "Up to date (version)" as the other apps; the rescue line. */
     @Test @Config(qualifiers = "fr-w1920dp-h720dp-land-mdpi") fun settingsUpToDate() {
         org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE).edit()
             .putBoolean("settings_tabs_v2", true).putInt("settings_tab", 5).putLong("upd_checked_at", 1L).commit()
         shoot(SettingsActivity::class.java, "settings_uptodate_fr.png")
+    }
+
+    /**
+     * Update panel mock-ups, the three apps in the same state (MG4Radio and MG4Link are not installed under Robolectric:
+     * their state lines are given the texts the screen shows once checked).
+     */
+    @Test @Config(qualifiers = "fr-w1920dp-h720dp-land-mdpi") fun settingsUpdateStates() {
+        val app = org.robolectric.RuntimeEnvironment.getApplication()
+        fun lines(newer: Boolean, name: String) {
+            app.getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE).edit().remove("upd_new_app")
+                .putInt("theme_mode", 1).putBoolean("settings_tabs_v2", true).putInt("settings_tab", 5).putLong("upd_checked_at", 1L)
+                .apply { if (newer) putString("upd_new_app", "1.7.3-beta16") }.commit()
+            val act = Robolectric.buildActivity(SettingsActivity::class.java).setup().get()
+            repeat(5) { shadowOf(Looper.getMainLooper()).idleFor(200, TimeUnit.MILLISECONDS) }
+            val versions = mapOf("MG4Radio" to ("1.6.2" to "1.6.3"), "MG4Link" to ("2.2.4" to "2.2.5"))
+            fun walk(v: View) {
+                if (v is ViewGroup) {
+                    val first = v.getChildAt(0) as? android.widget.TextView
+                    val pair = versions[first?.text?.toString()]
+                    if (pair != null && v.childCount == 2 && v.getChildAt(1) is android.widget.TextView) {
+                        (v.getChildAt(1) as android.widget.TextView).text = if (newer) act.getString(R.string.st_upd_new, pair.first, pair.second)
+                            else act.getString(R.string.st_upd_current, pair.first)
+                        val button = ((v.parent as ViewGroup).getChildAt(1) as android.widget.Button)
+                        button.isEnabled = true; button.alpha = 1f
+                        if (newer) button.text = act.getString(R.string.st_upd_install_ver, pair.second)
+                    }
+                    for (i in 0 until v.childCount) walk(v.getChildAt(i))
+                }
+            }
+            walk(act.window.decorView)
+            save(act.window.decorView, name)
+        }
+        lines(false, "settings_updates_uptodate_fr.png")
+        lines(true, "settings_updates_available_fr.png")
     }
 
     /** Settings tabs in English, for the README. */

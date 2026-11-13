@@ -444,8 +444,8 @@
     <string name="st_rd_available">MG4Radio %1$s verfügbar</string>
     <string name="st_rd_installing">MG4Radio wird installiert…</string>
     <string name="st_rd_done">MG4Radio ist installiert. Bildschirm neu starten (Home etwa 20 s halten), um es zu nutzen.</string>
-    <string name="st_upd_current">%1$s aktuell (%2$s)</string>
-    <string name="st_upd_new">%1$s · %2$s verfügbar</string>
+    <string name="st_upd_current">Aktuell (%1$s)</string>
+    <string name="st_upd_new">Update verfügbar: %2$s (installiert: %1$s)</string>
     <string name="st_upd_none_new">nicht installiert · %1$s verfügbar</string>
     <string name="st_upd_install_ver">%1$s installieren</string>
     <string name="st_upd_note">Das MG4Dash-Update startet den Bildschirm am Ende neu. MG4Radio gilt nach einem Neustart des Zentralbildschirms (Home etwa 20 s halten) und ist getestet auf %1$s.</string>

@@ -444,8 +444,8 @@
     <string name="st_rd_available">MG4Radio %1$s disponible</string>
     <string name="st_rd_installing">Instalando MG4Radio…</string>
     <string name="st_rd_done">MG4Radio está instalada. Reinicia la pantalla (mantén Home unos 20 s) para usarla.</string>
-    <string name="st_upd_current">%1$s al día (%2$s)</string>
-    <string name="st_upd_new">%1$s · %2$s disponible</string>
+    <string name="st_upd_current">Al día (%1$s)</string>
+    <string name="st_upd_new">Actualización disponible: %2$s (instalada: %1$s)</string>
     <string name="st_upd_none_new">no instalada · %1$s disponible</string>
     <string name="st_upd_install_ver">Instalar la %1$s</string>
     <string name="st_upd_note">La actualización de MG4Dash reinicia la pantalla al final. MG4Radio se aplica tras reiniciar la pantalla central (mantener Inicio unos 20 s) y está probada en %1$s.</string>

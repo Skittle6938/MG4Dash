@@ -444,8 +444,8 @@
     <string name="st_rd_available">MG4Radio %1$s mevcut</string>
     <string name="st_rd_installing">MG4Radio yükleniyor…</string>
     <string name="st_rd_done">MG4Radio yüklendi. Kullanmak için multimedya ünitesini yeniden başlatın (Home\'a yaklaşık 20 sn basılı tutun).</string>
-    <string name="st_upd_current">%1$s güncel (%2$s)</string>
-    <string name="st_upd_new">%1$s · %2$s mevcut</string>
+    <string name="st_upd_current">Güncel (%1$s)</string>
+    <string name="st_upd_new">Güncelleme mevcut: %2$s (yüklü: %1$s)</string>
     <string name="st_upd_none_new">yüklü değil · %1$s mevcut</string>
     <string name="st_upd_install_ver">%1$s yükle</string>
     <string name="st_upd_note">MG4Dash güncellemesi sonunda ekranı yeniden başlatır. MG4Radio, orta ekran yeniden başlatıldıktan sonra geçerli olur (Ana Sayfa\'ya yaklaşık 20 sn basılı tutun) ve %1$s üzerinde test edildi.</string>
