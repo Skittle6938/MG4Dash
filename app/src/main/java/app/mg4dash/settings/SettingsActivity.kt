@@ -312,7 +312,7 @@ class SettingsActivity : AppCompatActivity() {
         val appNew = prefs.raw.getString("upd_new_app", null)?.takeIf { app.mg4dash.system.Updater.isNewer(it) }
         val checked = prefs.raw.getLong("upd_checked_at", 0L) > 0L
         val (updState, updButton) = updateLine(upd, "MG4Dash", when {
-            appNew != null -> getString(R.string.st_upd_new, BuildConfig.VERSION_NAME, appNew)
+            appNew != null -> updateAvailable(BuildConfig.VERSION_NAME, appNew)
             checked -> getString(R.string.st_upd_current, BuildConfig.VERSION_NAME)
             else -> BuildConfig.VERSION_NAME
         }, appNew)
@@ -354,7 +354,7 @@ class SettingsActivity : AppCompatActivity() {
                 }
                 updState.text = when {
                     failed -> getString(R.string.st_update_error)
-                    newer != null -> getString(R.string.st_upd_new, BuildConfig.VERSION_NAME, r.version)
+                    newer != null -> updateAvailable(BuildConfig.VERSION_NAME, r.version)
                     else -> getString(R.string.st_upd_current, BuildConfig.VERSION_NAME)
                 }
                 // New version: release notes and Install / Cancel choice
@@ -709,16 +709,57 @@ class SettingsActivity : AppCompatActivity() {
     }
 
     /** Name and state on the left, a single button on the right: Check, or Install when a newer version is known. */
-    private fun updateLine(parent: LinearLayout, name: String, state: String, newVersion: String?): Pair<TextView, Button> {
+    private fun updateLine(parent: LinearLayout, name: String, state: CharSequence, newVersion: String?): Pair<TextView, Button> {
         val line = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL }
         val texts = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
         text(texts, name, 18f, R.color.text_value)
-        val stateView = text(texts, state, 17f, R.color.text_title)
+        val stateView = text(texts, "", 17f, R.color.text_title)
         line.addView(texts, LinearLayout.LayoutParams(0, -2, 1f))
         val b = button(if (newVersion != null) getString(R.string.st_upd_install_ver, newVersion) else getString(R.string.st_update_check)) {}
         line.addView(b, LinearLayout.LayoutParams(dp(300), dp(56)).apply { leftMargin = dp(16) })
         parent.addView(line, LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(10) })
+        // An update available (text from [updateAvailable]): the line tinted with the theme's selection colour, a bar
+        // on its left and the button as the OUI toggles; back to plain as soon as the state says something else
+        val plainBg = b.background; val plainText = b.textColors
+        stateView.addTextChangedListener(object : android.text.TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+            override fun afterTextChanged(s: android.text.Editable?) {
+                val on = (stateView.text as? android.text.Spanned)?.getSpans(0, stateView.text.length, NewMark::class.java)?.isNotEmpty() == true
+                markAvailable(line, b, on, plainBg, plainText)
+            }
+        })
+        stateView.text = state
         return stateView to b
+    }
+
+    /** Marks an update available text, for [updateLine]. */
+    private class NewMark
+
+    /** "Update available - current → new", the arrow larger, marked for [updateLine]'s highlight. */
+    private fun updateAvailable(current: String, newer: String): CharSequence {
+        val s = android.text.SpannableString(getString(R.string.st_upd_new, current, newer))
+        val arrow = s.indexOf('→')
+        if (arrow >= 0) s.setSpan(android.text.style.RelativeSizeSpan(1.5f), arrow, arrow + 1, 0)
+        s.setSpan(NewMark(), 0, s.length, android.text.Spanned.SPAN_INCLUSIVE_INCLUSIVE)
+        return s
+    }
+
+    private fun markAvailable(line: LinearLayout, b: Button, on: Boolean, plainBg: android.graphics.drawable.Drawable?, plainText: android.content.res.ColorStateList) {
+        if (on) {
+            val accent = TypedValue().also { theme.resolveAttribute(R.attr.mgSelect, it, true) }.data
+            val tint = android.graphics.drawable.GradientDrawable().apply { setColor((accent and 0x00ffffff) or 0x1f000000); cornerRadius = dp(10).toFloat() }
+            val bar = android.graphics.drawable.GradientDrawable().apply { setColor(accent); cornerRadius = dp(2).toFloat() }
+            line.background = android.graphics.drawable.LayerDrawable(arrayOf(tint, bar)).apply {
+                setLayerSize(1, dp(4), -1); setLayerGravity(1, Gravity.START or Gravity.FILL_VERTICAL)
+            }
+            line.setPadding(dp(16), dp(8), dp(8), dp(8))
+            b.setBackgroundResource(R.drawable.bg_chip); b.isSelected = true
+            b.setTextColor(androidx.core.content.ContextCompat.getColorStateList(this, R.color.chip_text))
+        } else {
+            line.background = null; line.setPadding(0, 0, 0, 0)
+            b.background = plainBg; b.isSelected = false; b.setTextColor(plainText)
+        }
     }
 
     /**
@@ -732,7 +773,7 @@ class SettingsActivity : AppCompatActivity() {
         fun stateText() = when {
             cur == null -> getString(R.string.st_aa_none)
             A.running -> getString(R.string.st_aa_busy)
-            found != null && app.mg4dash.system.Updater.isNewer(found!!.version, cur!!) -> getString(R.string.st_upd_new, cur, found!!.version)
+            found != null && app.mg4dash.system.Updater.isNewer(found!!.version, cur!!) -> updateAvailable(cur!!, found!!.version)
             found != null -> getString(R.string.st_upd_current, cur)
             else -> cur!!
         }
@@ -797,7 +838,7 @@ class SettingsActivity : AppCompatActivity() {
             !installed && rdNew != null -> getString(R.string.st_upd_none_new, rdNew)
             !installed -> getString(R.string.st_rd_none)
             cur == null -> getString(R.string.st_rd_unknown)
-            rdNew != null -> getString(R.string.st_upd_new, cur, rdNew)
+            rdNew != null -> updateAvailable(cur, rdNew)
             prefs.raw.getLong("upd_checked_at", 0L) > 0L -> getString(R.string.st_upd_current, cur)
             else -> cur
         }
