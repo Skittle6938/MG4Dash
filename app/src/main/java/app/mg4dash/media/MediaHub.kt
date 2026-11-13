@@ -1485,12 +1485,20 @@ object MediaHub {
      * kept the sound, from the second press on (#98).
      */
     private fun resumeApp(pkg: String) {
-        main.postDelayed({
-            val c = (lastCandidates.filter { it.packageName == pkg } + listOfNotNull(browserControllers[pkg])).firstOrNull() ?: return@postDelayed
-            if (isPlaying(c)) return@postDelayed
-            Log.i(TAG, "$pkg paused by the radio's passage: play")
-            c.transportControls.play()
-        }, 250)
+        // Once, 500 ms after the last press (#98): a burst of volume presses gives a single cut, not one per press
+        main.removeCallbacks(resumeRun)
+        resumePkg = pkg
+        main.postDelayed(resumeRun, RESUME_AFTER_MS)
+    }
+
+    private const val RESUME_AFTER_MS = 500L
+    @Volatile private var resumePkg: String? = null
+    private val resumeRun = Runnable {
+        val pkg = resumePkg ?: return@Runnable
+        val c = (lastCandidates.filter { it.packageName == pkg } + listOfNotNull(browserControllers[pkg])).firstOrNull() ?: return@Runnable
+        if (isPlaying(c)) return@Runnable
+        Log.i(TAG, "$pkg paused by the radio's passage: play")
+        c.transportControls.play()
     }
 
     /** Pauses the radio: through its session, otherwise through its service. */
