@@ -71,6 +71,8 @@ object MediaHub {
 
     fun start(context: Context) {
         appContext = context.applicationContext
+        // A wheel mute left by a crash (#98): undone once the car service is there
+        if (!BuildConfig.MOCK) context.applicationContext.let { c -> main.postDelayed({ Thread { app.mg4dash.car.CarMediaMute.restoreAtStart(c) }.start() }, 8_000) }
         if (BuildConfig.MOCK) {
             _now.value = NowPlaying(true, "com.saicmotor.radio", "RADIO DAB", "Radio Example", "Morning show", "DAB+ · 11B", mockLogo(), true, androidAuto = true)
             return
@@ -1515,25 +1517,28 @@ object MediaHub {
 
     /**
      * A volume key on the wheel while another app has the sound: the stock launcher restarts the radio, heard
-     * about 0.1 s until our pause takes (#98). The media volume stays at 0 from the radio's restart until the app
-     * plays again; read after the key's own volume change, so the new level is the one restored.
+     * about 0.1 s until our pause takes (#98). The media group stays muted from the radio's restart until the app
+     * plays again. Its level is never written (a write to 0 then back lost the presses made meanwhile).
      */
     @Volatile private var wheelSilence = false
     private const val WHEEL_SILENCE_MAX_MS = 2_000L
     private const val WHEEL_SILENCE_TAIL_MS = 150L
     /** Without a resume (the app was paused), after the radio's pause has taken. */
     private const val WHEEL_SILENCE_NO_RESUME_MS = 400L
+    private val wheelSilenceMax = Runnable { endWheelSilence("${WHEEL_SILENCE_MAX_MS / 1000} s at most") }
 
     private fun startWheelSilence() {
         val ctx = appContext ?: return
-        wheelSilence = true
-        app.mg4dash.sound.SoundTrigger.silenceForPause(ctx, WHEEL_SILENCE_MAX_MS)
+        if (wheelSilence) return
+        wheelSilence = app.mg4dash.car.CarMediaMute.mute(ctx)
+        if (wheelSilence) { main.removeCallbacks(wheelSilenceMax); main.postDelayed(wheelSilenceMax, WHEEL_SILENCE_MAX_MS) }
     }
 
     private fun endWheelSilence(why: String) {
         if (!wheelSilence) return
         wheelSilence = false
-        app.mg4dash.sound.SoundTrigger.endSilence(why)
+        main.removeCallbacks(wheelSilenceMax)
+        appContext?.let { app.mg4dash.car.CarMediaMute.unmute(it, why) }
     }
 
     /** Pauses the radio: through its session, otherwise through its service. */
