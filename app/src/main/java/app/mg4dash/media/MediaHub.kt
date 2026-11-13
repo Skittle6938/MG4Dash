@@ -871,8 +871,11 @@ object MediaHub {
         switchTo(next)
     }
 
-    /** Switches the car to this source and starts playback (swipe or source menu). */
-    fun switchTo(next: String) {
+    /**
+     * Switches the car to this source and starts playback (swipe or source menu). [play] false: the source only,
+     * the app's player left paused (the wheel's play / pause, #36).
+     */
+    fun switchTo(next: String, play: Boolean = true) {
         if (BuildConfig.MOCK) return
         userAction("source $next")
         if (next == RADIO_DAB || next == RADIO_FM) {
@@ -915,7 +918,7 @@ object MediaHub {
         val carSource = activateSource(next)
         // The radio does not always lose the sound to the app (DiAuto does not ask for it): pause
         if (!carSource && (radioShown || sourcePkg == RADIO)) pauseRadio()
-        main.postDelayed({
+        if (play) main.postDelayed({
             // Other app: "play" sent even if it thinks it is already playing. DiAuto stays playing
             // on the phone side when the radio takes the source from it; this "play" makes it resume
             (browserControllers[next] ?: lastCandidates.firstOrNull { it.packageName == next })
@@ -997,7 +1000,9 @@ object MediaHub {
                             // Volume key: silent at once, before the radio is heard (#98)
                             if (fwd == null) startWheelSilence()
                             val giveBack = {
-                                switchTo(back); wheelBack = back; wheelBackAt = android.os.SystemClock.uptimeMillis()
+                                // Play / pause on an app that played: its source back without the "play" switchTo sends,
+                                // which restarted it a second later (#36)
+                                switchTo(back, play = !(toggle && !replay)); wheelBack = back; wheelBackAt = android.os.SystemClock.uptimeMillis()
                                 if (replay) resumeApp(back)
                                 else {
                                     if (toggle) pauseApp(back)

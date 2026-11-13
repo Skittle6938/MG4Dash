@@ -88,6 +88,9 @@ object LegacyCar {
     internal fun tempLimits(min: Int?, max: Int?): Pair<Int, Int> =
         if (min != null && max != null && min in 10..20 && max in 28..40 && max - min >= 10) min to max else 17 to 33
 
+    /** The set point as the car service holds it, raw (-1 for a half degree or out of its range). */
+    fun drvTempRaw(): Int? = int("getDrvTemp")
+
     private fun int(name: String): Int? {
         val a = ac ?: return null
         return try { a.javaClass.getMethod(name).invoke(a) as? Int } catch (_: Exception) { null }
