@@ -445,8 +445,8 @@ object CarBridge {
 
     // ── Set point limits tested once on the car (#107, owner's design) ──────────────────────────────
     // Not deduced from the firmware: the lowest and highest set points the car really takes, each found by sending
-    // values from outside inwards and reading back what the car keeps (it refuses or brings back a value out of its
-    // range). Done once, climate off and standing still; the result is kept for good and wins over everything else.
+    // values from outside inwards and reading back what the car keeps (out of its range it refuses the value, or
+    // SWI69 turns it into another one). Done once, climate off and standing still; the result is kept for good and wins over everything else.
 
     private const val PREF_PROBE_LO = "temp_probe_lo"
     private const val PREF_PROBE_HI = "temp_probe_hi"
@@ -476,7 +476,7 @@ object CarBridge {
         maybeProbe(legacy)
     }
 
-    /** Low candidates from outside inwards: the first one the car takes (or the value it brings it back to) is LO. */
+    /** Candidates from outside inwards: the first one the car keeps exactly as sent is the limit. */
     internal fun probeCandidates(legacy: Boolean, low: Boolean): List<Float> = when {
         legacy && low -> listOf(13f, 14f, 15f, 16f, 17f)
         legacy -> listOf(35f, 34f, 33f, 32f, 31f)
@@ -521,7 +521,9 @@ object CarBridge {
                 send(c); delay(PROBE_WAIT_MS)
                 val r = read()
                 Log.i(TAG, "set point limits test: sent $c, car keeps $r")
-                if (r != null && r != 22f) return r
+                // Only a value the car keeps as sent: out of its range, SWI69 turns it into another one
+                // (14.5 read back as 31, 33.5 as 17), which is no limit
+                if (r != null && Math.abs(r - c) < 0.01f) return r
             }
             return null
         }
