@@ -305,7 +305,7 @@ class SettingsActivity : AppCompatActivity() {
             button(getString(R.string.st_replace)) { confirmReplace() },
             button(getString(R.string.st_valet)) { confirmValet() },
         )
-        text(valet, getString(R.string.st_adb), 14f, R.color.text_title)
+        text(valet, getString(R.string.st_rescue_note), 14f, R.color.text_title)
 
         // ── Update from GitHub ──
         val upd = panel(sysR, getString(R.string.st_update))
@@ -313,7 +313,7 @@ class SettingsActivity : AppCompatActivity() {
         val checked = prefs.raw.getLong("upd_checked_at", 0L) > 0L
         val (updState, updButton) = updateLine(upd, "MG4Dash", when {
             appNew != null -> getString(R.string.st_upd_new, BuildConfig.VERSION_NAME, appNew)
-            checked -> getString(R.string.st_upd_current, BuildConfig.VERSION_NAME)
+            checked -> getString(R.string.st_upd_current, "MG4Dash", BuildConfig.VERSION_NAME)
             else -> BuildConfig.VERSION_NAME
         }, appNew)
         // Progress of the download and the installation, under the line (the task goes on out of this screen)
@@ -355,7 +355,7 @@ class SettingsActivity : AppCompatActivity() {
                 updState.text = when {
                     failed -> getString(R.string.st_update_error)
                     newer != null -> getString(R.string.st_update_available, BuildConfig.VERSION_NAME, r.version)
-                    else -> getString(R.string.st_update_uptodate, BuildConfig.VERSION_NAME)
+                    else -> getString(R.string.st_upd_current, "MG4Dash", BuildConfig.VERSION_NAME)
                 }
                 // New version: release notes and Install / Cancel choice
                 if (newer != null && !isFinishing) {
@@ -733,7 +733,7 @@ class SettingsActivity : AppCompatActivity() {
             cur == null -> getString(R.string.st_aa_none)
             A.running -> getString(R.string.st_aa_busy)
             found != null && app.mg4dash.system.Updater.isNewer(found!!.version, cur!!) -> getString(R.string.st_upd_new, cur, found!!.version)
-            found != null -> getString(R.string.st_upd_current, cur)
+            found != null -> getString(R.string.st_upd_current, A.NAME, cur)
             else -> cur!!
         }
         val (state, button) = updateLine(parent, A.NAME, stateText(), null)
@@ -748,7 +748,7 @@ class SettingsActivity : AppCompatActivity() {
                 if (r == null) { A.end(); state.text = getString(R.string.st_update_error); return@launch }
                 found = r
                 cur = A.installedVersion(this@SettingsActivity) ?: cur
-                if (!app.mg4dash.system.Updater.isNewer(r.version, cur!!)) { A.end(); state.text = getString(R.string.st_aa_uptodate, cur); return@launch }
+                if (!app.mg4dash.system.Updater.isNewer(r.version, cur!!)) { A.end(); state.text = getString(R.string.st_upd_current, A.NAME, cur); return@launch }
                 showState()
                 var started = false
                 AlertDialog.Builder(this@SettingsActivity)
@@ -798,7 +798,7 @@ class SettingsActivity : AppCompatActivity() {
             !installed -> getString(R.string.st_rd_none)
             cur == null -> getString(R.string.st_rd_unknown)
             rdNew != null -> getString(R.string.st_upd_new, cur, rdNew)
-            prefs.raw.getLong("upd_checked_at", 0L) > 0L -> getString(R.string.st_upd_current, cur)
+            prefs.raw.getLong("upd_checked_at", 0L) > 0L -> getString(R.string.st_upd_current, "MG4Radio", cur)
             else -> cur
         }
         val blocker = R2.blocker(this)
@@ -813,7 +813,7 @@ class SettingsActivity : AppCompatActivity() {
                 if (r == null) { state.text = getString(R.string.st_update_error); return@launch }
                 app.mg4dash.ui.UpdatePrompt.remember(this@SettingsActivity, rd = r.version)
                 val cur = R2.installedVersion(this@SettingsActivity)
-                if (cur != null && !app.mg4dash.system.Updater.isNewer(r.version, cur)) { state.text = getString(R.string.st_rd_uptodate, cur); return@launch }
+                if (cur != null && !app.mg4dash.system.Updater.isNewer(r.version, cur)) { state.text = getString(R.string.st_upd_current, "MG4Radio", cur); return@launch }
                 showState()
                 AlertDialog.Builder(this@SettingsActivity)
                     .setTitle(getString(R.string.st_rd_available, r.version))

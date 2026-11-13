@@ -208,7 +208,7 @@
     <string name="st_home_desc">“SAIC ana ekranını değiştir” MG4Dash\'i ana ekran yapar. Hiçbir şey kaldırılmaz veya silinmez: orijinal ana ekran yalnızca ana ekran olarak kapatılır, aracın geri kalanı eskisi gibi çalışır (kamera, radyo, ses kaynakları, sistem çubuğu). Bakım modu onu tek dokunuşla yeniden açar, örneğin bayi ziyaretinden önce.</string>
     <string name="st_replace">SAIC ana ekranını değiştir</string>
     <string name="st_valet">Bakım modu</string>
-    <string name="st_adb">MG4Dash artık açılmıyorsa ADB ile kurtarma: adb shell cmd package compile -m speed -f app.mg4dash</string>
+    <string name="st_rescue_note">Güvenlik ağı: MG4Dash artık açılmazsa veya art arda birkaç kez çökerse, MG4Dash Rescue bir sonraki açılışta onu onarır ya da orijinal SAIC ana ekranını geri getirir.</string>
     <string name="st_battery_line">Yeni: %1$s kWh  ·  Mevcut: %2$s kWh  ·  Sağlık: %3$s</string>
     <string name="st_battery_model">Batarya modeli (Araç sayfasındaki tahmini sağlık için referans):</string>
     <string name="st_new_cap">Sağlık hesabı için yeni kapasite:</string>
@@ -350,7 +350,6 @@
     <string name="rescue_stock">MG4Dash başlamadı: SAIC ana ekranı geri getirildi. MG4Dash\'e dönmek için Ayarlar › Sistem › SAIC ana ekranını değiştir.</string>
     <string name="rescue_recompiled">MG4Dash başlamadı ve otomatik olarak onarıldı.</string>
     <string name="st_update_available">%2$s sürümü mevcut (yüklü: %1$s)</string>
-    <string name="st_update_uptodate">Güncel (%1$s)</string>
     <string name="st_update_install">Yükle</string>
     <string name="st_update_confirm">MG4Dash %1$s indirilip yüklensin mi? Ekran yeniden başlayacak.</string>
     <string name="st_update_downloading">İndiriliyor… %%%1$d</string>
@@ -443,10 +442,9 @@
     <string name="st_rd_desc">GitHub\'dan en son MG4Radio sürümünü yükler (yalnızca bu yazılımda). Yeni radyo, multimedya ünitesi yeniden başlatıldıktan sonra devreye girer (Home\'a yaklaşık 20 sn basılı tutun).</string>
     <string name="st_rd_check">MG4Radio\'yu güncelle</string>
     <string name="st_rd_available">MG4Radio %1$s mevcut</string>
-    <string name="st_rd_uptodate">MG4Radio güncel (%1$s)</string>
     <string name="st_rd_installing">MG4Radio yükleniyor…</string>
     <string name="st_rd_done">MG4Radio yüklendi. Kullanmak için multimedya ünitesini yeniden başlatın (Home\'a yaklaşık 20 sn basılı tutun).</string>
-    <string name="st_upd_current">%1$s · güncel</string>
+    <string name="st_upd_current">%1$s güncel (%2$s)</string>
     <string name="st_upd_new">%1$s · %2$s mevcut</string>
     <string name="st_upd_none_new">yüklü değil · %1$s mevcut</string>
     <string name="st_upd_install_ver">%1$s yükle</string>
@@ -893,7 +891,6 @@
     <string name="st_aa_none">yüklü değil</string>
     <string name="st_aa_busy">bir güncelleme zaten sürüyor</string>
     <string name="st_aa_available">MG4Link %1$s mevcut</string>
-    <string name="st_aa_uptodate">MG4Link güncel (%1$s)</string>
     <string name="st_aa_installing">MG4Link yükleniyor…</string>
     <string name="st_aa_done">MG4Link güncellendi. Android Auto kendiliğinden yeniden bağlanır.</string>
     <string name="st_aa_session_warning">Yükleme sırasında Android Auto yaklaşık bir dakika durur.</string>
