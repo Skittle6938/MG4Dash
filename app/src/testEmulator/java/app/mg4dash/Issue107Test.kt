@@ -14,7 +14,7 @@ import org.robolectric.annotation.Config
 @Config(sdk = [28])
 class Issue107Test {
     @Test fun fanOutOfRangeKeepsTheLastValidLevel() {
-        assertEquals("15 for a moment in AUTO: the last level kept", 6, LegacyCar.validFan(15, 6))
+        assertEquals("AUTO (15): the last manual level kept, − / + go on from it", 6, LegacyCar.validFan(LegacyCar.FAN_AUTO, 6))
         assertEquals(11, LegacyCar.validFan(11, 6))
         assertEquals("off", 0, LegacyCar.validFan(0, 6))
         assertEquals(null, LegacyCar.validFan(-1, null))
@@ -46,9 +46,35 @@ class Issue107Test {
             assertEquals("30°", app.mg4dash.car.VehicleState.tempLabel(30f))
             assertEquals("HI", app.mg4dash.car.VehicleState.tempLabel(31f))
         } finally { app.mg4dash.car.VehicleState.tempLo = lo; app.mg4dash.car.VehicleState.tempHi = hi }
-        // SWI69 unchanged: 17.5 / 32.5, numbers 18 to 32
+        // SWI69: LO 17, HI 33, numbers 18 to 32, whole degrees only
+        assertEquals("LO", app.mg4dash.car.VehicleState.tempLabel(17f))
+        assertEquals("the car may report LO as 17.5", "LO", app.mg4dash.car.VehicleState.tempLabel(17.5f))
+        assertEquals("no half degree shown", "22°", app.mg4dash.car.VehicleState.tempLabel(21.5f))
+        assertEquals("18°", app.mg4dash.car.VehicleState.tempLabel(18f))
+        assertEquals("HI", app.mg4dash.car.VehicleState.tempLabel(32.5f))
         assertEquals(18f, app.mg4dash.car.VehicleState.tempFirst)
         assertEquals(32f, app.mg4dash.car.VehicleState.tempLast)
+    }
+
+    /** SWI69 (A9): the range chosen as the stock climate app does (car model and nation). */
+    @Test fun a9RangeFromTheCarModel() {
+        val cb = app.mg4dash.car.CarBridge
+        assertEquals("MG4 sold in France / EU", true, cb.tempRange16to30(69, 5))
+        assertEquals("UK", true, cb.tempRange16to30(69, 8))
+        assertEquals("Australia", true, cb.tempRange16to30(69, 24))
+        assertEquals("EU/UK MY24", true, cb.tempRange16to30(132, null))
+        assertEquals("another market", false, cb.tempRange16to30(69, 1))
+        assertEquals("nation unknown: kept as it was", null, cb.tempRange16to30(69, null))
+        assertEquals(null, cb.tempRange16to30(null, 5))
+        val lo = app.mg4dash.car.VehicleState.tempLo; val hi = app.mg4dash.car.VehicleState.tempHi
+        try {
+            app.mg4dash.car.VehicleState.tempLo = 15.5f; app.mg4dash.car.VehicleState.tempHi = 30.5f
+            assertEquals(16f, app.mg4dash.car.VehicleState.tempFirst)
+            assertEquals(30f, app.mg4dash.car.VehicleState.tempLast)
+            assertEquals("LO", app.mg4dash.car.VehicleState.tempLabel(15.5f))
+            assertEquals("16°", app.mg4dash.car.VehicleState.tempLabel(16f))
+            assertEquals("HI", app.mg4dash.car.VehicleState.tempLabel(30.5f))
+        } finally { app.mg4dash.car.VehicleState.tempLo = lo; app.mg4dash.car.VehicleState.tempHi = hi }
     }
 
     @Test fun absurdSavedTripLengthsNotShown() {

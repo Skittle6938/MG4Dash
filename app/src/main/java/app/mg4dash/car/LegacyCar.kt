@@ -118,14 +118,16 @@ object LegacyCar {
         if (ac == null) return s
         readLimits()
         fun b(v: Int?) = v?.takeIf { it >= 0 }?.let { it == 1 }
+        val fan = int("getAirVolumeLevel")
         return s.copy(
             connected = true,
             hvacOn = b(int("getHvacPowerStatus")),
             acOn = b(int("getAcSwitch")),
-            autoOn = b(int("getAutoStatus")),
+            // Fan level 15 is AUTO (#107): shown as AUTO, as the stock climate app, even before the AUTO state follows
+            autoOn = if (fan == FAN_AUTO) true else b(int("getAutoStatus")),
             recirc = prop(PROP_LOOP_MODE),
-            // A level out of 1..11 (15 for a moment in AUTO, #107): the last valid one kept
-            fanSpeed = int("getAirVolumeLevel")?.let { validFan(it, s.fanSpeed) },
+            // AUTO (15) or invalid (-1): the last manual level kept, − / + go on from it as in the stock app
+            fanSpeed = fan?.let { validFan(it, s.fanSpeed) },
             fanDirection = (prop(PROP_BLOWER_DIRECTION) ?: int("getBlowerDirectionMode"))?.takeIf { it in 0..7 },
             driverTemp = int("getDrvTemp")?.takeIf { it in 10..40 }?.toFloat(),
             outsideTemp = float("getOutCarTemp")?.takeIf { !it.isNaN() && it > -60f && it < 70f } ?: s.outsideTemp,
@@ -169,6 +171,9 @@ object LegacyCar {
 
     /** Recirculation: press moving one step (outside → inside → auto), reread on the property. */
     fun loop(target: Int) = cycle(PROP_LOOP_MODE, target, 3) { set("setLoopMode", 1) }
+
+    /** Fan level the old SDK gives in AUTO (stock HVAC app: "air_volume_auto"). */
+    const val FAN_AUTO = 15
 
     /** Fan level read: kept when 0 (off) to [VehicleState.FAN_MAX]; otherwise the last valid one ([last]). */
     internal fun validFan(read: Int, last: Int?): Int? = if (read in 0..VehicleState.FAN_MAX) read else last

@@ -10,6 +10,7 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import app.mg4dash.R
 import app.mg4dash.car.CarBridge
+import app.mg4dash.car.VehicleState
 import app.mg4dash.ui.Fullscreen
 import app.mg4dash.ui.Kit
 import app.mg4dash.ui.Themes
@@ -170,7 +171,7 @@ class ClimateHoldActivity : AppCompatActivity() {
             t <= 32f -> R.color.accent_heat
             else -> R.color.accent_danger
         }))
-        outside.text = car.driverTemp?.let { getString(R.string.dm_cabin_set, String.format(Locale.getDefault(), "%.1f°", it)) } ?: ""
+        outside.text = car.driverTemp?.let { getString(R.string.dm_cabin_set, VehicleState.tempLabel(it)) } ?: ""
         val on = car.hvacOn == true
         val counting = st.phase == ClimateHold.Phase.ARMED
         val locked = st.phase == ClimateHold.Phase.WAITING || st.phase == ClimateHold.Phase.ON

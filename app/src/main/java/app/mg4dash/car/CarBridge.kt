@@ -352,7 +352,38 @@ object CarBridge {
         }
     }
 
+    @Volatile private var tempRangeChecked = false
+
+    /**
+     * SWI69 (A9) set point range, as the stock climate app (HvacService / AppCache.isTempRange16to30CarModel): 16 to 30
+     * (LO 15.5, HI 30.5) on the car models 132 (EU/UK MY24), 198 (Israel MY24), 200 (Turkey MY24) and on the model 69
+     * sold in the EU / UK (nation 5, 8), Australia (24) or Israel (7); 18 to 32 (LO 17.5, HI 32.5) otherwise.
+     */
+    private fun detectTempRange() {
+        if (tempRangeChecked || BuildConfig.MOCK) return
+        tempRangeChecked = true
+        val model = try { adapter?.queryClient(2)?.let { ConfigService(it).carModelConfig } } catch (_: Exception) { null }
+        val nation = try {
+            appContext?.getSystemService("CarConfigService")?.let { m -> m.javaClass.getMethod("getNationalCode").invoke(m) as? Int }
+        } catch (_: Throwable) { null }
+        val low = tempRange16to30(model, nation)
+        if (low != null) {
+            VehicleState.tempLo = if (low) 15.5f else 17.5f
+            VehicleState.tempHi = if (low) 30.5f else 32.5f
+        }
+        Log.i(TAG, "set point range: model $model, nation $nation → ${when (low) { true -> "16 to 30"; false -> "18 to 32"; null -> "unknown, 18 to 32 kept" }}")
+    }
+
+    /** The A9 car model and nation code: true for the 16-to-30 range, false for 18 to 32, null if unknown. */
+    internal fun tempRange16to30(model: Int?, nation: Int?): Boolean? = when {
+        model == null -> null
+        model in listOf(132, 198, 200) -> true
+        model == 69 -> nation?.let { it in listOf(5, 8, 24, 7) }
+        else -> false
+    }
+
     private fun refreshHvac() {
+        if (hvac != null) detectTempRange()
         val h = hvac ?: run { if (Firmware.family != Firmware.Family.A9) _state.value = held(LegacyCar.readHvac(_state.value)); return }
         _state.value = _state.value.copy(
             connected = true,
@@ -1021,8 +1052,8 @@ object CarBridge {
         val cur = _state.value.driverTemp ?: return
         val min = VehicleState.TEMP_MIN; val max = VehicleState.TEMP_MAX   // LO / HI
         val target = when {
-            direction > 0 && cur <= min -> VehicleState.tempFirst
-            direction < 0 && cur >= max -> VehicleState.tempLast
+            direction > 0 && cur < VehicleState.tempFirst -> VehicleState.tempFirst
+            direction < 0 && cur > VehicleState.tempLast -> VehicleState.tempLast
             direction > 0 -> (Math.floor(cur.toDouble()) + 1).toFloat()
             else -> (Math.ceil(cur.toDouble()) - 1).toFloat()
         }.let { t -> if (t < VehicleState.tempFirst) min else if (t > VehicleState.tempLast) max else t }
