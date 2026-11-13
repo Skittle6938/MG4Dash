@@ -28,10 +28,13 @@ import app.mg4dash.ui.HomeSlots.Layout as HL
 @Config(sdk = [28], qualifiers = "w1920dp-h720dp-land-mdpi")
 class ScreenshotTest {
 
-    /** Vertical bar on the left, as on a new install; one test puts it back at the bottom. */
+    /**
+     * Vertical bar on the left, as on a new install; one test puts it back at the bottom. The shortcuts menu's tour step
+     * (shown once after the update) already seen: else it covers home and takes the touches meant for it.
+     */
     @org.junit.Before fun verticalBarByDefault() {
         org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE)
-            .edit().putBoolean("vertical_dock", true).commit()
+            .edit().putBoolean("vertical_dock", true).putBoolean("tutorial_shortcuts_seen", true).commit()
     }
 
     /** Connection icons with the phone's network shown: framed with its battery (#86). */
