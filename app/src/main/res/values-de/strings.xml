@@ -895,4 +895,47 @@
     <string name="st_aa_installing">MG4Link wird installiert…</string>
     <string name="st_aa_done">MG4Link ist aktualisiert. Android Auto verbindet sich von selbst wieder.</string>
     <string name="st_aa_session_warning">Android Auto stoppt während der Installation etwa eine Minute.</string>
+
+    <!-- Shortcuts menu (pulled down from the top) -->
+    <string name="st_shortcuts_menu">Schnellzugriff-Menü</string>
+    <string name="st_shortcuts_menu_desc">Von oben über den Bildschirm wischen öffnet Schnellzugriffe (Nebelschlussleuchte, ESP, Assistenten…). Blendet auch die originale Nebelleuchten-Taste aus und gibt ihre Ecke frei.</string>
+    <string name="st_shortcuts_menu_restart">Die originale Nebelleuchten-Taste ändert sich beim nächsten Start des Radios.</string>
+    <string name="sc_title">Schnellzugriffe</string>
+    <string name="sc_edit_title">Schnellzugriffe wählen</string>
+    <string name="sc_edit_hint">Tippen zum Hinzufügen oder Entfernen</string>
+    <string name="sc_done">OK</string>
+    <string name="sc_fog">Nebelschlussleuchte</string>
+    <string name="sc_power">Auto ausschalten</string>
+    <string name="sc_esp">ESP</string>
+    <string name="sc_adas">Fahrassistenten</string>
+    <string name="sc_defrost">Heckscheibenheizung</string>
+    <string name="sc_mode">Fahrmodus</string>
+    <string name="sc_regen">Rekuperation</string>
+    <string name="sc_one_pedal">One Pedal</string>
+    <string name="sc_clim">Klima</string>
+    <string name="sc_screen">Bildschirm aus</string>
+    <string name="sc_aa">Android Auto trennen</string>
+    <string name="sc_v2l">V2L-Steckdose</string>
+    <string name="sc_doors">Türen</string>
+    <string name="sc_charge_lock">Ladesteckersperre</string>
+    <string name="sc_wheel_heat">Lenkradheizung</string>
+    <string name="sc_battery_heat">Batterievorheizung</string>
+    <string name="sc_on">An</string>
+    <string name="sc_off">Aus</string>
+    <string name="sc_active">An</string>
+    <string name="sc_inactive">Aus</string>
+    <string name="sc_aids_on">An</string>
+    <string name="sc_aids_off">Aus</string>
+    <string name="sc_aids_some">Teilweise</string>
+    <string name="sc_locked">Verriegelt</string>
+    <string name="sc_unlocked">Entriegelt</string>
+    <string name="sc_connected">Verbunden</string>
+    <string name="sc_cut">Getrennt</string>
+    <string name="sc_lights_off">Licht aus</string>
+    <string name="sc_lights_needed">Licht einschalten (Auto oder Abblendlicht)</string>
+    <string name="sc_lane">Spurhalteassistent</string>
+    <string name="sc_fcw">Kollisionswarnung</string>
+    <string name="sc_udw">Müdigkeitswarnung</string>
+    <string name="sc_all_off">Alle aus</string>
+    <string name="sc_close">Schließen</string>
 </resources>

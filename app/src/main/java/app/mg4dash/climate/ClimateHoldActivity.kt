@@ -81,7 +81,7 @@ class ClimateHoldActivity : AppCompatActivity() {
         kit = Kit(this)
         val root = kit.row().apply {
             setBackgroundResource(R.drawable.bg_root)
-            setPadding(kit.dp(Kit.FOG_SAFE_DP + 24), kit.dp(28), kit.dp(40), kit.dp(28))
+            setPadding(kit.dp(Kit.fogSafeDp(this@ClimateHoldActivity) + 24), kit.dp(28), kit.dp(40), kit.dp(28))
         }
         // Left: the inside temperature, huge
         val left = kit.column().apply { gravity = Gravity.CENTER }
@@ -120,7 +120,7 @@ class ClimateHoldActivity : AppCompatActivity() {
         val arm = kit.column().apply {
             gravity = Gravity.CENTER
             setBackgroundResource(R.drawable.bg_root)
-            setPadding(kit.dp(Kit.FOG_SAFE_DP + 24), kit.dp(20), kit.dp(40), kit.dp(20))
+            setPadding(kit.dp(Kit.fogSafeDp(this@ClimateHoldActivity) + 24), kit.dp(20), kit.dp(40), kit.dp(20))
         }
         arm.addView(kit.text(getString(R.string.dm_lock_in), 40f, R.color.text_sub).apply { gravity = Gravity.CENTER })
         countdown = kit.text("", 200f, R.color.accent_heat, light = true).apply { gravity = Gravity.CENTER; fontFeatureSettings = "tnum" }

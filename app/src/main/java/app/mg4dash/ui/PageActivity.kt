@@ -57,7 +57,7 @@ abstract class PageActivity : AppCompatActivity() {
         header = kit.row()
         // Top left corner left free: MG overlays the fog light button there.
         // (with the vertical bar, the button sits on the bar: no room to leave)
-        header.addView(android.view.View(this), kit.lp(if (Dock.vertical(this)) kit.dp(4) else kit.dp(Kit.FOG_SAFE_DP), 1))
+        header.addView(android.view.View(this), kit.lp(if (Dock.vertical(this)) kit.dp(4) else kit.dp(Kit.fogSafeDp(this)), 1))
         // Fixed height: the header keeps the same size on all pages.
         val title = kit.title(pageTitle).apply { textSize = 20f; gravity = android.view.Gravity.CENTER_VERTICAL }
         header.addView(title, kit.lp(0, kit.dp(52), 1f, l = 8))

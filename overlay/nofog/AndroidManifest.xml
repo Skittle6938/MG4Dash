@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- MG4Dash: hides MG's rear fog light button (SystemUI's FloatBallView) by giving its two icons a size of 0 -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="app.mg4dash.overlay.nofog"
+    android:versionCode="1"
+    android:versionName="1.0">
+    <uses-sdk android:minSdkVersion="28" android:targetSdkVersion="28" />
+    <overlay android:targetPackage="com.android.systemui" android:priority="1" />
+    <application android:hasCode="false" android:label="MG4Dash fog button hidden" />
+</manifest>

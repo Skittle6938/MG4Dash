@@ -439,5 +439,28 @@ class Prefs(context: Context) {
         get() = sp.getInt("theme_accent", 0)
         set(v) = sp.edit().putInt("theme_accent", v).commit().let { }
 
+    /**
+     * Shortcuts menu (pulled down from the top of the screen), on by default: it also hides MG's fog light button
+     * (FogOverlay, from the head unit's next start) and gives back the top left corner it kept free. Off: as before (button in its place, no menu).
+     */
+    var shortcutsMenu: Boolean
+        get() = sp.getBoolean("shortcuts_menu", true)
+        set(v) = sp.edit().putBoolean("shortcuts_menu", v).apply()
+
+    /** Tiles shown in the shortcuts menu, in order (ids of [app.mg4dash.ui.ShortcutTiles.Tile]); null = the default first row. */
+    var shortcutTiles: List<String>?
+        get() = sp.getString("shortcut_tiles", null)?.split(',')?.filter { it.isNotBlank() }
+        set(v) = sp.edit().putString("shortcut_tiles", v?.joinToString(",")).apply()
+
+    /** Lane keeping mode to restore when the driving aids are turned back on from the shortcuts menu (3 = assist). */
+    var shortcutLaneMode: Int
+        get() = sp.getInt("shortcut_lane_mode", 3)
+        set(v) = sp.edit().putInt("shortcut_lane_mode", v).apply()
+
+    /** Front collision choice to restore likewise (1 = warning, 2 = warning + braking). */
+    var shortcutFcw: Int
+        get() = sp.getInt("shortcut_fcw", 2)
+        set(v) = sp.edit().putInt("shortcut_fcw", v).apply()
+
     val raw: SharedPreferences get() = sp
 }

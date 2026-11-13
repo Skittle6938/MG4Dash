@@ -86,8 +86,11 @@ object CarBridge {
     fun chargeLockLocked(): Boolean? = CarProps.readIntArea(ELEC_CLCK_CTRL, 0x1000000)?.let { if (it == 1) true else if (it == 2 || it == 0) false else null }
 
     /** Locks / unlocks the gun: EV service (A9), otherwise the property directly. */
-    fun toggleChargeLock() {
-        val target = if (chargeLockLocked() == true) 2 else 1
+    fun toggleChargeLock() = setChargeLock(chargeLockLocked() != true)
+
+    /** Locks ([lock]) or frees the gun, whatever is read now (shortcuts menu: from the state shown). */
+    fun setChargeLock(lock: Boolean) {
+        val target = if (lock) 1 else 2
         if (BuildConfig.MOCK) return
         scope.launch {
             val e = ev
@@ -120,6 +123,12 @@ object CarBridge {
 
     /** Doors locked? (stock SystemUI: 0 = open, 1 to 4 = locked). */
     fun doorsLocked(): Boolean? = CarProps.readIntArea(VEHICLE_LOCK, 0x1000000)?.let { it in 1..4 }
+
+    /** Locks ([lock]) or unlocks the doors, whatever is read now (shortcuts menu: from the state shown). */
+    fun setDoors(lock: Boolean): Boolean {
+        if (BuildConfig.MOCK) return true
+        return CarProps.setIntArea(VEHICLE_LOCK, 0x1000000, if (lock) 1 else 2, if (lock) "doors: lock" else "doors: unlock")
+    }
 
     /** Locks or unlocks the doors, like the stock quick panel tile. Returns the action done. */
     fun toggleDoors(): Boolean? {

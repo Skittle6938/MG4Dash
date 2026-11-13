@@ -895,4 +895,47 @@
     <string name="st_aa_installing">Instalando MG4Link…</string>
     <string name="st_aa_done">MG4Link está actualizado. Android Auto se vuelve a conectar solo.</string>
     <string name="st_aa_session_warning">Android Auto se detiene un minuto aproximadamente durante la instalación.</string>
+
+    <!-- Shortcuts menu (pulled down from the top) -->
+    <string name="st_shortcuts_menu">Menú de accesos</string>
+    <string name="st_shortcuts_menu_desc">Deslizar desde arriba de la pantalla abre accesos directos (antiniebla, ESP, asistentes…). También oculta el botón antiniebla original y libera su esquina.</string>
+    <string name="st_shortcuts_menu_restart">El botón antiniebla original cambia en el próximo arranque de la radio.</string>
+    <string name="sc_title">Accesos</string>
+    <string name="sc_edit_title">Elegir los accesos</string>
+    <string name="sc_edit_hint">Toca para añadir o quitar</string>
+    <string name="sc_done">OK</string>
+    <string name="sc_fog">Antiniebla trasero</string>
+    <string name="sc_power">Apagar el coche</string>
+    <string name="sc_esp">ESP</string>
+    <string name="sc_adas">Asistentes</string>
+    <string name="sc_defrost">Desempañado trasero</string>
+    <string name="sc_mode">Modo de conducción</string>
+    <string name="sc_regen">Regeneración</string>
+    <string name="sc_one_pedal">One pedal</string>
+    <string name="sc_clim">Climatización</string>
+    <string name="sc_screen">Apagar pantalla</string>
+    <string name="sc_aa">Cortar Android Auto</string>
+    <string name="sc_v2l">Toma V2L</string>
+    <string name="sc_doors">Puertas</string>
+    <string name="sc_charge_lock">Bloqueo del cargador</string>
+    <string name="sc_wheel_heat">Volante calefactado</string>
+    <string name="sc_battery_heat">Precalentar batería</string>
+    <string name="sc_on">Encendido</string>
+    <string name="sc_off">Apagado</string>
+    <string name="sc_active">Activado</string>
+    <string name="sc_inactive">Desactivado</string>
+    <string name="sc_aids_on">Activos</string>
+    <string name="sc_aids_off">Apagados</string>
+    <string name="sc_aids_some">En parte</string>
+    <string name="sc_locked">Bloqueado</string>
+    <string name="sc_unlocked">Desbloqueado</string>
+    <string name="sc_connected">Conectado</string>
+    <string name="sc_cut">Cortado</string>
+    <string name="sc_lights_off">Luces apagadas</string>
+    <string name="sc_lights_needed">Enciende las luces (Auto o cruce)</string>
+    <string name="sc_lane">Mantenimiento de carril</string>
+    <string name="sc_fcw">Alerta de colisión</string>
+    <string name="sc_udw">Alerta de somnolencia</string>
+    <string name="sc_all_off">Apagar todo</string>
+    <string name="sc_close">Cerrar</string>
 </resources>

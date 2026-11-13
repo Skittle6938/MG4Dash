@@ -895,4 +895,47 @@
     <string name="st_aa_installing">Installazione di MG4Link…</string>
     <string name="st_aa_done">MG4Link è aggiornato. Android Auto si ricollega da solo.</string>
     <string name="st_aa_session_warning">Android Auto si ferma per circa un minuto durante l\'installazione.</string>
+
+    <!-- Shortcuts menu (pulled down from the top) -->
+    <string name="st_shortcuts_menu">Menu scorciatoie</string>
+    <string name="st_shortcuts_menu_desc">Scorri dall’alto dello schermo per aprire le scorciatoie (retronebbia, ESP, assistenze…). Nasconde anche il pulsante retronebbia originale e libera il suo angolo.</string>
+    <string name="st_shortcuts_menu_restart">Il pulsante retronebbia originale cambia al prossimo avvio dell’autoradio.</string>
+    <string name="sc_title">Scorciatoie</string>
+    <string name="sc_edit_title">Scegli le scorciatoie</string>
+    <string name="sc_edit_hint">Tocca per aggiungere o togliere</string>
+    <string name="sc_done">OK</string>
+    <string name="sc_fog">Retronebbia</string>
+    <string name="sc_power">Spegni l’auto</string>
+    <string name="sc_esp">ESP</string>
+    <string name="sc_adas">Assistenze alla guida</string>
+    <string name="sc_defrost">Lunotto termico</string>
+    <string name="sc_mode">Modalità di guida</string>
+    <string name="sc_regen">Rigenerazione</string>
+    <string name="sc_one_pedal">One pedal</string>
+    <string name="sc_clim">Clima</string>
+    <string name="sc_screen">Spegni lo schermo</string>
+    <string name="sc_aa">Interrompi Android Auto</string>
+    <string name="sc_v2l">Presa V2L</string>
+    <string name="sc_doors">Porte</string>
+    <string name="sc_charge_lock">Blocco presa</string>
+    <string name="sc_wheel_heat">Volante riscaldato</string>
+    <string name="sc_battery_heat">Preriscaldamento batteria</string>
+    <string name="sc_on">Acceso</string>
+    <string name="sc_off">Spento</string>
+    <string name="sc_active">Attivo</string>
+    <string name="sc_inactive">Disattivo</string>
+    <string name="sc_aids_on">Attive</string>
+    <string name="sc_aids_off">Spente</string>
+    <string name="sc_aids_some">In parte</string>
+    <string name="sc_locked">Bloccato</string>
+    <string name="sc_unlocked">Sbloccato</string>
+    <string name="sc_connected">Connesso</string>
+    <string name="sc_cut">Interrotto</string>
+    <string name="sc_lights_off">Luci spente</string>
+    <string name="sc_lights_needed">Accendi le luci (Auto o anabbaglianti)</string>
+    <string name="sc_lane">Mantenimento corsia</string>
+    <string name="sc_fcw">Avviso di collisione</string>
+    <string name="sc_udw">Avviso di sonnolenza</string>
+    <string name="sc_all_off">Spegni tutto</string>
+    <string name="sc_close">Chiudi</string>
 </resources>

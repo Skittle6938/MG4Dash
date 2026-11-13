@@ -34,6 +34,11 @@ class LauncherApp : Application() {
         if (started) return
         started = true
         installCrashGuard()
+        // Shortcuts menu, and MG's fog light button hidden by the SystemUI overlay (installed and switched with the
+        // setting): only once unlocked, as they read the settings (unreadable from the boot screen: MG4Dash crashed in
+        // a loop at start and Android showed its launcher picker)
+        app.mg4dash.system.FogOverlay.start(this)
+        app.mg4dash.ui.ShortcutsPanel.init(this)
         Log.i("App", "start ${BuildConfig.VERSION_NAME} (${BuildConfig.FLAVOR})")
         // Apps whose floating window can bring the SAIC bars back over home (#108)
         Thread { Log.i("Bars", "over other apps: ${app.mg4dash.ui.Fullscreen.overlayApps(this)}") }.start()

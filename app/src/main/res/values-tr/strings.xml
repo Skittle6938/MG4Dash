@@ -895,4 +895,47 @@
     <string name="st_aa_installing">MG4Link yükleniyor…</string>
     <string name="st_aa_done">MG4Link güncellendi. Android Auto kendiliğinden yeniden bağlanır.</string>
     <string name="st_aa_session_warning">Yükleme sırasında Android Auto yaklaşık bir dakika durur.</string>
+
+    <!-- Shortcuts menu (pulled down from the top) -->
+    <string name="st_shortcuts_menu">Kısayol menüsü</string>
+    <string name="st_shortcuts_menu_desc">Ekranın üstünden aşağı kaydırınca kısayollar açılır (sis lambası, ESP, sürüş destekleri…). Orijinal sis lambası düğmesini de gizler ve köşesini boşaltır.</string>
+    <string name="st_shortcuts_menu_restart">Orijinal sis lambası düğmesi, ünite bir sonraki açılışta değişir.</string>
+    <string name="sc_title">Kısayollar</string>
+    <string name="sc_edit_title">Kısayolları seç</string>
+    <string name="sc_edit_hint">Eklemek veya çıkarmak için dokunun</string>
+    <string name="sc_done">Tamam</string>
+    <string name="sc_fog">Arka sis lambası</string>
+    <string name="sc_power">Aracı kapat</string>
+    <string name="sc_esp">ESP</string>
+    <string name="sc_adas">Sürüş destekleri</string>
+    <string name="sc_defrost">Arka cam rezistansı</string>
+    <string name="sc_mode">Sürüş modu</string>
+    <string name="sc_regen">Rejenerasyon</string>
+    <string name="sc_one_pedal">Tek pedal</string>
+    <string name="sc_clim">Klima</string>
+    <string name="sc_screen">Ekranı kapat</string>
+    <string name="sc_aa">Android Auto’yu kes</string>
+    <string name="sc_v2l">V2L prizi</string>
+    <string name="sc_doors">Kapılar</string>
+    <string name="sc_charge_lock">Şarj kilidi</string>
+    <string name="sc_wheel_heat">Isıtmalı direksiyon</string>
+    <string name="sc_battery_heat">Batarya ön ısıtma</string>
+    <string name="sc_on">Açık</string>
+    <string name="sc_off">Kapalı</string>
+    <string name="sc_active">Açık</string>
+    <string name="sc_inactive">Kapalı</string>
+    <string name="sc_aids_on">Açık</string>
+    <string name="sc_aids_off">Kapalı</string>
+    <string name="sc_aids_some">Kısmen</string>
+    <string name="sc_locked">Kilitli</string>
+    <string name="sc_unlocked">Kilit açık</string>
+    <string name="sc_connected">Bağlı</string>
+    <string name="sc_cut">Kesildi</string>
+    <string name="sc_lights_off">Farlar kapalı</string>
+    <string name="sc_lights_needed">Farları açın (Otomatik veya kısa far)</string>
+    <string name="sc_lane">Şerit takip</string>
+    <string name="sc_fcw">Çarpışma uyarısı</string>
+    <string name="sc_udw">Yorgunluk uyarısı</string>
+    <string name="sc_all_off">Hepsini kapat</string>
+    <string name="sc_close">Kapat</string>
 </resources>

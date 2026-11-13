@@ -64,7 +64,7 @@ class SettingsActivity : AppCompatActivity() {
         top.addView(TextView(this).apply {
             text = getString(R.string.st_title, BuildConfig.VERSION_NAME); setTextColor(color(R.color.text_value))
             setTextSize(TypedValue.COMPLEX_UNIT_SP, 22f); typeface = Typeface.create("sans-serif-medium", Typeface.NORMAL)
-        }, LinearLayout.LayoutParams(0, -2, 1f).apply { leftMargin = if (vertical) dp(12) else dp(app.mg4dash.ui.Kit.FOG_SAFE_DP - 8) })
+        }, LinearLayout.LayoutParams(0, -2, 1f).apply { leftMargin = if (vertical) dp(12) else dp(app.mg4dash.ui.Kit.fogSafeDp(this@SettingsActivity) - 8) })
         // Tabs (setting themes) in the banner, next to the title
         val tabBar = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL }
         top.addView(tabBar, LinearLayout.LayoutParams(-2, dp(52)).apply { rightMargin = dp(16) })
@@ -141,6 +141,12 @@ class SettingsActivity : AppCompatActivity() {
             app.mg4dash.ui.Themes.publish(this); recreate()
         }
         toggle(style, R.string.st_wide_bar, R.string.st_wide_bar_desc, { prefs.wideBar }) { prefs.wideBar = it; recreate() }
+        // Shortcuts menu pulled down from the top; also hides MG's fog light button (gives its corner back)
+        toggle(style, R.string.st_shortcuts_menu, R.string.st_shortcuts_menu_desc, { prefs.shortcutsMenu }) {
+            prefs.shortcutsMenu = it; app.mg4dash.system.FogOverlay.settingChanged(this)
+            app.mg4dash.ui.Toasts.show(this, getString(R.string.st_shortcuts_menu_restart), long = true)
+            app.mg4dash.ui.Themes.publish(this); recreate()
+        }
         toggle(style, R.string.st_fullscreen, null, { prefs.fullscreen }) { prefs.fullscreen = it; Fullscreen.apply(this) }
         toggle(style, R.string.st_own_keyboard, R.string.st_own_keyboard_desc, { prefs.ownKeyboard }) { prefs.ownKeyboard = it }
         toggle(style, R.string.st_energy_card_power, R.string.st_energy_card_power_desc, { prefs.energyCardPower }) { prefs.energyCardPower = it }

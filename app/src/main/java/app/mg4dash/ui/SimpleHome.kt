@@ -116,7 +116,7 @@ class SimpleHome(private val a: AppCompatActivity) {
         climateCard = kit.panel()
         // Title only; top left corner free for the fog light button (except vertical bar)
         val head = kit.row()
-        head.addView(title(a.getString(R.string.title_climate)), kit.lp(0, -2, 1f, l = if (Dock.vertical(a)) 0 else Kit.FOG_SAFE_DP - 20))
+        head.addView(title(a.getString(R.string.title_climate)), kit.lp(0, -2, 1f, l = if (Dock.vertical(a)) 0 else Kit.fogSafeDp(a) - 20))
         climateCard.addView(head, kit.lp(-1, kit.dp(40)))
         if (hideTitles) head.visibility = if (Dock.vertical(a)) View.GONE else View.INVISIBLE
         // Heated seats and wheel (equipped versions): three centred buttons instead of the title

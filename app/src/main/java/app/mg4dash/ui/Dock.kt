@@ -142,6 +142,9 @@ object Dock {
     /** MG's fog light button falls on MG4Dash's bar (no room to keep on the cards): the vertical bar on the left only (#108). */
     internal fun fogOnBar(vertical: Boolean, rightSide: Boolean) = vertical && !rightSide
 
+    /** The fog light button's corner is kept free (shortcuts menu off: the button is there). */
+    fun fogShown(context: android.content.Context): Boolean = !Prefs(context).shortcutsMenu
+
     /** Vertical bar on the left chosen in the settings (all screens). */
     fun vertical(context: android.content.Context): Boolean = Prefs(context).verticalDock
 
@@ -183,7 +186,8 @@ object Dock {
         // 72 dp, overlapping the screen margin by 4 dp: centred under MG's fog light
         // button (x 20 → 76 dp, y ≈ 14 → 70 dp), with 8 dp on the left, right and above (#38)
         val barDp = if (Prefs(activity).wideBar) BAR_DP * 2 else BAR_DP   // "wide bar" setting (#67)
-        if (!right) root.addView(bar, LinearLayout.LayoutParams(kit.dp(barDp), LinearLayout.LayoutParams.MATCH_PARENT).apply { leftMargin = -kit.dp(4); topMargin = -kit.dp(6) })
+        // Fog light button hidden (shortcuts menu): the bar's top lines up with the cards' top, as on the right
+        if (!right) root.addView(bar, LinearLayout.LayoutParams(kit.dp(barDp), LinearLayout.LayoutParams.MATCH_PARENT).apply { leftMargin = -kit.dp(4); topMargin = if (fogShown(activity)) -kit.dp(6) else 0 })
         root.addView(content, LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.MATCH_PARENT, 1f).apply {
             if (right) rightMargin = kit.dp(12) else leftMargin = kit.dp(12)
         })
@@ -241,7 +245,8 @@ object Dock {
         bar.setPadding(kit.dp(4), kit.dp(4), kit.dp(4), kit.dp(6))
         // Place of the fog light button (overlaid by MG, it cannot be drawn by us);
         // on the right (right-hand drive), it stays on the left: the bar takes the full height
-        if (!rightSide(activity)) bar.addView(android.view.View(activity), LinearLayout.LayoutParams(-1, kit.dp(68)))
+        // (the shortcuts menu hides the button: full height, as on the right)
+        if (!rightSide(activity) && fogShown(activity)) bar.addView(android.view.View(activity), LinearLayout.LayoutParams(-1, kit.dp(68)))
         val order = listOf(
             ITEMS.first { it.label == R.string.dock_settings },
             ITEMS.first { it.label == R.string.dock_aa },

@@ -126,6 +126,15 @@ object CarProps {
         } catch (_: Throwable) { null }
     }
 
+    /** Boolean property on the global area (e.g. DIPD_BEAM_LGHT), null if unreadable. */
+    fun getBool(id: Int): Boolean? {
+        if (BuildConfig.MOCK) return mock[id]?.let { it.toInt() != 0 }
+        val m = cpm ?: return null
+        return try {
+            m.javaClass.getMethod("getBooleanProperty", Int::class.javaPrimitiveType, Int::class.javaPrimitiveType).invoke(m, id, 0) as? Boolean
+        } catch (_: Throwable) { null }
+    }
+
     fun getFloat(id: Int): Float? {
         if (BuildConfig.MOCK) return mock[id]?.toFloat()
         val m = cpm ?: return null

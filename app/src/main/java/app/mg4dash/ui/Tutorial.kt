@@ -239,7 +239,7 @@ object Tutorial {
                 bubble.measure(View.MeasureSpec.makeMeasureSpec(w, View.MeasureSpec.EXACTLY), View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED))
                 return bubble.measuredHeight
             }
-            val fog = dp(Kit.FOG_SAFE_DP)
+            val fog = dp(Kit.fogSafeDp(activity))
             /**
              * MG's fog light button, a system overlay at the top left (#38), covered the start of the title
              * of a bubble placed in that corner: lower it under the button (as long as it stays above [maxY]),

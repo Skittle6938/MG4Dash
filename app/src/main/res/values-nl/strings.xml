@@ -895,4 +895,47 @@
     <string name="st_aa_installing">MG4Link wordt geïnstalleerd…</string>
     <string name="st_aa_done">MG4Link is bijgewerkt. Android Auto maakt vanzelf weer verbinding.</string>
     <string name="st_aa_session_warning">Android Auto stopt ongeveer een minuut tijdens de installatie.</string>
+
+    <!-- Shortcuts menu (pulled down from the top) -->
+    <string name="st_shortcuts_menu">Snelmenu</string>
+    <string name="st_shortcuts_menu_desc">Veeg van boven naar beneden voor snelkoppelingen (mistachterlicht, ESP, hulpsystemen…). Verbergt ook de originele mistlichtknop en maakt zijn hoek vrij.</string>
+    <string name="st_shortcuts_menu_restart">De originele mistlichtknop verandert bij de volgende start van de radio.</string>
+    <string name="sc_title">Snelkoppelingen</string>
+    <string name="sc_edit_title">Snelkoppelingen kiezen</string>
+    <string name="sc_edit_hint">Tik om toe te voegen of te verwijderen</string>
+    <string name="sc_done">OK</string>
+    <string name="sc_fog">Mistachterlicht</string>
+    <string name="sc_power">Auto uitschakelen</string>
+    <string name="sc_esp">ESP</string>
+    <string name="sc_adas">Rijhulpsystemen</string>
+    <string name="sc_defrost">Achterruitverwarming</string>
+    <string name="sc_mode">Rijmodus</string>
+    <string name="sc_regen">Regeneratie</string>
+    <string name="sc_one_pedal">One pedal</string>
+    <string name="sc_clim">Klimaat</string>
+    <string name="sc_screen">Scherm uit</string>
+    <string name="sc_aa">Android Auto loskoppelen</string>
+    <string name="sc_v2l">V2L-stopcontact</string>
+    <string name="sc_doors">Deuren</string>
+    <string name="sc_charge_lock">Laadstekkerslot</string>
+    <string name="sc_wheel_heat">Stuurverwarming</string>
+    <string name="sc_battery_heat">Batterij voorverwarmen</string>
+    <string name="sc_on">Aan</string>
+    <string name="sc_off">Uit</string>
+    <string name="sc_active">Aan</string>
+    <string name="sc_inactive">Uit</string>
+    <string name="sc_aids_on">Aan</string>
+    <string name="sc_aids_off">Uit</string>
+    <string name="sc_aids_some">Deels</string>
+    <string name="sc_locked">Vergrendeld</string>
+    <string name="sc_unlocked">Ontgrendeld</string>
+    <string name="sc_connected">Verbonden</string>
+    <string name="sc_cut">Losgekoppeld</string>
+    <string name="sc_lights_off">Lichten uit</string>
+    <string name="sc_lights_needed">Zet de lichten aan (Auto of dimlicht)</string>
+    <string name="sc_lane">Rijstrookassistent</string>
+    <string name="sc_fcw">Botsingswaarschuwing</string>
+    <string name="sc_udw">Vermoeidheidswaarschuwing</string>
+    <string name="sc_all_off">Alles uit</string>
+    <string name="sc_close">Sluiten</string>
 </resources>
