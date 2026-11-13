@@ -243,6 +243,8 @@ object CarBridge {
         holdTemp?.let { (v, until) ->
             if (now > until || s.driverTemp == v) holdTemp = null else r = r.copy(driverTemp = v)
         }
+        // Limits test running (#107): the driver's set point stays on screen
+        probeShown?.let { r = r.copy(driverTemp = it) }
         holdFan?.let { (v, until) ->
             if (now > until || s.fanSpeed == v) holdFan = null else r = r.copy(fanSpeed = v)
         }
@@ -433,7 +435,112 @@ object CarBridge {
 
     private fun refreshHvac() {
         if (hvac != null) detectTempRange()
-        val h = hvac ?: run { if (Firmware.family != Firmware.Family.A9) _state.value = held(LegacyCar.readHvac(_state.value)); return }
+        val h = hvac ?: run {
+            if (Firmware.family != Firmware.Family.A9) { _state.value = held(LegacyCar.readHvac(_state.value)); afterHvacRead(legacy = true) }
+            return
+        }
+        refreshA9Hvac(h)
+        afterHvacRead(legacy = false)
+    }
+
+    // ── Set point limits tested once on the car (#107, owner's design) ──────────────────────────────
+    // Not deduced from the firmware: the lowest and highest set points the car really takes, each found by sending
+    // values from outside inwards and reading back what the car keeps (it refuses or brings back a value out of its
+    // range). Done once, climate off and standing still; the result is kept for good and wins over everything else.
+
+    private const val PREF_PROBE_LO = "temp_probe_lo"
+    private const val PREF_PROBE_HI = "temp_probe_hi"
+    private const val PREF_PROBE_PATH = "temp_probe_path"   // "legacy" or "a9": the values are in that path's units
+    private const val PROBE_WAIT_MS = 1_500L
+    private const val PREF_PROBE_TRIES = "temp_probe_tries"
+    /** A car that never gives a result is not tested at every start: three times at most. */
+    private const val PROBE_MAX_TRIES = 3
+    @Volatile private var probeTried = false
+    @Volatile private var probing = false
+    @Volatile private var probeShown: Float? = null
+
+    /** The limits tested before on this path, or null. */
+    private fun probedLimits(legacy: Boolean): Pair<Float, Float>? {
+        val p = rangePrefs() ?: return null
+        if (p.getString(PREF_PROBE_PATH, null) != if (legacy) "legacy" else "a9") return null
+        val lo = p.getFloat(PREF_PROBE_LO, 0f); val hi = p.getFloat(PREF_PROBE_HI, 0f)
+        return if (lo > 0f && hi > lo) lo to hi else null
+    }
+
+    private fun afterHvacRead(legacy: Boolean) {
+        if (BuildConfig.MOCK || probing) return
+        probedLimits(legacy)?.let { (lo, hi) ->
+            VehicleState.tempLo = lo; VehicleState.tempHi = hi; rangeLearned = true
+            return
+        }
+        maybeProbe(legacy)
+    }
+
+    /** Low candidates from outside inwards: the first one the car takes (or the value it brings it back to) is LO. */
+    internal fun probeCandidates(legacy: Boolean, low: Boolean): List<Float> = when {
+        legacy && low -> listOf(13f, 14f, 15f, 16f, 17f)
+        legacy -> listOf(35f, 34f, 33f, 32f, 31f)
+        low -> listOf(14.5f, 15.5f, 16.5f, 17.5f)
+        else -> listOf(33.5f, 32.5f, 31.5f, 30.5f)
+    }
+
+    /** Plausible limits: a dozen to twenty degrees apart, LO under 20 and HI over 28. */
+    internal fun plausibleLimits(lo: Float, hi: Float) = lo in 12f..20f && hi in 28f..36f && hi - lo in 12f..20f
+
+    private fun maybeProbe(legacy: Boolean) {
+        if (probeTried) return
+        val s = _state.value
+        val orig = s.driverTemp ?: return
+        // Only with the climate off and the car standing: the set point really changes for a few seconds
+        if (s.hvacOn != false || (s.speedKmh ?: 0f) > 1f) return
+        probeTried = true
+        val prefs = rangePrefs() ?: return
+        val tries = prefs.getInt(PREF_PROBE_TRIES, 0)
+        if (tries >= PROBE_MAX_TRIES) return
+        prefs.edit().putInt(PREF_PROBE_TRIES, tries + 1).apply()
+        probing = true; probeShown = orig
+        scope.launch {
+            try { probe(legacy, orig) } catch (e: Exception) { Log.w(TAG, "set point limits test: ${e.message}") }
+            finally { probing = false; probeShown = null }
+        }
+    }
+
+    private suspend fun probe(legacy: Boolean, orig: Float) {
+        fun send(v: Float) {
+            try { if (legacy) LegacyCar.temp(Math.round(v)) else hvac?.setDriverTemperature(v) }
+            catch (e: Exception) { Log.i(TAG, "set point limits test: $v refused (${e.message})") }
+        }
+        fun read(): Float? = if (legacy) LegacyCar.drvTempRaw()?.takeIf { it > 0 }?.toFloat()
+            else safe { hvac?.driverTemperature }?.takeIf { !it.isNaN() && it > 0f }
+        Log.i(TAG, "set point limits test (${if (legacy) "old SDK" else "A9"}), set point $orig")
+        suspend fun limit(low: Boolean): Float? {
+            // From a set point in the middle, so that any change read is the car's answer
+            send(22f); delay(PROBE_WAIT_MS)
+            if (read() != 22f) { Log.i(TAG, "set point limits test: 22 not taken (read ${read()})"); return null }
+            for (c in probeCandidates(legacy, low)) {
+                send(c); delay(PROBE_WAIT_MS)
+                val r = read()
+                Log.i(TAG, "set point limits test: sent $c, car keeps $r")
+                if (r != null && r != 22f) return r
+            }
+            return null
+        }
+        val lo = limit(true)
+        val hi = limit(false)
+        send(orig); delay(PROBE_WAIT_MS)
+        Log.i(TAG, "set point limits test: back to $orig (read ${read()})")
+        if (lo == null || hi == null || !plausibleLimits(lo, hi)) {
+            Log.i(TAG, "set point limits test: no result (LO $lo, HI $hi), range kept as it was")
+            return
+        }
+        rangePrefs()?.edit()?.putFloat(PREF_PROBE_LO, lo)?.putFloat(PREF_PROBE_HI, hi)
+            ?.putString(PREF_PROBE_PATH, if (legacy) "legacy" else "a9")?.apply()
+        VehicleState.tempLo = lo; VehicleState.tempHi = hi; rangeLearned = true
+        Log.i(TAG, "set point limits tested: LO $lo, HI $hi → ${VehicleState.tempFirst.toInt()} to ${VehicleState.tempLast.toInt()}, kept")
+        refreshHvac()
+    }
+
+    private fun refreshA9Hvac(h: HvacService) {
         // Fan level 15 is AUTO on SWI69 too (#108's report: fan=15 while AUTO read false): shown as AUTO
         val fanRaw = safe { h.fanSpeed }
         _state.value = _state.value.copy(
