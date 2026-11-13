@@ -705,6 +705,8 @@ object MediaHub {
 
     fun wheelPressed(forward: Boolean?) {
         if (forward != null) userAction("wheel ${if (forward) "next" else "previous"}")
+        // A press during the silence: the volume back before the car applies this key's step, which would be lost
+        else endWheelSilence("volume key")
         val app = current?.packageName?.takeIf { otherAppShown() } ?: recentBack() ?: return
         wheelFrom = app
         if (current?.packageName == app) wheelPlaying = current?.let { isPlaying(it) } == true
@@ -983,7 +985,13 @@ object MediaHub {
                             val fwd = wheelForward
                             val replay = wheelPlaying
                             // switchTo forgets the wheel's app (a user's choice): kept here, for a second press and the card
-                            val giveBack = { switchTo(back); wheelBack = back; wheelBackAt = android.os.SystemClock.uptimeMillis(); if (replay) resumeApp(back) }
+                            // Volume key: silent at once, before the radio is heard (#98)
+                            if (fwd == null) startWheelSilence()
+                            val giveBack = {
+                                switchTo(back); wheelBack = back; wheelBackAt = android.os.SystemClock.uptimeMillis()
+                                if (replay) resumeApp(back)
+                                else if (fwd == null) main.postDelayed({ endWheelSilence("radio paused") }, WHEEL_SILENCE_NO_RESUME_MS)
+                            }
                             if (fwd != null) undoRadioSkip(fwd) { giveBack() } else main.post { giveBack() }
                             return@newProxyInstance null
                         }
@@ -1485,20 +1493,47 @@ object MediaHub {
      * kept the sound, from the second press on (#98).
      */
     private fun resumeApp(pkg: String) {
-        // Once, 1 s after the last press (#98, 0.5 s still cut a little): a burst of volume presses gives a single cut, not one per press
+        // Once, 0.5 s after the last press (#98): a burst of volume presses gives a single cut, not one per press
         main.removeCallbacks(resumeRun)
         resumePkg = pkg
         main.postDelayed(resumeRun, RESUME_AFTER_MS)
     }
 
-    private const val RESUME_AFTER_MS = 1000L
+    private const val RESUME_AFTER_MS = 500L
     @Volatile private var resumePkg: String? = null
     private val resumeRun = Runnable {
-        val pkg = resumePkg ?: return@Runnable
-        val c = (lastCandidates.filter { it.packageName == pkg } + listOfNotNull(browserControllers[pkg])).firstOrNull() ?: return@Runnable
-        if (isPlaying(c)) return@Runnable
-        Log.i(TAG, "$pkg paused by the radio's passage: play")
-        c.transportControls.play()
+        val pkg = resumePkg ?: return@Runnable endWheelSilence("no app to resume")
+        val c = (lastCandidates.filter { it.packageName == pkg } + listOfNotNull(browserControllers[pkg])).firstOrNull()
+            ?: return@Runnable endWheelSilence("app gone")
+        if (!isPlaying(c)) {
+            Log.i(TAG, "$pkg paused by the radio's passage: play")
+            c.transportControls.play()
+        }
+        // The radio paused long ago: the volume back once the app plays again
+        main.postDelayed({ endWheelSilence("app resumed") }, WHEEL_SILENCE_TAIL_MS)
+    }
+
+    /**
+     * A volume key on the wheel while another app has the sound: the stock launcher restarts the radio, heard
+     * about 0.1 s until our pause takes (#98). The media volume stays at 0 from the radio's restart until the app
+     * plays again; read after the key's own volume change, so the new level is the one restored.
+     */
+    @Volatile private var wheelSilence = false
+    private const val WHEEL_SILENCE_MAX_MS = 2_000L
+    private const val WHEEL_SILENCE_TAIL_MS = 150L
+    /** Without a resume (the app was paused), after the radio's pause has taken. */
+    private const val WHEEL_SILENCE_NO_RESUME_MS = 400L
+
+    private fun startWheelSilence() {
+        val ctx = appContext ?: return
+        wheelSilence = true
+        app.mg4dash.sound.SoundTrigger.silenceForPause(ctx, WHEEL_SILENCE_MAX_MS)
+    }
+
+    private fun endWheelSilence(why: String) {
+        if (!wheelSilence) return
+        wheelSilence = false
+        app.mg4dash.sound.SoundTrigger.endSilence(why)
     }
 
     /** Pauses the radio: through its session, otherwise through its service. */
