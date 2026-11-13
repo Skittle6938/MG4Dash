@@ -564,13 +564,27 @@ public class WebActivity extends Activity {
     protected void onStart() {
         super.onStart();
         started = true;
-        if (web != null) web.onResume();
+        if (web != null) {
+            web.onResume();
+            // Stopped only a moment (the card's window attached again or detached: a new surface, #98): what played
+            // plays on, instead of staying paused
+            if (android.os.SystemClock.uptimeMillis() - stoppedAt < RESUME_WITHIN_MS) web.evaluateJavascript(RESUME_JS, null);
+        }
     }
+
+    /** When the page was last stopped (uptime); 0 never. */
+    private long stoppedAt = 0;
+    private static final long RESUME_WITHIN_MS = 3000;
+    /** Before pausing: the media that play are marked, to play them on if the stop lasts only a moment. */
+    private static final String MARK_JS = "document.querySelectorAll('video, audio').forEach(function (m) { try { m.__mg4dashPlaying = !m.paused && !m.ended; } catch (e) {} });";
+    private static final String RESUME_JS = "document.querySelectorAll('video, audio').forEach(function (m) { try { if (m.__mg4dashPlaying) { m.__mg4dashPlaying = false; m.play(); } } catch (e) {} });";
 
     @Override
     protected void onStop() {
         started = false;
+        stoppedAt = android.os.SystemClock.uptimeMillis();
         if (web != null) {
+            web.evaluateJavascript(MARK_JS, null);
             // Media are no longer suspended by Chromium (for the hidden card): out of sight, they stop here
             if (softVideo && inCardOnly()) web.evaluateJavascript(PAUSE_JS, null);
             web.onPause();
