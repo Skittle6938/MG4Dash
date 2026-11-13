@@ -120,6 +120,7 @@
     <string name="cl_eco_link">Suivre le mode ECO</string>
     <string name="cl_stock">Écran clim d\'origine  ›</string>
     <string name="cl_outside">Extérieur %1$d°</string>
+    <string name="cl_calibrating">Calibrage des limites…</string>
     <string name="en_stock">Appli Énergie d\'origine  ›</string>
     <string name="en_charging">RECHARGE</string>
     <string name="en_limit">LIMITE DE CHARGE</string>

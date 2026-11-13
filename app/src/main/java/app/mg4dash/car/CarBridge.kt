@@ -243,8 +243,9 @@ object CarBridge {
         holdTemp?.let { (v, until) ->
             if (now > until || s.driverTemp == v) holdTemp = null else r = r.copy(driverTemp = v)
         }
-        // Limits test running (#107): the driver's set point stays on screen
-        probeShown?.let { r = r.copy(driverTemp = it) }
+        // Limits test running (#107): the driver's set point and climate off stay on screen, the card says so
+        probeShown?.let { r = r.copy(driverTemp = it, hvacOn = false) }
+        r = r.copy(calibrating = probing)
         holdFan?.let { (v, until) ->
             if (now > until || s.fanSpeed == v) holdFan = null else r = r.copy(fanSpeed = v)
         }
@@ -499,9 +500,10 @@ object CarBridge {
         if (tries >= PROBE_MAX_TRIES) return
         prefs.edit().putInt(PREF_PROBE_TRIES, tries + 1).apply()
         probing = true; probeShown = orig
+        _state.value = held(_state.value)
         scope.launch {
             try { probe(legacy, orig) } catch (e: Exception) { Log.w(TAG, "set point limits test: ${e.message}") }
-            finally { probing = false; probeShown = null }
+            finally { probing = false; probeShown = null; _state.value = held(_state.value); refreshHvac() }
         }
     }
 
@@ -531,6 +533,13 @@ object CarBridge {
         val lo = limit(true)
         val hi = limit(false)
         send(orig); delay(PROBE_WAIT_MS)
+        // A set point sent turns the climate on: off again, as before the test
+        val on = if (legacy) LegacyCar.powerOn() else safe { hvac?.hvacPowerStatus }
+        if (on == true) {
+            try { if (legacy) LegacyCar.power(false) else hvac?.switchHvacPowerStatus() } catch (e: Exception) { Log.w(TAG, "set point limits test: climate off: ${e.message}") }
+            delay(PROBE_WAIT_MS)
+            Log.i(TAG, "set point limits test: climate off again (read ${if (legacy) LegacyCar.powerOn() else safe { hvac?.hvacPowerStatus }})")
+        }
         Log.i(TAG, "set point limits test: back to $orig (read ${read()})")
         if (lo == null || hi == null || !plausibleLimits(lo, hi)) {
             Log.i(TAG, "set point limits test: no result (LO $lo, HI $hi), range kept as it was")

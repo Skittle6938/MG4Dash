@@ -120,6 +120,7 @@
     <string name="cl_eco_link">Segui la modalità ECO</string>
     <string name="cl_stock">Schermata clima originale  ›</string>
     <string name="cl_outside">Temp. esterna: %1$d°</string>
+    <string name="cl_calibrating">Calibrazione limiti…</string>
     <string name="en_stock">App Energia originale  ›</string>
     <string name="en_charging">RICARICA</string>
     <string name="en_limit">LIMITE DI RICARICA</string>

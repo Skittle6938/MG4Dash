@@ -90,6 +90,8 @@ object LegacyCar {
 
     /** The set point as the car service holds it, raw (-1 for a half degree or out of its range). */
     fun drvTempRaw(): Int? = int("getDrvTemp")
+    /** Climate on, as the car service holds it. */
+    fun powerOn(): Boolean? = int("getHvacPowerStatus")?.takeIf { it >= 0 }?.let { it == 1 }
 
     private fun int(name: String): Int? {
         val a = ac ?: return null
