@@ -64,9 +64,10 @@ data class VehicleState(
 ) {
     companion object {
         /**
-         * Set point of the LO and HI positions. SWI69 (A9): 17.5 / 32.5, the numbers 18 to 32. Old SDK firmwares give
-         * their own (#107, getMinTemp / getMaxTemp: LO and HI values): 17 / 33 on SWI68 R46, 15 / 31 (16 to 30) on R67,
-         * R73 and recent SWI165; read by LegacyCar at connection.
+         * Set point sent for the LO and HI positions; whole degrees are all that is ever shown (owner's rule). SWI69 (A9),
+         * as the stock climate app: LO 15.5 / HI 30.5 with 16 to 30 on the EU, UK, Australian, Israeli and Turkish versions,
+         * LO 17.5 / HI 32.5 with 18 to 32 on the others (CarBridge.detectTempRange). Old SDK firmwares give their own
+         * (#107, getMinTemp / getMaxTemp): 17 / 33 on SWI68 R46, 15 / 31 (16 to 30) on R67, R73 and recent SWI165.
          */
         @Volatile var tempLo = 17.5f
         @Volatile var tempHi = 32.5f
@@ -207,10 +208,11 @@ data class VehicleState(
         /** LO / HI from the car's set point; the displayed number includes the calibration. */
         fun tempLabel(t: Float?): String = when {
             t == null || t.isNaN() || t <= 0f -> "—"
-            t <= TEMP_MIN -> "LO"
-            t >= TEMP_MAX -> "HI"
+            // Below the first number (17, or 17.5 as the car may report it) is LO; above the last, HI
+            t < tempFirst - 0.25f -> "LO"
+            t > tempLast + 0.25f -> "HI"
             else -> (t + tempOffset).let { d ->
-                if (d % 1f == 0f) "${d.toInt()}°" else String.format(Locale.getDefault(), "%.1f°", d)
+                "${Math.round(d)}°"   // whole degrees only
             }
         }
     }

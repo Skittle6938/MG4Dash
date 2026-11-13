@@ -183,8 +183,8 @@ class ClimateActivity : PageActivity() {
         tempGauge.onColor = kit.color(if (t != null && t >= 23f) R.color.accent_heat else R.color.accent_cold)
         tempGauge.value = when {
             t == null -> 0
-            t <= VehicleState.TEMP_MIN -> 1
-            t >= VehicleState.TEMP_MAX -> 17
+            t < VehicleState.tempFirst - 0.25f -> 1
+            t > VehicleState.tempLast + 0.25f -> 17
             else -> (Math.round(t) - Math.round(VehicleState.tempFirst) + 2).coerceIn(1, 17)
         }
         val autoOn = on && s.autoOn == true

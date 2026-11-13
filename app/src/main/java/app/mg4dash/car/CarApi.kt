@@ -123,6 +123,8 @@ class VehicleSettingService(b: IBinder) : RemoteService(b, "com.saicmotor.carapi
 class ConfigService(b: IBinder) : RemoteService(b, "com.saicmotor.carapi.config.ICarConfigService") {
     val seatHeatingConfig get() = int(23)
     val steeringWheelHeatConfig get() = int(52)
+    /** Car model code (getCarModelConfigData): 69 MG4, 132 EU/UK MY24, 198 Israel MY24, 200 Turkey MY24… */
+    val carModelConfig get() = int(8)
 }
 
 /**
