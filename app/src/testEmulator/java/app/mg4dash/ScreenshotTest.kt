@@ -1267,7 +1267,7 @@ class ScreenshotTest {
 
     private fun shortcutsMenu(theme: Int, name: String, release: Boolean = true) {
         val sp = org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE)
-        sp.edit().putInt("theme_mode", theme).commit()
+        sp.edit().putInt("theme_mode", theme).putBoolean("fullscreen", false).putBoolean("tutorial_shortcuts_seen", true).commit()   // the screen's own gesture (outside full screen)
         app.mg4dash.ui.ShortcutsPanel.init(org.robolectric.RuntimeEnvironment.getApplication())
         val activity = Robolectric.buildActivity(MainActivity::class.java).setup().get()
         repeat(5) { shadowOf(Looper.getMainLooper()).idleFor(200, TimeUnit.MILLISECONDS) }
@@ -1277,7 +1277,8 @@ class ScreenshotTest {
         var y = 10f
         for (i in 1..12) { y += if (release) 40f else 15f; touch(android.view.MotionEvent.ACTION_MOVE, y, i * 16L) }
         if (release) touch(android.view.MotionEvent.ACTION_UP, y, 300)
-        repeat(8) { shadowOf(Looper.getMainLooper()).idleFor(200, TimeUnit.MILLISECONDS) }
+        // The tiles' states are read in the background: let them come back
+        repeat(12) { Thread.sleep(150); shadowOf(Looper.getMainLooper()).idleFor(200, TimeUnit.MILLISECONDS) }
         save(activity.window.decorView, name)
     }
 
