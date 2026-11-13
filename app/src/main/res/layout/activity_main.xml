@@ -150,7 +150,9 @@
                     <app.mg4dash.ui.SegmentedGauge
                         android:id="@+id/fanGauge"
                         android:layout_width="0dp"
-                        android:layout_height="18dp"
+                        android:layout_height="34dp"
+                        android:paddingTop="8dp"
+                        android:paddingBottom="8dp"
                         android:layout_marginLeft="12dp"
                         android:layout_marginRight="12dp"
                         android:layout_weight="1" />

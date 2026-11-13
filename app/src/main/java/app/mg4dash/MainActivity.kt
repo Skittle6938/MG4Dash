@@ -93,6 +93,8 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         b = ActivityMainBinding.inflate(layoutInflater)
         setContentView(b.root)
         b.fanGauge.segments = VehicleState.FAN_MAX
+        // Touched or slid along: that fan level, sent once when lifted
+        b.fanGauge.onSegmentPick = { CarBridge.setFanLevel(it + 1) }
         b.kersGauge.segments = 4
         b.kersGauge.onColor = color(R.color.accent_energy)
         // Touch a segment = regeneration level; long press = one-pedal driving

@@ -39,7 +39,28 @@ class SegmentedGauge @JvmOverloads constructor(
         override fun onLongPress(e: android.view.MotionEvent) { onLongTap?.invoke() }
     })
 
+    /**
+     * Touching or sliding along the gauge picks a level: shown at once while the finger moves, given once when it is
+     * lifted (its index 0..segments-1). The fan and the temperature set point (climate card and page).
+     */
+    var onSegmentPick: ((Int) -> Unit)? = null
+    private var picking = -1
+
+    private fun indexAt(x: Float): Int {
+        val w = (width - paddingLeft - paddingRight).coerceAtLeast(1)
+        return ((x - paddingLeft) / w * segments).toInt().coerceIn(0, segments - 1)
+    }
+
     override fun onTouchEvent(event: android.view.MotionEvent): Boolean {
+        onSegmentPick?.let { pick ->
+            when (event.actionMasked) {
+                android.view.MotionEvent.ACTION_DOWN -> { parent?.requestDisallowInterceptTouchEvent(true); picking = indexAt(event.x); value = picking + 1 }
+                android.view.MotionEvent.ACTION_MOVE -> if (picking >= 0) { picking = indexAt(event.x); value = picking + 1 }
+                android.view.MotionEvent.ACTION_UP -> { if (picking >= 0) pick(indexAt(event.x)); picking = -1 }
+                android.view.MotionEvent.ACTION_CANCEL -> picking = -1
+            }
+            return true
+        }
         if (onSegmentTap == null) return super.onTouchEvent(event)
         parent?.requestDisallowInterceptTouchEvent(event.actionMasked == android.view.MotionEvent.ACTION_DOWN)
         return gestures.onTouchEvent(event)

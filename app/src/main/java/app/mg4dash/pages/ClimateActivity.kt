@@ -17,6 +17,12 @@ import app.mg4dash.ui.SegmentedGauge
 
 /** Climate page: temperature, fan, air direction and modes. */
 class ClimateActivity : PageActivity() {
+    private companion object {
+        /** Height of the temperature and fan bars (same as the climate card's), and the touch margin above and below. */
+        const val BAR_DP = 18
+        const val BAR_TOUCH = 12
+    }
+
     override val pageTitle get() = getString(R.string.title_climate)
     override val page = app.mg4dash.ui.Dock.Page.CLIMATE
 
@@ -63,10 +69,16 @@ class ClimateActivity : PageActivity() {
         tRow.addView(temp, kit.lp(0, -2, 1f))
         tRow.addView(up)
         tPanel.addView(tRow, kit.lp(-1, 0, 1f))
-        tempGauge = SegmentedGauge(this).apply { segments = 17 }
-        tPanel.addView(tempGauge, kit.lp(-1, kit.dp(14), t = 8))
+        // Touched or slid along: that set point (LO, the numbers, HI); the same bar height as the fan's, a taller touch zone
+        tempGauge = SegmentedGauge(this).apply {
+            segments = 17; setPadding(0, kit.dp(BAR_TOUCH), 0, kit.dp(BAR_TOUCH))
+            onSegmentPick = { CarBridge.setTempSlot(it) }
+        }
+        tPanel.addView(tempGauge, kit.lp(-1, kit.dp(BAR_DP + 2 * BAR_TOUCH), t = 8 - BAR_TOUCH))
         tPanel.addView(kit.row().apply {
-            listOf("LO", "20°", "24°", "28°", "HI").forEachIndexed { i, s ->
+            // From the car's range (#107): 20 / 24 / 28 with 18 to 32, 18 / 22 / 26 with 16 to 30
+            val f = VehicleState.tempFirst.toInt()
+            listOf("LO", "${f + 2}°", "${f + 6}°", "${f + 10}°", "HI").forEachIndexed { i, s ->
                 addView(kit.text(s, 15f, R.color.text_title).apply {
                     gravity = when (i) { 0 -> Gravity.START; 4 -> Gravity.END; else -> Gravity.CENTER }
                 }, kit.lp(0, -2, 1f))
@@ -78,7 +90,10 @@ class ClimateActivity : PageActivity() {
         val fPanel = kit.panel(getString(R.string.cl_fan))
         fanValue = kit.text("—", 72f, light = true).apply { gravity = Gravity.CENTER }
         fPanel.addView(fanValue, kit.lp(-1, 0, 1f))
-        fanGauge = SegmentedGauge(this).apply { segments = VehicleState.FAN_MAX }
+        fanGauge = SegmentedGauge(this).apply {
+            segments = VehicleState.FAN_MAX; setPadding(0, kit.dp(BAR_TOUCH), 0, kit.dp(BAR_TOUCH))
+            onSegmentPick = { CarBridge.setFanLevel(it + 1) }
+        }
         val fRow = kit.row()
         // As on home: − at the first notch turns the climate off, and does nothing with the climate off (#34)
         val fDown = kit.roundButton(R.drawable.ic_minus, 72) {
@@ -90,7 +105,7 @@ class ClimateActivity : PageActivity() {
         }
         val fUp = kit.roundButton(R.drawable.ic_plus, 72) { CarBridge.stepFan(1) }
         fRow.addView(fDown)
-        fRow.addView(fanGauge, kit.lp(0, kit.dp(26), 1f, l = 16, r = 16))
+        fRow.addView(fanGauge, kit.lp(0, kit.dp(BAR_DP + 2 * BAR_TOUCH), 1f, l = 16, r = 16))
         fRow.addView(fUp)
         fPanel.addView(fRow, kit.lp(-1, -2))
         fPanel.addView(kit.title(getString(R.string.cl_airflow)), kit.lp(-1, -2, t = 22))

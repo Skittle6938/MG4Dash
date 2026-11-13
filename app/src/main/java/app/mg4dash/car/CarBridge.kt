@@ -1079,6 +1079,34 @@ object CarBridge {
         else command("fan=$target") { it.setFanSpeed(target) }
     }
 
+    /** The temperature gauge's slot [i] (17 slots: LO, the numbers, HI) as the set point to send. */
+    internal fun tempForSlot(i: Int, slots: Int = 17): Float = when {
+        i <= 0 -> VehicleState.TEMP_MIN
+        i >= slots - 1 -> VehicleState.TEMP_MAX
+        else -> (VehicleState.tempFirst + (i - 1)).coerceAtMost(VehicleState.tempLast)
+    }
+
+    /** Set point picked on the gauge (climate page): sent once, shown at once and held as with − / +. */
+    fun setTempSlot(i: Int) {
+        val target = tempForSlot(i)
+        if (target == _state.value.driverTemp) return
+        _state.value = _state.value.copy(driverTemp = target)
+        holdTemp = target to System.currentTimeMillis() + HOLD_MS
+        if (useLegacy) legacy("temp=$target") { LegacyCar.temp(Math.round(target)) }
+        else command("temp=$target") { it.setDriverTemperature(target) }
+    }
+
+    /** Fan level picked on the gauge (1..11): climate off, it is turned on as with "+"; otherwise sent once and held. */
+    fun setFanLevel(level: Int) {
+        if (_state.value.hvacOn != true) { togglePower(); return }
+        val target = level.coerceIn(VehicleState.FAN_MIN, VehicleState.FAN_MAX)
+        if (target == _state.value.fanSpeed && _state.value.autoOn != true) return
+        _state.value = _state.value.copy(fanSpeed = target)
+        holdFan = target to System.currentTimeMillis() + HOLD_MS
+        if (useLegacy) legacy("fan=$target") { LegacyCar.fan(target) }
+        else command("fan=$target") { it.setFanSpeed(target) }
+    }
+
     /** Air direction, 0–6 scale (MG4Control's AirFlow table). */
     fun setFanDirection(value: Int) {
         if (value !in 0..6) return
