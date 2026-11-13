@@ -45,6 +45,9 @@ object Tutorial {
      */
     interface Places { fun tutorialView(id: Int): View? }
 
+    private val SHORTCUTS_STEP = Step(null, R.string.tu_shortcuts_t,
+        listOf(R.string.tu_shortcuts_1, R.string.tu_shortcuts_2, R.string.tu_shortcuts_3, R.string.tu_shortcuts_4), wide = true)
+
     private val STEPS = listOf(
         Step(null, R.string.tu_welcome_t, listOf(R.string.tu_welcome_1)),
         // Replace SAIC home, and Service mode to go back to stock
@@ -58,6 +61,8 @@ object Tutorial {
         // The bar in use: vertical (side) or at the bottom
         Step(R.id.dock, R.string.tu_bar_t, listOf(R.string.tu_bar_1, R.string.tu_bar_2, R.string.tu_bar_3, R.string.tu_bar_4, R.string.tu_bar_5, R.string.tu_bar_6),
             bottomTitle = R.string.tu_bar_bottom_t),
+        // Shortcuts menu pulled down from the very top, over every app; shown alone once to those who update
+        SHORTCUTS_STEP,
         // The widgets where they are now (#97): each step points at its card's place
         Step(R.id.climateCard, R.string.tu_climate_t, listOf(R.string.tu_climate_1, R.string.tu_climate_2, R.string.tu_climate_3)),
         Step(R.id.energyCard, R.string.tu_energy_t, listOf(R.string.tu_energy_1, R.string.tu_energy_2)),
@@ -74,22 +79,28 @@ object Tutorial {
         Step(null, R.string.tu_end_t, listOf(R.string.tu_end_1)),
     )
 
-    /** First install: the tutorial opens once on full home. */
+    /**
+     * First install: the tutorial opens once on full home. An update that brings the shortcuts menu: its step alone,
+     * once, to those who already had MG4Dash.
+     */
     fun showIfPending(activity: Activity) {
         val p = Prefs(activity)
-        if (!p.raw.getBoolean("tutorial_pending", false)) return
-        activity.window.decorView.post { show(activity) }
+        if (p.raw.getBoolean("tutorial_pending", false)) { activity.window.decorView.post { show(activity) }; return }
+        if (p.shortcutsMenu && !p.raw.getBoolean(SHORTCUTS_SEEN, false))
+            activity.window.decorView.post { show(activity, STEPS.indexOf(SHORTCUTS_STEP), only = true) }
     }
 
-    fun show(activity: Activity, from: Int = 0) {
+    private const val SHORTCUTS_SEEN = "tutorial_shortcuts_seen"
+
+    fun show(activity: Activity, from: Int = 0, only: Boolean = false) {
         val root = activity.findViewById<ViewGroup>(android.R.id.content)
         root.findViewWithTag<View>(TAG)?.let { root.removeView(it) }
-        root.addView(Overlay(activity, from).apply { tag = TAG }, FrameLayout.LayoutParams(-1, -1))
+        root.addView(Overlay(activity, from, only).apply { tag = TAG }, FrameLayout.LayoutParams(-1, -1))
     }
 
-    /** Closed (Finish or Skip): no longer comes back by itself. */
+    /** Closed (Finish or Skip): no longer comes back by itself (the shortcuts menu's step either, seen in it). */
     private fun done(activity: Activity) {
-        Prefs(activity).raw.edit().putBoolean("tutorial_pending", false).apply()
+        Prefs(activity).raw.edit().putBoolean("tutorial_pending", false).putBoolean(SHORTCUTS_SEEN, true).apply()
         val root = activity.findViewById<ViewGroup>(android.R.id.content)
         root.findViewWithTag<View>(TAG)?.let { root.removeView(it) }
     }
@@ -98,7 +109,7 @@ object Tutorial {
     /** Home extra: open the tutorial (Settings › System). */
     const val EXTRA_SHOW = "show_tutorial"
 
-    private class Overlay(val activity: Activity, var index: Int) : FrameLayout(activity) {
+    private class Overlay(val activity: Activity, var index: Int, val only: Boolean = false) : FrameLayout(activity) {
         private val d = resources.displayMetrics.density
         private fun dp(v: Int) = (v * d).toInt()
         private val accent = Themes.color(context, R.color.accent_action)
@@ -194,9 +205,10 @@ object Tutorial {
                     LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(14) })
             }
             val bottom = LinearLayout(context).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL }
-            val last = index == STEPS.size - 1
+            // A step alone (news after an update): no counter, a single button
+            val last = only || index == STEPS.size - 1
             if (!last) bottom.addView(button(R.string.tu_skip, false) { done(activity) })
-            bottom.addView(text("${index + 1} / ${STEPS.size}", 22f, Themes.color(context, R.color.text_title)).apply { gravity = Gravity.CENTER },
+            bottom.addView(text(if (only) "" else "${index + 1} / ${STEPS.size}", 22f, Themes.color(context, R.color.text_title)).apply { gravity = Gravity.CENTER },
                 LinearLayout.LayoutParams(0, -2, 1f))
             bottom.addView(button(if (last) R.string.tu_done else R.string.tu_next, true) {
                 if (last) done(activity) else { index++; render() }

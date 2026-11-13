@@ -931,6 +931,11 @@
     <string name="sc_unlocked">Desbloqueado</string>
     <string name="sc_connected">Conectado</string>
     <string name="sc_cut">Cortado</string>
+    <string name="tu_shortcuts_t">Menú de accesos</string>
+    <string name="tu_shortcuts_1">Desliza un dedo hacia abajo desde lo más alto de la pantalla, en todas las pantallas y sobre las demás apps (Android Auto incluido), para abrir el menú de accesos.</string>
+    <string name="tu_shortcuts_2">Toca una casilla para actuar: su icono y la línea de debajo muestran el estado del coche.</string>
+    <string name="tu_shortcuts_3">Pulsación larga en el menú para elegir los accesos mostrados.</string>
+    <string name="tu_shortcuts_4">Ajustes › Inicio › Menú de accesos: activado, también oculta el botón antiniebla original (tras el próximo arranque de la radio); desactivado, todo vuelve a ser como antes.</string>
     <string name="sc_heating">Calefacción</string>
     <string name="sc_cooling">Aire acond.</string>
     <string name="sc_clim_state">%1$s · ext. %2$s</string>

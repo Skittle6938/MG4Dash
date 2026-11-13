@@ -931,6 +931,11 @@
     <string name="sc_unlocked">Kilit açık</string>
     <string name="sc_connected">Bağlı</string>
     <string name="sc_cut">Kesildi</string>
+    <string name="tu_shortcuts_t">Kısayol menüsü</string>
+    <string name="tu_shortcuts_1">Kısayol menüsünü açmak için ekranın en üstünden tek parmakla aşağı kaydırın; her ekranda ve diğer uygulamaların üzerinde (Android Auto dahil).</string>
+    <string name="tu_shortcuts_2">İşlem için bir kutucuğa dokunun: simgesi ve altındaki satır aracın durumunu gösterir.</string>
+    <string name="tu_shortcuts_3">Gösterilen kısayolları seçmek için menüye uzun basın.</string>
+    <string name="tu_shortcuts_4">Ayarlar › Ana ekran › Kısayol menüsü: açıkken orijinal sis lambası düğmesini de gizler (ünitenin bir sonraki açılışında); kapalıyken her şey eskisi gibi.</string>
     <string name="sc_heating">Isıtma</string>
     <string name="sc_cooling">Klima</string>
     <string name="sc_clim_state">%1$s · dış %2$s</string>

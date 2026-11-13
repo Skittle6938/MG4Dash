@@ -931,6 +931,11 @@
     <string name="sc_unlocked">Déverrouillées</string>
     <string name="sc_connected">Connecté</string>
     <string name="sc_cut">Coupé</string>
+    <string name="tu_shortcuts_t">Menu de raccourcis</string>
+    <string name="tu_shortcuts_1">Glissez un doigt vers le bas depuis tout en haut de l’écran, sur tous les écrans et par-dessus les autres applis (Android Auto compris), pour ouvrir le menu de raccourcis.</string>
+    <string name="tu_shortcuts_2">Touchez une tuile pour agir : son icône et la ligne dessous montrent l’état de la voiture.</string>
+    <string name="tu_shortcuts_3">Appui long sur le menu pour choisir les raccourcis affichés.</string>
+    <string name="tu_shortcuts_4">Réglages › Accueil › Menu de raccourcis : activé, il masque aussi le bouton antibrouillard d’origine (au prochain démarrage de l’autoradio) ; désactivé, tout redevient comme avant.</string>
     <string name="sc_heating">Chauffage</string>
     <string name="sc_cooling">Clim</string>
     <string name="sc_clim_state">%1$s · ext. %2$s</string>

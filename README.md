@@ -14,7 +14,7 @@ Current version: **1.7.1** ([releases](https://github.com/Skittle6938/MG4Dash/re
 
 > Screenshots are rendered on a PC with simulated data and the **default settings** unless stated otherwise; the map excerpt is a fixed view of Paris (OpenStreetMap).
 
-**Contents**: [Home screen](#home-screen) · [Media player](#media-player) · [Energy card](#energy-card) · [Bottom-right widget](#bottom-right-widget) · [App card](#app-card) · [Other layouts](#other-home-layouts) · [Themes](#themes-and-day--night) · [Pages](#pages) · [Settings](#settings) · [Updates](#updates) · [Compatibility](#compatibility-beta) · [Install](#install-on-the-car) · [Replace / restore the SAIC home](#home-screen-replace-and-go-back) · [Gestures](#gestures)
+**Contents**: [Home screen](#home-screen) · [Shortcuts menu](#shortcuts-menu) · [Media player](#media-player) · [Energy card](#energy-card) · [Bottom-right widget](#bottom-right-widget) · [App card](#app-card) · [Other layouts](#other-home-layouts) · [Themes](#themes-and-day--night) · [Pages](#pages) · [Settings](#settings) · [Updates](#updates) · [Compatibility](#compatibility-beta) · [Install](#install-on-the-car) · [Replace / restore the SAIC home](#home-screen-replace-and-go-back) · [Gestures](#gestures)
 
 ## Home screen
 
@@ -22,7 +22,7 @@ Current version: **1.7.1** ([releases](https://github.com/Skittle6938/MG4Dash/re
 
 The default home screen (*Full* layout, vertical bar on the left). From left to right:
 
-- **Vertical bar**: Settings, Phone, Energy, Vehicle and Home, with the space at the top left for MG's fog light button. Each icon also has a long press or double tap shortcut, see [Gestures](#gestures).
+- **Vertical bar**: Settings, Phone, Energy, Vehicle and Home, at full height when the [shortcuts menu](#shortcuts-menu) hides MG's fog light button (otherwise with the space at the top left for it). Each icon also has a long press or double tap shortcut, see [Gestures](#gestures).
 - **Climate card**: set temperature (LO → HI in 1° steps) and outside temperature, fan from off to maximum, then power, A/C, AUTO, ECO, air directions and recirculation.
   - Fan minus at the lowest speed turns the climate off; long press jumps to the lowest speed.
   - Long press A/C for **intermittent A/C** (the compressor runs in cycles; tap A/C to stop).
@@ -38,6 +38,17 @@ The default home screen (*Full* layout, vertical bar on the left). From left to 
 **Heated seats and steering wheel**: on equipped cars, a row of buttons sits above the temperature (driver seat, steering wheel, passenger seat). Settings › Vehicle › Heated seats and steering wheel: Auto (detected), Yes or No.
 
 ![Heated seats and steering wheel](docs/screenshots/home_heated_seats.png?v=25)
+
+## Shortcuts menu
+
+Slide one finger down from the very top of the screen to pull the **shortcuts menu**: a panel of tiles that follows the finger, over every MG4Dash screen and, in full screen, over the other apps too (Android Auto included). Slide it back up or touch beside it to close it.
+
+- Each tile sends a single command and shows the car's state at once, in its line and in its icon: rear fog light (greyed while the lights are off), switch the car off (refused while driving), ESP, driving aids (lane keeping, collision and drowsiness warnings, *Turn all off*), rear defrost, drive mode, and to add: regeneration, one pedal, climate (heating or cooling, set point and outside temperature), battery preheat, heated wheel, doors, charge lock, V2L, screen off, cut Android Auto, ADB. A tile whose command the car does not have is not offered.
+- Long press the menu to choose its tiles; by default only the first row.
+- Settings › Home › *Shortcuts menu* (on by default): it also **hides MG's fog light button** with a SystemUI overlay that MG4Dash installs and switches with the option, from the head unit's next start (checked on SWI69 R45), and gives its corner back (full height bar, no margin). Off, everything is as before: the button in its place, no menu.
+- With MG4Link, its own two and three finger gestures from the top stay as they are; the menu opens with one finger.
+
+**ADB**: a home shortcut (long press a shortcut › *ADB*) and a menu tile turn on ADB over the USB port, as the adbutil app does, with their state; Settings › System › *ADB at start* (off by default) turns it on at each start. It goes off at the car's next start.
 
 ## Media player
 
@@ -213,12 +224,12 @@ Five tabs along the top; the last one used opens next time. Each on / off option
 
 | Tab | Options |
 |---|---|
-| Home | home layout (Full, Simple, Map), places and cards of the home screen (edit mode), audio source and playback at startup, menu bar (bottom or vertical, side), wide side bar, connection icons, full screen (hides the SAIC side bar and banner), live power in the energy card, voltage and current under the power bar, map stack back to the battery when plugged in, map zoom and colours, switch to the energy widget when offline |
+| Home | home layout (Full, Simple, Map), places and cards of the home screen (edit mode), audio source and playback at startup, menu bar (bottom or vertical, side), wide side bar, shortcuts menu (also hides MG's fog light button), connection icons, full screen (hides the SAIC side bar and banner), live power in the energy card, voltage and current under the power bar, map stack back to the battery when plugged in, map zoom and colours, switch to the energy widget when offline |
 | Look | light / dark / auto, night after sunset, smooth light / dark switch, clock 24 h or 12 h (no AM / PM), panel outline, background, button colour, full-throttle special |
 | Vehicle | units, tyre pressure unit, heated seats and steering wheel, Keep climate on, keep MG4Dash in front of the SAIC climate screen (old firmwares), startup sound (audio file from a USB stick or internal storage, 30 s and 20 MB at most, with its own volume), battery capacity when new, current capacity and health, battery model, MG4 XPower |
 | Connections | weather (fallback city or current position), Home Assistant (address, token, test) |
 | 4G data | the car's 4G data over the last 30 days, by use and day by day, the Wi-Fi client's too (4G and Wi-Fi buttons), the biggest day, and an optional monthly quota with an alert (4G only) |
-| System | replace the SAIC home, maintenance mode, updates (include betas, MG4Radio, recent web engine), diagnostics (compatibility test, log, energy data recorder: off by default, saved every 5 minutes to limit memory wear), gesture tour |
+| System | replace the SAIC home, maintenance mode, ADB at start, updates (include betas, MG4Radio, recent web engine), diagnostics (compatibility test, log, energy data recorder: off by default, saved every 5 minutes to limit memory wear), gesture tour |
 
 ## Updates
 
@@ -336,6 +347,7 @@ The gesture tour shows the same two buttons.
 
 A short tour of the main gestures opens after a first install (*Skip* closes it for good); see it again in Settings › System › *Show the gesture tour*. It is worth running again after each stable update, to discover what is new. Two of its steps explain the detached windows: how to turn them on in the edit mode, detach a window and put it back with a double tap, wake it with a touch, open its menu with a long press, then move and resize it (a corner, an edge or two fingers, then OK).
 
+- One finger sliding down from the very top of the screen: shortcuts menu (see [Shortcuts menu](#shortcuts-menu)); long press it to choose its tiles
 - "Settings" in the dock or the vertical bar: tap for the launcher settings, long press for the car settings
 - Long press "Home" in the dock: list of installed apps
 - Long press the clock in the dock: clock or Wi-Fi settings button

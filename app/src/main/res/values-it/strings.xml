@@ -931,6 +931,11 @@
     <string name="sc_unlocked">Sbloccato</string>
     <string name="sc_connected">Connesso</string>
     <string name="sc_cut">Interrotto</string>
+    <string name="tu_shortcuts_t">Menu scorciatoie</string>
+    <string name="tu_shortcuts_1">Scorri un dito verso il basso dal bordo superiore dello schermo, su tutte le schermate e sopra le altre app (anche Android Auto), per aprire il menu scorciatoie.</string>
+    <string name="tu_shortcuts_2">Tocca una casella per agire: la sua icona e la riga sotto mostrano lo stato dell’auto.</string>
+    <string name="tu_shortcuts_3">Pressione lunga sul menu per scegliere le scorciatoie mostrate.</string>
+    <string name="tu_shortcuts_4">Impostazioni › Home › Menu scorciatoie: attivo, nasconde anche il pulsante retronebbia originale (dal prossimo avvio dell’autoradio); disattivo, tutto torna come prima.</string>
     <string name="sc_heating">Riscaldamento</string>
     <string name="sc_cooling">Clima</string>
     <string name="sc_clim_state">%1$s · est. %2$s</string>
