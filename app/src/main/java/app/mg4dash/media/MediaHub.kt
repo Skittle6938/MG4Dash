@@ -717,10 +717,38 @@ object MediaHub {
         wheelPlayPause = playPause
         wheelFrom = app
         if (current?.packageName == app) wheelPlaying = current?.let { isPlaying(it) } == true
+        // Paused by the wheel and not played since: its player may still say "playing" for a moment,
+        // which made the next press pause it again instead of playing (#36, two presses to resume)
+        // A "playing" seen long after that pause is real (played again from the page itself)
+        if (wheelPlaying && android.os.SystemClock.uptimeMillis() - wheelPausedAt > 5_000) wheelPausedPkg = null
+        if (playPause && wheelPausedPkg == app) wheelPlaying = false
         wheelAt = android.os.SystemClock.uptimeMillis()
         wheelForward = forward
         // The card stays on the app during the brief passage through the radio
         pinnedPkg = wheelFrom
+        if (playPause) {
+            // The radio does not always take the source at this key (paused by us, it may only toggle):
+            // nothing to give back then, so the app is toggled directly
+            val at = wheelAt; val wasPlaying = wheelPlaying
+            main.postDelayed({
+                if (wheelFrom != app || wheelAt != at) return@postDelayed
+                wheelFrom = null
+                Log.i(TAG, "wheel play / pause: the radio did not take the source, $app toggled directly")
+                if (wasPlaying) pauseApp(app) else playApp(app)
+            }, WHEEL_PLAY_PAUSE_FALLBACK_MS)
+        }
+    }
+
+    private const val WHEEL_PLAY_PAUSE_FALLBACK_MS = 800L
+    /** App paused by the wheel's play / pause, until it plays again (#36). */
+    @Volatile private var wheelPausedPkg: String? = null
+    @Volatile private var wheelPausedAt = 0L
+
+    private fun playApp(pkg: String) {
+        wheelPausedPkg = null
+        val c = (lastCandidates.filter { it.packageName == pkg } + listOfNotNull(browserControllers[pkg])).firstOrNull() ?: return
+        Log.i(TAG, "$pkg: wheel play / pause, play")
+        c.transportControls.play()
     }
 
     /**
@@ -1003,7 +1031,7 @@ object MediaHub {
                                 // Play / pause on an app that played: its source back without the "play" switchTo sends,
                                 // which restarted it a second later (#36)
                                 switchTo(back, play = !(toggle && !replay)); wheelBack = back; wheelBackAt = android.os.SystemClock.uptimeMillis()
-                                if (replay) resumeApp(back)
+                                if (replay) { if (toggle) wheelPausedPkg = null; resumeApp(back) }
                                 else {
                                     if (toggle) pauseApp(back)
                                     if (fwd == null) main.postDelayed({ endWheelSilence("radio paused") }, WHEEL_SILENCE_NO_RESUME_MS)
@@ -1524,6 +1552,7 @@ object MediaHub {
         resumePkg = null
         val c = (lastCandidates.filter { it.packageName == pkg } + listOfNotNull(browserControllers[pkg])).firstOrNull() ?: return
         Log.i(TAG, "$pkg: wheel play / pause, paused")
+        wheelPausedPkg = pkg; wheelPausedAt = android.os.SystemClock.uptimeMillis()
         c.transportControls.pause()
     }
     @Volatile private var resumePkg: String? = null
