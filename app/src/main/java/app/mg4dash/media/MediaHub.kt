@@ -1012,6 +1012,12 @@ object MediaHub {
                             else -> pkg
                         }
                         Log.i(TAG, "audio source: $pkg ($type) → $src")
+                        // Wheel silence: over once the app has had the sound back for a moment; the radio taking it again
+                        // (its station change undone, ~1 s after next / previous) keeps it on
+                        if (wheelSilence) {
+                            main.removeCallbacks(silenceEnd)
+                            if (src != RADIO) main.postDelayed(silenceEnd, WHEEL_SILENCE_TAIL_MS)
+                        }
                         // Radio taken back by the stock launcher right after wheel left / right: back to
                         // the app. Handled here, without waiting for the main thread (often busy at that moment)
                         val back = wheelFrom?.takeIf { src == RADIO && android.os.SystemClock.uptimeMillis() - wheelAt < 2_000 }
@@ -1025,8 +1031,8 @@ object MediaHub {
                             // Play / pause (#36): the app plays if it was paused, stays paused if it played
                             val replay = if (toggle) !wheelPlaying else wheelPlaying
                             // switchTo forgets the wheel's app (a user's choice): kept here, for a second press and the card
-                            // Volume key: silent at once, before the radio is heard (#98)
-                            if (fwd == null) startWheelSilence()
+                            // Every wheel key (volume, next / previous, play / pause): silent at once, before the radio is heard (#98, #36)
+                            startWheelSilence()
                             val giveBack = {
                                 // Play / pause on an app that played: its source back without the "play" switchTo sends,
                                 // which restarted it a second later (#36)
@@ -1034,7 +1040,7 @@ object MediaHub {
                                 if (replay) { if (toggle) wheelPausedPkg = null; resumeApp(back) }
                                 else {
                                     if (toggle) pauseApp(back)
-                                    if (fwd == null) main.postDelayed({ endWheelSilence("radio paused") }, WHEEL_SILENCE_NO_RESUME_MS)
+                                    main.postDelayed({ endWheelSilence("radio paused") }, WHEEL_SILENCE_NO_RESUME_MS)
                                 }
                             }
                             if (fwd != null) undoRadioSkip(fwd) { giveBack() } else main.post { giveBack() }
@@ -1057,7 +1063,18 @@ object MediaHub {
                             if (src == AA_MBS) {
                                 // The manual choice stays as long as Android Auto is not playing (guidance only)
                                 if (sourcePkg != AA_MBS) { aaUnconfirmed = true; sourceBeforeAa = sourcePkg }
-                            } else { aaUnconfirmed = false; sourceBeforeAa = null; pinnedPkg = null }
+                            } else {
+                                aaUnconfirmed = false; sourceBeforeAa = null
+                                // The radio's late start (~0.1 s) right after a wheel key gave the source back to an app: with the
+                                // app paused by the wheel, nothing takes the source back from it and the card went to the DAB, the
+                                // next press then going to the radio (#36). The card stays on the app and the radio is paused again
+                                val kept = recentBack()?.takeIf { src == RADIO }
+                                if (kept != null) {
+                                    Log.i(TAG, "the radio took the source right after the wheel gave it back to $kept: card kept on $kept, radio paused")
+                                    pauseRadio()
+                                }
+                                pinnedPkg = kept
+                            }
                             // Change made on the car (source button, stock app): this is also a user's
                             // choice, unless it follows an automatic switch or the loss of the old source
                             val prev = sourcePkg
@@ -1564,8 +1581,8 @@ object MediaHub {
             Log.i(TAG, "$pkg paused by the radio's passage: play")
             c.transportControls.play()
         }
-        // The radio paused long ago: the volume back once the app plays again
-        main.postDelayed({ endWheelSilence("app resumed") }, WHEEL_SILENCE_TAIL_MS)
+        // The volume back once the app has the sound again (see watchAudioSource), at once if it already has it
+        if (sourcePkg != RADIO) { main.removeCallbacks(silenceEnd); main.postDelayed(silenceEnd, WHEEL_SILENCE_TAIL_MS) }
     }
 
     /**
@@ -1574,11 +1591,13 @@ object MediaHub {
      * plays again. Its level is never written (a write to 0 then back lost the presses made meanwhile).
      */
     @Volatile private var wheelSilence = false
-    private const val WHEEL_SILENCE_MAX_MS = 2_000L
+    // next / previous: the app had the sound back up to 1.9 s after the key (YouTube in the web app)
+    private const val WHEEL_SILENCE_MAX_MS = 3_000L
     private const val WHEEL_SILENCE_TAIL_MS = 150L
     /** Without a resume (the app was paused), after the radio's pause has taken. */
     private const val WHEEL_SILENCE_NO_RESUME_MS = 400L
     private val wheelSilenceMax = Runnable { endWheelSilence("${WHEEL_SILENCE_MAX_MS / 1000} s at most") }
+    private val silenceEnd = Runnable { endWheelSilence("the app has the sound") }
 
     private fun startWheelSilence() {
         val ctx = appContext ?: return
@@ -1590,7 +1609,7 @@ object MediaHub {
     private fun endWheelSilence(why: String) {
         if (!wheelSilence) return
         wheelSilence = false
-        main.removeCallbacks(wheelSilenceMax)
+        main.removeCallbacks(wheelSilenceMax); main.removeCallbacks(silenceEnd)
         appContext?.let { app.mg4dash.car.CarMediaMute.unmute(it, why) }
     }
 
