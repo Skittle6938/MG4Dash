@@ -697,6 +697,8 @@ object MediaHub {
     @Volatile private var wheelAt = 0L
     /** true / false: next / previous (station to restore); null: volume (nothing to restore). */
     @Volatile private var wheelForward: Boolean? = null
+    /** The wheel's play / pause (#36): the app given back its source is toggled, not just resumed. */
+    @Volatile private var wheelPlayPause = false
 
     /** App given back its source after a wheel button, and when: a second press soon after, while the radio still had it, went to the radio (#98). */
     @Volatile private var wheelBack: String? = null
@@ -705,11 +707,14 @@ object MediaHub {
     @Volatile private var wheelBackAt = 0L
     private fun recentBack() = wheelBack?.takeIf { android.os.SystemClock.uptimeMillis() - wheelBackAt < 3_000 }
 
-    fun wheelPressed(forward: Boolean?) {
+    fun wheelPressed(forward: Boolean?, playPause: Boolean = false) {
         if (forward != null) userAction("wheel ${if (forward) "next" else "previous"}")
         // A press during the silence: the volume back before the car applies this key's step, which would be lost
-        else endWheelSilence("volume key")
+        else endWheelSilence(if (playPause) "play / pause key" else "volume key")
         val app = current?.packageName?.takeIf { otherAppShown() } ?: recentBack() ?: return
+        // DiAuto reads play / pause itself: passed on, it would pause and restart at once
+        if (playPause && handlesWheelKeys(app)) return
+        wheelPlayPause = playPause
         wheelFrom = app
         if (current?.packageName == app) wheelPlaying = current?.let { isPlaying(it) } == true
         wheelAt = android.os.SystemClock.uptimeMillis()
@@ -985,14 +990,19 @@ object MediaHub {
                             Log.i(TAG, "steering wheel key sent to the radio by the stock launcher: back to $back")
                             sourcePkg = src
                             val fwd = wheelForward
-                            val replay = wheelPlaying
+                            val toggle = wheelPlayPause
+                            // Play / pause (#36): the app plays if it was paused, stays paused if it played
+                            val replay = if (toggle) !wheelPlaying else wheelPlaying
                             // switchTo forgets the wheel's app (a user's choice): kept here, for a second press and the card
                             // Volume key: silent at once, before the radio is heard (#98)
                             if (fwd == null) startWheelSilence()
                             val giveBack = {
                                 switchTo(back); wheelBack = back; wheelBackAt = android.os.SystemClock.uptimeMillis()
                                 if (replay) resumeApp(back)
-                                else if (fwd == null) main.postDelayed({ endWheelSilence("radio paused") }, WHEEL_SILENCE_NO_RESUME_MS)
+                                else {
+                                    if (toggle) pauseApp(back)
+                                    if (fwd == null) main.postDelayed({ endWheelSilence("radio paused") }, WHEEL_SILENCE_NO_RESUME_MS)
+                                }
                             }
                             if (fwd != null) undoRadioSkip(fwd) { giveBack() } else main.post { giveBack() }
                             return@newProxyInstance null
@@ -1502,6 +1512,15 @@ object MediaHub {
     }
 
     private const val RESUME_AFTER_MS = 500L
+
+    /** The wheel's play / pause on an app that was playing (#36): paused, the radio's passage having maybe not done it. */
+    private fun pauseApp(pkg: String) {
+        main.removeCallbacks(resumeRun)
+        resumePkg = null
+        val c = (lastCandidates.filter { it.packageName == pkg } + listOfNotNull(browserControllers[pkg])).firstOrNull() ?: return
+        Log.i(TAG, "$pkg: wheel play / pause, paused")
+        c.transportControls.pause()
+    }
     @Volatile private var resumePkg: String? = null
     private val resumeRun = Runnable {
         val pkg = resumePkg ?: return@Runnable endWheelSilence("no app to resume")

@@ -77,7 +77,12 @@ object StarKey {
                     }
                     return
                 }
-                if (code == JOY_OK && down && !long) MediaHub.wheelPlayPressed()
+                if (code == JOY_OK && down && !long) {
+                    MediaHub.wheelPlayPressed()
+                    // Another app's player (web app…): the stock launcher sends play / pause to the radio,
+                    // which takes the sound; the app is noted to give it back and toggle it (#36)
+                    MediaHub.wheelPressed(null, playPause = true)
+                }
                 if (code == JOY_LEFT || code == JOY_RIGHT) {
                     // From the press: the command goes to the app without waiting for the release
                     if (down && !long) { MediaHub.wheelPressed(code == JOY_RIGHT); if (MediaHub.wheelReleased(code == JOY_RIGHT)) return }
