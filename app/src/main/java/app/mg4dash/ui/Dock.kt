@@ -139,6 +139,9 @@ object Dock {
     private fun pkgIcon(activity: Activity, pkg: String): android.graphics.drawable.Drawable? =
         try { activity.packageManager.getApplicationIcon(pkg) } catch (_: Exception) { null }
 
+    /** MG's fog light button falls on MG4Dash's bar (no room to keep on the cards): the vertical bar on the left only (#108). */
+    internal fun fogOnBar(vertical: Boolean, rightSide: Boolean) = vertical && !rightSide
+
     /** Vertical bar on the left chosen in the settings (all screens). */
     fun vertical(context: android.content.Context): Boolean = Prefs(context).verticalDock
 

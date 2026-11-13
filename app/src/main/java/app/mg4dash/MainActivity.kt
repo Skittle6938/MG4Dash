@@ -603,9 +603,12 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
      * MG's fog light button covers the top left corner (#38): what the top left place shows leaves room
      * for it, unless the vertical bar is there.
      */
+
     private fun applyFog() {
         val tl = frames["tl"]
-        val fog = if (Dock.vertical(this)) 0 else dp(64)
+        // The vertical bar takes the button's place only on the left; on the right (right-hand drive, #108) the button
+        // still sits in the top left corner, over the top left place
+        val fog = if (Dock.fogOnBar(Dock.vertical(this), Dock.rightSide(this))) 0 else dp(64)
         ((b.climateCard.getChildAt(0) as LinearLayout).getChildAt(0).layoutParams as LinearLayout.LayoutParams).leftMargin =
             if (tl != null && Card.CLIMATE in tl.cards) fog else 0
         weathers.forEach { (c, w) -> w.setLeftInset(if (tl != null && c in tl.cards) fog else 0) }
