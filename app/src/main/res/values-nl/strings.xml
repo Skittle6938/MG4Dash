@@ -444,8 +444,8 @@
     <string name="st_rd_available">MG4Radio %1$s beschikbaar</string>
     <string name="st_rd_installing">MG4Radio installeren…</string>
     <string name="st_rd_done">MG4Radio is geïnstalleerd. Herstart het scherm (Home ongeveer 20 s ingedrukt houden) om het te gebruiken.</string>
-    <string name="st_upd_current">Up-to-date (%1$s)</string>
-    <string name="st_upd_new">Update beschikbaar: %2$s (geïnstalleerd: %1$s)</string>
+    <string name="st_upd_current">Up-to-date - %1$s</string>
+    <string name="st_upd_new">Update beschikbaar - %1$s → %2$s</string>
     <string name="st_upd_none_new">niet geïnstalleerd · %1$s beschikbaar</string>
     <string name="st_upd_install_ver">%1$s installeren</string>
     <string name="st_upd_note">De MG4Dash-update herstart het scherm aan het eind. MG4Radio werkt na een herstart van het middenscherm (Home ongeveer 20 s ingedrukt houden) en is getest op %1$s.</string>
