@@ -51,6 +51,8 @@ object Compat {
             appendLine("Android ${Build.VERSION.RELEASE} (SDK ${Build.VERSION.SDK_INT}), ${Build.MODEL}, ${dm.widthPixels}x${dm.heightPixels} @${dm.densityDpi} (screen ${realSize(a)})")
             appendLine("Packages: caradapter=${pkg("com.saicmotor.caradapter")} launcher=${pkg("com.saicmotor.launcher")} hmi.launcher=${pkg(Firmware.LEGACY_LAUNCHER)} adapterservice=${pkg("com.saicmotor.adapterservice")} radio=${pkg("com.saicmotor.radio")} androidauto=${pkg("com.allgo.app.androidauto")}")
             appendLine("Stock home: ${HomeSwitcher.STOCK.flattenToShortString()}")
+            // Apps whose floating window can bring the SAIC bars back over home (#108)
+            appendLine("Over other apps: ${app.mg4dash.ui.Fullscreen.overlayApps(a)}")
             appendLine("Services: " + CarBridge.probe().joinToString(", ") { "${it.first}=${it.second}" })
             appendLine("CarPropertyManager: ${if (CarProps.ready) "ok" else "absent"}; SOC=${f(0x2160f404)} range=${i(0x2140f41c)} V=${f(0x2160f406)} A=${f(0x2160f407)} driveMode=${i(0x2140a17c)} regen=${i(0x2140a191)} charge=${i(0x2140f409)}")
             appendLine("12 V battery: ${app.mg4dash.car.CarProps.battery12V() ?: "—"} (raw global=${app.mg4dash.car.CarProps.readFloatArea(app.mg4dash.car.CarProps.BAT_VOL, 0x1000000) ?: "—"} area0=${app.mg4dash.car.CarProps.readFloatArea(app.mg4dash.car.CarProps.BAT_VOL, 0) ?: "—"})")
