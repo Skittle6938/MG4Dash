@@ -366,12 +366,61 @@ object CarBridge {
         val nation = try {
             appContext?.getSystemService("CarConfigService")?.let { m -> m.javaClass.getMethod("getNationalCode").invoke(m) as? Int }
         } catch (_: Throwable) { null }
-        val low = tempRange16to30(model, nation)
-        if (low != null) {
-            VehicleState.tempLo = if (low) 15.5f else 17.5f
-            VehicleState.tempHi = if (low) 30.5f else 32.5f
+        // Learned from the car before (it always wins); otherwise the model and nation as the stock app, as a start;
+        // otherwise 16 to 32 shown until the car's answers at a limit tell (owner's design)
+        val learned = rangePrefs()?.getInt(PREF_TEMP_RANGE, 0) ?: 0
+        rangeLearned = learned != 0
+        val low = when (learned) { 1 -> true; 2 -> false; else -> if (START_FROM_MODEL) tempRange16to30(model, nation) else null }
+        applyTempRange(low)
+        Log.i(TAG, "set point range: model $model, nation $nation, learned $learned → ${rangeName(low)}")
+    }
+
+    /** Use the model and nation as a starting point (false: 16 to 32 for everyone until learned). */
+    private const val START_FROM_MODEL = true
+    private const val PREF_TEMP_RANGE = "a9_temp_range"   // 0 unknown, 1 16 to 30, 2 18 to 32
+    @Volatile private var rangeLearned = false
+    /** Last set point sent at a limit and when (to read the car's answer to it). */
+    @Volatile private var edgeSent: Pair<Float, Long>? = null
+
+    private fun rangePrefs() = appContext?.getSharedPreferences("mg4launcher", Context.MODE_PRIVATE)
+    private fun rangeName(low: Boolean?) = when (low) { true -> "16 to 30"; false -> "18 to 32"; null -> "16 to 32 until learned" }
+
+    /** LO / HI sent for a range: 15.5 / 30.5 (16 to 30), 17.5 / 32.5 (18 to 32), 15.5 / 32.5 (16 to 32, not known yet). */
+    private fun applyTempRange(low: Boolean?) {
+        VehicleState.tempLo = if (low == false) 17.5f else 15.5f
+        VehicleState.tempHi = if (low == true) 30.5f else 32.5f
+    }
+
+    /**
+     * The car's range from what it reports (raw, before any hold) and the last value sent at a limit: true 16 to 30,
+     * false 18 to 32, null nothing new. Only values that exist in one range alone count: 16 or lower (15, 15.5, 16) is
+     * 16 to 30, 32 or higher (32, 32.5, 33) is 18 to 32. A value sent below 16 the car keeps at 17 or more: 18 to 32;
+     * a value sent above 31 it keeps at 31 or less: 16 to 30.
+     */
+    internal fun learnRange(reported: Float?, sent: Float?, sentAgoMs: Long): Boolean? {
+        if (reported == null || reported.isNaN() || reported <= 0f) return null
+        if (reported <= 16.25f) return true
+        if (reported >= 31.75f) return false
+        if (sent != null && sentAgoMs in 1_500..6_000) {
+            if (sent < 16.25f && reported >= 16.75f) return false
+            if (sent > 31.25f && reported <= 31.25f) return true
         }
-        Log.i(TAG, "set point range: model $model, nation $nation → ${when (low) { true -> "16 to 30"; false -> "18 to 32"; null -> "unknown, 18 to 32 kept" }}")
+        return null
+    }
+
+    private fun learnFrom(reported: Float?) {
+        if (rangeLearned || BuildConfig.MOCK) return
+        val e = edgeSent
+        val low = learnRange(reported, e?.first, e?.let { System.currentTimeMillis() - it.second } ?: -1) ?: return
+        rangeLearned = true; edgeSent = null
+        applyTempRange(low)
+        rangePrefs()?.edit()?.putInt(PREF_TEMP_RANGE, if (low) 1 else 2)?.apply()
+        Log.i(TAG, "set point range learned: ${rangeName(low)} (car reported $reported)")
+    }
+
+    /** A set point sent: kept to read the car's answer if it is at a limit of the range not learned yet. */
+    private fun sentTemp(target: Float) {
+        if (!rangeLearned && (target < 16.25f || target > 31.25f)) edgeSent = target to System.currentTimeMillis()
     }
 
     /** The A9 car model and nation code: true for the 16-to-30 range, false for 18 to 32, null if unknown. */
@@ -393,7 +442,7 @@ object CarBridge {
             recirc = safe { h.airCirculationStatus }?.takeIf { it >= 0 },
             fanSpeed = safe { h.fanSpeed }?.let { LegacyCar.validFan(it, _state.value.fanSpeed) },
             fanDirection = safe { h.fanDirection }?.takeIf { it in 0..7 },
-            driverTemp = safe { h.driverTemperature }?.takeIf { !it.isNaN() && it > 0f },
+            driverTemp = safe { h.driverTemperature }?.takeIf { !it.isNaN() && it > 0f }.also { learnFrom(it) },
             outsideTemp = safe { h.outSideTemperature }?.takeIf { !it.isNaN() && it > -60f && it < 70f },
             defrostFront = safe { h.frontDefrostStatus },
             defrostRear = safe { h.rearDefrostStatus },
@@ -1061,7 +1110,7 @@ object CarBridge {
         _state.value = _state.value.copy(driverTemp = target)   // immediate visual feedback
         holdTemp = target to System.currentTimeMillis() + HOLD_MS
         if (useLegacy) legacy("temp=$target") { LegacyCar.temp(Math.round(target)) }
-        else command("temp=$target") { it.setDriverTemperature(target) }
+        else { sentTemp(target); command("temp=$target") { it.setDriverTemperature(target) } }
     }
 
     fun stepFan(delta: Int) {
@@ -1093,7 +1142,7 @@ object CarBridge {
         _state.value = _state.value.copy(driverTemp = target)
         holdTemp = target to System.currentTimeMillis() + HOLD_MS
         if (useLegacy) legacy("temp=$target") { LegacyCar.temp(Math.round(target)) }
-        else command("temp=$target") { it.setDriverTemperature(target) }
+        else { sentTemp(target); command("temp=$target") { it.setDriverTemperature(target) } }
     }
 
     /** Fan level picked on the gauge (1..11): climate off, it is turned on as with "+"; otherwise sent once and held. */
