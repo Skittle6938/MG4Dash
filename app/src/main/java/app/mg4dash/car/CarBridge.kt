@@ -434,13 +434,15 @@ object CarBridge {
     private fun refreshHvac() {
         if (hvac != null) detectTempRange()
         val h = hvac ?: run { if (Firmware.family != Firmware.Family.A9) _state.value = held(LegacyCar.readHvac(_state.value)); return }
+        // Fan level 15 is AUTO on SWI69 too (#108's report: fan=15 while AUTO read false): shown as AUTO
+        val fanRaw = safe { h.fanSpeed }
         _state.value = _state.value.copy(
             connected = true,
             hvacOn = safe { h.hvacPowerStatus },
             acOn = safe { h.acStatus },
-            autoOn = safe { h.autoStatus },
+            autoOn = if (fanRaw == LegacyCar.FAN_AUTO) true else safe { h.autoStatus },
             recirc = safe { h.airCirculationStatus }?.takeIf { it >= 0 },
-            fanSpeed = safe { h.fanSpeed }?.let { LegacyCar.validFan(it, _state.value.fanSpeed) },
+            fanSpeed = fanRaw?.let { LegacyCar.validFan(it, _state.value.fanSpeed) },
             fanDirection = safe { h.fanDirection }?.takeIf { it in 0..7 },
             driverTemp = safe { h.driverTemperature }?.takeIf { !it.isNaN() && it > 0f }.also { learnFrom(it) },
             outsideTemp = safe { h.outSideTemperature }?.takeIf { !it.isNaN() && it > -60f && it < 70f },

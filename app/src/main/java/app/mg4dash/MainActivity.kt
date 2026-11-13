@@ -435,6 +435,8 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         fxBoost && boostFrame === f -> Card.POWER
         f.current == Card.MAP && Card.CONSUMPTION in f.cards && prefs.mapOfflineSwitch && offline() &&
             !mapCard.hasCachedTiles(LocationRepo.location.value) -> Card.CONSUMPTION
+        // The web app too, its pages online (#44): the same setting, back to it when the connection returns
+        f.current == Card.WEB && Card.CONSUMPTION in f.cards && prefs.mapOfflineSwitch && offline() -> Card.CONSUMPTION
         else -> null
     }
 
