@@ -41,16 +41,17 @@ The default home screen (*Full* layout, vertical bar on the left). From left to 
 
 ## Shortcuts menu
 
-![Shortcuts menu, dark mode](docs/screenshots/shortcuts_menu.png?v=25)
+![Shortcuts menu, dark mode](docs/screenshots/shortcuts_menu.png?v=26)
 
 | Light mode | Following the finger |
 |---|---|
-| ![Shortcuts menu, light mode](docs/screenshots/shortcuts_menu_light.png?v=25) | ![Shortcuts menu half pulled](docs/screenshots/shortcuts_menu_half.png?v=25) |
+| ![Shortcuts menu, light mode](docs/screenshots/shortcuts_menu_light.png?v=26) | ![Shortcuts menu half pulled](docs/screenshots/shortcuts_menu_half.png?v=26) |
 
 Slide one finger down from the very top of the screen to pull the **shortcuts menu**: a panel of tiles that follows the finger, over every MG4Dash screen and, in full screen, over the other apps too (Android Auto included). Slide it back up or touch beside it to close it.
 
 - Each tile sends a single command and shows the car's state at once, in its line and in its icon: rear fog light (greyed while the lights are off), switch the car off (refused while driving), ESP, driving aids (lane keeping, collision and drowsiness warnings, *Turn all off*), rear defrost, drive mode, and to add: regeneration, one pedal, climate (heating or cooling, set point and outside temperature), battery preheat, heated wheel, doors, charge lock, V2L, screen off, cut Android Auto, ADB. A tile whose command the car does not have is not offered.
 - Long press the menu to choose its tiles; by default only the first row.
+- **Screen brightness** under the tiles: slide the bar (live), or touch **AUTO** for the automatic brightness, as the stock quick panel; AUTO is lit while it is on. The bar can be switched off in the menu's edit mode.
 - Settings › Home › *Shortcuts menu* (on by default): it also **hides MG's fog light button** with a SystemUI overlay that MG4Dash installs and switches with the option, from the head unit's next start (checked on SWI69 R45), and gives its corner back (full height bar, no margin). Off, everything is as before: the button in its place, no menu.
 - With MG4Link, its own two and three finger gestures from the top stay as they are; the menu opens with one finger.
 

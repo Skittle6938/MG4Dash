@@ -462,6 +462,11 @@ class Prefs(context: Context) {
         get() = sp.getInt("shortcut_fcw", 2)
         set(v) = sp.edit().putInt("shortcut_fcw", v).apply()
 
+    /** Screen brightness bar under the shortcuts menu's tiles (on by default; switched in its edit mode). */
+    var shortcutsBrightness: Boolean
+        get() = sp.getBoolean("shortcuts_brightness", true)
+        set(v) = sp.edit().putBoolean("shortcuts_brightness", v).apply()
+
     /** ADB turned on at each start (once unlocked), as the adbutil app does; off by default. */
     var adbAtStart: Boolean
         get() = sp.getBoolean("adb_at_start", false)
