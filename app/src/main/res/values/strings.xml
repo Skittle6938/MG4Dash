@@ -208,7 +208,7 @@
     <string name="st_home_desc">“Replace SAIC home” makes MG4Dash the home screen. Nothing is uninstalled or deleted: the original home screen is only switched off as the home screen, and the rest of the car keeps working as before (camera, radio, audio sources, system bar). Maintenance mode switches it back on in one tap, for example before a dealer visit.</string>
     <string name="st_replace">Replace SAIC home</string>
     <string name="st_valet">Maintenance mode</string>
-    <string name="st_adb">ADB recovery if MG4Dash no longer starts: adb shell cmd package compile -m speed -f app.mg4dash</string>
+    <string name="st_rescue_note">Safety net: if MG4Dash no longer starts or crashes several times in a row, MG4Dash Rescue repairs it at the next start, or puts the stock SAIC home back.</string>
     <string name="st_battery_line">New: %1$s kWh  ·  Current: %2$s kWh  ·  Health: %3$s</string>
     <string name="st_battery_model">Battery model (reference for the estimated health on the Vehicle page):</string>
     <string name="st_new_cap">New capacity used for the health figure:</string>
@@ -350,7 +350,6 @@
     <string name="rescue_stock">MG4Dash did not start: the SAIC home screen was put back. Settings › System › Replace SAIC home to use MG4Dash again.</string>
     <string name="rescue_recompiled">MG4Dash did not start and was repaired automatically.</string>
     <string name="st_update_available">Version %2$s available (installed: %1$s)</string>
-    <string name="st_update_uptodate">Up to date (%1$s)</string>
     <string name="st_update_install">Install</string>
     <string name="st_update_confirm">Download and install MG4Dash %1$s? The screen will restart.</string>
     <string name="st_update_downloading">Downloading… %1$d %%</string>
@@ -443,10 +442,9 @@
     <string name="st_rd_desc">Installs the latest MG4Radio release from GitHub (only on this firmware). The new radio applies after restarting the head unit (hold Home about 20 s).</string>
     <string name="st_rd_check">Update MG4Radio</string>
     <string name="st_rd_available">MG4Radio %1$s available</string>
-    <string name="st_rd_uptodate">MG4Radio up to date (%1$s)</string>
     <string name="st_rd_installing">Installing MG4Radio…</string>
     <string name="st_rd_done">MG4Radio is installed. Restart the head unit (hold Home about 20 s) to use it.</string>
-    <string name="st_upd_current">%1$s · up to date</string>
+    <string name="st_upd_current">%1$s up to date (%2$s)</string>
     <string name="st_upd_new">%1$s · %2$s available</string>
     <string name="st_upd_none_new">not installed · %1$s available</string>
     <string name="st_upd_install_ver">Install %1$s</string>
@@ -893,7 +891,6 @@
     <string name="st_aa_none">not installed</string>
     <string name="st_aa_busy">an update is already running</string>
     <string name="st_aa_available">MG4Link %1$s available</string>
-    <string name="st_aa_uptodate">MG4Link up to date (%1$s)</string>
     <string name="st_aa_installing">Installing MG4Link…</string>
     <string name="st_aa_done">MG4Link is updated. Android Auto connects again by itself.</string>
     <string name="st_aa_session_warning">Android Auto stops for about a minute while it installs.</string>

@@ -208,7 +208,7 @@
     <string name="st_home_desc">„SAIC-start vervangen” maakt MG4Dash het startscherm. Er wordt niets verwijderd of gewist: het originele startscherm wordt alleen uitgeschakeld als startscherm en de rest van de auto werkt zoals voorheen (camera, radio, audiobronnen, systeembalk). De Onderhoudsmodus zet het met één tik weer aan, bijvoorbeeld vóór een dealerbezoek.</string>
     <string name="st_replace">SAIC-start vervangen</string>
     <string name="st_valet">Onderhoudsmodus</string>
-    <string name="st_adb">ADB-herstel als MG4Dash niet meer start: adb shell cmd package compile -m speed -f app.mg4dash</string>
+    <string name="st_rescue_note">Vangnet: start MG4Dash niet meer of crasht het meerdere keren achter elkaar, dan herstelt MG4Dash Rescue het bij de volgende start of zet het originele SAIC-startscherm terug.</string>
     <string name="st_battery_line">Nieuw: %1$s kWh  ·  Huidig: %2$s kWh  ·  Gezondheid: %3$s</string>
     <string name="st_battery_model">Batterijmodel (referentie voor de geschatte gezondheid op de voertuigpagina):</string>
     <string name="st_new_cap">Nieuwe capaciteit voor de gezondheidsberekening:</string>
@@ -350,7 +350,6 @@
     <string name="rescue_stock">MG4Dash startte niet: het SAIC-startscherm is teruggezet. Instellingen › Systeem › SAIC-start vervangen om MG4Dash weer te gebruiken.</string>
     <string name="rescue_recompiled">MG4Dash startte niet en is automatisch hersteld.</string>
     <string name="st_update_available">Versie %2$s beschikbaar (geïnstalleerd: %1$s)</string>
-    <string name="st_update_uptodate">Up-to-date (%1$s)</string>
     <string name="st_update_install">Installeren</string>
     <string name="st_update_confirm">MG4Dash %1$s downloaden en installeren? Het scherm herstart.</string>
     <string name="st_update_downloading">Downloaden… %1$d %%</string>
@@ -443,10 +442,9 @@
     <string name="st_rd_desc">Installeert de nieuwste MG4Radio-versie van GitHub (alleen op deze firmware). De nieuwe radio werkt na een herstart van het scherm (Home ongeveer 20 s ingedrukt houden).</string>
     <string name="st_rd_check">MG4Radio bijwerken</string>
     <string name="st_rd_available">MG4Radio %1$s beschikbaar</string>
-    <string name="st_rd_uptodate">MG4Radio up-to-date (%1$s)</string>
     <string name="st_rd_installing">MG4Radio installeren…</string>
     <string name="st_rd_done">MG4Radio is geïnstalleerd. Herstart het scherm (Home ongeveer 20 s ingedrukt houden) om het te gebruiken.</string>
-    <string name="st_upd_current">%1$s · up-to-date</string>
+    <string name="st_upd_current">%1$s up-to-date (%2$s)</string>
     <string name="st_upd_new">%1$s · %2$s beschikbaar</string>
     <string name="st_upd_none_new">niet geïnstalleerd · %1$s beschikbaar</string>
     <string name="st_upd_install_ver">%1$s installeren</string>
@@ -893,7 +891,6 @@
     <string name="st_aa_none">niet geïnstalleerd</string>
     <string name="st_aa_busy">er loopt al een update</string>
     <string name="st_aa_available">MG4Link %1$s beschikbaar</string>
-    <string name="st_aa_uptodate">MG4Link is actueel (%1$s)</string>
     <string name="st_aa_installing">MG4Link wordt geïnstalleerd…</string>
     <string name="st_aa_done">MG4Link is bijgewerkt. Android Auto maakt vanzelf weer verbinding.</string>
     <string name="st_aa_session_warning">Android Auto stopt ongeveer een minuut tijdens de installatie.</string>

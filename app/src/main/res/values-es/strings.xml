@@ -208,7 +208,7 @@
     <string name="st_home_desc">«Sustituir inicio SAIC» convierte MG4Dash en la pantalla de inicio. No se desinstala ni se borra nada: el inicio original solo se desactiva como pantalla de inicio y el resto del coche funciona como antes (cámara, radio, fuentes de audio, barra del sistema). El Modo mantenimiento lo reactiva con un toque, por ejemplo antes de una visita al concesionario.</string>
     <string name="st_replace">Sustituir inicio SAIC</string>
     <string name="st_valet">Modo mantenimiento</string>
-    <string name="st_adb">Recuperación ADB si MG4Dash ya no arranca: adb shell cmd package compile -m speed -f app.mg4dash</string>
+    <string name="st_rescue_note">Red de seguridad: si MG4Dash ya no arranca o falla varias veces seguidas, MG4Dash Rescue lo repara en el siguiente arranque o restaura la pantalla de inicio original de SAIC.</string>
     <string name="st_battery_line">Nueva: %1$s kWh  ·  Actual: %2$s kWh  ·  Salud: %3$s</string>
     <string name="st_battery_model">Modelo de batería (referencia de la salud estimada, página Vehículo):</string>
     <string name="st_new_cap">Capacidad nueva para el cálculo de salud:</string>
@@ -350,7 +350,6 @@
     <string name="rescue_stock">MG4Dash no arrancó: se ha restaurado la pantalla de inicio de SAIC. Ajustes › Sistema › Sustituir inicio SAIC para volver a MG4Dash.</string>
     <string name="rescue_recompiled">MG4Dash no arrancó y se reparó automáticamente.</string>
     <string name="st_update_available">Versión %2$s disponible (instalada: %1$s)</string>
-    <string name="st_update_uptodate">Actualizado (%1$s)</string>
     <string name="st_update_install">Instalar</string>
     <string name="st_update_confirm">¿Descargar e instalar MG4Dash %1$s? La pantalla se reiniciará.</string>
     <string name="st_update_downloading">Descargando… %1$d %%</string>
@@ -443,10 +442,9 @@
     <string name="st_rd_desc">Instala la última versión de MG4Radio desde GitHub (solo en este firmware). La nueva radio se aplica tras reiniciar la pantalla (mantener Home unos 20 s).</string>
     <string name="st_rd_check">Actualizar MG4Radio</string>
     <string name="st_rd_available">MG4Radio %1$s disponible</string>
-    <string name="st_rd_uptodate">MG4Radio actualizada (%1$s)</string>
     <string name="st_rd_installing">Instalando MG4Radio…</string>
     <string name="st_rd_done">MG4Radio está instalada. Reinicia la pantalla (mantén Home unos 20 s) para usarla.</string>
-    <string name="st_upd_current">%1$s · al día</string>
+    <string name="st_upd_current">%1$s al día (%2$s)</string>
     <string name="st_upd_new">%1$s · %2$s disponible</string>
     <string name="st_upd_none_new">no instalada · %1$s disponible</string>
     <string name="st_upd_install_ver">Instalar la %1$s</string>
@@ -893,7 +891,6 @@
     <string name="st_aa_none">no instalado</string>
     <string name="st_aa_busy">ya hay una actualización en curso</string>
     <string name="st_aa_available">MG4Link %1$s disponible</string>
-    <string name="st_aa_uptodate">MG4Link al día (%1$s)</string>
     <string name="st_aa_installing">Instalando MG4Link…</string>
     <string name="st_aa_done">MG4Link está actualizado. Android Auto se vuelve a conectar solo.</string>
     <string name="st_aa_session_warning">Android Auto se detiene un minuto aproximadamente durante la instalación.</string>

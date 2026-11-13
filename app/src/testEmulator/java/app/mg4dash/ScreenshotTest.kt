@@ -288,6 +288,13 @@ class ScreenshotTest {
         shoot(SettingsActivity::class.java, "settings_updates_mock.png")
     }
 
+    /** System tab, checked and up to date: "MG4Dash up to date (version)" as the other apps; the rescue line. */
+    @Test @Config(qualifiers = "fr-w1920dp-h720dp-land-mdpi") fun settingsUpToDate() {
+        org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE).edit()
+            .putBoolean("settings_tabs_v2", true).putInt("settings_tab", 5).putLong("upd_checked_at", 1L).commit()
+        shoot(SettingsActivity::class.java, "settings_uptodate_fr.png")
+    }
+
     /** Settings tabs in English, for the README. */
     @Test fun settingsTabsEn() {
         for (t in 0..5) {
