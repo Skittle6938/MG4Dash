@@ -304,6 +304,28 @@ object DriveSettings {
         else -> callVsm("getFcwAutoBrakeMode") as? Int
     }?.takeIf { it in 1..2 }
 
+    /**
+     * Drowsiness warning (UDW, "unfit driver warning"), MG4Control's isDrowsinessOn / setDrowsiness:
+     * 1 = off, 2 = on (0 read as off). A9: CarVehicleSettingClient get/setUdwStatus; SWI68/165:
+     * get/setUnsteadyDrivingWarning; SWI133: VPM property 0x3010005 (UDW_MAIN_SWITCH, not DMS_SWITCH).
+     * null if unreadable.
+     */
+    fun udwOn(): Boolean? = when (route) {
+        Route.A9 -> callVsm("getUdwStatus") as? Int
+        Route.VSM_68 -> callVsm("getUnsteadyDrivingWarning") as? Int
+        Route.VPM_133 -> vpmInt(PROP_UDW_MAIN_SWITCH)
+    }?.let { when (it) { 2 -> true; 0, 1 -> false; else -> null } }
+
+    fun setUdw(on: Boolean): Boolean {
+        val v = if (on) 2 else 1
+        return when (route) {
+            Route.A9 -> callVsmVoid("setUdwStatus", v)
+            Route.VSM_68 -> callVsmVoid("setUnsteadyDrivingWarning", v)
+            Route.VPM_133 -> setVpmRecovery(PROP_UDW_MAIN_SWITCH, v)
+        }
+    }
+    private const val PROP_UDW_MAIN_SWITCH = 0x3010005
+
     /** Every setting into the vehicle state; a setting that does not answer stays null (greyed on the card). */
     fun read(s: VehicleState): VehicleState {
         val regen = regenLevel()

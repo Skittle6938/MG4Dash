@@ -895,4 +895,47 @@
     <string name="st_aa_installing">Installing MG4Link…</string>
     <string name="st_aa_done">MG4Link is updated. Android Auto connects again by itself.</string>
     <string name="st_aa_session_warning">Android Auto stops for about a minute while it installs.</string>
+
+    <!-- Shortcuts menu (pulled down from the top) -->
+    <string name="st_shortcuts_menu">Shortcuts menu</string>
+    <string name="st_shortcuts_menu_desc">Swipe down from the top of the screen to open shortcuts (fog light, ESP, driving aids…). Also hides the original fog light button and frees its corner.</string>
+    <string name="st_shortcuts_menu_restart">The original fog light button changes at the next start of the head unit.</string>
+    <string name="sc_title">Shortcuts</string>
+    <string name="sc_edit_title">Choose the shortcuts</string>
+    <string name="sc_edit_hint">Touch to add or remove</string>
+    <string name="sc_done">OK</string>
+    <string name="sc_fog">Rear fog light</string>
+    <string name="sc_power">Switch the car off</string>
+    <string name="sc_esp">ESP</string>
+    <string name="sc_adas">Driving aids</string>
+    <string name="sc_defrost">Rear defrost</string>
+    <string name="sc_mode">Drive mode</string>
+    <string name="sc_regen">Regeneration</string>
+    <string name="sc_one_pedal">One pedal</string>
+    <string name="sc_clim">Climate</string>
+    <string name="sc_screen">Screen off</string>
+    <string name="sc_aa">Cut Android Auto</string>
+    <string name="sc_v2l">V2L socket</string>
+    <string name="sc_doors">Doors</string>
+    <string name="sc_charge_lock">Charge lock</string>
+    <string name="sc_wheel_heat">Heated wheel</string>
+    <string name="sc_battery_heat">Battery preheat</string>
+    <string name="sc_on">On</string>
+    <string name="sc_off">Off</string>
+    <string name="sc_active">On</string>
+    <string name="sc_inactive">Off</string>
+    <string name="sc_aids_on">On</string>
+    <string name="sc_aids_off">Off</string>
+    <string name="sc_aids_some">Partly</string>
+    <string name="sc_locked">Locked</string>
+    <string name="sc_unlocked">Unlocked</string>
+    <string name="sc_connected">Connected</string>
+    <string name="sc_cut">Cut</string>
+    <string name="sc_lights_off">Lights off</string>
+    <string name="sc_lights_needed">Turn the lights on (Auto or dipped beam)</string>
+    <string name="sc_lane">Lane keeping</string>
+    <string name="sc_fcw">Collision warning</string>
+    <string name="sc_udw">Drowsiness warning</string>
+    <string name="sc_all_off">Turn all off</string>
+    <string name="sc_close">Close</string>
 </resources>

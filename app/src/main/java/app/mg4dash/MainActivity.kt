@@ -75,6 +75,8 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
             // Simple home: same HOME activity, other content
             simpleMode = true
             builtVertical = Dock.vertical(this)
+            builtRight = Dock.rightSide(this)
+            builtShortcuts = prefs.shortcutsMenu
             builtHideTitles = prefs.hideTitles
             builtHeating = CarBridge.heatingShown(this)
             builtConnections = prefs.connectionIcons
@@ -610,7 +612,8 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         val tl = frames["tl"]
         // The vertical bar takes the button's place only on the left; on the right (right-hand drive, #108) the button
         // still sits in the top left corner, over the top left place
-        val fog = if (Dock.fogOnBar(Dock.vertical(this), Dock.rightSide(this))) 0 else dp(64)
+        // The shortcuts menu hides the button: no room to keep
+        val fog = if (!Dock.fogShown(this) || Dock.fogOnBar(Dock.vertical(this), Dock.rightSide(this))) 0 else dp(64)
         ((b.climateCard.getChildAt(0) as LinearLayout).getChildAt(0).layoutParams as LinearLayout.LayoutParams).leftMargin =
             if (tl != null && Card.CLIMATE in tl.cards) fog else 0
         weathers.forEach { (c, w) -> w.setLeftInset(if (tl != null && c in tl.cards) fog else 0) }
@@ -706,7 +709,7 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         // MG4Dash had not started and the rescue app stepped in: say so once
         app.mg4dash.system.Rescue.notice?.let { app.mg4dash.system.Rescue.notice = null; app.mg4dash.ui.Toasts.show(this, it, long = true) }
         // Home layout changed in the settings: rebuild the screen
-        if ((prefs.homeStyle == 1) != simpleMode || (!simpleMode && HomeSlots.layoutOf(prefs) != slotLayout) || Dock.vertical(this) != builtVertical || prefs.hideTitles != builtHideTitles ||
+        if ((prefs.homeStyle == 1) != simpleMode || (!simpleMode && HomeSlots.layoutOf(prefs) != slotLayout) || Dock.vertical(this) != builtVertical || (builtVertical && Dock.rightSide(this) != builtRight) || prefs.shortcutsMenu != builtShortcuts || prefs.hideTitles != builtHideTitles ||
             CarBridge.heatingShown(this) != builtHeating || (!simpleMode && cardPower != builtCardPower) ||
             prefs.connectionIcons != builtConnections ||
             app.mg4dash.ui.Themes.signature(this) != themeSig) { app.mg4dash.ui.Themes.recreateSmooth(this); return }
@@ -790,11 +793,16 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         }
         Dock.mount(this, b.root as LinearLayout, b.dock, Dock.Page.HOME)
         builtVertical = Dock.vertical(this)
+        builtRight = Dock.rightSide(this)
+        builtShortcuts = prefs.shortcutsMenu
         builtHideTitles = prefs.hideTitles
         builtHeating = CarBridge.heatingShown(this)
     }
 
     private var builtVertical = false
+    /** Side of the vertical bar and shortcuts menu setting the screen was built with (a change in the settings rebuilds it). */
+    private var builtRight = false
+    private var builtShortcuts = true
     private var builtHideTitles = false
     private var builtHeating = false
 

@@ -77,7 +77,7 @@ object Shortcuts {
         val head = kit.row()
         head.addView(kit.title(activity.getString(R.string.title_shortcuts)).apply {
             if (app.mg4dash.system.Prefs(activity).hideTitles) visibility = android.view.View.INVISIBLE   // "Hide titles" option
-        }, kit.lp(0, -2, 1f, l = Kit.FOG_SAFE_DP - 20))
+        }, kit.lp(0, -2, 1f, l = Kit.fogSafeDp(activity) - 20))
         // One row (small place, #97): no title line, the tiles take the height
         holder.addView(head, kit.lp(-1, kit.dp(if (rows == 1) 0 else 48)))
         val grid = kit.column()

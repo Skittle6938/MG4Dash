@@ -1260,6 +1260,27 @@ class ScreenshotTest {
         File(File("build/screenshots").apply { mkdirs() }, name).outputStream().use { bmp.compress(Bitmap.CompressFormat.PNG, 100, it) }
     }
 
+    /** Shortcuts menu pulled down from the top edge (the real gesture, through the screen's touches). */
+    @Test fun shortcutsMenuDark() = shortcutsMenu(1, "shortcuts_menu_dark.png")
+    @Test fun shortcutsMenuLight() = shortcutsMenu(2, "shortcuts_menu_light.png")
+    @Test fun shortcutsMenuHalf() = shortcutsMenu(2, "shortcuts_menu_half.png", release = false)
+
+    private fun shortcutsMenu(theme: Int, name: String, release: Boolean = true) {
+        val sp = org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE)
+        sp.edit().putInt("theme_mode", theme).commit()
+        app.mg4dash.ui.ShortcutsPanel.init(org.robolectric.RuntimeEnvironment.getApplication())
+        val activity = Robolectric.buildActivity(MainActivity::class.java).setup().get()
+        repeat(5) { shadowOf(Looper.getMainLooper()).idleFor(200, TimeUnit.MILLISECONDS) }
+        val cb = activity.window.callback
+        fun touch(action: Int, y: Float, t: Long) = cb.dispatchTouchEvent(android.view.MotionEvent.obtain(0, t, action, 960f, y, 0))
+        touch(android.view.MotionEvent.ACTION_DOWN, 10f, 0)
+        var y = 10f
+        for (i in 1..12) { y += if (release) 40f else 15f; touch(android.view.MotionEvent.ACTION_MOVE, y, i * 16L) }
+        if (release) touch(android.view.MotionEvent.ACTION_UP, y, 300)
+        repeat(8) { shadowOf(Looper.getMainLooper()).idleFor(200, TimeUnit.MILLISECONDS) }
+        save(activity.window.decorView, name)
+    }
+
     private fun <T : Activity> shoot(cls: Class<T>, name: String, media: app.mg4dash.media.MediaHub.NowPlaying? = null) {
         // Screenshots in dark mode, unless the test chose another mode
         val sp = org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE)

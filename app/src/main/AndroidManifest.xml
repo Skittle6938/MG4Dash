@@ -154,6 +154,7 @@
         <receiver android:name=".system.RadioDashUpdater$Result" android:exported="false" />
         <receiver android:name=".system.AirlinkUpdater$Result" android:exported="false" />
         <receiver android:name=".system.Rescue$Result" android:exported="false" />
+        <receiver android:name=".system.FogOverlay$Result" android:exported="false" />
         <receiver
             android:name=".system.Updater$Relaunch"
             android:exported="true">
