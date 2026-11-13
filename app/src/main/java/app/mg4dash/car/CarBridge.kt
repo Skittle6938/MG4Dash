@@ -452,7 +452,7 @@ object CarBridge {
     private const val PREF_PROBE_HI = "temp_probe_hi"
     private const val PREF_PROBE_PATH = "temp_probe_path"   // "legacy" or "a9": the values are in that path's units
     private const val PROBE_WAIT_MS = 1_500L
-    private const val PREF_PROBE_TRIES = "temp_probe_tries"
+    private const val PREF_PROBE_TRIES = "temp_probe_tries2"   // 2: tries counted again with the half-degree rule
     /** A car that never gives a result is not tested at every start: three times at most. */
     private const val PROBE_MAX_TRIES = 3
     @Volatile private var probeTried = false
@@ -476,7 +476,7 @@ object CarBridge {
         maybeProbe(legacy)
     }
 
-    /** Candidates from outside inwards: the first one the car keeps exactly as sent is the limit. */
+    /** Candidates from outside inwards: the first one the car keeps (within half a degree) is the limit. */
     internal fun probeCandidates(legacy: Boolean, low: Boolean): List<Float> = when {
         legacy && low -> listOf(13f, 14f, 15f, 16f, 17f)
         legacy -> listOf(35f, 34f, 33f, 32f, 31f)
@@ -521,9 +521,10 @@ object CarBridge {
                 send(c); delay(PROBE_WAIT_MS)
                 val r = read()
                 Log.i(TAG, "set point limits test: sent $c, car keeps $r")
-                // Only a value the car keeps as sent: out of its range, SWI69 turns it into another one
-                // (14.5 read back as 31, 33.5 as 17), which is no limit
-                if (r != null && Math.abs(r - c) < 0.01f) return r
+                // Only a value the car keeps (within half a degree: SWI69 reads its LO 15.5 back as 15 and its HI
+                // 30.5 as 31). Out of its range it turns it into another one (14.5 read back as 31, 33.5 as 17).
+                // The value sent is the limit kept, since it is the one to send for LO / HI
+                if (r != null && Math.abs(r - c) <= 0.51f) return c
             }
             return null
         }
