@@ -931,6 +931,13 @@
     <string name="sc_unlocked">Unlocked</string>
     <string name="sc_connected">Connected</string>
     <string name="sc_cut">Cut</string>
+    <string name="sc_heating">Heating</string>
+    <string name="sc_cooling">Cooling</string>
+    <string name="sc_clim_state">%1$s · out. %2$s</string>
+    <string name="sc_adb">ADB</string>
+    <string name="st_adb_start">ADB at start</string>
+    <string name="st_adb_start_desc">Turns on ADB over the USB port at each start of the car, as the adbutil app does.</string>
+    <string name="sc_adb_already">ADB is already on (it goes off at the car\'s next start)</string>
     <string name="sc_lights_off">Lights off</string>
     <string name="sc_lights_needed">Turn the lights on (Auto or dipped beam)</string>
     <string name="sc_lane">Lane keeping</string>

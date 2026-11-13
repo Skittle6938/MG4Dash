@@ -85,6 +85,23 @@ class ShortcutsMenuTest {
         assertEquals(null, ShortcutTiles.fogAllowed(null, null))    // car silent: usable
     }
 
+    @Test fun onlyAClearOneFingerSlideDownPullsTheMenu() {
+        val d = 1f
+        assertTrue(app.mg4dash.ui.ShortcutsPanel.isPull(10f, 60f, d, 1))
+        // A widget's swipe (sideways), even starting at the top: never
+        assertEquals(false, app.mg4dash.ui.ShortcutsPanel.isPull(80f, 60f, d, 1))
+        assertEquals(false, app.mg4dash.ui.ShortcutsPanel.isPull(10f, 30f, d, 1))   // too short
+        assertEquals(false, app.mg4dash.ui.ShortcutsPanel.isPull(0f, 200f, d, 2))   // two fingers (MG4Link)
+    }
+
+    @Test fun climateHeatingOrCooling() {
+        assertEquals(true, ShortcutTiles.coolingFor(true, 20f, 28f, null))     // A/C on, set point below outside: cooling
+        assertEquals(false, ShortcutTiles.coolingFor(true, 22f, 9f, null))     // set point above outside: heating
+        assertEquals(false, ShortcutTiles.coolingFor(false, 20f, 28f, null))   // A/C off: heating
+        assertEquals(true, ShortcutTiles.coolingFor(true, 21.8f, 22f, true))   // within 0.5 °C: as before (no flicker)
+        assertEquals(true, ShortcutTiles.coolingFor(true, 22f, null, null))    // no outside temperature: the A/C decides
+    }
+
     @Test fun driveModeAndRegenCycles() {
         assertEquals(3, ShortcutTiles.nextDriveMode(2))
         assertEquals(4, ShortcutTiles.nextDriveMode(3))

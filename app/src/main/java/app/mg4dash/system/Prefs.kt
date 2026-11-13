@@ -462,5 +462,10 @@ class Prefs(context: Context) {
         get() = sp.getInt("shortcut_fcw", 2)
         set(v) = sp.edit().putInt("shortcut_fcw", v).apply()
 
+    /** ADB turned on at each start (once unlocked), as the adbutil app does; off by default. */
+    var adbAtStart: Boolean
+        get() = sp.getBoolean("adb_at_start", false)
+        set(v) = sp.edit().putBoolean("adb_at_start", v).apply()
+
     val raw: SharedPreferences get() = sp
 }

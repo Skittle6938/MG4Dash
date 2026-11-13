@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Shortcuts menu tile icon (line drawing, tinted by the code) -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:pathData="M11,4 h2 a3,3 0 0 1 3,3 v10 a3,3 0 0 1 -3,3 h-2 a3,3 0 0 1 -3,-3 v-10 a3,3 0 0 1 3,-3 z"
+        android:fillColor="#FFFFFFFF" />
+</vector>
