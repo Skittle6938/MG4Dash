@@ -35,6 +35,8 @@ class LauncherApp : Application() {
         started = true
         installCrashGuard()
         Log.i("App", "start ${BuildConfig.VERSION_NAME} (${BuildConfig.FLAVOR})")
+        // Apps whose floating window can bring the SAIC bars back over home (#108)
+        Thread { Log.i("Bars", "over other apps: ${app.mg4dash.ui.Fullscreen.overlayApps(this)}") }.start()
         // Separate safety net (MG4Dash Rescue): sign of life, and its installation if needed
         app.mg4dash.system.Rescue.start(this)
         // Consumption map removed (1/11): file and accelerometer settings deleted
