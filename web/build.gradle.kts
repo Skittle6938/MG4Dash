@@ -15,8 +15,8 @@ android {
         applicationId = "app.mg4dash.web"
         minSdk = 28
         targetSdk = 28
-        versionCode = 26
-        versionName = "1.24"
+        versionCode = 27
+        versionName = "1.25"
     }
 
     buildTypes {
