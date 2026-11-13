@@ -444,8 +444,8 @@
     <string name="st_rd_available">MG4Radio %1$s available</string>
     <string name="st_rd_installing">Installing MG4Radio…</string>
     <string name="st_rd_done">MG4Radio is installed. Restart the head unit (hold Home about 20 s) to use it.</string>
-    <string name="st_upd_current">Up to date (%1$s)</string>
-    <string name="st_upd_new">Update available: %2$s (installed: %1$s)</string>
+    <string name="st_upd_current">Up to date - %1$s</string>
+    <string name="st_upd_new">Update available - %1$s → %2$s</string>
     <string name="st_upd_none_new">not installed · %1$s available</string>
     <string name="st_upd_install_ver">Install %1$s</string>
     <string name="st_upd_note">MG4Dash restarts the screen at the end of its update. MG4Radio applies after restarting the head unit (hold Home about 20 s) and is tested on %1$s.</string>

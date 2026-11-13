@@ -288,7 +288,7 @@ class ScreenshotTest {
         shoot(SettingsActivity::class.java, "settings_updates_mock.png")
     }
 
-    /** System tab, checked and up to date: "Up to date (version)" as the other apps; the rescue line. */
+    /** System tab, checked and up to date: "Up to date – version" as the other apps; the rescue line. */
     @Test @Config(qualifiers = "fr-w1920dp-h720dp-land-mdpi") fun settingsUpToDate() {
         org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE).edit()
             .putBoolean("settings_tabs_v2", true).putInt("settings_tab", 5).putLong("upd_checked_at", 1L).commit()
@@ -301,23 +301,50 @@ class ScreenshotTest {
      */
     @Test @Config(qualifiers = "fr-w1920dp-h720dp-land-mdpi") fun settingsUpdateStates() {
         val app = org.robolectric.RuntimeEnvironment.getApplication()
-        fun lines(newer: Boolean, name: String) {
+        fun lines(newer: Boolean, name: String, theme: Int = 1, variant: Char? = null) {
             app.getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE).edit().remove("upd_new_app")
-                .putInt("theme_mode", 1).putBoolean("settings_tabs_v2", true).putInt("settings_tab", 5).putLong("upd_checked_at", 1L)
+                .putInt("theme_mode", theme).putBoolean("settings_tabs_v2", true).putInt("settings_tab", 5).putLong("upd_checked_at", 1L)
                 .apply { if (newer) putString("upd_new_app", "1.7.3-beta16") }.commit()
             val act = Robolectric.buildActivity(SettingsActivity::class.java).setup().get()
             repeat(5) { shadowOf(Looper.getMainLooper()).idleFor(200, TimeUnit.MILLISECONDS) }
             val versions = mapOf("MG4Radio" to ("1.6.2" to "1.6.3"), "MG4Link" to ("2.2.4" to "2.2.5"))
+            val accent = android.util.TypedValue().also { act.theme.resolveAttribute(R.attr.mgSelect, it, true) }.data
+            val dp = act.resources.displayMetrics.density
+            fun style(texts: ViewGroup, state: android.widget.TextView, button: android.widget.Button) {
+                val nameView = texts.getChildAt(0) as android.widget.TextView
+                // Every variant: the install button as the OUI toggles (theme's selected chip)
+                button.setBackgroundResource(R.drawable.bg_chip); button.isSelected = true
+                button.setTextColor(androidx.core.content.ContextCompat.getColorStateList(act, R.color.chip_text))
+                when (variant) {
+                    'A' -> state.setTextColor(accent)
+                    'B' -> nameView.text = android.text.SpannableStringBuilder(nameView.text).append("   ").also { sb ->
+                        val start = sb.length; sb.append("● Nouveau")
+                        sb.setSpan(android.text.style.ForegroundColorSpan(accent), start, sb.length, 0)
+                        sb.setSpan(android.text.style.RelativeSizeSpan(0.8f), start, sb.length, 0)
+                    }
+                    'C' -> {
+                        val line = texts.parent as ViewGroup
+                        val tint = android.graphics.drawable.GradientDrawable().apply { setColor((accent and 0x00ffffff) or 0x1f000000); cornerRadius = 10 * dp }
+                        val bar = android.graphics.drawable.GradientDrawable().apply { setColor(accent); cornerRadius = 2 * dp }
+                        line.background = android.graphics.drawable.LayerDrawable(arrayOf(tint, bar)).apply { setLayerSize(1, (4 * dp).toInt(), -1); setLayerGravity(1, android.view.Gravity.START or android.view.Gravity.FILL_VERTICAL) }
+                        line.setPadding((16 * dp).toInt(), (8 * dp).toInt(), (8 * dp).toInt(), (8 * dp).toInt())
+                    }
+                }
+            }
             fun walk(v: View) {
                 if (v is ViewGroup) {
                     val first = v.getChildAt(0) as? android.widget.TextView
-                    val pair = versions[first?.text?.toString()]
-                    if (pair != null && v.childCount == 2 && v.getChildAt(1) is android.widget.TextView) {
-                        (v.getChildAt(1) as android.widget.TextView).text = if (newer) act.getString(R.string.st_upd_new, pair.first, pair.second)
-                            else act.getString(R.string.st_upd_current, pair.first)
-                        val button = ((v.parent as ViewGroup).getChildAt(1) as android.widget.Button)
-                        button.isEnabled = true; button.alpha = 1f
-                        if (newer) button.text = act.getString(R.string.st_upd_install_ver, pair.second)
+                    val label = first?.text?.toString()
+                    if ((label in versions || label == "MG4Dash") && v.childCount == 2 && v.getChildAt(1) is android.widget.TextView && (v.parent as? ViewGroup)?.getChildAt(1) is android.widget.Button) {
+                        val state = v.getChildAt(1) as android.widget.TextView
+                        val button = (v.parent as ViewGroup).getChildAt(1) as android.widget.Button
+                        versions[label]?.let { pair ->
+                            state.text = if (newer) act.getString(R.string.st_upd_new, pair.first, pair.second) else act.getString(R.string.st_upd_current, pair.first)
+                            button.isEnabled = true; button.alpha = 1f
+                            if (newer) button.text = act.getString(R.string.st_upd_install_ver, pair.second)
+                        }
+                        if (newer && variant != null) style(v, state, button)
+                        return
                     }
                     for (i in 0 until v.childCount) walk(v.getChildAt(i))
                 }
@@ -327,6 +354,8 @@ class ScreenshotTest {
         }
         lines(false, "settings_updates_uptodate_fr.png")
         lines(true, "settings_updates_available_fr.png")
+        for (v in "ABC") lines(true, "update_variant_$v.png", variant = v)
+        for (v in "ABC") lines(true, "update_variant_${v}_light.png", theme = 2, variant = v)
     }
 
     /** Settings tabs in English, for the README. */
