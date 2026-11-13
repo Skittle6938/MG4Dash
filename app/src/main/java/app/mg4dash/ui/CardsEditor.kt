@@ -86,7 +86,8 @@ object CardsEditor {
         private val config: HomeSlots.Config get() = HomeSlots.load(prefs, layout, unavailable)
 
         init {
-            setBackgroundColor(ground and 0x00FFFFFF or (0xD0 shl 24))
+            // Opaque (owner's request): the bar's buttons and the cards' icons showed through
+            setBackgroundColor(ground or (0xFF shl 24))
             isClickable = true   // home underneath receives nothing while editing
             targets.forEach { t -> LinearLayout(context).apply { orientation = LinearLayout.VERTICAL }.also { boxes += t to it; addView(it) } }
             buildControls()
@@ -200,7 +201,7 @@ object CardsEditor {
             box.setPadding(dp(14), dp(10), dp(14), dp(10))
             box.background = GradientDrawable().apply {
                 cornerRadius = resources.getDimension(R.dimen.radius_panel)
-                setColor(ground and 0x00FFFFFF or (0xF0 shl 24)); setStroke(dp(2), accent, dp(10).toFloat(), dp(7).toFloat())
+                setColor(ground or (0xFF shl 24)); setStroke(dp(2), accent, dp(10).toFloat(), dp(7).toFloat())
             }
             val id = t.slot.id
             val here = c.fill(id)
