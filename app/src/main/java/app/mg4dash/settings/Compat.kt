@@ -114,7 +114,10 @@ object Compat {
     fun issueUrl(report: String): String {
         val title = "Compatibility: ${Firmware.version.substringBefore('-').ifBlank { Firmware.gen.name }}"
         val body = "**What works / what doesn't:**\n\n\n**Report (from Settings › Compatibility):**\n```\n$report\n```"
+        // Characters allowed as such in a query value (RFC 3986) left readable: a shorter URL, so a QR code that still
+        // reads once the report grew (#108's apps over other apps). "&", ";", "#", "+" and "%" stay encoded
         fun enc(t: String) = URLEncoder.encode(t, "UTF-8").replace("+", "%20")
+            .replace("%3A", ":").replace("%2F", "/").replace("%2C", ",").replace("%3D", "=").replace("%28", "(").replace("%29", ")")
         return "$ISSUES?labels=compatibility&title=${enc(title)}&body=${enc(body)}"
     }
 
