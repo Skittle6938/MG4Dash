@@ -931,6 +931,11 @@
     <string name="sc_unlocked">Ontgrendeld</string>
     <string name="sc_connected">Verbonden</string>
     <string name="sc_cut">Losgekoppeld</string>
+    <string name="tu_shortcuts_t">Snelmenu</string>
+    <string name="tu_shortcuts_1">Veeg met één vinger omlaag vanaf de bovenrand van het scherm, op elk scherm en over andere apps (ook Android Auto), om het snelmenu te openen.</string>
+    <string name="tu_shortcuts_2">Tik op een tegel om te handelen: het pictogram en de regel eronder tonen de toestand van de auto.</string>
+    <string name="tu_shortcuts_3">Druk lang op het menu om de getoonde snelkoppelingen te kiezen.</string>
+    <string name="tu_shortcuts_4">Instellingen › Start › Snelmenu: aan verbergt het ook de originele mistlichtknop (na de volgende start van de radio); uit, alles zoals voorheen.</string>
     <string name="sc_heating">Verwarming</string>
     <string name="sc_cooling">Koeling</string>
     <string name="sc_clim_state">%1$s · buiten %2$s</string>

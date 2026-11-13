@@ -931,6 +931,11 @@
     <string name="sc_unlocked">Entriegelt</string>
     <string name="sc_connected">Verbunden</string>
     <string name="sc_cut">Getrennt</string>
+    <string name="tu_shortcuts_t">Schnellzugriff-Menü</string>
+    <string name="tu_shortcuts_1">Mit einem Finger ganz oben vom Bildschirmrand nach unten wischen, auf jedem Bildschirm und über anderen Apps (auch Android Auto), öffnet das Schnellzugriff-Menü.</string>
+    <string name="tu_shortcuts_2">Eine Kachel antippen, um zu handeln: Symbol und Zeile darunter zeigen den Zustand des Autos.</string>
+    <string name="tu_shortcuts_3">Lange auf das Menü drücken, um die angezeigten Schnellzugriffe zu wählen.</string>
+    <string name="tu_shortcuts_4">Einstellungen › Startseite › Schnellzugriff-Menü: an, blendet es auch die originale Nebelleuchten-Taste aus (ab dem nächsten Start des Radios); aus, alles wie vorher.</string>
     <string name="sc_heating">Heizung</string>
     <string name="sc_cooling">Kühlung</string>
     <string name="sc_clim_state">%1$s · außen %2$s</string>

@@ -931,6 +931,11 @@
     <string name="sc_unlocked">Unlocked</string>
     <string name="sc_connected">Connected</string>
     <string name="sc_cut">Cut</string>
+    <string name="tu_shortcuts_t">Shortcuts menu</string>
+    <string name="tu_shortcuts_1">Slide one finger down from the very top of the screen, on every screen and over the other apps (Android Auto too), to open the shortcuts menu.</string>
+    <string name="tu_shortcuts_2">Touch a tile to act: its icon and the line below it show the car\'s state.</string>
+    <string name="tu_shortcuts_3">Long press the menu to choose the shortcuts shown.</string>
+    <string name="tu_shortcuts_4">Settings › Home › Shortcuts menu: on, it also hides MG\'s fog light button (after the head unit\'s next start); off, everything is as before.</string>
     <string name="sc_heating">Heating</string>
     <string name="sc_cooling">Cooling</string>
     <string name="sc_clim_state">%1$s · out. %2$s</string>
