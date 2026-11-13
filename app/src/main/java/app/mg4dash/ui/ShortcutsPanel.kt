@@ -272,6 +272,10 @@ object ShortcutsPanel : Application.ActivityLifecycleCallbacks {
                 }
                 grid.addView(row, LinearLayout.LayoutParams(-1, -2).apply { bottomMargin = kit.dp(16) })
             }
+            // Screen brightness under the tiles (option, on by default): in the edit mode a touch switches it
+            if (prefs.shortcutsBrightness || editing) grid.addView(BrightnessBar().apply {
+                if (editing) { alpha = if (prefs.shortcutsBrightness) 1f else 0.35f; editToggle = { prefs.shortcutsBrightness = !prefs.shortcutsBrightness; render() } }
+            }, LinearLayout.LayoutParams(-1, kit.dp(84)).apply { bottomMargin = kit.dp(16) })
             if (editing) grid.addView(TextView(ctx).apply {
                 text = ctx.getString(R.string.sc_edit_hint); setTextColor(c(R.color.text_sub)); setTextSize(TypedValue.COMPLEX_UNIT_SP, 17f)
             })
@@ -334,6 +338,114 @@ object ShortcutsPanel : Application.ActivityLifecycleCallbacks {
                 state.text = s?.state ?: ""
                 // Not usable now (rear fog light with the lights off): greyed
                 alpha = if (s?.disabled == true && !editing) 0.45f else if (editing) alpha else 1f
+            }
+        }
+
+        /**
+         * Screen brightness, as the stock quick panel sets it (Settings.System screen_brightness, 0 to 255, and the
+         * automatic mode turned off when moved by hand): small sun, track with a round knob, big sun, percentage. It
+         * follows the finger live; the last value is written once more when let go.
+         */
+        @SuppressLint("ViewConstructor")
+        private inner class BrightnessBar : LinearLayout(ctx) {
+            var editToggle: (() -> Unit)? = null
+            private val pct = TextView(ctx).apply { setTextColor(c(R.color.text_sub)); setTextSize(TypedValue.COMPLEX_UNIT_SP, 19f); gravity = Gravity.END or Gravity.CENTER_VERTICAL }
+            private val track = Track()
+            private var value = read()
+            private var lastWrite = 0L
+            private val auto = TextView(ctx).apply {
+                text = "AUTO"; gravity = Gravity.CENTER; setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f)
+                typeface = Typeface.create("sans-serif-medium", Typeface.NORMAL); letterSpacing = 0.05f
+            }
+            private val autoBg = GradientDrawable().apply { cornerRadius = kit.dp(16).toFloat(); setStroke(1, c(R.color.panel_border)) }
+
+            init {
+                orientation = HORIZONTAL; gravity = Gravity.CENTER_VERTICAL
+                background = GradientDrawable().apply { setColor(c(R.color.button_idle)); cornerRadius = kit.dp(22).toFloat() }
+                setPadding(kit.dp(24), 0, kit.dp(24), 0)
+                fun sun(size: Int) = ImageView(ctx).apply { setImageResource(R.drawable.ic_sc_sun); setColorFilter(c(R.color.text_value)) }
+                addView(sun(0), LayoutParams(kit.dp(28), kit.dp(28)))
+                addView(track, LayoutParams(0, -1, 1f).apply { leftMargin = kit.dp(18); rightMargin = kit.dp(18) })
+                addView(sun(0), LayoutParams(kit.dp(42), kit.dp(42)))
+                addView(pct, LayoutParams(kit.dp(84), -2))
+                // AUTO: back to the automatic brightness, as the stock quick panel (screen_brightness_mode 1); lit while on
+                addView(auto, LayoutParams(kit.dp(104), kit.dp(56)).apply { leftMargin = kit.dp(16) })
+                auto.setOnClickListener {
+                    if (editToggle != null) return@setOnClickListener
+                    try { android.provider.Settings.System.putInt(ctx.contentResolver, "screen_brightness_mode", 1); Log.i(TAG, "brightness auto") }
+                    catch (e: Exception) { Log.w(TAG, "brightness auto: ${e.message}") }
+                    showAuto()
+                }
+                show(); showAuto()
+                isClickable = true
+                setOnLongClickListener { edit(true); true }
+            }
+
+            private fun read(): Int = try { android.provider.Settings.System.getInt(ctx.contentResolver, "screen_brightness") } catch (_: Exception) { 128 }
+
+            private fun autoOn(): Boolean = try { android.provider.Settings.System.getInt(ctx.contentResolver, "screen_brightness_mode", 0) == 1 } catch (_: Exception) { false }
+
+            /** Lit (inverted, as a tile that is on) while the automatic brightness is on. */
+            private fun showAuto() {
+                val on = autoOn()
+                autoBg.setColor(c(if (on) R.color.text_value else R.color.panel))
+                auto.setTextColor(c(if (on) R.color.panel else R.color.text_value))
+                auto.background = autoBg
+            }
+
+            /** The real settings followed: the car (or the stock panel) changing them shows here. */
+            private val watch = object : android.database.ContentObserver(main) {
+                override fun onChange(selfChange: Boolean) { value = read(); show(); showAuto() }
+            }
+            override fun onAttachedToWindow() {
+                super.onAttachedToWindow()
+                val cr = ctx.contentResolver
+                cr.registerContentObserver(android.provider.Settings.System.getUriFor("screen_brightness_mode"), false, watch)
+                cr.registerContentObserver(android.provider.Settings.System.getUriFor("screen_brightness"), false, watch)
+            }
+            override fun onDetachedFromWindow() { ctx.contentResolver.unregisterContentObserver(watch); super.onDetachedFromWindow() }
+
+            private fun show() { pct.text = "${Math.round(value * 100f / 255f)} %"; track.invalidate() }
+
+            private fun write(v: Int, final: Boolean) {
+                val now = SystemClock.uptimeMillis()
+                if (!final && now - lastWrite < 60) return
+                lastWrite = now
+                try {
+                    val cr = ctx.contentResolver
+                    if (android.provider.Settings.System.getInt(cr, "screen_brightness_mode", 0) != 0) android.provider.Settings.System.putInt(cr, "screen_brightness_mode", 0)
+                    android.provider.Settings.System.putInt(cr, "screen_brightness", v)
+                    if (final) Log.i(TAG, "brightness $v")
+                } catch (e: Exception) { Log.w(TAG, "brightness: ${e.message}") }
+            }
+
+            @SuppressLint("ClickableViewAccessibility")
+            override fun onTouchEvent(e: MotionEvent): Boolean {
+                editToggle?.let { t -> if (e.actionMasked == MotionEvent.ACTION_UP) t(); return true }
+                val x = e.x - track.left
+                if (e.actionMasked == MotionEvent.ACTION_DOWN && e.x > track.right + kit.dp(8)) return false
+                val v = ((x - track.r) / (track.width - 2 * track.r)).coerceIn(0f, 1f).let { Math.round(it * 255) }
+                when (e.actionMasked) {
+                    MotionEvent.ACTION_DOWN -> { parent?.requestDisallowInterceptTouchEvent(true); value = v; show(); write(v, false) }
+                    MotionEvent.ACTION_MOVE -> { value = v; show(); write(v, false) }
+                    MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> { value = v; show(); write(v, true) }
+                }
+                return true
+            }
+
+            /** The track: filled up to the value, with its knob, in the colour of the tiles that are on. */
+            private inner class Track : View(ctx) {
+                val r get() = kit.dp(15).toFloat()
+                private val paint = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG)
+                override fun onDraw(cv: android.graphics.Canvas) {
+                    val cy = height / 2f; val h = kit.dp(10).toFloat()
+                    val x = r + (width - 2 * r) * value / 255f
+                    paint.color = c(R.color.panel)
+                    cv.drawRoundRect(r, cy - h / 2, width - r, cy + h / 2, h / 2, h / 2, paint)
+                    paint.color = c(R.color.text_value)
+                    cv.drawRoundRect(r, cy - h / 2, x, cy + h / 2, h / 2, h / 2, paint)
+                    cv.drawCircle(x, cy, r, paint)
+                }
             }
         }
 
