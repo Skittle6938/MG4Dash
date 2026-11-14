@@ -3,8 +3,13 @@ package app.mg4dash
 import app.mg4dash.ui.ShortcutsPanel
 import org.junit.Assert.assertEquals
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 
 /** − / + by the AUTO button: the automatic brightness shifted on five steps each way, 5 % a touch by hand. */
+@RunWith(RobolectricTestRunner::class)
+@Config(sdk = [28])
 class AutoBrightnessTest {
     @Test fun autoShiftOnItsSteps() {
         assertEquals(0.2f, ShortcutsPanel.adjStepped(0f, 1), 1e-6f)
