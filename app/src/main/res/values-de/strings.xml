@@ -941,4 +941,6 @@
     <string name="sc_all_off">Alle aus</string>
     <string name="sc_close">Schließen</string>
     <string name="tu_cards_3">Losgelöstes Fenster: doppelt tippen setzt es zurück; lang drücken › Verschieben / Größe ändern, dann OK.</string>
+    <string name="st_fx_volume">Lautstärke der Soundeffekte</string>
+    <string name="st_fx_volume_off">Aus</string>
 </resources>

@@ -129,8 +129,9 @@ class PowerFx(private val context: Context) : Drawable() {
         badgeArea.set((u[0] - c[0]).toFloat(), (u[1] - c[1]).toFloat(), (u[0] - c[0] + under.width).toFloat(), (u[1] - c[1] + under.height).toFloat())
     }
 
-    /** Soft sound at the jump to light speed (off in the settings preview). */
+    /** Sound of the animation (whoosh, crackle or fire, see [FxSound]; off in the settings preview). */
     var sound = true
+    private var lastSoundAt = 0L
 
     /** New measurement: triggers, restarts (new record) or lets the animation fall. */
     fun update(kw: Float, threshold: Float, peakKw: Float) {
@@ -142,10 +143,13 @@ class PowerFx(private val context: Context) : Drawable() {
             if (!active) {
                 active = true; record = kw; shown = threshold; eventAt = now; lastAbove = now; lastFrame = 0L
                 clearParticles(); jumpAt = now; strike(now)
-                if (style == HYPERSPACE) { light = Themes.isLight(context); if (sound) HyperSound.play(context) }
+                if (style == HYPERSPACE) light = Themes.isLight(context)
+                if (sound) { lastSoundAt = now; FxSound.play(context, style) }
                 onBadge?.invoke(true)
             } else if (kw > record + 0.5f) {
                 record = kw; eventAt = now; strike(now)
+                // A new lightning strike crackles again, at most once per strike
+                if (sound && style == LIGHTNING && now - lastSoundAt > STRIKE_MS) { lastSoundAt = now; FxSound.play(context, style) }
             }
             lastAbove = now
         } else {
@@ -266,23 +270,28 @@ class PowerFx(private val context: Context) : Drawable() {
     private fun drawBoltSet(c: Canvas, a: Float, scale: Float) {
         bolt.forEachIndexed { k, pts ->
             val w = if (k == 0) 1f else 0.55f
-            drawPoly(c, pts, cCold, (40 * a).toInt(), 26 * d * w * scale)
-            drawPoly(c, pts, cCold, (110 * a).toInt(), 10 * d * w * scale)
-            drawPoly(c, pts, 0xFFFFFFFF.toInt(), (255 * a).toInt(), 3.2f * d * w * scale)
+            // Wider and brighter than at first (14/11): seen at a glance on the car's screen
+            drawPoly(c, pts, cCold, (55 * a).toInt(), 38 * d * w * scale)
+            drawPoly(c, pts, cCold, (140 * a).toInt(), 15 * d * w * scale)
+            drawPoly(c, pts, 0xFFFFFFFF.toInt(), (255 * a).toInt(), 4.8f * d * w * scale)
         }
     }
+
+    /** Length of the lightning strike (3 bursts): 650 ms, longer than the first 450 ms (14/11). */
+    private val STRIKE_MS = 650L
 
     private fun drawLightningScene(c: Canvas, now: Long, dt: Float) {
         val b = bounds
         val t = now - eventAt
-        // Lightning strike: 3 bursts in 450 ms, new shape at each burst, flash of the whole card
-        if (t < 450) {
-            val flick = (t / 150).toLong()
+        // Lightning strike: 3 bursts in STRIKE_MS, new shape at each burst, flash of the whole card
+        if (t < STRIKE_MS) {
+            val burst = STRIKE_MS / 3
+            val flick = (t / burst)
             if (flick != boltSeed || bolt.isEmpty()) { boltSeed = flick; buildBolt() }
-            val a = 1f - (t % 150) / 220f
-            paint.shader = null; paint.color = 0xFFFFFFFF.toInt(); paint.alpha = ((1f - t / 450f) * 120).toInt()
+            val a = 1f - (t % burst) / (burst * 1.45f)
+            paint.shader = null; paint.color = 0xFFFFFFFF.toInt(); paint.alpha = ((1f - t / STRIKE_MS.toFloat()) * 120).toInt()
             c.drawRect(b, paint)
-            paint.color = cCold; paint.alpha = ((1f - t / 450f) * 60).toInt(); c.drawRect(b, paint)
+            paint.color = cCold; paint.alpha = ((1f - t / STRIKE_MS.toFloat()) * 60).toInt(); c.drawRect(b, paint)
             drawBoltSet(c, a, 1f)
             nextAftershock = now + 2500
         } else if (now >= nextAftershock) {
@@ -311,7 +320,7 @@ class PowerFx(private val context: Context) : Drawable() {
         }
         crackles.removeAll { it.until < now }
         drawBadge(c, bx, cy, bw, bh, cCold, text, bx + bh * 0.45f + icon)
-        for (k in crackles) { drawPoly(c, k.pts, cCold, 110, 5 * d); drawPoly(c, k.pts, 0xFFFFFFFF.toInt(), 255, 1.4f * d) }
+        for (k in crackles) { drawPoly(c, k.pts, cCold, 130, 7 * d); drawPoly(c, k.pts, 0xFFFFFFFF.toInt(), 255, 2f * d) }
         // Small bolt in front of the text
         val ix = bx + bh * 0.45f; val s = icon
         path.reset()
@@ -463,6 +472,27 @@ class PowerFx(private val context: Context) : Drawable() {
         val shakeT = sinceStart - CHARGE_MS
         if (shakeT in 0..SHAKE_MS) { shaking = true; shakeBy(5f * d * (1f - shakeT.toFloat() / SHAKE_MS)) }
         else if (shaking) { shaking = false; shakeBy(0f) }
+        // The peak badge under the stars (14/11): the streaks pass in front of it
+        sizeText()
+        val text = peakText()
+        val icon = textPaint.textSize * 0.9f
+        val (bw, bh) = badgeSize(text, icon)
+        val bx = badgeArea.centerX() - bw / 2f; val by = badgeArea.centerY()
+        drawBadge(c, bx, by, bw, bh, cCold, text, bx + bh * 0.45f + icon)
+        // Small shooting star in front of the text
+        val ix = bx + bh * 0.45f; val s = icon
+        stroke.color = cCold; stroke.strokeWidth = 2f * d
+        for (j in 0..2) {
+            stroke.alpha = 255 - j * 70
+            val yy = by + (j - 1) * s * 0.22f
+            c.drawLine(ix + s * (0.05f + j * 0.12f), yy, ix + s * 0.62f, yy, stroke)
+        }
+        val px = ix + s * 0.72f; val r4 = s * 0.2f
+        path.reset()
+        path.moveTo(px, by - r4 * 1.6f); path.lineTo(px + r4 * 0.4f, by - r4 * 0.4f); path.lineTo(px + r4 * 1.6f, by)
+        path.lineTo(px + r4 * 0.4f, by + r4 * 0.4f); path.lineTo(px, by + r4 * 1.6f); path.lineTo(px - r4 * 0.4f, by + r4 * 0.4f)
+        path.lineTo(px - r4 * 1.6f, by); path.lineTo(px - r4 * 0.4f, by - r4 * 0.4f); path.close()
+        paint.shader = null; paint.color = 0xFFFFFFFF.toInt(); paint.alpha = 255; c.drawPath(path, paint)
         // Stars: projected from the centre; the streak joins the star to where it was a moment ago
         if (veil > 0f) {
             val f = 0.15f * h
@@ -496,26 +526,6 @@ class PowerFx(private val context: Context) : Drawable() {
                 c.drawLines(lines[k], 0, lineN[k], stroke)
             }
         }
-        sizeText()
-        val text = peakText()
-        val icon = textPaint.textSize * 0.9f
-        val (bw, bh) = badgeSize(text, icon)
-        val bx = badgeArea.centerX() - bw / 2f; val by = badgeArea.centerY()
-        drawBadge(c, bx, by, bw, bh, cCold, text, bx + bh * 0.45f + icon)
-        // Small shooting star in front of the text
-        val ix = bx + bh * 0.45f; val s = icon
-        stroke.color = cCold; stroke.strokeWidth = 2f * d
-        for (j in 0..2) {
-            stroke.alpha = 255 - j * 70
-            val yy = by + (j - 1) * s * 0.22f
-            c.drawLine(ix + s * (0.05f + j * 0.12f), yy, ix + s * 0.62f, yy, stroke)
-        }
-        val px = ix + s * 0.72f; val r4 = s * 0.2f
-        path.reset()
-        path.moveTo(px, by - r4 * 1.6f); path.lineTo(px + r4 * 0.4f, by - r4 * 0.4f); path.lineTo(px + r4 * 1.6f, by)
-        path.lineTo(px + r4 * 0.4f, by + r4 * 0.4f); path.lineTo(px, by + r4 * 1.6f); path.lineTo(px - r4 * 0.4f, by + r4 * 0.4f)
-        path.lineTo(px - r4 * 1.6f, by); path.lineTo(px - r4 * 0.4f, by - r4 * 0.4f); path.close()
-        paint.shader = null; paint.color = 0xFFFFFFFF.toInt(); paint.alpha = 255; c.drawPath(path, paint)
     }
 
     private var jumpAt = 0L

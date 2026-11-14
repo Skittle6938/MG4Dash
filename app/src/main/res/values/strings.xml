@@ -941,4 +941,6 @@
     <string name="sc_all_off">Turn all off</string>
     <string name="sc_close">Close</string>
     <string name="tu_cards_3">Detached window: a double tap puts it back; long press › Move / resize, then OK.</string>
+    <string name="st_fx_volume">Sound effects volume</string>
+    <string name="st_fx_volume_off">Off</string>
 </resources>
