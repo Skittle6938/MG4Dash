@@ -58,6 +58,28 @@ object ShortcutsPanel : Application.ActivityLifecycleCallbacks {
     internal fun headingDown(dx: Float, dy: Float, slop: Int): Boolean = dy > slop && Math.abs(dx) < dy
 
     private const val COLS = 6
+
+    /**
+     * The automatic brightness shifted, as Android's own setting does it (Settings.System screen_auto_brightness_adj,
+     * -1 to 1, 0 by default): the light sensor's curve made darker or brighter, the mode staying automatic. Five steps
+     * each way; by hand, − and + move the brightness by 5 %.
+     */
+    internal const val AUTO_ADJ = "screen_auto_brightness_adj"
+    private const val ADJ_STEPS = 5
+    private const val HAND_STEP = 13
+
+    /** The next shift of the automatic brightness (dir -1 or +1), kept on its steps and within -1 to 1. */
+    internal fun adjStepped(current: Float, dir: Int): Float =
+        (Math.round(current * ADJ_STEPS) + dir).coerceIn(-ADJ_STEPS, ADJ_STEPS) / ADJ_STEPS.toFloat()
+
+    /** The shift shown on the AUTO button: AUTO alone at 0, else its step (AUTO +2, AUTO −1). */
+    internal fun adjLabel(adj: Float): String = when (val n = Math.round(adj * ADJ_STEPS)) {
+        0 -> "AUTO"
+        else -> if (n > 0) "AUTO +$n" else "AUTO \u2212${-n}"
+    }
+
+    /** The brightness set by hand moved by one step (5 %), within 0 to 255. */
+    internal fun handStepped(current: Int, dir: Int): Int = (current + dir * HAND_STEP).coerceIn(0, 255)
     private const val REFRESH_MS = 1_000L
     /** Screens without the menu (black screens, start). */
     private val EXCLUDED = setOf("ScreenOffActivity", "BootSplashActivity")
@@ -384,7 +406,8 @@ object ShortcutsPanel : Application.ActivityLifecycleCallbacks {
         /**
          * Screen brightness, as the stock quick panel sets it (Settings.System screen_brightness, 0 to 255, and the
          * automatic mode turned off when moved by hand): small sun, track with a round knob, big sun, percentage. It
-         * follows the finger live; the last value is written once more when let go.
+         * follows the finger live; the last value is written once more when let go. − and + around AUTO: with the
+         * automatic brightness on, they shift its curve (darker / brighter, still automatic); by hand, 5 % a touch.
          */
         @SuppressLint("ViewConstructor")
         private inner class BrightnessBar : LinearLayout(ctx) {
@@ -398,6 +421,14 @@ object ShortcutsPanel : Application.ActivityLifecycleCallbacks {
                 typeface = Typeface.create("sans-serif-medium", Typeface.NORMAL); letterSpacing = 0.05f
             }
             private val autoBg = GradientDrawable().apply { cornerRadius = kit.dp(16).toFloat(); setStroke(1, c(R.color.panel_border)) }
+            private fun stepButton(sign: String, dir: Int) = TextView(ctx).apply {
+                text = sign; gravity = Gravity.CENTER; setTextSize(TypedValue.COMPLEX_UNIT_SP, 26f); setTextColor(c(R.color.text_value))
+                typeface = Typeface.create("sans-serif-medium", Typeface.NORMAL)
+                background = GradientDrawable().apply { setColor(c(R.color.panel)); cornerRadius = kit.dp(16).toFloat(); setStroke(1, c(R.color.panel_border)) }
+                setOnClickListener { if (editToggle == null) step(dir) }
+            }
+            private val minus = stepButton("\u2212", -1)
+            private val plus = stepButton("+", 1)
 
             init {
                 orientation = HORIZONTAL; gravity = Gravity.CENTER_VERTICAL
@@ -409,7 +440,9 @@ object ShortcutsPanel : Application.ActivityLifecycleCallbacks {
                 addView(sun(0), LayoutParams(kit.dp(42), kit.dp(42)))
                 addView(pct, LayoutParams(kit.dp(84), -2))
                 // AUTO: back to the automatic brightness, as the stock quick panel (screen_brightness_mode 1); lit while on
-                addView(auto, LayoutParams(kit.dp(104), kit.dp(56)).apply { leftMargin = kit.dp(16) })
+                addView(minus, LayoutParams(kit.dp(56), kit.dp(56)).apply { leftMargin = kit.dp(16) })
+                addView(auto, LayoutParams(kit.dp(124), kit.dp(56)).apply { leftMargin = kit.dp(10) })
+                addView(plus, LayoutParams(kit.dp(56), kit.dp(56)).apply { leftMargin = kit.dp(10) })
                 auto.setOnClickListener {
                     if (editToggle != null) return@setOnClickListener
                     try { android.provider.Settings.System.putInt(ctx.contentResolver, "screen_brightness_mode", 1); Log.i(TAG, "brightness auto") }
@@ -423,6 +456,19 @@ object ShortcutsPanel : Application.ActivityLifecycleCallbacks {
 
             private fun read(): Int = try { android.provider.Settings.System.getInt(ctx.contentResolver, "screen_brightness") } catch (_: Exception) { 128 }
 
+            private fun adj(): Float = try { android.provider.Settings.System.getFloat(ctx.contentResolver, AUTO_ADJ, 0f) } catch (_: Exception) { 0f }
+
+            /** − / +: the automatic brightness shifted while it is on, else the brightness set by hand moved by 5 %. */
+            private fun step(dir: Int) {
+                if (autoOn()) try {
+                    val a = adjStepped(adj(), dir)
+                    android.provider.Settings.System.putFloat(ctx.contentResolver, AUTO_ADJ, a)
+                    Log.i(TAG, "brightness auto adjust $a")
+                } catch (e: Exception) { Log.w(TAG, "brightness auto adjust: ${e.message}") }
+                else { value = handStepped(read(), dir); write(value, true) }
+                show(); showAuto()
+            }
+
             private fun autoOn(): Boolean = try { android.provider.Settings.System.getInt(ctx.contentResolver, "screen_brightness_mode", 0) == 1 } catch (_: Exception) { false }
 
             /** Lit as a tile that is on (accent tint, border and text) while the automatic brightness is on. */
@@ -432,6 +478,7 @@ object ShortcutsPanel : Application.ActivityLifecycleCallbacks {
                 if (on) autoBg.setStroke(kit.dp(2), accentBorder) else autoBg.setStroke(1, c(R.color.panel_border))
                 auto.setTextColor(if (on) accentText else c(R.color.text_value))
                 auto.background = autoBg
+                auto.text = if (on) adjLabel(adj()) else "AUTO"
             }
 
             /** The real settings followed: the car (or the stock panel) changing them shows here. */
@@ -443,6 +490,7 @@ object ShortcutsPanel : Application.ActivityLifecycleCallbacks {
                 val cr = ctx.contentResolver
                 cr.registerContentObserver(android.provider.Settings.System.getUriFor("screen_brightness_mode"), false, watch)
                 cr.registerContentObserver(android.provider.Settings.System.getUriFor("screen_brightness"), false, watch)
+                cr.registerContentObserver(android.provider.Settings.System.getUriFor(AUTO_ADJ), false, watch)
             }
             override fun onDetachedFromWindow() { ctx.contentResolver.unregisterContentObserver(watch); super.onDetachedFromWindow() }
 
