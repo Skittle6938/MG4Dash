@@ -6,6 +6,7 @@ import app.mg4dash.ui.Kit
 import app.mg4dash.ui.ShortcutTiles
 import app.mg4dash.ui.ShortcutTiles.Tile
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -83,6 +84,14 @@ class ShortcutsMenuTest {
         assertEquals(true, ShortcutTiles.fogAllowed(0, true))       // dipped beam on
         assertEquals(false, ShortcutTiles.fogAllowed(0, false))     // lights off: greyed
         assertEquals(null, ShortcutTiles.fogAllowed(null, null))    // car silent: usable
+    }
+
+    @Test fun rearFogStillOffAfterThePressSaysToTurnTheDippedBeamOn() {
+        // #38, SWI69: with the parking lights only the car ignores the press; with the dipped beam it answers in 0.34 s
+        assertTrue("still off: refused", ShortcutTiles.fogRefused(0))
+        assertFalse("on: accepted", ShortcutTiles.fogRefused(1))
+        assertFalse("unreadable: nothing said", ShortcutTiles.fogRefused(null))
+        assertTrue("read again well after the car's answer", ShortcutTiles.FOG_CHECK_MS in 1_000L..2_000L)
     }
 
     @Test fun onlyAClearOneFingerSlideDownPullsTheMenu() {

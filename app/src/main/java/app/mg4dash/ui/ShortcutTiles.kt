@@ -103,7 +103,9 @@ object ShortcutTiles {
             Tile.FOG -> onOff(CarProps.getInt(REAR_FOG)?.let { if (it in 0..1) it == 1 else null }).let { s ->
                 // Lights off: greyed, a touch only says to turn them on (the car would refuse it)
                 if (s.available && !s.inverted && fogAllowed(lightInt(LIGHT_SWITCH_POS), lightBool(DIPPED_BEAM)) == false &&
-                    // Lights seen on by the theme's reading (VEH_SIDE_LGHT 3): never greyed, the car decides
+                    // Lights seen on by the theme's reading (VEH_SIDE_LGHT 3): never greyed, the car decides. On SWI69
+                    // LIGHT_SWITCH_POS_STS and DIPD_BEAM_LGHT always read 0 / false and VEH_SIDE_LGHT is 3 with the
+                    // parking lights as with the dipped beam (14/11): a refusal is told after the press instead (act)
                     !sideLightsOn())
                     Shown(t(R.string.sc_lights_off), false, disabled = true) else s
             }
@@ -203,6 +205,10 @@ object ShortcutTiles {
 
     /** Drive mode and regeneration chosen by quick touches: only the last one is sent, once the touches stop. */
     private const val SETTLE_MS = 600L
+    /** Rear fog light turned on: read again after this long (the car answers in about 0.3 s). */
+    internal const val FOG_CHECK_MS = 1_500L
+    /** The rear fog light still off after the press: the car refused it (lights not on dipped beam or Auto). */
+    internal fun fogRefused(read: Int?): Boolean = read == 0
     private val main = android.os.Handler(android.os.Looper.getMainLooper())
     private var modeTarget: Int? = null
     private var regenTarget: Int? = null
@@ -222,7 +228,22 @@ object ShortcutTiles {
         }
         val next = flipped(activity, tile, shown)
         when (tile) {
-            Tile.FOG -> background { CarProps.setInt(REAR_FOG, 1, "rear fog light (press)") }
+            Tile.FOG -> {
+                val turningOn = shown?.inverted != true
+                background {
+                    CarProps.setInt(REAR_FOG, 1, "rear fog light (press)")
+                    if (turningOn) {
+                        // With the parking lights only the car ignores the press silently (#38, SWI69: answered in
+                        // 0.34 s with the dipped beam), and no readable property tells parking lights from dipped beam
+                        Thread.sleep(FOG_CHECK_MS)
+                        if (fogRefused(CarProps.getInt(REAR_FOG))) {
+                            Log.i(TAG, "rear fog light refused by the car (parking lights only?)")
+                            holds.remove(Tile.FOG)
+                            main.post { Toasts.show(activity, R.string.sc_lights_needed) }
+                        }
+                    }
+                }
+            }
             Tile.ESP -> background { CarBridge.toggleEsc() }
             Tile.DEFROST -> CarBridge.toggleDefrostRear()
             Tile.MODE -> {
