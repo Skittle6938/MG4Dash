@@ -258,7 +258,7 @@ object Themes {
         return "${p.themeBackground},${p.themeAccent},${if (isLight(context)) 1 else 0},${if (p.verticalDock) 1 else 0},0," +
             "${if (p.wideBar) 1 else 0},${if (Dock.rightSide(context)) 1 else 0},${if (p.radioDashAm) 1 else 0}," +
             // 9th: MG's fog light button hidden by the shortcuts menu (Radio Dash's left bar then takes the full height)
-            "${if (p.shortcutsMenu) 1 else 0}"
+            "${if (app.mg4dash.system.FogOverlay.hides(context)) 1 else 0}"
     }
 
     /** Publishes the theme for Radio Dash (system uid required; no effect otherwise). */

@@ -142,8 +142,8 @@ object Dock {
     /** MG's fog light button falls on MG4Dash's bar (no room to keep on the cards): the vertical bar on the left only (#108). */
     internal fun fogOnBar(vertical: Boolean, rightSide: Boolean) = vertical && !rightSide
 
-    /** The fog light button's corner is kept free (shortcuts menu off: the button is there). */
-    fun fogShown(context: android.content.Context): Boolean = !Prefs(context).shortcutsMenu
+    /** The fog light button's corner is kept free (the button is there: shortcuts menu off, or an overlay that does not fit, #113). */
+    fun fogShown(context: android.content.Context): Boolean = !app.mg4dash.system.FogOverlay.hides(context)
 
     /** Vertical bar on the left chosen in the settings (all screens). */
     fun vertical(context: android.content.Context): Boolean = Prefs(context).verticalDock
