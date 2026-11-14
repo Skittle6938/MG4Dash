@@ -242,6 +242,9 @@
     <string name="st_replace_btn">Ersetzen</string>
     <string name="valet_back_msg">Der Wartungsmodus ist aktiv: Der Original-Startbildschirm von SAIC ist der Startbildschirm.\n\nMG4Dash wieder als Startbildschirm verwenden?</string>
     <string name="valet_back_btn">MG4Dash als Start</string>
+    <string name="valet_banner_title">Wartungsmodus aktiv</string>
+    <string name="valet_banner_sub">Der Original-Startbildschirm von SAIC ist der Startbildschirm.</string>
+    <string name="valet_banner_go">Zurück zu MG4Dash</string>
     <string name="cancel">Abbrechen</string>
     <string name="temp_cal_title">Temperaturkalibrierung</string>
     <string name="temp_cal_preview">Angezeigt: %1$s</string>

@@ -680,7 +680,14 @@ object ShortcutsPanel : Application.ActivityLifecycleCallbacks {
         private var app: Context? = null
         private var strip: View? = null
 
-        fun wanted(context: Context): Boolean = Prefs(context).let { it.shortcutsMenu && it.fullscreen }
+        /**
+         * Maintenance mode included (14/11, Discussion #111): there the strip pulls no menu, a one finger slide is
+         * given back to the car's own pull-down, and a three finger slide brings [ValetBanner] to put MG4Dash back as home.
+         */
+        fun wanted(context: Context): Boolean = Prefs(context).let { it.valetMode || (it.shortcutsMenu && it.fullscreen) }
+
+        /** A one finger touch handed back to the car (maintenance mode): the strip lets touches through meanwhile. */
+        @Volatile private var relaying = false
 
         /** Published for MG4Link (Settings.Global): 1 while the strip is there, so it pulls the menu itself over its projection. */
         private const val STRIP_SETTING = "mg4dash_shortcuts_strip"
@@ -706,7 +713,7 @@ object ShortcutsPanel : Application.ActivityLifecycleCallbacks {
         private val watch = object : Runnable {
             override fun run() {
                 val v = strip ?: return
-                touchable(!projectionInFront(v.context))
+                if (!relaying) touchable(!projectionInFront(v.context))
                 main.postDelayed(this, 400)
             }
         }
@@ -748,7 +755,7 @@ object ShortcutsPanel : Application.ActivityLifecycleCallbacks {
             var startDy = 0f
             val r = object : android.content.BroadcastReceiver() {
                 override fun onReceive(ctx: Context?, i: android.content.Intent?) {
-                    if (strip == null) return
+                    if (strip == null || Prefs(c).valetMode) return
                     val dy = i?.getFloatExtra("dy", 0f) ?: 0f
                     when (i?.getStringExtra("phase")) {
                         "begin" -> if (panel == null) { val p = openPanel(c); panel = p; dragging = p; startDy = dy; Log.i(TAG, "menu pulled from MG4Link") }
@@ -821,8 +828,13 @@ object ShortcutsPanel : Application.ActivityLifecycleCallbacks {
             /** More than one finger in this touch: the menu is not pulled. */
             private var multi = false
 
+            /** Maintenance mode, read at each touch down. */
+            private var valet = false
+
             @SuppressLint("ClickableViewAccessibility")
             override fun onTouchEvent(e: MotionEvent): Boolean {
+                if (e.actionMasked == MotionEvent.ACTION_DOWN) valet = Prefs(context).valetMode
+                if (valet) return valetTouch(e)
                 when (e.actionMasked) {
                     MotionEvent.ACTION_DOWN -> { downX = e.rawX; downY = e.rawY; dragging = null; multi = false }
                     // A second finger: an app's own multi-finger gesture (MG4Link: 2 fingers from the top, 3 fingers down),
@@ -848,7 +860,73 @@ object ShortcutsPanel : Application.ActivityLifecycleCallbacks {
                 }
                 return true
             }
+
+            // ── Maintenance mode: the car's own pull-down kept, three fingers for the way back to MG4Dash ──
+
+            /** Undecided, given back to the car, three fingers down, nothing more for this touch. */
+            private var valetState = VALET_WAIT
+            private var downTime = 0L
+            private var deviceId = 0
+            private var source = android.view.InputDevice.SOURCE_TOUCHSCREEN
+            private val handBack = Runnable { if (valetState == VALET_WAIT) giveBack(null) }
+
+            private fun valetTouch(e: MotionEvent): Boolean {
+                when (e.actionMasked) {
+                    MotionEvent.ACTION_DOWN -> {
+                        downX = e.rawX; downY = e.rawY; downTime = e.downTime; deviceId = e.deviceId; source = e.source
+                        valetState = VALET_WAIT
+                        // A finger alone and still: the car's
+                        main.postDelayed(handBack, ValetGesture.WAIT_MS)
+                    }
+                    MotionEvent.ACTION_POINTER_DOWN -> if (valetState == VALET_WAIT && e.pointerCount >= 3) { valetState = VALET_THREE; main.removeCallbacks(handBack) }
+                    MotionEvent.ACTION_MOVE -> when (valetState) {
+                        VALET_WAIT -> {
+                            val dy = e.rawY - downY
+                            if (e.pointerCount == 1 && Math.abs(dy) + Math.abs(e.rawX - downX) > slop) giveBack(e)
+                            else if (e.pointerCount == 2 && dy > slop * 3) { valetState = VALET_DONE; main.removeCallbacks(handBack) }
+                        }
+                        VALET_THREE -> if (ValetGesture.isThreeFingerPull(e.rawY - downY, e.pointerCount, resources.displayMetrics.density)) {
+                            valetState = VALET_DONE
+                            Log.i(TAG, "maintenance mode: three finger slide, banner shown")
+                            ValetBanner.show(context)
+                        }
+                    }
+                    MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+                        main.removeCallbacks(handBack)
+                        // A quick tap at the very top: the car's too
+                        if (valetState == VALET_WAIT && e.actionMasked == MotionEvent.ACTION_UP) giveBack(null, tap = true)
+                        valetState = VALET_WAIT
+                    }
+                }
+                return true
+            }
+
+            /**
+             * Gives the touch back to the car: the strip lets touches through, and the same finger is pressed again on the
+             * window below (the system bar, its pull-down). Being the same touch device, the rest of the real slide then
+             * goes to that window.
+             */
+            private fun giveBack(now: MotionEvent?, tap: Boolean = false) {
+                main.removeCallbacks(handBack)
+                valetState = VALET_DONE
+                relaying = true
+                touchable(false)
+                val x = downX; val y = downY; val dev = deviceId; val src = source
+                val atX = now?.rawX; val atY = now?.rawY
+                // The window manager takes the change a moment later
+                main.postDelayed({
+                    val t = SystemClock.uptimeMillis()
+                    ValetGesture.inject(context, ValetGesture.event(t, t, MotionEvent.ACTION_DOWN, x, y, dev, src))
+                    if (atX != null && atY != null) ValetGesture.inject(context, ValetGesture.event(t, t, MotionEvent.ACTION_MOVE, atX, atY, dev, src))
+                    if (tap) ValetGesture.inject(context, ValetGesture.event(t, SystemClock.uptimeMillis(), MotionEvent.ACTION_UP, x, y, dev, src))
+                }, 40)
+                main.postDelayed({ relaying = false; touchable(!projectionInFront(context)) }, 700)
+            }
         }
+
+        private const val VALET_WAIT = 0
+        private const val VALET_THREE = 1
+        private const val VALET_DONE = 2
 
         /** The menu's window: touches beside the panel close it (the shade), a slide up on the panel closes it too. */
         @SuppressLint("ViewConstructor")

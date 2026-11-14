@@ -2314,6 +2314,7 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
             .setPositiveButton(R.string.valet_back_btn) { _, _ ->
                 val ok = HomeSwitcher.replaceStock(this)
                 Log.i("Valet", "replacing SAIC home from the offer → $ok")
+                app.mg4dash.ui.ShortcutsPanel.GlobalStrip.update(this)
                 app.mg4dash.ui.Toasts.show(this, getString(if (ok) R.string.st_home_changed else R.string.st_failed))
             }
             .setNegativeButton(R.string.cancel, null)

@@ -242,6 +242,9 @@
     <string name="st_replace_btn">Sustituir</string>
     <string name="valet_back_msg">El Modo mantenimiento está activo: el inicio original de SAIC es la pantalla de inicio.\n\n¿Volver a poner MG4Dash como pantalla de inicio?</string>
     <string name="valet_back_btn">MG4Dash como inicio</string>
+    <string name="valet_banner_title">Modo mantenimiento activo</string>
+    <string name="valet_banner_sub">El inicio original de SAIC es la pantalla de inicio.</string>
+    <string name="valet_banner_go">Volver a MG4Dash</string>
     <string name="cancel">Cancelar</string>
     <string name="temp_cal_title">Calibración de la temperatura</string>
     <string name="temp_cal_preview">Mostrado: %1$s</string>
