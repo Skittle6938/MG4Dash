@@ -294,6 +294,12 @@ object Themes {
     /** Text over [bg]: black on a light colour, white on a dark one. */
     fun on(bg: Int): Int = if (androidx.core.graphics.ColorUtils.calculateLuminance(bg) > 0.45) 0xFF000000.toInt() else 0xFFFFFFFF.toInt()
 
+    /** A colour attribute of the current theme ([fallback] if the theme does not set it). */
+    fun attr(context: Context, attr: Int, fallback: Int): Int {
+        val tv = TypedValue()
+        return if (context.theme.resolveAttribute(attr, tv, true) && tv.type in TypedValue.TYPE_FIRST_COLOR_INT..TypedValue.TYPE_LAST_COLOR_INT) tv.data else fallback
+    }
+
     /** Selection colour (active chips) of the current theme. */
     fun select(context: Context): Int {
         val tv = TypedValue()
