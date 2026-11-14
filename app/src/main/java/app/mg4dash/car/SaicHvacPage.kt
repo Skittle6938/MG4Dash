@@ -12,12 +12,15 @@ import app.mg4dash.system.Log
  * SAIC climate page of old firmwares (#62): "hvac page" window of the system UI, opened by
  * the climate key under the screen (288) or when the climate is turned on. No setting disables it; it is
  * closed as SystemUI itself does, through its exported StartActivityService (transaction 2 =
- * stopHVAC). Found in the SWI68, SWI133 and XPower SystemUI; absent on SWI69.
+ * stopHVAC). Found in the SWI68, SWI133 and XPower SystemUI; absent on SWI69. SWI68 R59, R63, R69 and R73
+ * (#112) answer as com.saicmotor.sdk.external.IPageService, whose transaction 2 is closeHvac, the same close.
  */
 object SaicHvacPage {
     private const val TAG = "HvacPage"
     private const val ACTION = "com.android.systemui.saicmotor.action.StartActivity"
     private const val DESCRIPTOR = "com.android.systemui.IStartActivityService"
+    /** SWI68 R59 to R73 (#112): openHvac = 1, closeHvac = 2, no arguments, checked in their SystemUI. */
+    private const val PAGE_SERVICE = "com.saicmotor.sdk.external.IPageService"
     private const val TX_STOP_HVAC = 2
 
     @Volatile private var binder: IBinder? = null
@@ -25,12 +28,13 @@ object SaicHvacPage {
     @Volatile private var descriptor: String? = DESCRIPTOR
 
     /**
-     * Name to send for [actual], the service's own: it, when it is a StartActivityService under another package;
+     * Name to send for [actual], the service's own: it, when it is a StartActivityService under another package or
+     * the IPageService of SWI68 R59 to R73 (transaction 2 = closeHvac);
      * null when it is another interface, so that transaction 2 calls nothing else. Unknown: the usual name.
      */
     internal fun descriptorFor(actual: String?): String? = when {
         actual == null || actual.isEmpty() -> DESCRIPTOR
-        actual == DESCRIPTOR || actual.substringAfterLast('.') == "IStartActivityService" -> actual
+        actual == DESCRIPTOR || actual == PAGE_SERVICE || actual.substringAfterLast('.') == "IStartActivityService" -> actual
         else -> null
     }
     @Volatile private var binding = false

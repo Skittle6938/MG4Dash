@@ -14,10 +14,13 @@ class SaicHvacPageTest {
         assertEquals("com.saicmotor.systemui.IStartActivityService", SaicHvacPage.descriptorFor("com.saicmotor.systemui.IStartActivityService"))
         assertEquals("unknown: the usual name", usual, SaicHvacPage.descriptorFor(null))
         assertEquals(usual, SaicHvacPage.descriptorFor(""))
+        // SWI68 R59 to R73 (#112): IPageService, transaction 2 = closeHvac
+        assertEquals("com.saicmotor.sdk.external.IPageService", SaicHvacPage.descriptorFor("com.saicmotor.sdk.external.IPageService"))
     }
 
     @Test fun anotherInterfaceGetsNothing() {
         assertNull("transaction 2 could be anything there", SaicHvacPage.descriptorFor("com.android.systemui.IHvacService"))
+        assertNull(SaicHvacPage.descriptorFor("com.saicmotor.sdk.external.IOtherService"))
         assertNull(SaicHvacPage.descriptorFor("com.android.systemui.IStartActivityServiceV2"))
     }
 }
