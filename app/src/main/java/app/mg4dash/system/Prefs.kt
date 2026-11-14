@@ -222,6 +222,10 @@ class Prefs(context: Context) {
     var powerFx: Int
         get() = sp.getInt("power_fx", 4)
         set(v) = sp.edit().putInt("power_fx", v).apply()
+    /** Volume of the full power animations' sounds, in % (Settings › Look, under the animation). */
+    var fxVolume: Int
+        get() = sp.getInt("fx_volume", app.mg4dash.ui.FxSound.DEFAULT_VOLUME)
+        set(v) = sp.edit().putInt("fx_volume", v.coerceIn(0, 100)).apply()
 
     /**
      * "Power" energy card (#29): live power bar in the energy card, without

@@ -1042,6 +1042,37 @@ class SettingsActivity : AppCompatActivity() {
         line.addView(View(this), LinearLayout.LayoutParams(0, 1, 1f).apply { leftMargin = dp(10) })
         parent.addView(line, LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(10) })
         text(parent, getString(R.string.st_power_fx_desc), 16f, R.color.text_title)
+        fxVolumeSetting(parent)
+    }
+
+    /** Volume of the animations' sounds (whoosh, crackle, fire): one bar for all, a short trial when let go. */
+    private fun fxVolumeSetting(parent: LinearLayout) {
+        val header = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL }
+        header.addView(TextView(this).apply {
+            text = getString(R.string.st_fx_volume)
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f)
+            setTextColor(color(R.color.text_value))
+        }, LinearLayout.LayoutParams(0, -2, 1f))
+        val value = TextView(this).apply { setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f); setTextColor(color(R.color.accent_action)) }
+        header.addView(value)
+        fun show(v: Int) { value.text = if (v == 0) getString(R.string.st_fx_volume_off) else "$v %" }
+        val slider = SeekBar(this).apply {
+            max = 100
+            progress = prefs.fxVolume
+            progressTintList = android.content.res.ColorStateList.valueOf(color(R.color.accent_action))
+            thumbTintList = android.content.res.ColorStateList.valueOf(color(R.color.accent_action))
+        }
+        show(prefs.fxVolume)
+        slider.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) = show(progress)
+            override fun onStartTrackingTouch(seekBar: SeekBar) = Unit
+            override fun onStopTrackingTouch(seekBar: SeekBar) {
+                prefs.fxVolume = seekBar.progress
+                app.mg4dash.ui.FxSound.play(this@SettingsActivity, app.mg4dash.ui.PowerFx.LIGHTNING, seekBar.progress)
+            }
+        })
+        parent.addView(header, LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(16) })
+        parent.addView(slider, LinearLayout.LayoutParams(-1, dp(48)))
     }
 
     private fun confirmReplace() {

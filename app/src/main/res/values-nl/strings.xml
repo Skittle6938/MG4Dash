@@ -941,4 +941,6 @@
     <string name="sc_all_off">Alles uit</string>
     <string name="sc_close">Sluiten</string>
     <string name="tu_cards_3">Los venster: dubbeltikken zet het terug; lang drukken › Verplaatsen / formaat wijzigen, dan OK.</string>
+    <string name="st_fx_volume">Volume van de geluidseffecten</string>
+    <string name="st_fx_volume_off">Uit</string>
 </resources>
