@@ -25,7 +25,7 @@ class Kit(private val c: Context) {
          * Width kept free at the top left of the screens: [FOG_SAFE_DP] while MG's fog light button is there, the
          * normal margin (20 dp) when the shortcuts menu hides it.
          */
-        fun fogSafeDp(context: Context): Int = if (app.mg4dash.system.Prefs(context).shortcutsMenu) 20 else FOG_SAFE_DP
+        fun fogSafeDp(context: Context): Int = if (app.mg4dash.system.FogOverlay.hides(context)) 20 else FOG_SAFE_DP
     }
 
     /** Single choice selector (chips); returns the row and an update function. */

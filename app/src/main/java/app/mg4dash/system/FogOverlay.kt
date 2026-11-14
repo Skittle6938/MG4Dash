@@ -14,6 +14,12 @@ import java.io.File
  *
  * The setting switches the overlay on or off (IOverlayManager, allowed for the system uid). SystemUI builds the
  * button once, at its start: the change shows at the head unit's next start.
+ *
+ * The overlay's two ImageViews carry the numeric ids of the SystemUI it was built against (SWI69, A9_Systemui
+ * V1.0.0.222). Another SystemUI numbers them differently (SWI173 .153: img_front_lamp 0x7f0800b6): its FloatBallView
+ * then finds no front lamp, a NullPointerException at SystemUI's start, again and again, and the head unit restarts
+ * (#113). So the overlay is only installed and enabled when this SystemUI's ids are the overlay's, and is disabled
+ * everywhere else; the fog light button then stays, its corner kept free as before.
  */
 object FogOverlay {
     private const val TAG = "FogOverlay"
@@ -21,11 +27,40 @@ object FogOverlay {
     private const val BUNDLED_VERSION = 1L
     private const val ASSET = "overlay_nofog.apk"
     private const val USER = 0
+    private const val SYSTEMUI = "com.android.systemui"
+    /** The ids compiled into the overlay's layout_ball (SWI69's SystemUI). */
+    internal const val FRONT_ID = 0x7f0800b8
+    internal const val REAR_ID = 0x7f0800ba
+
+    /** The overlay fits a SystemUI whose img_front_lamp and img_rear_lamp are [front] and [rear]; 0: not found. */
+    internal fun idsMatch(front: Int, rear: Int) = front == FRONT_ID && rear == REAR_ID
+
+    @Volatile private var fits: Boolean? = null
+
+    /** This head unit's SystemUI has the overlay's ids (read once); false when they cannot be read. */
+    fun fits(context: Context): Boolean {
+        if (BuildConfig.MOCK) return true
+        fits?.let { return it }
+        val r = try {
+            val res = context.packageManager.getResourcesForApplication(SYSTEMUI)
+            val front = res.getIdentifier("img_front_lamp", "id", SYSTEMUI)
+            val rear = res.getIdentifier("img_rear_lamp", "id", SYSTEMUI)
+            idsMatch(front, rear).also {
+                if (!it) Log.i(TAG, "SystemUI ids front 0x${Integer.toHexString(front)} rear 0x${Integer.toHexString(rear)}: the overlay does not fit this SystemUI, fog light button left (#113)")
+            }
+        } catch (e: Exception) { Log.w(TAG, "SystemUI ids unreadable: ${e.message}"); false }
+        fits = r
+        return r
+    }
+
+    /** MG's fog light button hidden: the shortcuts menu on and an overlay that fits this SystemUI. */
+    fun hides(context: Context): Boolean = Prefs(context).shortcutsMenu && fits(context)
 
     /** At launch (off the main thread): installs the overlay if needed, then follows the setting. */
     fun start(context: Context) {
         if (BuildConfig.MOCK) return
-        Thread { try { if (ensureInstalled(context)) apply(context) } catch (e: Exception) { Log.w(TAG, "start: ${e.message}") } }.start()
+        // Not fitting this SystemUI: never installed, and disabled if an earlier version enabled it (#113)
+        Thread { try { if (!fits(context) || ensureInstalled(context)) apply(context) } catch (e: Exception) { Log.w(TAG, "start: ${e.message}") } }.start()
     }
 
     /** Setting changed: the overlay follows it (effective at the next start of the head unit). */
@@ -34,13 +69,14 @@ object FogOverlay {
         Thread { apply(context) }.start()
     }
 
-    /** Overlay on with the shortcuts menu, off without it. */
+    /** Overlay on with the shortcuts menu where it fits this SystemUI, off otherwise. */
     fun apply(context: Context) {
-        val on = Prefs(context).shortcutsMenu
+        val on = hides(context)
         val om = manager() ?: return
         try {
             val cur = enabled(om)
-            if (cur == on) return
+            // Not installed (null) and not wanted: nothing to do
+            if (cur == on || (cur == null && !on)) return
             om.javaClass.getMethod("setEnabled", String::class.java, Boolean::class.javaPrimitiveType, Int::class.javaPrimitiveType)
                 .invoke(om, PKG, on, USER)
             Log.i(TAG, "overlay ${if (on) "enabled" else "disabled"} (was $cur): effective at the next start of SystemUI")
