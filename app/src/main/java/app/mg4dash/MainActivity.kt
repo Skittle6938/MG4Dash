@@ -759,6 +759,8 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
     /** HOME pressed while already home: nothing is recreated, the map goes back to its widget size. */
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
+        // Home key while home is shown: the shortcuts menu closes too (Marc, 14/11)
+        if (intent?.hasCategory(Intent.CATEGORY_HOME) == true) app.mg4dash.ui.ShortcutsPanel.closeAll()
         if (!simpleMode) setMapFullscreen(false)
         if (intent?.getBooleanExtra(app.mg4dash.ui.Tutorial.EXTRA_SHOW, false) == true) b.root.post { app.mg4dash.ui.Tutorial.show(this) }
         if (intent?.getBooleanExtra(app.mg4dash.ui.CardsEditor.EXTRA_EDIT, false) == true) b.root.post { editCards() }

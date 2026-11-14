@@ -102,6 +102,13 @@ class ShortcutsMenuTest {
         assertFalse("greyed (lights off)", ShortcutTiles.lit(Tile.FOG, ShortcutTiles.Shown("Lights off", false, disabled = true)))
     }
 
+    @Test fun theHomeKeyClosesTheMenu() {
+        assertTrue(app.mg4dash.ui.ShortcutsPanel.closesOn("homekey"))
+        assertTrue(app.mg4dash.ui.ShortcutsPanel.closesOn("recentapps"))
+        assertFalse("a dialog of an app closing: the menu stays", app.mg4dash.ui.ShortcutsPanel.closesOn(null))
+        assertFalse(app.mg4dash.ui.ShortcutsPanel.closesOn("dream"))
+    }
+
     @Test fun rearFogStillOffAfterThePressSaysToTurnTheDippedBeamOn() {
         // #38, SWI69: with the parking lights only the car ignores the press; with the dipped beam it answers in 0.34 s
         assertTrue("still off: refused", ShortcutTiles.fogRefused(0))

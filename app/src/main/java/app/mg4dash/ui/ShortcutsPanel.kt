@@ -67,7 +67,21 @@ object ShortcutsPanel : Application.ActivityLifecycleCallbacks {
     /** Last states read, to show the panel at once (the car is read again in the background). */
     private val lastShown = HashMap<Tile, ShortcutTiles.Shown>()
 
-    fun init(application: Application) { application.registerActivityLifecycleCallbacks(this) }
+    fun init(application: Application) {
+        application.registerActivityLifecycleCallbacks(this)
+        // The car's Home key (Marc, 14/11) closes the menu, wherever it was pulled (over MG4Dash or another app):
+        // Android tells the system dialogs to close ("homekey"), and MainActivity gets the HOME intent too
+        try {
+            application.registerReceiver(object : android.content.BroadcastReceiver() {
+                override fun onReceive(c: Context, i: android.content.Intent) {
+                    if (closesOn(i.getStringExtra("reason")) && panel != null) { Log.i(TAG, "menu closed: ${i.getStringExtra("reason")}"); closeAll() }
+                }
+            }, android.content.IntentFilter(android.content.Intent.ACTION_CLOSE_SYSTEM_DIALOGS))
+        } catch (e: Exception) { Log.w(TAG, "home key: ${e.message}") }
+    }
+
+    /** System dialogs closed for this [reason]: Home key, recent apps or the assistant close the menu; the others not. */
+    internal fun closesOn(reason: String?): Boolean = reason == "homekey" || reason == "recentapps" || reason == "assist"
 
     private fun enabled(context: Context) = Prefs(context).shortcutsMenu
 
