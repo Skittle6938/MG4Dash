@@ -765,8 +765,8 @@
     <string name="tu_energy_2">Cable conectado: su botón inicia o detiene la carga, o el V2L.</string>
     <string name="tu_map_t">Mapa, web app y apps</string>
     <string name="tu_map_1">Desliza a izquierda / derecha: siguiente tarjeta del lugar.</string>
-    <string name="tu_map_3">Web app o app: un toque la despierta (borde iluminado) y luego se usa; pulsación larga: su menú.</string>
-    <string name="tu_map_2">Mapa: dos dedos para moverlo y ampliarlo. Doble toque: pantalla completa y vuelta.</string>
+    <string name="tu_map_3">Doble toque: pantalla completa y vuelta. Pulsación larga: su menú.</string>
+    <string name="tu_map_2">Mapa, web app o app: un toque lo despierta (borde iluminado) y luego se usa con un dedo.</string>
     <string name="tu_media_t">Música</string>
     <string name="tu_media_1">Desliza arriba / abajo: fuente; izquierda / derecha: pista.</string>
     <string name="tu_media_2">Toca el nombre de la fuente: lista de fuentes; la imagen: abrir su app.</string>

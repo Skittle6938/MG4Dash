@@ -30,7 +30,7 @@ class MapCard(private val context: Context, holder: ViewGroup) {
     private var preview: android.view.View? = null
     private var follow = true
     private var lastTouch = 0L
-    /** One finger moves the map: in full screen; as a widget, it swipes between the pages. */
+    /** One finger moves the map: awake, in full screen or in its window; otherwise (edit mode) it is left to the swipes. */
     var oneFingerPan = false
 
     /** Double tap on the map: full screen and back (#98), instead of osmdroid's zoom. */
@@ -97,7 +97,7 @@ class MapCard(private val context: Context, holder: ViewGroup) {
                     if (ev.actionMasked == MotionEvent.ACTION_UP || ev.actionMasked == MotionEvent.ACTION_CANCEL) doubled = false
                     return@setOnTouchListener true
                 }
-                // Widget: one finger is for the swipe between its pages, two fingers move and zoom the map
+                // At rest home takes the touches (swipe between cards, a touch wakes it, #98); here, the edit mode's swipes
                 if (ev.actionMasked == MotionEvent.ACTION_MOVE && ev.pointerCount == 1 && !oneFingerPan) return@setOnTouchListener true
                 when (ev.actionMasked) {
                     MotionEvent.ACTION_DOWN -> { downX = ev.x; downY = ev.y }

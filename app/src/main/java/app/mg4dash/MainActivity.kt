@@ -479,10 +479,11 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
     private fun slotSwipes(f: SlotFrame) = f.cards.size >= 2 && hiddenForMap == null && !covering(f)
 
     /**
-     * A web page or an app fills the card and takes its touches (#41, #97). The App card in its window over home
-     * (#98) too, even on the map: its view is in the window, out of its place's swipes, so it rests as an app.
+     * A web page, an app or the map fills the card and takes its touches once woken (#41, #97, #98): at rest a
+     * one-finger swipe changes card, a touch wakes it. The map too (Marc, 14/11), as the web app and the apps:
+     * no more two fingers to move it.
      */
-    private fun covering(f: SlotFrame) = f.shown == Card.WEB || f.shown == Card.MAP && (mapAppView?.visibility == View.VISIBLE || floatMap != null)
+    private fun covering(f: SlotFrame) = restsUntilTouched(f.shown)
 
     /** The page or the app of [f] gone (another card shown): it is at rest again. */
     private fun updateToggle(f: SlotFrame) {
@@ -514,7 +515,8 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
             awake = f
             floatWeb?.dockOutline(f?.shown == Card.WEB)
             // The App card's window in its card (#98): its outline lit as the web app's, and the map moved with one finger while awake
-            floatMap?.takeIf { !it.floating }?.let { fm -> fm.dockOutline(f?.shown == Card.MAP); mapCard.oneFingerPan = f?.shown == Card.MAP }
+            floatMap?.takeIf { !it.floating }?.dockOutline(f?.shown == Card.MAP)
+            syncMapPan()
             app.mg4dash.system.Log.i("Rest", if (f == null) "page or app at rest" else "${f.shown} awake")
         }
         if (f != null) handler.postDelayed(sleep, prefs.webWakeSeconds * 1000L)
@@ -564,10 +566,25 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         return pressTaken.also { if (ev.actionMasked == android.view.MotionEvent.ACTION_UP || ev.actionMasked == android.view.MotionEvent.ACTION_CANCEL) pressTaken = false }
     }
 
-    /** Touches on a page or an app at rest: true when taken here, the page seeing none of them. */
+    /**
+     * One finger moves the map while it is awake, in full screen or in its window over home; at rest its
+     * touches are taken by [restTouch] (swipe between cards, a touch wakes it).
+     */
+    private fun syncMapPan() {
+        mapCard.oneFingerPan = awake?.shown == Card.MAP || hiddenForMap != null || floatMap?.floating == true
+    }
+
+    /** The map's recentre button, which works at rest too. */
+    private fun onMapButton(ev: android.view.MotionEvent): Boolean {
+        if (b.mapButtons.visibility != View.VISIBLE || !b.mapButtons.isShown) return false
+        val r = android.graphics.Rect(); b.mapButtons.getGlobalVisibleRect(r)
+        return r.contains(ev.rawX.toInt(), ev.rawY.toInt())
+    }
+
+    /** Touches on a page, an app or the map at rest: true when taken here, the page seeing none of them. */
     private fun restTouch(ev: android.view.MotionEvent): Boolean {
         if (ev.actionMasked == android.view.MotionEvent.ACTION_DOWN) {
-            restFrame = frames.values.firstOrNull { covering(it) && it !== awake && inBox(it, ev) }
+            restFrame = frames.values.firstOrNull { covering(it) && it !== awake && inBox(it, ev) }?.takeUnless { it.shown == Card.MAP && onMapButton(ev) }
             restX = ev.rawX; restY = ev.rawY; restMulti = false
             // Awake: each touch keeps it awake
             awake?.let { if (inBox(it, ev)) setAwake(it) }
@@ -1264,7 +1281,7 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
             unalignFromBar()
             columnsRow.requestLayout()
         }
-        mapCard.oneFingerPan = on
+        syncMapPan()
         // The card's top moves with the bar's (#98): an embedded page or app gets its layer again at the new place,
         // once the new size's surface is made (on the car, the layer stayed lower than the bar's top)
         if (barMoved) {
@@ -1409,7 +1426,7 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         prefs.mapFloating = true
         fw.setFloating(true)
         applySlots()
-        mapCard.oneFingerPan = true
+        syncMapPan()
         cardShown(Card.MAP, true)
     }
 
@@ -1420,7 +1437,7 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         prefs.mapFloating = false
         fw.setFloating(false)
         fw.front(false)
-        mapCard.oneFingerPan = false
+        syncMapPan()
         HomeSlots.load(prefs, slotLayout, unavailable()).slotOf(Card.MAP)?.let { HomeSlots.setCurrent(prefs, slotLayout, it, Card.MAP) }
         applySlots()
     }
@@ -2295,13 +2312,15 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
 
     private fun color(res: Int) = app.mg4dash.ui.Themes.color(this, res)
     private fun dp(v: Int) = (v * resources.displayMetrics.density).toInt()
-    private companion object {
-        const val KEY_MAP_FULL = "map_full"
+    internal companion object {
+        /** What waits for a touch before taking the touches: the web app, an app and the map (Marc, 14/11). */
+        internal fun restsUntilTouched(shown: Card?) = shown == Card.WEB || shown == Card.MAP
+        private const val KEY_MAP_FULL = "map_full"
         /** Width of the consumption's logo, in text sizes: before the kWh/100, before the km (#29). */
-        const val CONS_ICON = 0.8f
-        const val RANGE_ICON = 0.66f
+        private const val CONS_ICON = 0.8f
+        private const val RANGE_ICON = 0.66f
         /** The card's kWh/100 read again every 10 s, as the owner of #29 asked: steady while driving. */
-        const val CONS_REFRESH_MS = 10_000L
+        private const val CONS_REFRESH_MS = 10_000L
         /** Map full screen to restore after a recreation (in addition to the saved state). */
         var mapFullOnRecreate = false
     }

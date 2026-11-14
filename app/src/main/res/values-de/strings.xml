@@ -765,8 +765,8 @@
     <string name="tu_energy_2">Kabel eingesteckt: die Taste startet oder stoppt das Laden oder V2L.</string>
     <string name="tu_map_t">Karte, Web-App und Apps</string>
     <string name="tu_map_1">Nach links / rechts wischen: nächste Karte des Platzes.</string>
-    <string name="tu_map_3">Web-App oder App: einmal tippen weckt sie (leuchtender Rand), dann bedienen; lang drücken: ihr Menü.</string>
-    <string name="tu_map_2">Karte: zwei Finger zum Bewegen und Zoomen. Doppelt tippen: Vollbild und zurück.</string>
+    <string name="tu_map_3">Doppelt tippen: Vollbild und zurück. Lang drücken: ihr Menü.</string>
+    <string name="tu_map_2">Karte, Web-App oder App: einmal tippen weckt sie (leuchtender Rand), dann mit einem Finger bedienen.</string>
     <string name="tu_media_t">Musik</string>
     <string name="tu_media_1">Nach oben / unten wischen: Quelle; links / rechts: Titel.</string>
     <string name="tu_media_2">Quellennamen tippen: Liste der Quellen; das Bild: ihre App öffnen.</string>

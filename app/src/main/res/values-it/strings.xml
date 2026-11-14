@@ -765,8 +765,8 @@
     <string name="tu_energy_2">Cavo collegato: il suo pulsante avvia o ferma la ricarica, o il V2L.</string>
     <string name="tu_map_t">Mappa, web app e app</string>
     <string name="tu_map_1">Scorri a sinistra / destra: scheda successiva del posto.</string>
-    <string name="tu_map_3">Web app o app: un tocco la risveglia (bordo illuminato), poi usala; pressione lunga: il suo menu.</string>
-    <string name="tu_map_2">Mappa: due dita per spostarla e ingrandirla. Doppio tocco: schermo intero e ritorno.</string>
+    <string name="tu_map_3">Doppio tocco: schermo intero e ritorno. Pressione lunga: il suo menu.</string>
+    <string name="tu_map_2">Mappa, web app o app: un tocco la risveglia (bordo illuminato), poi usala con un dito.</string>
     <string name="tu_media_t">Musica</string>
     <string name="tu_media_1">Scorri su / giù: sorgente; sinistra / destra: brano.</string>
     <string name="tu_media_2">Tocca il nome della sorgente: elenco delle sorgenti; l\'immagine: apri la sua app.</string>

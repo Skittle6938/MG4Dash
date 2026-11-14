@@ -765,8 +765,8 @@
     <string name="tu_energy_2">Plugged in: its button starts or stops charging, or V2L.</string>
     <string name="tu_map_t">Map, web app and apps</string>
     <string name="tu_map_1">Swipe left / right: next card of the place.</string>
-    <string name="tu_map_3">Web app or app: touch once to wake it (lit outline), then use it; long press: its menu.</string>
-    <string name="tu_map_2">Map: two fingers to move and zoom. Double tap: full screen and back.</string>
+    <string name="tu_map_3">Double tap: full screen and back. Long press: its menu.</string>
+    <string name="tu_map_2">Map, web app or app: touch once to wake it (lit outline), then use it with one finger.</string>
     <string name="tu_media_t">Music</string>
     <string name="tu_media_1">Swipe up / down: source; left / right: track.</string>
     <string name="tu_media_2">Touch the source name: list of sources; the picture: open its app.</string>
