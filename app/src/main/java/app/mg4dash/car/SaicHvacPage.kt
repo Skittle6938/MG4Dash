@@ -29,7 +29,7 @@ object SaicHvacPage {
      * null when it is another interface, so that transaction 2 calls nothing else. Unknown: the usual name.
      */
     internal fun descriptorFor(actual: String?): String? = when {
-        actual.isNullOrEmpty() -> DESCRIPTOR
+        actual == null || actual.isEmpty() -> DESCRIPTOR
         actual == DESCRIPTOR || actual.substringAfterLast('.') == "IStartActivityService" -> actual
         else -> null
     }
