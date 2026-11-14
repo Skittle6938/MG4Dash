@@ -35,6 +35,8 @@
     <!-- App embedded in the map: forced immersive mode (policy_control) -->
     <uses-permission android:name="android.permission.WRITE_SECURE_SETTINGS" />
     <uses-permission android:name="android.permission.REORDER_TASKS" />
+    <!-- Maintenance mode: a one finger touch at the very top handed back to the car's pull-down (ValetGesture) -->
+    <uses-permission android:name="android.permission.INJECT_EVENTS" tools:ignore="ProtectedPermissions" />
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
     <!-- Talk with MG4Dash Web, the Web app card's page (keyboard, card shown or hidden, #98) -->
     <uses-permission android:name="app.mg4dash.web.permission.TALK" />

@@ -242,6 +242,9 @@
     <string name="st_replace_btn">Sostituisci</string>
     <string name="valet_back_msg">La Modalità manutenzione è attiva: la home originale SAIC è la schermata iniziale.\n\nRimettere MG4Dash come schermata iniziale?</string>
     <string name="valet_back_btn">MG4Dash come home</string>
+    <string name="valet_banner_title">Modalità manutenzione attiva</string>
+    <string name="valet_banner_sub">La home originale SAIC è la schermata iniziale.</string>
+    <string name="valet_banner_go">Torna a MG4Dash</string>
     <string name="cancel">Annulla</string>
     <string name="temp_cal_title">Calibrazione della temperatura</string>
     <string name="temp_cal_preview">Visualizzato: %1$s</string>

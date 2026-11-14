@@ -1051,6 +1051,7 @@ class SettingsActivity : AppCompatActivity() {
             .setPositiveButton(R.string.st_replace_btn) { _, _ ->
                 val ok = HomeSwitcher.replaceStock(this)
                 Log.i("Valet", "replacing SAIC home → $ok")
+                app.mg4dash.ui.ShortcutsPanel.GlobalStrip.update(this)
                 refreshHome(); toastState(ok)
             }
             .setNegativeButton(R.string.cancel, null)
@@ -1066,6 +1067,7 @@ class SettingsActivity : AppCompatActivity() {
                 // Phone connection cut by a long press: restored for the dealership
                 app.mg4dash.system.ConnectionToggle.restore(this)
                 Log.i("Valet", "Maintenance mode → $ok")
+                app.mg4dash.ui.ShortcutsPanel.GlobalStrip.update(this)
                 refreshHome(); toastState(ok)
             }
             .setNegativeButton(R.string.cancel, null)

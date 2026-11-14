@@ -242,6 +242,9 @@
     <string name="st_replace_btn">Vervangen</string>
     <string name="valet_back_msg">De Onderhoudsmodus staat aan: het originele SAIC-startscherm is het startscherm.\n\nMG4Dash weer als startscherm gebruiken?</string>
     <string name="valet_back_btn">MG4Dash als start</string>
+    <string name="valet_banner_title">Onderhoudsmodus aan</string>
+    <string name="valet_banner_sub">Het originele SAIC-startscherm is het startscherm.</string>
+    <string name="valet_banner_go">Terug naar MG4Dash</string>
     <string name="cancel">Annuleren</string>
     <string name="temp_cal_title">Temperatuurkalibratie</string>
     <string name="temp_cal_preview">Weergegeven: %1$s</string>
