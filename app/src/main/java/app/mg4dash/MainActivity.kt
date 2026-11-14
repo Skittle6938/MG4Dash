@@ -734,6 +734,7 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         mapAppCn?.let { if (!mapAppInstalled(it)) refreshMap() }
         app.mg4dash.ui.UpdatePrompt.maybeShow(this)
         app.mg4dash.ui.DataAlert.attach(this)
+        offerHomeBack()
         if (simpleMode) { simple?.onResume(); Fullscreen.apply(this); return }
         mapCard.onResume()
         if (isShown(Card.WEB) || webDetached) webCard?.show()
@@ -776,6 +777,7 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
     /** HOME pressed while already home: nothing is recreated, the map goes back to its widget size. */
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
+        homeBackAsked = false   // opened again (MG4Link's shortcut, adb…): offered again in maintenance mode
         // Home key while home is shown: the shortcuts menu closes too (Marc, 14/11)
         if (intent?.hasCategory(Intent.CATEGORY_HOME) == true) app.mg4dash.ui.ShortcutsPanel.closeAll()
         if (!simpleMode) setMapFullscreen(false)
@@ -2289,6 +2291,33 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
 
     private fun renderWeatherFallbackOnly() {
         if (WeatherRepo.shown.value == null) renderWeather(null, CarBridge.state.value)
+    }
+
+    // ── Maintenance mode: back to MG4Dash as home ────────────────
+
+    private var homeBackAsked = false
+    private var homeBackDialog: AlertDialog? = null
+
+    /**
+     * Opened while Maintenance mode is on (Ciro, Discussion #111: "how do I get back to MG4Dash?"): MG4Dash is not
+     * in the SAIC app list, so it is opened by MG4Link's "Open MG4Dash", adb or another app. It then offers at
+     * once to be the home screen again, instead of the gear › System › Replace SAIC home path. Once per opening.
+     */
+    private fun offerHomeBack() {
+        if (BuildConfig.MOCK || homeBackAsked || homeBackDialog?.isShowing == true) return
+        if (!prefs.valetMode || HomeSwitcher.currentHome(this) == HomeSwitcher.ours(this)) return
+        homeBackAsked = true
+        Log.i("Valet", "opened in Maintenance mode: offering MG4Dash as home again")
+        homeBackDialog = AlertDialog.Builder(this)
+            .setTitle(R.string.st_valet)
+            .setMessage(R.string.valet_back_msg)
+            .setPositiveButton(R.string.valet_back_btn) { _, _ ->
+                val ok = HomeSwitcher.replaceStock(this)
+                Log.i("Valet", "replacing SAIC home from the offer → $ok")
+                app.mg4dash.ui.Toasts.show(this, getString(if (ok) R.string.st_home_changed else R.string.st_failed))
+            }
+            .setNegativeButton(R.string.cancel, null)
+            .show().also { app.mg4dash.ui.Dialogs.fix(it) }
     }
 
     // ── Startup: let the SAIC launcher register its interface ────────────────

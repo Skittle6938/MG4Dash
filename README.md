@@ -340,7 +340,7 @@ The SAIC launcher package (`com.saicmotor.launcher`) is never disabled: its serv
 
 1. Tap the **gear** (Settings) in the side bar, then the **System** tab.
 2. Under **HOME SCREEN**, tap **Replace SAIC home** and confirm. MG4Dash now opens at startup and with the car's Home button.
-3. **Back to the original** at any time (dealer visit, a problem, before uninstalling): same place, tap **Maintenance mode** and confirm. The SAIC home screen is the home screen again, exactly as before (a phone connection cut with the Android Auto button is restored too). Tap **Replace SAIC home** to come back to MG4Dash.
+3. **Back to the original** at any time (dealer visit, a problem, before uninstalling): same place, tap **Maintenance mode** and confirm. The SAIC home screen is the home screen again, exactly as before (a phone connection cut with the Android Auto button is restored too). To come back to MG4Dash, open it (MG4Dash is not in the SAIC app list: MG4Link's *Open MG4Dash*, adb `am start -n app.mg4dash/.MainActivity`, or another app): in Maintenance mode it offers at once to be the home screen again. Or tap **Replace SAIC home** here.
 
 **Nothing is uninstalled or deleted.** *Replace SAIC home* only switches off the SAIC home screen *as the home screen*: the SAIC launcher app stays installed, and its service keeps running the camera, audio sources and system bar as usual. The rest of the car is not touched. *Maintenance mode* switches the SAIC home screen back on in one tap. And if MG4Dash ever crashed 3 times within 3 minutes, the SAIC home screen would come back by itself.
 
