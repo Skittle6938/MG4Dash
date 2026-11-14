@@ -2296,7 +2296,7 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
     // ── Maintenance mode: back to MG4Dash as home ────────────────
 
     private var homeBackAsked = false
-    private var homeBackDialog: AlertDialog? = null
+    private var homeBackDialog: android.app.AlertDialog? = null
 
     /**
      * Opened while Maintenance mode is on (Ciro, Discussion #111: "how do I get back to MG4Dash?"): MG4Dash is not
@@ -2308,7 +2308,7 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         if (!prefs.valetMode || HomeSwitcher.currentHome(this) == HomeSwitcher.ours(this)) return
         homeBackAsked = true
         Log.i("Valet", "opened in Maintenance mode: offering MG4Dash as home again")
-        homeBackDialog = AlertDialog.Builder(this)
+        homeBackDialog = android.app.AlertDialog.Builder(this)
             .setTitle(R.string.st_valet)
             .setMessage(R.string.valet_back_msg)
             .setPositiveButton(R.string.valet_back_btn) { _, _ ->
