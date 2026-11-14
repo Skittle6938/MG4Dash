@@ -665,19 +665,9 @@
     <string name="st_edit_cards">Schede dei widget</string>
     <string name="st_edit_cards_desc">Scegliere le schede di ogni widget, come la scheda App (la mappa o un\'altra app) e una web app. Scorciatoia: pizzicare la schermata home con due dita.</string>
     <string name="st_edit_cards_btn">Modifica le schede</string>
-    <string name="tu_cards_t">Scegliere e spostare le schede</string>
-    <string name="tu_cards_1">Pizzica la schermata home con due dita: ogni posto mostra le sue schede; un posto medio può mostrare anche il clima o i media</string>
-    <string name="tu_cards_2">Tocca una scheda per mostrarla o toglierla; presa altrove, cambia posto. Predefinito rimette tutto com\'era all\'inizio</string>
-    <string name="tu_float_t">Finestre staccate</string>
-    <string name="tu_float_1">La web app e la scheda App (la mappa o la sua app) possono lasciare il loro posto: pizzica la schermata Home, tocca il loro posto, poi Doppio tocco › Finestra staccata</string>
-    <string name="tu_float_2">Poi un doppio tocco la stacca come finestra sopra la Home; un doppio tocco sulla finestra la rimette nella sua scheda</string>
-    <string name="tu_float_3">A riposo la finestra riceve i tuoi gesti, non la pagina: toccala una volta per svegliarla (bordo acceso), poi usa la pagina o l\'app</string>
-    <string name="tu_float_4">Pressione lunga sulla finestra: il suo menu (Indietro, Sposta / ridimensiona, cosa mostra)</string>
-    <string name="tu_move_t">Spostare e ridimensionare una finestra</string>
-    <string name="tu_move_1">Pressione lunga sulla finestra › Sposta / ridimensiona: appare una cornice con le maniglie e OK sotto</string>
-    <string name="tu_move_2">Scorri all\'interno per spostarla; tira un angolo per ridimensionarla senza deformarla, il centro di un bordo per la sola larghezza o altezza</string>
-    <string name="tu_move_3">Oppure due dita: in diagonale = tutta la dimensione, affiancate = la larghezza, una sopra l\'altra = l\'altezza</string>
-    <string name="tu_move_4">Solo OK chiude la modalità; i bordi si allineano alle schede, posizione e dimensione restano per la volta successiva</string>
+    <string name="tu_cards_t">Modificare la home</string>
+    <string name="tu_cards_1">Pizzica la home: scegli la disposizione, poi in ogni posto tocca una scheda per mostrarla o toglierla.</string>
+    <string name="tu_cards_2">Sul posto della web app o dell\'app: il suo indirizzo o la sua app, e cosa fa il doppio tocco (schermo intero o finestra staccata).</string>
     <string name="st_panel_outline">Contorno dei pannelli della home</string>
     <string name="st_clock">Orologio</string>
     <string name="st_clock_24">24 h</string>
@@ -752,43 +742,38 @@
     <string name="st_aa_button_desc">Tocca due volte il pulsante per interrompere la connessione del telefono (l\'app viene disattivata, l\'icona diventa rossa); tocca di nuovo due volte per ripristinarla. Pressione lunga: scegli l\'app.</string>
     <string name="dock_conn_disabled">%1$s disattivato: il telefono non si collegherà più. Tieni premuto di nuovo per ripristinarlo.</string>
     <string name="dock_conn_enabled">%1$s ripristinato</string>
-    <string name="dock_conn_off">%1$s è disattivato: tieni premuto il pulsante per ripristinarlo.</string>
+    <string name="dock_conn_off">%1$s è disattivato: la casella Interrompi Android Auto del menu scorciatoie lo ripristina.</string>
     <string name="tu_welcome_t">Benvenuto in MG4Dash</string>
-    <string name="tu_welcome_1">Un breve giro dei gesti principali, in pochi passi.</string>
-    <string name="tu_home_t">MG4Dash come schermata iniziale dell\'auto</string>
+    <string name="tu_welcome_1">I gesti principali, in pochi passaggi.</string>
+    <string name="tu_home_t">MG4Dash come schermata iniziale</string>
     <string name="tu_home_path">Impostazioni (ingranaggio) › Sistema</string>
-    <string name="tu_home_1">Sostituisci home SAIC: MG4Dash si apre all\'avvio e con il tasto Home. Niente viene disinstallato: la home originale è solo disattivata come schermata iniziale</string>
-    <string name="tu_home_2">Tornare all\'originale in qualsiasi momento (tagliando, un problema): Modalità manutenzione, nello stesso punto, un tocco</string>
-    <string name="tu_layouts_t">Tre layout della home</string>
-    <string name="tu_layouts_1">Sceglilo in Impostazioni › Home: Completa, Semplice (pannelli grandi) o Mappa (mappa grande)</string>
-    <string name="tu_layouts_2">Inoltre: barra laterale o in basso; in Aspetto: chiaro, scuro o automatico, colori</string>
+    <string name="tu_home_1">Sostituisci home SAIC: MG4Dash si apre all\'avvio e con il tasto Home. Niente viene disinstallato.</string>
+    <string name="tu_home_2">Modalità manutenzione, nello stesso punto: la home originale torna con un tocco.</string>
+    <string name="tu_layouts_t">Disposizione della home</string>
+    <string name="tu_layouts_1">Impostazioni › Home: Semplice (tre grandi pannelli) o Disposizione, con 8 schemi di widget.</string>
+    <string name="tu_layouts_2">Pizzica la home per scegliere i widget di ogni posto.</string>
     <string name="tu_bar_t">Barra laterale</string>
     <string name="tu_bar_bottom_t">Barra in basso</string>
-    <string name="tu_bar_1">Impostazioni: tocca = MG4Dash, pressione lunga = auto</string>
-    <string name="tu_bar_2">Energia: doppio tocco = schermo spento, pressione lunga = spegni l\'auto (mai in marcia)</string>
-    <string name="tu_bar_3">Veicolo: doppio tocco = blocca / sblocca le porte, pressione lunga = ESC off / on</string>
-    <string name="tu_bar_4">Home: pressione lunga = tutte le app</string>
-    <string name="tu_bar_5">Android Auto: pressione lunga = scegli l\'app (Android Auto, CarPlay o un\'altra), doppio tocco = interrompi / ripristina la connessione del telefono</string>
-    <string name="tu_bar_6">Due dita fatte scorrere dall\'alto dello schermo: apri Android Auto, con un telefono connesso</string>
+    <string name="tu_bar_1">Tocca: la pagina MG4Dash. Pressione lunga: la schermata originale dell\'auto (veicolo, clima, ricarica, telefono, impostazioni).</string>
+    <string name="tu_bar_2">Home, pressione lunga: tutte le app. Android Auto, pressione lunga: scegli Android Auto, CarPlay o un\'altra app.</string>
+    <string name="tu_bar_3">Due dita fatte scorrere dall\'alto: apri Android Auto, con un telefono connesso.</string>
     <string name="tu_climate_t">Climatizzazione</string>
-    <string name="tu_climate_1">Pressione lunga su A/C: A/C intermittente (tocca A/C per fermarlo)</string>
-    <string name="tu_climate_2">Pressione lunga sulla temperatura: calibrazione; sull\'accensione: clima acceso uscendo dall\'auto (campeggio)</string>
-    <string name="tu_climate_3">Ventola «−» al minimo spegne il clima</string>
+    <string name="tu_climate_1">Pressione lunga su A/C: A/C intermittente. Pressione lunga sulla temperatura: calibrazione.</string>
+    <string name="tu_climate_2">Ventola − al minimo: clima spento. Pressione lunga su − / +: velocità minima / massima.</string>
     <string name="tu_energy_t">Energia</string>
-    <string name="tu_energy_1">Tocca un segmento KERS: livello di rigenerazione; pressione lunga: guida a un pedale</string>
-    <string name="tu_energy_2">Pulsante CHARGE: ricarica e V2L</string>
-    <string name="tu_map_t">Mappa</string>
-    <string name="tu_map_1">Scorri a sinistra / destra: scheda successiva del widget (consumi, scorciatoie…)</string>
-    <string name="tu_map_3">Due dita: spostare e ingrandire la mappa (un dito a schermo intero)</string>
-    <string name="tu_map_2">Pizzica la schermata Home, poi App: un\'altra app al posto della mappa</string>
-    <string name="tu_map_4">Doppio tocco: schermo intero e ritorno, o una finestra staccata (vedi più avanti)</string>
+    <string name="tu_energy_1">Tocca un segmento KERS: livello di rigenerazione; pressione lunga: guida a un pedale.</string>
+    <string name="tu_energy_2">Cavo collegato: il suo pulsante avvia o ferma la ricarica, o il V2L.</string>
+    <string name="tu_map_t">Mappa, web app e app</string>
+    <string name="tu_map_1">Scorri a sinistra / destra: scheda successiva del posto.</string>
+    <string name="tu_map_3">Web app o app: un tocco la risveglia (bordo illuminato), poi usala; pressione lunga: il suo menu.</string>
+    <string name="tu_map_2">Mappa: due dita per spostarla e ingrandirla. Doppio tocco: schermo intero e ritorno.</string>
     <string name="tu_media_t">Musica</string>
-    <string name="tu_media_1">Scorri su / giù: sorgente successiva; sinistra / destra: brano precedente / successivo</string>
-    <string name="tu_media_2">Tocca il nome della sorgente: menu sorgenti; tocca l\'immagine: apri l\'app</string>
+    <string name="tu_media_1">Scorri su / giù: sorgente; sinistra / destra: brano.</string>
+    <string name="tu_media_2">Tocca il nome della sorgente: elenco delle sorgenti; l\'immagine: apri la sua app.</string>
     <string name="tu_media_3">Pressione lunga su play / pausa: pagina Suono</string>
     <string name="tu_widget_t">Widget con più schede</string>
-    <string name="tu_widget_1">Scorri a sinistra / destra: scheda successiva (viaggio, potenza, telefono, meteo per ora o per giorno…); su viaggio, potenza e telefono basta un tocco</string>
-    <string name="tu_widget_2">Pressione lunga su una scorciatoia telefono: cambiarla o sceglierne da 2 a 8</string>
+    <string name="tu_widget_1">Scorri a sinistra / destra: scheda successiva (viaggio, potenza, telefono, meteo…).</string>
+    <string name="tu_widget_2">Pressione lunga su una scorciatoia telefono per cambiarla.</string>
     <string name="tu_end_t">È tutto!</string>
     <string name="tu_end_1">Puoi rivedere questo tour in Impostazioni › Sistema.</string>
     <string name="tu_skip">Salta</string>
@@ -932,10 +917,9 @@
     <string name="sc_connected">Connesso</string>
     <string name="sc_cut">Interrotto</string>
     <string name="tu_shortcuts_t">Menu scorciatoie</string>
-    <string name="tu_shortcuts_1">Scorri un dito verso il basso dal bordo superiore dello schermo, su tutte le schermate e sopra le altre app (anche Android Auto), per aprire il menu scorciatoie.</string>
-    <string name="tu_shortcuts_2">Tocca una casella per agire: la sua icona e la riga sotto mostrano lo stato dell’auto.</string>
-    <string name="tu_shortcuts_3">Pressione lunga sul menu per scegliere le scorciatoie mostrate.</string>
-    <string name="tu_shortcuts_4">Impostazioni › Home › Menu scorciatoie: attivo, nasconde anche il pulsante retronebbia originale (dal prossimo avvio dell’autoradio); disattivo, tutto torna come prima.</string>
+    <string name="tu_shortcuts_1">Un dito verso il basso dal bordo superiore dello schermo, su tutte le schermate e sopra le altre app.</string>
+    <string name="tu_shortcuts_2">Tocca una casella per agire; pressione lunga sul menu per sceglierne le caselle. Il tasto Home lo chiude.</string>
+    <string name="tu_shortcuts_3">Impostazioni › Home › Menu scorciatoie: nasconde anche il pulsante retronebbia originale (dopo un riavvio dell\'autoradio).</string>
     <string name="sc_heating">Riscaldamento</string>
     <string name="sc_cooling">Clima</string>
     <string name="sc_clim_state">%1$s · est. %2$s</string>
@@ -950,4 +934,5 @@
     <string name="sc_udw">Avviso di sonnolenza</string>
     <string name="sc_all_off">Spegni tutto</string>
     <string name="sc_close">Chiudi</string>
+    <string name="tu_cards_3">Finestra staccata: un doppio tocco la rimette al suo posto; pressione lunga › Sposta / ridimensiona, poi OK.</string>
 </resources>

@@ -665,19 +665,9 @@
     <string name="st_edit_cards">Tarjetas de los widgets</string>
     <string name="st_edit_cards_desc">Elegir las tarjetas que muestra cada widget, como la tarjeta Aplicación (el mapa u otra app) y una web app. Atajo: pellizcar la pantalla de inicio con dos dedos.</string>
     <string name="st_edit_cards_btn">Editar las tarjetas</string>
-    <string name="tu_cards_t">Elegir y mover las tarjetas</string>
-    <string name="tu_cards_1">Pellizca la pantalla de inicio con dos dedos: cada lugar muestra sus tarjetas; un lugar mediano también puede mostrar la climatización o el multimedia</string>
-    <string name="tu_cards_2">Toca una tarjeta para mostrarla o quitarla; tomada de otro sitio, cambia de lugar. Por defecto lo deja todo como al principio</string>
-    <string name="tu_float_t">Ventanas separadas</string>
-    <string name="tu_float_1">La web app y la tarjeta Aplicación (el mapa o su app) pueden salir de su sitio: pellizca la pantalla de inicio, toca su lugar y luego Doble toque › Ventana separada</string>
-    <string name="tu_float_2">Después, un doble toque la separa como ventana sobre el inicio; un doble toque en la ventana la devuelve a su tarjeta</string>
-    <string name="tu_float_3">En reposo, la ventana recibe tus gestos, no la página: tócala una vez para despertarla (contorno encendido) y usa la página o la app</string>
-    <string name="tu_float_4">Pulsación larga en la ventana: su menú (Atrás, Mover / cambiar tamaño, lo que muestra)</string>
-    <string name="tu_move_t">Mover y redimensionar una ventana</string>
-    <string name="tu_move_1">Pulsación larga en la ventana › Mover / cambiar tamaño: aparece un marco con tiradores y Aceptar debajo</string>
-    <string name="tu_move_2">Desliza dentro para moverla; tira de una esquina para cambiar su tamaño sin deformarla, del centro de un borde para solo el ancho o el alto</string>
-    <string name="tu_move_3">O dos dedos: en diagonal = todo el tamaño, uno al lado del otro = el ancho, uno encima del otro = el alto</string>
-    <string name="tu_move_4">Solo Aceptar termina el modo; los bordes se ajustan a las tarjetas, y el lugar y el tamaño se guardan para la próxima vez</string>
+    <string name="tu_cards_t">Editar el inicio</string>
+    <string name="tu_cards_1">Pellizca el inicio: elige la disposición y, en cada lugar, toca una tarjeta para mostrarla o quitarla.</string>
+    <string name="tu_cards_2">En el lugar de la web app o de la app: su dirección o app, y lo que hace el doble toque (pantalla completa o ventana separada).</string>
     <string name="st_panel_outline">Contorno de los paneles de inicio</string>
     <string name="st_clock">Reloj</string>
     <string name="st_clock_24">24 h</string>
@@ -752,43 +742,38 @@
     <string name="st_aa_button_desc">Toca dos veces el botón para cortar la conexión del teléfono (la app se desactiva, el icono se pone rojo); vuelve a tocar dos veces para restablecerla. Pulsación larga: elegir la app.</string>
     <string name="dock_conn_disabled">%1$s desactivado: el teléfono ya no se conectará. Mantén pulsado de nuevo para restablecerlo.</string>
     <string name="dock_conn_enabled">%1$s restablecido</string>
-    <string name="dock_conn_off">%1$s está desactivado: mantén pulsado el botón para restablecerlo.</string>
+    <string name="dock_conn_off">%1$s está desactivado: la casilla Cortar Android Auto del menú de accesos lo restablece.</string>
     <string name="tu_welcome_t">Bienvenido a MG4Dash</string>
-    <string name="tu_welcome_1">Un breve recorrido por los gestos principales, en pocos pasos.</string>
-    <string name="tu_home_t">MG4Dash como pantalla de inicio del coche</string>
+    <string name="tu_welcome_1">Los gestos principales, en pocos pasos.</string>
+    <string name="tu_home_t">MG4Dash como pantalla de inicio</string>
     <string name="tu_home_path">Ajustes (engranaje) › Sistema</string>
-    <string name="tu_home_1">Sustituir inicio SAIC: MG4Dash se abre al arrancar y con el botón Inicio. No se desinstala nada: el inicio original solo se desactiva como pantalla de inicio</string>
-    <string name="tu_home_2">Volver al original en cualquier momento (concesionario, un problema): Modo mantenimiento, en el mismo lugar, un toque</string>
-    <string name="tu_layouts_t">Tres diseños de inicio</string>
-    <string name="tu_layouts_1">Elígelo en Ajustes › Inicio: Completo, Sencillo (paneles grandes) o Mapa (mapa grande)</string>
-    <string name="tu_layouts_2">También: barra lateral o inferior; en Aspecto: claro, oscuro o automático, colores</string>
+    <string name="tu_home_1">Sustituir inicio SAIC: MG4Dash se abre al arrancar y con la tecla Inicio. No se desinstala nada.</string>
+    <string name="tu_home_2">Modo mantenimiento, en el mismo lugar: el inicio original vuelve con un toque.</string>
+    <string name="tu_layouts_t">Disposición del inicio</string>
+    <string name="tu_layouts_1">Ajustes › Inicio: Sencillo (tres paneles grandes) o Disposición, con 8 distribuciones de widgets.</string>
+    <string name="tu_layouts_2">Pellizca el inicio para elegir los widgets de cada lugar.</string>
     <string name="tu_bar_t">Barra lateral</string>
     <string name="tu_bar_bottom_t">Barra inferior</string>
-    <string name="tu_bar_1">Ajustes: tocar = ajustes de MG4Dash, pulsación larga = ajustes del coche</string>
-    <string name="tu_bar_2">Energía: doble toque = pantalla apagada, pulsación larga = apagar el coche (nunca en marcha)</string>
-    <string name="tu_bar_3">Vehículo: doble toque = bloquear / desbloquear puertas, pulsación larga = ESC off / on</string>
-    <string name="tu_bar_4">Inicio: pulsación larga = todas las apps</string>
-    <string name="tu_bar_5">Android Auto: pulsación larga = elegir la app (Android Auto, CarPlay u otra), doble toque = cortar / restablecer la conexión del teléfono</string>
-    <string name="tu_bar_6">Dos dedos deslizados desde arriba de la pantalla: abrir Android Auto, con un teléfono conectado</string>
+    <string name="tu_bar_1">Tocar: la página de MG4Dash. Pulsación larga: la pantalla original del coche (vehículo, clima, carga, teléfono, ajustes).</string>
+    <string name="tu_bar_2">Inicio, pulsación larga: todas las apps. Android Auto, pulsación larga: elegir Android Auto, CarPlay u otra app.</string>
+    <string name="tu_bar_3">Dos dedos deslizados desde arriba: abrir Android Auto, con un teléfono conectado.</string>
     <string name="tu_climate_t">Climatización</string>
-    <string name="tu_climate_1">Pulsación larga en A/C: A/C intermitente (toca A/C para pararlo)</string>
-    <string name="tu_climate_2">Pulsación larga en la temperatura: calibración; en encendido: mantener el clima al salir del coche (camping)</string>
-    <string name="tu_climate_3">Ventilador «−» al mínimo apaga el clima</string>
+    <string name="tu_climate_1">Pulsación larga en A/C: A/C intermitente. Pulsación larga en la temperatura: calibración.</string>
+    <string name="tu_climate_2">Ventilador − al mínimo: clima apagado. Pulsación larga en − / +: velocidad mínima / máxima.</string>
     <string name="tu_energy_t">Energía</string>
-    <string name="tu_energy_1">Toca un segmento KERS: nivel de regeneración; pulsación larga: conducción con un pedal</string>
-    <string name="tu_energy_2">Botón CHARGE: carga y V2L</string>
-    <string name="tu_map_t">Mapa</string>
-    <string name="tu_map_1">Deslizar a izquierda / derecha: siguiente tarjeta del widget (consumo, accesos directos…)</string>
-    <string name="tu_map_3">Dos dedos: mover y ampliar el mapa (un dedo a pantalla completa)</string>
-    <string name="tu_map_2">Pellizca la pantalla de inicio y luego Aplicación: otra app en lugar del mapa</string>
-    <string name="tu_map_4">Doble toque: pantalla completa y vuelta, o una ventana separada (ver más adelante)</string>
+    <string name="tu_energy_1">Toca un segmento KERS: nivel de regeneración; pulsación larga: conducción con un pedal.</string>
+    <string name="tu_energy_2">Cable conectado: su botón inicia o detiene la carga, o el V2L.</string>
+    <string name="tu_map_t">Mapa, web app y apps</string>
+    <string name="tu_map_1">Desliza a izquierda / derecha: siguiente tarjeta del lugar.</string>
+    <string name="tu_map_3">Web app o app: un toque la despierta (borde iluminado) y luego se usa; pulsación larga: su menú.</string>
+    <string name="tu_map_2">Mapa: dos dedos para moverlo y ampliarlo. Doble toque: pantalla completa y vuelta.</string>
     <string name="tu_media_t">Música</string>
-    <string name="tu_media_1">Desliza arriba / abajo: siguiente fuente; izquierda / derecha: pista anterior / siguiente</string>
-    <string name="tu_media_2">Toca el nombre de la fuente: menú de fuentes; toca la imagen: abrir la app</string>
+    <string name="tu_media_1">Desliza arriba / abajo: fuente; izquierda / derecha: pista.</string>
+    <string name="tu_media_2">Toca el nombre de la fuente: lista de fuentes; la imagen: abrir su app.</string>
     <string name="tu_media_3">Pulsación larga en reproducir / pausa: página Sonido</string>
     <string name="tu_widget_t">Widgets con varias tarjetas</string>
-    <string name="tu_widget_1">Deslizar a izquierda / derecha: siguiente tarjeta (trayecto, potencia, teléfono, tiempo por horas o por días…); en trayecto, potencia y teléfono basta con tocar</string>
-    <string name="tu_widget_2">Pulsación larga en un acceso de teléfono: cambiarlo o elegir de 2 a 8</string>
+    <string name="tu_widget_1">Desliza a izquierda / derecha: siguiente tarjeta (trayecto, potencia, teléfono, tiempo…).</string>
+    <string name="tu_widget_2">Pulsación larga en un acceso de teléfono para cambiarlo.</string>
     <string name="tu_end_t">¡Eso es todo!</string>
     <string name="tu_end_1">Puedes volver a ver este recorrido en Ajustes › Sistema.</string>
     <string name="tu_skip">Omitir</string>
@@ -932,10 +917,9 @@
     <string name="sc_connected">Conectado</string>
     <string name="sc_cut">Cortado</string>
     <string name="tu_shortcuts_t">Menú de accesos</string>
-    <string name="tu_shortcuts_1">Desliza un dedo hacia abajo desde lo más alto de la pantalla, en todas las pantallas y sobre las demás apps (Android Auto incluido), para abrir el menú de accesos.</string>
-    <string name="tu_shortcuts_2">Toca una casilla para actuar: su icono y la línea de debajo muestran el estado del coche.</string>
-    <string name="tu_shortcuts_3">Pulsación larga en el menú para elegir los accesos mostrados.</string>
-    <string name="tu_shortcuts_4">Ajustes › Inicio › Menú de accesos: activado, también oculta el botón antiniebla original (tras el próximo arranque de la radio); desactivado, todo vuelve a ser como antes.</string>
+    <string name="tu_shortcuts_1">Un dedo hacia abajo desde lo más alto de la pantalla, en todas las pantallas y sobre las demás apps.</string>
+    <string name="tu_shortcuts_2">Toca una casilla para actuar; pulsación larga en el menú para elegir sus casillas. La tecla Inicio lo cierra.</string>
+    <string name="tu_shortcuts_3">Ajustes › Inicio › Menú de accesos: también oculta el botón antiniebla original (tras reiniciar la radio).</string>
     <string name="sc_heating">Calefacción</string>
     <string name="sc_cooling">Aire acond.</string>
     <string name="sc_clim_state">%1$s · ext. %2$s</string>
@@ -950,4 +934,5 @@
     <string name="sc_udw">Alerta de somnolencia</string>
     <string name="sc_all_off">Apagar todo</string>
     <string name="sc_close">Cerrar</string>
+    <string name="tu_cards_3">Ventana separada: un doble toque la devuelve a su sitio; pulsación larga › Mover / cambiar tamaño, y luego Aceptar.</string>
 </resources>

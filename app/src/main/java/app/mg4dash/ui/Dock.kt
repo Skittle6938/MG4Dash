@@ -24,9 +24,10 @@ import java.util.Date
 import java.util.Locale
 
 /**
- * Bottom dock common to all screens: clock + Home, Vehicle, Climate, Energy,
+ * Bottom dock common to all screens: clock + Home, Vehicle, Climate, Energy, Phone,
  * Android Auto, Settings. Move from one page to another without going back through home.
- * Long press on Home: list of apps; on Settings: launcher settings.
+ * Same rule on the vertical bar (#38): a tap opens the MG4Dash page, a long press the car's own screen
+ * ([stockScreens]); Home: long press = list of apps; Android Auto: long press = choose its app. No double tap.
  */
 object Dock {
     enum class Page { HOME, VEHICLE, CLIMATE, ENERGY, PHONE, SETTINGS, APPS }
@@ -130,7 +131,7 @@ object Dock {
             when (item.label) {
                 R.string.dock_home -> cell.setOnLongClickListener { if (current != Page.APPS) activity.startActivity(Intent(activity, AppsActivity::class.java)); true }
                 R.string.dock_aa -> aaGestures(activity, cell, { open(activity, item, current) }) { build(activity, dock, current, simple) }
-                else -> pageGestures(activity, cell, iconView, item, current, selected)
+                else -> pageGestures(activity, cell, item, current)
             }
             dock.addView(cell, LinearLayout.LayoutParams(0, -1, 1f).apply { if (index >= 0) leftMargin = kit.dp(6) })
         }
@@ -235,6 +236,11 @@ object Dock {
         })
     }
 
+    /**
+     * Vertical bar (driver's side, left or right): the same buttons and rules as the bottom dock (#38), a tap for the
+     * MG4Dash page, a long press for the car's own screen ([stockScreens]), Home's long press for the apps, Android
+     * Auto's for its app; no double tap.
+     */
     fun buildVertical(activity: Activity, bar: LinearLayout, current: Page) {
         val kit = Kit(activity)
         fun color(r: Int) = app.mg4dash.ui.Themes.color(activity, r)
@@ -295,10 +301,10 @@ object Dock {
             val prefs = app.mg4dash.system.Prefs(activity)
             if (item.label == R.string.dock_vehicle && (!prefs.connectionIcons || prefs.homeStyle == 1)) wifiBadge(activity, cell, size)
             if (item.label == R.string.dock_vehicle) watchEsc(activity, cell, icon, selected)
-            if (!pageGestures(activity, cell, icon, item, current, selected)) {
+            if (!pageGestures(activity, cell, item, current)) {
                 cell.setOnClickListener { open(activity, item, current) }
                 if (item.label == R.string.dock_home) cell.setOnLongClickListener { if (current != Page.APPS) activity.startActivity(Intent(activity, AppsActivity::class.java)); true }
-                // Long press: choice of app; double touch: cuts or restores the phone connection
+                // Long press: choice of app
                 if (item.label == R.string.dock_aa) aaGestures(activity, cell, { open(activity, item, current) }) { buildVertical(activity, bar, current) }
             }
             bar.addView(cell, LinearLayout.LayoutParams(-1, 0, 1f).apply { topMargin = kit.dp(4) })
@@ -324,52 +330,33 @@ object Dock {
     }
 
     /**
-     * Gestures of the Settings, Energy and Vehicle buttons, the same on both bars (#79).
+     * The car's own screens a long press opens (#38), the first installed one: the stock app of the page the
+     * button opens with a tap. Empty: the button has no long press of this kind.
+     */
+    internal fun stockScreens(page: Page?): List<android.content.ComponentName> = when (page) {
+        Page.VEHICLE -> listOf(Apps.VEHICLE)
+        Page.CLIMATE -> listOf(Apps.HVAC)
+        // Stock Energy app, or its charging page on SWI165 (#60), as the Energy page's button
+        Page.ENERGY -> listOf(Apps.ENERGY, Apps.ENERGY_SWI165)
+        // As the Phone page's button
+        Page.PHONE -> listOf(Apps.BT_PHONE, Apps.BT_CALL)
+        Page.SETTINGS -> listOf(Apps.SETTINGS)
+        else -> emptyList()
+    }
+
+    /**
+     * Vehicle, Climate, Energy, Phone and Settings, the same on both bars (#79, #38): a tap opens the MG4Dash page,
+     * a long press the car's own screen. No double tap: the special functions are in the shortcuts menu.
      * Returns false if this button has none: it then keeps its simple touch.
      */
-    private fun pageGestures(activity: Activity, cell: android.view.View, icon: ImageView, item: Item, current: Page, selected: Boolean): Boolean {
-        val listener: android.view.GestureDetector.SimpleOnGestureListener = when (item.label) {
-            // Touch / long press (the double touch for Wi-Fi is gone: the connection icons and their banner do it)
-            R.string.dock_settings -> object : android.view.GestureDetector.SimpleOnGestureListener() {
-                override fun onSingleTapUp(e: android.view.MotionEvent): Boolean { open(activity, item, current); return true }
-                override fun onLongPress(e: android.view.MotionEvent) { Apps.open(activity, Apps.SETTINGS, activity.getString(R.string.dock_settings)) }
-                override fun onDown(e: android.view.MotionEvent) = true
-            }
-            // Double touch: screen off; touch: Energy page
-            R.string.dock_energy -> object : android.view.GestureDetector.SimpleOnGestureListener() {
-                override fun onSingleTapConfirmed(e: android.view.MotionEvent): Boolean { open(activity, item, current); return true }
-                override fun onDoubleTap(e: android.view.MotionEvent): Boolean {
-                    // Same command as the stock launcher; a touch on the black screen turns it back on
-                    activity.startActivity(Intent(activity, ScreenOffActivity::class.java)); return true
-                }
-                // Long press: switch the car off (#12), without confirmation, but never while driving
-                override fun onLongPress(e: android.view.MotionEvent) {
-                    if (!app.mg4dash.car.CarBridge.powerOffCar())
-                        app.mg4dash.ui.Toasts.show(activity, R.string.power_off_driving)
-                }
-                override fun onDown(e: android.view.MotionEvent) = true
-            }
-            // Touch: Vehicle page; double touch: doors locked / unlocked (useful from
-            // the back, issue #12); long press: ESC (no confirmation, the car signals it itself)
-            R.string.dock_vehicle -> object : android.view.GestureDetector.SimpleOnGestureListener() {
-                override fun onSingleTapConfirmed(e: android.view.MotionEvent): Boolean { open(activity, item, current); return true }
-                override fun onDoubleTap(e: android.view.MotionEvent): Boolean {
-                    val nowLocked = app.mg4dash.car.CarBridge.toggleDoors()
-                    app.mg4dash.ui.Toasts.show(activity, when (nowLocked) {
-                        true -> R.string.doors_locked; false -> R.string.doors_unlocked; null -> R.string.doors_unknown
-                    })
-                    return true
-                }
-                override fun onLongPress(e: android.view.MotionEvent) {
-                    app.mg4dash.car.CarBridge.toggleEsc()
-                    cell.postDelayed({ tintVehicle(activity, icon, selected) }, 800)
-                }
-                override fun onDown(e: android.view.MotionEvent) = true
-            }
-            else -> return false
+    private fun pageGestures(activity: Activity, cell: android.view.View, item: Item, current: Page): Boolean {
+        val stock = stockScreens(item.page)
+        if (stock.isEmpty()) return false
+        cell.setOnClickListener { open(activity, item, current) }
+        cell.setOnLongClickListener {
+            val target = stock.firstOrNull { Apps.available(activity, it) } ?: stock.first()
+            Apps.open(activity, target, "SAIC"); true
         }
-        val gd = android.view.GestureDetector(activity, listener)
-        cell.setOnTouchListener { v, ev -> v.isPressed = ev.actionMasked == android.view.MotionEvent.ACTION_DOWN; gd.onTouchEvent(ev) }
         return true
     }
 
@@ -382,19 +369,11 @@ object Dock {
         }
     }
 
-    /**
-     * Android Auto button: touch = open, long press = choose Android Auto, CarPlay or another app,
-     * double touch = cut or restore the phone connection.
-     */
+    /** Android Auto button: tap = open, long press = choose Android Auto, CarPlay or another app (no double tap, #38). */
     private fun aaGestures(activity: Activity, cell: android.view.View, open: () -> Unit, rebuild: () -> Unit) {
-        val gd = android.view.GestureDetector(activity, object : android.view.GestureDetector.SimpleOnGestureListener() {
-            override fun onSingleTapConfirmed(e: android.view.MotionEvent): Boolean { open(); return true }
-            override fun onDoubleTap(e: android.view.MotionEvent): Boolean { toggleConnection(activity, rebuild); return true }
-            override fun onLongPress(e: android.view.MotionEvent) { pickAaTarget(activity, rebuild) }
-            override fun onDown(e: android.view.MotionEvent) = true
-        })
-        cell.setOnClickListener(null)
-        cell.setOnTouchListener { v, ev -> v.isPressed = ev.actionMasked == android.view.MotionEvent.ACTION_DOWN; gd.onTouchEvent(ev) }
+        cell.setOnTouchListener(null)
+        cell.setOnClickListener { open() }
+        cell.setOnLongClickListener { pickAaTarget(activity, rebuild); true }
     }
 
     /** Like the stock launcher: the button opens Android Auto, CarPlay or any app. */
@@ -414,19 +393,6 @@ object Dock {
             .setNegativeButton(R.string.cancel, null)
             .setOnDismissListener { Fullscreen.apply(activity) }
             .show().also { app.mg4dash.ui.Dialogs.fix(it) }
-    }
-
-    /** Double touch: cuts or restores the phone connection (the button's app is disabled). */
-    private fun toggleConnection(activity: Activity, rebuild: () -> Unit) {
-        val name = connectionName(activity)
-        app.mg4dash.system.ConnectionToggle.toggle(activity) { state ->
-            when (state) {
-                true -> Toasts.show(activity, activity.getString(R.string.dock_conn_disabled, name), long = true)
-                false -> Toasts.show(activity, activity.getString(R.string.dock_conn_enabled, name))
-                null -> Toasts.show(activity, activity.getString(R.string.st_failed))
-            }
-            if (!activity.isDestroyed) rebuild()
-        }
     }
 
     private fun connectionName(activity: Activity): String = customAa(activity)?.let {

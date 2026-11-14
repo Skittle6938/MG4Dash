@@ -984,7 +984,7 @@ class ScreenshotTest {
         org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE).edit().putInt("theme_mode", 1).commit()
         val activity = Robolectric.buildActivity(MainActivity::class.java).setup().get()
         repeat(3) { shadowOf(Looper.getMainLooper()).idleFor(200, TimeUnit.MILLISECONDS) }
-        app.mg4dash.ui.Tutorial.show(activity, 7)
+        app.mg4dash.ui.Tutorial.show(activity, app.mg4dash.ui.Tutorial.musicStep)
         val dir = File("build/screenshots").apply { mkdirs() }
         val fps = 20; val frames = 132
         java.io.DataOutputStream(File(dir, "tuto_swipe.rgb").outputStream().buffered()).use { out ->
@@ -1003,7 +1003,7 @@ class ScreenshotTest {
         org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE).edit().putInt("theme_mode", 1).commit()
         val activity = Robolectric.buildActivity(MainActivity::class.java).setup().get()
         repeat(3) { shadowOf(Looper.getMainLooper()).idleFor(200, TimeUnit.MILLISECONDS) }
-        for (step in 0 until 11) {
+        for (step in 0 until app.mg4dash.ui.Tutorial.stepCount) {
             app.mg4dash.ui.Tutorial.show(activity, step)
             repeat(2) { shadowOf(Looper.getMainLooper()).idleFor(200, TimeUnit.MILLISECONDS) }
             save(activity.window.decorView, "tutorial_$step.png")

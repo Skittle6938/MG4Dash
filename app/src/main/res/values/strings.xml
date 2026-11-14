@@ -665,19 +665,9 @@
     <string name="st_edit_cards">Widgets\' cards</string>
     <string name="st_edit_cards_desc">Choose the cards each widget goes through, such as the App card (the map or another app) and a web app. Shortcut: pinch the home screen with two fingers.</string>
     <string name="st_edit_cards_btn">Edit the cards</string>
-    <string name="tu_cards_t">Choose and move the cards</string>
-    <string name="tu_cards_1">Pinch the home screen with two fingers: each place shows the cards it can go through; a medium place can also show the climate or the media</string>
-    <string name="tu_cards_2">Touch a card to show or remove it; taken from elsewhere, it changes place. Default puts everything back as at first</string>
-    <string name="tu_float_t">Detached windows</string>
-    <string name="tu_float_1">The web app and the App card (the map or its app) can leave their place: pinch the home screen, touch their place, then Double tap › Detached window</string>
-    <string name="tu_float_2">Then a double tap on it detaches it as a window over home; a double tap on the window puts it back in its card</string>
-    <string name="tu_float_3">At rest the window takes your gestures, not the page: touch it once to wake it (lit outline), then use the page or the app</string>
-    <string name="tu_float_4">Long press the window: its menu (Back, Move / resize, what it shows)</string>
-    <string name="tu_move_t">Move and resize a window</string>
-    <string name="tu_move_1">Long press the window › Move / resize: a frame with handles shows, with OK under it</string>
-    <string name="tu_move_2">Slide inside to move it; pull a corner to resize it with its ratio kept, the middle of an edge for its width or its height alone</string>
-    <string name="tu_move_3">Or two fingers: diagonal = the whole size, side by side = the width, one above the other = the height</string>
-    <string name="tu_move_4">Only OK ends the mode; the edges settle on the cards, and the place and size are kept for next time</string>
+    <string name="tu_cards_t">Edit the home screen</string>
+    <string name="tu_cards_1">Pinch the home screen: choose the layout, then on each place touch a card to show or remove it.</string>
+    <string name="tu_cards_2">On the web app\'s or app\'s place: its address or app, and what a double tap does (full screen or detached window).</string>
     <string name="st_panel_outline">Home panel outline</string>
     <string name="st_clock">Clock</string>
     <string name="st_clock_24">24 h</string>
@@ -752,43 +742,38 @@
     <string name="st_aa_button_desc">Double tap the button to cut the phone connection (the app is disabled, the icon turns red); double tap again to restore it. Long press: choose the app.</string>
     <string name="dock_conn_disabled">%1$s disabled: the phone will no longer connect. Long press again to restore it.</string>
     <string name="dock_conn_enabled">%1$s restored</string>
-    <string name="dock_conn_off">%1$s is disabled: long press the button to restore it.</string>
+    <string name="dock_conn_off">%1$s is disabled: the Cut Android Auto tile of the shortcuts menu restores it.</string>
     <string name="tu_welcome_t">Welcome to MG4Dash</string>
-    <string name="tu_welcome_1">A quick tour of the main gestures, in a few steps.</string>
-    <string name="tu_home_t">MG4Dash as the car\'s home screen</string>
+    <string name="tu_welcome_1">The main gestures, in a few steps.</string>
+    <string name="tu_home_t">MG4Dash as the home screen</string>
     <string name="tu_home_path">Settings (gear) › System</string>
-    <string name="tu_home_1">Replace SAIC home: MG4Dash opens at startup and with the Home button. Nothing is uninstalled: the original home screen is only switched off as the home screen</string>
-    <string name="tu_home_2">Back to the original at any time (dealer visit, a problem): Maintenance mode, in the same place, one tap</string>
-    <string name="tu_layouts_t">Three home layouts</string>
-    <string name="tu_layouts_1">Choose it in Settings › Home: Full, Simple (large panels) or Map (large map)</string>
-    <string name="tu_layouts_2">Also there: side bar or bottom bar; in Look: light, dark or automatic, colours</string>
+    <string name="tu_home_1">Replace SAIC home: MG4Dash opens at start and with the Home key. Nothing is uninstalled.</string>
+    <string name="tu_home_2">Maintenance mode, in the same place: the original home screen back in one tap.</string>
+    <string name="tu_layouts_t">Home layout</string>
+    <string name="tu_layouts_1">Settings › Home: Simple (three large panels) or Layout, with 8 arrangements of widgets.</string>
+    <string name="tu_layouts_2">Pinch the home screen to choose the widgets of each place.</string>
     <string name="tu_bar_t">Side bar</string>
     <string name="tu_bar_bottom_t">Bottom bar</string>
-    <string name="tu_bar_1">Settings: tap = MG4Dash settings, long press = car settings</string>
-    <string name="tu_bar_2">Energy: double tap = screen off, long press = switch the car off (never while driving)</string>
-    <string name="tu_bar_3">Vehicle: double tap = lock / unlock the doors, long press = ESC off / on</string>
-    <string name="tu_bar_4">Home: long press = all apps</string>
-    <string name="tu_bar_5">Android Auto: long press = choose the app (Android Auto, CarPlay or another), double tap = cut / restore the phone connection</string>
-    <string name="tu_bar_6">Two fingers sliding down from the top of the screen: open Android Auto, when a phone is connected</string>
+    <string name="tu_bar_1">Tap: the MG4Dash page. Long press: the car\'s own screen (vehicle, climate, charging, phone, settings).</string>
+    <string name="tu_bar_2">Home, long press: all apps. Android Auto, long press: choose Android Auto, CarPlay or another app.</string>
+    <string name="tu_bar_3">Two fingers sliding down from the top: open Android Auto, when a phone is connected.</string>
     <string name="tu_climate_t">Climate</string>
-    <string name="tu_climate_1">Long press A/C: intermittent A/C (tap A/C to stop it)</string>
-    <string name="tu_climate_2">Long press the temperature: calibration; long press power: keep the climate on after leaving the car (camping)</string>
-    <string name="tu_climate_3">Fan minus at the lowest speed turns the climate off</string>
+    <string name="tu_climate_1">Long press A/C: intermittent A/C. Long press the temperature: calibration.</string>
+    <string name="tu_climate_2">Fan − at the lowest speed: climate off. Long press − / +: lowest / highest speed.</string>
     <string name="tu_energy_t">Energy</string>
-    <string name="tu_energy_1">Tap a KERS segment: regeneration level; long press: one-pedal driving</string>
-    <string name="tu_energy_2">CHARGE button: charging and V2L</string>
-    <string name="tu_map_t">Map</string>
-    <string name="tu_map_1">Swipe left / right: next card of the widget (consumption, shortcuts…)</string>
-    <string name="tu_map_3">Two fingers: move and zoom the map (one finger in full screen)</string>
-    <string name="tu_map_2">Pinch the home screen, then App: another app instead of the map</string>
-    <string name="tu_map_4">Double tap: full screen and back, or a detached window (see further on)</string>
+    <string name="tu_energy_1">Touch a KERS segment: regeneration level; long press: one-pedal driving.</string>
+    <string name="tu_energy_2">Plugged in: its button starts or stops charging, or V2L.</string>
+    <string name="tu_map_t">Map, web app and apps</string>
+    <string name="tu_map_1">Swipe left / right: next card of the place.</string>
+    <string name="tu_map_3">Web app or app: touch once to wake it (lit outline), then use it; long press: its menu.</string>
+    <string name="tu_map_2">Map: two fingers to move and zoom. Double tap: full screen and back.</string>
     <string name="tu_media_t">Music</string>
-    <string name="tu_media_1">Swipe up / down: next source; left / right: previous / next track</string>
-    <string name="tu_media_2">Tap the source name: source menu; tap the picture: open the source\'s app</string>
+    <string name="tu_media_1">Swipe up / down: source; left / right: track.</string>
+    <string name="tu_media_2">Touch the source name: list of sources; the picture: open its app.</string>
     <string name="tu_media_3">Long press play / pause: Sound page</string>
     <string name="tu_widget_t">Widgets with several cards</string>
-    <string name="tu_widget_1">Swipe left / right: next card (trip, power, phone, weather by hour or by day…); a tap is enough on the trip, power and phone cards</string>
-    <string name="tu_widget_2">Long press a phone shortcut: change it, or choose 2 to 8 shortcuts</string>
+    <string name="tu_widget_1">Swipe left / right: next card (trip, power, phone, weather…).</string>
+    <string name="tu_widget_2">Long press a phone shortcut to change it.</string>
     <string name="tu_end_t">That\'s it!</string>
     <string name="tu_end_1">You can see this tour again in Settings › System.</string>
     <string name="tu_skip">Skip</string>
@@ -932,10 +917,9 @@
     <string name="sc_connected">Connected</string>
     <string name="sc_cut">Cut</string>
     <string name="tu_shortcuts_t">Shortcuts menu</string>
-    <string name="tu_shortcuts_1">Slide one finger down from the very top of the screen, on every screen and over the other apps (Android Auto too), to open the shortcuts menu.</string>
-    <string name="tu_shortcuts_2">Touch a tile to act: its icon and the line below it show the car\'s state.</string>
-    <string name="tu_shortcuts_3">Long press the menu to choose the shortcuts shown.</string>
-    <string name="tu_shortcuts_4">Settings › Home › Shortcuts menu: on, it also hides MG\'s fog light button (after the head unit\'s next start); off, everything is as before.</string>
+    <string name="tu_shortcuts_1">One finger down from the very top of the screen, on every screen and over the other apps.</string>
+    <string name="tu_shortcuts_2">Touch a tile to act; long press the menu to choose its tiles. The Home key closes it.</string>
+    <string name="tu_shortcuts_3">Settings › Home › Shortcuts menu: it also hides MG\'s fog light button (after a head unit restart).</string>
     <string name="sc_heating">Heating</string>
     <string name="sc_cooling">Cooling</string>
     <string name="sc_clim_state">%1$s · out. %2$s</string>
@@ -950,4 +934,5 @@
     <string name="sc_udw">Drowsiness warning</string>
     <string name="sc_all_off">Turn all off</string>
     <string name="sc_close">Close</string>
+    <string name="tu_cards_3">Detached window: a double tap puts it back; long press › Move / resize, then OK.</string>
 </resources>

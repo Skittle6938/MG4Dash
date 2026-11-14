@@ -46,38 +46,44 @@ object Tutorial {
     interface Places { fun tutorialView(id: Int): View? }
 
     private val SHORTCUTS_STEP = Step(null, R.string.tu_shortcuts_t,
-        listOf(R.string.tu_shortcuts_1, R.string.tu_shortcuts_2, R.string.tu_shortcuts_3, R.string.tu_shortcuts_4), wide = true)
+        listOf(R.string.tu_shortcuts_1, R.string.tu_shortcuts_2, R.string.tu_shortcuts_3), wide = true)
 
+    /** The Music step, with its animated swipes (the screenshot tests' GIF). */
+    private val MUSIC_STEP = Step(R.id.mediaCard, R.string.tu_media_t, listOf(R.string.tu_media_1, R.string.tu_media_2, R.string.tu_media_3), swipes = "VH")
+
+    /**
+     * The tour (#38, 14/11 rework): one step per subject, short lines, each one checked against the code. Detached
+     * windows are in the edit mode's step, the bar's special gestures are gone (the shortcuts menu has them).
+     */
     private val STEPS = listOf(
         Step(null, R.string.tu_welcome_t, listOf(R.string.tu_welcome_1)),
-        // Replace SAIC home, and Service mode to go back to stock
+        // Replace SAIC home, and Maintenance mode to go back to stock
         Step(null, R.string.tu_home_t, listOf(R.string.tu_home_1, R.string.tu_home_2), homePanel = true),
-        // The three home layouts, in miniature
+        // Simple, or one of the layouts with its widgets (#97)
         Step(null, R.string.tu_layouts_t, listOf(R.string.tu_layouts_1, R.string.tu_layouts_2), listOf(
-            R.drawable.tu_layout_full to R.string.st_style_full,
             R.drawable.tu_layout_simple to R.string.st_style_simple,
-            R.drawable.tu_layout_map to R.string.st_style_map,
+            R.drawable.tu_layout_full to R.string.ly_title,
         )),
         // The bar in use: vertical (side) or at the bottom
-        Step(R.id.dock, R.string.tu_bar_t, listOf(R.string.tu_bar_1, R.string.tu_bar_2, R.string.tu_bar_3, R.string.tu_bar_4, R.string.tu_bar_5, R.string.tu_bar_6),
-            bottomTitle = R.string.tu_bar_bottom_t),
+        Step(R.id.dock, R.string.tu_bar_t, listOf(R.string.tu_bar_1, R.string.tu_bar_2, R.string.tu_bar_3), bottomTitle = R.string.tu_bar_bottom_t),
         // Shortcuts menu pulled down from the very top, over every app; shown alone once to those who update
         SHORTCUTS_STEP,
         // The widgets where they are now (#97): each step points at its card's place
-        Step(R.id.climateCard, R.string.tu_climate_t, listOf(R.string.tu_climate_1, R.string.tu_climate_2, R.string.tu_climate_3)),
+        Step(R.id.climateCard, R.string.tu_climate_t, listOf(R.string.tu_climate_1, R.string.tu_climate_2)),
         Step(R.id.energyCard, R.string.tu_energy_t, listOf(R.string.tu_energy_1, R.string.tu_energy_2)),
-        Step(R.id.mapCard, R.string.tu_map_t, listOf(R.string.tu_map_1, R.string.tu_map_3, R.string.tu_map_2, R.string.tu_map_4), swipes = "H"),
-        Step(R.id.mediaCard, R.string.tu_media_t, listOf(R.string.tu_media_1, R.string.tu_media_2, R.string.tu_media_3), swipes = "VH"),
+        // The map, and the web app or an app in a card, at rest until a touch wakes them (#98)
+        Step(R.id.mapCard, R.string.tu_map_t, listOf(R.string.tu_map_1, R.string.tu_map_2, R.string.tu_map_3), swipes = "H"),
+        MUSIC_STEP,
         // Any widget with several cards (the trip, power and phone one first)
         Step(R.id.secondaryCard, R.string.tu_widget_t, listOf(R.string.tu_widget_1, R.string.tu_widget_2), swipes = "H"),
-        // Edit mode of the cards (#97): pinch the home screen
-        Step(null, R.string.tu_cards_t, listOf(R.string.tu_cards_1, R.string.tu_cards_2)),
-        // Web app and App card detached as a window over home (#98): how to detach it, wake it, put it back...
-        Step(null, R.string.tu_float_t, listOf(R.string.tu_float_1, R.string.tu_float_2, R.string.tu_float_3, R.string.tu_float_4), wide = true),
-        // ... then move and resize it (long press › Move / resize)
-        Step(null, R.string.tu_move_t, listOf(R.string.tu_move_1, R.string.tu_move_2, R.string.tu_move_3, R.string.tu_move_4), wide = true),
+        // Edit mode (#97): pinch the home screen; the web app's and the App card's double tap, detached windows (#98)
+        Step(null, R.string.tu_cards_t, listOf(R.string.tu_cards_1, R.string.tu_cards_2, R.string.tu_cards_3), wide = true),
         Step(null, R.string.tu_end_t, listOf(R.string.tu_end_1)),
     )
+
+    /** Number of steps, and the Music step's index (screenshot tests). */
+    internal val stepCount get() = STEPS.size
+    internal val musicStep get() = STEPS.indexOf(MUSIC_STEP)
 
     /**
      * First install: the tutorial opens once on full home. An update that brings the shortcuts menu: its step alone,
