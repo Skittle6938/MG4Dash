@@ -440,7 +440,7 @@ object ShortcutsPanel : Application.ActivityLifecycleCallbacks {
                 addView(sun(0), LayoutParams(kit.dp(42), kit.dp(42)))
                 addView(pct, LayoutParams(kit.dp(84), -2))
                 // AUTO: back to the automatic brightness, as the stock quick panel (screen_brightness_mode 1); lit while on
-                addView(minus, LayoutParams(kit.dp(56), kit.dp(56)).apply { leftMargin = kit.dp(16) })
+                addView(minus, LayoutParams(kit.dp(56), kit.dp(56)).apply { leftMargin = kit.dp(24) })
                 addView(auto, LayoutParams(kit.dp(124), kit.dp(56)).apply { leftMargin = kit.dp(10) })
                 addView(plus, LayoutParams(kit.dp(56), kit.dp(56)).apply { leftMargin = kit.dp(10) })
                 auto.setOnClickListener {
