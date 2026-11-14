@@ -322,7 +322,12 @@ py -3 i18n\gen.py                         # regenerate the translations after ed
 adb push MG4Dash-<version>.apk /data/local/tmp/x.apk
 adb shell pm install -r -f /data/local/tmp/x.apk
 adb shell rm /data/local/tmp/x.apk
+adb shell am force-stop app.mg4dash
+adb shell cmd package compile -m speed -f app.mg4dash
+adb shell am force-stop app.mg4dash
 ```
+
+Always recompile after installing: the compilation Android does at install uses the usage profile the car has recorded ("speed-profile"), and that code sometimes does not load (`ClassNotFoundException: app.mg4dash.LauncherApp` at each start, seen on 14/11). Recompile while MG4Dash is stopped, never while it runs. Then check that it really starts: press Home, `adb shell pidof app.mg4dash` gives a pid, and `adb logcat -d | grep "FATAL EXCEPTION"` shows nothing new. `adb shell dumpsys package dexopt | grep -A1 "\[app.mg4dash\]"` should no longer say `speed-profile`. MG4Dash Rescue only checks once, 90 s after the head unit starts, not after an install.
 
 1. Try it without changing the home screen: `adb shell am start -n app.mg4dash/.MainActivity`
 2. Make it the home screen: see [Home screen: replace and go back](#home-screen-replace-and-go-back). This only disables the SAIC home activity, whose HOME priority of 2 cannot be beaten otherwise.
