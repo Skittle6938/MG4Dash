@@ -15,8 +15,10 @@ class AutoBrightnessTest {
         assertEquals(0.2f, ShortcutsPanel.adjStepped(0f, 1), 1e-6f)
         assertEquals(-0.2f, ShortcutsPanel.adjStepped(0f, -1), 1e-6f)
         assertEquals(0.6f, ShortcutsPanel.adjStepped(0.4f, 1), 1e-6f)
-        // A value set elsewhere off the steps: back on the nearest one, then moved
+        // A value set elsewhere between two steps: the next step in the direction touched
         assertEquals(0.4f, ShortcutsPanel.adjStepped(0.33f, 1), 1e-6f)
+        assertEquals(0.2f, ShortcutsPanel.adjStepped(0.33f, -1), 1e-6f)
+        assertEquals(0.2f, ShortcutsPanel.adjStepped(0.4f, -1), 1e-6f)
         // Kept within -1 to 1
         assertEquals(1f, ShortcutsPanel.adjStepped(1f, 1), 1e-6f)
         assertEquals(-1f, ShortcutsPanel.adjStepped(-0.9f, -1), 1e-6f)

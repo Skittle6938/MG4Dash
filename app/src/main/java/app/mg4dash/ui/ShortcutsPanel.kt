@@ -68,9 +68,15 @@ object ShortcutsPanel : Application.ActivityLifecycleCallbacks {
     private const val ADJ_STEPS = 5
     private const val HAND_STEP = 13
 
-    /** The next shift of the automatic brightness (dir -1 or +1), kept on its steps and within -1 to 1. */
-    internal fun adjStepped(current: Float, dir: Int): Float =
-        (Math.round(current * ADJ_STEPS) + dir).coerceIn(-ADJ_STEPS, ADJ_STEPS) / ADJ_STEPS.toFloat()
+    /**
+     * The next shift of the automatic brightness (dir -1 or +1), kept on its steps and within -1 to 1. A value set
+     * elsewhere between two steps goes to the next step in the direction touched.
+     */
+    internal fun adjStepped(current: Float, dir: Int): Float {
+        val x = current * ADJ_STEPS
+        val n = if (dir > 0) Math.floor(x + 1e-3).toInt() + 1 else Math.ceil(x - 1e-3).toInt() - 1
+        return n.coerceIn(-ADJ_STEPS, ADJ_STEPS) / ADJ_STEPS.toFloat()
+    }
 
     /** The shift shown on the AUTO button: AUTO alone at 0, else its step (AUTO +2, AUTO −1). */
     internal fun adjLabel(adj: Float): String = when (val n = Math.round(adj * ADJ_STEPS)) {
