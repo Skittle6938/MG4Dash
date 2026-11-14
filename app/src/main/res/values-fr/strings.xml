@@ -778,6 +778,7 @@
     <string name="tu_end_1">Vous retrouverez ce tuto dans Réglages › Système.</string>
     <string name="tu_skip">Passer</string>
     <string name="tu_next">Suivant</string>
+    <string name="tu_prev">Précédent</string>
     <string name="tu_done">Terminer</string>
     <string name="tu_show">Revoir le tuto des gestes</string>
     <string name="apps_open">OUVERTES</string>

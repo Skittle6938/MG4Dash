@@ -778,6 +778,7 @@
     <string name="tu_end_1">Puoi rivedere questo tour in Impostazioni › Sistema.</string>
     <string name="tu_skip">Salta</string>
     <string name="tu_next">Avanti</string>
+    <string name="tu_prev">Indietro</string>
     <string name="tu_done">Fine</string>
     <string name="tu_show">Rivedi il tour dei gesti</string>
     <string name="apps_open">APERTE</string>

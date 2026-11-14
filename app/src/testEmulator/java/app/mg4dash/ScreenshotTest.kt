@@ -1440,6 +1440,33 @@ class ScreenshotTest {
         file.outputStream().use { bmp.compress(Bitmap.CompressFormat.PNG, 100, it) }
     }
 
+    /**
+     * The gesture tour's miniatures of home (Marc, 14/11): Simple and three layouts, dark, 528 × 198 (264 × 99 dp at
+     * 2×), in build/screenshots/tutorial/, to copy into res/drawable-nodpi.
+     */
+    @Test fun tutorialMiniatures() {
+        val dir = File("build/screenshots/tutorial").apply { mkdirs() }
+        fun mini(act: Activity, name: String) {
+            save(act.window.decorView, "tmp_$name.png")
+            val tmp = File("build/screenshots", "tmp_$name.png")
+            val full = android.graphics.BitmapFactory.decodeFile(tmp.path)
+            val small = Bitmap.createScaledBitmap(full, 528, 198, true)
+            File(dir, "$name.png").outputStream().use { small.compress(Bitmap.CompressFormat.PNG, 100, it) }
+            tmp.delete()
+        }
+        listOf(HL.FULL to "tu_layout_full", HL.BAND_TOP to "tu_layout_band_top", HL.SQUARE_RIGHT to "tu_layout_square_right")
+            .forEach { (layout, name) -> mini(layoutHome(layout, null, 1), name) }
+        // Simple: three panes, its shortcuts and the weather
+        org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE).edit()
+            .putInt("theme_mode", 1).putInt("home_style", 1).remove("home_layout").commit()
+        lastHome?.let { runCatching { it.pause().stop().destroy() } }
+        val ctl = Robolectric.buildActivity(MainActivity::class.java).setup()
+        lastHome = ctl
+        repeat(5) { shadowOf(Looper.getMainLooper()).idleFor(200, TimeUnit.MILLISECONDS) }
+        mini(ctl.get(), "tu_layout_simple")
+        org.junit.Assert.assertEquals(4, dir.listFiles { f -> f.name.startsWith("tu_layout_") }!!.size)
+    }
+
     @Test @Config(qualifiers = "fr-w1920dp-h720dp-land-mdpi") fun layoutsFinal() {
         File("build/screenshots/final").mkdirs()
         app.mg4dash.ui.HomeSlots.Layout.entries.forEachIndexed { i, layout ->

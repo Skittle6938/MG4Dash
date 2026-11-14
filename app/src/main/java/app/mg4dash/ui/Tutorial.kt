@@ -22,7 +22,7 @@ import app.mg4dash.system.Prefs
 
 /**
  * Small tutorial of home gestures: a dark veil, the relevant card highlighted, an arrow
- * towards it and a bubble with the main gestures. Next / Skip; "Skip" closes it for good.
+ * towards it and a bubble with the main gestures. Back / Next / Skip; "Skip" closes it for good.
  * Launched once after a first install, or from Settings › System.
  */
 object Tutorial {
@@ -62,7 +62,9 @@ object Tutorial {
         // Simple, or one of the layouts with its widgets (#97)
         Step(null, R.string.tu_layouts_t, listOf(R.string.tu_layouts_1, R.string.tu_layouts_2), listOf(
             R.drawable.tu_layout_simple to R.string.st_style_simple,
-            R.drawable.tu_layout_full to R.string.ly_title,
+            R.drawable.tu_layout_full to R.string.ly_full,
+            R.drawable.tu_layout_band_top to R.string.ly_band_top,
+            R.drawable.tu_layout_square_right to R.string.ly_square_right,
         )),
         // The bar in use: vertical (side) or at the bottom
         Step(R.id.dock, R.string.tu_bar_t, listOf(R.string.tu_bar_1, R.string.tu_bar_2, R.string.tu_bar_3), bottomTitle = R.string.tu_bar_bottom_t),
@@ -192,16 +194,19 @@ object Tutorial {
             bubble.addView(text(context.getString(title), 34f, Themes.color(context, R.color.text_value), bold = true))
             if (step.images.isNotEmpty()) {
                 val row = LinearLayout(context).apply { orientation = LinearLayout.HORIZONTAL }
+                // Up to 264 × 99 dp each, smaller to fit 4 in the bubble (Simple and three layouts, Marc 14/11)
+                val n = step.images.size
+                val imgW = minOf(264, (step.width - 56 - 16 * (n - 1)) / n)
                 step.images.forEachIndexed { i, (img, label) ->
                     val col = LinearLayout(context).apply { orientation = LinearLayout.VERTICAL; gravity = Gravity.CENTER_HORIZONTAL }
                     col.addView(RoundedFrame(context).apply {
                         addView(android.widget.ImageView(context).apply {
                             setImageResource(img); scaleType = android.widget.ImageView.ScaleType.CENTER_CROP
                         }, FrameLayout.LayoutParams(-1, -1))
-                    }, LinearLayout.LayoutParams(dp(264), dp(99)))
-                    col.addView(text(context.getString(label), 23f, Themes.color(context, R.color.text_value)),
+                    }, LinearLayout.LayoutParams(dp(imgW), dp(imgW * 99 / 264)))
+                    col.addView(text(context.getString(label), if (n > 2) 20f else 23f, Themes.color(context, R.color.text_value)).apply { gravity = Gravity.CENTER },
                         LinearLayout.LayoutParams(-2, -2).apply { topMargin = dp(8) })
-                    row.addView(col, LinearLayout.LayoutParams(-2, -2).apply { if (i > 0) leftMargin = dp(16) })
+                    row.addView(col, LinearLayout.LayoutParams(dp(imgW), -2).apply { if (i > 0) leftMargin = dp(16) })
                 }
                 bubble.addView(row, LinearLayout.LayoutParams(-2, -2).apply { topMargin = dp(16) })
             }
@@ -216,6 +221,9 @@ object Tutorial {
             if (!last) bottom.addView(button(R.string.tu_skip, false) { done(activity) })
             bottom.addView(text(if (only) "" else "${index + 1} / ${STEPS.size}", 22f, Themes.color(context, R.color.text_title)).apply { gravity = Gravity.CENTER },
                 LinearLayout.LayoutParams(0, -2, 1f))
+            // Back to the previous step (Marc, 14/11)
+            if (!only && index > 0) bottom.addView(button(R.string.tu_prev, false) { index--; render() },
+                LinearLayout.LayoutParams(-2, -2).apply { rightMargin = dp(16) })
             bottom.addView(button(if (last) R.string.tu_done else R.string.tu_next, true) {
                 if (last) done(activity) else { index++; render() }
             })
