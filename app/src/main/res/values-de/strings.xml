@@ -778,6 +778,7 @@
     <string name="tu_end_1">Diese Tour finden Sie wieder unter Einstellungen › System.</string>
     <string name="tu_skip">Überspringen</string>
     <string name="tu_next">Weiter</string>
+    <string name="tu_prev">Zurück</string>
     <string name="tu_done">Fertig</string>
     <string name="tu_show">Gestentour anzeigen</string>
     <string name="apps_open">GEÖFFNET</string>
