@@ -1456,9 +1456,10 @@ class ScreenshotTest {
         }
         listOf(HL.FULL to "tu_layout_full", HL.BAND_TOP to "tu_layout_band_top", HL.SQUARE_RIGHT to "tu_layout_square_right")
             .forEach { (layout, name) -> mini(layoutHome(layout, null, 1), name) }
-        // Simple: three panes, its shortcuts and the weather
+        // Simple: three panes, its two shortcuts (filled, as in home_simple.png) and the weather
         org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE).edit()
-            .putInt("theme_mode", 1).putInt("home_style", 1).remove("home_layout").commit()
+            .putInt("theme_mode", 1).putInt("home_style", 1).remove("home_layout")
+            .putString("sc_100", "ha|cover.gate|Gate").putString("sc_101", "ha|cover.garage_door|Garage").commit()
         lastHome?.let { runCatching { it.pause().stop().destroy() } }
         val ctl = Robolectric.buildActivity(MainActivity::class.java).setup()
         lastHome = ctl
