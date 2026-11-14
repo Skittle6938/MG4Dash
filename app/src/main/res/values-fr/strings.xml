@@ -765,8 +765,8 @@
     <string name="tu_energy_2">Câble branché : son bouton lance ou arrête la recharge, ou le V2L.</string>
     <string name="tu_map_t">Carte, web app et applis</string>
     <string name="tu_map_1">Glissez à gauche / droite : carte suivante de l\'emplacement.</string>
-    <string name="tu_map_3">Web app ou appli : un appui la réveille (contour allumé), puis utilisez-la ; appui long : son menu.</string>
-    <string name="tu_map_2">Carte : deux doigts pour la déplacer et zoomer. Double appui : plein écran et retour.</string>
+    <string name="tu_map_3">Double appui : plein écran et retour. Appui long : son menu.</string>
+    <string name="tu_map_2">Carte, web app ou appli : un appui la réveille (contour allumé), puis utilisez-la d\'un doigt.</string>
     <string name="tu_media_t">Musique</string>
     <string name="tu_media_1">Glissez haut / bas : source ; gauche / droite : morceau.</string>
     <string name="tu_media_2">Touchez le nom de la source : liste des sources ; l\'image : ouvrir son appli.</string>

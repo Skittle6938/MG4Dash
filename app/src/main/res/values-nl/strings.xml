@@ -765,8 +765,8 @@
     <string name="tu_energy_2">Kabel aangesloten: de knop start of stopt het laden, of V2L.</string>
     <string name="tu_map_t">Kaart, web-app en apps</string>
     <string name="tu_map_1">Naar links / rechts vegen: volgende kaart van de plek.</string>
-    <string name="tu_map_3">Web-app of app: één tik maakt hem wakker (verlichte rand), daarna gebruiken; lang drukken: zijn menu.</string>
-    <string name="tu_map_2">Kaart: twee vingers om te verplaatsen en te zoomen. Dubbeltikken: volledig scherm en terug.</string>
+    <string name="tu_map_3">Dubbeltikken: volledig scherm en terug. Lang drukken: zijn menu.</string>
+    <string name="tu_map_2">Kaart, web-app of app: één tik maakt hem wakker (verlichte rand), daarna met één vinger gebruiken.</string>
     <string name="tu_media_t">Muziek</string>
     <string name="tu_media_1">Veeg omhoog / omlaag: bron; links / rechts: nummer.</string>
     <string name="tu_media_2">Tik op de bronnaam: lijst van bronnen; de afbeelding: de app openen.</string>

@@ -765,8 +765,8 @@
     <string name="tu_energy_2">Kablo takılıyken: düğmesi şarjı veya V2L\'yi başlatır ya da durdurur.</string>
     <string name="tu_map_t">Harita, web uygulaması ve uygulamalar</string>
     <string name="tu_map_1">Sola / sağa kaydır: bu yerin sonraki kartı.</string>
-    <string name="tu_map_3">Web uygulaması veya uygulama: bir dokunuş uyandırır (çerçeve yanar), sonra kullanın; uzun bas: menüsü.</string>
-    <string name="tu_map_2">Harita: taşımak ve yakınlaştırmak için iki parmak. Çift dokun: tam ekran ve geri.</string>
+    <string name="tu_map_3">Çift dokun: tam ekran ve geri. Uzun bas: menüsü.</string>
+    <string name="tu_map_2">Harita, web uygulaması veya uygulama: bir dokunuş uyandırır (çerçeve yanar), sonra tek parmakla kullanın.</string>
     <string name="tu_media_t">Müzik</string>
     <string name="tu_media_1">Yukarı / aşağı kaydır: kaynak; sola / sağa: parça.</string>
     <string name="tu_media_2">Kaynak adına dokun: kaynak listesi; resme dokun: uygulamasını aç.</string>
