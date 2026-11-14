@@ -42,12 +42,20 @@ object ShortcutsPanel : Application.ActivityLifecycleCallbacks {
     private const val TAG = "Shortcuts"
     /** Height of the top band where the gesture must start, in px (the strip's, everywhere: widgets start below). */
     internal const val EDGE_PX = 12
-    /** A pull: at least this far down (dp), and clearly vertical (sideways less than half of it): a widget's swipe never opens it. */
-    private const val PULL_DP = 40
+    /**
+     * On MG4Dash's own screens the band is taller (#38, "capricious" pull): a slide down starting there pulls the menu
+     * rather than moving the widget under it (its taps still go through). Over the other apps only the strip's 12 px.
+     */
+    internal const val SCREEN_EDGE_PX = 48
+    /** A pull: at least this far down (dp), and mostly vertical (sideways less than 0.7 of it). */
+    private const val PULL_DP = 24
 
-    /** Is this move from the touch down a pull of the menu? One finger, clearly down. */
+    /** Is this move from the touch down a pull of the menu? One finger, mostly down. */
     internal fun isPull(dx: Float, dy: Float, density: Float, pointers: Int): Boolean =
-        pointers == 1 && dy > PULL_DP * density && Math.abs(dx) < dy * 0.5f
+        pointers == 1 && dy > PULL_DP * density && Math.abs(dx) < dy * 0.7f
+
+    /** A touch from the top band starting to go down, not yet a pull: kept from the widget under it (no swipe of its own). */
+    internal fun headingDown(dx: Float, dy: Float, slop: Int): Boolean = dy > slop && Math.abs(dx) < dy
 
     private const val COLS = 6
     private const val REFRESH_MS = 1_000L
@@ -94,6 +102,8 @@ object ShortcutsPanel : Application.ActivityLifecycleCallbacks {
         private var downX = 0f
         private var downY = 0f
         private var candidate = false
+        /** Moves kept from the screen (going down from the band): a let go then cancels its touch, no click. */
+        private var withheld = false
         /** The finger moves the panel (pulling it down, or sliding it back up). */
         private var dragging: Panel? = null
         private var startProgress = 0f
@@ -102,10 +112,10 @@ object ShortcutsPanel : Application.ActivityLifecycleCallbacks {
             val open = panel?.takeIf { it.activity === activity }
             when (e.actionMasked) {
                 MotionEvent.ACTION_DOWN -> {
-                    downX = e.rawX; downY = e.rawY; dragging = null
-                    // From the top edge only (the strip's height): the cards and their swipes start below. In full screen
-                    // the strip itself pulls it, over MG4Dash too: the same gesture everywhere
-                    candidate = (open == null && e.y <= EDGE_PX && e.pointerCount == 1 && enabled(activity) && !GlobalStrip.wanted(activity)) ||
+                    downX = e.rawX; downY = e.rawY; dragging = null; withheld = false
+                    // From the top band of the screen (taller than the strip's): a slide down there is the menu's, the
+                    // widgets' swipes start below. In full screen the strip (above this window) takes its own 12 px
+                    candidate = (open == null && e.y <= SCREEN_EDGE_PX && e.pointerCount == 1 && enabled(activity)) ||
                         (open != null && open.dialogShown.not() && open.inSheet(e.rawX, e.rawY))
                 }
                 MotionEvent.ACTION_POINTER_DOWN -> if (dragging == null) candidate = false
@@ -123,6 +133,8 @@ object ShortcutsPanel : Application.ActivityLifecycleCallbacks {
                             dragging = p; startProgress = p.progress; downY = e.rawY
                             return true
                         }
+                        // Going down from the band, not a pull yet: the widget under it does not get the move
+                        if (open == null && headingDown(dx, dy, slop)) { withheld = true; return true }
                     }
                 }
                 MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
@@ -135,6 +147,10 @@ object ShortcutsPanel : Application.ActivityLifecycleCallbacks {
                         return true
                     }
                     candidate = false
+                    if (withheld) {
+                        withheld = false
+                        return base.dispatchTouchEvent(MotionEvent.obtain(e).apply { action = MotionEvent.ACTION_CANCEL })
+                    }
                 }
             }
             return base.dispatchTouchEvent(e)

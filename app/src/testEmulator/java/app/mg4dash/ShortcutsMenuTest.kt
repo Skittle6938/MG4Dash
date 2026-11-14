@@ -99,8 +99,16 @@ class ShortcutsMenuTest {
         assertTrue(app.mg4dash.ui.ShortcutsPanel.isPull(10f, 60f, d, 1))
         // A widget's swipe (sideways), even starting at the top: never
         assertEquals(false, app.mg4dash.ui.ShortcutsPanel.isPull(80f, 60f, d, 1))
-        assertEquals(false, app.mg4dash.ui.ShortcutsPanel.isPull(10f, 30f, d, 1))   // too short
+        assertEquals(false, app.mg4dash.ui.ShortcutsPanel.isPull(10f, 20f, d, 1))   // too short
         assertEquals(false, app.mg4dash.ui.ShortcutsPanel.isPull(0f, 200f, d, 2))   // two fingers (MG4Link)
+        // #38, "capricious": a shorter slide, a little slanted, is enough
+        assertTrue(app.mg4dash.ui.ShortcutsPanel.isPull(18f, 30f, d, 1))
+        // Going down from the band: the widget under it does not get the move; sideways or up it does
+        assertTrue(app.mg4dash.ui.ShortcutsPanel.headingDown(3f, 12f, 8))
+        assertFalse(app.mg4dash.ui.ShortcutsPanel.headingDown(30f, 12f, 8))
+        assertFalse(app.mg4dash.ui.ShortcutsPanel.headingDown(0f, -20f, 8))
+        assertTrue("taller band on MG4Dash's screens than the strip over the apps",
+            app.mg4dash.ui.ShortcutsPanel.SCREEN_EDGE_PX > app.mg4dash.ui.ShortcutsPanel.EDGE_PX)
     }
 
     @Test fun climateHeatingOrCooling() {
