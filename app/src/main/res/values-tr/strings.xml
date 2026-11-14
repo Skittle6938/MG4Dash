@@ -240,6 +240,8 @@
     <string name="st_title">Ayarlar · MG4Dash %1$s</string>
     <string name="st_replace_msg">MG4Dash başlangıçta ve Ana ekran düğmesiyle açılacak.\n\nHiçbir şey kaldırılmaz: orijinal SAIC ana ekranı yalnızca ana ekran olarak kapatılır, aracın diğer işlevleri normal şekilde çalışmaya devam eder.\n\nAynı yerdeki Bakım modu ile istediğiniz zaman geri dönebilirsiniz. MG4Dash art arda birkaç kez çökerse orijinal ana ekran kendiliğinden geri gelir.</string>
     <string name="st_replace_btn">Değiştir</string>
+    <string name="valet_back_msg">Bakım modu açık: orijinal SAIC ana ekranı şu an ana ekran.\n\nMG4Dash yeniden ana ekran yapılsın mı?</string>
+    <string name="valet_back_btn">MG4Dash ana ekran</string>
     <string name="cancel">İptal</string>
     <string name="temp_cal_title">Sıcaklık kalibrasyonu</string>
     <string name="temp_cal_preview">Gösterilen: %1$s</string>
