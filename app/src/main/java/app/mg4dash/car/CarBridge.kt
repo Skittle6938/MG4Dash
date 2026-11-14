@@ -70,7 +70,7 @@ object CarBridge {
         Log.i(TAG, "firmware ${Firmware.version} (${Firmware.gen}, family ${Firmware.family})")
         scope.launch { pollLoop() }
         watchSaicClimate(context.applicationContext)
-        watchClimateWindow()
+        watchClimateWindow(context.applicationContext)
         trackManualClimate(context.applicationContext)
     }
 
@@ -710,6 +710,23 @@ object CarBridge {
      * 3 s, bring MG4Dash back in front (same setting as #48). Not when MG4Dash opened an app itself.
      */
     private var lastTopSeen: String? = null
+    /** How long the SAIC climate page is looked for: climate already on at start (#112, cold start), turned on by the car, screen lit again. */
+    internal const val START_WATCH_MS = 90_000L
+    internal const val TURN_ON_WATCH_MS = 20_000L
+    internal const val SCREEN_ON_WATCH_MS = 45_000L
+
+    /**
+     * How long to look for the SAIC climate page after the climate state [prev] → [on], or null. #112: after a long
+     * stop the car starts with the climate already on (left on when leaving): MG4Dash then sees no turning on, only
+     * its first reading, and the page comes during the start. A turning on asked by MG4Dash itself opens nothing.
+     */
+    internal fun climatePageWatch(prev: Boolean?, on: Boolean?, now: Long, ownCommandAt: Long): Long? = when {
+        on != true -> null
+        prev == null -> START_WATCH_MS
+        prev == false && now - ownCommandAt > 4_000 -> TURN_ON_WATCH_MS
+        else -> null
+    }
+
     /** Last climate command sent by MG4Dash (elapsedRealtime). */
     @Volatile private var ownCommandAt = 0L
 
@@ -718,17 +735,45 @@ object CarBridge {
      * old firmwares the SAIC climate page is a window over MG4Dash, without changing the
      * foreground app: note the focused window and the top windows, read from the system state.
      */
-    private fun watchClimateWindow() {
+    private fun watchClimateWindow(ctx: Context) {
         if (Firmware.family == Firmware.Family.A9) return
         scope.launch {
             var prev: Boolean? = null
             _state.collect { s ->
                 val on = s.hvacOn
-                if (prev == false && on == true && android.os.SystemClock.elapsedRealtime() - ownCommandAt > 4_000) {
-                    delay(900)
-                    closeClimateWindow()
-                }
+                climatePageWatch(prev, on, android.os.SystemClock.elapsedRealtime(), ownCommandAt)?.let { watchPageFor(it, if (prev == null) "climate already on at start" else "climate turned on by the car") }
                 if (on != null) prev = on
+            }
+        }
+        // #112: the screen lit again (driver back in the car) with the climate on, the page can come then too
+        try {
+            ctx.registerReceiver(object : android.content.BroadcastReceiver() {
+                override fun onReceive(c: Context?, i: android.content.Intent?) {
+                    if (_state.value.hvacOn == true) watchPageFor(SCREEN_ON_WATCH_MS, "screen on, climate on")
+                }
+            }, android.content.IntentFilter(android.content.Intent.ACTION_SCREEN_ON))
+        } catch (e: Throwable) { Log.w(TAG, "climate page screen watch: ${e.message}") }
+    }
+
+    /** Until when the SAIC climate page is looked for (elapsedRealtime), 0 = not looked for. */
+    @Volatile private var pageWatchUntil = 0L
+    private var pageWatch: kotlinx.coroutines.Job? = null
+
+    /**
+     * Looks for the SAIC climate page every 1.5 s for [ms] and closes it once seen (#112). The page can come well
+     * after the climate came on, and the system UI service may not answer at once: looked for again until closed.
+     */
+    private fun watchPageFor(ms: Long, why: String) {
+        val until = android.os.SystemClock.elapsedRealtime() + ms
+        if (until <= pageWatchUntil) return
+        pageWatchUntil = until
+        Log.i(TAG, "climate page looked for ${ms / 1000} s ($why)")
+        if (pageWatch?.isActive == true) return
+        pageWatch = scope.launch {
+            delay(900)
+            while (android.os.SystemClock.elapsedRealtime() < pageWatchUntil) {
+                if (closeClimateWindow(quiet = true)) { pageWatchUntil = 0L; break }
+                delay(1_500)
             }
         }
     }
@@ -767,14 +812,16 @@ object CarBridge {
      * MG4Dash (lopezjm2001's log, SWI165). A "back" does not close it; it is closed through
      * SystemUI's service ([SaicHvacPage]): the previous screen stays shown (setting #48).
      */
-    private fun closeClimateWindow() {
+    /** True when there is nothing more to do: the page closed, or left shown by the setting. */
+    private fun closeClimateWindow(quiet: Boolean = false): Boolean {
         val focus = focusedWindow()
-        Log.i(TAG, "climate window: ${focus ?: "focus unknown"}")
-        if (focus?.contains("hvac page") != true) return
+        if (!quiet) Log.i(TAG, "climate window: ${focus ?: "focus unknown"}")
+        if (focus?.contains("hvac page") != true) return false
+        if (quiet) Log.i(TAG, "climate window: $focus")
         logHvacWindow("shown")
-        val ctx = appContext ?: return
-        if (!app.mg4dash.system.Prefs(ctx).hideSaicClimate) return
-        SaicHvacPage.close(ctx)   // back to the previous screen, as asked by lopezjm2001 (#62)
+        val ctx = appContext ?: return true
+        if (!app.mg4dash.system.Prefs(ctx).hideSaicClimate) return true
+        return SaicHvacPage.close(ctx)   // back to the previous screen, as asked by lopezjm2001 (#62)
     }
 
     private fun watchSaicClimate(ctx: Context) {
