@@ -15,25 +15,28 @@ import java.io.File
  * The setting switches the overlay on or off (IOverlayManager, allowed for the system uid). SystemUI builds the
  * button once, at its start: the change shows at the head unit's next start.
  *
- * The overlay's two ImageViews carry the numeric ids of the SystemUI it was built against (SWI69, A9_Systemui
- * V1.0.0.222). Another SystemUI numbers them differently (SWI173 .153: img_front_lamp 0x7f0800b6): its FloatBallView
- * then finds no front lamp, a NullPointerException at SystemUI's start, again and again, and the head unit restarts
- * (#113). So the overlay is only installed and enabled when this SystemUI's ids are the overlay's, and is disabled
- * everywhere else; the fog light button then stays, its corner kept free as before.
+ * A layout overlay keeps the numeric ids it was compiled with, and SystemUI versions number the two icons differently
+ * (img_front_lamp / img_rear_lamp: 0x7f0800b8 / 0x7f0800ba on SWI69's .222, 0x7f0800b6 / 0x7f0800b8 on SWI173's .153).
+ * Version 1, built for SWI69 only, left SWI173's FloatBallView without a front lamp: a NullPointerException at each
+ * start of SystemUI and the head unit restarting (#113). Version 2 (overlay/nofog/gen.py) holds one 0 x 0 ImageView
+ * per id of [ID_FIRST]..[ID_LAST], so both lamps are found whatever their numbers in that range. MG4Dash reads this
+ * SystemUI's real ids and only installs and enables the overlay when both fall in the range (and layout_ball exists);
+ * elsewhere it is disabled, and the fog light button stays with its corner kept free as before.
  */
 object FogOverlay {
     private const val TAG = "FogOverlay"
     const val PKG = "app.mg4dash.overlay.nofog"
-    private const val BUNDLED_VERSION = 1L
+    private const val BUNDLED_VERSION = 2L
     private const val ASSET = "overlay_nofog.apk"
     private const val USER = 0
     private const val SYSTEMUI = "com.android.systemui"
-    /** The ids compiled into the overlay's layout_ball (SWI69's SystemUI). */
-    internal const val FRONT_ID = 0x7f0800b8
-    internal const val REAR_ID = 0x7f0800ba
+    /** The ids the overlay's layouts hold a 0 x 0 ImageView for (overlay/nofog/gen.py: FIRST / LAST). */
+    internal const val ID_FIRST = 0x7f080040
+    internal const val ID_LAST = 0x7f08017f
 
-    /** The overlay fits a SystemUI whose img_front_lamp and img_rear_lamp are [front] and [rear]; 0: not found. */
-    internal fun idsMatch(front: Int, rear: Int) = front == FRONT_ID && rear == REAR_ID
+    /** The overlay fits a SystemUI with layout_ball whose img_front_lamp and img_rear_lamp are [front] and [rear]; 0: not found. */
+    internal fun idsMatch(front: Int, rear: Int, hasLayout: Boolean = true) =
+        hasLayout && front != rear && front in ID_FIRST..ID_LAST && rear in ID_FIRST..ID_LAST
 
     @Volatile private var fits: Boolean? = null
 
@@ -45,8 +48,10 @@ object FogOverlay {
             val res = context.packageManager.getResourcesForApplication(SYSTEMUI)
             val front = res.getIdentifier("img_front_lamp", "id", SYSTEMUI)
             val rear = res.getIdentifier("img_rear_lamp", "id", SYSTEMUI)
-            idsMatch(front, rear).also {
-                if (!it) Log.i(TAG, "SystemUI ids front 0x${Integer.toHexString(front)} rear 0x${Integer.toHexString(rear)}: the overlay does not fit this SystemUI, fog light button left (#113)")
+            val layout = res.getIdentifier("layout_ball", "layout", SYSTEMUI) != 0
+            val ids = "front 0x${Integer.toHexString(front)} rear 0x${Integer.toHexString(rear)} layout_ball ${if (layout) "yes" else "no"}"
+            idsMatch(front, rear, layout).also {
+                Log.i(TAG, "SystemUI fog light ids: $ids → overlay ${if (it) "fits" else "does not fit this SystemUI, fog light button left (#113)"}")
             }
         } catch (e: Exception) { Log.w(TAG, "SystemUI ids unreadable: ${e.message}"); false }
         fits = r
