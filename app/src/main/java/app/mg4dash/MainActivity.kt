@@ -1557,7 +1557,12 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         return true
     }
 
+    /** The gesture started on a window over home, or while one is moved: not for the cards under it. */
+    private var onWindow = false
+
     override fun dispatchTouchEvent(ev: android.view.MotionEvent): Boolean {
+        if (ev.actionMasked == android.view.MotionEvent.ACTION_DOWN)
+            onWindow = listOfNotNull(floatWeb, floatMap).any { it.floating && (it.moving || it.holds(ev)) }
         if (!app.mg4dash.ui.CardsEditor.isOpen(this) && outsideRest(ev)) return true
         // The windows over home (web app, map): at rest their gestures, awake straight to their page; the front one first
         if (!app.mg4dash.ui.CardsEditor.isOpen(this)) {
@@ -1568,6 +1573,8 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         }
         if (twoFingerPull.onTouch(ev) { super.dispatchTouchEvent(it) }) return true
         if (!simpleMode && !app.mg4dash.ui.CardsEditor.isOpen(this) && pinchToEdit.onTouch(ev) { super.dispatchTouchEvent(it) }) return true
+        // A window over home moved (its OK) or touched: the card at rest under it takes none of that gesture
+        if (onWindow) return super.dispatchTouchEvent(ev)
         if (!app.mg4dash.ui.CardsEditor.isOpen(this) && longPress(ev)) return true
         if (!app.mg4dash.ui.CardsEditor.isOpen(this) && restTouch(ev)) return true
         return super.dispatchTouchEvent(ev)
