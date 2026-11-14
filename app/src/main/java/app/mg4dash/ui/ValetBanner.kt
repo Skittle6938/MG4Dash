@@ -31,9 +31,9 @@ internal object ValetGesture {
 
     fun isThreeFingerPull(dy: Float, pointers: Int, density: Float): Boolean = pointers >= 3 && dy >= PULL_DP * density
 
-    fun event(downTime: Long, time: Long, action: Int, x: Float, y: Float, deviceId: Int, source: Int): MotionEvent {
+    fun event(downTime: Long, time: Long, action: Int, px: Float, py: Float, deviceId: Int, source: Int): MotionEvent {
         val props = arrayOf(MotionEvent.PointerProperties().apply { id = 0; toolType = MotionEvent.TOOL_TYPE_FINGER })
-        val coords = arrayOf(MotionEvent.PointerCoords().apply { this.x = x; this.y = y; pressure = 1f; size = 1f })
+        val coords = arrayOf(MotionEvent.PointerCoords().apply { x = px; y = py; pressure = 1f; size = 1f })
         return MotionEvent.obtain(downTime, time, action, 1, props, coords, 0, 0, 1f, 1f, deviceId, 0,
             if (source == 0) InputDevice.SOURCE_TOUCHSCREEN else source, 0)
     }
