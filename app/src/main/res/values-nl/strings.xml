@@ -665,19 +665,9 @@
     <string name="st_edit_cards">Kaarten van de widgets</string>
     <string name="st_edit_cards_desc">De kaarten kiezen die elke widget toont, zoals de app-kaart (de kaart of een andere app) en een web-app. Snelkoppeling: het startscherm met twee vingers samenknijpen.</string>
     <string name="st_edit_cards_btn">Kaarten bewerken</string>
-    <string name="tu_cards_t">Kaarten kiezen en verplaatsen</string>
-    <string name="tu_cards_1">Knijp het startscherm met twee vingers samen: elke plek toont haar kaarten; een middelgrote plek kan ook klimaat of media tonen</string>
-    <string name="tu_cards_2">Tik op een kaart om ze te tonen of te verwijderen; van elders gehaald, verandert ze van plek. Standaard zet alles terug zoals in het begin</string>
-    <string name="tu_float_t">Losse vensters</string>
-    <string name="tu_float_1">De web-app en de app-kaart (de kaart of haar app) kunnen hun plek verlaten: knijp in het startscherm, tik op hun plek, dan Dubbeltik › Los venster</string>
-    <string name="tu_float_2">Daarna maakt een dubbeltik er een los venster boven het startscherm van; een dubbeltik op het venster zet het terug in zijn kaart</string>
-    <string name="tu_float_3">In rust krijgt het venster je gebaren, niet de pagina: tik één keer om het te wekken (rand licht op) en gebruik dan de pagina of app</string>
-    <string name="tu_float_4">Lang drukken op het venster: zijn menu (Terug, Verplaatsen / formaat wijzigen, wat het toont)</string>
-    <string name="tu_move_t">Een venster verplaatsen en vergroten</string>
-    <string name="tu_move_1">Lang drukken op het venster › Verplaatsen / formaat wijzigen: een kader met grepen verschijnt, met OK eronder</string>
-    <string name="tu_move_2">Schuif binnenin om het te verplaatsen; trek aan een hoek om het formaat te wijzigen zonder vervorming, aan het midden van een rand voor alleen breedte of hoogte</string>
-    <string name="tu_move_3">Of twee vingers: schuin = het hele formaat, naast elkaar = de breedte, boven elkaar = de hoogte</string>
-    <string name="tu_move_4">Alleen OK sluit de modus; de randen sluiten aan op de kaarten, plek en formaat blijven bewaard voor de volgende keer</string>
+    <string name="tu_cards_t">Startscherm bewerken</string>
+    <string name="tu_cards_1">Knijp het startscherm samen: kies de indeling en tik op elke plek op een kaart om hem te tonen of weg te halen.</string>
+    <string name="tu_cards_2">Op de plek van de web-app of app: het adres of de app, en wat dubbeltikken doet (volledig scherm of los venster).</string>
     <string name="st_panel_outline">Rand van de startpanelen</string>
     <string name="st_clock">Klok</string>
     <string name="st_clock_24">24 u</string>
@@ -752,43 +742,38 @@
     <string name="st_aa_button_desc">Dubbeltik op de knop om de telefoonverbinding te verbreken (de app wordt uitgeschakeld, het pictogram wordt rood); nogmaals dubbeltikken om ze te herstellen. Lang drukken: app kiezen.</string>
     <string name="dock_conn_disabled">%1$s uitgeschakeld: de telefoon maakt geen verbinding meer. Nogmaals lang drukken om te herstellen.</string>
     <string name="dock_conn_enabled">%1$s hersteld</string>
-    <string name="dock_conn_off">%1$s is uitgeschakeld: houd de knop lang ingedrukt om te herstellen.</string>
+    <string name="dock_conn_off">%1$s is uitgeschakeld: de tegel Android Auto loskoppelen in het snelmenu herstelt het.</string>
     <string name="tu_welcome_t">Welkom bij MG4Dash</string>
-    <string name="tu_welcome_1">Een korte rondleiding langs de belangrijkste gebaren, in een paar stappen.</string>
-    <string name="tu_home_t">MG4Dash als startscherm van de auto</string>
+    <string name="tu_welcome_1">De belangrijkste gebaren, in een paar stappen.</string>
+    <string name="tu_home_t">MG4Dash als startscherm</string>
     <string name="tu_home_path">Instellingen (tandwiel) › Systeem</string>
-    <string name="tu_home_1">SAIC-start vervangen: MG4Dash opent bij het starten en met de Home-knop. Er wordt niets verwijderd: het originele startscherm wordt alleen uitgeschakeld als startscherm</string>
-    <string name="tu_home_2">Altijd terug naar het origineel (dealerbezoek, een probleem): Onderhoudsmodus, op dezelfde plek, één tik</string>
-    <string name="tu_layouts_t">Drie startindelingen</string>
-    <string name="tu_layouts_1">Kies in Instellingen › Start: Volledig, Eenvoudig (grote panelen) of Kaart (grote kaart)</string>
-    <string name="tu_layouts_2">Ook: zijbalk of onderbalk; bij Weergave: licht, donker of automatisch, kleuren</string>
+    <string name="tu_home_1">SAIC-start vervangen: MG4Dash opent bij het starten en met de Home-toets. Er wordt niets verwijderd.</string>
+    <string name="tu_home_2">Onderhoudsmodus, op dezelfde plek: het originele startscherm terug met één tik.</string>
+    <string name="tu_layouts_t">Indeling van het startscherm</string>
+    <string name="tu_layouts_1">Instellingen › Start: Eenvoudig (drie grote panelen) of Indeling, met 8 widgetindelingen.</string>
+    <string name="tu_layouts_2">Knijp het startscherm samen om de widgets van elke plek te kiezen.</string>
     <string name="tu_bar_t">Zijbalk</string>
     <string name="tu_bar_bottom_t">Onderbalk</string>
-    <string name="tu_bar_1">Instellingen: tikken = MG4Dash, lang drukken = auto</string>
-    <string name="tu_bar_2">Energie: dubbel tikken = scherm uit, lang drukken = auto uitzetten (nooit tijdens het rijden)</string>
-    <string name="tu_bar_3">Voertuig: dubbel tikken = deuren vergrendelen / ontgrendelen, lang drukken = ESC uit / aan</string>
-    <string name="tu_bar_4">Start: lang drukken = alle apps</string>
-    <string name="tu_bar_5">Android Auto: lang drukken = app kiezen (Android Auto, CarPlay of een andere), dubbeltikken = telefoonverbinding verbreken / herstellen</string>
-    <string name="tu_bar_6">Twee vingers vanaf de bovenkant van het scherm omlaag vegen: Android Auto openen, als een telefoon is verbonden</string>
+    <string name="tu_bar_1">Tikken: de MG4Dash-pagina. Lang drukken: het originele scherm van de auto (voertuig, klimaat, laden, telefoon, instellingen).</string>
+    <string name="tu_bar_2">Start, lang drukken: alle apps. Android Auto, lang drukken: Android Auto, CarPlay of een andere app kiezen.</string>
+    <string name="tu_bar_3">Twee vingers vanaf boven omlaag vegen: Android Auto openen, als een telefoon is verbonden.</string>
     <string name="tu_climate_t">Klimaat</string>
-    <string name="tu_climate_1">A/C lang drukken: A/C met tussenpozen (tik op A/C om te stoppen)</string>
-    <string name="tu_climate_2">Temperatuur lang drukken: kalibratie; aan/uit lang drukken: klimaat aan na het uitstappen (kamperen)</string>
-    <string name="tu_climate_3">Ventilator „−“ op de laagste stand zet het klimaat uit</string>
+    <string name="tu_climate_1">A/C lang drukken: A/C met tussenpozen. Temperatuur lang drukken: kalibratie.</string>
+    <string name="tu_climate_2">Ventilator − op de laagste stand: klimaat uit. − / + lang drukken: laagste / hoogste stand.</string>
     <string name="tu_energy_t">Energie</string>
-    <string name="tu_energy_1">Tik op een KERS-segment: regeneratieniveau; lang drukken: rijden met één pedaal</string>
-    <string name="tu_energy_2">Knop CHARGE: laden en V2L</string>
-    <string name="tu_map_t">Kaart</string>
-    <string name="tu_map_1">Naar links / rechts vegen: volgende kaart van de widget (verbruik, snelkoppelingen…)</string>
-    <string name="tu_map_3">Twee vingers: kaart verplaatsen en zoomen (één vinger op volledig scherm)</string>
-    <string name="tu_map_2">Knijp in het startscherm, dan App: een andere app in plaats van de kaart</string>
-    <string name="tu_map_4">Dubbeltik: volledig scherm en terug, of een los venster (zie verderop)</string>
+    <string name="tu_energy_1">Tik op een KERS-segment: regeneratieniveau; lang drukken: rijden met één pedaal.</string>
+    <string name="tu_energy_2">Kabel aangesloten: de knop start of stopt het laden, of V2L.</string>
+    <string name="tu_map_t">Kaart, web-app en apps</string>
+    <string name="tu_map_1">Naar links / rechts vegen: volgende kaart van de plek.</string>
+    <string name="tu_map_3">Web-app of app: één tik maakt hem wakker (verlichte rand), daarna gebruiken; lang drukken: zijn menu.</string>
+    <string name="tu_map_2">Kaart: twee vingers om te verplaatsen en te zoomen. Dubbeltikken: volledig scherm en terug.</string>
     <string name="tu_media_t">Muziek</string>
-    <string name="tu_media_1">Veeg omhoog / omlaag: volgende bron; links / rechts: vorig / volgend nummer</string>
-    <string name="tu_media_2">Tik op de bronnaam: bronmenu; tik op de afbeelding: app openen</string>
+    <string name="tu_media_1">Veeg omhoog / omlaag: bron; links / rechts: nummer.</string>
+    <string name="tu_media_2">Tik op de bronnaam: lijst van bronnen; de afbeelding: de app openen.</string>
     <string name="tu_media_3">Afspelen / pauze lang drukken: pagina Geluid</string>
     <string name="tu_widget_t">Widgets met meerdere kaarten</string>
-    <string name="tu_widget_1">Naar links / rechts vegen: volgende kaart (rit, vermogen, telefoon, weer per uur of per dag…); bij rit, vermogen en telefoon volstaat een tik</string>
-    <string name="tu_widget_2">Telefoonsnelkoppeling lang drukken: wijzigen of 2 tot 8 kiezen</string>
+    <string name="tu_widget_1">Naar links / rechts vegen: volgende kaart (rit, vermogen, telefoon, weer…).</string>
+    <string name="tu_widget_2">Telefoonsnelkoppeling lang drukken om hem te wijzigen.</string>
     <string name="tu_end_t">Dat was het!</string>
     <string name="tu_end_1">Je vindt deze rondleiding terug in Instellingen › Systeem.</string>
     <string name="tu_skip">Overslaan</string>
@@ -932,10 +917,9 @@
     <string name="sc_connected">Verbonden</string>
     <string name="sc_cut">Losgekoppeld</string>
     <string name="tu_shortcuts_t">Snelmenu</string>
-    <string name="tu_shortcuts_1">Veeg met één vinger omlaag vanaf de bovenrand van het scherm, op elk scherm en over andere apps (ook Android Auto), om het snelmenu te openen.</string>
-    <string name="tu_shortcuts_2">Tik op een tegel om te handelen: het pictogram en de regel eronder tonen de toestand van de auto.</string>
-    <string name="tu_shortcuts_3">Druk lang op het menu om de getoonde snelkoppelingen te kiezen.</string>
-    <string name="tu_shortcuts_4">Instellingen › Start › Snelmenu: aan verbergt het ook de originele mistlichtknop (na de volgende start van de radio); uit, alles zoals voorheen.</string>
+    <string name="tu_shortcuts_1">Eén vinger omlaag vanaf de bovenrand van het scherm, op elk scherm en over andere apps.</string>
+    <string name="tu_shortcuts_2">Tik op een tegel om te schakelen; lang drukken op het menu om de tegels te kiezen. De Home-toets sluit het.</string>
+    <string name="tu_shortcuts_3">Instellingen › Start › Snelmenu: verbergt ook de originele mistlichtknop (na een herstart van de radio).</string>
     <string name="sc_heating">Verwarming</string>
     <string name="sc_cooling">Koeling</string>
     <string name="sc_clim_state">%1$s · buiten %2$s</string>
@@ -950,4 +934,5 @@
     <string name="sc_udw">Vermoeidheidswaarschuwing</string>
     <string name="sc_all_off">Alles uit</string>
     <string name="sc_close">Sluiten</string>
+    <string name="tu_cards_3">Los venster: dubbeltikken zet het terug; lang drukken › Verplaatsen / formaat wijzigen, dan OK.</string>
 </resources>
