@@ -129,6 +129,21 @@ object ShortcutTiles {
         }
     }
 
+    /**
+     * Tile lit in the theme's accent colour (Marc, 14/11, mockup A): what it switches is on / active, ESP active
+     * included (unlike [Shown.inverted], which marks the unusual state for the icons). Padlocks: locked. Android Auto:
+     * connected. Levels (drive mode, regeneration) and actions (switch off, screen off) are never lit.
+     */
+    fun lit(tile: Tile, s: Shown?): Boolean {
+        if (s == null || !s.available || s.state.isEmpty() || s.disabled) return false
+        return when (tile) {
+            Tile.ESP, Tile.DOORS, Tile.AA -> !s.inverted
+            Tile.AIDS -> s.level != 0
+            Tile.MODE, Tile.REGEN, Tile.POWER, Tile.SCREEN -> false
+            else -> s.inverted
+        }
+    }
+
     /** Icon of [tile] for the state [s]: padlock open when unlocked, gauge needle on the drive mode (eco left, sport right). */
     fun icon(tile: Tile, s: Shown?): Int {
         // State unknown (not read yet, or not given by the car): the tile's usual icon

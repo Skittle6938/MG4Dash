@@ -172,6 +172,15 @@ object ShortcutsPanel : Application.ActivityLifecycleCallbacks {
         }
         private val panelBg = androidx.core.graphics.ColorUtils.compositeColors(
             Themes.color(ctx, R.color.panel), Themes.color(ctx, R.color.bg_top) or 0xFF000000.toInt()) or 0xFF000000.toInt()
+        // The theme's accent (Marc, 14/11, mockup A): what is on is tinted with it, as the climate buttons
+        private val light = Themes.isLight(ctx)
+        private val accent = Themes.color(ctx, R.color.accent_action)
+        /** Icon and state of a lit tile: the selection colour in dark, the accent itself in light (readable on white). */
+        private val accentText = if (light) accent else Themes.select(ctx)
+        private val accentBorder = Themes.attr(ctx, R.attr.mgActionBorder, accent)
+        /** Background of a lit tile: the deepest accent in dark, a light tint of it in light. */
+        private val accentTint = if (light) androidx.core.graphics.ColorUtils.blendARGB(panelBg, accent, 0.13f)
+            else Themes.attr(ctx, R.attr.mgActionDeeper, androidx.core.graphics.ColorUtils.blendARGB(panelBg, accent, 0.3f))
         private val root = FrameLayout(ctx)
         private val shade = View(ctx).apply { setBackgroundColor(0x73000000); alpha = 0f }
         private val sheet = LinearLayout(ctx).apply { orientation = LinearLayout.VERTICAL; isClickable = true }
@@ -343,14 +352,15 @@ object ShortcutsPanel : Application.ActivityLifecycleCallbacks {
                 show(null)
             }
 
-            /** On (or unusual state): inverted tile, light on dark or dark on light, no accent colour. */
+            /** On / active: background tinted with the theme's accent, its border, icon and state in the accent colour. */
             fun show(s: ShortcutTiles.Shown?) {
-                val inv = s?.inverted == true
-                val fg = c(if (inv) R.color.panel else R.color.text_value)
-                bg.setColor(c(if (inv) R.color.text_value else R.color.button_idle))
-                icon.setImageResource(ShortcutTiles.icon(tile, s)); icon.setColorFilter(fg); name.setTextColor(fg)
+                val lit = ShortcutTiles.lit(tile, s)
+                bg.setColor(if (lit) accentTint else c(R.color.button_idle))
+                if (lit) bg.setStroke(kit.dp(2), accentBorder) else bg.setStroke(0, 0)
+                icon.setImageResource(ShortcutTiles.icon(tile, s)); icon.setColorFilter(if (lit) accentText else c(R.color.text_value))
+                name.setTextColor(c(R.color.text_value))
                 name.text = s?.label ?: ctx.getString(tile.label)
-                state.setTextColor(if (inv) fg else c(R.color.text_sub)); state.alpha = if (inv) 0.75f else 1f
+                state.setTextColor(if (lit) accentText else c(R.color.text_sub)); state.alpha = 1f
                 state.text = s?.state ?: ""
                 // Not usable now (rear fog light with the lights off): greyed
                 alpha = if (s?.disabled == true && !editing) 0.45f else if (editing) alpha else 1f
@@ -401,11 +411,12 @@ object ShortcutsPanel : Application.ActivityLifecycleCallbacks {
 
             private fun autoOn(): Boolean = try { android.provider.Settings.System.getInt(ctx.contentResolver, "screen_brightness_mode", 0) == 1 } catch (_: Exception) { false }
 
-            /** Lit (inverted, as a tile that is on) while the automatic brightness is on. */
+            /** Lit as a tile that is on (accent tint, border and text) while the automatic brightness is on. */
             private fun showAuto() {
                 val on = autoOn()
-                autoBg.setColor(c(if (on) R.color.text_value else R.color.panel))
-                auto.setTextColor(c(if (on) R.color.panel else R.color.text_value))
+                autoBg.setColor(if (on) accentTint else c(R.color.panel))
+                if (on) autoBg.setStroke(kit.dp(2), accentBorder) else autoBg.setStroke(1, c(R.color.panel_border))
+                auto.setTextColor(if (on) accentText else c(R.color.text_value))
                 auto.background = autoBg
             }
 
@@ -449,7 +460,7 @@ object ShortcutsPanel : Application.ActivityLifecycleCallbacks {
                 return true
             }
 
-            /** The track: filled up to the value, with its knob, in the colour of the tiles that are on. */
+            /** The track: filled up to the value in the theme's accent, its knob with a soft halo. */
             private inner class Track : View(ctx) {
                 val r get() = kit.dp(15).toFloat()
                 private val paint = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG)
@@ -458,9 +469,12 @@ object ShortcutsPanel : Application.ActivityLifecycleCallbacks {
                     val x = r + (width - 2 * r) * value / 255f
                     paint.color = c(R.color.panel)
                     cv.drawRoundRect(r, cy - h / 2, width - r, cy + h / 2, h / 2, h / 2, paint)
-                    paint.color = c(R.color.text_value)
+                    paint.color = accent
                     cv.drawRoundRect(r, cy - h / 2, x, cy + h / 2, h / 2, h / 2, paint)
+                    paint.color = androidx.core.graphics.ColorUtils.setAlphaComponent(accent, 0x55)
                     cv.drawCircle(x, cy, r, paint)
+                    paint.color = accent
+                    cv.drawCircle(x, cy, r - kit.dp(5), paint)
                 }
             }
         }
@@ -569,16 +583,16 @@ object ShortcutsPanel : Application.ActivityLifecycleCallbacks {
             aidsRefresh?.invoke()
         }
 
-        /** Neutral switch (no accent colour): the knob on the right and the track inverted when on. */
+        /** Switch: on, the knob on the right over a track in the theme's accent. */
         private inner class Switch : View(ctx) {
             private var on = false
             private val paint = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG)
             fun set(v: Boolean) { on = v; invalidate() }
             override fun onDraw(cv: android.graphics.Canvas) {
                 val h = height.toFloat(); val w = width.toFloat(); val r = h / 2
-                paint.color = c(if (on) R.color.text_value else R.color.button_idle)
+                paint.color = if (on) accent else c(R.color.button_idle)
                 cv.drawRoundRect(0f, 0f, w, h, r, r, paint)
-                paint.color = c(if (on) R.color.panel else R.color.text_sub)
+                paint.color = if (on) 0xFFFFFFFF.toInt() else c(R.color.text_sub)
                 cv.drawCircle(if (on) w - r else r, r, r - kit.dp(4), paint)
             }
         }

@@ -86,6 +86,22 @@ class ShortcutsMenuTest {
         assertEquals(null, ShortcutTiles.fogAllowed(null, null))    // car silent: usable
     }
 
+    @Test fun whatIsOnIsLitInTheAccentColourEspActiveIncluded() {
+        fun sh(state: String, inv: Boolean, level: Int? = null) = ShortcutTiles.Shown(state, inv, level = level)
+        assertTrue("ESP active: lit (Marc, 14/11)", ShortcutTiles.lit(Tile.ESP, sh("Active", false)))
+        assertFalse("ESP off: not lit", ShortcutTiles.lit(Tile.ESP, sh("Off", true)))
+        assertTrue("rear fog light on", ShortcutTiles.lit(Tile.FOG, sh("On", true)))
+        assertFalse("rear fog light off", ShortcutTiles.lit(Tile.FOG, sh("Off", false)))
+        assertTrue("doors locked", ShortcutTiles.lit(Tile.DOORS, sh("Locked", false)))
+        assertTrue("aids all on", ShortcutTiles.lit(Tile.AIDS, sh("On", false, level = 2)))
+        assertTrue("some aids on", ShortcutTiles.lit(Tile.AIDS, sh("Some off", true, level = 1)))
+        assertFalse("aids all off", ShortcutTiles.lit(Tile.AIDS, sh("Off", true, level = 0)))
+        assertFalse("drive mode: a level, never lit", ShortcutTiles.lit(Tile.MODE, sh("Sport", false, level = 4)))
+        assertFalse("switch off: an action", ShortcutTiles.lit(Tile.POWER, sh("", false)))
+        assertFalse("not read yet", ShortcutTiles.lit(Tile.ESP, null))
+        assertFalse("greyed (lights off)", ShortcutTiles.lit(Tile.FOG, ShortcutTiles.Shown("Lights off", false, disabled = true)))
+    }
+
     @Test fun rearFogStillOffAfterThePressSaysToTurnTheDippedBeamOn() {
         // #38, SWI69: with the parking lights only the car ignores the press; with the dipped beam it answers in 0.34 s
         assertTrue("still off: refused", ShortcutTiles.fogRefused(0))
