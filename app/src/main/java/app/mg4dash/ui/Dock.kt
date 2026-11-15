@@ -452,9 +452,20 @@ object Dock {
         Thread {
             val s = app.mg4dash.system.Projection.session(activity)
             activity.runOnUiThread {
+                val noPhone = s is app.mg4dash.system.Projection.Session.Read && s.target == null
                 when {
-                    s is app.mg4dash.system.Projection.Session.Read && s.target == null ->
-                        app.mg4dash.ui.Toasts.show(activity, R.string.projection_no_phone)
+                    // MG4Link may be set not to connect at start: its own screen opens and, when it says it can,
+                    // starts connecting the phone as its Connect button does (extra mg4dash.connect)
+                    noPhone && openLinkWithoutPhone(custom == Apps.CARPLAY, isMg4Link(activity)) -> {
+                        val launch = activity.packageManager.getLaunchIntentForPackage(Apps.ANDROID_AUTO.packageName)
+                        if (launch != null) {
+                            launch.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK or android.content.Intent.FLAG_ACTIVITY_SINGLE_TOP)
+                            if (linkConnects(activity)) launch.putExtra(EXTRA_CONNECT, true)
+                            app.mg4dash.system.Log.i("Dock", "no phone: MG4Link opened${if (launch.hasExtra(EXTRA_CONNECT)) ", asked to connect" else ""}")
+                            activity.startActivity(launch)
+                        } else app.mg4dash.ui.Toasts.show(activity, R.string.projection_no_phone)
+                    }
+                    noPhone -> app.mg4dash.ui.Toasts.show(activity, R.string.projection_no_phone)
                     else -> {
                         val target = (s as? app.mg4dash.system.Projection.Session.Read)?.target ?: fallback
                         Apps.open(activity, target, activity.getString(if (target == Apps.CARPLAY) R.string.dock_cp else R.string.dock_aa))
@@ -475,6 +486,27 @@ object Dock {
         }
         openProjection(activity, done)
     }
+
+    /** Extra on MG4Link's launch intent asking it to connect the phone, as its Connect button does. */
+    const val EXTRA_CONNECT = "mg4dash.connect"
+
+    /** MG4Link handles [EXTRA_CONNECT]: it says so with the meta-data of the same name set to true. */
+    fun linkConnects(context: android.content.Context): Boolean = try {
+        context.packageManager.getApplicationInfo(Apps.ANDROID_AUTO.packageName, android.content.pm.PackageManager.GET_META_DATA)
+            .metaData?.getBoolean(EXTRA_CONNECT, false) == true
+    } catch (_: Exception) { false }
+
+    /** No phone connected: MG4Link (not the stock AllGo app, nor CarPlay) opens its own screen instead of a message. */
+    internal fun openLinkWithoutPhone(carPlay: Boolean, mg4Link: Boolean) = !carPlay && mg4Link
+
+    /**
+     * MG4Link installed in place of the stock Android Auto app (same package): told apart by its meta-data
+     * mg4dash.shortcuts_pull, which the stock app does not have.
+     */
+    fun isMg4Link(context: android.content.Context): Boolean = try {
+        context.packageManager.getApplicationInfo(Apps.ANDROID_AUTO.packageName, android.content.pm.PackageManager.GET_META_DATA)
+            .metaData?.containsKey("mg4dash.shortcuts_pull") == true
+    } catch (_: Exception) { false }
 
     /** Choice of the Android Auto button for Radio Dash: 0 Android Auto, 1 CarPlay, 2 another app ([aaTargetApp]). */
     internal fun aaChoice(target: String?): Int = when {
