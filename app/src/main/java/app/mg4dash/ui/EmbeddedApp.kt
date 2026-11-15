@@ -106,7 +106,8 @@ object EmbeddedApp {
      * "policy_control" forces immersive mode for this app (and MG4Dash); removed with no app.
      * The setting is shared with MG4Control (its "full screen apps", #248): both apps merge through
      * [ImmersivePolicy], the rule agreed with its developer, each one only removing its own packages
-     * (its claims in the Global key "mg4dash_immersive"). Android Auto and CarPlay are never forced,
+     * (its claims in the Global key "mg4dash_immersive", what either app wrote in "immersive_managed").
+     * Android Auto and CarPlay are never forced, nor reached by a "*" or "apps" (excluded next to them),
      * and always taken out (CarPlay left by 1.7.3 beta 2 hid the SAIC status bar over it, #104).
      * [pkg]: the map's app, null with none. A pass writes in the agreed order, and once more 5 s later
      * if the value still has to change (no atomic read-write in Settings, MG4Control may write at the same time).
@@ -130,7 +131,11 @@ object EmbeddedApp {
     private fun mapPackage(context: Context): String? =
         app.mg4dash.system.Prefs(context).mapApp?.let { ComponentName.unflattenFromString(it)?.packageName }
 
-    /** One pass of the common rule; true when something was written. */
+    /**
+     * One pass of the common rule; true when something was written, or a write was refused (the
+     * re-read 5 s later tries again). Nothing done when MG4Dash has no stake in the value (nothing to
+     * add or remove): it may belong to another app, not even "tidied".
+     */
     private fun pass(context: Context, pkg: String?, why: String): Boolean = try {
         // The car's package even on the emulator build (app.mg4dash.emu): the key of the common rule
         val self = ImmersivePolicy.MG4DASH
@@ -138,22 +143,34 @@ object EmbeddedApp {
             mapOf(self to setOf(ImmersiveMode.FULL), pkg to setOf(ImmersiveMode.FULL)) else emptyMap()
         val cr = context.contentResolver
         fun get(name: String) = android.provider.Settings.Global.getString(cr, name)?.ifEmpty { null }
-        fun put(name: String, value: String?) = android.provider.Settings.Global.putString(cr, name, value)
+        // A refused write stops the pass, the tracking keys as they are: the re-read takes over
+        var written = false
+        fun put(name: String, value: String?): Boolean {
+            written = true
+            return android.provider.Settings.Global.putString(cr, name, value).also {
+                if (!it) Log.w(TAG, "policy_control ($why): writing $name refused")
+            }
+        }
         val myKey = ImmersivePolicy.OWNER_KEYS.getValue(self)
         val keys = ImmersivePolicy.OWNER_KEYS.mapValues { (_, k) -> get(k) }
         val installed = ImmersivePolicy.OWNER_KEYS.keys.filter { it == self || installed(context, it) }.toSet()
         val before = get(ImmersivePolicy.SETTING)
-        val p = ImmersivePolicy.plan(self, wanted, before, keys, installed)
-        var wrote = false
-        var key = keys[self]
-        if (p.keyBefore != key) { put(myKey, p.keyBefore); key = p.keyBefore; wrote = true }
-        if (p.policyChanged) {
-            put(ImmersivePolicy.SETTING, p.policy); wrote = true
-            Log.i(TAG, "policy_control ($why): ${before ?: "(empty)"} → ${p.policy ?: "(empty)"}")
+        var managed = get(ImmersivePolicy.MANAGED)
+        if (ImmersivePolicy.hasStake(self, wanted, before, keys, installed, managed)) run {
+            val p = ImmersivePolicy.plan(self, wanted, before, keys, installed, managed)
+            var key = keys[self]
+            // The agreed order: own key, common key, policy_control, own key, common key, uninstalled owners' keys
+            if (p.keyBefore != key) { if (!put(myKey, p.keyBefore)) return@run; key = p.keyBefore }
+            if (p.managedBefore != managed) { if (!put(ImmersivePolicy.MANAGED, p.managedBefore)) return@run; managed = p.managedBefore }
+            if (p.policyChanged) {
+                if (!put(ImmersivePolicy.SETTING, p.policy)) return@run
+                Log.i(TAG, "policy_control ($why): ${before ?: "(empty)"} → ${p.policy ?: "(empty)"}")
+            }
+            if (p.keyAfter != key && !put(myKey, p.keyAfter)) return@run
+            if (p.managedAfter != managed && !put(ImmersivePolicy.MANAGED, p.managedAfter)) return@run
+            p.clearKeys.forEach { if (!put(it, null)) return@run; Log.i(TAG, "policy_control: $it cleared (its app is uninstalled)") }
         }
-        if (p.keyAfter != key) { put(myKey, p.keyAfter); wrote = true }
-        p.clearKeys.forEach { put(it, null); wrote = true; Log.i(TAG, "policy_control: $it cleared (its app is uninstalled)") }
-        wrote
+        written
     } catch (e: Throwable) { Log.w(TAG, "policy_control ($why): ${e.message}"); false }
 
     private fun installed(context: Context, pkg: String) =
