@@ -139,7 +139,7 @@ class ClimateActivity : PageActivity() {
         }
         val origin = kit.text(getString(R.string.cl_stock), 18f, R.color.accent_action).apply {
             gravity = Gravity.CENTER; setPadding(0, kit.dp(14), 0, kit.dp(4))
-            setOnClickListener { Apps.open(this@ClimateActivity, Apps.HVAC, "SAIC") }
+            setOnClickListener { Apps.open(this@ClimateActivity, Apps.stock(this@ClimateActivity, Apps.HVAC, Apps.HVAC_HMI), "SAIC") }
         }
         mPanel.addView(origin, kit.lp(-1, -2))
         controls += listOf(auto, ac, eco, recirc, defFront, defRear, defLink, ecoLink, power)

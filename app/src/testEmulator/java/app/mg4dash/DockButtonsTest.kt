@@ -17,9 +17,9 @@ import org.robolectric.annotation.Config
 @Config(sdk = [28])
 class DockButtonsTest {
     @Test fun longPressOpensTheCarsOwnScreen() {
-        assertEquals(listOf(Apps.VEHICLE), Dock.stockScreens(Dock.Page.VEHICLE))
-        assertEquals(listOf(Apps.HVAC), Dock.stockScreens(Dock.Page.CLIMATE))
-        assertEquals(listOf(Apps.SETTINGS), Dock.stockScreens(Dock.Page.SETTINGS))
+        assertEquals(listOf(Apps.VEHICLE, Apps.VEHICLE_HMI), Dock.stockScreens(Dock.Page.VEHICLE))
+        assertEquals(listOf(Apps.HVAC, Apps.HVAC_HMI), Dock.stockScreens(Dock.Page.CLIMATE))
+        assertEquals(listOf(Apps.SETTINGS, Apps.SETTINGS_HMI), Dock.stockScreens(Dock.Page.SETTINGS))
     }
 
     @Test fun firstInstalledAsTheirPages() {

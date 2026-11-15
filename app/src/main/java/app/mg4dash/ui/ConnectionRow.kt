@@ -298,7 +298,7 @@ class ConnectionRow(private val activity: Activity) : LinearLayout(activity) {
             activity.startActivity(Intent(action).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
         } catch (_: Exception) {
             if (action == TETHER_SETTINGS) openSettings(WIFI_SETTINGS)
-            else Apps.open(activity, Apps.SETTINGS, activity.getString(R.string.dock_settings))
+            else Apps.open(activity, Apps.stock(activity, Apps.SETTINGS, Apps.SETTINGS_HMI), activity.getString(R.string.dock_settings))
         }
     }
 
