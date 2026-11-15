@@ -1028,7 +1028,7 @@ class SettingsActivity : AppCompatActivity() {
         pick = button("") { list.visibility = if (list.visibility == View.VISIBLE) View.GONE else View.VISIBLE; label() }
             .apply { setBackgroundResource(R.drawable.bg_chip); setTextColor(color(R.color.accent_action)) }
         choices.forEach { (v, n) ->
-            list.addView(button(n) { prefs.powerFx = v; list.visibility = View.GONE; label(); paint() }
+            list.addView(button(n) { prefs.powerFx = v; list.visibility = View.GONE; label(); paint(); fxTrial() }
                 .apply { setBackgroundResource(R.drawable.bg_chip); gravity = Gravity.CENTER_VERTICAL or Gravity.START },
                 LinearLayout.LayoutParams(-1, dp(56)).apply { topMargin = dp(6) })
         }
@@ -1044,6 +1044,13 @@ class SettingsActivity : AppCompatActivity() {
         text(parent, getString(R.string.st_power_fx_desc), 16f, R.color.text_title)
         fxVolumeSetting(parent)
     }
+
+    /** Trials of the animations' sounds in the settings (random: each one in turn). */
+    private var fxTrials = 0
+
+    /** The chosen animation's sound at [percent], to set the volume while parked (15/11). */
+    private fun fxTrial(percent: Int = prefs.fxVolume) =
+        app.mg4dash.ui.FxSound.play(this, app.mg4dash.ui.FxSound.trialStyle(prefs.powerFx, fxTrials++), percent)
 
     /** Volume of the animations' sounds (whoosh, crackle, fire): one bar for all, a short trial when let go. */
     private fun fxVolumeSetting(parent: LinearLayout) {
@@ -1068,7 +1075,7 @@ class SettingsActivity : AppCompatActivity() {
             override fun onStartTrackingTouch(seekBar: SeekBar) = Unit
             override fun onStopTrackingTouch(seekBar: SeekBar) {
                 prefs.fxVolume = seekBar.progress
-                app.mg4dash.ui.FxSound.play(this@SettingsActivity, app.mg4dash.ui.PowerFx.LIGHTNING, seekBar.progress)
+                fxTrial(seekBar.progress)
             }
         })
         parent.addView(header, LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(16) })

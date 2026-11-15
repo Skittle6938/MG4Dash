@@ -30,4 +30,14 @@ class FxSoundTest {
         val ctx = org.robolectric.RuntimeEnvironment.getApplication()
         assertEquals(FxSound.DEFAULT_VOLUME, app.mg4dash.system.Prefs(ctx).fxVolume)
     }
+
+    @Test fun settingsTrialPlaysTheChosenAnimation() {
+        assertEquals(PowerFx.LIGHTNING, FxSound.trialStyle(PowerFx.LIGHTNING, 5))
+        assertEquals(PowerFx.FLAMES, FxSound.trialStyle(PowerFx.FLAMES, 0))
+        assertEquals(PowerFx.HYPERSPACE, FxSound.trialStyle(PowerFx.HYPERSPACE, 2))
+        assertEquals(PowerFx.NONE, FxSound.trialStyle(PowerFx.NONE, 1))
+        // Random: the three sounds in turn
+        assertEquals(listOf(PowerFx.LIGHTNING, PowerFx.FLAMES, PowerFx.HYPERSPACE, PowerFx.LIGHTNING),
+            (0..3).map { FxSound.trialStyle(PowerFx.RANDOM, it) })
+    }
 }
