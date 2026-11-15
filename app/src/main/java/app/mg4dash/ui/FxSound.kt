@@ -20,6 +20,13 @@ object FxSound {
     /** SoundPool volume (0..1) for a setting in % (0..100). */
     internal fun gain(percent: Int): Float = (percent.coerceIn(0, 100) / 100f)
 
+    /** Sound tried in the settings for the chosen animation; random: each style in turn, one per trial. */
+    internal fun trialStyle(setting: Int, turn: Int): Int = when (setting) {
+        PowerFx.HYPERSPACE, PowerFx.LIGHTNING, PowerFx.FLAMES -> setting
+        PowerFx.NONE -> PowerFx.NONE
+        else -> listOf(PowerFx.LIGHTNING, PowerFx.FLAMES, PowerFx.HYPERSPACE)[Math.floorMod(turn, 3)]
+    }
+
     /** Sound of an animation style, null when it has none. */
     internal fun soundOf(style: Int): Int? = when (style) {
         PowerFx.HYPERSPACE -> R.raw.fx_hyperspace
@@ -38,6 +45,7 @@ object FxSound {
     fun play(context: Context, style: Int, percent: Int = Prefs(context).fxVolume) {
         val res = soundOf(style) ?: return
         val v = gain(percent)
+        app.mg4dash.system.Log.i("FxSound", "style $style at $percent % (gain $v)")
         if (v <= 0f) return
         runCatching {
             val p = pool ?: SoundPool.Builder().setMaxStreams(2).setAudioAttributes(
