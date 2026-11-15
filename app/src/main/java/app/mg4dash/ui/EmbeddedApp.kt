@@ -6,6 +6,8 @@ import android.content.Context
 import android.content.Intent
 import android.view.View
 import android.view.ViewGroup
+import app.mg4dash.system.ImmersiveMode
+import app.mg4dash.system.ImmersivePolicy
 import app.mg4dash.system.Log
 
 /**
@@ -102,49 +104,60 @@ object EmbeddedApp {
      * Full screen: when touching the embedded app, its window takes control, and as it
      * does not ask for immersive mode, the SAIC bars reappeared. The system setting
      * "policy_control" forces immersive mode for this app (and MG4Dash); removed with no app.
+     * The setting is shared with MG4Control (its "full screen apps", #248): both apps merge through
+     * [ImmersivePolicy], the rule agreed with its developer, each one only removing its own packages
+     * (its claims in the Global key "mg4dash_immersive"). Android Auto and CarPlay are never forced,
+     * and always taken out (CarPlay left by 1.7.3 beta 2 hid the SAIC status bar over it, #104).
+     * [pkg]: the map's app, null with none. A pass writes in the agreed order, and once more 5 s later
+     * if the value still has to change (no atomic read-write in Settings, MG4Control may write at the same time).
      */
     fun immersive(context: Context, pkg: String?) {
-        val want = if (pkg != null && app.mg4dash.system.Prefs(context).fullscreen) "immersive.full=${context.packageName},$pkg" else null
-        try {
-            val cr = context.contentResolver
-            val cur = android.provider.Settings.Global.getString(cr, "policy_control")
-            // Only touch a value set by us (or empty), CarPlay alone included (left by 1.7.3 beta 2, #104)
-            if (cur != null && cur.isNotEmpty() && !cur.startsWith("immersive.full=${context.packageName},") && cur != "immersive.full=$CARPLAY") return
-            if (cur != want) {
-                android.provider.Settings.Global.putString(cr, "policy_control", want)
-                Log.i(TAG, "policy_control → ${want ?: "(empty)"}")
-            }
-        } catch (e: Throwable) { Log.w(TAG, "policy_control: ${e.message}") }
+        val app = context.applicationContext
+        main.removeCallbacks(reread)
+        if (pass(app, pkg, "map app ${pkg ?: "none"}")) {
+            reread = Runnable { pass(app, mapPackage(app), "re-read") }
+            main.postDelayed(reread, REREAD_MS)
+        }
     }
 
-    private const val CARPLAY = "com.allgo.carplay.service"
+    /** The same pass with the map's app from the settings: return to home, full screen setting changed. */
+    fun refreshImmersive(context: Context) = immersive(context, mapPackage(context))
 
-    /**
-     * 1.7.3 beta 2 put CarPlay in "policy_control" (#1), which hid the SAIC status bar over it, and beta 3 no
-     * longer took that value for its own: it stayed, even after a restart (#104). Cleared at each return to home:
-     * CarPlay taken out, the embedded app kept.
-     */
-    fun clearCarPlay(context: Context) {
-        try {
-            val cr = context.contentResolver
-            val cur = android.provider.Settings.Global.getString(cr, "policy_control")
-            val (change, next) = withoutCarPlay(cur, context.packageName)
-            if (!change) return
-            android.provider.Settings.Global.putString(cr, "policy_control", next)
-            Log.i(TAG, "policy_control: CarPlay taken out ($cur → ${next ?: "(empty)"})")
-        } catch (e: Throwable) { Log.w(TAG, "policy_control: ${e.message}") }
-    }
+    private const val REREAD_MS = 5_000L
+    private val main = android.os.Handler(android.os.Looper.getMainLooper())
+    private var reread = Runnable {}
 
-    /** Whether [cur] is one of MG4Dash's values with CarPlay in it, and the value without it (null: empty). */
-    internal fun withoutCarPlay(cur: String?, own: String): Pair<Boolean, String?> {
-        val prefix = "immersive.full="
-        if (cur == null || !cur.startsWith(prefix)) return false to cur
-        val apps = cur.removePrefix(prefix).split(',').map { it.trim() }.filter { it.isNotEmpty() }
-        if (CARPLAY !in apps || !(apps.first() == own || apps == listOf(CARPLAY))) return false to cur
-        val rest = apps - CARPLAY
-        // MG4Dash alone has nothing to force: as with no embedded app
-        return true to (if (rest.size < 2) null else prefix + rest.joinToString(","))
-    }
+    private fun mapPackage(context: Context): String? =
+        app.mg4dash.system.Prefs(context).mapApp?.let { ComponentName.unflattenFromString(it)?.packageName }
+
+    /** One pass of the common rule; true when something was written. */
+    private fun pass(context: Context, pkg: String?, why: String): Boolean = try {
+        // The car's package even on the emulator build (app.mg4dash.emu): the key of the common rule
+        val self = ImmersivePolicy.MG4DASH
+        val wanted = if (pkg != null && app.mg4dash.system.Prefs(context).fullscreen)
+            mapOf(self to setOf(ImmersiveMode.FULL), pkg to setOf(ImmersiveMode.FULL)) else emptyMap()
+        val cr = context.contentResolver
+        fun get(name: String) = android.provider.Settings.Global.getString(cr, name)?.ifEmpty { null }
+        fun put(name: String, value: String?) = android.provider.Settings.Global.putString(cr, name, value)
+        val myKey = ImmersivePolicy.OWNER_KEYS.getValue(self)
+        val keys = ImmersivePolicy.OWNER_KEYS.mapValues { (_, k) -> get(k) }
+        val installed = ImmersivePolicy.OWNER_KEYS.keys.filter { it == self || installed(context, it) }.toSet()
+        val before = get(ImmersivePolicy.SETTING)
+        val p = ImmersivePolicy.plan(self, wanted, before, keys, installed)
+        var wrote = false
+        var key = keys[self]
+        if (p.keyBefore != key) { put(myKey, p.keyBefore); key = p.keyBefore; wrote = true }
+        if (p.policyChanged) {
+            put(ImmersivePolicy.SETTING, p.policy); wrote = true
+            Log.i(TAG, "policy_control ($why): ${before ?: "(empty)"} → ${p.policy ?: "(empty)"}")
+        }
+        if (p.keyAfter != key) { put(myKey, p.keyAfter); wrote = true }
+        p.clearKeys.forEach { put(it, null); wrote = true; Log.i(TAG, "policy_control: $it cleared (its app is uninstalled)") }
+        wrote
+    } catch (e: Throwable) { Log.w(TAG, "policy_control ($why): ${e.message}"); false }
+
+    private fun installed(context: Context, pkg: String) =
+        try { context.packageManager.getPackageInfo(pkg, 0); true } catch (_: Exception) { false }
 
     private fun resize(v: View) {
         if (v.width <= 0 || v.height <= 0) return

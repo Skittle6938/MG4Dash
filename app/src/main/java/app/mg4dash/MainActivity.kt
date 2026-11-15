@@ -721,8 +721,8 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         CarBridge.setForeground(true)
         // As the stock launcher: back in front (Home), the SAIC phone's call shrinks to its floating card (#93)
         if (!BuildConfig.MOCK) app.mg4dash.system.SaicPhone.onHome(this)
-        // The SAIC status bar back over CarPlay for those who had 1.7.3 beta 2 (#104)
-        app.mg4dash.ui.EmbeddedApp.clearCarPlay(this)
+        // "policy_control" merged again with MG4Control's apps (#248), CarPlay taken out (#104)
+        app.mg4dash.ui.EmbeddedApp.refreshImmersive(this)
         // MG4Dash had not started and the rescue app stepped in: say so once
         app.mg4dash.system.Rescue.notice?.let { app.mg4dash.system.Rescue.notice = null; app.mg4dash.ui.Toasts.show(this, it, long = true) }
         // Home layout changed in the settings: rebuild the screen
