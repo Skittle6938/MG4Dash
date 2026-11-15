@@ -941,6 +941,7 @@
     <string name="sc_all_off">Spegni tutto</string>
     <string name="sc_close">Chiudi</string>
     <string name="tu_cards_3">Finestra staccata: un doppio tocco la rimette al suo posto; pressione lunga › Sposta / ridimensiona, poi OK.</string>
+    <string name="st_fx_sound">Effetti sonori</string>
     <string name="st_fx_volume">Volume degli effetti sonori</string>
     <string name="st_fx_volume_off">Disattivato</string>
 </resources>

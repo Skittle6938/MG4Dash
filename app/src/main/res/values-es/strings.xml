@@ -941,6 +941,7 @@
     <string name="sc_all_off">Apagar todo</string>
     <string name="sc_close">Cerrar</string>
     <string name="tu_cards_3">Ventana separada: un doble toque la devuelve a su sitio; pulsación larga › Mover / cambiar tamaño, y luego Aceptar.</string>
+    <string name="st_fx_sound">Efectos de sonido</string>
     <string name="st_fx_volume">Volumen de los efectos de sonido</string>
     <string name="st_fx_volume_off">Desactivado</string>
 </resources>

@@ -4,6 +4,7 @@ import app.mg4dash.ui.FxSound
 import app.mg4dash.ui.PowerFx
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -24,11 +25,20 @@ class FxSoundTest {
     @Test fun lowByDefaultAndWithinRange() {
         assertTrue(FxSound.DEFAULT_VOLUME in 1..40)
         assertEquals(0f, FxSound.gain(0), 0f)
-        assertEquals(0.3f, FxSound.gain(30), 1e-6f)
-        assertEquals(1f, FxSound.gain(150), 0f)
+        assertEquals(0.3f * FxSound.MAX_GAIN, FxSound.gain(30), 1e-6f)
+        assertEquals(FxSound.MAX_GAIN, FxSound.gain(150), 0f)
         assertEquals(0f, FxSound.gain(-5), 0f)
         val ctx = org.robolectric.RuntimeEnvironment.getApplication()
         assertEquals(FxSound.DEFAULT_VOLUME, app.mg4dash.system.Prefs(ctx).fxVolume)
+    }
+
+    @Test fun offByDefaultUntilSwitchedOn() {
+        val ctx = org.robolectric.RuntimeEnvironment.getApplication()
+        val prefs = app.mg4dash.system.Prefs(ctx)
+        assertFalse(FxSound.enabled(ctx))
+        prefs.fxSound = true
+        assertTrue(FxSound.enabled(ctx))
+        prefs.fxSound = false
     }
 
     @Test fun settingsTrialPlaysTheChosenAnimation() {

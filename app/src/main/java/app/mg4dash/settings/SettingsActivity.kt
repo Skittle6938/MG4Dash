@@ -1054,6 +1054,9 @@ class SettingsActivity : AppCompatActivity() {
 
     /** Volume of the animations' sounds (whoosh, crackle, fire): one bar for all, a short trial when let go. */
     private fun fxVolumeSetting(parent: LinearLayout) {
+        lateinit var volume: List<View>
+        fun shade() = volume.forEach { it.alpha = if (prefs.fxSound) 1f else 0.4f; it.isEnabled = prefs.fxSound }
+        toggle(parent, R.string.st_fx_sound, null, { prefs.fxSound }) { on -> prefs.fxSound = on; shade(); if (on) fxTrial() }
         val header = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL }
         header.addView(TextView(this).apply {
             text = getString(R.string.st_fx_volume)
@@ -1080,6 +1083,7 @@ class SettingsActivity : AppCompatActivity() {
         })
         parent.addView(header, LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(16) })
         parent.addView(slider, LinearLayout.LayoutParams(-1, dp(48)))
+        volume = listOf(header, slider); shade()
     }
 
     private fun confirmReplace() {
