@@ -147,7 +147,7 @@ class SettingsActivity : AppCompatActivity() {
             app.mg4dash.ui.Toasts.show(this, getString(R.string.st_shortcuts_menu_restart), long = true)
             app.mg4dash.ui.Themes.publish(this); recreate()
         }
-        toggle(style, R.string.st_fullscreen, null, { prefs.fullscreen }) { prefs.fullscreen = it; Fullscreen.apply(this); app.mg4dash.ui.ShortcutsPanel.GlobalStrip.update(this) }
+        toggle(style, R.string.st_fullscreen, null, { prefs.fullscreen }) { prefs.fullscreen = it; Fullscreen.apply(this); app.mg4dash.ui.ShortcutsPanel.GlobalStrip.update(this); app.mg4dash.ui.EmbeddedApp.refreshImmersive(this) }
         toggle(style, R.string.st_own_keyboard, R.string.st_own_keyboard_desc, { prefs.ownKeyboard }) { prefs.ownKeyboard = it }
         toggle(style, R.string.st_energy_card_power, R.string.st_energy_card_power_desc, { prefs.energyCardPower }) { prefs.energyCardPower = it }
         toggle(style, R.string.st_power_va, R.string.st_power_va_desc, { prefs.powerVa }) { prefs.powerVa = it }
