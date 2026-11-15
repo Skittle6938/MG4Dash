@@ -89,6 +89,27 @@ object HomeSwitcher {
         }
     }
 
+    /**
+     * Should MG4Dash set itself as home again? Only when the driver chose it ([stockDisabled]: SAIC home replaced),
+     * not in maintenance mode, and HOME no longer resolves to it ([current]: the chooser, or nothing).
+     */
+    internal fun needsHomeBack(valet: Boolean, stockDisabled: Boolean, current: ComponentName?, ours: ComponentName): Boolean =
+        !valet && stockDisabled && current != ours
+
+    /**
+     * MG4Dash's default home kept (15/11): during an update its HOME activities are gone for a moment, and Android
+     * drops the home preference if HOME is resolved then (its set of candidates changed). The car then shows
+     * Android's home chooser. Checked at each start, after an update and again a few seconds later.
+     */
+    fun ensureHome(context: Context, why: String) {
+        try {
+            val cur = currentHome(context)
+            if (!needsHomeBack(Prefs(context).valetMode, !isStockEnabled(context), cur, ours(context))) return
+            setPreferred(context, ours(context))
+            Log.i(TAG, "MG4Dash set as home again ($why): HOME was ${cur?.flattenToShortString()}, now ${currentHome(context)?.flattenToShortString()}")
+        } catch (e: Exception) { Log.w(TAG, "home check ($why): ${e.message}") }
+    }
+
     /** Service mode: re-enables SAIC home, makes it preferred, then opens it. */
     fun switchToStock(context: Context): Boolean {
         Prefs(context).valetMode = true
