@@ -51,7 +51,8 @@ class TripCostTest {
         val ctx = RuntimeEnvironment.getApplication()
         val sp = ctx.getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE)
         sp.edit().clear().commit()
-        val now = System.currentTimeMillis()
+        // Midday today: a trip one hour before stays in today, whatever the hour the test runs (it failed between 0 and 1 h)
+        val now = TripLog.dayStart(System.currentTimeMillis()) + 12 * 3_600_000L
         TripLog.add(sp, TripLog.Trip(now - 3_600_000, now - 1_800_000, 100, 129, 29.4f, 4.03f, 88, 81, 0.25f))
         TripLog.saveCurrent(sp, null)
         val card = app.mg4dash.ui.TripsCard(org.robolectric.Robolectric.buildActivity(android.app.Activity::class.java).setup().get())
