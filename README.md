@@ -7,7 +7,7 @@ Languages: English (default), French, German, Spanish, Italian, Dutch and Turkis
 > [!IMPORTANT]
 > **Safety net: MG4Dash Rescue (since 1.7.1).** MG4Dash now installs a tiny companion system app by itself, *MG4Dash Rescue*. If MG4Dash is your home screen and does not start after the head unit boots, Rescue repairs it (recompiles and relaunches it) and, if that is not enough, puts the SAIC home screen back. It also brings the SAIC home screen back if MG4Dash is uninstalled without going through *Maintenance mode* first. If MG4Dash is not your home screen, it does nothing. Installing 1.7.1 or later is strongly recommended.
 
-Current version: **1.7.1** ([releases](https://github.com/Skittle6938/MG4Dash/releases)). Betas (1.7.2-beta…) can be installed from the app, see [Updates](#updates).
+Current version: **1.7.3** ([releases](https://github.com/Skittle6938/MG4Dash/releases)). Betas (1.7.4-beta…) can be installed from the app, see [Updates](#updates).
 
 > [!TIP]
 > **After a stable update, run the gesture tour again** (Settings › System › *Show the gesture tour*). Each release adds gestures that are not always easy to guess, such as detaching the web app or the App card as a window over home (double tap), moving and resizing it (long press › *Move / resize*), or pinching the home screen to choose the cards. The tour shows them in a few steps.
