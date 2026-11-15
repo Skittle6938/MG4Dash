@@ -105,7 +105,7 @@ Every consumption can be chosen from the start. One not known yet (under 0.5 km)
 Swipe or tap it to switch between its pages:
 
 - **Trip energy**: one bar and the share of driving, climate control and accessories since start-up (details on the Energy page).
-- **Live power**: kW drawn from or recovered into the battery every second, on a two-way bar from zero with a 10 s peak marker, the trip average, voltage and current. It hides a **full-throttle special**: floor it and lightning, flames or a jump to light speed (stars stretched into streaks, with a soft whoosh) fill the screen, then the peak reached shows (Settings › Look › Live power). *Sound effects* (off by default) adds the whoosh, an electric crackle or a fire sound, mixed over the radio or the music without lowering them, with its own volume. This page leaves the widget when *Live power in the energy card* is on.
+- **Live power**: kW drawn from or recovered into the battery every second, on a two-way bar from zero with a 10 s peak marker, the trip average, voltage and current. It hides a **full-throttle special**: floor it and lightning, flames or a jump to light speed (stars stretched into streaks) fill the screen, then the peak reached shows (Settings › Look › Live power). *Sound effects* (off by default) adds the whoosh, an electric crackle or a fire sound, mixed over the radio or the music without lowering them, with its own volume. This page leaves the widget when *Live power in the energy card* is on.
 - **Phone**: favourite contacts, 3 by default (tap to call, long press to change one or to pick 2, 3, 4, 6 or 8 shortcuts, on one or two rows; contacts already chosen are kept).
 
 | | |
@@ -143,7 +143,7 @@ In a place with the App card, the edit mode also sets what it shows (the OpenStr
 
 | Consumption | Shortcuts |
 |---|---|
-| ![Consumption](docs/screenshots/home_map_layout_consumption.png?v=25) | ![Shortcuts](docs/screenshots/home_map_layout_shortcuts.png?v=25) |
+| ![Consumption](docs/screenshots/home_map_layout_consumption.png?v=25) | ![Shortcuts](docs/screenshots/home_map_layout_shortcuts.png?v=27) |
 
 **Another app in the App card**: pinch the home screen, then touch the card's *App* line to show another installed app inside the card instead of the map, for example an EV route planner such as ABRP or a navigation app such as Waze. A long press on the card does it at once: its menu offers the OpenStreetMap map, the last 3 apps chosen and *Other app…* (the same list as in the edit mode), plus *Back* for the app shown and *Move / resize* when detached; touching the one shown starts it again. It runs live and rests and wakes like the web app: at rest, swipe it for the next card or touch it twice to enlarge it or detach it (it stays full screen through day / night changes until you press Home or touch it twice again); touch it once to use it. Pick "OpenStreetMap map" to go back. *The apps below are drawn for the example.*
 
@@ -225,7 +225,7 @@ Five tabs along the top; the last one used opens next time. Each on / off option
 
 | Home | Look |
 |---|---|
-| ![Settings, Home](docs/screenshots/settings_en_tab0.png?v=25) | ![Settings, Look](docs/screenshots/settings_en_tab1.png?v=25) |
+| ![Settings, Home](docs/screenshots/settings_en_tab0.png?v=25) | ![Settings, Look](docs/screenshots/settings_en_tab1.png?v=27) |
 | **Vehicle** | **System** |
 | ![Settings, Vehicle](docs/screenshots/settings_en_tab2.png?v=25) | ![Settings, System](docs/screenshots/settings_en_tab4.png?v=25) |
 
