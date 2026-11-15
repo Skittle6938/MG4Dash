@@ -222,6 +222,10 @@ class Prefs(context: Context) {
     var powerFx: Int
         get() = sp.getInt("power_fx", 4)
         set(v) = sp.edit().putInt("power_fx", v).apply()
+    /** Sounds of the full power animations (Settings › Look, under the animation): off by default (Marc, 15/11). */
+    var fxSound: Boolean
+        get() = sp.getBoolean("fx_sound", false)
+        set(v) = sp.edit().putBoolean("fx_sound", v).apply()
     /** Volume of the full power animations' sounds, in % (Settings › Look, under the animation). */
     var fxVolume: Int
         get() = sp.getInt("fx_volume", app.mg4dash.ui.FxSound.DEFAULT_VOLUME)

@@ -941,6 +941,7 @@
     <string name="sc_all_off">Tout couper</string>
     <string name="sc_close">Fermer</string>
     <string name="tu_cards_3">Fenêtre détachée : un double appui la remet en place ; appui long › Déplacer / redimensionner, puis OK.</string>
+    <string name="st_fx_sound">Bruitages</string>
     <string name="st_fx_volume">Volume des bruitages</string>
     <string name="st_fx_volume_off">Coupé</string>
 </resources>
