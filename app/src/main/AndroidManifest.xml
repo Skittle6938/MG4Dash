@@ -103,6 +103,14 @@
             </intent-filter>
         </activity>
 
+        <!-- Android Auto button of Radio Dash's bars (MG4Radio #5): same user, not exported -->
+        <activity
+            android:name=".ui.OpenProjectionActivity"
+            android:excludeFromRecents="true"
+            android:exported="false"
+            android:noHistory="true"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+
         <activity
             android:name=".pages.TripsActivity"
             android:exported="false"

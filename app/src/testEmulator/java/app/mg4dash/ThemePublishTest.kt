@@ -1,5 +1,6 @@
 package app.mg4dash
 
+import app.mg4dash.system.Apps
 import app.mg4dash.ui.Themes
 import org.junit.Assert.assertEquals
 import org.junit.Test
@@ -29,7 +30,7 @@ class ThemePublishTest {
     @Test fun wideBarOnTheRight() {
         prefs().edit().putBoolean("vertical_dock", true).putBoolean("wide_bar", true).putInt("bar_side", 2).commit()
         val f = Themes.published(app).split(",")
-        assertEquals(9, f.size)
+        assertEquals(11, f.size)
         assertEquals(listOf("1", "0", "1", "1"), bar(f))
     }
 
@@ -44,5 +45,16 @@ class ThemePublishTest {
         assertEquals("0", Themes.published(app).split(",")[8])
         prefs().edit().putBoolean("shortcuts_menu", true).commit()
         assertEquals("1", Themes.published(app).split(",")[8])
+    }
+
+    /** MG4Radio #5: the Android Auto button's choice for Radio Dash's bars (10th) and the other app (11th). */
+    @Test fun projectionChoice() {
+        prefs().edit().remove("dock_aa_target").commit()
+        assertEquals(listOf("0", ""), Themes.published(app).split(",").subList(9, 11))
+        prefs().edit().putString("dock_aa_target", Apps.CARPLAY.flattenToString()).commit()
+        assertEquals(listOf("1", ""), Themes.published(app).split(",").subList(9, 11))
+        prefs().edit().putString("dock_aa_target", "com.waze/.FreeMapAppActivity").commit()
+        assertEquals(listOf("2", "com.waze/.FreeMapAppActivity"), Themes.published(app).split(",").subList(9, 11))
+        prefs().edit().remove("dock_aa_target").commit()
     }
 }
