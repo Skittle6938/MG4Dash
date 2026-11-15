@@ -40,6 +40,8 @@ class LauncherApp : Application() {
         app.mg4dash.system.FogOverlay.start(this)
         app.mg4dash.ui.ShortcutsPanel.init(this)
         app.mg4dash.ui.ShortcutsPanel.GlobalStrip.update(this)
+        // Brightness (automatic and its shift) put back as it was: the car resets it at each start (15/11)
+        if (!BuildConfig.MOCK) app.mg4dash.system.BrightnessMemory.start(this)
         // ADB at start (setting, off by default)
         if (!BuildConfig.MOCK && app.mg4dash.system.Prefs(this).adbAtStart) app.mg4dash.system.AdbSwitch.enable(this, "setting at start")
         Log.i("App", "start ${BuildConfig.VERSION_NAME} (${BuildConfig.FLAVOR})")

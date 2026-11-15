@@ -453,6 +453,7 @@ object ShortcutsPanel : Application.ActivityLifecycleCallbacks {
                     if (editToggle != null) return@setOnClickListener
                     try { android.provider.Settings.System.putInt(ctx.contentResolver, "screen_brightness_mode", 1); Log.i(TAG, "brightness auto") }
                     catch (e: Exception) { Log.w(TAG, "brightness auto: ${e.message}") }
+                    app.mg4dash.system.BrightnessMemory.chosen(ctx)
                     showAuto()
                 }
                 show(); showAuto()
@@ -472,6 +473,7 @@ object ShortcutsPanel : Application.ActivityLifecycleCallbacks {
                     Log.i(TAG, "brightness auto adjust $a")
                 } catch (e: Exception) { Log.w(TAG, "brightness auto adjust: ${e.message}") }
                 else { value = handStepped(read(), dir); write(value, true) }
+                app.mg4dash.system.BrightnessMemory.chosen(ctx)
                 show(); showAuto()
             }
 
@@ -512,6 +514,8 @@ object ShortcutsPanel : Application.ActivityLifecycleCallbacks {
                     android.provider.Settings.System.putInt(cr, "screen_brightness", v)
                     if (final) Log.i(TAG, "brightness $v")
                 } catch (e: Exception) { Log.w(TAG, "brightness: ${e.message}") }
+                // Kept for the next start (the car resets it), and no longer put back as the car's reset
+                if (final) app.mg4dash.system.BrightnessMemory.chosen(ctx)
             }
 
             @SuppressLint("ClickableViewAccessibility")
@@ -521,7 +525,7 @@ object ShortcutsPanel : Application.ActivityLifecycleCallbacks {
                 if (e.actionMasked == MotionEvent.ACTION_DOWN && e.x > track.right + kit.dp(8)) return false
                 val v = ((x - track.r) / (track.width - 2 * track.r)).coerceIn(0f, 1f).let { Math.round(it * 255) }
                 when (e.actionMasked) {
-                    MotionEvent.ACTION_DOWN -> { parent?.requestDisallowInterceptTouchEvent(true); value = v; show(); write(v, false) }
+                    MotionEvent.ACTION_DOWN -> { parent?.requestDisallowInterceptTouchEvent(true); app.mg4dash.system.BrightnessMemory.chosen(ctx); value = v; show(); write(v, false) }
                     MotionEvent.ACTION_MOVE -> { value = v; show(); write(v, false) }
                     MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> { value = v; show(); write(v, true) }
                 }
