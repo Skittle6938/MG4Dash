@@ -287,9 +287,9 @@ object Updater {
             if (intent.action != Intent.ACTION_MY_PACKAGE_REPLACED) return
             Log.i(TAG, "update installed: ${BuildConfig.VERSION_NAME}")
             // The home preference can be dropped during the install: checked now and once things have settled
-            app.mg4dash.system.HomeSwitcher.ensureHome(context, "update")
-            val app = context.applicationContext
-            android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({ app.mg4dash.system.HomeSwitcher.ensureHome(app, "update, 5 s later") }, 5_000)
+            HomeSwitcher.ensureHome(context, "update")
+            val appCtx = context.applicationContext
+            android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({ HomeSwitcher.ensureHome(appCtx, "update, 5 s later") }, 5_000)
             context.startActivity(Intent(context, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
         }
     }
