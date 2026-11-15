@@ -12,6 +12,10 @@ object Apps {
 
     val VEHICLE = ComponentName("com.saicmotor.vehiclesetting", "com.saicmotor.vehiclesetting.ui.VehicleSettingActivity")
     val HVAC = ComponentName("com.saicmotor.hvac", "com.saicmotor.hvac.ui.activity.MainActivity")
+    /** Old SDK firmwares (SWI68, #116): the car's own screens, as named in the SWI68 R73 launcher. */
+    val VEHICLE_HMI = ComponentName("com.saicmotor.hmi.vehiclesettings", "com.saicmotor.hmi.vehiclesettings.vehicleconfig.ui.VehicleSettingsActivity")
+    val HVAC_HMI = ComponentName("com.saicmotor.hmi.hvac", "com.saicmotor.hmi.hvac.hvaccontrol.ui.HvacActivity")
+    val SETTINGS_HMI = ComponentName("com.saicmotor.hmi.systemsettings", "com.saicmotor.hmi.systemsettings.SettingsActivity")
     val ENERGY = ComponentName("com.saicmotor.saicev", "com.saicmotor.saicev.activity.MainActivity")
     /** SWI165: no Energy app, charging is in the vehicle settings (#60). */
     val ENERGY_SWI165 = ComponentName("com.saicmotor.hmi.vehiclesettings", "com.saicmotor.hmi.vehiclesettings.chargemanagement.ui.ChargeManagementActivity")
@@ -48,6 +52,10 @@ object Apps {
     fun openPackage(context: Context, pkg: String, label: String = pkg): Boolean = fallback(context, pkg, label)
 
     /** The app exists on this firmware (known activity, package launcher or similar name): otherwise its button is hidden. */
+    /** The first of [components] installed on this car (A9 or old SDK names, #116), else the first one. */
+    fun stock(context: Context, vararg components: ComponentName): ComponentName =
+        components.firstOrNull { available(context, it) } ?: components.first()
+
     fun available(context: Context, component: ComponentName): Boolean {
         val pm = context.packageManager
         return pm.resolveActivity(Intent(Intent.ACTION_MAIN).setComponent(component), 0) != null ||

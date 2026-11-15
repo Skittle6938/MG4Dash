@@ -331,16 +331,16 @@ object Dock {
 
     /**
      * The car's own screens a long press opens (#38), the first installed one: the stock app of the page the
-     * button opens with a tap. Empty: the button has no long press of this kind.
+     * button opens with a tap, A9 names first, then the old SDK ones (SWI68, #116). Empty: the button has no long press of this kind.
      */
     internal fun stockScreens(page: Page?): List<android.content.ComponentName> = when (page) {
-        Page.VEHICLE -> listOf(Apps.VEHICLE)
-        Page.CLIMATE -> listOf(Apps.HVAC)
+        Page.VEHICLE -> listOf(Apps.VEHICLE, Apps.VEHICLE_HMI)
+        Page.CLIMATE -> listOf(Apps.HVAC, Apps.HVAC_HMI)
         // Stock Energy app, or its charging page on SWI165 (#60), as the Energy page's button
         Page.ENERGY -> listOf(Apps.ENERGY, Apps.ENERGY_SWI165)
         // As the Phone page's button
         Page.PHONE -> listOf(Apps.BT_PHONE, Apps.BT_CALL)
-        Page.SETTINGS -> listOf(Apps.SETTINGS)
+        Page.SETTINGS -> listOf(Apps.SETTINGS, Apps.SETTINGS_HMI)
         else -> emptyList()
     }
 
@@ -354,7 +354,7 @@ object Dock {
         if (stock.isEmpty()) return false
         cell.setOnClickListener { open(activity, item, current) }
         cell.setOnLongClickListener {
-            val target = stock.firstOrNull { Apps.available(activity, it) } ?: stock.first()
+            val target = Apps.stock(activity, *stock.toTypedArray())
             Apps.open(activity, target, "SAIC"); true
         }
         return true
@@ -365,7 +365,7 @@ object Dock {
         try {
             activity.startActivity(Intent(android.provider.Settings.ACTION_WIFI_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
         } catch (_: Exception) {
-            Apps.open(activity, Apps.SETTINGS, activity.getString(R.string.dock_settings))
+            Apps.open(activity, Apps.stock(activity, Apps.SETTINGS, Apps.SETTINGS_HMI), activity.getString(R.string.dock_settings))
         }
     }
 
