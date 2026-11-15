@@ -37,4 +37,11 @@ class ShortcutsGridTest {
         assertEquals(88, Shortcuts.iconDp(300f, 300f))
         assertTrue(Shortcuts.iconDp(133f, 238f) > 64)
     }
+
+    /** The icon side from the card's size equals the one of its tiles (no small first frame, Marc 15/11). */
+    @Test fun iconFromTheCardSize() {
+        // Medium place, 4 × 2: tiles of (562 - 30) / 4 × (378 - 4 - 10) / 2
+        assertEquals(Shortcuts.iconDp(133f, 182f), Shortcuts.tileIcon(562f, 378f, 4, 2))
+        assertTrue(Shortcuts.tileIcon(562f, 378f, 4, 2) > Shortcuts.tileIcon(562f, 378f, 5, 3))
+    }
 }
