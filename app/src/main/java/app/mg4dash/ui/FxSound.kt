@@ -10,14 +10,16 @@ import app.mg4dash.system.Prefs
 /**
  * Sounds of the full power animations: the whoosh of the jump to light speed, the electric crackle of the
  * lightning and the fire of the flames. One volume for all of them (Settings › Look, under the animation), low by
- * default; the files are levelled to the same loudness.
+ * default; the three files are levelled to the same loudness (about -12 dB RMS, soft-limited) so 100 % is loud.
  * The car only lets an app be heard while it holds the audio focus (15/11: played without it, nothing came out
  * over the radio): a short transient focus is taken for each sound, as for the start sound, then given back, so the
- * car takes it as a passing sound and its source stays the same.
+ * radio gets its focus back and plays on. The request and the release must go through the same AudioManager (the
+ * application's): Android matches them by AudioManager instance, and a release from another one was ignored, so
+ * the radio stayed paused (15/11).
  */
 object FxSound {
     /** Default volume of the animation sounds, in % (low: they play over the music). */
-    const val DEFAULT_VOLUME = 30
+    const val DEFAULT_VOLUME = 20
 
     /** SoundPool volume (0..1) for a setting in % (0..100). */
     internal fun gain(percent: Int): Float = (percent.coerceIn(0, 100) / 100f)
@@ -33,7 +35,7 @@ object FxSound {
     private fun lengthOf(res: Int): Long = when (res) {
         R.raw.fx_crackle -> 900L
         R.raw.fx_fire -> 2600L
-        else -> 1800L
+        else -> 1700L
     }
 
     private var focus: android.media.AudioFocusRequest? = null
@@ -42,7 +44,8 @@ object FxSound {
 
     /** The audio focus for [ms]: the car lets the sound be heard (a later sound extends it). */
     private fun holdFocus(context: Context, ms: Long) {
-        val am = context.getSystemService(Context.AUDIO_SERVICE) as? android.media.AudioManager ?: return
+        val appCtx = context.applicationContext
+        val am = appCtx.getSystemService(Context.AUDIO_SERVICE) as? android.media.AudioManager ?: return
         if (focus == null) {
             val req = android.media.AudioFocusRequest.Builder(android.media.AudioManager.AUDIOFOCUS_GAIN_TRANSIENT)
                 .setAudioAttributes(AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_MEDIA).build())
@@ -50,7 +53,7 @@ object FxSound {
                 .build()
             runCatching { am.requestAudioFocus(req); focus = req }
                 .onFailure { app.mg4dash.system.Log.w("FxSound", "audio focus: ${it.message}") }
-            appContext = context.applicationContext
+            appContext = appCtx
         }
         main.removeCallbacks(release)
         main.postDelayed(release, ms + 300)
