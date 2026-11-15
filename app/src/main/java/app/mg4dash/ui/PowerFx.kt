@@ -455,24 +455,8 @@ class PowerFx(private val context: Context) : Drawable() {
         val veilTarget = if (pushing || warp > 0.3f) 1f else 0f
         veil += (veilTarget - veil) * (1f - exp(-dt * (if (veilTarget > veil) 8f else 1.6f)))
         if (veil < 0.01f && !pushing) veil = 0f
-        if (veil > 0f) {
-            paint.shader = null; paint.style = Paint.Style.FILL
-            paint.color = 0xFF02040B.toInt(); paint.alpha = (veil * (if (light) 235 else 185)).toInt()
-            c.drawRect(b, paint)
-        }
-        // Jump: brief bluish flash and shake of the screen, also at each new record (smaller)
-        val flashT = now - flashAt
-        if (flashT in 0..FLASH_MS) {
-            val k = 1f - flashT.toFloat() / FLASH_MS
-            val big = flashAt == jumpAt + CHARGE_MS
-            paint.shader = null; paint.color = 0xFFDDE8FF.toInt(); paint.alpha = (k * k * (if (big) 110 else 55)).toInt()
-            c.drawRect(b, paint)
-        }
-        if (sinceStart >= CHARGE_MS && flashAt < jumpAt + CHARGE_MS) flashAt = jumpAt + CHARGE_MS
-        val shakeT = sinceStart - CHARGE_MS
-        if (shakeT in 0..SHAKE_MS) { shaking = true; shakeBy(5f * d * (1f - shakeT.toFloat() / SHAKE_MS)) }
-        else if (shaking) { shaking = false; shakeBy(0f) }
-        // The peak badge under the stars (Marc, 14/11): the streaks pass in front of it
+        // The peak badge behind the whole animation (Marc, 14/11 and 15/11): drawn first, under the dark veil and the
+        // stars, so it only shows clearly once the jump is over and the veil goes
         sizeText()
         val text = peakText()
         val icon = textPaint.textSize * 0.9f
@@ -493,6 +477,23 @@ class PowerFx(private val context: Context) : Drawable() {
         path.lineTo(px + r4 * 0.4f, by + r4 * 0.4f); path.lineTo(px, by + r4 * 1.6f); path.lineTo(px - r4 * 0.4f, by + r4 * 0.4f)
         path.lineTo(px - r4 * 1.6f, by); path.lineTo(px - r4 * 0.4f, by - r4 * 0.4f); path.close()
         paint.shader = null; paint.color = 0xFFFFFFFF.toInt(); paint.alpha = 255; c.drawPath(path, paint)
+        if (veil > 0f) {
+            paint.shader = null; paint.style = Paint.Style.FILL
+            paint.color = 0xFF02040B.toInt(); paint.alpha = (veil * (if (light) 235 else 185)).toInt()
+            c.drawRect(b, paint)
+        }
+        // Jump: brief bluish flash and shake of the screen, also at each new record (smaller)
+        val flashT = now - flashAt
+        if (flashT in 0..FLASH_MS) {
+            val k = 1f - flashT.toFloat() / FLASH_MS
+            val big = flashAt == jumpAt + CHARGE_MS
+            paint.shader = null; paint.color = 0xFFDDE8FF.toInt(); paint.alpha = (k * k * (if (big) 110 else 55)).toInt()
+            c.drawRect(b, paint)
+        }
+        if (sinceStart >= CHARGE_MS && flashAt < jumpAt + CHARGE_MS) flashAt = jumpAt + CHARGE_MS
+        val shakeT = sinceStart - CHARGE_MS
+        if (shakeT in 0..SHAKE_MS) { shaking = true; shakeBy(5f * d * (1f - shakeT.toFloat() / SHAKE_MS)) }
+        else if (shaking) { shaking = false; shakeBy(0f) }
         // Stars: projected from the centre; the streak joins the star to where it was a moment ago
         if (veil > 0f) {
             val f = 0.15f * h
