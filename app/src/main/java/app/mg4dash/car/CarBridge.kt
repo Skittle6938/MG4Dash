@@ -671,6 +671,8 @@ object CarBridge {
             val front = ourFrontTask()
             val ok = try { action() } catch (e: Exception) { Log.w(TAG, "SET $label: ${e.message}"); false }
             Log.i(TAG, "SET $label (old SDK) → $ok")
+            // #112 (lopezjm2001, SWI165): a command of ours (intermittent A/C resumed at start…) can open the page again
+            if (ok) watchPageFor(OWN_COMMAND_WATCH_MS, "after a climate command from MG4Dash")
             delay(300); refreshHvac(); keepFront(front)
             delay(700); refreshHvac(); keepFront(front)
             delay(1000); keepFront(front)
@@ -714,6 +716,7 @@ object CarBridge {
     internal const val START_WATCH_MS = 90_000L
     internal const val TURN_ON_WATCH_MS = 20_000L
     internal const val SCREEN_ON_WATCH_MS = 45_000L
+    internal const val OWN_COMMAND_WATCH_MS = 10_000L
 
     /**
      * How long to look for the SAIC climate page after the climate state [prev] → [on], or null. #112: after a long
@@ -757,11 +760,14 @@ object CarBridge {
 
     /** Until when the SAIC climate page is looked for (elapsedRealtime), 0 = not looked for. */
     @Volatile private var pageWatchUntil = 0L
+    /** After a close, the page is given time to go before it is looked for again (no second close of the same page). */
+    private const val PAGE_CLOSED_PAUSE_MS = 3_000L
     private var pageWatch: kotlinx.coroutines.Job? = null
 
     /**
-     * Looks for the SAIC climate page every 1.5 s for [ms] and closes it once seen (#112). The page can come well
-     * after the climate came on, and the system UI service may not answer at once: looked for again until closed.
+     * Looks for the SAIC climate page every 1.5 s for [ms] and closes it each time it is seen (#112). The page can come
+     * well after the climate came on, the system UI service may not answer at once, and the car can open it again
+     * after a first close (lopezjm2001, SWI165): looked for until the end of the time, not only until the first close.
      */
     private fun watchPageFor(ms: Long, why: String) {
         val until = android.os.SystemClock.elapsedRealtime() + ms
@@ -772,8 +778,7 @@ object CarBridge {
         pageWatch = scope.launch {
             delay(900)
             while (android.os.SystemClock.elapsedRealtime() < pageWatchUntil) {
-                if (closeClimateWindow(quiet = true)) { pageWatchUntil = 0L; break }
-                delay(1_500)
+                delay(if (closeClimateWindow(quiet = true)) PAGE_CLOSED_PAUSE_MS else 1_500)
             }
         }
     }
