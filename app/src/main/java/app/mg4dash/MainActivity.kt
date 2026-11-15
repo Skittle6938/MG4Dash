@@ -1653,9 +1653,8 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
     }
 
     private fun renderShortcuts() {
-        // Rows of tiles by the size of the place (#97): 3 on the tall map of the Map layout, 1 in a small place
-        val rows = when (frameOf(Card.SHORTCUTS)?.slot?.size) { HomeSlots.Size.TALL -> 3; HomeSlots.Size.SMALL -> 1; else -> 2 }
-        app.mg4dash.shortcuts.Shortcuts.render(this, shortcutsHolder, shortcutsPage, rows) { p ->
+        // Grid by the size of the place (#97) and the size step chosen there (Shortcuts.grid)
+        app.mg4dash.shortcuts.Shortcuts.render(this, shortcutsHolder, shortcutsPage, frameOf(Card.SHORTCUTS)?.slot?.size) { p ->
             shortcutsPage = p; renderShortcuts()
         }
     }

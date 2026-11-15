@@ -1409,6 +1409,31 @@ class ScreenshotTest {
 
     private var lastHome: org.robolectric.android.controller.ActivityController<MainActivity>? = null
 
+    /** Shortcuts card at its three size steps in each kind of place (15/11), in build/screenshots/sc_grid/. */
+    @Test fun shortcutsGrid() {
+        val names = listOf("cover.gate|Portail", "cover.garage_door|Garage", "light.allee|Allée", "lock.entree|Entrée",
+            "scene.arriving_home|Arrivée", "script.chauffage|Chauffage", "switch.prise_garage|Prise", "light.salon|Salon",
+            "climate.maison|Maison", "scene.depart|Départ", "light.terrasse|Terrasse", "cover.volets|Volets",
+            "switch.borne|Borne", "script.portail_pieton|Piéton", "light.cuisine|Cuisine", "scene.nuit|Nuit",
+            "switch.arrosage|Arrosage", "lock.garage|Garage 2", "light.jardin|Jardin", "script.alarme|Alarme")
+        val e = org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE).edit()
+        names.forEachIndexed { i, n -> e.putString("sc_$i", "ha|$n") }
+        e.putString("sc_3", "adb").commit()
+        val places = listOf(
+            Triple(HL.FULL, "tl=climate;tc=trips;tr=media;bl=energy;bc=hourly,daily;br=shortcuts", "SMALL"),
+            Triple(HL.FULL, "tl=climate;tc=shortcuts;tr=media;bl=energy;bc=hourly,daily;br=trip", "MEDIUM"),
+            Triple(HL.MAP, "tl=hourly,daily;tc=energy;r=shortcuts;bl=climate;bc=media", "TALL"),
+            Triple(HL.BAND_TOP, "w=shortcuts;tr=climate;bl=energy;bc=hourly,daily;br=trip", "WIDE"),
+            Triple(HL.SQUARE_LEFT, "g=shortcuts;tr=climate;br=energy", "LARGE"))
+        File("build/screenshots/sc_grid").mkdirs()
+        for ((layout, slots, size) in places) for (d in 0..2) {
+            org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE).edit()
+                .putInt("sc_density_$size", d).commit()
+            val act = layoutHome(layout, slots, 1)
+            save(act.window.decorView, "sc_grid/${size.lowercase()}_$d.png")
+        }
+    }
+
     @org.junit.After fun dropHome() { lastHome?.let { runCatching { it.pause().stop().destroy() } }; lastHome = null }
 
     private fun layoutHome(layout: app.mg4dash.ui.HomeSlots.Layout, slots: String?, mode: Int, drive: Int = 3): MainActivity {

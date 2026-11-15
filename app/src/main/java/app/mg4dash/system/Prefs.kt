@@ -222,6 +222,10 @@ class Prefs(context: Context) {
     var powerFx: Int
         get() = sp.getInt("power_fx", 4)
         set(v) = sp.edit().putInt("power_fx", v).apply()
+    /** Size step of the shortcuts card in a place of [size] (Shortcuts.grid): 0 = 4 per row as before. */
+    fun shortcutsDensity(size: app.mg4dash.ui.HomeSlots.Size?): Int = sp.getInt("sc_density_${size ?: "MEDIUM"}", 0).coerceIn(0, 2)
+    fun setShortcutsDensity(size: app.mg4dash.ui.HomeSlots.Size?, d: Int) = sp.edit().putInt("sc_density_${size ?: "MEDIUM"}", d.coerceIn(0, 2)).apply()
+
     /** Sounds of the full power animations (Settings › Look, under the animation): off by default (15/11). */
     var fxSound: Boolean
         get() = sp.getBoolean("fx_sound", false)

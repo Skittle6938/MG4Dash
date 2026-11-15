@@ -73,29 +73,54 @@ object Shortcuts {
     // ─── Vue ───
 
     /** Builds (or rebuilds) the grid in [holder]; [page] = displayed page. */
-    /** [rows]: 2 on the Full home, 3 in the Map layout (slots 8 to 11 added). */
-    fun render(activity: Activity, holder: LinearLayout, page: Int, rows: Int = ROWS, onPage: (Int) -> Unit) {
+    /** Shortcuts' size steps: today's grid, more, dense (15/11). */
+    val DENSITIES = 0..2
+
+    /**
+     * Columns × rows of the card in a place of [size] at [density]: a row first, then a column, so the tiles stay
+     * close to square (the places' sizes, 15/11): small 4×1, 4×2, 5×2; medium 4×2, 4×3, 5×3; tall 4×3, 4×4, 5×4.
+     * The slots are numbered along the rows, so a change of grid only moves them along, nothing is lost.
+     */
+    fun grid(size: app.mg4dash.ui.HomeSlots.Size?, density: Int): Pair<Int, Int> {
+        val d = density.coerceIn(DENSITIES)
+        return when (size) {
+            app.mg4dash.ui.HomeSlots.Size.SMALL -> listOf(4 to 1, 4 to 2, 5 to 2)[d]
+            app.mg4dash.ui.HomeSlots.Size.TALL -> listOf(4 to 3, 4 to 4, 5 to 4)[d]
+            // Two columns wide: more columns rather than rows (tiles over 280 dp wide with 4)
+            app.mg4dash.ui.HomeSlots.Size.WIDE -> listOf(4 to 2, 8 to 2, 8 to 3)[d]
+            app.mg4dash.ui.HomeSlots.Size.LARGE -> listOf(4 to 3, 8 to 3, 8 to 4)[d]
+            else -> listOf(4 to 2, 4 to 3, 5 to 3)[d]
+        }
+    }
+
+    /** Size of the place the card was last drawn in, for the size choice of its long press menu. */
+    private var shownSize: app.mg4dash.ui.HomeSlots.Size? = null
+
+    /**
+     * The card in a place of [size], at the size step chosen for that place. The card's title is hidden (option
+     * always on): no band is kept for it, the tiles take the whole height.
+     */
+    fun render(activity: Activity, holder: LinearLayout, page: Int, size: app.mg4dash.ui.HomeSlots.Size?, onPage: (Int) -> Unit) {
         val kit = Kit(activity)
         val prefs = Prefs(activity)
+        shownSize = size
+        val (cols, rows) = grid(size, prefs.shortcutsDensity(size))
         holder.removeAllViews()
-        val head = kit.row()
-        head.addView(kit.title(activity.getString(R.string.title_shortcuts)).apply {
-            if (app.mg4dash.system.Prefs(activity).hideTitles) visibility = android.view.View.INVISIBLE   // "Hide titles" option
-        }, kit.lp(0, -2, 1f, l = Kit.fogSafeDp(activity) - 20))
-        // One row (small place, #97): no title line, the tiles take the height
-        holder.addView(head, kit.lp(-1, kit.dp(if (rows == 1) 0 else 48)))
         val grid = kit.column()
         for (r in 0 until rows) {
             val row = kit.row()
-            for (c in 0 until COLS) {
-                val i = page * COLS * rows + r * COLS + c
-                row.addView(cell(activity, kit, prefs, i) { render(activity, holder, page, rows, onPage) },
+            for (c in 0 until cols) {
+                val i = page * cols * rows + r * cols + c
+                row.addView(cell(activity, kit, prefs, i) { render(activity, holder, page, size, onPage) },
                     kit.lp(0, -1, 1f, l = if (c > 0) 10 else 0))
             }
             grid.addView(row, kit.lp(-1, 0, 1f, t = if (r > 0) 10 else 0))
         }
         holder.addView(grid, kit.lp(-1, 0, 1f, t = 4))
     }
+
+    /** Icon side (dp) for a tile of [w] × [h] dp: it fills big tiles, and stays readable in small ones. */
+    internal fun iconDp(w: Float, h: Float): Int = minOf(w * 0.55f, h * 0.48f).toInt().coerceIn(48, 88)
 
     private fun cell(activity: Activity, kit: Kit, prefs: Prefs, i: Int, refresh: () -> Unit): View {
         val slot = get(prefs, i)
@@ -131,6 +156,17 @@ object Shortcuts {
         cell.addView(icon, LinearLayout.LayoutParams(kit.dp(64), kit.dp(64)))
         cell.addView(label, kit.lp(-1, -2, t = 6))
         cell.addView(state, kit.lp(-1, -2))
+        // Icon and texts follow the tile's size: bigger in big tiles, smaller in a dense grid
+        cell.addOnLayoutChangeListener { v, l, t, r, b, ol, ot, or_, ob ->
+            if (r - l == or_ - ol && b - t == ob - ot) return@addOnLayoutChangeListener
+            val d = v.resources.displayMetrics.density
+            val side = iconDp((r - l) / d, (b - t) / d)
+            v.post {
+                icon.layoutParams = LinearLayout.LayoutParams(kit.dp(side), kit.dp(side))
+                label.textSize = (14f + (side - 48) * 0.2f).coerceIn(15f, 22f)
+                state.textSize = (12f + (side - 48) * 0.15f).coerceIn(13f, 18f)
+            }
+        }
         cell.setOnClickListener {
             when (slot) {
                 Slot.Empty -> edit(activity, i, refresh)
@@ -266,6 +302,7 @@ object Shortcuts {
             activity.getString(R.string.sc_adb),
             ha?.let { activity.getString(R.string.sc_state) },
             activity.getString(R.string.sc_clear),
+            activity.getString(R.string.sw_fav_count),
         ).toTypedArray()
         AlertDialog.Builder(activity)
             .setTitle(R.string.sc_edit)
@@ -275,8 +312,23 @@ object Shortcuts {
                     choices[1] -> pickHa(activity) { id, label -> set(prefs, i, Slot.Ha(id, label)); refresh() }
                     activity.getString(R.string.sc_clear) -> { set(prefs, i, Slot.Empty); refresh() }
                     activity.getString(R.string.sc_adb) -> { set(prefs, i, Slot.Adb); refresh() }
+                    activity.getString(R.string.sw_fav_count) -> pickDensity(activity, refresh)
                     else -> if (ha != null) pickState(activity, i, ha, refresh)
                 }
+            }
+            .setNegativeButton(R.string.cancel, null)
+            .show().also { app.mg4dash.ui.Dialogs.fix(it) }
+    }
+
+    /** Number of shortcuts in this place: the three steps of [grid], shown as their counts. */
+    private fun pickDensity(activity: Activity, refresh: () -> Unit) {
+        val prefs = Prefs(activity)
+        val size = shownSize
+        val counts = DENSITIES.map { grid(size, it).let { (c, r) -> c * r } }
+        AlertDialog.Builder(activity)
+            .setTitle(R.string.sw_fav_count)
+            .setSingleChoiceItems(counts.map { it.toString() }.toTypedArray(), prefs.shortcutsDensity(size)) { d, w ->
+                prefs.setShortcutsDensity(size, w); d.dismiss(); refresh()
             }
             .setNegativeButton(R.string.cancel, null)
             .show().also { app.mg4dash.ui.Dialogs.fix(it) }
