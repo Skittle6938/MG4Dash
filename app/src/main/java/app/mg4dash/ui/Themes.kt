@@ -258,7 +258,10 @@ object Themes {
         return "${p.themeBackground},${p.themeAccent},${if (isLight(context)) 1 else 0},${if (p.verticalDock) 1 else 0},0," +
             "${if (p.wideBar) 1 else 0},${if (Dock.rightSide(context)) 1 else 0},${if (p.radioDashAm) 1 else 0}," +
             // 9th: MG's fog light button hidden by the shortcuts menu (Radio Dash's left bar then takes the full height)
-            "${if (app.mg4dash.system.FogOverlay.hides(context)) 1 else 0}"
+            "${if (app.mg4dash.system.FogOverlay.hides(context)) 1 else 0}," +
+            // 10th, 11th: the Android Auto button's choice (0 Android Auto, 1 CarPlay, 2 another app) and that app's
+            // component (empty otherwise), so Radio Dash names it and opens it through MG4Dash (MG4Radio #5)
+            "${Dock.aaChoice(p.dockAaTarget)},${p.dockAaTarget?.takeIf { Dock.aaChoice(it) == 2 } ?: ""}"
     }
 
     /** Publishes the theme for Radio Dash (system uid required; no effect otherwise). */

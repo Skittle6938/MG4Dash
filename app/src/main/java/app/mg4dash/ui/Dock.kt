@@ -384,7 +384,11 @@ object Dock {
     private fun pickAaTarget(activity: Activity, onDone: () -> Unit) {
         val choices = arrayOf(activity.getString(R.string.dock_aa_stock), activity.getString(R.string.dock_cp_stock), activity.getString(R.string.dock_other_app))
         // App change: the one that was cut is first re-enabled
-        fun choose(target: String?) { app.mg4dash.system.ConnectionToggle.restore(activity); Prefs(activity).dockAaTarget = target; onDone() }
+        fun choose(target: String?) {
+            app.mg4dash.system.ConnectionToggle.restore(activity); Prefs(activity).dockAaTarget = target
+            Themes.publish(activity)   // Radio Dash's bars follow the choice (MG4Radio #5)
+            onDone()
+        }
         android.app.AlertDialog.Builder(activity)
             .setTitle(R.string.dock_aa_pick)
             .setItems(choices) { _, w ->
@@ -439,9 +443,9 @@ object Dock {
     }
 
     /** Opens the app of the Android Auto button (also the two finger pull from the top of the screen). */
-    fun openProjection(activity: Activity) {
+    fun openProjection(activity: Activity, done: () -> Unit = {}) {
         val custom = customAa(activity)
-        if (custom != null && custom != Apps.CARPLAY) { Shortcuts.launch(activity, custom); return }
+        if (custom != null && custom != Apps.CARPLAY) { Shortcuts.launch(activity, custom); done(); return }
         // Stock Android Auto / CarPlay: with no phone connected, the screen stays black (#41).
         // Open the projection of the phone in session, or warn there is none.
         val fallback = custom ?: Apps.ANDROID_AUTO
@@ -456,8 +460,27 @@ object Dock {
                         Apps.open(activity, target, activity.getString(if (target == Apps.CARPLAY) R.string.dock_cp else R.string.dock_aa))
                     }
                 }
+                done()
             }
         }.start()
+    }
+
+    /**
+     * The Android Auto button pressed elsewhere (Radio Dash's bars, MG4Radio #5): as on MG4Dash's bar, a connection
+     * cut by a long press is reminded, otherwise the chosen app or the phone's projection opens.
+     */
+    fun pressProjection(activity: Activity, done: () -> Unit = {}) {
+        if (app.mg4dash.system.ConnectionToggle.isOff(activity)) {
+            Toasts.show(activity, activity.getString(R.string.dock_conn_off, connectionName(activity)), long = true); done(); return
+        }
+        openProjection(activity, done)
+    }
+
+    /** Choice of the Android Auto button for Radio Dash: 0 Android Auto, 1 CarPlay, 2 another app ([aaTargetApp]). */
+    internal fun aaChoice(target: String?): Int = when {
+        target == null -> 0
+        target == Apps.CARPLAY.flattenToString() -> 1
+        else -> 2
     }
 
     private fun open(activity: Activity, item: Item, current: Page) {
