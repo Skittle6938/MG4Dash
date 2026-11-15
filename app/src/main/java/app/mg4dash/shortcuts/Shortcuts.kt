@@ -104,14 +104,22 @@ object Shortcuts {
         val kit = Kit(activity)
         val prefs = Prefs(activity)
         shownSize = size
-        val (cols, rows) = grid(size, prefs.shortcutsDensity(size))
+        val density = prefs.shortcutsDensity(size)
+        val (cols, rows) = grid(size, density)
+        // Icon size known before the first drawing (15/11: on Home they showed small, then grew): from the
+        // card's size when it is laid out, else the last one found for this place and step
+        val d = activity.resources.displayMetrics.density
+        val key = "$size/$density"
+        val initial = if (holder.width > 0 && holder.height > 0)
+            tileIcon(holder.width / d, holder.height / d, cols, rows).also { lastIcon[key] = it }
+        else lastIcon[key] ?: 64
         holder.removeAllViews()
         val grid = kit.column()
         for (r in 0 until rows) {
             val row = kit.row()
             for (c in 0 until cols) {
                 val i = page * cols * rows + r * cols + c
-                row.addView(cell(activity, kit, prefs, i) { render(activity, holder, page, size, onPage) },
+                row.addView(cell(activity, kit, prefs, i, initial, key) { render(activity, holder, page, size, onPage) },
                     kit.lp(0, -1, 1f, l = if (c > 0) 10 else 0))
             }
             grid.addView(row, kit.lp(-1, 0, 1f, t = if (r > 0) 10 else 0))
@@ -122,7 +130,17 @@ object Shortcuts {
     /** Icon side (dp) for a tile of [w] × [h] dp: it fills big tiles, and stays readable in small ones. */
     internal fun iconDp(w: Float, h: Float): Int = minOf(w * 0.55f, h * 0.48f).toInt().coerceIn(48, 88)
 
-    private fun cell(activity: Activity, kit: Kit, prefs: Prefs, i: Int, refresh: () -> Unit): View {
+    /** Icon side (dp) of the tiles of a [cols] × [rows] grid in a card of [w] × [h] dp (10 dp gaps, 4 dp on top). */
+    internal fun tileIcon(w: Float, h: Float, cols: Int, rows: Int): Int =
+        iconDp((w - 10f * (cols - 1)) / cols, (h - 4f - 10f * (rows - 1)) / rows)
+
+    /** Last icon side found for a place size and step, for a card drawn before it is laid out. */
+    private val lastIcon = HashMap<String, Int>()
+
+    private fun labelSp(side: Int) = (14f + (side - 48) * 0.2f).coerceIn(15f, 22f)
+    private fun stateSp(side: Int) = (12f + (side - 48) * 0.15f).coerceIn(13f, 18f)
+
+    private fun cell(activity: Activity, kit: Kit, prefs: Prefs, i: Int, initial: Int, key: String, refresh: () -> Unit): View {
         val slot = get(prefs, i)
         val cell = kit.column().apply {
             gravity = Gravity.CENTER
@@ -153,19 +171,26 @@ object Shortcuts {
                 showAdb(activity, state, null)
             }
         }
-        cell.addView(icon, LinearLayout.LayoutParams(kit.dp(64), kit.dp(64)))
+        cell.addView(icon, LinearLayout.LayoutParams(kit.dp(initial), kit.dp(initial)))
+        label.textSize = labelSp(initial); state.textSize = stateSp(initial)
         cell.addView(label, kit.lp(-1, -2, t = 6))
         cell.addView(state, kit.lp(-1, -2))
         // Icon and texts follow the tile's size: bigger in big tiles, smaller in a dense grid
+        // Corrected only if the real tile differs (first start, card moved): before the frame is drawn
         cell.addOnLayoutChangeListener { v, l, t, r, b, ol, ot, or_, ob ->
             if (r - l == or_ - ol && b - t == ob - ot) return@addOnLayoutChangeListener
             val d = v.resources.displayMetrics.density
             val side = iconDp((r - l) / d, (b - t) / d)
-            v.post {
-                icon.layoutParams = LinearLayout.LayoutParams(kit.dp(side), kit.dp(side))
-                label.textSize = (14f + (side - 48) * 0.2f).coerceIn(15f, 22f)
-                state.textSize = (12f + (side - 48) * 0.15f).coerceIn(13f, 18f)
-            }
+            lastIcon[key] = side
+            if (icon.layoutParams.width == kit.dp(side)) return@addOnLayoutChangeListener
+            v.viewTreeObserver.addOnPreDrawListener(object : android.view.ViewTreeObserver.OnPreDrawListener {
+                override fun onPreDraw(): Boolean {
+                    v.viewTreeObserver.removeOnPreDrawListener(this)
+                    icon.layoutParams = LinearLayout.LayoutParams(kit.dp(side), kit.dp(side))
+                    label.textSize = labelSp(side); state.textSize = stateSp(side)
+                    return false   // this frame is skipped, the next one has the right size
+                }
+            })
         }
         cell.setOnClickListener {
             when (slot) {
