@@ -68,6 +68,8 @@ class LauncherApp : Application() {
         }
         app.mg4dash.car.VehicleState.tempOffset = app.mg4dash.system.Prefs(this).tempOffset
         app.mg4dash.system.HomeSwitcher.init(this)
+        // Default home lost during an update (Android's chooser at the next Home): MG4Dash set as home again
+        app.mg4dash.system.HomeSwitcher.ensureHome(this, "start")
         CarBridge.start(this)
         app.mg4dash.phone.PhoneBookAuto.start(this)
         app.mg4dash.car.CarProps.start(this)
