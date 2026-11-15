@@ -33,7 +33,7 @@ object FxSound {
 
     /** Length of each sound (ms), the time the audio focus is held. */
     private fun lengthOf(res: Int): Long = when (res) {
-        R.raw.fx_crackle -> 900L
+        R.raw.fx_crackle -> 1000L
         R.raw.fx_fire -> 2600L
         else -> 1700L
     }
