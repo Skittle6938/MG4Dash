@@ -641,7 +641,8 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         listOf(Card.ENERGY, Card.TRIP, Card.POWER, Card.PHONE, Card.CONSUMPTION, Card.SHORTCUTS, Card.WEB, Card.TRIPS, Card.DRIVING).forEach { c ->
             panels[c]?.let { pad(it, tl != null && c in tl.cards) }
         }
-        pad(b.mediaCard, tl?.fill == HomeSlots.Fill.Media)
+        // The media card keeps its full width (15/11, #118): its cover goes to the edge, under the button if any
+        pad(b.mediaCard, false)
     }
     private val basePad = HashMap<View, Int>()
 

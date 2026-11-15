@@ -144,7 +144,11 @@ object Dock {
     internal fun fogOnBar(vertical: Boolean, rightSide: Boolean) = vertical && !rightSide
 
     /** The fog light button's corner is kept free (the button is there: shortcuts menu off, or an overlay that does not fit, #113). */
-    fun fogShown(context: android.content.Context): Boolean = !app.mg4dash.system.FogOverlay.hides(context)
+    fun fogShown(context: android.content.Context): Boolean =
+        keepFogRoom(app.mg4dash.system.FogOverlay.hasButton(context), app.mg4dash.system.FogOverlay.hides(context))
+
+    /** Room kept for MG's fog light button: only when this SystemUI has one (#118) and it is not hidden by the overlay. */
+    internal fun keepFogRoom(hasButton: Boolean, hidden: Boolean) = hasButton && !hidden
 
     /** Vertical bar on the left chosen in the settings (all screens). */
     fun vertical(context: android.content.Context): Boolean = Prefs(context).verticalDock
