@@ -58,6 +58,23 @@ object FogOverlay {
         return r
     }
 
+    @Volatile private var button: Boolean? = null
+
+    /**
+     * This SystemUI has MG's floating fog light button at all (its layout_ball window, top left corner). SWI165's
+     * SystemUI has none, its rear fog light is a switch of the top bar (#118): no room to keep for it then. Unreadable:
+     * true, the room is kept as before.
+     */
+    fun hasButton(context: Context): Boolean {
+        if (BuildConfig.MOCK) return true
+        button?.let { return it }
+        val r = try {
+            context.packageManager.getResourcesForApplication(SYSTEMUI).getIdentifier("layout_ball", "layout", SYSTEMUI) != 0
+        } catch (e: Exception) { true }
+        button = r
+        return r
+    }
+
     /** MG's fog light button hidden: the shortcuts menu on and an overlay that fits this SystemUI. */
     fun hides(context: Context): Boolean = Prefs(context).shortcutsMenu && fits(context)
 
