@@ -366,10 +366,15 @@ object HomeSlots {
         if (prefs.weatherPage == 1) Card.DAILY else Card.HOURLY,
     )
 
-    /** Card after [cur] in [cards], in direction [dir] (±1), going round. */
-    fun next(cards: List<Card>, cur: Card?, dir: Int): Card? {
+    /** Card after [cur] in [cards], in direction [dir] (±1), going round, past the cards [skip] says (null if none is left). */
+    fun next(cards: List<Card>, cur: Card?, dir: Int, skip: (Card) -> Boolean = { false }): Card? {
         if (cards.isEmpty()) return null
         val i = cards.indexOf(cur)
-        return if (i < 0) cards.first() else cards[Math.floorMod(i + dir, cards.size)]
+        if (i < 0) return cards.firstOrNull { !skip(it) }
+        for (k in 1 until cards.size) {
+            val c = cards[Math.floorMod(i + k * dir, cards.size)]
+            if (!skip(c)) return c
+        }
+        return null
     }
 }
