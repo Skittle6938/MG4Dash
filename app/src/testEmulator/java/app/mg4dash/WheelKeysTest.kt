@@ -60,4 +60,14 @@ class WheelKeysTest {
         assertTrue("long enough for the slowest seen (1.9 s)", MediaHub.WHEEL_SILENCE_MAX_MS >= 2_500)
         assertTrue("never more than a few seconds", MediaHub.WHEEL_SILENCE_MAX_MS <= 3_000)
     }
+
+    /** MG4Link #28 contract: with Android Auto as the source, left / right are MG4Link's, MG4Dash sends nothing. */
+    @Test fun skipKeysLeftToMg4LinkWithAndroidAuto() {
+        assertTrue(MediaHub.wheelSkipLeftToAndroidAuto("com.allgo.remoteui.mediabrowserservice"))
+        assertTrue(MediaHub.wheelSkipLeftToAndroidAuto("com.allgo.app.androidauto"))
+        assertFalse(MediaHub.wheelSkipLeftToAndroidAuto(radio))
+        assertFalse(MediaHub.wheelSkipLeftToAndroidAuto(web))
+        assertFalse(MediaHub.wheelSkipLeftToAndroidAuto("app.mg4aa"))
+        assertFalse(MediaHub.wheelSkipLeftToAndroidAuto(null))
+    }
 }
