@@ -196,4 +196,37 @@ class StartupSequenceTest {
         assertFalse("a pause 10 s or more before: the driver's, kept however short", StartupSequence.lastState(null, last = false, lastAt = 100_000, before = true, aliveAt = 120_000))
         assertTrue(StartupSequence.lastState(null, last = true, lastAt = 100_000, before = false, aliveAt = 101_000))
     }
+
+    /** #106: the car's welcome message (voicetts) at start is not a source: nothing is switched to it, nor played. */
+    @Test fun carAnnouncementAtStartIsNotTheSource() {
+        val tts = "com.saicmotor.voicetts"; val cp = "carplay"
+        val s = seq(Mode.Car)
+        val a = run(s, 0, 14_000) { t -> Input(t, available = listOf(radio, bt), carSource = tts, phoneDecides = { it == cp }) }
+        assertTrue("no switch to the announcement, no play while it speaks", a.none { it.second == Action.Switch(tts) || it.second == Action.Play })
+        // CarPlay connects 16 s after the start: it is the source, kept
+        val b = run(s, 16_000, 20_000) { t -> Input(t, available = listOf(radio, bt, cp), carSource = cp, phoneDecides = { it == cp }) }
+        assertEquals(Action.Switch(cp), b.first().second)
+    }
+
+    /** #106: a later announcement (mid-drive) does not count as the source being taken from CarPlay. */
+    @Test fun announcementDoesNotTakeTheSource() {
+        val tts = "com.saicmotor.voicetts"; val cp = "carplay"
+        val s = seq(Mode.Car)
+        run(s, 0, 2_000) { t -> Input(t, available = listOf(radio, cp), carSource = cp, phoneDecides = { it == cp }) }
+        run(s, 2_250, 6_000) { t -> Input(t, available = listOf(radio, cp), carSource = if (t < 4_000) tts else cp, phoneDecides = { it == cp }) }
+        assertTrue("not ended by the announcement", s.endedBy != "source changed by the driver")
+    }
+
+    /** #106: CarPlay was the car's last source (Carlinkit box, late): the radio is not taken after 15 s, CarPlay is waited for. */
+    @Test fun lateCarPlayIsWaitedFor() {
+        val cp = "carplay"
+        val s = seq(Mode.Car)
+        val a = run(s, 0, 30_000) { t -> Input(t, available = listOf(radio, bt), carSource = null, projectionLast = true, phoneDecides = { it == cp }) }
+        assertTrue("no radio after 15 s", a.none { it.second == Action.Switch(radio) })
+        val b = run(s, 30_250, 32_000) { t -> Input(t, available = listOf(radio, bt, cp), carSource = cp, projectionLast = true, phoneDecides = { it == cp }) }
+        assertEquals(Action.Switch(cp), b.first().second)
+        // Without the projection as the last source: the radio after 15 s, as before
+        val c = run(seq(Mode.Car), 0, 16_000) { t -> Input(t, available = listOf(radio, bt), carSource = null) }
+        assertTrue(c.any { it.second == Action.Switch(radio) })
+    }
 }
