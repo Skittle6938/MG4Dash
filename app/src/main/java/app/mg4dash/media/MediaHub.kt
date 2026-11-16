@@ -492,6 +492,7 @@ object MediaHub {
                 soundEndAt = snd.bootSoundUntil.takeIf { snd.bootSoundExpected && it != 0L && up >= it }?.let { it - startedAt },
                 available = availableSources().filterNot { it == AA_MBS && carPlay },
                 carSource = effectiveSource(),
+                projectionLast = projectionLastAtStart,
                 playing = _now.value.available && realPlaying() && !phoneDecides(shown) && !phoneDecides(sourcePkg),
                 userAt = userAt?.let { it - startedAt },
                 phoneDecides = { phoneDecides(it) || handlesWheelKeys(sourcePkg) },
@@ -1001,10 +1002,14 @@ object MediaHub {
         else -> null
     }
 
+    /** The car's last source at power-on was CarPlay (50 to 56) or Android Auto (70): it may connect late (#106). */
+    @Volatile private var projectionLastAtStart = false
+
     private fun watchAudioSource(context: Context) {
         val am = context.getSystemService(Context.AUDIO_SERVICE) as android.media.AudioManager
         try {
             val last = am.javaClass.getMethod("getLastSource").invoke(am) as Int
+            projectionLastAtStart = last in 50..56 || last == 70
             sourcePkg = sourceFromCarType(last)
             Log.i(TAG, "audio source at startup: $last → $sourcePkg")
         } catch (e: Throwable) { Log.w(TAG, "getLastSource unavailable: ${e.message}") }
@@ -1024,6 +1029,11 @@ object MediaHub {
                         // card flickered to DiAuto at each announcement
                         // Same for AllGo without a phone: DiAuto closed the announcement under its name, and the following
                         // switch, Android Auto being absent, restarted paused Bluetooth (#78)
+                        // The car's own voice announcements (welcome message, prompts) neither: the source stays (#106)
+                        if (pkg in StartupSequence.PASSING) {
+                            Log.i(TAG, "audio source: $pkg ($type) ignored: car announcement, the source does not change")
+                            return@newProxyInstance null
+                        }
                         if (type == -1 && pkg != null && (!pkg.startsWith("com.saicmotor.") && !pkg.startsWith("com.allgo.") ||
                                 pkg == "com.allgo.app.androidauto" && projectionLive != true)) {
                             Log.i(TAG, "audio source: $pkg (-1) ignored: passing sound, the car source does not change")

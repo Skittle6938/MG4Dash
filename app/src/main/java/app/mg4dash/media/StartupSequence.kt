@@ -54,6 +54,8 @@ internal class StartupSequence(
         val soundEndAt: Long? = null,
         val available: List<String> = emptyList(),
         val carSource: String? = null,
+        /** The car's last source at power-on was the phone's projection (CarPlay, Android Auto), not connected yet. */
+        val projectionLast: Boolean = false,
         val playing: Boolean = false,
         val userAt: Long? = null,
         val phoneDecides: (String) -> Boolean = { false },
@@ -130,9 +132,13 @@ internal class StartupSequence(
         // The car already on the phone's projection (CarPlay, Android Auto, MG4Link): kept in every mode, never taken
         // from it for a car source, nor by the radio after the wait (#106: CarPlay lost the car's source to the radio
         // at each start; a fixed CarPlay source, connected 20 to 45 s after the start, never counted as there)
-        val car = i.carSource
+        // Only a real player: the car's voice announcements (welcome message, prompts) are a source of their own
+        // for Android, and taking one played Bluetooth instead of waiting for CarPlay (#106)
+        val car = i.carSource?.takeUnless { it in PASSING }
+        // The projection was the car's last source: a CarPlay through a box (Carlinkit…) connects late (#106)
+        val projectionWait = i.projectionLast && i.now - chooseAt < PROJECTION_WAIT_MS
         val t = if (car != null && i.phoneDecides(car)) car else when (mode) {
-            is Mode.Car -> car ?: if (waited) radio else null
+            is Mode.Car -> car ?: if (waited && !projectionWait) radio else null
             is Mode.Fixed -> if (mode.pkg in i.available) mode.pkg else if (waited) radio else null
             is Mode.Auto -> {
                 val pref = mode.order.firstOrNull()
@@ -163,13 +169,17 @@ internal class StartupSequence(
     private fun sourceTaken(i: Input): Boolean {
         val t = target ?: return false
         if (i.carSource == t) targetSeen = true
-        return targetSeen && i.carSource != null && i.carSource != t
+        return targetSeen && i.carSource != null && i.carSource != t && i.carSource !in PASSING
     }
 
     companion object {
         const val SOUND_MAX_MS = 30_000L
         const val AFTER_SOUND_MS = 1_000L
         const val PREFERRED_WAIT_MS = 15_000L
+        /** Longer wait for the projection when it was the car's last source, in "As the car" mode (#106). */
+        const val PROJECTION_WAIT_MS = 45_000L
+        /** Car sounds that pass and never are the source: its voice announcements (#106). */
+        val PASSING = setOf("com.saicmotor.voicetts")
         const val SETTLE_MS = 1_500L
         const val WATCH_MS = 10_000L
         const val COMMAND_GAP_MS = 1_500L
