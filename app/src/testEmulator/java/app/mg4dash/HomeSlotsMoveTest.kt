@@ -127,7 +127,7 @@ class HomeSlotsMoveTest {
     }
 
     @Test fun decodeIgnoresUnknownAndBrokenEntries() {
-        val c = HomeSlots.decode(Layout.FULL, "tl=climate;tc=map,radar,,trip;zz=phone;garbage;tr=media;bl=energy;bc=hourly;br=power")
+        val c = HomeSlots.decode(Layout.FULL, "tl=climate;tc=map,sonar,,trip;zz=phone;garbage;tr=media;bl=energy;bc=hourly;br=power")
         assertEquals(listOf(Card.MAP, Card.TRIP), c.cards("tc"))
         assertNull(c.slotOf(Card.PHONE))
         assertEquals(Fill.Media, c.fill("tr"))

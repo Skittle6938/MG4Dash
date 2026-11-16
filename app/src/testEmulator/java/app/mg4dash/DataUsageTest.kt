@@ -42,7 +42,7 @@ class DataUsageTest {
     }
 
     @Test fun dayWithoutWifiCountsNone() {
-        val d = Day(20261106, longArrayOf(1, 2, 3, 4, 5, 6))
+        val d = Day(20261106, longArrayOf(1, 2, 3, 4, 5, 6, 7))
         assertEquals(Use.values().size, d.wifi.size)
         assertEquals(0L, d.sum(g = false, w = true))
     }

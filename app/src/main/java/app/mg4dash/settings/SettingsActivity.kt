@@ -200,6 +200,7 @@ class SettingsActivity : AppCompatActivity() {
             toggle(units, R.string.st_hide_saic_climate, R.string.st_hide_saic_climate_desc, { prefs.hideSaicClimate }) { prefs.hideSaicClimate = it }
 
         soundTriggersSetting(panel(carL, getString(R.string.st_sound_trigger).uppercase()))
+        radarSetting(panel(carL, getString(R.string.st_rad_title).uppercase()))
 
         // ════ Appearance tab: theme and effects ════
         val theme = panel(lookL, getString(R.string.st_theme))
@@ -497,6 +498,7 @@ class SettingsActivity : AppCompatActivity() {
         /** Tab to open (index), e.g. [TAB_DATA] from the 4G data alert. */
         const val EXTRA_TAB = "tab"
         const val TAB_DATA = 4
+        const val TAB_CAR = 2
     }
 
     // ── 4G data: total over 30 days, by use, day by day, alert ──
@@ -1383,6 +1385,50 @@ class SettingsActivity : AppCompatActivity() {
                 }
                 .setNegativeButton(R.string.cancel, null).show().also { app.mg4dash.ui.Dialogs.fix(it); app.mg4dash.ui.Dialogs.hideBars(it) }
         }
+    }
+
+    /** Speed camera alerter (test): alerts, thresholds, network, prepared trips, cache. */
+    private fun radarSetting(parent: LinearLayout) {
+        text(parent, getString(R.string.st_rad_desc), 15f, R.color.text_title)
+        toggle(parent, R.string.st_rad_visual, null, { prefs.radarVisual }) { prefs.radarVisual = it }
+        dropdown(parent, getString(R.string.st_rad_sound), listOf(R.string.st_rad_sound_none, R.string.st_rad_sound_strong, R.string.st_rad_sound_both).map { getString(it) },
+            { prefs.radarSound }) { prefs.radarSound = it }
+        text(parent, getString(R.string.st_rad_sound_desc), 15f, R.color.text_title)
+        val unit = app.mg4dash.system.Units.speedUnit(this)
+        lateinit var low: TextView
+        lateinit var high: TextView
+        fun lows() = if (prefs.radarPercent) listOf(0f, 2f, 5f, 10f) else listOf(0f, 1f, 2f, 3f, 5f)
+        fun highs() = if (prefs.radarPercent) listOf(5f, 8f, 10f, 15f, 20f) else listOf(3f, 5f, 6f, 8f, 10f, 15f, 20f)
+        fun label(v: Float) = "+" + (if (v % 1f == 0f) v.toInt().toString() else v.toString()) + " " + (if (prefs.radarPercent) "%" else unit)
+        fun index(list: List<Float>, v: Float) = list.indices.minByOrNull { Math.abs(list[it] - v) } ?: 0
+        fun paint() {
+            low.text = label(lows()[index(lows(), prefs.radarLow)]) + "   ▾"
+            high.text = label(highs()[index(highs(), prefs.radarHigh)]) + "   ▾"
+        }
+        dropdown(parent, getString(R.string.st_rad_unit), listOf(unit, "%"), { if (prefs.radarPercent) 1 else 0 }) { prefs.radarPercent = it == 1; paint() }
+        low = dropdown(parent, getString(R.string.st_rad_low), lows().map { label(it) }, { index(lows(), prefs.radarLow) }) { prefs.radarLow = lows()[it]; paint() }
+        high = dropdown(parent, getString(R.string.st_rad_high), highs().map { label(it) }, { index(highs(), prefs.radarHigh) }) { prefs.radarHigh = highs()[it]; paint() }
+        // The menus show the values of the unit in use when opened
+        low.setOnClickListener { v -> app.mg4dash.ui.SourceMenu.choose(this, v, lows().map { label(it) }, index(lows(), prefs.radarLow)) { prefs.radarLow = lows()[it]; paint() } }
+        high.setOnClickListener { v -> app.mg4dash.ui.SourceMenu.choose(this, v, highs().map { label(it) }, index(highs(), prefs.radarHigh)) { prefs.radarHigh = highs()[it]; paint() } }
+        paint()
+        toggle(parent, R.string.st_rad_banner, R.string.st_rad_banner_desc, { prefs.radarBanner }) { prefs.radarBanner = it }
+        toggle(parent, R.string.st_rad_wifi, R.string.st_rad_wifi_desc, { prefs.radarWifiOnly }) { prefs.radarWifiOnly = it }
+        val cache = text(parent, "", 15f, R.color.text_sub)
+        fun showCache() {
+            val (n, bytes) = app.mg4dash.radar.RadarRepo.cacheSize(this)
+            val prep = app.mg4dash.radar.RadarRepo.prepare.value
+            cache.text = if (prep != null) getString(R.string.st_rad_preparing, prep.first, prep.second)
+                else getString(R.string.st_rad_cache, n, app.mg4dash.system.DataUsage.format(this, bytes))
+        }
+        showCache()
+        row(parent, button(getString(R.string.st_rad_prepare)) {
+            if (app.mg4dash.radar.RadarRepo.prepareTrips(this)) showCache()
+            else app.mg4dash.ui.Toasts.show(this, R.string.st_rad_prepare_no)
+        }, button(getString(R.string.st_rad_clear)) { app.mg4dash.radar.RadarRepo.clearCache(this); cache.postDelayed({ showCache() }, 500) })
+        text(parent, getString(R.string.st_rad_prepare_desc), 15f, R.color.text_title)
+        lifecycleScope.launch { app.mg4dash.radar.RadarRepo.prepare.collect { showCache() } }
+        text(parent, getString(R.string.rad_osm_licence), 14f, R.color.text_sub)
     }
 
     private fun panel(parent: LinearLayout, title: String, fill: Boolean = false): LinearLayout {
