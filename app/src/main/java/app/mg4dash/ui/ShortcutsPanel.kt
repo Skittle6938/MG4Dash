@@ -1,5 +1,6 @@
 package app.mg4dash.ui
 
+import app.mg4dash.system.Firmware
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.Application
@@ -697,6 +698,9 @@ object ShortcutsPanel : Application.ActivityLifecycleCallbacks {
         private const val STRIP_SETTING = "mg4dash_shortcuts_strip"
         /** Sent by MG4Link (explicit, to MG4Dash): "phase" begin / move / end / cancel, "dy" = slide in px since the touch down. */
         const val ACTION_PULL = "app.mg4dash.SHORTCUTS_PULL"
+        /** From MG4Link (#113): Android Auto full screen or not, extra [EXTRA_IMMERSIVE]. */
+        const val ACTION_LINK_IMMERSIVE = "app.mg4dash.LINK_IMMERSIVE"
+        const val EXTRA_IMMERSIVE = "immersive"
         private var receiver: android.content.BroadcastReceiver? = null
 
         /** At start (unlocked) and when the menu or full screen setting changes. */
@@ -729,8 +733,24 @@ object ShortcutsPanel : Application.ActivityLifecycleCallbacks {
         @Suppress("DEPRECATION")
         private fun projectionInFront(c: Context): Boolean = try {
             (c.getSystemService(Context.ACTIVITY_SERVICE) as android.app.ActivityManager).getRunningTasks(1).firstOrNull()?.topActivity
-                ?.let { it.packageName == MG4LINK && MediaHub.isProjectionScreen(it.className) && linkPulls(c) } == true
+                ?.let { it.packageName == MG4LINK && MediaHub.isProjectionScreen(it.className) && linkPulls(c) &&
+                    linkTakesTop(linkImmersive, Firmware.gen) } == true
         } catch (_: Exception) { false }
+
+        /**
+         * Android Auto in full screen in MG4Link (its [ACTION_LINK_IMMERSIVE] broadcast), null before it says (older
+         * MG4Link, or not sent yet).
+         */
+        @Volatile var linkImmersive: Boolean? = null
+
+        /**
+         * MG4Link's window reaches the top of the screen, so it sees a slide from there and pulls the menu itself (#113).
+         * Not in full screen, the car's status bar is above Android Auto (80 px on SWI173): a finger from the top lands on
+         * the bar and MG4Link never sees it, so the strip takes the slide, without touching MG4Link's two and three
+         * finger gestures, which start inside its window, under the bar. Unknown: as before, except on SWI173.
+         */
+        internal fun linkTakesTop(immersive: Boolean?, gen: Firmware.Gen): Boolean =
+            immersive ?: (gen != Firmware.Gen.SWI173)
 
         /** Read again when MG4Link is updated (its update time changes). */
         private var linkChecked: Pair<Long, Boolean>? = null
@@ -759,6 +779,12 @@ object ShortcutsPanel : Application.ActivityLifecycleCallbacks {
             var startDy = 0f
             val r = object : android.content.BroadcastReceiver() {
                 override fun onReceive(ctx: Context?, i: android.content.Intent?) {
+                    if (i?.action == ACTION_LINK_IMMERSIVE) {
+                        val on = i.getBooleanExtra(EXTRA_IMMERSIVE, false)
+                        if (linkImmersive != on) Log.i(TAG, "MG4Link: Android Auto ${if (on) "full screen" else "under the status bar"}")
+                        linkImmersive = on
+                        return
+                    }
                     if (strip == null || Prefs(c).valetMode) return
                     val dy = i?.getFloatExtra("dy", 0f) ?: 0f
                     when (i?.getStringExtra("phase")) {
@@ -769,7 +795,8 @@ object ShortcutsPanel : Application.ActivityLifecycleCallbacks {
                     }
                 }
             }
-            try { c.registerReceiver(r, android.content.IntentFilter(ACTION_PULL)); receiver = r } catch (e: Exception) { Log.w(TAG, "pull receiver: ${e.message}") }
+            val filter = android.content.IntentFilter(ACTION_PULL).apply { addAction(ACTION_LINK_IMMERSIVE) }
+            try { c.registerReceiver(r, filter); receiver = r } catch (e: Exception) { Log.w(TAG, "pull receiver: ${e.message}") }
         }
 
         private fun wm(c: Context) = c.getSystemService(Context.WINDOW_SERVICE) as android.view.WindowManager
