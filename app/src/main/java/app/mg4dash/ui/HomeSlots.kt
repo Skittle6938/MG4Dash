@@ -41,13 +41,15 @@ object HomeSlots {
         /** The last trips (#102): only where the driver places it, never put in a place by itself. */
         TRIPS("trips", R.string.wc_trips, R.drawable.ic_car),
         /** Driving settings (#38): only where the driver places it, as the last trips. */
-        DRIVING("driving", R.string.wc_driving, R.drawable.ic_car);
+        DRIVING("driving", R.string.wc_driving, R.drawable.ic_car),
+        /** Speed camera alerter (test, OpenStreetMap): only where the driver places it, in any size. */
+        RADAR("radar", R.string.wc_radar, R.drawable.ic_radar);
 
         /** Fills a big place (two columns): the others would look lost in it, they are greyed there in the edit mode. */
-        val big: Boolean get() = this == MAP || this == WEB || this == CONSUMPTION || this == SHORTCUTS || this == DRIVING
+        val big: Boolean get() = this == MAP || this == WEB || this == CONSUMPTION || this == SHORTCUTS || this == DRIVING || this == RADAR
 
         /** Only placed by the driver, never put in an empty place by itself. */
-        val manual: Boolean get() = this == TRIPS || this == DRIVING || this == CLIMATE
+        val manual: Boolean get() = this == TRIPS || this == DRIVING || this == CLIMATE || this == RADAR
     }
 
     /**

@@ -62,6 +62,21 @@ object FxSound {
         val v = gain(percent)
         app.mg4dash.system.Log.i("FxSound", "style $style at $percent % (gain $v)")
         if (v <= 0f) return
+        playRaw(context, res, v)
+    }
+
+    /** Gain of the speed camera alerter's beeps: the effects' volume, never under an audible minimum. */
+    internal const val MIN_ALERT_GAIN = 0.12f
+    internal fun alertGain(percent: Int): Float = maxOf(gain(percent), MIN_ALERT_GAIN)
+
+    /**
+     * A beep of the speed camera alerter ([strong]: the strong alert), on the same channel as the effects and at their
+     * volume, but whether the effects are on or not: the alerter has its own sound setting.
+     */
+    fun alert(context: Context, strong: Boolean) =
+        playRaw(context, if (strong) R.raw.fx_radar_strong else R.raw.fx_radar_light, alertGain(Prefs(context).fxVolume))
+
+    private fun playRaw(context: Context, res: Int, v: Float) {
         runCatching {
             val p = pool ?: SoundPool.Builder().setMaxStreams(2).setAudioAttributes(ATTRIBUTES).build().also { sp ->
                 pool = sp

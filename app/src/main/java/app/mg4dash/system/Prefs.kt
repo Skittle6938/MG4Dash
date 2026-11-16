@@ -227,6 +227,35 @@ class Prefs(context: Context) {
     fun setShortcutsDensity(size: app.mg4dash.ui.HomeSlots.Size?, d: Int) = sp.edit().putInt("sc_density_${size ?: "MEDIUM"}", d.coerceIn(0, 2)).apply()
 
     /** Sounds of the full power animations (Settings › Look, under the animation): off by default (15/11). */
+    // ── Speed camera alerter (test, OpenStreetMap) ──
+    /** Orange and red speed on the card when over the limit. */
+    var radarVisual: Boolean
+        get() = sp.getBoolean("radar_visual", true)
+        set(v) = sp.edit().putBoolean("radar_visual", v).apply()
+    /** Beeps: 0 none, 1 strong alerts only, 2 both levels (the strong alert in a camera zone always beeps). */
+    var radarSound: Int
+        get() = sp.getInt("radar_sound", 0)
+        set(v) = sp.edit().putInt("radar_sound", v.coerceIn(0, 2)).apply()
+    /** Thresholds in % of the limit instead of the speed unit. */
+    var radarPercent: Boolean
+        get() = sp.getBoolean("radar_percent", false)
+        set(v) = sp.edit().putBoolean("radar_percent", v).apply()
+    /** Light and strong thresholds over the limit, in the speed unit or in % ([radarPercent]), each kept apart. */
+    var radarLow: Float
+        get() = sp.getFloat(if (radarPercent) "radar_low_pct" else "radar_low", if (radarPercent) 2f else app.mg4dash.radar.Thresholds.DEFAULT_LOW)
+        set(v) = sp.edit().putFloat(if (radarPercent) "radar_low_pct" else "radar_low", v.coerceIn(0f, 50f)).apply()
+    var radarHigh: Float
+        get() = sp.getFloat(if (radarPercent) "radar_high_pct" else "radar_high", if (radarPercent) 8f else app.mg4dash.radar.Thresholds.DEFAULT_HIGH)
+        set(v) = sp.edit().putFloat(if (radarPercent) "radar_high_pct" else "radar_high", v.coerceIn(0f, 50f)).apply()
+    /** The strong alert in a camera zone shows a banner over every app, Android Auto too. */
+    var radarBanner: Boolean
+        get() = sp.getBoolean("radar_banner", true)
+        set(v) = sp.edit().putBoolean("radar_banner", v).apply()
+    /** No OpenStreetMap download on the car's 4G: the tiles already kept only. */
+    var radarWifiOnly: Boolean
+        get() = sp.getBoolean("radar_wifi_only", false)
+        set(v) = sp.edit().putBoolean("radar_wifi_only", v).apply()
+
     var fxSound: Boolean
         get() = sp.getBoolean("fx_sound", false)
         set(v) = sp.edit().putBoolean("fx_sound", v).apply()

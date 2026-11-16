@@ -33,6 +33,8 @@ object DataUsage {
         WEATHER(0x4D470004, R.string.du_weather, R.color.accent_heat),
         HA(0x4D470005, R.string.du_ha, R.color.accent_action),
         OTHER(0x4D470006, R.string.du_other, R.color.text_title),
+        /** Speed camera alerter (OpenStreetMap through Overpass); last, the days stored keep their order. */
+        RADARS(0x4D470007, R.string.du_radars, R.color.text_sub),
     }
 
     const val DAYS = 30
@@ -227,8 +229,8 @@ object DataUsage {
         val upd = when (i) { 6 -> 34; 13 -> 38; 22 -> 30; 27 -> 16; else -> 0 }
         return Day(date, longArrayOf(
             if (drive) ((2 + r.nextFloat() * 11) * mb).toLong() else 0L, upd * mb,
-            if (drive) ((0.5f + r.nextFloat() * 3) * mb).toLong() else 0L, 370_000L, 300_000L, 200_000L),
-            longArrayOf((r.nextFloat() * 4 * mb).toLong(), if (i % 9 == 4) 36 * mb else 0L, (r.nextFloat() * 6 * mb).toLong(), 200_000L, 900_000L, 100_000L))
+            if (drive) ((0.5f + r.nextFloat() * 3) * mb).toLong() else 0L, 370_000L, 300_000L, 200_000L, if (drive) 400_000L else 0L),
+            longArrayOf((r.nextFloat() * 4 * mb).toLong(), if (i % 9 == 4) 36 * mb else 0L, (r.nextFloat() * 6 * mb).toLong(), 200_000L, 900_000L, 100_000L, 0L))
     }
 
     /**

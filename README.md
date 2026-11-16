@@ -387,6 +387,7 @@ A short tour of the main gestures opens after a first install (*Skip* closes it 
 - [MG4-Custom-Launcher](https://github.com/adammcdonagh/MG4-Custom-Launcher) (adammcdonagh): Bluetooth album art, the discovery of the AOSP test keys and the stock launcher SDK on SWI68.
 - [MG4_Simple_Launcher](https://github.com/Tommasov/MG4_Simple_Launcher) (Tommasov): notes on the vehicle adapter service of other firmwares.
 - Maps © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors (osmdroid), weather by [Open-Meteo](https://open-meteo.com/).
+- Speed limits and speed cameras of the alerter card (test): © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors, [ODbL](https://opendatacommons.org/licenses/odbl/), read through the [Overpass API](https://wiki.openstreetmap.org/wiki/Overpass_API).
 
 ## Support
 

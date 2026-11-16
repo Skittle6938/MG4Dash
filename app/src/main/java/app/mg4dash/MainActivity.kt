@@ -188,6 +188,7 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
     private lateinit var consumption: app.mg4dash.ui.ConsumptionCard
     private lateinit var trips: app.mg4dash.ui.TripsCard
     private lateinit var driving: app.mg4dash.ui.DrivingCard
+    private lateinit var radar: app.mg4dash.radar.RadarCard
     private lateinit var shortcutsHolder: LinearLayout
 
     /** Trip energy, power and phone cards: same frame, title, page dots and content. */
@@ -278,6 +279,15 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         // Driving settings (#38), also only where the driver put it
         driving = app.mg4dash.ui.DrivingCard(this)
         panels[Card.DRIVING] = frame(driving)
+        // Speed camera alerter (test): only where the driver put it; a long press opens its settings
+        radar = app.mg4dash.radar.RadarCard(this).apply {
+            setOnLongClickListener {
+                startActivity(android.content.Intent(this@MainActivity, app.mg4dash.settings.SettingsActivity::class.java)
+                    .putExtra(app.mg4dash.settings.SettingsActivity.EXTRA_TAB, app.mg4dash.settings.SettingsActivity.TAB_CAR))
+                true
+            }
+        }
+        panels[Card.RADAR] = frame(radar)
         // Web app (#97): the page itself is only loaded when shown
         val web = app.mg4dash.ui.WebCard(this).also { webCard = it }
         web.keyboardSpan = { webKeyboardSpan(it) }
@@ -407,6 +417,13 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
             HomeSlots.Size.WIDE -> app.mg4dash.ui.DrivingCard.Form.WIDE
             else -> app.mg4dash.ui.DrivingCard.Form.MEDIUM
         }
+        radar.form = when (frameOf(Card.RADAR)?.slot?.size) {
+            HomeSlots.Size.SMALL -> app.mg4dash.radar.RadarCard.Form.SMALL
+            HomeSlots.Size.MEDIUM, null -> app.mg4dash.radar.RadarCard.Form.MEDIUM
+            else -> app.mg4dash.radar.RadarCard.Form.FULL
+        }
+        // The alerter works while its card is in a place, shown or not (its alerts go over Android Auto)
+        if (frameOf(Card.RADAR) != null) app.mg4dash.radar.RadarRepo.start(this) else app.mg4dash.radar.RadarRepo.stop()
         applyMapButtons()
         placeMapInfo()
         applyFog()
@@ -459,6 +476,7 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
             Card.SHORTCUTS -> if (on) renderShortcuts()
             Card.TRIPS -> if (on) trips.show()
             Card.DRIVING -> if (on) driving.show()
+            Card.RADAR -> if (on) radar.show(app.mg4dash.radar.RadarRepo.state.value)
             Card.WEB -> webCard?.let { w -> w.visibility = if (on) View.VISIBLE else View.GONE; if (on) w.show() else w.pause() }
             Card.ENERGY -> {}
             Card.TRIP -> if (on) renderTripEnergy()
@@ -644,7 +662,7 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
             val base = basePad.getOrPut(v) { v.paddingLeft }
             v.setPadding(if (on) maxOf(base, fog) else base, v.paddingTop, v.paddingRight, v.paddingBottom)
         }
-        listOf(Card.ENERGY, Card.TRIP, Card.POWER, Card.PHONE, Card.CONSUMPTION, Card.SHORTCUTS, Card.WEB, Card.TRIPS, Card.DRIVING).forEach { c ->
+        listOf(Card.ENERGY, Card.TRIP, Card.POWER, Card.PHONE, Card.CONSUMPTION, Card.SHORTCUTS, Card.WEB, Card.TRIPS, Card.DRIVING, Card.RADAR).forEach { c ->
             panels[c]?.let { pad(it, tl != null && c in tl.cards) }
         }
         // The media card keeps its full width (15/11, #118): its cover goes to the edge, under the button if any
@@ -2262,6 +2280,7 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
                 launch { CarBridge.drivePending.collect { if (isShown(Card.DRIVING)) driving.show() } }
                 launch { CarBridge.driveRefused.collect { app.mg4dash.ui.Toasts.show(this@MainActivity, R.string.dv_not_confirmed) } }
                 launch { MediaHub.now.collect { renderMedia(it) } }
+                launch { app.mg4dash.radar.RadarRepo.state.collect { if (isShown(Card.RADAR)) radar.show(it) } }
                 launch { WeatherRepo.shown.collect { renderWeather(it, CarBridge.state.value) } }
                 launch { LocationRepo.location.collect { renderLocation(it, CarBridge.state.value) } }
                 // DiAuto guidance: banner on the map (not on the shortcuts)
