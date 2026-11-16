@@ -2,7 +2,7 @@
 
 Full-screen launcher for the MG4 and its 1920 × 720 screen, for every head unit firmware (SWI69, SWI131/132/173, SWI68, SWI133, SWI165; see [Compatibility](#compatibility-beta)). It replaces the stock home screen with one dashboard (climate, battery, map, weather, media) and adds Climate, Energy, Vehicle, Sound and Phone pages, in dark, light or automatic mode following the car's lights.
 
-Languages: English (default), French, German, Spanish, Italian, Dutch and Turkish, following the car's system language. Units: km and kWh/100 km or miles and mi/kWh (following the car or set by hand), tyre pressure in bar, psi or kPa.
+Languages: English (default), French, German, Spanish, Italian, Dutch, Turkish and Czech, following the car's system language. Units: km and kWh/100 km or miles and mi/kWh (following the car or set by hand), tyre pressure in bar, psi or kPa.
 
 > [!IMPORTANT]
 > **Safety net: MG4Dash Rescue (since 1.7.1).** MG4Dash now installs a tiny companion system app by itself, *MG4Dash Rescue*. If MG4Dash is your home screen and does not start after the head unit boots, Rescue repairs it (recompiles and relaunches it) and, if that is not enough, puts the SAIC home screen back. It also brings the SAIC home screen back if MG4Dash is uninstalled without going through *Maintenance mode* first. If MG4Dash is not your home screen, it does nothing. Installing 1.7.1 or later is strongly recommended.

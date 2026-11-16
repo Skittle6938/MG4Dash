@@ -75,7 +75,7 @@ object Updater {
     }
 
     /** Name of the language blocks in the release notes (#73): `<details><summary>Français</summary> … </details>`. */
-    private val LANG_NAMES = mapOf("fr" to "Français", "de" to "Deutsch", "es" to "Español", "it" to "Italiano", "nl" to "Nederlands", "tr" to "Türkçe")
+    private val LANG_NAMES = mapOf("fr" to "Français", "de" to "Deutsch", "es" to "Español", "it" to "Italiano", "nl" to "Nederlands", "tr" to "Türkçe", "cs" to "Čeština")
 
     /**
      * Notes in the head unit's language (#73): this language's collapsible block if it exists, otherwise the

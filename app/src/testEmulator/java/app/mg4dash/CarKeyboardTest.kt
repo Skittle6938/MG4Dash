@@ -41,6 +41,10 @@ class CarKeyboardTest {
         assertTrue(CarKeyboard.lettersFor("de")[0].startsWith("qwertz"))
         assertTrue(CarKeyboard.lettersFor("en")[0].startsWith("qwerty"))
         assertTrue(CarKeyboard.lettersFor("tr")[0].startsWith("qwerty"))
+        // Czech (#121): QWERTZ, and its letters under a long press
+        assertTrue(CarKeyboard.lettersFor("cs")[0].startsWith("qwertz"))
+        for ((c, cz) in listOf('c' to 'č', 'e' to 'ě', 'r' to 'ř', 's' to 'š', 'z' to 'ž', 'u' to 'ů', 'y' to 'ý', 'd' to 'ď', 't' to 'ť', 'n' to 'ň'))
+            assertTrue("$c → $cz", cz in CarKeyboard.accents(c))
     }
 
     @Test fun lettersAreLowerCaseAndShiftAppliesOnce() {
