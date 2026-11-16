@@ -790,6 +790,14 @@ object MediaHub {
 
     fun isAndroidAuto(pkg: String?) = pkg == AA_MBS || pkg?.startsWith("com.allgo.app.androidauto") == true
 
+    /**
+     * Joystick left / right (299 / 300) left to MG4Link while Android Auto is the car's media source (MG4Link #28
+     * contract): it skips the track itself at the press, MG4Dash sending it too would skip twice.
+     */
+    internal fun wheelSkipLeftToAndroidAuto(source: String?) = isAndroidAuto(source) || source?.startsWith("com.allgo.") == true
+
+    fun androidAutoPlaying() = wheelSkipLeftToAndroidAuto(current?.packageName)
+
     /** USB / BT chip: switches between Bluetooth and USB, starting from what is shown. */
     /**
      * Vertical swipe on the music card (issue #6): next (+1) or previous (−1) source

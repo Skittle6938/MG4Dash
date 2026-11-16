@@ -83,6 +83,11 @@ object StarKey {
                     // which takes the sound; the app is noted to give it back and toggle it (#36)
                     MediaHub.wheelPressed(null, playPause = true)
                 }
+                // Android Auto as the source: MG4Link skips the track itself (MG4Link #28), not twice
+                if ((code == JOY_LEFT || code == JOY_RIGHT) && MediaHub.androidAutoPlaying()) {
+                    if (down && !long) Log.i(TAG, "steering wheel button $code left to MG4Link (Android Auto source)")
+                    return
+                }
                 if (code == JOY_LEFT || code == JOY_RIGHT) {
                     // From the press: the command goes to the app without waiting for the release
                     if (down && !long) { MediaHub.wheelPressed(code == JOY_RIGHT); if (MediaHub.wheelReleased(code == JOY_RIGHT)) return }
