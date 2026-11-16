@@ -435,11 +435,15 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
     /** Consumption instead of the map with no connection and no tiles (#15), the power at full power (#29). */
     private fun insteadOf(f: SlotFrame): Card? = when {
         fxBoost && boostFrame === f -> Card.POWER
-        f.current == Card.MAP && Card.CONSUMPTION in f.cards && prefs.mapOfflineSwitch && offline() &&
-            !mapCard.hasCachedTiles(LocationRepo.location.value) -> Card.CONSUMPTION
-        // The web app too, its pages online (#44): the same setting, back to it when the connection returns
-        f.current == Card.WEB && Card.CONSUMPTION in f.cards && prefs.mapOfflineSwitch && offline() -> Card.CONSUMPTION
-        else -> null
+        else -> offlineInstead(f, f.current)
+    }
+
+    /** Consumption shown instead of [card] in [f] while offline: the map without tiles, the web app (#44). */
+    private fun offlineInstead(f: SlotFrame, card: Card?): Card? = when {
+        card != Card.MAP && card != Card.WEB -> null
+        Card.CONSUMPTION !in f.cards || !prefs.mapOfflineSwitch || !offline() -> null
+        card == Card.MAP && mapCard.hasCachedTiles(LocationRepo.location.value) -> null
+        else -> Card.CONSUMPTION
     }
 
     /** A card shown or hidden: what it starts or stops. */
@@ -469,7 +473,9 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
     private fun swipeSlot(f: SlotFrame, dir: Int) {
         if (f.cards.size < 2) return
         cancelBoost(f)   // the driver changes card: no going back after the full power
-        val next = HomeSlots.next(f.cards, f.shown, dir) ?: return
+        // Offline, the map and the web app give way to consumption, which has its own turn: skipped, or the
+        // swipe would land on consumption again and never reach the cards beyond (shortcuts, Marc 16/11)
+        val next = HomeSlots.next(f.cards, f.shown, dir) { offlineInstead(f, it) != null } ?: return
         f.current = next
         HomeSlots.setCurrent(prefs, slotLayout, f.slot.id, next)
         showFrame(f)

@@ -173,6 +173,18 @@ class HomeSlotsMoveTest {
         assertNull(HomeSlots.next(emptyList(), Card.MAP, 1))
     }
 
+    /** Offline (Marc 16/11): the web app and the map give way to consumption; swiping back reaches the shortcuts. */
+    @Test fun nextSkipsCardsShownAsConsumptionOffline() {
+        val cards = listOf(Card.SHORTCUTS, Card.WEB, Card.MAP, Card.CONSUMPTION)
+        val offline: (Card) -> Boolean = { it == Card.WEB || it == Card.MAP }
+        assertEquals(Card.CONSUMPTION, HomeSlots.next(cards, Card.SHORTCUTS, 1, offline))
+        assertEquals(Card.SHORTCUTS, HomeSlots.next(cards, Card.CONSUMPTION, -1, offline))
+        assertEquals(Card.SHORTCUTS, HomeSlots.next(cards, Card.CONSUMPTION, 1, offline))
+        assertEquals(Card.CONSUMPTION, HomeSlots.next(cards, Card.SHORTCUTS, -1, offline))
+        assertNull("nothing else to show", HomeSlots.next(listOf(Card.WEB, Card.CONSUMPTION), Card.CONSUMPTION, 1, offline))
+        assertEquals(Card.SHORTCUTS, HomeSlots.next(listOf(Card.WEB, Card.SHORTCUTS), Card.MAP, 1, offline))
+    }
+
     @Test fun kindOfEachFill() {
         assertEquals(Kind.MEDIA, HomeSlots.kindOf(Fill.Media))
         assertEquals(Kind.CARDS, HomeSlots.kindOf(Fill.Cards(listOf(Card.MAP))))
