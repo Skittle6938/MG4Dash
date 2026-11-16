@@ -160,21 +160,26 @@ class CarKeyboard(
 
         internal fun lettersFor(language: String): List<String> = when (language) {
             "fr" -> listOf("azertyuiop", "qsdfghjklm", "wxcvbn'")
-            "de" -> listOf("qwertzuiop", "asdfghjkl", "yxcvbnm")
+            // Czech keyboards are QWERTZ too (#121)
+            "de", "cs" -> listOf("qwertzuiop", "asdfghjkl", "yxcvbnm")
             else -> listOf("qwertyuiop", "asdfghjkl", "zxcvbnm")
         }
 
         internal fun accents(c: Char): String = when (c) {
             'a' -> "àâäáãæ"
-            'c' -> "çć"
-            'e' -> "éèêëę"
+            'c' -> "çćč"
+            'd' -> "ď"
+            'e' -> "éèêëęě"
             'g' -> "ğ"
             'i' -> "îïíìı"
-            'n' -> "ñ"
+            'n' -> "ñň"
             'o' -> "ôöóòõœ"
-            's' -> "ßş"
-            'u' -> "ùûüú"
-            'y' -> "ÿ"
+            'r' -> "ř"
+            's' -> "ßşš"
+            't' -> "ť"
+            'u' -> "ùûüúů"
+            'y' -> "ÿý"
+            'z' -> "ž"
             else -> ""
         }
 
