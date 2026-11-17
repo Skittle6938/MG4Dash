@@ -255,6 +255,29 @@ class Prefs(context: Context) {
     var radarPrepareKm: Int
         get() = app.mg4dash.radar.RadarRepo.prepareRadius(sp.getInt("radar_prepare_km", app.mg4dash.radar.RadarRepo.PREPARE_DEFAULT_KM))
         set(v) = sp.edit().putInt("radar_prepare_km", v).apply()
+    /** Age after which the tiles around the car are downloaded again (hours), one of [app.mg4dash.radar.RadarRepo.REFRESH_HOURS]. */
+    var radarRefreshHours: Int
+        get() = sp.getInt("radar_refresh_hours", app.mg4dash.radar.RadarRepo.REFRESH_DEFAULT_HOURS).let { h ->
+            if (h in app.mg4dash.radar.RadarRepo.REFRESH_HOURS) h else app.mg4dash.radar.RadarRepo.REFRESH_DEFAULT_HOURS }
+        set(v) = sp.edit().putInt("radar_refresh_hours", v).apply()
+    /** ISA study: the car's speed limit properties logged while driving (off by default). */
+    var radarIsaLog: Boolean
+        get() = sp.getBoolean("radar_isa_log", false)
+        set(v) = sp.edit().putBoolean("radar_isa_log", v).apply()
+    /** OSM's limit sent to the car as the navigation's speed limit (off by default; held back in IsaWrite for now). */
+    var radarIsaWrite: Boolean
+        get() = sp.getBoolean("radar_isa_write", false)
+        set(v) = sp.edit().putBoolean("radar_isa_write", v).apply()
+    /** Sound of each kind of alert. */
+    fun radarSoundOf(kind: app.mg4dash.radar.RadarAlert.Kind): app.mg4dash.radar.RadarAlert.Sound =
+        sp.getString("radar_snd_" + kind.key, null)?.let { k -> app.mg4dash.radar.RadarAlert.Sound.values().firstOrNull { it.key == k } } ?: kind.sound
+    fun setRadarSoundOf(kind: app.mg4dash.radar.RadarAlert.Kind, v: app.mg4dash.radar.RadarAlert.Sound) = sp.edit().putString("radar_snd_" + kind.key, v.key).apply()
+    /** Volume (%) of each kind of alert ([app.mg4dash.radar.RadarAlert.Kind]). */
+    fun radarVolume(kind: app.mg4dash.radar.RadarAlert.Kind): Int = sp.getInt("radar_vol_" + kind.key, kind.volume)
+    fun setRadarVolume(kind: app.mg4dash.radar.RadarAlert.Kind, v: Int) = sp.edit().putInt("radar_vol_" + kind.key, v.coerceIn(0, 100)).apply()
+    /** Seconds between two beeps of the same alert while it lasts, 0 = once only. */
+    fun radarRepeat(kind: app.mg4dash.radar.RadarAlert.Kind): Int = sp.getInt("radar_rep_" + kind.key, kind.repeat)
+    fun setRadarRepeat(kind: app.mg4dash.radar.RadarAlert.Kind, v: Int) = sp.edit().putInt("radar_rep_" + kind.key, v).apply()
     /** No OpenStreetMap download on the car's 4G: the tiles already kept only. */
     var radarWifiOnly: Boolean
         get() = sp.getBoolean("radar_wifi_only", false)

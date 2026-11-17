@@ -73,8 +73,14 @@ object FxSound {
      * A beep of the speed camera alerter ([strong]: the strong alert), on the same channel as the effects and at their
      * volume, but whether the effects are on or not: the alerter has its own sound setting.
      */
-    fun alert(context: Context, strong: Boolean) =
-        playRaw(context, if (strong) R.raw.fx_radar_strong else R.raw.fx_radar_light, alertGain(Prefs(context).fxVolume))
+    fun alert(context: Context, strong: Boolean, percent: Int = Prefs(context).fxVolume) =
+        playRaw(context, if (strong) R.raw.fx_radar_strong else R.raw.fx_radar_light, alertGain(percent))
+
+    /** An alerter sound ([res]) at [percent] of the alerts' scale; 0 % is silent. */
+    fun alertRaw(context: Context, res: Int, percent: Int) {
+        if (percent <= 0) return
+        playRaw(context, res, alertGain(percent))
+    }
 
     private fun playRaw(context: Context, res: Int, v: Float) {
         runCatching {

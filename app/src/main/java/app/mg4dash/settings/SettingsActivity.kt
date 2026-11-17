@@ -1417,15 +1417,13 @@ class SettingsActivity : AppCompatActivity() {
         app.mg4dash.ui.FadeOutline.applyTo(root)
         radarAlerts(panel(l, getString(R.string.st_rad_alerts).uppercase()))
         radarData(panel(r, getString(R.string.st_rad_data).uppercase()))
+        radarSounds(panel(r, getString(R.string.st_rad_sounds).uppercase()))
     }
 
     /** Alerts: visual, sound, thresholds, banner. */
     private fun radarAlerts(parent: LinearLayout) {
         text(parent, getString(R.string.st_rad_desc), 15f, R.color.text_title)
         toggle(parent, R.string.st_rad_visual, null, { prefs.radarVisual }) { prefs.radarVisual = it }
-        dropdown(parent, getString(R.string.st_rad_sound), listOf(R.string.st_rad_sound_none, R.string.st_rad_sound_strong, R.string.st_rad_sound_both).map { getString(it) },
-            { prefs.radarSound }) { prefs.radarSound = it }
-        text(parent, getString(R.string.st_rad_sound_desc), 15f, R.color.text_title)
         val unit = app.mg4dash.system.Units.speedUnit(this)
         lateinit var low: TextView
         lateinit var high: TextView
@@ -1445,11 +1443,51 @@ class SettingsActivity : AppCompatActivity() {
         high.setOnClickListener { v -> app.mg4dash.ui.SourceMenu.choose(this, v, highs().map { label(it) }, index(highs(), prefs.radarHigh)) { prefs.radarHigh = highs()[it]; paint() } }
         paint()
         toggle(parent, R.string.st_rad_banner, R.string.st_rad_banner_desc, { prefs.radarBanner }) { prefs.radarBanner = it }
+        // The car's speed limit assistance (ISA), studied: off by default
+        toggle(parent, R.string.st_rad_isa_log, R.string.st_rad_isa_log_desc, { prefs.radarIsaLog }) { prefs.radarIsaLog = it }
+        toggle(parent, R.string.st_rad_isa_write, R.string.st_rad_isa_write_desc, { prefs.radarIsaWrite }) { prefs.radarIsaWrite = it }
+    }
+
+    /** Sounds: for each kind of alert, its sound, volume and repeat, and ▶ to hear it. */
+    private fun radarSounds(parent: LinearLayout) {
+        val A = app.mg4dash.radar.RadarAlert
+        val sounds = app.mg4dash.radar.RadarAlert.Sound.values().toList()
+        val soundNames = listOf(R.string.st_rad_snd_none, R.string.st_rad_snd_chime, R.string.st_rad_snd_beep, R.string.st_rad_snd_loud).map { getString(it) }
+        val vols = listOf(0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100)
+        val reps = A.REPEATS
+        fun repLabel(sec: Int) = when { sec == 0 -> getString(R.string.st_rad_rep_never); sec < 60 -> getString(R.string.st_rad_rep_s, sec); else -> getString(R.string.st_rad_rep_min, sec / 60) }
+        listOf(app.mg4dash.radar.RadarAlert.Kind.APPROACH to R.string.st_rad_kind_approach, app.mg4dash.radar.RadarAlert.Kind.LIGHT to R.string.st_rad_kind_light,
+            app.mg4dash.radar.RadarAlert.Kind.STRONG to R.string.st_rad_kind_strong, app.mg4dash.radar.RadarAlert.Kind.ZONE to R.string.st_rad_kind_zone).forEach { (k, name) ->
+            text(parent, getString(name), 18f, R.color.text_value)
+            fun pick(v: View, labels: List<String>, cur: Int, set: (Int) -> Unit) =
+                app.mg4dash.ui.SourceMenu.choose(this, v, labels, cur) { set(it) }
+            val sound = choiceButtons(listOf(""), { 0 }) {}.first()
+            fun paintSound() { sound.text = soundNames[sounds.indexOf(prefs.radarSoundOf(k))] + "  ▾" }
+            sound.setOnClickListener { v -> pick(v, soundNames, sounds.indexOf(prefs.radarSoundOf(k))) { prefs.setRadarSoundOf(k, sounds[it]); paintSound() } }
+            paintSound()
+            val vol = choiceButtons(listOf(""), { 0 }) {}.first()
+            fun paintVol() { vol.text = "${prefs.radarVolume(k)} %  ▾" }
+            vol.setOnClickListener { v -> pick(v, vols.map { "$it %" }, vols.indexOf(prefs.radarVolume(k)).coerceAtLeast(0)) { prefs.setRadarVolume(k, vols[it]); paintVol() } }
+            paintVol()
+            val play = button("\u25B6") { A.play(this, k) }
+            if (k == app.mg4dash.radar.RadarAlert.Kind.APPROACH) row(parent, sound, vol, play)
+            else {
+                val rep = choiceButtons(listOf(""), { 0 }) {}.first()
+                fun paintRep() { rep.text = repLabel(prefs.radarRepeat(k)) + "  ▾" }
+                rep.setOnClickListener { v -> pick(v, reps.map { repLabel(it) }, reps.indexOf(prefs.radarRepeat(k)).coerceAtLeast(0)) { prefs.setRadarRepeat(k, reps[it]); paintRep() } }
+                paintRep()
+                row(parent, sound, vol, rep, play)
+            }
+        }
     }
 
     /** OpenStreetMap data: Wi-Fi only, prepared trips with their progress, cache, licence. */
     private fun radarData(parent: LinearLayout) {
         toggle(parent, R.string.st_rad_wifi, R.string.st_rad_wifi_desc, { prefs.radarWifiOnly }) { prefs.radarWifiOnly = it }
+        // Tiles around the car downloaded again after this age (when the network allows)
+        val ages = app.mg4dash.radar.RadarRepo.REFRESH_HOURS
+        fun ageLabel(h: Int) = if (h < 24) getString(R.string.st_rad_age_hours, h) else getString(R.string.st_rad_age_days, h / 24)
+        dropdown(parent, getString(R.string.st_rad_refresh), ages.map { ageLabel(it) }, { ages.indexOf(prefs.radarRefreshHours).coerceAtLeast(0) }) { prefs.radarRefreshHours = ages[it] }
         val cache = text(parent, "", 17f, R.color.text_value)
         // Radius of the prepared trips, with the areas and the data it takes (estimate)
         val radii = app.mg4dash.radar.RadarRepo.PREPARE_RADII
@@ -1465,13 +1503,22 @@ class SettingsActivity : AppCompatActivity() {
         // The estimate under the radius
         (estimate.parent as LinearLayout).let { p -> p.removeView(estimate); p.addView(estimate) }
         showEstimate()
-        val state = text(parent, "", 16f, R.color.text_value)
+        val state = text(parent, "", 18f, R.color.text_value)
+        // The preparation's progress, live (it goes on with the page closed)
+        val bar = android.widget.ProgressBar(this, null, android.R.attr.progressBarStyleHorizontal).apply {
+            max = 1000; isIndeterminate = false
+            progressTintList = android.content.res.ColorStateList.valueOf(color(R.color.text_value))
+            progressBackgroundTintList = android.content.res.ColorStateList.valueOf(color(R.color.text_sub))
+        }
+        parent.addView(bar, LinearLayout.LayoutParams(-1, dp(14)).apply { topMargin = dp(6) })
         fun show() {
             val (n, bytes) = app.mg4dash.radar.RadarRepo.cacheSize(this)
             cache.text = getString(R.string.st_rad_space, app.mg4dash.system.DataUsage.format(this, bytes), n)
             val p = app.mg4dash.radar.RadarRepo.prepare.value
             state.visibility = if (p == null) View.GONE else View.VISIBLE
-            state.text = p?.let { radarPrepText(it) } ?: ""
+            state.text = p?.let { radarPrepText(it) + if (it.total > 0) " · ${it.done * 100 / it.total} %" else "" } ?: ""
+            bar.visibility = if (p == null) View.GONE else View.VISIBLE
+            bar.progress = if (p != null && p.total > 0) p.done * 1000 / p.total else 0
         }
         show()
         row(parent, button(getString(R.string.st_rad_prepare)) {

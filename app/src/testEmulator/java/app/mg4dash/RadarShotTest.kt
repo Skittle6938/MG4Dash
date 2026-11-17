@@ -36,7 +36,16 @@ class RadarShotTest {
     )
     private val estimated = RadarRepo.State(status = RadarRepo.Status.OK, speedKmh = 47f, limit = 50, estimated = true, highway = "residential")
 
-    private fun shot(slots: String, layout: String, state: RadarRepo.State, name: String, theme: Int = 1) {
+    /** A preparation under way, as the page and the card show it. */
+    private val preparing = RadarRepo.Prep(212, 560, 3, RadarRepo.PrepPhase.RUNNING)
+
+    @Suppress("UNCHECKED_CAST")
+    private fun setPrepare(p: RadarRepo.Prep?) {
+        val f = RadarRepo::class.java.getDeclaredField("_prepare").apply { isAccessible = true }
+        (f.get(null) as kotlinx.coroutines.flow.MutableStateFlow<RadarRepo.Prep?>).value = p
+    }
+
+    private fun shot(slots: String, layout: String, state: RadarRepo.State, name: String, theme: Int = 1, prep: RadarRepo.Prep? = null) {
         org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE).edit()
             .putBoolean("vertical_dock", true).putBoolean("tutorial_shortcuts_seen", true)
             .putInt("theme_mode", theme).putInt("home_style", 0).putString("home_layout", layout)
@@ -45,6 +54,7 @@ class RadarShotTest {
         repeat(5) { shadowOf(Looper.getMainLooper()).idleFor(200, TimeUnit.MILLISECONDS) }
         val card = MainActivity::class.java.getDeclaredField("radar").apply { isAccessible = true }.get(act) as RadarCard
         card.show(state)
+        card.downloads(prep, 0)
         val root = act.window.decorView
         val bmp = Bitmap.createBitmap(root.width, root.height, Bitmap.Config.ARGB_8888)
         root.draw(Canvas(bmp))
@@ -60,7 +70,20 @@ class RadarShotTest {
     @Test fun tallEstimatedLight() = shot("tl=hourly,daily;tc=energy,trip,power,phone;r=radar;bl=climate;bc=media", "map", estimated, "radar_tall_estimated_light.png", theme = 2)
 
     /** The alerter's own page (long press on the card). */
-    @Test fun settingsPage() {
+    @Test fun smallDownloading() = shot("tl=climate;tc=map,consumption,shortcuts;tr=media;bl=energy;bc=radar;br=trip,power,phone", "full", light, "radar_small_download.png", prep = preparing)
+    @Test fun mediumDownloading() = shot("tl=climate;tc=radar;tr=media;bl=energy;bc=hourly,daily;br=trip,power,phone", "full", inZoneStrong, "radar_medium_download.png", prep = preparing)
+    @Test fun wideDownloading() = shot("w=radar;tr=climate;bl=energy;bc=hourly,daily;br=trip,power,phone", "band_top", light, "radar_wide_download.png", prep = preparing)
+    @Test fun largeDownloading() = shot("g=radar;tr=climate;br=energy,trip,power,phone,hourly,daily", "square_left", inZoneStrong, "radar_large_download.png", prep = preparing)
+
+    /** The alerter's page while a preparation runs. */
+    @Test fun settingsPageDownloading() {
+        setPrepare(preparing)
+        try { settingsPage("radar_settings_download.png") } finally { setPrepare(null) }
+    }
+
+    @Test fun settingsPage() = settingsPage("radar_settings_page.png")
+
+    private fun settingsPage(name: String) {
         org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE).edit()
             .putBoolean("vertical_dock", true).putBoolean("tutorial_shortcuts_seen", true).putInt("theme_mode", 1).commit()
         val act = Robolectric.buildActivity(app.mg4dash.settings.SettingsActivity::class.java,
@@ -70,6 +93,6 @@ class RadarShotTest {
         val bmp = Bitmap.createBitmap(root.width, root.height, Bitmap.Config.ARGB_8888)
         root.draw(Canvas(bmp))
         val dir = File("build/screenshots").apply { mkdirs() }
-        File(dir, "radar_settings_page.png").outputStream().use { bmp.compress(Bitmap.CompressFormat.PNG, 100, it) }
+        File(dir, name).outputStream().use { bmp.compress(Bitmap.CompressFormat.PNG, 100, it) }
     }
 }

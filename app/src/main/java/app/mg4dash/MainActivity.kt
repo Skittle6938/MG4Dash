@@ -2281,6 +2281,9 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
                 launch { CarBridge.driveRefused.collect { app.mg4dash.ui.Toasts.show(this@MainActivity, R.string.dv_not_confirmed) } }
                 launch { MediaHub.now.collect { renderMedia(it) } }
                 launch { app.mg4dash.radar.RadarRepo.state.collect { if (isShown(Card.RADAR)) radar.show(it) } }
+                // Download mark of the alerter's card: the preparation's progress, tiles downloaded live
+                launch { app.mg4dash.radar.RadarRepo.prepare.collect { radar.downloads(it, app.mg4dash.radar.RadarRepo.live.value) } }
+                launch { app.mg4dash.radar.RadarRepo.live.collect { radar.downloads(app.mg4dash.radar.RadarRepo.prepare.value, it) } }
                 launch { WeatherRepo.shown.collect { renderWeather(it, CarBridge.state.value) } }
                 launch { LocationRepo.location.collect { renderLocation(it, CarBridge.state.value) } }
                 // DiAuto guidance: banner on the map (not on the shortcuts)
