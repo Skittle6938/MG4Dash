@@ -81,6 +81,41 @@ class ConnectionBarTest {
     /** The edit mode with the "Connection bar here" button on each place. */
     @Test fun editModeButton() = shoot("connections_edit_mode.png", edit = true)
 
+    // ── The bar belongs to the place: centred at its top, every card there makes room inside (Marc, 17/11) ──
+
+    private fun hostShots(place: String, prefix: String) {
+        val layout = "full"
+        prefs.raw.edit().putBoolean("vertical_dock", true).putBoolean("tutorial_shortcuts_seen", true).putInt("theme_mode", 1)
+            .putInt("home_style", 0).putString("home_layout", layout)
+            .putString("slots_$layout", "tl=climate,trip;tc=energy,consumption;tr=media;bl=power;bc=hourly,daily;br=phone").commit()
+        HomeSlots.setConnectionsChoice(prefs, HomeSlots.Layout.FULL, place)
+        val act = Robolectric.buildActivity(MainActivity::class.java).setup().get()
+        repeat(6) { shadowOf(Looper.getMainLooper()).idleFor(200, TimeUnit.MILLISECONDS) }
+        fun snap(name: String) {
+            val root = act.window.decorView
+            val bmp = Bitmap.createBitmap(root.width, root.height, Bitmap.Config.ARGB_8888)
+            root.draw(Canvas(bmp))
+            File(File("build/screenshots").apply { mkdirs() }, name).outputStream().use { bmp.compress(Bitmap.CompressFormat.PNG, 100, it) }
+        }
+        snap("${prefix}_before_swipe.png")
+        val frames = MainActivity::class.java.getDeclaredField("frames").apply { isAccessible = true }.get(act) as Map<*, *>
+        val frame = frames[place]!!
+        val box = frame.javaClass.getDeclaredField("box").apply { isAccessible = true }.get(frame) as android.view.ViewGroup
+        val boxTop = box.top
+        val swipe = MainActivity::class.java.declaredMethods.first { it.name == "swipeSlot" }.apply { isAccessible = true }
+        swipe.invoke(act, frame, 1)
+        repeat(4) { shadowOf(Looper.getMainLooper()).idleFor(200, TimeUnit.MILLISECONDS) }
+        snap("${prefix}_after_swipe.png")
+        // Still in the same place, and the place has not moved
+        val row = MainActivity::class.java.getDeclaredField("connections").apply { isAccessible = true }.get(act) as android.view.View
+        assertTrue(row.parent === box)
+        assertEquals(boxTop, box.top)
+        HomeSlots.setConnectionsChoice(prefs, HomeSlots.Layout.FULL, null)
+    }
+
+    @Test fun barInClimatePlaceStaysOnSwipe() = hostShots("tl", "conn_climate")
+    @Test fun barInEnergyPlaceStaysOnSwipe() = hostShots("tc", "conn_energy")
+
     // ── The old "connection icons" setting ──
 
     @Test fun oldSettingOffBecomesNoBar() {
