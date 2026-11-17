@@ -347,6 +347,26 @@ object ShortcutTiles {
         return on.copy(level = mode, label = when (mode) { 1 -> context.getString(R.string.sc_heating); 2 -> context.getString(R.string.sc_cooling); else -> null })
     }
 
+    /**
+     * The climate's mode as the shortcut tile shows it (#122), for the climate card and page: its icon and its word
+     * ("Heating", "Cooling"), with the guess made at the switch-on until the car tells its own; null when off or unknown.
+     */
+    fun climateMode(context: Context, s: VehicleState): Pair<Int, String>? {
+        val v = shown(Tile.CLIMATE, climate(context, s))
+        if (!v.available || !v.inverted) return null
+        val icon = icon(Tile.CLIMATE, v)
+        return icon to (v.label ?: context.getString(Tile.CLIMATE.label))
+    }
+
+    /** [mode] as text: its icon at the text's size then its word, in [color]. */
+    fun modeText(context: Context, mode: Pair<Int, String>, color: Int, sizePx: Int): CharSequence {
+        val d = androidx.core.content.ContextCompat.getDrawable(context, mode.first)?.mutate() ?: return mode.second
+        d.setTint(color); d.setBounds(0, 0, sizePx, sizePx)
+        return android.text.SpannableString("  " + mode.second).apply {
+            setSpan(android.text.style.ImageSpan(d, android.text.style.DynamicDrawableSpan.ALIGN_BOTTOM), 0, 1, android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+        }
+    }
+
     internal fun coolingFor(ac: Boolean, set: Float?, out: Float?, last: Boolean?): Boolean = when {
         out == null || set == null -> ac
         !ac -> false

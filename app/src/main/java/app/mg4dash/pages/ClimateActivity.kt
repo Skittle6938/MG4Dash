@@ -191,7 +191,11 @@ class ClimateActivity : PageActivity() {
         controls.forEach { it.isEnabled = known }
         power.isSelected = on
         power.setColorFilter(kit.color(if (on) R.color.accent_action else R.color.text_sub))
-        outside.text = s.outsideTemp?.let { getString(R.string.cl_outside, Math.round(it)) } ?: ""
+        // The mode as the shortcut tile shows it: heating or cooling (#122)
+        val outsideText = s.outsideTemp?.let { getString(R.string.cl_outside, Math.round(it)) } ?: ""
+        outside.text = app.mg4dash.ui.ShortcutTiles.climateMode(this, s)?.let { m ->
+            android.text.TextUtils.concat(outsideText, if (outsideText.isEmpty()) "" else "  ·  ", app.mg4dash.ui.ShortcutTiles.modeText(this, m, outside.currentTextColor, outside.textSize.toInt()))
+        } ?: outsideText
         temp.text = VehicleState.tempLabel(s.driverTemp)
         temp.setTextColor(kit.color(if (on) R.color.text_value else R.color.text_disabled))
         val t = s.driverTemp

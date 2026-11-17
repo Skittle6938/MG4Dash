@@ -1041,8 +1041,11 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         b.climPower.putTint(color(if (on) R.color.accent_action else R.color.text_sub))
         b.temp.put(if (on || s.driverTemp != null) VehicleState.tempLabel(s.driverTemp) else getString(R.string.no_data))
         b.temp.setTextColor(color(if (on) R.color.text_value else R.color.text_disabled))
-        b.climOutside.put(if (s.calibrating) getString(R.string.cl_calibrating)
-            else s.outsideTemp?.let { getString(R.string.cl_outside, Math.round(it)) } ?: "")
+        // With the outside temperature, the mode as the shortcut tile shows it: heating or cooling (#122)
+        val mode = if (s.calibrating) null else app.mg4dash.ui.ShortcutTiles.climateMode(this, s)
+        val outsideText = if (s.calibrating) getString(R.string.cl_calibrating) else s.outsideTemp?.let { getString(R.string.cl_outside, Math.round(it)) } ?: ""
+        b.climOutside.put(if (mode == null) outsideText else android.text.TextUtils.concat(outsideText, if (outsideText.isEmpty()) "" else "  ·  ",
+            app.mg4dash.ui.ShortcutTiles.modeText(this, mode, b.climOutside.currentTextColor, b.climOutside.textSize.toInt())))
         // In AUTO mode the car reports a meaningless speed (often the maximum):
         // show "AUTO" and a greyed gauge rather than a misleading level.
         val auto = on && s.autoOn == true
