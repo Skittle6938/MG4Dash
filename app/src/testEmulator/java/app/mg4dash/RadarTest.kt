@@ -536,4 +536,25 @@ class RadarTest {
         assertEquals(RadarRepo.PrepPhase.CANCELLED, RadarRepo.prepare.value?.phase)
         assertEquals(null, sp.getString("radar_prep_resume", null))
     }
+
+    /** A fallback server that never answers is left out for 30 min after 2 tries in a row; the official one never is. */
+    @Test fun silentFallbackSkipped() {
+        val o = app.mg4dash.radar.Overpass
+        o.resetSkips()
+        val (main, fallback) = o.SERVERS
+        val t = 1_000_000L
+        o.noAnswer(fallback, t)
+        assertEquals(listOf(main, fallback), o.order(t))
+        o.noAnswer(fallback, t)
+        assertEquals(listOf(main), o.order(t + 1))
+        assertEquals(listOf(main), o.order(t + o.SKIP_MS - 1))
+        assertEquals(listOf(main, fallback), o.order(t + o.SKIP_MS))
+        // An answer resets the count
+        o.noAnswer(fallback, t); o.answered(fallback); o.noAnswer(fallback, t)
+        assertEquals(listOf(main, fallback), o.order(t))
+        // The official server is always tried
+        repeat(5) { o.noAnswer(main, t) }
+        assertEquals(main, o.order(t).first())
+        o.resetSkips()
+    }
 }
