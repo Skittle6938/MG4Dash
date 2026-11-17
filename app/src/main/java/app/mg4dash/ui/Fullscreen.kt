@@ -46,27 +46,49 @@ object Fullscreen {
     }
 
     /**
-     * Home has the focus again (17/11: after the SAIC call window shrank to its floating card, the top bar stayed
-     * over home). Writing the same flags again changes nothing and no visibility change reached home, so the bars are
-     * checked a moment later, once the other window is gone, and hidden the same way as [restore].
+     * Home has the focus again (17/11: after the SAIC call window, the top bar stayed over home). Writing the same
+     * flags again changes nothing and no visibility change reached home, so the bars are checked a moment later and
+     * hidden once, as [restore] does. During a call the SAIC call window keeps the bar on screen whatever home does
+     * (two tries in a row left it there, each one making home's side bar blink): nothing is tried until the call
+     * ends, then once.
      */
     fun focusBack(activity: Activity) {
         apply(activity)
         val decor = activity.window.decorView
-        for (ms in longArrayOf(400L, 1_500L)) decor.postDelayed({
-            if (!activity.isFinishing && !activity.isDestroyed && activity.hasWindowFocus()) {
-                if (barsShown(decor)) Log.i("Bars", "SAIC bars still shown with the focus back (${activity.javaClass.simpleName}): hidden again")
-                restore(activity)
+        decor.removeCallbacks(decor.getTag(app.mg4dash.R.id.fullscreen_focus) as? Runnable ?: Runnable {})
+        val check = object : Runnable {
+            var waited = 0L
+            override fun run() {
+                if (activity.isFinishing || activity.isDestroyed || !activity.hasWindowFocus() || !Prefs(activity).fullscreen) return
+                if (inCall(activity)) {
+                    // The call's bar: wait for the end of the call, then one try
+                    if (waited < CALL_WAIT_MS) { waited += CALL_POLL_MS; decor.postDelayed(this, CALL_POLL_MS) }
+                    return
+                }
+                if (barsShown(decor)) { Log.i("Bars", "SAIC bars still shown with the focus back (${activity.javaClass.simpleName}): hidden again"); restore(activity) }
             }
-        }, ms)
+        }
+        decor.setTag(app.mg4dash.R.id.fullscreen_focus, check)
+        decor.postDelayed(check, 400L)
     }
+
+    /** A call in progress or ringing (the Bluetooth phone's calls go through Android's telecom). */
+    internal var inCall: (android.content.Context) -> Boolean = { c ->
+        val m = (c.getSystemService(android.content.Context.AUDIO_SERVICE) as? android.media.AudioManager)?.mode
+        m == android.media.AudioManager.MODE_IN_CALL || m == android.media.AudioManager.MODE_IN_COMMUNICATION || m == android.media.AudioManager.MODE_RINGTONE
+    }
+    private const val CALL_POLL_MS = 2_000L
+    private const val CALL_WAIT_MS = 4 * 3600_000L
 
     @Volatile private var selfChange = false
 
-    /** Whether the SAIC bars take room on [View]'s window, on any of the four sides (not always on the left, #108). */
-    internal var barsShown: (View) -> Boolean = { decor ->
-        decor.rootWindowInsets?.let { it.systemWindowInsetTop != 0 || it.systemWindowInsetLeft != 0 || it.systemWindowInsetRight != 0 || it.systemWindowInsetBottom != 0 } ?: false
-    }
+    /**
+     * Whether the top bar is really on screen for [View]'s window: the system's own state of the bars, not the insets
+     * (with LAYOUT_STABLE they always give the bars' room, hidden or not: the check said "shown" at every return of
+     * the focus and hid them again each time, making home's side bar blink, 17/11).
+     */
+    @Suppress("DEPRECATION")
+    internal var barsShown: (View) -> Boolean = { decor -> decor.windowSystemUiVisibility and View.SYSTEM_UI_FLAG_FULLSCREEN == 0 }
 
     /** Times the bars were hidden again (tests). */
     @Volatile internal var restores = 0
@@ -86,6 +108,8 @@ object Fullscreen {
                 if (activity.isFinishing || activity.isDestroyed || !Prefs(activity).fullscreen) return
                 // Another window has the focus (our menus included): wait until home has it back
                 if (!activity.hasWindowFocus()) { if (++tries < 20) decor.postDelayed(this, REHIDE_MS); return }
+                // During a call the SAIC call window keeps the bar: no try (it only made home blink), the focus check after the call does it
+                if (inCall(activity)) return
                 restore(activity)
             }
         }
