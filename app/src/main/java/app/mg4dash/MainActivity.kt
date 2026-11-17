@@ -739,12 +739,16 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
 
     /** The frame whose cards make room at their top for the connection bar (a place other than the weather's). */
     private var connFrame: SlotFrame? = null
-    private val connBarDp = 44
+    /** Height of the bar's line (its icons and their frame). */
+    private val connBarDp = 34
+    /** Each card's own top padding, before the bar's room is added. */
+    private val baseTopPad = HashMap<View, Int>()
 
     /**
      * Connection icons (#86): in the weather by default (to the right of the city, following the weather card shown),
-     * or at the top of the place chosen in the edit mode (17/11), whose cards then start below it; hidden when
-     * chosen so.
+     * or at the top of the place chosen in the edit mode (17/11): centred, at the height of the weather's line.
+     * The bar belongs to the place: every card shown there in turn makes room for it inside, its frame unchanged.
+     * Hidden when chosen so.
      */
     private fun placeConnections() {
         val row = connections ?: return
@@ -764,7 +768,8 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
             strip != null -> {
                 if (row.parent !== strip.box) {
                     (row.parent as? android.view.ViewGroup)?.removeView(row)
-                    strip.box.addView(row, android.widget.FrameLayout.LayoutParams(-2, dp(connBarDp), Gravity.TOP or Gravity.END).apply { rightMargin = dp(16); topMargin = dp(4) })
+                    strip.box.addView(row, android.widget.FrameLayout.LayoutParams(-2, dp(connBarDp), Gravity.TOP or Gravity.CENTER_HORIZONTAL)
+                        .apply { topMargin = resources.getDimensionPixelSize(R.dimen.panel_pad) })
                 }
                 reserveConnections(strip, true); connFrame = strip
                 row.bringToFront()
@@ -793,10 +798,16 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
             .show { if (prefs.energyCardPower != power) app.mg4dash.ui.Themes.recreateSmooth(this) }
     }
 
-    /** The cards of [f] start below the bar ([on]) or at the top again. */
+    /**
+     * The content of [f]'s cards starts below the bar ([on]) or where it was: a top padding inside each card, so the
+     * cards keep their frame (17/11: the places do not move).
+     */
     private fun reserveConnections(f: SlotFrame, on: Boolean) {
+        val room = resources.getDimensionPixelSize(R.dimen.panel_pad) + dp(connBarDp + 6)
         f.cards.forEach { c -> panels[c]?.let { v ->
-            (v.layoutParams as? android.widget.FrameLayout.LayoutParams)?.let { lp -> val m = if (on) dp(connBarDp + 4) else 0; if (lp.topMargin != m) { lp.topMargin = m; v.layoutParams = lp } }
+            val base = baseTopPad.getOrPut(v) { v.paddingTop }
+            val top = if (on) maxOf(base, room) else base
+            if (v.paddingTop != top) v.setPadding(v.paddingLeft, top, v.paddingRight, v.paddingBottom)
         } }
     }
 
