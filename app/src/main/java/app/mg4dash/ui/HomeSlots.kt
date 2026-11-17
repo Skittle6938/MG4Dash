@@ -383,14 +383,10 @@ object HomeSlots {
     }
 
     /**
-     * Whether [slot] can hold the bar: a place of cards (not the media), medium or larger (a small card has no room to give
-     * up), or the weather's (the bar goes beside the city there).
+     * Whether [slot] can hold the bar: any place of the layout, cards or the media (Marc, 17/11: refused on the media
+     * and the small places before); its content makes room below it.
      */
-    fun canHoldConnections(config: Config, slot: String): Boolean {
-        val s = config.layout.slot(slot) ?: return false
-        val cards = (config.fill(slot) as? Fill.Cards)?.cards ?: return false
-        return s.size != Size.SMALL || Card.HOURLY in cards || Card.DAILY in cards
-    }
+    fun canHoldConnections(config: Config, slot: String): Boolean = config.layout.slot(slot) != null
 
     /** Card shown in [slot] among [cards]: the last one shown there, otherwise the page its widget showed before. */
     fun current(prefs: Prefs, layout: Layout, slot: String, cards: List<Card>): Card? {

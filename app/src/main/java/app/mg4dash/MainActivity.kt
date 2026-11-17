@@ -823,7 +823,9 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
      */
     private fun reserveConnections(f: SlotFrame, on: Boolean) {
         val room = resources.getDimensionPixelSize(R.dimen.panel_pad) + dp(connBarDp + 6)
-        f.cards.forEach { c -> panels[c]?.let { v ->
+        // The media keeps its whole frame: the bar sits over the top of its cover, in the middle, clear of its title on the left
+        val views = f.cards.mapNotNull { panels[it] }
+        views.forEach { v -> run {
             val base = baseTopPad.getOrPut(v) { v.paddingTop }
             val top = if (on) maxOf(base, room) else base
             if (v.paddingTop != top) v.setPadding(v.paddingLeft, top, v.paddingRight, v.paddingBottom)

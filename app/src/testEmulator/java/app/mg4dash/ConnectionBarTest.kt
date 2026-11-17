@@ -48,15 +48,13 @@ class ConnectionBarTest {
         assertNull(HomeSlots.connectionsSlot(HomeSlots.CONN_NONE, full))
     }
 
-    @Test fun notOnTheMediaNorAMissingPlace() {
-        // "tr" holds the media in the Full layout: back to the weather; an unknown place too
-        assertFalse(HomeSlots.canHoldConnections(full, "tr"))
+    @Test fun anyPlaceButAMissingOne() {
+        // Every place of the layout can hold it, the media and the small ones too (Marc, 17/11); an unknown one cannot
+        assertTrue(HomeSlots.canHoldConnections(full, "tr"))
         assertTrue(HomeSlots.canHoldConnections(full, "tl"))
-        // A small card (energy, bottom left) has no room to give up; the weather's small place does (beside the city)
-        assertFalse(HomeSlots.canHoldConnections(full, "bl"))
-        assertTrue(HomeSlots.canHoldConnections(full, "bc"))
-        assertEquals("bc", HomeSlots.connectionsSlot("bl", full))
-        assertEquals("bc", HomeSlots.connectionsSlot("tr", full))
+        assertTrue(HomeSlots.canHoldConnections(full, "bl"))
+        assertFalse(HomeSlots.canHoldConnections(full, "zz"))
+        assertEquals("tr", HomeSlots.connectionsSlot("tr", full))
         assertEquals("bc", HomeSlots.connectionsSlot("zz", full))
     }
 
@@ -110,6 +108,24 @@ class ConnectionBarTest {
         val row = MainActivity::class.java.getDeclaredField("connections").apply { isAccessible = true }.get(act) as android.view.View
         assertTrue(row.parent === box)
         assertEquals(boxTop, box.top)
+        HomeSlots.setConnectionsChoice(prefs, HomeSlots.Layout.FULL, null)
+    }
+
+    /** On the media (Marc, 17/11): the bar at its top, the player a little lower in its frame. */
+    @Test fun barOnTheMedia() {
+        prefs.raw.edit().putBoolean("vertical_dock", true).putBoolean("tutorial_shortcuts_seen", true).putInt("theme_mode", 1)
+            .putInt("home_style", 0).putString("home_layout", "full").remove("slots_full").commit()
+        HomeSlots.setConnectionsChoice(prefs, HomeSlots.Layout.FULL, "tr")
+        val act = Robolectric.buildActivity(MainActivity::class.java).setup().get()
+        repeat(6) { shadowOf(Looper.getMainLooper()).idleFor(200, TimeUnit.MILLISECONDS) }
+        val root = act.window.decorView
+        val bmp = Bitmap.createBitmap(root.width, root.height, Bitmap.Config.ARGB_8888)
+        root.draw(Canvas(bmp))
+        File(File("build/screenshots").apply { mkdirs() }, "conn_media.png").outputStream().use { bmp.compress(Bitmap.CompressFormat.PNG, 100, it) }
+        val frames = MainActivity::class.java.getDeclaredField("frames").apply { isAccessible = true }.get(act) as Map<*, *>
+        val box = frames["tr"]!!.let { f -> f.javaClass.getDeclaredField("box").apply { isAccessible = true }.get(f) as android.view.ViewGroup }
+        val row = MainActivity::class.java.getDeclaredField("connections").apply { isAccessible = true }.get(act) as android.view.View
+        assertTrue(row.parent === box)
         HomeSlots.setConnectionsChoice(prefs, HomeSlots.Layout.FULL, null)
     }
 
