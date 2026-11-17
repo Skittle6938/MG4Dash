@@ -721,20 +721,55 @@ object ShortcutsPanel : Application.ActivityLifecycleCallbacks {
         private val watch = object : Runnable {
             override fun run() {
                 val v = strip ?: return
-                if (!relaying) touchable(!projectionInFront(v.context))
+                if (!relaying) {
+                    val link = linkInFront(v.context)
+                    // MG4Link's projection under the car's status bar: the strip is the bar, no more (see [stripHeight])
+                    place(stripHeight(link && linkImmersive == false, barHeight(v.context)))
+                    touchable(!(link && linkTakesTop(linkImmersive, Firmware.gen)))
+                }
                 main.postDelayed(this, 400)
             }
+        }
+
+        /**
+         * Height of the strip: the 12 px band at the top, and over MG4Link's projection under the car's status bar
+         * ([underBar], MG4Link said immersive = false) exactly the bar (80 px on SWI173), so that a slide from the very
+         * top opens the menu wherever it lands on the bar while everything that starts below the bar, in Android Auto's
+         * window, stays MG4Link's: its two and three finger gestures start just under the bar (#113 regression, 17/11).
+         */
+        internal fun stripHeight(underBar: Boolean, barPx: Int): Int = if (underBar && barPx > 0) maxOf(barPx, EDGE_PX) else EDGE_PX
+
+        /** The car's status bar height, read from the system (status_bar_height), 0 if unknown. */
+        internal fun barHeight(c: Context): Int = try {
+            val id = c.resources.getIdentifier("status_bar_height", "dimen", "android")
+            if (id > 0) c.resources.getDimensionPixelSize(id) else 0
+        } catch (_: Exception) { 0 }
+
+        /**
+         * Height and place of the strip: [height] px from the very top of the screen. Where the window manager put it
+         * lower (under a system bar), it is moved up by as much, so that it never reaches below the height asked.
+         */
+        private fun place(height: Int) {
+            val v = strip ?: return
+            val lp = v.layoutParams as? android.view.WindowManager.LayoutParams ?: return
+            val at = IntArray(2).also { v.getLocationOnScreen(it) }
+            val y = if (v.isAttachedToWindow && v.height > 0 && at[1] != 0) lp.y - at[1] else lp.y
+            if (lp.height == height && lp.y == y) return
+            lp.height = height; lp.y = y
+            try { wm(v.context).updateViewLayout(v, lp); Log.i(TAG, "strip ${height} px from the top (window moved by ${y} px, status bar ${barHeight(v.context)} px)") } catch (_: Throwable) {}
         }
 
         /**
          * MG4Link's projection in front, and that MG4Link pulls the menu itself (meta-data mg4dash.shortcuts_pull in its
          * manifest). The stock AllGo app or an older MG4Link (same package) does not: the strip stays as over other apps.
          */
+        private fun projectionInFront(c: Context): Boolean = linkInFront(c) && linkTakesTop(linkImmersive, Firmware.gen)
+
+        /** MG4Link's projection in front, and an MG4Link that pulls the menu itself. */
         @Suppress("DEPRECATION")
-        private fun projectionInFront(c: Context): Boolean = try {
+        private fun linkInFront(c: Context): Boolean = try {
             (c.getSystemService(Context.ACTIVITY_SERVICE) as android.app.ActivityManager).getRunningTasks(1).firstOrNull()?.topActivity
-                ?.let { it.packageName == MG4LINK && MediaHub.isProjectionScreen(it.className) && linkPulls(c) &&
-                    linkTakesTop(linkImmersive, Firmware.gen) } == true
+                ?.let { it.packageName == MG4LINK && MediaHub.isProjectionScreen(it.className) && linkPulls(c) } == true
         } catch (_: Exception) { false }
 
         /**
