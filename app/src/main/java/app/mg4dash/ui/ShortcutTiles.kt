@@ -155,7 +155,7 @@ object ShortcutTiles {
             Tile.FOG -> if (on) tile.icon else R.drawable.ic_sc_fog_off
             // ESP: inverted when it is off
             Tile.ESP -> if (on) R.drawable.ic_sc_esp_off else tile.icon
-            Tile.CLIMATE -> when { !on -> R.drawable.ic_sc_clim_off; s.level == 1 -> R.drawable.ic_sc_clim_heat; s.level == 3 -> R.drawable.ic_fan; else -> tile.icon }
+            Tile.CLIMATE -> when { !on -> R.drawable.ic_sc_clim_off; s.level == 1 -> R.drawable.ic_sc_clim_heat; else -> tile.icon }
             Tile.AIDS -> if (s.level == 0) R.drawable.ic_sc_adas_off else tile.icon
             Tile.DEFROST -> if (on) tile.icon else R.drawable.ic_sc_defrost_off
             Tile.WHEEL_HEAT -> if (on) tile.icon else R.drawable.ic_sc_wheel_heat_off
@@ -328,24 +328,13 @@ object ShortcutTiles {
     }
 
     /**
-     * The mode the climate will take, guessed when it is switched on (17/11: the icon changed only once the car
-     * told its mode, seconds later): heating with the outside more than 1 °C below the set point, cooling more than
-     * 1 °C above it, otherwise neither (the fan); null without both temperatures. 1 = heating, 2 = cooling, 3 = neither.
+     * The climate switched on, shown at once (17/11: the icon changed only seconds later): the car has no heating
+     * or cooling reading, the mode is the set point against the outside temperature, so it is known from the last
+     * readings before the car confirms the switch-on. Before, the tile showed a plain "On" held [HOLD_MS] until the
+     * car's state line came.
      */
-    internal fun predictMode(set: Float?, out: Float?): Int? = when {
-        set == null || out == null -> null
-        out < set - PREDICT_MARGIN -> 1
-        out > set + PREDICT_MARGIN -> 2
-        else -> 3
-    }
-    private const val PREDICT_MARGIN = 1f
-
-    /** [on] with the predicted mode's icon and name, until the car tells its own. */
-    private fun predicted(context: Context, s: VehicleState, on: Shown): Shown {
-        val mode = predictMode(s.driverTemp, s.outsideTemp?.takeIf { it > -60f && it < 70f }) ?: return on
-        lastCooling = if (mode == 3) lastCooling else mode == 2
-        return on.copy(level = mode, label = when (mode) { 1 -> context.getString(R.string.sc_heating); 2 -> context.getString(R.string.sc_cooling); else -> null })
-    }
+    private fun predicted(context: Context, s: VehicleState, on: Shown): Shown =
+        climate(context, s.copy(hvacOn = true)).takeIf { it.available && it.inverted } ?: on
 
     /**
      * The climate's mode as the shortcut tile shows it (#122), for the climate card and page: its icon and its word
