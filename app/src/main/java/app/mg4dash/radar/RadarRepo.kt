@@ -7,6 +7,7 @@ import android.os.HandlerThread
 import android.os.Looper
 import app.mg4dash.BuildConfig
 import app.mg4dash.car.CarBridge
+import app.mg4dash.car.CarProps
 import app.mg4dash.map.LocationRepo
 import app.mg4dash.system.DataUsage
 import app.mg4dash.system.Log
@@ -44,16 +45,15 @@ object RadarRepo {
     /** A radius stored before (80 km) or out of the list: the nearest one offered, at most the largest. */
     fun prepareRadius(stored: Int): Int = PREPARE_RADII.lastOrNull { it <= stored } ?: PREPARE_RADII.first()
     /**
-     * Typical size of one box (2 × 2 tiles, 0.04°) uncompressed, for a mix of countryside, suburbs and city (measured on
-     * 17/11): main roads about 10 kB in the countryside, 150 kB in a suburb, 1.1 MB in central Paris; all the streets
-     * about 34 kB, 1.3 MB and 2.6 MB. A server that compresses its answers sends about a fifth of it.
+     * Typical size of one tile (0.02°) with all its streets, for a mix of countryside, suburbs and city (measured on 17/11:
+     * about 9 kB, 330 kB and 650 kB uncompressed); the official server compresses it to about a fifth.
      */
-    const val PREP_BOX_BYTES = 1_000_000L
-    /** Downloaded when the compressing server answers (about a fifth), and kept on disk in the compact form. */
-    const val PREP_BOX_BYTES_GZIP = 200_000L
-    const val PREP_BOX_BYTES_KEPT = 550_000L
-    /** Typical time per box: the server's answer and the pause between queries. */
-    const val PREP_BOX_SECONDS = 10
+    const val PREP_BOX_BYTES = 250_000L
+    /** Downloaded (gzip), and kept on disk in the compact form. */
+    const val PREP_BOX_BYTES_GZIP = 50_000L
+    const val PREP_BOX_BYTES_KEPT = 140_000L
+    /** Typical time per tile: the server's answer and the pause between queries. */
+    const val PREP_BOX_SECONDS = 4
 
     /** Estimate of a preparation: boxes, bytes downloaded (compressed), bytes kept, minutes. */
     data class Estimate(val boxes: Int, val download: Long, val kept: Long, val minutes: Int)
@@ -61,7 +61,7 @@ object RadarRepo {
     enum class Status { OK, NO_POSITION, LOADING, NO_DATA, WIFI_ONLY, OFF_ROAD }
 
     /** The zone the car is in: what checks it, the speed checked, metres left to its end. */
-    class InZone(val kind: CamKind, val limit: Int?, val toEnd: Double)
+    class InZone(val kind: CamKind, val limit: Int?, val toEnd: Double, val cam: Long = 0)
 
     /** A zone ahead: metres to its start. */
     class NextZone(val kind: CamKind, val limit: Int?, val dist: Double)
@@ -76,6 +76,8 @@ object RadarRepo {
         val next: List<NextZone> = emptyList(),
         val nextLimit: Pair<Double, Int>? = null,
         val highway: String? = null,
+        /** The limit is the car's own (ISA), OSM having none. */
+        val fromCar: Boolean = false,
     ) {
         /** Over the high threshold inside a camera zone: the very strong alert. */
         val critical: Boolean get() = zone != null && level == Level.STRONG
@@ -102,6 +104,9 @@ object RadarRepo {
     // Worker thread state
     private val tiles = HashMap<RadarData.Key, RadarData.Tile>()
     private val fetching = HashSet<RadarData.Key>()
+    /** Tiles being downloaded around the car now (live), for the card's download mark. */
+    private val _live = MutableStateFlow(0)
+    val live: StateFlow<Int> = _live
     private var failedAt = 0L
     private var roads: Collection<Road> = emptyList()
     private var cameras: Collection<Camera> = emptyList()
@@ -170,14 +175,19 @@ object RadarRepo {
             }
         }
         val zone = activeZone()
-        val limit = m.limit
         val p = Prefs(c)
+        // OSM's limit; the car's own (ISA) where OSM has none, once its property is known
+        val carLimit = if (m.tagged == null) Isa.carLimit() else null
+        val limit = carLimit ?: m.limit
+        if (p.radarIsaLog) IsaLog.sample(c, now, m.tagged, speed)
+        if (p.radarIsaWrite) IsaWrite.apply(m.tagged, m.tagged == null, Isa.carLimit(), now, false, hasIsa = false) { w ->
+            w.f?.let { CarProps.setFloat(w.id, it, "navigation speed limit") } ?: CarProps.setInt(w.id, w.i ?: 0, "navigation speed limit") }
         val t = Thresholds(p.radarLow, p.radarHigh, p.radarPercent, Units.miles(c))
         // In a zone, the speed checked there
         val checked = zone?.limit ?: limit
         level = speed?.let { t.level(it, checked, level) } ?: Level.NONE
         publish(State(
-            status = Status.OK, speedKmh = speed, limit = limit, estimated = m.estimated, level = level, zone = zone,
+            status = Status.OK, speedKmh = speed, limit = limit, estimated = carLimit == null && m.estimated, level = level, zone = zone, fromCar = carLimit != null,
             next = zones.filter { it.start > 0 && it.cam.id != zoneCam?.id }.take(3).map { NextZone(it.cam.kind, it.limit, it.start) },
             nextLimit = Ahead.nextLimit(path), highway = m.road.highway,
         ))
@@ -187,7 +197,7 @@ object RadarRepo {
         val cam = zoneCam ?: return null
         val left = zoneEnd - odo
         if (left <= 0) { zoneCam = null; Log.i(TAG, "out of the zone of camera ${cam.id}"); return null }
-        return InZone(cam.kind, zoneLimit, left)
+        return InZone(cam.kind, zoneLimit, left, cam.id)
     }
 
     private fun publish(s: State) {
@@ -204,10 +214,30 @@ object RadarRepo {
         // Far tiles out of memory (kept on disk)
         val keep = RadarData.keysAround(lat, lon, HALF_LAT * 3, HALF_LON * 3).toSet()
         if (tiles.keys.retainAll(keep)) changed = true
-        val want = keys.filter { k -> tiles[k].let { it == null || !it.fresh(now) || it.level != RadarData.Level.FULL } && k !in fetching }
-        if (want.isNotEmpty() && now - failedAt > BACKOFF_MS && netAllowed(c)) want.forEach { fetch(c, it) }
+        val refreshMs = Prefs(c).radarRefreshHours * 3_600_000L
+        val want = keys.filter { k -> needsFetch(tiles[k], now, refreshMs) && k !in fetching }
+        // At most one tile started every few seconds: driving through many tiles does not hammer the server
+        if (want.isNotEmpty() && now - failedAt > BACKOFF_MS && now - lastFetch >= FETCH_GAP_MS && netAllowed(c)) {
+            lastFetch = now
+            fetch(c, want.first())
+        }
         if (changed || loadedKeys != tiles.keys) rebuild()
     }
+
+    /** Live downloads: one tile started at most every this long. */
+    private const val FETCH_GAP_MS = 5_000L
+    private var lastFetch = 0L
+
+    /** Refresh ages offered for the tiles around the car (hours), 6 by default (Marc, 17/11). */
+    val REFRESH_HOURS = listOf(1, 2, 6, 24, 168, 720)
+    const val REFRESH_DEFAULT_HOURS = 6
+
+    /**
+     * The tile under or around the car is downloaded again: missing, of main roads only, or older than [refreshMs] (the
+     * live refresh age; prepared tiles elsewhere keep their 30 days). The old tile stays in use until the new one is in.
+     */
+    internal fun needsFetch(t: RadarData.Tile?, now: Long, refreshMs: Long): Boolean =
+        t == null || t.level != RadarData.Level.FULL || now - t.fetched >= refreshMs || !t.fresh(now)
 
     private fun rebuild() {
         val r = HashMap<Long, Road>(); val cams = HashMap<Long, Camera>()
@@ -217,6 +247,7 @@ object RadarRepo {
 
     private fun fetch(c: Context, key: RadarData.Key) {
         fetching += key
+        _live.value = fetching.size
         net.post {
             val q = RadarData.query(key.south, key.west, key.south + RadarData.TILE, key.west + RadarData.TILE, RadarData.Level.FULL)
             val tile = download(q, Prefs(c).radarWifiOnly).body?.let { json ->
@@ -225,6 +256,7 @@ object RadarRepo {
             if (tile != null) runCatching { RadarData.write(c.filesDir, tile) }
             worker.post {
                 fetching -= key
+                _live.value = fetching.size
                 if (tile != null) { tiles[key] = tile; rebuild(); Log.i(TAG, "tile $key: ${tile.roads.size} roads, ${tile.cameras.size} cameras") }
                 else failedAt = System.currentTimeMillis()
             }
@@ -238,32 +270,38 @@ object RadarRepo {
      */
     private fun download(query: String, wifiOnly: Boolean): Overpass.Result = DataUsage.tag(DataUsage.Use.RADARS) {
         var busy = false; var error: String? = null
+        val body = ("data=" + URLEncoder.encode(query, "UTF-8")).toByteArray()
+        val agent = "MG4Dash/${BuildConfig.VERSION_NAME}"
         for (route in Overpass.routes(wifi(), wifiOnly)) {
-            val first = Overpass.preferred
             val via = if (route != null) "Wi-Fi" else "default network"
-            for ((k, server) in Overpass.order(first).withIndex()) {
+            for (server in Overpass.order()) {
                 try {
                     val url = URL(server)
-                    val conn = (route?.openConnection(url) ?: url.openConnection()) as HttpURLConnection
-                    conn.connectTimeout = 15_000; conn.readTimeout = 120_000
-                    conn.requestMethod = "POST"; conn.doOutput = true
-                    conn.setRequestProperty("User-Agent", "MG4Dash/${BuildConfig.VERSION_NAME}")
-                    conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded")
-                    // Compressed answers when the server can (about a fifth of the data)
-                    conn.setRequestProperty("Accept-Encoding", "gzip")
-                    conn.outputStream.use { it.write(("data=" + URLEncoder.encode(query, "UTF-8")).toByteArray()) }
-                    val code = conn.responseCode
-                    if (code == 200) {
-                        val raw = conn.inputStream
-                        val input = if (conn.contentEncoding.equals("gzip", ignoreCase = true)) java.util.zip.GZIPInputStream(raw) else raw
-                        val body = input.use { it.readBytes().toString(Charsets.UTF_8) }
-                        Overpass.preferred = Math.floorMod(first + k, Overpass.SERVERS.size)
-                        return@tag Overpass.Result(body)
+                    val (code, text) = if (RadarHttp.tls13) {
+                        // TLS 1.3 (Conscrypt): the official server needs it
+                        val r = RadarHttp.post(url, body, "application/x-www-form-urlencoded", agent, route, 15_000, 120_000)
+                        r.code to (if (r.code == 200) r.body.toString(Charsets.UTF_8) else null)
+                    } else {
+                        // Android's own TLS (1.2): the official server refuses it, the fallback answers
+                        val conn = (route?.openConnection(url) ?: url.openConnection()) as HttpURLConnection
+                        conn.connectTimeout = 15_000; conn.readTimeout = 120_000
+                        conn.requestMethod = "POST"; conn.doOutput = true
+                        conn.setRequestProperty("User-Agent", agent)
+                        conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded")
+                        conn.setRequestProperty("Accept-Encoding", "gzip")
+                        conn.outputStream.use { it.write(body) }
+                        val c = conn.responseCode
+                        val t = if (c == 200) {
+                            val raw = conn.inputStream
+                            (if (conn.contentEncoding.equals("gzip", ignoreCase = true)) java.util.zip.GZIPInputStream(raw) else raw).use { it.readBytes().toString(Charsets.UTF_8) }
+                        } else null
+                        conn.disconnect()
+                        c to t
                     }
+                    if (code == 200 && text != null) return@tag Overpass.Result(text)
                     if (Overpass.busy(code)) busy = true
                     error = "HTTP $code"
                     Log.w(TAG, "$server ($via): HTTP $code")
-                    conn.disconnect()
                 } catch (e: Exception) {
                     error = e.javaClass.simpleName
                     Log.w(TAG, "$server ($via): ${e.javaClass.simpleName} ${e.message}")
@@ -276,14 +314,14 @@ object RadarRepo {
     // ── Prepared trips ──
 
     /**
-     * The boxes the preparation asks for are [PREP_TILES] × [PREP_TILES] tiles of the disk grid (0.04°): small enough
-     * for the servers to answer in time, and lined up on the tiles, so that each tile is fetched whole by one box and
-     * kept in one file, whichever position the preparation starts from.
+     * The preparation asks for one tile of the disk grid at a time (0.02°): small answers that get through a Wi-Fi that
+     * drops now and then, each kept as soon as it is in, so that a preparation stopped and started again goes on from
+     * there (tiles already in and fresh are skipped). Kept as a constant to ask for [PREP_TILES] × [PREP_TILES] tiles.
      */
-    internal const val PREP_TILES = 2
-    /** Tries per box, and how long the Wi-Fi may be gone before the preparation stops. */
+    internal const val PREP_TILES = 1
+    /** Tries per tile, and how long the Wi-Fi may be gone before the preparation stops. */
     private const val PREP_TRIES = 4
-    private const val PREP_WIFI_WAIT_MS = 120_000L
+    private const val PREP_WIFI_WAIT_MS = 600_000L
 
     @Volatile private var lastBusy = false
 
@@ -309,8 +347,8 @@ object RadarRepo {
 
     /**
      * All the roads and cameras within the radius chosen (Prefs.radarPrepareKm) around the car, over the Wi-Fi only, in
-     * boxes of [PREP_TILES] × [PREP_TILES] tiles; tiles already there and fresh are kept, the others written over. A box that fails is tried again after a pause (longer when the servers are
-     * busy); without Wi-Fi it waits for it up to 2 min, then stops. False when it cannot start (no position, no
+     * tiles ([PREP_TILES]); tiles already there and fresh are kept, the others written over. A tile that fails is tried
+     * again after a pause (longer when the servers are busy); without Wi-Fi it waits for it up to 10 min, then stops. False when it cannot start (no position, no
      * Wi-Fi, already running).
      */
     fun prepareTrips(context: Context): Boolean {

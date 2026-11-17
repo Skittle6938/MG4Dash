@@ -25,22 +25,60 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 
 /**
- * The alerts: over the high threshold inside a camera zone, a red flashing banner over every app (Android Auto too,
- * option on by default) and a beep every 2 s while it lasts, even with the sound set to none (the only forced
- * sound). Elsewhere a beep on entering a level, as the sound setting says.
+ * The alerts. Over the high threshold inside a camera zone, a red flashing banner over every app (Android Auto too,
+ * option on by default). Four kinds of sound, each with its own sound, volume and repeat (Marc, 17/11): a camera zone
+ * coming (once), a little over the limit, well over it, well over it inside a camera zone.
  */
 @SuppressLint("StaticFieldLeak")
 object RadarAlert {
     private const val TAG = "Radar"
     /** TYPE_BOOT_PROGRESS, as the shortcuts menu: above the system bars and the other apps. */
     private const val TYPE = 2021
-    const val BEEP_MS = 2_000L
     private const val FLASH_MS = 450L
+    /** Repeats are checked this often. */
+    private const val TICK_MS = 1_000L
 
-    /** Sound setting: none, the strong alerts only, both levels. */
-    const val SOUND_NONE = 0
-    const val SOUND_STRONG = 1
-    const val SOUND_BOTH = 2
+    /** Sounds offered: none, a chime, a beep, a loud beep. */
+    enum class Sound(val key: String) { NONE("none"), CHIME("chime"), BEEP("beep"), LOUD("loud") }
+
+    /** Kinds of alert, with their defaults: sound, volume (%), repeat (s, 0 = never). */
+    enum class Kind(val key: String, val sound: Sound, val volume: Int, val repeat: Int) {
+        /** A camera zone coming: once, on entering it. */
+        APPROACH("approach", Sound.CHIME, 60, 0),
+        LIGHT("light", Sound.NONE, 30, 0),
+        STRONG("strong", Sound.BEEP, 70, 10),
+        /** Well over the limit inside a camera zone, with the red banner. */
+        ZONE("zone", Sound.LOUD, 100, 5),
+    }
+
+    /** Repeats offered (s): never, 5 s, 10 s, 1 min, 5 min. */
+    val REPEATS = listOf(0, 5, 10, 60, 300)
+
+    /** The over-the-limit alert now (the camera zone coming is apart), null when none. */
+    internal fun kindOf(level: Level, critical: Boolean): Kind? = when {
+        critical -> Kind.ZONE
+        level == Level.STRONG -> Kind.STRONG
+        level == Level.LIGHT -> Kind.LIGHT
+        else -> null
+    }
+
+    /**
+     * When to sound an alert that lasts: at once when it starts (or changes), then every its repeat while it lasts;
+     * never again with no repeat. Driven every [TICK_MS].
+     */
+    internal class Repeater {
+        private var kind: Kind? = null
+        private var lastAt = 0L
+
+        /** The kind to sound now, null for none. */
+        fun tick(k: Kind?, now: Long, repeatOf: (Kind) -> Int): Kind? {
+            if (k != kind) { kind = k; lastAt = now; return k }
+            if (k == null) return null
+            val every = repeatOf(k)
+            if (every > 0 && now - lastAt >= every * 1000L) { lastAt = now; return k }
+            return null
+        }
+    }
 
     private val main = Handler(Looper.getMainLooper())
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
@@ -49,29 +87,36 @@ object RadarAlert {
     private var banner: View? = null
     private var bannerText: TextView? = null
     private var bannerSub: TextView? = null
-    private var lastLevel = Level.NONE
     private var critical = false
     private var flashOn = false
-
-    /** A sound for a level reached ([critical] is beeped apart, every [BEEP_MS]). */
-    internal fun beepFor(level: Level, previous: Level, setting: Int): Boolean? = when {
-        level == previous || level == Level.NONE -> null
-        level == Level.STRONG && setting >= SOUND_STRONG -> true
-        level == Level.LIGHT && setting == SOUND_BOTH && previous == Level.NONE -> false
-        else -> null
-    }
+    private var current: Kind? = null
+    private var zoneCam: Long? = null
+    private val repeater = Repeater()
 
     fun start(context: Context) {
         if (job != null) return
         ctx = context.applicationContext
         job = scope.launch { RadarRepo.state.collect { on(it) } }
+        main.post(tick)
     }
 
     fun stop() {
         job?.cancel(); job = null
-        setCritical(false)
+        main.removeCallbacks(tick)
+        critical = false; current = null; zoneCam = null
         hideBanner()
-        lastLevel = Level.NONE
+    }
+
+    /** Plays the sound of [kind] as set (the settings' ▶ too); nothing with no sound. */
+    fun play(c: Context, kind: Kind) {
+        val p = Prefs(c)
+        val res = when (p.radarSoundOf(kind)) {
+            Sound.NONE -> return
+            Sound.CHIME -> app.mg4dash.R.raw.fx_radar_chime
+            Sound.BEEP -> app.mg4dash.R.raw.fx_radar_light
+            Sound.LOUD -> app.mg4dash.R.raw.fx_radar_strong
+        }
+        FxSound.alertRaw(c, res, p.radarVolume(kind))
     }
 
     private fun on(s: RadarRepo.State) {
@@ -79,28 +124,28 @@ object RadarAlert {
         val p = Prefs(c)
         if (s.critical) {
             if (!critical) Log.i(TAG, "strong alert in a zone: ${s.speedKmh} for ${s.zone?.limit}")
-            setCritical(true)
+            critical = true
             if (p.radarBanner) showBanner(c, s) else hideBanner()
         } else {
-            setCritical(false)
+            critical = false
             hideBanner()
-            beepFor(s.level, lastLevel, p.radarSound)?.let { FxSound.alert(c, it) }
         }
-        lastLevel = s.level
+        // A camera zone entered: its chime, once
+        val cam = s.zone?.cam
+        if (cam != null && cam != zoneCam) play(c, Kind.APPROACH)
+        zoneCam = cam
+        current = kindOf(s.level, s.critical)
+        sound()
     }
 
-    private val beep = object : Runnable {
-        override fun run() {
-            ctx?.let { FxSound.alert(it, true) }
-            main.postDelayed(this, BEEP_MS)
-        }
+    private fun sound() {
+        val c = ctx ?: return
+        val p = Prefs(c)
+        repeater.tick(current, android.os.SystemClock.elapsedRealtime()) { p.radarRepeat(it) }?.let { play(c, it) }
     }
 
-    private fun setCritical(on: Boolean) {
-        if (on == critical) return
-        critical = on
-        main.removeCallbacks(beep)
-        if (on) main.post(beep)
+    private val tick = object : Runnable {
+        override fun run() { sound(); main.postDelayed(this, TICK_MS) }
     }
 
     private val flash = object : Runnable {

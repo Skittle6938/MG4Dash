@@ -1,26 +1,20 @@
 package app.mg4dash.radar
 
 /**
- * The Overpass servers the alerter reads OpenStreetMap from, and how it goes through them.
+ * The Overpass servers the alerter reads OpenStreetMap from, and how it goes through them (Marc's choice, 17/11).
  *
- * Android 9 has no TLS 1.3: overpass-api.de now only accepts TLS 1.3 (seen on the car on 17/11: every request
- * "SSLHandshakeException Handshake failed"), so it is tried last, for newer head units. The others accept TLS 1.2.
- * maps.mail.ru first: it compresses its answers (about a fifth of the data, measured 17/11). The server that answered
- * last is tried first next time.
+ * The official server, overpass-api.de (Germany / Finland), always first. It only accepts TLS 1.3, which Android 9
+ * lacks: [RadarHttp] brings it with Conscrypt. Then one public instance as a fallback, overpass.private.coffee
+ * (Austria; overpass.kumi.systems is the same server). Both send gzip when asked.
  */
 object Overpass {
     val SERVERS = listOf(
-        "https://maps.mail.ru/osm/tools/overpass/api/interpreter",
-        "https://overpass.kumi.systems/api/interpreter",
-        "https://overpass.private.coffee/api/interpreter",
         "https://overpass-api.de/api/interpreter",
+        "https://overpass.private.coffee/api/interpreter",
     )
 
-    /** Index of the server that answered last. */
-    @Volatile var preferred = 0
-
-    /** The servers in the order to try them: the last one that answered first. */
-    fun order(first: Int = preferred): List<String> = SERVERS.indices.map { SERVERS[Math.floorMod(first + it, SERVERS.size)] }
+    /** The servers in the order to try them: the official one first, always. */
+    fun order(): List<String> = SERVERS
 
     /** A server answer that says it is busy: try another one, and wait longer before the next round. */
     fun busy(code: Int) = code == 429 || code == 503 || code == 504

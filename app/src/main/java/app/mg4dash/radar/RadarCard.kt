@@ -30,6 +30,14 @@ class RadarCard(context: Context) : View(context) {
 
     fun show(state: RadarRepo.State) { if (state != s) { s = state; invalidate() } }
 
+    /** A preparation running (its progress) and tiles downloaded live: a thin bar at the bottom of the card. */
+    private var prep: RadarRepo.Prep? = null
+    private var live = 0
+    fun downloads(prep: RadarRepo.Prep?, live: Int) {
+        val p = prep?.takeIf { it.running }
+        if (p != this.prep || live != this.live) { this.prep = p; this.live = live; invalidate() }
+    }
+
     private val p = Paint(Paint.ANTI_ALIAS_FLAG)
     private val medium = Typeface.create("sans-serif-medium", Typeface.NORMAL)
     private val bold = Typeface.create("sans-serif", Typeface.BOLD)
@@ -67,9 +75,7 @@ class RadarCard(context: Context) : View(context) {
                 drawRows(c, RectF(pad, pad * 1.5f + side, w - pad, h - pad * 1.2f))
             }
         }
-        // Attribution, small, in the corner
-        p.typeface = Typeface.DEFAULT; p.textSize = 11 * d; p.color = col(R.color.text_sub); p.textAlign = Paint.Align.RIGHT
-        c.drawText(context.getString(R.string.rad_osm), w - 14 * d, h - 9 * d, p)
+        drawDownload(c, w, h)
     }
 
     private fun speedText(): String = s.speedKmh?.let { Speeds.toUnit(it, miles).toString() } ?: "—"
@@ -83,10 +89,10 @@ class RadarCard(context: Context) : View(context) {
         p.textSize = sign * 0.72f
         c.drawText(speedText(), r.left, cy + p.textSize * 0.36f, p)
         val sw = p.measureText(speedText())
-        p.typeface = Typeface.DEFAULT; p.textSize = 20 * d; p.color = col(R.color.text_sub)
+        p.typeface = Typeface.DEFAULT; p.textSize = 24 * d; p.color = col(R.color.text_sub)
         c.drawText(Units.speedUnit(context), r.left + sw + 10 * d, cy + sign * 0.26f, p)
         if (status) {
-            p.textSize = 19 * d; p.color = if (s.zone != null) col(R.color.text_value) else col(R.color.text_sub)
+            p.textSize = 25 * d; p.color = if (s.zone != null) col(R.color.text_value) else col(R.color.text_sub)
             c.drawText(ellipsize(statusLine(), r.width()), r.left, r.bottom - 2 * d, p)
         }
     }
@@ -105,7 +111,11 @@ class RadarCard(context: Context) : View(context) {
         val txt = if (known) Speeds.toUnit(limit!!.toFloat(), miles).toString() else "?"
         p.textSize = rad * (if (txt.length >= 3) 0.78f else 0.95f)
         c.drawText(txt, cx, cy + p.textSize * 0.36f, p)
-        if (known && grey) {
+        if (known && s.fromCar) {
+            // The car's own limit (ISA), OSM having none
+            p.typeface = bold; p.textSize = rad * 0.26f; p.color = 0xFF111111.toInt()
+            c.drawText(context.getString(R.string.rad_isa), cx, cy + rad * 0.64f, p)
+        } else if (known && grey) {
             p.typeface = Typeface.DEFAULT; p.textSize = rad * 0.24f
             c.drawText(context.getString(R.string.rad_estimated), cx, cy + rad * 0.62f, p)
         }
@@ -122,12 +132,12 @@ class RadarCard(context: Context) : View(context) {
             p.style = Paint.Style.STROKE; p.strokeWidth = 2 * d; p.color = col(R.color.accent_danger)
             c.drawRoundRect(r, rr, rr, p); p.style = Paint.Style.FILL
         }
-        p.textAlign = Paint.Align.LEFT; p.typeface = medium; p.textSize = 22 * d
+        p.textAlign = Paint.Align.LEFT; p.typeface = medium; p.textSize = 27 * d
         p.color = col(R.color.text_value)
         val x = r.left + 18 * d
         val line1 = if (z != null) zoneTitle(z.kind, z.limit) else s.next.firstOrNull()?.let { context.getString(R.string.rad_next_zone, kindName(context, it.kind), distText(context, it.dist)) } ?: statusLine()
         c.drawText(ellipsize(line1, r.width() - 36 * d), x, r.top + r.height() * 0.42f, p)
-        p.typeface = Typeface.DEFAULT; p.textSize = 18 * d; p.color = col(R.color.text_sub)
+        p.typeface = Typeface.DEFAULT; p.textSize = 24 * d; p.color = col(R.color.text_sub)
         val line2 = if (z != null) context.getString(R.string.rad_zone_end, distText(context, z.toEnd))
             else s.nextLimit?.let { (dist, lim) -> context.getString(R.string.rad_next_limit, limitText(lim), distText(context, dist)) } ?: ""
         c.drawText(ellipsize(line2, r.width() - 36 * d), x, r.top + r.height() * 0.78f, p)
@@ -163,16 +173,16 @@ class RadarCard(context: Context) : View(context) {
     private fun drawRows(c: Canvas, r: RectF) {
         val sign = min(r.height() * 0.34f, r.width() * 0.4f)
         drawSign(c, r.left + sign / 2, r.top + sign / 2, sign / 2)
-        p.textAlign = Paint.Align.LEFT; p.typeface = medium; p.textSize = 22 * d; p.color = col(R.color.text_value)
+        p.textAlign = Paint.Align.LEFT; p.typeface = medium; p.textSize = 28 * d; p.color = col(R.color.text_value)
         val tx = r.left + sign + 20 * d
         c.drawText(ellipsize(if (s.status == RadarRepo.Status.OK) (if (s.zone == null && s.estimated) context.getString(R.string.rad_limit_estimated) else context.getString(R.string.rad_limit)) else statusLine(), r.right - tx), tx, r.top + sign * 0.45f, p)
-        p.typeface = Typeface.DEFAULT; p.textSize = 18 * d; p.color = col(R.color.text_sub)
+        p.typeface = Typeface.DEFAULT; p.textSize = 24 * d; p.color = col(R.color.text_sub)
         s.nextLimit?.let { (dist, lim) -> c.drawText(ellipsize(context.getString(R.string.rad_next_limit, limitText(lim), distText(context, dist)), r.right - tx), tx, r.top + sign * 0.8f, p) }
         val rows = ArrayList<Pair<String, Boolean>>()
         s.zone?.let { z -> rows += (zoneTitle(z.kind, z.limit) + " · " + context.getString(R.string.rad_zone_end, distText(context, z.toEnd))) to true }
         s.next.forEach { n -> rows += context.getString(R.string.rad_next_zone, kindName(context, n.kind) + (n.limit?.let { " " + limitText(it) } ?: ""), distText(context, n.dist)) to false }
         if (rows.isEmpty() && s.status == RadarRepo.Status.OK) rows += context.getString(R.string.rad_no_zone) to false
-        val rowH = 52 * d
+        val rowH = 64 * d
         var y = r.top + sign + 16 * d
         for ((text, zone) in rows) {
             if (y + rowH > r.bottom + 4 * d) break
@@ -181,10 +191,30 @@ class RadarCard(context: Context) : View(context) {
             p.color = if (zone) (col(R.color.accent_danger) and 0x00FFFFFF) or 0x33000000 else (col(R.color.text_sub) and 0x00FFFFFF) or 0x1A000000
             c.drawRoundRect(box, 14 * d, 14 * d, p)
             if (zone) { p.style = Paint.Style.STROKE; p.strokeWidth = 2 * d; p.color = col(R.color.accent_danger); c.drawRoundRect(box, 14 * d, 14 * d, p); p.style = Paint.Style.FILL }
-            p.textSize = 19 * d; p.typeface = if (zone) medium else Typeface.DEFAULT; p.color = col(R.color.text_value)
-            c.drawText(ellipsize(text, box.width() - 32 * d), box.left + 16 * d, box.centerY() + 7 * d, p)
+            p.textSize = 25 * d; p.typeface = if (zone) medium else Typeface.DEFAULT; p.color = col(R.color.text_value)
+            c.drawText(ellipsize(text, box.width() - 32 * d), box.left + 16 * d, box.centerY() + 9 * d, p)
             y += rowH
         }
+    }
+
+    /**
+     * Download mark: a thin bar along the bottom of the card, filled as far as the preparation went, with its count;
+     * a short bar and an arrow while tiles around the car are downloaded.
+     */
+    private fun drawDownload(c: Canvas, w: Float, h: Float) {
+        val pr = prep
+        if (pr == null && live == 0) return
+        val y = h - 7 * d
+        val x0 = 22 * d; val x1 = w - 22 * d
+        p.style = Paint.Style.STROKE; p.strokeCap = Paint.Cap.ROUND; p.strokeWidth = 5 * d
+        p.color = (col(R.color.text_sub) and 0x00FFFFFF) or 0x40000000
+        c.drawLine(x0, y, x1, y, p)
+        p.color = col(R.color.text_value)
+        val f = if (pr != null && pr.total > 0) pr.done.toFloat() / pr.total else 0.15f
+        c.drawLine(x0, y, x0 + (x1 - x0) * f.coerceIn(0.02f, 1f), y, p)
+        p.style = Paint.Style.FILL; p.strokeCap = Paint.Cap.BUTT
+        p.typeface = medium; p.textSize = 18 * d; p.textAlign = Paint.Align.RIGHT; p.color = col(R.color.text_sub)
+        c.drawText(if (pr != null) "\u2193 ${pr.done} / ${pr.total}" else "\u2193", x1, y - 8 * d, p)
     }
 
     private fun zoneTitle(kind: CamKind, limit: Int?) = kindName(context, kind) + (limit?.let { " · " + limitText(it) } ?: "")

@@ -6,6 +6,7 @@ import app.mg4dash.radar.Camera
 import app.mg4dash.radar.Country
 import app.mg4dash.radar.DefaultLimits
 import app.mg4dash.radar.Geo
+import app.mg4dash.radar.IsaWrite
 import app.mg4dash.radar.Level
 import app.mg4dash.radar.Matcher
 import app.mg4dash.radar.RadarAlert
@@ -264,22 +265,47 @@ class RadarTest {
         assertNotNull(RadarData.keysAround(48.9008, 2.3614, 0.012, 0.017).firstOrNull { it == key })
     }
 
-    @Test fun beepsOnLevels() {
-        assertEquals(true, RadarAlert.beepFor(Level.STRONG, Level.LIGHT, RadarAlert.SOUND_STRONG))
-        assertNull(RadarAlert.beepFor(Level.LIGHT, Level.NONE, RadarAlert.SOUND_STRONG))
-        assertEquals(false, RadarAlert.beepFor(Level.LIGHT, Level.NONE, RadarAlert.SOUND_BOTH))
-        assertNull(RadarAlert.beepFor(Level.STRONG, Level.LIGHT, RadarAlert.SOUND_NONE))
-        assertNull(RadarAlert.beepFor(Level.STRONG, Level.STRONG, RadarAlert.SOUND_BOTH))
+    @Test fun alertKindsAndDefaults() {
+        assertEquals(RadarAlert.Kind.ZONE, RadarAlert.kindOf(Level.STRONG, critical = true))
+        assertEquals(RadarAlert.Kind.STRONG, RadarAlert.kindOf(Level.STRONG, critical = false))
+        assertEquals(RadarAlert.Kind.LIGHT, RadarAlert.kindOf(Level.LIGHT, critical = false))
+        assertNull(RadarAlert.kindOf(Level.NONE, critical = false))
+        // Defaults (Marc's mockup, 17/11): approach chime 60 % once, light silent, strong beep 70 % every 10 s, zone loud 100 % every 5 s
+        assertEquals(RadarAlert.Sound.CHIME, RadarAlert.Kind.APPROACH.sound); assertEquals(60, RadarAlert.Kind.APPROACH.volume); assertEquals(0, RadarAlert.Kind.APPROACH.repeat)
+        assertEquals(RadarAlert.Sound.NONE, RadarAlert.Kind.LIGHT.sound)
+        assertEquals(RadarAlert.Sound.BEEP, RadarAlert.Kind.STRONG.sound); assertEquals(70, RadarAlert.Kind.STRONG.volume); assertEquals(10, RadarAlert.Kind.STRONG.repeat)
+        assertEquals(RadarAlert.Sound.LOUD, RadarAlert.Kind.ZONE.sound); assertEquals(100, RadarAlert.Kind.ZONE.volume); assertEquals(5, RadarAlert.Kind.ZONE.repeat)
+        assertEquals(listOf(0, 5, 10, 60, 300), RadarAlert.REPEATS)
+        val prefs = app.mg4dash.system.Prefs(org.robolectric.RuntimeEnvironment.getApplication())
+        assertEquals(RadarAlert.Sound.LOUD, prefs.radarSoundOf(RadarAlert.Kind.ZONE))
+        prefs.setRadarSoundOf(RadarAlert.Kind.ZONE, RadarAlert.Sound.BEEP)
+        assertEquals(RadarAlert.Sound.BEEP, prefs.radarSoundOf(RadarAlert.Kind.ZONE))
+    }
+
+    @Test fun alertRepeater() {
+        val r = RadarAlert.Repeater()
+        val rep = { k: RadarAlert.Kind -> k.repeat }
+        // A new alert sounds at once
+        assertEquals(RadarAlert.Kind.STRONG, r.tick(RadarAlert.Kind.STRONG, 0, rep))
+        assertNull(r.tick(RadarAlert.Kind.STRONG, 9_000, rep))
+        assertEquals(RadarAlert.Kind.STRONG, r.tick(RadarAlert.Kind.STRONG, 10_000, rep))   // every 10 s
+        // Into a zone: at once, then every 5 s
+        assertEquals(RadarAlert.Kind.ZONE, r.tick(RadarAlert.Kind.ZONE, 11_000, rep))
+        assertNull(r.tick(RadarAlert.Kind.ZONE, 15_000, rep))
+        assertEquals(RadarAlert.Kind.ZONE, r.tick(RadarAlert.Kind.ZONE, 16_000, rep))
+        // Back under the limit: nothing; a light alert never repeated
+        assertNull(r.tick(null, 17_000, rep))
+        assertEquals(RadarAlert.Kind.LIGHT, r.tick(RadarAlert.Kind.LIGHT, 18_000, rep))
+        assertNull(r.tick(RadarAlert.Kind.LIGHT, 600_000, rep))
     }
 
     // ── Network ──
 
-    @Test fun overpassServersTls12First() {
-        // overpass-api.de only speaks TLS 1.3, which Android 9 lacks: last
-        assertEquals("https://overpass-api.de/api/interpreter", app.mg4dash.radar.Overpass.order(0).last())
-        val o = app.mg4dash.radar.Overpass.order(2)
-        assertEquals(app.mg4dash.radar.Overpass.SERVERS[2], o.first())
-        assertEquals(app.mg4dash.radar.Overpass.SERVERS.toSet(), o.toSet())
+    @Test fun officialServerFirstNoOther() {
+        // The official server first, always (TLS 1.3 through Conscrypt); one public fallback, outside Russia
+        assertEquals(listOf("https://overpass-api.de/api/interpreter", "https://overpass.private.coffee/api/interpreter"),
+            app.mg4dash.radar.Overpass.order())
+        assertTrue(app.mg4dash.radar.Overpass.SERVERS.none { it.contains("mail.ru") })
     }
 
     @Test fun overpassBusyAndBackoff() {
@@ -304,9 +330,9 @@ class RadarTest {
         val r = app.mg4dash.radar.RadarRepo
         assertEquals(listOf(10, 20, 30, 50), r.PREPARE_RADII)
         assertEquals(20, app.mg4dash.system.Prefs(org.robolectric.RuntimeEnvironment.getApplication()).radarPrepareKm)
-        // 30 km around Paris: 60 km square in boxes of 2 x 2 tiles (0.04°), about 15 x 21
+        // 30 km around Paris: 60 km square, one tile (0.02°) per request, about 28 x 42
         val boxes = r.prepareBoxes(48.86, 2.35, 30)
-        assertTrue(boxes.size in 280..360)
+        assertTrue(boxes.size in 1100..1400)
         assertEquals(boxes.size, boxes.toSet().size)
         // Every point within 30 km is in one of the tiles fetched
         val tiles = boxes.flatMap { r.boxTiles(it) }
@@ -318,7 +344,7 @@ class RadarTest {
         val e = sizes[2]
         assertEquals(e.boxes * r.PREP_BOX_BYTES_GZIP, e.download)
         assertEquals(e.boxes * r.PREP_BOX_BYTES_KEPT, e.kept)
-        assertTrue(e.minutes in 40..70)
+        assertTrue(e.minutes in 60..110)
     }
 
     /** Boxes on the tile grid: a tile belongs to one box only, whatever the starting position, so it is never fetched in halves or kept twice. */
@@ -358,6 +384,91 @@ class RadarTest {
         val prefs = app.mg4dash.system.Prefs(org.robolectric.RuntimeEnvironment.getApplication())
         prefs.raw.edit().putInt("radar_prepare_km", 80).commit()
         assertEquals(50, prefs.radarPrepareKm)
-        assertTrue(app.mg4dash.radar.Overpass.SERVERS.first().contains("mail.ru"))
+    }
+
+    // ── Radar5: HTTP answers, live refresh, ISA ──
+
+    private fun http(head: String, body: ByteArray) = (head.toByteArray(Charsets.ISO_8859_1) + body).inputStream()
+
+    @Test fun httpAnswerChunkedAndGzip() {
+        val json = "{\"elements\":[]}".toByteArray()
+        val gz = java.io.ByteArrayOutputStream().also { java.util.zip.GZIPOutputStream(it).use { g -> g.write(json) } }.toByteArray()
+        // Two chunks, gzip
+        val a = gz.copyOfRange(0, 10); val b = gz.copyOfRange(10, gz.size)
+        val chunked = "${Integer.toHexString(a.size)}\r\n".toByteArray() + a + "\r\n${Integer.toHexString(b.size)}\r\n".toByteArray() + b + "\r\n0\r\n\r\n".toByteArray()
+        val r = app.mg4dash.radar.RadarHttp.readResponse(http("HTTP/1.1 200 OK\r\nTransfer-Encoding: chunked\r\nContent-Encoding: gzip\r\n\r\n", chunked))
+        assertEquals(200, r.code)
+        assertEquals(String(json), String(r.body))
+        // Content-Length, plain
+        val r2 = app.mg4dash.radar.RadarHttp.readResponse(http("HTTP/1.1 429 Too Many Requests\r\nContent-Length: 4\r\n\r\n", "busy".toByteArray()))
+        assertEquals(429, r2.code); assertEquals("busy", String(r2.body))
+    }
+
+    @Test fun liveRefreshOfTheTileUnderTheCar() {
+        val r = app.mg4dash.radar.RadarRepo
+        val key = RadarData.Key.of(48.9, 2.36)
+        val h = 3_600_000L
+        val now = 100 * 24 * h
+        fun tile(ageH: Long, level: RadarData.Level = RadarData.Level.FULL) = RadarData.Tile(key, level, now - ageH * h, emptyList(), emptyList())
+        assertTrue(r.needsFetch(null, now, 6 * h))                              // missing
+        assertFalse(r.needsFetch(tile(2), now, 6 * h))                          // 2 h old, refresh after 6 h
+        assertTrue(r.needsFetch(tile(7), now, 6 * h))                           // older than the refresh age
+        assertFalse(r.needsFetch(tile(7), now, 24 * h))                         // 1 day chosen
+        assertTrue(r.needsFetch(tile(1, RadarData.Level.MAIN), now, 24 * h))    // main roads only: completed
+        assertTrue(r.needsFetch(tile(31 * 24), now, 720 * h))                   // past the 30 days in any case
+        assertEquals(listOf(1, 2, 6, 24, 168, 720), r.REFRESH_HOURS)
+        val prefs = app.mg4dash.system.Prefs(org.robolectric.RuntimeEnvironment.getApplication())
+        assertEquals(6, prefs.radarRefreshHours)
+        prefs.raw.edit().putInt("radar_refresh_hours", 5).commit()
+        assertEquals(6, prefs.radarRefreshHours)                                // not offered: the default
+    }
+
+    @Test fun isaWriteDecision() {
+        val w = app.mg4dash.radar.IsaWrite
+        // A tagged limit, nothing sent yet: sent; the same again: nothing; too soon after the last write: nothing
+        assertEquals(IsaWrite.Decision.Send(50f), w.decide(50, false, null, null, 0, 10_000, false))
+        assertEquals(IsaWrite.Decision.Nothing, w.decide(50, false, null, 50, 0, 10_000, false))
+        assertEquals(IsaWrite.Decision.Nothing, w.decide(70, false, null, 50, 8_000, 10_000, false))
+        assertEquals(IsaWrite.Decision.Send(70f), w.decide(70, false, null, 50, 0, 10_000, false))
+        // The car already says the same: nothing
+        assertEquals(IsaWrite.Decision.Nothing, w.decide(70, false, 70, 50, 0, 10_000, false))
+        // Estimated or unknown: cleared once, then nothing
+        assertEquals(IsaWrite.Decision.Clear, w.decide(50, true, null, 70, 0, 10_000, false))
+        assertEquals(IsaWrite.Decision.Clear, w.decide(null, false, null, 70, 0, 10_000, false))
+        assertEquals(IsaWrite.Decision.Nothing, w.decide(null, false, null, 0, 0, 10_000, false))
+        // mph: 113 km/h sent as 70
+        assertEquals(IsaWrite.Decision.Send(70f), w.decide(113, false, null, null, 0, 10_000, true))
+        // The writes mirror the stock map: value to both, status to both, then the unit
+        val ws = w.writes(IsaWrite.Decision.Send(50f), hasIsa = false, miles = false)
+        assertEquals(listOf(0x2160a185, 0x2160a1a8, 0x2140a183, 0x2140a1a9, 0x2140a184), ws.map { it.id })
+        assertEquals(50f, ws[0].f); assertEquals(50f, ws[1].f)
+        assertEquals(2, ws[4].i)                                                // km/h without the car's ISA: 2, as stock
+        assertEquals(1, w.writes(IsaWrite.Decision.Send(50f), hasIsa = true, miles = false)[4].i)
+        assertEquals(0f, w.writes(IsaWrite.Decision.Clear, false, false)[0].f)
+        assertTrue(w.writes(IsaWrite.Decision.Nothing, false, false).isEmpty())
+        // Held back: nothing reaches the car
+        assertFalse(w.WRITE_ALLOWED)
+        var written = 0
+        w.apply(50, false, null, 1_000_000, false, false) { written++; true }
+        assertEquals(0, written)
+    }
+
+    @Test fun isaLogChangesAndOsmSteps() {
+        val c = org.robolectric.RuntimeEnvironment.getApplication()
+        val log = app.mg4dash.radar.IsaLog
+        log.reset(); log.file(c).delete()
+        val values = HashMap<Int, String>()
+        var all = mapOf(1 to "0", 2 to "5")
+        log.sample(c, 1_000, 50, 48f, read = { values[it] ?: "" }, readAll = { all })
+        values[0x2160a212] = "50.0"
+        all = mapOf(1 to "0", 2 to "7")
+        log.sample(c, 2_000, 70, 66f, read = { values[it] ?: "" }, readAll = { all })
+        val text = log.file(c).readText()
+        assertTrue(text.startsWith("time,what,name,id,before,after,osm_kmh,gps_kmh"))
+        assertTrue(text.contains("prop,SPEED_AST_SYS_TRAGET_VCU,0x2160a212,,50.0,70,66"))
+        // Property 2 changed in step with OSM's limit (50 → 70): logged as a candidate
+        assertTrue(text.contains("with-osm,?,0x2,5,7,70,66"))
+        assertTrue(text.contains("osm,OSM,0x0,50,70,70,66"))
+        assertNull(app.mg4dash.radar.Isa.CAR_LIMIT_PROP)
     }
 }
