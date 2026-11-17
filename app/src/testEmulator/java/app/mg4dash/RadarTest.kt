@@ -297,4 +297,23 @@ class RadarTest {
         assertEquals(listOf<String?>(null), app.mg4dash.radar.Overpass.routes<String>(null, wifiOnly = false))
         assertTrue(app.mg4dash.radar.Overpass.routes<String>(null, wifiOnly = true).isEmpty())
     }
+
+    // ── Prepared trips ──
+
+    @Test fun prepareRadiusBoxesAndEstimate() {
+        val r = app.mg4dash.radar.RadarRepo
+        assertEquals(listOf(10, 20, 30, 50, 80), r.PREPARE_RADII)
+        assertEquals(30, app.mg4dash.system.Prefs(org.robolectric.RuntimeEnvironment.getApplication()).radarPrepareKm)
+        // 30 km around Paris: 60 km square in 0.05° boxes, about 12 x 17
+        val boxes = r.prepareBoxes(48.86, 2.35, 30)
+        assertTrue(boxes.size in 180..240)
+        assertEquals(boxes.size, boxes.toSet().size)
+        // Every point within 30 km is in a box
+        listOf(48.86 + 0.26 to 2.35, 48.86 to 2.35 - 0.39, 48.86 - 0.26 to 2.35 + 0.39).forEach { (la, lo) ->
+            assertTrue(boxes.any { (s, w) -> la >= s && la < s + 0.05 && lo >= w && lo < w + 0.05 })
+        }
+        val sizes = r.PREPARE_RADII.map { r.prepareEstimate(it, 48.86) }
+        assertEquals(sizes.sortedBy { it.first }, sizes)
+        assertEquals(sizes[2].first * r.PREP_BOX_BYTES, sizes[2].second)
+    }
 }

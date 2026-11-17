@@ -995,4 +995,10 @@
     <string name="st_rad_prep_retry">Sunucu meşgul, yeniden deneniyor… (%1$d / %2$d)</string>
     <string name="st_rad_prep_done">Hazırlandı: %1$d / %2$d bölge</string>
     <string name="st_rad_prep_no_wifi">Durduruldu, 2 dakikadır Wi-Fi yok (%1$d / %2$d)</string>
+    <string name="st_rad_radius">Hazırlanan yolculukların yarıçapı</string>
+    <string name="st_rad_radius_item">%1$d km · ≈ %2$d bölge · ≈ %3$s</string>
+    <string name="st_rad_space">Kullanılan alan: %1$s (%2$d bölge)</string>
+    <string name="st_rad_clear_msg">Araçta kayıtlı hız sınırları ve radarlar (%1$s) silinir. Gerektiğinde yeniden indirilir.</string>
+    <string name="st_rad_clear_btn">Temizle</string>
+    <string name="st_rad_prepare_desc2">Ana yolları ve radarları, 4G olmayan yolculuklar için aracın çevresinde yukarıda seçilen yarıçapta Wi-Fi ile indirir. Boyut tahminidir: kırsalda daha az, şehir merkezinde daha fazla.</string>
 </resources>

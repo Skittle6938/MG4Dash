@@ -995,4 +995,10 @@
     <string name="st_rad_prep_retry">Serveur occupé, nouvel essai… (%1$d / %2$d)</string>
     <string name="st_rad_prep_done">Préparé : %1$d / %2$d zones</string>
     <string name="st_rad_prep_no_wifi">Arrêté, pas de Wi-Fi depuis 2 min (%1$d / %2$d)</string>
+    <string name="st_rad_radius">Rayon des trajets préparés</string>
+    <string name="st_rad_radius_item">%1$d km · ≈ %2$d zones · ≈ %3$s</string>
+    <string name="st_rad_space">Espace occupé : %1$s (%2$d zones)</string>
+    <string name="st_rad_clear_msg">Les limitations et radars gardés dans la voiture (%1$s) sont effacés. Ils seront téléchargés à nouveau au besoin.</string>
+    <string name="st_rad_clear_btn">Vider</string>
+    <string name="st_rad_prepare_desc2">Télécharge en Wi-Fi les routes principales et les radars dans le rayon choisi ci-dessus autour de la voiture, pour les trajets sans 4G. La taille est une estimation : moins à la campagne, plus en centre-ville.</string>
 </resources>
