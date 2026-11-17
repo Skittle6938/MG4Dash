@@ -88,6 +88,6 @@ abstract class PageActivity : AppCompatActivity() {
 
     override fun onWindowFocusChanged(hasFocus: Boolean) {
         super.onWindowFocusChanged(hasFocus)
-        if (hasFocus) Fullscreen.apply(this)
+        if (hasFocus) Fullscreen.focusBack(this)
     }
 }

@@ -47,6 +47,24 @@ object Fullscreen {
         decor.post { selfChange = false; apply(activity) }
     }
 
+    /**
+     * Home has the focus again (17/11: after the SAIC call window shrank to its floating card, the top bar stayed
+     * over home). Writing the same flags again changes nothing and no visibility change reached home, so the bars are
+     * checked a moment later, once the other window is gone, and hidden the same way as [restore].
+     */
+    fun focusBack(activity: Activity) {
+        apply(activity)
+        val decor = activity.window.decorView
+        for (ms in longArrayOf(400L, 1_500L)) decor.postDelayed({
+            if (!activity.isFinishing && !activity.isDestroyed && activity.hasWindowFocus()) {
+                val i = decor.rootWindowInsets
+                if (i != null && (i.systemWindowInsetTop != 0 || i.systemWindowInsetLeft != 0 || i.systemWindowInsetRight != 0 || i.systemWindowInsetBottom != 0))
+                    Log.i("Bars", "SAIC bars still shown with the focus back (${activity.javaClass.simpleName}): hidden again")
+                restore(activity)
+            }
+        }, ms)
+    }
+
     @Volatile private var selfChange = false
 
     /**

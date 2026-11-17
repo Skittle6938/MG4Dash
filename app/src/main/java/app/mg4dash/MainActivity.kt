@@ -867,7 +867,7 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
 
     override fun onWindowFocusChanged(hasFocus: Boolean) {
         super.onWindowFocusChanged(hasFocus)
-        if (hasFocus) Fullscreen.apply(this)
+        if (hasFocus) Fullscreen.focusBack(this)
     }
 
 
