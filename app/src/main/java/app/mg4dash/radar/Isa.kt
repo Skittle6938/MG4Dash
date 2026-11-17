@@ -166,6 +166,9 @@ object IsaWrite {
 
     private var sent: Int? = null
     private var lastAt = 0L
+    /** Last decision taken (time, km/h sent, 0 = cleared) and whether it reached the car; null: none yet. */
+    @Volatile var last: Triple<Long, Int, Boolean>? = null
+        private set
 
     /** Called with the alerter's state while the option is on; writes only with [WRITE_ALLOWED]. */
     fun apply(osm: Int?, estimated: Boolean, car: Int?, now: Long, carMiles: Boolean, hasIsa: Boolean, write: (Write) -> Boolean) {
@@ -176,5 +179,6 @@ object IsaWrite {
         if (WRITE_ALLOWED) ws.forEach { write(it) }
         else Log.i(TAG, "held back: " + ws.joinToString { "0x${Integer.toHexString(it.id)}=${it.f ?: it.i}" })
         sent = if (d is Decision.Send) osm else 0
+        last = Triple(System.currentTimeMillis(), sent ?: 0, WRITE_ALLOWED)
     }
 }

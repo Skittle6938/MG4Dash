@@ -231,6 +231,8 @@ object ShortcutsPanel : Application.ActivityLifecycleCallbacks {
         private val grid = LinearLayout(ctx).apply { orientation = LinearLayout.VERTICAL }
         private val headTitle = TextView(ctx)
         private val headRight = TextView(ctx)
+        /** Title row: only while editing (its title and Done); the menu itself has none, to stay short (17/11). */
+        private lateinit var headRow: View
         private var box: View? = null
         val dialogShown get() = box != null
         var progress = 0f; private set
@@ -257,6 +259,7 @@ object ShortcutsPanel : Application.ActivityLifecycleCallbacks {
             head.addView(headTitle, LinearLayout.LayoutParams(0, -2, 1f))
             head.addView(headRight, LinearLayout.LayoutParams(-2, kit.dp(52)))
             sheet.addView(head, LinearLayout.LayoutParams(-1, kit.dp(52)).apply { bottomMargin = kit.dp(10); leftMargin = kit.dp(6) })
+            headRow = head
             sheet.addView(grid, LinearLayout.LayoutParams(-1, -2))
             // Handle: the panel can be slid back up
             val handle = View(ctx).apply {
@@ -326,6 +329,7 @@ object ShortcutsPanel : Application.ActivityLifecycleCallbacks {
             headTitle.text = ctx.getString(if (editing) R.string.sc_edit_title else R.string.sc_title)
             headRight.text = ctx.getString(R.string.sc_done)
             headRight.visibility = if (editing) View.VISIBLE else View.GONE
+            headRow.visibility = if (editing) View.VISIBLE else View.GONE
             grid.removeAllViews(); tileViews.clear()
             val chosen = ShortcutTiles.chosen(prefs)
             shownTiles().chunked(COLS).forEach { rowTiles ->

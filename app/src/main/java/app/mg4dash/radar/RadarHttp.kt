@@ -20,7 +20,8 @@ import javax.net.ssl.TrustManagerFactory
  * is trusted. One request per connection (Connection: close); gzip asked and undone; chunked answers read.
  */
 object RadarHttp {
-    class Response(val code: Int, val body: ByteArray, val headers: Map<String, String>)
+    /** [wire]: bytes of the body as received (compressed when gzip). */
+    class Response(val code: Int, val body: ByteArray, val headers: Map<String, String>, val wire: Int = body.size)
 
     /** Conscrypt's TLS with Android's CAs; null when Conscrypt cannot load (another ABI): the platform's TLS then. */
     private val tls: SSLContext? by lazy {
@@ -38,7 +39,14 @@ object RadarHttp {
      * answer otherwise, whatever its code.
      */
     fun post(url: URL, body: ByteArray, contentType: String, userAgent: String, network: android.net.Network?,
-             connectMs: Int, readMs: Int): Response {
+             connectMs: Int, readMs: Int): Response = request("POST", url, body, contentType, userAgent, network, connectMs, readMs)
+
+    /** GET (the server's status). */
+    fun get(url: URL, userAgent: String, network: android.net.Network?, connectMs: Int, readMs: Int): Response =
+        request("GET", url, null, null, userAgent, network, connectMs, readMs)
+
+    private fun request(method: String, url: URL, body: ByteArray?, contentType: String?, userAgent: String, network: android.net.Network?,
+                        connectMs: Int, readMs: Int): Response {
         val ctx = tls ?: throw IOException("no TLS 1.3")
         val host = url.host
         val port = if (url.port > 0) url.port else 443
@@ -50,10 +58,10 @@ object RadarHttp {
             try { org.conscrypt.Conscrypt.setHostname(s, host) } catch (_: Throwable) {}
             s.startHandshake()
             if (!HttpsURLConnection.getDefaultHostnameVerifier().verify(host, s.session)) throw IOException("certificate does not match $host")
-            val head = "POST ${url.file.ifEmpty { "/" }} HTTP/1.1\r\nHost: $host\r\nUser-Agent: $userAgent\r\nAccept-Encoding: gzip\r\n" +
-                "Content-Type: $contentType\r\nContent-Length: ${body.size}\r\nConnection: close\r\n\r\n"
+            val head = "$method ${url.file.ifEmpty { "/" }} HTTP/1.1\r\nHost: $host\r\nUser-Agent: $userAgent\r\nAccept-Encoding: gzip\r\n" +
+                (if (body != null) "Content-Type: $contentType\r\nContent-Length: ${body.size}\r\n" else "") + "Connection: close\r\n\r\n"
             val out = s.outputStream
-            out.write(head.toByteArray(Charsets.ISO_8859_1)); out.write(body); out.flush()
+            out.write(head.toByteArray(Charsets.ISO_8859_1)); body?.let { out.write(it) }; out.flush()
             return s.inputStream.use { readResponse(it) }
         } finally {
             try { plain.close() } catch (_: Exception) {}
@@ -77,8 +85,9 @@ object RadarHttp {
             headers["content-length"] != null -> exactly(inp, headers["content-length"]!!.toInt())
             else -> inp.readBytes()
         }
+        val wire = body.size
         if (headers["content-encoding"]?.contains("gzip", ignoreCase = true) == true) body = GZIPInputStream(body.inputStream()).use { it.readBytes() }
-        return Response(code, body, headers)
+        return Response(code, body, headers, wire)
     }
 
     private fun line(inp: InputStream): String? {

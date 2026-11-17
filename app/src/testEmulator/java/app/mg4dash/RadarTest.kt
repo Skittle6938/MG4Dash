@@ -330,9 +330,9 @@ class RadarTest {
         val r = app.mg4dash.radar.RadarRepo
         assertEquals(listOf(10, 20, 30, 50), r.PREPARE_RADII)
         assertEquals(20, app.mg4dash.system.Prefs(org.robolectric.RuntimeEnvironment.getApplication()).radarPrepareKm)
-        // 30 km around Paris: 60 km square, one tile (0.02°) per request, about 28 x 42
+        // 30 km around Paris: 60 km square, blocks of 2 x 2 tiles (0.04°) per request, about 15 x 21
         val boxes = r.prepareBoxes(48.86, 2.35, 30)
-        assertTrue(boxes.size in 1100..1400)
+        assertTrue(boxes.size in 280..360)
         assertEquals(boxes.size, boxes.toSet().size)
         // Every point within 30 km is in one of the tiles fetched
         val tiles = boxes.flatMap { r.boxTiles(it) }
@@ -342,9 +342,11 @@ class RadarTest {
         val sizes = r.PREPARE_RADII.map { r.prepareEstimate(it, 48.86) }
         assertEquals(sizes.sortedBy { it.boxes }, sizes)
         val e = sizes[2]
+        // Counted in tiles (4 per block)
+        assertEquals(r.prepareBoxes(48.86, 0.025, 30).size * 4, e.boxes)
         assertEquals(e.boxes * r.PREP_BOX_BYTES_GZIP, e.download)
         assertEquals(e.boxes * r.PREP_BOX_BYTES_KEPT, e.kept)
-        assertTrue(e.minutes in 60..110)
+        assertTrue(e.minutes in 50..110)
     }
 
     /** Boxes on the tile grid: a tile belongs to one box only, whatever the starting position, so it is never fetched in halves or kept twice. */
@@ -470,5 +472,32 @@ class RadarTest {
         assertTrue(text.contains("with-osm,?,0x2,5,7,70,66"))
         assertTrue(text.contains("osm,OSM,0x0,50,70,70,66"))
         assertNull(app.mg4dash.radar.Isa.CAR_LIMIT_PROP)
+    }
+
+    // ── Radar5b: saturated servers, blocks split ──
+
+    @Test fun busyAnswersAndStatusPage() {
+        val o = app.mg4dash.radar.Overpass
+        assertTrue(o.busy(502))                      // "at capacity" from overpass-api.de
+        assertEquals(30_000L, o.busyWaitMs(1)); assertEquals(60_000L, o.busyWaitMs(2)); assertEquals(300_000L, o.busyWaitMs(9))
+        assertEquals(0, o.slotWait("Connected as: 1\nRate limit: 2\n2 slots available now.\nCurrently running queries"))
+        assertEquals(12, o.slotWait("Rate limit: 2\nSlot available after: 2026-11-17T12:00:12Z, in 12 seconds.\nSlot available after: 2026-11-17T12:00:40Z, in 40 seconds."))
+        assertEquals(0, o.slotWait("Slot available after: 2026-11-17T12:00:12Z, in -3 seconds."))
+        assertNull(o.slotWait("<html>502</html>"))
+    }
+
+    @Test fun blocksSplitIntoQuartersThenTiles() {
+        val r = app.mg4dash.radar.RadarRepo
+        val sw = RadarData.Key(2440, 117)
+        assertEquals(4, r.blockTiles(sw, 2).size)
+        val q = r.subBlocks(sw, 2)
+        assertEquals(4, q.size)
+        assertTrue(q.all { it.second == 1 })
+        // The quarters cover exactly the block's tiles, each once
+        assertEquals(r.blockTiles(sw, 2).toSet(), q.flatMap { r.blockTiles(it.first, it.second) }.toSet())
+        assertTrue(r.subBlocks(sw, 1).isEmpty())
+        // A 4 x 4 block: quarters of 2 x 2
+        assertEquals(listOf(2, 2, 2, 2), r.subBlocks(sw, 4).map { it.second })
+        assertEquals(16, r.subBlocks(sw, 4).flatMap { r.blockTiles(it.first, it.second) }.toSet().size)
     }
 }

@@ -348,6 +348,50 @@ object HomeSlots {
 
     private fun nowKey(layout: Layout, slot: String) = "slot_now_${layout.key}_$slot"
 
+    // ── The connection bar (17/11): in the weather by default, or in the place chosen in the edit mode ──
+
+    /** Stored for no bar at all. */
+    const val CONN_NONE = "none"
+    private fun connKey(layout: Layout) = "conn_slot_" + layout.key
+
+    /** The place chosen for the connection bar in [layout]: null = the weather (default), [CONN_NONE] = hidden. */
+    fun connectionsChoice(prefs: Prefs, layout: Layout): String? = prefs.raw.getString(connKey(layout), null)
+
+    fun setConnectionsChoice(prefs: Prefs, layout: Layout, choice: String?) {
+        prefs.raw.edit().apply { if (choice == null) remove(connKey(layout)) else putString(connKey(layout), choice) }.apply()
+    }
+
+    /**
+     * The place that holds the connection bar in [config]: the one chosen if it still holds cards (not the media), else
+     * the weather's place (as always); null when hidden or when no place qualifies.
+     */
+    fun connectionsSlot(choice: String?, config: Config): String? {
+        if (choice == CONN_NONE) return null
+        if (choice != null && canHoldConnections(config, choice)) return choice
+        return config.slotOf(Card.HOURLY) ?: config.slotOf(Card.DAILY)
+    }
+
+    /**
+     * Once: the old "connection icons" setting (off) becomes no bar in every layout; the bar is then placed or hidden
+     * from the edit mode only, and the old setting stays on.
+     */
+    fun migrateConnections(prefs: Prefs) {
+        if (prefs.raw.getBoolean("conn_migrated", false)) return
+        val e = prefs.raw.edit()
+        if (!prefs.connectionIcons) Layout.entries.forEach { e.putString(connKey(it), CONN_NONE) }
+        e.putBoolean("connection_icons", true).putBoolean("conn_migrated", true).apply()
+    }
+
+    /**
+     * Whether [slot] can hold the bar: a place of cards (not the media), medium or larger (a small card has no room to give
+     * up), or the weather's (the bar goes beside the city there).
+     */
+    fun canHoldConnections(config: Config, slot: String): Boolean {
+        val s = config.layout.slot(slot) ?: return false
+        val cards = (config.fill(slot) as? Fill.Cards)?.cards ?: return false
+        return s.size != Size.SMALL || Card.HOURLY in cards || Card.DAILY in cards
+    }
+
     /** Card shown in [slot] among [cards]: the last one shown there, otherwise the page its widget showed before. */
     fun current(prefs: Prefs, layout: Layout, slot: String, cards: List<Card>): Card? {
         if (cards.isEmpty()) return null

@@ -151,10 +151,6 @@ class SettingsActivity : AppCompatActivity() {
         }
         toggle(style, R.string.st_fullscreen, null, { prefs.fullscreen }) { prefs.fullscreen = it; Fullscreen.apply(this); app.mg4dash.ui.ShortcutsPanel.GlobalStrip.update(this); app.mg4dash.ui.EmbeddedApp.refreshImmersive(this) }
         toggle(style, R.string.st_own_keyboard, R.string.st_own_keyboard_desc, { prefs.ownKeyboard }) { prefs.ownKeyboard = it }
-        toggle(style, R.string.st_energy_card_power, R.string.st_energy_card_power_desc, { prefs.energyCardPower }) { prefs.energyCardPower = it }
-        toggle(style, R.string.st_power_va, R.string.st_power_va_desc, { prefs.powerVa }) { prefs.powerVa = it }
-        toggle(style, R.string.st_stack_auto, null, { prefs.stackAuto }) { prefs.stackAuto = it }
-        toggle(style, R.string.st_conn_icons, null, { prefs.connectionIcons }) { prefs.connectionIcons = it }
         // Audio source: drop-down menu (same style as the card menus)
         val src = panel(homeR, getString(R.string.st_audio_source).uppercase())
         val srcLabels = listOf(getString(R.string.st_src_auto), getString(R.string.st_src_car), "Radio", "Bluetooth", "USB", "CarPlay / Android Auto")
@@ -187,10 +183,8 @@ class SettingsActivity : AppCompatActivity() {
             }
         }
         text(src, getString(R.string.st_aa_button_desc), 16f, R.color.text_title)
-        val map = panel(homeR, getString(R.string.st_style_map).uppercase())
-        dropdown(map, getString(R.string.st_map_zoom), listOf("14", "15", "16", "17", "18"), { prefs.mapZoom - 14 }) { prefs.mapZoom = 14 + it }
-        dropdown(map, getString(R.string.st_map_theme), listOf(R.string.st_mode_auto, R.string.st_mode_light, R.string.st_mode_dark).map { getString(it) }, { prefs.mapTheme }) { prefs.mapTheme = it }
-        toggle(map, R.string.st_map_offline_switch, R.string.st_map_offline_switch_desc, { prefs.mapOfflineSwitch }) { prefs.mapOfflineSwitch = it }
+        // The energy card's and the map's own options are now in popups on those widgets (17/11)
+        text(style, getString(R.string.st_widget_options_moved), 15f, R.color.text_sub)
 
         // ════ Vehicle tab: units, equipment, climate, and startup sound ════
         val units = panel(carL, getString(R.string.st_tab_car).uppercase())
@@ -479,8 +473,6 @@ class SettingsActivity : AppCompatActivity() {
             finish()
         })
         toggle(diag, R.string.st_energy_log, R.string.st_energy_log_desc, { prefs.energyLog }) { prefs.energyLog = it }
-        row(diag, button(getString(R.string.st_copy_sysui)) { copySystemUi() })
-        text(diag, getString(R.string.st_copy_sysui_desc), 14f, R.color.text_title)
 
         // ════ 4G data tab ════
         dataTab(dataL, dataR)
@@ -502,6 +494,8 @@ class SettingsActivity : AppCompatActivity() {
         const val TAB_CAR = 2
         /** Opens the speed camera alerter's own page instead of the settings (long press on its card). */
         const val EXTRA_RADAR = "radar"
+        /** Tab of the alerter's page to open (RadarPage.Tab ordinal), Alertes by default. */
+        const val EXTRA_RADAR_TAB = "radar_tab"
     }
 
     // ── 4G data: total over 30 days, by use, day by day, alert ──
@@ -1300,41 +1294,6 @@ class SettingsActivity : AppCompatActivity() {
     }
 
     /**
-     * #62: copies the SAIC system UI (and SAIC climate apps) to the USB stick, to find out how to
-     * stop the climate page coming over MG4Dash. Read only: nothing is changed in the car.
-     */
-    private fun copySystemUi() {
-        val sm = getSystemService(STORAGE_SERVICE) as android.os.storage.StorageManager
-        val usb = sm.storageVolumes.filter { it.isRemovable && it.state == android.os.Environment.MEDIA_MOUNTED }
-            .firstNotNullOfOrNull { v -> try { v.javaClass.getMethod("getPathFile").invoke(v) as? java.io.File } catch (_: Throwable) { null } }
-        if (usb == null) { app.mg4dash.ui.Toasts.show(this, R.string.st_copy_sysui_nousb, long = true); return }
-        app.mg4dash.ui.Toasts.show(this, R.string.st_copy_sysui_busy)
-        Thread {
-            // Stick root not writable (beta 10, SWI165: "No such file or directory"):
-            // MG4Dash's own folder on the stick (Android/data/app.mg4dash/files), always allowed
-            val own = getExternalFilesDirs(null).firstOrNull { it != null && it.absolutePath.startsWith(usb.absolutePath) }
-            val out = (if (java.io.File(usb, "mg4dash_systemui").let { it.mkdirs() || it.isDirectory } && java.io.File(usb, "mg4dash_systemui").canWrite())
-                java.io.File(usb, "mg4dash_systemui") else java.io.File(own ?: usb, "mg4dash_systemui").apply { mkdirs() })
-            Log.i("Settings", "system UI copy to ${out.absolutePath}")
-            val pkgs = packageManager.getInstalledApplications(0).filter { a ->
-                a.packageName == "com.android.systemui" ||
-                    a.packageName.startsWith("com.saicmotor") && listOf("hvac", "aircondition", "climate", "systemui").any { it in a.packageName.lowercase() }
-            }
-            var n = 0
-            for (a in pkgs) for (path in listOf(a.sourceDir) + a.splitSourceDirs.orEmpty()) try {
-                val src = java.io.File(path)
-                src.copyTo(java.io.File(out, "${a.packageName}${if (path == a.sourceDir) "" else "_" + src.nameWithoutExtension}.apk"), overwrite = true)
-                n++
-                Log.i("Settings", "copied ${a.packageName} ($path, ${src.length() / 1024} KB) to USB")
-            } catch (e: Exception) { Log.w("Settings", "copy ${a.packageName}: ${e.message}") }
-            runOnUiThread {
-                if (n > 0) app.mg4dash.ui.Toasts.show(this, getString(R.string.st_copy_sysui_done, n) + " : " + out.absolutePath.removePrefix(usb.absolutePath).trimStart('/'), long = true)
-                else app.mg4dash.ui.Toasts.show(this, R.string.st_copy_sysui_fail, long = true)
-            }
-        }.start()
-    }
-
-    /**
      * Recent web engine (#98): the car's WebView or Chromium 138 for the web app card, downloaded from the
      * MG4Dash-WebView repository; the way back to the car's own. Only on head units that can take it.
      */
@@ -1391,8 +1350,8 @@ class SettingsActivity : AppCompatActivity() {
     }
 
     /**
-     * The speed camera alerter's own page (test, 17/11), opened by a long press on its card, apart from the
-     * settings: the alerts on the left, the OpenStreetMap data (network, prepared trips, cache) on the right.
+     * The speed camera alerter's own page (the owner's mockups, 17/11), opened by a long press on its card, apart from the
+     * settings: three tabs (Alertes, Données, Voiture (ISA)) built by [app.mg4dash.radar.RadarPage].
      */
     private fun radarPage() {
         val root = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; setPadding(dp(16), dp(12), dp(16), dp(12)) }
@@ -1404,150 +1363,16 @@ class SettingsActivity : AppCompatActivity() {
         }, LinearLayout.LayoutParams(0, -2, 1f).apply { leftMargin = if (vertical) dp(12) else dp(app.mg4dash.ui.Kit.fogSafeDp(this@SettingsActivity) - 8) })
         top.addView(button(getString(R.string.st_close)) { finish() }, LinearLayout.LayoutParams(dp(160), dp(52)))
         root.addView(top, LinearLayout.LayoutParams(-1, -2).apply { bottomMargin = dp(12) })
-        val cols = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
-        val l = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
-        val r = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
-        cols.addView(l, LinearLayout.LayoutParams(0, -2, 1f).apply { rightMargin = dp(8) })
-        cols.addView(r, LinearLayout.LayoutParams(0, -2, 1f).apply { leftMargin = dp(8) })
-        root.addView(ScrollView(this).apply { isVerticalScrollBarEnabled = true; addView(cols) }, LinearLayout.LayoutParams(-1, 0, 1f))
+        val page = app.mg4dash.radar.RadarPage(this, prefs)
+        val tab = app.mg4dash.radar.RadarPage.Tab.values().getOrElse(intent.getIntExtra(EXTRA_RADAR_TAB, 0)) { app.mg4dash.radar.RadarPage.Tab.ALERTS }
+        root.addView(page.build(tab), LinearLayout.LayoutParams(-1, 0, 1f))
         val dock = LinearLayout(this)
         root.addView(dock, LinearLayout.LayoutParams(-1, dp(84)).apply { topMargin = dp(12) })
         app.mg4dash.ui.Dock.mount(this, root, dock, app.mg4dash.ui.Dock.Page.SETTINGS)
         setContentView(root)
         app.mg4dash.ui.FadeOutline.applyTo(root)
-        radarAlerts(panel(l, getString(R.string.st_rad_alerts).uppercase()))
-        radarData(panel(r, getString(R.string.st_rad_data).uppercase()))
-        radarSounds(panel(r, getString(R.string.st_rad_sounds).uppercase()))
-    }
-
-    /** Alerts: visual, sound, thresholds, banner. */
-    private fun radarAlerts(parent: LinearLayout) {
-        text(parent, getString(R.string.st_rad_desc), 15f, R.color.text_title)
-        toggle(parent, R.string.st_rad_visual, null, { prefs.radarVisual }) { prefs.radarVisual = it }
-        val unit = app.mg4dash.system.Units.speedUnit(this)
-        lateinit var low: TextView
-        lateinit var high: TextView
-        fun lows() = if (prefs.radarPercent) listOf(0f, 2f, 5f, 10f) else listOf(0f, 1f, 2f, 3f, 5f)
-        fun highs() = if (prefs.radarPercent) listOf(5f, 8f, 10f, 15f, 20f) else listOf(3f, 5f, 6f, 8f, 10f, 15f, 20f)
-        fun label(v: Float) = "+" + (if (v % 1f == 0f) v.toInt().toString() else v.toString()) + " " + (if (prefs.radarPercent) "%" else unit)
-        fun index(list: List<Float>, v: Float) = list.indices.minByOrNull { Math.abs(list[it] - v) } ?: 0
-        fun paint() {
-            low.text = label(lows()[index(lows(), prefs.radarLow)]) + "   ▾"
-            high.text = label(highs()[index(highs(), prefs.radarHigh)]) + "   ▾"
-        }
-        dropdown(parent, getString(R.string.st_rad_unit), listOf(unit, "%"), { if (prefs.radarPercent) 1 else 0 }) { prefs.radarPercent = it == 1; paint() }
-        low = dropdown(parent, getString(R.string.st_rad_low), lows().map { label(it) }, { index(lows(), prefs.radarLow) }) { prefs.radarLow = lows()[it]; paint() }
-        high = dropdown(parent, getString(R.string.st_rad_high), highs().map { label(it) }, { index(highs(), prefs.radarHigh) }) { prefs.radarHigh = highs()[it]; paint() }
-        // The menus show the values of the unit in use when opened
-        low.setOnClickListener { v -> app.mg4dash.ui.SourceMenu.choose(this, v, lows().map { label(it) }, index(lows(), prefs.radarLow)) { prefs.radarLow = lows()[it]; paint() } }
-        high.setOnClickListener { v -> app.mg4dash.ui.SourceMenu.choose(this, v, highs().map { label(it) }, index(highs(), prefs.radarHigh)) { prefs.radarHigh = highs()[it]; paint() } }
-        paint()
-        toggle(parent, R.string.st_rad_banner, R.string.st_rad_banner_desc, { prefs.radarBanner }) { prefs.radarBanner = it }
-        // The car's speed limit assistance (ISA), studied: off by default
-        toggle(parent, R.string.st_rad_isa_log, R.string.st_rad_isa_log_desc, { prefs.radarIsaLog }) { prefs.radarIsaLog = it }
-        toggle(parent, R.string.st_rad_isa_write, R.string.st_rad_isa_write_desc, { prefs.radarIsaWrite }) { prefs.radarIsaWrite = it }
-    }
-
-    /** Sounds: for each kind of alert, its sound, volume and repeat, and ▶ to hear it. */
-    private fun radarSounds(parent: LinearLayout) {
-        val A = app.mg4dash.radar.RadarAlert
-        val sounds = app.mg4dash.radar.RadarAlert.Sound.values().toList()
-        val soundNames = listOf(R.string.st_rad_snd_none, R.string.st_rad_snd_chime, R.string.st_rad_snd_beep, R.string.st_rad_snd_loud).map { getString(it) }
-        val vols = listOf(0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100)
-        val reps = A.REPEATS
-        fun repLabel(sec: Int) = when { sec == 0 -> getString(R.string.st_rad_rep_never); sec < 60 -> getString(R.string.st_rad_rep_s, sec); else -> getString(R.string.st_rad_rep_min, sec / 60) }
-        listOf(app.mg4dash.radar.RadarAlert.Kind.APPROACH to R.string.st_rad_kind_approach, app.mg4dash.radar.RadarAlert.Kind.LIGHT to R.string.st_rad_kind_light,
-            app.mg4dash.radar.RadarAlert.Kind.STRONG to R.string.st_rad_kind_strong, app.mg4dash.radar.RadarAlert.Kind.ZONE to R.string.st_rad_kind_zone).forEach { (k, name) ->
-            text(parent, getString(name), 18f, R.color.text_value)
-            fun pick(v: View, labels: List<String>, cur: Int, set: (Int) -> Unit) =
-                app.mg4dash.ui.SourceMenu.choose(this, v, labels, cur) { set(it) }
-            val sound = choiceButtons(listOf(""), { 0 }) {}.first()
-            fun paintSound() { sound.text = soundNames[sounds.indexOf(prefs.radarSoundOf(k))] + "  ▾" }
-            sound.setOnClickListener { v -> pick(v, soundNames, sounds.indexOf(prefs.radarSoundOf(k))) { prefs.setRadarSoundOf(k, sounds[it]); paintSound() } }
-            paintSound()
-            val vol = choiceButtons(listOf(""), { 0 }) {}.first()
-            fun paintVol() { vol.text = "${prefs.radarVolume(k)} %  ▾" }
-            vol.setOnClickListener { v -> pick(v, vols.map { "$it %" }, vols.indexOf(prefs.radarVolume(k)).coerceAtLeast(0)) { prefs.setRadarVolume(k, vols[it]); paintVol() } }
-            paintVol()
-            val play = button("\u25B6") { A.play(this, k) }
-            if (k == app.mg4dash.radar.RadarAlert.Kind.APPROACH) row(parent, sound, vol, play)
-            else {
-                val rep = choiceButtons(listOf(""), { 0 }) {}.first()
-                fun paintRep() { rep.text = repLabel(prefs.radarRepeat(k)) + "  ▾" }
-                rep.setOnClickListener { v -> pick(v, reps.map { repLabel(it) }, reps.indexOf(prefs.radarRepeat(k)).coerceAtLeast(0)) { prefs.setRadarRepeat(k, reps[it]); paintRep() } }
-                paintRep()
-                row(parent, sound, vol, rep, play)
-            }
-        }
-    }
-
-    /** OpenStreetMap data: Wi-Fi only, prepared trips with their progress, cache, licence. */
-    private fun radarData(parent: LinearLayout) {
-        toggle(parent, R.string.st_rad_wifi, R.string.st_rad_wifi_desc, { prefs.radarWifiOnly }) { prefs.radarWifiOnly = it }
-        // Tiles around the car downloaded again after this age (when the network allows)
-        val ages = app.mg4dash.radar.RadarRepo.REFRESH_HOURS
-        fun ageLabel(h: Int) = if (h < 24) getString(R.string.st_rad_age_hours, h) else getString(R.string.st_rad_age_days, h / 24)
-        dropdown(parent, getString(R.string.st_rad_refresh), ages.map { ageLabel(it) }, { ages.indexOf(prefs.radarRefreshHours).coerceAtLeast(0) }) { prefs.radarRefreshHours = ages[it] }
-        val cache = text(parent, "", 17f, R.color.text_value)
-        // Radius of the prepared trips, with the areas and the data it takes (estimate)
-        val radii = app.mg4dash.radar.RadarRepo.PREPARE_RADII
-        val estimate = text(parent, "", 15f, R.color.text_sub)
-        // Areas, data downloaded and kept, time it takes (estimate, all the streets)
-        fun showEstimate() {
-            val e = app.mg4dash.radar.RadarRepo.prepareEstimate(prefs.radarPrepareKm)
-            estimate.text = getString(R.string.st_rad_estimate, e.boxes, app.mg4dash.system.DataUsage.format(this, e.download),
-                app.mg4dash.system.DataUsage.format(this, e.kept), e.minutes)
-        }
-        dropdown(parent, getString(R.string.st_rad_radius), radii.map { "$it km" },
-            { radii.indexOf(prefs.radarPrepareKm).coerceAtLeast(0) }) { prefs.radarPrepareKm = radii[it]; showEstimate() }
-        // The estimate under the radius
-        (estimate.parent as LinearLayout).let { p -> p.removeView(estimate); p.addView(estimate) }
-        showEstimate()
-        val state = text(parent, "", 18f, R.color.text_value)
         // The preparation's progress, live (it goes on with the page closed)
-        val bar = android.widget.ProgressBar(this, null, android.R.attr.progressBarStyleHorizontal).apply {
-            max = 1000; isIndeterminate = false
-            progressTintList = android.content.res.ColorStateList.valueOf(color(R.color.text_value))
-            progressBackgroundTintList = android.content.res.ColorStateList.valueOf(color(R.color.text_sub))
-        }
-        parent.addView(bar, LinearLayout.LayoutParams(-1, dp(14)).apply { topMargin = dp(6) })
-        fun show() {
-            val (n, bytes) = app.mg4dash.radar.RadarRepo.cacheSize(this)
-            cache.text = getString(R.string.st_rad_space, app.mg4dash.system.DataUsage.format(this, bytes), n)
-            val p = app.mg4dash.radar.RadarRepo.prepare.value
-            state.visibility = if (p == null) View.GONE else View.VISIBLE
-            state.text = p?.let { radarPrepText(it) + if (it.total > 0) " · ${it.done * 100 / it.total} %" else "" } ?: ""
-            bar.visibility = if (p == null) View.GONE else View.VISIBLE
-            bar.progress = if (p != null && p.total > 0) p.done * 1000 / p.total else 0
-        }
-        show()
-        row(parent, button(getString(R.string.st_rad_prepare)) {
-            if (app.mg4dash.radar.RadarRepo.prepareTrips(this)) show()
-            else app.mg4dash.ui.Toasts.show(this, R.string.st_rad_prepare_no)
-        }, button(getString(R.string.st_rad_clear)) {
-            // Asked first: the areas prepared over the Wi-Fi are gone with it
-            AlertDialog.Builder(this)
-                .setTitle(R.string.st_rad_clear)
-                .setMessage(getString(R.string.st_rad_clear_msg, app.mg4dash.system.DataUsage.format(this, app.mg4dash.radar.RadarRepo.cacheSize(this).second)))
-                .setPositiveButton(R.string.st_rad_clear_btn) { _, _ -> app.mg4dash.radar.RadarRepo.clearCache(this); cache.postDelayed({ show() }, 500) }
-                .setNegativeButton(R.string.cancel, null)
-                .show().also { app.mg4dash.ui.Dialogs.fix(it) }
-        })
-        text(parent, getString(R.string.st_rad_prepare_desc2), 15f, R.color.text_title)
-        lifecycleScope.launch { app.mg4dash.radar.RadarRepo.prepare.collect { show() } }
-        text(parent, getString(R.string.rad_osm_licence), 14f, R.color.text_sub)
-    }
-
-    /** Where the preparation is: running, waiting for the Wi-Fi, retrying a busy server, done, stopped. */
-    private fun radarPrepText(p: app.mg4dash.radar.RadarRepo.Prep): String {
-        val failed = if (p.failed > 0) " · " + getString(R.string.st_rad_prep_failed, p.failed) else ""
-        return when (p.phase) {
-            app.mg4dash.radar.RadarRepo.PrepPhase.RUNNING -> getString(R.string.st_rad_preparing, p.done, p.total)
-            app.mg4dash.radar.RadarRepo.PrepPhase.WAIT_WIFI -> getString(R.string.st_rad_prep_wait_wifi, p.done, p.total)
-            app.mg4dash.radar.RadarRepo.PrepPhase.RETRY -> getString(R.string.st_rad_prep_retry, p.done, p.total)
-            app.mg4dash.radar.RadarRepo.PrepPhase.DONE -> getString(R.string.st_rad_prep_done, p.done - p.failed, p.total)
-            app.mg4dash.radar.RadarRepo.PrepPhase.NO_WIFI -> getString(R.string.st_rad_prep_no_wifi, p.done, p.total)
-        } + failed
+        lifecycleScope.launch { app.mg4dash.radar.RadarRepo.prepare.collect { page.refresh() } }
     }
 
     private fun panel(parent: LinearLayout, title: String, fill: Boolean = false): LinearLayout {

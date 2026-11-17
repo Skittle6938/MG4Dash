@@ -17,7 +17,13 @@ object Overpass {
     fun order(): List<String> = SERVERS
 
     /** A server answer that says it is busy: try another one, and wait longer before the next round. */
-    fun busy(code: Int) = code == 429 || code == 503 || code == 504
+    fun busy(code: Int) = code == 429 || code == 502 || code == 503 || code == 504
+
+    /**
+     * Wait after the [n]th busy answer in a row (overpass-api.de: "at capacity, retry using exponential backoff"): 30 s
+     * doubling, at most 5 min. Busy answers are not failed tries: the same request waits its turn.
+     */
+    fun busyWaitMs(n: Int): Long = minOf(30_000L * (1L shl (n - 1).coerceIn(0, 4)), 300_000L)
 
     /** Pause before attempt [attempt] (2, 3…) of the same request: 5 s doubling, 30 s doubling when the servers were busy. */
     fun backoffMs(attempt: Int, busy: Boolean): Long = (if (busy) 30_000L else 5_000L) * (1L shl (attempt - 2).coerceIn(0, 3))
@@ -32,5 +38,18 @@ object Overpass {
     }
 
     /** Outcome of a request: the answer, or whether the servers were busy and the last error. */
-    class Result(val body: String?, val busy: Boolean = false, val error: String? = null)
+    /** [retryAfter]: seconds the server asked to wait (Retry-After), 0 when it did not say. */
+    class Result(val body: String?, val busy: Boolean = false, val error: String? = null, val wire: Int = 0, val retryAfter: Int = 0)
+
+    const val STATUS = "https://overpass-api.de/api/status"
+
+    /**
+     * Wait before the next query from the official server's status page (seconds): 0 with a slot free now, the time to
+     * the next slot otherwise; null when the page says nothing usable (asked anyway).
+     */
+    fun slotWait(status: String): Int? {
+        Regex("(\\d+) slots? available now").find(status)?.let { if (it.groupValues[1].toInt() > 0) return 0 }
+        val waits = Regex("in (-?\\d+) seconds").findAll(status).mapNotNull { it.groupValues[1].toIntOrNull() }.toList()
+        return if (waits.isEmpty()) null else maxOf(0, waits.min())
+    }
 }
