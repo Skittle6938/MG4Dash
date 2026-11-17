@@ -1095,4 +1095,6 @@
     <string name="wc_conn_small">Platz zu klein für die Verbindungsleiste</string>
     <string name="st_climate_fx">Warm-/Kalt-Animation der Klimakarte</string>
     <string name="st_climate_fx_desc">Hitzeflimmern beim Heizen, Reif beim Kühlen, stärker je weiter der Sollwert von der Außentemperatur entfernt ist. Aus: nur die Animation verschwindet, Heizen / Kühlen bleibt.</string>
+    <string name="st_call_bar">Obere Leiste bei Anrufen ausblenden</string>
+    <string name="st_call_bar_desc">Auch das Anruffenster des Autos bleibt im Vollbild. Ein Wischen von oben zeigt die Leiste weiterhin; auch in der SAIC-Telefon-App ist sie ausgeblendet.</string>
 </resources>

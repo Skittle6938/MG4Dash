@@ -404,6 +404,11 @@ class Prefs(context: Context) {
     var ownKeyboard: Boolean
         get() = sp.getBoolean("own_keyboard", true)
         set(v) = sp.edit().putBoolean("own_keyboard", v).apply()
+    /** The SAIC call window kept full screen too, so the top bar stays hidden during calls (on by default). */
+    var callBarHidden: Boolean
+        get() = sp.getBoolean("call_bar_hidden", true)
+        set(v) = sp.edit().putBoolean("call_bar_hidden", v).apply()
+
     var fullscreen: Boolean
         get() = sp.getBoolean("fullscreen", true)
         set(v) = sp.edit().putBoolean("fullscreen", v).apply()

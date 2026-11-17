@@ -1095,4 +1095,6 @@
     <string name="wc_conn_small">This place is too small for the connection bar</string>
     <string name="st_climate_fx">Climate card warm / cold animation</string>
     <string name="st_climate_fx_desc">Heat haze while heating, frost while cooling, stronger as the set point is far from outside. Off: only the animation goes, Heating / Cooling stays.</string>
+    <string name="st_call_bar">Hide the top bar during calls</string>
+    <string name="st_call_bar_desc">The car\'s call window stays in full screen too. A swipe from the top still shows the bar; it is also hidden in the SAIC Phone app.</string>
 </resources>

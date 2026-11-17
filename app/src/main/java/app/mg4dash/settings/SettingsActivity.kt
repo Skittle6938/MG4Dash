@@ -150,6 +150,8 @@ class SettingsActivity : AppCompatActivity() {
             app.mg4dash.ui.Themes.publish(this); recreate()
         }
         toggle(style, R.string.st_fullscreen, null, { prefs.fullscreen }) { prefs.fullscreen = it; Fullscreen.apply(this); app.mg4dash.ui.ShortcutsPanel.GlobalStrip.update(this); app.mg4dash.ui.EmbeddedApp.refreshImmersive(this) }
+        // The SAIC call window in full screen too: no top bar during calls
+        toggle(style, R.string.st_call_bar, R.string.st_call_bar_desc, { prefs.callBarHidden }) { prefs.callBarHidden = it; app.mg4dash.ui.EmbeddedApp.refreshImmersive(this) }
         toggle(style, R.string.st_own_keyboard, R.string.st_own_keyboard_desc, { prefs.ownKeyboard }) { prefs.ownKeyboard = it }
         // Audio source: drop-down menu (same style as the card menus)
         val src = panel(homeR, getString(R.string.st_audio_source).uppercase())
