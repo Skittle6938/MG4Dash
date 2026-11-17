@@ -11,6 +11,7 @@ import app.mg4dash.radar.Level
 import app.mg4dash.radar.Matcher
 import app.mg4dash.radar.RadarAlert
 import app.mg4dash.radar.RadarData
+import app.mg4dash.radar.RadarRepo
 import app.mg4dash.radar.Road
 import app.mg4dash.radar.Speeds
 import app.mg4dash.radar.Thresholds
@@ -499,5 +500,40 @@ class RadarTest {
         // A 4 x 4 block: quarters of 2 x 2
         assertEquals(listOf(2, 2, 2, 2), r.subBlocks(sw, 4).map { it.second })
         assertEquals(16, r.subBlocks(sw, 4).flatMap { r.blockTiles(it.first, it.second) }.toSet().size)
+    }
+
+    /** Saturated servers (Marc, 17/11: "29 s" stayed on screen): the wait counts down from the worker's absolute time. */
+    @Test fun retryCountdownFromAbsoluteTime() {
+        val t0 = 1_000_000L
+        val p = RadarRepo.Prep(3, 140, 0, RadarRepo.PrepPhase.RETRY, busyUntil = t0 + 29_500)
+        assertEquals(30L, p.retryLeftS(t0))
+        assertEquals(29L, p.retryLeftS(t0 + 1_000))
+        assertEquals(1L, p.retryLeftS(t0 + 29_000))
+        assertEquals(1L, p.retryLeftS(t0 + 40_000))     // overdue: the try is under way, never 0 or negative
+        assertEquals(null, p.copy(phase = RadarRepo.PrepPhase.RUNNING).retryLeftS(t0))
+        assertEquals(null, p.copy(busyUntil = 0).retryLeftS(t0))
+    }
+
+    /** The waits between rounds while the servers stay saturated: 30 s, then doubling up to 5 min, or the server's own. */
+    @Test fun busyWaitsGrow() {
+        assertEquals(listOf(30_000L, 60_000L, 120_000L, 240_000L, 300_000L, 300_000L), (1..6).map { app.mg4dash.radar.Overpass.busyWaitMs(it) })
+    }
+
+    /** A preparation cut by the app stopping goes on at the next start, around the same place, then forgets it when cancelled. */
+    @Test fun preparationTakenUpAgainAtStart() {
+        val ctx = org.robolectric.RuntimeEnvironment.getApplication()
+        val sp = ctx.getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE)
+        sp.edit().putString("radar_prep_resume", "48.8966,2.3354").commit()
+        RadarRepo.start(ctx)
+        try {
+            assertEquals(true, RadarRepo.prepare.value?.running)
+        } finally {
+            RadarRepo.cancelPrepare()
+            val until = System.currentTimeMillis() + 5_000
+            while (RadarRepo.prepare.value?.running == true && System.currentTimeMillis() < until) Thread.sleep(100)
+            RadarRepo.stop()
+        }
+        assertEquals(RadarRepo.PrepPhase.CANCELLED, RadarRepo.prepare.value?.phase)
+        assertEquals(null, sp.getString("radar_prep_resume", null))
     }
 }

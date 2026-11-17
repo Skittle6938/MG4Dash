@@ -214,8 +214,14 @@ class RadarCard(context: Context) : View(context) {
         c.drawLine(x0, y, x0 + (x1 - x0) * f.coerceIn(0.02f, 1f), y, p)
         p.style = Paint.Style.FILL; p.strokeCap = Paint.Cap.BUTT
         p.typeface = medium; p.textSize = 18 * d; p.textAlign = Paint.Align.RIGHT; p.color = col(R.color.text_sub)
-        c.drawText(if (pr != null) "\u2193 ${pr.done} / ${pr.total}" else "\u2193", x1, y - 8 * d, p)
+        // Saturated servers: the seconds before the next try, counted down every second
+        val wait = pr?.retryLeftS(System.currentTimeMillis())
+        val txt = if (pr == null) "\u2193" else "\u2193 ${pr.done} / ${pr.total}" + (wait?.let { " \u00b7 " + waitText(it) } ?: "")
+        c.drawText(txt, x1, y - 8 * d, p)
+        if (wait != null) postInvalidateDelayed(1_000)
     }
+
+    private fun waitText(s: Long) = if (s >= 60) context.getString(R.string.rp_rep_min, ((s + 30) / 60).toInt()) else context.getString(R.string.rp_rep_s, s.toInt())
 
     private fun zoneTitle(kind: CamKind, limit: Int?) = kindName(context, kind) + (limit?.let { " · " + limitText(it) } ?: "")
 

@@ -1373,6 +1373,13 @@ class SettingsActivity : AppCompatActivity() {
         app.mg4dash.ui.FadeOutline.applyTo(root)
         // The preparation's progress, live (it goes on with the page closed)
         lifecycleScope.launch { app.mg4dash.radar.RadarRepo.prepare.collect { page.refresh() } }
+        // The wait for saturated servers counts down every second: nothing else changes meanwhile
+        lifecycleScope.launch {
+            while (true) {
+                kotlinx.coroutines.delay(1_000)
+                if (app.mg4dash.radar.RadarRepo.prepare.value?.phase == app.mg4dash.radar.RadarRepo.PrepPhase.RETRY) page.refresh()
+            }
+        }
     }
 
     private fun panel(parent: LinearLayout, title: String, fill: Boolean = false): LinearLayout {

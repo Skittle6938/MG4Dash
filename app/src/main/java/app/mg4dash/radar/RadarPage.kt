@@ -311,9 +311,9 @@ class RadarPage(private val a: Activity, private val prefs: Prefs) {
         refreshers += {
             val p = RadarRepo.prepare.value
             val running = p?.running == true
-            val busyLeft = p?.takeIf { it.phase == RadarRepo.PrepPhase.RETRY && it.busyUntil > 0 }?.let { (it.busyUntil - System.currentTimeMillis()) / 1000 }
+            val busyLeft = p?.retryLeftS(System.currentTimeMillis())
             state.text = "● " + if (busyLeft != null) a.getString(R.string.rp_busy,
-                if (busyLeft >= 60) a.getString(R.string.rp_rep_min, ((busyLeft + 30) / 60).toInt()) else a.getString(R.string.rp_rep_s, Math.max(1, busyLeft).toInt()))
+                if (busyLeft >= 60) a.getString(R.string.rp_rep_min, ((busyLeft + 30) / 60).toInt()) else a.getString(R.string.rp_rep_s, busyLeft.toInt()))
             else a.getString(when (p?.phase) {
                 RadarRepo.PrepPhase.RUNNING, RadarRepo.PrepPhase.RETRY -> R.string.rp_prep_running
                 RadarRepo.PrepPhase.WAIT_WIFI -> R.string.rp_prep_wait
