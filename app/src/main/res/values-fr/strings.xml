@@ -1093,4 +1093,6 @@
     <string name="wc_conn_hidden">Barre de connexion masquée</string>
     <string name="st_widget_options_moved">Les options de la carte énergie et de la carte OpenStreetMap sont maintenant sur ces widgets : appui long sur la carte énergie, roue dentée à côté de la carte dans son menu. La barre de connexion se place depuis le mode édition (pincement).</string>
     <string name="wc_conn_small">Case trop petite pour la barre de connexion</string>
+    <string name="st_climate_fx">Animation chaud/froid de la carte clim</string>
+    <string name="st_climate_fx_desc">Ondulations de chaleur quand ça chauffe, givre quand ça refroidit, plus marqués quand la consigne est loin de la température extérieure. Désactivée : seule l\'animation disparaît, Chauffage / Clim reste affiché.</string>
 </resources>

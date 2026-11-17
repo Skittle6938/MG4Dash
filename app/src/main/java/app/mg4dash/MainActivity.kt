@@ -777,6 +777,25 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         }
     }
 
+    /** The climate card's warm / cold animation (#122), made when first needed. */
+    private var climateFx: app.mg4dash.ui.ClimateFx.Effect? = null
+
+    /**
+     * The climate card heats or cools (#122): its animation, as strong as the set point is far from the outside, by the
+     * shortcut tile's own mode; none with the climate off, the option off or no outside temperature.
+     */
+    private fun renderClimateFx(s: VehicleState) {
+        val shown = if (!prefs.climateFx || s.hvacOn != true) null
+            else app.mg4dash.ui.ShortcutTiles.climate(this, s).takeIf { it.inverted && (it.level == 1 || it.level == 2) }
+        val set = s.driverTemp; val out = s.outsideTemp?.takeIf { it > -60f && it < 70f }
+        val k = if (shown == null || set == null || out == null) 0f else app.mg4dash.ui.ClimateFx.intensity(set - out)
+        if (k <= 0f && climateFx == null) return
+        val fx = climateFx ?: app.mg4dash.ui.ClimateFx.Effect(resources.displayMetrics.density,
+            app.mg4dash.ui.FadeOutline.RADIUS * resources.displayMetrics.density,
+            if (app.mg4dash.ui.Themes.isLight(this)) 1f else 0.75f).also { climateFx = it; b.climateCard.foreground = it }
+        fx.set(shown?.level == 1, k)
+    }
+
     /** The OpenStreetMap map's options (Marc, 17/11, once in Settings › Home): zoom, colours, energy when offline. */
     private fun mapOptions() {
         val zoom = prefs.mapZoom; val theme = prefs.mapTheme
@@ -1041,6 +1060,7 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         b.climPower.putTint(color(if (on) R.color.accent_action else R.color.text_sub))
         b.temp.put(if (on || s.driverTemp != null) VehicleState.tempLabel(s.driverTemp) else getString(R.string.no_data))
         b.temp.setTextColor(color(if (on) R.color.text_value else R.color.text_disabled))
+        renderClimateFx(s)
         // With the outside temperature, the mode as the shortcut tile shows it: heating or cooling (#122)
         val mode = if (s.calibrating) null else app.mg4dash.ui.ShortcutTiles.climateMode(this, s)
         val outsideText = if (s.calibrating) getString(R.string.cl_calibrating) else s.outsideTemp?.let { getString(R.string.cl_outside, Math.round(it)) } ?: ""

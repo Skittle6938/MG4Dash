@@ -1093,4 +1093,6 @@
     <string name="wc_conn_hidden">Barra de conexión oculta</string>
     <string name="st_widget_options_moved">Las opciones de la tarjeta de energía y del mapa OpenStreetMap están ahora en esos widgets: pulsación larga en la tarjeta de energía, engranaje junto al mapa en su menú. La barra de conexión se coloca desde el modo edición (pellizco).</string>
     <string name="wc_conn_small">Lugar demasiado pequeño para la barra de conexión</string>
+    <string name="st_climate_fx">Animación cálido/frío de la tarjeta de clima</string>
+    <string name="st_climate_fx_desc">Ondas de calor al calentar, escarcha al enfriar, más marcadas cuanto más lejos está la consigna de la temperatura exterior. Desactivada: solo desaparece la animación, Calefacción / Refrigeración sigue visible.</string>
 </resources>

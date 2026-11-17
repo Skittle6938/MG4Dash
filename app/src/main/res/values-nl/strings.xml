@@ -1093,4 +1093,6 @@
     <string name="wc_conn_hidden">Verbindingsbalk verborgen</string>
     <string name="st_widget_options_moved">De opties van de energiekaart en de OpenStreetMap-kaart staan nu op die widgets: lang drukken op de energiekaart, tandwiel naast de kaart in het menu. De verbindingsbalk plaats je in de bewerkmodus (knijpen).</string>
     <string name="wc_conn_small">Plek te klein voor de verbindingsbalk</string>
+    <string name="st_climate_fx">Warm/koud-animatie van de klimaatkaart</string>
+    <string name="st_climate_fx_desc">Hittegolven bij verwarmen, rijp bij koelen, sterker naarmate de ingestelde temperatuur verder van buiten ligt. Uit: alleen de animatie verdwijnt, Verwarmen / Koelen blijft.</string>
 </resources>

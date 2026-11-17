@@ -49,6 +49,32 @@ class ClimateModeTest {
         assertEquals(R.drawable.ic_sc_clim_heat, ShortcutTiles.icon(ShortcutTiles.Tile.CLIMATE, next))
     }
 
+    /** #122 animation: none within half a degree, stronger with the gap, full from about 14 °C. */
+    @Test fun animationStrength() {
+        assertEquals(0f, app.mg4dash.ui.ClimateFx.intensity(0.4f), 1e-6f)
+        assertEquals(0.25f + 3f / 14f, app.mg4dash.ui.ClimateFx.intensity(3f), 1e-4f)
+        assertEquals(app.mg4dash.ui.ClimateFx.intensity(3f), app.mg4dash.ui.ClimateFx.intensity(-3f), 1e-6f)
+        assertEquals(1f, app.mg4dash.ui.ClimateFx.intensity(18f), 1e-6f)
+    }
+
+    private fun cardFx(option: Boolean, on: Boolean): app.mg4dash.ui.ClimateFx.Effect? {
+        ctx.getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE).edit()
+            .putBoolean("vertical_dock", true).putBoolean("tutorial_shortcuts_seen", true).putInt("theme_mode", 1).putBoolean("climate_fx", option).commit()
+        val act = Robolectric.buildActivity(MainActivity::class.java).setup().get()
+        repeat(3) { shadowOf(Looper.getMainLooper()).idleFor(200, TimeUnit.MILLISECONDS) }
+        flow.value = flow.value.copy(hvacOn = on, acOn = true, driverTemp = 22f, outsideTemp = 4f)
+        repeat(5) { shadowOf(Looper.getMainLooper()).idleFor(200, TimeUnit.MILLISECONDS) }
+        val card = MainActivity::class.java.getDeclaredField("climatePanel").apply { isAccessible = true }.get(act) as android.view.View
+        return card.foreground as? app.mg4dash.ui.ClimateFx.Effect
+    }
+
+    /** Heating: the card animates; the option off or the climate off: no animation, the mode's word stays with the option off. */
+    @Test fun animationOnTheCardOnly() {
+        assertEquals(true, cardFx(option = true, on = true)?.running)
+        assertEquals(true, cardFx(option = false, on = true)?.running != true)
+        assertEquals(true, cardFx(option = true, on = false)?.running != true)
+    }
+
     private fun snap(root: android.view.View, name: String) {
         val bmp = Bitmap.createBitmap(root.width, root.height, Bitmap.Config.ARGB_8888)
         root.draw(Canvas(bmp))
