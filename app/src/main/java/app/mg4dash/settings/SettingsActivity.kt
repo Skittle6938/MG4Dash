@@ -1450,11 +1450,19 @@ class SettingsActivity : AppCompatActivity() {
     /** OpenStreetMap data: Wi-Fi only, prepared trips with their progress, cache, licence. */
     private fun radarData(parent: LinearLayout) {
         toggle(parent, R.string.st_rad_wifi, R.string.st_rad_wifi_desc, { prefs.radarWifiOnly }) { prefs.radarWifiOnly = it }
+        val cache = text(parent, "", 17f, R.color.text_value)
+        // Radius of the prepared trips, with the areas and the data it takes (estimate)
+        val radii = app.mg4dash.radar.RadarRepo.PREPARE_RADII
+        fun radiusLabel(km: Int): String {
+            val (n, bytes) = app.mg4dash.radar.RadarRepo.prepareEstimate(km)
+            return getString(R.string.st_rad_radius_item, km, n, app.mg4dash.system.DataUsage.format(this, bytes))
+        }
+        dropdown(parent, getString(R.string.st_rad_radius), radii.map { radiusLabel(it) },
+            { radii.indexOf(prefs.radarPrepareKm).coerceAtLeast(0) }) { prefs.radarPrepareKm = radii[it] }
         val state = text(parent, "", 16f, R.color.text_value)
-        val cache = text(parent, "", 15f, R.color.text_sub)
         fun show() {
             val (n, bytes) = app.mg4dash.radar.RadarRepo.cacheSize(this)
-            cache.text = getString(R.string.st_rad_cache, n, app.mg4dash.system.DataUsage.format(this, bytes))
+            cache.text = getString(R.string.st_rad_space, app.mg4dash.system.DataUsage.format(this, bytes), n)
             val p = app.mg4dash.radar.RadarRepo.prepare.value
             state.visibility = if (p == null) View.GONE else View.VISIBLE
             state.text = p?.let { radarPrepText(it) } ?: ""
@@ -1463,8 +1471,16 @@ class SettingsActivity : AppCompatActivity() {
         row(parent, button(getString(R.string.st_rad_prepare)) {
             if (app.mg4dash.radar.RadarRepo.prepareTrips(this)) show()
             else app.mg4dash.ui.Toasts.show(this, R.string.st_rad_prepare_no)
-        }, button(getString(R.string.st_rad_clear)) { app.mg4dash.radar.RadarRepo.clearCache(this); cache.postDelayed({ show() }, 500) })
-        text(parent, getString(R.string.st_rad_prepare_desc), 15f, R.color.text_title)
+        }, button(getString(R.string.st_rad_clear)) {
+            // Asked first: the areas prepared over the Wi-Fi are gone with it
+            AlertDialog.Builder(this)
+                .setTitle(R.string.st_rad_clear)
+                .setMessage(getString(R.string.st_rad_clear_msg, app.mg4dash.system.DataUsage.format(this, app.mg4dash.radar.RadarRepo.cacheSize(this).second)))
+                .setPositiveButton(R.string.st_rad_clear_btn) { _, _ -> app.mg4dash.radar.RadarRepo.clearCache(this); cache.postDelayed({ show() }, 500) }
+                .setNegativeButton(R.string.cancel, null)
+                .show().also { app.mg4dash.ui.Dialogs.fix(it) }
+        })
+        text(parent, getString(R.string.st_rad_prepare_desc2), 15f, R.color.text_title)
         lifecycleScope.launch { app.mg4dash.radar.RadarRepo.prepare.collect { show() } }
         text(parent, getString(R.string.rad_osm_licence), 14f, R.color.text_sub)
     }

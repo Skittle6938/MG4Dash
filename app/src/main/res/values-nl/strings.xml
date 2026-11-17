@@ -995,4 +995,10 @@
     <string name="st_rad_prep_retry">Server bezet, nieuwe poging… (%1$d / %2$d)</string>
     <string name="st_rad_prep_done">Voorbereid: %1$d / %2$d gebieden</string>
     <string name="st_rad_prep_no_wifi">Gestopt, al 2 min geen wifi (%1$d / %2$d)</string>
+    <string name="st_rad_radius">Straal van de voorbereide ritten</string>
+    <string name="st_rad_radius_item">%1$d km · ≈ %2$d gebieden · ≈ %3$s</string>
+    <string name="st_rad_space">Gebruikte ruimte: %1$s (%2$d gebieden)</string>
+    <string name="st_rad_clear_msg">De in de auto bewaarde limieten en flitsers (%1$s) worden gewist. Ze worden zo nodig opnieuw gedownload.</string>
+    <string name="st_rad_clear_btn">Wissen</string>
+    <string name="st_rad_prepare_desc2">Downloadt via wifi de hoofdwegen en flitsers binnen de hierboven gekozen straal rond de auto, voor ritten zonder 4G. De grootte is een schatting: minder op het platteland, meer in een stadscentrum.</string>
 </resources>
