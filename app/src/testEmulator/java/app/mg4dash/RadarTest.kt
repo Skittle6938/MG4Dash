@@ -304,16 +304,45 @@ class RadarTest {
         val r = app.mg4dash.radar.RadarRepo
         assertEquals(listOf(10, 20, 30, 50, 80), r.PREPARE_RADII)
         assertEquals(30, app.mg4dash.system.Prefs(org.robolectric.RuntimeEnvironment.getApplication()).radarPrepareKm)
-        // 30 km around Paris: 60 km square in 0.05° boxes, about 12 x 17
+        // 30 km around Paris: 60 km square in boxes of 2 x 2 tiles (0.04°), about 15 x 21
         val boxes = r.prepareBoxes(48.86, 2.35, 30)
-        assertTrue(boxes.size in 180..240)
+        assertTrue(boxes.size in 280..360)
         assertEquals(boxes.size, boxes.toSet().size)
-        // Every point within 30 km is in a box
+        // Every point within 30 km is in one of the tiles fetched
+        val tiles = boxes.flatMap { r.boxTiles(it) }
         listOf(48.86 + 0.26 to 2.35, 48.86 to 2.35 - 0.39, 48.86 - 0.26 to 2.35 + 0.39).forEach { (la, lo) ->
-            assertTrue(boxes.any { (s, w) -> la >= s && la < s + 0.05 && lo >= w && lo < w + 0.05 })
+            assertTrue(RadarData.Key.of(la, lo) in tiles)
         }
         val sizes = r.PREPARE_RADII.map { r.prepareEstimate(it, 48.86) }
         assertEquals(sizes.sortedBy { it.first }, sizes)
         assertEquals(sizes[2].first * r.PREP_BOX_BYTES, sizes[2].second)
+    }
+
+    /** Boxes on the tile grid: a tile belongs to one box only, whatever the starting position, so it is never fetched in halves or kept twice. */
+    @Test fun prepareBoxesOnTheTileGrid() {
+        val r = app.mg4dash.radar.RadarRepo
+        val a = r.prepareBoxes(48.86, 2.35, 10).flatMap { r.boxTiles(it) }
+        val b = r.prepareBoxes(48.87, 2.37, 10).flatMap { r.boxTiles(it) }
+        assertEquals(a.size, a.toSet().size)
+        // Two preparations from nearby positions share whole tiles, the same keys
+        assertTrue(a.toSet().intersect(b.toSet()).size > a.size / 2)
+        r.prepareBoxes(48.86, 2.35, 10).forEach { sw ->
+            assertEquals(0, Math.floorMod(sw.y, r.PREP_TILES)); assertEquals(0, Math.floorMod(sw.x, r.PREP_TILES))
+        }
+    }
+
+    /** The same tile written again replaces its file: the kept data does not grow. */
+    @Test fun sameTileWrittenTwiceKeptOnce() {
+        val dir = java.nio.file.Files.createTempDirectory("radar").toFile()
+        val (roads, cams) = load("periph")
+        val key = RadarData.Key.of(48.9008, 2.3614)
+        RadarData.write(dir, RadarData.Tile(key, RadarData.Level.MAIN, 1L, roads, cams))
+        val (n1, size1) = RadarData.size(dir)
+        RadarData.write(dir, RadarData.Tile(key, RadarData.Level.FULL, 2L, roads, cams))
+        val (n2, size2) = RadarData.size(dir)
+        assertEquals(1, n1); assertEquals(1, n2)
+        assertTrue(Math.abs(size2 - size1) < 10)
+        assertEquals(RadarData.Level.FULL, RadarData.read(dir, key)!!.level)
+        dir.deleteRecursively()
     }
 }
