@@ -231,7 +231,6 @@ object CardsEditor {
                 val row = FlowRow(context, dp(6))
                 row.addView(chip(context.getString(R.string.wc_conn_here), on, null, greyed = !fits) {
                     when {
-                        media -> Toasts.show(context, R.string.wc_conn_media)
                         !fits -> Toasts.show(context, R.string.wc_conn_small)
                         on -> { conn.set(null); Toasts.show(context, R.string.wc_conn_hidden); render(); onChange() }
                         else -> { conn.set(id); render(); onChange() }
