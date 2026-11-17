@@ -125,6 +125,9 @@ object EmbeddedApp {
     fun refreshImmersive(context: Context) = immersive(context, mapPackage(context))
 
     private const val REREAD_MS = 5_000L
+
+    /** The SAIC phone (A9 firmwares), whose call window brought the top bar back during calls. */
+    const val SAIC_PHONE = "com.saicmotor.btphone"
     private val main = android.os.Handler(android.os.Looper.getMainLooper())
     private var reread = Runnable {}
 
@@ -139,8 +142,13 @@ object EmbeddedApp {
     private fun pass(context: Context, pkg: String?, why: String): Boolean = try {
         // The car's package even on the emulator build (app.mg4dash.emu): the key of the common rule
         val self = ImmersivePolicy.MG4DASH
-        val wanted = if (pkg != null && app.mg4dash.system.Prefs(context).fullscreen)
-            mapOf(self to setOf(ImmersiveMode.FULL), pkg to setOf(ImmersiveMode.FULL)) else emptyMap()
+        val prefs = app.mg4dash.system.Prefs(context)
+        val wanted = buildMap {
+            if (prefs.fullscreen && pkg != null) { put(self, setOf(ImmersiveMode.FULL)); put(pkg, setOf(ImmersiveMode.FULL)) }
+            // The SAIC phone's call window (Marc, 17/11): it does not ask for full screen, so the top bar came back over
+            // home for the whole call; forced like the map's app, the bar stays hidden (a swipe from the top still shows it)
+            if (prefs.fullscreen && prefs.callBarHidden) put(SAIC_PHONE, setOf(ImmersiveMode.FULL))
+        }
         val cr = context.contentResolver
         fun get(name: String) = android.provider.Settings.Global.getString(cr, name)?.ifEmpty { null }
         // A refused write stops the pass, the tracking keys as they are: the re-read takes over

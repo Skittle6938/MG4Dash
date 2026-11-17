@@ -1095,4 +1095,6 @@
     <string name="wc_conn_small">Case trop petite pour la barre de connexion</string>
     <string name="st_climate_fx">Animation chaud/froid de la carte clim</string>
     <string name="st_climate_fx_desc">Ondulations de chaleur quand ça chauffe, givre quand ça refroidit, plus marqués quand la consigne est loin de la température extérieure. Désactivée : seule l\'animation disparaît, Chauffage / Clim reste affiché.</string>
+    <string name="st_call_bar">Cacher la barre du haut pendant les appels</string>
+    <string name="st_call_bar_desc">La fenêtre d\'appel de la voiture reste aussi en plein écran. Un glissement depuis le haut affiche toujours la barre ; elle est aussi cachée dans l\'appli Téléphone SAIC.</string>
 </resources>

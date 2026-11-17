@@ -1093,4 +1093,6 @@
     <string name="wc_conn_small">Místo je pro lištu připojení příliš malé</string>
     <string name="st_climate_fx">Animace teplo/chlad na kartě klimatizace</string>
     <string name="st_climate_fx_desc">Vlnění tepla při topení, jinovatka při chlazení, výraznější čím dál je nastavená teplota od venkovní. Vypnuto: zmizí jen animace, Topení / Chlazení zůstane.</string>
+    <string name="st_call_bar">Skrýt horní lištu během hovorů</string>
+    <string name="st_call_bar_desc">Okno hovoru vozu zůstane také na celou obrazovku. Přejetí shora lištu stále zobrazí; skryje se i v aplikaci Telefon SAIC.</string>
 </resources>

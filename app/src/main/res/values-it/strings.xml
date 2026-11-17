@@ -1095,4 +1095,6 @@
     <string name="wc_conn_small">Posto troppo piccolo per la barra di connessione</string>
     <string name="st_climate_fx">Animazione caldo/freddo della scheda clima</string>
     <string name="st_climate_fx_desc">Ondulazioni di calore quando riscalda, brina quando raffredda, più marcate quanto più la temperatura impostata è lontana da quella esterna. Disattivata: sparisce solo l\'animazione, Riscaldamento / Raffreddamento resta.</string>
+    <string name="st_call_bar">Nascondi la barra superiore durante le chiamate</string>
+    <string name="st_call_bar_desc">Anche la finestra di chiamata dell\'auto resta a schermo intero. Uno scorrimento dall\'alto mostra comunque la barra; è nascosta anche nell\'app Telefono SAIC.</string>
 </resources>
