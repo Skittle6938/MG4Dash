@@ -10,14 +10,20 @@ import app.mg4dash.system.Firmware
  * others land anywhere (the strip is not split-touch, so it gets them all):
  * - one finger down: the shortcuts menu, which follows the finger;
  * - two fingers down: back to MG4Dash's home (on MG4Dash's own screens, Android Auto / CarPlay instead, as there);
- * - three fingers down: MG4Link is asked to end its session ([LinkContract.ACTION_USER_DISCONNECT]).
+ * - three fingers down, over MG4Link's projection only: MG4Link is asked to end its session
+ *   ([LinkContract.ACTION_USER_DISCONNECT]); over the other apps nothing, so that no other app's gesture ever ends a
+ *   session (see [stripAction]).
  */
 internal class StripGesture(private val density: Float) {
     enum class Action { NONE, MENU, HOME, DISCONNECT }
 
     companion object {
-        /** Two or three fingers: the first one goes down at least this far (dp), mostly vertically. */
-        const val MULTI_PULL_DP = 40
+        /**
+         * Two or three fingers: the first one goes down at least this far (dp, = px on the car), mostly vertically. Long
+         * enough for a third finger landing a little late to be counted before the gesture is decided, as MG4Link
+         * waits 200 px for its own; shorter than that so that it stays within reach from the 12 px strip.
+         */
+        const val MULTI_PULL_DP = 120
     }
 
     private var downX = 0f
@@ -61,6 +67,25 @@ internal class StripGesture(private val density: Float) {
     enum class Mode { CATCH, PASS }
 }
 
+/** What a recognised gesture does where it is made: three fingers only over MG4Link's projection, nothing elsewhere. */
+internal fun stripAction(a: StripGesture.Action, linkInFront: Boolean): StripGesture.Action =
+    if (a == StripGesture.Action.DISCONNECT && !linkInFront) StripGesture.Action.NONE else a
+
+/** The strip's height and whether it catches the touches. */
+internal data class StripState(val height: Int, val catches: Boolean)
+
+/**
+ * The strip now: over MG4Link's projection under the car's status bar ([immersive] = false, its car pull-down option
+ * off), exactly the bar ([barPx]); elsewhere the 12 px band. It catches as [stripMode] says.
+ */
+internal fun stripState(linkInFront: Boolean, immersive: Boolean?, gen: Firmware.Gen, carPulldown: Boolean, barPx: Int): StripState {
+    val pulldown = linkInFront && carPulldown
+    return StripState(
+        ShortcutsPanel.GlobalStrip.stripHeight(linkInFront && immersive == false && !pulldown, barPx),
+        stripMode(linkInFront, immersive, gen, pulldown) == StripGesture.Mode.CATCH,
+    )
+}
+
 /**
  * The strip's mode: over MG4Link's projection it lets everything through when Android Auto reaches the top (full screen,
  * MG4Link pulls the menu itself) or when MG4Link leaves the top to the car's own pull-down menu (its option,
@@ -93,7 +118,10 @@ object LinkContract {
         android.provider.Settings.Global.getInt(context.contentResolver, SETTING_CAR_PULLDOWN, 0) == 1
     } catch (_: Exception) { false }
 
-    /** Asks MG4Link to end its session; false when MG4Link is not installed (nothing sent). */
+    /**
+     * Sends MG4Link the request to end its session (MG4Link acts on it only with a session, and says nothing back);
+     * false when MG4Link is not installed (nothing sent).
+     */
     fun sendDisconnect(context: Context): Boolean {
         val installed = try { context.packageManager.getPackageInfo(PACKAGE, 0); true } catch (_: Exception) { false }
         if (!installed) return false

@@ -11,6 +11,9 @@ import app.mg4dash.ui.StripGesture.Action
 import app.mg4dash.ui.StripGesture.Mode
 import app.mg4dash.ui.TwoFingerPull
 import app.mg4dash.ui.stripMode
+import app.mg4dash.ui.stripAction
+import app.mg4dash.ui.stripState
+import app.mg4dash.ui.StripState
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
@@ -26,7 +29,7 @@ import org.robolectric.annotation.Config
 /**
  * Gestures from the top strip (Marc, 17/11): one finger the menu, two fingers MG4Dash's home, three fingers MG4Link's
  * disconnection; when the strip catches them; the two finger pull of MG4Dash's own screens; the contract with MG4Link.
- * Density 1 here: dp = px.
+ * Density 1 here, as on the car: dp = px. Two and three fingers need 120 px.
  */
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [28])
@@ -46,29 +49,29 @@ class StripGestureTest {
     @Test fun twoFingersDownAreHome() {
         val s = g(); s.down(500f, 5f)
         s.pointerDown(2)
-        assertEquals(Action.NONE, s.move(500f, 30f, 2))      // under 40 dp
-        assertEquals(Action.HOME, s.move(505f, 50f, 2))
-        assertEquals(Action.NONE, s.move(505f, 120f, 2))
+        assertEquals(Action.NONE, s.move(500f, 100f, 2))     // under 120 dp
+        assertEquals(Action.HOME, s.move(505f, 130f, 2))
+        assertEquals(Action.NONE, s.move(505f, 200f, 2))
     }
 
     @Test fun threeFingersDownDisconnect() {
         val s = g(); s.down(500f, 5f)
         s.pointerDown(2); s.pointerDown(3)
-        assertEquals(Action.DISCONNECT, s.move(500f, 60f, 3))
+        assertEquals(Action.DISCONNECT, s.move(500f, 130f, 3))
     }
 
     @Test fun aThirdFingerBeforeTheThresholdMakesItThree() {
         val s = g(); s.down(500f, 5f)
         s.pointerDown(2)
-        assertEquals(Action.NONE, s.move(500f, 20f, 2))
+        assertEquals(Action.NONE, s.move(500f, 80f, 2))       // a third finger a little late is still counted
         s.pointerDown(3)
-        assertEquals(Action.DISCONNECT, s.move(500f, 60f, 3))
+        assertEquals(Action.DISCONNECT, s.move(500f, 130f, 3))
     }
 
     @Test fun aFingerLiftedEarlyStillCountsTheMostFingers() {
         val s = g(); s.down(500f, 5f)
         s.pointerDown(3)
-        assertEquals(Action.DISCONNECT, s.move(500f, 60f, 2))
+        assertEquals(Action.DISCONNECT, s.move(500f, 130f, 2))
     }
 
     @Test fun aSecondFingerAfterTheMenuGivesItBackAndBecomesHome() {
@@ -76,20 +79,20 @@ class StripGestureTest {
         assertEquals(Action.MENU, s.move(500f, 30f, 1))
         assertTrue(s.pointerDown(2))                          // the menu goes back
         assertFalse(s.menu)
-        assertEquals(Action.HOME, s.move(500f, 60f, 2))
+        assertEquals(Action.HOME, s.move(500f, 130f, 2))
     }
 
     @Test fun sidewaysOrUpIsNothing() {
         val s = g(); s.down(500f, 5f); s.pointerDown(2)
-        assertEquals(Action.NONE, s.move(600f, 60f, 2))       // more sideways than down
-        assertEquals(Action.NONE, s.move(500f, -40f, 2))
+        assertEquals(Action.NONE, s.move(700f, 130f, 2))      // more sideways than down
+        assertEquals(Action.NONE, s.move(500f, -140f, 2))
         val one = g(); one.down(500f, 5f)
         assertEquals(Action.NONE, one.move(560f, 40f, 1))     // slanted
     }
 
     @Test fun anewAtEachTouch() {
         val s = g(); s.down(500f, 5f); s.pointerDown(2)
-        assertEquals(Action.HOME, s.move(500f, 60f, 2))
+        assertEquals(Action.HOME, s.move(500f, 130f, 2))
         s.up()
         s.down(500f, 5f)
         assertEquals(Action.MENU, s.move(500f, 40f, 1))
@@ -111,6 +114,27 @@ class StripGestureTest {
         // No word from an older MG4Link: as before (caught on SWI173 only)
         assertEquals(Mode.CATCH, stripMode(true, null, Gen.SWI173, false))
         assertEquals(Mode.PASS, stripMode(true, null, Gen.SWI69, false))
+    }
+
+    @Test fun threeFingersOnlyOverMg4Link() {
+        assertEquals(Action.DISCONNECT, stripAction(Action.DISCONNECT, linkInFront = true))
+        assertEquals(Action.NONE, stripAction(Action.DISCONNECT, linkInFront = false))
+        // The others wherever they are
+        assertEquals(Action.HOME, stripAction(Action.HOME, linkInFront = false))
+        assertEquals(Action.MENU, stripAction(Action.MENU, linkInFront = true))
+    }
+
+    @Test fun stripStateHeightAndCatching() {
+        // MG4Link under the car's bar: the bar exactly, caught
+        assertEquals(StripState(80, true), stripState(true, false, Gen.SWI173, carPulldown = false, barPx = 80))
+        // Its car pull-down option on: the thin band, let through (the top is the car's menu)
+        assertEquals(StripState(12, false), stripState(true, false, Gen.SWI173, carPulldown = true, barPx = 80))
+        // Full screen: the thin band, let through
+        assertEquals(StripState(12, false), stripState(true, true, Gen.SWI173, carPulldown = false, barPx = 80))
+        // Another app: the thin band, caught, whatever MG4Link's option
+        assertEquals(StripState(12, true), stripState(false, false, Gen.SWI173, carPulldown = true, barPx = 80))
+        // Bar height unknown: never more than the thin band
+        assertEquals(StripState(12, true), stripState(true, false, Gen.SWI173, carPulldown = false, barPx = 0))
     }
 
     // ── MG4Dash's own screens: two fingers from the top ──
