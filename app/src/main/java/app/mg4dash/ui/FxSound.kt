@@ -67,7 +67,12 @@ object FxSound {
 
     /** Gain of the speed camera alerter's beeps: the effects' volume, never under an audible minimum. */
     internal const val MIN_ALERT_GAIN = 0.12f
-    internal fun alertGain(percent: Int): Float = maxOf(gain(percent), MIN_ALERT_GAIN)
+    /**
+     * The alerts' own scale, louder than the effects' (Marc, 17/11: too quiet in the car at 100 %): 100 % is SoundPool's
+     * full volume, four times the effects' top, on the same channel (mixed over the source, nothing lowered).
+     */
+    internal const val ALERT_MAX_GAIN = 1f
+    internal fun alertGain(percent: Int): Float = maxOf(percent.coerceIn(0, 100) / 100f * ALERT_MAX_GAIN, MIN_ALERT_GAIN)
 
     /**
      * A beep of the speed camera alerter ([strong]: the strong alert), on the same channel as the effects and at their
