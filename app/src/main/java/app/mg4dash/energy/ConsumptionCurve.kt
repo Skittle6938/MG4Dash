@@ -75,7 +75,9 @@ object ConsumptionCurve {
     /**
      * Points (position 0..1 over the duration, value): average of each slice of equal duration, at the mean date of its
      * points, then smoothing with neighbouring slices. An empty slice gives no point and breaks the smoothing:
-     * a period without driving stays visible, and no value spills over to the other side.
+     * a period without driving stays visible, and no value spills over to the other side. The window stays centred
+     * (as many slices on each side), so the first and last points are their own slices: the curve's end is the
+     * present, not an average lagging behind it (#44).
      */
     fun timeLine(times: List<Long>, values: List<Float>, slices: Int = TIME_SLICES): List<Pair<Float, Float>> {
         if (times.size != values.size || times.size < 2) return emptyList()
@@ -91,7 +93,8 @@ object ConsumptionCurve {
             // Up to 2 slices on each side, without crossing an empty slice
             val before = (s - 1 downTo maxOf(0, s - 2)).takeWhile { n[it] > 0 }
             val after = (s + 1..minOf(slices - 1, s + 2)).takeWhile { n[it] > 0 }
-            val near = before + s + after
+            val r = minOf(before.size, after.size)
+            val near = before.take(r) + s + after.take(r)
             (sumT[s] / n[s] / span).toFloat() to near.map { mean[it] }.average().toFloat()
         }
     }
@@ -107,7 +110,29 @@ object ConsumptionCurve {
     }
 
     private fun mixOfTotals(t: EnergyMonitor.Totals) =
-        if (t.km < 2) null else mix(t.driveKwh, t.climKwh, t.heatKwh, t.accKwh, t.regenKwh, t.km.toFloat())
+        if (yearAverage(t) == null) null else mix(t.driveKwh, t.climKwh, t.heatKwh, t.accKwh, t.regenKwh, t.distKm)
+
+    /** A trip counts in the 12 months from this distance (#44: shorter ones are left out), to the tenth of a km. */
+    const val YEAR_MIN_KM = 2f
+
+    /**
+     * The trip's average for the 12 months: from [YEAR_MIN_KM] of precise distance only. The trip's own average shows
+     * from 0.5 km (#29), which let short trips into the 12 months, without a breakdown (#44).
+     */
+    fun yearAverage(t: EnergyMonitor.Totals): Float? = if (t.distKm >= YEAR_MIN_KM) t.per100 else null
+
+    /** Build that let short trips into the 12 months (#29, v1.7.2): its commit time. */
+    internal const val SHORT_TRIPS_SINCE = 1794057459000L
+
+    /**
+     * One-off cleanup (#44, at the first start of this version): the 12-month trips kept no distance, so the short ones let in since
+     * [SHORT_TRIPS_SINCE] are told by their missing breakdown (the breakdown needed 2 km on the odometer). A trip of
+     * 2 to 3 km counted 1 km by the odometer goes too; earlier trips, and those whose distance is known, stay.
+     */
+    internal fun withoutShortTrips(trips: List<Pair<Long, Float>>, mixes: Map<Long, Mix>, dists: Map<Long, Float>): List<Pair<Long, Float>> =
+        trips.filter { (t, _) -> dists[t]?.let { it >= YEAR_MIN_KM } ?: (t < SHORT_TRIPS_SINCE || mixes.containsKey(t)) }
+
+    private fun distText(km: Float) = String.format(java.util.Locale.US, "%.1f", km)
 
     private fun mixText(m: Mix?) = m?.parts()?.joinToString(":") { String.format(java.util.Locale.US, "%.1f", it) } ?: ""
     private fun parseMix(s: String?): Mix? {
@@ -148,15 +173,28 @@ object ConsumptionCurve {
         val tripMixes = (sp.getString("cc_trips_m", "") ?: "").split(';').mapNotNull { e ->
             val p = e.split('='); p.getOrNull(0)?.toLongOrNull()?.let { t -> parseMix(p.getOrNull(1))?.let { t to it } }
         }.toMap().toMutableMap()
+        // Distance of these trips (km, to the tenth), by time: "timestamp=km"; kept since #44, absent before
+        val tripDists = (sp.getString("cc_trips_d", "") ?: "").split(';').mapNotNull { e ->
+            val p = e.split('='); p.getOrNull(0)?.toLongOrNull()?.let { t -> p.getOrNull(1)?.toFloatOrNull()?.let { t to it } }
+        }.toMap().toMutableMap()
         // Trip left open at the previous stop: the car cuts the head unit, so MG4Dash never saw
         // the end of the trip and the 12 month curve stayed empty (#44). Its last average is kept here.
         sp.getString("cc_open", null)?.split(':')?.let { p ->
             val t = p.getOrNull(0)?.toLongOrNull(); val avg = p.getOrNull(1)?.toFloatOrNull()
             if (t != null && p.size == 6) parseMix(p.drop(2).joinToString(":"))?.let { tripMixes[t] = it }
+            if (t != null) sp.getString("cc_open_d", null)?.toFloatOrNull()?.let { tripDists[t] = it }
             if (t != null && avg != null) { trips.add(t to avg); Log.i(TAG, "previous trip kept for 12 months: ${"%.1f".format(java.util.Locale.US, avg)} kWh/100") }
-            sp.edit().remove("cc_open").apply()
+            sp.edit().remove("cc_open").remove("cc_open_d").apply()
         }
         trips.removeAll { System.currentTimeMillis() - it.first > YEAR_MS }
+        // Short trips let into the 12 months by #29 leave, once (Marc, 17/11)
+        if (!sp.getBoolean("cc_short_cleaned", false)) {
+            val kept = withoutShortTrips(trips, tripMixes, tripDists)
+            Log.i(TAG, "12 months: ${trips.size - kept.size} short trips removed")
+            trips.retainAll(kept.toSet())
+            sp.edit().putString("cc_trips", trips.joinToString(";") { "${it.first}:${String.format(java.util.Locale.US, "%.1f", it.second)}" })
+                .putBoolean("cc_short_cleaned", true).apply()
+        }
         var trip = parse(sp.getString("cc_trip", "")).takeLast(MAX_POINTS)
         var charge = parse(sp.getString("cc_charge", "")).takeLast(MAX_POINTS)
         // Points from before dates: without times, the curve stays by km until the next charge
@@ -166,7 +204,7 @@ object ConsumptionCurve {
         var chargeMix = parseMixes(sp.getString("cc_charge_m", ""), charge.size)
         // 12 months: finished trips, plus the current trip from 2 km (#44)
         fun publish() {
-            val now = EnergyMonitor.sinceStart.value.per100
+            val now = yearAverage(EnergyMonitor.sinceStart.value)
             val clock = System.currentTimeMillis()
             _curves.value = Curves(trip, charge, trips.map { it.second } + listOfNotNull(now),
                 trips.firstOrNull()?.first ?: now?.let { clock },
@@ -192,15 +230,17 @@ object ConsumptionCurve {
                 var changed = false
                 // New start: average of the finished trip kept for the year, trip curve emptied
                 if (EnergyMonitor.tripSeq != seq) {
-                    if (seq >= 0) lastStart.per100?.let { avg ->
+                    if (seq >= 0) yearAverage(lastStart)?.let { avg ->
                         val now = System.currentTimeMillis()
                         trips.add(now to avg)
                         mixOfTotals(lastStart)?.let { tripMixes[now] = it }
+                        tripDists[now] = lastStart.distKm
                         trips.removeAll { now - it.first > YEAR_MS }
                         tripMixes.keys.retainAll(trips.map { it.first }.toSet())
+                        tripDists.keys.retainAll(trips.map { it.first }.toSet())
                         Log.i(TAG, "trip ended: ${lastStart.km} km, ${"%.1f".format(java.util.Locale.US, avg)} kWh/100")
                     }
-                    sp.edit().remove("cc_open").apply()
+                    sp.edit().remove("cc_open").remove("cc_open_d").apply()
                     seq = EnergyMonitor.tripSeq
                     trip = emptyList(); tripMix = emptyList(); mixBase = start
                     lastKm = start.km; lastNet = start.netKwh; stillSince = tick; dist = 0f
@@ -265,11 +305,12 @@ object ConsumptionCurve {
                         .putString("cc_trip_m", tripMix.joinToString(";") { mixText(it) })
                         .putString("cc_charge_m", chargeMix.joinToString(";") { mixText(it) })
                         .putString("cc_trips_m", tripMixes.entries.joinToString(";") { "${it.key}=${mixText(it.value)}" })
+                        .putString("cc_trips_d", tripDists.entries.joinToString(";") { "${it.key}=${distText(it.value)}" })
                         .putString("cc_trips", trips.joinToString(";") { "${it.first}:${String.format(java.util.Locale.US, "%.1f", it.second)}" })
                         .apply {
                             // Average of the current trip, picked up at the next start if it ends with the car off
-                            start.per100?.let { putString("cc_open", "${System.currentTimeMillis()}:${String.format(java.util.Locale.US, "%.1f", it)}" +
-                                (mixOfTotals(start)?.let { x -> ":" + mixText(x) } ?: "")) }
+                            yearAverage(start)?.let { putString("cc_open", "${System.currentTimeMillis()}:${String.format(java.util.Locale.US, "%.1f", it)}" +
+                                (mixOfTotals(start)?.let { x -> ":" + mixText(x) } ?: "")); putString("cc_open_d", distText(start.distKm)) }
                         }
                         .apply()
                 }

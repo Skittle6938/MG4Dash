@@ -92,8 +92,15 @@ class RingChart @JvmOverloads constructor(context: Context, attrs: AttributeSet?
 }
 
 /** Consumption curve (kWh/100 km) with a gradient area and average line. */
-/** Smoothed curve (#44): each point = average of itself and its 2 neighbours on each side (5 points; 3 was too jagged once placed by km). */
-fun List<Float>.smoothed(): List<Float> = indices.map { i -> subList(maxOf(0, i - 2), minOf(size, i + 3)).average().toFloat() }
+/**
+ * Smoothed curve (#44): each point = average of itself and up to 2 neighbours on each side (5 points; 3 was too jagged
+ * once placed by km). The window stays centred, so it narrows towards the ends (5, 3, then 1): the last point is the
+ * real latest value instead of the average of the last 3, which lagged behind the present.
+ */
+fun List<Float>.smoothed(): List<Float> = indices.map { i ->
+    val r = minOf(2, i, lastIndex - i)
+    subList(i - r, i + r + 1).average().toFloat()
+}
 
 private const val MAX_POINTS = 50
 
@@ -161,8 +168,11 @@ class LineChart @JvmOverloads constructor(context: Context, attrs: AttributeSet?
         invalidate()
     }
 
-    /** Stacked layer of a curve: its colour and its value at each point. */
-    class Layer(val color: Int, val values: List<Float>)
+    /**
+     * Stacked layer of a curve: its colour and its value at each point; [plain]: no band of its own, only its top line
+     * (the total), under the lines of the layers below where they meet (#44).
+     */
+    class Layer(val color: Int, val values: List<Float>, val plain: Boolean = false)
     private var layers: List<Layer>? = null
 
     /** Possible tops of the scale, in order: the first that fits, higher values are cut at the last one (#44). */
@@ -210,9 +220,11 @@ class LineChart @JvmOverloads constructor(context: Context, attrs: AttributeSet?
             band.lineTo(x.last(), lower.last())
             addCurve(band, x.reversedArray(), lower.reversedArray())
             band.close()
-            val rgb = stack[k].color and 0xFFFFFF
-            fill.shader = LinearGradient(0f, top, 0f, bottom, 0x50000000 or rgb, 0x10000000 or rgb, Shader.TileMode.CLAMP)
-            canvas.drawPath(band, fill)
+            if (!stack[k].plain) {
+                val rgb = stack[k].color and 0xFFFFFF
+                fill.shader = LinearGradient(0f, top, 0f, bottom, 0x50000000 or rgb, 0x10000000 or rgb, Shader.TileMode.CLAMP)
+                canvas.drawPath(band, fill)
+            }
             line.color = stack[k].color
             canvas.drawPath(curvePath(x, upper), line)
         }
