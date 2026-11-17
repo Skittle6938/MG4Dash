@@ -209,7 +209,9 @@ object RadarData {
     fun write(base: File, t: Tile) {
         val f = File(dir(base), "${t.key}.txt")
         val tmp = File(f.path + ".tmp")
-        tmp.writeText(encode(t)); tmp.renameTo(f)
+        tmp.writeText(encode(t))
+        // Replaces the tile kept before, if any: one file per tile
+        java.nio.file.Files.move(tmp.toPath(), f.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING)
     }
 
     fun clear(base: File) { dir(base).listFiles()?.forEach { it.delete() } }
