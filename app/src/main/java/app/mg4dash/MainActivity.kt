@@ -294,6 +294,8 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         web.visibility = View.GONE
         panels[Card.WEB] = frame(web).also { webPanel = it }
         panels[Card.ENERGY] = b.energyCard
+        // Its own options in a popup (Marc, 17/11): a long press on the card
+        b.energyCard.setOnLongClickListener { energyOptions(); true }
         mapOf(Card.TRIP to R.string.sw_energy, Card.POWER to R.string.sw_power, Card.PHONE to R.string.sw_phone).forEach { (card, title) ->
             val v = layoutInflater.inflate(R.layout.card_secondary, null, false)
             if (card != Card.TRIP) v.id = View.NO_ID   // the tutorial points at the trip card
@@ -728,16 +730,74 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
 
     /** Connection icons (#86): at the top right of the weather, to the right of the city; they follow the weather card shown. */
     private fun setupConnections() {
+        HomeSlots.migrateConnections(prefs)
         builtConnections = prefs.connectionIcons
         if (!builtConnections) return
         connections = app.mg4dash.ui.ConnectionRow(this)
         placeConnections()
     }
 
+    /** The frame whose cards make room at their top for the connection bar (a place other than the weather's). */
+    private var connFrame: SlotFrame? = null
+    private val connBarDp = 44
+
+    /**
+     * Connection icons (#86): in the weather by default (to the right of the city, following the weather card shown),
+     * or at the top of the place chosen in the edit mode (Marc, 17/11), whose cards then start below it; hidden when
+     * chosen so.
+     */
     private fun placeConnections() {
         val row = connections ?: return
-        val card = listOf(Card.HOURLY, Card.DAILY).firstOrNull { isShown(it) } ?: if (row.parent == null) Card.HOURLY else return
-        weathers[card]?.addConnections(row)
+        val choice = if (simpleMode) null else HomeSlots.connectionsChoice(prefs, slotLayout)
+        val host = choice?.let { HomeSlots.connectionsSlot(it, HomeSlots.load(prefs, slotLayout, unavailable())) }
+        val f = host?.let { frames[it] }
+        // In the weather (default, or the place chosen showing the weather now): to the right of the city
+        val inWeather = choice == null || (f != null && (f.shown == Card.HOURLY || f.shown == Card.DAILY))
+        val strip = if (inWeather || choice == HomeSlots.CONN_NONE) null else f
+        if (connFrame != null && connFrame !== strip) { reserveConnections(connFrame!!, false); connFrame = null }
+        when {
+            choice == HomeSlots.CONN_NONE || (choice != null && f == null) -> (row.parent as? android.view.ViewGroup)?.removeView(row)
+            inWeather -> {
+                val card = listOf(Card.HOURLY, Card.DAILY).firstOrNull { isShown(it) } ?: if (row.parent == null) Card.HOURLY else return
+                weathers[card]?.addConnections(row)
+            }
+            strip != null -> {
+                if (row.parent !== strip.box) {
+                    (row.parent as? android.view.ViewGroup)?.removeView(row)
+                    strip.box.addView(row, android.widget.FrameLayout.LayoutParams(-2, dp(connBarDp), Gravity.TOP or Gravity.END).apply { rightMargin = dp(16); topMargin = dp(4) })
+                }
+                reserveConnections(strip, true); connFrame = strip
+                row.bringToFront()
+            }
+        }
+    }
+
+    /** The OpenStreetMap map's options (Marc, 17/11, once in Settings › Home): zoom, colours, energy when offline. */
+    private fun mapOptions() {
+        val zoom = prefs.mapZoom; val theme = prefs.mapTheme
+        app.mg4dash.ui.OptionsPopup(this, getString(R.string.st_style_map))
+            .choice(getString(R.string.st_map_zoom), null, listOf("14", "15", "16", "17", "18"), { prefs.mapZoom - 14 }) { prefs.mapZoom = 14 + it }
+            .choice(getString(R.string.st_map_theme), null, listOf(R.string.st_mode_auto, R.string.st_mode_light, R.string.st_mode_dark).map { getString(it) }, { prefs.mapTheme }) { prefs.mapTheme = it }
+            .toggle(getString(R.string.st_map_offline_switch, "").trimEnd(' ', ':', ' ', ' '), getString(R.string.st_map_offline_switch_desc), { prefs.mapOfflineSwitch }) { prefs.mapOfflineSwitch = it }
+            .show { if (prefs.mapZoom != zoom || prefs.mapTheme != theme) app.mg4dash.ui.Themes.recreateSmooth(this) else refreshCards() }
+    }
+
+    /** The energy card's options (Marc, 17/11, once in Settings › Home): live power in it, volts and amps, back to it plugged in. */
+    private fun energyOptions() {
+        val power = prefs.energyCardPower
+        fun t(res: Int) = getString(res, "").trimEnd(' ', ':', ' ', ' ')
+        app.mg4dash.ui.OptionsPopup(this, getString(R.string.wc_energy))
+            .toggle(t(R.string.st_energy_card_power), getString(R.string.st_energy_card_power_desc), { prefs.energyCardPower }) { prefs.energyCardPower = it }
+            .toggle(t(R.string.st_power_va), getString(R.string.st_power_va_desc), { prefs.powerVa }) { prefs.powerVa = it }
+            .toggle(t(R.string.st_stack_auto), null, { prefs.stackAuto }) { prefs.stackAuto = it }
+            .show { if (prefs.energyCardPower != power) app.mg4dash.ui.Themes.recreateSmooth(this) }
+    }
+
+    /** The cards of [f] start below the bar ([on]) or at the top again. */
+    private fun reserveConnections(f: SlotFrame, on: Boolean) {
+        f.cards.forEach { c -> panels[c]?.let { v ->
+            (v.layoutParams as? android.widget.FrameLayout.LayoutParams)?.let { lp -> val m = if (on) dp(connBarDp + 4) else 0; if (lp.topMargin != m) { lp.topMargin = m; v.layoutParams = lp } }
+        } }
     }
 
     /** Called by the dock when the clock / Wi-Fi slot changes. */
@@ -1487,7 +1547,7 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
             app.mg4dash.ui.EmbeddedApp.back(view)
         }
         if (onMove != null) rows += app.mg4dash.ui.CardMenu.Row("✥", getString(R.string.wc_web_move), null, false) { onMove() }
-        rows += app.mg4dash.ui.CardMenu.Row(if (cn == null) "◉" else "○", getString(R.string.map_app_osm), null, cn == null) {
+        rows += app.mg4dash.ui.CardMenu.Row(if (cn == null) "◉" else "○", getString(R.string.map_app_osm), null, cn == null, settings = { mapOptions() }) {
             if (cn == null) mapCard.recenter(LocationRepo.location.value) else use(null)
         }
         prefs.mapAppsRecent.mapNotNull { android.content.ComponentName.unflattenFromString(it) }.filter { mapAppInstalled(it) }.forEach { c ->
@@ -1546,7 +1606,11 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
             name = { prefs.mapApp?.let { android.content.ComponentName.unflattenFromString(it) }?.let { app.mg4dash.shortcuts.Shortcuts.appLabel(this, it) } ?: getString(R.string.map_app_osm) },
             pick = { done -> app.mg4dash.shortcuts.Shortcuts.pickApp(this, getString(R.string.map_app_pick), getString(R.string.map_app_osm)) { cn ->
                 prefs.mapApp = cn?.flattenToString(); done() } })
-        CardsEditor.show(this, slotLayout, frames.values.map { CardsEditor.Target(it.slot, it.box) }, unavailable(), dockView(), mapApp) { applySlots() }
+        // The connection bar's place, when the icons are on
+        val conn = if (!prefs.connectionIcons) null else CardsEditor.Connections(
+            host = { HomeSlots.connectionsChoice(prefs, slotLayout).let { ch -> if (ch == HomeSlots.CONN_NONE) null else HomeSlots.connectionsSlot(ch, HomeSlots.load(prefs, slotLayout, unavailable())) } },
+            set = { HomeSlots.setConnectionsChoice(prefs, slotLayout, it ?: HomeSlots.CONN_NONE) })
+        CardsEditor.show(this, slotLayout, frames.values.map { CardsEditor.Target(it.slot, it.box) }, unavailable(), dockView(), mapApp, conn) { applySlots() }
     }
 
     /** The bar (at the bottom, or the vertical one): the edit mode puts its buttons there. */

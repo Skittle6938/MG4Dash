@@ -37,7 +37,7 @@ class RadarShotTest {
     private val estimated = RadarRepo.State(status = RadarRepo.Status.OK, speedKmh = 47f, limit = 50, estimated = true, highway = "residential")
 
     /** A preparation under way, as the page and the card show it. */
-    private val preparing = RadarRepo.Prep(212, 560, 3, RadarRepo.PrepPhase.RUNNING)
+    private val preparing = RadarRepo.Prep(212, 560, 3, RadarRepo.PrepPhase.RUNNING, bytes = 23_400_000, minutesLeft = 5)
 
     @Suppress("UNCHECKED_CAST")
     private fun setPrepare(p: RadarRepo.Prep?) {
@@ -78,16 +78,19 @@ class RadarShotTest {
     /** The alerter's page while a preparation runs. */
     @Test fun settingsPageDownloading() {
         setPrepare(preparing)
-        try { settingsPage("radar_settings_download.png") } finally { setPrepare(null) }
+        try { settingsPage("radar_settings_download.png", 1) } finally { setPrepare(null) }
     }
 
     @Test fun settingsPage() = settingsPage("radar_settings_page.png")
+    @Test fun settingsDataTab() = settingsPage("radar_settings_data.png", 1)
+    @Test fun settingsCarTab() = settingsPage("radar_settings_car.png", 2)
 
-    private fun settingsPage(name: String) {
+    private fun settingsPage(name: String, tab: Int = 0) {
         org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE).edit()
             .putBoolean("vertical_dock", true).putBoolean("tutorial_shortcuts_seen", true).putInt("theme_mode", 1).commit()
         val act = Robolectric.buildActivity(app.mg4dash.settings.SettingsActivity::class.java,
-            android.content.Intent().putExtra(app.mg4dash.settings.SettingsActivity.EXTRA_RADAR, true)).setup().get()
+            android.content.Intent().putExtra(app.mg4dash.settings.SettingsActivity.EXTRA_RADAR, true)
+                .putExtra(app.mg4dash.settings.SettingsActivity.EXTRA_RADAR_TAB, tab)).setup().get()
         repeat(3) { shadowOf(Looper.getMainLooper()).idleFor(200, TimeUnit.MILLISECONDS) }
         val root = act.window.decorView
         val bmp = Bitmap.createBitmap(root.width, root.height, Bitmap.Config.ARGB_8888)

@@ -34,6 +34,9 @@ object CardsEditor {
     /** A place on screen: its model and its view. */
     class Target(val slot: HomeSlots.Slot, val view: View)
 
+    /** The connection bar's place: the one holding it now (null: hidden) and how to move it (null: hide it). */
+    class Connections(val host: () -> String?, val set: (String?) -> Unit)
+
     /** Map card's extra line: the map app's name and how to change it. */
     class MapApp(val name: () -> String, val pick: (() -> Unit) -> Unit)
 
@@ -48,10 +51,10 @@ object CardsEditor {
 
     /** [unavailable]: cards not offered now (the power, shown in the energy card); [dock]: the bar, where the buttons go. */
     fun show(activity: Activity, layout: HomeSlots.Layout, targets: List<Target>, unavailable: Set<Card>, dock: View?,
-             mapApp: MapApp?, onChange: () -> Unit) {
+             mapApp: MapApp?, connections: Connections? = null, onChange: () -> Unit) {
         val root = activity.findViewById<ViewGroup>(android.R.id.content)
         root.findViewWithTag<View>(TAG)?.let { root.removeView(it) }
-        root.addView(Overlay(activity, layout, targets, unavailable, dock, mapApp, onChange).apply { tag = TAG }, FrameLayout.LayoutParams(-1, -1))
+        root.addView(Overlay(activity, layout, targets, unavailable, dock, mapApp, connections, onChange).apply { tag = TAG }, FrameLayout.LayoutParams(-1, -1))
     }
 
     fun close(activity: Activity) {
@@ -60,7 +63,7 @@ object CardsEditor {
     }
 
     private class Overlay(val activity: Activity, val layout: HomeSlots.Layout, val targets: List<Target>, val unavailable: Set<Card>,
-                          val dock: View?, val mapApp: MapApp?, val onChange: () -> Unit) : FrameLayout(activity) {
+                          val dock: View?, val mapApp: MapApp?, val connections: Connections?, val onChange: () -> Unit) : FrameLayout(activity) {
         private val prefs = Prefs(activity)
         private val d = resources.displayMetrics.density
         private fun dp(v: Int) = (v * d).toInt()
@@ -221,6 +224,21 @@ object CardsEditor {
                 })
             }
             column.addView(flow, LinearLayout.LayoutParams(-1, -2))
+            // The connection bar: here (one place at a time); touched again where it is, hidden
+            connections?.let { conn ->
+                val on = conn.host() == id
+                val fits = HomeSlots.canHoldConnections(c, id)
+                val row = FlowRow(context, dp(6))
+                row.addView(chip(context.getString(R.string.wc_conn_here), on, null, greyed = !fits) {
+                    when {
+                        media -> Toasts.show(context, R.string.wc_conn_media)
+                        !fits -> Toasts.show(context, R.string.wc_conn_small)
+                        on -> { conn.set(null); Toasts.show(context, R.string.wc_conn_hidden); render(); onChange() }
+                        else -> { conn.set(id); render(); onChange() }
+                    }
+                })
+                column.addView(row, LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(8) })
+            }
             fun hint(text: Int) = column.addView(TextView(context).apply {
                 this.text = context.getString(text); setTextColor(sub); setTextSize(TypedValue.COMPLEX_UNIT_SP, 17f)
                 setPadding(dp(4), dp(10), dp(4), 0)

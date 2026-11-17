@@ -13,8 +13,9 @@ import app.mg4dash.R
  */
 object CardMenu {
     /** [edit] and [delete]: buttons at the end of the row (an address of the web app, #98); the menu closes first. */
+    /** [settings]: a gear at the end of the row, for the options of what the row shows (the OpenStreetMap map). */
     class Row(val mark: String, val title: String, val detail: String?, val on: Boolean,
-              val edit: (() -> Unit)? = null, val delete: (() -> Unit)? = null, val click: () -> Unit)
+              val edit: (() -> Unit)? = null, val delete: (() -> Unit)? = null, val settings: (() -> Unit)? = null, val click: () -> Unit)
 
     fun show(activity: Activity, rows: List<Row>) {
         val d = activity.resources.displayMetrics.density
@@ -53,6 +54,7 @@ object CardMenu {
                 }
                 setOnClickListener { dialog?.dismiss(); action() }
             }, LinearLayout.LayoutParams(dp(60), dp(60)).apply { leftMargin = dp(10) })
+            row.settings?.let { end("⚙", it) }
             row.edit?.let { end("✎", it) }
             row.delete?.let { end("✕", it) }
             list.addView(r, LinearLayout.LayoutParams(-1, -2).apply { bottomMargin = dp(10) })
