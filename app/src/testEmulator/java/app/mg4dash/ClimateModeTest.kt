@@ -38,6 +38,17 @@ class ClimateModeTest {
         assertNull(ShortcutTiles.climateMode(ctx, VehicleState(hvacOn = false, driverTemp = 22f, outsideTemp = 4f)))
     }
 
+    /** Switched on from the tile: heating or cooling at once, from the last set point and outside temperature. */
+    @Test fun shownAtOnceWhenSwitchedOn() {
+        flow.value = flow.value.copy(hvacOn = false, acOn = true, driverTemp = 22f, outsideTemp = 4f)
+        val off = ShortcutTiles.climate(ctx, flow.value)
+        val next = ShortcutTiles.act(ctx, ShortcutTiles.Tile.CLIMATE, off)!!
+        assertEquals(true, next.inverted)
+        assertEquals(1, next.level)
+        assertEquals(ctx.getString(R.string.sc_heating), next.label)
+        assertEquals(R.drawable.ic_sc_clim_heat, ShortcutTiles.icon(ShortcutTiles.Tile.CLIMATE, next))
+    }
+
     private fun snap(root: android.view.View, name: String) {
         val bmp = Bitmap.createBitmap(root.width, root.height, Bitmap.Config.ARGB_8888)
         root.draw(Canvas(bmp))
