@@ -1093,4 +1093,6 @@
     <string name="wc_conn_hidden">Connection bar hidden</string>
     <string name="st_widget_options_moved">The energy card\'s and the OpenStreetMap map\'s options are now on those widgets: a long press on the energy card, the gear next to the map in its menu. The connection bar is placed from the edit mode (pinch).</string>
     <string name="wc_conn_small">This place is too small for the connection bar</string>
+    <string name="st_climate_fx">Climate card warm / cold animation</string>
+    <string name="st_climate_fx_desc">Heat haze while heating, frost while cooling, stronger as the set point is far from outside. Off: only the animation goes, Heating / Cooling stays.</string>
 </resources>

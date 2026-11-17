@@ -287,6 +287,11 @@ class Prefs(context: Context) {
         get() = sp.getBoolean("radar_wifi_only", false)
         set(v) = sp.edit().putBoolean("radar_wifi_only", v).apply()
 
+    /** The climate card's warm / cold animation (#122), on by default; off, the mode's word and icon stay. */
+    var climateFx: Boolean
+        get() = sp.getBoolean("climate_fx", true)
+        set(v) = sp.edit().putBoolean("climate_fx", v).apply()
+
     var fxSound: Boolean
         get() = sp.getBoolean("fx_sound", false)
         set(v) = sp.edit().putBoolean("fx_sound", v).apply()

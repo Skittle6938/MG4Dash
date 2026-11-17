@@ -1091,4 +1091,6 @@
     <string name="wc_conn_hidden">Lišta připojení skryta</string>
     <string name="st_widget_options_moved">Volby karty energie a mapy OpenStreetMap jsou nyní přímo na těchto widgetech: dlouhý stisk karty energie, ozubené kolo vedle mapy v její nabídce. Lištu připojení umístíte v režimu úprav (sevřením).</string>
     <string name="wc_conn_small">Místo je pro lištu připojení příliš malé</string>
+    <string name="st_climate_fx">Animace teplo/chlad na kartě klimatizace</string>
+    <string name="st_climate_fx_desc">Vlnění tepla při topení, jinovatka při chlazení, výraznější čím dál je nastavená teplota od venkovní. Vypnuto: zmizí jen animace, Topení / Chlazení zůstane.</string>
 </resources>

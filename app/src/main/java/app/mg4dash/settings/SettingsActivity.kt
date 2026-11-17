@@ -1042,6 +1042,8 @@ class SettingsActivity : AppCompatActivity() {
         parent.addView(line, LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(10) })
         text(parent, getString(R.string.st_power_fx_desc), 16f, R.color.text_title)
         fxVolumeSetting(parent)
+        // The climate card's warm / cold animation (#122): only the animation, the mode's word stays
+        toggle(parent, R.string.st_climate_fx, R.string.st_climate_fx_desc, { prefs.climateFx }) { prefs.climateFx = it }
     }
 
     /** Trials of the animations' sounds in the settings (random: each one in turn). */

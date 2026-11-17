@@ -1093,4 +1093,6 @@
     <string name="wc_conn_hidden">Verbindungsleiste ausgeblendet</string>
     <string name="st_widget_options_moved">Die Optionen der Energiekarte und der OpenStreetMap-Karte sind jetzt auf diesen Widgets: langes Drücken auf die Energiekarte, Zahnrad neben der Karte in ihrem Menü. Die Verbindungsleiste wird im Bearbeitungsmodus (Zusammenziehen) platziert.</string>
     <string name="wc_conn_small">Platz zu klein für die Verbindungsleiste</string>
+    <string name="st_climate_fx">Warm-/Kalt-Animation der Klimakarte</string>
+    <string name="st_climate_fx_desc">Hitzeflimmern beim Heizen, Reif beim Kühlen, stärker je weiter der Sollwert von der Außentemperatur entfernt ist. Aus: nur die Animation verschwindet, Heizen / Kühlen bleibt.</string>
 </resources>

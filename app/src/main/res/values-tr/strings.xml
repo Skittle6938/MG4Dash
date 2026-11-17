@@ -1093,4 +1093,6 @@
     <string name="wc_conn_hidden">Bağlantı çubuğu gizlendi</string>
     <string name="st_widget_options_moved">Enerji kartı ve OpenStreetMap haritası seçenekleri artık bu widget\'larda: enerji kartına uzun basın, menüsünde haritanın yanındaki dişli. Bağlantı çubuğu düzenleme modunda (kıstırma) yerleştirilir.</string>
     <string name="wc_conn_small">Bu alan bağlantı çubuğu için çok küçük</string>
+    <string name="st_climate_fx">Klima kartında sıcak/soğuk animasyonu</string>
+    <string name="st_climate_fx_desc">Isıtırken sıcak dalgaları, soğuturken kırağı; ayar dış sıcaklıktan ne kadar uzaksa o kadar belirgin. Kapalı: yalnızca animasyon kalkar, Isıtma / Soğutma görünür kalır.</string>
 </resources>
