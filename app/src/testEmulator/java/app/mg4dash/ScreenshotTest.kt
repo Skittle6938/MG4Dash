@@ -23,6 +23,7 @@ import app.mg4dash.ui.HomeSlots.Layout as HL
  * Full screen rendering of the screens on the MG4's panel (1920 × 720 dp, 160 dpi),
  * with simulated data. PNGs are written to build/screenshots/.
  */
+@org.junit.experimental.categories.Category(Screenshot::class)
 @RunWith(RobolectricTestRunner::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 @Config(sdk = [28], qualifiers = "w1920dp-h720dp-land-mdpi")

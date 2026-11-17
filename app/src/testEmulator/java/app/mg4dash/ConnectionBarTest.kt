@@ -74,9 +74,11 @@ class ConnectionBarTest {
     }
 
     /** The bar at the top of the climate card (top left), its content below it. */
+    @org.junit.experimental.categories.Category(Screenshot::class)
     @Test fun barInTheClimateCard() = shoot("connections_in_climate.png", edit = false)
 
     /** The edit mode with the "Connection bar here" button on each place. */
+    @org.junit.experimental.categories.Category(Screenshot::class)
     @Test fun editModeButton() = shoot("connections_edit_mode.png", edit = true)
 
     // ── The bar belongs to the place: centred at its top, every card there makes room inside (Marc, 17/11) ──
@@ -112,6 +114,7 @@ class ConnectionBarTest {
     }
 
     /** On the media (Marc, 17/11): the bar at its top, the player a little lower in its frame. */
+    @org.junit.experimental.categories.Category(Screenshot::class)
     @Test fun barOnTheMedia() {
         prefs.raw.edit().putBoolean("vertical_dock", true).putBoolean("tutorial_shortcuts_seen", true).putInt("theme_mode", 1)
             .putInt("home_style", 0).putString("home_layout", "full").remove("slots_full").commit()
@@ -129,7 +132,9 @@ class ConnectionBarTest {
         HomeSlots.setConnectionsChoice(prefs, HomeSlots.Layout.FULL, null)
     }
 
+    @org.junit.experimental.categories.Category(Screenshot::class)
     @Test fun barInClimatePlaceStaysOnSwipe() = hostShots("tl", "conn_climate")
+    @org.junit.experimental.categories.Category(Screenshot::class)
     @Test fun barInEnergyPlaceStaysOnSwipe() = hostShots("tc", "conn_energy")
 
     // ── The old "connection icons" setting ──
@@ -167,10 +172,13 @@ class ConnectionBarTest {
         File(File("build/screenshots").apply { mkdirs() }, name).outputStream().use { bmp.compress(Bitmap.CompressFormat.PNG, 100, it) }
     }
 
+    @org.junit.experimental.categories.Category(Screenshot::class)
     @Test fun energyOptionsPopup() = popupShot("energyOptions", "popup_energy_options.png")
+    @org.junit.experimental.categories.Category(Screenshot::class)
     @Test fun mapOptionsPopup() = popupShot("mapOptions", "popup_map_options.png")
 
     /** Settings > Home, lighter. */
+    @org.junit.experimental.categories.Category(Screenshot::class)
     @Test fun homeSettings() {
         prefs.raw.edit().putBoolean("vertical_dock", true).putBoolean("tutorial_shortcuts_seen", true).putInt("theme_mode", 1).commit()
         val act = Robolectric.buildActivity(app.mg4dash.settings.SettingsActivity::class.java,

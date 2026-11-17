@@ -56,7 +56,16 @@ android {
     testOptions {
         unitTests.isIncludeAndroidResources = true
         // The screenshot renders build many home screens: more than the default 512 MB
-        unitTests.all { it.maxHeapSize = "2g" }
+        unitTests.all {
+            it.maxHeapSize = "2g"
+            // Screens rendered to images (category Screenshot): apart, slow (-Pscreenshots: them only; -PallTests: everything)
+            it.useJUnit {
+                when {
+                    project.hasProperty("screenshots") -> includeCategories("app.mg4dash.Screenshot")
+                    !project.hasProperty("allTests") -> excludeCategories("app.mg4dash.Screenshot")
+                }
+            }
+        }
     }
 
     lint {

@@ -83,6 +83,7 @@ class ClimateModeTest {
 
     private fun heating() { flow.value = flow.value.copy(hvacOn = true, acOn = true, driverTemp = 22f, outsideTemp = 4f) }
 
+    @org.junit.experimental.categories.Category(Screenshot::class)
     @Test fun cardHeating() {
         ctx.getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE).edit()
             .putBoolean("vertical_dock", true).putBoolean("tutorial_shortcuts_seen", true).putInt("theme_mode", 1).commit()
@@ -93,6 +94,7 @@ class ClimateModeTest {
         snap(act.window.decorView, "climate_mode_card.png")
     }
 
+    @org.junit.experimental.categories.Category(Screenshot::class)
     @Test fun pageHeating() {
         ctx.getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE).edit()
             .putBoolean("vertical_dock", true).putInt("theme_mode", 1).commit()
