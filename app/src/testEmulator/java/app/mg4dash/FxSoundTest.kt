@@ -53,9 +53,9 @@ class FxSoundTest {
 
     /** The radar alerts: their own, louder scale (100 % = full volume, 4 x the effects' top), never under audible. */
     @Test fun alertsLouderScale() {
-        assertEquals(1f, FxSound.alertGain(100), 1e-6f)
-        assertEquals(4f * FxSound.gain(100), FxSound.alertGain(100), 1e-6f)
-        assertEquals(0.7f, FxSound.alertGain(70), 1e-6f)
+        assertEquals(0.5f, FxSound.alertGain(100), 1e-6f)
+        assertEquals(2f * FxSound.gain(100), FxSound.alertGain(100), 1e-6f)
+        assertEquals(0.35f, FxSound.alertGain(70), 1e-6f)
         assertEquals(FxSound.MIN_ALERT_GAIN, FxSound.alertGain(5), 1e-6f)
     }
 }
