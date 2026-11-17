@@ -996,9 +996,9 @@
     <string name="st_rad_prep_done">Prepared: %1$d / %2$d areas</string>
     <string name="st_rad_prep_no_wifi">Stopped, no Wi-Fi for 2 min (%1$d / %2$d)</string>
     <string name="st_rad_radius">Radius of the prepared trips</string>
-    <string name="st_rad_radius_item">%1$d km · ≈ %2$d areas · ≈ %3$s</string>
     <string name="st_rad_space">Space used: %1$s (%2$d areas)</string>
     <string name="st_rad_clear_msg">The speed limits and speed cameras kept on the car (%1$s) are deleted. They are downloaded again when needed.</string>
     <string name="st_rad_clear_btn">Clear</string>
-    <string name="st_rad_prepare_desc2">Downloads over the Wi-Fi the main roads and speed cameras within the radius chosen above around the car, for the trips without 4G. The size is an estimate: less in the countryside, more in a city centre.</string>
+    <string name="st_rad_estimate">≈ %1$d areas · ≈ %2$s downloaded · ≈ %3$s kept · ≈ %4$d min</string>
+    <string name="st_rad_prepare_desc2">Downloads over the Wi-Fi all the roads and speed cameras within the radius chosen above around the car, as while driving, for the trips without 4G. Sizes and time are estimates: less in the countryside, more in a city centre.</string>
 </resources>

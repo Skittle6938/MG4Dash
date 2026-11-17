@@ -996,9 +996,9 @@
     <string name="st_rad_prep_done">Vorbereitet: %1$d / %2$d Gebiete</string>
     <string name="st_rad_prep_no_wifi">Abgebrochen, seit 2 Min. kein WLAN (%1$d / %2$d)</string>
     <string name="st_rad_radius">Umkreis der vorbereiteten Fahrten</string>
-    <string name="st_rad_radius_item">%1$d km · ≈ %2$d Gebiete · ≈ %3$s</string>
     <string name="st_rad_space">Belegter Speicher: %1$s (%2$d Gebiete)</string>
     <string name="st_rad_clear_msg">Die im Auto gespeicherten Tempolimits und Blitzer (%1$s) werden gelöscht. Sie werden bei Bedarf erneut geladen.</string>
     <string name="st_rad_clear_btn">Löschen</string>
-    <string name="st_rad_prepare_desc2">Lädt über WLAN die Hauptstraßen und Blitzer im oben gewählten Umkreis um das Auto, für Fahrten ohne 4G. Die Größe ist geschätzt: weniger auf dem Land, mehr in der Innenstadt.</string>
+    <string name="st_rad_estimate">≈ %1$d Gebiete · ≈ %2$s Download · ≈ %3$s gespeichert · ≈ %4$d Min.</string>
+    <string name="st_rad_prepare_desc2">Lädt über WLAN alle Straßen und Blitzer im oben gewählten Umkreis um das Auto, wie beim Fahren, für Fahrten ohne 4G. Größen und Dauer sind geschätzt: weniger auf dem Land, mehr in der Innenstadt.</string>
 </resources>

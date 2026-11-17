@@ -37,15 +37,26 @@ object RadarRepo {
     private const val MIN_HEADING_KMH = 6f
     /** A failed fetch waits this long before the next try. */
     private const val BACKOFF_MS = 60_000L
-    /** Prepared trips: radii offered around the car (km), 30 by default (Marc, 17/11). */
-    val PREPARE_RADII = listOf(10, 20, 30, 50, 80)
-    const val PREPARE_DEFAULT_KM = 30
+    /** Prepared trips: radii offered around the car (km), 20 by default, 50 at most (Marc, 17/11). */
+    val PREPARE_RADII = listOf(10, 20, 30, 50)
+    const val PREPARE_DEFAULT_KM = 20
+
+    /** A radius stored before (80 km) or out of the list: the nearest one offered, at most the largest. */
+    fun prepareRadius(stored: Int): Int = PREPARE_RADII.lastOrNull { it <= stored } ?: PREPARE_RADII.first()
     /**
-     * Typical size of one box (2 × 2 tiles, 0.04°) of main roads and cameras, as downloaded (Overpass answers
-     * uncompressed): about 155 kB in a suburb (243 kB measured for 0.05° on 17/11), less in the countryside, more in a
-     * city centre.
+     * Typical size of one box (2 × 2 tiles, 0.04°) uncompressed, for a mix of countryside, suburbs and city (measured on
+     * 17/11): main roads about 10 kB in the countryside, 150 kB in a suburb, 1.1 MB in central Paris; all the streets
+     * about 34 kB, 1.3 MB and 2.6 MB. A server that compresses its answers sends about a fifth of it.
      */
-    const val PREP_BOX_BYTES = 130_000L
+    const val PREP_BOX_BYTES = 1_000_000L
+    /** Downloaded when the compressing server answers (about a fifth), and kept on disk in the compact form. */
+    const val PREP_BOX_BYTES_GZIP = 200_000L
+    const val PREP_BOX_BYTES_KEPT = 550_000L
+    /** Typical time per box: the server's answer and the pause between queries. */
+    const val PREP_BOX_SECONDS = 10
+
+    /** Estimate of a preparation: boxes, bytes downloaded (compressed), bytes kept, minutes. */
+    data class Estimate(val boxes: Int, val download: Long, val kept: Long, val minutes: Int)
 
     enum class Status { OK, NO_POSITION, LOADING, NO_DATA, WIFI_ONLY, OFF_ROAD }
 
@@ -238,10 +249,14 @@ object RadarRepo {
                     conn.requestMethod = "POST"; conn.doOutput = true
                     conn.setRequestProperty("User-Agent", "MG4Dash/${BuildConfig.VERSION_NAME}")
                     conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded")
+                    // Compressed answers when the server can (about a fifth of the data)
+                    conn.setRequestProperty("Accept-Encoding", "gzip")
                     conn.outputStream.use { it.write(("data=" + URLEncoder.encode(query, "UTF-8")).toByteArray()) }
                     val code = conn.responseCode
                     if (code == 200) {
-                        val body = conn.inputStream.use { it.readBytes().toString(Charsets.UTF_8) }
+                        val raw = conn.inputStream
+                        val input = if (conn.contentEncoding.equals("gzip", ignoreCase = true)) java.util.zip.GZIPInputStream(raw) else raw
+                        val body = input.use { it.readBytes().toString(Charsets.UTF_8) }
                         Overpass.preferred = Math.floorMod(first + k, Overpass.SERVERS.size)
                         return@tag Overpass.Result(body)
                     }
@@ -286,14 +301,14 @@ object RadarRepo {
     internal fun boxTiles(sw: RadarData.Key): List<RadarData.Key> =
         (0 until PREP_TILES).flatMap { dy -> (0 until PREP_TILES).map { dx -> RadarData.Key(sw.y + dy, sw.x + dx) } }
 
-    /** Estimate for a radius: boxes and bytes downloaded (at [lat]; 48.8 when the position is unknown). */
-    fun prepareEstimate(km: Int, lat: Double = LocationRepo.location.value?.latitude ?: 48.8): Pair<Int, Long> {
+    /** Estimate for a radius (at [lat]; 48.8 when the position is unknown), for a mix of countryside, suburbs and city. */
+    fun prepareEstimate(km: Int, lat: Double = LocationRepo.location.value?.latitude ?: 48.8): Estimate {
         val n = prepareBoxes(lat, 0.025, km).size
-        return n to n * PREP_BOX_BYTES
+        return Estimate(n, n * PREP_BOX_BYTES_GZIP, n * PREP_BOX_BYTES_KEPT, Math.max(1, (n * PREP_BOX_SECONDS + 59) / 60))
     }
 
     /**
-     * Main roads and cameras within the radius chosen (Prefs.radarPrepareKm) around the car, over the Wi-Fi only, in
+     * All the roads and cameras within the radius chosen (Prefs.radarPrepareKm) around the car, over the Wi-Fi only, in
      * boxes of [PREP_TILES] × [PREP_TILES] tiles; tiles already there and fresh are kept, the others written over. A box that fails is tried again after a pause (longer when the servers are
      * busy); without Wi-Fi it waits for it up to 2 min, then stops. False when it cannot start (no position, no
      * Wi-Fi, already running).
@@ -302,7 +317,9 @@ object RadarRepo {
         val loc = LocationRepo.location.value ?: return false
         if (!onWifi() || _prepare.value?.running == true) return false
         val c = context.applicationContext
-        val boxes = prepareBoxes(loc.latitude, loc.longitude, Prefs(c).radarPrepareKm)
+        // The complete data, all the streets, as around the car while driving (Marc, 17/11)
+        val level = RadarData.Level.FULL
+        val boxes = prepareBoxes(loc.latitude, loc.longitude, prepareRadius(Prefs(c).radarPrepareKm))
         _prepare.value = Prep(0, boxes.size, 0, PrepPhase.RUNNING)
         Log.i(TAG, "preparing trips: ${boxes.size} boxes")
         prep.post {
@@ -321,7 +338,8 @@ object RadarRepo {
                 val bs = sw.south; val bw = sw.west
                 val bn = RadarData.Key(sw.y + PREP_TILES, sw.x).south; val be = RadarData.Key(sw.y, sw.x + PREP_TILES).west
                 val now = System.currentTimeMillis()
-                val missing = keys.filter { k -> RadarData.read(c.filesDir, k)?.let { !it.fresh(now) } ?: true }
+                // A tile of main roads only (earlier preparations) is fetched again with all its streets
+                val missing = keys.filter { k -> RadarData.read(c.filesDir, k)?.let { !it.fresh(now) || it.level != RadarData.Level.FULL } ?: true }
                 if (missing.isNotEmpty()) {
                     var ok = false
                     for (attempt in 1..PREP_TRIES) {
@@ -334,11 +352,11 @@ object RadarRepo {
                             Thread.sleep(Overpass.backoffMs(attempt, lastBusy))
                             show(PrepPhase.RUNNING)
                         }
-                        val r = download(RadarData.query(bs, bw, bn, be, RadarData.Level.MAIN), wifiOnly = true)
+                        val r = download(RadarData.query(bs, bw, bn, be, level), wifiOnly = true)
                         lastBusy = r.busy
                         val parsed = r.body?.let { json -> runCatching { RadarData.parse(json) }.getOrNull() }
                         if (parsed != null) {
-                            RadarData.split(missing, RadarData.Level.MAIN, now, parsed.first, parsed.second).forEach { runCatching { RadarData.write(c.filesDir, it) } }
+                            RadarData.split(missing, level, now, parsed.first, parsed.second).forEach { runCatching { RadarData.write(c.filesDir, it) } }
                             ok = true; break
                         }
                         Log.w(TAG, "preparing: box $bs,$bw failed (try $attempt, ${r.error}${if (r.busy) ", servers busy" else ""})")

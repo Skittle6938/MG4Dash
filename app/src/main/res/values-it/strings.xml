@@ -996,9 +996,9 @@
     <string name="st_rad_prep_done">Preparato: %1$d / %2$d zone</string>
     <string name="st_rad_prep_no_wifi">Interrotto, nessun Wi-Fi da 2 min (%1$d / %2$d)</string>
     <string name="st_rad_radius">Raggio dei tragitti preparati</string>
-    <string name="st_rad_radius_item">%1$d km · ≈ %2$d zone · ≈ %3$s</string>
     <string name="st_rad_space">Spazio occupato: %1$s (%2$d zone)</string>
     <string name="st_rad_clear_msg">I limiti e gli autovelox salvati nell\'auto (%1$s) vengono cancellati. Saranno riscaricati quando serve.</string>
     <string name="st_rad_clear_btn">Svuota</string>
-    <string name="st_rad_prepare_desc2">Scarica via Wi-Fi le strade principali e gli autovelox nel raggio scelto sopra intorno all\'auto, per i tragitti senza 4G. La dimensione è una stima: meno in campagna, di più in centro città.</string>
+    <string name="st_rad_estimate">≈ %1$d zone · ≈ %2$s scaricati · ≈ %3$s salvati · ≈ %4$d min</string>
+    <string name="st_rad_prepare_desc2">Scarica via Wi-Fi tutte le strade e gli autovelox nel raggio scelto sopra intorno all\'auto, come durante la guida, per i tragitti senza 4G. Dimensioni e durata sono stime: meno in campagna, di più in centro città.</string>
 </resources>

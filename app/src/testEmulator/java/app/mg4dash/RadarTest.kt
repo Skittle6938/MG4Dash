@@ -302,8 +302,8 @@ class RadarTest {
 
     @Test fun prepareRadiusBoxesAndEstimate() {
         val r = app.mg4dash.radar.RadarRepo
-        assertEquals(listOf(10, 20, 30, 50, 80), r.PREPARE_RADII)
-        assertEquals(30, app.mg4dash.system.Prefs(org.robolectric.RuntimeEnvironment.getApplication()).radarPrepareKm)
+        assertEquals(listOf(10, 20, 30, 50), r.PREPARE_RADII)
+        assertEquals(20, app.mg4dash.system.Prefs(org.robolectric.RuntimeEnvironment.getApplication()).radarPrepareKm)
         // 30 km around Paris: 60 km square in boxes of 2 x 2 tiles (0.04°), about 15 x 21
         val boxes = r.prepareBoxes(48.86, 2.35, 30)
         assertTrue(boxes.size in 280..360)
@@ -314,8 +314,11 @@ class RadarTest {
             assertTrue(RadarData.Key.of(la, lo) in tiles)
         }
         val sizes = r.PREPARE_RADII.map { r.prepareEstimate(it, 48.86) }
-        assertEquals(sizes.sortedBy { it.first }, sizes)
-        assertEquals(sizes[2].first * r.PREP_BOX_BYTES, sizes[2].second)
+        assertEquals(sizes.sortedBy { it.boxes }, sizes)
+        val e = sizes[2]
+        assertEquals(e.boxes * r.PREP_BOX_BYTES_GZIP, e.download)
+        assertEquals(e.boxes * r.PREP_BOX_BYTES_KEPT, e.kept)
+        assertTrue(e.minutes in 40..70)
     }
 
     /** Boxes on the tile grid: a tile belongs to one box only, whatever the starting position, so it is never fetched in halves or kept twice. */
@@ -344,5 +347,17 @@ class RadarTest {
         assertTrue(Math.abs(size2 - size1) < 10)
         assertEquals(RadarData.Level.FULL, RadarData.read(dir, key)!!.level)
         dir.deleteRecursively()
+    }
+
+    /** 50 km at most (Marc, 17/11): a radius stored before (80) comes back as 50; the compressing server asked first. */
+    @Test fun preparationRadiusClamped() {
+        val r = app.mg4dash.radar.RadarRepo
+        assertEquals(50, r.prepareRadius(80))
+        assertEquals(30, r.prepareRadius(30))
+        assertEquals(10, r.prepareRadius(5))
+        val prefs = app.mg4dash.system.Prefs(org.robolectric.RuntimeEnvironment.getApplication())
+        prefs.raw.edit().putInt("radar_prepare_km", 80).commit()
+        assertEquals(50, prefs.radarPrepareKm)
+        assertTrue(app.mg4dash.radar.Overpass.SERVERS.first().contains("mail.ru"))
     }
 }

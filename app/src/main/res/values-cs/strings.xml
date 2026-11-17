@@ -994,9 +994,9 @@
     <string name="st_rad_prep_done">Připraveno: %1$d / %2$d oblastí</string>
     <string name="st_rad_prep_no_wifi">Zastaveno, 2 min bez Wi-Fi (%1$d / %2$d)</string>
     <string name="st_rad_radius">Poloměr připravených tras</string>
-    <string name="st_rad_radius_item">%1$d km · ≈ %2$d oblastí · ≈ %3$s</string>
     <string name="st_rad_space">Obsazené místo: %1$s (%2$d oblastí)</string>
     <string name="st_rad_clear_msg">Limity a radary uložené ve voze (%1$s) budou smazány. V případě potřeby se znovu stáhnou.</string>
     <string name="st_rad_clear_btn">Vyprázdnit</string>
-    <string name="st_rad_prepare_desc2">Stáhne přes Wi-Fi hlavní silnice a radary ve výše zvoleném poloměru kolem vozu, pro trasy bez 4G. Velikost je odhad: na venkově méně, v centru města více.</string>
+    <string name="st_rad_estimate">≈ %1$d oblastí · ≈ %2$s staženo · ≈ %3$s uloženo · ≈ %4$d min</string>
+    <string name="st_rad_prepare_desc2">Stáhne přes Wi-Fi všechny silnice a radary ve výše zvoleném poloměru kolem vozu, jako při jízdě, pro trasy bez 4G. Velikosti a doba jsou odhady: na venkově méně, v centru města více.</string>
 </resources>

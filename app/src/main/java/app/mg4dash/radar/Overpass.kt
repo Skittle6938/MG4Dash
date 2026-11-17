@@ -5,13 +5,14 @@ package app.mg4dash.radar
  *
  * Android 9 has no TLS 1.3: overpass-api.de now only accepts TLS 1.3 (seen on the car on 17/11: every request
  * "SSLHandshakeException Handshake failed"), so it is tried last, for newer head units. The others accept TLS 1.2.
- * The server that answered last is tried first next time.
+ * maps.mail.ru first: it compresses its answers (about a fifth of the data, measured 17/11). The server that answered
+ * last is tried first next time.
  */
 object Overpass {
     val SERVERS = listOf(
+        "https://maps.mail.ru/osm/tools/overpass/api/interpreter",
         "https://overpass.kumi.systems/api/interpreter",
         "https://overpass.private.coffee/api/interpreter",
-        "https://maps.mail.ru/osm/tools/overpass/api/interpreter",
         "https://overpass-api.de/api/interpreter",
     )
 

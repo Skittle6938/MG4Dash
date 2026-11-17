@@ -1453,12 +1453,18 @@ class SettingsActivity : AppCompatActivity() {
         val cache = text(parent, "", 17f, R.color.text_value)
         // Radius of the prepared trips, with the areas and the data it takes (estimate)
         val radii = app.mg4dash.radar.RadarRepo.PREPARE_RADII
-        fun radiusLabel(km: Int): String {
-            val (n, bytes) = app.mg4dash.radar.RadarRepo.prepareEstimate(km)
-            return getString(R.string.st_rad_radius_item, km, n, app.mg4dash.system.DataUsage.format(this, bytes))
+        val estimate = text(parent, "", 15f, R.color.text_sub)
+        // Areas, data downloaded and kept, time it takes (estimate, all the streets)
+        fun showEstimate() {
+            val e = app.mg4dash.radar.RadarRepo.prepareEstimate(prefs.radarPrepareKm)
+            estimate.text = getString(R.string.st_rad_estimate, e.boxes, app.mg4dash.system.DataUsage.format(this, e.download),
+                app.mg4dash.system.DataUsage.format(this, e.kept), e.minutes)
         }
-        dropdown(parent, getString(R.string.st_rad_radius), radii.map { radiusLabel(it) },
-            { radii.indexOf(prefs.radarPrepareKm).coerceAtLeast(0) }) { prefs.radarPrepareKm = radii[it] }
+        dropdown(parent, getString(R.string.st_rad_radius), radii.map { "$it km" },
+            { radii.indexOf(prefs.radarPrepareKm).coerceAtLeast(0) }) { prefs.radarPrepareKm = radii[it]; showEstimate() }
+        // The estimate under the radius
+        (estimate.parent as LinearLayout).let { p -> p.removeView(estimate); p.addView(estimate) }
+        showEstimate()
         val state = text(parent, "", 16f, R.color.text_value)
         fun show() {
             val (n, bytes) = app.mg4dash.radar.RadarRepo.cacheSize(this)

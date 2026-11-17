@@ -253,7 +253,7 @@ class Prefs(context: Context) {
         set(v) = sp.edit().putBoolean("radar_banner", v).apply()
     /** Radius of the prepared trips (km), one of [app.mg4dash.radar.RadarRepo.PREPARE_RADII]. */
     var radarPrepareKm: Int
-        get() = sp.getInt("radar_prepare_km", app.mg4dash.radar.RadarRepo.PREPARE_DEFAULT_KM)
+        get() = app.mg4dash.radar.RadarRepo.prepareRadius(sp.getInt("radar_prepare_km", app.mg4dash.radar.RadarRepo.PREPARE_DEFAULT_KM))
         set(v) = sp.edit().putInt("radar_prepare_km", v).apply()
     /** No OpenStreetMap download on the car's 4G: the tiles already kept only. */
     var radarWifiOnly: Boolean
