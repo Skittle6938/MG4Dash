@@ -202,7 +202,8 @@ class RadarPage(private val a: Activity, private val prefs: Prefs) {
         val soundNames = listOf(R.string.st_rad_snd_none, R.string.st_rad_snd_chime, R.string.st_rad_snd_beep, R.string.st_rad_snd_loud).map { a.getString(it) }
         val reps = RadarAlert.REPEATS
         // Column widths: alert, sound, volume, repeat, play
-        val w = intArrayOf(0, 200, 250, 170, 60)
+        // The volume wide, for an easy setting (Marc, 17/11)
+        val w = intArrayOf(0, 190, 460, 160, 60)
         fun header() = LinearLayout(a).apply {
             orientation = LinearLayout.HORIZONTAL
             listOf(R.string.rp_col_alert, R.string.rp_col_sound, R.string.rp_col_volume, R.string.rp_col_repeat).forEachIndexed { i, s ->
@@ -240,7 +241,9 @@ class RadarPage(private val a: Activity, private val prefs: Prefs) {
                 })
             }
             pct.text = "${prefs.radarVolume(k)} %"
-            volBox.addView(seek, LinearLayout.LayoutParams(0, -2, 1f))
+            // A tall touch area: the whole row's height, not just the thin bar
+            seek.minimumHeight = dp(56)
+            volBox.addView(seek, LinearLayout.LayoutParams(0, dp(56), 1f))
             volBox.addView(pct, LinearLayout.LayoutParams(dp(60), -2))
             fun dim() { val on = prefs.radarSoundOf(k) != RadarAlert.Sound.NONE; volBox.alpha = if (on) 1f else 0.35f; seek.isEnabled = on }
             val sound = dropdown({ soundNames }, { sounds.indexOf(prefs.radarSoundOf(k)) }) { prefs.setRadarSoundOf(k, sounds[it]); dim() }

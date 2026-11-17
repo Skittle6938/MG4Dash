@@ -69,9 +69,10 @@ object FxSound {
     internal const val MIN_ALERT_GAIN = 0.12f
     /**
      * The alerts' own scale, louder than the effects' (Marc, 17/11: too quiet in the car at 100 %): 100 % is SoundPool's
-     * full volume, four times the effects' top, on the same channel (mixed over the source, nothing lowered).
+     * full volume, four times the effects' top, on the same channel (mixed over the source, nothing lowered); then too
+     * loud at 100 % (Marc, 17/11): half of it, twice the effects' top (the sounds normalised to -0.5 dBFS).
      */
-    internal const val ALERT_MAX_GAIN = 1f
+    internal const val ALERT_MAX_GAIN = 0.5f
     internal fun alertGain(percent: Int): Float = maxOf(percent.coerceIn(0, 100) / 100f * ALERT_MAX_GAIN, MIN_ALERT_GAIN)
 
     /**
