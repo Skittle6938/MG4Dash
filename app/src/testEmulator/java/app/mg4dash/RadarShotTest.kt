@@ -18,6 +18,7 @@ import java.io.File
 import java.util.concurrent.TimeUnit
 
 /** The speed camera alerter's card (test) in its sizes, with simulated states; PNGs in build/screenshots/. */
+@org.junit.experimental.categories.Category(Screenshot::class)
 @RunWith(RobolectricTestRunner::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 @Config(sdk = [28], qualifiers = "fr-w1920dp-h720dp-land-mdpi")
