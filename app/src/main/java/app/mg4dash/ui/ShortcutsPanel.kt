@@ -724,10 +724,10 @@ object ShortcutsPanel : Application.ActivityLifecycleCallbacks {
                 val v = strip ?: return
                 if (!relaying) {
                     val link = linkInFront(v.context)
-                    val pulldown = link && LinkContract.carPulldown(v.context)
-                    // MG4Link's projection under the car's status bar: the strip is the bar, no more (see [stripHeight])
-                    place(stripHeight(link && linkImmersive == false && !pulldown, barHeight(v.context)))
-                    touchable(stripMode(link, linkImmersive, Firmware.gen, pulldown) == StripGesture.Mode.CATCH)
+                    // MG4Link's projection under the car's status bar: the strip is the bar, no more (see [stripState])
+                    val st = stripState(link, linkImmersive, Firmware.gen, link && LinkContract.carPulldown(v.context), barHeight(v.context))
+                    place(st.height)
+                    touchable(st.catches)
                 }
                 main.postDelayed(this, 400)
             }
@@ -779,7 +779,9 @@ object ShortcutsPanel : Application.ActivityLifecycleCallbacks {
             if (ownInFront(c)) {
                 if (MediaHub.phoneProjecting) {
                     Log.i(TAG, "strip: two fingers on MG4Dash, Android Auto / CarPlay")
-                    try { c.startActivity(android.content.Intent(c, OpenProjectionActivity::class.java).addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)) }
+                    // As the two finger pull of MG4Dash's screens: the projection opened directly, no message
+                    try { c.startActivity(android.content.Intent(c, OpenProjectionActivity::class.java).putExtra(OpenProjectionActivity.EXTRA_DIRECT, true)
+                        .addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)) }
                     catch (e: Exception) { Log.w(TAG, "projection: ${e.message}") }
                 }
                 return
@@ -791,10 +793,10 @@ object ShortcutsPanel : Application.ActivityLifecycleCallbacks {
             } catch (e: Exception) { Log.w(TAG, "home: ${e.message}") }
         }
 
-        /** Three fingers from the strip: MG4Link is asked to end its session (nothing when it is not installed). */
+        /** Three fingers from the strip, over MG4Link's projection: MG4Link is asked to end its session. */
         private fun threeFingers(c: Context) {
             val sent = LinkContract.sendDisconnect(c)
-            Log.i(TAG, "strip: three fingers, ${if (sent) "MG4Link asked to disconnect" else "no MG4Link"}")
+            Log.i(TAG, "strip: three fingers, ${if (sent) "disconnect request sent to MG4Link" else "MG4Link not installed, nothing sent"}")
         }
 
         /** MG4Link's projection in front, and an MG4Link that pulls the menu itself. */
@@ -946,7 +948,11 @@ object ShortcutsPanel : Application.ActivityLifecycleCallbacks {
                         val d = dragging
                         if (d != null) { d.setProgress((e.rawY - downY) / d.sheetHeight()); return true }
                         // rawX / rawY: the first finger's position
-                        when (gesture.move(e.rawX, e.rawY, e.pointerCount)) {
+                        val a = gesture.move(e.rawX, e.rawY, e.pointerCount)
+                        // Three fingers only over MG4Link's projection; elsewhere nothing (no session to end there)
+                        val act = if (a == StripGesture.Action.DISCONNECT) stripAction(a, linkInFront(context)) else a
+                        if (a != act) Log.i(TAG, "strip: three fingers outside MG4Link, nothing")
+                        when (act) {
                             StripGesture.Action.MENU -> if (panel == null) {
                                 val p = openPanel(context)
                                 panel = p; dragging = p; downY = e.rawY
