@@ -138,6 +138,13 @@ class ShortcutsMenuTest {
         assertEquals(true, ShortcutTiles.coolingFor(true, 20f, 28f, null))     // A/C on, set point below outside: cooling
         assertEquals(false, ShortcutTiles.coolingFor(true, 22f, 9f, null))     // set point above outside: heating
         assertEquals(false, ShortcutTiles.coolingFor(false, 20f, 28f, null))   // A/C off: heating
+        // Guessed at the switch-on, before the car tells its mode: 1 °C margin each way
+        assertEquals(1, ShortcutTiles.predictMode(21f, 19.9f))   // outside more than 1 °C below: heating
+        assertEquals(3, ShortcutTiles.predictMode(21f, 20f))     // within 1 °C: neither
+        assertEquals(3, ShortcutTiles.predictMode(21f, 22f))
+        assertEquals(2, ShortcutTiles.predictMode(21f, 22.1f))   // more than 1 °C above: cooling
+        assertEquals(null, ShortcutTiles.predictMode(null, 15f))
+        assertEquals(null, ShortcutTiles.predictMode(21f, null))
         assertEquals(true, ShortcutTiles.coolingFor(true, 21.8f, 22f, true))   // within 0.5 °C: as before (no flicker)
         assertEquals(true, ShortcutTiles.coolingFor(true, 22f, null, null))    // no outside temperature: the A/C decides
     }

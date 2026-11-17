@@ -155,7 +155,7 @@ object ShortcutTiles {
             Tile.FOG -> if (on) tile.icon else R.drawable.ic_sc_fog_off
             // ESP: inverted when it is off
             Tile.ESP -> if (on) R.drawable.ic_sc_esp_off else tile.icon
-            Tile.CLIMATE -> when { !on -> R.drawable.ic_sc_clim_off; s.level == 1 -> R.drawable.ic_sc_clim_heat; else -> tile.icon }
+            Tile.CLIMATE -> when { !on -> R.drawable.ic_sc_clim_off; s.level == 1 -> R.drawable.ic_sc_clim_heat; s.level == 3 -> R.drawable.ic_fan; else -> tile.icon }
             Tile.AIDS -> if (s.level == 0) R.drawable.ic_sc_adas_off else tile.icon
             Tile.DEFROST -> if (on) tile.icon else R.drawable.ic_sc_defrost_off
             Tile.WHEEL_HEAT -> if (on) tile.icon else R.drawable.ic_sc_wheel_heat_off
@@ -189,6 +189,8 @@ object ShortcutTiles {
 
     /** The state to show for [tile] given the car's [read] now. */
     fun shown(tile: Tile, read: Shown, now: Long = System.currentTimeMillis()): Shown {
+        // The climate: its guessed mode gives way as soon as the car says it is on (its own state line and mode)
+        if (tile == Tile.CLIMATE) holds[tile]?.let { h -> if (read.available && read.inverted == h.first.inverted && read.state.isNotEmpty()) holds.remove(tile) }
         val (v, keep) = held(read, holds[tile], now)
         if (!keep) holds.remove(tile)
         return v
@@ -241,7 +243,7 @@ object ShortcutTiles {
             if (tile == Tile.FOG) Toasts.show(activity, R.string.sc_lights_needed)
             return null
         }
-        val next = flipped(activity, tile, shown)
+        val next = flipped(activity, tile, shown)?.let { n -> if (tile == Tile.CLIMATE && n.inverted) predicted(activity, s, n) else n }
         when (tile) {
             Tile.FOG -> {
                 val turningOn = shown?.inverted != true
@@ -323,6 +325,26 @@ object ShortcutTiles {
         val cooling = coolingFor(s.acOn == true, set, out, lastCooling).also { lastCooling = it }
         val state = if (set != null) context.getString(R.string.sc_clim_state, temp(set), out?.let { temp(it) } ?: "?") else ""
         return Shown(state, true, level = if (cooling) 2 else 1, label = t(if (cooling) R.string.sc_cooling else R.string.sc_heating))
+    }
+
+    /**
+     * The mode the climate will take, guessed when it is switched on (17/11: the icon changed only once the car
+     * told its mode, seconds later): heating with the outside more than 1 °C below the set point, cooling more than
+     * 1 °C above it, otherwise neither (the fan); null without both temperatures. 1 = heating, 2 = cooling, 3 = neither.
+     */
+    internal fun predictMode(set: Float?, out: Float?): Int? = when {
+        set == null || out == null -> null
+        out < set - PREDICT_MARGIN -> 1
+        out > set + PREDICT_MARGIN -> 2
+        else -> 3
+    }
+    private const val PREDICT_MARGIN = 1f
+
+    /** [on] with the predicted mode's icon and name, until the car tells its own. */
+    private fun predicted(context: Context, s: VehicleState, on: Shown): Shown {
+        val mode = predictMode(s.driverTemp, s.outsideTemp?.takeIf { it > -60f && it < 70f }) ?: return on
+        lastCooling = if (mode == 3) lastCooling else mode == 2
+        return on.copy(level = mode, label = when (mode) { 1 -> context.getString(R.string.sc_heating); 2 -> context.getString(R.string.sc_cooling); else -> null })
     }
 
     internal fun coolingFor(ac: Boolean, set: Float?, out: Float?, last: Boolean?): Boolean = when {
