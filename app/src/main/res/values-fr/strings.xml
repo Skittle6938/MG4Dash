@@ -988,4 +988,11 @@
     <string name="st_rad_prepare_no">Il faut un Wi-Fi et la position de la voiture</string>
     <string name="st_rad_prepare_desc">Télécharge en Wi-Fi les routes principales et les radars à 30 km autour de la voiture, pour les trajets sans 4G.</string>
     <string name="st_rad_clear">Effacer les données gardées</string>
+    <string name="st_rad_alerts">Alertes</string>
+    <string name="st_rad_data">Données OpenStreetMap</string>
+    <string name="st_rad_prep_failed">%1$d en échec</string>
+    <string name="st_rad_prep_wait_wifi">En attente du Wi-Fi… (%1$d / %2$d)</string>
+    <string name="st_rad_prep_retry">Serveur occupé, nouvel essai… (%1$d / %2$d)</string>
+    <string name="st_rad_prep_done">Préparé : %1$d / %2$d zones</string>
+    <string name="st_rad_prep_no_wifi">Arrêté, pas de Wi-Fi depuis 2 min (%1$d / %2$d)</string>
 </resources>

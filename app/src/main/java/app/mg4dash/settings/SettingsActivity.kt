@@ -56,6 +56,8 @@ class SettingsActivity : AppCompatActivity() {
         prefs = Prefs(this)
         app.mg4dash.ui.Themes.apply(this)
         themeSig = app.mg4dash.ui.Themes.signature(this)
+        // The speed camera alerter's own page (17/11): a long press on its card
+        if (intent.getBooleanExtra(EXTRA_RADAR, false)) { radarPage(); return }
         // A single scrolling area: two columns of categories, under a fixed banner
         // (title, log, close) that leaves room for the fog light button.
         val root = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; setPadding(dp(16), dp(12), dp(16), dp(12)) }
@@ -200,7 +202,6 @@ class SettingsActivity : AppCompatActivity() {
             toggle(units, R.string.st_hide_saic_climate, R.string.st_hide_saic_climate_desc, { prefs.hideSaicClimate }) { prefs.hideSaicClimate = it }
 
         soundTriggersSetting(panel(carL, getString(R.string.st_sound_trigger).uppercase()))
-        radarSetting(panel(carL, getString(R.string.st_rad_title).uppercase()))
 
         // ════ Appearance tab: theme and effects ════
         val theme = panel(lookL, getString(R.string.st_theme))
@@ -499,6 +500,8 @@ class SettingsActivity : AppCompatActivity() {
         const val EXTRA_TAB = "tab"
         const val TAB_DATA = 4
         const val TAB_CAR = 2
+        /** Opens the speed camera alerter's own page instead of the settings (long press on its card). */
+        const val EXTRA_RADAR = "radar"
     }
 
     // ── 4G data: total over 30 days, by use, day by day, alert ──
@@ -1387,8 +1390,37 @@ class SettingsActivity : AppCompatActivity() {
         }
     }
 
-    /** Speed camera alerter (test): alerts, thresholds, network, prepared trips, cache. */
-    private fun radarSetting(parent: LinearLayout) {
+    /**
+     * The speed camera alerter's own page (test, 17/11), opened by a long press on its card, apart from the
+     * settings: the alerts on the left, the OpenStreetMap data (network, prepared trips, cache) on the right.
+     */
+    private fun radarPage() {
+        val root = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; setPadding(dp(16), dp(12), dp(16), dp(12)) }
+        val vertical = app.mg4dash.ui.Dock.vertical(this)
+        val top = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL }
+        top.addView(TextView(this).apply {
+            text = getString(R.string.st_rad_title); setTextColor(color(R.color.text_value))
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, 22f); typeface = Typeface.create("sans-serif-medium", Typeface.NORMAL)
+        }, LinearLayout.LayoutParams(0, -2, 1f).apply { leftMargin = if (vertical) dp(12) else dp(app.mg4dash.ui.Kit.fogSafeDp(this@SettingsActivity) - 8) })
+        top.addView(button(getString(R.string.st_close)) { finish() }, LinearLayout.LayoutParams(dp(160), dp(52)))
+        root.addView(top, LinearLayout.LayoutParams(-1, -2).apply { bottomMargin = dp(12) })
+        val cols = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
+        val l = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
+        val r = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
+        cols.addView(l, LinearLayout.LayoutParams(0, -2, 1f).apply { rightMargin = dp(8) })
+        cols.addView(r, LinearLayout.LayoutParams(0, -2, 1f).apply { leftMargin = dp(8) })
+        root.addView(ScrollView(this).apply { isVerticalScrollBarEnabled = true; addView(cols) }, LinearLayout.LayoutParams(-1, 0, 1f))
+        val dock = LinearLayout(this)
+        root.addView(dock, LinearLayout.LayoutParams(-1, dp(84)).apply { topMargin = dp(12) })
+        app.mg4dash.ui.Dock.mount(this, root, dock, app.mg4dash.ui.Dock.Page.SETTINGS)
+        setContentView(root)
+        app.mg4dash.ui.FadeOutline.applyTo(root)
+        radarAlerts(panel(l, getString(R.string.st_rad_alerts).uppercase()))
+        radarData(panel(r, getString(R.string.st_rad_data).uppercase()))
+    }
+
+    /** Alerts: visual, sound, thresholds, banner. */
+    private fun radarAlerts(parent: LinearLayout) {
         text(parent, getString(R.string.st_rad_desc), 15f, R.color.text_title)
         toggle(parent, R.string.st_rad_visual, null, { prefs.radarVisual }) { prefs.radarVisual = it }
         dropdown(parent, getString(R.string.st_rad_sound), listOf(R.string.st_rad_sound_none, R.string.st_rad_sound_strong, R.string.st_rad_sound_both).map { getString(it) },
@@ -1413,22 +1445,40 @@ class SettingsActivity : AppCompatActivity() {
         high.setOnClickListener { v -> app.mg4dash.ui.SourceMenu.choose(this, v, highs().map { label(it) }, index(highs(), prefs.radarHigh)) { prefs.radarHigh = highs()[it]; paint() } }
         paint()
         toggle(parent, R.string.st_rad_banner, R.string.st_rad_banner_desc, { prefs.radarBanner }) { prefs.radarBanner = it }
+    }
+
+    /** OpenStreetMap data: Wi-Fi only, prepared trips with their progress, cache, licence. */
+    private fun radarData(parent: LinearLayout) {
         toggle(parent, R.string.st_rad_wifi, R.string.st_rad_wifi_desc, { prefs.radarWifiOnly }) { prefs.radarWifiOnly = it }
+        val state = text(parent, "", 16f, R.color.text_value)
         val cache = text(parent, "", 15f, R.color.text_sub)
-        fun showCache() {
+        fun show() {
             val (n, bytes) = app.mg4dash.radar.RadarRepo.cacheSize(this)
-            val prep = app.mg4dash.radar.RadarRepo.prepare.value
-            cache.text = if (prep != null) getString(R.string.st_rad_preparing, prep.first, prep.second)
-                else getString(R.string.st_rad_cache, n, app.mg4dash.system.DataUsage.format(this, bytes))
+            cache.text = getString(R.string.st_rad_cache, n, app.mg4dash.system.DataUsage.format(this, bytes))
+            val p = app.mg4dash.radar.RadarRepo.prepare.value
+            state.visibility = if (p == null) View.GONE else View.VISIBLE
+            state.text = p?.let { radarPrepText(it) } ?: ""
         }
-        showCache()
+        show()
         row(parent, button(getString(R.string.st_rad_prepare)) {
-            if (app.mg4dash.radar.RadarRepo.prepareTrips(this)) showCache()
+            if (app.mg4dash.radar.RadarRepo.prepareTrips(this)) show()
             else app.mg4dash.ui.Toasts.show(this, R.string.st_rad_prepare_no)
-        }, button(getString(R.string.st_rad_clear)) { app.mg4dash.radar.RadarRepo.clearCache(this); cache.postDelayed({ showCache() }, 500) })
+        }, button(getString(R.string.st_rad_clear)) { app.mg4dash.radar.RadarRepo.clearCache(this); cache.postDelayed({ show() }, 500) })
         text(parent, getString(R.string.st_rad_prepare_desc), 15f, R.color.text_title)
-        lifecycleScope.launch { app.mg4dash.radar.RadarRepo.prepare.collect { showCache() } }
+        lifecycleScope.launch { app.mg4dash.radar.RadarRepo.prepare.collect { show() } }
         text(parent, getString(R.string.rad_osm_licence), 14f, R.color.text_sub)
+    }
+
+    /** Where the preparation is: running, waiting for the Wi-Fi, retrying a busy server, done, stopped. */
+    private fun radarPrepText(p: app.mg4dash.radar.RadarRepo.Prep): String {
+        val failed = if (p.failed > 0) " · " + getString(R.string.st_rad_prep_failed, p.failed) else ""
+        return when (p.phase) {
+            app.mg4dash.radar.RadarRepo.PrepPhase.RUNNING -> getString(R.string.st_rad_preparing, p.done, p.total)
+            app.mg4dash.radar.RadarRepo.PrepPhase.WAIT_WIFI -> getString(R.string.st_rad_prep_wait_wifi, p.done, p.total)
+            app.mg4dash.radar.RadarRepo.PrepPhase.RETRY -> getString(R.string.st_rad_prep_retry, p.done, p.total)
+            app.mg4dash.radar.RadarRepo.PrepPhase.DONE -> getString(R.string.st_rad_prep_done, p.done - p.failed, p.total)
+            app.mg4dash.radar.RadarRepo.PrepPhase.NO_WIFI -> getString(R.string.st_rad_prep_no_wifi, p.done, p.total)
+        } + failed
     }
 
     private fun panel(parent: LinearLayout, title: String, fill: Boolean = false): LinearLayout {

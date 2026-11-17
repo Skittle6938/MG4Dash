@@ -988,4 +988,11 @@
     <string name="st_rad_prepare_no">Benötigt WLAN und die Position des Autos</string>
     <string name="st_rad_prepare_desc">Lädt über WLAN die Hauptstraßen und Blitzer im Umkreis von 30 km um das Auto, für Fahrten ohne 4G.</string>
     <string name="st_rad_clear">Gespeicherte Daten löschen</string>
+    <string name="st_rad_alerts">Warnungen</string>
+    <string name="st_rad_data">OpenStreetMap-Daten</string>
+    <string name="st_rad_prep_failed">%1$d fehlgeschlagen</string>
+    <string name="st_rad_prep_wait_wifi">Warte auf WLAN… (%1$d / %2$d)</string>
+    <string name="st_rad_prep_retry">Server ausgelastet, neuer Versuch… (%1$d / %2$d)</string>
+    <string name="st_rad_prep_done">Vorbereitet: %1$d / %2$d Gebiete</string>
+    <string name="st_rad_prep_no_wifi">Abgebrochen, seit 2 Min. kein WLAN (%1$d / %2$d)</string>
 </resources>

@@ -271,4 +271,30 @@ class RadarTest {
         assertNull(RadarAlert.beepFor(Level.STRONG, Level.LIGHT, RadarAlert.SOUND_NONE))
         assertNull(RadarAlert.beepFor(Level.STRONG, Level.STRONG, RadarAlert.SOUND_BOTH))
     }
+
+    // ── Network ──
+
+    @Test fun overpassServersTls12First() {
+        // overpass-api.de only speaks TLS 1.3, which Android 9 lacks: last
+        assertEquals("https://overpass-api.de/api/interpreter", app.mg4dash.radar.Overpass.order(0).last())
+        val o = app.mg4dash.radar.Overpass.order(2)
+        assertEquals(app.mg4dash.radar.Overpass.SERVERS[2], o.first())
+        assertEquals(app.mg4dash.radar.Overpass.SERVERS.toSet(), o.toSet())
+    }
+
+    @Test fun overpassBusyAndBackoff() {
+        assertTrue(app.mg4dash.radar.Overpass.busy(429) && app.mg4dash.radar.Overpass.busy(504) && app.mg4dash.radar.Overpass.busy(503))
+        assertFalse(app.mg4dash.radar.Overpass.busy(400))
+        assertEquals(5_000L, app.mg4dash.radar.Overpass.backoffMs(2, busy = false))
+        assertEquals(10_000L, app.mg4dash.radar.Overpass.backoffMs(3, busy = false))
+        assertEquals(30_000L, app.mg4dash.radar.Overpass.backoffMs(2, busy = true))
+        assertEquals(120_000L, app.mg4dash.radar.Overpass.backoffMs(4, busy = true))
+    }
+
+    @Test fun wifiAlwaysFirst() {
+        assertEquals(listOf("wifi", null), app.mg4dash.radar.Overpass.routes("wifi", wifiOnly = false))
+        assertEquals(listOf("wifi"), app.mg4dash.radar.Overpass.routes("wifi", wifiOnly = true))
+        assertEquals(listOf<String?>(null), app.mg4dash.radar.Overpass.routes<String>(null, wifiOnly = false))
+        assertTrue(app.mg4dash.radar.Overpass.routes<String>(null, wifiOnly = true).isEmpty())
+    }
 }

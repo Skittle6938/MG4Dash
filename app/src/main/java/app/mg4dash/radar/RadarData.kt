@@ -22,7 +22,6 @@ object RadarData {
     const val FULL_ROADS = "motorway|trunk|primary|secondary|tertiary|unclassified|residential|living_street|motorway_link|trunk_link|primary_link|secondary_link|tertiary_link"
     const val MAIN_ROADS = "motorway|trunk|primary|secondary|tertiary|motorway_link|trunk_link|primary_link|secondary_link|tertiary_link"
 
-    val SERVERS = listOf("https://overpass-api.de/api/interpreter", "https://overpass.kumi.systems/api/interpreter")
 
     data class Key(val y: Int, val x: Int) {
         val south get() = y * TILE
@@ -49,7 +48,7 @@ object RadarData {
     fun query(s: Double, w: Double, n: Double, e: Double, level: Level): String {
         val bb = String.format(java.util.Locale.US, "%.5f,%.5f,%.5f,%.5f", s, w, n, e)
         val roads = if (level == Level.FULL) FULL_ROADS else MAIN_ROADS
-        return "[out:json][timeout:60];" +
+        return "[out:json][timeout:90];" +
             "way[\"highway\"~\"^($roads)$\"]($bb);out body geom qt;" +
             "node[\"highway\"=\"speed_camera\"]($bb);out body qt;" +
             "relation[\"type\"=\"enforcement\"]($bb)->.r;.r out body qt;node(r.r);out skel qt;"
