@@ -133,7 +133,7 @@ class ConsumptionCard(context: Context) : LinearLayout(context) {
         figures.text = figuresText(points)
         // Dot of the last km at the curve's end, not on the 12 months (one point per trip)
         chart.lastDotColor = if (period != 2 && points >= 2 && lastKm(context) != null) c(R.color.text_sub) else null
-        // The dot at the figure's height, so they always agree (the curve's end is smoothed over 5 points)
+        // The dot at the figure's height, so they always agree (the curve's last point is the last slice, the figure the last km)
         chart.lastDotValue = lastKm(context)
         showDuration()
     }
@@ -259,21 +259,30 @@ class ConsumptionCard(context: Context) : LinearLayout(context) {
             return v.size to curveNote(c, period, v)
         }
 
-        /** Stacked chart (Energy page), bottom to top: the steady items first, so their size can be read, driving last (#44); points without composition form a grey layer. */
+        /**
+         * Parts of the stacked chart, bottom to top: the steady items first, so their size can be read, then driving (#44).
+         * A point without composition (a trip from before the breakdown) adds its whole value last, above the items: it is
+         * drawn as the plain total only, never as a band of its own, and the items always start from zero (#44).
+         */
+        internal fun stackParts(v: List<Float>, mixes: List<app.mg4dash.energy.ConsumptionCurve.Mix?>, unit: (Float) -> Float): List<List<Float>> =
+            listOf(1, 3, 2, 0).map { k -> v.indices.map { i -> mixes[i]?.parts()?.get(k)?.let(unit) ?: 0f } } +
+                listOf<List<Float>>(v.indices.map { i -> if (mixes[i] == null) v[i] else 0f })
+
+        /** Stacked chart (Energy page), see [stackParts]. */
         private fun showStack(c: android.content.Context, chart: LineChart, curves: app.mg4dash.energy.ConsumptionCurve.Curves, period: Int, v: List<Float>, mean: Float): Boolean {
             val mixes = curves.mixOf(period)
             if (v.size < 2 || mixes.size != v.size || mixes.all { it == null }) return false
-            val colors = listOf(Themes.color(c, R.color.text_sub), Themes.color(c, R.color.accent_cold), Themes.color(c, R.color.accent_heat),
-                Themes.color(c, R.color.accent_battery), Themes.color(c, R.color.accent_energy))
-            val parts = listOf<List<Float>>(v.indices.map { i -> if (mixes[i] == null) v[i] else 0f }) +
-                listOf(1, 3, 2, 0).map { k -> v.indices.map { i -> mixes[i]?.parts()?.get(k)?.let { app.mg4dash.system.Units.stackValue(c, it) } ?: 0f } }
+            val colors = listOf(Themes.color(c, R.color.accent_cold), Themes.color(c, R.color.accent_heat),
+                Themes.color(c, R.color.accent_battery), Themes.color(c, R.color.accent_energy), Themes.color(c, R.color.text_sub))
+            val parts = stackParts(v, mixes) { app.mg4dash.system.Units.stackValue(c, it) }
+            fun layer(k: Int, values: List<Float>) = LineChart.Layer(colors[k], values, plain = k == parts.lastIndex)
             val times = curves.timesOf(period)
             if (times.size == v.size) {
                 val lines = parts.map { app.mg4dash.energy.ConsumptionCurve.timeLine(times, it) }
                 if (lines[0].size < 2) return false
-                chart.showLayers(lines[0].map { it.first }, lines.mapIndexed { k, l -> LineChart.Layer(colors[k], l.map { it.second }) }, mean)
+                chart.showLayers(lines[0].map { it.first }, lines.mapIndexed { k, l -> layer(k, l.map { it.second }) }, mean)
             } else {
-                chart.showLayers(null, parts.mapIndexed { k, l -> LineChart.Layer(colors[k], l.smoothed().atMost(50)) }, mean)
+                chart.showLayers(null, parts.mapIndexed { k, l -> layer(k, l.smoothed().atMost(50)) }, mean)
             }
             return true
         }
