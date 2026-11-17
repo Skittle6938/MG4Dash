@@ -1,6 +1,7 @@
 package app.mg4dash.ui
 
 import app.mg4dash.system.Firmware
+import app.mg4dash.system.HomeSwitcher
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.Application
@@ -723,9 +724,10 @@ object ShortcutsPanel : Application.ActivityLifecycleCallbacks {
                 val v = strip ?: return
                 if (!relaying) {
                     val link = linkInFront(v.context)
+                    val pulldown = link && LinkContract.carPulldown(v.context)
                     // MG4Link's projection under the car's status bar: the strip is the bar, no more (see [stripHeight])
-                    place(stripHeight(link && linkImmersive == false, barHeight(v.context)))
-                    touchable(!(link && linkTakesTop(linkImmersive, Firmware.gen)))
+                    place(stripHeight(link && linkImmersive == false && !pulldown, barHeight(v.context)))
+                    touchable(stripMode(link, linkImmersive, Firmware.gen, pulldown) == StripGesture.Mode.CATCH)
                 }
                 main.postDelayed(this, 400)
             }
@@ -763,7 +765,37 @@ object ShortcutsPanel : Application.ActivityLifecycleCallbacks {
          * MG4Link's projection in front, and that MG4Link pulls the menu itself (meta-data mg4dash.shortcuts_pull in its
          * manifest). The stock AllGo app or an older MG4Link (same package) does not: the strip stays as over other apps.
          */
-        private fun projectionInFront(c: Context): Boolean = linkInFront(c) && linkTakesTop(linkImmersive, Firmware.gen)
+        private fun projectionInFront(c: Context): Boolean =
+            linkInFront(c).let { link -> stripMode(link, linkImmersive, Firmware.gen, link && LinkContract.carPulldown(c)) == StripGesture.Mode.PASS }
+
+        /** MG4Dash's own screen in front: two fingers open Android Auto / CarPlay there, as on its screens. */
+        @Suppress("DEPRECATION")
+        private fun ownInFront(c: Context): Boolean = try {
+            (c.getSystemService(Context.ACTIVITY_SERVICE) as android.app.ActivityManager).getRunningTasks(1).firstOrNull()?.topActivity?.packageName == c.packageName
+        } catch (_: Exception) { false }
+
+        /** Two fingers from the strip: MG4Dash's home, or on MG4Dash's own screens Android Auto / CarPlay when a phone projects. */
+        private fun twoFingers(c: Context) {
+            if (ownInFront(c)) {
+                if (MediaHub.phoneProjecting) {
+                    Log.i(TAG, "strip: two fingers on MG4Dash, Android Auto / CarPlay")
+                    try { c.startActivity(android.content.Intent(c, OpenProjectionActivity::class.java).addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)) }
+                    catch (e: Exception) { Log.w(TAG, "projection: ${e.message}") }
+                }
+                return
+            }
+            Log.i(TAG, "strip: two fingers, back to MG4Dash's home")
+            try {
+                c.startActivity(android.content.Intent(android.content.Intent.ACTION_MAIN).addCategory(android.content.Intent.CATEGORY_HOME)
+                    .setComponent(HomeSwitcher.ours(c)).addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK))
+            } catch (e: Exception) { Log.w(TAG, "home: ${e.message}") }
+        }
+
+        /** Three fingers from the strip: MG4Link is asked to end its session (nothing when it is not installed). */
+        private fun threeFingers(c: Context) {
+            val sent = LinkContract.sendDisconnect(c)
+            Log.i(TAG, "strip: three fingers, ${if (sent) "MG4Link asked to disconnect" else "no MG4Link"}")
+        }
 
         /** MG4Link's projection in front, and an MG4Link that pulls the menu itself. */
         @Suppress("DEPRECATION")
@@ -884,15 +916,17 @@ object ShortcutsPanel : Application.ActivityLifecycleCallbacks {
             if (keep) p.animateTo(1f) {} else close(now = false)
         }
 
-        /** The strip: a slide down pulls the menu, which follows the finger. */
+        /**
+         * The strip: one finger down pulls the menu, which follows it; two fingers go back to MG4Dash's home, three ask
+         * MG4Link to disconnect ([StripGesture]).
+         */
         @SuppressLint("ViewConstructor")
         private class StripView(c: Context) : View(c) {
             private val slop = ViewConfiguration.get(c).scaledTouchSlop
             private var downX = 0f
             private var downY = 0f
             private var dragging: Panel? = null
-            /** More than one finger in this touch: the menu is not pulled. */
-            private var multi = false
+            private val gesture = StripGesture(c.resources.displayMetrics.density)
 
             /** Maintenance mode, read at each touch down. */
             private var valet = false
@@ -902,27 +936,30 @@ object ShortcutsPanel : Application.ActivityLifecycleCallbacks {
                 if (e.actionMasked == MotionEvent.ACTION_DOWN) valet = Prefs(context).valetMode
                 if (valet) return valetTouch(e)
                 when (e.actionMasked) {
-                    MotionEvent.ACTION_DOWN -> { downX = e.rawX; downY = e.rawY; dragging = null; multi = false }
-                    // A second finger: an app's own multi-finger gesture (MG4Link: 2 fingers from the top, 3 fingers down),
-                    // never the menu; a menu already pulled goes back
-                    MotionEvent.ACTION_POINTER_DOWN -> {
-                        multi = true
+                    MotionEvent.ACTION_DOWN -> { downX = e.rawX; downY = e.rawY; dragging = null; gesture.down(e.rawX, e.rawY) }
+                    // Another finger: a two or three finger gesture, never the menu; a menu already pulled goes back
+                    MotionEvent.ACTION_POINTER_DOWN -> if (gesture.pointerDown(e.pointerCount)) {
                         dragging?.let { Log.i(TAG, "strip: second finger, menu given up"); close(now = true) }
                         dragging = null
                     }
                     MotionEvent.ACTION_MOVE -> {
                         val d = dragging
-                        if (multi) return true
-                        if (d != null) d.setProgress((e.rawY - downY) / d.sheetHeight())
-                        else {
-                            val dy = e.rawY - downY; val dx = e.rawX - downX
-                            if (isPull(dx, dy, resources.displayMetrics.density, e.pointerCount) && panel == null) {
+                        if (d != null) { d.setProgress((e.rawY - downY) / d.sheetHeight()); return true }
+                        // rawX / rawY: the first finger's position
+                        when (gesture.move(e.rawX, e.rawY, e.pointerCount)) {
+                            StripGesture.Action.MENU -> if (panel == null) {
                                 val p = openPanel(context)
                                 panel = p; dragging = p; downY = e.rawY
                             }
+                            StripGesture.Action.HOME -> twoFingers(context)
+                            StripGesture.Action.DISCONNECT -> threeFingers(context)
+                            StripGesture.Action.NONE -> {}
                         }
                     }
-                    MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> { if (!multi) dragging?.let { settle(it, 0f) }; dragging = null; multi = false }
+                    MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+                        if (gesture.menu) dragging?.let { settle(it, 0f) }
+                        dragging = null; gesture.up()
+                    }
                 }
                 return true
             }
