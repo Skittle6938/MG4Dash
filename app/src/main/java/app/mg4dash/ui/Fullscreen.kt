@@ -38,10 +38,8 @@ object Fullscreen {
     fun restore(activity: Activity) {
         if (!Prefs(activity).fullscreen) return
         val decor = activity.window.decorView
-        val insets = decor.rootWindowInsets ?: return
-        // All four sides: the SAIC bar is not always on the left (right-hand drive, #108)
-        if (insets.systemWindowInsetTop == 0 && insets.systemWindowInsetLeft == 0 &&
-            insets.systemWindowInsetRight == 0 && insets.systemWindowInsetBottom == 0) return
+        if (!barsShown(decor)) return
+        restores++
         selfChange = true
         decor.systemUiVisibility = View.SYSTEM_UI_FLAG_VISIBLE
         decor.post { selfChange = false; apply(activity) }
@@ -57,15 +55,21 @@ object Fullscreen {
         val decor = activity.window.decorView
         for (ms in longArrayOf(400L, 1_500L)) decor.postDelayed({
             if (!activity.isFinishing && !activity.isDestroyed && activity.hasWindowFocus()) {
-                val i = decor.rootWindowInsets
-                if (i != null && (i.systemWindowInsetTop != 0 || i.systemWindowInsetLeft != 0 || i.systemWindowInsetRight != 0 || i.systemWindowInsetBottom != 0))
-                    Log.i("Bars", "SAIC bars still shown with the focus back (${activity.javaClass.simpleName}): hidden again")
+                if (barsShown(decor)) Log.i("Bars", "SAIC bars still shown with the focus back (${activity.javaClass.simpleName}): hidden again")
                 restore(activity)
             }
         }, ms)
     }
 
     @Volatile private var selfChange = false
+
+    /** Whether the SAIC bars take room on [View]'s window, on any of the four sides (not always on the left, #108). */
+    internal var barsShown: (View) -> Boolean = { decor ->
+        decor.rootWindowInsets?.let { it.systemWindowInsetTop != 0 || it.systemWindowInsetLeft != 0 || it.systemWindowInsetRight != 0 || it.systemWindowInsetBottom != 0 } ?: false
+    }
+
+    /** Times the bars were hidden again (tests). */
+    @Volatile internal var restores = 0
 
     /**
      * Bars brought back by another window (SAIC window, another app's floating window that takes
