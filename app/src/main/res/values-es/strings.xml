@@ -996,9 +996,9 @@
     <string name="st_rad_prep_done">Preparado: %1$d / %2$d zonas</string>
     <string name="st_rad_prep_no_wifi">Detenido, sin Wi-Fi desde hace 2 min (%1$d / %2$d)</string>
     <string name="st_rad_radius">Radio de los trayectos preparados</string>
-    <string name="st_rad_radius_item">%1$d km · ≈ %2$d zonas · ≈ %3$s</string>
     <string name="st_rad_space">Espacio ocupado: %1$s (%2$d zonas)</string>
     <string name="st_rad_clear_msg">Se borran los límites y radares guardados en el coche (%1$s). Se descargarán de nuevo cuando haga falta.</string>
     <string name="st_rad_clear_btn">Vaciar</string>
-    <string name="st_rad_prepare_desc2">Descarga por Wi-Fi las carreteras principales y los radares en el radio elegido arriba alrededor del coche, para los trayectos sin 4G. El tamaño es una estimación: menos en el campo, más en el centro de la ciudad.</string>
+    <string name="st_rad_estimate">≈ %1$d zonas · ≈ %2$s descargados · ≈ %3$s guardados · ≈ %4$d min</string>
+    <string name="st_rad_prepare_desc2">Descarga por Wi-Fi todas las carreteras y radares en el radio elegido arriba alrededor del coche, como al circular, para los trayectos sin 4G. Tamaños y duración son estimaciones: menos en el campo, más en el centro de la ciudad.</string>
 </resources>
