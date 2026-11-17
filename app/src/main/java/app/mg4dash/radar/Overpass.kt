@@ -13,8 +13,30 @@ object Overpass {
         "https://overpass.private.coffee/api/interpreter",
     )
 
-    /** The servers in the order to try them: the official one first, always. */
-    fun order(): List<String> = SERVERS
+    /**
+     * The servers in the order to try them: the official one first, always; a fallback that gave no answer twice in a
+     * row (a timeout, no connection: 90 s lost each round, Marc, 17/11) is left out for [SKIP_MS].
+     */
+    fun order(now: Long = System.currentTimeMillis()): List<String> =
+        SERVERS.filterIndexed { i, s -> i == 0 || (skippedUntil[s] ?: 0L) <= now }
+
+    /** No answer in a row from a fallback before it is left out. */
+    const val SKIP_AFTER = 2
+    const val SKIP_MS = 30L * 60_000L
+    private val noAnswer = java.util.concurrent.ConcurrentHashMap<String, Int>()
+    private val skippedUntil = java.util.concurrent.ConcurrentHashMap<String, Long>()
+
+    /** [server] answered (whatever its HTTP code): it counts again. */
+    fun answered(server: String) { noAnswer.remove(server); skippedUntil.remove(server) }
+
+    /** [server] gave no answer (a timeout, a failed connection): left out for a while after [SKIP_AFTER] in a row. */
+    fun noAnswer(server: String, now: Long = System.currentTimeMillis()) {
+        val n = (noAnswer[server] ?: 0) + 1
+        noAnswer[server] = n
+        if (n >= SKIP_AFTER && server != SERVERS.first()) { skippedUntil[server] = now + SKIP_MS; noAnswer.remove(server) }
+    }
+
+    internal fun resetSkips() { noAnswer.clear(); skippedUntil.clear() }
 
     /** A server answer that says it is busy: try another one, and wait longer before the next round. */
     fun busy(code: Int) = code == 429 || code == 502 || code == 503 || code == 504

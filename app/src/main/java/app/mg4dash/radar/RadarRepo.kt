@@ -325,6 +325,7 @@ object RadarRepo {
                         conn.disconnect()
                         c to t
                     }
+                    Overpass.answered(server)
                     if (code == 200 && text != null) return@tag Overpass.Result(text, wire = wire)
                     if (Overpass.busy(code)) busy = true
                     error = "HTTP $code"
@@ -332,6 +333,7 @@ object RadarRepo {
                 } catch (e: Exception) {
                     error = e.javaClass.simpleName
                     Log.w(TAG, "$server ($via): ${e.javaClass.simpleName} ${e.message}")
+                    if (e is java.io.IOException) Overpass.noAnswer(server)
                 }
             }
         }
