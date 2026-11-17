@@ -279,11 +279,11 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         // Driving settings (#38), also only where the driver put it
         driving = app.mg4dash.ui.DrivingCard(this)
         panels[Card.DRIVING] = frame(driving)
-        // Speed camera alerter (test): only where the driver put it; a long press opens its settings
+        // Speed camera alerter (test): only where the driver put it; a long press opens its own settings page
         radar = app.mg4dash.radar.RadarCard(this).apply {
             setOnLongClickListener {
                 startActivity(android.content.Intent(this@MainActivity, app.mg4dash.settings.SettingsActivity::class.java)
-                    .putExtra(app.mg4dash.settings.SettingsActivity.EXTRA_TAB, app.mg4dash.settings.SettingsActivity.TAB_CAR))
+                    .putExtra(app.mg4dash.settings.SettingsActivity.EXTRA_RADAR, true))
                 true
             }
         }

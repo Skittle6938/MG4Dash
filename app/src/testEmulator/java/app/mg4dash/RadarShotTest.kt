@@ -58,4 +58,18 @@ class RadarShotTest {
     @Test fun wideLight() = shot("w=radar;tr=climate;bl=energy;bc=hourly,daily;br=trip,power,phone", "band_top", light, "radar_wide_light.png")
     @Test fun largeInZone() = shot("g=radar;tr=climate;br=energy,trip,power,phone,hourly,daily", "square_left", inZoneStrong, "radar_large_zone.png")
     @Test fun tallEstimatedLight() = shot("tl=hourly,daily;tc=energy,trip,power,phone;r=radar;bl=climate;bc=media", "map", estimated, "radar_tall_estimated_light.png", theme = 2)
+
+    /** The alerter's own page (long press on the card). */
+    @Test fun settingsPage() {
+        org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE).edit()
+            .putBoolean("vertical_dock", true).putBoolean("tutorial_shortcuts_seen", true).putInt("theme_mode", 1).commit()
+        val act = Robolectric.buildActivity(app.mg4dash.settings.SettingsActivity::class.java,
+            android.content.Intent().putExtra(app.mg4dash.settings.SettingsActivity.EXTRA_RADAR, true)).setup().get()
+        repeat(3) { shadowOf(Looper.getMainLooper()).idleFor(200, TimeUnit.MILLISECONDS) }
+        val root = act.window.decorView
+        val bmp = Bitmap.createBitmap(root.width, root.height, Bitmap.Config.ARGB_8888)
+        root.draw(Canvas(bmp))
+        val dir = File("build/screenshots").apply { mkdirs() }
+        File(dir, "radar_settings_page.png").outputStream().use { bmp.compress(Bitmap.CompressFormat.PNG, 100, it) }
+    }
 }

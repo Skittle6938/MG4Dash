@@ -986,4 +986,11 @@
     <string name="st_rad_prepare_no">Je potřeba Wi-Fi a poloha vozu</string>
     <string name="st_rad_prepare_desc">Stáhne přes Wi-Fi hlavní silnice a radary do 30 km od vozu, pro trasy bez 4G.</string>
     <string name="st_rad_clear">Smazat uložená data</string>
+    <string name="st_rad_alerts">Upozornění</string>
+    <string name="st_rad_data">Data OpenStreetMap</string>
+    <string name="st_rad_prep_failed">%1$d selhalo</string>
+    <string name="st_rad_prep_wait_wifi">Čekání na Wi-Fi… (%1$d / %2$d)</string>
+    <string name="st_rad_prep_retry">Server je vytížen, nový pokus… (%1$d / %2$d)</string>
+    <string name="st_rad_prep_done">Připraveno: %1$d / %2$d oblastí</string>
+    <string name="st_rad_prep_no_wifi">Zastaveno, 2 min bez Wi-Fi (%1$d / %2$d)</string>
 </resources>

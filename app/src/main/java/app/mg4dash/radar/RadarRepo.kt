@@ -66,9 +66,14 @@ object RadarRepo {
     private val _state = MutableStateFlow(State())
     val state: StateFlow<State> = _state
 
-    /** Prepared trips: progress (done, total), null when not running; [prepareResult] the last outcome. */
-    private val _prepare = MutableStateFlow<Pair<Int, Int>?>(null)
-    val prepare: StateFlow<Pair<Int, Int>?> = _prepare
+    /** Prepared trips: where the preparation is, or how the last one ended (null: none since the start). */
+    enum class PrepPhase { RUNNING, WAIT_WIFI, RETRY, DONE, NO_WIFI }
+    data class Prep(val done: Int, val total: Int, val failed: Int, val phase: PrepPhase) {
+        val running: Boolean get() = phase == PrepPhase.RUNNING || phase == PrepPhase.WAIT_WIFI || phase == PrepPhase.RETRY
+    }
+    private val _prepare = MutableStateFlow<Prep?>(null)
+    val prepare: StateFlow<Prep?> = _prepare
+    private val prep: Handler by lazy { Handler(HandlerThread("radar-prepare").apply { start() }.looper) }
 
     private var ctx: Context? = null
     private var job: Job? = null
@@ -117,7 +122,9 @@ object RadarRepo {
 
     /** Wi-Fi only and not on a Wi-Fi now: no fetch. */
     private fun netAllowed(c: Context): Boolean = !Prefs(c).radarWifiOnly || onWifi()
-    private fun onWifi(): Boolean = WifiFirst.bound != null
+    /** The Wi-Fi in use (internet checked), else the Wi-Fi connected, null without Wi-Fi. */
+    private fun wifi(): android.net.Network? = WifiFirst.bound ?: WifiFirst.wifi
+    private fun onWifi(): Boolean = wifi() != null
 
     // ── Worker thread ──
 
@@ -194,7 +201,7 @@ object RadarRepo {
         fetching += key
         net.post {
             val q = RadarData.query(key.south, key.west, key.south + RadarData.TILE, key.west + RadarData.TILE, RadarData.Level.FULL)
-            val tile = download(q)?.let { json ->
+            val tile = download(q, Prefs(c).radarWifiOnly).body?.let { json ->
                 runCatching { RadarData.parse(json) }.onFailure { Log.w(TAG, "tile $key: ${it.message}") }.getOrNull()
             }?.let { (r, cams) -> RadarData.Tile(key, RadarData.Level.FULL, System.currentTimeMillis(), r, cams) }
             if (tile != null) runCatching { RadarData.write(c.filesDir, tile) }
@@ -206,37 +213,66 @@ object RadarRepo {
         }
     }
 
-    /** POSTs [query] to Overpass (the second server if the first fails), counted as the alerter's data. */
-    private fun download(query: String): String? = DataUsage.tag(DataUsage.Use.RADARS) {
-        for (server in RadarData.SERVERS) {
-            try {
-                val conn = WifiFirst.bound?.openConnection(URL(server)) as? HttpURLConnection ?: URL(server).openConnection() as HttpURLConnection
-                conn.connectTimeout = 15_000; conn.readTimeout = 90_000
-                conn.requestMethod = "POST"; conn.doOutput = true
-                conn.setRequestProperty("User-Agent", "MG4Dash/${BuildConfig.VERSION_NAME}")
-                conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded")
-                conn.outputStream.use { it.write(("data=" + URLEncoder.encode(query, "UTF-8")).toByteArray()) }
-                val code = conn.responseCode
-                if (code == 200) return@tag conn.inputStream.use { it.readBytes().toString(Charsets.UTF_8) }
-                Log.w(TAG, "$server: HTTP $code")
-                conn.disconnect()
-            } catch (e: Exception) { Log.w(TAG, "$server: ${e.javaClass.simpleName} ${e.message}") }
+    /**
+     * POSTs [query] to Overpass, on the Wi-Fi first when there is one, then on the 4G unless [wifiOnly]; each network
+     * through the servers in turn (a busy one, HTTP 429 / 503 / 504, gives way to the next). Counted as the alerter's
+     * data, on the network it went through.
+     */
+    private fun download(query: String, wifiOnly: Boolean): Overpass.Result = DataUsage.tag(DataUsage.Use.RADARS) {
+        var busy = false; var error: String? = null
+        for (route in Overpass.routes(wifi(), wifiOnly)) {
+            val first = Overpass.preferred
+            val via = if (route != null) "Wi-Fi" else "default network"
+            for ((k, server) in Overpass.order(first).withIndex()) {
+                try {
+                    val url = URL(server)
+                    val conn = (route?.openConnection(url) ?: url.openConnection()) as HttpURLConnection
+                    conn.connectTimeout = 15_000; conn.readTimeout = 120_000
+                    conn.requestMethod = "POST"; conn.doOutput = true
+                    conn.setRequestProperty("User-Agent", "MG4Dash/${BuildConfig.VERSION_NAME}")
+                    conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded")
+                    conn.outputStream.use { it.write(("data=" + URLEncoder.encode(query, "UTF-8")).toByteArray()) }
+                    val code = conn.responseCode
+                    if (code == 200) {
+                        val body = conn.inputStream.use { it.readBytes().toString(Charsets.UTF_8) }
+                        Overpass.preferred = Math.floorMod(first + k, Overpass.SERVERS.size)
+                        return@tag Overpass.Result(body)
+                    }
+                    if (Overpass.busy(code)) busy = true
+                    error = "HTTP $code"
+                    Log.w(TAG, "$server ($via): HTTP $code")
+                    conn.disconnect()
+                } catch (e: Exception) {
+                    error = e.javaClass.simpleName
+                    Log.w(TAG, "$server ($via): ${e.javaClass.simpleName} ${e.message}")
+                }
+            }
         }
-        null
+        Overpass.Result(null, busy, error)
     }
 
     // ── Prepared trips ──
 
+    /** Side of the boxes the preparation asks for (degrees): small enough for the servers to answer in time. */
+    private const val PREP_STEP = 0.05
+    /** Tries per box, and how long the Wi-Fi may be gone before the preparation stops. */
+    private const val PREP_TRIES = 4
+    private const val PREP_WIFI_WAIT_MS = 120_000L
+
+    @Volatile private var lastBusy = false
+
     /**
-     * Main roads and cameras within [PREPARE_KM] km of the car, over the Wi-Fi only, in boxes of 0.1°; the tiles
-     * already there at the full level are kept. False when it cannot start (no position, no Wi-Fi, running).
+     * Main roads and cameras within [PREPARE_KM] km of the car, over the Wi-Fi only, in boxes of [PREP_STEP]°; tiles
+     * already there and fresh are kept. A box that fails is tried again after a pause (longer when the servers are
+     * busy); without Wi-Fi it waits for it up to 2 min, then stops. False when it cannot start (no position, no
+     * Wi-Fi, already running).
      */
     fun prepareTrips(context: Context): Boolean {
         val loc = LocationRepo.location.value ?: return false
-        if (!onWifi() || _prepare.value != null) return false
+        if (!onWifi() || _prepare.value?.running == true) return false
         val c = context.applicationContext
         val dLat = PREPARE_KM * 1000 / Geo.M_PER_LAT; val dLon = PREPARE_KM * 1000 / Geo.mPerLon(loc.latitude)
-        val step = 0.1
+        val step = PREP_STEP
         val boxes = ArrayList<Pair<Double, Double>>()
         var s = Math.floor((loc.latitude - dLat) / step) * step
         while (s < loc.latitude + dLat) {
@@ -244,35 +280,56 @@ object RadarRepo {
             while (w < loc.longitude + dLon) { boxes += s to w; w += step }
             s += step
         }
-        _prepare.value = 0 to boxes.size
+        _prepare.value = Prep(0, boxes.size, 0, PrepPhase.RUNNING)
         Log.i(TAG, "preparing trips: ${boxes.size} boxes")
-        net.post {
-            var done = 0; var ok = 0
+        prep.post {
+            var done = 0; var failed = 0
+            fun show(phase: PrepPhase) { _prepare.value = Prep(done, boxes.size, failed, phase) }
+            // Waits for a Wi-Fi up to PREP_WIFI_WAIT_MS: false if none came back
+            fun waitWifi(): Boolean {
+                if (onWifi()) return true
+                show(PrepPhase.WAIT_WIFI)
+                val until = System.currentTimeMillis() + PREP_WIFI_WAIT_MS
+                while (System.currentTimeMillis() < until) { Thread.sleep(5_000); if (onWifi()) { show(PrepPhase.RUNNING); return true } }
+                return false
+            }
             for ((bs, bw) in boxes) {
-                if (!onWifi()) { Log.w(TAG, "preparing stopped: no Wi-Fi"); break }
                 val keys = RadarData.keysAround(bs + step / 2, bw + step / 2, step / 2 - 1e-9, step / 2 - 1e-9)
                 val now = System.currentTimeMillis()
                 val missing = keys.filter { k -> RadarData.read(c.filesDir, k)?.let { !it.fresh(now) } ?: true }
                 if (missing.isNotEmpty()) {
-                    download(RadarData.query(bs, bw, bs + step, bw + step, RadarData.Level.MAIN))?.let { json -> runCatching { RadarData.parse(json) }.getOrNull() }?.let { (r, cams) ->
-                        RadarData.split(missing, RadarData.Level.MAIN, now, r, cams).forEach { runCatching { RadarData.write(c.filesDir, it) } }
-                        ok++
+                    var ok = false
+                    for (attempt in 1..PREP_TRIES) {
+                        if (!waitWifi()) {
+                            Log.w(TAG, "preparing stopped: no Wi-Fi for ${PREP_WIFI_WAIT_MS / 1000} s ($done / ${boxes.size})")
+                            show(PrepPhase.NO_WIFI); return@post
+                        }
+                        if (attempt > 1) {
+                            show(PrepPhase.RETRY)
+                            Thread.sleep(Overpass.backoffMs(attempt, lastBusy))
+                            show(PrepPhase.RUNNING)
+                        }
+                        val r = download(RadarData.query(bs, bw, bs + step, bw + step, RadarData.Level.MAIN), wifiOnly = true)
+                        lastBusy = r.busy
+                        val parsed = r.body?.let { json -> runCatching { RadarData.parse(json) }.getOrNull() }
+                        if (parsed != null) {
+                            RadarData.split(missing, RadarData.Level.MAIN, now, parsed.first, parsed.second).forEach { runCatching { RadarData.write(c.filesDir, it) } }
+                            ok = true; break
+                        }
+                        Log.w(TAG, "preparing: box $bs,$bw failed (try $attempt, ${r.error}${if (r.busy) ", servers busy" else ""})")
                     }
-                    // Overpass asks for a pause between big queries
-                    Thread.sleep(2_000)
-                } else ok++
+                    if (!ok) failed++
+                    // A short pause between queries, as Overpass asks
+                    Thread.sleep(1_000)
+                }
                 done++
-                _prepare.value = done to boxes.size
+                show(PrepPhase.RUNNING)
             }
-            Log.i(TAG, "preparing trips done: $ok / ${boxes.size}")
-            _prepare.value = null
-            lastPrepare = ok to boxes.size
+            Log.i(TAG, "preparing trips done: ${done - failed} / ${boxes.size}, $failed failed")
+            show(PrepPhase.DONE)
         }
         return true
     }
-
-    @Volatile var lastPrepare: Pair<Int, Int>? = null
-        private set
 
     fun clearCache(context: Context) {
         val c = context.applicationContext

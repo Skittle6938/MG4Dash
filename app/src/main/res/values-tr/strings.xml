@@ -988,4 +988,11 @@
     <string name="st_rad_prepare_no">Wi-Fi ve aracın konumu gerekli</string>
     <string name="st_rad_prepare_desc">Ana yolları ve radarları aracın 30 km çevresinde Wi-Fi ile indirir, 4G olmayan yolculuklar için.</string>
     <string name="st_rad_clear">Kayıtlı verileri sil</string>
+    <string name="st_rad_alerts">Uyarılar</string>
+    <string name="st_rad_data">OpenStreetMap verileri</string>
+    <string name="st_rad_prep_failed">%1$d başarısız</string>
+    <string name="st_rad_prep_wait_wifi">Wi-Fi bekleniyor… (%1$d / %2$d)</string>
+    <string name="st_rad_prep_retry">Sunucu meşgul, yeniden deneniyor… (%1$d / %2$d)</string>
+    <string name="st_rad_prep_done">Hazırlandı: %1$d / %2$d bölge</string>
+    <string name="st_rad_prep_no_wifi">Durduruldu, 2 dakikadır Wi-Fi yok (%1$d / %2$d)</string>
 </resources>

@@ -988,4 +988,11 @@
     <string name="st_rad_prepare_no">Servono il Wi-Fi e la posizione dell\'auto</string>
     <string name="st_rad_prepare_desc">Scarica via Wi-Fi le strade principali e gli autovelox entro 30 km dall\'auto, per i tragitti senza 4G.</string>
     <string name="st_rad_clear">Cancella i dati salvati</string>
+    <string name="st_rad_alerts">Avvisi</string>
+    <string name="st_rad_data">Dati OpenStreetMap</string>
+    <string name="st_rad_prep_failed">%1$d non riuscite</string>
+    <string name="st_rad_prep_wait_wifi">In attesa del Wi-Fi… (%1$d / %2$d)</string>
+    <string name="st_rad_prep_retry">Server occupato, nuovo tentativo… (%1$d / %2$d)</string>
+    <string name="st_rad_prep_done">Preparato: %1$d / %2$d zone</string>
+    <string name="st_rad_prep_no_wifi">Interrotto, nessun Wi-Fi da 2 min (%1$d / %2$d)</string>
 </resources>

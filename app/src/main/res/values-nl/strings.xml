@@ -988,4 +988,11 @@
     <string name="st_rad_prepare_no">Wifi en de positie van de auto nodig</string>
     <string name="st_rad_prepare_desc">Downloadt via wifi de hoofdwegen en flitsers binnen 30 km van de auto, voor ritten zonder 4G.</string>
     <string name="st_rad_clear">Bewaarde gegevens wissen</string>
+    <string name="st_rad_alerts">Waarschuwingen</string>
+    <string name="st_rad_data">OpenStreetMap-gegevens</string>
+    <string name="st_rad_prep_failed">%1$d mislukt</string>
+    <string name="st_rad_prep_wait_wifi">Wachten op wifi… (%1$d / %2$d)</string>
+    <string name="st_rad_prep_retry">Server bezet, nieuwe poging… (%1$d / %2$d)</string>
+    <string name="st_rad_prep_done">Voorbereid: %1$d / %2$d gebieden</string>
+    <string name="st_rad_prep_no_wifi">Gestopt, al 2 min geen wifi (%1$d / %2$d)</string>
 </resources>
