@@ -92,6 +92,12 @@ object RadarRepo {
     /** [busyUntil]: the servers are saturated, next try at this time (ms), 0 otherwise. */
     data class Prep(val done: Int, val total: Int, val failed: Int, val phase: PrepPhase, val bytes: Long = 0, val minutesLeft: Int? = null, val busyUntil: Long = 0) {
         val running: Boolean get() = phase == PrepPhase.RUNNING || phase == PrepPhase.WAIT_WIFI || phase == PrepPhase.RETRY || phase == PrepPhase.PAUSED
+
+        /**
+         * Seconds before the next try while the servers are saturated, counted from the worker's absolute time, so
+         * that whoever shows it can count down every second; null when not waiting for them.
+         */
+        fun retryLeftS(now: Long): Long? = if (phase == PrepPhase.RETRY && busyUntil > 0) maxOf(1L, (busyUntil - now + 999) / 1000) else null
     }
 
     /** Pause, resume and cancel of the preparation (from its page). */
@@ -136,6 +142,7 @@ object RadarRepo {
         if (job != null) return
         ctx = context.applicationContext
         Log.i(TAG, "alerter on")
+        resumePrepare(ctx!!)
         job = scope.launch {
             LocationRepo.location.collect { loc -> if (loc != null) worker.post { onLocation(loc) } }
         }
@@ -374,10 +381,30 @@ object RadarRepo {
     fun prepareTrips(context: Context): Boolean {
         val loc = LocationRepo.location.value ?: return false
         if (!onWifi() || _prepare.value?.running == true) return false
+        return prepareAround(context, loc.latitude, loc.longitude)
+    }
+
+    /** Where an unfinished preparation was centred ("lat,lon"): taken up again at the next start (an update, a restart). */
+    private const val PREP_RESUME_KEY = "radar_prep_resume"
+
+    /**
+     * A preparation cut by the app stopping (an update, the car switched off) goes on at the next start, around the
+     * same place: the tiles already in and fresh are kept, so it starts again where it was.
+     */
+    private fun resumePrepare(context: Context) {
+        val at = Prefs(context).raw.getString(PREP_RESUME_KEY, null)?.split(',')?.mapNotNull { it.toDoubleOrNull() } ?: return
+        if (at.size != 2 || _prepare.value?.running == true) return
+        Log.i(TAG, "preparing trips: taken up again")
+        prepareAround(context, at[0], at[1])
+    }
+
+    private fun prepareAround(context: Context, lat: Double, lon: Double): Boolean {
         val c = context.applicationContext
+        val resume = Prefs(c).raw
+        resume.edit().putString(PREP_RESUME_KEY, "$lat,$lon").apply()
         // The complete data, all the streets, as around the car while driving (17/11)
         val level = RadarData.Level.FULL
-        val boxes = prepareBoxes(loc.latitude, loc.longitude, prepareRadius(Prefs(c).radarPrepareKm))
+        val boxes = prepareBoxes(lat, lon, prepareRadius(Prefs(c).radarPrepareKm))
         // Progress in tiles (each block is split again if the server cannot answer it whole)
         val total = boxes.size * PREP_TILES * PREP_TILES
         _prepare.value = Prep(0, total, 0, PrepPhase.RUNNING)
@@ -395,12 +422,13 @@ object RadarRepo {
                 if (onWifi()) return true
                 show(PrepPhase.WAIT_WIFI)
                 val until = System.currentTimeMillis() + PREP_WIFI_WAIT_MS
-                while (System.currentTimeMillis() < until) { Thread.sleep(5_000); if (onWifi()) { show(PrepPhase.RUNNING); return true } }
+                while (System.currentTimeMillis() < until && !prepCancelled) { Thread.sleep(1_000); if (onWifi()) { show(PrepPhase.RUNNING); return true } }
+                if (prepCancelled) return true   // the cancel is told by the loop
                 return false
             }
             fun cancelled(): Boolean {
                 if (!prepCancelled) return false
-                Log.i(TAG, "preparing cancelled ($done / $total)"); show(PrepPhase.CANCELLED); return true
+                Log.i(TAG, "preparing cancelled ($done / $total)"); resume.edit().remove(PREP_RESUME_KEY).apply(); show(PrepPhase.CANCELLED); return true
             }
             // Blocks to fetch: the 2 x 2 ones first; one that fails or is too big comes back as its quarters
             val queue = ArrayDeque(boxes.map { it to PREP_TILES })
@@ -423,6 +451,7 @@ object RadarRepo {
                         Log.w(TAG, "preparing stopped: no Wi-Fi for ${PREP_WIFI_WAIT_MS / 1000} s ($done / $total)")
                         show(PrepPhase.NO_WIFI); return@post
                     }
+                    if (cancelled()) return@post
                     if (attempt > 0 || busyStreak > 0) {
                         val wait = if (busyStreak > 0) maxOf(Overpass.busyWaitMs(busyStreak), lastRetryAfter * 1000L) else Overpass.backoffMs(attempt + 1, false)
                         retryAt = if (busyStreak > 0) System.currentTimeMillis() + wait else 0L
@@ -453,6 +482,7 @@ object RadarRepo {
                 Thread.sleep(1_000)
             }
             Log.i(TAG, "preparing trips done: ${done - failed} / $total tiles, $failed failed")
+            resume.edit().remove(PREP_RESUME_KEY).apply()
             show(PrepPhase.DONE)
         }
         return true
