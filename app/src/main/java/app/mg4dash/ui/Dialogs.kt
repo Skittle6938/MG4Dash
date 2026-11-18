@@ -24,6 +24,21 @@ object Dialogs {
         d.findViewById<TextView>(id)?.apply { setPadding((64 * resources.displayMetrics.density).toInt(), paddingTop, paddingRight, paddingBottom) }
     }
 
+    /**
+     * Shows [d] without the car's top bar flashing (#26: a long press on the map or web app card showed it a moment):
+     * a dialog takes the focus as it opens, before its own flags are set, and the bars came back for it. It opens
+     * without the focus and with home's full screen flags already set, then takes the focus back.
+     */
+    @Suppress("DEPRECATION")
+    fun show(d: Dialog) {
+        val w = d.window
+        w?.addFlags(android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE)
+        hideBars(d)
+        d.show()
+        hideBars(d)
+        w?.clearFlags(android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE)
+    }
+
     @Suppress("DEPRECATION")
     fun hideBars(d: Dialog) {
         activityOf(d.context)?.let {

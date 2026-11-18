@@ -458,7 +458,7 @@ class EnergyActivity : PageActivity() {
             .setView(view)
             .setPositiveButton(android.R.string.ok) { _, _ -> setTime(start, read()) }
             .setNegativeButton(R.string.cancel, null)
-            .show().also { app.mg4dash.ui.Dialogs.fix(it) }
+            .create().also { app.mg4dash.ui.Dialogs.show(it); app.mg4dash.ui.Dialogs.fix(it) }
     }
 
     private fun shiftTime(start: Boolean, deltaMin: Int) {

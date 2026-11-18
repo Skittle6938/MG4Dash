@@ -362,7 +362,7 @@ class RadarPage(private val a: Activity, private val prefs: Prefs) {
             AlertDialog.Builder(a).setTitle(R.string.st_rad_clear)
                 .setMessage(a.getString(R.string.st_rad_clear_msg, DataUsage.format(a, RadarRepo.cacheSize(a).second)))
                 .setPositiveButton(R.string.st_rad_clear_btn) { _, _ -> RadarRepo.clearCache(a); space.postDelayed({ refresh() }, 500) }
-                .setNegativeButton(R.string.cancel, null).show().also { app.mg4dash.ui.Dialogs.fix(it) }
+                .setNegativeButton(R.string.cancel, null).create().also { app.mg4dash.ui.Dialogs.show(it); app.mg4dash.ui.Dialogs.fix(it) }
         }.apply { setTextColor(col(R.color.accent_danger)) }, LinearLayout.LayoutParams(-1, dp(56)).apply { topMargin = dp(18) })
         return two
     }

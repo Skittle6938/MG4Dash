@@ -61,7 +61,7 @@ object CardMenu {
         }
         dialog = android.app.AlertDialog.Builder(activity)
             .setView(android.widget.ScrollView(activity).apply { isVerticalScrollBarEnabled = false; addView(list) })
-            .show().also { Dialogs.hideBars(it) }
+            .create().also { Dialogs.show(it); Dialogs.hideBars(it) }
         dialog.window?.setLayout(dp(560), -2)
     }
 }

@@ -94,6 +94,7 @@ object UpdatePrompt {
         val scrim = FrameLayout(activity).apply {
             setBackgroundColor(Color.argb(0xB3, 0, 0, 0))
             isClickable = true; isFocusable = true
+            setTag(app.mg4dash.R.id.home_panel, true)
             elevation = kit.dp(24).toFloat()
         }
         val panel = kit.panel(activity.getString(R.string.upd_title))

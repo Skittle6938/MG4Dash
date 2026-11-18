@@ -154,6 +154,6 @@ object Compat {
             .setPositiveButton(R.string.st_close, null)
             // In MG4Dash Web on the car: its browser refuses pages on some head units (#95)
             .setNeutralButton(R.string.st_compat_open) { _, _ -> app.mg4dash.system.WebViewer.open(a, url) }
-            .show().also { app.mg4dash.ui.Dialogs.fix(it) }
+            .create().also { app.mg4dash.ui.Dialogs.show(it); app.mg4dash.ui.Dialogs.fix(it) }
     }
 }

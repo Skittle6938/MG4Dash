@@ -72,8 +72,7 @@ class OptionsPopup(private val a: Activity, title: String) {
         val dialog = AlertDialog.Builder(a).setView(body).create()
         close.setOnClickListener { dialog.dismiss() }
         dialog.setOnDismissListener { onClose() }
-        dialog.show()
-        Dialogs.hideBars(dialog)
+        Dialogs.show(dialog)
         dialog.window?.setLayout(dp(900), android.view.ViewGroup.LayoutParams.WRAP_CONTENT)
     }
 }
