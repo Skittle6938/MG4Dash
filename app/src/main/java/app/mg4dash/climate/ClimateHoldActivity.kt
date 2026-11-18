@@ -68,6 +68,8 @@ class ClimateHoldActivity : AppCompatActivity() {
 
     override fun onDestroy() { if (displayOff) CarBridge.setDisplay(true); super.onDestroy() }
     private lateinit var main: android.view.View
+    /** The warm / cold effect behind the figures, as on the climate card (#122). */
+    private lateinit var fx: app.mg4dash.ui.ClimateFx.Effect
     private lateinit var armed: android.view.View
     private lateinit var countdown: TextView
     private val handler = Handler(Looper.getMainLooper())
@@ -133,6 +135,12 @@ class ClimateHoldActivity : AppCompatActivity() {
             .apply { textSize = 24f }, kit.lp(kit.dp(330), kit.dp(72), t = 22))
         armed = arm
         val frame = android.widget.FrameLayout(this)
+        // The warm / cold effect (variant B) between the background and the figures: the background moves to the frame
+        frame.setBackgroundResource(R.drawable.bg_root)
+        root.background = null
+        val d = resources.displayMetrics.density
+        fx = app.mg4dash.ui.ClimateFx.Effect(d * app.mg4dash.ui.ClimateFx.HOLD_SCALE, 0f, 1f)
+        frame.addView(android.view.View(this).apply { background = fx }, android.widget.FrameLayout.LayoutParams(-1, -1))
         frame.addView(root, android.widget.FrameLayout.LayoutParams(-1, -1))
         frame.addView(arm, android.widget.FrameLayout.LayoutParams(-1, -1))
         // Screen off once locked (option): a black veil on top, a touch lifts it for 10 s
@@ -185,6 +193,9 @@ class ClimateHoldActivity : AppCompatActivity() {
         // Screen on once locked: minimum brightness (a touch raises it for 10 s)
         if (locked && brightUntil == 0L) brightUntil = now + 3000
         dim((locked || st.finished) && now >= brightUntil)
+        // Heating or cooling, as the climate card shows it; nothing while waiting, screen off or with the option off
+        val effect = app.mg4dash.ui.ClimateFx.holdEffect(st.phase == ClimateHold.Phase.ON, car.hvacOn, !displayOff, prefs.climateFx, car.acOn, car.driverTemp, car.outsideTemp)
+        fx.set(effect?.first ?: true, effect?.second ?: 0f)
         armed.visibility = if (counting) android.view.View.VISIBLE else android.view.View.GONE
         main.visibility = if (counting) android.view.View.GONE else android.view.View.VISIBLE
         if (counting) countdown.text = ((st.lockAt - now).coerceAtLeast(0) / 1000 + 1).toString()

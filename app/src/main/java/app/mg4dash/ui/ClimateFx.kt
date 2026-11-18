@@ -28,6 +28,20 @@ object ClimateFx {
 
     private val paint = Paint(Paint.ANTI_ALIAS_FLAG)
 
+    /** Scale of the effect on the Keep climate screen (seen from outside): larger waves and crystals than on the card. */
+    const val HOLD_SCALE = 1.5f
+
+    /**
+     * The Keep climate screen's effect (18/11, variant B): heating ([first] true) or cooling and its strength, as
+     * the climate card's; null with nothing to show: the climate not running (waiting for its time, finished), the
+     * screen off, the option off, a temperature unknown, or within half a degree.
+     */
+    fun holdEffect(running: Boolean, hvacOn: Boolean?, screenOn: Boolean, option: Boolean, acOn: Boolean?, set: Float?, out: Float?): Pair<Boolean, Float>? {
+        if (!running || hvacOn != true || !screenOn || !option || set == null || out == null) return null
+        val k = intensity(set - out).takeIf { it > 0f } ?: return null
+        return !app.mg4dash.ui.ShortcutTiles.coolingFor(acOn == true, set, out, null) to k
+    }
+
     /**
      * Draws the effect in [r] at time [t] (0..1 over [PERIOD_MS]); [d]: screen density, [warm]: heating, else cooling,
      * [k]: strength from [intensity].
