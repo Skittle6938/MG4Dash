@@ -287,10 +287,20 @@ class Prefs(context: Context) {
         get() = sp.getBoolean("radar_wifi_only", false)
         set(v) = sp.edit().putBoolean("radar_wifi_only", v).apply()
 
-    /** The climate card's warm / cold animation (#122), on by default; off, the mode's word and icon stay. */
-    var climateFx: Boolean
-        get() = sp.getBoolean("climate_fx", true)
-        set(v) = sp.edit().putBoolean("climate_fx", v).apply()
+    /**
+     * Heating / cooling on the climate card, its page and the Keep climate screen (#34, set in the card's long-press
+     * panel): 0 none, 1 the word only, 2 the word and the animation (default). The old Appearance switch carries over:
+     * on = word and animation, off = word only.
+     */
+    var climateFxMode: Int
+        get() = sp.getInt("climate_fx_mode", if (sp.contains("climate_fx")) (if (sp.getBoolean("climate_fx", true)) 2 else 1) else 2).coerceIn(0, 2)
+        set(v) = sp.edit().putInt("climate_fx_mode", v.coerceIn(0, 2)).apply()
+
+    /** The warm / cold animation (card, Keep climate screen). */
+    val climateFx: Boolean get() = climateFxMode == 2
+
+    /** The word Heating / Cooling (card, page). */
+    val climateIndicator: Boolean get() = climateFxMode >= 1
 
     var fxSound: Boolean
         get() = sp.getBoolean("fx_sound", false)

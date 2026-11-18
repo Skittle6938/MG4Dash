@@ -155,7 +155,7 @@ object ShortcutTiles {
             Tile.FOG -> if (on) tile.icon else R.drawable.ic_sc_fog_off
             // ESP: inverted when it is off
             Tile.ESP -> if (on) R.drawable.ic_sc_esp_off else tile.icon
-            Tile.CLIMATE -> when { !on -> R.drawable.ic_sc_clim_off; s.level == 1 -> R.drawable.ic_sc_clim_heat; else -> tile.icon }
+            Tile.CLIMATE -> when { !on -> R.drawable.ic_sc_clim_off; s.level == 1 -> R.drawable.ic_sc_clim_heat; s.level == NEUTRAL -> R.drawable.ic_fan; else -> tile.icon }
             Tile.AIDS -> if (s.level == 0) R.drawable.ic_sc_adas_off else tile.icon
             Tile.DEFROST -> if (on) tile.icon else R.drawable.ic_sc_defrost_off
             Tile.WHEEL_HEAT -> if (on) tile.icon else R.drawable.ic_sc_wheel_heat_off
@@ -316,16 +316,35 @@ object ShortcutTiles {
      * the outside temperature, otherwise heat waves ("Heating"); with no valid outside temperature, snowflake with the
      * A/C on. The state line: set point and outside temperature.
      */
-    internal fun climate(context: Context, s: VehicleState): Shown {
+    internal fun climate(context: Context, s: VehicleState, now: Long = android.os.SystemClock.elapsedRealtime(),
+                         watts: Float? = app.mg4dash.energy.EnergyMonitor.climateW.takeIf { it > 0f }): Shown {
         val on = s.hvacOn ?: return Shown("", false, false)
         fun t(r: Int) = context.getString(r)
+        val drawing = app.mg4dash.climate.ClimateDraw.shared.update(now, on, watts)
         if (!on) return Shown(t(R.string.sc_off), false, level = 0)
         val out = s.outsideTemp?.takeIf { it > -60f && it < 70f }
         val set = s.driverTemp
-        val cooling = coolingFor(s.acOn == true, set, out, lastCooling).also { lastCooling = it }
         val state = if (set != null) context.getString(R.string.sc_clim_state, temp(set), out?.let { temp(it) } ?: "?") else ""
-        return Shown(state, true, level = if (cooling) 2 else 1, label = t(if (cooling) R.string.sc_cooling else R.string.sc_heating))
+        // Only the blower measured (#34): neither heating nor cooling
+        val mode = if (drawing == false) null else modeFor(s.acOn == true, set, out, lastCooling)
+        if (mode == null) return Shown(state, true, level = NEUTRAL)
+        lastCooling = mode == 2
+        return Shown(state, true, level = mode, label = t(if (mode == 2) R.string.sc_cooling else R.string.sc_heating))
     }
+
+    /** Climate on, neither heating nor cooling (the blower, or no rule applies): the fan. */
+    const val NEUTRAL = 3
+
+    /**
+     * The mode by the rule (#34): with the A/C on, cooling when the set point is under the outside temperature (as
+     * before); with the A/C off never cooling, heating only with the set point more than [HEAT_MARGIN] above outside,
+     * otherwise neither. 1 heating, 2 cooling, null neither.
+     */
+    internal fun modeFor(ac: Boolean, set: Float?, out: Float?, last: Boolean?): Int? = when {
+        !ac -> if (set != null && out != null && set > out + HEAT_MARGIN) 1 else null
+        else -> if (coolingFor(true, set, out, last)) 2 else 1
+    }
+    private const val HEAT_MARGIN = 1f
 
     /**
      * The climate switched on, shown at once (17/11: the icon changed only seconds later): the car has no heating
@@ -341,8 +360,9 @@ object ShortcutTiles {
      * ("Heating", "Cooling"), with the guess made at the switch-on until the car tells its own; null when off or unknown.
      */
     fun climateMode(context: Context, s: VehicleState): Pair<Int, String>? {
+        if (!app.mg4dash.system.Prefs(context).climateIndicator) return null
         val v = shown(Tile.CLIMATE, climate(context, s))
-        if (!v.available || !v.inverted) return null
+        if (!v.available || !v.inverted || (v.level != 1 && v.level != 2)) return null
         val icon = icon(Tile.CLIMATE, v)
         return icon to (v.label ?: context.getString(Tile.CLIMATE.label))
     }

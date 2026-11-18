@@ -36,10 +36,12 @@ object ClimateFx {
      * the climate card's; null with nothing to show: the climate not running (waiting for its time, finished), the
      * screen off, the option off, a temperature unknown, or within half a degree.
      */
-    fun holdEffect(running: Boolean, hvacOn: Boolean?, screenOn: Boolean, option: Boolean, acOn: Boolean?, set: Float?, out: Float?): Pair<Boolean, Float>? {
+    fun holdEffect(running: Boolean, hvacOn: Boolean?, screenOn: Boolean, option: Boolean, level: Int?, set: Float?, out: Float?): Pair<Boolean, Float>? {
         if (!running || hvacOn != true || !screenOn || !option || set == null || out == null) return null
+        // The climate card's mode (its rule and the power measured): heating 1, cooling 2, neither otherwise
+        if (level != 1 && level != 2) return null
         val k = intensity(set - out).takeIf { it > 0f } ?: return null
-        return !app.mg4dash.ui.ShortcutTiles.coolingFor(acOn == true, set, out, null) to k
+        return (level == 1) to k
     }
 
     /**

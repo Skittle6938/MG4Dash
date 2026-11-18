@@ -194,7 +194,8 @@ class ClimateHoldActivity : AppCompatActivity() {
         if (locked && brightUntil == 0L) brightUntil = now + 3000
         dim((locked || st.finished) && now >= brightUntil)
         // Heating or cooling, as the climate card shows it; nothing while waiting, screen off or with the option off
-        val effect = app.mg4dash.ui.ClimateFx.holdEffect(st.phase == ClimateHold.Phase.ON, car.hvacOn, !displayOff, prefs.climateFx, car.acOn, car.driverTemp, car.outsideTemp)
+        val effect = app.mg4dash.ui.ClimateFx.holdEffect(st.phase == ClimateHold.Phase.ON, car.hvacOn, !displayOff, prefs.climateFx,
+            app.mg4dash.ui.ShortcutTiles.climate(this, car).level, car.driverTemp, car.outsideTemp)
         fx.set(effect?.first ?: true, effect?.second ?: 0f)
         armed.visibility = if (counting) android.view.View.VISIBLE else android.view.View.GONE
         main.visibility = if (counting) android.view.View.GONE else android.view.View.VISIBLE
