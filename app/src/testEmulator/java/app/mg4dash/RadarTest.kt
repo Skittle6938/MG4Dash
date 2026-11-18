@@ -406,7 +406,9 @@ class RadarTest {
         val key = RadarData.Key.of(48.9, 2.36)
         val h = 3_600_000L
         val now = 100 * 24 * h
-        fun tile(ageH: Long, level: RadarData.Level = RadarData.Level.FULL) = RadarData.Tile(key, level, now - ageH * h, emptyList(), emptyList())
+        // With a road: a tile without any is asked again after an hour (emptyRegionalAnswerNotTrusted)
+        val road = Road(1, "primary", longArrayOf(1, 2), doubleArrayOf(48.9, 48.901), doubleArrayOf(2.36, 2.361), 50)
+        fun tile(ageH: Long, level: RadarData.Level = RadarData.Level.FULL) = RadarData.Tile(key, level, now - ageH * h, listOf(road), emptyList())
         assertTrue(r.needsFetch(null, now, 6 * h))                              // missing
         assertFalse(r.needsFetch(tile(2), now, 6 * h))                          // 2 h old, refresh after 6 h
         assertTrue(r.needsFetch(tile(7), now, 6 * h))                           // older than the refresh age
@@ -673,7 +675,7 @@ class RadarTest {
         // No answer twice in a row: left out 30 min
         o.noAnswer(o.DRESEL_EU, t); assertEquals(o.DRESEL_EU, o.order(app.mg4dash.radar.Overpass.Region.EUROPE, t).first())
         o.noAnswer(o.DRESEL_EU, t); assertEquals(o.OFFICIAL, o.order(app.mg4dash.radar.Overpass.Region.EUROPE, t + 1))
-        assertEquals(o.DRESEL_EU, o.order(app.mg4dash.radar.Overpass.Region.EUROPE, t + o.SKIP_MS).first())
+        assertEquals(o.DRESEL_EU, o.order(app.mg4dash.radar.Overpass.Region.EUROPE, t + o.SKIP_STEPS_MS[0]).first())
         o.resetSkips()
         // 429 / 406: paused 30 s
         assertTrue(o.tooMany(429) && o.tooMany(406) && !o.tooMany(502))
@@ -720,5 +722,72 @@ class RadarTest {
         assertEquals(4, RadarRepo.subBlocks(RadarData.Key(0, 0), 4).size)
         assertTrue(RadarRepo.subBlocks(RadarData.Key(0, 0), 4).all { it.second == 2 })
         assertEquals(16, RadarRepo.blockTiles(RadarData.Key(0, 0), 4).size)
+    }
+
+    /** dresel's coverage (Geofabrik's Europe and North America), not a plain rectangle. */
+    @Test fun regionsFollowTheExtracts() {
+        val o = app.mg4dash.radar.Overpass
+        val EU = app.mg4dash.radar.Overpass.Region.EUROPE; val NA = app.mg4dash.radar.Overpass.Region.NORTH_AMERICA; val X = app.mg4dash.radar.Overpass.Region.OTHER
+        // Europe, its islands and Turkey
+        listOf(48.86 to 2.35, 38.72 to -9.14, 36.72 to -4.42, 37.39 to -5.98, 38.12 to 13.36, 39.22 to 9.11, 35.34 to 25.13, 35.9 to 14.51,
+            64.15 to -21.94, 60.17 to 24.94, 53.9 to 27.56, 50.0 to 36.23, 41.01 to 28.98, 39.93 to 32.86, 35.17 to 33.36).forEach { (la, lo) ->
+            assertEquals("$la,$lo", EU, o.region(la, lo)) }
+        // Not in it: North Africa, the Middle East, the Caucasus, Russia beyond Belarus
+        listOf(36.81 to 10.18, 36.75 to 3.06, 34.02 to -6.84, 32.89 to 13.19, 33.89 to 35.5, 33.51 to 36.29, 31.77 to 35.21,
+            40.18 to 44.51, 40.41 to 49.87, 55.75 to 37.62).forEach { (la, lo) -> assertTrue("$la,$lo", o.region(la, lo) != EU) }
+        // North America: US, Canada, Mexico, Alaska, Hawaii, Greenland; not Central America nor the Caribbean
+        listOf(40.71 to -74.0, 34.05 to -118.24, 45.5 to -73.57, 19.43 to -99.13, 61.22 to -149.9, 21.31 to -157.86, 64.18 to -51.72)
+            .forEach { (la, lo) -> assertEquals("$la,$lo", NA, o.region(la, lo)) }
+        listOf(14.63 to -90.51, 23.11 to -82.37, 18.47 to -69.9, -33.87 to 151.21, 35.68 to 139.69).forEach { (la, lo) -> assertEquals("$la,$lo", X, o.region(la, lo)) }
+    }
+
+    /** An empty answer from dresel is checked elsewhere, and an empty tile is asked again after an hour. */
+    @Test fun emptyRegionalAnswerNotTrusted() {
+        val o = app.mg4dash.radar.Overpass
+        assertTrue(o.regional(o.DRESEL_EU) && o.regional(o.DRESEL_NA) && o.OFFICIAL.none { o.regional(it) })
+        assertTrue(o.noRoads("""{"version":0.6,"elements":[]}"""))
+        assertTrue(o.noRoads("""{"elements":[{"type": "node","id":1}]}"""))
+        assertFalse(o.noRoads("""{"elements":[{"type": "way","id":1}]}"""))
+        assertFalse(o.noRoads("""{"elements":[{"type":"way","id":1}]}"""))
+        val now = 10L * 3_600_000L
+        val empty = RadarData.Tile(RadarData.Key(1, 1), RadarData.Level.FULL, now - 30 * 60_000L, emptyList(), emptyList())
+        assertFalse(RadarRepo.needsFetch(empty, now, 6 * 3_600_000L))
+        assertTrue(RadarRepo.needsFetch(empty, now + 31 * 60_000L, 6 * 3_600_000L))
+    }
+
+    /** No answer from every server at once is the car's network (a tunnel): no server blamed. */
+    @Test fun ourNetworkIsNotTheServersFault() {
+        val o = app.mg4dash.radar.Overpass
+        assertTrue(o.silentToCount(4, listOf("a", "b", "c", "d")).isEmpty())
+        assertEquals(listOf("a"), o.silentToCount(4, listOf("a")))
+        assertTrue(o.silentToCount(0, emptyList()).isEmpty())
+    }
+
+    /** A silent server is left out longer each time (1, 2, 5, 10, 30 min), forgiven on an answer or a network change. */
+    @Test fun growingPenalty() {
+        val o = app.mg4dash.radar.Overpass
+        val EU = app.mg4dash.radar.Overpass.Region.EUROPE
+        o.resetSkips()
+        var t = 1_000_000L
+        for (step in o.SKIP_STEPS_MS) {
+            o.noAnswer(o.DRESEL_EU, t); o.noAnswer(o.DRESEL_EU, t)
+            assertEquals(o.OFFICIAL, o.order(EU, t + step - 1))
+            assertEquals(o.DRESEL_EU, o.order(EU, t + step).first())
+            t += step
+        }
+        // At most 30 min
+        o.noAnswer(o.DRESEL_EU, t); o.noAnswer(o.DRESEL_EU, t)
+        assertEquals(o.DRESEL_EU, o.order(EU, t + 30 * 60_000L).first())
+        // An answer starts it again at 1 min
+        o.answered(o.DRESEL_EU)
+        o.noAnswer(o.DRESEL_EU, t); o.noAnswer(o.DRESEL_EU, t)
+        assertEquals(o.DRESEL_EU, o.order(EU, t + 60_000L).first())
+        // A network change forgives at once, a 429 pause stays
+        o.noAnswer(o.DRESEL_EU, t); o.noAnswer(o.DRESEL_EU, t)
+        o.pause(o.OFFICIAL[0])
+        o.networkChanged()
+        assertEquals(o.DRESEL_EU, o.order(EU).first())
+        assertTrue(o.OFFICIAL[0] !in o.order(EU))
+        o.resetSkips()
     }
 }

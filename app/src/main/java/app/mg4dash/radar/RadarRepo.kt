@@ -177,6 +177,22 @@ object RadarRepo {
     private fun wifi(): android.net.Network? = WifiFirst.bound ?: WifiFirst.wifi
     private fun onWifi(): Boolean = wifi() != null
 
+    /** A network with internet, as Android checked it (no request at all without one). */
+    private fun networkUp(): Boolean = try {
+        val cm = ctx?.getSystemService(Context.CONNECTIVITY_SERVICE) as? android.net.ConnectivityManager
+        val n = wifi() ?: cm?.activeNetwork
+        val caps = n?.let { cm?.getNetworkCapabilities(it) }
+        caps == null && cm == null || caps?.hasCapability(android.net.NetworkCapabilities.NET_CAPABILITY_VALIDATED) == true
+    } catch (_: Exception) { true }
+
+    /** The network last used for the downloads: a change gives the servers left out another chance. */
+    @Volatile private var lastNetwork: String? = null
+    private fun noteNetwork() {
+        val key = wifi()?.let { "wifi:$it" } ?: "default"
+        if (lastNetwork != null && key != lastNetwork) { Log.i(TAG, "network changed: the servers left out are tried again"); Overpass.networkChanged() }
+        lastNetwork = key
+    }
+
     // ── Worker thread ──
 
     private fun onLocation(loc: Location) {
@@ -300,6 +316,9 @@ object RadarRepo {
         return dLat * dLat + dLon * dLon
     }
 
+    /** A tile without any road is asked again after this long, whatever the refresh age. */
+    const val EMPTY_REFRESH_MS = 3_600_000L
+
     /** Live downloads: one tile started at most every this long. */
     private const val FETCH_GAP_MS = 5_000L
     private var lastFetch = 0L
@@ -314,6 +333,8 @@ object RadarRepo {
      */
     internal fun needsFetch(t: RadarData.Tile?, now: Long, refreshMs: Long, level: RadarData.Level = RadarData.Level.FULL): Boolean = when {
         t == null -> true
+        // A tile without any road (the sea, a forest… or an answer to check): asked again after an hour
+        t.roads.isEmpty() && now - t.fetched >= EMPTY_REFRESH_MS -> true
         // Far ahead (main roads wanted): a complete tile, even old, is kept as it is; it is refreshed complete once near
         level == RadarData.Level.MAIN && t.level == RadarData.Level.FULL -> false
         level == RadarData.Level.FULL && t.level != RadarData.Level.FULL -> true
@@ -400,9 +421,17 @@ object RadarRepo {
         var busy = false; var error: String? = null; var retryAfter = 0
         val agent = Overpass.USER_AGENT
         val c = ctx
+        // No usable network: no request at all (each would cost its connection wait), and no server blamed
+        if (!networkUp()) { c?.let { RadarLog.add(it, what, "-", "no network", 0, 0) }; return@tag Overpass.Result(null, error = "no network") }
+        noteNetwork()
+        // An empty answer from a regional server, kept only if no other server has the area
+        var emptyFromRegional: String? = null
         for (route in Overpass.routes(wifi(), wifiOnly)) {
             val via = if (route != null) "Wi-Fi" else "default network"
+            val silent = ArrayList<String>(); var tried = 0
+            fun blame() { Overpass.silentToCount(tried, silent).forEach { Overpass.noAnswer(it) } }
             for (server in Overpass.order(region)) {
+                tried++
                 if (stop()) return@tag Overpass.Result(null, error = "stopped")
                 var wire = 0
                 val started = android.os.SystemClock.elapsedRealtime()
@@ -438,10 +467,16 @@ object RadarRepo {
                     }
                     Overpass.answered(server)
                     val stopped = text?.let { Overpass.runtimeError(it) }
+                    // Nothing at all from the region's own extract: perhaps outside it (North Africa, the Middle East…),
+                    // checked on the official servers before anything is kept
+                    if (code == 200 && text != null && stopped == null && Overpass.regional(server) && Overpass.noRoads(text)) {
+                        emptyFromRegional = text; log("200 empty"); Log.w(TAG, "$server ($via): no road, asked elsewhere"); continue
+                    }
                     if (code == 200 && text != null && stopped == null) {
                         Log.i(TAG, "$server ($via): ${wire / 1024} KB")
                         log("200")
                         Overpass.worked(region, server)
+                        blame()
                         return@tag Overpass.Result(text, wire = wire)
                     }
                     if (stopped != null) { busy = true; error = "remark: $stopped"; log("remark"); Log.w(TAG, "$server ($via): stopped, $stopped"); continue }
@@ -457,10 +492,14 @@ object RadarRepo {
                     error = e.javaClass.simpleName
                     log(e.javaClass.simpleName)
                     Log.w(TAG, "$server ($via): ${e.javaClass.simpleName} ${e.message}")
-                    if (e is java.io.IOException) Overpass.noAnswer(server)
+                    // Counted against it only if another server answered in this round (otherwise: our network)
+                    if (e is java.io.IOException) silent += server
                 }
             }
+            blame()
         }
+        // The other servers failed: the regional server's empty answer is not taken for the truth
+        if (emptyFromRegional != null) Log.w(TAG, "$what: only an empty answer, nothing kept")
         Overpass.Result(null, busy, error, retryAfter = retryAfter)
     }
 

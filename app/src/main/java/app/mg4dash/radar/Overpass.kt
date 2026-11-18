@@ -24,10 +24,49 @@ object Overpass {
 
     /** The region of a point, for the servers that cover it (dresel's extracts: Europe, North America). */
     fun region(lat: Double, lon: Double): Region = when {
-        lat in 34.0..72.0 && lon in -25.0..45.0 -> Region.EUROPE
-        lat in 14.0..72.0 && lon in -170.0..-50.0 -> Region.NORTH_AMERICA
+        inside(EUROPE_AREA, lat, lon) -> Region.EUROPE
+        northAmerica(lat, lon) -> Region.NORTH_AMERICA
         else -> Region.OTHER
     }
+
+    /**
+     * Close to what dresel's European data covers (Geofabrik's Europe): Iceland to Ukraine and Turkey, the
+     * Mediterranean islands, without North Africa, the Middle East, the Caucasus beyond Turkey and Russia east of
+     * Belarus. Coarse: an empty answer near its edges is checked on the official servers anyway.
+     */
+    internal val EUROPE_AREA = listOf(
+        72.0 to -25.0, 72.0 to 33.0, 56.0 to 33.0, 52.0 to 34.0, 52.0 to 40.0, 46.0 to 40.0, 43.6 to 40.0, 42.0 to 46.5, 41.2 to 46.5, 41.2 to 43.5, 40.0 to 43.6, 39.7 to 44.8,
+        37.0 to 44.8, 36.8 to 36.3, 35.95 to 35.9, 35.9 to 35.0, 34.4 to 35.0, 34.4 to 32.0, 34.6 to 23.0, 35.2 to 15.0,
+        36.5 to 14.0, 37.8 to 11.5, 38.6 to 8.5, 37.6 to 1.0, 36.0 to -5.3, 36.0 to -10.0, 34.0 to -25.0,
+    )
+
+    /** dresel's North America (Geofabrik's): Canada, the United States with Alaska and Hawaii, Mexico, Greenland. */
+    internal fun northAmerica(lat: Double, lon: Double): Boolean = when {
+        lat in 18.5..23.0 && lon in -161.0..-154.0 -> true                 // Hawaii
+        lat !in 14.4..84.0 || lon !in -170.0..-11.0 -> false
+        lat < 18.5 && lon > -92.3 -> false                                   // Guatemala, Belize and the south
+        lat < 24.4 && lon > -86.6 -> false                                   // the Caribbean
+        lat < 59.0 && lon > -52.0 -> false                                   // the Atlantic, Bermuda
+        else -> true
+    }
+
+    /** Ray casting on (lat, lon) points. */
+    internal fun inside(poly: List<Pair<Double, Double>>, lat: Double, lon: Double): Boolean {
+        var c = false
+        var j = poly.lastIndex
+        for (i in poly.indices) {
+            val (yi, xi) = poly[i]; val (yj, xj) = poly[j]
+            if ((yi > lat) != (yj > lat) && lon < (xj - xi) * (lat - yi) / (yj - yi) + xi) c = !c
+            j = i
+        }
+        return c
+    }
+
+    /** A server of a region's own extract (dresel): an empty answer from it may only mean the area is outside it. */
+    fun regional(server: String) = server.contains("dresel")
+
+    /** Whether an Overpass answer holds no road at all. */
+    fun noRoads(json: String): Boolean = !json.contains("\"type\": \"way\"") && !json.contains("\"type\":\"way\"")
 
     /** The servers for [region], in their own order. */
     fun servers(region: Region): List<String> = when (region) {
@@ -69,20 +108,38 @@ object Overpass {
 
     /** No answer in a row before a server is left out for [SKIP_MS]. */
     const val SKIP_AFTER = 2
-    const val SKIP_MS = 30L * 60_000L
+    /** How long a server that gives no answer is left out, longer each time it does it again: 1, 2, 5, 10, then 30 min. */
+    val SKIP_STEPS_MS = listOf(1L, 2L, 5L, 10L, 30L).map { it * 60_000L }
+    val SKIP_MS: Long get() = SKIP_STEPS_MS.last()
+    private val strikes = java.util.concurrent.ConcurrentHashMap<String, Int>()
     /** HTTP 429 / 406 (too many requests): that server paused this long, as its usage policy asks. */
     const val PAUSE_MS = 30_000L
     private val noAnswer = java.util.concurrent.ConcurrentHashMap<String, Int>()
     private val skippedUntil = java.util.concurrent.ConcurrentHashMap<String, Long>()
 
     /** [server] answered (whatever its HTTP code): it counts again. */
-    fun answered(server: String) { noAnswer.remove(server); if ((skippedUntil[server] ?: 0L) - System.currentTimeMillis() > PAUSE_MS) skippedUntil.remove(server) }
+    fun answered(server: String) { noAnswer.remove(server); strikes.remove(server); if ((skippedUntil[server] ?: 0L) - System.currentTimeMillis() > PAUSE_MS) skippedUntil.remove(server) }
 
     /** [server] gave no answer (a timeout, a failed connection): left out for a while after [SKIP_AFTER] in a row. */
     fun noAnswer(server: String, now: Long = System.currentTimeMillis()) {
         val n = (noAnswer[server] ?: 0) + 1
         noAnswer[server] = n
-        if (n >= SKIP_AFTER) { skippedUntil[server] = now + SKIP_MS; noAnswer.remove(server) }
+        if (n >= SKIP_AFTER) {
+            val s = strikes[server] ?: 0
+            skippedUntil[server] = now + SKIP_STEPS_MS[s.coerceAtMost(SKIP_STEPS_MS.lastIndex)]
+            strikes[server] = s + 1
+            noAnswer.remove(server)
+        }
+    }
+
+    /**
+     * The network the car uses changed (Wi-Fi and mobile data, or found again after a loss): the servers left out for
+     * not answering get another chance, the requests to slow down (429) are kept.
+     */
+    fun networkChanged() {
+        noAnswer.clear(); strikes.clear()
+        val now = System.currentTimeMillis()
+        skippedUntil.entries.removeIf { it.value - now > PAUSE_MS }
     }
 
     /** [server] asked to slow down (HTTP 429 / 406): paused [PAUSE_MS]. */
@@ -91,7 +148,13 @@ object Overpass {
     /** What to do with an HTTP [code] other than 200: true = try the next server (busy), and pause it on 429 / 406. */
     fun tooMany(code: Int) = code == 429 || code == 406
 
-    internal fun resetSkips() { noAnswer.clear(); skippedUntil.clear(); preferred.clear() }
+    internal fun resetSkips() { noAnswer.clear(); skippedUntil.clear(); preferred.clear(); strikes.clear() }
+
+    /**
+     * After a round of requests, which servers that gave no answer count against themselves: none when every server
+     * tried failed that way (the car's network is down, a tunnel), only them when another one answered.
+     */
+    fun silentToCount(tried: Int, silent: List<String>): List<String> = if (silent.size >= tried) emptyList() else silent
 
     /**
      * An answer with HTTP 200 that is not data: Overpass reports a query stopped half-way (timeout, out of memory) in
