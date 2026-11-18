@@ -1098,4 +1098,9 @@
     <string name="st_call_bar">Bovenste balk verbergen tijdens gesprekken</string>
     <string name="st_call_bar_desc">Ook het belvenster van de auto blijft schermvullend. Vegen vanaf boven toont de balk nog steeds; hij is ook verborgen in de SAIC-telefoonapp.</string>
     <string name="rp_stop">Stoppen</string>
+    <string name="clim_settings_title">Klimaatinstellingen</string>
+    <string name="clim_fx_title">Verwarmen / koelen op de kaart</string>
+    <string name="clim_fx_off">Uit</string>
+    <string name="clim_fx_text">Alleen tekst</string>
+    <string name="clim_fx_anim">Tekst en animatie</string>
 </resources>

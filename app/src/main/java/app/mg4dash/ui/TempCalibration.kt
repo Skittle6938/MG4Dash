@@ -49,9 +49,16 @@ object TempCalibration {
         }
         durRow(R.string.ac_cycle_on, { prefs.acCycleOnSec }) { prefs.acCycleOnSec = it }
         durRow(R.string.ac_cycle_off, { prefs.acCycleOffSec }) { prefs.acCycleOffSec = it }
+        // Heating / cooling on the card (#34, Marc's choice C): none, the word only, the word and the animation
+        box.addView(kit.text(activity.getString(R.string.clim_fx_title), 18f, R.color.text_title), kit.lp(-1, -2, t = 22))
+        val (seg, pick) = kit.segmented(listOf(R.string.clim_fx_off, R.string.clim_fx_text, R.string.clim_fx_anim).map { activity.getString(it) }) { }
+        fun pickMode(m: Int) { prefs.climateFxMode = m; pick(m); onChange() }
+        for (i in 0 until seg.childCount) seg.getChildAt(i).setOnClickListener { pickMode(i) }
+        pick(prefs.climateFxMode)
+        box.addView(seg, kit.lp(-1, -2, t = 8))
         refresh()
         val dlg = AlertDialog.Builder(activity)
-            .setTitle(R.string.temp_cal_title)
+            .setTitle(R.string.clim_settings_title)
             .setView(box)
             .setPositiveButton(android.R.string.ok, null)
             .setNeutralButton(R.string.temp_cal_reset) { _, _ -> step(-prefs.tempOffset) }

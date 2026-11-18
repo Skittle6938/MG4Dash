@@ -1098,4 +1098,9 @@
     <string name="st_call_bar">Cacher la barre du haut pendant les appels</string>
     <string name="st_call_bar_desc">La fenêtre d\'appel de la voiture reste aussi en plein écran. Un glissement depuis le haut affiche toujours la barre ; elle est aussi cachée dans l\'appli Téléphone SAIC.</string>
     <string name="rp_stop">Arrêter</string>
+    <string name="clim_settings_title">Réglages de la clim</string>
+    <string name="clim_fx_title">Chauffage / clim sur la carte</string>
+    <string name="clim_fx_off">Non</string>
+    <string name="clim_fx_text">Texte seul</string>
+    <string name="clim_fx_anim">Texte et animation</string>
 </resources>

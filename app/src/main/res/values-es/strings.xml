@@ -1098,4 +1098,9 @@
     <string name="st_call_bar">Ocultar la barra superior durante las llamadas</string>
     <string name="st_call_bar_desc">La ventana de llamada del coche también queda a pantalla completa. Deslizar desde arriba sigue mostrando la barra; también se oculta en la app Teléfono de SAIC.</string>
     <string name="rp_stop">Detener</string>
+    <string name="clim_settings_title">Ajustes del clima</string>
+    <string name="clim_fx_title">Calefacción / refrigeración en la tarjeta</string>
+    <string name="clim_fx_off">No</string>
+    <string name="clim_fx_text">Solo texto</string>
+    <string name="clim_fx_anim">Texto y animación</string>
 </resources>

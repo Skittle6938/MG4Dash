@@ -30,18 +30,19 @@ class HoldFxTest {
     private val ctx get() = RuntimeEnvironment.getApplication()
 
     @Test fun shownOnlyWhileTheClimateRuns() {
-        // Heating, as strong as on the card
-        val heat = ClimateFx.holdEffect(true, true, true, true, true, 22f, 4f)!!
+        // Heating, as strong as on the card; the mode comes from the card's (level 1 heating, 2 cooling)
+        val heat = ClimateFx.holdEffect(true, true, true, true, 1, 22f, 4f)!!
         assertEquals(true, heat.first)
         assertEquals(ClimateFx.intensity(18f), heat.second, 1e-6f)
-        assertEquals(false, ClimateFx.holdEffect(true, true, true, true, true, 19f, 31f)!!.first)
-        // Waiting for its time, climate off, screen off, option off, a temperature unknown, no gap: nothing
-        assertNull(ClimateFx.holdEffect(false, true, true, true, true, 22f, 4f))
-        assertNull(ClimateFx.holdEffect(true, false, true, true, true, 22f, 4f))
-        assertNull(ClimateFx.holdEffect(true, true, false, true, true, 22f, 4f))
-        assertNull(ClimateFx.holdEffect(true, true, true, false, true, 22f, 4f))
-        assertNull(ClimateFx.holdEffect(true, true, true, true, true, null, 4f))
-        assertNull(ClimateFx.holdEffect(true, true, true, true, true, 21f, 21.2f))
+        assertEquals(false, ClimateFx.holdEffect(true, true, true, true, 2, 19f, 31f)!!.first)
+        // Waiting for its time, climate off, screen off, option off, a temperature unknown, no gap, neither mode: nothing
+        assertNull(ClimateFx.holdEffect(false, true, true, true, 1, 22f, 4f))
+        assertNull(ClimateFx.holdEffect(true, false, true, true, 1, 22f, 4f))
+        assertNull(ClimateFx.holdEffect(true, true, false, true, 1, 22f, 4f))
+        assertNull(ClimateFx.holdEffect(true, true, true, false, 1, 22f, 4f))
+        assertNull(ClimateFx.holdEffect(true, true, true, true, 1, null, 4f))
+        assertNull(ClimateFx.holdEffect(true, true, true, true, 1, 21f, 21.2f))
+        assertNull(ClimateFx.holdEffect(true, true, true, true, app.mg4dash.ui.ShortcutTiles.NEUTRAL, 19f, 31f))
     }
 
     @Suppress("UNCHECKED_CAST")

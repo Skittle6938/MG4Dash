@@ -1096,4 +1096,9 @@
     <string name="st_call_bar">Skrýt horní lištu během hovorů</string>
     <string name="st_call_bar_desc">Okno hovoru vozu zůstane také na celou obrazovku. Přejetí shora lištu stále zobrazí; skryje se i v aplikaci Telefon SAIC.</string>
     <string name="rp_stop">Zastavit</string>
+    <string name="clim_settings_title">Nastavení klimatizace</string>
+    <string name="clim_fx_title">Topení / chlazení na kartě</string>
+    <string name="clim_fx_off">Ne</string>
+    <string name="clim_fx_text">Jen text</string>
+    <string name="clim_fx_anim">Text a animace</string>
 </resources>

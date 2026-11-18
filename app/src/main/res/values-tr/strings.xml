@@ -1098,4 +1098,9 @@
     <string name="st_call_bar">Aramalar sırasında üst çubuğu gizle</string>
     <string name="st_call_bar_desc">Aracın arama penceresi de tam ekran kalır. Yukarıdan kaydırmak çubuğu yine gösterir; SAIC Telefon uygulamasında da gizlenir.</string>
     <string name="rp_stop">Durdur</string>
+    <string name="clim_settings_title">Klima ayarları</string>
+    <string name="clim_fx_title">Kartta ısıtma / soğutma</string>
+    <string name="clim_fx_off">Kapalı</string>
+    <string name="clim_fx_text">Yalnızca metin</string>
+    <string name="clim_fx_anim">Metin ve animasyon</string>
 </resources>

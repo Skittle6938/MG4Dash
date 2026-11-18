@@ -1098,4 +1098,9 @@
     <string name="st_call_bar">Obere Leiste bei Anrufen ausblenden</string>
     <string name="st_call_bar_desc">Auch das Anruffenster des Autos bleibt im Vollbild. Ein Wischen von oben zeigt die Leiste weiterhin; auch in der SAIC-Telefon-App ist sie ausgeblendet.</string>
     <string name="rp_stop">Stoppen</string>
+    <string name="clim_settings_title">Klimaeinstellungen</string>
+    <string name="clim_fx_title">Heizen / Kühlen auf der Karte</string>
+    <string name="clim_fx_off">Aus</string>
+    <string name="clim_fx_text">Nur Text</string>
+    <string name="clim_fx_anim">Text und Animation</string>
 </resources>

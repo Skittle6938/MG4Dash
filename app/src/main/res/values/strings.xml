@@ -1098,4 +1098,9 @@
     <string name="st_call_bar">Hide the top bar during calls</string>
     <string name="st_call_bar_desc">The car\'s call window stays in full screen too. A swipe from the top still shows the bar; it is also hidden in the SAIC Phone app.</string>
     <string name="rp_stop">Stop</string>
+    <string name="clim_settings_title">Climate settings</string>
+    <string name="clim_fx_title">Heating / cooling on the card</string>
+    <string name="clim_fx_off">Off</string>
+    <string name="clim_fx_text">Text only</string>
+    <string name="clim_fx_anim">Text and animation</string>
 </resources>
