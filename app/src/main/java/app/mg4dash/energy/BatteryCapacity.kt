@@ -18,7 +18,7 @@ import org.json.JSONObject
  *     on). The % lost with the car closed, and charging, are outside the measurement: the drop adds up over
  *     several trips and days, without waiting for a charge, and the total is kept with the
  *     preferences (kept across updates). From 15 % of total drop, the measurement joins the
- *     history, dated; smoothing: average weighted by the % drop, over the last 30 days.
+ *     history, dated; smoothing: median weighted by the % drop, over the last 30 days (a mean before 1.7.4 beta 5).
  * Health: measured capacity ÷ the reference of the model (51, 64 or 77 kWh: see [MODELS]), also smoothed
  * over 30 days, and over the whole measured period to follow the trend.
  *
@@ -67,12 +67,30 @@ object BatteryCapacity {
         return if (w == 0) null else list.sumOf { (it.kwh * it.drop).toDouble() }.toFloat() / w
     }
 
+    /**
+     * The capacity in the middle of the measurements, each counting for its % drop (Marc, 18/11, instead of the
+     * mean): sorted by capacity, the one where half of all the % drop is reached; with two equal halves, between the
+     * two. One measurement far off (a BMS recalibration) no longer moves the result.
+     */
+    internal fun weightedMedian(list: List<Sample>): Float? {
+        val s = list.filter { it.drop > 0 }.sortedBy { it.kwh }
+        val total = s.sumOf { it.drop }
+        if (total == 0) return null
+        var acc = 0
+        for ((i, x) in s.withIndex()) {
+            acc += x.drop
+            if (acc * 2 == total && i + 1 < s.size) return (x.kwh + s[i + 1].kwh) / 2f
+            if (acc * 2 > total) return x.kwh
+        }
+        return s.last().kwh
+    }
+
     /** Measured capacity, smoothed over 30 days (otherwise all measurements), and number of measurements. */
     fun estimate(context: Context): Pair<Float, Int>? {
         val all = samples(context)
         val recent = all.filter { System.currentTimeMillis() - it.at < MONTH_MS }
-        weighted(recent)?.let { return it to recent.size }
-        weighted(all)?.let { return it to all.size }
+        weightedMedian(recent)?.let { return it to recent.size }
+        weightedMedian(all)?.let { return it to all.size }
         return null
     }
 
@@ -149,7 +167,7 @@ object BatteryCapacity {
     fun health(context: Context): Health? {
         val all = samples(context).takeIf { it.isNotEmpty() } ?: return null
         val recent = all.filter { System.currentTimeMillis() - it.at < MONTH_MS }.ifEmpty { all }
-        val m = weighted(recent) ?: return null
+        val m = weightedMedian(recent) ?: return null
         return Health((m / nominal(context) * 100f).coerceAtMost(100f), recent.sumOf { it.km.toDouble() }.toFloat(), recent.size)
     }
 

@@ -6,6 +6,7 @@ import app.mg4dash.energy.BatteryCapacity.Sample
 import app.mg4dash.energy.ConsumptionEstimator
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 /** Consumption from the battery %, capacity measurement, and the car's charge codes. */
@@ -50,6 +51,20 @@ class EnergyEstimatesTest {
         val list = listOf(Sample(0, 50f, 20), Sample(0, 60f, 60))
         assertEquals(57.5f, BatteryCapacity.weighted(list)!!, 0.01f)
         assertNull(BatteryCapacity.weighted(emptyList()))
+    }
+
+    /** Marc, 18/11: the median weighted by the % drop, so that one measurement far off no longer moves the result. */
+    @Test fun weightedMedianIgnoresAnOutlier() {
+        // Three close measurements and one far off (a BMS recalibration): the mean moved, the median stays
+        val list = listOf(Sample(0, 47.8f, 15), Sample(0, 48.2f, 18), Sample(0, 48.0f, 16), Sample(0, 62f, 15))
+        assertEquals(48.2f, BatteryCapacity.weightedMedian(list)!!, 0.01f)
+        assertTrue(BatteryCapacity.weighted(list)!! > 51f)
+        // Weighted: the larger drops count more
+        assertEquals(60f, BatteryCapacity.weightedMedian(listOf(Sample(0, 50f, 20), Sample(0, 60f, 60)))!!, 0.01f)
+        // Two equal halves: between the two
+        assertEquals(55f, BatteryCapacity.weightedMedian(listOf(Sample(0, 50f, 20), Sample(0, 60f, 20)))!!, 0.01f)
+        assertEquals(49f, BatteryCapacity.weightedMedian(listOf(Sample(0, 49f, 15)))!!, 0.01f)
+        assertNull(BatteryCapacity.weightedMedian(emptyList()))
     }
 
     @Test fun defaultCapacitiesOfTheModels() {
