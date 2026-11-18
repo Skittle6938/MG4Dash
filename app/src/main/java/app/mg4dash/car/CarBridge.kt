@@ -14,6 +14,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
@@ -148,6 +149,19 @@ object CarBridge {
         "AirConditionManager" to LegacyCar.probe(),
         "VehicleChargingManager" to LegacyCar.probeCharging(),
     )
+
+    /**
+     * The car's speed read now, outside the polling cycle (the alerter, four times a second: the cycle rereads it
+     * every 3 s only, with the energy): the general service's, else PERF_VEHICLE_SPEED. The state gets it too.
+     */
+    fun readSpeed(): Float? {
+        if (BuildConfig.MOCK) return _state.value.speedKmh
+        val v = general?.let { g -> safe { g.latestSpeed } }
+            ?: (CarProps.readFloatArea(0x11600207, 0x1000000) ?: CarProps.readFloatArea(0x11600207, 0))
+                ?.takeIf { !it.isNaN() }?.let { Math.abs(it) }?.takeIf { it < 300f }
+        if (v != null && v != _state.value.speedKmh) _state.update { it.copy(speedKmh = v) }
+        return v
+    }
 
     /** Slows polling when home is not visible. */
     fun setForeground(foreground: Boolean) {
