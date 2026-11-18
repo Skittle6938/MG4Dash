@@ -57,16 +57,17 @@ object TempCalibration {
         pick(prefs.climateFxMode)
         box.addView(seg, kit.lp(-1, -2, t = 8))
         refresh()
-        val dlg = AlertDialog.Builder(activity)
-            .setTitle(R.string.clim_settings_title)
-            .setView(box)
-            .setPositiveButton(android.R.string.ok, null)
-            .setNeutralButton(R.string.temp_cal_reset) { _, _ -> step(-prefs.tempOffset) }
-            .create()
-        // Full screen kept (#34): shown without taking focus, same screen settings as the page, then focus given back
-        dlg.window?.setFlags(android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE, android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE)
-        dlg.show(); app.mg4dash.ui.Dialogs.fix(dlg)
-        dlg.window?.decorView?.systemUiVisibility = activity.window.decorView.systemUiVisibility
-        dlg.window?.clearFlags(android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE)
+        // All of it drawn by MG4Dash, title and buttons too (#34, 18/11: on another head unit the car's own dialog
+        // style replaced ours: a huge title, its buttons in capitals), shown like the other MG4Dash menus
+        val title = kit.text(activity.getString(R.string.clim_settings_title), 22f).apply { typeface = android.graphics.Typeface.DEFAULT_BOLD }
+        box.addView(title, 0, kit.lp(-1, -2, b = 14))
+        val dlg = AlertDialog.Builder(activity).setView(box).create()
+        val buttons = kit.row().apply { gravity = Gravity.CENTER_VERTICAL }
+        buttons.addView(kit.toggleTile(activity.getString(R.string.temp_cal_reset)) { step(-prefs.tempOffset) }, kit.lp(0, kit.dp(56), 1f))
+        buttons.addView(kit.toggleTile(activity.getString(android.R.string.ok)) { dlg.dismiss() }.apply { isSelected = true }, kit.lp(0, kit.dp(56), 1f, l = 12))
+        box.addView(buttons, kit.lp(-1, -2, t = 22))
+        box.setPadding(kit.dp(28), kit.dp(22), kit.dp(28), kit.dp(22))
+        Dialogs.show(dlg)
+        dlg.window?.setLayout(kit.dp(900), android.view.ViewGroup.LayoutParams.WRAP_CONTENT)
     }
 }
