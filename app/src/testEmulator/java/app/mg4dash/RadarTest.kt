@@ -584,4 +584,36 @@ class RadarTest {
         assertEquals(RadarData.Key.of(lat, lon), sorted.first())
         assertTrue(keys.first() != sorted.first())
     }
+
+    /** Look-ahead (18/11): the car's tile first and complete, then those along the heading, about 2 min of driving. */
+    @Test fun liveLookAhead() {
+        val lat = 45.0101; val lon = 7.0105
+        val here = RadarData.Key.of(lat, lon)
+        // Northbound at 130 km/h: 2 min is about 4.3 km ahead
+        val fast = RadarRepo.liveWants(lat, lon, 0f, 130f)
+        assertEquals(here to RadarData.Level.FULL, fast.first())
+        val north = RadarData.Key.of(lat + 4_000 / 111_320.0, lon)
+        val iNorth = fast.indexOfFirst { it.first == north }
+        assertTrue("tile 4 km ahead wanted", iNorth > 0)
+        assertEquals("far ahead, main roads only", RadarData.Level.MAIN, fast[iNorth].second)
+        // Ahead before the side and rear tiles
+        val south = RadarData.Key.of(lat - 1_200 / 111_320.0, lon)
+        assertTrue(iNorth < fast.indexOfFirst { it.first == south })
+        // Slow: complete tiles, not as far
+        val slow = RadarRepo.liveWants(lat, lon, 0f, 40f)
+        assertTrue(slow.all { it.second == RadarData.Level.FULL })
+        assertTrue(slow.none { it.first == north })
+        // No heading (parked): the car's tile and those around, complete
+        assertTrue(RadarRepo.liveWants(lat, lon, null, null).all { it.second == RadarData.Level.FULL })
+    }
+
+    /** A main-roads tile never stands in for the complete one once the car gets near; it does for the far ahead. */
+    @Test fun lightTileUpgradedWhenNear() {
+        val now = 10_000_000L
+        val light = RadarData.Tile(RadarData.Key(1, 1), RadarData.Level.MAIN, now - 1_000, emptyList(), emptyList())
+        assertTrue(RadarRepo.needsFetch(light, now, 3_600_000L, RadarData.Level.FULL))
+        assertFalse(RadarRepo.needsFetch(light, now, 3_600_000L, RadarData.Level.MAIN))
+        val full = RadarData.Tile(RadarData.Key(1, 1), RadarData.Level.FULL, now - 1_000, emptyList(), emptyList())
+        assertFalse(RadarRepo.needsFetch(full, now, 3_600_000L, RadarData.Level.MAIN))
+    }
 }
