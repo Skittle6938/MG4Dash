@@ -616,4 +616,25 @@ class RadarTest {
         val full = RadarData.Tile(RadarData.Key(1, 1), RadarData.Level.FULL, now - 1_000, emptyList(), emptyList())
         assertFalse(RadarRepo.needsFetch(full, now, 3_600_000L, RadarData.Level.MAIN))
     }
+
+    /** Old tiles stay in use until a new one is in (Marc, 18/11): the three cases. */
+    @Test fun oldTilesKept() {
+        val now = 100L * 86_400_000L
+        val road = Road(1, "primary", longArrayOf(1L, 2L), doubleArrayOf(45.0, 45.001), doubleArrayOf(7.0, 7.001), 50)
+        val old = RadarData.Tile(RadarData.Key(1, 1), RadarData.Level.FULL, now - 40L * 86_400_000L, listOf(road), emptyList())
+        // 1. Past its 30 days: still a tile (used), only wanted again first
+        assertFalse(old.fresh(now))
+        assertTrue(RadarRepo.needsFetch(old, now, 6 * 3_600_000L))
+        // 2. A failed or stopped download, or an answer with no road, never replaces it
+        assertNull(RadarRepo.replacement(old, null))
+        assertNull(RadarRepo.replacement(old, RadarData.Tile(old.key, RadarData.Level.FULL, now, emptyList(), emptyList())))
+        // 3. A main-roads tile never replaces a complete one, even older; it fills an empty place
+        val light = RadarData.Tile(old.key, RadarData.Level.MAIN, now, listOf(road), emptyList())
+        assertNull(RadarRepo.replacement(old, light))
+        assertEquals(light, RadarRepo.replacement(null, light))
+        assertFalse(RadarRepo.needsFetch(old, now, 6 * 3_600_000L, RadarData.Level.MAIN))
+        // A good complete answer does replace it
+        val fresh = RadarData.Tile(old.key, RadarData.Level.FULL, now, listOf(road), emptyList())
+        assertEquals(fresh, RadarRepo.replacement(old, fresh))
+    }
 }

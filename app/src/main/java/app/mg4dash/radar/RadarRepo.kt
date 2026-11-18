@@ -296,8 +296,27 @@ object RadarRepo {
      * The tile under or around the car is downloaded again: missing, of main roads only, or older than [refreshMs] (the
      * live refresh age; prepared tiles elsewhere keep their 30 days). The old tile stays in use until the new one is in.
      */
-    internal fun needsFetch(t: RadarData.Tile?, now: Long, refreshMs: Long, level: RadarData.Level = RadarData.Level.FULL): Boolean =
-        t == null || (level == RadarData.Level.FULL && t.level != RadarData.Level.FULL) || now - t.fetched >= refreshMs || !t.fresh(now)
+    internal fun needsFetch(t: RadarData.Tile?, now: Long, refreshMs: Long, level: RadarData.Level = RadarData.Level.FULL): Boolean = when {
+        t == null -> true
+        // Far ahead (main roads wanted): a complete tile, even old, is kept as it is; it is refreshed complete once near
+        level == RadarData.Level.MAIN && t.level == RadarData.Level.FULL -> false
+        level == RadarData.Level.FULL && t.level != RadarData.Level.FULL -> true
+        else -> now - t.fetched >= refreshMs || !t.fresh(now)
+    }
+
+    /**
+     * What a download brings for a tile already there (Marc, 18/11: the old tiles stay in use when the new ones do not
+     * come): the new tile, or null to keep the old one. A tile past its 30 days stays in use until a new one is in; a
+     * failed or stopped download brings nothing; a main-roads tile never replaces a complete one, even older; an
+     * answer without any road never replaces a tile that had some.
+     */
+    internal fun replacement(old: RadarData.Tile?, new: RadarData.Tile?): RadarData.Tile? = when {
+        new == null -> null
+        old == null -> new
+        old.level == RadarData.Level.FULL && new.level == RadarData.Level.MAIN -> null
+        old.roads.isNotEmpty() && new.roads.isEmpty() -> null
+        else -> new
+    }
 
     private fun rebuild() {
         val r = HashMap<Long, Road>(); val cams = HashMap<Long, Camera>()
@@ -313,6 +332,7 @@ object RadarRepo {
             val tile = download(q, Prefs(c).radarWifiOnly).body?.let { json ->
                 runCatching { RadarData.parse(json) }.onFailure { Log.w(TAG, "tile $key: ${it.message}") }.getOrNull()
             }?.let { (r, cams) -> RadarData.Tile(key, level, System.currentTimeMillis(), r, cams) }
+                ?.let { got -> replacement(RadarData.read(c.filesDir, key), got).also { if (it == null) Log.w(TAG, "tile $key ($level): ${got.roads.size} roads, the one kept stays") } }
             if (tile != null) runCatching { RadarData.write(c.filesDir, tile) }
             worker.post {
                 fetching -= key
@@ -512,7 +532,9 @@ object RadarRepo {
                     if (size > 1 && (r.body?.length ?: 0) > PREP_MAX_ANSWER) { split = true; Log.i(TAG, "preparing: block $sw too big (${r.body?.length}), in quarters"); break }
                     val parsed = r.body?.let { json -> runCatching { RadarData.parse(json) }.getOrNull() }
                     if (parsed != null) {
-                        RadarData.split(missing, level, now, parsed.first, parsed.second).forEach { runCatching { RadarData.write(c.filesDir, it) } }
+                        RadarData.split(missing, level, now, parsed.first, parsed.second).forEach { t ->
+                            replacement(RadarData.read(c.filesDir, t.key), t)?.let { runCatching { RadarData.write(c.filesDir, it) } }
+                        }
                         ok = true; break
                     }
                     if (r.busy) { busyStreak++; lastRetryAfter = r.retryAfter; Log.w(TAG, "preparing: block $sw, servers busy ($busyStreak), waiting"); continue }
