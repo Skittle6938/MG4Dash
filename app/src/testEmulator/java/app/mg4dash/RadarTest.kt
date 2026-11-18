@@ -303,8 +303,9 @@ class RadarTest {
     // ── Network ──
 
     @Test fun officialServerFirstNoOther() {
-        // The official server first, always (TLS 1.3 through Conscrypt); one public fallback, outside Russia
-        assertEquals(listOf("https://overpass-api.de/api/interpreter", "https://overpass.private.coffee/api/interpreter"),
+        // The official server first, always (TLS 1.3 through Conscrypt), then its second official address; one public fallback, outside Russia
+        app.mg4dash.radar.Overpass.resetSkips()
+        assertEquals(listOf("https://overpass-api.de/api/interpreter", "https://z.overpass-api.de/api/interpreter", "https://overpass.private.coffee/api/interpreter"),
             app.mg4dash.radar.Overpass.order())
         assertTrue(app.mg4dash.radar.Overpass.SERVERS.none { it.contains("mail.ru") })
     }
@@ -541,20 +542,46 @@ class RadarTest {
     @Test fun silentFallbackSkipped() {
         val o = app.mg4dash.radar.Overpass
         o.resetSkips()
-        val (main, fallback) = o.SERVERS
+        val (main, second, fallback) = o.SERVERS
         val t = 1_000_000L
         o.noAnswer(fallback, t)
-        assertEquals(listOf(main, fallback), o.order(t))
+        assertEquals(listOf(main, second, fallback), o.order(t))
         o.noAnswer(fallback, t)
-        assertEquals(listOf(main), o.order(t + 1))
-        assertEquals(listOf(main), o.order(t + o.SKIP_MS - 1))
-        assertEquals(listOf(main, fallback), o.order(t + o.SKIP_MS))
+        assertEquals(listOf(main, second), o.order(t + 1))
+        assertEquals(listOf(main, second), o.order(t + o.SKIP_MS - 1))
+        assertEquals(listOf(main, second, fallback), o.order(t + o.SKIP_MS))
         // An answer resets the count
         o.noAnswer(fallback, t); o.answered(fallback); o.noAnswer(fallback, t)
-        assertEquals(listOf(main, fallback), o.order(t))
+        assertEquals(listOf(main, second, fallback), o.order(t))
         // The official server is always tried
         repeat(5) { o.noAnswer(main, t) }
         assertEquals(main, o.order(t).first())
         o.resetSkips()
+    }
+
+    /** Marc, 18/11: the official address answered "at capacity" to almost everything; its second official address comes next. */
+    @Test fun secondOfficialAddressBeforeTheFallback() {
+        val o = app.mg4dash.radar.Overpass
+        assertEquals("https://overpass-api.de/api/interpreter", o.SERVERS[0])
+        assertEquals("https://z.overpass-api.de/api/interpreter", o.SERVERS[1])
+    }
+
+    /** A query stopped half-way comes back with HTTP 200 and a "remark": a failed try, never a tile kept with roads missing. */
+    @Test fun runtimeErrorIsNotData() {
+        val o = app.mg4dash.radar.Overpass
+        val stopped = """{"version":0.6,"elements":[],"remark":"runtime error: Query timed out in \"query\" at line 1 after 26 seconds."}"""
+        assertNotNull(o.runtimeError(stopped))
+        assertNull(o.runtimeError("""{"version":0.6,"elements":[{"type":"way","id":1}]}"""))
+        // A remark that is not an error (Overpass also sends notes) is data
+        assertNull(o.runtimeError("""{"elements":[],"remark":"note: nothing found"}"""))
+    }
+
+    /** The live downloads start with the tile under the car, then the nearest ones. */
+    @Test fun carTileFirst() {
+        val lat = 45.0101; val lon = 7.0105
+        val keys = RadarData.keysAround(lat, lon, 0.012, 0.017)
+        val sorted = keys.sortedBy { RadarRepo.tileDistance(it, lat, lon) }
+        assertEquals(RadarData.Key.of(lat, lon), sorted.first())
+        assertTrue(keys.first() != sorted.first())
     }
 }
