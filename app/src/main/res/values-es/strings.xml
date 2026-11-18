@@ -1097,4 +1097,5 @@
     <string name="st_climate_fx_desc">Ondas de calor al calentar, escarcha al enfriar, más marcadas cuanto más lejos está la consigna de la temperatura exterior. Desactivada: solo desaparece la animación, Calefacción / Refrigeración sigue visible.</string>
     <string name="st_call_bar">Ocultar la barra superior durante las llamadas</string>
     <string name="st_call_bar_desc">La ventana de llamada del coche también queda a pantalla completa. Deslizar desde arriba sigue mostrando la barra; también se oculta en la app Teléfono de SAIC.</string>
+    <string name="rp_stop">Detener</string>
 </resources>

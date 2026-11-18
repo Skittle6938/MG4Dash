@@ -105,7 +105,19 @@ object RadarRepo {
     @Volatile private var prepPaused = false
     @Volatile private var prepCancelled = false
     fun pausePrepare(on: Boolean) { prepPaused = on }
-    fun cancelPrepare() { prepCancelled = true; prepPaused = false }
+
+    /** The preparation's thread while it runs: its request in progress is cut when it is stopped. */
+    @Volatile private var prepThread: Thread? = null
+
+    /**
+     * Stops the preparation at once (Marc, 18/11: it waited for the request in progress, up to 90 s): the request is
+     * cut, the page shows it stopped now; the tiles already in are kept.
+     */
+    fun cancelPrepare() {
+        prepCancelled = true; prepPaused = false
+        _prepare.value?.takeIf { it.running }?.let { _prepare.value = it.copy(phase = PrepPhase.CANCELLED, busyUntil = 0) }
+        RadarHttp.abort(prepThread)
+    }
     private val _prepare = MutableStateFlow<Prep?>(null)
     val prepare: StateFlow<Prep?> = _prepare
     private val prep: Handler by lazy { Handler(HandlerThread("radar-prepare").apply { start() }.looper) }
@@ -348,13 +360,14 @@ object RadarRepo {
      * through the servers in turn (a busy one, HTTP 429 / 503 / 504, gives way to the next). Counted as the alerter's
      * data, on the network it went through.
      */
-    private fun download(query: String, wifiOnly: Boolean): Overpass.Result = DataUsage.tag(DataUsage.Use.RADARS) {
+    private fun download(query: String, wifiOnly: Boolean, stop: () -> Boolean = { false }): Overpass.Result = DataUsage.tag(DataUsage.Use.RADARS) {
         var busy = false; var error: String? = null; var retryAfter = 0
         val body = ("data=" + URLEncoder.encode(query, "UTF-8")).toByteArray()
         val agent = "MG4Dash/${BuildConfig.VERSION_NAME}"
         for (route in Overpass.routes(wifi(), wifiOnly)) {
             val via = if (route != null) "Wi-Fi" else "default network"
             for (server in Overpass.order()) {
+                if (stop()) return@tag Overpass.Result(null, error = "stopped")
                 var wire = 0
                 try {
                     val url = URL(server)
@@ -388,6 +401,7 @@ object RadarRepo {
                     val stopped = text?.let { Overpass.runtimeError(it) }
                     if (code == 200 && text != null && stopped == null) {
                         Log.i(TAG, "$server ($via): ${wire / 1024} KB")
+                        Overpass.worked(server)
                         return@tag Overpass.Result(text, wire = wire)
                     }
                     if (stopped != null) { busy = true; error = "remark: $stopped"; Log.w(TAG, "$server ($via): stopped, $stopped"); continue }
@@ -395,6 +409,8 @@ object RadarRepo {
                     error = "HTTP $code"
                     Log.w(TAG, "$server ($via): HTTP $code")
                 } catch (e: Exception) {
+                    // Cut on purpose (preparation stopped): not the server's fault
+                    if (stop()) return@tag Overpass.Result(null, error = "stopped")
                     error = e.javaClass.simpleName
                     Log.w(TAG, "$server ($via): ${e.javaClass.simpleName} ${e.message}")
                     if (e is java.io.IOException) Overpass.noAnswer(server)
@@ -480,6 +496,7 @@ object RadarRepo {
             var bytes = 0L
             val started = System.currentTimeMillis()
             prepPaused = false; prepCancelled = false
+            prepThread = Thread.currentThread()
             fun left(): Int? = if (done < 8) null else (((System.currentTimeMillis() - started) / done) * (total - done) / 60_000L).toInt()
             var retryAt = 0L
             fun show(phase: PrepPhase) { _prepare.value = Prep(done, total, failed, phase, bytes, left(), if (phase == PrepPhase.RETRY) retryAt else 0L) }
@@ -494,6 +511,7 @@ object RadarRepo {
             }
             fun cancelled(): Boolean {
                 if (!prepCancelled) return false
+                prepThread = null
                 Log.i(TAG, "preparing cancelled ($done / $total)"); resume.edit().remove(PREP_RESUME_KEY).apply(); show(PrepPhase.CANCELLED); return true
             }
             // Blocks to fetch: the 2 x 2 ones first; one that fails or is too big comes back as its quarters
@@ -523,11 +541,12 @@ object RadarRepo {
                         retryAt = if (busyStreak > 0) System.currentTimeMillis() + wait else 0L
                         show(PrepPhase.RETRY)
                         val until = System.currentTimeMillis() + wait
-                        while (System.currentTimeMillis() < until && !prepCancelled) Thread.sleep(1_000)
+                        while (System.currentTimeMillis() < until && !prepCancelled) Thread.sleep(200)
                         if (cancelled()) return@post
                         show(PrepPhase.RUNNING)
                     }
-                    val r = download(RadarData.query(sw.south, sw.west, bn, be, level), wifiOnly = true)
+                    val r = download(RadarData.query(sw.south, sw.west, bn, be, level), wifiOnly = true) { prepCancelled }
+                    if (cancelled()) return@post
                     bytes += r.wire
                     if (size > 1 && (r.body?.length ?: 0) > PREP_MAX_ANSWER) { split = true; Log.i(TAG, "preparing: block $sw too big (${r.body?.length}), in quarters"); break }
                     val parsed = r.body?.let { json -> runCatching { RadarData.parse(json) }.getOrNull() }
@@ -549,6 +568,7 @@ object RadarRepo {
                 // A short pause between queries, as Overpass asks
                 Thread.sleep(1_000)
             }
+            prepThread = null
             Log.i(TAG, "preparing trips done: ${done - failed} / $total tiles, $failed failed")
             resume.edit().remove(PREP_RESUME_KEY).apply()
             show(PrepPhase.DONE)

@@ -29,8 +29,19 @@ object Overpass {
      * The servers in the order to try them: the official one first, always; a fallback that gave no answer twice in a
      * row (a timeout, no connection: 90 s lost each round, Marc, 17/11) is left out for [SKIP_MS].
      */
-    fun order(now: Long = System.currentTimeMillis()): List<String> =
-        SERVERS.filterIndexed { i, s -> i == 0 || (skippedUntil[s] ?: 0L) <= now }
+    fun order(now: Long = System.currentTimeMillis()): List<String> {
+        val open = SERVERS.filterIndexed { i, s -> i == 0 || (skippedUntil[s] ?: 0L) <= now }
+        // The last server that gave data first (Marc, 18/11): no time lost again on a full one at each request
+        val p = preferred?.takeIf { it in open } ?: return open
+        return listOf(p) + (open - p)
+    }
+
+    /** The last server that gave data, tried first; null: the list's order. */
+    @Volatile var preferred: String? = null
+        private set
+
+    /** [server] gave data: it is tried first from now on. */
+    fun worked(server: String) { preferred = server }
 
     /** No answer in a row from a fallback before it is left out. */
     const val SKIP_AFTER = 2
@@ -48,7 +59,7 @@ object Overpass {
         if (n >= SKIP_AFTER && server != SERVERS.first()) { skippedUntil[server] = now + SKIP_MS; noAnswer.remove(server) }
     }
 
-    internal fun resetSkips() { noAnswer.clear(); skippedUntil.clear() }
+    internal fun resetSkips() { noAnswer.clear(); skippedUntil.clear(); preferred = null }
 
     /** A server answer that says it is busy: try another one, and wait longer before the next round. */
     fun busy(code: Int) = code == 429 || code == 502 || code == 503 || code == 504
