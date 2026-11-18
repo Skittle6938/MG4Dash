@@ -282,7 +282,7 @@ class SettingsActivity : AppCompatActivity() {
                 .setMessage(R.string.st_v2l_auto_warning)
                 .setPositiveButton(R.string.st_v2l_auto_enable) { _, _ -> prefs.v2lAuto = true; repaintV2l() }
                 .setNegativeButton(R.string.cancel, null)
-                .show().also { app.mg4dash.ui.Dialogs.fix(it) }
+                .create().also { app.mg4dash.ui.Dialogs.show(it); app.mg4dash.ui.Dialogs.fix(it) }
         }
         // Price of a kWh (#102): the cost of each trip and reading in the Trips page; empty: none
         lateinit var priceBtn: Button
@@ -387,7 +387,7 @@ class SettingsActivity : AppCompatActivity() {
                         .setView(notes)
                         .setPositiveButton(R.string.st_update_install) { _, _ -> install(newer) }
                         .setNegativeButton(R.string.cancel, null)
-                        .show().also { app.mg4dash.ui.Dialogs.fix(it) }
+                        .create().also { app.mg4dash.ui.Dialogs.show(it); app.mg4dash.ui.Dialogs.fix(it) }
                 }
             }
         }
@@ -595,7 +595,7 @@ class SettingsActivity : AppCompatActivity() {
         row(alert, button(getString(R.string.du_reset)) {
             AlertDialog.Builder(this).setMessage(R.string.du_reset_confirm)
                 .setPositiveButton(R.string.du_reset) { _, _ -> DataUsage.reset(this) }
-                .setNegativeButton(android.R.string.cancel, null).show().also { app.mg4dash.ui.Dialogs.fix(it); app.mg4dash.ui.Dialogs.hideBars(it) }
+                .setNegativeButton(android.R.string.cancel, null).create().also { app.mg4dash.ui.Dialogs.show(it); app.mg4dash.ui.Dialogs.fix(it); app.mg4dash.ui.Dialogs.hideBars(it) }
         })
 
         val dayFormat = java.text.SimpleDateFormat("EEEE d MMMM", Locale.getDefault())
@@ -613,7 +613,7 @@ class SettingsActivity : AppCompatActivity() {
                     .setMessage(lines)
                     .setPositiveButton(R.string.st_close, null)
                     .setOnDismissListener { chart.selected = -1 }
-                    .show().also { app.mg4dash.ui.Dialogs.fix(it); app.mg4dash.ui.Dialogs.hideBars(it) }
+                    .create().also { app.mg4dash.ui.Dialogs.show(it); app.mg4dash.ui.Dialogs.fix(it); app.mg4dash.ui.Dialogs.hideBars(it) }
             }
         }
         val render: (DataUsage.Snapshot) -> Unit = { s ->
@@ -716,7 +716,7 @@ class SettingsActivity : AppCompatActivity() {
         row(col, button("Relire") { show() })
         show()
         AlertDialog.Builder(this).setTitle("Tests (charge)").setView(ScrollView(this).apply { addView(col) })
-            .setPositiveButton(R.string.st_close, null).show().also { app.mg4dash.ui.Dialogs.fix(it) }
+            .setPositiveButton(R.string.st_close, null).create().also { app.mg4dash.ui.Dialogs.show(it); app.mg4dash.ui.Dialogs.fix(it) }
     }
 
     /** Name and state on the left, a single button on the right: Check, or Install when a newer version is known. */
@@ -822,7 +822,7 @@ class SettingsActivity : AppCompatActivity() {
                                     showState()
                                     if (!isFinishing) AlertDialog.Builder(this@SettingsActivity)
                                         .setMessage(if (ok) R.string.st_aa_done else R.string.st_update_error)
-                                        .setPositiveButton(android.R.string.ok, null).show().also { app.mg4dash.ui.Dialogs.fix(it) }
+                                        .setPositiveButton(android.R.string.ok, null).create().also { app.mg4dash.ui.Dialogs.show(it); app.mg4dash.ui.Dialogs.fix(it) }
                                 } }
                                 withContext(Dispatchers.IO) { A.install(this@SettingsActivity, apk, r.version) }
                             } catch (e: Exception) {
@@ -834,7 +834,7 @@ class SettingsActivity : AppCompatActivity() {
                     }
                     .setNegativeButton(R.string.cancel, null)
                     .setOnDismissListener { if (!started) { A.end(); showState() } }
-                    .show().also { app.mg4dash.ui.Dialogs.fix(it) }
+                    .create().also { app.mg4dash.ui.Dialogs.show(it); app.mg4dash.ui.Dialogs.fix(it) }
             }
         }
     }
@@ -884,7 +884,7 @@ class SettingsActivity : AppCompatActivity() {
                                     showState()
                                     if (!isFinishing) AlertDialog.Builder(this@SettingsActivity)
                                         .setMessage(if (ok) R.string.st_rd_done else R.string.st_update_error)
-                                        .setPositiveButton(android.R.string.ok, null).show().also { app.mg4dash.ui.Dialogs.fix(it) }
+                                        .setPositiveButton(android.R.string.ok, null).create().also { app.mg4dash.ui.Dialogs.show(it); app.mg4dash.ui.Dialogs.fix(it) }
                                 } }
                                 withContext(Dispatchers.IO) { R2.install(this@SettingsActivity, apk, r.version) }
                             } catch (e: Exception) {
@@ -894,7 +894,7 @@ class SettingsActivity : AppCompatActivity() {
                         }
                     }
                     .setNegativeButton(R.string.cancel, null)
-                    .show().also { app.mg4dash.ui.Dialogs.fix(it) }
+                    .create().also { app.mg4dash.ui.Dialogs.show(it); app.mg4dash.ui.Dialogs.fix(it) }
             }
         }
     }
@@ -943,7 +943,7 @@ class SettingsActivity : AppCompatActivity() {
                             }
                         }
                         .setNegativeButton(R.string.cancel, null)
-                        .show().also { app.mg4dash.ui.Dialogs.fix(it); app.mg4dash.ui.Dialogs.fullHeight(it) }
+                        .create().also { app.mg4dash.ui.Dialogs.show(it); app.mg4dash.ui.Dialogs.fix(it); app.mg4dash.ui.Dialogs.fullHeight(it) }
                 }
             }.start()
         }
@@ -1100,7 +1100,7 @@ class SettingsActivity : AppCompatActivity() {
                 refreshHome(); toastState(ok)
             }
             .setNegativeButton(R.string.cancel, null)
-            .show().also { app.mg4dash.ui.Dialogs.fix(it) }
+            .create().also { app.mg4dash.ui.Dialogs.show(it); app.mg4dash.ui.Dialogs.fix(it) }
     }
 
     private fun confirmValet() {
@@ -1116,7 +1116,7 @@ class SettingsActivity : AppCompatActivity() {
                 refreshHome(); toastState(ok)
             }
             .setNegativeButton(R.string.cancel, null)
-            .show().also { app.mg4dash.ui.Dialogs.fix(it) }
+            .create().also { app.mg4dash.ui.Dialogs.show(it); app.mg4dash.ui.Dialogs.fix(it) }
     }
 
     private fun toastState(ok: Boolean) {
@@ -1167,7 +1167,7 @@ class SettingsActivity : AppCompatActivity() {
                 addView(status)
                 addView(row, LinearLayout.LayoutParams(-1, -2))
             })
-            .show().also { app.mg4dash.ui.Dialogs.fix(it) }
+            .create().also { app.mg4dash.ui.Dialogs.show(it); app.mg4dash.ui.Dialogs.fix(it) }
         logDialog = d
         var radioLines: List<Pair<Long, String>> = emptyList()
         // Radio Dash's lines among ours (#80): read from logcat, which takes a moment
@@ -1333,7 +1333,7 @@ class SettingsActivity : AppCompatActivity() {
             if (on) {
                 AlertDialog.Builder(this).setMessage(R.string.st_web_engine_revert_confirm)
                     .setPositiveButton(R.string.st_web_engine_revert_ok) { _, _ -> busy = true; we.revert(this) { finished(it) } }
-                    .setNegativeButton(R.string.cancel, null).show().also { app.mg4dash.ui.Dialogs.fix(it); app.mg4dash.ui.Dialogs.hideBars(it) }
+                    .setNegativeButton(R.string.cancel, null).create().also { app.mg4dash.ui.Dialogs.show(it); app.mg4dash.ui.Dialogs.fix(it); app.mg4dash.ui.Dialogs.hideBars(it) }
                 return@setOnClickListener
             }
             if (app.mg4dash.system.DataUsage.updatesBlocked(this)) { state.text = getString(R.string.du_updates_wait); return@setOnClickListener }
@@ -1349,7 +1349,7 @@ class SettingsActivity : AppCompatActivity() {
                         }
                     }) { finished(it) }
                 }
-                .setNegativeButton(R.string.cancel, null).show().also { app.mg4dash.ui.Dialogs.fix(it); app.mg4dash.ui.Dialogs.hideBars(it) }
+                .setNegativeButton(R.string.cancel, null).create().also { app.mg4dash.ui.Dialogs.show(it); app.mg4dash.ui.Dialogs.fix(it); app.mg4dash.ui.Dialogs.hideBars(it) }
         }
     }
 

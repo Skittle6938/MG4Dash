@@ -293,7 +293,7 @@ object Shortcuts {
                 else apps[p - (if (extraFirst != null) 1 else 0)].activityInfo.let { onPick(ComponentName(it.packageName, it.name)) }
             }
             .setNegativeButton(R.string.cancel, null)
-            .show().also { app.mg4dash.ui.Dialogs.fix(it); app.mg4dash.ui.Dialogs.fullHeight(it) }
+            .create().also { app.mg4dash.ui.Dialogs.show(it); app.mg4dash.ui.Dialogs.fix(it); app.mg4dash.ui.Dialogs.fullHeight(it) }
     }
 
     /** ADB state under the tile: [now] shown at once, otherwise the reading (then again after a few seconds). */
@@ -342,7 +342,7 @@ object Shortcuts {
                 }
             }
             .setNegativeButton(R.string.cancel, null)
-            .show().also { app.mg4dash.ui.Dialogs.fix(it) }
+            .create().also { app.mg4dash.ui.Dialogs.show(it); app.mg4dash.ui.Dialogs.fix(it) }
     }
 
     /** Number of shortcuts in this place: the three steps of [grid], shown as their counts. */
@@ -356,7 +356,7 @@ object Shortcuts {
                 prefs.setShortcutsDensity(size, w); d.dismiss(); refresh()
             }
             .setNegativeButton(R.string.cancel, null)
-            .show().also { app.mg4dash.ui.Dialogs.fix(it) }
+            .create().also { app.mg4dash.ui.Dialogs.show(it); app.mg4dash.ui.Dialogs.fix(it) }
     }
 
     // ─── Home Assistant ───
@@ -476,7 +476,7 @@ object Shortcuts {
             }
         })
         list.setOnItemClickListener { _, _, pos, _ -> dialog.dismiss(); onPick(shown[pos]) }
-        dialog.show(); app.mg4dash.ui.Dialogs.fix(dialog)
+        app.mg4dash.ui.Dialogs.show(dialog); app.mg4dash.ui.Dialogs.fix(dialog)
         app.mg4dash.ui.Dialogs.compact(dialog)
         app.mg4dash.ui.Dialogs.fullHeight(dialog)
         app.mg4dash.ui.CarKeyboard.attachInDialog(search, dialog, box)

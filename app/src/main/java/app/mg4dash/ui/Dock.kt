@@ -65,7 +65,7 @@ object Dock {
                     build(activity, dock, current, simple)
                 }
                 .setNegativeButton(R.string.cancel, null)
-                .show().also { app.mg4dash.ui.Dialogs.fix(it) }
+                .create().also { app.mg4dash.ui.Dialogs.show(it); app.mg4dash.ui.Dialogs.fix(it) }
             true
         }
         if (wifi) {
@@ -400,7 +400,7 @@ object Dock {
             }
             .setNegativeButton(R.string.cancel, null)
             .setOnDismissListener { Fullscreen.apply(activity) }
-            .show().also { app.mg4dash.ui.Dialogs.fix(it) }
+            .create().also { app.mg4dash.ui.Dialogs.show(it); app.mg4dash.ui.Dialogs.fix(it) }
     }
 
     private fun connectionName(activity: Activity): String = customAa(activity)?.let {

@@ -1687,7 +1687,27 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
     /** The gesture started on a window over home, or while one is moved: not for the cards under it. */
     private var onWindow = false
 
+    /**
+     * A panel over the whole of home (Keep the climate on, an alert, the update prompt): its touches are its own (#26:
+     * home took the taps on its buttons over the map and web app cards as touches on those cards, by position, before
+     * the panel had them). The views marked [R.id.home_panel] over home's layout (not the map's and web app's windows).
+     */
+    internal fun panelOver(): Boolean {
+        val content = findViewById<android.view.ViewGroup>(android.R.id.content) ?: return false
+        for (i in content.childCount - 1 downTo 0) {
+            val v = content.getChildAt(i)
+            if (v === b.root) return false
+            if (v.visibility == View.VISIBLE && v.getTag(R.id.home_panel) == true) return true
+        }
+        return false
+    }
+
     override fun dispatchTouchEvent(ev: android.view.MotionEvent): Boolean {
+        if (panelOver()) {
+            // The card gestures under it end there
+            if (ev.actionMasked == android.view.MotionEvent.ACTION_DOWN) { pressFrame = null; handler.removeCallbacks(longPressed); restFrame = null }
+            return super.dispatchTouchEvent(ev)
+        }
         if (ev.actionMasked == android.view.MotionEvent.ACTION_DOWN)
             onWindow = listOfNotNull(floatWeb, floatMap).any { it.floating && (it.moving || it.holds(ev)) }
         if (!app.mg4dash.ui.CardsEditor.isOpen(this) && outsideRest(ev)) return true
@@ -2446,7 +2466,7 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
                 app.mg4dash.ui.Toasts.show(this, getString(if (ok) R.string.st_home_changed else R.string.st_failed))
             }
             .setNegativeButton(R.string.cancel, null)
-            .show().also { app.mg4dash.ui.Dialogs.fix(it) }
+            .create().also { app.mg4dash.ui.Dialogs.show(it); app.mg4dash.ui.Dialogs.fix(it) }
     }
 
     // ── Startup: let the SAIC launcher register its interface ────────────────

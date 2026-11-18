@@ -37,6 +37,7 @@ object ClimateHoldPanel {
             tag = TAG
             setBackgroundColor(0xB3000000.toInt())
             isClickable = true   // the page underneath no longer receives touches
+            setTag(R.id.home_panel, true)
         }
         val panel = kit.panel(a.getString(R.string.dm_title)).apply {
             setPadding(kit.dp(32), kit.dp(22), kit.dp(32), kit.dp(22))

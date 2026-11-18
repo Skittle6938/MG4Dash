@@ -3,6 +3,7 @@
     <!-- Blink animation of the A/C button during the intermittent cycle (#34) -->
     <item name="tag_ac_cycle" type="id" />
     <item name="fullscreen_focus" type="id" />
+    <item name="home_panel" type="id" />
     <item name="fullscreen_watch" type="id" />
     <!-- Last image and last tint written on a view (QuietViews) -->
     <item name="tag_shown_image" type="id" />

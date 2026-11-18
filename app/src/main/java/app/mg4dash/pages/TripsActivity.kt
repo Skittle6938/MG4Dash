@@ -201,7 +201,7 @@ class TripsActivity : PageActivity() {
             .setMessage(R.string.tr_clear_all_confirm)
             .setPositiveButton(R.string.tr_clear) { _, _ -> TripLog.clearAll(sp); refresh() }
             .setNegativeButton(android.R.string.cancel, null)
-            .show().also { app.mg4dash.ui.Dialogs.hideBars(it) }
+            .create().also { app.mg4dash.ui.Dialogs.show(it); app.mg4dash.ui.Dialogs.hideBars(it) }
     }
 
     companion object {
