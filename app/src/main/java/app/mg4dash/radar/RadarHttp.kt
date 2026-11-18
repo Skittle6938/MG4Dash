@@ -51,6 +51,8 @@ object RadarHttp {
         val host = url.host
         val port = if (url.port > 0) url.port else 443
         val plain = network?.socketFactory?.createSocket() ?: Socket()
+        val me = Thread.currentThread()
+        open[me] = plain
         try {
             plain.connect(InetSocketAddress(host, port), connectMs)
             plain.soTimeout = readMs
@@ -64,8 +66,18 @@ object RadarHttp {
             out.write(head.toByteArray(Charsets.ISO_8859_1)); body?.let { out.write(it) }; out.flush()
             return s.inputStream.use { readResponse(it) }
         } finally {
+            open.remove(me, plain)
             try { plain.close() } catch (_: Exception) {}
         }
+    }
+
+    /** The socket each thread is using now, so that a request can be cut from elsewhere (the preparation stopped). */
+    private val open = java.util.concurrent.ConcurrentHashMap<Thread, Socket>()
+
+    /** Cuts the request [thread] is making, if any: it ends at once with an IOException. */
+    fun abort(thread: Thread?) {
+        val t = thread ?: return
+        open[t]?.let { try { it.close() } catch (_: Exception) {} }
     }
 
     /** Reads an HTTP/1.1 answer: status line, headers, body (Content-Length, chunked or until the end), gzip undone. */

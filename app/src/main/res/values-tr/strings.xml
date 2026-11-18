@@ -1097,4 +1097,5 @@
     <string name="st_climate_fx_desc">Isıtırken sıcak dalgaları, soğuturken kırağı; ayar dış sıcaklıktan ne kadar uzaksa o kadar belirgin. Kapalı: yalnızca animasyon kalkar, Isıtma / Soğutma görünür kalır.</string>
     <string name="st_call_bar">Aramalar sırasında üst çubuğu gizle</string>
     <string name="st_call_bar_desc">Aracın arama penceresi de tam ekran kalır. Yukarıdan kaydırmak çubuğu yine gösterir; SAIC Telefon uygulamasında da gizlenir.</string>
+    <string name="rp_stop">Durdur</string>
 </resources>

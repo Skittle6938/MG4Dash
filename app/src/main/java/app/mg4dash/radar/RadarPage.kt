@@ -327,18 +327,16 @@ class RadarPage(private val a: Activity, private val prefs: Prefs) {
             detail.text = p?.let { a.getString(R.string.rp_prep_detail, DataUsage.format(a, it.bytes)) +
                 (it.minutesLeft?.takeIf { _ -> running }?.let { m -> " · " + a.getString(R.string.rp_prep_left, Math.max(1, m)) } ?: "") } ?: ""
             failed.text = p?.takeIf { it.failed > 0 }?.let { a.getString(R.string.rp_prep_failed, it.failed) } ?: ""
-            main.text = a.getString(when { !running -> R.string.st_rad_prepare; p?.phase == RadarRepo.PrepPhase.PAUSED -> R.string.rp_resume; else -> R.string.rp_pause })
+            // One button (18/11: pause and stop did the same): Stop while it runs, Prepare otherwise; preparing
+            // again skips the tiles already in, so it goes on where it stopped
+            main.text = a.getString(if (running) R.string.rp_stop else R.string.st_rad_prepare)
             main.isSelected = true
             main.setOnClickListener {
-                val q = RadarRepo.prepare.value
-                when {
-                    q?.running != true -> if (!RadarRepo.prepareTrips(a)) app.mg4dash.ui.Toasts.show(a, R.string.st_rad_prepare_no)
-                    q.phase == RadarRepo.PrepPhase.PAUSED -> RadarRepo.pausePrepare(false)
-                    else -> RadarRepo.pausePrepare(true)
-                }
+                if (RadarRepo.prepare.value?.running == true) RadarRepo.cancelPrepare()
+                else if (!RadarRepo.prepareTrips(a)) app.mg4dash.ui.Toasts.show(a, R.string.st_rad_prepare_no)
                 refresh()
             }
-            cancel.visibility = if (running) View.VISIBLE else View.GONE
+            cancel.visibility = View.GONE
         }
 
         // While driving

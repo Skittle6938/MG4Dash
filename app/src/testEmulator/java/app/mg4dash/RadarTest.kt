@@ -530,8 +530,9 @@ class RadarTest {
             assertEquals(true, RadarRepo.prepare.value?.running)
         } finally {
             RadarRepo.cancelPrepare()
+            // The page shows it stopped at once; the worker then forgets the place
             val until = System.currentTimeMillis() + 5_000
-            while (RadarRepo.prepare.value?.running == true && System.currentTimeMillis() < until) Thread.sleep(100)
+            while (sp.getString("radar_prep_resume", null) != null && System.currentTimeMillis() < until) Thread.sleep(100)
             RadarRepo.stop()
         }
         assertEquals(RadarRepo.PrepPhase.CANCELLED, RadarRepo.prepare.value?.phase)
@@ -636,5 +637,48 @@ class RadarTest {
         // A good complete answer does replace it
         val fresh = RadarData.Tile(old.key, RadarData.Level.FULL, now, listOf(road), emptyList())
         assertEquals(fresh, RadarRepo.replacement(old, fresh))
+    }
+
+    /** The last server that gave data is tried first (18/11), the breaker still applies. */
+    @Test fun lastWorkingServerFirst() {
+        val o = app.mg4dash.radar.Overpass
+        o.resetSkips()
+        val (main, second, fallback) = o.SERVERS
+        assertEquals(listOf(main, second, fallback), o.order(1_000L))
+        o.worked(second)
+        assertEquals(listOf(second, main, fallback), o.order(1_000L))
+        o.worked(fallback)
+        assertEquals(listOf(fallback, main, second), o.order(1_000L))
+        // Left out by the breaker: not first any more, nor in the list
+        o.noAnswer(fallback, 1_000L); o.noAnswer(fallback, 1_000L)
+        assertEquals(listOf(main, second), o.order(2_000L))
+        o.resetSkips()
+    }
+
+    /** Stop (18/11): the request in progress is cut at once and the page shows it stopped now. */
+    @Test fun stopCutsTheRequestAtOnce() {
+        val server = java.net.ServerSocket(0)
+        val accepted = java.util.concurrent.CountDownLatch(1)
+        Thread { try { server.accept(); accepted.countDown(); Thread.sleep(30_000) } catch (_: Exception) {} }.apply { isDaemon = true; start() }
+        var error: Throwable? = null
+        val t = Thread {
+            try {
+                val s = java.net.Socket()
+                val f = app.mg4dash.radar.RadarHttp::class.java.getDeclaredField("open").apply { isAccessible = true }
+                @Suppress("UNCHECKED_CAST") (f.get(app.mg4dash.radar.RadarHttp) as MutableMap<Thread, java.net.Socket>)[Thread.currentThread()] = s
+                s.connect(java.net.InetSocketAddress("127.0.0.1", server.localPort), 2_000)
+                s.soTimeout = 30_000
+                s.getInputStream().read()   // waits as a slow server would
+            } catch (e: Throwable) { error = e }
+        }
+        t.start()
+        assertTrue(accepted.await(5, java.util.concurrent.TimeUnit.SECONDS))
+        val start = System.currentTimeMillis()
+        app.mg4dash.radar.RadarHttp.abort(t)
+        t.join(5_000)
+        assertFalse(t.isAlive)
+        assertTrue("cut in ${System.currentTimeMillis() - start} ms", System.currentTimeMillis() - start < 2_000)
+        assertTrue(error is java.io.IOException)
+        server.close()
     }
 }

@@ -1097,4 +1097,5 @@
     <string name="st_climate_fx_desc">Hittegolven bij verwarmen, rijp bij koelen, sterker naarmate de ingestelde temperatuur verder van buiten ligt. Uit: alleen de animatie verdwijnt, Verwarmen / Koelen blijft.</string>
     <string name="st_call_bar">Bovenste balk verbergen tijdens gesprekken</string>
     <string name="st_call_bar_desc">Ook het belvenster van de auto blijft schermvullend. Vegen vanaf boven toont de balk nog steeds; hij is ook verborgen in de SAIC-telefoonapp.</string>
+    <string name="rp_stop">Stoppen</string>
 </resources>
