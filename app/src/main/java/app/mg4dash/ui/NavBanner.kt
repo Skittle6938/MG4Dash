@@ -114,8 +114,8 @@ class NavArrowView(context: Context) : View(context) {
                 val r = w * 0.2f; val cy = h * 0.5f
                 c.drawCircle(cx, cy, r, stroke)
                 c.drawLine(cx, h * 0.95f, cx, cy + r, stroke)
-                // Exit: angle provided (0 = straight), otherwise according to the side
-                val deg = n.angle?.toFloat() ?: (sign * 90f)
+                // Exit: where it lies seen from the entry (0 = straight on, clockwise), from Android Auto's angle
+                val deg = roundaboutHeading(n.side, n.exitNumber, n.angle, leftTraffic).toFloat()
                 val a = Math.toRadians((deg - 90).toDouble())
                 val ex = cx + (r * Math.cos(a)).toFloat(); val ey = cy + (r * Math.sin(a)).toFloat()
                 val tx = cx + (w * 0.44f * Math.cos(a)).toFloat(); val ty = cy + (h * 0.44f * Math.sin(a)).toFloat()
@@ -149,6 +149,27 @@ class NavArrowView(context: Context) : View(context) {
                 c.drawLine(cx, jy, tx, ty, stroke)
                 head(c, tx, ty, a)
             }
+        }
+    }
+
+    /** Traffic on the left where the car is set (UK, Ireland, Malta, Cyprus…): roundabouts go clockwise there. */
+    private val leftTraffic: Boolean = java.util.Locale.getDefault().country.uppercase() in LEFT_TRAFFIC
+
+    companion object {
+        internal val LEFT_TRAFFIC = setOf("GB", "IE", "MT", "CY", "AU", "NZ", "JP", "IN", "ZA", "HK", "SG", "MY", "TH", "ID")
+
+        /**
+         * Where a roundabout's exit lies, in degrees clockwise from straight on (90 = right, 270 = left), as MG4Link
+         * draws it on the cluster. Android Auto's [angle] is the degrees travelled round the roundabout from the
+         * entrance to the exit, 1 to 360 (four even exits: 90, 180, 270, 360): with the traffic on the right
+         * (counter-clockwise) 90 is the exit on the right; clockwise, on the left. The [side] of a roundabout is the
+         * side of the traffic (1 left = clockwise, 2 right), otherwise [leftTraffic] for the car's country. Without an
+         * angle, the [exitNumber] as even exits (90° each, at most 3); without either, straight on.
+         */
+        fun roundaboutHeading(side: Int?, exitNumber: Int?, angle: Int?, leftTraffic: Boolean = false): Int {
+            val clockwise = when (side) { 1 -> true; 2 -> false; else -> leftTraffic }
+            val a = angle?.takeIf { it in 1..360 } ?: exitNumber?.takeIf { it >= 1 }?.let { minOf(it, 3) * 90 } ?: return 0
+            return Math.floorMod(if (clockwise) 180 + a else 180 - a, 360)
         }
     }
 
