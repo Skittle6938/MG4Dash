@@ -174,7 +174,7 @@ object RadarRepo {
         last?.let { p -> val d = Geo.dist(p.latitude, p.longitude, loc.latitude, loc.longitude); if (d < 300) odo += d }
         last = loc
         val heading = loc.takeIf { it.hasBearing() && (speed ?: 0f) >= MIN_HEADING_KMH }?.bearing
-        ensureTiles(c, loc.latitude, loc.longitude, now)
+        ensureTiles(c, loc.latitude, loc.longitude, now, heading, speed)
         if (loadedKeys.isEmpty() && fetching.isEmpty()) {
             publish(State(status = if (!netAllowed(c)) Status.WIFI_ONLY else Status.NO_DATA, speedKmh = speed)); return
         }
@@ -221,25 +221,60 @@ object RadarRepo {
     }
 
     /** Loads the tiles around the car from disk, fetches those missing or old when allowed, drops those far away. */
-    private fun ensureTiles(c: Context, lat: Double, lon: Double, now: Long) {
-        val keys = RadarData.keysAround(lat, lon, HALF_LAT, HALF_LON).toSet()
+    private fun ensureTiles(c: Context, lat: Double, lon: Double, now: Long, heading: Float? = null, speedKmh: Float? = null) {
+        val wanted = liveWants(lat, lon, heading, speedKmh)
+        val keys = wanted.map { it.first }.toSet()
         var changed = false
         for (k in keys) {
             if (k !in tiles) RadarData.read(c.filesDir, k)?.let { tiles[k] = it; changed = true }
         }
-        // Far tiles out of memory (kept on disk)
-        val keep = RadarData.keysAround(lat, lon, HALF_LAT * 3, HALF_LON * 3).toSet()
+        // Far tiles out of memory (kept on disk); those ahead stay
+        val keep = RadarData.keysAround(lat, lon, HALF_LAT * 3, HALF_LON * 3).toSet() + keys
         if (tiles.keys.retainAll(keep)) changed = true
         val refreshMs = Prefs(c).radarRefreshHours * 3_600_000L
-        // The tile under the car first, then the nearest (the order of the grid fetched a corner tile first)
-        val want = keys.filter { k -> needsFetch(tiles[k], now, refreshMs) && k !in fetching }.sortedBy { k -> tileDistance(k, lat, lon) }
-        // At most one tile started every few seconds: driving through many tiles does not hammer the server
+        val want = wanted.filter { (k, level) -> needsFetch(tiles[k], now, refreshMs, level) && k !in fetching }
         // One live download at a time: queued ones went stale while the car moved on (a tile takes 20 to 40 s when busy)
         if (want.isNotEmpty() && fetching.isEmpty() && now - failedAt > BACKOFF_MS && now - lastFetch >= FETCH_GAP_MS && netAllowed(c)) {
             lastFetch = now
-            fetch(c, want.first())
+            fetch(c, want.first().first, want.first().second)
         }
         if (changed || loadedKeys != tiles.keys) rebuild()
+    }
+
+    /** Look-ahead: about this long of driving in the direction of travel (Marc, 18/11: at 130 km/h the next tile came too late). */
+    private const val AHEAD_S = 120.0
+    private const val AHEAD_MIN_M = 1_500.0
+    private const val AHEAD_MAX_M = 5_000.0
+    private const val AHEAD_STEP_M = 700.0
+    /** From this speed, the tiles far ahead come with the main roads only, much lighter and faster to get. */
+    const val MAIN_AHEAD_KMH = 70f
+
+    /**
+     * The tiles wanted around the car, in the order to fetch them, with their level: the tile under the car first,
+     * always complete; then those along the heading, about [AHEAD_S] of driving ahead (main roads only beyond the
+     * nearest ones from [MAIN_AHEAD_KMH]); then the others around. A tile wanted complete that holds only the main
+     * roads is fetched again: the light version never stands in for the complete one once the car gets near.
+     */
+    internal fun liveWants(lat: Double, lon: Double, heading: Float?, speedKmh: Float?): List<Pair<RadarData.Key, RadarData.Level>> {
+        val out = LinkedHashMap<RadarData.Key, RadarData.Level>()
+        val here = RadarData.Key.of(lat, lon)
+        out[here] = RadarData.Level.FULL
+        val near = RadarData.keysAround(lat, lon, HALF_LAT, HALF_LON).toSet()
+        if (heading != null) {
+            val v = (speedKmh ?: 0f).coerceAtLeast(0f)
+            val reach = (v / 3.6 * AHEAD_S).coerceIn(AHEAD_MIN_M, AHEAD_MAX_M)
+            val h = Math.toRadians(heading.toDouble())
+            var d = AHEAD_STEP_M
+            while (d <= reach + 1) {
+                val pLat = lat + d * Math.cos(h) / 111_320.0
+                val pLon = lon + d * Math.sin(h) / (111_320.0 * Math.cos(Math.toRadians(lat)))
+                val k = RadarData.Key.of(pLat, pLon)
+                if (k !in out) out[k] = if (v >= MAIN_AHEAD_KMH && k !in near) RadarData.Level.MAIN else RadarData.Level.FULL
+                d += AHEAD_STEP_M
+            }
+        }
+        near.sortedBy { tileDistance(it, lat, lon) }.forEach { if (it !in out) out[it] = RadarData.Level.FULL }
+        return out.toList()
     }
 
     /** Distance (in degrees, longitude scaled) from [lat], [lon] to the centre of [k]. */
@@ -261,8 +296,8 @@ object RadarRepo {
      * The tile under or around the car is downloaded again: missing, of main roads only, or older than [refreshMs] (the
      * live refresh age; prepared tiles elsewhere keep their 30 days). The old tile stays in use until the new one is in.
      */
-    internal fun needsFetch(t: RadarData.Tile?, now: Long, refreshMs: Long): Boolean =
-        t == null || t.level != RadarData.Level.FULL || now - t.fetched >= refreshMs || !t.fresh(now)
+    internal fun needsFetch(t: RadarData.Tile?, now: Long, refreshMs: Long, level: RadarData.Level = RadarData.Level.FULL): Boolean =
+        t == null || (level == RadarData.Level.FULL && t.level != RadarData.Level.FULL) || now - t.fetched >= refreshMs || !t.fresh(now)
 
     private fun rebuild() {
         val r = HashMap<Long, Road>(); val cams = HashMap<Long, Camera>()
@@ -270,19 +305,19 @@ object RadarRepo {
         roads = r.values; cameras = cams.values; graph = Ahead.Graph(roads); loadedKeys = tiles.keys.toSet()
     }
 
-    private fun fetch(c: Context, key: RadarData.Key) {
+    private fun fetch(c: Context, key: RadarData.Key, level: RadarData.Level = RadarData.Level.FULL) {
         fetching += key
         _live.value = fetching.size
         net.post {
-            val q = RadarData.query(key.south, key.west, key.south + RadarData.TILE, key.west + RadarData.TILE, RadarData.Level.FULL)
+            val q = RadarData.query(key.south, key.west, key.south + RadarData.TILE, key.west + RadarData.TILE, level)
             val tile = download(q, Prefs(c).radarWifiOnly).body?.let { json ->
                 runCatching { RadarData.parse(json) }.onFailure { Log.w(TAG, "tile $key: ${it.message}") }.getOrNull()
-            }?.let { (r, cams) -> RadarData.Tile(key, RadarData.Level.FULL, System.currentTimeMillis(), r, cams) }
+            }?.let { (r, cams) -> RadarData.Tile(key, level, System.currentTimeMillis(), r, cams) }
             if (tile != null) runCatching { RadarData.write(c.filesDir, tile) }
             worker.post {
                 fetching -= key
                 _live.value = fetching.size
-                if (tile != null) { tiles[key] = tile; rebuild(); Log.i(TAG, "tile $key: ${tile.roads.size} roads, ${tile.cameras.size} cameras") }
+                if (tile != null) { tiles[key] = tile; rebuild(); Log.i(TAG, "tile $key ($level): ${tile.roads.size} roads, ${tile.cameras.size} cameras") }
                 else failedAt = System.currentTimeMillis()
             }
         }
