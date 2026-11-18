@@ -34,6 +34,9 @@ import org.robolectric.annotation.Config
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [28])
 class RadarTest {
+    /** The servers' shared state (left out, preferred) starts clean for each test: no test depends on another's. */
+    @org.junit.Before @org.junit.After fun cleanServers() = app.mg4dash.radar.Overpass.resetSkips()
+
     private fun load(name: String): Pair<List<Road>, List<Camera>> =
         RadarData.parse(javaClass.getResourceAsStream("/radar/$name.json")!!.bufferedReader().readText())
 
@@ -789,5 +792,13 @@ class RadarTest {
         assertEquals(o.DRESEL_EU, o.order(EU).first())
         assertTrue(o.OFFICIAL[0] !in o.order(EU))
         o.resetSkips()
+    }
+
+    /** A head unit's network often never gets Android's check: with internet it still downloads, without blaming servers. */
+    @Test fun downloadsWithoutAndroidsCheck() {
+        assertTrue(RadarRepo.canTry(internet = true))
+        assertFalse(RadarRepo.canTry(internet = false))
+        assertTrue(RadarRepo.blameAllowed(validated = true))
+        assertFalse(RadarRepo.blameAllowed(validated = false))
     }
 }
