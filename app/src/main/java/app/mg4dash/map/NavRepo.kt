@@ -61,6 +61,27 @@ object NavRepo {
         } catch (e: Exception) { Log.w(TAG, "guidance listener failed: ${e.message}") }
     }
 
+    private val ROUNDABOUTS = setOf(Turn.ROUNDABOUT_ENTER, Turn.ROUNDABOUT_EXIT, Turn.ROUNDABOUT)
+    private var lastRoundabout: String? = null
+
+    /**
+     * Each roundabout's raw values as MG4Link sends them, once per roundabout (18/11: its drawing did not show
+     * the exit), with the heading drawn: nav_log.txt in the app's folder, 64 KB at most. No position, no road name.
+     */
+    private fun logRoundabout(context: Context, n: Nav) {
+        val key = "type ${n.eventType}\tside ${n.side}\texit ${n.exitNumber}\tangle ${n.angle}"
+        if (key == lastRoundabout) return
+        lastRoundabout = key
+        try {
+            val f = java.io.File(context.getExternalFilesDir(null) ?: context.filesDir, "nav_log.txt")
+            if (f.length() > 64 * 1024) f.delete()
+            val heading = app.mg4dash.ui.NavArrowView.roundaboutHeading(n.side, n.exitNumber, n.angle,
+                java.util.Locale.getDefault().country.uppercase() in app.mg4dash.ui.NavArrowView.LEFT_TRAFFIC)
+            val stamp = java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", java.util.Locale.US).format(java.util.Date())
+            f.appendText("$stamp\t$key\tdrawn ${heading}°\n")
+        } catch (_: Exception) {}
+    }
+
     /** For PC screenshots. */
     fun setForTest(n: Nav?) { _nav.value = n }
 
@@ -77,6 +98,7 @@ object NavRepo {
                 arrival = str("estimated_arrival"),
             )
             if (_nav.value == null) Log.i(TAG, "guidance received (manoeuvre ${n.eventType})")
+            if (n.eventType in ROUNDABOUTS) logRoundabout(context, n)
             _nav.value = n
             main.removeCallbacks(expire)
             main.postDelayed(expire, TIMEOUT_MS)
