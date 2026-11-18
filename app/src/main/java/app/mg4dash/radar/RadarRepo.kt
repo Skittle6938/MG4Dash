@@ -177,13 +177,27 @@ object RadarRepo {
     private fun wifi(): android.net.Network? = WifiFirst.bound ?: WifiFirst.wifi
     private fun onWifi(): Boolean = wifi() != null
 
-    /** A network with internet, as Android checked it (no request at all without one). */
-    private fun networkUp(): Boolean = try {
+    /**
+     * The network the downloads would use: whether it offers internet at all, and whether Android checked it works
+     * (VALIDATED). Head units often never get the check (its server out of reach, the car's own modem), so only a
+     * network without internet stops the requests; the check only decides whether a failure can be blamed on a server.
+     */
+    private fun network(): Pair<Boolean, Boolean> = try {
         val cm = ctx?.getSystemService(Context.CONNECTIVITY_SERVICE) as? android.net.ConnectivityManager
-        val n = wifi() ?: cm?.activeNetwork
-        val caps = n?.let { cm?.getNetworkCapabilities(it) }
-        caps == null && cm == null || caps?.hasCapability(android.net.NetworkCapabilities.NET_CAPABILITY_VALIDATED) == true
-    } catch (_: Exception) { true }
+        val caps = (wifi() ?: cm?.activeNetwork)?.let { cm?.getNetworkCapabilities(it) }
+        when {
+            cm == null -> true to true
+            caps == null -> false to false
+            else -> caps.hasCapability(android.net.NetworkCapabilities.NET_CAPABILITY_INTERNET) to
+                caps.hasCapability(android.net.NetworkCapabilities.NET_CAPABILITY_VALIDATED)
+        }
+    } catch (_: Exception) { true to true }
+
+    /** Whether to send the requests: any network with internet, checked by Android or not. */
+    internal fun canTry(internet: Boolean) = internet
+
+    /** Whether the servers that gave no answer are blamed: only on a network Android checked works. */
+    internal fun blameAllowed(validated: Boolean) = validated
 
     /** The network last used for the downloads: a change gives the servers left out another chance. */
     @Volatile private var lastNetwork: String? = null
@@ -422,14 +436,15 @@ object RadarRepo {
         val agent = Overpass.USER_AGENT
         val c = ctx
         // No usable network: no request at all (each would cost its connection wait), and no server blamed
-        if (!networkUp()) { c?.let { RadarLog.add(it, what, "-", "no network", 0, 0) }; return@tag Overpass.Result(null, error = "no network") }
+        val (internet, validated) = network()
+        if (!canTry(internet)) { c?.let { RadarLog.add(it, what, "-", "no network", 0, 0) }; return@tag Overpass.Result(null, error = "no network") }
         noteNetwork()
         // An empty answer from a regional server, kept only if no other server has the area
         var emptyFromRegional: String? = null
         for (route in Overpass.routes(wifi(), wifiOnly)) {
             val via = if (route != null) "Wi-Fi" else "default network"
             val silent = ArrayList<String>(); var tried = 0
-            fun blame() { Overpass.silentToCount(tried, silent).forEach { Overpass.noAnswer(it) } }
+            fun blame() { if (blameAllowed(validated)) Overpass.silentToCount(tried, silent).forEach { Overpass.noAnswer(it) } }
             for (server in Overpass.order(region)) {
                 tried++
                 if (stop()) return@tag Overpass.Result(null, error = "stopped")
