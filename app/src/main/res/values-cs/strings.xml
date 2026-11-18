@@ -1101,4 +1101,14 @@
     <string name="clim_fx_off">Ne</string>
     <string name="clim_fx_text">Jen text</string>
     <string name="clim_fx_anim">Text a animace</string>
+    <string name="wc_nav">Navigace</string>
+    <string name="nav_idle">Žádná navigace</string>
+    <string name="nav_idle_sub">Spusťte trasu v Android Auto</string>
+    <string name="nav_exit_first">Výjezd 1</string>
+    <string name="nav_exit_n">Výjezd %1$d</string>
+    <string name="nav_battery">≈ %1$d %% při příjezdu</string>
+    <string name="nav_battery_short">≈ %1$d %%</string>
+    <string name="nav_on_arrival">při příjezdu</string>
+    <string name="nav_arrival_at">příjezd %1$s</string>
+    <string name="nav_then">pak</string>
 </resources>

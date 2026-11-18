@@ -1026,3 +1026,13 @@ clim_fx_title|Heating / cooling on the card|Chauffage / clim sur la carte|Heizen
 clim_fx_off|Off|Non|Aus|No|No|Uit|Kapalı|Ne
 clim_fx_text|Text only|Texte seul|Nur Text|Solo texto|Solo testo|Alleen tekst|Yalnızca metin|Jen text
 clim_fx_anim|Text and animation|Texte et animation|Text und Animation|Texto y animación|Testo e animazione|Tekst en animatie|Metin ve animasyon|Text a animace
+wc_nav|Guidance|Guidage|Zielführung|Guiado|Guida|Navigatie|Navigasyon|Navigace
+nav_idle|No guidance|Pas de guidage|Keine Zielführung|Sin guiado|Nessuna guida|Geen navigatie|Navigasyon yok|Žádná navigace
+nav_idle_sub|Start a route in Android Auto|Lancez un itinéraire dans Android Auto|Starten Sie eine Route in Android Auto|Inicie una ruta en Android Auto|Avvia un percorso in Android Auto|Start een route in Android Auto|Android Auto'da bir rota başlatın|Spusťte trasu v Android Auto
+nav_exit_first|Exit 1|1re sortie|Ausfahrt 1|Salida 1|Uscita 1|Afslag 1|1. çıkış|Výjezd 1
+nav_exit_n|Exit %1$d|%1$de sortie|Ausfahrt %1$d|Salida %1$d|Uscita %1$d|Afslag %1$d|%1$d. çıkış|Výjezd %1$d
+nav_battery|≈ %1$d %% on arrival|≈ %1$d %% à l'arrivée|≈ %1$d %% bei Ankunft|≈ %1$d %% al llegar|≈ %1$d %% all'arrivo|≈ %1$d %% bij aankomst|Varışta ≈ %%%1$d|≈ %1$d %% při příjezdu
+nav_battery_short|≈ %1$d %%|≈ %1$d %%|≈ %1$d %%|≈ %1$d %%|≈ %1$d %%|≈ %1$d %%|≈ %%%1$d|≈ %1$d %%
+nav_on_arrival|on arrival|à l'arrivée|bei Ankunft|al llegar|all'arrivo|bij aankomst|varışta|při příjezdu
+nav_arrival_at|arrival %1$s|arrivée %1$s|Ankunft %1$s|llegada %1$s|arrivo %1$s|aankomst %1$s|varış %1$s|příjezd %1$s
+nav_then|then|puis|dann|luego|poi|daarna|sonra|pak

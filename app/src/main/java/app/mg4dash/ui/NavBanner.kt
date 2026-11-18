@@ -82,74 +82,16 @@ class NavBanner(context: Context) : LinearLayout(context) {
     }
 }
 
-/** Drawn manoeuvre arrow (straight, turn, U-turn, roundabout with exit, arrival). */
+/** Drawn manoeuvre (straight, turn, U-turn, roundabout with its exit, arrival): see [NavGlyph]. */
 class NavArrowView(context: Context) : View(context) {
-    private val d = resources.displayMetrics.density
-    private val stroke = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        style = Paint.Style.STROKE; strokeWidth = 9 * d; strokeCap = Paint.Cap.ROUND; strokeJoin = Paint.Join.ROUND
-        color = Themes.color(context, R.color.text_value)
-    }
-    private val fill = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.FILL; color = Themes.color(context, R.color.text_value) }
-    private val accent = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.FILL; color = Themes.color(context, R.color.accent_action) }
-    private val text = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Themes.color(context, R.color.text_value); textAlign = Paint.Align.CENTER
-        textSize = 22 * d; typeface = android.graphics.Typeface.DEFAULT_BOLD
-    }
-    private var nav: NavRepo.Nav? = null
+    private var shape: NavGlyph.Shape? = null
 
-    fun set(n: NavRepo.Nav) { nav = n; invalidate() }
+    fun set(n: NavRepo.Nav) { setShape(NavGlyph.shape(n, leftTraffic)) }
+    fun setShape(s: NavGlyph.Shape?) { if (s != shape) { shape = s; invalidate() } }
 
     override fun onDraw(c: Canvas) {
-        val n = nav ?: return
-        val w = width.toFloat(); val h = height.toFloat()
-        val cx = w / 2; val sign = when (n.side) { 1 -> -1f; 2 -> 1f; else -> 0f }
-        when (n.eventType) {
-            NavRepo.Turn.DESTINATION -> {   // arrival marker
-                c.drawCircle(cx, h * 0.38f, w * 0.24f, accent)
-                c.drawCircle(cx, h * 0.38f, w * 0.09f, fill)
-                val p = Path().apply { moveTo(cx - w * 0.17f, h * 0.55f); lineTo(cx, h * 0.9f); lineTo(cx + w * 0.17f, h * 0.55f); close() }
-                c.drawPath(p, accent)
-            }
-            NavRepo.Turn.ROUNDABOUT, NavRepo.Turn.ROUNDABOUT_ENTER, NavRepo.Turn.ROUNDABOUT_EXIT -> {
-                val r = w * 0.2f; val cy = h * 0.5f
-                c.drawCircle(cx, cy, r, stroke)
-                c.drawLine(cx, h * 0.95f, cx, cy + r, stroke)
-                // Exit: where it lies seen from the entry (0 = straight on, clockwise), from Android Auto's angle
-                val deg = roundaboutHeading(n.side, n.exitNumber, n.angle, leftTraffic).toFloat()
-                val a = Math.toRadians((deg - 90).toDouble())
-                val ex = cx + (r * Math.cos(a)).toFloat(); val ey = cy + (r * Math.sin(a)).toFloat()
-                val tx = cx + (w * 0.44f * Math.cos(a)).toFloat(); val ty = cy + (h * 0.44f * Math.sin(a)).toFloat()
-                c.drawLine(ex, ey, tx, ty, stroke)
-                head(c, tx, ty, a)
-                n.exitNumber?.takeIf { it > 0 }?.let { c.drawText("$it", cx, cy + text.textSize * 0.35f, text) }
-            }
-            NavRepo.Turn.U_TURN -> {
-                val s = if (sign == 0f) -1f else sign
-                val x1 = cx - s * w * 0.12f; val x2 = cx + s * w * 0.18f
-                val p = Path().apply {
-                    moveTo(x1, h * 0.92f); lineTo(x1, h * 0.38f)
-                    arcTo(RectF(minOf(x1, x2), h * 0.12f, maxOf(x1, x2), h * 0.12f + Math.abs(x2 - x1)), 180f, 180f * s, false)
-                    lineTo(x2, h * 0.55f)
-                }
-                c.drawPath(p, stroke)
-                head(c, x2, h * 0.6f, Math.PI / 2)
-            }
-            else -> {
-                val deg = when (n.eventType) {
-                    NavRepo.Turn.TURN -> 90f
-                    NavRepo.Turn.SHARP -> 135f
-                    NavRepo.Turn.SLIGHT, NavRepo.Turn.FORK, NavRepo.Turn.MERGE, NavRepo.Turn.ON_RAMP, NavRepo.Turn.OFF_RAMP -> 45f
-                    else -> 0f
-                } * sign
-                val jy = h * 0.55f
-                c.drawLine(cx, h * 0.95f, cx, jy, stroke)
-                val a = Math.toRadians((deg - 90).toDouble())
-                val len = h * 0.42f
-                val tx = cx + (len * Math.cos(a)).toFloat(); val ty = jy + (len * Math.sin(a)).toFloat()
-                c.drawLine(cx, jy, tx, ty, stroke)
-                head(c, tx, ty, a)
-            }
-        }
+        val s = shape ?: return
+        NavGlyph.draw(c, RectF(0f, 0f, width.toFloat(), height.toFloat()), s, Themes.color(context, R.color.text_value))
     }
 
     /** Traffic on the left where the car is set (UK, Ireland, Malta, Cyprus…): roundabouts go clockwise there. */
@@ -171,17 +113,5 @@ class NavArrowView(context: Context) : View(context) {
             val a = angle?.takeIf { it in 1..360 } ?: exitNumber?.takeIf { it >= 1 }?.let { minOf(it, 3) * 90 } ?: return 0
             return Math.floorMod(if (clockwise) 180 + a else 180 - a, 360)
         }
-    }
-
-    /** Arrow head at point (x, y), oriented by angle a (radians). */
-    private fun head(c: Canvas, x: Float, y: Float, a: Double) {
-        val s = 16 * d
-        val p = Path().apply {
-            moveTo(x + (s * Math.cos(a)).toFloat(), y + (s * Math.sin(a)).toFloat())
-            lineTo(x + (s * Math.cos(a + 2.4)).toFloat(), y + (s * Math.sin(a + 2.4)).toFloat())
-            lineTo(x + (s * Math.cos(a - 2.4)).toFloat(), y + (s * Math.sin(a - 2.4)).toFloat())
-            close()
-        }
-        c.drawPath(p, fill)
     }
 }

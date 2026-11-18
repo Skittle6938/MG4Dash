@@ -189,6 +189,7 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
     private lateinit var trips: app.mg4dash.ui.TripsCard
     private lateinit var driving: app.mg4dash.ui.DrivingCard
     private lateinit var radar: app.mg4dash.radar.RadarCard
+    private lateinit var navCard: app.mg4dash.ui.NavCard
     private lateinit var shortcutsHolder: LinearLayout
 
     /** Trip energy, power and phone cards: same frame, title, page dots and content. */
@@ -288,6 +289,9 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
             }
         }
         panels[Card.RADAR] = frame(radar)
+        // The Android Auto guidance alone (19/11), only where the driver put it
+        navCard = app.mg4dash.ui.NavCard(this)
+        panels[Card.NAV] = frame(navCard)
         // Web app (#97): the page itself is only loaded when shown
         val web = app.mg4dash.ui.WebCard(this).also { webCard = it }
         web.keyboardSpan = { webKeyboardSpan(it) }
@@ -424,6 +428,7 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
             HomeSlots.Size.MEDIUM, null -> app.mg4dash.radar.RadarCard.Form.MEDIUM
             else -> app.mg4dash.radar.RadarCard.Form.FULL
         }
+        navCard.form = app.mg4dash.ui.NavCard.formFor(frameOf(Card.NAV)?.slot?.size)
         // The alerter works while its card is in a place, shown or not (its alerts go over Android Auto)
         if (frameOf(Card.RADAR) != null) app.mg4dash.radar.RadarRepo.start(this) else app.mg4dash.radar.RadarRepo.stop()
         applyMapButtons()
@@ -479,6 +484,7 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
             Card.TRIPS -> if (on) trips.show()
             Card.DRIVING -> if (on) driving.show()
             Card.RADAR -> if (on) radar.show(app.mg4dash.radar.RadarRepo.state.value)
+            Card.NAV -> if (on) showNavCard(app.mg4dash.map.NavRepo.nav.value)
             Card.WEB -> webCard?.let { w -> w.visibility = if (on) View.VISIBLE else View.GONE; if (on) w.show() else w.pause() }
             Card.ENERGY -> {}
             Card.TRIP -> if (on) renderTripEnergy()
@@ -664,7 +670,7 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
             val base = basePad.getOrPut(v) { v.paddingLeft }
             v.setPadding(if (on) maxOf(base, fog) else base, v.paddingTop, v.paddingRight, v.paddingBottom)
         }
-        listOf(Card.ENERGY, Card.TRIP, Card.POWER, Card.PHONE, Card.CONSUMPTION, Card.SHORTCUTS, Card.WEB, Card.TRIPS, Card.DRIVING, Card.RADAR).forEach { c ->
+        listOf(Card.ENERGY, Card.TRIP, Card.POWER, Card.PHONE, Card.CONSUMPTION, Card.SHORTCUTS, Card.WEB, Card.TRIPS, Card.DRIVING, Card.RADAR, Card.NAV).forEach { c ->
             panels[c]?.let { pad(it, tl != null && c in tl.cards) }
         }
         // The media card keeps its full width (15/11, #118): its cover goes to the edge, under the button if any
@@ -1133,6 +1139,11 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
 
     /** Height of the power card's battery bar, unplugged (start marker included). */
     private var gaugeHeight = 0
+
+    /** The guidance card: the manoeuvre, and the battery estimated on arrival from the distance left. */
+    private fun showNavCard(n: app.mg4dash.map.NavRepo.Nav?) {
+        navCard.show(n, n?.let { app.mg4dash.energy.ArrivalBattery.now(this, it.totalMeters) })
+    }
 
     private fun renderEnergy(s: VehicleState, avg: Float?) {
         val pct = s.batteryPercent
@@ -2409,6 +2420,7 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
                 // DiAuto guidance: banner on the map (not on the shortcuts)
                 launch { app.mg4dash.energy.ConsumptionCurve.curves.collect { if (isShown(Card.CONSUMPTION)) consumption.show() } }
                 launch { app.mg4dash.map.NavRepo.nav.collect { n -> navBanner?.show(n?.takeIf { isShown(Card.MAP) }) } }
+                launch { app.mg4dash.map.NavRepo.nav.collect { n -> if (isShown(Card.NAV)) showNavCard(n) } }
                 launch { while (true) { updatePower(); delay(1_000) } }
                 // Startup (#64): home is built with the last known theme; as soon as the car
                 // answers, the lights state is read and the theme changed at once, without waiting for the 5 s loop

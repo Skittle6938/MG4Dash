@@ -1103,4 +1103,14 @@
     <string name="clim_fx_off">Kapalı</string>
     <string name="clim_fx_text">Yalnızca metin</string>
     <string name="clim_fx_anim">Metin ve animasyon</string>
+    <string name="wc_nav">Navigasyon</string>
+    <string name="nav_idle">Navigasyon yok</string>
+    <string name="nav_idle_sub">Android Auto\'da bir rota başlatın</string>
+    <string name="nav_exit_first">1. çıkış</string>
+    <string name="nav_exit_n">%1$d. çıkış</string>
+    <string name="nav_battery">Varışta ≈ %%%1$d</string>
+    <string name="nav_battery_short">≈ %%%1$d</string>
+    <string name="nav_on_arrival">varışta</string>
+    <string name="nav_arrival_at">varış %1$s</string>
+    <string name="nav_then">sonra</string>
 </resources>
