@@ -46,30 +46,74 @@ class NavRoundaboutTest {
 
     /** Drawn: the exit's arrow is at its heading, off the entry line, for each exit and both directions. */
     @Test fun exitDrawnWhereItLies() {
-        val ctx = org.robolectric.RuntimeEnvironment.getApplication()
         val size = 200
-        fun draw(side: Int, angle: Int): android.graphics.Bitmap {
-            val v = NavArrowView(ctx)
-            v.set(NavRepo.Nav(300, 20, "", NavRepo.Turn.ROUNDABOUT, "", side, 1, angle, null, null, ""))
-            v.measure(android.view.View.MeasureSpec.makeMeasureSpec(size, android.view.View.MeasureSpec.EXACTLY),
-                android.view.View.MeasureSpec.makeMeasureSpec(size, android.view.View.MeasureSpec.EXACTLY))
-            v.layout(0, 0, size, size)
-            val b = android.graphics.Bitmap.createBitmap(size, size, android.graphics.Bitmap.Config.ARGB_8888)
-            v.draw(android.graphics.Canvas(b))
-            return b
-        }
-        /** Whether anything is drawn around the point at [deg] (clockwise from up) and [frac] of the size from the centre. */
-        fun inked(b: android.graphics.Bitmap, deg: Int, frac: Float): Boolean {
-            val a = Math.toRadians(deg - 90.0)
-            val x = (size / 2 + size * frac * Math.cos(a)).toInt(); val y = (size / 2 + size * frac * Math.sin(a)).toInt()
-            for (dx in -3..3) for (dy in -3..3) if (android.graphics.Color.alpha(b.getPixel((x + dx).coerceIn(0, size - 1), (y + dy).coerceIn(0, size - 1))) > 0) return true
-            return false
-        }
+        val box = android.graphics.RectF(0f, 0f, size.toFloat(), size.toFloat())
         for ((side, angle, heading) in listOf(Triple(2, 90, 90), Triple(2, 180, 0), Triple(2, 270, 270), Triple(1, 90, 270), Triple(1, 270, 90))) {
-            val b = draw(side, angle)
-            assertTrue("side $side angle $angle: exit at $heading°", inked(b, heading, 0.33f))
-            // The other sides stay empty there (the entry comes from below, at 180°)
-            for (other in listOf(0, 90, 270).filter { it != heading }) assertTrue("side $side angle $angle: nothing at $other°", !inked(b, other, 0.33f))
+            val b = android.graphics.Bitmap.createBitmap(size, size, android.graphics.Bitmap.Config.ARGB_8888)
+            val shape = app.mg4dash.ui.NavGlyph.shape(NavRepo.Nav(300, 20, "", NavRepo.Turn.ROUNDABOUT, "", side, 1, angle, null, null, ""), false)
+            app.mg4dash.ui.NavGlyph.draw(android.graphics.Canvas(b), box, shape, -1)
+            val (tip, centre) = app.mg4dash.ui.NavGlyph.tipAndOrigin(box, shape)
+            // The head points from the roundabout's centre towards the exit
+            val deg = (Math.toDegrees(Math.atan2((tip.x - centre.x).toDouble(), (centre.y - tip.y).toDouble())) + 360) % 360
+            assertTrue("side $side angle $angle: tip at $deg°, wanted $heading°", Math.abs(((deg - heading + 540) % 360) - 180) < 5)
+            // And it is drawn there, in full colour, just inside the tip
+            val ix = (tip.x + (centre.x - tip.x) * 0.08f).toInt(); val iy = (tip.y + (centre.y - tip.y) * 0.08f).toInt()
+            assertTrue("side $side angle $angle: nothing drawn at the tip", android.graphics.Color.alpha(b.getPixel(ix, iy)) > 200)
         }
+    }
+
+    /** Every drawing, every direction, every style and size: nothing reaches the outer 2 px (the tip was cut, 18/11). */
+    @Test fun nothingCutAtTheEdges() {
+        val shapes = ArrayList<app.mg4dash.ui.NavGlyph.Shape>()
+        for (h in -180..180 step 15) shapes += app.mg4dash.ui.NavGlyph.Shape.Turn(h.toFloat())
+        for (h in 0 until 360 step 15) for (cw in listOf(false, true)) for (n in listOf(null, 1, 12)) shapes += app.mg4dash.ui.NavGlyph.Shape.Round(h.toFloat(), n, cw)
+        for (r in listOf(false, true)) { shapes += app.mg4dash.ui.NavGlyph.Shape.UTurn(r); shapes += app.mg4dash.ui.NavGlyph.Shape.Fork(r); shapes += app.mg4dash.ui.NavGlyph.Shape.Merge(r) }
+        shapes += app.mg4dash.ui.NavGlyph.Shape.Arrival
+        for (size in listOf(52, 190, 220)) for (s in shapes) {
+            val b = android.graphics.Bitmap.createBitmap(size, size, android.graphics.Bitmap.Config.ARGB_8888)
+            app.mg4dash.ui.NavGlyph.draw(android.graphics.Canvas(b), android.graphics.RectF(0f, 0f, size.toFloat(), size.toFloat()), s, -1)
+            for (i in 0 until size) for (k in 0 until 2) for ((x, y) in listOf(i to k, i to size - 1 - k, k to i, size - 1 - k to i))
+                assertTrue("$s at $size px touches the edge at $x,$y", android.graphics.Color.alpha(b.getPixel(x, y)) == 0)
+            // And something is drawn
+            assertTrue("$s empty", android.graphics.Color.alpha(b.getPixel(size / 2, size / 2)) > 0 || (0 until size).any { x -> android.graphics.Color.alpha(b.getPixel(x, size / 2)) > 0 })
+        }
+    }
+
+    /** The exit number exactly in the middle of the ring (Marc, 19/11): its ink centred within 1 px. */
+    @Test fun exitNumberCentred() {
+        for (size in listOf(176, 220, 300)) for (n in listOf(1, 2, 3, 4, 7)) for (h in listOf(0f, 90f, 270f)) {
+            val box = android.graphics.RectF(0f, 0f, size.toFloat(), size.toFloat())
+            fun draw(num: Int?): android.graphics.Bitmap {
+                val b = android.graphics.Bitmap.createBitmap(size, size, android.graphics.Bitmap.Config.ARGB_8888)
+                app.mg4dash.ui.NavGlyph.draw(android.graphics.Canvas(b), box, app.mg4dash.ui.NavGlyph.Shape.Round(h, num, false), -1)
+                return b
+            }
+            val with = draw(n); val without = draw(null)
+            var x0 = size; var x1 = -1; var y0 = size; var y1 = -1
+            for (x in 0 until size) for (y in 0 until size) if (Math.abs(android.graphics.Color.alpha(with.getPixel(x, y)) - android.graphics.Color.alpha(without.getPixel(x, y))) > 100) {
+                x0 = minOf(x0, x); x1 = maxOf(x1, x); y0 = minOf(y0, y); y1 = maxOf(y1, y)
+            }
+            assertTrue("no digit drawn", x1 >= 0)
+            val (_, ring) = app.mg4dash.ui.NavGlyph.tipAndOrigin(box, app.mg4dash.ui.NavGlyph.Shape.Round(h, n, false))
+            val cx = (x0 + x1 + 1) / 2f; val cy = (y0 + y1 + 1) / 2f
+            assertTrue("$n at $size px, exit $h: digit centre $cx,$cy, ring ${ring.x},${ring.y}", Math.abs(cx - ring.x) <= 1.2f && Math.abs(cy - ring.y) <= 1.2f)
+        }
+    }
+
+    /** A roundabout balanced (Marc, 19/11): its ring in the middle whatever the exit, entry and exit legs alike. */
+    @Test fun roundaboutBalanced() {
+
+        val tips = ArrayList<Double>()
+        for (size in listOf(176, 220, 300)) { tips.clear(); for (h in listOf(0f, 45f, 90f, 135f, 180f, 225f, 270f, 315f)) for (cw in listOf(false, true)) {
+            val box = android.graphics.RectF(0f, 0f, size.toFloat(), size.toFloat())
+            val shape = app.mg4dash.ui.NavGlyph.Shape.Round(h, 2, cw)
+            val (tip, c) = app.mg4dash.ui.NavGlyph.tipAndOrigin(box, shape)
+            assertTrue("ring centre ${c.x},${c.y} at $size px, exit $h", Math.abs(c.x - size / 2f) <= 1f && Math.abs(c.y - size / 2f) <= 1f)
+            tips += Math.hypot((tip.x - c.x).toDouble(), (tip.y - c.y).toDouble())
+            val (entry, exit) = app.mg4dash.ui.NavGlyph.legs(shape)
+            assertTrue("legs $entry / $exit", Math.abs(entry - exit) <= 0.05f * entry)
+        }
+        // The same reach for every exit
+        assertTrue("reach ${tips.min()}..${tips.max()} at $size", tips.max() - tips.min() <= 1.0) }
     }
 }

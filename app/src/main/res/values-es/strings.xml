@@ -1103,4 +1103,14 @@
     <string name="clim_fx_off">No</string>
     <string name="clim_fx_text">Solo texto</string>
     <string name="clim_fx_anim">Texto y animación</string>
+    <string name="wc_nav">Guiado</string>
+    <string name="nav_idle">Sin guiado</string>
+    <string name="nav_idle_sub">Inicie una ruta en Android Auto</string>
+    <string name="nav_exit_first">Salida 1</string>
+    <string name="nav_exit_n">Salida %1$d</string>
+    <string name="nav_battery">≈ %1$d %% al llegar</string>
+    <string name="nav_battery_short">≈ %1$d %%</string>
+    <string name="nav_on_arrival">al llegar</string>
+    <string name="nav_arrival_at">llegada %1$s</string>
+    <string name="nav_then">luego</string>
 </resources>

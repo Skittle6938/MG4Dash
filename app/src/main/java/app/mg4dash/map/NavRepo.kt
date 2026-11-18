@@ -47,7 +47,12 @@ object NavRepo {
         val totalSeconds: Long?,
         val arrival: String,
         val at: Long = System.currentTimeMillis(),
+        /** The manoeuvre after this one, if MG4Link sends it (extras next2_…; none sent so far). */
+        val then: Then? = null,
     )
+
+    /** A following manoeuvre: as [Nav]'s eventType, side, exitNumber and angle, and its road. */
+    data class Then(val eventType: Int, val side: Int?, val exitNumber: Int?, val angle: Int?, val road: String)
 
     private val _nav = MutableStateFlow<Nav?>(null)
     val nav: StateFlow<Nav?> = _nav
@@ -96,6 +101,9 @@ object NavRepo {
                 side = int("turn_side"), exitNumber = int("turn_number"), angle = int("turn_angle"),
                 totalMeters = int("total_distance_meters"), totalSeconds = (x.get("total_time_seconds") as? Number)?.toLong(),
                 arrival = str("estimated_arrival"),
+                then = int("next2_event_type")?.takeIf { it > 0 }?.let {
+                    Then(it, int("next2_side"), int("next2_exit")?.takeIf { e -> e > 0 }, int("next2_angle")?.takeIf { a -> a >= 0 }, str("next2_road"))
+                },
             )
             if (_nav.value == null) Log.i(TAG, "guidance received (manoeuvre ${n.eventType})")
             if (n.eventType in ROUNDABOUTS) logRoundabout(context, n)

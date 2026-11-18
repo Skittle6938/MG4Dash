@@ -1103,4 +1103,14 @@
     <string name="clim_fx_off">Uit</string>
     <string name="clim_fx_text">Alleen tekst</string>
     <string name="clim_fx_anim">Tekst en animatie</string>
+    <string name="wc_nav">Navigatie</string>
+    <string name="nav_idle">Geen navigatie</string>
+    <string name="nav_idle_sub">Start een route in Android Auto</string>
+    <string name="nav_exit_first">Afslag 1</string>
+    <string name="nav_exit_n">Afslag %1$d</string>
+    <string name="nav_battery">≈ %1$d %% bij aankomst</string>
+    <string name="nav_battery_short">≈ %1$d %%</string>
+    <string name="nav_on_arrival">bij aankomst</string>
+    <string name="nav_arrival_at">aankomst %1$s</string>
+    <string name="nav_then">daarna</string>
 </resources>
