@@ -37,7 +37,8 @@ object RadarRepo {
     /** Below this speed the GPS heading is not trusted. */
     private const val MIN_HEADING_KMH = 6f
     /** A failed fetch waits this long before the next try. */
-    private const val BACKOFF_MS = 60_000L
+    /** After a failed live download, the next one waits this long (a whole minute left the car's tiles empty while driving). */
+    private const val BACKOFF_MS = 10_000L
     /** Prepared trips: radii offered around the car (km), 20 by default, 50 at most (17/11). */
     val PREPARE_RADII = listOf(10, 20, 30, 50)
     const val PREPARE_DEFAULT_KM = 20
@@ -230,13 +231,22 @@ object RadarRepo {
         val keep = RadarData.keysAround(lat, lon, HALF_LAT * 3, HALF_LON * 3).toSet()
         if (tiles.keys.retainAll(keep)) changed = true
         val refreshMs = Prefs(c).radarRefreshHours * 3_600_000L
-        val want = keys.filter { k -> needsFetch(tiles[k], now, refreshMs) && k !in fetching }
+        // The tile under the car first, then the nearest (the order of the grid fetched a corner tile first)
+        val want = keys.filter { k -> needsFetch(tiles[k], now, refreshMs) && k !in fetching }.sortedBy { k -> tileDistance(k, lat, lon) }
         // At most one tile started every few seconds: driving through many tiles does not hammer the server
-        if (want.isNotEmpty() && now - failedAt > BACKOFF_MS && now - lastFetch >= FETCH_GAP_MS && netAllowed(c)) {
+        // One live download at a time: queued ones went stale while the car moved on (a tile takes 20 to 40 s when busy)
+        if (want.isNotEmpty() && fetching.isEmpty() && now - failedAt > BACKOFF_MS && now - lastFetch >= FETCH_GAP_MS && netAllowed(c)) {
             lastFetch = now
             fetch(c, want.first())
         }
         if (changed || loadedKeys != tiles.keys) rebuild()
+    }
+
+    /** Distance (in degrees, longitude scaled) from [lat], [lon] to the centre of [k]. */
+    internal fun tileDistance(k: RadarData.Key, lat: Double, lon: Double): Double {
+        val dLat = k.south + RadarData.TILE / 2 - lat
+        val dLon = (k.west + RadarData.TILE / 2 - lon) * Math.cos(Math.toRadians(lat))
+        return dLat * dLat + dLon * dLon
     }
 
     /** Live downloads: one tile started at most every this long. */
@@ -294,15 +304,9 @@ object RadarRepo {
                 try {
                     val url = URL(server)
                     val (code, text) = if (RadarHttp.tls13) {
-                        // TLS 1.3 (Conscrypt): the official server needs it
-                        // Official server: a free slot first (its status page), rather than a refused query
-                        if (server == Overpass.SERVERS.first()) {
-                            val st = try { RadarHttp.get(URL(Overpass.STATUS), agent, route, 15_000, 20_000) } catch (_: Exception) { null }
-                            if (st != null && Overpass.busy(st.code)) { busy = true; error = "HTTP ${st.code}"; Log.w(TAG, "$server ($via): status ${st.code}, busy"); continue }
-                            val waitS = st?.takeIf { it.code == 200 }?.let { Overpass.slotWait(it.body.toString(Charsets.UTF_8)) } ?: 0
-                            if (waitS in 1..120) { Log.i(TAG, "$server: next slot in $waitS s"); Thread.sleep(waitS * 1000L + 500) }
-                            else if (waitS > 120) { busy = true; retryAfter = maxOf(retryAfter, waitS); continue }
-                        }
+                        // TLS 1.3 (Conscrypt): the official server needs it. No status page first any more: it was
+                        // itself refused or slow when the server is full, and could hold the query up to 2 min; a
+                        // full server answers 502 at once and the next address is tried
                         val r = RadarHttp.post(url, body, "application/x-www-form-urlencoded", agent, route, 15_000, 90_000)
                         wire = r.wire
                         r.headers["retry-after"]?.trim()?.toIntOrNull()?.let { retryAfter = maxOf(retryAfter, it) }
@@ -326,7 +330,12 @@ object RadarRepo {
                         c to t
                     }
                     Overpass.answered(server)
-                    if (code == 200 && text != null) return@tag Overpass.Result(text, wire = wire)
+                    val stopped = text?.let { Overpass.runtimeError(it) }
+                    if (code == 200 && text != null && stopped == null) {
+                        Log.i(TAG, "$server ($via): ${wire / 1024} KB")
+                        return@tag Overpass.Result(text, wire = wire)
+                    }
+                    if (stopped != null) { busy = true; error = "remark: $stopped"; Log.w(TAG, "$server ($via): stopped, $stopped"); continue }
                     if (Overpass.busy(code)) busy = true
                     error = "HTTP $code"
                     Log.w(TAG, "$server ($via): HTTP $code")

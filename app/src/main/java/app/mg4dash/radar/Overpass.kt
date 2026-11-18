@@ -4,14 +4,26 @@ package app.mg4dash.radar
  * The Overpass servers the alerter reads OpenStreetMap from, and how it goes through them (the owner's choice, 17/11).
  *
  * The official server, overpass-api.de (Germany / Finland), always first. It only accepts TLS 1.3, which Android 9
- * lacks: [RadarHttp] brings it with Conscrypt. Then one public instance as a fallback, overpass.private.coffee
- * (Austria; overpass.kumi.systems is the same server). Both send gzip when asked.
+ * lacks: [RadarHttp] brings it with Conscrypt. Then its second official address, z.overpass-api.de (18/11: the
+ * first one answered "at capacity" (502) to almost every request while z gave whole tiles in 20 to 40 s), then one
+ * public instance as a last fallback, overpass.private.coffee (Austria; overpass.kumi.systems is the same server),
+ * left out for a while when it does not answer. All send gzip when asked.
  */
 object Overpass {
     val SERVERS = listOf(
         "https://overpass-api.de/api/interpreter",
+        "https://z.overpass-api.de/api/interpreter",
         "https://overpass.private.coffee/api/interpreter",
     )
+
+    /**
+     * An answer with HTTP 200 that is not data: Overpass reports a query stopped half-way (timeout, out of memory) in
+     * "remark" with the elements found so far, or none (wiki: Overpass API, "runtime error"). Kept, it would hold a
+     * tile with roads missing until its refresh; it is a failed try instead.
+     */
+    fun runtimeError(json: String): String? =
+        Regex("\"remark\"\\s*:\\s*\"([^\"]*)\"").find(json.take(4096) + json.takeLast(4096))?.groupValues?.get(1)
+            ?.takeIf { it.contains("error", ignoreCase = true) }
 
     /**
      * The servers in the order to try them: the official one first, always; a fallback that gave no answer twice in a
