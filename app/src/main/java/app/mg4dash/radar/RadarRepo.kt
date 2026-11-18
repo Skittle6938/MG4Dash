@@ -50,11 +50,11 @@ object RadarRepo {
      * about 9 kB, 330 kB and 650 kB uncompressed); the official server compresses it to about a fifth.
      */
     const val PREP_BOX_BYTES = 250_000L
-    /** Downloaded (gzip), and kept on disk in the compact form. */
+    /** Downloaded (gzip, from the official servers; dresel sends it whole: [PREP_BOX_BYTES]), and kept on disk in the compact form. */
     const val PREP_BOX_BYTES_GZIP = 50_000L
     const val PREP_BOX_BYTES_KEPT = 140_000L
-    /** Typical time per query (2 × 2 tiles): the server's answer and the pause between queries. */
-    const val PREP_BOX_SECONDS = 15
+    /** Typical time per query (4 × 4 tiles, dresel 18/11: 3 x 3 in 14 s): the server's answer and the pause between queries. */
+    const val PREP_BOX_SECONDS = 20
 
     /** Estimate of a preparation: boxes, bytes downloaded (compressed), bytes kept, minutes. */
     data class Estimate(val boxes: Int, val download: Long, val kept: Long, val minutes: Int)
@@ -244,11 +244,15 @@ object RadarRepo {
         val keep = RadarData.keysAround(lat, lon, HALF_LAT * 3, HALF_LON * 3).toSet() + keys
         if (tiles.keys.retainAll(keep)) changed = true
         val refreshMs = Prefs(c).radarRefreshHours * 3_600_000L
-        val want = wanted.filter { (k, level) -> needsFetch(tiles[k], now, refreshMs, level) && k !in fetching }
+        // On the Wi-Fi every tile complete; on the car's data the far ones ahead with the main roads only
+        val wifiNow = onWifi()
+        val want = wanted.map { (k, level) -> k to (if (wifiNow) RadarData.Level.FULL else level) }
+            .filter { (k, level) -> needsFetch(tiles[k], now, refreshMs, level) && k !in fetching }
         // One live download at a time: queued ones went stale while the car moved on (a tile takes 20 to 40 s when busy)
         if (want.isNotEmpty() && fetching.isEmpty() && now - failedAt > BACKOFF_MS && now - lastFetch >= FETCH_GAP_MS && netAllowed(c)) {
             lastFetch = now
-            fetch(c, want.first().first, want.first().second)
+            val group = liveGroup(want)
+            fetch(c, group, want.first().second)
         }
         if (changed || loadedKeys != tiles.keys) rebuild()
     }
@@ -336,21 +340,52 @@ object RadarRepo {
         roads = r.values; cameras = cams.values; graph = Ahead.Graph(roads); loadedKeys = tiles.keys.toSet()
     }
 
-    private fun fetch(c: Context, key: RadarData.Key, level: RadarData.Level = RadarData.Level.FULL) {
-        fetching += key
+    /** A live request covers at most this many tiles across (0.08°): one request instead of one per tile. */
+    const val LIVE_SPAN = 4
+
+    /**
+     * The tiles fetched together with the first one wanted (18/11: one request costs the busy servers 35 to 45 s
+     * whatever its size, so the tiles came one by one too late): those of the same level whose box with it stays
+     * within [LIVE_SPAN] tiles across, in their order.
+     */
+    internal fun liveGroup(want: List<Pair<RadarData.Key, RadarData.Level>>): List<RadarData.Key> {
+        if (want.isEmpty()) return emptyList()
+        val level = want.first().second
+        val out = ArrayList<RadarData.Key>()
+        var y0 = want.first().first.y; var y1 = y0; var x0 = want.first().first.x; var x1 = x0
+        for ((k, l) in want) {
+            if (l != level) continue
+            val ny0 = minOf(y0, k.y); val ny1 = maxOf(y1, k.y); val nx0 = minOf(x0, k.x); val nx1 = maxOf(x1, k.x)
+            if (ny1 - ny0 >= LIVE_SPAN || nx1 - nx0 >= LIVE_SPAN) continue
+            y0 = ny0; y1 = ny1; x0 = nx0; x1 = nx1
+            out += k
+        }
+        return out
+    }
+
+    private fun fetch(c: Context, keys: List<RadarData.Key>, level: RadarData.Level = RadarData.Level.FULL) {
+        if (keys.isEmpty()) return
+        fetching += keys
         _live.value = fetching.size
         net.post {
-            val q = RadarData.query(key.south, key.west, key.south + RadarData.TILE, key.west + RadarData.TILE, level)
-            val tile = download(q, Prefs(c).radarWifiOnly).body?.let { json ->
-                runCatching { RadarData.parse(json) }.onFailure { Log.w(TAG, "tile $key: ${it.message}") }.getOrNull()
-            }?.let { (r, cams) -> RadarData.Tile(key, level, System.currentTimeMillis(), r, cams) }
-                ?.let { got -> replacement(RadarData.read(c.filesDir, key), got).also { if (it == null) Log.w(TAG, "tile $key ($level): ${got.roads.size} roads, the one kept stays") } }
-            if (tile != null) runCatching { RadarData.write(c.filesDir, tile) }
+            val s = keys.minOf { it.south }; val w = keys.minOf { it.west }
+            val n = keys.maxOf { it.south } + RadarData.TILE; val e = keys.maxOf { it.west } + RadarData.TILE
+            val region = Overpass.region((s + n) / 2, (w + e) / 2)
+            val now = System.currentTimeMillis()
+            val got = download(region, Prefs(c).radarWifiOnly, "live ${keys.size} ${level.name.lowercase()}") { t -> RadarData.query(s, w, n, e, level, t) }.body?.let { json ->
+                runCatching { RadarData.parse(json) }.onFailure { Log.w(TAG, "live ${keys.size} tiles: ${it.message}") }.getOrNull()
+            }?.let { (r, cams) -> RadarData.split(keys, level, now, r, cams) }
+            // Each tile kept only if it is better than the one there (a light one never replaces a complete one)
+            val kept = got?.mapNotNull { t -> replacement(RadarData.read(c.filesDir, t.key), t) }.orEmpty()
+            kept.forEach { runCatching { RadarData.write(c.filesDir, it) } }
             worker.post {
-                fetching -= key
+                fetching -= keys.toSet()
                 _live.value = fetching.size
-                if (tile != null) { tiles[key] = tile; rebuild(); Log.i(TAG, "tile $key ($level): ${tile.roads.size} roads, ${tile.cameras.size} cameras") }
-                else failedAt = System.currentTimeMillis()
+                if (got != null) {
+                    kept.forEach { tiles[it.key] = it }
+                    if (kept.isNotEmpty()) rebuild()
+                    Log.i(TAG, "live: ${keys.size} tiles ($level), ${kept.size} kept, ${kept.sumOf { it.roads.size }} roads")
+                } else failedAt = System.currentTimeMillis()
             }
         }
     }
@@ -360,58 +395,67 @@ object RadarRepo {
      * through the servers in turn (a busy one, HTTP 429 / 503 / 504, gives way to the next). Counted as the alerter's
      * data, on the network it went through.
      */
-    private fun download(query: String, wifiOnly: Boolean, stop: () -> Boolean = { false }): Overpass.Result = DataUsage.tag(DataUsage.Use.RADARS) {
+    private fun download(region: Overpass.Region, wifiOnly: Boolean, what: String, stop: () -> Boolean = { false },
+                         query: (Int) -> String): Overpass.Result = DataUsage.tag(DataUsage.Use.RADARS) {
         var busy = false; var error: String? = null; var retryAfter = 0
-        val body = ("data=" + URLEncoder.encode(query, "UTF-8")).toByteArray()
-        val agent = "MG4Dash/${BuildConfig.VERSION_NAME}"
+        val agent = Overpass.USER_AGENT
+        val c = ctx
         for (route in Overpass.routes(wifi(), wifiOnly)) {
             val via = if (route != null) "Wi-Fi" else "default network"
-            for (server in Overpass.order()) {
+            for (server in Overpass.order(region)) {
                 if (stop()) return@tag Overpass.Result(null, error = "stopped")
                 var wire = 0
+                val started = android.os.SystemClock.elapsedRealtime()
+                fun log(outcome: String) { c?.let { RadarLog.add(it, "$what $via", server, outcome, android.os.SystemClock.elapsedRealtime() - started, wire) } }
+                // The query declares the time this server is given, its answer is awaited a little longer
+                val body = ("data=" + URLEncoder.encode(query(Overpass.queryTimeoutS(server)), "UTF-8")).toByteArray()
+                val readMs = Overpass.readTimeoutMs(server)
                 try {
                     val url = URL(server)
                     val (code, text) = if (RadarHttp.tls13) {
-                        // TLS 1.3 (Conscrypt): the official server needs it. No status page first any more: it was
-                        // itself refused or slow when the server is full, and could hold the query up to 2 min; a
-                        // full server answers 502 at once and the next address is tried
-                        val r = RadarHttp.post(url, body, "application/x-www-form-urlencoded", agent, route, 15_000, 90_000)
+                        // TLS 1.3 (Conscrypt): the official servers need it; a full server answers 502 at once
+                        val r = RadarHttp.post(url, body, "application/x-www-form-urlencoded", agent, route, 15_000, readMs)
                         wire = r.wire
                         r.headers["retry-after"]?.trim()?.toIntOrNull()?.let { retryAfter = maxOf(retryAfter, it) }
                         r.code to (if (r.code == 200) r.body.toString(Charsets.UTF_8) else null)
                     } else {
-                        // Android's own TLS (1.2): the official server refuses it, the fallback answers
+                        // Android's own TLS (1.2): the servers that accept it
                         val conn = (route?.openConnection(url) ?: url.openConnection()) as HttpURLConnection
-                        conn.connectTimeout = 15_000; conn.readTimeout = 90_000
+                        conn.connectTimeout = 15_000; conn.readTimeout = readMs
                         conn.requestMethod = "POST"; conn.doOutput = true
                         conn.setRequestProperty("User-Agent", agent)
                         conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded")
                         conn.setRequestProperty("Accept-Encoding", "gzip")
                         conn.outputStream.use { it.write(body) }
-                        val c = conn.responseCode
-                        val t = if (c == 200) {
+                        val code = conn.responseCode
+                        val t = if (code == 200) {
                             val raw = conn.inputStream.use { it.readBytes() }
                             wire = raw.size
                             (if (conn.contentEncoding.equals("gzip", ignoreCase = true)) java.util.zip.GZIPInputStream(raw.inputStream()).use { it.readBytes() } else raw).toString(Charsets.UTF_8)
                         } else null
                         conn.disconnect()
-                        c to t
+                        code to t
                     }
                     Overpass.answered(server)
                     val stopped = text?.let { Overpass.runtimeError(it) }
                     if (code == 200 && text != null && stopped == null) {
                         Log.i(TAG, "$server ($via): ${wire / 1024} KB")
-                        Overpass.worked(server)
+                        log("200")
+                        Overpass.worked(region, server)
                         return@tag Overpass.Result(text, wire = wire)
                     }
-                    if (stopped != null) { busy = true; error = "remark: $stopped"; Log.w(TAG, "$server ($via): stopped, $stopped"); continue }
-                    if (Overpass.busy(code)) busy = true
+                    if (stopped != null) { busy = true; error = "remark: $stopped"; log("remark"); Log.w(TAG, "$server ($via): stopped, $stopped"); continue }
+                    // Too many requests: that server waits 30 s, as its policy asks; full or slow: the next one at once
+                    if (Overpass.tooMany(code)) Overpass.pause(server)
+                    if (Overpass.busy(code) || Overpass.tooMany(code)) busy = true
                     error = "HTTP $code"
+                    log("HTTP $code")
                     Log.w(TAG, "$server ($via): HTTP $code")
                 } catch (e: Exception) {
                     // Cut on purpose (preparation stopped): not the server's fault
                     if (stop()) return@tag Overpass.Result(null, error = "stopped")
                     error = e.javaClass.simpleName
+                    log(e.javaClass.simpleName)
                     Log.w(TAG, "$server ($via): ${e.javaClass.simpleName} ${e.message}")
                     if (e is java.io.IOException) Overpass.noAnswer(server)
                 }
@@ -423,11 +467,11 @@ object RadarRepo {
     // ── Prepared trips ──
 
     /**
-     * The preparation asks for boxes of [PREP_TILES] × [PREP_TILES] tiles of the disk grid (0.04°), lined up on the tiles:
+     * The preparation asks for boxes of [PREP_TILES] × [PREP_TILES] tiles of the disk grid (0.08°, 18/11: one request costs the busy servers about the same whatever its size), lined up on the tiles:
      * fewer, larger queries, as Overpass prefers (its slots are per query), each split and kept tile by tile as soon as it
      * is in, so that a preparation stopped and started again goes on from there (tiles already in and fresh are skipped).
      */
-    internal const val PREP_TILES = 2
+    internal const val PREP_TILES = 4
     /** Tries per tile, and how long the Wi-Fi may be gone before the preparation stops. */
     private const val PREP_TRIES = 4
     private const val PREP_WIFI_WAIT_MS = 600_000L
@@ -451,7 +495,9 @@ object RadarRepo {
     fun prepareEstimate(km: Int, lat: Double = LocationRepo.location.value?.latitude ?: 48.8): Estimate {
         val n = prepareBoxes(lat, 0.025, km).size
         val tiles = n * PREP_TILES * PREP_TILES
-        return Estimate(tiles, tiles * PREP_BOX_BYTES_GZIP, tiles * PREP_BOX_BYTES_KEPT, Math.max(1, (n * PREP_BOX_SECONDS + 59) / 60))
+        // Europe and North America: dresel first, which does not compress
+        val bytes = if (Overpass.region(lat, 2.35) == Overpass.Region.OTHER) PREP_BOX_BYTES_GZIP else PREP_BOX_BYTES
+        return Estimate(tiles, tiles * bytes, tiles * PREP_BOX_BYTES_KEPT, Math.max(1, (n * PREP_BOX_SECONDS + 59) / 60))
     }
 
     /**
@@ -514,7 +560,7 @@ object RadarRepo {
                 prepThread = null
                 Log.i(TAG, "preparing cancelled ($done / $total)"); resume.edit().remove(PREP_RESUME_KEY).apply(); show(PrepPhase.CANCELLED); return true
             }
-            // Blocks to fetch: the 2 x 2 ones first; one that fails or is too big comes back as its quarters
+            // Blocks to fetch: the 4 x 4 ones first; one that fails or is too big comes back as its quarters
             val queue = ArrayDeque(boxes.map { it to PREP_TILES })
             while (queue.isNotEmpty()) {
                 // Paused: waits; cancelled: stops, the tiles already in are kept
@@ -545,7 +591,8 @@ object RadarRepo {
                         if (cancelled()) return@post
                         show(PrepPhase.RUNNING)
                     }
-                    val r = download(RadarData.query(sw.south, sw.west, bn, be, level), wifiOnly = true) { prepCancelled }
+                    val r = download(Overpass.region((sw.south + bn) / 2, (sw.west + be) / 2), true, "prep $size x $size", { prepCancelled }) { t ->
+                        RadarData.query(sw.south, sw.west, bn, be, level, t) }
                     if (cancelled()) return@post
                     bytes += r.wire
                     if (size > 1 && (r.body?.length ?: 0) > PREP_MAX_ANSWER) { split = true; Log.i(TAG, "preparing: block $sw too big (${r.body?.length}), in quarters"); break }

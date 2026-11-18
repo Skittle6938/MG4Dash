@@ -1,20 +1,97 @@
 package app.mg4dash.radar
 
 /**
- * The Overpass servers the alerter reads OpenStreetMap from, and how it goes through them (the owner's choice, 17/11).
+ * The Overpass servers the alerter reads OpenStreetMap from, and how it goes through them.
  *
- * The official server, overpass-api.de (Germany / Finland), always first. It only accepts TLS 1.3, which Android 9
- * lacks: [RadarHttp] brings it with Conscrypt. Then its second official address, z.overpass-api.de (18/11: the
- * first one answered "at capacity" (502) to almost every request while z gave whole tiles in 20 to 40 s), then one
- * public instance as a last fallback, overpass.private.coffee (Austria; overpass.kumi.systems is the same server),
- * left out for a while when it does not answer. All send gzip when asked.
+ * Measured on 18/11 (a dense tile of all the streets, three tries each): the overpass-api.de servers take 35 to 45 s
+ * a request whatever its size (waiting for a slot, not the data), and refuse about 40 % ("at capacity", 502 / 504);
+ * overpass.private.coffee no longer answers. ovp.dresel.systems (listed on the OSM wiki: free, no key, up to 4
+ * queries at a time per address, updated every night) gave the same data in 7 s, and 3 x 3 tiles in 14 s, every time.
+ * So by the region of the area asked: dresel's European or North American server first, then the official ones
+ * (z, lz4, the main address; first elsewhere). Never maps.mail.ru (the owner's choice). The official servers need TLS 1.3,
+ * which Android 9 lacks: [RadarHttp] brings it with Conscrypt.
  */
 object Overpass {
-    val SERVERS = listOf(
-        "https://overpass-api.de/api/interpreter",
+    const val DRESEL_EU = "https://ovp.dresel.systems/api/interpreter"
+    const val DRESEL_NA = "https://ovp.dresel.systems/api-na/interpreter"
+    val OFFICIAL = listOf(
         "https://z.overpass-api.de/api/interpreter",
-        "https://overpass.private.coffee/api/interpreter",
+        "https://lz4.overpass-api.de/api/interpreter",
+        "https://overpass-api.de/api/interpreter",
     )
+
+    enum class Region { EUROPE, NORTH_AMERICA, OTHER }
+
+    /** The region of a point, for the servers that cover it (dresel's extracts: Europe, North America). */
+    fun region(lat: Double, lon: Double): Region = when {
+        lat in 34.0..72.0 && lon in -25.0..45.0 -> Region.EUROPE
+        lat in 14.0..72.0 && lon in -170.0..-50.0 -> Region.NORTH_AMERICA
+        else -> Region.OTHER
+    }
+
+    /** The servers for [region], in their own order. */
+    fun servers(region: Region): List<String> = when (region) {
+        Region.EUROPE -> listOf(DRESEL_EU) + OFFICIAL
+        Region.NORTH_AMERICA -> listOf(DRESEL_NA) + OFFICIAL
+        Region.OTHER -> OFFICIAL
+    }
+
+    /** Every server MG4Dash may ask. */
+    val SERVERS: List<String> get() = (listOf(DRESEL_EU, DRESEL_NA) + OFFICIAL)
+
+    /** The Identification Overpass asks for, without any personal data. */
+    val USER_AGENT: String get() = "MG4Dash/${app.mg4dash.BuildConfig.VERSION_NAME} (+https://github.com/Skittle6938/MG4Dash)"
+
+    /** Waiting for the answer: dresel answers within seconds, the official servers make the query wait its turn. */
+    fun readTimeoutMs(server: String): Int = if (server.contains("dresel")) 45_000 else 90_000
+
+    /** The [timeout:] the query declares to [server], under its socket wait. */
+    fun queryTimeoutS(server: String): Int = if (server.contains("dresel")) 40 else 85
+
+    /**
+     * The servers for [region] in the order to try them: the last one that gave data there first; one left out (no
+     * answer twice in a row, or asked to pause) skipped until its time, unless all are.
+     */
+    fun order(region: Region, now: Long = System.currentTimeMillis()): List<String> {
+        val all = servers(region)
+        val open = all.filter { (skippedUntil[it] ?: 0L) <= now }.ifEmpty { all }
+        val p = preferred[region]?.takeIf { it in open } ?: return open
+        return listOf(p) + (open - p)
+    }
+
+    private val preferred = java.util.concurrent.ConcurrentHashMap<Region, String>()
+
+    /** The last server that gave data for [region], tried first there; null: the list's order. */
+    fun preferred(region: Region): String? = preferred[region]
+
+    /** [server] gave data for [region]: it is tried first there from now on. */
+    fun worked(region: Region, server: String) { preferred[region] = server }
+
+    /** No answer in a row before a server is left out for [SKIP_MS]. */
+    const val SKIP_AFTER = 2
+    const val SKIP_MS = 30L * 60_000L
+    /** HTTP 429 / 406 (too many requests): that server paused this long, as its usage policy asks. */
+    const val PAUSE_MS = 30_000L
+    private val noAnswer = java.util.concurrent.ConcurrentHashMap<String, Int>()
+    private val skippedUntil = java.util.concurrent.ConcurrentHashMap<String, Long>()
+
+    /** [server] answered (whatever its HTTP code): it counts again. */
+    fun answered(server: String) { noAnswer.remove(server); if ((skippedUntil[server] ?: 0L) - System.currentTimeMillis() > PAUSE_MS) skippedUntil.remove(server) }
+
+    /** [server] gave no answer (a timeout, a failed connection): left out for a while after [SKIP_AFTER] in a row. */
+    fun noAnswer(server: String, now: Long = System.currentTimeMillis()) {
+        val n = (noAnswer[server] ?: 0) + 1
+        noAnswer[server] = n
+        if (n >= SKIP_AFTER) { skippedUntil[server] = now + SKIP_MS; noAnswer.remove(server) }
+    }
+
+    /** [server] asked to slow down (HTTP 429 / 406): paused [PAUSE_MS]. */
+    fun pause(server: String, now: Long = System.currentTimeMillis()) { skippedUntil[server] = maxOf(skippedUntil[server] ?: 0L, now + PAUSE_MS) }
+
+    /** What to do with an HTTP [code] other than 200: true = try the next server (busy), and pause it on 429 / 406. */
+    fun tooMany(code: Int) = code == 429 || code == 406
+
+    internal fun resetSkips() { noAnswer.clear(); skippedUntil.clear(); preferred.clear() }
 
     /**
      * An answer with HTTP 200 that is not data: Overpass reports a query stopped half-way (timeout, out of memory) in
@@ -24,42 +101,6 @@ object Overpass {
     fun runtimeError(json: String): String? =
         Regex("\"remark\"\\s*:\\s*\"([^\"]*)\"").find(json.take(4096) + json.takeLast(4096))?.groupValues?.get(1)
             ?.takeIf { it.contains("error", ignoreCase = true) }
-
-    /**
-     * The servers in the order to try them: the official one first, always; a fallback that gave no answer twice in a
-     * row (a timeout, no connection: 90 s lost each round, 17/11) is left out for [SKIP_MS].
-     */
-    fun order(now: Long = System.currentTimeMillis()): List<String> {
-        val open = SERVERS.filterIndexed { i, s -> i == 0 || (skippedUntil[s] ?: 0L) <= now }
-        // The last server that gave data first (18/11): no time lost again on a full one at each request
-        val p = preferred?.takeIf { it in open } ?: return open
-        return listOf(p) + (open - p)
-    }
-
-    /** The last server that gave data, tried first; null: the list's order. */
-    @Volatile var preferred: String? = null
-        private set
-
-    /** [server] gave data: it is tried first from now on. */
-    fun worked(server: String) { preferred = server }
-
-    /** No answer in a row from a fallback before it is left out. */
-    const val SKIP_AFTER = 2
-    const val SKIP_MS = 30L * 60_000L
-    private val noAnswer = java.util.concurrent.ConcurrentHashMap<String, Int>()
-    private val skippedUntil = java.util.concurrent.ConcurrentHashMap<String, Long>()
-
-    /** [server] answered (whatever its HTTP code): it counts again. */
-    fun answered(server: String) { noAnswer.remove(server); skippedUntil.remove(server) }
-
-    /** [server] gave no answer (a timeout, a failed connection): left out for a while after [SKIP_AFTER] in a row. */
-    fun noAnswer(server: String, now: Long = System.currentTimeMillis()) {
-        val n = (noAnswer[server] ?: 0) + 1
-        noAnswer[server] = n
-        if (n >= SKIP_AFTER && server != SERVERS.first()) { skippedUntil[server] = now + SKIP_MS; noAnswer.remove(server) }
-    }
-
-    internal fun resetSkips() { noAnswer.clear(); skippedUntil.clear(); preferred = null }
 
     /** A server answer that says it is busy: try another one, and wait longer before the next round. */
     fun busy(code: Int) = code == 429 || code == 502 || code == 503 || code == 504
