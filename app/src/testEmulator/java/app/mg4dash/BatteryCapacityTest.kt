@@ -95,6 +95,18 @@ class BatteryCapacityTest {
         assertEquals(55f, BatteryCapacity.estimate(ctx)!!.first, 0.01f)
     }
 
+    /** The median (18/11) reads the samples already stored as they are: same key, same format, old ones without km too. */
+    @Test fun storedSamplesKeptWithTheMedian() {
+        val now = System.currentTimeMillis()
+        prefs.raw.edit().putString("cap_samples",
+            "[{\"t\":${now - 3 * day},\"k\":47.8,\"d\":15},{\"t\":${now - 2 * day},\"k\":48.2,\"d\":18,\"m\":120.5}," +
+            "{\"t\":${now - day},\"k\":48.0,\"d\":16,\"m\":95.0},{\"t\":$now,\"k\":62.0,\"d\":15,\"m\":80.0}]").commit()
+        assertEquals(4, BatteryCapacity.samples(ctx).size)
+        assertEquals(48.2f to 4, BatteryCapacity.estimate(ctx)!!)
+        // Nothing rewritten by reading them
+        assertEquals(4, org.json.JSONArray(prefs.raw.getString("cap_samples", "[]")).length())
+    }
+
     @Test fun damagedHistoryIsIgnored() {
         prefs.raw.edit().putString("cap_samples", "{not json").commit()
         assertTrue(BatteryCapacity.samples(ctx).isEmpty())
