@@ -302,13 +302,6 @@ class RadarTest {
 
     // ── Network ──
 
-    @Test fun officialServerFirstNoOther() {
-        // The official server first, always (TLS 1.3 through Conscrypt), then its second official address; one public fallback, outside Russia
-        app.mg4dash.radar.Overpass.resetSkips()
-        assertEquals(listOf("https://overpass-api.de/api/interpreter", "https://z.overpass-api.de/api/interpreter", "https://overpass.private.coffee/api/interpreter"),
-            app.mg4dash.radar.Overpass.order())
-        assertTrue(app.mg4dash.radar.Overpass.SERVERS.none { it.contains("mail.ru") })
-    }
 
     @Test fun overpassBusyAndBackoff() {
         assertTrue(app.mg4dash.radar.Overpass.busy(429) && app.mg4dash.radar.Overpass.busy(504) && app.mg4dash.radar.Overpass.busy(503))
@@ -332,9 +325,9 @@ class RadarTest {
         val r = app.mg4dash.radar.RadarRepo
         assertEquals(listOf(10, 20, 30, 50), r.PREPARE_RADII)
         assertEquals(20, app.mg4dash.system.Prefs(org.robolectric.RuntimeEnvironment.getApplication()).radarPrepareKm)
-        // 30 km around Paris: 60 km square, blocks of 2 x 2 tiles (0.04°) per request, about 15 x 21
+        // 30 km around Paris: 60 km square, blocks of 4 x 4 tiles (0.08°) per request, about 8 x 11
         val boxes = r.prepareBoxes(48.86, 2.35, 30)
-        assertTrue(boxes.size in 280..360)
+        assertTrue("${boxes.size}", boxes.size in 60..110)
         assertEquals(boxes.size, boxes.toSet().size)
         // Every point within 30 km is in one of the tiles fetched
         val tiles = boxes.flatMap { r.boxTiles(it) }
@@ -344,11 +337,11 @@ class RadarTest {
         val sizes = r.PREPARE_RADII.map { r.prepareEstimate(it, 48.86) }
         assertEquals(sizes.sortedBy { it.boxes }, sizes)
         val e = sizes[2]
-        // Counted in tiles (4 per block)
-        assertEquals(r.prepareBoxes(48.86, 0.025, 30).size * 4, e.boxes)
-        assertEquals(e.boxes * r.PREP_BOX_BYTES_GZIP, e.download)
+        // Counted in tiles (16 per block); in Europe from dresel, sent whole
+        assertEquals(r.prepareBoxes(48.86, 0.025, 30).size * 16, e.boxes)
+        assertEquals(e.boxes * r.PREP_BOX_BYTES, e.download)
         assertEquals(e.boxes * r.PREP_BOX_BYTES_KEPT, e.kept)
-        assertTrue(e.minutes in 50..110)
+        assertTrue("${e.minutes}", e.minutes in 15..50)
     }
 
     /** Boxes on the tile grid: a tile belongs to one box only, whatever the starting position, so it is never fetched in halves or kept twice. */
@@ -539,33 +532,7 @@ class RadarTest {
         assertEquals(null, sp.getString("radar_prep_resume", null))
     }
 
-    /** A fallback server that never answers is left out for 30 min after 2 tries in a row; the official one never is. */
-    @Test fun silentFallbackSkipped() {
-        val o = app.mg4dash.radar.Overpass
-        o.resetSkips()
-        val (main, second, fallback) = o.SERVERS
-        val t = 1_000_000L
-        o.noAnswer(fallback, t)
-        assertEquals(listOf(main, second, fallback), o.order(t))
-        o.noAnswer(fallback, t)
-        assertEquals(listOf(main, second), o.order(t + 1))
-        assertEquals(listOf(main, second), o.order(t + o.SKIP_MS - 1))
-        assertEquals(listOf(main, second, fallback), o.order(t + o.SKIP_MS))
-        // An answer resets the count
-        o.noAnswer(fallback, t); o.answered(fallback); o.noAnswer(fallback, t)
-        assertEquals(listOf(main, second, fallback), o.order(t))
-        // The official server is always tried
-        repeat(5) { o.noAnswer(main, t) }
-        assertEquals(main, o.order(t).first())
-        o.resetSkips()
-    }
 
-    /** Marc, 18/11: the official address answered "at capacity" to almost everything; its second official address comes next. */
-    @Test fun secondOfficialAddressBeforeTheFallback() {
-        val o = app.mg4dash.radar.Overpass
-        assertEquals("https://overpass-api.de/api/interpreter", o.SERVERS[0])
-        assertEquals("https://z.overpass-api.de/api/interpreter", o.SERVERS[1])
-    }
 
     /** A query stopped half-way comes back with HTTP 200 and a "remark": a failed try, never a tile kept with roads missing. */
     @Test fun runtimeErrorIsNotData() {
@@ -639,21 +606,6 @@ class RadarTest {
         assertEquals(fresh, RadarRepo.replacement(old, fresh))
     }
 
-    /** The last server that gave data is tried first (Marc, 18/11), the breaker still applies. */
-    @Test fun lastWorkingServerFirst() {
-        val o = app.mg4dash.radar.Overpass
-        o.resetSkips()
-        val (main, second, fallback) = o.SERVERS
-        assertEquals(listOf(main, second, fallback), o.order(1_000L))
-        o.worked(second)
-        assertEquals(listOf(second, main, fallback), o.order(1_000L))
-        o.worked(fallback)
-        assertEquals(listOf(fallback, main, second), o.order(1_000L))
-        // Left out by the breaker: not first any more, nor in the list
-        o.noAnswer(fallback, 1_000L); o.noAnswer(fallback, 1_000L)
-        assertEquals(listOf(main, second), o.order(2_000L))
-        o.resetSkips()
-    }
 
     /** Stop (Marc, 18/11): the request in progress is cut at once and the page shows it stopped now. */
     @Test fun stopCutsTheRequestAtOnce() {
@@ -680,5 +632,93 @@ class RadarTest {
         assertTrue("cut in ${System.currentTimeMillis() - start} ms", System.currentTimeMillis() - start < 2_000)
         assertTrue(error is java.io.IOException)
         server.close()
+    }
+
+    // ── Overpass servers (18/11: by region, dresel first, one request for several tiles) ──
+
+    @Test fun serversByRegion() {
+        val o = app.mg4dash.radar.Overpass
+        o.resetSkips()
+        assertEquals(app.mg4dash.radar.Overpass.Region.EUROPE, o.region(48.89, 2.33))        // Paris
+        assertEquals(app.mg4dash.radar.Overpass.Region.EUROPE, o.region(51.5, -0.12))        // London
+        assertEquals(app.mg4dash.radar.Overpass.Region.EUROPE, o.region(41.9, 12.5))         // Rome
+        assertEquals(app.mg4dash.radar.Overpass.Region.NORTH_AMERICA, o.region(40.7, -74.0)) // New York
+        assertEquals(app.mg4dash.radar.Overpass.Region.OTHER, o.region(-33.9, 151.2))        // Sydney
+        assertEquals(o.DRESEL_EU, o.order(app.mg4dash.radar.Overpass.Region.EUROPE).first())
+        assertEquals(o.DRESEL_NA, o.order(app.mg4dash.radar.Overpass.Region.NORTH_AMERICA).first())
+        assertEquals(o.OFFICIAL, o.order(app.mg4dash.radar.Overpass.Region.OTHER))
+        assertEquals(o.OFFICIAL, o.order(app.mg4dash.radar.Overpass.Region.EUROPE).drop(1))
+        // Never these
+        assertTrue(o.SERVERS.none { it.contains("mail.ru") || it.contains("private.coffee") })
+        assertTrue(o.USER_AGENT.startsWith("MG4Dash/") && o.USER_AGENT.contains("github.com/Skittle6938/MG4Dash"))
+        assertEquals(45_000, o.readTimeoutMs(o.DRESEL_EU)); assertEquals(40, o.queryTimeoutS(o.DRESEL_EU))
+        assertEquals(90_000, o.readTimeoutMs(o.OFFICIAL[0])); assertEquals(85, o.queryTimeoutS(o.OFFICIAL[0]))
+    }
+
+    @Test fun lastWorkingServerFirstPerRegion() {
+        val o = app.mg4dash.radar.Overpass
+        o.resetSkips()
+        val z = o.OFFICIAL[0]
+        o.worked(app.mg4dash.radar.Overpass.Region.EUROPE, z)
+        assertEquals(z, o.order(app.mg4dash.radar.Overpass.Region.EUROPE).first())
+        // Not elsewhere
+        assertEquals(o.DRESEL_NA, o.order(app.mg4dash.radar.Overpass.Region.NORTH_AMERICA).first())
+        o.resetSkips()
+    }
+
+    @Test fun silentOrBusyServerLeftOut() {
+        val o = app.mg4dash.radar.Overpass
+        o.resetSkips()
+        val t = 1_000_000L
+        // No answer twice in a row: left out 30 min
+        o.noAnswer(o.DRESEL_EU, t); assertEquals(o.DRESEL_EU, o.order(app.mg4dash.radar.Overpass.Region.EUROPE, t).first())
+        o.noAnswer(o.DRESEL_EU, t); assertEquals(o.OFFICIAL, o.order(app.mg4dash.radar.Overpass.Region.EUROPE, t + 1))
+        assertEquals(o.DRESEL_EU, o.order(app.mg4dash.radar.Overpass.Region.EUROPE, t + o.SKIP_MS).first())
+        o.resetSkips()
+        // 429 / 406: paused 30 s
+        assertTrue(o.tooMany(429) && o.tooMany(406) && !o.tooMany(502))
+        o.pause(o.DRESEL_EU, t)
+        assertEquals(o.OFFICIAL, o.order(app.mg4dash.radar.Overpass.Region.EUROPE, t + 1))
+        assertEquals(o.DRESEL_EU, o.order(app.mg4dash.radar.Overpass.Region.EUROPE, t + o.PAUSE_MS).first())
+        // All left out: all tried anyway
+        o.OFFICIAL.forEach { o.pause(it, t) }; o.pause(o.DRESEL_EU, t)
+        assertEquals(o.servers(app.mg4dash.radar.Overpass.Region.EUROPE), o.order(app.mg4dash.radar.Overpass.Region.EUROPE, t + 1))
+        // 502 / 504: busy, the next one at once (not paused)
+        assertTrue(o.busy(502) && o.busy(504))
+        o.resetSkips()
+    }
+
+    /** One request for the tiles wanted together, at most 4 tiles across, the same level only. */
+    @Test fun liveTilesInOneRequest() {
+        val F = RadarData.Level.FULL; val M = RadarData.Level.MAIN
+        val want = listOf(RadarData.Key(100, 200) to F, RadarData.Key(100, 201) to F, RadarData.Key(101, 200) to F,
+            RadarData.Key(103, 200) to F, RadarData.Key(104, 200) to F, RadarData.Key(100, 202) to M)
+        val g = RadarRepo.liveGroup(want)
+        assertEquals(listOf(RadarData.Key(100, 200), RadarData.Key(100, 201), RadarData.Key(101, 200), RadarData.Key(103, 200)), g)
+        assertTrue(RadarRepo.liveGroup(emptyList()).isEmpty())
+    }
+
+    /** A big answer split into tiles gives each tile what a request for it alone would have. */
+    @Test fun splitMatchesTileByTile() {
+        val a = RadarData.Key(2000, 300); val b = RadarData.Key(2000, 301)
+        fun lat(k: RadarData.Key, f: Double) = (k.y + f) * RadarData.TILE
+        fun lon(k: RadarData.Key, f: Double) = (k.x + f) * RadarData.TILE
+        val inA = Road(1, "primary", longArrayOf(1, 2), doubleArrayOf(lat(a, .2), lat(a, .4)), doubleArrayOf(lon(a, .2), lon(a, .4)), 50)
+        val across = Road(2, "secondary", longArrayOf(3, 4), doubleArrayOf(lat(a, .5), lat(b, .5)), doubleArrayOf(lon(a, .9), lon(b, .1)), 70)
+        val cam = Camera(9, lat(b, .5), lon(b, .5), CamKind.FIXED, 70, null)
+        val both = RadarData.split(listOf(a, b), RadarData.Level.FULL, 1L, listOf(inA, across), listOf(cam)).associateBy { it.key }
+        val onlyA = RadarData.split(listOf(a), RadarData.Level.FULL, 1L, listOf(inA, across), emptyList()).single()
+        assertEquals(onlyA.roads.map { it.id }.toSet(), both.getValue(a).roads.map { it.id }.toSet())
+        assertEquals(setOf(2L), both.getValue(b).roads.map { it.id }.toSet())
+        assertEquals(listOf(9L), both.getValue(b).cameras.map { it.id })
+        assertTrue(both.getValue(a).cameras.isEmpty())
+    }
+
+    @Test fun preparationBlocksAreBigger() {
+        assertEquals(4, RadarRepo.PREP_TILES)
+        // Quarters when a block fails or is too big: 4 -> 2 -> 1
+        assertEquals(4, RadarRepo.subBlocks(RadarData.Key(0, 0), 4).size)
+        assertTrue(RadarRepo.subBlocks(RadarData.Key(0, 0), 4).all { it.second == 2 })
+        assertEquals(16, RadarRepo.blockTiles(RadarData.Key(0, 0), 4).size)
     }
 }

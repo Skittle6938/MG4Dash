@@ -45,10 +45,10 @@ object RadarData {
     }
 
     /** Overpass query for the box [s], [w], [n], [e]: roads with their nodes and geometry, cameras, enforcement relations. */
-    fun query(s: Double, w: Double, n: Double, e: Double, level: Level): String {
+    fun query(s: Double, w: Double, n: Double, e: Double, level: Level, timeoutS: Int = 90): String {
         val bb = String.format(java.util.Locale.US, "%.5f,%.5f,%.5f,%.5f", s, w, n, e)
         val roads = if (level == Level.FULL) FULL_ROADS else MAIN_ROADS
-        return "[out:json][timeout:90];" +
+        return "[out:json][timeout:$timeoutS];" +
             "way[\"highway\"~\"^($roads)$\"]($bb);out body geom qt;" +
             "node[\"highway\"=\"speed_camera\"]($bb);out body qt;" +
             "relation[\"type\"=\"enforcement\"]($bb)->.r;.r out body qt;node(r.r);out skel qt;"
