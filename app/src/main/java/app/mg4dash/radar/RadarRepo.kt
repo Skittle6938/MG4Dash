@@ -147,6 +147,18 @@ object RadarRepo {
     private var zoneEnd = 0.0
     private var zoneLimit: Int? = null
     private var level = Level.NONE
+    /** The speed shown and checked: the car's, set right on the GPS (worker thread). */
+    private var speedCalib = RadarSpeed()
+    /** The speed checked at the last fix (the zone's or the road's) and the thresholds then, for the speed between fixes. */
+    private var checkedLimit: Int? = null
+    private var thresholds: Thresholds? = null
+    /** The car's speed read now (tests: a speed of their own). */
+    internal var carSpeed: () -> Float? = { CarBridge.readSpeed() }
+    /** Last time the car moved, for the reading pace. */
+    private var movedAt = 0L
+    private val speedTick = object : Runnable {
+        override fun run() { if (job != null) worker.postDelayed(this, onSpeedTick()) }
+    }
 
     val running: Boolean get() = job != null
 
@@ -159,6 +171,12 @@ object RadarRepo {
         job = scope.launch {
             LocationRepo.location.collect { loc -> if (loc != null) worker.post { onLocation(loc) } }
         }
+        val sp = ctx!!.getSharedPreferences(SPEED_PREFS, Context.MODE_PRIVATE)
+        worker.post {
+            speedCalib = RadarSpeed(sp.getFloat("k", 1f), sp.getInt("windows", 0))
+            movedAt = android.os.SystemClock.elapsedRealtime()
+            worker.removeCallbacks(speedTick); worker.post(speedTick)
+        }
         RadarAlert.start(context.applicationContext)
     }
 
@@ -166,7 +184,8 @@ object RadarRepo {
         if (job == null) return
         job?.cancel(); job = null
         RadarAlert.stop()
-        worker.post { tiles.clear(); roads = emptyList(); cameras = emptyList(); graph = Ahead.Graph(emptyList()); loadedKeys = emptySet(); matcher.reset(); zoneCam = null }
+        worker.removeCallbacks(speedTick)
+        worker.post { worker.removeCallbacks(speedTick); checkedLimit = null; thresholds = null; tiles.clear(); roads = emptyList(); cameras = emptyList(); graph = Ahead.Graph(emptyList()); loadedKeys = emptySet(); matcher.reset(); zoneCam = null }
         _state.value = State()
         Log.i(TAG, "alerter off")
     }
@@ -212,7 +231,17 @@ object RadarRepo {
     private fun onLocation(loc: Location) {
         val c = ctx ?: return
         val now = System.currentTimeMillis()
-        val speed = CarBridge.state.value.speedKmh?.takeIf { it >= 0f } ?: loc.takeIf { it.hasSpeed() }?.speed?.times(3.6f)
+        // The car's speed read now, set right on the GPS's on steady stretches; the GPS's alone without it
+        val car = carSpeed()?.takeIf { it >= 0f } ?: CarBridge.state.value.speedKmh?.takeIf { it >= 0f }
+        val gps = loc.takeIf { it.hasSpeed() }?.speed?.times(3.6f)
+        if (speedCalib.gps(loc.elapsedRealtimeNanos / 1_000_000L, car, gps, loc.takeIf { it.hasAccuracy() }?.accuracy,
+                loc.takeIf { android.os.Build.VERSION.SDK_INT >= 26 && it.hasSpeedAccuracy() }?.speedAccuracyMetersPerSecond,
+                loc.takeIf { it.hasBearing() }?.bearing)) {
+            Log.i(TAG, "speed factor ${"%.3f".format(java.util.Locale.US, speedCalib.k)} (${speedCalib.windows} stretches)")
+            c.getSharedPreferences(SPEED_PREFS, Context.MODE_PRIVATE).edit().putFloat("k", speedCalib.k).putInt("windows", speedCalib.windows).apply()
+        }
+        val speed = speedCalib.shown(car, gps)
+        checkedLimit = null
         last?.let { p -> val d = Geo.dist(p.latitude, p.longitude, loc.latitude, loc.longitude); if (d < 300) odo += d }
         last = loc
         val heading = loc.takeIf { it.hasBearing() && (speed ?: 0f) >= MIN_HEADING_KMH }?.bearing
@@ -243,12 +272,32 @@ object RadarRepo {
         val t = Thresholds(p.radarLow, p.radarHigh, p.radarPercent, Units.miles(c))
         // In a zone, the speed checked there
         val checked = zone?.limit ?: limit
+        checkedLimit = checked; thresholds = t
         level = speed?.let { t.level(it, checked, level) } ?: Level.NONE
         publish(State(
             status = Status.OK, speedKmh = speed, limit = limit, estimated = carLimit == null && m.estimated, level = level, zone = zone, fromCar = carLimit != null,
             next = zones.filter { it.start > 0 && it.cam.id != zoneCam?.id }.take(3).map { NextZone(it.cam.kind, it.limit, it.start) },
             nextLimit = Ahead.nextLimit(path), highway = m.road.highway,
         ))
+    }
+
+    /**
+     * Between the GPS fixes: the car's speed read again, the speed shown and its alert level updated at once (the
+     * road, the limit and the zones stay those of the last fix). Returns the wait before the next reading: [RadarSpeed.TICK_MS],
+     * once a second when parked a while.
+     */
+    private fun onSpeedTick(): Long {
+        val now = android.os.SystemClock.elapsedRealtime()
+        val car = carSpeed()?.takeIf { it >= 0f }
+        if (car != null) {
+            if (car > 0.5f) movedAt = now
+            val speed = speedCalib.shown(car, null)
+            val cur = _state.value
+            val t = thresholds
+            if (cur.status == Status.OK && t != null) level = speed?.let { t.level(it, checkedLimit, level) } ?: Level.NONE
+            publish(cur.copy(speedKmh = speed, level = if (cur.status == Status.OK) level else cur.level))
+        }
+        return if (now - movedAt > RadarSpeed.PARKED_MS) RadarSpeed.PARKED_TICK_MS else RadarSpeed.TICK_MS
     }
 
     private fun activeZone(): InZone? {
@@ -332,6 +381,9 @@ object RadarRepo {
 
     /** A tile without any road is asked again after this long, whatever the refresh age. */
     const val EMPTY_REFRESH_MS = 3_600_000L
+
+    /** Where the speed factor learnt from the GPS is kept between runs. */
+    private const val SPEED_PREFS = "radar_speed"
 
     /** Live downloads: one tile started at most every this long. */
     private const val FETCH_GAP_MS = 5_000L
@@ -591,11 +643,12 @@ object RadarRepo {
         val total = boxes.size * PREP_TILES * PREP_TILES
         _prepare.value = Prep(0, total, 0, PrepPhase.RUNNING)
         Log.i(TAG, "preparing trips: ${boxes.size} blocks, $total tiles")
+        // Cleared here, not on the preparation thread: a Stop pressed before it starts is kept
+        prepPaused = false; prepCancelled = false
         prep.post {
             var done = 0; var failed = 0
             var bytes = 0L
             val started = System.currentTimeMillis()
-            prepPaused = false; prepCancelled = false
             prepThread = Thread.currentThread()
             fun left(): Int? = if (done < 8) null else (((System.currentTimeMillis() - started) / done) * (total - done) / 60_000L).toInt()
             var retryAt = 0L
