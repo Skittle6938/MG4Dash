@@ -19,8 +19,8 @@ public class BootReceiver extends BroadcastReceiver {
     static final String ACTION_CHECK = "app.mg4dash.rescue.CHECK";
     static final String ACTION_UPDATED = "app.mg4dash.rescue.UPDATED";
     static final String ACTION_CRASH = "app.mg4dash.rescue.CRASH";
-    /** After an install by another way than MG4Dash's updater: the time for the system to relaunch it. */
-    static final long INSTALLED_DELAY_MS = 60_000;
+    /** After an install by another way than MG4Dash's updater: the install settled. */
+    static final long INSTALLED_DELAY_MS = 5_000;
     /** After MG4Dash's update: its own process gone, the install settled. */
     static final long UPDATED_DELAY_MS = 3_000;
     /** After a crash of code that does not load: Android's own relaunch tries first. */

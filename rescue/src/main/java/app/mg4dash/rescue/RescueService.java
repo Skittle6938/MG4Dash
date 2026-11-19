@@ -100,7 +100,7 @@ public class RescueService extends Service {
         // A repair cut by a power loss left MG4Dash disabled: first of all, enabled again
         undoInterruptedRepair();
         try {
-            if (MODE_UPDATED.equals(mode)) afterUpdate(delay);
+            if (MODE_UPDATED.equals(mode) || MODE_INSTALLED.equals(mode)) afterInstall(delay, MODE_UPDATED.equals(mode));
             else check(delay, mode, sinceElapsed);
         } finally {
             undoInterruptedRepair();
@@ -121,7 +121,14 @@ public class RescueService extends Service {
             return;
         }
         // MG4Dash is not home (SAIC home or another launcher): nothing to do
-        if (!dashIsHome(pm, stockDisabled)) { Log.i(TAG, "MG4Dash is not home: nothing to do"); return; }
+        if (!dashIsHome(pm, stockDisabled)) {
+            // Its code not loading is repaired whatever the home (a recompilation never changes the home); nothing else
+            if (MODE_CRASH.equals(mode) && !alreadyRecompiled(pm)) {
+                Log.w(TAG, "MG4Dash's code does not load, it is not home: recompiled, not relaunched");
+                recompileStopped(pm);
+            } else Log.i(TAG, "MG4Dash is not home: nothing to do");
+            return;
+        }
 
         if (healthy(sinceElapsed, 0)) { Log.i(TAG, "MG4Dash is fine"); return; }
 
@@ -151,18 +158,27 @@ public class RescueService extends Service {
     }
 
     /**
-     * MG4Dash updated itself (its updater hands over to the rescue): the install's compiled code is replaced by a clean
-     * one while MG4Dash is stopped, then MG4Dash is relaunched and watched; SAIC home if, home, it does not start.
+     * MG4Dash just installed, whatever the way: its updater handing over ([updated]), or USB / ADB (Android's
+     * PACKAGE_REPLACED). The install's compiled code is replaced by a clean one while MG4Dash is stopped, once per
+     * install (bad compiled code can also break a screen opened later, while driving, not only the start). Then, home:
+     * relaunched as the home and watched, SAIC home if it does not start; not home: relaunched as it was only after its
+     * own update (the driver was in it), otherwise left alone.
      */
-    private void afterUpdate(long delay) throws InterruptedException {
+    private void afterInstall(long delay, boolean updated) throws InterruptedException {
         pause(delay);
         PackageManager pm = getPackageManager();
-        if (!installed(pm, DASH)) { Log.i(TAG, "update: MG4Dash absent"); return; }
+        if (!installed(pm, DASH)) { Log.i(TAG, "install: MG4Dash absent"); return; }
         ComponentName stock = findStock(pm);
         boolean stockDisabled = stock != null && pm.getComponentEnabledSetting(stock) == PackageManager.COMPONENT_ENABLED_STATE_DISABLED;
         boolean home = dashIsHome(pm, stockDisabled);
-        Log.i(TAG, "update: clean recompilation of MG4Dash (home " + home + ")");
-        recompileStopped(pm);
+        if (!recompiledForThisInstall(pm)) {
+            Log.i(TAG, "install (" + (updated ? "update" : "package replaced") + "): clean recompilation of MG4Dash (home " + home + ")");
+            recompileStopped(pm);
+        } else if (!updated) {
+            Log.i(TAG, "install: already recompiled for this install, nothing to do");
+            return;
+        } else Log.i(TAG, "update: already recompiled for this install, relaunching it");
+        if (!home && !updated) { Log.i(TAG, "install: MG4Dash is not home, not relaunched"); return; }
         if (home) setPreferred(pm, DASH_HOME);
         forceStop(DASH);
         long t0 = SystemClock.elapsedRealtime();
@@ -175,9 +191,16 @@ public class RescueService extends Service {
             Log.w(TAG, "relaunch failed: " + e.getMessage());
         }
         pause(RETRY_WAIT_MS);
-        if (healthy(t0, wall0)) { Log.i(TAG, "update: MG4Dash started"); return; }
-        if (home) restoreStock(pm, stock, "MG4Dash not starting after its update");
-        else Log.w(TAG, "update: MG4Dash not starting, it is not home: left as it is");
+        if (healthy(t0, wall0)) { Log.i(TAG, "install: MG4Dash started"); return; }
+        if (home) restoreStock(pm, stock, "MG4Dash not starting after its install");
+        else Log.w(TAG, "install: MG4Dash not starting, it is not home: left as it is");
+    }
+
+    /** MG4Dash's current install already recompiled by the rescue (this boot or an earlier one). */
+    private boolean recompiledForThisInstall(PackageManager pm) {
+        String v = Settings.Global.getString(getContentResolver(), KEY_RECOMPILED);
+        String key = recompileKey(pm);
+        return v != null && v.substring(0, Math.max(0, v.indexOf(':') + 1)).equals(key.substring(0, key.indexOf(':') + 1));
     }
 
     /**
