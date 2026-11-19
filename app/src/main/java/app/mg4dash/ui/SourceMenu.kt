@@ -43,7 +43,7 @@ object SourceMenu {
         // "wrap_content" height cut the bottom of the last line.
         list.measure(View.MeasureSpec.makeMeasureSpec(popup.width, View.MeasureSpec.EXACTLY), View.MeasureSpec.UNSPECIFIED)
         popup.height = list.measuredHeight + (6 * d).toInt()
-        popup.showAsDropDown(anchor, 0, (4 * d).toInt()); Themes.track(popup)
+        Popups.fit(activity, popup); popup.showAsDropDown(anchor, 0, (4 * d).toInt()); Themes.track(popup)
     }
 
     /** Confirmation in the menu style, centred on [anchor]: [message], Cancel and [ok] (coloured). */
@@ -85,7 +85,8 @@ object SourceMenu {
         val screenW = anchor.rootView.width
         val x = (at[0] + anchor.width / 2 - popup.width / 2).coerceIn(0, (screenW - popup.width).coerceAtLeast(0))
         val y = at[1] + anchor.height / 2 - box.measuredHeight / 2
-        popup.showAtLocation(anchor.rootView, Gravity.TOP or Gravity.START, x, y); Themes.track(popup)
+        popup.height = box.measuredHeight; Popups.fit(activity, popup)
+        popup.showAtLocation(anchor.rootView, Gravity.TOP or Gravity.START, x, y.coerceIn(0, (anchor.rootView.height - popup.height).coerceAtLeast(0))); Themes.track(popup)
     }
 
     /** Generic choice menu under [anchor]; [current] is coloured. */
@@ -118,7 +119,7 @@ object SourceMenu {
         // "wrap_content" height cut the bottom of the last line.
         list.measure(View.MeasureSpec.makeMeasureSpec(popup.width, View.MeasureSpec.EXACTLY), View.MeasureSpec.UNSPECIFIED)
         popup.height = list.measuredHeight + (6 * d).toInt()
-        popup.showAsDropDown(anchor, 0, (4 * d).toInt()); Themes.track(popup)
+        Popups.fit(activity, popup); popup.showAsDropDown(anchor, 0, (4 * d).toInt()); Themes.track(popup)
     }
 
     /** Prepares a card title as a source selector. */
