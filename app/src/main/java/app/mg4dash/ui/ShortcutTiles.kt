@@ -304,7 +304,7 @@ object ShortcutTiles {
                 val cur = app.mg4dash.system.Profiles.current(activity)
                 val next = nextProfile(list.map { it.id }, cur.id)
                 if (list.size >= 3 && activity is Activity) main.post {
-                    SourceMenu.choose(activity, activity.window.decorView, list.map { it.name }, list.indexOf(cur)) { i -> app.mg4dash.system.Profiles.switchTo(activity, list[i].id, "tile") }
+                    SourceMenu.choose(activity, activity.window.decorView, list.map { it.name }, list.indexOf(cur), centred = true) { i -> app.mg4dash.system.Profiles.switchTo(activity, list[i].id, "tile") }
                 } else if (next != null) app.mg4dash.system.Profiles.switchTo(activity, next, "tile")
                 return null
             }

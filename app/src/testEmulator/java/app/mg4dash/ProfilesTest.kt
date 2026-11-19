@@ -52,7 +52,8 @@ class ProfilesTest {
         assertNull(refused)
         assertTrue(Profiles.switchTo(ctx, b!!.id, "test"))
         // B: the defaults, the shared settings as they were
-        assertTrue("B starts from the defaults: ${mine()}", mine().isEmpty())
+        // The first install's defaults (full screen, vertical bar), nothing else
+        assertEquals("B starts from the defaults", mapOf("fullscreen" to true, "vertical_dock" to true), mine())
         assertTrue(sound.all.isEmpty())
         assertEquals(beforeShared, shared())
         // B changes its own settings and a shared one
@@ -106,6 +107,34 @@ class ProfilesTest {
         // Renamed, with a phone
         assertNull(Profiles.update(ctx, Profiles.current(ctx).id, "Marc", "AA:BB:CC:DD:EE:FF"))
         assertEquals("AA:BB:CC:DD:EE:FF", Profiles.current(ctx).phone)
+    }
+
+    /** Review of step 14: a deleted profile's id is never given again, with its trips and drive memory. */
+    @Test fun deletedIdNotReused() {
+        val (b, _) = Profiles.create(ctx, "Paul", fromCurrent = true)
+        ctx.getSharedPreferences(Profiles.FILE, Context.MODE_PRIVATE).edit().putString("drive_${b!!.id}", "2,3,0").commit()
+        Profiles.delete(ctx, b.id)
+        assertNull(ctx.getSharedPreferences(Profiles.FILE, Context.MODE_PRIVATE).getString("drive_${b.id}", null))
+        val (s, _) = Profiles.create(ctx, "Sophie", fromCurrent = true)
+        assertTrue("${s!!.id} != ${b.id}", s.id != b.id)
+    }
+
+    /** The start sound's car volume being restored after a cut stays with the car, not with a profile. */
+    @Test fun volumeRestoreNotCopied() {
+        sound.edit().putBoolean("sound_trigger_enabled", true).putBoolean("volume_restore_pending", true).putInt("volume_restore_before", 12).commit()
+        val (b, _) = Profiles.create(ctx, "B", fromCurrent = false)
+        Profiles.switchTo(ctx, b!!.id, "test")
+        assertEquals("kept through the switch", true, sound.getBoolean("volume_restore_pending", false))
+        assertEquals(false, sound.contains("sound_trigger_enabled"))
+        sound.edit().putBoolean("volume_restore_pending", false).commit()
+        Profiles.switchTo(ctx, "p1", "test")
+        assertEquals("not brought back from the profile", false, sound.getBoolean("volume_restore_pending", true))
+        assertEquals(true, sound.getBoolean("sound_trigger_enabled", false))
+    }
+
+    @Test fun damagedListGivesTheMainProfileAgain() {
+        ctx.getSharedPreferences(Profiles.FILE, Context.MODE_PRIVATE).edit().putString("list", "{broken").commit()
+        assertEquals("p1", Profiles.current(ctx).id)
     }
 
     /** A switch changes the theme's signature: the open screens rebuild even with the same theme. */

@@ -90,7 +90,7 @@ object SourceMenu {
     }
 
     /** Generic choice menu under [anchor]; [current] is coloured. */
-    fun choose(activity: Activity, anchor: View, labels: List<String>, current: Int, onPick: (Int) -> Unit) {
+    fun choose(activity: Activity, anchor: View, labels: List<String>, current: Int, centred: Boolean = false, onPick: (Int) -> Unit) {
         val d = activity.resources.displayMetrics.density
         val list = LinearLayout(activity).apply {
             orientation = LinearLayout.VERTICAL
@@ -119,7 +119,10 @@ object SourceMenu {
         // "wrap_content" height cut the bottom of the last line.
         list.measure(View.MeasureSpec.makeMeasureSpec(popup.width, View.MeasureSpec.EXACTLY), View.MeasureSpec.UNSPECIFIED)
         popup.height = list.measuredHeight + (6 * d).toInt()
-        Popups.fit(activity, popup); popup.showAsDropDown(anchor, 0, (4 * d).toInt()); Themes.track(popup)
+        Popups.fit(activity, popup)
+        // In the middle of the screen (a tile of the shortcuts menu, no button to hang it under)
+        if (centred) popup.showAtLocation(anchor.rootView, Gravity.CENTER, 0, 0) else popup.showAsDropDown(anchor, 0, (4 * d).toInt())
+        Themes.track(popup)
     }
 
     /** Prepares a card title as a source selector. */

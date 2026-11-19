@@ -91,12 +91,12 @@ class LauncherApp : Application() {
         started = true
         // A profile switch cut by the car switching off: finished before anything reads the settings
         app.mg4dash.system.Profiles.resume(this)
-        app.mg4dash.system.Profiles.onSwitch { afterProfileSwitch(it) }
-        if (!BuildConfig.MOCK) app.mg4dash.system.PhoneProfile.start(this)
-        // Each trip marked with the profile driving (step 12); the first profile's left unmarked, as the trips from before
-        app.mg4dash.energy.TripLog.profile = { app.mg4dash.system.Profiles.current(this).id.takeIf { it != "p1" } }
         installCrashGuard()
         if (!BuildConfig.MOCK && app.mg4dash.system.Maintenance.on(this)) { startMaintenance(); return }
+        // Profiles, not in maintenance mode (no switch there: it would set the drive and the brightness)
+        app.mg4dash.system.Profiles.onSwitch { afterProfileSwitch(it) }
+        // Each trip marked with the profile driving (step 12); the first profile's left unmarked, as the trips from before
+        app.mg4dash.energy.TripLog.profile = { app.mg4dash.system.Profiles.current(this).id.takeIf { it != "p1" } }
         // Shortcuts menu, and MG's fog light button hidden by the SystemUI overlay (installed and switched with the
         // setting): only once unlocked, as they read the settings (unreadable from the boot screen: MG4Dash crashed in
         // a loop at start and Android showed its launcher picker)
@@ -134,6 +134,8 @@ class LauncherApp : Application() {
         // Default home lost during an update (Android's chooser at the next Home): MG4Dash set as home again
         app.mg4dash.system.HomeSwitcher.ensureHome(this, "start")
         CarBridge.start(this)
+        // The paired phone's profile: once the car link is up (its drive memory reads the car)
+        if (!BuildConfig.MOCK) app.mg4dash.system.PhoneProfile.start(this)
         app.mg4dash.phone.PhoneBookAuto.start(this)
         app.mg4dash.car.CarProps.start(this)
         app.mg4dash.energy.EnergyMonitor.start(this)
