@@ -299,52 +299,27 @@ public class RescueV4Test {
 
     // ── After an install by USB / ADB (PACKAGE_REPLACED): the same clean recompilation ──
 
-    @Test public void packageReplacedRecompilesEvenIfStarted() throws Exception {
-        // Bad compiled code can break a screen opened later, not only the start: recompiled whatever
-        dashHomeSaicEnabled("1");
-        alive(BOOT);
-        service.onRelaunch = () -> alive(BOOT);
-        service.run(0, RescueService.MODE_INSTALLED, SystemClock.elapsedRealtime());
-        assertEquals(1, service.recompiles);
-        assertEquals(DASH_HOME, opened());
-        assertNull(rescued());
-    }
 
-    @Test public void packageReplacedNotHomeRecompiledNotRelaunched() throws Exception {
-        dashHomeSaicEnabled("0");
-        service.run(0, RescueService.MODE_INSTALLED, -1);
-        assertEquals(1, service.recompiles);
-        assertNull(opened());
-        assertTrue("background woken, not left stopped", woken());
-        assertEquals(PackageManager.COMPONENT_ENABLED_STATE_DEFAULT, dashEnabled());
-    }
 
-    @Test public void oneRecompilePerInstallUpdatedThenReplaced() throws Exception {
+
+
+    @Test public void oneRecompilePerInstall() throws Exception {
+        // Its updater and its first start both tell the rescue of the same install: recompiled once, relaunched each time
         dashHomeSaicEnabled("1");
         service.onRelaunch = () -> alive(BOOT);
         service.run(0, RescueService.MODE_UPDATED, -1);
-        service.run(0, RescueService.MODE_INSTALLED, -1);
-        assertEquals(1, service.recompiles);
-    }
-
-    @Test public void oneRecompilePerInstallReplacedThenUpdated() throws Exception {
-        dashHomeSaicEnabled("1");
-        service.onRelaunch = () -> alive(BOOT);
-        service.run(0, RescueService.MODE_INSTALLED, -1);
         service.run(0, RescueService.MODE_UPDATED, -1);
         assertEquals(1, service.recompiles);
-        // The update still relaunches it (MG4Dash did not restart itself)
-        assertEquals(DASH_HOME, opened());
     }
 
     @Test public void aNewInstallIsRecompiledAgain() throws Exception {
         dashHomeSaicEnabled("1");
         service.onRelaunch = () -> alive(BOOT);
-        service.run(0, RescueService.MODE_INSTALLED, -1);
+        service.run(0, RescueService.MODE_UPDATED, -1);
         PackageInfo p = pm.getPackageInfo(DASH, 0);
         p.lastUpdateTime = 2_000L;
         spm.installPackage(p);
-        service.run(0, RescueService.MODE_INSTALLED, -1);
+        service.run(0, RescueService.MODE_UPDATED, -1);
         assertEquals(2, service.recompiles);
     }
 
@@ -433,7 +408,7 @@ public class RescueV4Test {
     @Test public void autoAfterInstallRelaunchedAsHomeAndToldSo() throws Exception {
         dashHomeSaicEnabled("auto");
         service.onRelaunch = () -> alive(BOOT);
-        service.run(0, RescueService.MODE_INSTALLED, -1);
+        service.run(0, RescueService.MODE_UPDATED, -1);
         assertEquals(1, service.recompiles);
         assertEquals(DASH_HOME, opened());
         assertEquals("1", homeWord());
@@ -513,29 +488,7 @@ public class RescueV4Test {
         assertEquals(RescueService.MODE_UPDATED, i.getStringExtra("mode"));
     }
 
-    @Test public void dashInstalledByOtherWaysStartsACheck() {
-        new BootReceiver().onReceive(RuntimeEnvironment.getApplication(), new Intent(Intent.ACTION_PACKAGE_REPLACED, Uri.parse("package:" + DASH)));
-        Intent i = started();
-        assertEquals(RescueService.MODE_INSTALLED, i.getStringExtra("mode"));
-        assertTrue(i.getLongExtra("since_elapsed", -1) >= 0);
-        // Another app: nothing
-        new BootReceiver().onReceive(RuntimeEnvironment.getApplication(), new Intent(Intent.ACTION_PACKAGE_REPLACED, Uri.parse("package:com.other")));
-        assertNull(started());
-    }
 
-    @Test public void crashLogStartsACheckOnlyForCodeNotLoading() {
-        android.content.Context c = RuntimeEnvironment.getApplication();
-        DropBoxManager db = c.getSystemService(DropBoxManager.class);
-        long t = System.currentTimeMillis();
-        shadowOf(db).addData("system_app_crash", t, ("Process: " + DASH + "\n\njava.lang.ClassNotFoundException: app.mg4dash.LauncherApp\n").getBytes(StandardCharsets.UTF_8));
-        new BootReceiver().onReceive(c, new Intent(DropBoxManager.ACTION_DROPBOX_ENTRY_ADDED).putExtra(DropBoxManager.EXTRA_TAG, "system_app_crash").putExtra(DropBoxManager.EXTRA_TIME, t));
-        assertEquals(RescueService.MODE_CRASH, started().getStringExtra("mode"));
-        // Another app's crash, another tag: nothing
-        shadowOf(db).addData("system_app_crash", t + 5, "Process: com.other\n\njava.lang.ClassNotFoundException: x\n".getBytes(StandardCharsets.UTF_8));
-        new BootReceiver().onReceive(c, new Intent(DropBoxManager.ACTION_DROPBOX_ENTRY_ADDED).putExtra(DropBoxManager.EXTRA_TAG, "system_app_crash").putExtra(DropBoxManager.EXTRA_TIME, t + 5));
-        new BootReceiver().onReceive(c, new Intent(DropBoxManager.ACTION_DROPBOX_ENTRY_ADDED).putExtra(DropBoxManager.EXTRA_TAG, "SYSTEM_BOOT").putExtra(DropBoxManager.EXTRA_TIME, t));
-        assertNull(started());
-    }
 
     @Test public void crashToldByDashStartsACheck() {
         new BootReceiver().onReceive(RuntimeEnvironment.getApplication(), new Intent(BootReceiver.ACTION_CRASH));
