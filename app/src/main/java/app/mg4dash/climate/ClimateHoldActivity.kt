@@ -22,6 +22,8 @@ import java.util.Locale
  * battery. The screen stays on; holding the button stops the mode.
  */
 class ClimateHoldActivity : AppCompatActivity() {
+    /** Closed at once in maintenance mode (its onCreate went no further). */
+    private var closedForMaintenance = false
     private lateinit var kit: Kit
     private lateinit var inside: TextView
     private lateinit var outside: TextView
@@ -66,7 +68,7 @@ class ClimateHoldActivity : AppCompatActivity() {
         return super.dispatchTouchEvent(ev)
     }
 
-    override fun onDestroy() { if (displayOff) CarBridge.setDisplay(true); super.onDestroy() }
+    override fun onDestroy() { if (closedForMaintenance) { super.onDestroy(); return }; if (displayOff) CarBridge.setDisplay(true); super.onDestroy() }
     private lateinit var main: android.view.View
     /** The warm / cold effect behind the figures, as on the climate card (#122). */
     private lateinit var fx: app.mg4dash.ui.ClimateFx.Effect
@@ -78,6 +80,7 @@ class ClimateHoldActivity : AppCompatActivity() {
         // Always dark, even in day mode: less light in the cabin, less screen wear
         Themes.apply(this, dark = true)
         super.onCreate(savedInstanceState)
+        if (app.mg4dash.system.Maintenance.closeIfOn(this)) { closedForMaintenance = true; return }
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON or WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or
             WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON)
         kit = Kit(this)
@@ -151,6 +154,7 @@ class ClimateHoldActivity : AppCompatActivity() {
     }
 
     override fun onResume() {
+        if (closedForMaintenance) { super.onResume(); return }
         super.onResume()
         Fullscreen.apply(this)
         handler.post(tick)

@@ -1,5 +1,6 @@
 package app.mg4dash.ui
 
+import app.mg4dash.system.Maintenance
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
@@ -105,13 +106,10 @@ internal object ValetBanner {
         banner.addView(button(R.string.upd_later, false) { close() }, LinearLayout.LayoutParams(-2, dp(68)).apply { leftMargin = dp(24) })
         banner.addView(button(R.string.valet_banner_go, true) {
             close()
-            val ok = HomeSwitcher.replaceStock(app)
-            Log.i(TAG, "MG4Dash back as home from the banner → $ok")
-            if (ok) try {
-                app.startActivity(Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_HOME)
-                    .setComponent(HomeSwitcher.ours(app)).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
-            } catch (e: Exception) { Log.w(TAG, "opening MG4Dash: ${e.message}") }
+            // Back as the home, and restarted in full (only its gesture ran in maintenance mode)
             ShortcutsPanel.GlobalStrip.update(app)
+            val ok = Maintenance.backToDash(app)
+            Log.i(TAG, "MG4Dash back as home from the banner → $ok")
         }, LinearLayout.LayoutParams(-2, dp(68)).apply { leftMargin = dp(20) })
 
         val width = minOf(dp(1140), c.resources.displayMetrics.widthPixels - dp(32))

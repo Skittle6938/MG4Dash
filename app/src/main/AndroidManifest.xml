@@ -157,6 +157,10 @@
             </intent-filter>
         </receiver>
 
+        <!-- Maintenance mode's only screen: the offer to become the home again -->
+        <activity android:name=".system.MaintenanceActivity" android:exported="false" android:excludeFromRecents="true"
+            android:screenOrientation="landscape" android:theme="@style/Theme.MG4Launcher" />
+
         <!-- Woken by MG4Dash Rescue after a repair that does not relaunch it (not the home): the process starts, and with it
              the shortcuts strip and the maintenance gesture; left "stopped", MG4Dash would not even get the boot (19/11) -->
         <receiver

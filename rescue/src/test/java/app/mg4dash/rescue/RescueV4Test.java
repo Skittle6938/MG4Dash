@@ -289,12 +289,15 @@ public class RescueV4Test {
         assertTrue(rescued(), rescued().startsWith("stock:"));
     }
 
-    @Test public void updatedNotHomeIsRelaunchedNotReplaced() throws Exception {
+    @Test public void updatedInMaintenanceRecompiledNotRelaunched() throws Exception {
+        // Maintenance mode (Marc, 19/11): MG4Dash does nothing but wait for its gesture: recompiled, its background
+        // woken for the gesture, no screen of it opened
         dashHomeSaicEnabled("0");
         service.run(0, RescueService.MODE_UPDATED, -1);
         assertEquals(1, service.recompiles);
         assertNull(rescued());
-        assertEquals(DASH_HOME, opened());
+        assertNull("no screen opened", opened());
+        assertTrue("gesture woken", woken());
     }
 
     // ── After an install by USB / ADB (PACKAGE_REPLACED): the same clean recompilation ──

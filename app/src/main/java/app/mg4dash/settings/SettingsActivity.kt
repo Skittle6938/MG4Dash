@@ -33,6 +33,8 @@ import java.util.Locale
  * Contains Valet / Service mode: the SAIC launcher becomes the default home again.
  */
 class SettingsActivity : AppCompatActivity() {
+    /** Closed at once in maintenance mode (its onCreate went no further). */
+    private var closedForMaintenance = false
     private val twoFingerPull by lazy { app.mg4dash.ui.TwoFingerPull(this) }
 
     override fun dispatchTouchEvent(ev: android.view.MotionEvent): Boolean =
@@ -53,6 +55,7 @@ class SettingsActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        if (app.mg4dash.system.Maintenance.closeIfOn(this)) { closedForMaintenance = true; return }
         prefs = Prefs(this)
         app.mg4dash.ui.Themes.apply(this)
         themeSig = app.mg4dash.ui.Themes.signature(this)
@@ -651,6 +654,7 @@ class SettingsActivity : AppCompatActivity() {
         getString(R.string.du_net_4g).takeIf { g }, getString(R.string.du_net_wifi).takeIf { w }).joinToString(" + ")
 
     override fun onDestroy() {
+        if (closedForMaintenance) { super.onDestroy(); return }
         dataListener?.let { DataUsage.unlisten(it) }
         super.onDestroy()
     }
@@ -666,12 +670,14 @@ class SettingsActivity : AppCompatActivity() {
     }
 
     override fun onResume() {
+        if (closedForMaintenance) { super.onResume(); return }
         super.onResume()
         Fullscreen.apply(this)
         themeHandler.postDelayed(themeWatch, 5000)
     }
 
     override fun onPause() {
+        if (closedForMaintenance) { super.onPause(); return }
         super.onPause()
         themeHandler.removeCallbacks(themeWatch)
     }
@@ -1112,6 +1118,8 @@ class SettingsActivity : AppCompatActivity() {
                 Log.i("Valet", "Maintenance mode → $ok")
                 app.mg4dash.ui.ShortcutsPanel.GlobalStrip.update(this)
                 refreshHome(); toastState(ok)
+                // From now on nothing but the three-finger gesture (19/11): restarted in its light form
+                if (ok) app.mg4dash.system.Maintenance.restartLight(this)
             }
             .setNegativeButton(R.string.cancel, null)
             .create().also { app.mg4dash.ui.Dialogs.show(it); app.mg4dash.ui.Dialogs.fix(it) }
