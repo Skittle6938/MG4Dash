@@ -30,15 +30,19 @@ object DriveMemory {
 
     fun enabled(c: Context) = Prefs(c).profilesDrive
 
-    /** Leaving [from]: the car's drive noted for it. */
+    /** Leaving [from]: the car's drive noted for it; not while the car has not said it yet (its memory kept). */
     fun note(c: Context, from: String) {
         if (!enabled(c)) return
+        if (now().mode == null) return
         c.getSharedPreferences(Profiles.FILE, Context.MODE_PRIVATE).edit().putString("drive_$from", now().encode()).apply()
     }
 
-    /** Arriving on [to]: its drive put back, what differs only. */
-    fun putBack(c: Context, to: String) {
+    private val main = android.os.Handler(android.os.Looper.getMainLooper())
+
+    /** Arriving on [to]: its drive put back, what differs only; once the car says its drive (up to a minute). */
+    fun putBack(c: Context, to: String, tries: Int = 30) {
         if (!enabled(c)) return
+        if (now().mode == null) { if (tries > 0) main.postDelayed({ if (Profiles.current(c).id == to) putBack(c, to, tries - 1) }, 2_000); return }
         val stored = Drive.decode(c.getSharedPreferences(Profiles.FILE, Context.MODE_PRIVATE).getString("drive_$to", null))
         commands(stored, now()).forEach { (what, v) ->
             Log.i("Profiles", "drive of the profile put back: $what $v")

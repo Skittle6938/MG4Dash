@@ -91,6 +91,13 @@ object Profiles {
     /** [key] follows the profile; anything else in the settings stays shared. */
     fun isPersonal(key: String): Boolean = key in PERSONAL || PERSONAL_PREFIXES.any { key.startsWith(it) }
 
+    /** A key of the start sound's file that follows the profile: its settings, not the car volume it is restoring after a cut. */
+    fun isSoundSetting(key: String): Boolean = !key.startsWith("volume_restore_")
+
+    /** What a profile started from the default settings gets: the first install's defaults (LauncherApp, defaults_v1). */
+    internal fun firstInstall(): JSONObject = JSONObject()
+        .put("fullscreen", JSONArray().put("b").put(true)).put("vertical_dock", JSONArray().put("b").put(true))
+
     /** [key] is known: personal or shared. */
     fun classified(key: String): Boolean = isPersonal(key) || key in SHARED || SHARED_PREFIXES.any { key.startsWith(it) }
 
@@ -111,7 +118,12 @@ object Profiles {
         return try {
             val a = JSONArray(raw)
             (0 until a.length()).map { a.getJSONObject(it).let { o -> Profile(o.getString("id"), o.getString("name"), o.optString("phone").ifEmpty { null }) } }
-        } catch (e: Exception) { Log.w(TAG, "list: ${e.message}"); emptyList() }
+        } catch (e: Exception) { null }?.takeIf { it.isNotEmpty() } ?: run {
+            // Damaged list: the first profile again, the settings in place kept
+            Log.w(TAG, "profiles list unreadable: the Main profile again")
+            val main = Profile("p1", c.getString(app.mg4dash.R.string.pf_main)); write(c, listOf(main)); store(c).edit().putString("current", main.id).commit()
+            listOf(main)
+        }
     }
 
     private fun write(c: Context, list: List<Profile>) {
@@ -143,9 +155,12 @@ object Profiles {
         val l = list(c)
         if (l.size >= MAX) return null to Refusal.FULL
         refusal(c, name)?.let { return null to it }
-        val id = "p" + ((l.mapNotNull { it.id.drop(1).toIntOrNull() }.maxOrNull() ?: 0) + 1)
+        // Never a deleted profile's id again (its trips and drive memory stay its own)
+        val next = maxOf(store(c).getInt("next_id", 2), (l.mapNotNull { it.id.drop(1).toIntOrNull() }.maxOrNull() ?: 0) + 1)
+        store(c).edit().putInt("next_id", next + 1).commit()
+        val id = "p$next"
         val p = Profile(id, name.trim(), phone?.takeIf { it.isNotBlank() })
-        val data = if (fromCurrent) snapshot(settings(c)) else JSONObject()
+        val data = if (fromCurrent) snapshot(settings(c)) else firstInstall()
         val snd = if (fromCurrent) snapshot(sound(c), all = true) else JSONObject()
         store(c).edit().putString("data_$id", data.toString()).putString("sound_$id", snd.toString()).commit()
         write(c, l + p)
@@ -166,7 +181,7 @@ object Profiles {
         if (l.size <= 1) return Refusal.LAST
         if (current(c).id == id) switchTo(c, l.first { it.id != id }.id, "deleted")
         write(c, list(c).filter { it.id != id })
-        store(c).edit().remove("data_$id").remove("sound_$id").commit()
+        store(c).edit().remove("data_$id").remove("sound_$id").remove("drive_$id").commit()
         after()
         return null
     }
@@ -220,7 +235,7 @@ object Profiles {
     internal fun snapshot(prefs: SharedPreferences, all: Boolean = false): JSONObject {
         val o = JSONObject()
         prefs.all.forEach { (k, v) ->
-            if (v == null || (!all && !isPersonal(k))) return@forEach
+            if (v == null || (if (all) !isSoundSetting(k) else !isPersonal(k))) return@forEach
             val t = when (v) { is Boolean -> "b"; is Int -> "i"; is Long -> "l"; is Float -> "f"; is String -> "s"; is Set<*> -> "S"; else -> return@forEach }
             o.put(k, JSONArray().put(t).put(if (v is Set<*>) JSONArray(v.map { it.toString() }) else v))
         }
@@ -230,9 +245,9 @@ object Profiles {
     /** The personal settings of [prefs] ([all]: every one) replaced by [data]. */
     internal fun put(prefs: SharedPreferences, data: JSONObject, all: Boolean) {
         val e = prefs.edit()
-        prefs.all.keys.filter { all || isPersonal(it) }.forEach { e.remove(it) }
+        prefs.all.keys.filter { if (all) isSoundSetting(it) else isPersonal(it) }.forEach { e.remove(it) }
         data.keys().forEach { k ->
-            if (!all && !isPersonal(k)) return@forEach
+            if (if (all) !isSoundSetting(k) else !isPersonal(k)) return@forEach
             val a = data.getJSONArray(k)
             when (a.getString(0)) {
                 "b" -> e.putBoolean(k, a.getBoolean(1)); "i" -> e.putInt(k, a.getInt(1)); "l" -> e.putLong(k, a.getLong(1))
