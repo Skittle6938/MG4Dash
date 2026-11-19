@@ -775,20 +775,28 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         if (connFrame != null && connFrame !== strip) { reserveConnections(connFrame!!, false); connFrame = null }
         when {
             choice == HomeSlots.CONN_NONE || (choice != null && f == null) -> (row.parent as? android.view.ViewGroup)?.removeView(row)
+            // On the weather shown: at the top of its place as on the other cards, over the weather, which keeps its
+            // whole height (Marc, 19/11: its layout leaves that room); no weather shown, no bar
             inWeather -> {
-                val card = listOf(Card.HOURLY, Card.DAILY).firstOrNull { isShown(it) } ?: if (row.parent == null) Card.HOURLY else return
-                weathers[card]?.addConnections(row)
+                val card = listOf(Card.HOURLY, Card.DAILY).firstOrNull { isShown(it) }
+                val wf = card?.let { frameOf(it) }
+                if (wf == null) (row.parent as? android.view.ViewGroup)?.removeView(row) else attachConnections(row, wf)
             }
             strip != null -> {
-                if (row.parent !== strip.box) {
-                    (row.parent as? android.view.ViewGroup)?.removeView(row)
-                    strip.box.addView(row, android.widget.FrameLayout.LayoutParams(-2, dp(connBarDp), Gravity.TOP or Gravity.CENTER_HORIZONTAL)
-                        .apply { topMargin = resources.getDimensionPixelSize(R.dimen.panel_pad) })
-                }
+                attachConnections(row, strip)
                 reserveConnections(strip, true); connFrame = strip
-                row.bringToFront()
             }
         }
+    }
+
+    /** The bar at the top of [f]'s place, centred: the same place, size and margin on every card. */
+    private fun attachConnections(row: View, f: SlotFrame) {
+        if (row.parent !== f.box) {
+            (row.parent as? android.view.ViewGroup)?.removeView(row)
+            f.box.addView(row, android.widget.FrameLayout.LayoutParams(-2, dp(connBarDp), Gravity.TOP or Gravity.CENTER_HORIZONTAL)
+                .apply { topMargin = resources.getDimensionPixelSize(R.dimen.panel_pad) })
+        }
+        row.bringToFront()
     }
 
     /** The climate card's warm / cold animation (#122), made when first needed. */

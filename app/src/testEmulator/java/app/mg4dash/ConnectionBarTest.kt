@@ -58,6 +58,65 @@ class ConnectionBarTest {
         assertEquals("bc", HomeSlots.connectionsSlot("zz", full))
     }
 
+    /**
+     * On the weather (Marc, 19/11): the bar at the top of its place exactly as on the other cards, over the weather,
+     * which keeps its whole height.
+     */
+    @Test fun weatherBarAtTheTopLikeTheOtherCards() {
+        fun home(choice: String?): Triple<android.view.View?, android.view.ViewGroup, android.view.View> {
+            prefs.raw.edit().putBoolean("vertical_dock", true).putBoolean("tutorial_shortcuts_seen", true)
+                .putInt("home_style", 0).putString("home_layout", "full")
+                .putString("slots_full", "tl=climate,trip;tc=energy,consumption;tr=media;bl=power;bc=hourly,daily;br=phone").commit()
+            HomeSlots.setConnectionsChoice(prefs, HomeSlots.Layout.FULL, choice)
+            val act = Robolectric.buildActivity(MainActivity::class.java).setup().get()
+            repeat(6) { shadowOf(Looper.getMainLooper()).idleFor(200, TimeUnit.MILLISECONDS) }
+            val row = MainActivity::class.java.getDeclaredField("connections").apply { isAccessible = true }.get(act) as android.view.View?
+            val frames = MainActivity::class.java.getDeclaredField("frames").apply { isAccessible = true }.get(act) as Map<*, *>
+            val frame = frames[choice ?: "bc"]!!
+            val box = frame.javaClass.getDeclaredField("box").apply { isAccessible = true }.get(frame) as android.view.ViewGroup
+            val panels = MainActivity::class.java.getDeclaredField("panels").apply { isAccessible = true }.get(act) as Map<*, *>
+            return Triple(row, box, panels[app.mg4dash.ui.HomeSlots.Card.HOURLY] as android.view.View)
+        }
+        val (wRow, wBox, weather) = home(null)
+        assertTrue("in the weather's place", wRow?.parent === wBox)
+        val wTop = wRow!!.top; val wH = wRow.height
+        val wCentre = wRow.left + wRow.width / 2 - wBox.width / 2
+        val weatherPad = weather.paddingTop; val weatherH = weather.height
+        val (cRow, cBox, _) = home("tl")
+        assertTrue(cRow!!.parent === cBox)
+        assertEquals("same top as on the climate", cRow.top, wTop)
+        assertEquals("same height", cRow.height, wH)
+        assertEquals("centred the same way", cRow.left + cRow.width / 2 - cBox.width / 2, wCentre)
+        // The weather made no room: same padding and height as with the bar elsewhere
+        prefs.raw.edit().putBoolean("connection_icons", false).commit()
+        val (_, _, plain) = home(null)
+        assertEquals(plain.paddingTop, weatherPad)
+        assertEquals(plain.height, weatherH)
+        prefs.raw.edit().remove("connection_icons").commit()
+        HomeSlots.setConnectionsChoice(prefs, HomeSlots.Layout.FULL, null)
+    }
+
+    /** The weather with and without the bar (Marc, 19/11): same widget, the bar over its top. */
+    @org.junit.experimental.categories.Category(Screenshot::class)
+    @Test fun weatherWithAndWithoutTheBar() {
+        // Bar on the weather, bar off, bar on the card beside it (to compare where it sits)
+        for ((name, on, place) in listOf(Triple("on", true, null), Triple("off", false, null), Triple("beside", true, "bl"))) {
+            prefs.raw.edit().putBoolean("vertical_dock", true).putBoolean("tutorial_shortcuts_seen", true).putInt("theme_mode", 1)
+                .putInt("home_style", 0).putString("home_layout", "full")
+                .putString("slots_full", "tl=climate,trip;tc=energy,consumption;tr=media;bl=power;bc=hourly,daily;br=phone")
+                .putBoolean("connection_icons", on).commit()
+            HomeSlots.setConnectionsChoice(prefs, HomeSlots.Layout.FULL, place)
+            val act = Robolectric.buildActivity(MainActivity::class.java).setup().get()
+            repeat(6) { shadowOf(Looper.getMainLooper()).idleFor(200, TimeUnit.MILLISECONDS) }
+            val root = act.window.decorView
+            val bmp = Bitmap.createBitmap(root.width, root.height, Bitmap.Config.ARGB_8888)
+            root.draw(Canvas(bmp))
+            File(File("build/screenshots").apply { mkdirs() }, "weather_bar_$name.png").outputStream().use { bmp.compress(Bitmap.CompressFormat.PNG, 100, it) }
+        }
+        prefs.raw.edit().remove("connection_icons").remove("slots_full").commit()
+        HomeSlots.setConnectionsChoice(prefs, HomeSlots.Layout.FULL, null)
+    }
+
     private fun shoot(name: String, edit: Boolean) {
         prefs.raw.edit().putBoolean("vertical_dock", true).putBoolean("tutorial_shortcuts_seen", true).putInt("theme_mode", 1)
             .putInt("home_style", 0).putString("home_layout", "full").commit()
