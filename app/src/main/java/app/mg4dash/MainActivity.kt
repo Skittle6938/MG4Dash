@@ -59,8 +59,12 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
     private var simple: SimpleHome? = null
     private val handler = Handler(Looper.getMainLooper())
 
+    /** Closed at once in maintenance mode (19/11): nothing of home runs then. */
+    private var closedForMaintenance = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        if (!BuildConfig.MOCK && app.mg4dash.system.Maintenance.closeIfOn(this)) { closedForMaintenance = true; return }
         // MG4Dash Rescue's sign of life: once this screen is drawn, the code really loads
         app.mg4dash.system.Rescue.aliveAtFirstFrame(this)
         prefs = Prefs(this)
@@ -153,6 +157,7 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
+        if (closedForMaintenance) { super.onSaveInstanceState(outState); return }
         super.onSaveInstanceState(outState)
         outState.putBoolean(KEY_MAP_FULL, hiddenForMap != null)
         if (isChangingConfigurations && hiddenForMap != null) mapFullOnRecreate = true
@@ -167,6 +172,7 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
     }
 
     override fun onDestroy() {
+        if (closedForMaintenance) { super.onDestroy(); return }
         try { unregisterReceiver(callChanged) } catch (_: Exception) {}
         if (isChangingConfigurations && hiddenForMap != null) mapFullOnRecreate = true
         super.onDestroy()
@@ -842,6 +848,7 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
 
     /** Called by the dock when the clock / Wi-Fi slot changes. */
     override fun onResume() {
+        if (closedForMaintenance) { super.onResume(); return }
         super.onResume()
         CarBridge.setForeground(true)
         // As the stock launcher: back in front (Home), the SAIC phone's call shrinks to its floating card (#93)
@@ -868,18 +875,21 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
     }
 
     override fun onConfigurationChanged(newConfig: android.content.res.Configuration) {
+        if (closedForMaintenance) { super.onConfigurationChanged(newConfig); return }
         super.onConfigurationChanged(newConfig)
         // Car day / night change (auto mode): redraw with the other theme
         if (app.mg4dash.ui.Themes.signature(this) != themeSig) { app.mg4dash.ui.Themes.publish(this); app.mg4dash.ui.Themes.recreateSmooth(this) }
     }
 
     override fun onWindowFocusChanged(hasFocus: Boolean) {
+        if (closedForMaintenance) { super.onWindowFocusChanged(hasFocus); return }
         super.onWindowFocusChanged(hasFocus)
         if (hasFocus) Fullscreen.focusBack(this)
     }
 
 
     override fun onPause() {
+        if (closedForMaintenance) { super.onPause(); return }
         super.onPause()
         setAwake(null)
         app.mg4dash.ui.DataAlert.detach(this)
@@ -893,6 +903,7 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
 
     /** Home no longer in sight (a page, another app): the keyboard over it for the web app's page goes too. */
     override fun onStop() {
+        if (closedForMaintenance) { super.onStop(); return }
         // The detached window rests only when home is out of sight: home pauses as soon as its page is touched
         floatWeb?.rest()
         webCard?.closeKeyboard()
@@ -901,6 +912,7 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
 
     /** HOME pressed while already home: nothing is recreated, the map goes back to its widget size. */
     override fun onNewIntent(intent: Intent?) {
+        if (closedForMaintenance) { super.onNewIntent(intent); return }
         super.onNewIntent(intent)
         homeBackAsked = false   // opened again (MG4Link's shortcut, adb…): offered again in maintenance mode
         // Home key while home is shown: the shortcuts menu closes too (14/11)
@@ -2474,7 +2486,7 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
             .setTitle(R.string.st_valet)
             .setMessage(R.string.valet_back_msg)
             .setPositiveButton(R.string.valet_back_btn) { _, _ ->
-                val ok = HomeSwitcher.replaceStock(this)
+                val ok = app.mg4dash.system.Maintenance.backToDash(this)
                 Log.i("Valet", "replacing SAIC home from the offer → $ok")
                 app.mg4dash.ui.ShortcutsPanel.GlobalStrip.update(this)
                 app.mg4dash.ui.Toasts.show(this, getString(if (ok) R.string.st_home_changed else R.string.st_failed))

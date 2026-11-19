@@ -35,18 +35,22 @@ abstract class PageActivity : AppCompatActivity() {
         }
     }
 
-    override fun onPause() {
-        super.onPause()
-        body.removeCallbacks(themeWatch)
-    }
-
     abstract val pageTitle: String
     abstract val page: Dock.Page
     abstract fun buildBody()
     abstract fun render(s: VehicleState)
 
+    /** Closed at once in maintenance mode (its onCreate went no further). */
+    protected var closedForMaintenance = false
+
+    override fun onPause() {
+        super.onPause()
+        if (!closedForMaintenance) body.removeCallbacks(themeWatch)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        if (app.mg4dash.system.Maintenance.closeIfOn(this)) { closedForMaintenance = true; return }
         Themes.apply(this)
         themeSig = Themes.signature(this)
         kit = Kit(this)
@@ -80,6 +84,7 @@ abstract class PageActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
+        if (closedForMaintenance) return
         if (Themes.signature(this) != themeSig || Dock.vertical(this) != builtVertical) { Themes.recreateSmooth(this); return }
         CarBridge.setForeground(true)
         body.postDelayed(themeWatch, 5000)
@@ -87,6 +92,7 @@ abstract class PageActivity : AppCompatActivity() {
     }
 
     override fun onWindowFocusChanged(hasFocus: Boolean) {
+        if (closedForMaintenance) { super.onWindowFocusChanged(hasFocus); return }
         super.onWindowFocusChanged(hasFocus)
         if (hasFocus) Fullscreen.focusBack(this)
     }

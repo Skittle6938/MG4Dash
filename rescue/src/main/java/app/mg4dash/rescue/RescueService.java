@@ -187,7 +187,9 @@ public class RescueService extends Service {
             Log.i(TAG, "install: already recompiled for this install, nothing to do");
             return;
         } else Log.i(TAG, "update: already recompiled for this install, relaunching it");
-        if (!home && !updated) { Log.i(TAG, "install: MG4Dash is not home, not relaunched"); wakeDash(); return; }
+        // Not the home (maintenance mode, 19/11: MG4Dash then does nothing but wait for its three-finger gesture):
+        // not relaunched, only its background woken so that the gesture works
+        if (!home) { Log.i(TAG, "install: MG4Dash is not home, not relaunched, its gesture woken"); wakeDash(); return; }
         if (home) setPreferred(pm, DASH_HOME);
         forceStop(DASH);
         long t0 = SystemClock.elapsedRealtime();

@@ -76,7 +76,7 @@ object FogOverlay {
     }
 
     /** MG's fog light button hidden: the shortcuts menu on and an overlay that fits this SystemUI. */
-    fun hides(context: Context): Boolean = Prefs(context).shortcutsMenu && fits(context)
+    fun hides(context: Context): Boolean = Prefs(context).shortcutsMenu && !Prefs(context).valetMode && fits(context)
 
     /** At launch (off the main thread): installs the overlay if needed, then follows the setting. */
     fun start(context: Context) {

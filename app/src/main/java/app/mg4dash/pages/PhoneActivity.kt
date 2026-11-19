@@ -263,6 +263,7 @@ class PhoneActivity : PageActivity() {
 
     override fun onResume() {
         super.onResume()
+        if (closedForMaintenance) return
         load()
         contentResolver.registerContentObserver(ContactsContract.AUTHORITY_URI, true, observer)
         contentResolver.registerContentObserver(CallLog.Calls.CONTENT_URI, true, observer)
@@ -270,6 +271,7 @@ class PhoneActivity : PageActivity() {
 
     override fun onPause() {
         super.onPause()
+        if (closedForMaintenance) return
         contentResolver.unregisterContentObserver(observer)
     }
 

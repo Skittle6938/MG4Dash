@@ -152,6 +152,7 @@ class SoundActivity : PageActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
+        if (closedForMaintenance) return
         io.shutdown()
     }
 
@@ -161,6 +162,7 @@ class SoundActivity : PageActivity() {
 
     override fun onResume() {
         super.onResume()
+        if (closedForMaintenance) return
         if (BuildConfig.MOCK) { eq.spectrum = FloatArray(BARS) { k -> (0.75f - 0.5f * k / BARS + 0.2f * kotlin.math.sin(k * 0.9f)).coerceIn(0.05f, 1f) }; return }
         try {
             val v = android.media.audiofx.Visualizer(0)
@@ -180,6 +182,7 @@ class SoundActivity : PageActivity() {
 
     override fun onPause() {
         super.onPause()
+        if (closedForMaintenance) return
         try { visualizer?.enabled = false; visualizer?.release() } catch (_: Throwable) {}
         visualizer = null
     }

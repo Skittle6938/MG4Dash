@@ -244,6 +244,7 @@ class ClimateActivity : PageActivity() {
 
     override fun onPause() {
         super.onPause()
+        if (closedForMaintenance) return
         handler.removeCallbacksAndMessages(null)
     }
 }

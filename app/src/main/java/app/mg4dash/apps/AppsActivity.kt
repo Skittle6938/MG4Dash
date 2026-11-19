@@ -23,12 +23,15 @@ import app.mg4dash.system.Log
  * (#70, #71): a cross closes the app, "Close all" closes all those that do not hold the car.
  */
 class AppsActivity : AppCompatActivity() {
+    /** Closed at once in maintenance mode (its onCreate went no further). */
+    private var closedForMaintenance = false
 
     private lateinit var openSection: LinearLayout
     private lateinit var openRow: LinearLayout
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        if (app.mg4dash.system.Maintenance.closeIfOn(this)) { closedForMaintenance = true; return }
         app.mg4dash.ui.Themes.apply(this)
         val pm = packageManager
         val apps: List<ResolveInfo> = pm.queryIntentActivities(
@@ -90,6 +93,7 @@ class AppsActivity : AppCompatActivity() {
     }
 
     override fun onResume() {
+        if (closedForMaintenance) { super.onResume(); return }
         super.onResume()
         app.mg4dash.ui.Fullscreen.apply(this)
         if (::openRow.isInitialized) renderOpen()

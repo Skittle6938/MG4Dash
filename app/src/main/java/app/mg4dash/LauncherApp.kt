@@ -53,6 +53,23 @@ class LauncherApp : Application() {
     }
 
     /**
+     * Maintenance mode (19/11): nothing but the three-finger gesture and its "Back to MG4Dash" banner, what that
+     * banner needs (SAIC home known), the fog button's overlay taken off, and the rescue app kept up to date. Neither the
+     * car link, the media and radio, the guidance, the location, the speed cameras, the weather, the Wi-Fi first, the
+     * star key, the V2L, the brightness, the SAIC launcher link nor the boot's adb.
+     */
+    private fun startMaintenance() {
+        Log.i("App", "start ${BuildConfig.VERSION_NAME} in maintenance mode: the three-finger gesture only")
+        app.mg4dash.system.HomeSwitcher.init(this)
+        app.mg4dash.system.HomeSwitcher.ensureHome(this, "start, maintenance")
+        app.mg4dash.system.FogOverlay.start(this)
+        app.mg4dash.ui.ShortcutsPanel.init(this)
+        app.mg4dash.ui.ShortcutsPanel.GlobalStrip.update(this)
+        app.mg4dash.system.Rescue.start(this)
+        app.mg4dash.system.Rescue.alive(this)
+    }
+
+    /**
      * Safety net trials (build with -PcrashTest, never published): the crash of code that does not load, as on 19/11;
      * "once" until MG4Dash Rescue has recompiled this install, "always" every time.
      */
@@ -73,6 +90,7 @@ class LauncherApp : Application() {
         if (started) return
         started = true
         installCrashGuard()
+        if (!BuildConfig.MOCK && app.mg4dash.system.Maintenance.on(this)) { startMaintenance(); return }
         // Shortcuts menu, and MG's fog light button hidden by the SystemUI overlay (installed and switched with the
         // setting): only once unlocked, as they read the settings (unreadable from the boot screen: MG4Dash crashed in
         // a loop at start and Android showed its launcher picker)
