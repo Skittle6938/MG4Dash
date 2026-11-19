@@ -72,6 +72,40 @@ class UninstallAndClimateTest {
         assertEquals(Uninstaller.Removal.NOTHING, Uninstaller.removalOf(ApplicationInfo.FLAG_SYSTEM))
     }
 
+    @Test fun dataKeptOnlyWhenTheCarsOwnVersionIsNotOlder() {
+        // Android 9: an update's data stays unless removing it is a downgrade; a plain uninstall wipes it
+        val revert = Uninstaller.Removal.REVERT_UPDATE
+        assertTrue("MG4Radio on SWI69, both 2", Uninstaller.keepsData(revert, 2L, 2L))
+        assertFalse("MG4Link 2211 over the car's 1", Uninstaller.keepsData(revert, 1L, 2211L))
+        assertFalse("car's own version unknown", Uninstaller.keepsData(revert, null, 2L))
+        assertFalse("MG4Radio on SWI68, a plain app", Uninstaller.keepsData(Uninstaller.Removal.UNINSTALL, null, 2L))
+    }
+
+    @Test fun removedRadioForgotten() {
+        // Its version stayed in Settings after the uninstall (car, 19/11)
+        val ctx = RuntimeEnvironment.getApplication()
+        val p = app.mg4dash.system.Prefs(ctx)
+        p.raw.edit().putString("radio_dash_version", "1.6.3").putString("radio_dash_pending", "1.6.3").commit()
+        Uninstaller.forget(ctx, "com.allgo.app.androidauto")
+        assertEquals("1.6.3", p.raw.getString("radio_dash_version", null))
+        Uninstaller.forget(ctx, app.mg4dash.system.RadioDashUpdater.PKG)
+        assertNull(p.raw.getString("radio_dash_version", null))
+        assertNull(p.raw.getString("radio_dash_pending", null))
+        assertNull(app.mg4dash.system.RadioDashUpdater.installedVersion(ctx))
+    }
+
+    @Test fun uninstallTextSaysWhatBecomesOfTheData() {
+        val ctx = RuntimeEnvironment.getApplication()
+        ctx.getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE).edit().putBoolean("tutorial_shortcuts_seen", true).commit()
+        val act = org.robolectric.Robolectric.buildActivity(MainActivity::class.java).setup().get()
+        val radio = app.mg4dash.ui.UninstallWindow.App("MG4Radio", "x", true, "1.6.3", R.string.un_radio_what, true)
+        val link = app.mg4dash.ui.UninstallWindow.App("MG4Link", "y", true, "2.2.7", R.string.un_link_what, false)
+        val dash = app.mg4dash.ui.UninstallWindow.App("MG4Dash", "z", true, "1.7.4", R.string.un_dash_what)
+        assertTrue(app.mg4dash.ui.UninstallWindow.whatOf(act, radio).endsWith(ctx.getString(R.string.un_data_kept)))
+        assertTrue(app.mg4dash.ui.UninstallWindow.whatOf(act, link).endsWith(ctx.getString(R.string.un_data_lost)))
+        assertEquals(ctx.getString(R.string.un_dash_what), app.mg4dash.ui.UninstallWindow.whatOf(act, dash))
+    }
+
     @Test fun keepClimateSetPointWithinTheCarsLimits() {
         // LO, the numbers, HI: each slot maps back to itself
         val slots = CarBridge.tempSlots

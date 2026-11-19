@@ -402,7 +402,7 @@ class SettingsActivity : AppCompatActivity() {
         toggle(upd, R.string.st_update_auto, R.string.st_update_auto_desc, { prefs.updateAuto }) { prefs.updateAuto = it }
         toggle(upd, R.string.st_update_beta, null, { prefs.updateBeta }) { prefs.updateBeta = it }
         // Uninstalling MG4Dash, MG4Radio or MG4Link (19/11, #111): one button, its window explains each one
-        row(upd, button(getString(R.string.un_button)) { app.mg4dash.ui.UninstallWindow.show(this) }.apply { setTextColor(color(R.color.accent_danger)) })
+        row(upd, button(getString(R.string.un_button)) { app.mg4dash.ui.UninstallWindow.show(this) { if (!isFinishing && !isDestroyed) recreate() } }.apply { setTextColor(color(R.color.accent_danger)) })
 
         // ── Weather ──
         val weather = panel(netL, getString(R.string.title_weather))
