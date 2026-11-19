@@ -1113,4 +1113,21 @@
     <string name="nav_on_arrival">bij aankomst</string>
     <string name="nav_arrival_at">aankomst %1$s</string>
     <string name="nav_then">daarna</string>
+    <string name="un_button">MG4Dash, MG4Radio of MG4Link verwijderen…</string>
+    <string name="un_title">Verwijderen</string>
+    <string name="un_do">Verwijderen</string>
+    <string name="un_radio_what">Zet de originele radio van de auto terug (verder verandert er niets). Werkt na een herstart van het centrale scherm (Home ongeveer 20 s ingedrukt houden).</string>
+    <string name="un_link_what">Verwijdert MG4Link en de instellingen: de originele Android Auto van de auto komt terug.</string>
+    <string name="un_dash_what">Zet het SAIC-startscherm terug en verwijdert daarna MG4Dash, de reddingsapp en alle instellingen. Om het opnieuw te installeren is de volledige installatie nodig.</string>
+    <string name="un_confirm_title">%1$s verwijderen?</string>
+    <string name="un_dash_body">Het SAIC-startscherm wordt weer het startscherm, daarna worden MG4Dash en de reddingsapp verwijderd met alle instellingen (kaarten, snelkoppelingen, verbruiksgeschiedenis).</string>
+    <string name="un_dash_note">MG4Radio en MG4Link blijven geïnstalleerd: verwijder ze eerst om alles te verwijderen. Het scherm herstart aan het eind.</string>
+    <string name="un_hold">Ingedrukt houden om te verwijderen</string>
+    <string name="un_done">%1$s verwijderd</string>
+    <string name="un_failed">Verwijderen mislukt (%1$s)</string>
+    <string name="un_working">Bezig met verwijderen…</string>
+    <string name="dm_temp">Temperatuur</string>
+    <string name="dm_fan">Ventilatie</string>
+    <string name="dm_note_now_set">De klimaatregeling start meteen op %1$s, ventilatie %2$d, daarna vergrendelen de deuren na de wachttijd. Stopt onder 20 %% accu, bij ontgrendelen of als de auto rijdt.</string>
+    <string name="dm_note_at_set">De auto blijft aan (klimaat uit, ongeveer 0,2 kW) en vergrendeld tot de eerste cyclus en start dan de klimaatregeling op %1$s, ventilatie %2$d. Hij schakelt uit na de laatste cyclus of onder 20 %% accu, en alles stopt bij ontgrendelen.</string>
 </resources>

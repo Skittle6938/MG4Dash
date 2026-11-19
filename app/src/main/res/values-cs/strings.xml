@@ -1111,4 +1111,21 @@
     <string name="nav_on_arrival">při příjezdu</string>
     <string name="nav_arrival_at">příjezd %1$s</string>
     <string name="nav_then">pak</string>
+    <string name="un_button">Odinstalovat MG4Dash, MG4Radio nebo MG4Link…</string>
+    <string name="un_title">Odinstalovat</string>
+    <string name="un_do">Odinstalovat</string>
+    <string name="un_radio_what">Vrátí původní rádio vozu (nic jiného se nemění). Projeví se po restartu centrální obrazovky (dlouhý stisk Domů asi 20 s).</string>
+    <string name="un_link_what">Odstraní MG4Link a jeho nastavení: vrátí se původní Android Auto vozu.</string>
+    <string name="un_dash_what">Vrátí domovskou obrazovku SAIC a poté odstraní MG4Dash, jeho záchrannou aplikaci a všechna nastavení. Pro novou instalaci bude nutná celá instalace.</string>
+    <string name="un_confirm_title">Odinstalovat %1$s?</string>
+    <string name="un_dash_body">Domovská obrazovka SAIC se znovu stane domovskou obrazovkou a poté se odstraní MG4Dash a jeho záchranná aplikace se všemi nastaveními (karty, zkratky, historie spotřeby).</string>
+    <string name="un_dash_note">MG4Radio a MG4Link zůstanou nainstalované: chcete-li odstranit vše, odinstalujte je nejdříve. Obrazovka se na konci restartuje.</string>
+    <string name="un_hold">Podržte pro odinstalaci</string>
+    <string name="un_done">%1$s odinstalován</string>
+    <string name="un_failed">Odinstalace selhala (%1$s)</string>
+    <string name="un_working">Odinstalace…</string>
+    <string name="dm_temp">Teplota</string>
+    <string name="dm_fan">Ventilátor</string>
+    <string name="dm_note_now_set">Klimatizace se spustí hned na %1$s, ventilátor %2$d, poté se dveře po prodlevě zamknou. Zastaví se pod 20 %% baterie, při odemčení dveří nebo když se vůz rozjede.</string>
+    <string name="dm_note_at_set">Vůz zůstane zapnutý (klimatizace vypnutá, asi 0,2 kW) a zamčený až do prvního cyklu, pak spustí klimatizaci na %1$s, ventilátor %2$d. Vypne se po posledním cyklu nebo pod 20 %% baterie a vše se zastaví při odemčení dveří.</string>
 </resources>

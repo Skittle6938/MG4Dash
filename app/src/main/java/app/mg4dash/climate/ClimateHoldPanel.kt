@@ -11,6 +11,8 @@ import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
+import app.mg4dash.car.CarBridge
+import app.mg4dash.car.VehicleState
 import app.mg4dash.R
 import app.mg4dash.system.Prefs
 import app.mg4dash.ui.Kit
@@ -131,7 +133,24 @@ object ClimateHoldPanel {
             dur = (dur + d * 5).coerceIn(5, 60); prefs.climateHoldRunMin = dur; v.text = mins(dur) }
         val gapRow = stepper(kit, a.getString(R.string.dm_gap), mins(gap)) { d, v ->
             gap = (gap + d * 5).coerceIn(5, 240); prefs.climateHoldGapMin = gap; v.text = mins(gap) }
-        val note = kit.text("", 18f, R.color.text_title).apply { maxLines = 4; setLineSpacing(0f, 1.1f) }
+        // Set point and fan (#26): the climate's own to start with, within the car's limits, applied as it starts
+        val car = CarBridge.state.value
+        var tSlot = CarBridge.slotOf(car.driverTemp?.takeIf { it > 0f } ?: 21f)
+        var fan = (car.fanSpeed ?: 3).coerceIn(VehicleState.FAN_MIN, VehicleState.FAN_MAX)
+        val note = kit.text("", 18f, R.color.text_title).apply { maxLines = 4; setLineSpacing(0f, 1.05f) }
+        lateinit var paintNote: () -> Unit
+        fun temp() = CarBridge.tempForSlot(tSlot, CarBridge.tempSlots)
+        fun tempColor(v: TextView) {
+            val out = car.outsideTemp?.takeIf { it > -60f && it < 70f }
+            v.setTextColor(kit.color(when { out == null -> R.color.text_value; temp() > out -> R.color.accent_heat; else -> R.color.accent_cold }))
+        }
+        fun save() { prefs.climateHoldTemp = temp(); prefs.climateHoldFan = fan }
+        save()
+        val tempRow = stepper(kit, a.getString(R.string.dm_temp), VehicleState.tempLabel(temp())) { d, v ->
+            tSlot = (tSlot + d).coerceIn(0, CarBridge.tempSlots - 1); save(); v.text = VehicleState.tempLabel(temp()); tempColor(v); paintNote() }
+        (tempRow.getChildAt(2) as? TextView)?.let { tempColor(it) }
+        val fanRow = stepper(kit, a.getString(R.string.dm_fan), "$fan") { d, v ->
+            fan = (fan + d).coerceIn(VehicleState.FAN_MIN, VehicleState.FAN_MAX); save(); v.text = "$fan"; paintNote() }
         // Screen off once locked: a single YES / NO button, like the options in the settings
         val offRow = kit.row()
         offRow.addView(kit.column().apply {
@@ -146,14 +165,15 @@ object ClimateHoldPanel {
         offBtn = kit.toggleTile("") { prefs.climateHoldScreenOff = !prefs.climateHoldScreenOff; paintOff() }.apply { textSize = 20f }
         paintOff()
         offRow.addView(offBtn, kit.lp(kit.dp(130), kit.dp(52)))
-        listOf(lockRow, durRow, runsRow, gapRow, offRow).forEach { right.addView(it, kit.lp(-1, -2, b = 8)) }
+        listOf(tempRow, fanRow, lockRow, durRow, runsRow, gapRow, offRow).forEach { right.addView(it, kit.lp(-1, -2, b = 4)) }
         right.addView(note, kit.lp(-1, -2, t = 4))
 
+        paintNote = { note.text = a.getString(if (scheduled) R.string.dm_note_at_set else R.string.dm_note_now_set, VehicleState.tempLabel(temp()), fan) }
         fun paintAll() {
             paintMode(if (scheduled) 1 else 0)
             left.removeAllViews(); left.addView(if (scheduled) timeBox else maxBox, kit.lp(-1, -2))
             listOf(durRow, runsRow, gapRow).forEach { it.visibility = if (scheduled) View.VISIBLE else View.GONE }
-            note.text = a.getString(if (scheduled) R.string.dm_note_at else R.string.dm_note_now)
+            paintNote()
         }
         // The selector calls onPick back: the chips are wired once the view is built
         for (i in 0 until modeRow.childCount) modeRow.getChildAt(i).setOnClickListener {

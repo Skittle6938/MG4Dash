@@ -187,6 +187,16 @@ object HomeSwitcher {
         return ok
     }
 
+    /**
+     * Before MG4Dash uninstalls itself: SAIC home enabled again and the preferred HOME, without opening it nor any
+     * maintenance mode; true only when HOME really resolves to it.
+     */
+    fun stockHomeBack(context: Context): Boolean = try {
+        context.packageManager.setComponentEnabledSetting(STOCK, PackageManager.COMPONENT_ENABLED_STATE_DEFAULT, PackageManager.DONT_KILL_APP)
+        setPreferred(context, STOCK)
+        (currentHome(context) == STOCK).also { Log.i(TAG, "SAIC home back before the uninstall → $it") }
+    } catch (e: Exception) { Log.e(TAG, "SAIC home back: ${e.message}"); false }
+
     @Suppress("DEPRECATION")
     private fun setPreferred(context: Context, target: ComponentName) {
         val pm = context.packageManager

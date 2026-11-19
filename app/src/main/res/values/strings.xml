@@ -1113,4 +1113,21 @@
     <string name="nav_on_arrival">on arrival</string>
     <string name="nav_arrival_at">arrival %1$s</string>
     <string name="nav_then">then</string>
+    <string name="un_button">Uninstall MG4Dash, MG4Radio or MG4Link…</string>
+    <string name="un_title">Uninstall</string>
+    <string name="un_do">Uninstall</string>
+    <string name="un_radio_what">Puts the car\'s own radio back (nothing else changes). It applies after a restart of the central screen (long press on Home for about 20 s).</string>
+    <string name="un_link_what">Removes MG4Link and its settings: the car\'s own Android Auto comes back.</string>
+    <string name="un_dash_what">Puts the SAIC home back, then removes MG4Dash, its rescue app and all its settings. To reinstall it, the full installation has to be done again.</string>
+    <string name="un_confirm_title">Uninstall %1$s?</string>
+    <string name="un_dash_body">The SAIC home becomes the home screen again, then MG4Dash and its rescue app are removed, with all their settings (cards, shortcuts, consumption history).</string>
+    <string name="un_dash_note">MG4Radio and MG4Link stay installed: uninstall them first to remove everything. The screen restarts at the end.</string>
+    <string name="un_hold">Hold to uninstall</string>
+    <string name="un_done">%1$s uninstalled</string>
+    <string name="un_failed">Uninstall failed (%1$s)</string>
+    <string name="un_working">Uninstalling…</string>
+    <string name="dm_temp">Temperature</string>
+    <string name="dm_fan">Fan</string>
+    <string name="dm_note_now_set">The climate starts now at %1$s, fan %2$d, then the doors lock after the delay. Stops below 20 %% battery, when the doors are unlocked or if the car moves.</string>
+    <string name="dm_note_at_set">The car stays on (climate off, about 0.2 kW) and locked until the first run, then runs the climate at %1$s, fan %2$d. It switches off after the last run, below 20 %% battery, and stops when the doors are unlocked.</string>
 </resources>

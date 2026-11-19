@@ -1113,4 +1113,21 @@
     <string name="nav_on_arrival">bei Ankunft</string>
     <string name="nav_arrival_at">Ankunft %1$s</string>
     <string name="nav_then">dann</string>
+    <string name="un_button">MG4Dash, MG4Radio oder MG4Link deinstallieren…</string>
+    <string name="un_title">Deinstallieren</string>
+    <string name="un_do">Deinstallieren</string>
+    <string name="un_radio_what">Stellt das originale Radio des Autos wieder her (sonst ändert sich nichts). Wirksam nach einem Neustart des Zentralbildschirms (Home etwa 20 s gedrückt halten).</string>
+    <string name="un_link_what">Entfernt MG4Link und seine Einstellungen: das originale Android Auto des Autos kehrt zurück.</string>
+    <string name="un_dash_what">Stellt den SAIC-Startbildschirm wieder her und entfernt dann MG4Dash, seine Rettungs-App und alle Einstellungen. Zur Neuinstallation ist die komplette Installation nötig.</string>
+    <string name="un_confirm_title">%1$s deinstallieren?</string>
+    <string name="un_dash_body">Der SAIC-Startbildschirm wird wieder zum Startbildschirm, dann werden MG4Dash und seine Rettungs-App mit allen Einstellungen entfernt (Karten, Verknüpfungen, Verbrauchsverlauf).</string>
+    <string name="un_dash_note">MG4Radio und MG4Link bleiben installiert: zuerst deinstallieren, um alles zu entfernen. Der Bildschirm startet am Ende neu.</string>
+    <string name="un_hold">Zum Deinstallieren halten</string>
+    <string name="un_done">%1$s deinstalliert</string>
+    <string name="un_failed">Deinstallation fehlgeschlagen (%1$s)</string>
+    <string name="un_working">Wird deinstalliert…</string>
+    <string name="dm_temp">Temperatur</string>
+    <string name="dm_fan">Gebläse</string>
+    <string name="dm_note_now_set">Die Klimaanlage startet sofort mit %1$s, Gebläse %2$d, dann verriegeln die Türen nach der Wartezeit. Stopp unter 20 %% Akku, beim Entriegeln oder wenn das Auto fährt.</string>
+    <string name="dm_note_at_set">Das Auto bleibt eingeschaltet (Klima aus, etwa 0,2 kW) und verriegelt bis zum ersten Zyklus und startet dann die Klimaanlage mit %1$s, Gebläse %2$d. Es schaltet nach dem letzten Zyklus oder unter 20 %% Akku ab, alles stoppt beim Entriegeln.</string>
 </resources>
