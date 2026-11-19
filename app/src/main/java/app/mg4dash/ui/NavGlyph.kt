@@ -182,34 +182,42 @@ object NavGlyph {
         return -r.exactCenterX() * k to -r.exactCenterY() * k
     }
 
-    /** Draws [shape] in [box] in [color]; everything stays within [box] minus [margin]. */
+    /**
+     * Draws [shape] in [box] in [color]; everything stays within [box] minus [margin]. Every path, width and size is
+     * worked out in the view's own pixels: the canvas is never scaled. On the car (Android 9, hardware drawing) a path
+     * drawn in the drawing's small units on a canvas scaled about 80 times is rasterised at its small size and then
+     * stretched, which showed a blurred blob instead of the arrow (Marc, 19/11), and the roundabout's legs and number
+     * did not show; the ring alone, a plain circle, came out right.
+     */
     fun draw(c: Canvas, box: RectF, shape: Shape, color: Int, margin: Float = box.width() * 0.04f) {
         val ops = ops(shape)
         val f = fit(box, layoutBounds(shape, ops), margin)
-        c.save()
-        c.translate(f.ox, f.oy)
-        c.scale(f.scale, f.scale)
+        val k = f.scale
+        val m = android.graphics.Matrix().apply { setScale(k, k); postTranslate(f.ox, f.oy) }
+        fun px(x: Float) = f.ox + x * k
+        fun py(y: Float) = f.oy + y * k
+        fun mapped(p: Path) = Path().also { p.transform(m, it) }
         val stroke = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            style = Paint.Style.STROKE; strokeCap = Paint.Cap.ROUND; strokeJoin = Paint.Join.ROUND; strokeWidth = BAND; this.color = color
+            style = Paint.Style.STROKE; strokeCap = Paint.Cap.ROUND; strokeJoin = Paint.Join.ROUND; strokeWidth = BAND * k; this.color = color
         }
         val fill = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.FILL; this.color = color }
         for (o in ops) when (o) {
-            is Op.Line -> c.drawPath(o.path, stroke)
-            is Op.Ring -> c.drawCircle(0f, 0f, o.r, stroke)
+            is Op.Line -> c.drawPath(mapped(o.path), stroke)
+            is Op.Ring -> c.drawCircle(px(0f), py(0f), o.r * k, stroke)
             is Op.Head -> {
                 val bx = o.x - o.ux * HEAD_LEN; val by = o.y - o.uy * HEAD_LEN
                 val p = Path().apply {
-                    moveTo(o.x, o.y)
-                    lineTo(bx - o.uy * HEAD_HALF, by + o.ux * HEAD_HALF)
-                    lineTo(bx + o.uy * HEAD_HALF, by - o.ux * HEAD_HALF)
+                    moveTo(px(o.x), py(o.y))
+                    lineTo(px(bx - o.uy * HEAD_HALF), py(by + o.ux * HEAD_HALF))
+                    lineTo(px(bx + o.uy * HEAD_HALF), py(by - o.ux * HEAD_HALF))
                     close()
                 }
-                fill.pathEffect = android.graphics.CornerPathEffect(0.05f); c.drawPath(p, fill); fill.pathEffect = null
+                fill.pathEffect = android.graphics.CornerPathEffect(0.05f * k); c.drawPath(p, fill); fill.pathEffect = null
             }
             is Op.Number -> {
-                val t = Paint(Paint.ANTI_ALIAS_FLAG).apply { typeface = android.graphics.Typeface.DEFAULT_BOLD; textSize = o.r * 1.3f; this.color = color }
+                val t = Paint(Paint.ANTI_ALIAS_FLAG).apply { typeface = android.graphics.Typeface.DEFAULT_BOLD; textSize = o.r * 1.3f * k; this.color = color }
                 val (dx, dy) = inkOffset(t, o.text)
-                c.drawText(o.text, dx, dy, t)
+                c.drawText(o.text, px(0f) + dx, py(0f) + dy, t)
             }
             is Op.Pin -> {
                 val cy = -o.r * 0.4f
@@ -217,9 +225,8 @@ object NavGlyph {
                     addCircle(0f, cy, o.r, Path.Direction.CW)
                     op(Path().apply { moveTo(-o.r * 0.82f, cy + o.r * 0.58f); lineTo(0f, o.r * 1.5f); lineTo(o.r * 0.82f, cy + o.r * 0.58f); close() }, Path.Op.UNION)
                 }
-                c.drawPath(Path(outer).apply { op(Path().apply { addCircle(0f, cy, o.r * 0.4f, Path.Direction.CW) }, Path.Op.DIFFERENCE) }, fill)
+                c.drawPath(mapped(Path(outer).apply { op(Path().apply { addCircle(0f, cy, o.r * 0.4f, Path.Direction.CW) }, Path.Op.DIFFERENCE) }), fill)
             }
         }
-        c.restore()
     }
 }
