@@ -334,6 +334,7 @@
     <string name="st_style_full">Tam</string>
     <string name="st_style_simple">Basit</string>
     <string name="st_style_big">Büyük ekran (test)</string>
+    <string name="big_more">Daha fazla</string>
     <string name="st_style_desc">Basit: üç büyük panel (klima, batarya, medya), iki kısayol ve bugünün hava durumu. Değişiklik ana ekrana döndüğünüzde uygulanır.</string>
     <string name="en_heating">BATARYA ISITMA</string>
     <string name="st_theme">TEMA</string>

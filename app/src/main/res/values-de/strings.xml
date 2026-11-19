@@ -334,6 +334,7 @@
     <string name="st_style_full">Vollständig</string>
     <string name="st_style_simple">Schlicht</string>
     <string name="st_style_big">Große Anzeige (Test)</string>
+    <string name="big_more">Mehr</string>
     <string name="st_style_desc">Schlicht: drei große Felder (Klima, Batterie, Medien), zwei Verknüpfungen und das heutige Wetter. Die Änderung gilt beim Zurückkehren zur Startseite.</string>
     <string name="en_heating">BATTERIEHEIZUNG</string>
     <string name="st_theme">DESIGN</string>

@@ -64,6 +64,30 @@ class BigDisplayShots {
         }
     }
 
+    /**
+     * Step 3: each main card in each form of place (quarter, half, band), in French, English, German and Turkish (the
+     * longest words), dark and light.
+     */
+    @Test fun cardForms() {
+        val sets = listOf(
+            "quarters" to ("big_quad" to "tl=climate;bl=energy;tr=media;br=hourly"),
+            "quarters2" to ("big_quad" to "tl=shortcuts;bl=trip;tr=media;br=daily"),
+            "halves" to ("big_two" to "l=climate;r=media"),
+            "halves2" to ("big_two" to "l=energy;r=hourly"),
+            "bands" to ("big_two_bands" to "t=climate;b=media"),
+            "bands2" to ("big_two_bands" to "t=energy;b=hourly"),
+            "bands3" to ("big_two_bands" to "t=shortcuts;b=media"),
+        )
+        for (lang in listOf("fr", "en", "de", "tr")) for (theme in listOf(1, 2)) {
+            if (theme == 2 && lang != "fr") continue
+            RuntimeEnvironment.setQualifiers("$lang-w1920dp-h720dp-land-mdpi")
+            for ((name, spec) in sets) {
+                prefs.raw.edit().putInt("theme_mode", theme).putString("home_layout_big", spec.first).putString("slots_" + spec.first, spec.second).commit()
+                shoot(MainActivity::class.java, "big_form_${name}_$lang${if (theme == 2) "_light" else ""}.png")
+            }
+        }
+    }
+
     @Test fun climatePage() = shoot(app.mg4dash.pages.ClimateActivity::class.java, "big_page_climate.png")
     @Test fun vehiclePage() = shoot(app.mg4dash.pages.VehicleActivity::class.java, "big_page_vehicle.png")
 

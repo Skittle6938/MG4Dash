@@ -334,6 +334,7 @@
     <string name="st_style_full">Complet</string>
     <string name="st_style_simple">Épuré</string>
     <string name="st_style_big">Grand affichage (test)</string>
+    <string name="big_more">Plus</string>
     <string name="st_style_desc">Épuré : trois grands volets (climatisation, batterie, multimédia), deux raccourcis et la météo du jour. Le changement s\'applique au retour sur l\'accueil.</string>
     <string name="en_heating">RÉCHAUFFAGE BATTERIE</string>
     <string name="st_theme">THÈME</string>
