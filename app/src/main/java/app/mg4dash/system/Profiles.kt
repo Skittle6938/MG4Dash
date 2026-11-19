@@ -177,10 +177,14 @@ object Profiles {
     private val listeners = java.util.concurrent.CopyOnWriteArrayList<(Profile) -> Unit>()
     fun onSwitch(l: (Profile) -> Unit) { listeners += l }
 
-    /** Switches to [id] ([why] for the log); false if it is already the current one or unknown. */
+    /** A profile chosen by hand since this start (Settings, the tile): the paired phone no longer switches. */
+    @Volatile var manualThisStart = false
+
+    /** Switches to [id] ([why] for the log; "phone" for the paired phone); false if it is already the current one or unknown. */
     fun switchTo(c: Context, id: String, why: String): Boolean {
         val from = current(c)
         val to = list(c).firstOrNull { it.id == id } ?: return false
+        if (why != "phone") manualThisStart = true
         if (to.id == from.id) return false
         val s = store(c)
         // 1. The current profile's personal settings put away (marked: a cut after this is finished at the next start)
