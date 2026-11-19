@@ -33,25 +33,37 @@ class SwipeBox(
     private var downX = 0f; private var downY = 0f; private var dir = 0; private var axisH = false
     private val slop = 60 * resources.displayMetrics.density / 2
 
-    override fun onInterceptTouchEvent(ev: MotionEvent): Boolean {
-        if (!active()) return false
+    /** Follows the gesture: the start, a second finger, the direction once past the slop. */
+    private fun track(ev: MotionEvent) {
         when (ev.actionMasked) {
             MotionEvent.ACTION_DOWN -> {
                 downX = ev.x; downY = ev.y; dir = 0; multi = false
                 val e = edge(); fromEdge = e <= 0 || ev.x < e || ev.x >= width - e
             }
             MotionEvent.ACTION_POINTER_DOWN -> { multi = true; dir = 0 }
-            MotionEvent.ACTION_MOVE -> if (!multi && fromEdge) {
+            MotionEvent.ACTION_MOVE -> if (!multi && fromEdge && dir == 0) {
                 val dx = ev.x - downX; val dy = ev.y - downY
                 val edged = edge() > 0
                 if ((horizontal || onHorizontal != null) && Math.abs(dx) > slop && Math.abs(dx) > 2 * Math.abs(dy)) { dir = if (dx < 0) 1 else -1; axisH = true }
                 else if (vertical && !edged && Math.abs(dy) > slop && Math.abs(dy) > 2 * Math.abs(dx)) { dir = if (dy < 0) 1 else -1; axisH = false }
             }
         }
+    }
+
+    override fun onInterceptTouchEvent(ev: MotionEvent): Boolean {
+        if (!active()) return false
+        track(ev)
         return dir != 0
     }
 
+    /**
+     * After the content took the touch and the swipe was intercepted; also when no content takes it at all (a card
+     * with nothing to touch, such as the guidance card, 19/11): the gesture then comes here from its start, and was
+     * not followed (only the interception did), so that card could not be swiped.
+     */
     override fun onTouchEvent(ev: MotionEvent): Boolean {
+        if (!active()) return true
+        if (ev.actionMasked != MotionEvent.ACTION_DOWN || dir == 0) track(ev)
         if (ev.actionMasked == MotionEvent.ACTION_UP && dir != 0) {
             val h = onHorizontal
             if (axisH && h != null) h(dir) else onSwipe(dir)
