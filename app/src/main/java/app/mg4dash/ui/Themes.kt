@@ -271,7 +271,8 @@ object Themes {
 
     /**
      * What Radio Dash reads: background, accent, light, vertical bar, 0, wide bar, bar on the right
-     * (the last two for its own bar, Radio Dash #2), AM band allowed (Radio Dash #2, off by default), fog light button hidden by the shortcuts menu.
+     * (the last two for its own bar, Radio Dash #2), AM band allowed (Radio Dash #2, off by default), fog light button hidden by the shortcuts menu, the Android Auto
+     * button's choice and app (MG4Radio #5), Grand affichage (12th, 1 or 0).
      */
     fun published(context: Context): String {
         val p = Prefs(context)
@@ -281,7 +282,9 @@ object Themes {
             "${if (app.mg4dash.system.FogOverlay.hides(context)) 1 else 0}," +
             // 10th, 11th: the Android Auto button's choice (0 Android Auto, 1 CarPlay, 2 another app) and that app's
             // component (empty otherwise), so Radio Dash names it and opens it through MG4Dash (MG4Radio #5)
-            "${Dock.aaChoice(p.dockAaTarget)},${p.dockAaTarget?.takeIf { Dock.aaChoice(it) == 2 } ?: ""}"
+            "${Dock.aaChoice(p.dockAaTarget)},${p.dockAaTarget?.takeIf { Dock.aaChoice(it) == 2 } ?: ""}," +
+            // 12th: Grand affichage (study v4, step 13), for MG4Radio to follow; published again at each profile switch
+            "${if (p.homeStyle == Prefs.STYLE_BIG) 1 else 0}"
     }
 
     /** Publishes the theme for Radio Dash (system uid required; no effect otherwise). */
