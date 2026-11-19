@@ -9,8 +9,9 @@ import android.util.Log;
 
 /**
  * What starts a check: the head unit's boot (the service itself waits for everything to be up), an on-demand CHECK,
- * MG4Dash's own update (UPDATED, sent by its updater), its install by any other way (USB, ADB), and a crash of its code
- * that does not load (seen in Android's crash log, or told by MG4Dash itself). INIT, sent by MG4Dash after installing
+ * MG4Dash's install (UPDATED: sent by its updater, and by MG4Dash at its first start after any install), a crash of its
+ * code that does not load (CRASH, told by MG4Dash), and the rescue's own alarm reading Android's crash log (SCAN).
+ * Android's own notices (PACKAGE_REPLACED, DROPBOX_ENTRY_ADDED) are not delivered to it on the car (19/11). INIT, sent by MG4Dash after installing
  * the rescue, only takes it out of the "stopped" state and gets an answer. Each start alone: one failing never stops
  * the others, and the boot's own path is the one it always was.
  */
@@ -25,8 +26,6 @@ public class BootReceiver extends BroadcastReceiver {
     static final long SCAN_EVERY_MS = 5 * 60_000L;
     /** The last crash log time read (in the rescue's own preferences). */
     private static final String PREF_SCANNED = "scanned_until";
-    /** After an install by another way than MG4Dash's updater: the install settled. */
-    static final long INSTALLED_DELAY_MS = 5_000;
     /** After MG4Dash's update: its own process gone, the install settled. */
     static final long UPDATED_DELAY_MS = 3_000;
     /** After a crash of code that does not load: Android's own relaunch tries first. */
@@ -36,11 +35,6 @@ public class BootReceiver extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
         String action = intent.getAction();
         if (action == null) return;
-        // Android's crash log: only MG4Dash's crashes of code that does not load, everything else at once ignored
-        if (DropBoxManager.ACTION_DROPBOX_ENTRY_ADDED.equals(action)) {
-            try { dropbox(context, intent); } catch (Exception e) { Log.w(RescueService.TAG, "crash log: " + e.getMessage()); }
-            return;
-        }
         Log.i(RescueService.TAG, "received " + action);
         try {
             switch (action) {
@@ -67,16 +61,6 @@ public class BootReceiver extends BroadcastReceiver {
                 case ACTION_CRASH:
                     start(context, RescueService.MODE_CRASH, CRASH_DELAY_MS);
                     return;
-                case Intent.ACTION_PACKAGE_REPLACED:
-                case Intent.ACTION_PACKAGE_ADDED: {
-                    String pkg = intent.getData() != null ? intent.getData().getSchemeSpecificPart() : null;
-                    if (!"app.mg4dash".equals(pkg)) return;
-                    // Its sign of life wanted after this install
-                    Intent i = service(context, RescueService.MODE_INSTALLED, INSTALLED_DELAY_MS);
-                    i.putExtra("since_elapsed", SystemClock.elapsedRealtime());
-                    context.startForegroundService(i);
-                    return;
-                }
                 default:
             }
         } catch (Exception e) {
@@ -128,19 +112,5 @@ public class BootReceiver extends BroadcastReceiver {
 
     private static void start(Context context, String mode, long delay) {
         context.startForegroundService(service(context, mode, delay));
-    }
-
-    private static void dropbox(Context context, Intent intent) {
-        String tag = intent.getStringExtra(DropBoxManager.EXTRA_TAG);
-        if (!"system_app_crash".equals(tag) && !"data_app_crash".equals(tag)) return;
-        long time = intent.getLongExtra(DropBoxManager.EXTRA_TIME, 0);
-        DropBoxManager db = context.getSystemService(DropBoxManager.class);
-        DropBoxManager.Entry e = db.getNextEntry(tag, time - 1);
-        if (e == null) return;
-        String text = e.getText(4096);
-        e.close();
-        if (!RescueService.isLoadCrash(text)) return;
-        Log.w(RescueService.TAG, "MG4Dash crashed, its code does not load: check");
-        start(context, RescueService.MODE_CRASH, CRASH_DELAY_MS);
     }
 }

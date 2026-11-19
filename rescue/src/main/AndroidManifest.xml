@@ -33,16 +33,6 @@
                 <!-- The rescue's own alarm: the crash log read every 5 min -->
                 <action android:name="app.mg4dash.rescue.SCAN" />
             </intent-filter>
-            <!-- Android's crash log (READ_LOGS): a crash of MG4Dash's code that does not load -->
-            <intent-filter>
-                <action android:name="android.intent.action.DROPBOX_ENTRY_ADDED" />
-            </intent-filter>
-            <!-- MG4Dash installed by another way (USB, ADB): to check on the car that it is delivered -->
-            <intent-filter>
-                <action android:name="android.intent.action.PACKAGE_REPLACED" />
-                <action android:name="android.intent.action.PACKAGE_ADDED" />
-                <data android:scheme="package" android:ssp="app.mg4dash" />
-            </intent-filter>
         </receiver>
 
         <service android:name=".RescueService" android:exported="false" />

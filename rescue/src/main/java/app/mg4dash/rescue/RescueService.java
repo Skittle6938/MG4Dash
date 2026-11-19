@@ -55,7 +55,7 @@ public class RescueService extends Service {
     static final int CRASH_LIMIT = 3;
 
     /** Why a check runs: the head unit's boot (or on demand), MG4Dash updated by itself, installed, or crashed. */
-    static final String MODE_BOOT = "boot", MODE_UPDATED = "updated", MODE_INSTALLED = "installed", MODE_CRASH = "crash";
+    static final String MODE_BOOT = "boot", MODE_UPDATED = "updated", MODE_CRASH = "crash";
 
     private volatile boolean running;
 
@@ -103,7 +103,7 @@ public class RescueService extends Service {
         undoInterruptedRepair();
         putGlobal(KEY_BUSY, Settings.Global.getInt(getContentResolver(), Settings.Global.BOOT_COUNT, -1) + ":" + SystemClock.elapsedRealtime());
         try {
-            if (MODE_UPDATED.equals(mode) || MODE_INSTALLED.equals(mode)) afterInstall(delay, MODE_UPDATED.equals(mode));
+            if (MODE_UPDATED.equals(mode)) afterInstall(delay, true);
             else check(delay, mode, sinceElapsed);
         } finally {
             undoInterruptedRepair();
