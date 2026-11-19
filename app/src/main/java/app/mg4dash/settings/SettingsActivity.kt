@@ -72,6 +72,8 @@ class SettingsActivity : AppCompatActivity() {
         }, LinearLayout.LayoutParams(0, -2, 1f).apply { leftMargin = if (vertical) dp(12) else dp(app.mg4dash.ui.Kit.fogSafeDp(this@SettingsActivity) - 8) })
         // Tabs (setting themes) in the banner, next to the title
         val tabBar = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL }
+        // Profiles (study v4, step 10): the current one, its menu on every tab
+        top.addView(ProfileWindow.button(this) { recreate() }, LinearLayout.LayoutParams(-2, dp(52)).apply { rightMargin = dp(12) })
         top.addView(tabBar, LinearLayout.LayoutParams(-2, dp(52)).apply { rightMargin = dp(16) })
         top.addView(button(getString(R.string.st_close)) { finish() }, LinearLayout.LayoutParams(dp(160), dp(52)))
         root.addView(top, LinearLayout.LayoutParams(-1, -2).apply { bottomMargin = dp(12) })
@@ -159,6 +161,8 @@ class SettingsActivity : AppCompatActivity() {
             app.mg4dash.ui.Toasts.show(this, getString(R.string.st_shortcuts_menu_restart), long = true)
             app.mg4dash.ui.Themes.publish(this); recreate()
         }
+        // Shared by every profile: MG's fog button is hidden by an overlay the car only reads at its start
+        text(style, getString(R.string.pf_all), 14f, R.color.text_title)
         toggle(style, R.string.st_fullscreen, null, { prefs.fullscreen }) { prefs.fullscreen = it; Fullscreen.apply(this); app.mg4dash.ui.ShortcutsPanel.GlobalStrip.update(this); app.mg4dash.ui.EmbeddedApp.refreshImmersive(this) }
         // The SAIC call window in full screen too: no top bar during calls
         toggle(style, R.string.st_call_bar, R.string.st_call_bar_desc, { prefs.callBarHidden }) { prefs.callBarHidden = it; app.mg4dash.ui.EmbeddedApp.refreshImmersive(this) }
