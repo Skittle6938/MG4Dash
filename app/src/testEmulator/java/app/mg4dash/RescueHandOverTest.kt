@@ -68,12 +68,21 @@ class RescueHandOverTest {
         assertNull(org.robolectric.Shadows.shadowOf(ctx).nextStartedActivity)
     }
 
+    @Test fun rescueUpdateWaitsWhileItChecks() {
+        // Updating the rescue in the middle of its check killed it (car trial, 19/11)
+        assertTrue(Rescue.busy("7:100000", 7, 160_000))
+        assertFalse("stale", Rescue.busy("7:100000", 7, 100_000 + 5 * 60_000L))
+        assertFalse("another boot", Rescue.busy("6:100000", 7, 160_000))
+        assertFalse(Rescue.busy(null, 7, 160_000))
+        assertFalse(Rescue.busy("garbage", 7, 160_000))
+    }
+
     @Test fun updateHandedOverFromRescue4() {
         assertFalse(Rescue.handsOver(-1))
         assertFalse(Rescue.handsOver(3))
         assertTrue(Rescue.handsOver(4))
         assertTrue(Rescue.handsOver(5))
-        assertEquals(5L, Rescue.BUNDLED_VERSION)
+        assertEquals(6L, Rescue.BUNDLED_VERSION)
     }
 
     @Test fun rescueRecompiledAndAnsweringAfterItsInstall() {

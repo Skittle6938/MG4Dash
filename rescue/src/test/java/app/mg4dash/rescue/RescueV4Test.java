@@ -449,6 +449,60 @@ public class RescueV4Test {
         assertEquals("0", homeWord());
     }
 
+    // ── Busy mark, crash log alarm (after the car trials, 19/11) ──
+
+    @Test public void busyWhileCheckingClearedAfter() throws Exception {
+        dashHomeSaicEnabled("1");
+        final String[] during = { null };
+        service.onRecompile = () -> during[0] = Settings.Global.getString(cr, RescueService.KEY_BUSY);
+        service.onRelaunch = () -> alive(BOOT);
+        service.run(0);
+        assertNotNull("busy during the check", during[0]);
+        assertTrue(during[0], during[0].startsWith(BOOT + ":"));
+        assertNull("cleared after", Settings.Global.getString(cr, RescueService.KEY_BUSY));
+    }
+
+    @Test public void busyClearedEvenWhenTheCheckThrows() throws Exception {
+        dashHomeSaicEnabled("1");
+        service.onRecompile = () -> { throw new IllegalStateException("dexopt died"); };
+        try { service.run(0); } catch (IllegalStateException expected) { }
+        assertNull(Settings.Global.getString(cr, RescueService.KEY_BUSY));
+    }
+
+    @Test public void crashLogScanFindsCodeNotLoading() {
+        android.content.Context c = RuntimeEnvironment.getApplication();
+        DropBoxManager db = c.getSystemService(DropBoxManager.class);
+        shadowOf(db).addData("system_app_crash", System.currentTimeMillis() - 1000,
+                ("Process: " + DASH + "\n\njava.lang.ClassNotFoundException: app.mg4dash.LauncherApp\n").getBytes(StandardCharsets.UTF_8));
+        BootReceiver.scan(c);
+        Intent i = started();
+        assertNotNull("check started", i);
+        assertEquals(RescueService.MODE_CRASH, i.getStringExtra("mode"));
+        // Already read: not again
+        BootReceiver.scan(c);
+        assertNull(started());
+    }
+
+    @Test public void crashLogScanIgnoresOthers() {
+        android.content.Context c = RuntimeEnvironment.getApplication();
+        DropBoxManager db = c.getSystemService(DropBoxManager.class);
+        shadowOf(db).addData("system_app_crash", System.currentTimeMillis() - 1000, "Process: app.mg4dash\n\njava.lang.NullPointerException\n".getBytes(StandardCharsets.UTF_8));
+        shadowOf(db).addData("data_app_crash", System.currentTimeMillis() - 900, "Process: com.other\n\njava.lang.ClassNotFoundException\n".getBytes(StandardCharsets.UTF_8));
+        BootReceiver.scan(c);
+        assertNull(started());
+    }
+
+    @Test public void bootAndInitArmTheScan() {
+        android.content.Context c = RuntimeEnvironment.getApplication();
+        android.app.AlarmManager am = c.getSystemService(android.app.AlarmManager.class);
+        new BootReceiver().onReceive(c, new Intent(Intent.ACTION_BOOT_COMPLETED));
+        assertNotNull("armed at boot", shadowOf(am).getNextScheduledAlarm());
+        // The boot's own check still starts
+        assertNotNull(started());
+        new BootReceiver().onReceive(c, new Intent(BootReceiver.ACTION_INIT));
+        assertNotNull("armed at init", shadowOf(am).getNextScheduledAlarm());
+    }
+
     // ── Starts ──
 
     private Intent started() { return shadowOf(RuntimeEnvironment.getApplication()).getNextStartedService(); }

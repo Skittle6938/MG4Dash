@@ -30,6 +30,8 @@
                 <action android:name="app.mg4dash.rescue.UPDATED" />
                 <!-- Sent by MG4Dash when its code does not load -->
                 <action android:name="app.mg4dash.rescue.CRASH" />
+                <!-- The rescue's own alarm: the crash log read every 5 min -->
+                <action android:name="app.mg4dash.rescue.SCAN" />
             </intent-filter>
             <!-- Android's crash log (READ_LOGS): a crash of MG4Dash's code that does not load -->
             <intent-filter>

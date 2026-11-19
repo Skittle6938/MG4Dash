@@ -292,8 +292,10 @@ object Updater {
             HomeSwitcher.ensureHome(context, "update")
             val appCtx = context.applicationContext
             android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({ HomeSwitcher.ensureHome(appCtx, "update, 5 s later") }, 5_000)
-            // The rescue relaunches it after its clean recompilation (opening it now would run it meanwhile)
-            if (Rescue.handsOver(Rescue.installedVersion(context))) return
+            // The rescue recompiles it cleanly and relaunches it (opening it now would run it meanwhile). Told here too:
+            // Android does not tell the rescue of an install by USB or ADB (seen on the car, 19/11); for an update from
+            // the app it already was, and the rescue does it once per install
+            if (Rescue.handOverUpdate(context)) return
             context.startActivity(Intent(context, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
         }
     }

@@ -20,7 +20,7 @@ object Rescue {
     private const val TAG = "Rescue"
     const val PKG = "app.mg4dash.rescue"
     /** Version of the embedded rescue app (versionCode of rescue/build.gradle.kts). */
-    const val BUNDLED_VERSION = 5L
+    const val BUNDLED_VERSION = 6L
     /** The first rescue that takes over after MG4Dash's update (UPDATED). */
     const val HANDS_OVER_FROM = 4L
     private const val ASSET = "rescue.apk"
@@ -99,11 +99,32 @@ object Rescue {
         } catch (e: Exception) { Log.w(TAG, "hand-over: ${e.message}"); false }
     }
 
-    /** Installs the rescue app if needed (off the main thread), then wakes it. */
-    fun ensureInstalled(context: Context) {
+    /** The rescue's "busy" mark ("boot:elapsedRealtime" while it checks). */
+    const val KEY_BUSY = "mg4dash_rescue_busy"
+    /** A busy mark older than this is stale (a check never lasts so long). */
+    private const val BUSY_FRESH_MS = 5 * 60_000L
+
+    /** Whether the rescue is in the middle of a check: updating it would kill it (seen on the car, 19/11). */
+    internal fun busy(mark: String?, boot: Int, nowElapsed: Long): Boolean {
+        val p = mark?.split(':') ?: return false
+        if (p.size != 2) return false
+        val b = p[0].toIntOrNull() ?: return false
+        val at = p[1].toLongOrNull() ?: return false
+        return b == boot && nowElapsed - at in 0 until BUSY_FRESH_MS
+    }
+
+    private fun rescueBusy(context: Context): Boolean = try {
+        busy(Settings.Global.getString(context.contentResolver, KEY_BUSY),
+            Settings.Global.getInt(context.contentResolver, Settings.Global.BOOT_COUNT, -1), android.os.SystemClock.elapsedRealtime())
+    } catch (_: Exception) { false }
+
+    /** Installs the rescue app if needed (off the main thread), then wakes it; never while it is checking. */
+    fun ensureInstalled(context: Context, sleep: (Long) -> Unit = { Thread.sleep(it) }) {
         if (BuildConfig.MOCK) return
         val installed = installedVersion(context)
         if (installed >= BUNDLED_VERSION) { wake(context); return }
+        var waited = 0
+        while (rescueBusy(context) && waited < 10) { Log.i(TAG, "rescue busy: its update waits"); sleep(60_000L); waited++ }
         try {
             val apk = File(context.cacheDir, ASSET)
             context.assets.open(ASSET).use { i -> apk.outputStream().use { o -> i.copyTo(o) } }
