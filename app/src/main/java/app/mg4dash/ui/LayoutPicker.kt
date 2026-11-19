@@ -105,6 +105,7 @@ object LayoutPicker {
         popup.setBackgroundDrawable(android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT))
         box.measure(View.MeasureSpec.makeMeasureSpec(popup.width, View.MeasureSpec.EXACTLY), View.MeasureSpec.UNSPECIFIED)
         popup.height = box.measuredHeight + dp(6)
+        Popups.fit(activity, popup)
         val at = IntArray(2).also { anchor.getLocationOnScreen(it) }
         val screenW = anchor.rootView.width; val screenH = anchor.rootView.height
         val x: Int; val y: Int
