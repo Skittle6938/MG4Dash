@@ -448,7 +448,7 @@
     <string name="st_upd_new">Update available - %1$s → %2$s</string>
     <string name="st_upd_none_new">not installed · %1$s available</string>
     <string name="st_upd_install_ver">Install %1$s</string>
-    <string name="st_upd_note">MG4Dash restarts the screen at the end of its update. MG4Radio applies after restarting the head unit (hold Home about 20 s) and is tested on %1$s.</string>
+    <string name="st_upd_note">MG4Dash restarts the screen at the end of its update. MG4Radio is for %1$s only; it applies after restarting the head unit (hold Home about 20 s).</string>
     <string name="st_update_auto">Check automatically: %1$s</string>
     <string name="st_update_auto_desc">MG4Dash and MG4Radio, once a week, or every day with beta versions included.</string>
     <string name="st_rd_newer_radio">this car\'s radio is newer than MG4Radio, which can\'t replace it</string>
@@ -1130,4 +1130,5 @@
     <string name="dm_fan">Fan</string>
     <string name="dm_note_now_set">The climate starts now at %1$s, fan %2$d, then the doors lock after the delay. Stops below 20 %% battery, when the doors are unlocked or if the car moves.</string>
     <string name="dm_note_at_set">The car stays on (climate off, about 0.2 kW) and locked until the first run, then runs the climate at %1$s, fan %2$d. It switches off after the last run, below 20 %% battery, and stops when the doors are unlocked.</string>
+    <string name="st_rd_not_validated">Not validated on this firmware</string>
 </resources>

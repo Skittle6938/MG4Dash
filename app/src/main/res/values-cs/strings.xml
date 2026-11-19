@@ -448,7 +448,7 @@
     <string name="st_upd_new">K dispozici aktualizace - %1$s → %2$s</string>
     <string name="st_upd_none_new">nenainstalováno · k dispozici %1$s</string>
     <string name="st_upd_install_ver">Nainstalovat %1$s</string>
-    <string name="st_upd_note">MG4Dash po dokončení aktualizace restartuje obrazovku. MG4Radio se projeví po restartu jednotky (podržte Domů asi 20 s) a je testováno na %1$s.</string>
+    <string name="st_upd_note">Aktualizace MG4Dash na konci restartuje obrazovku. MG4Radio je pouze pro %1$s; projeví se po restartu centrální obrazovky (dlouhý stisk Domů asi 20 s).</string>
     <string name="st_update_auto">Kontrolovat automaticky: %1$s</string>
     <string name="st_update_auto_desc">MG4Dash a MG4Radio jednou týdně, nebo denně při zahrnutí beta verzí.</string>
     <string name="st_rd_newer_radio">rádio v tomto voze je novější než MG4Radio, které ho nemůže nahradit</string>
@@ -1128,4 +1128,5 @@
     <string name="dm_fan">Ventilátor</string>
     <string name="dm_note_now_set">Klimatizace se spustí hned na %1$s, ventilátor %2$d, poté se dveře po prodlevě zamknou. Zastaví se pod 20 %% baterie, při odemčení dveří nebo když se vůz rozjede.</string>
     <string name="dm_note_at_set">Vůz zůstane zapnutý (klimatizace vypnutá, asi 0,2 kW) a zamčený až do prvního cyklu, pak spustí klimatizaci na %1$s, ventilátor %2$d. Vypne se po posledním cyklu nebo pod 20 %% baterie a vše se zastaví při odemčení dveří.</string>
+    <string name="st_rd_not_validated">Na tomto firmwaru neověřeno</string>
 </resources>

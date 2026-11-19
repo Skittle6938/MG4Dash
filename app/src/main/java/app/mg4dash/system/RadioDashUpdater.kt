@@ -19,7 +19,17 @@ object RadioDashUpdater {
     const val PKG = "com.saicmotor.radio"
     private const val API = "https://api.github.com/repos/Skittle6938/MG4Radio/releases?per_page=10"
     /** Firmwares on which Radio Dash has been tested, named in Settings. */
-    const val TESTED_ON = "SWI69, SWI68 R67"
+    const val TESTED_ON = "SWI69"
+
+    /**
+     * Whether Radio Dash is offered on the firmware [raw] (Marc, 19/11, discussion #111: on SWI68 R46 it restarted the
+     * head unit): SWI69 only, any revision, the firmware it is built from. Elsewhere it is neither offered nor updated;
+     * one already installed can still be uninstalled.
+     */
+    fun validatedOn(raw: String?): Boolean = Firmware.parse(raw) == Firmware.Gen.SWI69
+
+    /** Radio Dash validated on this car's firmware. */
+    val validated: Boolean get() = validatedOn(Firmware.version)
 
     /** versionCode of Radio Dash, the one of the stock radio it is built from. */
     private const val RADIO_DASH_CODE = 2L

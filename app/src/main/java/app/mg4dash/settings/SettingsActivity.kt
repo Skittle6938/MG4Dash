@@ -861,7 +861,8 @@ class SettingsActivity : AppCompatActivity() {
             prefs.raw.getLong("upd_checked_at", 0L) > 0L -> getString(R.string.st_upd_current, cur)
             else -> cur
         }
-        val blocker = R2.blocker(this)
+        // Not validated on this firmware (#111): neither offered nor updated
+        val blocker = if (!R2.validated) R.string.st_rd_not_validated else R2.blocker(this)
         val (state, rdButton) = updateLine(parent, "MG4Radio", blocker?.let { getString(it) } ?: stateText(), rdNew.takeIf { blocker == null })
         fun showState() { state.text = stateText() }
         if (blocker != null) { rdButton.isEnabled = false; rdButton.alpha = 0.4f; return }

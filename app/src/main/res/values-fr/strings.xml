@@ -448,7 +448,7 @@
     <string name="st_upd_new">Mise à jour disponible - %1$s → %2$s</string>
     <string name="st_upd_none_new">non installée · %1$s disponible</string>
     <string name="st_upd_install_ver">Installer la %1$s</string>
-    <string name="st_upd_note">La mise à jour de MG4Dash redémarre l\'écran à la fin. MG4Radio s\'applique après un redémarrage de l\'écran central (appui long sur Accueil environ 20 s) et est testée sur %1$s.</string>
+    <string name="st_upd_note">La mise à jour de MG4Dash redémarre l\'écran à la fin. MG4Radio est uniquement pour %1$s ; elle s\'applique après un redémarrage de l\'écran central (appui long sur Accueil environ 20 s).</string>
     <string name="st_update_auto">Vérification automatique : %1$s</string>
     <string name="st_update_auto_desc">MG4Dash et MG4Radio, une fois par semaine, ou chaque jour avec les versions bêta.</string>
     <string name="st_rd_newer_radio">la radio de cette voiture est plus récente que MG4Radio, qui ne peut pas la remplacer</string>
@@ -1130,4 +1130,5 @@
     <string name="dm_fan">Ventilation</string>
     <string name="dm_note_now_set">La clim démarre tout de suite à %1$s, ventilation %2$d, puis les portes se verrouillent après le délai. Arrêt sous 20 %% de batterie, au déverrouillage des portes ou si la voiture roule.</string>
     <string name="dm_note_at_set">La voiture reste allumée (clim coupée, environ 0,2 kW) et verrouillée jusqu\'au premier cycle, puis lance la clim à %1$s, ventilation %2$d. Elle s\'éteint après le dernier cycle ou sous 20 %% de batterie, et tout s\'arrête au déverrouillage des portes.</string>
+    <string name="st_rd_not_validated">Non validée sur ce firmware</string>
 </resources>
