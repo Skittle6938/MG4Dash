@@ -88,6 +88,18 @@ class BigDisplayShots {
         }
     }
 
+    /** Step 5: every page enlarged, in French and German. */
+    @Test fun pages() {
+        val pages = listOf(app.mg4dash.pages.ClimateActivity::class.java, app.mg4dash.pages.EnergyActivity::class.java,
+            app.mg4dash.pages.VehicleActivity::class.java, app.mg4dash.pages.SoundActivity::class.java,
+            app.mg4dash.pages.PhoneActivity::class.java, app.mg4dash.pages.TripsActivity::class.java,
+            app.mg4dash.apps.AppsActivity::class.java, app.mg4dash.climate.ClimateHoldActivity::class.java)
+        for (lang in listOf("fr", "de")) {
+            RuntimeEnvironment.setQualifiers("$lang-w1920dp-h720dp-land-mdpi")
+            pages.forEach { shoot(it, "big_page_${it.simpleName.removeSuffix("Activity").lowercase()}_$lang.png") }
+        }
+    }
+
     @Test fun climatePage() = shoot(app.mg4dash.pages.ClimateActivity::class.java, "big_page_climate.png")
     @Test fun vehiclePage() = shoot(app.mg4dash.pages.VehicleActivity::class.java, "big_page_vehicle.png")
 

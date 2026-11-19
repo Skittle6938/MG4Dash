@@ -17,6 +17,8 @@ import kotlinx.coroutines.launch
  * service (ride-hailing, deliveries) and the list of the last 50 trips.
  */
 class TripsActivity : PageActivity() {
+    /** Its lists scroll on their own (Grand affichage). */
+    override val scrollsWhenBig = false
     override val pageTitle get() = getString(R.string.title_trips)
     override val page = app.mg4dash.ui.Dock.Page.VEHICLE
 
