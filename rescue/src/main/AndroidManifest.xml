@@ -15,7 +15,10 @@
 
     <application
         android:allowBackup="false"
+        android:vmSafeMode="true"
         android:label="MG4Dash Rescue">
+        <!-- vmSafeMode: compiled without a usage profile ("quicken"), so the rescue itself never gets the
+             speed-profile code that sometimes does not load (to check on the car: dumpsys package dexopt) -->
 
         <receiver android:name=".BootReceiver" android:exported="true">
             <intent-filter>
@@ -23,6 +26,20 @@
                 <!-- Sent by MG4Dash right after installation: takes the app out of the "stopped" state -->
                 <action android:name="app.mg4dash.rescue.INIT" />
                 <action android:name="app.mg4dash.rescue.CHECK" />
+                <!-- Sent by MG4Dash's updater after its own update: clean recompilation, relaunch, watch -->
+                <action android:name="app.mg4dash.rescue.UPDATED" />
+                <!-- Sent by MG4Dash when its code does not load -->
+                <action android:name="app.mg4dash.rescue.CRASH" />
+            </intent-filter>
+            <!-- Android's crash log (READ_LOGS): a crash of MG4Dash's code that does not load -->
+            <intent-filter>
+                <action android:name="android.intent.action.DROPBOX_ENTRY_ADDED" />
+            </intent-filter>
+            <!-- MG4Dash installed by another way (USB, ADB): to check on the car that it is delivered -->
+            <intent-filter>
+                <action android:name="android.intent.action.PACKAGE_REPLACED" />
+                <action android:name="android.intent.action.PACKAGE_ADDED" />
+                <data android:scheme="package" android:ssp="app.mg4dash" />
             </intent-filter>
         </receiver>
 
