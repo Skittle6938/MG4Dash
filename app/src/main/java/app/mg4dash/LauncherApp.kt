@@ -177,7 +177,7 @@ class LauncherApp : Application() {
                 Log.e("Crash", "crash #${recent.size} in the window", error)
                 if (recent.size >= CRASH_LIMIT) {
                     sp.edit().putString("times", "").putBoolean("fell_back", true).commit()
-                    HomeSwitcher.switchToStock(this)
+                    HomeSwitcher.switchToStock(this, auto = true)
                 }
             } catch (_: Throwable) {
                 // Never hide the original crash.

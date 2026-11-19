@@ -130,7 +130,10 @@ public class RescueService extends Service {
             return;
         }
 
-        if (healthy(sinceElapsed, 0)) { Log.i(TAG, "MG4Dash is fine"); return; }
+        // In its crash guard's service mode, MG4Dash may well run (not as the home): it is brought back as the home once
+        boolean auto = "auto".equals(Settings.Global.getString(getContentResolver(), KEY_HOME));
+        if (!auto && healthy(sinceElapsed, 0)) { Log.i(TAG, "MG4Dash is fine"); return; }
+        if (auto) Log.w(TAG, "MG4Dash's crash guard put SAIC home: repairing and bringing it back");
 
         // 2) Stop, recompile, relaunch: once per install and boot, then SAIC home
         if (alreadyRecompiled(pm)) { restoreStock(pm, stock, "MG4Dash still not starting after its recompilation"); return; }
@@ -151,6 +154,7 @@ public class RescueService extends Service {
         if (healthy(t0, wall0)) {
             Log.i(TAG, "MG4Dash started after recompiling");
             mark("recompiled");
+            homeAgain();
             return;
         }
         // 3) SAIC home
@@ -191,7 +195,12 @@ public class RescueService extends Service {
             Log.w(TAG, "relaunch failed: " + e.getMessage());
         }
         pause(RETRY_WAIT_MS);
-        if (healthy(t0, wall0)) { Log.i(TAG, "install: MG4Dash started"); return; }
+        if (healthy(t0, wall0)) {
+            Log.i(TAG, "install: MG4Dash started");
+            // Brought back as the home from its crash guard's service mode: told, so that it leaves that mode
+            if (home && "auto".equals(Settings.Global.getString(getContentResolver(), KEY_HOME))) { mark("recompiled"); homeAgain(); }
+            return;
+        }
         if (home) restoreStock(pm, stock, "MG4Dash not starting after its install");
         else Log.w(TAG, "install: MG4Dash not starting, it is not home: left as it is");
     }
@@ -212,7 +221,8 @@ public class RescueService extends Service {
         if (stockDisabled) return true;
         String said = Settings.Global.getString(getContentResolver(), KEY_HOME);
         if ("0".equals(said)) return false;
-        if ("1".equals(said)) return true;
+        // "auto": MG4Dash's own crash guard put SAIC home, not the driver: the home to bring back once repaired
+        if ("1".equals(said) || "auto".equals(said)) return true;
         return DASH_HOME.equals(preferredHome(pm));
     }
 
@@ -355,8 +365,18 @@ public class RescueService extends Service {
         return false;
     }
 
+    /** MG4Dash the home again after a repair: "auto" (its crash guard's service mode) becomes "1". */
+    private void homeAgain() {
+        if ("auto".equals(Settings.Global.getString(getContentResolver(), KEY_HOME))) {
+            putGlobal(KEY_HOME, "1");
+            Log.i(TAG, "MG4Dash is the home again");
+        }
+    }
+
     private void restoreStock(PackageManager pm, ComponentName stock, String why) {
         Log.w(TAG, why + ": restoring SAIC home " + stock);
+        // SAIC home from now on, not tried again at each boot (only a new install of MG4Dash gets checked again)
+        putGlobal(KEY_HOME, "0");
         forceStop(DASH);
         if (stock == null) { Log.e(TAG, "no SAIC home found"); return; }
         pm.setComponentEnabledSetting(stock, PackageManager.COMPONENT_ENABLED_STATE_DEFAULT, PackageManager.DONT_KILL_APP);

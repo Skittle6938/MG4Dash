@@ -361,6 +361,74 @@ public class RescueV4Test {
         assertTrue("watched", service.pauses.contains(RescueService.RETRY_WAIT_MS));
     }
 
+    // ── MG4Dash's own crash guard put SAIC home ("auto"): brought back once repaired ──
+
+    private String homeWord() { return Settings.Global.getString(cr, RescueService.KEY_HOME); }
+
+    @Test public void autoLoadCrashRepairedAndHomeAgain() throws Exception {
+        dashHomeSaicEnabled("auto");
+        crash(true, true);
+        service.onRelaunch = () -> alive(BOOT);
+        service.run(0, RescueService.MODE_CRASH, -1);
+        assertEquals(1, service.recompiles);
+        assertTrue(rescued(), rescued().startsWith("recompiled:"));
+        assertEquals("1", homeWord());
+        assertEquals(DASH_HOME, opened());
+        List<IntentFilter> filters = new ArrayList<>();
+        List<ComponentName> names = new ArrayList<>();
+        pm.getPreferredActivities(filters, names, null);
+        assertTrue("MG4Dash the preferred HOME", names.contains(DASH_HOME));
+    }
+
+    @Test public void autoEvenRunningIsBroughtBackAtBoot() throws Exception {
+        // Its process runs (not as the home) and gave a sign of life: brought back as the home all the same
+        dashHomeSaicEnabled("auto");
+        alive(BOOT);
+        service.onRelaunch = () -> alive(BOOT);
+        service.run(0);
+        assertEquals(1, service.recompiles);
+        assertEquals("1", homeWord());
+    }
+
+    @Test public void autoStillCrashingStockAndNoRetry() throws Exception {
+        dashHomeSaicEnabled("auto");
+        service.onRelaunch = () -> { alive(BOOT); crash(true, true); };
+        service.run(0);
+        assertTrue(rescued(), rescued().startsWith("stock:"));
+        assertEquals("0", homeWord());
+        // Next boot: not tried again (only a new install is)
+        Settings.Global.putInt(cr, Settings.Global.BOOT_COUNT, BOOT + 1);
+        service.run(0);
+        assertEquals(1, service.recompiles);
+    }
+
+    @Test public void autoAtBootNoSignOfLifeOneAttempt() throws Exception {
+        dashHomeSaicEnabled("auto");
+        service.run(0);
+        service.run(0);
+        assertEquals(1, service.recompiles);
+        assertEquals("0", homeWord());
+    }
+
+    @Test public void autoAfterInstallRelaunchedAsHomeAndToldSo() throws Exception {
+        dashHomeSaicEnabled("auto");
+        service.onRelaunch = () -> alive(BOOT);
+        service.run(0, RescueService.MODE_INSTALLED, -1);
+        assertEquals(1, service.recompiles);
+        assertEquals(DASH_HOME, opened());
+        assertEquals("1", homeWord());
+        assertTrue(rescued(), rescued().startsWith("recompiled:"));
+    }
+
+    @Test public void driversOwnChoiceUntouched() throws Exception {
+        dashHomeSaicEnabled("0");
+        service.run(0);
+        crash(true, true);
+        service.run(0, RescueService.MODE_CRASH, -1);
+        assertNull(opened());
+        assertEquals("0", homeWord());
+    }
+
     // ── Starts ──
 
     private Intent started() { return shadowOf(RuntimeEnvironment.getApplication()).getNextStartedService(); }
