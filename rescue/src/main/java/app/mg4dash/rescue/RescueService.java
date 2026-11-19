@@ -48,6 +48,8 @@ public class RescueService extends Service {
     static final String KEY_RECOMPILED = "mg4dash_rescue_recompiled";
     /** The rescue's answer to INIT: "versionCode:time". */
     static final String KEY_OK = "mg4dash_rescue_ok";
+    /** "boot:elapsedRealtime" while a check runs: MG4Dash then waits before updating the rescue (it would kill it). */
+    static final String KEY_BUSY = "mg4dash_rescue_busy";
     private static final long FIRST_CHECK_MS = 90_000;
     static final long RETRY_WAIT_MS = 60_000;
     static final int CRASH_LIMIT = 3;
@@ -99,11 +101,13 @@ public class RescueService extends Service {
     void run(long delay, String mode, long sinceElapsed) throws InterruptedException {
         // A repair cut by a power loss left MG4Dash disabled: first of all, enabled again
         undoInterruptedRepair();
+        putGlobal(KEY_BUSY, Settings.Global.getInt(getContentResolver(), Settings.Global.BOOT_COUNT, -1) + ":" + SystemClock.elapsedRealtime());
         try {
             if (MODE_UPDATED.equals(mode) || MODE_INSTALLED.equals(mode)) afterInstall(delay, MODE_UPDATED.equals(mode));
             else check(delay, mode, sinceElapsed);
         } finally {
             undoInterruptedRepair();
+            putGlobal(KEY_BUSY, null);
         }
     }
 
