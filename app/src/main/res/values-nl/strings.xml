@@ -333,6 +333,7 @@
     <string name="st_style_now">Huidige stijl: %1$s</string>
     <string name="st_style_full">Volledig</string>
     <string name="st_style_simple">Eenvoudig</string>
+    <string name="st_style_big">Groot scherm (test)</string>
     <string name="st_style_desc">Eenvoudig: drie grote vlakken (klimaat, accu, media), twee snelkoppelingen en het weer van vandaag. De wijziging geldt zodra je terugkeert naar het startscherm.</string>
     <string name="en_heating">ACCUVERWARMING</string>
     <string name="st_theme">THEMA</string>

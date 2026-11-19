@@ -49,6 +49,8 @@ import kotlinx.coroutines.launch
 import java.util.Locale
 
 class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
+    /** Grand affichage: this screen enlarged (BigDisplay), Android's own setting untouched. */
+    override fun attachBaseContext(newBase: android.content.Context) = super.attachBaseContext(app.mg4dash.ui.BigDisplay.wrap(newBase))
 
     private lateinit var b: ActivityMainBinding
     private lateinit var prefs: Prefs

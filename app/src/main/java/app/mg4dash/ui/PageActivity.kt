@@ -16,6 +16,8 @@ import kotlinx.coroutines.launch
  * full screen, refreshed at each vehicle state.
  */
 abstract class PageActivity : AppCompatActivity() {
+    /** Grand affichage: this screen enlarged (BigDisplay), Android's own setting untouched. */
+    override fun attachBaseContext(newBase: android.content.Context) = super.attachBaseContext(app.mg4dash.ui.BigDisplay.wrap(newBase))
     private val twoFingerPull by lazy { TwoFingerPull(this) }
 
     override fun dispatchTouchEvent(ev: android.view.MotionEvent): Boolean =

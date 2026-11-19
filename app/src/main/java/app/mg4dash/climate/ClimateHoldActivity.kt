@@ -22,6 +22,8 @@ import java.util.Locale
  * battery. The screen stays on; holding the button stops the mode.
  */
 class ClimateHoldActivity : AppCompatActivity() {
+    /** Grand affichage: this screen enlarged (BigDisplay), Android's own setting untouched. */
+    override fun attachBaseContext(newBase: android.content.Context) = super.attachBaseContext(app.mg4dash.ui.BigDisplay.wrap(newBase))
     /** Closed at once in maintenance mode (its onCreate went no further). */
     private var closedForMaintenance = false
     private lateinit var kit: Kit
