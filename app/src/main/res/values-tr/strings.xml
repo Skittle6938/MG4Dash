@@ -448,7 +448,7 @@
     <string name="st_upd_new">Güncelleme mevcut - %1$s → %2$s</string>
     <string name="st_upd_none_new">yüklü değil · %1$s mevcut</string>
     <string name="st_upd_install_ver">%1$s yükle</string>
-    <string name="st_upd_note">MG4Dash güncellemesi sonunda ekranı yeniden başlatır. MG4Radio, orta ekran yeniden başlatıldıktan sonra geçerli olur (Ana Sayfa\'ya yaklaşık 20 sn basılı tutun) ve %1$s üzerinde test edildi.</string>
+    <string name="st_upd_note">MG4Dash güncellemesi sonunda ekranı yeniden başlatır. MG4Radio yalnızca %1$s içindir; orta ekran yeniden başlatıldıktan sonra geçerli olur (Ana sayfaya yaklaşık 20 sn basılı tutun).</string>
     <string name="st_update_auto">Otomatik kontrol: %1$s</string>
     <string name="st_update_auto_desc">MG4Dash ve MG4Radio, haftada bir, beta sürümleriyle her gün.</string>
     <string name="st_rd_newer_radio">bu aracın radyosu MG4Radio\'dan daha yeni, MG4Radio onun yerini alamaz</string>
@@ -1130,4 +1130,5 @@
     <string name="dm_fan">Fan</string>
     <string name="dm_note_now_set">Klima hemen %1$s, fan %2$d ile başlar, ardından kapılar gecikmeden sonra kilitlenir. Batarya %%20\'nin altına düşünce, kapılar açılınca veya araç hareket edince durur.</string>
     <string name="dm_note_at_set">Araç ilk döngüye kadar açık (klima kapalı, yaklaşık 0,2 kW) ve kilitli kalır, ardından klimayı %1$s, fan %2$d ile çalıştırır. Son döngüden sonra veya batarya %%20\'nin altında kapanır, kapılar açılınca her şey durur.</string>
+    <string name="st_rd_not_validated">Bu yazılımda doğrulanmadı</string>
 </resources>

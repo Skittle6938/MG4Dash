@@ -448,7 +448,7 @@
     <string name="st_upd_new">Update beschikbaar - %1$s → %2$s</string>
     <string name="st_upd_none_new">niet geïnstalleerd · %1$s beschikbaar</string>
     <string name="st_upd_install_ver">%1$s installeren</string>
-    <string name="st_upd_note">De MG4Dash-update herstart het scherm aan het eind. MG4Radio werkt na een herstart van het middenscherm (Home ongeveer 20 s ingedrukt houden) en is getest op %1$s.</string>
+    <string name="st_upd_note">De update van MG4Dash herstart het scherm aan het eind. MG4Radio is alleen voor %1$s; het werkt na een herstart van het centrale scherm (Home ongeveer 20 s ingedrukt houden).</string>
     <string name="st_update_auto">Automatisch controleren: %1$s</string>
     <string name="st_update_auto_desc">MG4Dash en MG4Radio, één keer per week, of elke dag met bètaversies.</string>
     <string name="st_rd_newer_radio">de radio van deze auto is nieuwer dan MG4Radio, dat hem niet kan vervangen</string>
@@ -1130,4 +1130,5 @@
     <string name="dm_fan">Ventilatie</string>
     <string name="dm_note_now_set">De klimaatregeling start meteen op %1$s, ventilatie %2$d, daarna vergrendelen de deuren na de wachttijd. Stopt onder 20 %% accu, bij ontgrendelen of als de auto rijdt.</string>
     <string name="dm_note_at_set">De auto blijft aan (klimaat uit, ongeveer 0,2 kW) en vergrendeld tot de eerste cyclus en start dan de klimaatregeling op %1$s, ventilatie %2$d. Hij schakelt uit na de laatste cyclus of onder 20 %% accu, en alles stopt bij ontgrendelen.</string>
+    <string name="st_rd_not_validated">Niet gevalideerd op deze firmware</string>
 </resources>

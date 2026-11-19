@@ -448,7 +448,7 @@
     <string name="st_upd_new">Update verfügbar - %1$s → %2$s</string>
     <string name="st_upd_none_new">nicht installiert · %1$s verfügbar</string>
     <string name="st_upd_install_ver">%1$s installieren</string>
-    <string name="st_upd_note">Das MG4Dash-Update startet den Bildschirm am Ende neu. MG4Radio gilt nach einem Neustart des Zentralbildschirms (Home etwa 20 s halten) und ist getestet auf %1$s.</string>
+    <string name="st_upd_note">Das MG4Dash-Update startet den Bildschirm am Ende neu. MG4Radio ist nur für %1$s; es wird nach einem Neustart des Zentralbildschirms wirksam (Home etwa 20 s gedrückt halten).</string>
     <string name="st_update_auto">Automatisch prüfen: %1$s</string>
     <string name="st_update_auto_desc">MG4Dash und MG4Radio, einmal pro Woche, mit Beta-Versionen jeden Tag.</string>
     <string name="st_rd_newer_radio">das Radio dieses Autos ist neuer als MG4Radio, das es nicht ersetzen kann</string>
@@ -1130,4 +1130,5 @@
     <string name="dm_fan">Gebläse</string>
     <string name="dm_note_now_set">Die Klimaanlage startet sofort mit %1$s, Gebläse %2$d, dann verriegeln die Türen nach der Wartezeit. Stopp unter 20 %% Akku, beim Entriegeln oder wenn das Auto fährt.</string>
     <string name="dm_note_at_set">Das Auto bleibt eingeschaltet (Klima aus, etwa 0,2 kW) und verriegelt bis zum ersten Zyklus und startet dann die Klimaanlage mit %1$s, Gebläse %2$d. Es schaltet nach dem letzten Zyklus oder unter 20 %% Akku ab, alles stoppt beim Entriegeln.</string>
+    <string name="st_rd_not_validated">Auf dieser Firmware nicht freigegeben</string>
 </resources>

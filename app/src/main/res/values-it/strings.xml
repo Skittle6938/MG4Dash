@@ -448,7 +448,7 @@
     <string name="st_upd_new">Aggiornamento disponibile - %1$s → %2$s</string>
     <string name="st_upd_none_new">non installata · %1$s disponibile</string>
     <string name="st_upd_install_ver">Installa la %1$s</string>
-    <string name="st_upd_note">L\'aggiornamento di MG4Dash riavvia lo schermo alla fine. MG4Radio si applica dopo il riavvio dello schermo centrale (tenere premuto Home circa 20 s) ed è provata su %1$s.</string>
+    <string name="st_upd_note">L\'aggiornamento di MG4Dash riavvia lo schermo alla fine. MG4Radio è solo per %1$s; si applica dopo un riavvio dello schermo centrale (pressione lunga su Home per circa 20 s).</string>
     <string name="st_update_auto">Controllo automatico: %1$s</string>
     <string name="st_update_auto_desc">MG4Dash e MG4Radio, una volta a settimana, o ogni giorno con le versioni beta.</string>
     <string name="st_rd_newer_radio">la radio di quest\'auto è più recente di MG4Radio, che non può sostituirla</string>
@@ -1130,4 +1130,5 @@
     <string name="dm_fan">Ventilazione</string>
     <string name="dm_note_now_set">Il clima parte subito a %1$s, ventilazione %2$d, poi le porte si bloccano dopo il ritardo. Si ferma sotto il 20 %% di batteria, allo sblocco delle porte o se l\'auto si muove.</string>
     <string name="dm_note_at_set">L\'auto resta accesa (clima spento, circa 0,2 kW) e bloccata fino al primo ciclo, poi avvia il clima a %1$s, ventilazione %2$d. Si spegne dopo l\'ultimo ciclo o sotto il 20 %% di batteria, e tutto si ferma allo sblocco delle porte.</string>
+    <string name="st_rd_not_validated">Non convalidata su questo firmware</string>
 </resources>

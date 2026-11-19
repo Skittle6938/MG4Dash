@@ -60,7 +60,9 @@ object UpdatePrompt {
         owner.lifecycleScope.launch {
             withContext(Dispatchers.IO) {
                 val mine = try { Updater.latest(prefs.updateBeta) } catch (e: Exception) { Log.w(TAG, "periodic check: ${e.message}"); return@withContext }
-                val rd = try { app.mg4dash.system.RadioDashUpdater.latest(prefs.updateBeta) } catch (e: Exception) { null }
+                // Radio Dash only where it is validated (#111)
+                val rd = if (!app.mg4dash.system.RadioDashUpdater.validated) null
+                    else try { app.mg4dash.system.RadioDashUpdater.latest(prefs.updateBeta) } catch (e: Exception) { null }
                 remember(activity, mine?.version, rd?.version)
                 Log.i(TAG, "periodic check: MG4Dash ${mine?.version}, Radio Dash ${rd?.version}")
             }
