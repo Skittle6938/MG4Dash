@@ -1116,8 +1116,8 @@
     <string name="un_button">Disinstalla MG4Dash, MG4Radio o MG4Link…</string>
     <string name="un_title">Disinstalla</string>
     <string name="un_do">Disinstalla</string>
-    <string name="un_radio_what">Rimette la radio originale dell\'auto (nient\'altro cambia). Si applica dopo un riavvio dello schermo centrale (pressione lunga su Home per circa 20 s).</string>
-    <string name="un_link_what">Rimuove MG4Link e le sue impostazioni: torna l\'Android Auto originale dell\'auto.</string>
+    <string name="un_radio_what">Rimette la radio originale dell\'auto. Si applica dopo un riavvio dello schermo centrale (pressione lunga su Home per circa 20 s).</string>
+    <string name="un_link_what">Rimuove MG4Link: l\'Android Auto originale dell\'auto torna dopo un riavvio dello schermo centrale (pressione lunga su Home per circa 20 s).</string>
     <string name="un_dash_what">Rimette la home SAIC, poi rimuove MG4Dash, la sua app di soccorso e tutte le impostazioni. Per reinstallarlo servirà rifare l\'installazione completa.</string>
     <string name="un_confirm_title">Disinstallare %1$s?</string>
     <string name="un_dash_body">La home SAIC torna a essere la schermata iniziale, poi MG4Dash e la sua app di soccorso vengono rimossi con tutte le impostazioni (schede, scorciatoie, cronologia dei consumi).</string>
@@ -1131,4 +1131,6 @@
     <string name="dm_note_now_set">Il clima parte subito a %1$s, ventilazione %2$d, poi le porte si bloccano dopo il ritardo. Si ferma sotto il 20 %% di batteria, allo sblocco delle porte o se l\'auto si muove.</string>
     <string name="dm_note_at_set">L\'auto resta accesa (clima spento, circa 0,2 kW) e bloccata fino al primo ciclo, poi avvia il clima a %1$s, ventilazione %2$d. Si spegne dopo l\'ultimo ciclo o sotto il 20 %% di batteria, e tutto si ferma allo sblocco delle porte.</string>
     <string name="st_rd_not_validated">Non convalidata su questo firmware</string>
+    <string name="un_data_kept">I suoi dati (preferiti, impostazioni) vengono conservati.</string>
+    <string name="un_data_lost">I suoi dati (preferiti, impostazioni) vengono cancellati.</string>
 </resources>

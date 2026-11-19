@@ -17,16 +17,26 @@ import app.mg4dash.system.Uninstaller
 object UninstallWindow {
     private const val TAG = "Uninstall"
 
-    /** An app the window offers: its name, its package, whether it is installed, its version, what removing it does. */
-    internal class App(val name: String, val pkg: String, val installed: Boolean, val version: String?, val what: Int)
+    /**
+     * An app the window offers: its name, its package, whether it is installed, its version, what removing it does,
+     * and whether its data stays (null: MG4Dash, its own text says it).
+     */
+    internal class App(val name: String, val pkg: String, val installed: Boolean, val version: String?, val what: Int, val keepsData: Boolean? = null)
+
+    /** What removing [app] does, with what becomes of its data. */
+    internal fun whatOf(a: Activity, app: App): String = listOfNotNull(a.getString(app.what),
+        app.keepsData?.let { a.getString(if (it) R.string.un_data_kept else R.string.un_data_lost) }).joinToString(" ")
 
     internal fun apps(a: Activity): List<App> = listOf(
         App("MG4Dash", a.packageName, true, app.mg4dash.BuildConfig.VERSION_NAME, R.string.un_dash_what),
-        App("MG4Radio", RadioDashUpdater.PKG, RadioDashUpdater.installed(a), RadioDashUpdater.installedVersion(a), R.string.un_radio_what),
-        App("MG4Link", AirlinkUpdater.PKG, AirlinkUpdater.installedVersion(a) != null, AirlinkUpdater.installedVersion(a), R.string.un_link_what),
+        App("MG4Radio", RadioDashUpdater.PKG, RadioDashUpdater.installed(a), RadioDashUpdater.installedVersion(a), R.string.un_radio_what,
+            Uninstaller.keepsData(a, RadioDashUpdater.PKG)),
+        App("MG4Link", AirlinkUpdater.PKG, AirlinkUpdater.installedVersion(a) != null, AirlinkUpdater.installedVersion(a), R.string.un_link_what,
+            Uninstaller.keepsData(a, AirlinkUpdater.PKG)),
     )
 
-    fun show(a: Activity) {
+    /** [removed]: called on the main thread once an app is gone (the settings refresh their update lines). */
+    fun show(a: Activity, removed: () -> Unit = {}) {
         val kit = Kit(a)
         val box = kit.column().apply { setPadding(kit.dp(30), kit.dp(24), kit.dp(30), kit.dp(22)) }
         box.addView(kit.text(a.getString(R.string.un_title).uppercase(), 16f, R.color.text_title).apply { letterSpacing = 0.12f }, kit.lp(-1, -2, b = 8))
@@ -35,11 +45,11 @@ object UninstallWindow {
             val line = kit.row().apply { gravity = Gravity.CENTER_VERTICAL }
             line.addView(kit.column().apply {
                 addView(kit.text(listOfNotNull(app.name, app.version).joinToString(" · "), 22f))
-                addView(kit.text(a.getString(app.what), 17f, R.color.text_sub).apply { maxLines = 3; setLineSpacing(0f, 1.1f) }, kit.lp(-1, -2, t = 2))
+                addView(kit.text(whatOf(a, app), 17f, R.color.text_sub).apply { maxLines = 4; setLineSpacing(0f, 1.1f) }, kit.lp(-1, -2, t = 2))
             }, kit.lp(0, -2, 1f))
             line.addView(redTile(kit, a, a.getString(R.string.un_do)) {
                 dialog.dismiss()
-                if (app.pkg == a.packageName) confirmDash(a) else confirmApp(a, app)
+                if (app.pkg == a.packageName) confirmDash(a) else confirmApp(a, app, removed)
             }, kit.lp(kit.dp(220), kit.dp(56), l = 20))
             box.addView(line, kit.lp(-1, -2, t = 12))
         }
@@ -51,12 +61,12 @@ object UninstallWindow {
     private fun redTile(kit: Kit, a: Activity, label: String, onClick: () -> Unit): TextView =
         kit.toggleTile(label, onClick = onClick).apply { textSize = 19f; setTextColor(Themes.color(a, R.color.accent_danger)) }
 
-    private fun confirmApp(a: Activity, app: App) {
+    private fun confirmApp(a: Activity, app: App, removed: () -> Unit) {
         AlertDialog.Builder(a)
             .setTitle(a.getString(R.string.un_confirm_title, app.name))
-            .setMessage(app.what)
+            .setMessage(whatOf(a, app))
             .setNegativeButton(R.string.cancel, null)
-            .setPositiveButton(R.string.un_do) { _, _ -> run(a, app.name) { Uninstaller.removeApp(a.applicationContext, app.pkg) } }
+            .setPositiveButton(R.string.un_do) { _, _ -> run(a, app.name, removed) { Uninstaller.removeApp(a.applicationContext, app.pkg) } }
             .create().also { Dialogs.show(it); Dialogs.fix(it) }
     }
 
@@ -79,7 +89,7 @@ object UninstallWindow {
     }
 
     /** Runs [work] off the main thread, then tells how it went (for MG4Dash itself, its process goes before). */
-    private fun run(a: Activity, name: String, work: () -> Boolean) {
+    private fun run(a: Activity, name: String, removed: () -> Unit = {}, work: () -> Boolean) {
         Toasts.show(a, a.getString(R.string.un_working))
         val app = a.applicationContext
         Thread {
@@ -87,6 +97,7 @@ object UninstallWindow {
             Log.i(TAG, "$name uninstall → $ok")
             android.os.Handler(android.os.Looper.getMainLooper()).post {
                 Toasts.show(app, if (ok) app.getString(R.string.un_done, name) else app.getString(R.string.un_failed, name), long = true)
+                if (ok) removed()
             }
         }.start()
     }

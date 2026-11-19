@@ -44,6 +44,28 @@ object Uninstaller {
         else -> Removal.UNINSTALL
     }
 
+    /**
+     * Whether the app's data (favourites, settings) survives its removal. Android 9 (deleteSystemPackageLIF) keeps an
+     * update's data when the car's own version is not older, and wipes it for a downgrade; a plain uninstall wipes it.
+     * On SWI69 (19/11): MG4Radio and the car's radio are both versionCode 2, kept; MG4Link 2211 over the car's 1, wiped.
+     */
+    fun keepsData(removal: Removal, factoryCode: Long?, installedCode: Long): Boolean =
+        removal == Removal.REVERT_UPDATE && factoryCode != null && factoryCode >= installedCode
+
+    /** [keepsData] for [pkg] on this car; false when unknown (the warning then says the data goes). */
+    fun keepsData(context: Context, pkg: String): Boolean = try {
+        val pm = context.packageManager
+        val p = pm.getPackageInfo(pkg, 0)
+        // MATCH_FACTORY_ONLY: the car's own version under the update
+        val factory = try { pm.getPackageInfo(pkg, 0x00200000).longVersionCode } catch (_: Exception) { null }
+        keepsData(removalOf(p.applicationInfo.flags), factory, p.longVersionCode)
+    } catch (_: Exception) { false }
+
+    /** What MG4Dash remembers of a removed app, forgotten (MG4Radio: the version it installed, shown in Settings). */
+    fun forget(context: Context, pkg: String) {
+        if (pkg == RadioDashUpdater.PKG) Prefs(context).raw.edit().remove("radio_dash_version").remove("radio_dash_pending").apply()
+    }
+
     /** How MG4Dash's own uninstall went: the steps done, and the one that failed (null: all done). */
     data class Result(val done: List<Step>, val failed: Step?)
 
@@ -105,5 +127,5 @@ object Uninstaller {
     }
 
     /** MG4Radio or MG4Link: its update removed, the car's own app back. Off the main thread. */
-    fun removeApp(context: Context, pkg: String): Boolean = CarOps(context).remove(pkg)
+    fun removeApp(context: Context, pkg: String): Boolean = CarOps(context).remove(pkg).also { if (it) forget(context, pkg) }
 }
