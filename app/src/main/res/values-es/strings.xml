@@ -333,7 +333,9 @@
     <string name="st_style_now">Estilo actual: %1$s</string>
     <string name="st_style_full">Completo</string>
     <string name="st_style_simple">Sencillo</string>
-    <string name="st_style_big">Pantalla grande (prueba)</string>
+    <string name="st_style_big">Pantalla grande</string>
+    <string name="st_style_standard">Estándar</string>
+    <string name="sc_big">Pantalla grande</string>
     <string name="big_more">Más</string>
     <string name="st_style_desc">Sencillo: tres paneles grandes (clima, batería, multimedia), dos accesos y el tiempo de hoy. El cambio se aplica al volver al inicio.</string>
     <string name="en_heating">CALEFACCIÓN BATERÍA</string>

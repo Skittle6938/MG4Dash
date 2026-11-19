@@ -534,6 +534,11 @@ class Prefs(context: Context) {
         get() = sp.getString("home_layout", null)
         set(v) = sp.edit().putString("home_layout", v).apply()
 
+    /** The style before Grand affichage (0 Standard, 1 Simple), which its shortcuts tile goes back to. */
+    var styleBeforeBig: Int
+        get() = sp.getInt("home_style_before_big", 0)
+        set(v) = sp.edit().putInt("home_style_before_big", v).apply()
+
     /** Layout of Grand affichage (a HomeSlots.Layout key of two columns); null: Four. Kept apart from [homeLayout]. */
     var homeLayoutBig: String?
         get() = sp.getString("home_layout_big", null)

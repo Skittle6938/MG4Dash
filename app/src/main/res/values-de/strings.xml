@@ -333,7 +333,9 @@
     <string name="st_style_now">Aktueller Stil: %1$s</string>
     <string name="st_style_full">Vollständig</string>
     <string name="st_style_simple">Schlicht</string>
-    <string name="st_style_big">Große Anzeige (Test)</string>
+    <string name="st_style_big">Große Anzeige</string>
+    <string name="st_style_standard">Standard</string>
+    <string name="sc_big">Große Anzeige</string>
     <string name="big_more">Mehr</string>
     <string name="st_style_desc">Schlicht: drei große Felder (Klima, Batterie, Medien), zwei Verknüpfungen und das heutige Wetter. Die Änderung gilt beim Zurückkehren zur Startseite.</string>
     <string name="en_heating">BATTERIEHEIZUNG</string>

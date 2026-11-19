@@ -236,9 +236,22 @@ object HomeSlots {
      * The layout chosen for the current mode: one is remembered per mode (home_layout, home_layout_big), so going to
      * Grand affichage and back loses nothing. Before the eight layouts (#38), the Map home style was the Map layout.
      */
-    fun layoutOf(prefs: Prefs): Layout =
-        if (prefs.homeStyle == Prefs.STYLE_BIG) Layout.of(prefs.homeLayoutBig)?.takeIf { it.big } ?: Layout.BIG_QUAD
+    fun layoutOf(prefs: Prefs): Layout = layoutOf(prefs, prefs.homeStyle == Prefs.STYLE_BIG)
+
+    /** The layout remembered for Grand affichage ([big]) or for the Standard style, whichever style is in use. */
+    fun layoutOf(prefs: Prefs, big: Boolean): Layout =
+        if (big) Layout.of(prefs.homeLayoutBig)?.takeIf { it.big } ?: Layout.BIG_QUAD
         else Layout.of(prefs.homeLayout)?.takeIf { !it.big } ?: if (prefs.homeStyle == 2) Layout.MAP else Layout.FULL
+
+    /**
+     * The shortcuts menu's Grand affichage tile: into the mode, or back to the style used before it (Standard or
+     * Simple); each style keeps its layout and cards.
+     */
+    fun toggleBig(prefs: Prefs) {
+        if (prefs.homeStyle == Prefs.STYLE_BIG) { prefs.homeStyle = if (prefs.styleBeforeBig == 1) 1 else 0; return }
+        prefs.styleBeforeBig = if (prefs.homeStyle == 1) 1 else 0
+        prefs.homeStyle = Prefs.STYLE_BIG
+    }
 
     /**
      * Chooses [layout] (Settings › Home, the edit mode), in its own mode: a layout of Grand affichage keeps that mode, any
