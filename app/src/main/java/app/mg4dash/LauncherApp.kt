@@ -89,6 +89,9 @@ class LauncherApp : Application() {
     private fun startAll() {
         if (started) return
         started = true
+        // A profile switch cut by the car switching off: finished before anything reads the settings
+        app.mg4dash.system.Profiles.resume(this)
+        app.mg4dash.system.Profiles.onSwitch { afterProfileSwitch(it) }
         installCrashGuard()
         if (!BuildConfig.MOCK && app.mg4dash.system.Maintenance.on(this)) { startMaintenance(); return }
         // Shortcuts menu, and MG's fog light button hidden by the SystemUI overlay (installed and switched with the
@@ -155,6 +158,20 @@ class LauncherApp : Application() {
         // MG4Dash Rescue's sign of life: everything started, its code loads (home's first frame gives it too, for a
         // start hidden behind another app it is this one)
         app.mg4dash.system.Rescue.alive(this)
+    }
+
+    /**
+     * After a profile switch: the theme published again for MG4Radio, the profile's brightness put back, the shortcuts
+     * strip and the fog overlay as the profile wants them, and a short message; the open screens rebuild by themselves
+     * (the theme's signature includes the profile).
+     */
+    private fun afterProfileSwitch(p: app.mg4dash.system.Profiles.Profile) {
+        android.os.Handler(android.os.Looper.getMainLooper()).post {
+            app.mg4dash.ui.Themes.publish(this)
+            if (!BuildConfig.MOCK) app.mg4dash.system.BrightnessMemory.restore(this, "profile ${p.name}")
+            app.mg4dash.ui.ShortcutsPanel.GlobalStrip.update(this)
+            app.mg4dash.ui.Toasts.show(this, getString(R.string.pf_switched, p.name))
+        }
     }
 
     private fun startThemeWatch() {

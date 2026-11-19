@@ -99,7 +99,9 @@ object Themes {
     private const val GLOBAL_KEY = "mg4dash_theme"
 
     /** Signature of the current theme: used to know if a screen must redraw. */
-    fun signature(context: Context): Int = Prefs(context).let { it.themeBackground * 10 + it.themeAccent + (if (isLight(context)) 100 else 0) + (if (it.verticalDock) 1000 else 0) + (if (it.panelFade) 0 else 10000) + (if (it.wideBar) 100000 else 0) + (if (it.homeStyle == Prefs.STYLE_BIG) 1000000 else 0) }
+    fun signature(context: Context): Int = Prefs(context).let { it.themeBackground * 10 + it.themeAccent + (if (isLight(context)) 100 else 0) + (if (it.verticalDock) 1000 else 0) + (if (it.panelFade) 0 else 10000) + (if (it.wideBar) 100000 else 0) + (if (it.homeStyle == Prefs.STYLE_BIG) 1000000 else 0) +
+        // A profile switch rebuilds the open screens even when both profiles have the same theme
+        app.mg4dash.system.Profiles.generation(context) * 10_000_000 }
 
     /**
      * A context with MG4Dash's theme (background and buttons chosen), for windows outside the screens; enlarged in
