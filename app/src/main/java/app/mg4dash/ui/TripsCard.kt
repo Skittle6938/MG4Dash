@@ -20,7 +20,7 @@ class TripsCard(context: Context) : LinearLayout(context) {
     private fun tv(sp: Float, colorRes: Int, light: Boolean = false) = TextView(context).apply {
         setTextColor(Themes.color(context, colorRes)); setTextSize(TypedValue.COMPLEX_UNIT_SP, sp); maxLines = 1
         includeFontPadding = false
-        if (light) typeface = android.graphics.Typeface.create("sans-serif-light", android.graphics.Typeface.NORMAL)
+        if (light) typeface = Themes.valueFont(context)
     }
     private fun line(left: TextView, right: TextView) = LinearLayout(context).apply {
         orientation = HORIZONTAL; gravity = Gravity.CENTER_VERTICAL

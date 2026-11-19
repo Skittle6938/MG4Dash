@@ -113,7 +113,15 @@ object Themes {
         return android.view.ContextThemeWrapper(BigDisplay.wrap(context.applicationContext, big), R.style.Theme_MG4Launcher).apply {
             theme.applyStyle(bgs.getOrElse(p.themeBackground) { bgs[0] }, true)
             theme.applyStyle(accs.getOrElse(p.themeAccent) { accs[0] }, true)
+            if (big) theme.applyStyle(if (light) R.style.MgBigLight else R.style.MgBigDark, true)
         }
+    }
+
+    /** The big numbers' font: light, regular in Grand affichage (its theme overlay). */
+    fun valueFont(context: Context): android.graphics.Typeface {
+        val tv = TypedValue()
+        val name = if (context.theme.resolveAttribute(R.attr.mgValueFont, tv, true) && tv.string != null) tv.string.toString() else "sans-serif-light"
+        return android.graphics.Typeface.create(name, android.graphics.Typeface.NORMAL)
     }
 
     /** To call in onCreate, before setContentView; [dark] forces the dark theme. */
@@ -124,6 +132,8 @@ object Themes {
         val accs = if (light) ACCENTS_LIGHT else ACCENTS
         activity.theme.applyStyle(bgs.getOrElse(p.themeBackground) { bgs[0] }, true)
         activity.theme.applyStyle(accs.getOrElse(p.themeAccent) { accs[0] }, true)
+        // Grand affichage: stronger contrast and regular big numbers, on the enlarged screens
+        if (BigDisplay.factor(activity) > 1f) activity.theme.applyStyle(if (light) R.style.MgBigLight else R.style.MgBigDark, true)
         fitHeight(activity)
         fadeFromPrevious(activity)
     }
