@@ -82,6 +82,7 @@ object HomeSwitcher {
             )
             val now = currentHome(context)
             Log.i(TAG, "SAIC home disabled; HOME resolves to: ${now?.flattenToShortString()}")
+            tellRescue(context, "1")
             true
         } catch (e: SecurityException) {
             Log.e(TAG, "disabling SAIC home refused (system uid required)", e)
@@ -104,10 +105,40 @@ object HomeSwitcher {
     fun ensureHome(context: Context, why: String) {
         try {
             val cur = currentHome(context)
-            if (!needsHomeBack(Prefs(context).valetMode, !isStockEnabled(context), cur, ours(context))) return
+            if (!needsHomeBack(Prefs(context).valetMode, !isStockEnabled(context), cur, ours(context))) { noteHome(context); return }
             setPreferred(context, ours(context))
             Log.i(TAG, "MG4Dash set as home again ($why): HOME was ${cur?.flattenToShortString()}, now ${currentHome(context)?.flattenToShortString()}")
+            noteHome(context)
         } catch (e: Exception) { Log.w(TAG, "home check ($why): ${e.message}") }
+    }
+
+    /** Global setting read by MG4Dash Rescue: "1" MG4Dash is the home chosen, "0" it is not. */
+    const val KEY_HOME = "mg4dash_home"
+
+    /**
+     * What to tell MG4Dash Rescue about the home (19/11: with SAIC home enabled, the rescue did not know MG4Dash was the
+     * home and left it crashing): "0" in maintenance mode or with another home in use, "1" with SAIC home replaced or
+     * MG4Dash the HOME resolved; null with Android's chooser (after a crash loop Android forgets the preference: the
+     * last word stays).
+     */
+    internal fun homeWord(valet: Boolean, stockDisabled: Boolean, current: ComponentName?, ours: ComponentName): String? = when {
+        valet -> "0"
+        stockDisabled || current == ours -> "1"
+        current == null || current.packageName == "android" || current.className.contains("Resolver") || current.packageName.contains("lenspicker") -> null
+        else -> "0"
+    }
+
+    /** Tells MG4Dash Rescue whether MG4Dash is the home now. */
+    fun noteHome(context: Context) = tellRescue(context, homeWord(Prefs(context).valetMode, !isStockEnabled(context), currentHome(context), ours(context)))
+
+    private fun tellRescue(context: Context, word: String?) {
+        if (word == null || app.mg4dash.BuildConfig.MOCK) return
+        try {
+            if (android.provider.Settings.Global.getString(context.contentResolver, KEY_HOME) != word) {
+                android.provider.Settings.Global.putString(context.contentResolver, KEY_HOME, word)
+                Log.i(TAG, "rescue told: home $word")
+            }
+        } catch (e: Exception) { Log.w(TAG, "home word: ${e.message}") }
     }
 
     /** Service mode: re-enables SAIC home, makes it preferred, then opens it. */
@@ -124,6 +155,7 @@ object HomeSwitcher {
             false
         }
         Log.i(TAG, "SAIC home re-enabled → $ok")
+        tellRescue(context, "0")
         if (ok) {
             try {
                 context.startActivity(Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_HOME)

@@ -10,18 +10,27 @@ import java.io.File
 /**
  * Link with MG4Dash Rescue (rescue/ module), the separate safety net: if it does not see MG4Dash start,
  * it recompiles and relaunches it, then restores SAIC home if that is not enough.
- *  - sign of life at each launch (global setting mg4dash_alive);
- *  - installation of the embedded rescue app (assets of the car version) if missing or older;
+ *  - sign of life once home's screen is drawn (global setting mg4dash_alive): the code really loads (19/11: written at
+ *    the very start, it came before the crash and the rescue thought all was well);
+ *  - installation of the embedded rescue app (assets of the car version) if missing or older, then checked;
+ *  - after MG4Dash's own update, the hand-over to it (a clean recompilation and a watched relaunch);
  *  - message at the next launch when it had to step in.
  */
 object Rescue {
     private const val TAG = "Rescue"
     const val PKG = "app.mg4dash.rescue"
     /** Version of the embedded rescue app (versionCode of rescue/build.gradle.kts). */
-    private const val BUNDLED_VERSION = 3L
+    const val BUNDLED_VERSION = 4L
+    /** The first rescue that takes over after MG4Dash's update (UPDATED). */
+    const val HANDS_OVER_FROM = 4L
     private const val ASSET = "rescue.apk"
+    const val ACTION_UPDATED = "$PKG.UPDATED"
+    const val ACTION_INIT = "$PKG.INIT"
+    const val KEY_OK = "mg4dash_rescue_ok"
+    /** Waited for the rescue's answer to INIT. */
+    private const val ACK_WAIT_MS = 30_000L
 
-    /** MG4Dash started during this head unit boot. */
+    /** MG4Dash's sign of life during this head unit boot: home's first frame drawn. */
     fun alive(context: Context) {
         if (BuildConfig.MOCK) return
         try {
@@ -30,13 +39,28 @@ object Rescue {
         } catch (e: Exception) { Log.w(TAG, "alive: ${e.message}") }
     }
 
+    /** The sign of life given once [activity]'s first frame is drawn (not before: the code has to load first). */
+    fun aliveAtFirstFrame(activity: android.app.Activity) {
+        val decor = activity.window.decorView
+        val listener = object : android.view.ViewTreeObserver.OnDrawListener {
+            var done = false
+            override fun onDraw() {
+                if (done) return
+                done = true
+                alive(activity.applicationContext)
+                // (removing a draw listener while drawing is refused: done after)
+                decor.post { try { decor.viewTreeObserver.removeOnDrawListener(this) } catch (_: Exception) {} }
+            }
+        }
+        decor.viewTreeObserver.addOnDrawListener(listener)
+    }
+
     /** Message to show once on home (text already translated), or null. */
     @Volatile var notice: Int? = null
 
-    /** At launch: sign of life, possible rescue app intervention, its installation. */
+    /** At launch: possible rescue app intervention, its installation. The sign of life comes with the first frame. */
     fun start(context: Context) {
         if (BuildConfig.MOCK) return
-        alive(context)
         when (takeRescued(context)) {
             "stock" -> { Prefs(context).valetMode = true; notice = app.mg4dash.R.string.rescue_stock }
             "recompiled" -> notice = app.mg4dash.R.string.rescue_recompiled
@@ -52,12 +76,32 @@ object Rescue {
         }
     } catch (e: Exception) { null }
 
+    /** Version of the rescue app installed, -1 without one. */
+    fun installedVersion(context: Context): Long = try {
+        context.packageManager.getPackageInfo(PKG, 0).longVersionCode
+    } catch (_: Exception) { -1L }
+
+    /** Whether the rescue installed takes over after MG4Dash's update. */
+    fun handsOver(installed: Long) = installed >= HANDS_OVER_FROM
+
+    /**
+     * MG4Dash just updated: the rescue (v4 and later) recompiles it cleanly while it is stopped, relaunches and watches
+     * it. True when handed over (MG4Dash then does not restart itself), false with an older or no rescue.
+     */
+    fun handOverUpdate(context: Context): Boolean {
+        if (BuildConfig.MOCK || !handsOver(installedVersion(context))) return false
+        return try {
+            context.sendBroadcast(Intent(ACTION_UPDATED).setPackage(PKG)
+                .addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES or Intent.FLAG_RECEIVER_FOREGROUND))
+            Log.i(TAG, "update handed over to the rescue")
+            true
+        } catch (e: Exception) { Log.w(TAG, "hand-over: ${e.message}"); false }
+    }
+
     /** Installs the rescue app if needed (off the main thread), then wakes it. */
     fun ensureInstalled(context: Context) {
         if (BuildConfig.MOCK) return
-        val installed = try {
-            context.packageManager.getPackageInfo(PKG, 0).longVersionCode
-        } catch (_: Exception) { -1L }
+        val installed = installedVersion(context)
         if (installed >= BUNDLED_VERSION) { wake(context); return }
         try {
             val apk = File(context.cacheDir, ASSET)
@@ -86,19 +130,55 @@ object Rescue {
 
     /**
      * An installed app stays "stopped" and does not receive the head unit's boot until one of its
-     * components has been used: an explicit message gets it out of that state.
+     * components has been used: an explicit message gets it out of that state (and it answers in mg4dash_rescue_ok).
      */
     private fun wake(context: Context) {
         try {
-            context.sendBroadcast(Intent("$PKG.INIT").setPackage(PKG).addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES))
+            context.sendBroadcast(Intent(ACTION_INIT).setPackage(PKG).addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES))
         } catch (e: Exception) { Log.w(TAG, "wake: ${e.message}") }
+    }
+
+    /** Recompiles [pkg] (forced, as "cmd package compile -f"): the rescue is never home, so never running meanwhile. */
+    internal var recompile: (Context, String) -> Boolean = { _, pkg ->
+        try {
+            val pm = Class.forName("android.app.ActivityThread").getMethod("getPackageManager").invoke(null)
+            val m = pm.javaClass.methods.first { it.name == "performDexOptMode" && it.parameterTypes.size == 6 }
+            (m.invoke(pm, pkg, false, "speed", true, true, null) as? Boolean) ?: false
+        } catch (e: Throwable) { Log.w(TAG, "recompile $pkg: ${(e.cause ?: e).message}"); false }
+    }
+
+    /** The rescue's answer to INIT after [since] (wall clock), as "versionCode:time". */
+    internal fun answered(context: Context, since: Long): Boolean = try {
+        Settings.Global.getString(context.contentResolver, KEY_OK)?.substringAfter(':')?.toLongOrNull()?.let { it >= since } == true
+    } catch (_: Exception) { false }
+
+    /**
+     * After the rescue's install: its code recompiled cleanly (the install's compilation may not load, as MG4Dash's did),
+     * then woken and its answer waited for; no answer, recompiled again and asked again. True when it answered.
+     */
+    internal fun checkInstalled(context: Context, sleep: (Long) -> Unit = { Thread.sleep(it) }): Boolean {
+        for (attempt in 1..2) {
+            Log.i(TAG, "rescue recompiled (attempt $attempt): ${recompile(context, PKG)}")
+            val since = System.currentTimeMillis()
+            wake(context)
+            var waited = 0L
+            while (waited < ACK_WAIT_MS) {
+                if (answered(context, since)) { Log.i(TAG, "rescue answered (attempt $attempt)"); return true }
+                sleep(1_000L); waited += 1_000L
+            }
+            Log.w(TAG, "rescue gave no answer (attempt $attempt)")
+        }
+        return false
     }
 
     class Result : android.content.BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             val status = intent.getIntExtra(PackageInstaller.EXTRA_STATUS, -999)
             Log.i(TAG, "rescue install result: $status ${intent.getStringExtra(PackageInstaller.EXTRA_STATUS_MESSAGE)}")
-            if (status == PackageInstaller.STATUS_SUCCESS) wake(context)
+            if (status == PackageInstaller.STATUS_SUCCESS) {
+                val app = context.applicationContext
+                Thread { checkInstalled(app) }.start()
+            }
         }
     }
 }

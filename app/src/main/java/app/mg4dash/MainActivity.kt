@@ -61,6 +61,8 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // MG4Dash Rescue's sign of life: once this screen is drawn, the code really loads
+        app.mg4dash.system.Rescue.aliveAtFirstFrame(this)
         prefs = Prefs(this)
         app.mg4dash.ui.Themes.apply(this)
         themeSig = app.mg4dash.ui.Themes.signature(this)

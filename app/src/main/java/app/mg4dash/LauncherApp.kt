@@ -10,8 +10,32 @@ import app.mg4dash.weather.WeatherRepo
 
 class LauncherApp : Application() {
 
+    override fun attachBaseContext(base: android.content.Context) {
+        super.attachBaseContext(base)
+        tellRescueWhenCodeDoesNotLoad(base)
+    }
+
+    /**
+     * First of all: a crash of code that does not load (damaged compiled code, 19/11) is told to MG4Dash Rescue at
+     * once, which repairs it; then the crash goes on as usual. Only Android's own classes here: MG4Dash's may not load.
+     */
+    private fun tellRescueWhenCodeDoesNotLoad(base: android.content.Context) {
+        val previous = Thread.getDefaultUncaughtExceptionHandler()
+        Thread.setDefaultUncaughtExceptionHandler { thread, error ->
+            try {
+                var e: Throwable? = error
+                var load = false
+                while (e != null && !load) { load = e is ClassNotFoundException || e is LinkageError; e = e.cause }
+                if (load) base.sendBroadcast(android.content.Intent("app.mg4dash.rescue.CRASH").setPackage("app.mg4dash.rescue")
+                    .addFlags(android.content.Intent.FLAG_INCLUDE_STOPPED_PACKAGES or android.content.Intent.FLAG_RECEIVER_FOREGROUND))
+            } catch (_: Throwable) {}
+            previous?.uncaughtException(thread, error)
+        }
+    }
+
     override fun onCreate() {
         super.onCreate()
+        crashTest()
         Tr.app = this
         // Car started before unlock (BootSplash screen): the settings storage
         // is not readable yet; everything else starts at unlock, in the same process.
@@ -26,6 +50,21 @@ class LauncherApp : Application() {
             return
         }
         startAll()
+    }
+
+    /**
+     * Safety net trials (build with -PcrashTest, never published): the crash of code that does not load, as on 19/11;
+     * "once" until MG4Dash Rescue has recompiled this install, "always" every time.
+     */
+    private fun crashTest() {
+        val mode = BuildConfig.CRASH_TEST
+        if (mode.isEmpty()) return
+        if (mode == "once") {
+            val updated = try { packageManager.getPackageInfo(packageName, 0).lastUpdateTime } catch (_: Exception) { 0L }
+            val done = try { android.provider.Settings.Global.getString(contentResolver, "mg4dash_rescue_recompiled") } catch (_: Exception) { null }
+            if (done != null && done.startsWith("$updated:")) return
+        }
+        throw NoClassDefFoundError("Failed resolution of: Lapp/mg4dash/R\$style; (crash test: $mode)")
     }
 
     @Volatile private var started = false
@@ -95,6 +134,9 @@ class LauncherApp : Application() {
         app.mg4dash.ui.Themes.publish(this)
         app.mg4dash.system.DataUsage.publishWifiOnly(this)
         startThemeWatch()
+        // MG4Dash Rescue's sign of life: everything started, its code loads (home's first frame gives it too, for a
+        // start hidden behind another app it is this one)
+        app.mg4dash.system.Rescue.alive(this)
     }
 
     private fun startThemeWatch() {
