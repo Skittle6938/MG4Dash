@@ -100,6 +100,30 @@ class BigDisplayShots {
         }
     }
 
+    /** Steps 10 and 11: Settings with two profiles, the New profile window, in French, English, German and Turkish. */
+    @Test fun profiles() {
+        for (lang in listOf("fr", "en", "de", "tr")) {
+            RuntimeEnvironment.setQualifiers("$lang-w1920dp-h720dp-land-mdpi")
+            listOf("mg4launcher", "mg4_profiles").forEach { RuntimeEnvironment.getApplication().getSharedPreferences(it, 0).edit().clear().commit() }
+            prefs.raw.edit().putBoolean("vertical_dock", true).putInt("theme_mode", 1).putBoolean("tutorial_shortcuts_seen", true).commit()
+            val ctx = RuntimeEnvironment.getApplication()
+            app.mg4dash.system.Profiles.update(ctx, app.mg4dash.system.Profiles.current(ctx).id, "Alex", null)
+            app.mg4dash.system.Profiles.create(ctx, "Sophie", fromCurrent = true)
+            val a = Robolectric.buildActivity(app.mg4dash.settings.SettingsActivity::class.java).setup().get(); idle()
+            save(a.window.decorView, "pf_settings_$lang.png")
+            app.mg4dash.settings.ProfileWindow.edit(a, null) {}
+            idle()
+            val d = org.robolectric.shadows.ShadowDialog.getLatestDialog()
+            val v = d.window!!.decorView
+            v.measure(View.MeasureSpec.makeMeasureSpec(1000, View.MeasureSpec.EXACTLY), View.MeasureSpec.makeMeasureSpec(700, View.MeasureSpec.AT_MOST))
+            v.layout(0, 0, v.measuredWidth, v.measuredHeight)
+            val bmp = Bitmap.createBitmap(v.measuredWidth, v.measuredHeight, Bitmap.Config.ARGB_8888)
+            v.draw(Canvas(bmp))
+            File(File("build/screenshots").apply { mkdirs() }, "pf_window_$lang.png").outputStream().use { bmp.compress(Bitmap.CompressFormat.PNG, 100, it) }
+            d.dismiss()
+        }
+    }
+
     @Test fun climatePage() = shoot(app.mg4dash.pages.ClimateActivity::class.java, "big_page_climate.png")
     @Test fun vehiclePage() = shoot(app.mg4dash.pages.VehicleActivity::class.java, "big_page_vehicle.png")
 
