@@ -1167,5 +1167,4 @@
     <string name="sc_profile">Profile</string>
     <string name="pf_drive">Profiles keep the drive mode and the regeneration</string>
     <string name="pf_drive_desc">Leaving a profile, MG4Dash notes the car\'s drive mode and regeneration; arriving on a profile, it puts them back, stopped or driving. Off by default.</string>
-    <string name="trips_all">All</string>
 </resources>

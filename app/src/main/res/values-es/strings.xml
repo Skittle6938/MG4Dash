@@ -1167,5 +1167,4 @@
     <string name="sc_profile">Perfil</string>
     <string name="pf_drive">Los perfiles guardan el modo de conducción y la regeneración</string>
     <string name="pf_drive_desc">Al salir de un perfil, MG4Dash anota el modo de conducción y la regeneración; al llegar a un perfil, los vuelve a poner, parado o en marcha. Apagado por defecto.</string>
-    <string name="trips_all">Todos</string>
 </resources>

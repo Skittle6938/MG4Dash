@@ -1167,5 +1167,4 @@
     <string name="sc_profile">Profil</string>
     <string name="pf_drive">Profile merken sich Fahrmodus und Rekuperation</string>
     <string name="pf_drive_desc">Beim Verlassen eines Profils merkt sich MG4Dash Fahrmodus und Rekuperation; beim Wechsel zu einem Profil stellt es sie wieder ein, im Stand wie während der Fahrt. Standardmäßig aus.</string>
-    <string name="trips_all">Alle</string>
 </resources>

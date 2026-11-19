@@ -1165,5 +1165,4 @@
     <string name="sc_profile">Profil</string>
     <string name="pf_drive">Profily si pamatují jízdní režim a rekuperaci</string>
     <string name="pf_drive_desc">Při opuštění profilu si MG4Dash zapamatuje jízdní režim a rekuperaci; při přechodu na profil je vrátí, ve stoje i za jízdy. Ve výchozím stavu vypnuto.</string>
-    <string name="trips_all">Vše</string>
 </resources>
