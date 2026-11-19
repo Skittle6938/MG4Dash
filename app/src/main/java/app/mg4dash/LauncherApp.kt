@@ -92,6 +92,7 @@ class LauncherApp : Application() {
         // A profile switch cut by the car switching off: finished before anything reads the settings
         app.mg4dash.system.Profiles.resume(this)
         app.mg4dash.system.Profiles.onSwitch { afterProfileSwitch(it) }
+        if (!BuildConfig.MOCK) app.mg4dash.system.PhoneProfile.start(this)
         installCrashGuard()
         if (!BuildConfig.MOCK && app.mg4dash.system.Maintenance.on(this)) { startMaintenance(); return }
         // Shortcuts menu, and MG's fog light button hidden by the SystemUI overlay (installed and switched with the
