@@ -117,7 +117,7 @@ class Kit(private val c: Context) {
     fun text(value: String = "", sp: Float = 18f, colorRes: Int = R.color.text_value, light: Boolean = false): TextView =
         TextView(c).apply {
             text = value; setTextColor(color(colorRes)); setTextSize(TypedValue.COMPLEX_UNIT_SP, sp)
-            if (light) typeface = Typeface.create("sans-serif-light", Typeface.NORMAL)
+            if (light) typeface = Themes.valueFont(c)
             includeFontPadding = false; maxLines = 1
         }
 
