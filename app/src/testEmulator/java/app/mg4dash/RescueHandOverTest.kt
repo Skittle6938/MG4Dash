@@ -56,6 +56,18 @@ class RescueHandOverTest {
         assertTrue(p.valetMode)
     }
 
+    @Test fun wakeOnlyStartsTheBackground() {
+        // Woken by the rescue: neither the home nor the service mode changes, no activity opened
+        val ctx = RuntimeEnvironment.getApplication()
+        val p = app.mg4dash.system.Prefs(ctx)
+        p.valetMode = true; p.valetAuto = false
+        val homeBefore = HomeSwitcher.currentHome(ctx)
+        app.mg4dash.system.WakeReceiver().onReceive(ctx, android.content.Intent(app.mg4dash.system.WakeReceiver.ACTION))
+        assertTrue(p.valetMode); assertFalse(p.valetAuto)
+        assertEquals(homeBefore, HomeSwitcher.currentHome(ctx))
+        assertNull(org.robolectric.Shadows.shadowOf(ctx).nextStartedActivity)
+    }
+
     @Test fun updateHandedOverFromRescue4() {
         assertFalse(Rescue.handsOver(-1))
         assertFalse(Rescue.handsOver(3))

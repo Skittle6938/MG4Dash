@@ -126,6 +126,7 @@ public class RescueService extends Service {
             if (MODE_CRASH.equals(mode) && !alreadyRecompiled(pm)) {
                 Log.w(TAG, "MG4Dash's code does not load, it is not home: recompiled, not relaunched");
                 recompileStopped(pm);
+                wakeDash();
             } else Log.i(TAG, "MG4Dash is not home: nothing to do");
             return;
         }
@@ -182,7 +183,7 @@ public class RescueService extends Service {
             Log.i(TAG, "install: already recompiled for this install, nothing to do");
             return;
         } else Log.i(TAG, "update: already recompiled for this install, relaunching it");
-        if (!home && !updated) { Log.i(TAG, "install: MG4Dash is not home, not relaunched"); return; }
+        if (!home && !updated) { Log.i(TAG, "install: MG4Dash is not home, not relaunched"); wakeDash(); return; }
         if (home) setPreferred(pm, DASH_HOME);
         forceStop(DASH);
         long t0 = SystemClock.elapsedRealtime();
@@ -363,6 +364,23 @@ public class RescueService extends Service {
             Log.w(TAG, "crash log: " + e.getMessage());
         }
         return false;
+    }
+
+    /** Action of MG4Dash's WakeReceiver. */
+    static final String ACTION_WAKE_DASH = "app.mg4dash.WAKE";
+
+    /**
+     * After a repair that does not relaunch MG4Dash (not the home): its background woken, as stopped it would have neither
+     * its shortcuts strip nor its maintenance gesture (the driver's way back to it), nor even the boot. No activity opened.
+     */
+    void wakeDash() {
+        try {
+            sendBroadcast(new Intent(ACTION_WAKE_DASH).setComponent(new ComponentName(DASH, "app.mg4dash.system.WakeReceiver"))
+                    .addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES | Intent.FLAG_RECEIVER_FOREGROUND));
+            Log.i(TAG, "MG4Dash's background woken");
+        } catch (Exception e) {
+            Log.w(TAG, "waking MG4Dash: " + e.getMessage());
+        }
     }
 
     /** MG4Dash the home again after a repair: "auto" (its crash guard's service mode) becomes "1". */
