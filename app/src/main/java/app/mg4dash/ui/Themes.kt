@@ -263,7 +263,7 @@ object Themes {
      */
     fun published(context: Context): String {
         val p = Prefs(context)
-        return "${p.themeBackground},${p.themeAccent},${if (isLight(context)) 1 else 0},${if (p.verticalDock) 1 else 0},0," +
+        return "${p.themeBackground},${p.themeAccent},${if (isLight(context)) 1 else 0},${if (Dock.vertical(context)) 1 else 0},0," +
             "${if (p.wideBar) 1 else 0},${if (Dock.rightSide(context)) 1 else 0},${if (p.radioDashAm) 1 else 0}," +
             // 9th: MG's fog light button hidden by the shortcuts menu (Radio Dash's left bar then takes the full height)
             "${if (app.mg4dash.system.FogOverlay.hides(context)) 1 else 0}," +
