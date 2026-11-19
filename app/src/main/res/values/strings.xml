@@ -333,6 +333,7 @@
     <string name="st_style_now">Current layout: %1$s</string>
     <string name="st_style_full">Full</string>
     <string name="st_style_simple">Simple</string>
+    <string name="st_style_big">Large display (test)</string>
     <string name="st_style_desc">Simple: three large panels (climate, battery, media), two shortcuts and today\'s weather. The change applies when you go back to the home screen.</string>
     <string name="en_heating">BATTERY HEATING</string>
     <string name="st_theme">THEME</string>

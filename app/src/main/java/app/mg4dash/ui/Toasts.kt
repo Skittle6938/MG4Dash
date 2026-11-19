@@ -9,7 +9,9 @@ import app.mg4dash.R
 
 /** Short messages in MG4Dash style (current theme's colours), instead of the car's style. */
 object Toasts {
-    fun show(context: Context, text: CharSequence, long: Boolean = false) {
+    fun show(base: Context, text: CharSequence, long: Boolean = false) {
+        // Grand affichage: enlarged wherever it comes from (a service, Settings), as it is read while driving
+        val context = if (!BigDisplay.on(base) || BigDisplay.factor(base) > 1f) base else Themes.themed(base)
         val d = context.resources.displayMetrics.density
         val tv = TextView(context).apply {
             this.text = text; setTextColor(Themes.color(context, R.color.text_value)); setTextSize(TypedValue.COMPLEX_UNIT_SP, 19f)

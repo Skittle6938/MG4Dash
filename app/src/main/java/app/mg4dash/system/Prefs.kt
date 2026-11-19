@@ -5,6 +5,11 @@ import android.content.SharedPreferences
 
 /** Persistent launcher settings. */
 class Prefs(context: Context) {
+    companion object {
+        /** [homeStyle] of Grand affichage (2 is taken by the old Map style). */
+        const val STYLE_BIG = 3
+    }
+
     private val sp: SharedPreferences =
         context.applicationContext.getSharedPreferences("mg4launcher", Context.MODE_PRIVATE)
 
@@ -516,7 +521,10 @@ class Prefs(context: Context) {
         get() = sp.getBoolean("energy_log", false)   // off by default: a write every 5 s wears the storage
         set(v) = sp.edit().putBoolean("energy_log", v).apply()
 
-    /** Home style: 0 = full (3 columns), 1 = simple (3 panes + 2 shortcuts + weather). */
+    /**
+     * Home style: 0 = the layouts, 1 = simple (3 panes + 2 shortcuts + weather), [STYLE_BIG] = Grand affichage
+     * (everything bigger, BigDisplay). 2 is the old Map style, still stored on old installs (HomeSlots.layoutOf).
+     */
     var homeStyle: Int
         get() = sp.getInt("home_style", 0)
         set(v) = sp.edit().putInt("home_style", v).apply()

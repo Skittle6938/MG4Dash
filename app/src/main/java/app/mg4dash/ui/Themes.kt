@@ -99,15 +99,18 @@ object Themes {
     private const val GLOBAL_KEY = "mg4dash_theme"
 
     /** Signature of the current theme: used to know if a screen must redraw. */
-    fun signature(context: Context): Int = Prefs(context).let { it.themeBackground * 10 + it.themeAccent + (if (isLight(context)) 100 else 0) + (if (it.verticalDock) 1000 else 0) + (if (it.panelFade) 0 else 10000) + (if (it.wideBar) 100000 else 0) }
+    fun signature(context: Context): Int = Prefs(context).let { it.themeBackground * 10 + it.themeAccent + (if (isLight(context)) 100 else 0) + (if (it.verticalDock) 1000 else 0) + (if (it.panelFade) 0 else 10000) + (if (it.wideBar) 100000 else 0) + (if (it.homeStyle == Prefs.STYLE_BIG) 1000000 else 0) }
 
-    /** A context with MG4Dash's theme (background and buttons chosen), for windows outside the screens. */
-    fun themed(context: Context): Context {
+    /**
+     * A context with MG4Dash's theme (background and buttons chosen), for windows outside the screens; enlarged in
+     * Grand affichage unless [big] is false (what sits under MG's own buttons keeps its pixels).
+     */
+    fun themed(context: Context, big: Boolean = BigDisplay.on(context)): Context {
         val p = Prefs(context)
         val light = isLight(context)
         val bgs = if (light) BACKGROUNDS_LIGHT else BACKGROUNDS
         val accs = if (light) ACCENTS_LIGHT else ACCENTS
-        return android.view.ContextThemeWrapper(context.applicationContext, R.style.Theme_MG4Launcher).apply {
+        return android.view.ContextThemeWrapper(BigDisplay.wrap(context.applicationContext, big), R.style.Theme_MG4Launcher).apply {
             theme.applyStyle(bgs.getOrElse(p.themeBackground) { bgs[0] }, true)
             theme.applyStyle(accs.getOrElse(p.themeAccent) { accs[0] }, true)
         }
@@ -232,19 +235,24 @@ object Themes {
     /**
      * Screen shorter than the panel (SAIC bars shown outside full screen, #43): everything is
      * reduced accordingly, so pages drawn for 720 dp of height fit without being cut.
+     *
+     * Grand affichage: the screen's own factor (BigDisplay) is kept, the reduction multiplies it. The metrics are shared
+     * by the screens of the same configuration, so they are set from the panel's, never reduced in place; and the height
+     * is the panel's real one (an enlarged screen reports 540 dp for the 720 of the panel), or it was reduced twice.
      */
     private fun fitHeight(activity: Activity) {
-        val h = activity.resources.configuration.screenHeightDp
+        val h = activity.applicationContext.resources.configuration.screenHeightDp
         val sys = android.content.res.Resources.getSystem().displayMetrics
+        val big = BigDisplay.factor(activity)
         // Full screen (default setting): the whole panel is ours, even if the configuration
         // announces a height reduced by the hidden SAIC bars; reducing shifted everything,
         // including the vertical bar under the fog light button (#38)
         val full = Prefs(activity).fullscreen
         val scale = if (!full && h in 400 until FULL_HEIGHT_DP - 8) h / FULL_HEIGHT_DP.toFloat() else 1f
         val m = activity.resources.displayMetrics
-        m.density = sys.density * scale
-        m.scaledDensity = sys.scaledDensity * scale
-        m.densityDpi = (sys.densityDpi * scale).toInt()
+        m.density = sys.density * big * scale
+        m.scaledDensity = sys.scaledDensity * big * scale
+        m.densityDpi = (sys.densityDpi * big * scale).toInt()
     }
 
     private const val FULL_HEIGHT_DP = 720

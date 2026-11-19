@@ -116,13 +116,18 @@ class SettingsActivity : AppCompatActivity() {
         // Simple, or one of the eight layouts with its drawing (#38); the cards of each place in the edit mode
         lateinit var paintStyle: () -> Unit
         val (simpleBtn) = choiceButtons(listOf(getString(R.string.st_style_simple)), { if (prefs.homeStyle == 1) 0 else -1 }) { prefs.homeStyle = 1; paintStyle() }
-        val (layoutBtn) = choiceButtons(listOf(getString(R.string.ly_title) + "   ▾"), { if (prefs.homeStyle != 1) 0 else -1 }) {}
+        val (layoutBtn) = choiceButtons(listOf(getString(R.string.ly_title) + "   ▾"), { if (prefs.homeStyle != 1 && prefs.homeStyle != Prefs.STYLE_BIG) 0 else -1 }) {}
         layoutBtn.setOnClickListener { v ->
             app.mg4dash.ui.LayoutPicker.show(this, v, if (prefs.homeStyle == 1) null else app.mg4dash.ui.HomeSlots.layoutOf(prefs)) {
                 app.mg4dash.ui.HomeSlots.choose(prefs, it); paintStyle()
             }
         }
         row(style, simpleBtn, layoutBtn)
+        // Grand affichage (accessibility, being built: marked "test"): everything bigger, Settings itself keeps its size
+        val (bigBtn) = choiceButtons(listOf(getString(R.string.st_style_big)), { if (prefs.homeStyle == Prefs.STYLE_BIG) 0 else -1 }) {
+            prefs.homeStyle = if (prefs.homeStyle == Prefs.STYLE_BIG) 0 else Prefs.STYLE_BIG; paintStyle()
+        }
+        row(style, bigBtn)
         val editBtn = button(getString(R.string.ly_edit)) {
             startActivity(android.content.Intent(this, app.mg4dash.MainActivity::class.java)
                 .putExtra(app.mg4dash.ui.CardsEditor.EXTRA_EDIT, true)
@@ -132,7 +137,8 @@ class SettingsActivity : AppCompatActivity() {
         row(style, editBtn)
         paintStyle = {
             simpleBtn.isSelected = prefs.homeStyle == 1
-            layoutBtn.isSelected = prefs.homeStyle != 1
+            layoutBtn.isSelected = prefs.homeStyle != 1 && prefs.homeStyle != Prefs.STYLE_BIG
+            bigBtn.isSelected = prefs.homeStyle == Prefs.STYLE_BIG
             layoutBtn.setCompoundDrawablesRelativeWithIntrinsicBounds(app.mg4dash.ui.LayoutPicker.glyph(this, app.mg4dash.ui.HomeSlots.layoutOf(prefs)), null, null, null)
             layoutBtn.setPadding(dp(22), 0, dp(20), 0)
             (editBtn.parent as View).visibility = if (prefs.homeStyle == 1) View.GONE else View.VISIBLE

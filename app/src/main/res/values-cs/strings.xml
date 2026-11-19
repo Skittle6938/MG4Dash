@@ -333,6 +333,7 @@
     <string name="st_style_now">Aktuální rozložení: %1$s</string>
     <string name="st_style_full">Úplné</string>
     <string name="st_style_simple">Jednoduché</string>
+    <string name="st_style_big">Velké zobrazení (test)</string>
     <string name="st_style_desc">Jednoduché: tři velké panely (klimatizace, baterie, média), dvě zkratky a dnešní počasí. Změna se projeví po návratu na domovskou obrazovku.</string>
     <string name="en_heating">OHŘEV BATERIE</string>
     <string name="st_theme">MOTIV</string>

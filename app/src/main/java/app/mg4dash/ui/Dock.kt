@@ -192,7 +192,7 @@ object Dock {
         // button (x 20 → 76 dp, y ≈ 14 → 70 dp), with 8 dp on the left, right and above (#38)
         val barDp = if (Prefs(activity).wideBar) BAR_DP * 2 else BAR_DP   // "wide bar" setting (#67)
         // Fog light button hidden (shortcuts menu): the bar's top lines up with the cards' top, as on the right
-        if (!right) root.addView(bar, LinearLayout.LayoutParams(kit.dp(barDp), LinearLayout.LayoutParams.MATCH_PARENT).apply { leftMargin = -kit.dp(4); topMargin = if (fogShown(activity)) -kit.dp(6) else 0 })
+        if (!right) root.addView(bar, LinearLayout.LayoutParams(kit.dp(barDp), LinearLayout.LayoutParams.MATCH_PARENT).apply { leftMargin = -kit.dp(4); topMargin = if (fogShown(activity)) -kit.dp(BigDisplay.unscaled(activity, 6)) else 0 })
         root.addView(content, LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.MATCH_PARENT, 1f).apply {
             if (right) rightMargin = kit.dp(12) else leftMargin = kit.dp(12)
         })
@@ -256,7 +256,7 @@ object Dock {
         // Place of the fog light button (overlaid by MG, it cannot be drawn by us);
         // on the right (right-hand drive), it stays on the left: the bar takes the full height
         // (the shortcuts menu hides the button: full height, as on the right)
-        if (!rightSide(activity) && fogShown(activity)) bar.addView(android.view.View(activity), LinearLayout.LayoutParams(-1, kit.dp(68)))
+        if (!rightSide(activity) && fogShown(activity)) bar.addView(android.view.View(activity), LinearLayout.LayoutParams(-1, kit.dp(BigDisplay.unscaled(activity, 68))))   // under MG's fog button: its pixels
         val order = listOf(
             ITEMS.first { it.label == R.string.dock_settings },
             ITEMS.first { it.label == R.string.dock_aa },
