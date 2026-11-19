@@ -1113,4 +1113,21 @@
     <string name="nav_on_arrival">à l\'arrivée</string>
     <string name="nav_arrival_at">arrivée %1$s</string>
     <string name="nav_then">puis</string>
+    <string name="un_button">Désinstaller MG4Dash, MG4Radio ou MG4Link…</string>
+    <string name="un_title">Désinstaller</string>
+    <string name="un_do">Désinstaller</string>
+    <string name="un_radio_what">Remet la radio d\'origine de la voiture (rien d\'autre ne change). Elle s\'applique après un redémarrage de l\'écran central (appui long sur Accueil environ 20 s).</string>
+    <string name="un_link_what">Supprime MG4Link et ses réglages : l\'Android Auto d\'origine de la voiture revient.</string>
+    <string name="un_dash_what">Remet l\'accueil SAIC, puis supprime MG4Dash, son appli de secours et tous ses réglages. Pour le réinstaller, il faudra repasser par l\'installation complète.</string>
+    <string name="un_confirm_title">Désinstaller %1$s ?</string>
+    <string name="un_dash_body">L\'accueil SAIC redevient l\'écran d\'accueil, puis MG4Dash et son appli de secours sont supprimés, avec tous leurs réglages (cartes, raccourcis, historique de conso).</string>
+    <string name="un_dash_note">MG4Radio et MG4Link restent installés : désinstalle-les d\'abord si tu veux tout retirer. L\'écran redémarre à la fin.</string>
+    <string name="un_hold">Maintenir pour désinstaller</string>
+    <string name="un_done">%1$s désinstallé</string>
+    <string name="un_failed">Échec de la désinstallation (%1$s)</string>
+    <string name="un_working">Désinstallation…</string>
+    <string name="dm_temp">Température</string>
+    <string name="dm_fan">Ventilation</string>
+    <string name="dm_note_now_set">La clim démarre tout de suite à %1$s, ventilation %2$d, puis les portes se verrouillent après le délai. Arrêt sous 20 %% de batterie, au déverrouillage des portes ou si la voiture roule.</string>
+    <string name="dm_note_at_set">La voiture reste allumée (clim coupée, environ 0,2 kW) et verrouillée jusqu\'au premier cycle, puis lance la clim à %1$s, ventilation %2$d. Elle s\'éteint après le dernier cycle ou sous 20 %% de batterie, et tout s\'arrête au déverrouillage des portes.</string>
 </resources>

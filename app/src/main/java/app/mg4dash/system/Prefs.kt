@@ -189,6 +189,13 @@ class Prefs(context: Context) {
     var climateHoldLockSec: Int
         get() = sp.getInt("climhold_lock_sec", 20)
         set(v) = sp.edit().putInt("climhold_lock_sec", v).apply()
+    /** Keep climate on's set point and fan level (#26), applied as the climate starts; 0: the climate's own. */
+    var climateHoldTemp: Float
+        get() = sp.getFloat("climhold_temp", 0f)
+        set(v) = sp.edit().putFloat("climhold_temp", v).apply()
+    var climateHoldFan: Int
+        get() = sp.getInt("climhold_fan", 0)
+        set(v) = sp.edit().putInt("climhold_fan", v).apply()
     /** Keep climate on at a set time (otherwise right away), first cycle time (minutes since midnight), cycles. */
     var climateHoldScheduled: Boolean
         get() = sp.getBoolean("climhold_scheduled", false)

@@ -6,6 +6,7 @@ import android.os.PowerManager
 import android.os.SystemClock
 import app.mg4dash.system.Log
 import app.mg4dash.car.CarBridge
+import app.mg4dash.car.VehicleState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -57,11 +58,31 @@ object ClimateHold {
     private var job: Job? = null
     private var wake: PowerManager.WakeLock? = null
 
+    /** The set point and fan level chosen in the menu (#26), null for the climate's own. */
+    @Volatile internal var chosen: Pair<Float, Int>? = null
+
+    internal fun chosenOf(p: app.mg4dash.system.Prefs): Pair<Float, Int>? =
+        p.climateHoldTemp.takeIf { it > 0f }?.let { it to p.climateHoldFan.coerceIn(VehicleState.FAN_MIN, VehicleState.FAN_MAX) }
+
+    /** Once the climate is on (its own start takes a moment): the chosen set point and fan sent. */
+    private fun applyChosen() {
+        val c = chosen ?: return
+        scope.launch {
+            delay(2500)
+            Log.i(TAG, "set point ${c.first}, fan ${c.second}")
+            CarBridge.setTempValue(c.first)
+            delay(600)
+            CarBridge.setFanLevel(c.second)
+        }
+    }
+
     /** Right away: climate on, lock after [lockSec] s, end after [maxMin] min (0 = never). */
     fun start(context: Context, maxMin: Int, lockSec: Int) {
         val now = SystemClock.elapsedRealtime()
+        chosen = chosenOf(app.mg4dash.system.Prefs(context))
         begin(context, Status(Phase.ARMED, now, if (maxMin > 0) now + maxMin * 60_000L else 0L, now + lockSec * 1000L))
         CarBridge.setHvac(true)
+        applyChosen()
         Log.i(TAG, "now: ${if (maxMin > 0) "$maxMin min" else "no limit"}, locking in $lockSec s")
     }
 
@@ -71,6 +92,7 @@ object ClimateHold {
      */
     fun schedule(context: Context, firstWall: Long, runs: Int, durMin: Int, gapMin: Int, lockSec: Int) {
         val now = SystemClock.elapsedRealtime(); val wall = System.currentTimeMillis()
+        chosen = chosenOf(app.mg4dash.system.Prefs(context))
         val first = now + (firstWall - wall).coerceAtLeast(0L)
         val list = (0 until runs).map { i ->
             val s = first + i * (durMin + gapMin) * 60_000L
@@ -132,6 +154,7 @@ object ClimateHold {
                 Phase.WAITING -> if (now >= st.runs[st.run][0]) {
                     Log.i(TAG, "cycle ${st.run + 1}: climate on")
                     CarBridge.setHvac(true); offReads = 0
+                    applyChosen()
                     // Compressor too at each cycle (#26), once the climate is on
                     scope.launch { delay(2500); if (CarBridge.state.value.acOn != true) CarBridge.toggleAc() }
                     _status.value = st.copy(phase = Phase.ON)

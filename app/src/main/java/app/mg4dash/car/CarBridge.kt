@@ -1331,9 +1331,21 @@ object CarBridge {
         else -> (VehicleState.tempFirst + (i - 1)).coerceAtMost(VehicleState.tempLast)
     }
 
+    /** The slots of the set point, LO and HI included, by the car's limits. */
+    val tempSlots: Int get() = (VehicleState.tempLast - VehicleState.tempFirst + 1).toInt().coerceAtLeast(1) + 2
+
+    /** The slot of a set point [t] (LO 0, HI the last). */
+    fun slotOf(t: Float, slots: Int = tempSlots): Int = when {
+        t < VehicleState.tempFirst - 0.25f -> 0
+        t > VehicleState.tempLast + 0.25f -> slots - 1
+        else -> (Math.round(t - VehicleState.tempFirst) + 1).coerceIn(1, slots - 2)
+    }
+
     /** Set point picked on the gauge (climate page): sent once, shown at once and held as with − / +. */
-    fun setTempSlot(i: Int) {
-        val target = tempForSlot(i)
+    fun setTempSlot(i: Int) = setTempValue(tempForSlot(i))
+
+    /** A set point given as such (Keep climate on, #26): sent once, shown at once and held. */
+    fun setTempValue(target: Float) {
         if (target == _state.value.driverTemp) return
         _state.value = _state.value.copy(driverTemp = target)
         holdTemp = target to System.currentTimeMillis() + HOLD_MS

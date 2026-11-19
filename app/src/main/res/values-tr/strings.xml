@@ -1113,4 +1113,21 @@
     <string name="nav_on_arrival">varışta</string>
     <string name="nav_arrival_at">varış %1$s</string>
     <string name="nav_then">sonra</string>
+    <string name="un_button">MG4Dash, MG4Radio veya MG4Link\'i kaldır…</string>
+    <string name="un_title">Kaldır</string>
+    <string name="un_do">Kaldır</string>
+    <string name="un_radio_what">Aracın orijinal radyosunu geri getirir (başka hiçbir şey değişmez). Orta ekran yeniden başlatıldıktan sonra geçerli olur (Ana sayfaya yaklaşık 20 sn basılı tutun).</string>
+    <string name="un_link_what">MG4Link\'i ve ayarlarını kaldırır: aracın orijinal Android Auto\'su geri gelir.</string>
+    <string name="un_dash_what">SAIC ana ekranını geri getirir, ardından MG4Dash\'i, kurtarma uygulamasını ve tüm ayarlarını kaldırır. Yeniden kurmak için tam kurulum gerekir.</string>
+    <string name="un_confirm_title">%1$s kaldırılsın mı?</string>
+    <string name="un_dash_body">SAIC ana ekranı yeniden ana ekran olur, ardından MG4Dash ve kurtarma uygulaması tüm ayarlarıyla (kartlar, kısayollar, tüketim geçmişi) kaldırılır.</string>
+    <string name="un_dash_note">MG4Radio ve MG4Link kurulu kalır: her şeyi kaldırmak için önce onları kaldırın. Ekran sonunda yeniden başlar.</string>
+    <string name="un_hold">Kaldırmak için basılı tutun</string>
+    <string name="un_done">%1$s kaldırıldı</string>
+    <string name="un_failed">Kaldırma başarısız (%1$s)</string>
+    <string name="un_working">Kaldırılıyor…</string>
+    <string name="dm_temp">Sıcaklık</string>
+    <string name="dm_fan">Fan</string>
+    <string name="dm_note_now_set">Klima hemen %1$s, fan %2$d ile başlar, ardından kapılar gecikmeden sonra kilitlenir. Batarya %%20\'nin altına düşünce, kapılar açılınca veya araç hareket edince durur.</string>
+    <string name="dm_note_at_set">Araç ilk döngüye kadar açık (klima kapalı, yaklaşık 0,2 kW) ve kilitli kalır, ardından klimayı %1$s, fan %2$d ile çalıştırır. Son döngüden sonra veya batarya %%20\'nin altında kapanır, kapılar açılınca her şey durur.</string>
 </resources>

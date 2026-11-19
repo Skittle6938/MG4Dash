@@ -1113,4 +1113,21 @@
     <string name="nav_on_arrival">al llegar</string>
     <string name="nav_arrival_at">llegada %1$s</string>
     <string name="nav_then">luego</string>
+    <string name="un_button">Desinstalar MG4Dash, MG4Radio o MG4Link…</string>
+    <string name="un_title">Desinstalar</string>
+    <string name="un_do">Desinstalar</string>
+    <string name="un_radio_what">Vuelve a poner la radio original del coche (nada más cambia). Se aplica tras reiniciar la pantalla central (pulsación larga en Inicio unos 20 s).</string>
+    <string name="un_link_what">Elimina MG4Link y sus ajustes: vuelve el Android Auto original del coche.</string>
+    <string name="un_dash_what">Vuelve a poner el inicio de SAIC y luego elimina MG4Dash, su app de rescate y todos sus ajustes. Para reinstalarlo habrá que repetir la instalación completa.</string>
+    <string name="un_confirm_title">¿Desinstalar %1$s?</string>
+    <string name="un_dash_body">El inicio de SAIC vuelve a ser la pantalla de inicio y luego se eliminan MG4Dash y su app de rescate con todos sus ajustes (tarjetas, accesos directos, historial de consumo).</string>
+    <string name="un_dash_note">MG4Radio y MG4Link siguen instalados: desinstálalos antes si quieres quitarlo todo. La pantalla se reinicia al final.</string>
+    <string name="un_hold">Mantener para desinstalar</string>
+    <string name="un_done">%1$s desinstalado</string>
+    <string name="un_failed">Error al desinstalar (%1$s)</string>
+    <string name="un_working">Desinstalando…</string>
+    <string name="dm_temp">Temperatura</string>
+    <string name="dm_fan">Ventilación</string>
+    <string name="dm_note_now_set">El clima arranca ya a %1$s, ventilación %2$d, y las puertas se bloquean tras el retardo. Se detiene por debajo del 20 %% de batería, al desbloquear las puertas o si el coche se mueve.</string>
+    <string name="dm_note_at_set">El coche sigue encendido (clima apagado, unos 0,2 kW) y bloqueado hasta el primer ciclo, luego pone el clima a %1$s, ventilación %2$d. Se apaga tras el último ciclo o por debajo del 20 %% de batería, y todo se detiene al desbloquear las puertas.</string>
 </resources>
