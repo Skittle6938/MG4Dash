@@ -1167,5 +1167,4 @@
     <string name="sc_profile">Profilo</string>
     <string name="pf_drive">I profili ricordano la modalità di guida e la rigenerazione</string>
     <string name="pf_drive_desc">Lasciando un profilo, MG4Dash annota modalità di guida e rigenerazione; arrivando su un profilo, le rimette, da fermo o in marcia. Spento per impostazione predefinita.</string>
-    <string name="trips_all">Tutti</string>
 </resources>

@@ -1167,5 +1167,4 @@
     <string name="sc_profile">Profil</string>
     <string name="pf_drive">Profiller sürüş modunu ve rejenerasyonu hatırlar</string>
     <string name="pf_drive_desc">MG4Dash bir profilden çıkarken sürüş modunu ve rejenerasyonu kaydeder; bir profile geçerken bunları geri koyar, dururken de sürerken de. Varsayılan olarak kapalı.</string>
-    <string name="trips_all">Tümü</string>
 </resources>

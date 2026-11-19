@@ -534,6 +534,11 @@ class Prefs(context: Context) {
         get() = sp.getString("home_layout", null)
         set(v) = sp.edit().putString("home_layout", v).apply()
 
+    /** Profiles keep the drive mode and the regeneration (Settings › Vehicle, step 12): off by default, shared. */
+    var profilesDrive: Boolean
+        get() = sp.getBoolean("profiles_drive", false)
+        set(v) = sp.edit().putBoolean("profiles_drive", v).apply()
+
     /** The style before Grand affichage (0 Standard, 1 Simple), which its shortcuts tile goes back to. */
     var styleBeforeBig: Int
         get() = sp.getInt("home_style_before_big", 0)

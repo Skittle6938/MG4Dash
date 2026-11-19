@@ -123,7 +123,9 @@ class ProfilesTest {
         val others = setOf("alert_level", "popup", "reset_at", "show_4g", "show_wifi", "threshold", "updates_wifi_only", "times", "adb",
             "android", "band", "radio", "source", "browser_download_url", "name", "tag_name", "chunked", "gzip", "d", "t", "dresel", "error",
             "entity_id", "HfpClientConnectionService", "id", "ref", "k", "windows", "key_car_source_type", "lenspicker", "Resolver", "setupwizard",
-            "mCurrentFocus", "mg4dash", "relative_humidity_2m", "time", "list", "current", "generation", "switching")
+            "mCurrentFocus", "mg4dash", "relative_humidity_2m", "time", "list", "current", "generation", "switching",
+            // the profiles' own file
+            "drive_")
         val call = Regex("""(?:getString|getInt|getBoolean|getFloat|getLong|getStringSet|putString|putInt|putBoolean|putFloat|putLong|putStringSet|remove|contains)\(\s*"([A-Za-z0-9_]+)""")
         val dyn = Regex(""""([a-z][a-z0-9_]*_)(?:"\s*\+|\$)""")
         val missing = sortedSetOf<String>()

@@ -111,6 +111,7 @@ class BigDisplayShots {
             app.mg4dash.system.Profiles.create(ctx, "Sophie", fromCurrent = true)
             val a = Robolectric.buildActivity(app.mg4dash.settings.SettingsActivity::class.java).setup().get(); idle()
             save(a.window.decorView, "pf_settings_$lang.png")
+            shoot(app.mg4dash.pages.TripsActivity::class.java, "pf_trips_$lang.png")
             app.mg4dash.settings.ProfileWindow.edit(a, null) {}
             idle()
             val d = org.robolectric.shadows.ShadowDialog.getLatestDialog()
@@ -130,6 +131,8 @@ class BigDisplayShots {
     /** The shortcuts menu, pulled down from the top. */
     @Test fun shortcutsMenu() {
         prefs.raw.edit().putBoolean("fullscreen", false).commit()
+        // With the Large display and Profile tiles (steps 8 and 11)
+        prefs.shortcutTiles = listOf("fog", "power", "esp", "aids", "big", "profile")
         app.mg4dash.ui.ShortcutsPanel.init(RuntimeEnvironment.getApplication())
         val a = Robolectric.buildActivity(MainActivity::class.java).setup().get(); idle()
         val cb = a.window.callback

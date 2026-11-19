@@ -93,6 +93,8 @@ class LauncherApp : Application() {
         app.mg4dash.system.Profiles.resume(this)
         app.mg4dash.system.Profiles.onSwitch { afterProfileSwitch(it) }
         if (!BuildConfig.MOCK) app.mg4dash.system.PhoneProfile.start(this)
+        // Each trip marked with the profile driving (step 12); the first profile's left unmarked, as the trips from before
+        app.mg4dash.energy.TripLog.profile = { app.mg4dash.system.Profiles.current(this).id.takeIf { it != "p1" } }
         installCrashGuard()
         if (!BuildConfig.MOCK && app.mg4dash.system.Maintenance.on(this)) { startMaintenance(); return }
         // Shortcuts menu, and MG's fog light button hidden by the SystemUI overlay (installed and switched with the

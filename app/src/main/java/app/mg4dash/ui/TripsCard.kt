@@ -105,8 +105,11 @@ class TripsCard(context: Context) : LinearLayout(context) {
 
     fun show(now: Long = System.currentTimeMillis()) {
         val c = context
-        val cur = TripLog.current.value
-        val trips = TripLog.trips.value
+        // The current profile's trips (study v4, step 12), from two profiles
+        val mine = app.mg4dash.system.Profiles.list(c).takeIf { it.size >= 2 }?.let { app.mg4dash.system.Profiles.current(c).id }
+        fun ours(t: TripLog.Trip) = mine == null || t.by(mine, TripLog.firstProfile())
+        val cur = TripLog.current.value?.takeIf { ours(it) }
+        val trips = TripLog.trips.value.filter { ours(it) }
         val odo = CarBridge.state.value.odometerKm
         if (cur != null) {
             nowLabel.text = c.getString(R.string.tr_now, TripText.time(c, cur.start))

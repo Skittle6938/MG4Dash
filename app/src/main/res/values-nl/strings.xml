@@ -1167,5 +1167,4 @@
     <string name="sc_profile">Profiel</string>
     <string name="pf_drive">Profielen onthouden de rijmodus en de regeneratie</string>
     <string name="pf_drive_desc">Bij het verlaten van een profiel noteert MG4Dash rijmodus en regeneratie; bij het wisselen naar een profiel zet het ze terug, stilstaand of rijdend. Standaard uit.</string>
-    <string name="trips_all">Alle</string>
 </resources>

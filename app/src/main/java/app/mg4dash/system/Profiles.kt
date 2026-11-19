@@ -187,12 +187,15 @@ object Profiles {
         if (why != "phone") manualThisStart = true
         if (to.id == from.id) return false
         val s = store(c)
+        // The car's drive mode and regeneration noted for the profile left (option, step 12)
+        try { DriveMemory.note(c, from.id) } catch (e: Throwable) { Log.w(TAG, "drive: ${e.message}") }
         // 1. The current profile's personal settings put away (marked: a cut after this is finished at the next start)
         s.edit().putString("data_${from.id}", snapshot(settings(c)).toString()).putString("sound_${from.id}", snapshot(sound(c), all = true).toString())
             .putString("switching", "${from.id}>${to.id}").commit()
         // 2 and 3. Taken off, the chosen profile's put in their place; 4. it is the current one
         finish(c, to.id)
         Log.i(TAG, "profile ${from.name} → ${to.name} ($why)")
+        try { DriveMemory.putBack(c, to.id) } catch (e: Throwable) { Log.w(TAG, "drive: ${e.message}") }
         listeners.forEach { try { it(to) } catch (e: Throwable) { Log.w(TAG, "after the switch: ${e.message}") } }
         return true
     }

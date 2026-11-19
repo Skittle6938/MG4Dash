@@ -210,6 +210,9 @@ class SettingsActivity : AppCompatActivity() {
         toggle(units, R.string.st_climhold, R.string.st_climhold_desc, { prefs.climateHoldEnabled }) { prefs.climateHoldEnabled = it }
         if (app.mg4dash.system.Firmware.family == app.mg4dash.system.Firmware.Family.LEGACY)
             toggle(units, R.string.st_hide_saic_climate, R.string.st_hide_saic_climate_desc, { prefs.hideSaicClimate }) { prefs.hideSaicClimate = it }
+        // Profiles (step 12): each one keeps the drive mode and the regeneration; shared, off by default
+        toggle(units, R.string.pf_drive, R.string.pf_drive_desc, { prefs.profilesDrive }) { prefs.profilesDrive = it }
+        text(units, getString(R.string.pf_all), 14f, R.color.text_title)
 
         soundTriggersSetting(panel(carL, getString(R.string.st_sound_trigger).uppercase()))
 
