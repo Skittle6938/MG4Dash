@@ -75,6 +75,7 @@ object HomeSwitcher {
     /** MG4Dash becomes home: preference set, then SAIC home disabled. */
     fun replaceStock(context: Context): Boolean {
         Prefs(context).valetMode = false
+        Prefs(context).valetAuto = false
         setPreferred(context, ours(context))
         return try {
             context.packageManager.setComponentEnabledSetting(
@@ -117,11 +118,13 @@ object HomeSwitcher {
 
     /**
      * What to tell MG4Dash Rescue about the home (19/11: with SAIC home enabled, the rescue did not know MG4Dash was the
-     * home and left it crashing): "0" in maintenance mode or with another home in use, "1" with SAIC home replaced or
+     * home and left it crashing): "auto" in the service mode MG4Dash's crash guard put (the rescue may bring it back
+     * after a repair), "0" in the driver's maintenance mode or with another home in use, "1" with SAIC home replaced or
      * MG4Dash the HOME resolved; null with Android's chooser (after a crash loop Android forgets the preference: the
      * last word stays).
      */
-    internal fun homeWord(valet: Boolean, stockDisabled: Boolean, current: ComponentName?, ours: ComponentName): String? = when {
+    internal fun homeWord(valet: Boolean, stockDisabled: Boolean, current: ComponentName?, ours: ComponentName, valetAuto: Boolean = false): String? = when {
+        valet && valetAuto -> "auto"
         valet -> "0"
         stockDisabled || current == ours -> "1"
         current == null || current.packageName == "android" || current.className.contains("Resolver") || current.packageName.contains("lenspicker") -> null
@@ -129,7 +132,20 @@ object HomeSwitcher {
     }
 
     /** Tells MG4Dash Rescue whether MG4Dash is the home now. */
-    fun noteHome(context: Context) = tellRescue(context, homeWord(Prefs(context).valetMode, !isStockEnabled(context), currentHome(context), ours(context)))
+    fun noteHome(context: Context) = Prefs(context).let { p -> tellRescue(context, homeWord(p.valetMode, !isStockEnabled(context), currentHome(context), ours(context), p.valetAuto)) }
+
+    /**
+     * Back as the home after MG4Dash Rescue repaired it (19/11): a service mode MG4Dash's own crash guard had put is left,
+     * as [replaceStock] leaves it (SAIC home itself as the driver had it); the driver's own service mode stays.
+     */
+    fun backAfterRescue(context: Context) {
+        val p = Prefs(context)
+        if (!p.valetMode || !p.valetAuto) return
+        if (currentHome(context) != ours(context)) return
+        p.valetMode = false; p.valetAuto = false
+        Log.i(TAG, "service mode left: MG4Dash is the home again after its repair")
+        tellRescue(context, "1")
+    }
 
     private fun tellRescue(context: Context, word: String?) {
         if (word == null || app.mg4dash.BuildConfig.MOCK) return
@@ -141,9 +157,13 @@ object HomeSwitcher {
         } catch (e: Exception) { Log.w(TAG, "home word: ${e.message}") }
     }
 
-    /** Service mode: re-enables SAIC home, makes it preferred, then opens it. */
-    fun switchToStock(context: Context): Boolean {
+    /**
+     * Service mode: re-enables SAIC home, makes it preferred, then opens it. [auto]: put by MG4Dash's crash guard, not by
+     * the driver (MG4Dash Rescue then brings MG4Dash back once its code is repaired).
+     */
+    fun switchToStock(context: Context, auto: Boolean = false): Boolean {
         Prefs(context).valetMode = true
+        Prefs(context).valetAuto = auto
         val ok = try {
             context.packageManager.setComponentEnabledSetting(
                 STOCK, PackageManager.COMPONENT_ENABLED_STATE_DEFAULT, PackageManager.DONT_KILL_APP,
@@ -155,7 +175,7 @@ object HomeSwitcher {
             false
         }
         Log.i(TAG, "SAIC home re-enabled → $ok")
-        tellRescue(context, "0")
+        tellRescue(context, if (auto) "auto" else "0")
         if (ok) {
             try {
                 context.startActivity(Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_HOME)

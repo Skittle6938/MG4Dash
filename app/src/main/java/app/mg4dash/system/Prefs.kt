@@ -403,6 +403,14 @@ class Prefs(context: Context) {
     var valetMode: Boolean
         get() = sp.getBoolean("valet_mode", false)
         set(v) = sp.edit().putBoolean("valet_mode", v).commit().let { }
+    /**
+     * Service mode put by MG4Dash's own crash guard (3 crashes in a row), not by the driver: MG4Dash Rescue may then
+     * bring MG4Dash back as the home once its code is repaired (19/11). False for the driver's choice, and for a service
+     * mode from before this setting.
+     */
+    var valetAuto: Boolean
+        get() = sp.getBoolean("valet_auto", false)
+        set(v) = sp.edit().putBoolean("valet_auto", v).commit().let { }
 
     /** Wanted charge limit (%), sent to the car. */
     var chargeLimit: Int

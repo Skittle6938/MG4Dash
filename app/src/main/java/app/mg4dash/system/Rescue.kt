@@ -20,7 +20,7 @@ object Rescue {
     private const val TAG = "Rescue"
     const val PKG = "app.mg4dash.rescue"
     /** Version of the embedded rescue app (versionCode of rescue/build.gradle.kts). */
-    const val BUNDLED_VERSION = 4L
+    const val BUNDLED_VERSION = 5L
     /** The first rescue that takes over after MG4Dash's update (UPDATED). */
     const val HANDS_OVER_FROM = 4L
     private const val ASSET = "rescue.apk"
@@ -62,8 +62,9 @@ object Rescue {
     fun start(context: Context) {
         if (BuildConfig.MOCK) return
         when (takeRescued(context)) {
-            "stock" -> { Prefs(context).valetMode = true; notice = app.mg4dash.R.string.rescue_stock }
-            "recompiled" -> notice = app.mg4dash.R.string.rescue_recompiled
+            // SAIC home put back by the rescue: a service mode of its own (not to be retried at each start)
+            "stock" -> { Prefs(context).valetMode = true; Prefs(context).valetAuto = false; notice = app.mg4dash.R.string.rescue_stock }
+            "recompiled" -> { notice = app.mg4dash.R.string.rescue_recompiled; HomeSwitcher.backAfterRescue(context) }
         }
         Thread { Thread.sleep(30_000); ensureInstalled(context) }.start()
     }

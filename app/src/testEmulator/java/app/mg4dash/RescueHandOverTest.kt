@@ -34,12 +34,34 @@ class RescueHandOverTest {
         assertNull(HomeSwitcher.homeWord(false, false, null, ours))
     }
 
+    @Test fun crashGuardServiceModeStaysAuto() {
+        // The crash guard's service mode: "auto" (the rescue brings MG4Dash back); the driver's own: "0"
+        assertEquals("auto", HomeSwitcher.homeWord(true, false, saic, ours, valetAuto = true))
+        assertEquals("0", HomeSwitcher.homeWord(true, false, saic, ours, valetAuto = false))
+        // A service mode from before the setting counts as the driver's
+        assertEquals("0", HomeSwitcher.homeWord(true, false, saic, ours))
+    }
+
+    @Test fun serviceModeLeftAfterRescueOnlyIfAuto() {
+        val ctx = RuntimeEnvironment.getApplication()
+        val p = app.mg4dash.system.Prefs(ctx)
+        val home = HomeSwitcher.currentHome(ctx)
+        org.junit.Assume.assumeTrue("HOME resolves to MG4Dash here", home == HomeSwitcher.ours(ctx))
+        p.valetMode = true; p.valetAuto = true
+        HomeSwitcher.backAfterRescue(ctx)
+        assertFalse(p.valetMode); assertFalse(p.valetAuto)
+        // The driver's own service mode stays
+        p.valetMode = true; p.valetAuto = false
+        HomeSwitcher.backAfterRescue(ctx)
+        assertTrue(p.valetMode)
+    }
+
     @Test fun updateHandedOverFromRescue4() {
         assertFalse(Rescue.handsOver(-1))
         assertFalse(Rescue.handsOver(3))
         assertTrue(Rescue.handsOver(4))
         assertTrue(Rescue.handsOver(5))
-        assertEquals(4L, Rescue.BUNDLED_VERSION)
+        assertEquals(5L, Rescue.BUNDLED_VERSION)
     }
 
     @Test fun rescueRecompiledAndAnsweringAfterItsInstall() {
