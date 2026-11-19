@@ -113,8 +113,25 @@ public class RescueV4Test {
         // A crash "after" comes a second after whatever was written before it (its sign of life)
         if (after) org.robolectric.shadows.ShadowSystemClock.advanceBy(Duration.ofSeconds(1));
         long now = System.currentTimeMillis();
-        long at = after ? (last = Math.max(now + 1, last + 1)) : (lastBefore = Math.min(now - 1000, lastBefore - 1));
+        long at = after ? (last = Math.max(now - 500, last + 1)) : (lastBefore = Math.min(now - 1000, lastBefore - 1));
         String text = "Process: " + DASH + "\nFlags: 0x0\n\n" + (load ? "java.lang.NoClassDefFoundError: Failed resolution of: Lapp/mg4dash/R$style;\n" : "java.lang.IllegalStateException: oops\n");
+        shadowOf(service.getSystemService(DropBoxManager.class)).addData("system_app_crash", at, text.getBytes(StandardCharsets.UTF_8));
+    }
+
+    /** Whether MG4Dash's background was woken (its WakeReceiver, explicitly). */
+    private boolean woken() {
+        for (Intent i : shadowOf(RuntimeEnvironment.getApplication()).getBroadcastIntents())
+            if ("app.mg4dash.WAKE".equals(i.getAction()) && i.getComponent() != null && DASH.equals(i.getComponent().getPackageName())
+                    && (i.getFlags() & Intent.FLAG_INCLUDE_STOPPED_PACKAGES) != 0) return true;
+        return false;
+    }
+
+    /** A crash of code not loading after MG4Dash's relaunch (from onRelaunch): after the relaunch's wall time. */
+    private void crashAfterRelaunch() {
+        // A second after its sign of life (the test's elapsed clock is its own, the wall clock the real one)
+        org.robolectric.shadows.ShadowSystemClock.advanceBy(Duration.ofSeconds(1));
+        long at = last = Math.max(System.currentTimeMillis() + 1, last + 1);
+        String text = "Process: " + DASH + "\nFlags: 0x0\n\njava.lang.NoClassDefFoundError: Failed resolution of: Lapp/mg4dash/R$style;\n";
         shadowOf(service.getSystemService(DropBoxManager.class)).addData("system_app_crash", at, text.getBytes(StandardCharsets.UTF_8));
     }
 
@@ -195,7 +212,7 @@ public class RescueV4Test {
 
     @Test public void stillCrashingAfterRecompileFallsBack() throws Exception {
         dashHomeSaicEnabled("1");
-        service.onRelaunch = () -> { alive(BOOT); crash(true, true); };
+        service.onRelaunch = () -> { alive(BOOT); crashAfterRelaunch(); };
         service.run(0);
         assertTrue(rescued(), rescued().startsWith("stock:"));
         assertEquals(SAIC_HOME, opened());
@@ -298,6 +315,7 @@ public class RescueV4Test {
         service.run(0, RescueService.MODE_INSTALLED, -1);
         assertEquals(1, service.recompiles);
         assertNull(opened());
+        assertTrue("background woken, not left stopped", woken());
         assertEquals(PackageManager.COMPONENT_ENABLED_STATE_DEFAULT, dashEnabled());
     }
 
@@ -340,6 +358,7 @@ public class RescueV4Test {
         service.run(0, RescueService.MODE_CRASH, -1);
         assertEquals(1, service.recompiles);
         assertNull("no relaunch", opened());
+        assertTrue("background woken", woken());
         List<IntentFilter> filters = new ArrayList<>();
         List<ComponentName> names = new ArrayList<>();
         pm.getPreferredActivities(filters, names, null);
@@ -359,6 +378,7 @@ public class RescueV4Test {
         assertEquals(DASH_HOME, opened());
         assertTrue(rescued(), rescued().startsWith("recompiled:"));
         assertTrue("watched", service.pauses.contains(RescueService.RETRY_WAIT_MS));
+        assertFalse("relaunched instead", woken());
     }
 
     // ── MG4Dash's own crash guard put SAIC home ("auto"): brought back once repaired ──
@@ -392,7 +412,7 @@ public class RescueV4Test {
 
     @Test public void autoStillCrashingStockAndNoRetry() throws Exception {
         dashHomeSaicEnabled("auto");
-        service.onRelaunch = () -> { alive(BOOT); crash(true, true); };
+        service.onRelaunch = () -> { alive(BOOT); crashAfterRelaunch(); };
         service.run(0);
         assertTrue(rescued(), rescued().startsWith("stock:"));
         assertEquals("0", homeWord());

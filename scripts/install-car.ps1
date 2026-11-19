@@ -36,6 +36,8 @@ if ($rescue -ge 4) {
     Invoke-Adb @("shell", "am", "force-stop", $pkg) | Out-Null
     Invoke-Adb @("shell", "cmd", "package", "compile", "-m", "speed", "-f", $pkg) | Out-Null
     Invoke-Adb @("shell", "am", "force-stop", $pkg) | Out-Null
+    # Out of the "stopped" state (its strip, its maintenance gesture, the boot), without opening anything
+    & adb.exe shell am broadcast -n app.mg4dash/.system.WakeReceiver -a app.mg4dash.WAKE -f 0x10000020 | Out-Null
     Write-Host "Recompiled: press Home on the car to start MG4Dash, then press Enter here"
     [void](Read-Host)
 }
