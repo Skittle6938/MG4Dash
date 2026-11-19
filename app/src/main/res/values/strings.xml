@@ -603,6 +603,11 @@
     <string name="ly_square_right">Big square on the right</string>
     <string name="ly_band_top">Band at the top</string>
     <string name="ly_band_bottom">Band at the bottom</string>
+    <string name="ly_big_quad">Four</string>
+    <string name="ly_big_left">Big on the left</string>
+    <string name="ly_big_right">Big on the right</string>
+    <string name="ly_big_two">Two columns</string>
+    <string name="ly_big_two_bands">Two bands</string>
     <string name="ly_edit">Edit the layout and the widgets  ›</string>
     <string name="wc_too_big">Too small for a place this big: it is greyed here</string>
     <string name="wc_big_hint">Big place: App, Web app, Consumption, Shortcuts and Driving only</string>

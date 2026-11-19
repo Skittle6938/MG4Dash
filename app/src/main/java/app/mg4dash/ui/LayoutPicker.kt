@@ -33,7 +33,7 @@ object LayoutPicker {
                 val f = cells[s.id] ?: return@forEach
                 val inset = p.strokeWidth / 2
                 r.set(b.left + f.left * b.width() + inset, b.top + f.top * b.height() + inset, b.left + f.right * b.width() - inset, b.top + f.bottom * b.height() - inset)
-                if (s.size != HomeSlots.Size.SMALL && s.size != HomeSlots.Size.MEDIUM) {
+                if (s.size != HomeSlots.Size.SMALL && s.size != HomeSlots.Size.MEDIUM && s.size != HomeSlots.Size.QUARTER) {
                     p.style = Paint.Style.FILL; p.color = fill; c.drawRoundRect(r, 2 * d, 2 * d, p)
                 }
                 p.style = Paint.Style.STROKE; p.color = line; c.drawRoundRect(r, 2 * d, 2 * d, p)
@@ -52,9 +52,10 @@ object LayoutPicker {
 
     /**
      * The menu: two columns of drawings and names, [current] ticked. Opened under [anchor], or beside it ([side]:
-     * a button of the vertical bar), never off the screen.
+     * a button of the vertical bar), never off the screen. Only the layouts of one mode: Grand affichage's ([big]) or the
+     * others.
      */
-    fun show(activity: Activity, anchor: View, current: HomeSlots.Layout?, side: Boolean = false, onPick: (HomeSlots.Layout) -> Unit) {
+    fun show(activity: Activity, anchor: View, current: HomeSlots.Layout?, side: Boolean = false, big: Boolean = current?.big == true, onPick: (HomeSlots.Layout) -> Unit) {
         val d = activity.resources.displayMetrics.density
         fun dp(v: Int) = (v * d).toInt()
         val box = LinearLayout(activity).apply {
@@ -76,7 +77,7 @@ object LayoutPicker {
             setTextColor(Themes.color(activity, R.color.text_title)); setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
             setPadding(dp(14), 0, 0, dp(6))
         })
-        val all = HomeSlots.Layout.entries
+        val all = HomeSlots.Layout.of(big)
         val half = (all.size + 1) / 2
         for (row in 0 until half) {
             val line = LinearLayout(activity).apply { orientation = LinearLayout.HORIZONTAL }

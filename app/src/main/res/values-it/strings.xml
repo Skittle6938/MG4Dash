@@ -603,6 +603,11 @@
     <string name="ly_square_right">Quadrato grande a destra</string>
     <string name="ly_band_top">Banda in alto</string>
     <string name="ly_band_bottom">Banda in basso</string>
+    <string name="ly_big_quad">Quattro</string>
+    <string name="ly_big_left">Grande a sinistra</string>
+    <string name="ly_big_right">Grande a destra</string>
+    <string name="ly_big_two">Due colonne</string>
+    <string name="ly_big_two_bands">Due bande</string>
     <string name="ly_edit">Modifica disposizione e widget  ›</string>
     <string name="wc_too_big">Troppo piccola per uno spazio così grande: in grigio qui</string>
     <string name="wc_big_hint">Spazio grande: solo App, Web app, Consumi, Scorciatoie e Guida</string>

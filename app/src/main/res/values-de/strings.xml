@@ -603,6 +603,11 @@
     <string name="ly_square_right">Großes Quadrat rechts</string>
     <string name="ly_band_top">Band oben</string>
     <string name="ly_band_bottom">Band unten</string>
+    <string name="ly_big_quad">Vier</string>
+    <string name="ly_big_left">Groß links</string>
+    <string name="ly_big_right">Groß rechts</string>
+    <string name="ly_big_two">Zwei Spalten</string>
+    <string name="ly_big_two_bands">Zwei Bänder</string>
     <string name="ly_edit">Anordnung und Widgets bearbeiten  ›</string>
     <string name="wc_too_big">Zu klein für einen so großen Platz: hier ausgegraut</string>
     <string name="wc_big_hint">Großer Platz: nur App, Web-App, Verbrauch, Verknüpfungen und Fahren</string>

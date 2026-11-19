@@ -608,6 +608,11 @@ ly_square_left|Big square on the left|Grand carré à gauche|Großes Quadrat lin
 ly_square_right|Big square on the right|Grand carré à droite|Großes Quadrat rechts|Cuadro grande a la derecha|Quadrato grande a destra|Groot vierkant rechts|Büyük kare sağda|Velký čtverec vpravo
 ly_band_top|Band at the top|Bandeau en haut|Band oben|Banda arriba|Banda in alto|Band boven|Üstte bant|Pás nahoře
 ly_band_bottom|Band at the bottom|Bandeau en bas|Band unten|Banda abajo|Banda in basso|Band onder|Altta bant|Pás dole
+ly_big_quad|Four|Quatre|Vier|Cuatro|Quattro|Vier|Dört|Čtyři
+ly_big_left|Big on the left|Grande à gauche|Groß links|Grande a la izquierda|Grande a sinistra|Groot links|Büyük solda|Velké vlevo
+ly_big_right|Big on the right|Grande à droite|Groß rechts|Grande a la derecha|Grande a destra|Groot rechts|Büyük sağda|Velké vpravo
+ly_big_two|Two columns|Deux colonnes|Zwei Spalten|Dos columnas|Due colonne|Twee kolommen|İki sütun|Dva sloupce
+ly_big_two_bands|Two bands|Deux bandeaux|Zwei Bänder|Dos bandas|Due bande|Twee banden|İki bant|Dva pásy
 ly_edit|Edit the layout and the widgets  ›|Modifier la disposition et les widgets  ›|Anordnung und Widgets bearbeiten  ›|Editar la disposición y los widgets  ›|Modifica disposizione e widget  ›|Indeling en widgets bewerken  ›|Yerleşimi ve widget'ları düzenle  ›|Upravit rozvržení a widgety  ›
 wc_too_big|Too small for a place this big: it is greyed here|Trop petite pour une case aussi grande : grisée ici|Zu klein für einen so großen Platz: hier ausgegraut|Demasiado pequeña para un espacio tan grande: atenuada aquí|Troppo piccola per uno spazio così grande: in grigio qui|Te klein voor zo'n grote plek: hier grijs|Bu kadar büyük bir alan için çok küçük: burada gri|Na tak velké místo příliš malá: zde je zašedlá
 wc_big_hint|Big place: App, Web app, Consumption, Shortcuts and Driving only|Grande case : Application, Web app, Consommation, Raccourcis et Conduite seulement|Großer Platz: nur App, Web-App, Verbrauch, Verknüpfungen und Fahren|Espacio grande: solo Aplicación, Web app, Consumo, Accesos directos y Conducción|Spazio grande: solo App, Web app, Consumi, Scorciatoie e Guida|Grote plek: alleen App, Web-app, Verbruik, Snelkoppelingen en Rijden|Büyük alan: yalnızca Uygulama, Web uygulaması, Tüketim, Kısayollar ve Sürüş|Velké místo: pouze Aplikace, Webová aplikace, Spotřeba, Zkratky a Jízda

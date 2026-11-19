@@ -603,6 +603,11 @@
     <string name="ly_square_right">Velký čtverec vpravo</string>
     <string name="ly_band_top">Pás nahoře</string>
     <string name="ly_band_bottom">Pás dole</string>
+    <string name="ly_big_quad">Čtyři</string>
+    <string name="ly_big_left">Velké vlevo</string>
+    <string name="ly_big_right">Velké vpravo</string>
+    <string name="ly_big_two">Dva sloupce</string>
+    <string name="ly_big_two_bands">Dva pásy</string>
     <string name="ly_edit">Upravit rozvržení a widgety  ›</string>
     <string name="wc_too_big">Na tak velké místo příliš malá: zde je zašedlá</string>
     <string name="wc_big_hint">Velké místo: pouze Aplikace, Webová aplikace, Spotřeba, Zkratky a Jízda</string>
