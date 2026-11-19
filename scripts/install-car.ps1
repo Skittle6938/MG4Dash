@@ -28,6 +28,8 @@ if ($info) { $rescue = [int]$info.Matches[0].Groups[1].Value }
 
 if ($rescue -ge 4) {
     Write-Host "MG4Dash Rescue ${rescue}: hand-over (clean recompilation, relaunch, watch)"
+    # A crash before this (the old process started again on the APK being replaced) is not the build's
+    $since = (Invoke-Adb @("shell", "date", "+%s")).Trim()
     Invoke-Adb @("shell", "am", "broadcast", "-n", "app.mg4dash.rescue/.BootReceiver", "-a", "app.mg4dash.rescue.UPDATED", "-f", "0x10000000") | Out-Null
     # Its stop, recompilation and relaunch, then MG4Dash's start
     Start-Sleep -Seconds 45
@@ -36,6 +38,7 @@ if ($rescue -ge 4) {
     Invoke-Adb @("shell", "am", "force-stop", $pkg) | Out-Null
     Invoke-Adb @("shell", "cmd", "package", "compile", "-m", "speed", "-f", $pkg) | Out-Null
     Invoke-Adb @("shell", "am", "force-stop", $pkg) | Out-Null
+    $since = (Invoke-Adb @("shell", "date", "+%s")).Trim()
     # Out of the "stopped" state (its strip, its maintenance gesture, the boot), without opening anything
     & adb.exe shell am broadcast -n app.mg4dash/.system.WakeReceiver -a app.mg4dash.WAKE -f 0x10000020 | Out-Null
     Write-Host "Recompiled: press Home on the car to start MG4Dash, then press Enter here"
@@ -50,5 +53,18 @@ $m = [regex]::Match($dex, "\[$([regex]::Escape($pkg))\][\s\S]*?status=([^\]\s]+)
 if ($m.Success) { Write-Host "Compiled code: $($m.Groups[1].Value)"; if ($m.Groups[1].Value -match "speed-profile") { Write-Warning "still speed-profile" } }
 $procId = "$(& adb shell pidof $pkg)".Trim()
 if ($procId) { Write-Host "MG4Dash running (pid $procId)" } else { Write-Warning "MG4Dash not running" }
-$crash = & adb logcat -d -b crash -T "$before.000" 2>$null | Select-String "Process: $pkg,|FATAL EXCEPTION"
-if ($crash) { Write-Warning "New crash since the install:"; $crash | Select-Object -First 5 | ForEach-Object { Write-Host $_ } } else { Write-Host "No new crash" }
+# MG4Dash's crashes only (another app's are not this install's), split at the hand-over / recompilation
+function Get-DashCrashes([string]$from) {
+    $lines = @(& adb logcat -d -b crash -T "$from.000" 2>$null)
+    $out = @()
+    for ($i = 0; $i -lt $lines.Count; $i++) {
+        if ($lines[$i] -match "FATAL EXCEPTION" -and $i + 1 -lt $lines.Count -and $lines[$i + 1] -match "Process: $([regex]::Escape($pkg)),") {
+            $out += $lines[$i]; $out += $lines[$i + 1]; if ($i + 2 -lt $lines.Count) { $out += $lines[$i + 2] }
+        }
+    }
+    $out
+}
+$all = @(Get-DashCrashes $before)
+$after = @(Get-DashCrashes $since)
+if ($all.Count -gt $after.Count) { Write-Host "During the APK replacement, before the recompilation (not counted): $(($all.Count - $after.Count) / 3) crash(es) of the old process" }
+if ($after.Count -gt 0) { Write-Warning "New crash since the recompilation:"; $after | Select-Object -First 6 | ForEach-Object { Write-Host $_ } } else { Write-Host "No new crash" }
