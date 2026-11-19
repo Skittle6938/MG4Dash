@@ -10,13 +10,13 @@ $ErrorActionPreference = "Stop"
 $pkg = "app.mg4dash"
 if (-not (Test-Path $Apk)) { throw "No such APK: $Apk" }
 
-function Adb([string[]]$a) { $out = & adb @a 2>&1; if ($LASTEXITCODE -ne 0) { throw "adb $($a -join ' '): $out" }; $out }
+function Invoke-Adb([string[]]$a) { $ErrorActionPreference = "Continue"; $out = & adb.exe @a 2>&1; if ($LASTEXITCODE -ne 0) { throw "adb $($a -join ' '): $out" }; $out }
 
-$before = (Adb @("shell", "date", "+%s")).Trim()
+$before = (Invoke-Adb @("shell", "date", "+%s")).Trim()
 Write-Host "Installing $Apk"
-Adb @("push", $Apk, "/data/local/tmp/x.apk") | Out-Null
+Invoke-Adb @("push", $Apk, "/data/local/tmp/x.apk") | Out-Null
 try {
-    $r = Adb @("shell", "pm", "install", "-r", "-f", "/data/local/tmp/x.apk")
+    $r = Invoke-Adb @("shell", "pm", "install", "-r", "-f", "/data/local/tmp/x.apk")
     if (-not ($r -match "Success")) { throw "install failed: $r" }
 } finally {
     & adb shell rm -f /data/local/tmp/x.apk | Out-Null
@@ -28,22 +28,22 @@ if ($info) { $rescue = [int]$info.Matches[0].Groups[1].Value }
 
 if ($rescue -ge 4) {
     Write-Host "MG4Dash Rescue ${rescue}: hand-over (clean recompilation, relaunch, watch)"
-    Adb @("shell", "am", "broadcast", "-n", "app.mg4dash.rescue/.BootReceiver", "-a", "app.mg4dash.rescue.UPDATED", "-f", "0x10000000") | Out-Null
+    Invoke-Adb @("shell", "am", "broadcast", "-n", "app.mg4dash.rescue/.BootReceiver", "-a", "app.mg4dash.rescue.UPDATED", "-f", "0x10000000") | Out-Null
     # Its stop, recompilation and relaunch, then MG4Dash's start
     Start-Sleep -Seconds 45
 } else {
     Write-Host "MG4Dash Rescue $rescue (older): README sequence"
-    Adb @("shell", "am", "force-stop", $pkg) | Out-Null
-    Adb @("shell", "cmd", "package", "compile", "-m", "speed", "-f", $pkg) | Out-Null
-    Adb @("shell", "am", "force-stop", $pkg) | Out-Null
+    Invoke-Adb @("shell", "am", "force-stop", $pkg) | Out-Null
+    Invoke-Adb @("shell", "cmd", "package", "compile", "-m", "speed", "-f", $pkg) | Out-Null
+    Invoke-Adb @("shell", "am", "force-stop", $pkg) | Out-Null
     Write-Host "Recompiled: press Home on the car to start MG4Dash, then press Enter here"
     [void](Read-Host)
 }
 
 # Checks
-$v = Adb @("shell", "dumpsys", "package", $pkg) | Select-String "versionName=|versionCode=" | Select-Object -First 2
+$v = Invoke-Adb @("shell", "dumpsys", "package", $pkg) | Select-String "versionName=|versionCode=" | Select-Object -First 2
 Write-Host ($v -join "`n")
-$dex = Adb @("shell", "dumpsys", "package", "dexopt") | Out-String
+$dex = Invoke-Adb @("shell", "dumpsys", "package", "dexopt") | Out-String
 $m = [regex]::Match($dex, "\[$([regex]::Escape($pkg))\][\s\S]*?status=([^\]\s]+)")
 if ($m.Success) { Write-Host "Compiled code: $($m.Groups[1].Value)"; if ($m.Groups[1].Value -match "speed-profile") { Write-Warning "still speed-profile" } }
 $procId = "$(& adb shell pidof $pkg)".Trim()
