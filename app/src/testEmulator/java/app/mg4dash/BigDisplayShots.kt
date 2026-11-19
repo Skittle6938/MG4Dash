@@ -56,6 +56,14 @@ class BigDisplayShots {
         save(home.window.decorView, "big_home_after_settings.png")
     }
 
+    /** The seven layouts of Grand affichage with their starting contents (step 2), and their menu. */
+    @Test fun sevenLayouts() {
+        for (layout in app.mg4dash.ui.HomeSlots.Layout.of(big = true)) {
+            prefs.raw.edit().putString("home_layout_big", layout.key).commit()
+            shoot(MainActivity::class.java, "big_layout_${layout.key}.png")
+        }
+    }
+
     @Test fun climatePage() = shoot(app.mg4dash.pages.ClimateActivity::class.java, "big_page_climate.png")
     @Test fun vehiclePage() = shoot(app.mg4dash.pages.VehicleActivity::class.java, "big_page_vehicle.png")
 

@@ -54,4 +54,38 @@ class EditModeReachTest {
             ctl.pause().stop().destroy()
         }
     }
+
+    /** Grand affichage: the same in its seven layouts, enlarged (shorter places, every card offered everywhere). */
+    @Test fun everyOptionReachableInEveryBigPlace() {
+        val sp = RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE)
+        for (layout in Layout.of(big = true)) {
+            // The map and the web app ticked with the defaults: the most options at once
+            val spec = app.mg4dash.ui.HomeSlots.defaults(layout).let { d ->
+                val first = layout.slots.first { d.fill(it.id) is app.mg4dash.ui.HomeSlots.Fill.Cards }.id
+                val cards = (d.cards(first) + listOf(app.mg4dash.ui.HomeSlots.Card.MAP, app.mg4dash.ui.HomeSlots.Card.WEB)).distinct()
+                layout.slots.joinToString(";") { s -> s.id + "=" + when {
+                    s.id == first -> cards.joinToString(",") { it.id }
+                    d.fill(s.id) is app.mg4dash.ui.HomeSlots.Fill.Media -> "media"
+                    else -> d.cards(s.id).filter { it !in cards }.joinToString(",") { it.id }
+                } }
+            }
+            sp.edit().clear().putBoolean("vertical_dock", true).putInt("home_style", app.mg4dash.system.Prefs.STYLE_BIG)
+                .putString("home_layout_big", layout.key).putString("slots_" + layout.key, spec).commit()
+            val ctl = Robolectric.buildActivity(MainActivity::class.java).setup()
+            val act = ctl.get()
+            repeat(3) { shadowOf(Looper.getMainLooper()).idleFor(200, TimeUnit.MILLISECONDS) }
+            act.editCards()
+            repeat(3) { shadowOf(Looper.getMainLooper()).idleFor(200, TimeUnit.MILLISECONDS) }
+            val list = scrolls(act.window.decorView)
+            assertTrue("${layout.key}: a scroll area per place", list.size >= layout.slots.size)
+            list.forEach { s ->
+                val content = s.getChildAt(0)
+                s.scrollTo(0, content.height)
+                assertTrue("${layout.key}: options reachable (${content.height} in ${s.height}, scrolled ${s.scrollY})",
+                    content.height <= s.height || s.scrollY + s.height >= content.height - 1)
+                assertTrue("${layout.key}: its bar shown when it scrolls", content.height <= s.height || s.isVerticalScrollBarEnabled)
+            }
+            ctl.pause().stop().destroy()
+        }
+    }
 }

@@ -603,6 +603,11 @@
     <string name="ly_square_right">Groot vierkant rechts</string>
     <string name="ly_band_top">Band boven</string>
     <string name="ly_band_bottom">Band onder</string>
+    <string name="ly_big_quad">Vier</string>
+    <string name="ly_big_left">Groot links</string>
+    <string name="ly_big_right">Groot rechts</string>
+    <string name="ly_big_two">Twee kolommen</string>
+    <string name="ly_big_two_bands">Twee banden</string>
     <string name="ly_edit">Indeling en widgets bewerken  ›</string>
     <string name="wc_too_big">Te klein voor zo\'n grote plek: hier grijs</string>
     <string name="wc_big_hint">Grote plek: alleen App, Web-app, Verbruik, Snelkoppelingen en Rijden</string>

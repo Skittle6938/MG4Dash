@@ -534,6 +534,11 @@ class Prefs(context: Context) {
         get() = sp.getString("home_layout", null)
         set(v) = sp.edit().putString("home_layout", v).apply()
 
+    /** Layout of Grand affichage (a HomeSlots.Layout key of two columns); null: Four. Kept apart from [homeLayout]. */
+    var homeLayoutBig: String?
+        get() = sp.getString("home_layout_big", null)
+        set(v) = sp.edit().putString("home_layout_big", v).apply()
+
     /** Theme: background (0 navy, 1 black, 2 charcoal, 3 dark green, 4 burgundy) and buttons (0 blue, 1 grey, 2 red, 3 green, 4 orange). */
     var themeBackground: Int
         get() = sp.getInt("theme_bg", 1)   // black by default

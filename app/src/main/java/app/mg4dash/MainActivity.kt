@@ -423,22 +423,22 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
             f.current = HomeSlots.current(prefs, slotLayout, f.slot.id, f.cards)
         }
         // Smaller versions in a small place: consumption, map without + and −, one row of shortcuts
-        consumption.compact = frameOf(Card.CONSUMPTION)?.slot?.size == HomeSlots.Size.SMALL
-        trips.compact = frameOf(Card.TRIPS)?.slot?.size == HomeSlots.Size.SMALL
+        consumption.compact = frameOf(Card.CONSUMPTION)?.slot?.size?.form == HomeSlots.Size.SMALL
+        trips.compact = frameOf(Card.TRIPS)?.slot?.size?.form == HomeSlots.Size.SMALL
         // Tall place: more previous trips, to fill its height (owner's choice)
-        trips.previous = if (frameOf(Card.TRIPS)?.slot?.size == HomeSlots.Size.TALL) 14 else 2
-        driving.form = when (frameOf(Card.DRIVING)?.slot?.size) {
+        trips.previous = if (frameOf(Card.TRIPS)?.slot?.size?.form == HomeSlots.Size.TALL) 14 else 2
+        driving.form = when (frameOf(Card.DRIVING)?.slot?.size?.form) {
             HomeSlots.Size.SMALL -> app.mg4dash.ui.DrivingCard.Form.COMPACT
             HomeSlots.Size.TALL, HomeSlots.Size.LARGE -> app.mg4dash.ui.DrivingCard.Form.FULL
             HomeSlots.Size.WIDE -> app.mg4dash.ui.DrivingCard.Form.WIDE
             else -> app.mg4dash.ui.DrivingCard.Form.MEDIUM
         }
-        radar.form = when (frameOf(Card.RADAR)?.slot?.size) {
+        radar.form = when (frameOf(Card.RADAR)?.slot?.size?.form) {
             HomeSlots.Size.SMALL -> app.mg4dash.radar.RadarCard.Form.SMALL
             HomeSlots.Size.MEDIUM, null -> app.mg4dash.radar.RadarCard.Form.MEDIUM
             else -> app.mg4dash.radar.RadarCard.Form.FULL
         }
-        navCard.form = app.mg4dash.ui.NavCard.formFor(frameOf(Card.NAV)?.slot?.size)
+        navCard.form = app.mg4dash.ui.NavCard.formFor(frameOf(Card.NAV)?.slot?.size?.form)
         // The alerter works while its card is in a place, shown or not (its alerts go over Android Auto)
         if (frameOf(Card.RADAR) != null) app.mg4dash.radar.RadarRepo.start(this) else app.mg4dash.radar.RadarRepo.stop()
         applyMapButtons()
@@ -691,7 +691,7 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
     /** Speed and guidance banner of the map: at the top left on the tall map of the Map layout (#6), otherwise at the bottom left. */
     private fun placeMapInfo() {
         val f = frameOf(Card.MAP)
-        val top = mapLayout && f?.slot?.size.let { it == HomeSlots.Size.TALL || it == HomeSlots.Size.LARGE }
+        val top = mapLayout && f?.slot?.size?.form.let { it == HomeSlots.Size.TALL || it == HomeSlots.Size.LARGE }
         val pill = b.mapSpeed.parent as View
         (pill.layoutParams as android.widget.FrameLayout.LayoutParams).gravity = if (top) Gravity.TOP or Gravity.START else Gravity.BOTTOM or Gravity.LEFT
         pill.requestLayout()

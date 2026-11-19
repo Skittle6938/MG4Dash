@@ -603,6 +603,11 @@
     <string name="ly_square_right">Grand carré à droite</string>
     <string name="ly_band_top">Bandeau en haut</string>
     <string name="ly_band_bottom">Bandeau en bas</string>
+    <string name="ly_big_quad">Quatre</string>
+    <string name="ly_big_left">Grande à gauche</string>
+    <string name="ly_big_right">Grande à droite</string>
+    <string name="ly_big_two">Deux colonnes</string>
+    <string name="ly_big_two_bands">Deux bandeaux</string>
     <string name="ly_edit">Modifier la disposition et les widgets  ›</string>
     <string name="wc_too_big">Trop petite pour une case aussi grande : grisée ici</string>
     <string name="wc_big_hint">Grande case : Application, Web app, Consommation, Raccourcis et Conduite seulement</string>
