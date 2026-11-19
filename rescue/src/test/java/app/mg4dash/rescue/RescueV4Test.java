@@ -110,6 +110,8 @@ public class RescueV4Test {
 
     /** A crash of MG4Dash, its code not loading ([load]) or not, after now ([after]) or a little before. */
     private void crash(boolean load, boolean after) {
+        // A crash "after" comes a second after whatever was written before it (its sign of life)
+        if (after) org.robolectric.shadows.ShadowSystemClock.advanceBy(Duration.ofSeconds(1));
         long now = System.currentTimeMillis();
         long at = after ? (last = Math.max(now + 1, last + 1)) : (lastBefore = Math.min(now - 1000, lastBefore - 1));
         String text = "Process: " + DASH + "\nFlags: 0x0\n\n" + (load ? "java.lang.NoClassDefFoundError: Failed resolution of: Lapp/mg4dash/R$style;\n" : "java.lang.IllegalStateException: oops\n");
@@ -278,24 +280,85 @@ public class RescueV4Test {
         assertEquals(DASH_HOME, opened());
     }
 
-    @Test public void installedWantsANewSignOfLife() throws Exception {
-        // Installed by USB / ADB: the sign of life from before the install does not count
+    // ── After an install by USB / ADB (PACKAGE_REPLACED): the same clean recompilation ──
+
+    @Test public void packageReplacedRecompilesEvenIfStarted() throws Exception {
+        // Bad compiled code can break a screen opened later, not only the start: recompiled whatever
         dashHomeSaicEnabled("1");
         alive(BOOT);
-        org.robolectric.shadows.ShadowSystemClock.advanceBy(Duration.ofSeconds(5));
-        long installedAt = SystemClock.elapsedRealtime();
         service.onRelaunch = () -> alive(BOOT);
-        service.run(0, RescueService.MODE_INSTALLED, installedAt);
+        service.run(0, RescueService.MODE_INSTALLED, SystemClock.elapsedRealtime());
+        assertEquals(1, service.recompiles);
+        assertEquals(DASH_HOME, opened());
+        assertNull(rescued());
+    }
+
+    @Test public void packageReplacedNotHomeRecompiledNotRelaunched() throws Exception {
+        dashHomeSaicEnabled("0");
+        service.run(0, RescueService.MODE_INSTALLED, -1);
+        assertEquals(1, service.recompiles);
+        assertNull(opened());
+        assertEquals(PackageManager.COMPONENT_ENABLED_STATE_DEFAULT, dashEnabled());
+    }
+
+    @Test public void oneRecompilePerInstallUpdatedThenReplaced() throws Exception {
+        dashHomeSaicEnabled("1");
+        service.onRelaunch = () -> alive(BOOT);
+        service.run(0, RescueService.MODE_UPDATED, -1);
+        service.run(0, RescueService.MODE_INSTALLED, -1);
         assertEquals(1, service.recompiles);
     }
 
-    @Test public void installedAndStartedNothingDone() throws Exception {
+    @Test public void oneRecompilePerInstallReplacedThenUpdated() throws Exception {
         dashHomeSaicEnabled("1");
-        long installedAt = SystemClock.elapsedRealtime();
-        org.robolectric.shadows.ShadowSystemClock.advanceBy(Duration.ofSeconds(20));
+        service.onRelaunch = () -> alive(BOOT);
+        service.run(0, RescueService.MODE_INSTALLED, -1);
+        service.run(0, RescueService.MODE_UPDATED, -1);
+        assertEquals(1, service.recompiles);
+        // The update still relaunches it (MG4Dash did not restart itself)
+        assertEquals(DASH_HOME, opened());
+    }
+
+    @Test public void aNewInstallIsRecompiledAgain() throws Exception {
+        dashHomeSaicEnabled("1");
+        service.onRelaunch = () -> alive(BOOT);
+        service.run(0, RescueService.MODE_INSTALLED, -1);
+        PackageInfo p = pm.getPackageInfo(DASH, 0);
+        p.lastUpdateTime = 2_000L;
+        spm.installPackage(p);
+        service.run(0, RescueService.MODE_INSTALLED, -1);
+        assertEquals(2, service.recompiles);
+    }
+
+    // ── Code repair whatever the home, home steps only for the home ──
+
+    @Test public void loadCrashNotHomeRecompiledOnly() throws Exception {
+        // MG4Dash's own crash fallback said "not home" while the rescue's repair was pending: code fixed, SAIC stays
+        dashHomeSaicEnabled("0");
         alive(BOOT);
-        service.run(0, RescueService.MODE_INSTALLED, installedAt);
-        assertEquals(0, service.recompiles);
+        crash(true, true);
+        service.run(0, RescueService.MODE_CRASH, -1);
+        assertEquals(1, service.recompiles);
+        assertNull("no relaunch", opened());
+        List<IntentFilter> filters = new ArrayList<>();
+        List<ComponentName> names = new ArrayList<>();
+        pm.getPreferredActivities(filters, names, null);
+        assertTrue("no HOME preference set", names.isEmpty());
+        assertTrue("SAIC home untouched", pm.getComponentEnabledSetting(SAIC_HOME) != PackageManager.COMPONENT_ENABLED_STATE_DISABLED);
+        assertNull(rescued());
+        assertEquals(PackageManager.COMPONENT_ENABLED_STATE_DEFAULT, dashEnabled());
+    }
+
+    @Test public void loadCrashHomeRecompiledRelaunchedWatched() throws Exception {
+        dashHomeSaicEnabled("1");
+        alive(BOOT);
+        crash(true, true);
+        service.onRelaunch = () -> alive(BOOT);
+        service.run(0, RescueService.MODE_CRASH, -1);
+        assertEquals(1, service.recompiles);
+        assertEquals(DASH_HOME, opened());
+        assertTrue(rescued(), rescued().startsWith("recompiled:"));
+        assertTrue("watched", service.pauses.contains(RescueService.RETRY_WAIT_MS));
     }
 
     // ── Starts ──
