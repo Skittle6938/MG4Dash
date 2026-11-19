@@ -113,21 +113,20 @@ class SettingsActivity : AppCompatActivity() {
         // ════ Home tab: layout and map ════
         val style = panel(homeL, getString(R.string.st_style))
         text(style, getString(R.string.st_style_desc), 16f, R.color.text_title)
-        // Simple, or one of the eight layouts with its drawing (#38); the cards of each place in the edit mode
+        // Three styles (study v4, step 8): Standard ▾ and Grand affichage ▾ each open their own menu of layouts (with
+        // their drawing), Simple stays as it is; each style keeps its layout and cards, the edit mode changes them
         lateinit var paintStyle: () -> Unit
+        fun styleMenu(v: View, big: Boolean) = app.mg4dash.ui.LayoutPicker.show(this, v,
+            app.mg4dash.ui.HomeSlots.layoutOf(prefs, big).takeIf { (prefs.homeStyle == Prefs.STYLE_BIG) == big && prefs.homeStyle != 1 }, big = big) {
+            app.mg4dash.ui.HomeSlots.choose(prefs, it); paintStyle()
+        }
+        val (layoutBtn) = choiceButtons(listOf(getString(R.string.st_style_standard) + "   ▾"), { if (prefs.homeStyle != 1 && prefs.homeStyle != Prefs.STYLE_BIG) 0 else -1 }) {}
+        layoutBtn.setOnClickListener { styleMenu(it, big = false) }
+        // Grand affichage (accessibility): everything bigger; Settings itself keeps its size
+        val (bigBtn) = choiceButtons(listOf(getString(R.string.st_style_big) + "   ▾"), { if (prefs.homeStyle == Prefs.STYLE_BIG) 0 else -1 }) {}
+        bigBtn.setOnClickListener { styleMenu(it, big = true) }
         val (simpleBtn) = choiceButtons(listOf(getString(R.string.st_style_simple)), { if (prefs.homeStyle == 1) 0 else -1 }) { prefs.homeStyle = 1; paintStyle() }
-        val (layoutBtn) = choiceButtons(listOf(getString(R.string.ly_title) + "   ▾"), { if (prefs.homeStyle != 1 && prefs.homeStyle != Prefs.STYLE_BIG) 0 else -1 }) {}
-        layoutBtn.setOnClickListener { v ->
-            app.mg4dash.ui.LayoutPicker.show(this, v, if (prefs.homeStyle == 1) null else app.mg4dash.ui.HomeSlots.layoutOf(prefs)) {
-                app.mg4dash.ui.HomeSlots.choose(prefs, it); paintStyle()
-            }
-        }
-        row(style, simpleBtn, layoutBtn)
-        // Grand affichage (accessibility, being built: marked "test"): everything bigger, Settings itself keeps its size
-        val (bigBtn) = choiceButtons(listOf(getString(R.string.st_style_big)), { if (prefs.homeStyle == Prefs.STYLE_BIG) 0 else -1 }) {
-            prefs.homeStyle = if (prefs.homeStyle == Prefs.STYLE_BIG) 0 else Prefs.STYLE_BIG; paintStyle()
-        }
-        row(style, bigBtn)
+        row(style, layoutBtn, bigBtn, simpleBtn)
         val editBtn = button(getString(R.string.ly_edit)) {
             startActivity(android.content.Intent(this, app.mg4dash.MainActivity::class.java)
                 .putExtra(app.mg4dash.ui.CardsEditor.EXTRA_EDIT, true)
@@ -139,8 +138,10 @@ class SettingsActivity : AppCompatActivity() {
             simpleBtn.isSelected = prefs.homeStyle == 1
             layoutBtn.isSelected = prefs.homeStyle != 1 && prefs.homeStyle != Prefs.STYLE_BIG
             bigBtn.isSelected = prefs.homeStyle == Prefs.STYLE_BIG
-            layoutBtn.setCompoundDrawablesRelativeWithIntrinsicBounds(app.mg4dash.ui.LayoutPicker.glyph(this, app.mg4dash.ui.HomeSlots.layoutOf(prefs)), null, null, null)
-            layoutBtn.setPadding(dp(22), 0, dp(20), 0)
+            listOf(layoutBtn to false, bigBtn to true).forEach { (btn, big) ->
+                btn.setCompoundDrawablesRelativeWithIntrinsicBounds(app.mg4dash.ui.LayoutPicker.glyph(this, app.mg4dash.ui.HomeSlots.layoutOf(prefs, big)), null, null, null)
+                btn.setPadding(dp(18), 0, dp(16), 0)
+            }
             (editBtn.parent as View).visibility = if (prefs.homeStyle == 1) View.GONE else View.VISIBLE
         }
         paintStyle()

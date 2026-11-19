@@ -333,7 +333,9 @@
     <string name="st_style_now">Stile attuale: %1$s</string>
     <string name="st_style_full">Completa</string>
     <string name="st_style_simple">Semplice</string>
-    <string name="st_style_big">Visualizzazione grande (test)</string>
+    <string name="st_style_big">Visualizzazione grande</string>
+    <string name="st_style_standard">Standard</string>
+    <string name="sc_big">Visualizzazione grande</string>
     <string name="big_more">Altro</string>
     <string name="st_style_desc">Semplice: tre grandi riquadri (clima, batteria, multimedia), due scorciatoie e il meteo di oggi. La modifica vale al ritorno alla home.</string>
     <string name="en_heating">RISCALDAMENTO BATTERIA</string>
