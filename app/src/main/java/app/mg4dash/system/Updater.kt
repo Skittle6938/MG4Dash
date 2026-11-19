@@ -255,7 +255,9 @@ object Updater {
             if (status != PackageInstaller.STATUS_SUCCESS) { fail(context, context.getString(app.mg4dash.R.string.upd_err_install)); return }
             // No more recompilation here: as MG4Dash is often home, Android could relaunch it while
             // it rewrote its compiled code, which then stayed damaged (screen stuck at the next start,
-            // reproduced on 31/10). The compilation done by the installation is enough; Rescue repairs otherwise.
+            // reproduced on 31/10). With MG4Dash Rescue v4, it takes over: MG4Dash stopped, recompiled cleanly (the
+            // install's code sometimes does not load, 19/11), relaunched and watched; an older one: restarted as before.
+            if (Rescue.handOverUpdate(context)) return
             restart(context)
         }
     }
@@ -290,6 +292,8 @@ object Updater {
             HomeSwitcher.ensureHome(context, "update")
             val appCtx = context.applicationContext
             android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({ HomeSwitcher.ensureHome(appCtx, "update, 5 s later") }, 5_000)
+            // The rescue relaunches it after its clean recompilation (opening it now would run it meanwhile)
+            if (Rescue.handsOver(Rescue.installedVersion(context))) return
             context.startActivity(Intent(context, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
         }
     }

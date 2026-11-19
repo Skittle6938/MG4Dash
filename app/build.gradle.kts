@@ -15,6 +15,9 @@ android {
         targetSdk = 28
         versionCode = 299
         versionName = "1.7.4-beta6"
+        // Safety net trials only (never published): -PcrashTest=once|always builds a MG4Dash whose code "does not load"
+        // at start (once: until MG4Dash Rescue has recompiled this install; always: every time). Empty otherwise.
+        buildConfigField("String", "CRASH_TEST", "\"${project.findProperty("crashTest") ?: ""}\"")
     }
 
     flavorDimensions += "target"
