@@ -1180,9 +1180,14 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
                 VehicleState.flowDirection(parts)?.let { CarBridge.setFanDirection(it) }
             }
         }
-        b.temp.setOnClickListener { startActivity(Intent(this, ClimateActivity::class.java)) }
-        // Long press: calibrate the displayed temperature
-        b.temp.setOnLongClickListener { app.mg4dash.ui.TempCalibration.show(this) { renderClimate(CarBridge.state.value) }; true }
+        // The whole temperature area between − and + (20/11: not only the number), its full height: a touch opens the
+        // climate page, a long press the climate's settings (calibration of the displayed temperature)
+        val tempZone = b.temp.parent as LinearLayout
+        (tempZone.layoutParams as LinearLayout.LayoutParams).let { it.height = LinearLayout.LayoutParams.MATCH_PARENT; tempZone.layoutParams = it }
+        listOf<View>(tempZone, b.temp, b.climOutside).forEach { v ->
+            v.setOnClickListener { startActivity(Intent(this, ClimateActivity::class.java)) }
+            v.setOnLongClickListener { app.mg4dash.ui.TempCalibration.show(this) { renderClimate(CarBridge.state.value) }; true }
+        }
     }
 
     /** Press = one step; hold = repeat every 350 ms. */
