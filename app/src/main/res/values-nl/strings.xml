@@ -1185,7 +1185,14 @@
     <string name="br_curve">Geleerde curve</string>
     <string name="br_curve_show">Curve tonen  ▾</string>
     <string name="br_curve_hide">Verbergen  ▴</string>
-    <string name="br_curve_hint">Schuif een punt omhoog of omlaag · raak de curve aan om bij dat licht een punt toe te voegen · de curve blijft stijgen: een punt stopt bij zijn buren</string>
+    <string name="br_curve_hint">Schuif een punt omhoog of omlaag · raak de curve aan om een punt toe te voegen · lang drukken: wissen</string>
     <string name="br_point_delete">Dit punt verwijderen</string>
     <string name="br_curve_count">%1$d punten</string>
+    <string name="br_look_dark">Donker</string>
+    <string name="br_look_light">Licht</string>
+    <string name="br_curve_counts">Donker: %1$d punten · Licht: %2$d punten</string>
+    <string name="br_erase_title">Geleerde wissen?</string>
+    <string name="br_erase_msg">Deze curve: de getoonde gaat terug naar 15 / 35 / 70 / 100 %. Alles wissen: beide curves van dit profiel, licht en donker.</string>
+    <string name="br_erase_this">Deze curve</string>
+    <string name="br_erase_all">Alles wissen</string>
 </resources>

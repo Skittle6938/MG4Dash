@@ -1185,7 +1185,14 @@
     <string name="br_curve">Learnt curve</string>
     <string name="br_curve_show">See the curve  ▾</string>
     <string name="br_curve_hide">Hide  ▴</string>
-    <string name="br_curve_hint">Slide a point up or down · touch the curve to add a point at that light · the curve keeps rising: a point stops at its neighbours</string>
+    <string name="br_curve_hint">Slide a point up or down · touch the curve to add a point · long press: erase</string>
     <string name="br_point_delete">Delete this point</string>
     <string name="br_curve_count">%1$d points</string>
+    <string name="br_look_dark">Dark</string>
+    <string name="br_look_light">Light</string>
+    <string name="br_curve_counts">Dark: %1$d points · Light: %2$d points</string>
+    <string name="br_erase_title">Erase what was learnt?</string>
+    <string name="br_erase_msg">This curve: the one shown goes back to 15 / 35 / 70 / 100 %. Erase all: both curves of this profile, light and dark.</string>
+    <string name="br_erase_this">This curve</string>
+    <string name="br_erase_all">Erase all</string>
 </resources>

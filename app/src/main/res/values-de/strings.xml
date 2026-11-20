@@ -1185,7 +1185,14 @@
     <string name="br_curve">Gelernte Kurve</string>
     <string name="br_curve_show">Kurve anzeigen  ▾</string>
     <string name="br_curve_hide">Ausblenden  ▴</string>
-    <string name="br_curve_hint">Einen Punkt nach oben oder unten ziehen · die Kurve berühren, um bei diesem Licht einen Punkt hinzuzufügen · die Kurve steigt immer: ein Punkt hält bei seinen Nachbarn</string>
+    <string name="br_curve_hint">Punkt nach oben oder unten ziehen · Kurve berühren, um einen Punkt hinzuzufügen · lange drücken: löschen</string>
     <string name="br_point_delete">Diesen Punkt löschen</string>
     <string name="br_curve_count">%1$d Punkte</string>
+    <string name="br_look_dark">Dunkel</string>
+    <string name="br_look_light">Hell</string>
+    <string name="br_curve_counts">Dunkel: %1$d Punkte · Hell: %2$d Punkte</string>
+    <string name="br_erase_title">Gelerntes löschen?</string>
+    <string name="br_erase_msg">Diese Kurve: die angezeigte kehrt zu 15 / 35 / 70 / 100 % zurück. Alles löschen: beide Kurven dieses Profils, hell und dunkel.</string>
+    <string name="br_erase_this">Diese Kurve</string>
+    <string name="br_erase_all">Alles löschen</string>
 </resources>

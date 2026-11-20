@@ -1183,7 +1183,14 @@
     <string name="br_curve">Naučená křivka</string>
     <string name="br_curve_show">Zobrazit křivku  ▾</string>
     <string name="br_curve_hide">Skrýt  ▴</string>
-    <string name="br_curve_hint">Posuňte bod nahoru nebo dolů · dotykem křivky přidáte bod při tomto světle · křivka stále stoupá: bod se zastaví u sousedů</string>
+    <string name="br_curve_hint">Posuňte bod nahoru nebo dolů · dotykem křivky přidáte bod · dlouhý stisk: smazat</string>
     <string name="br_point_delete">Smazat tento bod</string>
     <string name="br_curve_count">Bodů: %1$d</string>
+    <string name="br_look_dark">Tmavý</string>
+    <string name="br_look_light">Světlý</string>
+    <string name="br_curve_counts">Tmavý: %1$d bodů · Světlý: %2$d bodů</string>
+    <string name="br_erase_title">Smazat naučené?</string>
+    <string name="br_erase_msg">Tato křivka: zobrazená se vrátí na 15 / 35 / 70 / 100 %. Smazat vše: obě křivky tohoto profilu, světlá i tmavá.</string>
+    <string name="br_erase_this">Tato křivka</string>
+    <string name="br_erase_all">Smazat vše</string>
 </resources>

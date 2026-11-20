@@ -52,7 +52,7 @@ class CurveView(context: Context, private var curve: BrightnessCurve, private va
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         val w = MeasureSpec.getSize(widthMeasureSpec)
-        setMeasuredDimension(w, (w * 0.42f).toInt().coerceAtMost((300 * d).toInt()))
+        setMeasuredDimension(w, (w * 0.42f).toInt().coerceAtMost((240 * d).toInt()))
     }
 
     override fun onDraw(c: Canvas) {
@@ -95,6 +95,27 @@ class CurveView(context: Context, private var curve: BrightnessCurve, private va
 
     private var dragging: BrightnessCurve.Point? = null
 
+    /** A long press held still on an empty part of the graph (Marc, 20/11): the erase window. */
+    var onLongPress: (() -> Unit)? = null
+
+    // A touch away from the points: a new point once the finger moves or lifts, the erase window if held still
+    private var downX = 0f
+    private var downY = 0f
+    private var waiting = false
+    private val slop = android.view.ViewConfiguration.get(context).scaledTouchSlop
+    private val longPress = Runnable {
+        if (waiting) { waiting = false; performHapticFeedback(android.view.HapticFeedbackConstants.LONG_PRESS); onLongPress?.invoke() }
+    }
+
+    /** A new point on the curve at the light under [px], held by the finger from now on. */
+    private fun addAt(px: Float) {
+        val lv = levelAt(px)
+        val (lo, hi) = curve.bounds(lv)
+        val p = BrightnessCurve.Point(lv, false, curve.valueAt(lv).coerceIn(lo, hi), System.currentTimeMillis())
+        curve = BrightnessCurve((curve.points.filter { Math.abs(it.level - lv) >= BrightnessCurve.REPLACE } + p).takeLast(BrightnessCurve.MAX_POINTS))
+        selected = p; dragging = p
+    }
+
     @SuppressLint("ClickableViewAccessibility")
     override fun onTouchEvent(e: MotionEvent): Boolean {
         when (e.actionMasked) {
@@ -103,23 +124,29 @@ class CurveView(context: Context, private var curve: BrightnessCurve, private va
                 val near = curve.points.minByOrNull { Math.hypot((x(it.level) - e.x).toDouble(), (y(it.value) - e.y).toDouble()) }
                     ?.takeIf { Math.hypot((x(it.level) - e.x).toDouble(), (y(it.value) - e.y).toDouble()) < 28 * d }
                 if (near != null) { selected = near; dragging = near }
-                else {
-                    // A new point on the curve at this light, then moved with the finger
-                    val lv = levelAt(e.x)
-                    val (lo, hi) = curve.bounds(lv)
-                    val p = BrightnessCurve.Point(lv, false, curve.valueAt(lv).coerceIn(lo, hi), System.currentTimeMillis())
-                    curve = BrightnessCurve((curve.points.filter { Math.abs(it.level - lv) >= BrightnessCurve.REPLACE } + p).takeLast(BrightnessCurve.MAX_POINTS))
-                    selected = p; dragging = p
+                else { downX = e.x; downY = e.y; waiting = true; postDelayed(longPress, LONG_PRESS_MS) }
+            }
+            MotionEvent.ACTION_MOVE -> {
+                if (waiting && Math.hypot((e.x - downX).toDouble(), (e.y - downY).toDouble()) > slop) {
+                    waiting = false; removeCallbacks(longPress); addAt(downX)
+                }
+                dragging?.let { p ->
+                    curve = curve.moved(p, valueAt(e.y), p.at)
+                    val np = curve.points.first { it.level == p.level }
+                    dragging = np; selected = np
                 }
             }
-            MotionEvent.ACTION_MOVE -> dragging?.let { p ->
-                curve = curve.moved(p, valueAt(e.y), p.at)
-                val np = curve.points.first { it.level == p.level }
-                dragging = np; selected = np
+            MotionEvent.ACTION_UP -> {
+                if (waiting) { waiting = false; removeCallbacks(longPress); addAt(downX) }
+                if (dragging != null) onChange(curve)
+                dragging = null
             }
-            MotionEvent.ACTION_UP -> { if (dragging != null) onChange(curve); dragging = null }
-            MotionEvent.ACTION_CANCEL -> dragging = null
+            MotionEvent.ACTION_CANCEL -> { waiting = false; removeCallbacks(longPress); dragging = null }
         }
         return true
+    }
+
+    companion object {
+        const val LONG_PRESS_MS = 1_000L
     }
 }

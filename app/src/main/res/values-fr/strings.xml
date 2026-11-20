@@ -1185,7 +1185,14 @@
     <string name="br_curve">Courbe apprise</string>
     <string name="br_curve_show">Voir la courbe  ▾</string>
     <string name="br_curve_hide">Masquer  ▴</string>
-    <string name="br_curve_hint">Glisse un point vers le haut ou le bas · touche la courbe pour ajouter un point à cette lumière · la courbe reste croissante : un point se bloque entre ses voisins</string>
+    <string name="br_curve_hint">Glisse un point vers le haut ou le bas · touche la courbe pour ajouter un point · appui long : effacer</string>
     <string name="br_point_delete">Supprimer ce point</string>
     <string name="br_curve_count">%1$d points</string>
+    <string name="br_look_dark">Sombre</string>
+    <string name="br_look_light">Clair</string>
+    <string name="br_curve_counts">Sombre : %1$d points · Clair : %2$d points</string>
+    <string name="br_erase_title">Effacer l’apprentissage ?</string>
+    <string name="br_erase_msg">Cette courbe : celle affichée revient à 15 / 35 / 70 / 100 %. Tout effacer : les deux courbes de ce profil, claire et sombre.</string>
+    <string name="br_erase_this">Cette courbe</string>
+    <string name="br_erase_all">Tout effacer</string>
 </resources>
