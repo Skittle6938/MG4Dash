@@ -67,6 +67,40 @@ class ClimateTouchZoneTest {
         assertSame("$tag: − still answers", down, hit(a.window.decorView, d.centerX(), d.centerY()))
     }
 
+    /** The fan's levels (20/11): held still, the settings and the level unchanged; a touch still picks a level. */
+    @Test fun fanGaugeHoldAndTap() {
+        val a = home(0, "home_layout", "full", "tl=climate;tc=map;tr=media;bl=energy;bc=hourly,daily;br=trip,power,phone")
+        val g = a.findViewById<app.mg4dash.ui.SegmentedGauge>(R.id.fanGauge)
+        fun ev(action: Int, x: Float, t: Long) = android.view.MotionEvent.obtain(0, t, action, x, g.height / 2f, 0)
+        val before = g.value
+        // Held still on the 8th level: the settings open, nothing picked
+        var picked = -1
+        val pick = g.onSegmentPick!!
+        g.onSegmentPick = { picked = it; pick(it) }
+        val x8 = g.paddingLeft + (g.width - g.paddingLeft - g.paddingRight) * 7.5f / g.segments
+        g.dispatchTouchEvent(ev(android.view.MotionEvent.ACTION_DOWN, x8, 0))
+        shadowOf(Looper.getMainLooper()).idleFor(android.view.ViewConfiguration.getLongPressTimeout() + 100L, TimeUnit.MILLISECONDS)
+        g.dispatchTouchEvent(ev(android.view.MotionEvent.ACTION_UP, x8, 900))
+        idle()
+        assertNotNull("held: the settings", ShadowDialog.getLatestDialog()?.takeIf { it.isShowing })
+        assertTrue("held: no level picked ($picked)", picked == -1)
+        assertTrue("held: the level shown before (${g.value} vs $before)", g.value == before)
+        ShadowDialog.getLatestDialog().dismiss(); idle()
+        // A touch: the level
+        val x3 = g.paddingLeft + (g.width - g.paddingLeft - g.paddingRight) * 2.5f / g.segments
+        g.dispatchTouchEvent(ev(android.view.MotionEvent.ACTION_DOWN, x3, 1000))
+        g.dispatchTouchEvent(ev(android.view.MotionEvent.ACTION_UP, x3, 1080))
+        idle()
+        assertTrue("a touch picks the 3rd level ($picked)", picked == 2)
+        // A slide too, even slow
+        g.dispatchTouchEvent(ev(android.view.MotionEvent.ACTION_DOWN, x3, 2000))
+        g.dispatchTouchEvent(ev(android.view.MotionEvent.ACTION_MOVE, x8, 2100))
+        shadowOf(Looper.getMainLooper()).idleFor(android.view.ViewConfiguration.getLongPressTimeout() + 100L, TimeUnit.MILLISECONDS)
+        g.dispatchTouchEvent(ev(android.view.MotionEvent.ACTION_UP, x8, 3000))
+        idle()
+        assertTrue("a slide picks the 8th level ($picked)", picked == 7)
+    }
+
     @Test fun normalCard() = check(home(0, "home_layout", "full", "tl=climate;tc=map;tr=media;bl=energy;bc=hourly,daily;br=trip,power,phone"), "full")
 
     // Grand affichage: the climate in a quarter, a band and a half

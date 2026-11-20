@@ -105,6 +105,8 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         b.fanGauge.segments = VehicleState.FAN_MAX
         // Touched or slid along: that fan level, sent once when lifted
         b.fanGauge.onSegmentPick = { CarBridge.setFanLevel(it + 1) }
+        // Held still on the fan's levels (20/11): the climate's settings, as on the temperature; a touch or a slide still sets the fan
+        b.fanGauge.onPickHold = { climateSettings() }
         b.kersGauge.segments = 4
         b.kersGauge.onColor = color(R.color.accent_energy)
         // Touch a segment = regeneration level; long press = one-pedal driving
@@ -1186,9 +1188,14 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         (tempZone.layoutParams as LinearLayout.LayoutParams).let { it.height = LinearLayout.LayoutParams.MATCH_PARENT; tempZone.layoutParams = it }
         listOf<View>(tempZone, b.temp, b.climOutside).forEach { v ->
             v.setOnClickListener { startActivity(Intent(this, ClimateActivity::class.java)) }
-            v.setOnLongClickListener { app.mg4dash.ui.TempCalibration.show(this) { renderClimate(CarBridge.state.value) }; true }
+            v.setOnLongClickListener { climateSettings(); true }
         }
+        // The fan's icon and number below it too
+        listOf<View>(b.fanIcon, b.fanValue).forEach { it.setOnLongClickListener { climateSettings(); true } }
     }
+
+    /** The climate's settings: the calibration of the displayed temperature. */
+    private fun climateSettings() = app.mg4dash.ui.TempCalibration.show(this) { renderClimate(CarBridge.state.value) }
 
     /** Press = one step; hold = repeat every 350 ms. */
     private fun repeatOnHold(view: View, action: () -> Unit) {
