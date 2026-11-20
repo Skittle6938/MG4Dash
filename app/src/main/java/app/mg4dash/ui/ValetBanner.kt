@@ -65,7 +65,7 @@ internal object ValetBanner {
     fun show(context: Context) = main.post {
         if (shown != null) return@post
         val app = context.applicationContext
-        val c = Themes.themed(app)
+        val c = Themes.themed(app, big = false)   // maintenance: always the normal size
         val d = c.resources.displayMetrics.density
         fun dp(v: Int) = (v * d).toInt()
         fun col(res: Int) = Themes.color(c, res)

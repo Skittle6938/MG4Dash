@@ -26,7 +26,7 @@ class WeatherCompact(context: Context) : LinearLayout(context) {
     private fun tv(sp: Float, colorRes: Int, bold: Boolean = false) = TextView(context).apply {
         setTextColor(c(colorRes)); setTextSize(TypedValue.COMPLEX_UNIT_SP, sp); maxLines = 1
         includeFontPadding = false
-        if (bold) typeface = Typeface.create("sans-serif-light", Typeface.NORMAL)
+        if (bold) typeface = Themes.valueFont(context)
     }
 
     private val icon = ImageView(context)

@@ -37,6 +37,10 @@ object ShortcutTiles {
         SCREEN("screen", R.drawable.ic_sc_screen, R.string.sc_screen),
         AA("aa", R.drawable.ic_sc_aa, R.string.sc_aa),
         ADB("adb", R.drawable.ic_sc_adb, R.string.sc_adb),
+        /** Grand affichage on and off (study v4, step 8): back to the style used before it. */
+        BIG("big", R.drawable.ic_sc_big, R.string.sc_big),
+        /** The profiles (step 11): with two, a touch goes to the other; from three, it opens the list. */
+        PROFILE("profile", R.drawable.ic_sc_profile, R.string.sc_profile),
     }
 
     /** By default only the first row (13/11): the users add the others. */
@@ -125,6 +129,8 @@ object ShortcutTiles {
             Tile.V2L -> if (!CarBridge.chargeControl) Shown("", false, false) else onOff(VehicleState.isDischarging(s))
             Tile.SCREEN -> Shown("", false)
             Tile.ADB -> onOff(app.mg4dash.system.AdbSwitch.on(context))
+            Tile.BIG -> onOff(Prefs(context).homeStyle == Prefs.STYLE_BIG)
+            Tile.PROFILE -> Shown(app.mg4dash.system.Profiles.current(context).name, false)
             Tile.AA -> app.mg4dash.system.ConnectionToggle.isOff(context).let { Shown(t(if (it) R.string.sc_cut else R.string.sc_connected), it) }
         }
     }
@@ -139,7 +145,7 @@ object ShortcutTiles {
         return when (tile) {
             Tile.ESP, Tile.DOORS, Tile.AA -> !s.inverted
             Tile.AIDS -> s.level != 0
-            Tile.MODE, Tile.REGEN, Tile.POWER, Tile.SCREEN -> false
+            Tile.MODE, Tile.REGEN, Tile.POWER, Tile.SCREEN, Tile.PROFILE -> false
             else -> s.inverted
         }
     }
@@ -205,7 +211,7 @@ object ShortcutTiles {
         val inv = cur.inverted
         return when (tile) {
             // inverted = on
-            Tile.FOG, Tile.DEFROST, Tile.ONE_PEDAL, Tile.CLIMATE, Tile.BATTERY_HEAT, Tile.WHEEL_HEAT, Tile.V2L ->
+            Tile.FOG, Tile.DEFROST, Tile.ONE_PEDAL, Tile.CLIMATE, Tile.BATTERY_HEAT, Tile.WHEEL_HEAT, Tile.V2L, Tile.BIG ->
                 Shown(t(if (!inv) R.string.sc_on else R.string.sc_off), !inv)
             // inverted = off (unusual)
             Tile.ESP -> Shown(t(if (inv) R.string.sc_active else R.string.sc_inactive), !inv)
@@ -288,10 +294,28 @@ object ShortcutTiles {
             // ADB: on only (adbutil has no off either; the car's next start switches it off)
             Tile.ADB -> if (shown?.inverted == true) { Toasts.show(activity, R.string.sc_adb_already); return null }
                 else app.mg4dash.system.AdbSwitch.enable(activity, "shortcuts menu")
+            // Home and the open screens rebuild with the mode (theme signature); MG4Radio is told
+            Tile.BIG -> {
+                HomeSlots.toggleBig(Prefs(activity)); Themes.publish(activity)
+                if (activity is Activity && !activity.isFinishing) main.post { Themes.recreateSmooth(activity) }
+            }
+            Tile.PROFILE -> {
+                val list = app.mg4dash.system.Profiles.list(activity)
+                val cur = app.mg4dash.system.Profiles.current(activity)
+                val next = nextProfile(list.map { it.id }, cur.id)
+                if (list.size >= 3 && activity is Activity) main.post {
+                    SourceMenu.choose(activity, activity.window.decorView, list.map { it.name }, list.indexOf(cur), centred = true) { i -> app.mg4dash.system.Profiles.switchTo(activity, list[i].id, "tile") }
+                } else if (next != null) app.mg4dash.system.Profiles.switchTo(activity, next, "tile")
+                return null
+            }
             Tile.POWER, Tile.AIDS -> {}
         }
         return next?.let { hold(tile, it) }
     }
+
+    /** The profile a touch on the Profile tile goes to: the next one (with two, the other one); null with one. */
+    internal fun nextProfile(ids: List<String>, current: String): String? =
+        if (ids.size < 2) null else ids[(ids.indexOf(current).coerceAtLeast(0) + 1) % ids.size]
 
     /** The aids tile after a change in its list, shown at once. */
     fun aidsShown(context: Context, a: Aids): Shown = aidsState(context, a).let { if (it.available) hold(Tile.AIDS, it) else it }

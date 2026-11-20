@@ -23,6 +23,8 @@ import app.mg4dash.system.Log
  * (#70, #71): a cross closes the app, "Close all" closes all those that do not hold the car.
  */
 class AppsActivity : AppCompatActivity() {
+    /** Grand affichage: this screen enlarged (BigDisplay), Android's own setting untouched. */
+    override fun attachBaseContext(newBase: android.content.Context) = super.attachBaseContext(app.mg4dash.ui.BigDisplay.wrap(newBase))
     /** Closed at once in maintenance mode (its onCreate went no further). */
     private var closedForMaintenance = false
 

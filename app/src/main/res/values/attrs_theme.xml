@@ -23,4 +23,6 @@
     <attr name="mgTextTitle" format="color" />
     <attr name="mgTextSub" format="color" />
     <attr name="mgTextDisabled" format="color" />
+    <!-- Font of the big numbers: light, regular in Grand affichage (thicker strokes, study v4 step 7) -->
+    <attr name="mgValueFont" format="string" />
 </resources>

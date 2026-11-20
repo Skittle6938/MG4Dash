@@ -125,7 +125,7 @@ object RadarAlert {
         if (s.critical) {
             if (!critical) Log.i(TAG, "strong alert in a zone: ${s.speedKmh} for ${s.zone?.limit}")
             critical = true
-            if (p.radarBanner) showBanner(c, s) else hideBanner()
+            if (p.radarBanner) showBanner(app.mg4dash.ui.BigDisplay.wrap(c), s) else hideBanner()
         } else {
             critical = false
             hideBanner()
