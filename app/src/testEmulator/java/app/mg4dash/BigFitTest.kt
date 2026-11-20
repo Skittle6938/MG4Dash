@@ -68,10 +68,16 @@ class BigFitTest {
             Triple("big_quad", "tl=climate;bl=energy;tr=media;br=hourly", "tl"),
             Triple("big_left", "l=map,consumption;tr=climate,energy;br=media", "l"),
             Triple("big_band_top", "t=energy;bl=climate,hourly;br=media", "t"),
+            // The normal size's small places too
+            Triple("full", "tl=climate;tc=map;tr=media;bl=energy;bc=hourly,daily;br=trip,power,phone", "bl"),
+            Triple("full", "tl=climate;tc=map;tr=media;bl=energy;bc=hourly,daily;br=trip,power,phone", "br"),
+            Triple("map", "tl=hourly,daily;tc=energy,trip;r=map;bl=climate;bc=media", "tc"),
         )) {
-            prefs.raw.edit().clear().putBoolean("vertical_dock", true).putBoolean("tutorial_shortcuts_seen", true).putInt("home_style", Prefs.STYLE_BIG)
-                .putString("home_layout_big", layout).putString("slots_$layout", spec).putString("conn_slot_$layout", slot)
-                .putStringSet("conn_icons_hidden", emptySet()).commit()
+            for (fade in listOf(true, false)) {
+            val big = layout.startsWith("big_")
+            prefs.raw.edit().clear().putBoolean("vertical_dock", true).putBoolean("tutorial_shortcuts_seen", true).putInt("home_style", if (big) Prefs.STYLE_BIG else 0)
+                .putString(if (big) "home_layout_big" else "home_layout", layout).putString("slots_$layout", spec).putString("conn_slot_$layout", slot)
+                .putStringSet("conn_icons_hidden", emptySet()).putBoolean("panel_fade", fade).commit()
             val a = Robolectric.buildActivity(MainActivity::class.java).setup().get().also { idle(); lay(it) }
             val row = MainActivity::class.java.getDeclaredField("connections").apply { isAccessible = true }.get(a) as View?
             assertTrue("$layout/$slot: a bar", row != null)
@@ -82,7 +88,8 @@ class BigFitTest {
             assertTrue("$layout/$slot: inside it", rect(box).contains(rect(row)))
             // Drawn over the card shown there (the cards have an elevation of their own)
             val shown = (0 until box.childCount).map { box.getChildAt(it) }.filter { it !== row && it.visibility == View.VISIBLE }
-            assertTrue("$layout/$slot: over the card (z ${row.z} vs ${shown.map { it.z }})", shown.all { it.z <= row.z })
+            assertTrue("$layout/$slot (fade $fade): over the card (z ${row.z} vs ${shown.map { it.z }})", shown.all { it.z <= row.z })
+            }
         }
     }
 
