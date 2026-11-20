@@ -7,10 +7,8 @@ import android.os.SystemClock
 import android.provider.Settings
 
 /**
- * Screen brightness kept from one start to the next (Marc, 15/11): the car puts the automatic brightness and its
- * shift (AUTO −2 … AUTO +2) back to its own values at each start. The last state seen (from MG4Dash's bar, the stock
- * panel or anything else) is remembered, and put back at start and when the screen lights again. For a minute after
- * that, a change that is not the remembered state is taken as the car resetting it, and put back again.
+ * Restores the remembered offset at startup or wake while automatic brightness is still enabled.
+ * For a minute afterwards, the car can reset the offset again. Manual mode and its brightness are left alone.
  */
 object BrightnessMemory {
     private const val TAG = "Brightness"
@@ -39,9 +37,9 @@ object BrightnessMemory {
         State(Settings.System.getInt(cr, MODE, 0) == 1, Settings.System.getFloat(cr, ADJ, 0f), Settings.System.getInt(cr, VALUE, 128))
     } catch (_: Exception) { null }
 
-    /** What differs between [now] and [saved] and matters: the shift only in automatic, the level only by hand. */
+    /** Only restore an offset when both the saved and current settings are automatic. */
     internal fun differs(now: State, saved: State): Boolean =
-        now.auto != saved.auto || (saved.auto && Math.abs(now.adj - saved.adj) > 0.01f) || (!saved.auto && now.value != saved.value)
+        now.auto && saved.auto && Math.abs(now.adj - saved.adj) > 0.01f
 
     /** The current state remembered (MG4Dash's bar calls it after each change, the observer for the others). */
     fun save(ctx: Context) {
@@ -61,15 +59,8 @@ object BrightnessMemory {
         val now = current(ctx) ?: return
         if (!differs(now, saved)) return
         try {
-            val cr = ctx.contentResolver
-            if (saved.auto) {
-                Settings.System.putFloat(cr, ADJ, saved.adj)
-                Settings.System.putInt(cr, MODE, 1)
-            } else {
-                Settings.System.putInt(cr, MODE, 0)
-                Settings.System.putInt(cr, VALUE, saved.value)
-            }
-            Log.i(TAG, "put back ($why): ${if (saved.auto) "auto, shift ${saved.adj}" else "by hand ${saved.value}"} (was ${if (now.auto) "auto, shift ${now.adj}" else "by hand ${now.value}"})")
+            Settings.System.putFloat(ctx.contentResolver, ADJ, saved.adj)
+            Log.i(TAG, "put back ($why): auto shift ${saved.adj} (was ${now.adj})")
         } catch (e: Exception) { Log.w(TAG, "put back ($why): ${e.message}") }
     }
 
