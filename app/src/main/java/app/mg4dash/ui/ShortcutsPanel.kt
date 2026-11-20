@@ -134,6 +134,8 @@ object ShortcutsPanel : Application.ActivityLifecycleCallbacks {
     /** Closes the menu wherever it is (the car's camera came, the setting went off). */
     fun closeAll() = main.post { close(now = true) }
 
+    internal fun covers(activity: Activity): Boolean = panel?.activity === activity
+
     internal fun close(now: Boolean) {
         val p = panel ?: return
         if (now) { p.remove(); panel = null } else p.animateTo(0f) { p.remove(); if (panel === p) panel = null }
@@ -160,7 +162,7 @@ object ShortcutsPanel : Application.ActivityLifecycleCallbacks {
                     // From the top band of the screen (taller than the strip's): a slide down there is the menu's, the
                     // widgets' swipes start below. In full screen the strip (above this window) takes its own 12 px
                     candidate = (open == null && e.y <= SCREEN_EDGE_PX && e.pointerCount == 1 && enabled(activity)) ||
-                        (open != null && open.dialogShown.not() && open.inSheet(e.rawX, e.rawY))
+                        (open != null && !open.editMode && open.dialogShown.not() && open.inSheet(e.rawX, e.rawY))
                 }
                 MotionEvent.ACTION_POINTER_DOWN -> if (dragging == null) candidate = false
                 MotionEvent.ACTION_MOVE -> {
@@ -237,6 +239,7 @@ object ShortcutsPanel : Application.ActivityLifecycleCallbacks {
         val dialogShown get() = box != null
         var progress = 0f; private set
         private var editing = false
+        val editMode get() = editing
         private val tileViews = HashMap<Tile, TileView>()
 
         init {
@@ -332,23 +335,24 @@ object ShortcutsPanel : Application.ActivityLifecycleCallbacks {
             headRow.visibility = if (editing) View.VISIBLE else View.GONE
             grid.removeAllViews(); tileViews.clear()
             val chosen = ShortcutTiles.chosen(prefs)
-            shownTiles().chunked(COLS).forEach { rowTiles ->
+            val entries = shownTiles().map { tile ->
+                TileView(tile).also { tv ->
+                    tileViews[tile] = tv
+                    tv.show(lastShown[tile])
+                    if (editing) tv.alpha = if (tile in chosen) 1f else 0.35f
+                }
+            }.toMutableList()
+            if (editing) entries.add(0, TileView(null).apply { alpha = if (prefs.shortcutsBrightness) 1f else 0.35f })
+            entries.chunked(COLS).forEach { rowTiles ->
                 val row = LinearLayout(ctx).apply { orientation = LinearLayout.HORIZONTAL }
                 for (i in 0 until COLS) {
-                    val tile = rowTiles.getOrNull(i)
-                    val v: View = if (tile == null) View(ctx) else TileView(tile).also { tv ->
-                        tileViews[tile] = tv
-                        tv.show(lastShown[tile])
-                        if (editing) tv.alpha = if (tile in chosen) 1f else 0.35f
-                    }
+                    val v = rowTiles.getOrNull(i) ?: View(ctx)
                     row.addView(v, LinearLayout.LayoutParams(0, kit.dp(138), 1f).apply { if (i > 0) leftMargin = kit.dp(16) })
                 }
                 grid.addView(row, LinearLayout.LayoutParams(-1, -2).apply { bottomMargin = kit.dp(16) })
             }
-            // Screen brightness under the tiles (option, on by default): in the edit mode a touch switches it
-            if (prefs.shortcutsBrightness || editing) grid.addView(BrightnessBar().apply {
-                if (editing) { alpha = if (prefs.shortcutsBrightness) 1f else 0.35f; editToggle = { prefs.shortcutsBrightness = !prefs.shortcutsBrightness; render() } }
-            }, LinearLayout.LayoutParams(-1, kit.dp(84)).apply { bottomMargin = kit.dp(16) })
+            if (prefs.shortcutsBrightness && !editing) grid.addView(BrightnessBar(),
+                LinearLayout.LayoutParams(-1, kit.dp(84)).apply { bottomMargin = kit.dp(16) })
             if (editing) grid.addView(TextView(ctx).apply {
                 text = ctx.getString(R.string.sc_edit_hint); setTextColor(c(R.color.text_sub)); setTextSize(TypedValue.COMPLEX_UNIT_SP, 17f)
             })
@@ -396,9 +400,11 @@ object ShortcutsPanel : Application.ActivityLifecycleCallbacks {
             }.start()
         }
 
-        private inner class TileView(val tile: Tile) : LinearLayout(ctx) {
-            private val icon = ImageView(ctx).apply { setImageResource(tile.icon) }
-            private val name = TextView(ctx).apply { text = ctx.getString(tile.label); setTextSize(TypedValue.COMPLEX_UNIT_SP, 20f); gravity = Gravity.CENTER; maxLines = 1 }
+        /** A null tile is the edit-only entry for the brightness bar. */
+        private inner class TileView(val tile: Tile?) : LinearLayout(ctx) {
+            private val label = tile?.label ?: R.string.br_title
+            private val icon = ImageView(ctx)
+            private val name = TextView(ctx).apply { setTextSize(TypedValue.COMPLEX_UNIT_SP, 20f); gravity = Gravity.CENTER; maxLines = 1 }
             private val state = TextView(ctx).apply { setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f); gravity = Gravity.CENTER; maxLines = 1 }
             private val bg = GradientDrawable().apply { cornerRadius = kit.dp(22).toFloat() }
 
@@ -409,19 +415,46 @@ object ShortcutsPanel : Application.ActivityLifecycleCallbacks {
                 addView(name, LayoutParams(-1, -2).apply { topMargin = kit.dp(8) })
                 addView(state, LayoutParams(-1, -2).apply { topMargin = kit.dp(2) })
                 isClickable = true
-                setOnClickListener { touched(tile) }
-                setOnLongClickListener { longPressed(tile); true }
+                setOnClickListener {
+                    if (tile != null) touched(tile)
+                    else { prefs.shortcutsBrightness = !prefs.shortcutsBrightness; render() }
+                }
+                if (tile != null) {
+                    setOnLongClickListener {
+                        if (!editing) { longPressed(tile); true }
+                        else tile in ShortcutTiles.chosen(prefs) &&
+                            startDragAndDrop(null, View.DragShadowBuilder(this), tile, 0)
+                    }
+                    setOnDragListener { _, event ->
+                        val source = event.localState as? Tile
+                        val chosen = ShortcutTiles.chosen(prefs)
+                        if (!editing || source == null || source !in chosen || tile !in chosen) {
+                            false
+                        } else {
+                            if (event.action == android.view.DragEvent.ACTION_DROP && source != tile) {
+                                val reordered = chosen.toMutableList()
+                                val destination = reordered.indexOf(tile)
+                                reordered.remove(source)
+                                reordered.add(destination, source)
+                                ShortcutTiles.choose(prefs, reordered)
+                                root.post { render() }
+                            }
+                            true
+                        }
+                    }
+                }
                 show(null)
             }
 
             /** On / active: background tinted with the theme's accent, its border, icon and state in the accent colour. */
             fun show(s: ShortcutTiles.Shown?) {
-                val lit = ShortcutTiles.lit(tile, s)
+                val lit = tile != null && ShortcutTiles.lit(tile, s)
                 bg.setColor(if (lit) accentTint else c(R.color.button_idle))
                 if (lit) bg.setStroke(kit.dp(2), accentBorder) else bg.setStroke(0, 0)
-                icon.setImageResource(ShortcutTiles.icon(tile, s)); icon.setColorFilter(if (lit) accentText else c(R.color.text_value))
+                icon.setImageResource(tile?.let { ShortcutTiles.icon(it, s) } ?: R.drawable.ic_sc_sun)
+                icon.setColorFilter(if (lit) accentText else c(R.color.text_value))
                 name.setTextColor(c(R.color.text_value))
-                name.text = s?.label ?: ctx.getString(tile.label)
+                name.text = s?.label ?: ctx.getString(label)
                 state.setTextColor(if (lit) accentText else c(R.color.text_sub)); state.alpha = 1f
                 state.text = s?.state ?: ""
                 // Not usable now (rear fog light with the lights off): greyed
@@ -437,7 +470,6 @@ object ShortcutsPanel : Application.ActivityLifecycleCallbacks {
          */
         @SuppressLint("ViewConstructor")
         private inner class BrightnessBar : LinearLayout(ctx) {
-            var editToggle: (() -> Unit)? = null
             private val pct = TextView(ctx).apply { setTextColor(c(R.color.text_sub)); setTextSize(TypedValue.COMPLEX_UNIT_SP, 19f); gravity = Gravity.END or Gravity.CENTER_VERTICAL }
             private val track = Track()
             private var value = read()
@@ -451,7 +483,7 @@ object ShortcutsPanel : Application.ActivityLifecycleCallbacks {
                 text = sign; gravity = Gravity.CENTER; setTextSize(TypedValue.COMPLEX_UNIT_SP, 26f); setTextColor(c(R.color.text_value))
                 typeface = Typeface.create("sans-serif-medium", Typeface.NORMAL)
                 background = GradientDrawable().apply { setColor(c(R.color.panel)); cornerRadius = kit.dp(16).toFloat(); setStroke(1, c(R.color.panel_border)) }
-                setOnClickListener { if (editToggle == null) step(dir) }
+                setOnClickListener { step(dir) }
             }
             private val minus = stepButton("\u2212", -1)
             private val plus = stepButton("+", 1)
@@ -470,7 +502,6 @@ object ShortcutsPanel : Application.ActivityLifecycleCallbacks {
                 addView(auto, LayoutParams(kit.dp(124), kit.dp(56)).apply { leftMargin = kit.dp(10) })
                 addView(plus, LayoutParams(kit.dp(56), kit.dp(56)).apply { leftMargin = kit.dp(10) })
                 auto.setOnClickListener {
-                    if (editToggle != null) return@setOnClickListener
                     // Smart brightness: it is already the automatic mode; AUTO sets the screen from its curve again at once
                     if (app.mg4dash.brightness.SmartBrightness.enabled(ctx)) { app.mg4dash.brightness.SmartBrightness.refresh(ctx); showAuto(); return@setOnClickListener }
                     try { android.provider.Settings.System.putInt(ctx.contentResolver, "screen_brightness_mode", 1); Log.i(TAG, "brightness auto") }
@@ -556,7 +587,6 @@ object ShortcutsPanel : Application.ActivityLifecycleCallbacks {
 
             @SuppressLint("ClickableViewAccessibility")
             override fun onTouchEvent(e: MotionEvent): Boolean {
-                editToggle?.let { t -> if (e.actionMasked == MotionEvent.ACTION_UP) t(); return true }
                 val x = e.x - track.left
                 if (e.actionMasked == MotionEvent.ACTION_DOWN && e.x > track.right + kit.dp(8)) return false
                 val v = ((x - track.r) / (track.width - 2 * track.r)).coerceIn(0f, 1f).let { Math.round(it * 255) }
@@ -802,15 +832,14 @@ object ShortcutsPanel : Application.ActivityLifecycleCallbacks {
         private fun projectionInFront(c: Context): Boolean =
             linkInFront(c).let { link -> stripMode(link, linkImmersive, Firmware.gen, link && LinkContract.carPulldown(c)) == StripGesture.Mode.PASS }
 
-        /** MG4Dash's own screen in front: two fingers open Android Auto / CarPlay there, as on its screens. */
+        /** Whether the front screen already belongs to MG4Dash. */
         @Suppress("DEPRECATION")
         private fun ownInFront(c: Context): Boolean = try {
             (c.getSystemService(Context.ACTIVITY_SERVICE) as android.app.ActivityManager).getRunningTasks(1).firstOrNull()?.topActivity?.packageName == c.packageName
         } catch (_: Exception) { false }
 
-        /** Two fingers from the strip: MG4Dash's home, or on MG4Dash's own screens Android Auto / CarPlay when a phone projects. */
+        /** Two fingers from the strip return from another app to MG4Dash's home. */
         private fun twoFingers(c: Context) {
-            // On MG4Dash's own screens too (20/11: the projection is now one finger in from a side edge, EdgeSwipe)
             Log.i(TAG, "strip: two fingers, back to MG4Dash's home")
             try {
                 c.startActivity(android.content.Intent(android.content.Intent.ACTION_MAIN).addCategory(android.content.Intent.CATEGORY_HOME)
@@ -975,8 +1004,9 @@ object ShortcutsPanel : Application.ActivityLifecycleCallbacks {
                         // rawX / rawY: the first finger's position
                         val a = gesture.move(e.rawX, e.rawY, e.pointerCount)
                         // Three fingers only over MG4Link's projection; elsewhere nothing (no session to end there)
-                        val act = if (a == StripGesture.Action.DISCONNECT) stripAction(a, linkInFront(context)) else a
-                        if (a != act) Log.i(TAG, "strip: three fingers outside MG4Link, nothing")
+                        val act = stripAction(a,
+                            linkInFront = a == StripGesture.Action.DISCONNECT && linkInFront(context),
+                            dashInFront = a == StripGesture.Action.HOME && ownInFront(context))
                         when (act) {
                             StripGesture.Action.MENU -> if (panel == null) {
                                 val p = openPanel(context)
@@ -1076,7 +1106,7 @@ object ShortcutsPanel : Application.ActivityLifecycleCallbacks {
             override fun onInterceptTouchEvent(e: MotionEvent): Boolean {
                 val p = panel ?: return false
                 when (e.actionMasked) {
-                    MotionEvent.ACTION_DOWN -> { downX = e.rawX; downY = e.rawY; dragging = false; candidate = !p.dialogShown && p.inSheet(e.rawX, e.rawY) }
+                    MotionEvent.ACTION_DOWN -> { downX = e.rawX; downY = e.rawY; dragging = false; candidate = !p.editMode && !p.dialogShown && p.inSheet(e.rawX, e.rawY) }
                     MotionEvent.ACTION_MOVE -> if (candidate) {
                         val dy = e.rawY - downY; val dx = e.rawX - downX
                         if (dy < -slop * 2 && -dy > Math.abs(dx) * 1.5f) { dragging = true; started = p.progress; downY = e.rawY; return true }

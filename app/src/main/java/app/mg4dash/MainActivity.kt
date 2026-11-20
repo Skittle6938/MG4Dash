@@ -1866,7 +1866,7 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
     }
 
     override fun dispatchTouchEvent(ev: android.view.MotionEvent): Boolean {
-        if (panelOver()) {
+        if (panelOver() || app.mg4dash.ui.ShortcutsPanel.covers(this)) {
             // The card gestures under it end there
             if (ev.actionMasked == android.view.MotionEvent.ACTION_DOWN) { pressFrame = null; handler.removeCallbacks(longPressed); restFrame = null }
             return super.dispatchTouchEvent(ev)

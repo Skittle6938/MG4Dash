@@ -9,7 +9,7 @@ import app.mg4dash.system.Firmware
  * to the other by a message, never by touches injected again. Only the first finger has to start in the strip, the
  * others land anywhere (the strip is not split-touch, so it gets them all):
  * - one finger down: the shortcuts menu, which follows the finger;
- * - two fingers down: back to MG4Dash's home (the phone's projection is one finger in from a side edge, [EdgeSwipe]);
+ * - two fingers down over another app: back to MG4Dash's home;
  * - three fingers down, over MG4Link's projection only: MG4Link is asked to end its session
  *   ([LinkContract.ACTION_USER_DISCONNECT]); over the other apps nothing, so that no other app's gesture ever ends a
  *   session (see [stripAction]).
@@ -67,9 +67,12 @@ internal class StripGesture(private val density: Float) {
     enum class Mode { CATCH, PASS }
 }
 
-/** What a recognised gesture does where it is made: three fingers only over MG4Link's projection, nothing elsewhere. */
-internal fun stripAction(a: StripGesture.Action, linkInFront: Boolean): StripGesture.Action =
-    if (a == StripGesture.Action.DISCONNECT && !linkInFront) StripGesture.Action.NONE else a
+/** What a recognised gesture does on the screen in front. */
+internal fun stripAction(a: StripGesture.Action, linkInFront: Boolean, dashInFront: Boolean = false): StripGesture.Action = when (a) {
+    StripGesture.Action.DISCONNECT -> if (linkInFront) a else StripGesture.Action.NONE
+    StripGesture.Action.HOME -> if (dashInFront) StripGesture.Action.NONE else a
+    else -> a
+}
 
 /** The strip's height and whether it catches the touches. */
 internal data class StripState(val height: Int, val catches: Boolean)
