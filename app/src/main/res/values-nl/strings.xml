@@ -1177,7 +1177,7 @@
     <string name="br_reset_this">Deze curve</string>
     <string name="br_reset_all">Alles</string>
     <string name="br_reset_this_confirm">Vergeten wat voor dit profiel in deze weergave (licht of donker) is geleerd?</string>
-    <string name="br_reset_all_confirm">Alles wat is geleerd vergeten, voor alle profielen, licht en donker?</string>
+    <string name="br_reset_all_confirm">Alles wat is geleerd vergeten voor dit profiel, licht en donker?</string>
     <string name="br_night">Nacht</string>
     <string name="br_dusk">Schemering</string>
     <string name="br_overcast">Bewolkt</string>

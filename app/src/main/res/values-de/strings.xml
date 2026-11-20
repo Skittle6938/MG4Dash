@@ -1177,7 +1177,7 @@
     <string name="br_reset_this">Diese Kurve</string>
     <string name="br_reset_all">Alle</string>
     <string name="br_reset_this_confirm">Das für dieses Profil in dieser Darstellung (hell oder dunkel) Gelernte vergessen?</string>
-    <string name="br_reset_all_confirm">Alles Gelernte für alle Profile vergessen, hell und dunkel?</string>
+    <string name="br_reset_all_confirm">Alles Gelernte für dieses Profil vergessen, hell und dunkel?</string>
     <string name="br_night">Nacht</string>
     <string name="br_dusk">Dämmerung</string>
     <string name="br_overcast">Bedeckt</string>
