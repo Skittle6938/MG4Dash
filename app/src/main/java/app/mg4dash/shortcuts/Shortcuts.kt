@@ -83,7 +83,14 @@ object Shortcuts {
      */
     fun grid(size: app.mg4dash.ui.HomeSlots.Size?, density: Int): Pair<Int, Int> {
         val d = density.coerceIn(DENSITIES)
-        return when (size) {
+        // Grand affichage (study v4): a quarter, a half, a band
+        when (size) {
+            app.mg4dash.ui.HomeSlots.Size.QUARTER -> return listOf(3 to 1, 3 to 2, 4 to 2)[d]
+            app.mg4dash.ui.HomeSlots.Size.HALF -> return listOf(3 to 3, 3 to 4, 4 to 4)[d]
+            app.mg4dash.ui.HomeSlots.Size.BAND -> return listOf(6 to 1, 6 to 2, 8 to 2)[d]
+            else -> {}
+        }
+        return when (size?.form) {
             app.mg4dash.ui.HomeSlots.Size.SMALL -> listOf(4 to 1, 4 to 2, 5 to 2)[d]
             app.mg4dash.ui.HomeSlots.Size.TALL -> listOf(4 to 3, 4 to 4, 5 to 4)[d]
             // Two columns wide: more columns rather than rows (tiles over 280 dp wide with 4)

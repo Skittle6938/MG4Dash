@@ -63,7 +63,9 @@ class SettingsActivity : AppCompatActivity() {
         if (intent.getBooleanExtra(EXTRA_RADAR, false)) { radarPage(); return }
         // A single scrolling area: two columns of categories, under a fixed banner
         // (title, log, close) that leaves room for the fog light button.
-        val root = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; setPadding(dp(16), dp(12), dp(16), dp(12)) }
+        // The screen's margins as home's (Grand affichage: enlarged like its bar, which then sits where home's does)
+        val bd = app.mg4dash.ui.Dock.sized(this).resources.displayMetrics.density
+        val root = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; setPadding((16 * bd).toInt(), (12 * bd).toInt(), (16 * bd).toInt(), (12 * bd).toInt()) }
         val vertical = app.mg4dash.ui.Dock.vertical(this)
         val top = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL }
         top.addView(TextView(this).apply {
@@ -72,6 +74,8 @@ class SettingsActivity : AppCompatActivity() {
         }, LinearLayout.LayoutParams(0, -2, 1f).apply { leftMargin = if (vertical) dp(12) else dp(app.mg4dash.ui.Kit.fogSafeDp(this@SettingsActivity) - 8) })
         // Tabs (setting themes) in the banner, next to the title
         val tabBar = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL }
+        // Profiles (study v4, step 10): the current one, its menu on every tab
+        top.addView(ProfileWindow.button(this) { recreate() }, LinearLayout.LayoutParams(-2, dp(52)).apply { rightMargin = dp(12) })
         top.addView(tabBar, LinearLayout.LayoutParams(-2, dp(52)).apply { rightMargin = dp(16) })
         top.addView(button(getString(R.string.st_close)) { finish() }, LinearLayout.LayoutParams(dp(160), dp(52)))
         root.addView(top, LinearLayout.LayoutParams(-1, -2).apply { bottomMargin = dp(12) })
@@ -113,16 +117,20 @@ class SettingsActivity : AppCompatActivity() {
         // ════ Home tab: layout and map ════
         val style = panel(homeL, getString(R.string.st_style))
         text(style, getString(R.string.st_style_desc), 16f, R.color.text_title)
-        // Simple, or one of the eight layouts with its drawing (#38); the cards of each place in the edit mode
+        // Three styles (study v4, step 8): Standard ▾ and Grand affichage ▾ each open their own menu of layouts (with
+        // their drawing), Simple stays as it is; each style keeps its layout and cards, the edit mode changes them
         lateinit var paintStyle: () -> Unit
-        val (simpleBtn) = choiceButtons(listOf(getString(R.string.st_style_simple)), { if (prefs.homeStyle == 1) 0 else -1 }) { prefs.homeStyle = 1; paintStyle() }
-        val (layoutBtn) = choiceButtons(listOf(getString(R.string.ly_title) + "   ▾"), { if (prefs.homeStyle != 1) 0 else -1 }) {}
-        layoutBtn.setOnClickListener { v ->
-            app.mg4dash.ui.LayoutPicker.show(this, v, if (prefs.homeStyle == 1) null else app.mg4dash.ui.HomeSlots.layoutOf(prefs)) {
-                app.mg4dash.ui.HomeSlots.choose(prefs, it); paintStyle()
-            }
+        fun styleMenu(v: View, big: Boolean) = app.mg4dash.ui.LayoutPicker.show(this, v,
+            app.mg4dash.ui.HomeSlots.layoutOf(prefs, big).takeIf { (prefs.homeStyle == Prefs.STYLE_BIG) == big && prefs.homeStyle != 1 }, big = big) {
+            app.mg4dash.ui.HomeSlots.choose(prefs, it); paintStyle()
         }
-        row(style, simpleBtn, layoutBtn)
+        val (layoutBtn) = choiceButtons(listOf(getString(R.string.st_style_standard) + "   ▾"), { if (prefs.homeStyle != 1 && prefs.homeStyle != Prefs.STYLE_BIG) 0 else -1 }) {}
+        layoutBtn.setOnClickListener { styleMenu(it, big = false) }
+        // Grand affichage (accessibility): everything bigger; Settings itself keeps its size
+        val (bigBtn) = choiceButtons(listOf(getString(R.string.st_style_big) + "   ▾"), { if (prefs.homeStyle == Prefs.STYLE_BIG) 0 else -1 }) {}
+        bigBtn.setOnClickListener { styleMenu(it, big = true) }
+        val (simpleBtn) = choiceButtons(listOf(getString(R.string.st_style_simple)), { if (prefs.homeStyle == 1) 0 else -1 }) { prefs.homeStyle = 1; paintStyle() }
+        row(style, layoutBtn, bigBtn, simpleBtn)
         val editBtn = button(getString(R.string.ly_edit)) {
             startActivity(android.content.Intent(this, app.mg4dash.MainActivity::class.java)
                 .putExtra(app.mg4dash.ui.CardsEditor.EXTRA_EDIT, true)
@@ -132,9 +140,12 @@ class SettingsActivity : AppCompatActivity() {
         row(style, editBtn)
         paintStyle = {
             simpleBtn.isSelected = prefs.homeStyle == 1
-            layoutBtn.isSelected = prefs.homeStyle != 1
-            layoutBtn.setCompoundDrawablesRelativeWithIntrinsicBounds(app.mg4dash.ui.LayoutPicker.glyph(this, app.mg4dash.ui.HomeSlots.layoutOf(prefs)), null, null, null)
-            layoutBtn.setPadding(dp(22), 0, dp(20), 0)
+            layoutBtn.isSelected = prefs.homeStyle != 1 && prefs.homeStyle != Prefs.STYLE_BIG
+            bigBtn.isSelected = prefs.homeStyle == Prefs.STYLE_BIG
+            listOf(layoutBtn to false, bigBtn to true).forEach { (btn, big) ->
+                btn.setCompoundDrawablesRelativeWithIntrinsicBounds(app.mg4dash.ui.LayoutPicker.glyph(this, app.mg4dash.ui.HomeSlots.layoutOf(prefs, big)), null, null, null)
+                btn.setPadding(dp(18), 0, dp(16), 0)
+            }
             (editBtn.parent as View).visibility = if (prefs.homeStyle == 1) View.GONE else View.VISIBLE
         }
         paintStyle()
@@ -152,6 +163,8 @@ class SettingsActivity : AppCompatActivity() {
             app.mg4dash.ui.Toasts.show(this, getString(R.string.st_shortcuts_menu_restart), long = true)
             app.mg4dash.ui.Themes.publish(this); recreate()
         }
+        // Shared by every profile: MG's fog button is hidden by an overlay the car only reads at its start
+        text(style, getString(R.string.pf_all), 14f, R.color.text_title)
         toggle(style, R.string.st_fullscreen, null, { prefs.fullscreen }) { prefs.fullscreen = it; Fullscreen.apply(this); app.mg4dash.ui.ShortcutsPanel.GlobalStrip.update(this); app.mg4dash.ui.EmbeddedApp.refreshImmersive(this) }
         // The SAIC call window in full screen too: no top bar during calls
         toggle(style, R.string.st_call_bar, R.string.st_call_bar_desc, { prefs.callBarHidden }) { prefs.callBarHidden = it; app.mg4dash.ui.EmbeddedApp.refreshImmersive(this) }
@@ -199,11 +212,15 @@ class SettingsActivity : AppCompatActivity() {
         toggle(units, R.string.st_climhold, R.string.st_climhold_desc, { prefs.climateHoldEnabled }) { prefs.climateHoldEnabled = it }
         if (app.mg4dash.system.Firmware.family == app.mg4dash.system.Firmware.Family.LEGACY)
             toggle(units, R.string.st_hide_saic_climate, R.string.st_hide_saic_climate_desc, { prefs.hideSaicClimate }) { prefs.hideSaicClimate = it }
+        // Profiles (step 12): each one keeps the drive mode and the regeneration; shared, off by default
+        toggle(units, R.string.pf_drive, R.string.pf_drive_desc, { prefs.profilesDrive }) { prefs.profilesDrive = it }
+        text(units, getString(R.string.pf_all), 14f, R.color.text_title)
 
         soundTriggersSetting(panel(carL, getString(R.string.st_sound_trigger).uppercase()))
 
         // ════ Appearance tab: theme and effects ════
         val theme = panel(lookL, getString(R.string.st_theme))
+        // Brightness (smart brightness, Marc 20/11): right under the theme, with the rest of the look
         dropdown(theme, getString(R.string.st_theme_mode), listOf(R.string.st_mode_auto, R.string.st_mode_dark, R.string.st_mode_light).map { getString(it) }, { prefs.themeMode }) {
             if (prefs.themeMode != it) { prefs.themeMode = it; onThemeChanged() }
         }
@@ -299,6 +316,8 @@ class SettingsActivity : AppCompatActivity() {
         row(energy, priceBtn)
         text(energy, getString(R.string.st_kwh_price_desc), 15f, R.color.text_title)
         toggle(energy, R.string.st_cc_stopped, R.string.st_cc_stopped_desc, { prefs.raw.getBoolean("cc_stopped", true) }) { prefs.raw.edit().putBoolean("cc_stopped", it).apply() }
+        // Brightness at the top of the right column, above the live power (Marc, 20/11)
+        brightnessSetting(panel(lookR, getString(R.string.br_title)))
         // Speed × temperature consumption map (in testing, off by default)
         powerFxSetting(panel(lookR, getString(R.string.sw_power)))
 
@@ -1367,7 +1386,9 @@ class SettingsActivity : AppCompatActivity() {
      * settings: three tabs (Alertes, Données, Voiture (ISA)) built by [app.mg4dash.radar.RadarPage].
      */
     private fun radarPage() {
-        val root = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; setPadding(dp(16), dp(12), dp(16), dp(12)) }
+        // The screen's margins as home's (Grand affichage: enlarged like its bar, which then sits where home's does)
+        val bd = app.mg4dash.ui.Dock.sized(this).resources.displayMetrics.density
+        val root = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; setPadding((16 * bd).toInt(), (12 * bd).toInt(), (16 * bd).toInt(), (12 * bd).toInt()) }
         val vertical = app.mg4dash.ui.Dock.vertical(this)
         val top = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL }
         top.addView(TextView(this).apply {
@@ -1395,6 +1416,79 @@ class SettingsActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * Smart brightness (Marc, 20/11, mockup v3): compact lines, the text on the left and small buttons on the right.
+     * The automatic mode, Android's own (default) or the smart one; the learnt curve, shown on demand for the dark or
+     * the light look and edited by hand; a long press on the graph erases this curve or both of this profile.
+     */
+    private fun brightnessSetting(p: LinearLayout) {
+        val smart = app.mg4dash.brightness.SmartBrightness
+        fun small(v: TextView) = v.apply {
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f); minHeight = 0; minimumHeight = 0; minWidth = 0; minimumWidth = 0
+            setPadding(dp(16), 0, dp(16), 0)
+        }
+        /** A line: [title] and [sub] on the left, [views] (40 dp high) on the right; returns the sub text. */
+        fun line(parent: LinearLayout, title: String?, sub: String?, vararg views: View): TextView {
+            val l = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL; minimumHeight = dp(56) }
+            val texts = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
+            title?.let { texts.addView(TextView(this).apply { text = it; setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f); setTextColor(color(R.color.text_value)) }) }
+            val s = TextView(this).apply {
+                text = sub ?: ""; setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f); setTextColor(color(R.color.text_title))
+                visibility = if (sub == null) View.GONE else View.VISIBLE
+            }
+            texts.addView(s)
+            l.addView(texts, LinearLayout.LayoutParams(0, -2, 1f).apply { rightMargin = dp(12) })
+            views.forEach { v -> l.addView(v, LinearLayout.LayoutParams(-2, dp(40)).apply { leftMargin = dp(8) }) }
+            parent.addView(l, LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(2) })
+            return s
+        }
+        // The mode
+        val modeBtns = choiceButtons(listOf(getString(R.string.br_original), getString(R.string.br_smart)), { if (smart.enabled(this)) 1 else 0 }) { i ->
+            smart.setEnabled(this, i == 1)
+        }.onEach { small(it) }
+        androidx.core.content.ContextCompat.getDrawable(this, R.drawable.ic_smart)?.mutate()?.let { star ->
+            star.setTint(color(R.color.text_value)); star.setBounds(0, 0, dp(18), dp(18))
+            modeBtns[1].text = android.text.SpannableString("*" + getString(R.string.br_smart)).apply {
+                setSpan(app.mg4dash.ui.CenteredIconSpan(star, dp(6)), 0, 1, android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+            }
+        }
+        line(p, getString(R.string.br_auto), getString(R.string.br_auto_desc), *modeBtns)
+        // The learnt curve: the current look's at first, the other one by Sombre | Clair (its own curve, edited too)
+        val activeLight = smart.isLight(this)
+        var shownLight = activeLight
+        fun countText() = getString(R.string.br_curve_counts, smart.curve(this, false).points.size, smart.curve(this, true).points.size)
+        lateinit var deleteBtn: View
+        lateinit var view: app.mg4dash.brightness.CurveView
+        val looks = choiceButtons(listOf(getString(R.string.br_look_dark), getString(R.string.br_look_light)).mapIndexed { i, s ->
+            if ((i == 1) == activeLight) "$s  •" else s   // the active look's mark
+        }, { if (shownLight) 1 else 0 }) { i -> shownLight = i == 1; view.set(smart.curve(this, shownLight)) }.onEach { small(it) }
+        val seg = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; visibility = View.GONE }
+        looks.forEachIndexed { i, b -> seg.addView(b, LinearLayout.LayoutParams(-2, -1).apply { if (i > 0) leftMargin = dp(4) }) }
+        lateinit var showBtn: Button
+        val box = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; visibility = View.GONE }
+        showBtn = small(button(getString(R.string.br_curve_show)) {
+            val open = box.visibility != View.VISIBLE
+            box.visibility = if (open) View.VISIBLE else View.GONE
+            seg.visibility = box.visibility
+            showBtn.text = getString(if (open) R.string.br_curve_hide else R.string.br_curve_show)
+            if (open) view.set(smart.curve(this, shownLight))
+        }) as Button
+        val count = line(p, getString(R.string.br_curve), countText(), seg, showBtn)
+        view = app.mg4dash.brightness.CurveView(this, smart.curve(this, shownLight), { smart.levelNow(this) },
+            onChange = { c -> smart.save(this, c, shownLight); count.text = countText() },
+            onSelect = { on -> deleteBtn.isEnabled = on; deleteBtn.alpha = if (on) 1f else 0.4f })
+        view.onLongPress = {
+            app.mg4dash.ui.SourceMenu.ask(this, view, getString(R.string.br_erase_title), getString(R.string.br_erase_msg),
+                listOf(getString(R.string.br_erase_this), getString(R.string.br_erase_all))) { i ->
+                if (i == 0) smart.resetLook(this, shownLight) else smart.reset(this, all = true)
+                view.set(smart.curve(this, shownLight)); count.text = countText()
+            }
+        }
+        box.addView(view, LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(4) })
+        deleteBtn = small(button(getString(R.string.br_point_delete)) { view.deleteSelected() }).apply { isEnabled = false; alpha = 0.4f }
+        line(box, null, getString(R.string.br_curve_hint), deleteBtn)
+        p.addView(box, LinearLayout.LayoutParams(-1, -2))
+    }
     private fun panel(parent: LinearLayout, title: String, fill: Boolean = false): LinearLayout {
         val p = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL

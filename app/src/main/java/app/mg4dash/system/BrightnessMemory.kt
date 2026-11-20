@@ -45,6 +45,8 @@ object BrightnessMemory {
 
     /** The current state remembered (MG4Dash's bar calls it after each change, the observer for the others). */
     fun save(ctx: Context) {
+        // The smart brightness sets the screen itself: its values are not the driver's to keep
+        if (app.mg4dash.brightness.SmartBrightness.enabled(ctx)) return
         val s = current(ctx) ?: return
         val old = saved(ctx)
         if (old == s) return
@@ -54,6 +56,7 @@ object BrightnessMemory {
 
     /** The remembered state put back if the car changed it. */
     fun restore(ctx: Context, why: String) {
+        if (app.mg4dash.brightness.SmartBrightness.enabled(ctx)) return
         val saved = saved(ctx) ?: return
         val now = current(ctx) ?: return
         if (!differs(now, saved)) return

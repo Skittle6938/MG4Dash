@@ -16,12 +16,21 @@ object HomeSlots {
     /**
      * Sizes of the shared grid (#38): three equal columns, 60 / 40 % of the height or the full height. SMALL ≈ 594 × 274,
      * MEDIUM ≈ 594 × 410, TALL ≈ 595 × 696; LARGE (two columns, full height) ≈ 1189 × 696, WIDE (two columns, 60 %) ≈ 1197 × 410.
+     *
+     * Grand affichage's grid of two columns (screen of 1442 × 540 dp): QUARTER (2 × 2) ≈ 659 × 252, HALF (one column, full
+     * height) ≈ 659 × 516, BAND (two columns, half the height) ≈ 1330 × 252.
      */
     enum class Size {
-        SMALL, MEDIUM, TALL, LARGE, WIDE;
+        SMALL, MEDIUM, TALL, LARGE, WIDE, QUARTER, HALF, BAND;
 
         /** Columns it spans. */
-        val span: Int get() = if (this == LARGE || this == WIDE) 2 else 1
+        val span: Int get() = if (this == LARGE || this == WIDE || this == BAND) 2 else 1
+
+        /** A place of Grand affichage's grid. */
+        val big: Boolean get() = this == QUARTER || this == HALF || this == BAND
+
+        /** The normal place of the closest shape, whose form the cards take until they have their own (step 3). */
+        val form: Size get() = when (this) { QUARTER -> SMALL; HALF -> TALL; BAND -> WIDE; else -> this }
     }
 
     /** Cards, in the order they go by in a place. [icon]: on the button that changes card over a web page or an app. */
@@ -60,13 +69,15 @@ object HomeSlots {
      * offered there in the edit mode.
      */
     fun fits(card: Card, size: Size): Boolean = when {
+        // Grand affichage: every card in every place (the study, step 2)
+        size.big -> true
         card == Card.CLIMATE -> size == Size.MEDIUM || size == Size.TALL
         card.big -> true
         else -> size.span == 1
     }
 
     /** The media in a medium or tall place, alone: it uses the swipes for its sources and tracks. */
-    fun mediaFits(size: Size): Boolean = size == Size.MEDIUM || size == Size.TALL
+    fun mediaFits(size: Size): Boolean = size == Size.MEDIUM || size == Size.TALL || size.big
 
     /** What a place shows. */
     sealed class Fill {
@@ -92,12 +103,21 @@ object HomeSlots {
     private fun M(id: String) = Slot(id, Size.MEDIUM, 60f)
     private fun H(id: String) = Slot(id, Size.TALL)
     private fun G(id: String) = Slot(id, Size.LARGE)
+    // Grand affichage: a quarter, half the column's height; a half, the column's full height; a band, two columns wide
+    private fun Q(id: String) = Slot(id, Size.QUARTER, 50f)
+    private fun Hf(id: String) = Slot(id, Size.HALF)
+    private fun B(id: String) = Slot(id, Size.BAND, 2f)
+    private fun row(vararg s: Slot) = Line(s.toList(), 50f)
+    private fun quarters(vararg ids: String) = ids.map { Slot(it, Size.QUARTER, 1f) }.toTypedArray()
 
     /**
      * The eight layouts of the shared grid (#38, mockups v5). [lines]: columns from left to right, or rows from top to
      * bottom when [rows] (the bands, whose wide place spans two columns of the row). [label]: its name in the menus.
+     *
+     * The seven layouts of Grand affichage (study v4) are on a grid of two columns ([columns]), with 2 to 4 places; [big]
+     * tells them apart, each mode has its own menu and its own layout remembered.
      */
-    enum class Layout(val key: String, val label: Int, val lines: List<Line>, val defaults: String, val rows: Boolean = false) {
+    enum class Layout(val key: String, val label: Int, val lines: List<Line>, val defaults: String, val rows: Boolean = false, val columns: Int = 3) {
         FULL("full", R.string.ly_full, listOf(col(M("tl"), P("bl")), col(M("tc"), P("bc")), col(M("tr"), P("br"))),
             "tl=climate;tc=map,consumption,shortcuts;tr=media;bl=energy;bc=hourly,daily;br=trip,power,phone"),
         /** Small places on top, medium ones at the bottom, the map at full height on the right (#6). */
@@ -118,7 +138,29 @@ object HomeSlots {
         BAND_BOTTOM("band_bottom", R.string.ly_band_bottom, listOf(
             Line(listOf(Slot("tl", Size.SMALL, 1f), Slot("tc", Size.SMALL, 1f), Slot("tr", Size.SMALL, 1f)), 40f),
             Line(listOf(Slot("bl", Size.MEDIUM, 1f), Slot("w", Size.WIDE, 2f)), 60f),
-        ), "tl=hourly,daily;tc=energy;tr=trip,power,phone;bl=climate;w=map,consumption,shortcuts", rows = true);
+        ), "tl=hourly,daily;tc=energy;tr=trip,power,phone;bl=climate;w=map,consumption,shortcuts", rows = true),
+
+        // ── Grand affichage (study v4, Marc 19/11): Four by default ──
+        BIG_QUAD("big_quad", R.string.ly_big_quad, listOf(col(Q("tl"), Q("bl")), col(Q("tr"), Q("br"))),
+            "tl=climate;tr=media;bl=energy,trip,power,phone;br=hourly,daily", columns = 2),
+        /** The map (or the guidance) in a half on the left. */
+        BIG_LEFT("big_left", R.string.ly_big_left, listOf(col(Hf("l")), col(Q("tr"), Q("br"))),
+            "l=map,consumption,shortcuts;tr=climate,energy,hourly,daily;br=media", columns = 2),
+        BIG_RIGHT("big_right", R.string.ly_big_right, listOf(col(Q("tl"), Q("bl")), col(Hf("r"))),
+            "tl=climate,energy,hourly,daily;bl=media;r=map,consumption,shortcuts", columns = 2),
+        BIG_BAND_BOTTOM("big_band_bottom", R.string.ly_band_bottom, listOf(row(*quarters("tl", "tr")), row(B("b"))),
+            "tl=climate;tr=energy,trip,power,phone,hourly,daily;b=media", rows = true, columns = 2),
+        BIG_BAND_TOP("big_band_top", R.string.ly_band_top, listOf(row(B("t")), row(*quarters("bl", "br"))),
+            "t=map,consumption,shortcuts;bl=climate,energy,hourly,daily;br=media", rows = true, columns = 2),
+        /** The calmest: two halves. */
+        BIG_TWO("big_two", R.string.ly_big_two, listOf(col(Hf("l")), col(Hf("r"))),
+            "l=climate,energy,hourly,daily;r=media", columns = 2),
+        /** The climate on one line, the media like a car radio; nothing else. */
+        BIG_TWO_BANDS("big_two_bands", R.string.ly_big_two_bands, listOf(row(B("t")), row(B("b"))),
+            "t=climate;b=media", rows = true, columns = 2);
+
+        /** A layout of Grand affichage (two columns). */
+        val big: Boolean get() = columns == 2
 
         val slots: List<Slot> get() = lines.flatMap { it.slots }
         fun slot(id: String): Slot? = slots.firstOrNull { it.id == id }
@@ -129,7 +171,7 @@ object HomeSlots {
          */
         fun cells(gapX: Float, gapY: Float): Map<String, android.graphics.RectF> {
             val out = LinkedHashMap<String, android.graphics.RectF>()
-            val unit = (1f - 2 * gapX) / 3
+            val unit = (1f - (columns - 1) * gapX) / columns
             fun width(span: Int) = span * unit + (span - 1) * gapX
             if (!rows) {
                 var x = 0f
@@ -157,6 +199,9 @@ object HomeSlots {
 
         companion object {
             fun of(key: String?): Layout? = entries.firstOrNull { it.key == key }
+
+            /** The layouts of a mode, in their menu's order. */
+            fun of(big: Boolean): List<Layout> = entries.filter { it.big == big }
         }
     }
 
@@ -187,11 +232,33 @@ object HomeSlots {
     /** Cards in the order they were ticked (the order they go by in their place), each once. */
     private fun Fill.ordered(): Fill = if (this is Fill.Cards) Fill.Cards(cards.distinct()) else this
 
-    /** The layout chosen; before the eight layouts (#38), the Map home style was the Map layout. */
-    fun layoutOf(prefs: Prefs): Layout = Layout.of(prefs.homeLayout) ?: if (prefs.homeStyle == 2) Layout.MAP else Layout.FULL
+    /**
+     * The layout chosen for the current mode: one is remembered per mode (home_layout, home_layout_big), so going to
+     * Grand affichage and back loses nothing. Before the eight layouts (#38), the Map home style was the Map layout.
+     */
+    fun layoutOf(prefs: Prefs): Layout = layoutOf(prefs, prefs.homeStyle == Prefs.STYLE_BIG)
 
-    /** Chooses [layout] (Settings › Home, the edit mode): the home screen leaves the Simple style. */
+    /** The layout remembered for Grand affichage ([big]) or for the Standard style, whichever style is in use. */
+    fun layoutOf(prefs: Prefs, big: Boolean): Layout =
+        if (big) Layout.of(prefs.homeLayoutBig)?.takeIf { it.big } ?: Layout.BIG_QUAD
+        else Layout.of(prefs.homeLayout)?.takeIf { !it.big } ?: if (prefs.homeStyle == 2) Layout.MAP else Layout.FULL
+
+    /**
+     * The shortcuts menu's Grand affichage tile: into the mode, or back to the style used before it (Standard or
+     * Simple); each style keeps its layout and cards.
+     */
+    fun toggleBig(prefs: Prefs) {
+        if (prefs.homeStyle == Prefs.STYLE_BIG) { prefs.homeStyle = if (prefs.styleBeforeBig == 1) 1 else 0; return }
+        prefs.styleBeforeBig = if (prefs.homeStyle == 1) 1 else 0
+        prefs.homeStyle = Prefs.STYLE_BIG
+    }
+
+    /**
+     * Chooses [layout] (Settings › Home, the edit mode), in its own mode: a layout of Grand affichage keeps that mode, any
+     * other leaves the Simple style and Grand affichage.
+     */
     fun choose(prefs: Prefs, layout: Layout) {
+        if (layout.big) { prefs.homeLayoutBig = layout.key; prefs.homeStyle = Prefs.STYLE_BIG; return }
         prefs.homeLayout = layout.key
         prefs.homeStyle = 0
     }

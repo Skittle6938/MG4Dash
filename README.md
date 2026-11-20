@@ -167,6 +167,15 @@ Settings › Home › Home layout: **Full** (default), **Map** or **Simple**. *M
 | ![Bottom dock](docs/screenshots/home_bottom_bar.png?v=25) | ![Vertical bar on the right](docs/screenshots/home_right_hand.png?v=25) |
 | *Horizontal at the bottom*: dock with clock and date (long press the clock: clock or Wi-Fi settings). | On right-hand drive cars (detected), the vertical bar goes on the right, next to the driver; it can also be forced to either side. |
 
+## Grand affichage (large display)
+
+Settings › Home › Home style: **Standard ▾**, **Grand affichage ▾** or **Simple**, or the *Large display* tile of the shortcuts menu, which goes back to the style used before. Everything MG4Dash shows gets a third bigger: home, the bar, the pages, the menus, the windows and the messages, with stronger contrast and thicker numbers. Settings keeps its normal size, and the car's own screens are not touched.
+
+Home has seven layouts of two to four places (Four by default, big place on the left or right, band at the bottom or top, two columns, two bands), chosen and filled like the others: each place takes any card, the edit mode works the same, and each style keeps its own layout and cards. The bar stays on the driver's side.
+
+| Four | Band at the bottom |
+|---|---|
+| ![Grand affichage, Four](docs/screenshots/big_quad.png?v=27) | ![Grand affichage, band at the bottom](docs/screenshots/big_band_bottom.png?v=27) |
 ## Themes and day / night
 
 Settings › Look: **Auto** (default, follows the car's lights), **Dark** or **Light**; 5 backgrounds and 5 button colours, applied to every page and to [MG4Radio](https://github.com/Skittle6938/MG4Radio). Battery green, heating orange, cooling cyan and alert red keep their meaning.

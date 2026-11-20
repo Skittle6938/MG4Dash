@@ -38,6 +38,8 @@ import kotlinx.coroutines.withContext
  * stays the SAIC app's (its InCallService).
  */
 class PhoneActivity : PageActivity() {
+    /** Its lists scroll on their own (Grand affichage). */
+    override val scrollsWhenBig = false
     override val pageTitle get() = getString(R.string.title_phone)
     override val page = Dock.Page.PHONE
 

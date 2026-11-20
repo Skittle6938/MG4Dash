@@ -23,6 +23,8 @@ object TripLog {
         val km: Float, val kwh: Float, val startSoc: Int? = null, val endSoc: Int? = null,
         /** Price of a kWh when it was recorded (#102): a later price does not change it; null without a price. */
         val price: Float? = null,
+        /** The profile driving (study v4, step 12); null for the trips from before the profiles: the first profile's. */
+        val profile: String? = null,
     ) {
         /** Its length; 0 if absurd (over a week: a start taken on the car's clock before it was set from GPS, #107). */
         val minutes: Long get() = ((end - start) / 60_000L).let { if (it < 0L || it > 7 * 24 * 60L) 0L else it }
@@ -31,14 +33,17 @@ object TripLog {
         /** What its kWh cost, at its price; null without a price or with no kWh known. */
         val cost: Float? get() = cost(kwh, price)
 
-        fun encode() = listOf(start, end, startKm, endKm, km, kwh, startSoc ?: -1, endSoc ?: -1, price ?: -1f).joinToString(",")
+        fun encode() = listOf(start, end, startKm, endKm, km, kwh, startSoc ?: -1, endSoc ?: -1, price ?: -1f, profile ?: "").joinToString(",")
+
+        /** Driven by [id] (the trips from before the profiles: by [first], the first profile). */
+        fun by(id: String, first: String): Boolean = (profile ?: first) == id
 
         companion object {
             fun decode(s: String): Trip? = try {
                 val p = s.split(',')
                 Trip(p[0].toLong(), p[1].toLong(), p[2].toInt(), p[3].toInt(), p[4].toFloat(), p[5].toFloat(),
                     p[6].toInt().takeIf { it >= 0 }, p[7].toInt().takeIf { it >= 0 },
-                    p.getOrNull(8)?.toFloatOrNull()?.takeIf { it > 0f })
+                    p.getOrNull(8)?.toFloatOrNull()?.takeIf { it > 0f }, p.getOrNull(9)?.takeIf { it.isNotEmpty() })
             } catch (_: Exception) { null }
         }
     }
@@ -63,18 +68,30 @@ object TripLog {
     fun load(sp: SharedPreferences): List<Trip> =
         (sp.getString(KEY, null)?.split(';')?.mapNotNull { Trip.decode(it) } ?: emptyList()).also { _trips.value = it }
 
-    /** [trip] first, the oldest beyond [MAX] dropped; too short, nothing is kept. */
+    /** The current profile's id, given at the start (Profiles); a trip is marked with it. */
+    @Volatile var profile: () -> String? = { null }
+    /** The first profile's id: the one of the trips from before the profiles. */
+    @Volatile var firstProfile: () -> String = { "p1" }
+
+    /** [trip] first, the oldest beyond [MAX] of its profile dropped; too short, nothing is kept. */
     fun add(sp: SharedPreferences, trip: Trip) {
         if (trip.km < MIN_KM) return
-        val all = (listOf(trip) + load(sp)).take(MAX)
+        val all = keepPerProfile(listOf(trip.copy(profile = trip.profile ?: profile())) + load(sp), firstProfile())
         sp.edit().putString(KEY, all.joinToString(";") { it.encode() }).apply()
         _trips.value = all
+    }
+
+    /** The [MAX] latest trips of each profile, the latest first. */
+    internal fun keepPerProfile(trips: List<Trip>, first: String): List<Trip> {
+        val count = HashMap<String, Int>()
+        return trips.filter { t -> val k = t.profile ?: first; val n = (count[k] ?: 0) + 1; count[k] = n; n <= MAX }
     }
 
     fun clear(sp: SharedPreferences) { sp.edit().remove(KEY).apply(); _trips.value = emptyList() }
 
     /** The trip in progress, saved to be recorded at the next start even after a restart. */
-    fun saveCurrent(sp: SharedPreferences, trip: Trip?) {
+    fun saveCurrent(sp: SharedPreferences, trip0: Trip?) {
+        val trip = trip0?.let { it.copy(profile = it.profile ?: profile()) }
         _current.value = trip
         sp.edit().apply { if (trip == null) remove(CURRENT) else putString(CURRENT, trip.encode()) }.apply()
     }
