@@ -63,20 +63,26 @@ object RadarAlert {
     }
 
     /**
-     * When to sound an alert that lasts: at once when it starts (or changes), then every its repeat while it lasts;
-     * never again with no repeat. Driven every [TICK_MS].
+     * A positive repeat interval is also the minimum time between sounds of the same kind across crossings.
+     * With repeat disabled, sound once per episode.
      */
     internal class Repeater {
         private var kind: Kind? = null
-        private var lastAt = 0L
+        private val lastAt = mutableMapOf<Kind, Long>()
+
+        fun endEpisode() { kind = null }
 
         /** The kind to sound now, null for none. */
         fun tick(k: Kind?, now: Long, repeatOf: (Kind) -> Int): Kind? {
-            if (k != kind) { kind = k; lastAt = now; return k }
+            val started = k != kind
+            kind = k
             if (k == null) return null
             val every = repeatOf(k)
-            if (every > 0 && now - lastAt >= every * 1000L) { lastAt = now; return k }
-            return null
+            val last = lastAt[k]
+            if (every <= 0 && !started) return null
+            if (every > 0 && last != null && now - last < every * 1000L) return null
+            lastAt[k] = now
+            return k
         }
     }
 
@@ -104,6 +110,7 @@ object RadarAlert {
         job?.cancel(); job = null
         main.removeCallbacks(tick)
         critical = false; current = null; zoneCam = null
+        repeater.endEpisode()
         hideBanner()
     }
 

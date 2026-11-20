@@ -185,7 +185,8 @@ class Match(val road: Road, val forward: Boolean, val seg: Int, val t: Double, v
 
 /**
  * Map-matching: the nearest road within [MAX_DIST] m whose direction follows the heading (±[MAX_ANGLE]°), keeping the
- * previous road while it is still one of them; another road is taken only when it has been the best for [SWITCH_MS].
+ * previous road while it is still one of them. A connected continuation can take over at the endpoint;
+ * ambiguous changes wait [SWITCH_MS].
  */
 class Matcher {
     companion object {
@@ -233,6 +234,9 @@ class Matcher {
         val best = cands.firstOrNull()
         if (best == null) { current = null; pending = null; return null }
         if (cur == null) { current = best; pending = null; return best }
+        if (heading != null && (same == null || best.dist < same.dist) && followsEndpoint(same ?: cur, best, same != null)) {
+            current = best; pending = null; return best
+        }
         if (same != null && same.dist <= best.dist + KEEP_BONUS) { current = same; pending = null; return same }
         // Another road: taken once it has stayed the best for a while (the previous one meanwhile, if still near)
         if (pending?.road?.id != best.road.id || pending?.forward != best.forward) { pending = best; pendingSince = now }
@@ -241,6 +245,17 @@ class Matcher {
         }
         current = same ?: cur
         return current
+    }
+
+    private fun followsEndpoint(current: Match, next: Match, stillNear: Boolean): Boolean {
+        val nodes = current.road.nodes
+        val exitSegment = if (current.forward) nodes.size - 2 else 0
+        val exitFraction = if (current.forward) 1.0 else 0.0
+        if (current.seg != exitSegment || (stillNear && current.t != exitFraction)) return false
+        val exitNode = if (current.forward) nodes.last() else nodes.first()
+        val nextNodes = next.road.nodes
+        return if (next.forward) next.seg == 0 && next.t > 0.0 && nextNodes.first() == exitNode
+            else next.seg == nextNodes.size - 2 && next.t < 1.0 && nextNodes.last() == exitNode
     }
 
     fun reset() { current = null; pending = null }
