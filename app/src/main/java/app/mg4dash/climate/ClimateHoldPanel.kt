@@ -196,6 +196,8 @@ object ClimateHoldPanel {
             } else ClimateHold.start(a, ClimateHold.DURATIONS[idx], lockSec)
         }.apply { textSize = 22f; isSelected = true }, kit.lp(0, kit.dp(62), 1f, l = 16))
         panel.addView(buttons, kit.lp(-1, -2, t = 14))
+        // Within the screen whatever its height (Grand affichage: 540 dp): the settings scroll, Close and Start stay in sight
+        app.mg4dash.ui.Popups.scrollMiddle(panel, 1, panel.childCount - 1, kit.dp(12))
     }
 
     /** Compact "label  −  value  +" line. */

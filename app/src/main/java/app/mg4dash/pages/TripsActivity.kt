@@ -17,6 +17,8 @@ import kotlinx.coroutines.launch
  * service (ride-hailing, deliveries) and the list of the last 50 trips.
  */
 class TripsActivity : PageActivity() {
+    /** Its lists scroll on their own (Grand affichage). */
+    override val scrollsWhenBig = false
     override val pageTitle get() = getString(R.string.title_trips)
     override val page = app.mg4dash.ui.Dock.Page.VEHICLE
 
@@ -31,6 +33,8 @@ class TripsActivity : PageActivity() {
     private lateinit var list: LinearLayout
     private var odometer: Int? = null
     private var filter = TripLog.Filter.ALL
+    /** The profile shown (study v4, step 12): the current one at the opening; null = all. */
+    private var profile: String? = null
     private lateinit var head: LinearLayout
     /** A kWh price is set: a Cost column, and the costs of today and of the reading (#102). */
     private var priced = false
@@ -74,6 +78,18 @@ class TripsActivity : PageActivity() {
         }
         mark = pickFilter
         right.addView(filterRow, kit.lp(-1, -2, t = 10))
+        // From two profiles: All and a button per profile, open on the current one; totals and costs follow it
+        val profiles = app.mg4dash.system.Profiles.list(this)
+        if (profiles.size >= 2) {
+            profile = app.mg4dash.system.Profiles.current(this).id
+            var markP: (Int?) -> Unit = {}
+            val (profileRow, pickProfile) = kit.segmented(listOf(getString(R.string.pf_all)) + profiles.map { it.name }) { i ->
+                profile = if (i == 0) null else profiles[i - 1].id; markP(i); refresh()
+            }
+            markP = pickProfile
+            right.addView(profileRow, kit.lp(-1, -2, t = 8))
+            pickProfile(profiles.indexOfFirst { it.id == profile } + 1)
+        }
         // The columns' titles, the cost's with a kWh price only (#102)
         head = kit.column()
         right.addView(head, kit.lp(-1, -2, t = 10))
@@ -113,8 +129,9 @@ class TripsActivity : PageActivity() {
 
     private fun refresh(now: Long = System.currentTimeMillis()) {
         if (!::list.isInitialized) return
-        val trips = TripLog.load(sp)
-        val cur = TripLog.current.value
+        val first = TripLog.firstProfile()
+        val trips = TripLog.load(sp).filter { t -> profile.let { it == null || t.by(it, first) } }
+        val cur = TripLog.current.value?.takeIf { t -> profile.let { it == null || t.by(it, first) } }
         val day = TripLog.today(trips, cur, now)
         todayKm.text = TripText.dist(this, day.km)
         val km = trips.filter { it.start >= TripLog.dayStart(now) } + listOfNotNull(cur?.takeIf { it.start >= TripLog.dayStart(now) })

@@ -1,6 +1,7 @@
 package app.mg4dash
 
 import app.mg4dash.system.Apps
+import app.mg4dash.system.Prefs
 import app.mg4dash.ui.Themes
 import org.junit.Assert.assertEquals
 import org.junit.Test
@@ -30,7 +31,7 @@ class ThemePublishTest {
     @Test fun wideBarOnTheRight() {
         prefs().edit().putBoolean("vertical_dock", true).putBoolean("wide_bar", true).putInt("bar_side", 2).commit()
         val f = Themes.published(app).split(",")
-        assertEquals(11, f.size)
+        assertEquals(12, f.size)
         assertEquals(listOf("1", "0", "1", "1"), bar(f))
     }
 
@@ -56,5 +57,15 @@ class ThemePublishTest {
         prefs().edit().putString("dock_aa_target", "com.waze/.FreeMapAppActivity").commit()
         assertEquals(listOf("2", "com.waze/.FreeMapAppActivity"), Themes.published(app).split(",").subList(9, 11))
         prefs().edit().remove("dock_aa_target").commit()
+    }
+
+    /** The 12th field (Grand affichage, MG4Radio contract): 1 in the mode, 0 in the other styles, the 11th left as it was. */
+    @Test fun bigDisplayTwelfth() {
+        prefs().edit().putInt("home_style", 0).putString("dock_aa_target", "com.waze/.FreeMapAppActivity").commit()
+        assertEquals(listOf("com.waze/.FreeMapAppActivity", "0"), Themes.published(app).split(",").subList(10, 12))
+        prefs().edit().putInt("home_style", Prefs.STYLE_BIG).commit()
+        assertEquals("1", Themes.published(app).split(",")[11])
+        prefs().edit().putInt("home_style", 1).remove("dock_aa_target").commit()
+        assertEquals(listOf("", "0"), Themes.published(app).split(",").subList(10, 12))
     }
 }

@@ -220,7 +220,7 @@ class NavCard(context: Context) : FrameLayout(context) {
         private val ROUNDABOUTS = setOf(NavRepo.Turn.ROUNDABOUT, NavRepo.Turn.ROUNDABOUT_ENTER, NavRepo.Turn.ROUNDABOUT_EXIT)
 
         /** The layout for a place of [size]: the large place as the wide one (its height adds nothing to read). */
-        fun formFor(size: HomeSlots.Size?): Form = when (size) {
+        fun formFor(size: HomeSlots.Size?): Form = when (size?.form) {
             HomeSlots.Size.SMALL -> Form.SMALL
             HomeSlots.Size.TALL -> Form.TALL
             HomeSlots.Size.WIDE, HomeSlots.Size.LARGE -> Form.WIDE

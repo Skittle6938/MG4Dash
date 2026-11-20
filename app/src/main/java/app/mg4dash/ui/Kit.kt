@@ -25,7 +25,7 @@ class Kit(private val c: Context) {
          * Width kept free at the top left of the screens: [FOG_SAFE_DP] while MG's fog light button is there, the
          * normal margin (20 dp) when the shortcuts menu hides it.
          */
-        fun fogSafeDp(context: Context): Int = if (!Dock.fogShown(context)) 20 else FOG_SAFE_DP
+        fun fogSafeDp(context: Context): Int = if (!Dock.fogShown(context)) 20 else BigDisplay.unscaled(context, FOG_SAFE_DP)   // MG's button keeps its pixels in Grand affichage
     }
 
     /** Single choice selector (chips); returns the row and an update function. */
@@ -117,7 +117,7 @@ class Kit(private val c: Context) {
     fun text(value: String = "", sp: Float = 18f, colorRes: Int = R.color.text_value, light: Boolean = false): TextView =
         TextView(c).apply {
             text = value; setTextColor(color(colorRes)); setTextSize(TypedValue.COMPLEX_UNIT_SP, sp)
-            if (light) typeface = Typeface.create("sans-serif-light", Typeface.NORMAL)
+            if (light) typeface = Themes.valueFont(c)
             includeFontPadding = false; maxLines = 1
         }
 
