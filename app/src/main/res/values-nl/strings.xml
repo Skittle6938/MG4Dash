@@ -1167,4 +1167,15 @@
     <string name="sc_profile">Profiel</string>
     <string name="pf_drive">Profielen onthouden de rijmodus en de regeneratie</string>
     <string name="pf_drive_desc">Bij het verlaten van een profiel noteert MG4Dash rijmodus en regeneratie; bij het wisselen naar een profiel zet het ze terug, stilstaand of rijdend. Standaard uit.</string>
+    <string name="br_title">Helderheid</string>
+    <string name="br_auto">Automatische helderheid</string>
+    <string name="br_auto_desc">Slim: leert van je instellingen met de schuif, volgens het geschatte daglicht en de lichten. Origineel: de Android-modus, met − en +.</string>
+    <string name="br_original">Origineel</string>
+    <string name="br_smart">Slim</string>
+    <string name="br_reset">Leren opnieuw instellen</string>
+    <string name="br_reset_desc">Terug naar de standaardcurve (15 / 35 / 70 / 100 %).</string>
+    <string name="br_reset_this">Deze curve</string>
+    <string name="br_reset_all">Alles</string>
+    <string name="br_reset_this_confirm">Vergeten wat voor dit profiel in deze weergave (licht of donker) is geleerd?</string>
+    <string name="br_reset_all_confirm">Alles wat is geleerd vergeten, voor alle profielen, licht en donker?</string>
 </resources>

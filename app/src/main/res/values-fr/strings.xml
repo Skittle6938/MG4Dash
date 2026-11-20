@@ -1167,4 +1167,15 @@
     <string name="sc_profile">Profil</string>
     <string name="pf_drive">Les profils retiennent le mode de conduite et la régénération</string>
     <string name="pf_drive_desc">En quittant un profil, MG4Dash note le mode de conduite et la régénération de la voiture ; en arrivant sur un profil, il les remet, à l\'arrêt comme en roulant. Éteint par défaut.</string>
+    <string name="br_title">Luminosité</string>
+    <string name="br_auto">Luminosité automatique</string>
+    <string name="br_auto_desc">Intelligente : apprend de tes réglages au curseur, selon la lumière du jour estimée et les feux. D\'origine : le mode d\'Android, avec − et +.</string>
+    <string name="br_original">D\'origine</string>
+    <string name="br_smart">Intelligente</string>
+    <string name="br_reset">Réinitialiser l\'apprentissage</string>
+    <string name="br_reset_desc">Revient à la courbe par défaut (15 / 35 / 70 / 100 %).</string>
+    <string name="br_reset_this">Cette courbe</string>
+    <string name="br_reset_all">Tout</string>
+    <string name="br_reset_this_confirm">Oublier ce qui a été appris pour ce profil, dans cet affichage (clair ou sombre) ?</string>
+    <string name="br_reset_all_confirm">Oublier tout ce qui a été appris, pour tous les profils, en clair et en sombre ?</string>
 </resources>

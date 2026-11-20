@@ -44,7 +44,7 @@ object Profiles {
         // Shortcuts menu: its tiles and the brightness bar (the menu itself stays shared, for MG's fog button)
         "shortcut_tiles", "shortcuts_brightness",
         // Screen: full screen, top bar during calls, MG4Dash's keyboard; the brightness
-        "fullscreen", "call_bar_hidden", "own_keyboard", "bright_auto", "bright_adj", "bright_value",
+        "fullscreen", "call_bar_hidden", "own_keyboard", "bright_auto", "bright_adj", "bright_value", "bright_smart",
         // Media: start source and playback, MG4Radio's bands
         "start_source", "start_playback", "radio_dash_bands", "radio_dash_am",
         // Map and web
@@ -59,7 +59,9 @@ object Profiles {
     )
 
     /** The settings that follow the profile, by family. */
-    val PERSONAL_PREFIXES = listOf("slots_", "slot_now_", "conn_slot_", "wc_", "sc_", "fav_phone_", "radar_snd_", "radar_vol_", "radar_rep_")
+    val PERSONAL_PREFIXES = listOf("slots_", "slot_now_", "conn_slot_", "wc_", "sc_", "fav_phone_", "radar_snd_", "radar_vol_", "radar_rep_",
+        // The smart brightness's learnt curves (one per light / dark look)
+        "bright_curve_")
 
     /** Shared by every profile (the car, the system, the data, the climate, the state of the moment), by name. */
     val SHARED = setOf(
@@ -184,6 +186,18 @@ object Profiles {
         store(c).edit().remove("data_$id").remove("sound_$id").remove("drive_$id").commit()
         after()
         return null
+    }
+
+    /** The keys starting with [prefix] taken off every profile's stored settings (the smart brightness's "reset all"). */
+    fun forgetEverywhere(c: Context, prefix: String) {
+        val s = store(c)
+        val e = s.edit()
+        list(c).forEach { p ->
+            val data = try { JSONObject(s.getString("data_${p.id}", null) ?: return@forEach) } catch (_: Exception) { return@forEach }
+            data.keys().asSequence().toList().filter { it.startsWith(prefix) }.forEach { data.remove(it) }
+            e.putString("data_${p.id}", data.toString())
+        }
+        e.commit()
     }
 
     // ── The switch ──
