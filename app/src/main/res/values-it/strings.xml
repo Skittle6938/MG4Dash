@@ -758,7 +758,7 @@
     <string name="tu_home_1">Sostituisci home SAIC: MG4Dash si apre all\'avvio e con il tasto Home. Niente viene disinstallato.</string>
     <string name="tu_home_2">Modalità manutenzione, nello stesso punto: la home originale torna con un tocco.</string>
     <string name="tu_layouts_t">Disposizione della home</string>
-    <string name="tu_layouts_1">Impostazioni › Home: Semplice (tre grandi pannelli) o Disposizione, con 8 schemi di widget.</string>
+    <string name="tu_layouts_1">Impostazioni › Home: Standard, Visualizzazione grande (tutto un terzo più grande) o Semplice (tre grandi pannelli), ognuno con i suoi schemi.</string>
     <string name="tu_layouts_2">Pizzica la home per scegliere i widget di ogni posto.</string>
     <string name="tu_bar_t">Barra laterale</string>
     <string name="tu_bar_bottom_t">Barra in basso</string>
@@ -766,7 +766,7 @@
     <string name="tu_bar_2">Home, pressione lunga: tutte le app. Android Auto, pressione lunga: scegli Android Auto, CarPlay o un\'altra app.</string>
     <string name="tu_bar_3">Un dito trascinato dal bordo sinistro o destro: apre Android Auto, quando un telefono è collegato.</string>
     <string name="tu_climate_t">Climatizzazione</string>
-    <string name="tu_climate_1">Pressione lunga su A/C: A/C intermittente. Pressione lunga sulla temperatura: calibrazione.</string>
+    <string name="tu_climate_1">Tocca la temperatura: pagina Clima. Pressione lunga su di essa o sulla ventola: impostazioni del clima (calibrazione). Pressione lunga su A/C: A/C intermittente.</string>
     <string name="tu_climate_2">Ventola − al minimo: clima spento. Pressione lunga su − / +: velocità minima / massima.</string>
     <string name="tu_energy_t">Energia</string>
     <string name="tu_energy_1">Tocca un segmento KERS: livello di rigenerazione; pressione lunga: guida a un pedale.</string>
@@ -927,7 +927,7 @@
     <string name="sc_cut">Interrotto</string>
     <string name="tu_shortcuts_t">Menu scorciatoie</string>
     <string name="tu_shortcuts_1">Un dito verso il basso dal bordo superiore dello schermo, su tutte le schermate e sopra le altre app.</string>
-    <string name="tu_shortcuts_2">Tocca una casella per agire; pressione lunga sul menu per sceglierne le caselle. Il tasto Home lo chiude.</string>
+    <string name="tu_shortcuts_2">Tocca una casella per agire; pressione lunga sul menu per sceglierne le caselle, e tocca lì la barra della luminosità per nasconderla o mostrarla. Il tasto Home lo chiude.</string>
     <string name="tu_shortcuts_3">Impostazioni › Home › Menu scorciatoie: nasconde anche il pulsante retronebbia originale (dopo un riavvio dell\'autoradio).</string>
     <string name="sc_heating">Riscaldamento</string>
     <string name="sc_cooling">Clima</string>

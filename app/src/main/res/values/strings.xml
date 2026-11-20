@@ -758,7 +758,7 @@
     <string name="tu_home_1">Replace SAIC home: MG4Dash opens at start and with the Home key. Nothing is uninstalled.</string>
     <string name="tu_home_2">Maintenance mode, in the same place: the original home screen back in one tap.</string>
     <string name="tu_layouts_t">Home layout</string>
-    <string name="tu_layouts_1">Settings › Home: Simple (three large panels) or Layout, with 8 arrangements of widgets.</string>
+    <string name="tu_layouts_1">Settings › Home: Standard, Large display (everything a third bigger) or Simple (three large panels), each with its own layouts.</string>
     <string name="tu_layouts_2">Pinch the home screen to choose the widgets of each place.</string>
     <string name="tu_bar_t">Side bar</string>
     <string name="tu_bar_bottom_t">Bottom bar</string>
@@ -766,7 +766,7 @@
     <string name="tu_bar_2">Home, long press: all apps. Android Auto, long press: choose Android Auto, CarPlay or another app.</string>
     <string name="tu_bar_3">One finger sliding in from the left or right edge: open Android Auto, when a phone is connected.</string>
     <string name="tu_climate_t">Climate</string>
-    <string name="tu_climate_1">Long press A/C: intermittent A/C. Long press the temperature: calibration.</string>
+    <string name="tu_climate_1">Touch the temperature: Climate page. Long press it or the fan: the climate’s settings (calibration). Long press A/C: intermittent A/C.</string>
     <string name="tu_climate_2">Fan − at the lowest speed: climate off. Long press − / +: lowest / highest speed.</string>
     <string name="tu_energy_t">Energy</string>
     <string name="tu_energy_1">Touch a KERS segment: regeneration level; long press: one-pedal driving.</string>
@@ -927,7 +927,7 @@
     <string name="sc_cut">Cut</string>
     <string name="tu_shortcuts_t">Shortcuts menu</string>
     <string name="tu_shortcuts_1">One finger down from the very top of the screen, on every screen and over the other apps.</string>
-    <string name="tu_shortcuts_2">Touch a tile to act; long press the menu to choose its tiles. The Home key closes it.</string>
+    <string name="tu_shortcuts_2">Touch a tile to act; long press the menu to choose its tiles, and touch the brightness bar there to hide or show it. The Home key closes it.</string>
     <string name="tu_shortcuts_3">Settings › Home › Shortcuts menu: it also hides MG\'s fog light button (after a head unit restart).</string>
     <string name="sc_heating">Heating</string>
     <string name="sc_cooling">Cooling</string>

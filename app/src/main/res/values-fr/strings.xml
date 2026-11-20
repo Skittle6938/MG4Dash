@@ -758,7 +758,7 @@
     <string name="tu_home_1">Remplacer l\'accueil SAIC : MG4Dash s\'ouvre au démarrage et avec la touche Accueil. Rien n\'est désinstallé.</string>
     <string name="tu_home_2">Mode maintenance, au même endroit : l\'accueil d\'origine revient en un appui.</string>
     <string name="tu_layouts_t">Disposition de l\'accueil</string>
-    <string name="tu_layouts_1">Réglages › Accueil : Épuré (trois grands volets) ou Disposition, avec 8 agencements de widgets.</string>
+    <string name="tu_layouts_1">Réglages › Accueil : Standard, Grand affichage (tout un tiers plus grand) ou Épuré (trois grands volets), chacun avec ses dispositions.</string>
     <string name="tu_layouts_2">Pincez l\'accueil pour choisir les widgets de chaque emplacement.</string>
     <string name="tu_bar_t">Barre latérale</string>
     <string name="tu_bar_bottom_t">Barre du bas</string>
@@ -766,7 +766,7 @@
     <string name="tu_bar_2">Accueil, appui long : toutes les applis. Android Auto, appui long : choisir Android Auto, CarPlay ou une autre appli.</string>
     <string name="tu_bar_3">Un doigt glissé depuis le bord gauche ou droit : ouvrir Android Auto, quand un téléphone est connecté.</string>
     <string name="tu_climate_t">Climatisation</string>
-    <string name="tu_climate_1">Appui long sur A/C : clim intermittente. Appui long sur la température : calibrage.</string>
+    <string name="tu_climate_1">Touchez la température : page Climatisation. Appui long dessus ou sur la ventilation : réglages de la clim (calibrage). Appui long sur A/C : clim intermittente.</string>
     <string name="tu_climate_2">Ventilation − à la vitesse minimale : clim éteinte. Appui long sur − / + : vitesse minimale / maximale.</string>
     <string name="tu_energy_t">Énergie</string>
     <string name="tu_energy_1">Touchez un segment KERS : niveau de régénération ; appui long : conduite à une pédale.</string>
@@ -927,7 +927,7 @@
     <string name="sc_cut">Coupé</string>
     <string name="tu_shortcuts_t">Menu de raccourcis</string>
     <string name="tu_shortcuts_1">Un doigt glissé vers le bas depuis tout en haut de l\'écran, sur tous les écrans et par-dessus les autres applis.</string>
-    <string name="tu_shortcuts_2">Touchez une tuile pour agir ; appui long sur le menu pour choisir ses tuiles. La touche Accueil le ferme.</string>
+    <string name="tu_shortcuts_2">Touchez une tuile pour agir ; appui long sur le menu pour choisir ses tuiles, et touchez-y la barre de luminosité pour la masquer ou l’afficher. La touche Accueil le ferme.</string>
     <string name="tu_shortcuts_3">Réglages › Accueil › Menu de raccourcis : il masque aussi le bouton antibrouillard SAIC (après un redémarrage de l\'autoradio).</string>
     <string name="sc_heating">Chauffage</string>
     <string name="sc_cooling">Clim</string>

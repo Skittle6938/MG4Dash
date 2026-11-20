@@ -24,10 +24,10 @@ import java.io.File
 class SmartStarShot {
     @Test fun starAndWordCentredTogether() {
         val ctx = RuntimeEnvironment.getApplication()
-        val star = androidx.core.content.ContextCompat.getDrawable(ctx, R.drawable.ic_smart)!!.mutate().apply { setTint(Color.WHITE); setBounds(0, 0, 20, 20) }
+        val star = androidx.core.content.ContextCompat.getDrawable(ctx, R.drawable.ic_smart)!!.mutate().apply { setTint(Color.WHITE); setBounds(0, 0, 28, 28) }
         val tv = TextView(ctx).apply {
             gravity = Gravity.CENTER; textSize = 18f; setTextColor(Color.WHITE); setBackgroundColor(Color.BLACK)
-            text = android.text.SpannableString("*AUTO").apply { setSpan(CenteredIconSpan(star, 6), 0, 1, android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE) }
+            text = android.text.SpannableString("*AUTO").apply { setSpan(CenteredIconSpan(star, 8), 0, 1, android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE) }
         }
         val w = 300; val h = 60
         tv.measure(View.MeasureSpec.makeMeasureSpec(w, View.MeasureSpec.EXACTLY), View.MeasureSpec.makeMeasureSpec(h, View.MeasureSpec.EXACTLY))

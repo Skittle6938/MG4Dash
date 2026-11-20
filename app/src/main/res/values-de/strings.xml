@@ -758,7 +758,7 @@
     <string name="tu_home_1">SAIC-Startbildschirm ersetzen: MG4Dash öffnet sich beim Start und mit der Home-Taste. Nichts wird deinstalliert.</string>
     <string name="tu_home_2">Wartungsmodus, an derselben Stelle: der Original-Startbildschirm mit einem Tippen zurück.</string>
     <string name="tu_layouts_t">Aufbau der Startseite</string>
-    <string name="tu_layouts_1">Einstellungen › Startseite: Schlicht (drei große Felder) oder Anordnung, mit 8 Widget-Aufteilungen.</string>
+    <string name="tu_layouts_1">Einstellungen › Startseite: Standard, Große Anzeige (alles ein Drittel größer) oder Schlicht (drei große Felder), jeweils mit eigenen Anordnungen.</string>
     <string name="tu_layouts_2">Startbildschirm zusammenziehen, um die Widgets jedes Platzes zu wählen.</string>
     <string name="tu_bar_t">Seitenleiste</string>
     <string name="tu_bar_bottom_t">Untere Leiste</string>
@@ -766,7 +766,7 @@
     <string name="tu_bar_2">Start, lang drücken: alle Apps. Android Auto, lang drücken: Android Auto, CarPlay oder eine andere App wählen.</string>
     <string name="tu_bar_3">Ein Finger vom linken oder rechten Rand hereingezogen: Android Auto öffnen, wenn ein Telefon verbunden ist.</string>
     <string name="tu_climate_t">Klima</string>
-    <string name="tu_climate_1">A/C lang drücken: A/C im Intervall. Temperatur lang drücken: Kalibrierung.</string>
+    <string name="tu_climate_1">Temperatur tippen: Klimaseite. Lang drücken oder auf das Gebläse: Klimaeinstellungen (Kalibrierung). A/C lang drücken: A/C im Intervall.</string>
     <string name="tu_climate_2">Lüfter − auf kleinster Stufe: Klima aus. − / + lang drücken: kleinste / höchste Stufe.</string>
     <string name="tu_energy_t">Energie</string>
     <string name="tu_energy_1">KERS-Segment tippen: Rekuperationsstufe; lang drücken: One-Pedal-Fahren.</string>
@@ -927,7 +927,7 @@
     <string name="sc_cut">Getrennt</string>
     <string name="tu_shortcuts_t">Schnellzugriff-Menü</string>
     <string name="tu_shortcuts_1">Ein Finger ganz oben vom Bildschirmrand nach unten, auf jedem Bildschirm und über anderen Apps.</string>
-    <string name="tu_shortcuts_2">Kachel tippen zum Schalten; Menü lang drücken, um die Kacheln zu wählen. Die Home-Taste schließt es.</string>
+    <string name="tu_shortcuts_2">Kachel tippen zum Schalten; Menü lang drücken, um die Kacheln zu wählen, und dort die Helligkeitsleiste tippen, um sie aus- oder einzublenden. Die Home-Taste schließt es.</string>
     <string name="tu_shortcuts_3">Einstellungen › Startseite › Schnellzugriff-Menü: blendet auch die originale Nebelleuchten-Taste aus (nach einem Neustart des Radios).</string>
     <string name="sc_heating">Heizung</string>
     <string name="sc_cooling">Kühlung</string>
