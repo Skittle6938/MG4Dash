@@ -63,7 +63,9 @@ class SettingsActivity : AppCompatActivity() {
         if (intent.getBooleanExtra(EXTRA_RADAR, false)) { radarPage(); return }
         // A single scrolling area: two columns of categories, under a fixed banner
         // (title, log, close) that leaves room for the fog light button.
-        val root = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; setPadding(dp(16), dp(12), dp(16), dp(12)) }
+        // The screen's margins as home's (Grand affichage: enlarged like its bar, which then sits where home's does)
+        val bd = app.mg4dash.ui.Dock.sized(this).resources.displayMetrics.density
+        val root = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; setPadding((16 * bd).toInt(), (12 * bd).toInt(), (16 * bd).toInt(), (12 * bd).toInt()) }
         val vertical = app.mg4dash.ui.Dock.vertical(this)
         val top = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL }
         top.addView(TextView(this).apply {
@@ -1381,7 +1383,9 @@ class SettingsActivity : AppCompatActivity() {
      * settings: three tabs (Alertes, Données, Voiture (ISA)) built by [app.mg4dash.radar.RadarPage].
      */
     private fun radarPage() {
-        val root = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; setPadding(dp(16), dp(12), dp(16), dp(12)) }
+        // The screen's margins as home's (Grand affichage: enlarged like its bar, which then sits where home's does)
+        val bd = app.mg4dash.ui.Dock.sized(this).resources.displayMetrics.density
+        val root = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; setPadding((16 * bd).toInt(), (12 * bd).toInt(), (16 * bd).toInt(), (12 * bd).toInt()) }
         val vertical = app.mg4dash.ui.Dock.vertical(this)
         val top = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL }
         top.addView(TextView(this).apply {

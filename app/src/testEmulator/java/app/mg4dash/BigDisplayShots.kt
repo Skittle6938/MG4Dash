@@ -125,6 +125,22 @@ class BigDisplayShots {
         }
     }
 
+    /** Marc's first car test (20/11): Keep climate on within the screen, the media in a quarter with Android Auto. */
+    @Test fun carFixes() {
+        val a = Robolectric.buildActivity(MainActivity::class.java).setup().get(); idle()
+        app.mg4dash.climate.ClimateHoldPanel.show(a); idle()
+        save(a.window.decorView, "big_keep_climate.png")
+        prefs.raw.edit().putBoolean("climhold_scheduled", true).commit()
+        app.mg4dash.climate.ClimateHoldPanel.show(a); idle()
+        save(a.window.decorView, "big_keep_climate_scheduled.png")
+        val f = app.mg4dash.media.MediaHub::class.java.getDeclaredField("_now").apply { isAccessible = true }
+        @Suppress("UNCHECKED_CAST")
+        (f.get(app.mg4dash.media.MediaHub) as kotlinx.coroutines.flow.MutableStateFlow<app.mg4dash.media.MediaHub.NowPlaying>).value =
+            app.mg4dash.media.MediaHub.NowPlaying(true, "com.google.android.projection.gearhead", "Android Auto",
+                "A very long song title that would take two lines in a small place", "An artist with a long name", "Album", null, true, 240_000, 60_000)
+        shoot(MainActivity::class.java, "big_media_quarter_aa.png")
+    }
+
     @Test fun climatePage() = shoot(app.mg4dash.pages.ClimateActivity::class.java, "big_page_climate.png")
     @Test fun vehiclePage() = shoot(app.mg4dash.pages.VehicleActivity::class.java, "big_page_vehicle.png")
 
