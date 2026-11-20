@@ -143,9 +143,11 @@ class SmartBrightnessTest {
     }
 
     @Test fun targetCoversTheWholeRange() {
-        // 0 % is the system's own minimum (10 of 255 on the car), not a floor of ours
+        // 0 % is the car's own floor, 16 of 255 (below it the screen does not change, 20/11)
         val dark = BrightnessCurve().with(0.0, true, 0.0, 1).with(0.5, true, 0.0, 2)
-        assertTrue(SmartBrightness.target(dark, 1.0) <= 5)
+        assertTrue(SmartBrightness.target(dark, 1.0).let { it in SmartBrightness.FLOOR..SmartBrightness.FLOOR + 15 })
+        assertEquals(0.0, SmartBrightness.fromSetting(5), 0.0)
+        assertEquals(SmartBrightness.FLOOR, SmartBrightness.toSetting(0.0))
         assertEquals(255, SmartBrightness.target(BrightnessCurve(), 100_000.0))
     }
 }

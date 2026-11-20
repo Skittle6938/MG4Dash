@@ -38,6 +38,12 @@ object SmartBrightness {
     const val LIGHTS_RAMP_MS = 1_000L
 
     private const val SIDE_LIGHTS = 557880099   // VEH_SIDE_LGHT: 0 off, 3 on
+    /**
+     * The car's own floor (20/11, checked on the screen): below 16 of 255 nothing changes, the display stays at 16.
+     * The curve's 0 is that floor, its 1 the top: 0 % of the curve is the dimmest the screen can really be.
+     */
+    const val FLOOR = 16
+    private const val TOP = 255
 
     @Volatile private var ctx: Context? = null
     private val worker: Handler by lazy { Handler(HandlerThread("smart-brightness").apply { start() }.looper) }
@@ -87,7 +93,12 @@ object SmartBrightness {
     }
 
     /** The brightness (0 to 255) the curve gives for [lux]. */
-    internal fun target(curve: BrightnessCurve, lux: Double): Int = Math.round(curve.valueAt(LightEstimator.level(lux)) * 255).toInt().coerceIn(0, 255)
+    internal fun target(curve: BrightnessCurve, lux: Double): Int = toSetting(curve.valueAt(LightEstimator.level(lux)))
+
+    /** The curve's 0 to 1 as the setting: [FLOOR] to 255. */
+    internal fun toSetting(value: Double): Int = (FLOOR + Math.round(value.coerceIn(0.0, 1.0) * (TOP - FLOOR))).toInt()
+    /** The setting as the curve's 0 to 1 (below the floor: 0). */
+    internal fun fromSetting(v: Int): Double = ((v - FLOOR).toDouble() / (TOP - FLOOR)).coerceIn(0.0, 1.0)
 
     private fun readLights(): Boolean? = try {
         val v = app.mg4dash.car.CarProps.readAny(SIDE_LIGHTS)
@@ -192,9 +203,9 @@ object SmartBrightness {
         val cur = curve(c)
         // Only a correction: a value the curve already gives is not a point
         if (Math.abs(target(cur, lux) - v) < MIN_CHANGE * 255) { written = v; return }
-        val next = cur.with(LightEstimator.level(lux), lights == true, v / 255.0, now)
+        val next = cur.with(LightEstimator.level(lux), lights == true, fromSetting(v), now)
         Prefs(c).raw.edit().putString(curveKey(c), next.encode()).apply()
         written = v
-        Log.i(TAG, "learnt: ${Math.round(lux)} lux${if (lights == true) ", lights on" else ""} → ${Math.round(v * 100 / 255f)} % (${next.points.size} points)")
+        Log.i(TAG, "learnt: ${Math.round(lux)} lux${if (lights == true) ", lights on" else ""} → ${Math.round(fromSetting(v) * 100)} % (${next.points.size} points)")
     }
 }
