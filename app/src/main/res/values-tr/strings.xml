@@ -758,7 +758,7 @@
     <string name="tu_home_1">SAIC ana ekranını değiştir: MG4Dash açılışta ve Ana ekran tuşuyla açılır. Hiçbir şey kaldırılmaz.</string>
     <string name="tu_home_2">Bakım modu, aynı yerde: orijinal ana ekran tek dokunuşla geri gelir.</string>
     <string name="tu_layouts_t">Ana ekran yerleşimi</string>
-    <string name="tu_layouts_1">Ayarlar › Ana ekran: Basit (üç büyük panel) veya Yerleşim, 8 widget düzeniyle.</string>
+    <string name="tu_layouts_1">Ayarlar › Ana ekran: Standart, Büyük ekran (her şey üçte bir daha büyük) veya Basit (üç büyük panel), her biri kendi yerleşimleriyle.</string>
     <string name="tu_layouts_2">Her yerin widget\'larını seçmek için ana ekranı kıstırın.</string>
     <string name="tu_bar_t">Yan çubuk</string>
     <string name="tu_bar_bottom_t">Alt çubuk</string>
@@ -766,7 +766,7 @@
     <string name="tu_bar_2">Ana ekran, uzun bas: tüm uygulamalar. Android Auto, uzun bas: Android Auto, CarPlay veya başka bir uygulama seç.</string>
     <string name="tu_bar_3">Sol veya sağ kenardan içeri tek parmakla kaydırma: telefon bağlıyken Android Auto’yu açar.</string>
     <string name="tu_climate_t">Klima</string>
-    <string name="tu_climate_1">A/C\'ye uzun bas: aralıklı A/C. Sıcaklığa uzun bas: kalibrasyon.</string>
+    <string name="tu_climate_1">Sıcaklığa dokunun: Klima sayfası. Ona veya fana uzun basın: klima ayarları (kalibrasyon). A/C’ye uzun bas: aralıklı A/C.</string>
     <string name="tu_climate_2">En düşük fanda −: klima kapanır. − / + uzun bas: en düşük / en yüksek hız.</string>
     <string name="tu_energy_t">Enerji</string>
     <string name="tu_energy_1">KERS bölümüne dokun: rejenerasyon seviyesi; uzun bas: tek pedal sürüş.</string>
@@ -927,7 +927,7 @@
     <string name="sc_cut">Kesildi</string>
     <string name="tu_shortcuts_t">Kısayol menüsü</string>
     <string name="tu_shortcuts_1">Ekranın en üstünden tek parmakla aşağı; her ekranda ve diğer uygulamaların üzerinde.</string>
-    <string name="tu_shortcuts_2">İşlem için bir kutucuğa dokunun; kutucukları seçmek için menüye uzun basın. Ana ekran tuşu menüyü kapatır.</string>
+    <string name="tu_shortcuts_2">İşlem için bir kutucuğa dokunun; kutucukları seçmek için menüye uzun basın, parlaklık çubuğuna dokunarak onu gizleyin veya gösterin. Ana ekran tuşu menüyü kapatır.</string>
     <string name="tu_shortcuts_3">Ayarlar › Ana ekran › Kısayol menüsü: orijinal sis lambası düğmesini de gizler (ünite yeniden başlatıldıktan sonra).</string>
     <string name="sc_heating">Isıtma</string>
     <string name="sc_cooling">Klima</string>

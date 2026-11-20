@@ -515,10 +515,10 @@ object ShortcutsPanel : Application.ActivityLifecycleCallbacks {
                 // The smart mode's small star before AUTO (the owner's choice A), star and word centred together (20/11:
                 // as a compound drawable it sat at the button's far left edge)
                 val star = if (smart) androidx.core.content.ContextCompat.getDrawable(ctx, R.drawable.ic_smart)?.mutate()?.apply {
-                    setTint(if (on) accentText else c(R.color.text_value)); setBounds(0, 0, kit.dp(20), kit.dp(20))
+                    setTint(if (on) accentText else c(R.color.text_value)); setBounds(0, 0, kit.dp(28), kit.dp(28))   // well visible: the smart mode (20/11)
                 } else null
                 auto.text = if (star != null) android.text.SpannableString("*AUTO").apply {
-                    setSpan(CenteredIconSpan(star, kit.dp(6)), 0, 1, android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+                    setSpan(CenteredIconSpan(star, kit.dp(8)), 0, 1, android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
                 } else if (on) adjLabel(adj()) else "AUTO"
                 auto.setCompoundDrawablesRelative(null, null, null, null)
             }

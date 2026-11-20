@@ -758,7 +758,7 @@
     <string name="tu_home_1">Sustituir inicio SAIC: MG4Dash se abre al arrancar y con la tecla Inicio. No se desinstala nada.</string>
     <string name="tu_home_2">Modo mantenimiento, en el mismo lugar: el inicio original vuelve con un toque.</string>
     <string name="tu_layouts_t">Disposición del inicio</string>
-    <string name="tu_layouts_1">Ajustes › Inicio: Sencillo (tres paneles grandes) o Disposición, con 8 distribuciones de widgets.</string>
+    <string name="tu_layouts_1">Ajustes › Inicio: Estándar, Pantalla grande (todo un tercio más grande) o Sencillo (tres paneles grandes), cada uno con sus disposiciones.</string>
     <string name="tu_layouts_2">Pellizca el inicio para elegir los widgets de cada lugar.</string>
     <string name="tu_bar_t">Barra lateral</string>
     <string name="tu_bar_bottom_t">Barra inferior</string>
@@ -766,7 +766,7 @@
     <string name="tu_bar_2">Inicio, pulsación larga: todas las apps. Android Auto, pulsación larga: elegir Android Auto, CarPlay u otra app.</string>
     <string name="tu_bar_3">Un dedo deslizado desde el borde izquierdo o derecho: abrir Android Auto, cuando hay un teléfono conectado.</string>
     <string name="tu_climate_t">Climatización</string>
-    <string name="tu_climate_1">Pulsación larga en A/C: A/C intermitente. Pulsación larga en la temperatura: calibración.</string>
+    <string name="tu_climate_1">Toque la temperatura: página Clima. Pulsación larga en ella o en el ventilador: ajustes del clima (calibración). Pulsación larga en A/C: A/C intermitente.</string>
     <string name="tu_climate_2">Ventilador − al mínimo: clima apagado. Pulsación larga en − / +: velocidad mínima / máxima.</string>
     <string name="tu_energy_t">Energía</string>
     <string name="tu_energy_1">Toca un segmento KERS: nivel de regeneración; pulsación larga: conducción con un pedal.</string>
@@ -927,7 +927,7 @@
     <string name="sc_cut">Cortado</string>
     <string name="tu_shortcuts_t">Menú de accesos</string>
     <string name="tu_shortcuts_1">Un dedo hacia abajo desde lo más alto de la pantalla, en todas las pantallas y sobre las demás apps.</string>
-    <string name="tu_shortcuts_2">Toca una casilla para actuar; pulsación larga en el menú para elegir sus casillas. La tecla Inicio lo cierra.</string>
+    <string name="tu_shortcuts_2">Toca una casilla para actuar; pulsación larga en el menú para elegir sus casillas, y toca allí la barra de brillo para ocultarla o mostrarla. La tecla Inicio lo cierra.</string>
     <string name="tu_shortcuts_3">Ajustes › Inicio › Menú de accesos: también oculta el botón antiniebla original (tras reiniciar la radio).</string>
     <string name="sc_heating">Calefacción</string>
     <string name="sc_cooling">Aire acond.</string>

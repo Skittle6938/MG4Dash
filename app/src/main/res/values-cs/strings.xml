@@ -758,7 +758,7 @@
     <string name="tu_home_1">Nahradit domovskou obrazovku SAIC: MG4Dash se otevře při spuštění a tlačítkem Domů. Nic se neodinstaluje.</string>
     <string name="tu_home_2">Servisní režim na stejném místě: původní domovská obrazovka zpět jedním klepnutím.</string>
     <string name="tu_layouts_t">Rozvržení domovské obrazovky</string>
-    <string name="tu_layouts_1">Nastavení › Domů: Jednoduché (tři velké panely) nebo Rozvržení s 8 uspořádáními widgetů.</string>
+    <string name="tu_layouts_1">Nastavení › Domů: Standardní, Velké zobrazení (vše o třetinu větší) nebo Jednoduché (tři velké panely), každé s vlastními rozvrženími.</string>
     <string name="tu_layouts_2">Sevřete domovskou obrazovku a vyberte widgety pro každé místo.</string>
     <string name="tu_bar_t">Boční lišta</string>
     <string name="tu_bar_bottom_t">Spodní lišta</string>
@@ -766,7 +766,7 @@
     <string name="tu_bar_2">Domů, dlouhé podržení: všechny aplikace. Android Auto, dlouhé podržení: výběr Android Auto, CarPlay nebo jiné aplikace.</string>
     <string name="tu_bar_3">Jeden prst přetažený od levého nebo pravého okraje: otevře Android Auto, když je připojen telefon.</string>
     <string name="tu_climate_t">Klimatizace</string>
-    <string name="tu_climate_1">Dlouhé podržení A/C: přerušovaná A/C. Dlouhé podržení teploty: kalibrace.</string>
+    <string name="tu_climate_1">Klepněte na teplotu: stránka Klimatizace. Dlouhé podržení na ní nebo na ventilátoru: nastavení klimatizace (kalibrace). Dlouhé podržení A/C: přerušovaná A/C.</string>
     <string name="tu_climate_2">Ventilátor − na nejnižší rychlosti: klimatizace vypnuta. Dlouhé podržení − / +: nejnižší / nejvyšší rychlost.</string>
     <string name="tu_energy_t">Energie</string>
     <string name="tu_energy_1">Dotkněte se segmentu KERS: úroveň rekuperace; dlouhé podržení: jízda jedním pedálem.</string>
@@ -925,7 +925,7 @@
     <string name="sc_cut">Odpojeno</string>
     <string name="tu_shortcuts_t">Nabídka zkratek</string>
     <string name="tu_shortcuts_1">Jedním prstem dolů od úplného horního okraje obrazovky, na každé obrazovce i přes ostatní aplikace.</string>
-    <string name="tu_shortcuts_2">Dotykem dlaždice ji ovládáte; dlouhým podržením nabídky vyberete její dlaždice. Tlačítko Domů ji zavře.</string>
+    <string name="tu_shortcuts_2">Dotykem dlaždice ji ovládáte; dlouhým podržením nabídky vyberete její dlaždice a dotykem lišty jasu ji skryjete nebo zobrazíte. Tlačítko Domů ji zavře.</string>
     <string name="tu_shortcuts_3">Nastavení › Domů › Nabídka zkratek: také skryje tlačítko mlhového světla MG (po restartu jednotky).</string>
     <string name="sc_heating">Topení</string>
     <string name="sc_cooling">Chlazení</string>
