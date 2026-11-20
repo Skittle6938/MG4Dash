@@ -99,7 +99,7 @@ class RadarCard(context: Context) : View(context) {
 
     /** The limit sign: red ring with the limit, grey when estimated or unknown. */
     private fun drawSign(c: Canvas, cx: Float, cy: Float, rad: Float) {
-        val limit = s.zone?.limit ?: s.limit
+        val limit = s.checkedLimit
         val known = limit != null && s.status == RadarRepo.Status.OK
         val grey = !known || (s.zone == null && s.estimated)
         p.style = Paint.Style.FILL; p.color = 0xFFFFFFFF.toInt()
@@ -145,7 +145,7 @@ class RadarCard(context: Context) : View(context) {
 
     /** Dial: 240° arc, the part up to the speed filled, a red mark at the limit, the speed in the middle. */
     private fun drawDial(c: Canvas, r: RectF) {
-        val limit = s.zone?.limit ?: s.limit
+        val limit = s.checkedLimit
         val speed = s.speedKmh ?: 0f
         val max = maxOf((limit ?: 90) * 1.4f, speed * 1.1f, 60f)
         val stroke = r.width() * 0.07f

@@ -169,6 +169,21 @@ class RadarTest {
         assertEquals(2L, m.update(listOf(a, b), lat, 2.005, 90f, 4_100)!!.road.id)
     }
 
+    @Test fun switchesLimitAtAConnectedRoadBoundary() {
+        val west = road(1, "primary", 50, 0, 48.0 to 2.0, 48.0 to 2.001, first = 10)
+        val east = road(2, "primary", 70, 0, 48.0 to 2.001, 48.0 to 2.002, first = 11)
+        val roads = listOf(west, east)
+        val eastbound = Matcher()
+        assertEquals(50, eastbound.update(roads, 48.0, 2.00096, 90f, 0)?.limit)
+        assertEquals(70, eastbound.update(roads, 48.0, 2.00104, 90f, 1_000)?.limit)
+        val westbound = Matcher()
+        assertEquals(70, westbound.update(roads, 48.0, 2.00104, 270f, 0)?.limit)
+        assertEquals(50, westbound.update(roads, 48.0, 2.00096, 270f, 1_000)?.limit)
+        val skippedBoundary = Matcher()
+        assertEquals(50, skippedBoundary.update(roads, 48.0, 2.00096, 90f, 0)?.limit)
+        assertEquals(70, skippedBoundary.update(roads, 48.0, 2.0014, 90f, 1_000)?.limit)
+    }
+
     @Test fun directionalLimits() {
         val r = road(7, "primary", 70, 0, 48.0 to 2.0, 48.01 to 2.0, fwd = 50, bwd = 90)
         assertEquals(50, Matcher().update(listOf(r), 48.005, 2.0, 0f, 0)!!.limit)
@@ -301,6 +316,21 @@ class RadarTest {
         assertNull(r.tick(null, 17_000, rep))
         assertEquals(RadarAlert.Kind.LIGHT, r.tick(RadarAlert.Kind.LIGHT, 18_000, rep))
         assertNull(r.tick(RadarAlert.Kind.LIGHT, 600_000, rep))
+    }
+
+    @Test fun repeatIntervalSurvivesDroppingBelowTheThreshold() {
+        val r = RadarAlert.Repeater()
+        val strong = RadarAlert.Kind.STRONG
+        val light = RadarAlert.Kind.LIGHT
+        val rep = { k: RadarAlert.Kind -> k.repeat }
+        assertEquals(strong, r.tick(strong, 0, rep))
+        assertNull(r.tick(null, 1_000, rep))
+        assertNull(r.tick(strong, 2_000, rep))
+        assertEquals(light, r.tick(light, 3_000, rep))
+        assertNull(r.tick(strong, 9_999, rep))
+        assertEquals(strong, r.tick(strong, 10_000, rep))
+        assertEquals(light, r.tick(light, 10_001, rep))
+        assertNull(r.tick(light, 600_000, rep))
     }
 
     // ── Network ──

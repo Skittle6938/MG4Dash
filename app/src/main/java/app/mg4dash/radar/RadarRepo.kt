@@ -80,6 +80,8 @@ object RadarRepo {
         /** The limit is the car's own (ISA), OSM having none. */
         val fromCar: Boolean = false,
     ) {
+        internal val checkedLimit: Int? get() = zone?.limit ?: limit
+
         /** Over the high threshold inside a camera zone: the very strong alert. */
         val critical: Boolean get() = zone != null && level == Level.STRONG
     }
@@ -153,12 +155,12 @@ object RadarRepo {
     private var zoneCam: Camera? = null
     private var zoneEnd = 0.0
     private var zoneLimit: Int? = null
-    @Volatile private var level = Level.NONE
     /** The speed shown and checked: the car's, set right on the GPS (worker thread). */
     private var speedCalib = RadarSpeed()
-    /** The speed checked at the last fix (the zone's or the road's) and the thresholds then, for the speed between fixes. */
-    @Volatile private var checkedLimit: Int? = null
-    @Volatile private var thresholds: Thresholds? = null
+    /** Thresholds for the published fix, guarded by speedLock with the state. */
+    private var thresholds: Thresholds? = null
+    /** Counts speed readings even when the value hasn't changed. Guarded by speedLock. */
+    private var speedSample = 0L
     /** The car's speed read now (tests: a speed of their own). */
     internal var carSpeed: () -> Float? = { CarBridge.readSpeed() }
     /** Last time the car moved, for the reading pace. */
@@ -192,8 +194,8 @@ object RadarRepo {
         job?.cancel(); job = null
         RadarAlert.stop()
         speedWorker.removeCallbacks(speedTick)
-        worker.post { speedWorker.removeCallbacks(speedTick); checkedLimit = null; thresholds = null; tiles.clear(); roads = emptyList(); cameras = emptyList(); graph = Ahead.Graph(emptyList()); loadedKeys = emptySet(); matcher.reset(); zoneCam = null }
-        _state.value = State()
+        worker.post { speedWorker.removeCallbacks(speedTick); tiles.clear(); roads = emptyList(); cameras = emptyList(); graph = Ahead.Graph(emptyList()); loadedKeys = emptySet(); matcher.reset(); zoneCam = null }
+        synchronized(speedLock) { thresholds = null; _state.value = State() }
         Log.i(TAG, "alerter off")
     }
 
@@ -237,6 +239,7 @@ object RadarRepo {
 
     private fun onLocation(loc: Location) {
         val c = ctx ?: return
+        val before = synchronized(speedLock) { speedSample }
         val now = System.currentTimeMillis()
         // The car's speed read now, set right on the GPS's on steady stretches; the GPS's alone without it
         val car = carSpeed()?.takeIf { it >= 0f } ?: CarBridge.state.value.speedKmh?.takeIf { it >= 0f }
@@ -248,17 +251,16 @@ object RadarRepo {
             c.getSharedPreferences(SPEED_PREFS, Context.MODE_PRIVATE).edit().putFloat("k", speedCalib.k).putInt("windows", speedCalib.windows).apply()
         }
         val speed = synchronized(speedLock) { speedCalib.shown(car, gps) }
-        checkedLimit = null
         last?.let { p -> val d = Geo.dist(p.latitude, p.longitude, loc.latitude, loc.longitude); if (d < 300) odo += d }
         last = loc
         val heading = loc.takeIf { it.hasBearing() && (speed ?: 0f) >= MIN_HEADING_KMH }?.bearing
         ensureTiles(c, loc.latitude, loc.longitude, now, heading, speed)
         if (loadedKeys.isEmpty() && fetching.isEmpty()) {
-            publish(State(status = if (!netAllowed(c)) Status.WIFI_ONLY else Status.NO_DATA, speedKmh = speed)); return
+            publishFix(before, State(status = if (!netAllowed(c)) Status.WIFI_ONLY else Status.NO_DATA, speedKmh = speed)); return
         }
-        if (roads.isEmpty()) { publish(State(status = Status.LOADING, speedKmh = speed)); return }
+        if (roads.isEmpty()) { publishFix(before, State(status = Status.LOADING, speedKmh = speed)); return }
         val m = matcher.update(roads, loc.latitude, loc.longitude, heading, android.os.SystemClock.elapsedRealtime())
-        if (m == null) { level = Level.NONE; publish(State(status = Status.OFF_ROAD, speedKmh = speed, zone = activeZone())); return }
+        if (m == null) { publishFix(before, State(status = Status.OFF_ROAD, speedKmh = speed, zone = activeZone())); return }
         val path = Ahead.path(m, loc.latitude, loc.longitude, graph)
         val zones = Ahead.zones(path, cameras)
         // Entering a zone: from then on, it lasts until the car has gone past its end
@@ -277,15 +279,11 @@ object RadarRepo {
         if (p.radarIsaWrite) IsaWrite.apply(m.tagged, m.tagged == null, Isa.carLimit(), now, false, hasIsa = false) { w ->
             w.f?.let { CarProps.setFloat(w.id, it, "navigation speed limit") } ?: CarProps.setInt(w.id, w.i ?: 0, "navigation speed limit") }
         val t = Thresholds(p.radarLow, p.radarHigh, p.radarPercent, Units.miles(c))
-        // In a zone, the speed checked there
-        val checked = zone?.limit ?: limit
-        checkedLimit = checked; thresholds = t
-        level = speed?.let { t.level(it, checked, level) } ?: Level.NONE
-        publish(State(
-            status = Status.OK, speedKmh = speed, limit = limit, estimated = carLimit == null && m.estimated, level = level, zone = zone, fromCar = carLimit != null,
+        publishFix(before, State(
+            status = Status.OK, speedKmh = speed, limit = limit, estimated = carLimit == null && m.estimated, zone = zone, fromCar = carLimit != null,
             next = zones.filter { it.start > 0 && it.cam.id != zoneCam?.id }.take(3).map { NextZone(it.cam.kind, it.limit, it.start) },
             nextLimit = Ahead.nextLimit(path), highway = m.road.highway,
-        ))
+        ), t)
     }
 
     /**
@@ -300,11 +298,11 @@ object RadarRepo {
             if (car > 0.5f) movedAt = now
             // Read and published under the lock: a fix published meanwhile is never overwritten by this older state
             synchronized(speedLock) {
+                if (job == null) return@synchronized
                 val speed = speedCalib.shown(car, null)
                 val cur = _state.value
-                val t = thresholds
-                if (cur.status == Status.OK && t != null) level = speed?.let { t.level(it, checkedLimit, level) } ?: Level.NONE
-                publish(cur.copy(speedKmh = speed, level = if (cur.status == Status.OK) level else cur.level))
+                speedSample++
+                _state.value = cur.withSpeed(speed, thresholds, cur)
             }
         }
         return if (now - movedAt > RadarSpeed.PARKED_MS) RadarSpeed.PARKED_TICK_MS else RadarSpeed.TICK_MS
@@ -317,8 +315,19 @@ object RadarRepo {
         return InZone(cam.kind, zoneLimit, left, cam.id)
     }
 
-    private fun publish(s: State) = synchronized(speedLock) {
-        if (s != _state.value) _state.value = s
+    private fun publishFix(before: Long, fix: State, t: Thresholds? = null) = synchronized(speedLock) {
+        if (job == null) return@synchronized
+        val current = _state.value
+        // Map matching can take longer than a speed tick. Keep any newer speed published during the fix.
+        val speed = if (speedSample != before) current.speedKmh else fix.speedKmh
+        thresholds = t
+        _state.value = fix.withSpeed(speed, t, current)
+    }
+
+    private fun State.withSpeed(speed: Float?, t: Thresholds?, previous: State): State {
+        val previousLevel = if (previous.checkedLimit == checkedLimit) previous.level else Level.NONE
+        val alert = if (speed != null && t != null) t.level(speed, checkedLimit, previousLevel) else Level.NONE
+        return copy(speedKmh = speed, level = alert)
     }
 
     /** Loads the tiles around the car from disk, fetches those missing or old when allowed, drops those far away. */
