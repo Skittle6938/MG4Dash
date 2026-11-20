@@ -488,7 +488,7 @@
     <string name="doors_unknown">Verrouillage indisponible</string>
     <string name="en_gun_unlock">DÉVERROUILLER LE PISTOLET</string>
     <string name="en_gun_lock">VERROUILLER LE PISTOLET</string>
-    <string name="power_off_driving">Pas en roulant</string>
+    <string name="power_off_driving">Arrêt indisponible. Immobilisez la voiture et sélectionnez P.</string>
     <string name="st_power_fx">Fonction spéciale pied au plancher (widget Puissance en direct) :</string>
     <string name="st_power_fx_desc" formatted="false">Mettez le pied au plancher (au-delà de 80 % de la puissance maximale de la voiture) et vous verrez bien… puis le pic atteint (kW et ch) reste affiché 10 secondes.</string>
     <string name="fx_none">Aucune</string>

@@ -102,15 +102,20 @@ object CarBridge {
 
     private const val POWER_MODE = 557897487   // 0x2140d70f: 2 = switch off (stock SystemUI, CarComfortableController)
 
-    /** Switches the car off, like the "Switch off" button of the stock quick panel. */
+    /** Switches the car off after fresh vehicle reads. Call off the main thread. */
     fun powerOffCar(): Boolean {
-        // Never while driving: unknown speed or above 1 km/h = refused
-        val v = state.value.speedKmh
-        if (v == null || v > 1f) { Log.w(TAG, "power off refused, speed $v"); return false }
+        val speed = readSpeed()
+        val parked = if (BuildConfig.MOCK) true else ReadyState.inPark()
+        if (!canPowerOff(parked, speed)) {
+            Log.w(TAG, "power off refused, park=$parked speed=$speed")
+            return false
+        }
         if (BuildConfig.MOCK) return true
-        CarProps.setIntArea(POWER_MODE, 0, 2, "car power off")
-        return true
+        return CarProps.setIntArea(POWER_MODE, 0, 2, "car power off")
     }
+
+    internal fun canPowerOff(parked: Boolean?, speed: Float?): Boolean =
+        parked == true && speed != null && speed in 0f..1f
 
     /** Locks the doors (does nothing if they already are). */
     fun lockDoors(): Boolean {

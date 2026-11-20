@@ -488,7 +488,7 @@
     <string name="doors_unknown">Vergrendeling niet beschikbaar</string>
     <string name="en_gun_unlock">KABEL ONTGRENDELEN</string>
     <string name="en_gun_lock">KABEL VERGRENDELEN</string>
-    <string name="power_off_driving">Niet tijdens het rijden</string>
+    <string name="power_off_driving">Uitschakelen niet beschikbaar. Stop en kies P.</string>
     <string name="st_power_fx">Speciale functie plankgas (widget Live vermogen):</string>
     <string name="st_power_fx_desc" formatted="false">Plankgas (boven 80 % van het maximale vermogen van de auto) en je zult het zien… daarna blijft de bereikte piek (kW en pk) 10 seconden in beeld.</string>
     <string name="fx_none">Geen</string>

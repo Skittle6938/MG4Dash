@@ -488,7 +488,7 @@
     <string name="doors_unknown">Zámek dveří není k dispozici</string>
     <string name="en_gun_unlock">ODEMKNOUT KABEL</string>
     <string name="en_gun_lock">ZAMKNOUT KABEL</string>
-    <string name="power_off_driving">Ne během jízdy</string>
+    <string name="power_off_driving">Vypnutí není dostupné. Zastavte a zvolte P.</string>
     <string name="st_power_fx">Efekt při plném plynu (widget Aktuální výkon):</string>
     <string name="st_power_fx_desc" formatted="false">Sešlápněte plyn až na podlahu (nad 80 % maximálního výkonu vozu) a uvidíte… pak dosažená špička (kW a k) zůstane na obrazovce 10 sekund.</string>
     <string name="fx_none">Žádný</string>
