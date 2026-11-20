@@ -764,7 +764,7 @@
     <string name="tu_bar_bottom_t">Barra in basso</string>
     <string name="tu_bar_1">Tocca: la pagina MG4Dash. Pressione lunga: la schermata originale dell\'auto (veicolo, clima, ricarica, telefono, impostazioni).</string>
     <string name="tu_bar_2">Home, pressione lunga: tutte le app. Android Auto, pressione lunga: scegli Android Auto, CarPlay o un\'altra app.</string>
-    <string name="tu_bar_3">Due dita fatte scorrere dall\'alto: apri Android Auto, con un telefono connesso.</string>
+    <string name="tu_bar_3">Un dito trascinato dal bordo sinistro o destro: apre Android Auto, quando un telefono è collegato.</string>
     <string name="tu_climate_t">Climatizzazione</string>
     <string name="tu_climate_1">Pressione lunga su A/C: A/C intermittente. Pressione lunga sulla temperatura: calibrazione.</string>
     <string name="tu_climate_2">Ventola − al minimo: clima spento. Pressione lunga su − / +: velocità minima / massima.</string>

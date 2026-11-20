@@ -764,7 +764,7 @@
     <string name="tu_bar_bottom_t">Untere Leiste</string>
     <string name="tu_bar_1">Tippen: die MG4Dash-Seite. Lang drücken: der Originalbildschirm des Autos (Fahrzeug, Klima, Laden, Telefon, Einstellungen).</string>
     <string name="tu_bar_2">Start, lang drücken: alle Apps. Android Auto, lang drücken: Android Auto, CarPlay oder eine andere App wählen.</string>
-    <string name="tu_bar_3">Zwei Finger von oben nach unten wischen: Android Auto öffnen, wenn ein Telefon verbunden ist.</string>
+    <string name="tu_bar_3">Ein Finger vom linken oder rechten Rand hereingezogen: Android Auto öffnen, wenn ein Telefon verbunden ist.</string>
     <string name="tu_climate_t">Klima</string>
     <string name="tu_climate_1">A/C lang drücken: A/C im Intervall. Temperatur lang drücken: Kalibrierung.</string>
     <string name="tu_climate_2">Lüfter − auf kleinster Stufe: Klima aus. − / + lang drücken: kleinste / höchste Stufe.</string>

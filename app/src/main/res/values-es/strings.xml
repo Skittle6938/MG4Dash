@@ -764,7 +764,7 @@
     <string name="tu_bar_bottom_t">Barra inferior</string>
     <string name="tu_bar_1">Tocar: la página de MG4Dash. Pulsación larga: la pantalla original del coche (vehículo, clima, carga, teléfono, ajustes).</string>
     <string name="tu_bar_2">Inicio, pulsación larga: todas las apps. Android Auto, pulsación larga: elegir Android Auto, CarPlay u otra app.</string>
-    <string name="tu_bar_3">Dos dedos deslizados desde arriba: abrir Android Auto, con un teléfono conectado.</string>
+    <string name="tu_bar_3">Un dedo deslizado desde el borde izquierdo o derecho: abrir Android Auto, cuando hay un teléfono conectado.</string>
     <string name="tu_climate_t">Climatización</string>
     <string name="tu_climate_1">Pulsación larga en A/C: A/C intermitente. Pulsación larga en la temperatura: calibración.</string>
     <string name="tu_climate_2">Ventilador − al mínimo: clima apagado. Pulsación larga en − / +: velocidad mínima / máxima.</string>

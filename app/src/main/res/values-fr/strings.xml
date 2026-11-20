@@ -764,7 +764,7 @@
     <string name="tu_bar_bottom_t">Barre du bas</string>
     <string name="tu_bar_1">Appui court : la page MG4Dash. Appui long : l\'écran d\'origine de la voiture (véhicule, clim, recharge, téléphone, réglages).</string>
     <string name="tu_bar_2">Accueil, appui long : toutes les applis. Android Auto, appui long : choisir Android Auto, CarPlay ou une autre appli.</string>
-    <string name="tu_bar_3">Deux doigts glissés depuis le haut : ouvrir Android Auto, quand un téléphone est connecté.</string>
+    <string name="tu_bar_3">Un doigt glissé depuis le bord gauche ou droit : ouvrir Android Auto, quand un téléphone est connecté.</string>
     <string name="tu_climate_t">Climatisation</string>
     <string name="tu_climate_1">Appui long sur A/C : clim intermittente. Appui long sur la température : calibrage.</string>
     <string name="tu_climate_2">Ventilation − à la vitesse minimale : clim éteinte. Appui long sur − / + : vitesse minimale / maximale.</string>
