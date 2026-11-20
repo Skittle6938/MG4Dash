@@ -16,8 +16,7 @@ import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
 
 /**
- * Maintenance mode (Marc, 19/11, #123): MG4Dash does nothing but wait for its three-finger gesture. Its screens close
- * at once, the offer to become the home again opened instead; without maintenance mode, nothing changes.
+ * In maintenance mode, settings and pages offer a way back to MG4Dash. The projection shortcut closes silently.
  */
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [28])
@@ -41,11 +40,10 @@ class MaintenanceModeTest {
     }
 
     @Test fun projectionShortcutDoesNothingInMaintenance() {
-        // Radio Dash's Android Auto button: nothing opened but the way back
         Prefs(ctx).valetMode = true
         val a = Robolectric.buildActivity(app.mg4dash.ui.OpenProjectionActivity::class.java).setup().get()
         assertTrue(a.isFinishing)
-        assertEquals(MaintenanceActivity::class.java.name, opened(a))
+        assertNull(shadowOf(a).nextStartedActivity)
     }
 
     @Test fun pagesOpenNormallyOtherwise() {
