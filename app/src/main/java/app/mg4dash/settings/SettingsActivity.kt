@@ -221,7 +221,6 @@ class SettingsActivity : AppCompatActivity() {
         // ════ Appearance tab: theme and effects ════
         val theme = panel(lookL, getString(R.string.st_theme))
         // Brightness (smart brightness, 20/11): right under the theme, with the rest of the look
-        brightnessSetting(panel(lookL, getString(R.string.br_title)))
         dropdown(theme, getString(R.string.st_theme_mode), listOf(R.string.st_mode_auto, R.string.st_mode_dark, R.string.st_mode_light).map { getString(it) }, { prefs.themeMode }) {
             if (prefs.themeMode != it) { prefs.themeMode = it; onThemeChanged() }
         }
@@ -317,6 +316,8 @@ class SettingsActivity : AppCompatActivity() {
         row(energy, priceBtn)
         text(energy, getString(R.string.st_kwh_price_desc), 15f, R.color.text_title)
         toggle(energy, R.string.st_cc_stopped, R.string.st_cc_stopped_desc, { prefs.raw.getBoolean("cc_stopped", true) }) { prefs.raw.edit().putBoolean("cc_stopped", it).apply() }
+        // Brightness at the top of the right column, above the live power (20/11)
+        brightnessSetting(panel(lookR, getString(R.string.br_title)))
         // Speed × temperature consumption map (in testing, off by default)
         powerFxSetting(panel(lookR, getString(R.string.sw_power)))
 
