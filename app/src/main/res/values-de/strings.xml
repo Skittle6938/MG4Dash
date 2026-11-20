@@ -1178,4 +1178,14 @@
     <string name="br_reset_all">Alle</string>
     <string name="br_reset_this_confirm">Das für dieses Profil in dieser Darstellung (hell oder dunkel) Gelernte vergessen?</string>
     <string name="br_reset_all_confirm">Alles Gelernte für alle Profile vergessen, hell und dunkel?</string>
+    <string name="br_night">Nacht</string>
+    <string name="br_dusk">Dämmerung</string>
+    <string name="br_overcast">Bedeckt</string>
+    <string name="br_sun">Sonne</string>
+    <string name="br_curve">Gelernte Kurve</string>
+    <string name="br_curve_show">Kurve anzeigen  ▾</string>
+    <string name="br_curve_hide">Ausblenden  ▴</string>
+    <string name="br_curve_hint">Einen Punkt nach oben oder unten ziehen · die Kurve berühren, um bei diesem Licht einen Punkt hinzuzufügen · die Kurve steigt immer: ein Punkt hält bei seinen Nachbarn</string>
+    <string name="br_point_delete">Diesen Punkt löschen</string>
+    <string name="br_curve_count">%1$d Punkte</string>
 </resources>

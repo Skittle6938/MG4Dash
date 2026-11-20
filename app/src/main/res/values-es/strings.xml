@@ -1178,4 +1178,14 @@
     <string name="br_reset_all">Todo</string>
     <string name="br_reset_this_confirm">¿Olvidar lo aprendido para este perfil, en este aspecto (claro u oscuro)?</string>
     <string name="br_reset_all_confirm">¿Olvidar todo lo aprendido, para todos los perfiles, claro y oscuro?</string>
+    <string name="br_night">Noche</string>
+    <string name="br_dusk">Crepúsculo</string>
+    <string name="br_overcast">Nublado</string>
+    <string name="br_sun">Sol</string>
+    <string name="br_curve">Curva aprendida</string>
+    <string name="br_curve_show">Ver la curva  ▾</string>
+    <string name="br_curve_hide">Ocultar  ▴</string>
+    <string name="br_curve_hint">Desliza un punto hacia arriba o abajo · toca la curva para añadir un punto a esa luz · la curva sigue creciendo: un punto se detiene en sus vecinos</string>
+    <string name="br_point_delete">Eliminar este punto</string>
+    <string name="br_curve_count">%1$d puntos</string>
 </resources>

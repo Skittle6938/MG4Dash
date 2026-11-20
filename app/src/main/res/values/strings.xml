@@ -1178,4 +1178,14 @@
     <string name="br_reset_all">All</string>
     <string name="br_reset_this_confirm">Forget what was learnt for this profile, in this look (light or dark)?</string>
     <string name="br_reset_all_confirm">Forget everything learnt, for every profile, light and dark?</string>
+    <string name="br_night">Night</string>
+    <string name="br_dusk">Dusk</string>
+    <string name="br_overcast">Overcast</string>
+    <string name="br_sun">Sun</string>
+    <string name="br_curve">Learnt curve</string>
+    <string name="br_curve_show">See the curve  ▾</string>
+    <string name="br_curve_hide">Hide  ▴</string>
+    <string name="br_curve_hint">Slide a point up or down · touch the curve to add a point at that light · the curve keeps rising: a point stops at its neighbours</string>
+    <string name="br_point_delete">Delete this point</string>
+    <string name="br_curve_count">%1$d points</string>
 </resources>
