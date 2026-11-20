@@ -69,5 +69,10 @@ class ClimateTouchZoneTest {
 
     @Test fun normalCard() = check(home(0, "home_layout", "full", "tl=climate;tc=map;tr=media;bl=energy;bc=hourly,daily;br=trip,power,phone"), "full")
 
+    // Grand affichage: the climate in a quarter, a band and a half
+    @Test fun bigQuarter() = check(home(app.mg4dash.system.Prefs.STYLE_BIG, "home_layout_big", "big_quad", "tl=climate;bl=energy;tr=media;br=hourly"), "quarter")
+    @Test fun bigBand() = check(home(app.mg4dash.system.Prefs.STYLE_BIG, "home_layout_big", "big_two_bands", "t=climate;b=media"), "band")
+    @Test fun bigHalf() = check(home(app.mg4dash.system.Prefs.STYLE_BIG, "home_layout_big", "big_two", "l=climate;r=media"), "half")
+
     @Test fun mapLayout() = check(home(0, "home_layout", "map", "tl=hourly,daily;tc=energy,trip;r=map;bl=climate;bc=media"), "map")
 }
