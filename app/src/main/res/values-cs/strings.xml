@@ -1175,7 +1175,7 @@
     <string name="br_reset_this">Tuto křivku</string>
     <string name="br_reset_all">Vše</string>
     <string name="br_reset_this_confirm">Zapomenout, co se naučilo pro tento profil v tomto vzhledu (světlém nebo tmavém)?</string>
-    <string name="br_reset_all_confirm">Zapomenout vše naučené pro všechny profily, světlé i tmavé?</string>
+    <string name="br_reset_all_confirm">Zapomenout vše naučené pro tento profil, světlé i tmavé?</string>
     <string name="br_night">Noc</string>
     <string name="br_dusk">Soumrak</string>
     <string name="br_overcast">Zataženo</string>

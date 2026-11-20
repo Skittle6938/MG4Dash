@@ -1177,7 +1177,7 @@
     <string name="br_reset_this">Questa curva</string>
     <string name="br_reset_all">Tutto</string>
     <string name="br_reset_this_confirm">Dimenticare ciò che è stato appreso per questo profilo, in questo aspetto (chiaro o scuro)?</string>
-    <string name="br_reset_all_confirm">Dimenticare tutto ciò che è stato appreso, per tutti i profili, chiaro e scuro?</string>
+    <string name="br_reset_all_confirm">Dimenticare tutto ciò che è stato appreso per questo profilo, chiaro e scuro?</string>
     <string name="br_night">Notte</string>
     <string name="br_dusk">Crepuscolo</string>
     <string name="br_overcast">Coperto</string>

@@ -135,11 +135,13 @@ class SmartBrightnessTest {
         raw.edit().putString("bright_curve_dark", BrightnessCurve().with(4.0, false, 0.9, 1).encode()).commit()
         Profiles.switchTo(ctx, "p1", "test")
         assertEquals(0.3, BrightnessCurve.decode(raw.getString("bright_curve_dark", null)).points.single().value, 0.0)
-        // Reset all: every profile's
+        // Reset all: both looks of the current profile only (20/11)
+        raw.edit().putString("bright_curve_light", BrightnessCurve().with(1.0, false, 0.5, 1).encode()).commit()
         SmartBrightness.reset(ctx, all = true)
         assertNull(raw.getString("bright_curve_dark", null))
+        assertNull(raw.getString("bright_curve_light", null))
         Profiles.switchTo(ctx, b.id, "test")
-        assertNull(raw.getString("bright_curve_dark", null))
+        assertEquals(0.9, BrightnessCurve.decode(raw.getString("bright_curve_dark", null)).points.single().value, 0.0)
     }
 
     @Test fun targetCoversTheWholeRange() {
@@ -220,5 +222,47 @@ class SmartBrightnessTest {
         assertEquals(1, saved!!.points.size)
         assertFalse(selected)
         assertTrue(saved!!.points[0].level > 3)
+    }
+
+    // ── The slider beyond a neighbour (20/11): the newest choice wins ──
+
+    private fun rising(c: BrightnessCurve) = c.points.sortedBy { it.level }.zipWithNext().all { (a, b) -> a.value <= b.value }
+
+    @Test fun aSliderPointAboveALighterOneRemovesIt() {
+        val c = BrightnessCurve().with(1.0, true, 0.2, 1).with(3.0, false, 0.5, 2).with(4.5, false, 0.9, 3)
+        val n = c.with(2.0, false, 0.7, 4)
+        assertEquals(listOf(1.0, 4.5, 2.0), n.points.map { it.level })
+        assertEquals(0.7, n.points.first { it.level == 2.0 }.value, 0.0)
+        assertTrue(rising(n))
+    }
+
+    @Test fun aSliderPointBelowADarkerOneRemovesIt() {
+        val c = BrightnessCurve().with(1.0, true, 0.2, 1).with(3.0, false, 0.5, 2).with(4.5, false, 0.9, 3)
+        val n = c.with(4.0, false, 0.1, 4)
+        // 1.0 (0.2) and 3.0 (0.5) are darker yet brighter: gone; 4.5 (0.9) agrees: kept
+        assertEquals(listOf(4.5, 4.0), n.points.map { it.level })
+        assertTrue(rising(n))
+        assertTrue(n.valueAt(4.0) < 0.5)
+    }
+
+    @Test fun replaceAndCapStillWorkAndTheCurveKeepsRising() {
+        var c = BrightnessCurve()
+        val r = java.util.Random(7)
+        repeat(200) { k ->
+            c = c.with(r.nextDouble() * 5, r.nextBoolean(), r.nextDouble(), k.toLong())
+            assertTrue(c.points.size <= BrightnessCurve.MAX_POINTS)
+            assertTrue(rising(c))
+            val s = c.points.sortedBy { it.level }
+            assertTrue(s.zipWithNext().all { (a, b) -> b.level - a.level >= BrightnessCurve.REPLACE })
+            val curve = (0..50).map { c.valueAt(it / 10.0) }
+            assertTrue(curve.zipWithNext().all { (a, b) -> b >= a - 1e-9 })
+        }
+        // Agreeing points: up to the cap, the oldest goes
+        var d = BrightnessCurve()
+        for (k in 0 until 14) d = d.with(k * 0.35, false, k / 14.0, k.toLong())
+        assertEquals(BrightnessCurve.MAX_POINTS, d.points.size)
+        assertFalse(d.points.any { it.at < 2 })
+        // Replacement within the radius
+        assertEquals(1, BrightnessCurve().with(2.0, false, 0.3, 1).with(2.2, false, 0.6, 2).points.size)
     }
 }

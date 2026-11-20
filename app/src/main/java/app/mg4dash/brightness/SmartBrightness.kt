@@ -62,13 +62,11 @@ object SmartBrightness {
     fun curveKey(c: Context): String = KEY_CURVE + if (app.mg4dash.ui.Themes.isLight(c)) "light" else "dark"
     fun curve(c: Context): BrightnessCurve = BrightnessCurve.decode(Prefs(c).raw.getString(curveKey(c), null))
 
-    /** Learning forgotten: this curve (current profile and look), or [all] of them, every profile's. */
+    /** Learning forgotten: this curve (current profile and look), or [all] of the current profile's (light and dark; 20/11). */
     fun reset(c: Context, all: Boolean) {
         val raw = Prefs(c).raw
-        if (all) {
-            raw.edit().apply { raw.all.keys.filter { it.startsWith(KEY_CURVE) }.forEach { remove(it) } }.apply()
-            app.mg4dash.system.Profiles.forgetEverywhere(c, KEY_CURVE)
-        } else raw.edit().remove(curveKey(c)).apply()
+        if (all) raw.edit().apply { raw.all.keys.filter { it.startsWith(KEY_CURVE) }.forEach { remove(it) } }.apply()
+        else raw.edit().remove(curveKey(c)).apply()
         Log.i(TAG, "learning reset (${if (all) "all" else curveKey(c)})")
         worker.post { retarget(LIGHTS_RAMP_MS) }
     }

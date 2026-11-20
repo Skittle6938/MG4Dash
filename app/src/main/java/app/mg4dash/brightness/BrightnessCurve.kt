@@ -50,10 +50,16 @@ class BrightnessCurve(points: List<Point> = emptyList()) {
         isotonic(DoubleArray(iso.size) { (base[it] + diff[it]).coerceIn(0.0, 1.0) }).also { cached = it }
     }
 
-    /** A correction at [level] (lights [lights]) to [value] (0 to 1): replaces the point within [REPLACE] of it, the oldest goes beyond [MAX_POINTS]. */
+    /**
+     * A correction at [level] (lights [lights]) to [value] (0 to 1), from the slider: not held between its neighbours.
+     * It replaces the point within [REPLACE] of it, and the newest choice wins (20/11): an older point it
+     * contradicts (darker light yet brighter, or lighter yet darker) is deleted; the oldest goes beyond [MAX_POINTS].
+     */
     fun with(level: Double, lights: Boolean, value: Double, at: Long): BrightnessCurve {
+        val v = value.coerceIn(0.0, 1.0)
         val kept = points.filter { abs(it.level - level) >= REPLACE }
-        val all = (kept + Point(level, lights, value.coerceIn(0.0, 1.0), at)).sortedBy { it.at }.takeLast(MAX_POINTS)
+            .filterNot { (it.level < level && it.value > v) || (it.level > level && it.value < v) }
+        val all = (kept + Point(level, lights, v, at)).sortedBy { it.at }.takeLast(MAX_POINTS)
         return BrightnessCurve(all)
     }
 

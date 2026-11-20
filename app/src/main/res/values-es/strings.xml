@@ -1177,7 +1177,7 @@
     <string name="br_reset_this">Esta curva</string>
     <string name="br_reset_all">Todo</string>
     <string name="br_reset_this_confirm">¿Olvidar lo aprendido para este perfil, en este aspecto (claro u oscuro)?</string>
-    <string name="br_reset_all_confirm">¿Olvidar todo lo aprendido, para todos los perfiles, claro y oscuro?</string>
+    <string name="br_reset_all_confirm">¿Olvidar todo lo aprendido para este perfil, claro y oscuro?</string>
     <string name="br_night">Noche</string>
     <string name="br_dusk">Crepúsculo</string>
     <string name="br_overcast">Nublado</string>
