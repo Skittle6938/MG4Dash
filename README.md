@@ -69,7 +69,7 @@ The player (Full, Map and Simple layouts) works like the Android Auto player: th
 
 **Sources**: the source menu only lists the sources available right now: Bluetooth, USB and Android Auto / CarPlay appear when a phone or a USB key is connected, and other apps playing music (for example [MG4Link](https://github.com/Skittle6938/MG4Link) or SimpMusic) are offered too. Switching to an app sends it play, leaving it pauses it, and when an app starts playing the other apps are paused. DAB or FM is chosen in the radio app, as on the stock home screen.
 
-**Open Android Auto from anywhere**: with a phone connected, slide two fingers down from the top of the screen, on the home screen, a page or the settings. Without a phone, nothing happens. Moving the map with two fingers does not trigger it, as both fingers must start at the top.
+**Open Android Auto from anywhere**: with a phone connected, slide one finger in from the left or the right edge of the screen, on the home screen, a page or the settings: either side, so the driver can reach it whichever side the wheel is, and so can the passenger. Without a phone, nothing happens. A second finger cancels it, so moving or pinching the map never triggers it.
 
 **Cut the phone connection**: double tap the Android Auto button (dock or vertical bar) to close the Android Auto / CarPlay session and keep it off; the icon turns red, even after a restart. The phone stays connected over Bluetooth for calls and music, and Bluetooth is offered in the sources (it is hidden while Android Auto, CarPlay or MG4Link is running). Double tap again: Android Auto comes back by itself, with the phone still plugged in. It works the same with [MG4Link](https://github.com/Skittle6938/MG4Link) chosen for the button (long press › Other app): its session is closed and it reconnects wirelessly on the next double tap. Music that was playing carries on over Bluetooth after a cut.
 
@@ -382,7 +382,7 @@ A short tour of the main gestures opens after a first install (*Skip* closes it 
 - Swipe the App card: map → consumption → shortcuts → web app (the cards on); a touch wakes the map, the web app or an app (lit outline), then one finger moves the map and the swipe no longer changes card until it rests again; double tap for full screen and back; with the detached window on, double tap the App card or the web app to detach it or put it back, long press it › *Move / resize* to move it or pull a corner or a side to resize it, then OK
 - Pinch the home screen with two fingers: choose the cards of each widget (see [Choosing the cards](#choosing-the-cards))
 - Long press the connection icons: choose which ones show, including USB-A and USB-C, which are off by default
-- Two fingers sliding down from the top of the screen: open Android Auto when a phone is connected
+- One finger sliding in from the left or right edge: open Android Auto when a phone is connected
 - Swipe the weather card: hourly ↔ daily forecast
 - Tap a segment of the KERS gauge: regeneration level; long press: one-pedal driving
 - Long press a shortcut: edit it

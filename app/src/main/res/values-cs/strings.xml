@@ -764,7 +764,7 @@
     <string name="tu_bar_bottom_t">Spodní lišta</string>
     <string name="tu_bar_1">Klepnutí: stránka MG4Dash. Dlouhé podržení: vlastní obrazovka vozu (vozidlo, klimatizace, nabíjení, telefon, nastavení).</string>
     <string name="tu_bar_2">Domů, dlouhé podržení: všechny aplikace. Android Auto, dlouhé podržení: výběr Android Auto, CarPlay nebo jiné aplikace.</string>
-    <string name="tu_bar_3">Dva prsty tažené dolů od horního okraje: otevře Android Auto, když je připojen telefon.</string>
+    <string name="tu_bar_3">Jeden prst přetažený od levého nebo pravého okraje: otevře Android Auto, když je připojen telefon.</string>
     <string name="tu_climate_t">Klimatizace</string>
     <string name="tu_climate_1">Dlouhé podržení A/C: přerušovaná A/C. Dlouhé podržení teploty: kalibrace.</string>
     <string name="tu_climate_2">Ventilátor − na nejnižší rychlosti: klimatizace vypnuta. Dlouhé podržení − / +: nejnižší / nejvyšší rychlost.</string>

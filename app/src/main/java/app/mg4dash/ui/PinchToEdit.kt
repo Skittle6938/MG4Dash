@@ -5,7 +5,7 @@ import android.view.MotionEvent
 
 /**
  * Pinch on the home screen, two fingers moving together, as on Samsung or Pixel home screens:
- * opens the cards' edit mode (#97). Read in the activity's own touch handling, like [TwoFingerPull];
+ * opens the cards' edit mode (#97). Read in the activity's own touch handling, like [EdgeSwipe];
  * [excluded] keeps the pinch for areas that zoom with it (the map, a web page or an app in the map).
  */
 class PinchToEdit(activity: Activity, private val excluded: (Float, Float) -> Boolean, private val onPinch: () -> Unit) {

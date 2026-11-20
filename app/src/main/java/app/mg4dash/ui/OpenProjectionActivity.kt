@@ -20,7 +20,7 @@ class OpenProjectionActivity : Activity() {
             overridePendingTransition(0, 0)
             return
         }
-        // From the strip's two finger pull on MG4Dash's screens: the projection opened directly, as TwoFingerPull does
+        // EXTRA_DIRECT: the projection opened directly, as the edge swipe of MG4Dash's screens does (EdgeSwipe)
         if (intent.getBooleanExtra(EXTRA_DIRECT, false)) Dock.openProjection(this) { main.removeCallbacks(leave); finish() }
         else Dock.pressProjection(this) { main.removeCallbacks(leave); finish() }
         main.postDelayed(leave, 4000)
@@ -32,7 +32,7 @@ class OpenProjectionActivity : Activity() {
     }
 
     companion object {
-        /** Open the phone's projection directly (Dock.openProjection), as the two finger pull, not the button's choice. */
+        /** Open the phone's projection directly (Dock.openProjection), as the edge swipe, not the button's choice. */
         const val EXTRA_DIRECT = "direct"
     }
 }

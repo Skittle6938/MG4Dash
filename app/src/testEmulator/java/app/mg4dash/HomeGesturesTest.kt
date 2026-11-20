@@ -4,7 +4,7 @@ import android.app.Activity
 import android.os.SystemClock
 import android.view.MotionEvent
 import app.mg4dash.ui.PinchToEdit
-import app.mg4dash.ui.TwoFingerPull
+import app.mg4dash.ui.EdgeSwipe
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -137,34 +137,54 @@ class HomeGesturesTest {
         assertEquals(0, pinches)
     }
 
-    // ── Two fingers pulled down ──
+    // ── One finger in from a side edge (Marc, 20/11): the phone's projection ──
 
-    @Test fun pullFromTheTopIsRecognised() {
-        val g = TwoFingerPull(activity)
-        assertTrue(twoFingers({ g.onTouch(it, cancel) }, 800f to 40f, 1000f to 60f, 820f to 300f, 1010f to 320f))
+    private var opened = 0
+    private fun edge() = EdgeSwipe(activity) { opened++ }
+
+    /** One finger from [x0], [y0] to [x1], [y1] in [steps] moves; true if the gesture took the touch. */
+    private fun swipe(g: EdgeSwipe, x0: Float, y0: Float, x1: Float, y1: Float, steps: Int = 6): Boolean {
+        var took = g.onTouch(one(MotionEvent.ACTION_DOWN, x0, y0), 1920, cancel)
+        for (k in 1..steps) took = g.onTouch(one(MotionEvent.ACTION_MOVE, x0 + (x1 - x0) * k / steps, y0 + (y1 - y0) * k / steps, k * 16L), 1920, cancel) || took
+        g.onTouch(one(MotionEvent.ACTION_UP, x1, y1, (steps + 1) * 16L), 1920, cancel)
+        return took
+    }
+
+    @Test fun fromTheLeftEdgeIsRecognised() {
+        assertTrue(swipe(edge(), 10f, 360f, 220f, 380f))
         assertEquals(listOf(MotionEvent.ACTION_CANCEL), cancels)
+        assertEquals(1, opened)
     }
 
-    @Test fun pullStartingLowDoesNothing() {
-        val g = TwoFingerPull(activity)
-        // One finger under the top zone (130 dp): moving the map with two fingers
-        assertFalse(twoFingers({ g.onTouch(it, cancel) }, 800f to 40f, 1000f to 200f, 820f to 300f, 1010f to 460f))
-        assertTrue(cancels.isEmpty())
+    @Test fun fromTheRightEdgeIsRecognised() {
+        assertTrue(swipe(edge(), 1910f, 300f, 1700f, 280f))
+        assertEquals(1, opened)
     }
 
-    @Test fun shortPullDoesNothing() {
-        val g = TwoFingerPull(activity)
-        assertFalse(twoFingers({ g.onTouch(it, cancel) }, 800f to 40f, 1000f to 60f, 800f to 120f, 1000f to 140f))
+    @Test fun startingAwayFromTheEdgeDoesNothing() {
+        // 60 px in: a swipe on a card or the map (the band is 32 dp)
+        assertFalse(swipe(edge(), 60f, 360f, 400f, 360f))
+        assertFalse(swipe(edge(), 1860f, 360f, 1500f, 360f))
+        assertTrue(cancels.isEmpty()); assertEquals(0, opened)
     }
 
-    @Test fun slantedPullDoesNothing() {
-        val g = TwoFingerPull(activity)
-        // Down far enough but 300 px sideways (more than 150 dp)
-        assertFalse(twoFingers({ g.onTouch(it, cancel) }, 800f to 40f, 1000f to 60f, 1100f to 300f, 1300f to 320f))
+    @Test fun shortOrOutwardsDoesNothing() {
+        assertFalse(swipe(edge(), 10f, 360f, 110f, 360f))      // 100 px, under 120 dp
+        assertFalse(swipe(edge(), 1910f, 360f, 1919f, 360f))   // outwards
+        assertEquals(0, opened)
     }
 
-    @Test fun pullUpDoesNothing() {
-        val g = TwoFingerPull(activity)
-        assertFalse(twoFingers({ g.onTouch(it, cancel) }, 800f to 120f, 1000f to 120f, 800f to 0f, 1000f to 0f))
+    @Test fun slantedDoesNothing() {
+        // In far enough, but more up than half of the way in
+        assertFalse(swipe(edge(), 10f, 200f, 200f, 500f))
+        assertEquals(0, opened)
+    }
+
+    @Test fun aSecondFingerEndsIt() {
+        val g = edge()
+        g.onTouch(one(MotionEvent.ACTION_DOWN, 10f, 360f), 1920, cancel)
+        g.onTouch(many(second(MotionEvent.ACTION_POINTER_DOWN), 10, 10f to 360f, 400f to 360f), 1920, cancel)
+        assertFalse(g.onTouch(many(MotionEvent.ACTION_MOVE, 30, 300f to 360f, 700f to 360f), 1920, cancel))
+        assertEquals(0, opened)
     }
 }

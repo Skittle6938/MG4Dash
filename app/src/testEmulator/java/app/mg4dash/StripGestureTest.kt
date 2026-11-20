@@ -9,7 +9,6 @@ import app.mg4dash.ui.LinkContract
 import app.mg4dash.ui.StripGesture
 import app.mg4dash.ui.StripGesture.Action
 import app.mg4dash.ui.StripGesture.Mode
-import app.mg4dash.ui.TwoFingerPull
 import app.mg4dash.ui.stripMode
 import app.mg4dash.ui.stripAction
 import app.mg4dash.ui.stripState
@@ -143,31 +142,6 @@ class StripGestureTest {
         val props = Array(pts.size) { i -> MotionEvent.PointerProperties().apply { id = i; toolType = MotionEvent.TOOL_TYPE_FINGER } }
         val coords = Array(pts.size) { i -> MotionEvent.PointerCoords().apply { x = pts[i].first; y = pts[i].second; pressure = 1f; size = 1f } }
         return MotionEvent.obtain(down, SystemClock.uptimeMillis(), action, pts.size, props, coords, 0, 0, 1f, 1f, 0, 0, 0, 0)
-    }
-
-    @Test fun twoFingerPullOnMg4DashScreens() {
-        val a = Robolectric.buildActivity(Activity::class.java).setup().get()
-        val pull = TwoFingerPull(a)
-        val t = SystemClock.uptimeMillis()
-        var cancelled = 0
-        val cancel: (MotionEvent) -> Unit = { if (it.actionMasked == MotionEvent.ACTION_CANCEL) cancelled++ }
-        assertFalse(pull.onTouch(ev(t, MotionEvent.ACTION_DOWN, 300f to 20f), cancel))
-        assertFalse(pull.onTouch(ev(t, MotionEvent.ACTION_POINTER_DOWN or (1 shl MotionEvent.ACTION_POINTER_INDEX_SHIFT), 300f to 20f, 500f to 30f), cancel))
-        assertFalse(pull.onTouch(ev(t, MotionEvent.ACTION_MOVE, 300f to 80f, 500f to 90f), cancel))
-        // Both fingers down far enough: the gesture takes the touch from the widgets
-        assertTrue(pull.onTouch(ev(t, MotionEvent.ACTION_MOVE, 305f to 150f, 505f to 160f), cancel))
-        assertEquals(1, cancelled)
-        assertTrue(pull.onTouch(ev(t, MotionEvent.ACTION_MOVE, 305f to 200f, 505f to 210f), cancel))
-    }
-
-    @Test fun twoFingerPullStartingLowIsNothing() {
-        val a = Robolectric.buildActivity(Activity::class.java).setup().get()
-        val pull = TwoFingerPull(a)
-        val t = SystemClock.uptimeMillis()
-        val none: (MotionEvent) -> Unit = {}
-        pull.onTouch(ev(t, MotionEvent.ACTION_DOWN, 300f to 300f), none)
-        pull.onTouch(ev(t, MotionEvent.ACTION_POINTER_DOWN or (1 shl MotionEvent.ACTION_POINTER_INDEX_SHIFT), 300f to 300f, 500f to 300f), none)
-        assertFalse(pull.onTouch(ev(t, MotionEvent.ACTION_MOVE, 300f to 500f, 500f to 500f), none))
     }
 
     // ── Contract with MG4Link ──

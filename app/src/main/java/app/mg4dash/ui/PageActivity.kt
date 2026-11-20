@@ -18,10 +18,10 @@ import kotlinx.coroutines.launch
 abstract class PageActivity : AppCompatActivity() {
     /** Grand affichage: this screen enlarged (BigDisplay), Android's own setting untouched. */
     override fun attachBaseContext(newBase: android.content.Context) = super.attachBaseContext(app.mg4dash.ui.BigDisplay.wrap(newBase))
-    private val twoFingerPull by lazy { TwoFingerPull(this) }
+    private val edgeSwipe by lazy { EdgeSwipe(this) }
 
     override fun dispatchTouchEvent(ev: android.view.MotionEvent): Boolean =
-        twoFingerPull.onTouch(ev) { super.dispatchTouchEvent(it) } || super.dispatchTouchEvent(ev)
+        edgeSwipe.onTouch(ev, window.decorView.width) { super.dispatchTouchEvent(it) } || super.dispatchTouchEvent(ev)
 
     protected lateinit var kit: Kit
     protected lateinit var header: LinearLayout

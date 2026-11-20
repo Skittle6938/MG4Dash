@@ -9,7 +9,7 @@ import app.mg4dash.system.Firmware
  * to the other by a message, never by touches injected again. Only the first finger has to start in the strip, the
  * others land anywhere (the strip is not split-touch, so it gets them all):
  * - one finger down: the shortcuts menu, which follows the finger;
- * - two fingers down: back to MG4Dash's home (on MG4Dash's own screens, Android Auto / CarPlay instead, as there);
+ * - two fingers down: back to MG4Dash's home (the phone's projection is one finger in from a side edge, [EdgeSwipe]);
  * - three fingers down, over MG4Link's projection only: MG4Link is asked to end its session
  *   ([LinkContract.ACTION_USER_DISCONNECT]); over the other apps nothing, so that no other app's gesture ever ends a
  *   session (see [stripAction]).

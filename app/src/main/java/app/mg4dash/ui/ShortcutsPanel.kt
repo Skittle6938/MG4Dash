@@ -810,16 +810,7 @@ object ShortcutsPanel : Application.ActivityLifecycleCallbacks {
 
         /** Two fingers from the strip: MG4Dash's home, or on MG4Dash's own screens Android Auto / CarPlay when a phone projects. */
         private fun twoFingers(c: Context) {
-            if (ownInFront(c)) {
-                if (MediaHub.phoneProjecting) {
-                    Log.i(TAG, "strip: two fingers on MG4Dash, Android Auto / CarPlay")
-                    // As the two finger pull of MG4Dash's screens: the projection opened directly, no message
-                    try { c.startActivity(android.content.Intent(c, OpenProjectionActivity::class.java).putExtra(OpenProjectionActivity.EXTRA_DIRECT, true)
-                        .addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)) }
-                    catch (e: Exception) { Log.w(TAG, "projection: ${e.message}") }
-                }
-                return
-            }
+            // On MG4Dash's own screens too (Marc, 20/11: the projection is now one finger in from a side edge, EdgeSwipe)
             Log.i(TAG, "strip: two fingers, back to MG4Dash's home")
             try {
                 c.startActivity(android.content.Intent(android.content.Intent.ACTION_MAIN).addCategory(android.content.Intent.CATEGORY_HOME)

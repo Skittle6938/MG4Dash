@@ -452,7 +452,7 @@ object Dock {
         return cn
     }
 
-    /** Opens the app of the Android Auto button (also the two finger pull from the top of the screen). */
+    /** Opens the app of the Android Auto button (also one finger in from a side edge, EdgeSwipe). */
     fun openProjection(activity: Activity, done: () -> Unit = {}) {
         val custom = customAa(activity)
         if (custom != null && custom != Apps.CARPLAY) { Shortcuts.launch(activity, custom); done(); return }

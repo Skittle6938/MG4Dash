@@ -764,7 +764,7 @@
     <string name="tu_bar_bottom_t">Alt çubuk</string>
     <string name="tu_bar_1">Dokun: MG4Dash sayfası. Uzun bas: aracın orijinal ekranı (araç, klima, şarj, telefon, ayarlar).</string>
     <string name="tu_bar_2">Ana ekran, uzun bas: tüm uygulamalar. Android Auto, uzun bas: Android Auto, CarPlay veya başka bir uygulama seç.</string>
-    <string name="tu_bar_3">Telefon bağlıyken iki parmağı yukarıdan aşağı kaydır: Android Auto\'yu aç.</string>
+    <string name="tu_bar_3">Sol veya sağ kenardan içeri tek parmakla kaydırma: telefon bağlıyken Android Auto’yu açar.</string>
     <string name="tu_climate_t">Klima</string>
     <string name="tu_climate_1">A/C\'ye uzun bas: aralıklı A/C. Sıcaklığa uzun bas: kalibrasyon.</string>
     <string name="tu_climate_2">En düşük fanda −: klima kapanır. − / + uzun bas: en düşük / en yüksek hız.</string>

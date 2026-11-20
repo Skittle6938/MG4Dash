@@ -35,10 +35,10 @@ import java.util.Locale
 class SettingsActivity : AppCompatActivity() {
     /** Closed at once in maintenance mode (its onCreate went no further). */
     private var closedForMaintenance = false
-    private val twoFingerPull by lazy { app.mg4dash.ui.TwoFingerPull(this) }
+    private val edgeSwipe by lazy { app.mg4dash.ui.EdgeSwipe(this) }
 
     override fun dispatchTouchEvent(ev: android.view.MotionEvent): Boolean =
-        twoFingerPull.onTouch(ev) { super.dispatchTouchEvent(it) } || super.dispatchTouchEvent(ev)
+        edgeSwipe.onTouch(ev, window.decorView.width) { super.dispatchTouchEvent(it) } || super.dispatchTouchEvent(ev)
 
 
     private lateinit var prefs: Prefs

@@ -1777,7 +1777,8 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         } catch (e: Throwable) { app.mg4dash.system.Log.w("MapApp", "reclaim: ${e.message}") }
     }
 
-    private val twoFingerPull by lazy { app.mg4dash.ui.TwoFingerPull(this) }
+    /** One finger in from the left or right edge: the phone's projection (MG4Link). */
+    private val edgeSwipe by lazy { app.mg4dash.ui.EdgeSwipe(this) }
 
     /**
      * Pinch on the home screen: edit mode of the cards (#97), except where the pinch zooms: the map,
@@ -1880,7 +1881,7 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
                 if (fw.through) return super.dispatchTouchEvent(ev)
             }
         }
-        if (twoFingerPull.onTouch(ev) { super.dispatchTouchEvent(it) }) return true
+        if (edgeSwipe.onTouch(ev, window.decorView.width) { super.dispatchTouchEvent(it) }) return true
         if (!simpleMode && !app.mg4dash.ui.CardsEditor.isOpen(this) && pinchToEdit.onTouch(ev) { super.dispatchTouchEvent(it) }) return true
         // A window over home moved (its OK) or touched: the card at rest under it takes none of that gesture
         if (onWindow) return super.dispatchTouchEvent(ev)

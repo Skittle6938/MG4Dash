@@ -764,7 +764,7 @@
     <string name="tu_bar_bottom_t">Onderbalk</string>
     <string name="tu_bar_1">Tikken: de MG4Dash-pagina. Lang drukken: het originele scherm van de auto (voertuig, klimaat, laden, telefoon, instellingen).</string>
     <string name="tu_bar_2">Start, lang drukken: alle apps. Android Auto, lang drukken: Android Auto, CarPlay of een andere app kiezen.</string>
-    <string name="tu_bar_3">Twee vingers vanaf boven omlaag vegen: Android Auto openen, als een telefoon is verbonden.</string>
+    <string name="tu_bar_3">Eén vinger vanaf de linker- of rechterrand naar binnen: Android Auto openen, als er een telefoon verbonden is.</string>
     <string name="tu_climate_t">Klimaat</string>
     <string name="tu_climate_1">A/C lang drukken: A/C met tussenpozen. Temperatuur lang drukken: kalibratie.</string>
     <string name="tu_climate_2">Ventilator − op de laagste stand: klimaat uit. − / + lang drukken: laagste / hoogste stand.</string>
