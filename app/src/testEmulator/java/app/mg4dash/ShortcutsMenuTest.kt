@@ -1,5 +1,7 @@
 package app.mg4dash
 
+import app.mg4dash.car.CarBridge
+
 import android.content.Context
 import app.mg4dash.system.Prefs
 import app.mg4dash.ui.Kit
@@ -23,6 +25,17 @@ class ShortcutsMenuTest {
     private val prefs get() = Prefs(ctx)
 
     @Before fun clear() { prefs.raw.edit().clear().commit() }
+
+    @Test fun powerOffRequiresParkAndAValidNearZeroSpeed() {
+        assertTrue(CarBridge.canPowerOff(true, 0f))
+        assertTrue(CarBridge.canPowerOff(true, 1f))
+        assertFalse(CarBridge.canPowerOff(false, 0f))
+        assertFalse(CarBridge.canPowerOff(null, 0f))
+        assertFalse(CarBridge.canPowerOff(true, null))
+        assertFalse(CarBridge.canPowerOff(true, 1.1f))
+        assertFalse(CarBridge.canPowerOff(true, -1f))
+        assertFalse(CarBridge.canPowerOff(true, Float.NaN))
+    }
 
     @Test fun menuOnByDefaultAndCornerGivenBack() {
         assertTrue(prefs.shortcutsMenu)

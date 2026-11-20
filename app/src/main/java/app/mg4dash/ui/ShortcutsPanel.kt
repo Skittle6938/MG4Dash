@@ -365,8 +365,7 @@ object ShortcutsPanel : Application.ActivityLifecycleCallbacks {
                 ShortcutTiles.choose(prefs, ShortcutTiles.toggled(ShortcutTiles.chosen(prefs), tile)); render(); return
             }
             when (tile) {
-                // A single touch switches the car off (Marc, 13/11), never while driving
-                Tile.POWER -> if (!CarBridge.powerOffCar()) Toasts.show(ctx, R.string.power_off_driving) else close(now = false)
+                Tile.POWER -> requestPowerOff()
                 Tile.AIDS -> aidsBox()
                 else -> {
                     // The new state at once, as the climate buttons; the car's reading confirms it
@@ -382,6 +381,21 @@ object ShortcutsPanel : Application.ActivityLifecycleCallbacks {
         }
 
         @SuppressLint("ViewConstructor")
+        private var powerOffPending = false
+
+        private fun requestPowerOff() {
+            if (powerOffPending) return
+            powerOffPending = true
+            Thread {
+                val sent = CarBridge.powerOffCar()
+                main.post {
+                    powerOffPending = false
+                    if (panel !== this) return@post
+                    if (sent) close(now = false) else Toasts.show(ctx, R.string.power_off_driving)
+                }
+            }.start()
+        }
+
         private inner class TileView(val tile: Tile) : LinearLayout(ctx) {
             private val icon = ImageView(ctx).apply { setImageResource(tile.icon) }
             private val name = TextView(ctx).apply { text = ctx.getString(tile.label); setTextSize(TypedValue.COMPLEX_UNIT_SP, 20f); gravity = Gravity.CENTER; maxLines = 1 }

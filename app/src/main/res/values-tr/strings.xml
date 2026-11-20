@@ -488,7 +488,7 @@
     <string name="doors_unknown">Kapı kilidi kullanılamıyor</string>
     <string name="en_gun_unlock">KABLO KİLİDİNİ AÇ</string>
     <string name="en_gun_lock">KABLOYU KİLİTLE</string>
-    <string name="power_off_driving">Sürüş sırasında olmaz</string>
+    <string name="power_off_driving">Kapatma kullanılamıyor. Aracı durdurup P konumunu seçin.</string>
     <string name="st_power_fx">Tam gaz sürprizi (Anlık güç pencere öğesi):</string>
     <string name="st_power_fx_desc" formatted="false">Gaza sonuna kadar basın (aracın maksimum gücünün %80\'inin üzerinde) ve ne olacağını görün… ardından ulaşılan tepe değer (kW ve bg) 10 saniye ekranda kalır.</string>
     <string name="fx_none">Yok</string>

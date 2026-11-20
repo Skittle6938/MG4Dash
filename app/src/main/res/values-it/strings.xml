@@ -488,7 +488,7 @@
     <string name="doors_unknown">Blocco non disponibile</string>
     <string name="en_gun_unlock">SBLOCCA CAVO</string>
     <string name="en_gun_lock">BLOCCA CAVO</string>
-    <string name="power_off_driving">Non durante la guida</string>
+    <string name="power_off_driving">Spegnimento non disponibile. Ferma l’auto e seleziona P.</string>
     <string name="st_power_fx">Funzione speciale a tavoletta (widget Potenza in tempo reale):</string>
     <string name="st_power_fx_desc" formatted="false">Pedale a tavoletta (oltre l\'80 % della potenza massima dell\'auto) e vedrai… poi il picco raggiunto (kW e CV) resta visibile per 10 secondi.</string>
     <string name="fx_none">Nessuna</string>

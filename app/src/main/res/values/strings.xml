@@ -488,7 +488,7 @@
     <string name="doors_unknown">Door lock not available</string>
     <string name="en_gun_unlock">UNLOCK CABLE</string>
     <string name="en_gun_lock">LOCK CABLE</string>
-    <string name="power_off_driving">Not while driving</string>
+    <string name="power_off_driving">Power off unavailable. Stop and select P.</string>
     <string name="st_power_fx">Full-throttle special (Live power widget):</string>
     <string name="st_power_fx_desc" formatted="false">Floor it (above 80 % of the car\'s maximum power) and see what happens… then the peak reached (kW and hp) stays on screen for 10 seconds.</string>
     <string name="fx_none">None</string>

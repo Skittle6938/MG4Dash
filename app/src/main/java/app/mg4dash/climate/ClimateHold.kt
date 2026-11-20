@@ -180,9 +180,9 @@ object ClimateHold {
     private suspend fun end(phase: Phase) {
         CarBridge.setHvac(false)
         delay(3000)
-        CarBridge.powerOffCar()
+        val powerOffSent = CarBridge.powerOffCar()
         _status.value = _status.value.copy(phase = phase)
-        Log.i(TAG, "end: $phase, car off")
+        Log.i(TAG, "end: $phase, power-off sent=$powerOffSent")
         delay(5 * 60_000L)
         if (_status.value.phase == phase) { _status.value = Status(); release() }
         job = null
