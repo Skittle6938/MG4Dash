@@ -1178,4 +1178,14 @@
     <string name="br_reset_all">Tout</string>
     <string name="br_reset_this_confirm">Oublier ce qui a été appris pour ce profil, dans cet affichage (clair ou sombre) ?</string>
     <string name="br_reset_all_confirm">Oublier tout ce qui a été appris, pour tous les profils, en clair et en sombre ?</string>
+    <string name="br_night">Nuit</string>
+    <string name="br_dusk">Crépuscule</string>
+    <string name="br_overcast">Couvert</string>
+    <string name="br_sun">Soleil</string>
+    <string name="br_curve">Courbe apprise</string>
+    <string name="br_curve_show">Voir la courbe  ▾</string>
+    <string name="br_curve_hide">Masquer  ▴</string>
+    <string name="br_curve_hint">Glisse un point vers le haut ou le bas · touche la courbe pour ajouter un point à cette lumière · la courbe reste croissante : un point se bloque entre ses voisins</string>
+    <string name="br_point_delete">Supprimer ce point</string>
+    <string name="br_curve_count">%1$d points</string>
 </resources>

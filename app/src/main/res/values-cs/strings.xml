@@ -1176,4 +1176,14 @@
     <string name="br_reset_all">Vše</string>
     <string name="br_reset_this_confirm">Zapomenout, co se naučilo pro tento profil v tomto vzhledu (světlém nebo tmavém)?</string>
     <string name="br_reset_all_confirm">Zapomenout vše naučené pro všechny profily, světlé i tmavé?</string>
+    <string name="br_night">Noc</string>
+    <string name="br_dusk">Soumrak</string>
+    <string name="br_overcast">Zataženo</string>
+    <string name="br_sun">Slunce</string>
+    <string name="br_curve">Naučená křivka</string>
+    <string name="br_curve_show">Zobrazit křivku  ▾</string>
+    <string name="br_curve_hide">Skrýt  ▴</string>
+    <string name="br_curve_hint">Posuňte bod nahoru nebo dolů · dotykem křivky přidáte bod při tomto světle · křivka stále stoupá: bod se zastaví u sousedů</string>
+    <string name="br_point_delete">Smazat tento bod</string>
+    <string name="br_curve_count">Bodů: %1$d</string>
 </resources>

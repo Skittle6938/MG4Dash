@@ -73,6 +73,18 @@ object SmartBrightness {
         worker.post { retarget(LIGHTS_RAMP_MS) }
     }
 
+    /** The curve edited by hand (Settings): kept for this profile and look, the screen follows at once. */
+    fun save(c: Context, curve: BrightnessCurve) {
+        Prefs(c).raw.edit().putString(curveKey(c), curve.encode()).apply()
+        refresh(c)
+    }
+
+    /** The light now on the curve's scale (log10 lux), for the "now" marker; null if it cannot be told. */
+    fun levelNow(c: Context): Double? = try {
+        val now = System.currentTimeMillis()
+        LightEstimator.level(lightNow(now, app.mg4dash.system.SunTimes.position(c), lights ?: readLights(), SkyForecast.at(now)))
+    } catch (_: Exception) { null }
+
     /** The screen set from the curve again at once (AUTO touched, a profile or a look changed). */
     fun refresh(c: Context) {
         ctx = c.applicationContext

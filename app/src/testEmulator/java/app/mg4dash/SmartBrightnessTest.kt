@@ -150,4 +150,75 @@ class SmartBrightnessTest {
         assertEquals(SmartBrightness.FLOOR, SmartBrightness.toSetting(0.0))
         assertEquals(255, SmartBrightness.target(BrightnessCurve(), 100_000.0))
     }
+
+    // ── The curve edited by hand (Settings) ──
+
+    @Test fun aMovedPointStaysBetweenItsNeighbours() {
+        val c = BrightnessCurve().with(1.0, true, 0.2, 1).with(2.5, false, 0.5, 2).with(4.0, false, 0.8, 3)
+        val mid = c.points.first { it.level == 2.5 }
+        assertEquals(0.8, c.moved(mid, 0.95, 4).points.first { it.level == 2.5 }.value, 1e-9)
+        assertEquals(0.2, c.moved(mid, 0.0, 4).points.first { it.level == 2.5 }.value, 1e-9)
+        assertEquals(0.6, c.moved(mid, 0.6, 4).points.first { it.level == 2.5 }.value, 1e-9)
+        // The ends: free up to 0 and 100 %
+        val first = c.points.first { it.level == 1.0 }
+        assertEquals(0.0, c.moved(first, -1.0, 4).points.first { it.level == 1.0 }.value, 1e-9)
+        val last = c.points.first { it.level == 4.0 }
+        assertEquals(1.0, c.moved(last, 2.0, 4).points.first { it.level == 4.0 }.value, 1e-9)
+        // A point not on the curve changes nothing
+        assertEquals(c.points, c.moved(BrightnessCurve.Point(3.0, false, 0.1, 9), 0.5, 4).points)
+    }
+
+    @Test fun aPointDeletedAndTheBounds() {
+        val c = BrightnessCurve().with(1.0, true, 0.2, 1).with(2.5, false, 0.5, 2).with(4.0, false, 0.8, 3)
+        val mid = c.points.first { it.level == 2.5 }
+        val less = c.without(mid)
+        assertEquals(2, less.points.size)
+        assertFalse(less.points.contains(mid))
+        assertEquals(BrightnessCurve.decode(less.encode()).points, less.points)
+        assertEquals(0.2 to 0.8, c.bounds(2.5, except = mid))
+        assertEquals(0.2 to 0.5, c.bounds(2.0))
+        assertEquals(0.0 to 0.2, c.bounds(0.5))
+        assertEquals(0.8 to 1.0, c.bounds(4.5))
+    }
+
+    @Test fun theCurveIsEditedWithTheFinger() {
+        var saved: BrightnessCurve? = null
+        var selected = false
+        val v = app.mg4dash.brightness.CurveView(ctx, BrightnessCurve(), { 2.0 }, { saved = it }, { selected = it })
+        v.measure(android.view.View.MeasureSpec.makeMeasureSpec(800, android.view.View.MeasureSpec.EXACTLY),
+            android.view.View.MeasureSpec.makeMeasureSpec(0, android.view.View.MeasureSpec.UNSPECIFIED))
+        v.layout(0, 0, v.measuredWidth, v.measuredHeight)
+        val d = ctx.resources.displayMetrics.density
+        val left = 44 * d; val right = 800 - 10 * d; val top = 10 * d; val bottom = v.measuredHeight - 30 * d
+        fun x(level: Double) = (left + (right - left) * level / 5.0).toFloat()
+        fun y(value: Double) = (bottom - (bottom - top) * value).toFloat()
+        fun touch(action: Int, px: Float, py: Float) {
+            val e = android.view.MotionEvent.obtain(0, 0, action, px, py, 0)
+            v.onTouchEvent(e); e.recycle()
+        }
+        // A touch on the curve at a light adds a point there, the slide sets it, lifting the finger saves it
+        touch(android.view.MotionEvent.ACTION_DOWN, x(2.0), y(BrightnessCurve.defaultAt(2.0)))
+        assertTrue(selected)
+        touch(android.view.MotionEvent.ACTION_MOVE, x(2.0), y(0.9))
+        touch(android.view.MotionEvent.ACTION_UP, x(2.0), y(0.9))
+        assertEquals(1, saved!!.points.size)
+        assertEquals(2.0, saved!!.points[0].level, 0.02)
+        assertEquals(0.9, saved!!.points[0].value, 0.02)
+        // A second point brighter in the light cannot go below the first one: the curve keeps rising
+        touch(android.view.MotionEvent.ACTION_DOWN, x(3.5), y(saved!!.valueAt(3.5)))
+        touch(android.view.MotionEvent.ACTION_MOVE, x(3.5), y(0.1))
+        touch(android.view.MotionEvent.ACTION_UP, x(3.5), y(0.1))
+        assertEquals(2, saved!!.points.size)
+        assertEquals(0.9, saved!!.points.first { it.level > 3 }.value, 0.02)
+        // The point grabbed again moves it, it does not add one; then deleted
+        touch(android.view.MotionEvent.ACTION_DOWN, x(2.0), y(0.9))
+        touch(android.view.MotionEvent.ACTION_MOVE, x(2.0), y(0.5))
+        touch(android.view.MotionEvent.ACTION_UP, x(2.0), y(0.5))
+        assertEquals(2, saved!!.points.size)
+        assertEquals(0.5, saved!!.points.first { it.level < 3 }.value, 0.02)
+        v.deleteSelected()
+        assertEquals(1, saved!!.points.size)
+        assertFalse(selected)
+        assertTrue(saved!!.points[0].level > 3)
+    }
 }

@@ -1178,4 +1178,14 @@
     <string name="br_reset_all">Alles</string>
     <string name="br_reset_this_confirm">Vergeten wat voor dit profiel in deze weergave (licht of donker) is geleerd?</string>
     <string name="br_reset_all_confirm">Alles wat is geleerd vergeten, voor alle profielen, licht en donker?</string>
+    <string name="br_night">Nacht</string>
+    <string name="br_dusk">Schemering</string>
+    <string name="br_overcast">Bewolkt</string>
+    <string name="br_sun">Zon</string>
+    <string name="br_curve">Geleerde curve</string>
+    <string name="br_curve_show">Curve tonen  ▾</string>
+    <string name="br_curve_hide">Verbergen  ▴</string>
+    <string name="br_curve_hint">Schuif een punt omhoog of omlaag · raak de curve aan om bij dat licht een punt toe te voegen · de curve blijft stijgen: een punt stopt bij zijn buren</string>
+    <string name="br_point_delete">Dit punt verwijderen</string>
+    <string name="br_curve_count">%1$d punten</string>
 </resources>

@@ -1178,4 +1178,14 @@
     <string name="br_reset_all">Tutto</string>
     <string name="br_reset_this_confirm">Dimenticare ciò che è stato appreso per questo profilo, in questo aspetto (chiaro o scuro)?</string>
     <string name="br_reset_all_confirm">Dimenticare tutto ciò che è stato appreso, per tutti i profili, chiaro e scuro?</string>
+    <string name="br_night">Notte</string>
+    <string name="br_dusk">Crepuscolo</string>
+    <string name="br_overcast">Coperto</string>
+    <string name="br_sun">Sole</string>
+    <string name="br_curve">Curva appresa</string>
+    <string name="br_curve_show">Vedi la curva  ▾</string>
+    <string name="br_curve_hide">Nascondi  ▴</string>
+    <string name="br_curve_hint">Trascina un punto in alto o in basso · tocca la curva per aggiungere un punto a quella luce · la curva resta crescente: un punto si ferma tra i vicini</string>
+    <string name="br_point_delete">Elimina questo punto</string>
+    <string name="br_curve_count">%1$d punti</string>
 </resources>

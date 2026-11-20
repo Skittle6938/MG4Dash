@@ -57,6 +57,28 @@ class BrightnessCurve(points: List<Point> = emptyList()) {
         return BrightnessCurve(all)
     }
 
+    /** [p] taken off (Settings, "Supprimer ce point"). */
+    fun without(p: Point): BrightnessCurve = BrightnessCurve(points.filter { it != p })
+
+    /**
+     * [p] moved to [value] by hand (Settings, the curve dragged), kept between its neighbours' values so that the curve
+     * still rises: never above the next point to the right, nor below the one to the left.
+     */
+    fun moved(p: Point, value: Double, at: Long): BrightnessCurve {
+        val sorted = points.sortedBy { it.level }
+        val i = sorted.indexOf(p).takeIf { it >= 0 } ?: return this
+        val lo = sorted.getOrNull(i - 1)?.value ?: 0.0
+        val hi = sorted.getOrNull(i + 1)?.value ?: 1.0
+        return BrightnessCurve(points.map { if (it == p) it.copy(value = value.coerceIn(lo, hi).coerceIn(0.0, 1.0), at = at) else it })
+    }
+
+    /** The bounds a point at [level] may take by hand: between its neighbours' values. */
+    fun bounds(level: Double, except: Point? = null): Pair<Double, Double> {
+        val others = points.filter { it != except }
+        return (others.filter { it.level < level }.maxByOrNull { it.level }?.value ?: 0.0) to
+            (others.filter { it.level > level }.minByOrNull { it.level }?.value ?: 1.0)
+    }
+
     fun encode(): String = JSONArray().apply {
         points.forEach { put(JSONObject().put("l", it.level).put("f", it.lights).put("v", it.value).put("t", it.at)) }
     }.toString()
