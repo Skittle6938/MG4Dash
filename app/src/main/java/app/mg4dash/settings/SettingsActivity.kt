@@ -1226,8 +1226,10 @@ class SettingsActivity : AppCompatActivity() {
         close.setOnClickListener { d.dismiss() }
         export.setOnClickListener {
             val text = LogExport.text(title, Compat.report(this), Log.snapshot(radioLines))
-            val path = app.mg4dash.system.UsbExport.write(this, LogExport.fileName(System.currentTimeMillis()), text)
-            if (path != null) say(getString(R.string.st_log_exported, path), ok = true) else paintStick()
+            val w = app.mg4dash.system.UsbExport.write(this, LogExport.fileName(System.currentTimeMillis()), text)
+            // In MG4Dash's own folder (the car refused the others): a phone cannot open it, say so (#110)
+            if (w != null) say(getString(R.string.st_log_exported, w.path) + if (w.hidden) "\n" + getString(R.string.usb_read_on_computer) else "", ok = true)
+            else paintStick()
         }
         eject.setOnClickListener {
             ejecting = true; paintStick(); say(getString(R.string.st_log_ejecting), ok = false)

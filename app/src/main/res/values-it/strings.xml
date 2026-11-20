@@ -1195,4 +1195,5 @@
     <string name="br_erase_msg">Questa curva: quella mostrata torna a 15 / 35 / 70 / 100 %. Cancella tutto: le due curve di questo profilo, chiara e scura.</string>
     <string name="br_erase_this">Questa curva</string>
     <string name="br_erase_all">Cancella tutto</string>
+    <string name="usb_read_on_computer">L’auto ha rifiutato la radice della chiavetta, quindi il file è nella cartella di MG4Dash: un telefono non può aprirla, leggi la chiavetta su un computer.</string>
 </resources>

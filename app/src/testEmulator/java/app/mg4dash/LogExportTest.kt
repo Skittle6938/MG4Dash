@@ -33,16 +33,44 @@ class LogExportTest {
         assertEquals(listOf("18:01 oldest", "18:02 middle", "18:03 newest"), log)
     }
 
-    @Test fun writtenAtTheRootOrInMG4DashsFolder() {
+    @Test fun writtenAtTheRootFirst() {
         val usb = tmp.newFolder("usb")
-        val f = UsbExport.writeTo(usb, null, "a.txt", "hello")
+        val f = UsbExport.writeTo(usb, tmp.newFolder("raw"), tmp.newFolder("own"), "a.txt", "hello")
         assertEquals(java.io.File(usb, "a.txt"), f)
         assertEquals("hello", f!!.readText())
-        // Root read only: MG4Dash's own folder on the stick
-        val ro = tmp.newFolder("ro").apply { setWritable(false) }
+    }
+
+    /** #110: the places in order, MG4Dash's own folder (a phone cannot open it) only last. */
+    @Test fun theOrderOfThePlaces() {
+        val usb = java.io.File("/storage/ABCD-1234"); val raw = java.io.File("/mnt/media_rw/ABCD-1234")
+        val own = java.io.File(usb, "Android/data/app.mg4dash/files")
+        assertEquals(listOf(java.io.File(usb, "x.txt"), java.io.File(raw, "x.txt"), java.io.File(usb, "MG4Dash/x.txt"),
+            java.io.File(raw, "MG4Dash/x.txt"), java.io.File(own, "x.txt")), UsbExport.places(usb, raw, own, "x.txt"))
+        // Without a raw mount or an own folder: they are left out
+        assertEquals(listOf(java.io.File(usb, "x.txt"), java.io.File(usb, "MG4Dash/x.txt")), UsbExport.places(usb, null, null, "x.txt"))
+    }
+
+    @Test fun rootRefusedThenTheRawMountThenOwnFolder() {
+        // A "stick" that refuses everything: a plain file in place of a folder (nothing can be created under it)
+        val refused = tmp.newFile("refused")
+        val raw = tmp.newFolder("raw")
         val own = java.io.File(tmp.root, "own")
-        val g = UsbExport.writeTo(ro, own, "b.txt", "x")
-        if (!java.io.File(ro, "b.txt").exists()) assertEquals(java.io.File(own, "b.txt"), g)
+        assertEquals(java.io.File(raw, "b.txt"), UsbExport.writeTo(refused, raw, own, "b.txt", "x"))
+        // The raw mount refused too: MG4Dash's own folder, last
+        assertEquals(java.io.File(own, "b.txt"), UsbExport.writeTo(refused, tmp.newFile("raw2"), own, "b.txt", "x"))
+        // Nothing writable: null, never anywhere else
+        assertNull(UsbExport.writeTo(refused, null, null, "b.txt", "x"))
+    }
+
+    @Test fun theWrittenPathAndWhetherAPhoneCanOpenIt() {
+        val ctx = org.robolectric.RuntimeEnvironment.getApplication()
+        val usb = tmp.newFolder("stick")
+        UsbExport.simulated = usb
+        try {
+            val w = UsbExport.write(ctx, "c.txt", "x")
+            assertEquals(UsbExport.Written("c.txt", hidden = false), w)
+            assertTrue(UsbExport.readDirs(ctx).contains(java.io.File(usb, "MG4Dash")))
+        } finally { UsbExport.simulated = null }
     }
 
     @Test fun nothingWithoutAStick() {

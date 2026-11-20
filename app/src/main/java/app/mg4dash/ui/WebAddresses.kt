@@ -99,14 +99,10 @@ object WebAddresses {
     /** The addresses of [file] added to [current] (not twice): the new ones. */
     internal fun merge(current: List<String>, file: List<String>): List<String> = file.filter { it !in current }
 
-    private fun stick(context: Context): File? = app.mg4dash.system.UsbExport.stick(context)
-
-    private fun ownFolder(context: Context, usb: File): File? = app.mg4dash.system.UsbExport.ownFolder(context, usb)
 
     /** The addresses read on the stick and added to the list (the new ones), or null with no file (a toast says so). */
     fun importUsb(context: Context): List<String>? {
-        val usb = stick(context)
-        val file = listOfNotNull(usb, usb?.let { ownFolder(context, it) })
+        val file = app.mg4dash.system.UsbExport.readDirs(context)
             .flatMap { dir -> dir.listFiles()?.toList().orEmpty() }
             .firstOrNull { it.isFile && it.name.equals(FILE, ignoreCase = true) }
         if (file == null) { Toasts.show(context, R.string.wc_urls_import_none, long = true); return null }
@@ -118,11 +114,12 @@ object WebAddresses {
         return added
     }
 
-    /** The list written to the stick's root (or MG4Dash's folder on it if the root is read only). */
+    /** The list written to the stick's root, or where the car lets MG4Dash write on it (UsbExport.write). */
     fun exportUsb(context: Context) {
-        val path = app.mg4dash.system.UsbExport.write(context, FILE, format(Prefs(context).webUrls))
-        if (path == null) { Toasts.show(context, R.string.wc_urls_no_usb, long = true); return }
-        Log.i(TAG, "addresses exported to $path")
-        Toasts.show(context, context.getString(R.string.wc_urls_exported, path), long = true)
+        val w = app.mg4dash.system.UsbExport.write(context, FILE, format(Prefs(context).webUrls))
+        if (w == null) { Toasts.show(context, R.string.wc_urls_no_usb, long = true); return }
+        Log.i(TAG, "addresses exported to ${w.path}")
+        Toasts.show(context, context.getString(R.string.wc_urls_exported, w.path) +
+            if (w.hidden) "\n" + context.getString(R.string.usb_read_on_computer) else "", long = true)
     }
 }

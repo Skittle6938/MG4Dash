@@ -1195,4 +1195,5 @@
     <string name="br_erase_msg">Esta curva: la mostrada vuelve a 15 / 35 / 70 / 100 %. Borrar todo: las dos curvas de este perfil, clara y oscura.</string>
     <string name="br_erase_this">Esta curva</string>
     <string name="br_erase_all">Borrar todo</string>
+    <string name="usb_read_on_computer">El coche rechazó la raíz de la memoria, así que el archivo está en la carpeta propia de MG4Dash: un teléfono no puede abrirla, lea la memoria en un ordenador.</string>
 </resources>
