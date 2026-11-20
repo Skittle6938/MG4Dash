@@ -317,6 +317,7 @@ class SettingsActivity : AppCompatActivity() {
         toggle(energy, R.string.st_cc_stopped, R.string.st_cc_stopped_desc, { prefs.raw.getBoolean("cc_stopped", true) }) { prefs.raw.edit().putBoolean("cc_stopped", it).apply() }
         // Speed × temperature consumption map (in testing, off by default)
         powerFxSetting(panel(lookR, getString(R.string.sw_power)))
+        brightnessSetting(panel(lookR, getString(R.string.br_title)))
 
         // ════ Right column: system, connections, diagnostic ════
 
@@ -1411,6 +1412,30 @@ class SettingsActivity : AppCompatActivity() {
                 if (app.mg4dash.radar.RadarRepo.prepare.value?.phase == app.mg4dash.radar.RadarRepo.PrepPhase.RETRY) page.refresh()
             }
         }
+    }
+
+    /**
+     * Smart brightness (Marc, 20/11): the automatic mode, Android's own (default) or the smart one, and its learning
+     * reset, for this curve (profile and look) or all of them, each confirmed. The curve's window comes later (mockup).
+     */
+    private fun brightnessSetting(p: LinearLayout) {
+        val smart = app.mg4dash.brightness.SmartBrightness
+        val modeBtns = choiceButtons(listOf(getString(R.string.br_original), getString(R.string.br_smart)), { if (smart.enabled(this)) 1 else 0 }) { i ->
+            smart.setEnabled(this, i == 1)
+        }
+        text(p, getString(R.string.br_auto), 18f, R.color.text_value)
+        text(p, getString(R.string.br_auto_desc), 15f, R.color.text_title)
+        row(p, *modeBtns)
+        text(p, getString(R.string.br_reset), 18f, R.color.text_value).apply { (layoutParams as? LinearLayout.LayoutParams)?.topMargin = dp(14) }
+        text(p, getString(R.string.br_reset_desc), 15f, R.color.text_title)
+        lateinit var thisBtn: View; lateinit var allBtn: View
+        thisBtn = button(getString(R.string.br_reset_this)) {
+            app.mg4dash.ui.SourceMenu.confirm(this, thisBtn, getString(R.string.br_reset_this_confirm), getString(R.string.br_reset_this)) { smart.reset(this, all = false) }
+        }
+        allBtn = button(getString(R.string.br_reset_all)) {
+            app.mg4dash.ui.SourceMenu.confirm(this, allBtn, getString(R.string.br_reset_all_confirm), getString(R.string.br_reset_all)) { smart.reset(this, all = true) }
+        }
+        row(p, thisBtn, allBtn)
     }
 
     private fun panel(parent: LinearLayout, title: String, fill: Boolean = false): LinearLayout {

@@ -457,6 +457,8 @@ object ShortcutsPanel : Application.ActivityLifecycleCallbacks {
                 addView(plus, LayoutParams(kit.dp(56), kit.dp(56)).apply { leftMargin = kit.dp(10) })
                 auto.setOnClickListener {
                     if (editToggle != null) return@setOnClickListener
+                    // Smart brightness: it is already the automatic mode; AUTO sets the screen from its curve again at once
+                    if (app.mg4dash.brightness.SmartBrightness.enabled(ctx)) { app.mg4dash.brightness.SmartBrightness.refresh(ctx); showAuto(); return@setOnClickListener }
                     try { android.provider.Settings.System.putInt(ctx.contentResolver, "screen_brightness_mode", 1); Log.i(TAG, "brightness auto") }
                     catch (e: Exception) { Log.w(TAG, "brightness auto: ${e.message}") }
                     app.mg4dash.system.BrightnessMemory.chosen(ctx)
@@ -487,12 +489,21 @@ object ShortcutsPanel : Application.ActivityLifecycleCallbacks {
 
             /** Lit as a tile that is on (accent tint, border and text) while the automatic brightness is on. */
             private fun showAuto() {
-                val on = autoOn()
+                // Smart brightness (Marc, 20/11): always automatic, the slider adds a point; no − and + to shift a curve
+                val smart = app.mg4dash.brightness.SmartBrightness.enabled(ctx)
+                minus.visibility = if (smart) View.GONE else View.VISIBLE
+                plus.visibility = if (smart) View.GONE else View.VISIBLE
+                val on = smart || autoOn()
                 autoBg.setColor(if (on) accentTint else c(R.color.panel))
                 if (on) autoBg.setStroke(kit.dp(2), accentBorder) else autoBg.setStroke(1, c(R.color.panel_border))
                 auto.setTextColor(if (on) accentText else c(R.color.text_value))
                 auto.background = autoBg
-                auto.text = if (on) adjLabel(adj()) else "AUTO"
+                auto.text = if (smart) "AUTO" else if (on) adjLabel(adj()) else "AUTO"
+                // The smart mode's small star before AUTO (Marc's choice A)
+                val star = if (smart) androidx.core.content.ContextCompat.getDrawable(ctx, R.drawable.ic_smart)?.mutate()?.apply {
+                    setTint(if (on) accentText else c(R.color.text_value)); setBounds(0, 0, kit.dp(20), kit.dp(20))
+                } else null
+                auto.setCompoundDrawablesRelative(star, null, null, null); auto.compoundDrawablePadding = kit.dp(6)
             }
 
             /** The real settings followed: the car (or the stock panel) changing them shows here. */
@@ -520,6 +531,8 @@ object ShortcutsPanel : Application.ActivityLifecycleCallbacks {
                     android.provider.Settings.System.putInt(cr, "screen_brightness", v)
                     if (final) Log.i(TAG, "brightness $v")
                 } catch (e: Exception) { Log.w(TAG, "brightness: ${e.message}") }
+                // Smart brightness: the value is learnt once let go and left alone, the mode stays automatic
+                app.mg4dash.brightness.SmartBrightness.userSet(ctx, v, final)
                 // Kept for the next start (the car resets it), and no longer put back as the car's reset
                 if (final) app.mg4dash.system.BrightnessMemory.chosen(ctx)
             }

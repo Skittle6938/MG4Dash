@@ -105,6 +105,8 @@ class LauncherApp : Application() {
         app.mg4dash.ui.ShortcutsPanel.GlobalStrip.update(this)
         // Brightness (automatic and its shift) put back as it was: the car resets it at each start (15/11)
         if (!BuildConfig.MOCK) app.mg4dash.system.BrightnessMemory.start(this)
+        // Smart brightness (off by default): MG4Dash sets the screen from the light estimated and the learnt curve
+        if (!BuildConfig.MOCK) app.mg4dash.brightness.SmartBrightness.start(this)
         // ADB at start (setting, off by default)
         if (!BuildConfig.MOCK && app.mg4dash.system.Prefs(this).adbAtStart) app.mg4dash.system.AdbSwitch.enable(this, "setting at start")
         Log.i("App", "start ${BuildConfig.VERSION_NAME} (${BuildConfig.FLAVOR})")
@@ -175,6 +177,8 @@ class LauncherApp : Application() {
             app.mg4dash.ui.Themes.publish(this)
             if (!BuildConfig.MOCK) app.mg4dash.system.BrightnessMemory.restore(this, "profile ${p.name}")
             app.mg4dash.ui.ShortcutsPanel.GlobalStrip.update(this)
+            // The profile's own curve (and its mode)
+            if (!BuildConfig.MOCK && app.mg4dash.brightness.SmartBrightness.enabled(this)) app.mg4dash.brightness.SmartBrightness.refresh(this)
             app.mg4dash.ui.Toasts.show(this, getString(R.string.pf_switched, p.name))
         }
     }

@@ -1165,4 +1165,15 @@
     <string name="sc_profile">Profil</string>
     <string name="pf_drive">Profily si pamatují jízdní režim a rekuperaci</string>
     <string name="pf_drive_desc">Při opuštění profilu si MG4Dash zapamatuje jízdní režim a rekuperaci; při přechodu na profil je vrátí, ve stoje i za jízdy. Ve výchozím stavu vypnuto.</string>
+    <string name="br_title">Jas</string>
+    <string name="br_auto">Automatický jas</string>
+    <string name="br_auto_desc">Chytrý: učí se z vašich nastavení posuvníkem podle odhadovaného denního světla a světel. Původní: režim Androidu s − a +.</string>
+    <string name="br_original">Původní</string>
+    <string name="br_smart">Chytrý</string>
+    <string name="br_reset">Obnovit učení</string>
+    <string name="br_reset_desc">Návrat k výchozí křivce (15 / 35 / 70 / 100 %).</string>
+    <string name="br_reset_this">Tuto křivku</string>
+    <string name="br_reset_all">Vše</string>
+    <string name="br_reset_this_confirm">Zapomenout, co se naučilo pro tento profil v tomto vzhledu (světlém nebo tmavém)?</string>
+    <string name="br_reset_all_confirm">Zapomenout vše naučené pro všechny profily, světlé i tmavé?</string>
 </resources>

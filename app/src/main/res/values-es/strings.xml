@@ -1167,4 +1167,15 @@
     <string name="sc_profile">Perfil</string>
     <string name="pf_drive">Los perfiles guardan el modo de conducción y la regeneración</string>
     <string name="pf_drive_desc">Al salir de un perfil, MG4Dash anota el modo de conducción y la regeneración; al llegar a un perfil, los vuelve a poner, parado o en marcha. Apagado por defecto.</string>
+    <string name="br_title">Brillo</string>
+    <string name="br_auto">Brillo automático</string>
+    <string name="br_auto_desc">Inteligente: aprende de tus ajustes con el control, según la luz del día estimada y las luces. Original: el modo de Android, con − y +.</string>
+    <string name="br_original">Original</string>
+    <string name="br_smart">Inteligente</string>
+    <string name="br_reset">Restablecer el aprendizaje</string>
+    <string name="br_reset_desc">Vuelve a la curva por defecto (15 / 35 / 70 / 100 %).</string>
+    <string name="br_reset_this">Esta curva</string>
+    <string name="br_reset_all">Todo</string>
+    <string name="br_reset_this_confirm">¿Olvidar lo aprendido para este perfil, en este aspecto (claro u oscuro)?</string>
+    <string name="br_reset_all_confirm">¿Olvidar todo lo aprendido, para todos los perfiles, claro y oscuro?</string>
 </resources>

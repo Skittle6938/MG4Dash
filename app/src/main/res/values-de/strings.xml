@@ -1167,4 +1167,15 @@
     <string name="sc_profile">Profil</string>
     <string name="pf_drive">Profile merken sich Fahrmodus und Rekuperation</string>
     <string name="pf_drive_desc">Beim Verlassen eines Profils merkt sich MG4Dash Fahrmodus und Rekuperation; beim Wechsel zu einem Profil stellt es sie wieder ein, im Stand wie während der Fahrt. Standardmäßig aus.</string>
+    <string name="br_title">Helligkeit</string>
+    <string name="br_auto">Automatische Helligkeit</string>
+    <string name="br_auto_desc">Intelligent: lernt aus Ihren Einstellungen mit dem Regler, je nach geschätztem Tageslicht und Licht. Original: der Android-Modus, mit − und +.</string>
+    <string name="br_original">Original</string>
+    <string name="br_smart">Intelligent</string>
+    <string name="br_reset">Lernen zurücksetzen</string>
+    <string name="br_reset_desc">Zurück zur Standardkurve (15 / 35 / 70 / 100 %).</string>
+    <string name="br_reset_this">Diese Kurve</string>
+    <string name="br_reset_all">Alle</string>
+    <string name="br_reset_this_confirm">Das für dieses Profil in dieser Darstellung (hell oder dunkel) Gelernte vergessen?</string>
+    <string name="br_reset_all_confirm">Alles Gelernte für alle Profile vergessen, hell und dunkel?</string>
 </resources>
