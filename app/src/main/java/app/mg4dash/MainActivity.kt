@@ -752,6 +752,9 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         climateForm(frameOf(Card.CLIMATE)?.slot?.size)
         val media = frames.values.firstOrNull { it.fill == HomeSlots.Fill.Media }?.slot?.size
         b.mediaAlbum.visibility = if (media == HomeSlots.Size.QUARTER) View.GONE else View.VISIBLE
+        // A quarter (20/11): the title on one line, so a long title and its artist never push the buttons out of the place
+        b.mediaTitle.maxLines = if (media == HomeSlots.Size.QUARTER) 1 else 2
+        mediaQuarter(media == HomeSlots.Size.QUARTER)
         energyForm(frameOf(Card.ENERGY)?.slot?.size == HomeSlots.Size.QUARTER)
         weathers.forEach { (card, wc) ->
             val tight = frameOf(card)?.slot?.size != HomeSlots.Size.HALF
@@ -809,6 +812,23 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         card.addView(android.widget.Space(this), LinearLayout.LayoutParams(-1, 0, 1f))
         card.addView(bottom, LinearLayout.LayoutParams(-1, -2))
         climateBand = listOf(top, bottom)
+    }
+
+    /** The media card's own sizes (title sp, play button height px, controls' top padding px), before a quarter tightens them. */
+    private var mediaBase: FloatArray? = null
+
+    /** The media in a quarter: a smaller title and play button, the buttons closer, so that they never leave the place. */
+    private fun mediaQuarter(on: Boolean) {
+        val sp = resources.displayMetrics.scaledDensity
+        val base = mediaBase ?: floatArrayOf(b.mediaTitle.textSize / sp, b.mediaPlay.layoutParams.height.toFloat(), b.mediaControls.paddingTop.toFloat())
+            .also { mediaBase = it }
+        b.mediaTitle.setTextSize(TypedValue.COMPLEX_UNIT_SP, if (on) minOf(22f, base[0]) else base[0])
+        val h = if (on) minOf(dp(58).toFloat(), base[1]) else base[1]
+        if (b.mediaPlay.layoutParams.height != h.toInt()) b.mediaPlay.layoutParams = b.mediaPlay.layoutParams.apply { height = h.toInt() }
+        // Its icon as big as before: less padding in the lower button
+        val pad = (h * 14f / 72f).toInt()
+        b.mediaPlay.setPadding(pad, pad, pad, pad)
+        b.mediaControls.setPadding(b.mediaControls.paddingLeft, if (on) dp(4) else base[2].toInt(), b.mediaControls.paddingRight, b.mediaControls.paddingBottom)
     }
 
     private fun energyForm(quarter: Boolean) {

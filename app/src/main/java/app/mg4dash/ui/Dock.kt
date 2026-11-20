@@ -178,7 +178,7 @@ object Dock {
      */
     fun mount(activity: Activity, root: LinearLayout, dock: LinearLayout, current: Page, simple: Boolean = false) {
         if (!vertical(activity)) { build(activity, dock, current, simple); return }
-        val kit = Kit(activity)
+        val sized = sized(activity); val kit = Kit(sized)
         val children = (0 until root.childCount).map { root.getChildAt(it) }.filter { it !== dock }
         root.removeAllViews()
         root.orientation = LinearLayout.HORIZONTAL
@@ -190,9 +190,9 @@ object Dock {
         children.forEach { content.addView(it) }   // each child keeps its parameters (weight, margins)
         // 72 dp, overlapping the screen margin by 4 dp: centred under MG's fog light
         // button (x 20 → 76 dp, y ≈ 14 → 70 dp), with 8 dp on the left, right and above (#38)
-        val barDp = barDp(activity)   // "wide bar" setting (#67)
+        val barDp = barDp(sized)   // "wide bar" setting (#67)
         // Fog light button hidden (shortcuts menu): the bar's top lines up with the cards' top, as on the right
-        if (!right) root.addView(bar, LinearLayout.LayoutParams(kit.dp(barDp), LinearLayout.LayoutParams.MATCH_PARENT).apply { leftMargin = -kit.dp(4); topMargin = if (fogShown(activity)) -kit.dp(BigDisplay.unscaled(activity, 6)) else 0 })
+        if (!right) root.addView(bar, LinearLayout.LayoutParams(kit.dp(barDp), LinearLayout.LayoutParams.MATCH_PARENT).apply { leftMargin = -kit.dp(4); topMargin = if (fogShown(activity)) -kit.dp(BigDisplay.unscaled(sized, 6)) else 0 })
         root.addView(content, LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.MATCH_PARENT, 1f).apply {
             if (right) rightMargin = kit.dp(12) else leftMargin = kit.dp(12)
         })
@@ -210,6 +210,13 @@ object Dock {
 
     /** The vertical bar's width: twice as wide with the "wide bar" setting (#67), only half as wide again in Grand affichage, not to eat the screen. */
     fun barDp(context: android.content.Context): Int = if (!Prefs(context).wideBar) BAR_DP else if (BigDisplay.factor(context) > 1f) BAR_DP * 3 / 2 else BAR_DP * 2
+
+    /**
+     * The context the vertical bar is sized with: in Grand affichage, the enlarged one even on a screen kept at its normal
+     * size (Settings, 20/11), so that the bar is the same as on home and does not jump when Settings opens.
+     */
+    internal fun sized(activity: Activity): android.content.Context =
+        if (BigDisplay.on(activity) && BigDisplay.factor(activity) <= 1f) BigDisplay.wrap(activity, big = true) else activity
 
     /** Left free for the bar by a full width overlay: the bar and its margins, or the screen margin with the dock. */
     fun keyboardMarginDp(context: android.content.Context): Int =
@@ -249,7 +256,7 @@ object Dock {
      * Auto's for its app; no double tap.
      */
     fun buildVertical(activity: Activity, bar: LinearLayout, current: Page) {
-        val kit = Kit(activity)
+        val sized = sized(activity); val kit = Kit(sized)
         fun color(r: Int) = app.mg4dash.ui.Themes.color(activity, r)
         bar.removeAllViews()
         bar.orientation = LinearLayout.VERTICAL
@@ -259,7 +266,7 @@ object Dock {
         // Place of the fog light button (overlaid by MG, it cannot be drawn by us);
         // on the right (right-hand drive), it stays on the left: the bar takes the full height
         // (the shortcuts menu hides the button: full height, as on the right)
-        if (!rightSide(activity) && fogShown(activity)) bar.addView(android.view.View(activity), LinearLayout.LayoutParams(-1, kit.dp(BigDisplay.unscaled(activity, 68))))   // under MG's fog button: its pixels
+        if (!rightSide(activity) && fogShown(activity)) bar.addView(android.view.View(activity), LinearLayout.LayoutParams(-1, kit.dp(BigDisplay.unscaled(sized, 68))))   // under MG's fog button: its pixels
         val order = listOf(
             ITEMS.first { it.label == R.string.dock_settings },
             ITEMS.first { it.label == R.string.dock_aa },
@@ -296,7 +303,7 @@ object Dock {
             // an equal visual gap between icons, and recentred (car drawn from y=5 to 21, house from 3 to 20
             // in their 24 frame) so the drawing, not only its frame, is in the centre.
             val size = when { item.label == R.string.dock_vehicle -> 38; item.label == R.string.dock_home -> 37; projection -> 32; else -> 34 }
-                .let { if (Prefs(activity).wideBar) (if (BigDisplay.factor(activity) > 1f) it * 5 / 4 else it * 3 / 2) else it }
+                .let { if (Prefs(activity).wideBar) (if (BigDisplay.factor(sized) > 1f) it * 5 / 4 else it * 3 / 2) else it }
             icon.translationY = when (item.label) {
                 R.string.dock_vehicle -> -kit.dp(size) / 24f
                 R.string.dock_home -> kit.dp(size) / 48f
