@@ -1185,7 +1185,14 @@
     <string name="br_curve">Curva aprendida</string>
     <string name="br_curve_show">Ver la curva  ▾</string>
     <string name="br_curve_hide">Ocultar  ▴</string>
-    <string name="br_curve_hint">Desliza un punto hacia arriba o abajo · toca la curva para añadir un punto a esa luz · la curva sigue creciendo: un punto se detiene en sus vecinos</string>
+    <string name="br_curve_hint">Desliza un punto arriba o abajo · toca la curva para añadir un punto · pulsación larga: borrar</string>
     <string name="br_point_delete">Eliminar este punto</string>
     <string name="br_curve_count">%1$d puntos</string>
+    <string name="br_look_dark">Oscuro</string>
+    <string name="br_look_light">Claro</string>
+    <string name="br_curve_counts">Oscuro: %1$d puntos · Claro: %2$d puntos</string>
+    <string name="br_erase_title">¿Borrar lo aprendido?</string>
+    <string name="br_erase_msg">Esta curva: la mostrada vuelve a 15 / 35 / 70 / 100 %. Borrar todo: las dos curvas de este perfil, clara y oscura.</string>
+    <string name="br_erase_this">Esta curva</string>
+    <string name="br_erase_all">Borrar todo</string>
 </resources>

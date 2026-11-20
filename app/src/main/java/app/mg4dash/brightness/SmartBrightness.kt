@@ -59,8 +59,20 @@ object SmartBrightness {
     }
 
     /** The curve of the current look (light or dark) of the current profile. */
-    fun curveKey(c: Context): String = KEY_CURVE + if (app.mg4dash.ui.Themes.isLight(c)) "light" else "dark"
+    fun curveKey(c: Context): String = curveKey(app.mg4dash.ui.Themes.isLight(c))
     fun curve(c: Context): BrightnessCurve = BrightnessCurve.decode(Prefs(c).raw.getString(curveKey(c), null))
+
+    /** The light or dark look's curve, whichever is shown (Settings, Sombre | Clair). */
+    fun curveKey(light: Boolean): String = KEY_CURVE + if (light) "light" else "dark"
+    fun curve(c: Context, light: Boolean): BrightnessCurve = BrightnessCurve.decode(Prefs(c).raw.getString(curveKey(light), null))
+    fun isLight(c: Context): Boolean = app.mg4dash.ui.Themes.isLight(c)
+
+    /** The [light] look's curve forgotten (the long press's "Cette courbe"). */
+    fun resetLook(c: Context, light: Boolean) {
+        Prefs(c).raw.edit().remove(curveKey(light)).apply()
+        Log.i(TAG, "learning reset (${curveKey(light)})")
+        worker.post { retarget(LIGHTS_RAMP_MS) }
+    }
 
     /** Learning forgotten: this curve (current profile and look), or [all] of the current profile's (light and dark; 20/11). */
     fun reset(c: Context, all: Boolean) {
@@ -72,8 +84,8 @@ object SmartBrightness {
     }
 
     /** The curve edited by hand (Settings): kept for this profile and look, the screen follows at once. */
-    fun save(c: Context, curve: BrightnessCurve) {
-        Prefs(c).raw.edit().putString(curveKey(c), curve.encode()).apply()
+    fun save(c: Context, curve: BrightnessCurve, light: Boolean = isLight(c)) {
+        Prefs(c).raw.edit().putString(curveKey(light), curve.encode()).apply()
         refresh(c)
     }
 

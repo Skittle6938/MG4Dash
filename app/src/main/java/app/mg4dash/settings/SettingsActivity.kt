@@ -1416,55 +1416,78 @@ class SettingsActivity : AppCompatActivity() {
     }
 
     /**
-     * Smart brightness (20/11): the automatic mode, Android's own (default) or the smart one, and its learning
-     * reset, for this curve (profile and look) or all of them, each confirmed. The learnt curve, shown on demand and edited by hand.
+     * Smart brightness (20/11, mockup v3): compact lines, the text on the left and small buttons on the right.
+     * The automatic mode, Android's own (default) or the smart one; the learnt curve, shown on demand for the dark or
+     * the light look and edited by hand; a long press on the graph erases this curve or both of this profile.
      */
     private fun brightnessSetting(p: LinearLayout) {
         val smart = app.mg4dash.brightness.SmartBrightness
+        fun small(v: TextView) = v.apply {
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f); minHeight = 0; minimumHeight = 0; minWidth = 0; minimumWidth = 0
+            setPadding(dp(16), 0, dp(16), 0)
+        }
+        /** A line: [title] and [sub] on the left, [views] (40 dp high) on the right; returns the sub text. */
+        fun line(parent: LinearLayout, title: String?, sub: String?, vararg views: View): TextView {
+            val l = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL; minimumHeight = dp(56) }
+            val texts = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
+            title?.let { texts.addView(TextView(this).apply { text = it; setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f); setTextColor(color(R.color.text_value)) }) }
+            val s = TextView(this).apply {
+                text = sub ?: ""; setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f); setTextColor(color(R.color.text_title))
+                visibility = if (sub == null) View.GONE else View.VISIBLE
+            }
+            texts.addView(s)
+            l.addView(texts, LinearLayout.LayoutParams(0, -2, 1f).apply { rightMargin = dp(12) })
+            views.forEach { v -> l.addView(v, LinearLayout.LayoutParams(-2, dp(40)).apply { leftMargin = dp(8) }) }
+            parent.addView(l, LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(2) })
+            return s
+        }
+        // The mode
         val modeBtns = choiceButtons(listOf(getString(R.string.br_original), getString(R.string.br_smart)), { if (smart.enabled(this)) 1 else 0 }) { i ->
             smart.setEnabled(this, i == 1)
+        }.onEach { small(it) }
+        androidx.core.content.ContextCompat.getDrawable(this, R.drawable.ic_smart)?.mutate()?.let { star ->
+            star.setTint(color(R.color.text_value)); star.setBounds(0, 0, dp(18), dp(18))
+            modeBtns[1].text = android.text.SpannableString("*" + getString(R.string.br_smart)).apply {
+                setSpan(app.mg4dash.ui.CenteredIconSpan(star, dp(6)), 0, 1, android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+            }
         }
-        text(p, getString(R.string.br_auto), 18f, R.color.text_value)
-        text(p, getString(R.string.br_auto_desc), 15f, R.color.text_title)
-        row(p, *modeBtns)
-        // The learnt curve (mockup v2, 20/11): shown on demand in this panel, edited by hand
-        text(p, getString(R.string.br_curve), 18f, R.color.text_value).apply { (layoutParams as? LinearLayout.LayoutParams)?.topMargin = dp(14) }
-        val count = text(p, "", 15f, R.color.text_title)
-        val box = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; visibility = View.GONE }
+        line(p, getString(R.string.br_auto), getString(R.string.br_auto_desc), *modeBtns)
+        // The learnt curve: the current look's at first, the other one by Sombre | Clair (its own curve, edited too)
+        val activeLight = smart.isLight(this)
+        var shownLight = activeLight
+        fun countText() = getString(R.string.br_curve_counts, smart.curve(this, false).points.size, smart.curve(this, true).points.size)
         lateinit var deleteBtn: View
-        fun paintCount() { count.text = getString(R.string.br_curve_count, smart.curve(this).points.size) }
-        val view = app.mg4dash.brightness.CurveView(this, smart.curve(this), { smart.levelNow(this) },
-            onChange = { c -> smart.save(this, c); paintCount() },
-            onSelect = { on -> deleteBtn.isEnabled = on; deleteBtn.alpha = if (on) 1f else 0.4f })
-        box.addView(view, LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(8) })
-        box.addView(TextView(this).apply {
-            text = getString(R.string.br_curve_hint); setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f); setTextColor(color(R.color.text_title))
-        }, LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(6) })
-        deleteBtn = button(getString(R.string.br_point_delete)) { view.deleteSelected() }.apply { isEnabled = false; alpha = 0.4f }
+        lateinit var view: app.mg4dash.brightness.CurveView
+        val looks = choiceButtons(listOf(getString(R.string.br_look_dark), getString(R.string.br_look_light)).mapIndexed { i, s ->
+            if ((i == 1) == activeLight) "$s  •" else s   // the active look's mark
+        }, { if (shownLight) 1 else 0 }) { i -> shownLight = i == 1; view.set(smart.curve(this, shownLight)) }.onEach { small(it) }
+        val seg = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; visibility = View.GONE }
+        looks.forEachIndexed { i, b -> seg.addView(b, LinearLayout.LayoutParams(-2, -1).apply { if (i > 0) leftMargin = dp(4) }) }
         lateinit var showBtn: Button
-        showBtn = button(getString(R.string.br_curve_show)) {
+        val box = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; visibility = View.GONE }
+        showBtn = small(button(getString(R.string.br_curve_show)) {
             val open = box.visibility != View.VISIBLE
             box.visibility = if (open) View.VISIBLE else View.GONE
+            seg.visibility = box.visibility
             showBtn.text = getString(if (open) R.string.br_curve_hide else R.string.br_curve_show)
-            if (open) { view.set(smart.curve(this)); paintCount() }
+            if (open) view.set(smart.curve(this, shownLight))
+        }) as Button
+        val count = line(p, getString(R.string.br_curve), countText(), seg, showBtn)
+        view = app.mg4dash.brightness.CurveView(this, smart.curve(this, shownLight), { smart.levelNow(this) },
+            onChange = { c -> smart.save(this, c, shownLight); count.text = countText() },
+            onSelect = { on -> deleteBtn.isEnabled = on; deleteBtn.alpha = if (on) 1f else 0.4f })
+        view.onLongPress = {
+            app.mg4dash.ui.SourceMenu.ask(this, view, getString(R.string.br_erase_title), getString(R.string.br_erase_msg),
+                listOf(getString(R.string.br_erase_this), getString(R.string.br_erase_all))) { i ->
+                if (i == 0) smart.resetLook(this, shownLight) else smart.reset(this, all = true)
+                view.set(smart.curve(this, shownLight)); count.text = countText()
+            }
         }
-        row(p, showBtn)
+        box.addView(view, LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(4) })
+        deleteBtn = small(button(getString(R.string.br_point_delete)) { view.deleteSelected() }).apply { isEnabled = false; alpha = 0.4f }
+        line(box, null, getString(R.string.br_curve_hint), deleteBtn)
         p.addView(box, LinearLayout.LayoutParams(-1, -2))
-        row(box, deleteBtn)
-        paintCount()
-        text(p, getString(R.string.br_reset), 18f, R.color.text_value).apply { (layoutParams as? LinearLayout.LayoutParams)?.topMargin = dp(14) }
-        text(p, getString(R.string.br_reset_desc), 15f, R.color.text_title)
-        lateinit var thisBtn: View; lateinit var allBtn: View
-        fun afterReset() { view.set(smart.curve(this)); paintCount() }
-        thisBtn = button(getString(R.string.br_reset_this)) {
-            app.mg4dash.ui.SourceMenu.confirm(this, thisBtn, getString(R.string.br_reset_this_confirm), getString(R.string.br_reset_this)) { smart.reset(this, all = false); afterReset() }
-        }
-        allBtn = button(getString(R.string.br_reset_all)) {
-            app.mg4dash.ui.SourceMenu.confirm(this, allBtn, getString(R.string.br_reset_all_confirm), getString(R.string.br_reset_all)) { smart.reset(this, all = true); afterReset() }
-        }
-        row(p, thisBtn, allBtn)
     }
-
     private fun panel(parent: LinearLayout, title: String, fill: Boolean = false): LinearLayout {
         val p = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL

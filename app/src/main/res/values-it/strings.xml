@@ -1185,7 +1185,14 @@
     <string name="br_curve">Curva appresa</string>
     <string name="br_curve_show">Vedi la curva  ▾</string>
     <string name="br_curve_hide">Nascondi  ▴</string>
-    <string name="br_curve_hint">Trascina un punto in alto o in basso · tocca la curva per aggiungere un punto a quella luce · la curva resta crescente: un punto si ferma tra i vicini</string>
+    <string name="br_curve_hint">Trascina un punto in alto o in basso · tocca la curva per aggiungere un punto · pressione lunga: cancella</string>
     <string name="br_point_delete">Elimina questo punto</string>
     <string name="br_curve_count">%1$d punti</string>
+    <string name="br_look_dark">Scuro</string>
+    <string name="br_look_light">Chiaro</string>
+    <string name="br_curve_counts">Scuro: %1$d punti · Chiaro: %2$d punti</string>
+    <string name="br_erase_title">Cancellare ciò che è stato appreso?</string>
+    <string name="br_erase_msg">Questa curva: quella mostrata torna a 15 / 35 / 70 / 100 %. Cancella tutto: le due curve di questo profilo, chiara e scura.</string>
+    <string name="br_erase_this">Questa curva</string>
+    <string name="br_erase_all">Cancella tutto</string>
 </resources>

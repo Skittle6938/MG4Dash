@@ -200,8 +200,9 @@ class SmartBrightnessTest {
         }
         // A touch on the curve at a light adds a point there, the slide sets it, lifting the finger saves it
         touch(android.view.MotionEvent.ACTION_DOWN, x(2.0), y(BrightnessCurve.defaultAt(2.0)))
-        assertTrue(selected)
+        assertFalse(selected)   // not yet: a long press would erase
         touch(android.view.MotionEvent.ACTION_MOVE, x(2.0), y(0.9))
+        assertTrue(selected)
         touch(android.view.MotionEvent.ACTION_UP, x(2.0), y(0.9))
         assertEquals(1, saved!!.points.size)
         assertEquals(2.0, saved!!.points[0].level, 0.02)
@@ -264,5 +265,49 @@ class SmartBrightnessTest {
         assertFalse(d.points.any { it.at < 2 })
         // Replacement within the radius
         assertEquals(1, BrightnessCurve().with(2.0, false, 0.3, 1).with(2.2, false, 0.6, 2).points.size)
+    }
+
+    // ── Mockup v3: the long press, each look's curve ──
+
+    @Test fun aLongPressOnTheGraphAsksToEraseAndAddsNothing() {
+        val a = org.robolectric.Robolectric.buildActivity(android.app.Activity::class.java).setup().get()
+        var saved: BrightnessCurve? = null
+        var asked = 0
+        val v = app.mg4dash.brightness.CurveView(a, BrightnessCurve().with(1.0, false, 0.2, 1), { null }, { saved = it }, {})
+        v.onLongPress = { asked++ }
+        a.setContentView(v, android.view.ViewGroup.LayoutParams(800, 300))
+        v.measure(android.view.View.MeasureSpec.makeMeasureSpec(800, android.view.View.MeasureSpec.EXACTLY),
+            android.view.View.MeasureSpec.makeMeasureSpec(0, android.view.View.MeasureSpec.UNSPECIFIED))
+        v.layout(0, 0, 800, v.measuredHeight)
+        fun touch(action: Int, px: Float, py: Float) { val e = android.view.MotionEvent.obtain(0, 0, action, px, py, 0); v.onTouchEvent(e); e.recycle() }
+        val looper = org.robolectric.Shadows.shadowOf(android.os.Looper.getMainLooper())
+        // Held still 1 s on an empty spot: asked, and lifting adds no point
+        touch(android.view.MotionEvent.ACTION_DOWN, 600f, 60f)
+        looper.idleFor(1_100, java.util.concurrent.TimeUnit.MILLISECONDS)
+        assertEquals(1, asked)
+        touch(android.view.MotionEvent.ACTION_UP, 600f, 60f)
+        assertNull(saved)
+        // A short touch there adds a point
+        touch(android.view.MotionEvent.ACTION_DOWN, 600f, 60f)
+        looper.idleFor(300, java.util.concurrent.TimeUnit.MILLISECONDS)
+        touch(android.view.MotionEvent.ACTION_UP, 600f, 60f)
+        looper.idleFor(1_000, java.util.concurrent.TimeUnit.MILLISECONDS)
+        assertEquals(1, asked)
+        assertEquals(2, saved!!.points.size)
+    }
+
+    @Test fun eachLookItsCurveAndEraseThisOneOrBoth() {
+        val raw = ctx.getSharedPreferences("mg4launcher", Context.MODE_PRIVATE)
+        raw.edit().clear().commit()
+        SmartBrightness.save(ctx, BrightnessCurve().with(2.0, false, 0.3, 1), light = false)
+        SmartBrightness.save(ctx, BrightnessCurve().with(3.0, false, 0.8, 1), light = true)
+        assertEquals(0.3, SmartBrightness.curve(ctx, false).points.single().value, 0.0)
+        assertEquals(0.8, SmartBrightness.curve(ctx, true).points.single().value, 0.0)
+        SmartBrightness.resetLook(ctx, true)
+        assertTrue(SmartBrightness.curve(ctx, true).points.isEmpty())
+        assertEquals(1, SmartBrightness.curve(ctx, false).points.size)
+        SmartBrightness.save(ctx, BrightnessCurve().with(3.0, false, 0.8, 1), light = true)
+        SmartBrightness.reset(ctx, all = true)
+        assertTrue(SmartBrightness.curve(ctx, true).points.isEmpty() && SmartBrightness.curve(ctx, false).points.isEmpty())
     }
 }
