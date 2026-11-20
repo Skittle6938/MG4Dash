@@ -26,6 +26,7 @@
         <item name="mgTextTitle">#FF8A94A6</item>
         <item name="mgTextSub">#FFA0AEC0</item>
         <item name="mgTextDisabled">#FF4A5366</item>
+        <item name="mgValueFont">sans-serif-light</item>
         <item name="mgAction">#FF2979FF</item>
         <item name="mgSelect">#FF00D2FF</item>
         <item name="mgActionPressed">#FF1C54B2</item>
@@ -76,9 +77,26 @@
         <item name="android:maxLines">1</item>
     </style>
 
+    <!-- Grand affichage (study v4, step 7): secondary texts, titles and greyed texts lighter, card outlines more marked,
+         the big numbers regular. Laid over the chosen theme, dark or light; the colours with a meaning do not change. -->
+    <style name="MgBigDark">
+        <item name="mgTextTitle">#FFC2CAD6</item>
+        <item name="mgTextSub">#FFD3DAE4</item>
+        <item name="mgTextDisabled">#FF7C8698</item>
+        <item name="mgPanelBorder">#FF4C5566</item>
+        <item name="mgValueFont">sans-serif</item>
+    </style>
+    <style name="MgBigLight">
+        <item name="mgTextTitle">#FF333C4A</item>
+        <item name="mgTextSub">#FF262E3B</item>
+        <item name="mgTextDisabled">#FF6B7585</item>
+        <item name="mgPanelBorder">#FF8F99AA</item>
+        <item name="mgValueFont">sans-serif</item>
+    </style>
+
     <style name="ValueBig">
         <item name="android:textColor">?attr/mgTextValue</item>
-        <item name="android:fontFamily">sans-serif-light</item>
+        <item name="android:fontFamily">?attr/mgValueFont</item>
         <item name="android:includeFontPadding">false</item>
         <item name="android:maxLines">1</item>
     </style>

@@ -71,6 +71,8 @@ class WebCard(private val activity: android.app.Activity) : FrameLayout(activity
             settings.useWideViewPort = true
             settings.loadWithOverviewMode = true
             settings.mediaPlaybackRequiresUserGesture = true
+            // Grand affichage: the page's texts too (the WebView does not follow the screen's density)
+            if (BigDisplay.factor(context) > 1f) settings.textZoom = 133
             setBackgroundColor(Themes.color(context, R.color.bg_top))
             settings.setGeolocationEnabled(true)
             webChromeClient = object : android.webkit.WebChromeClient() {

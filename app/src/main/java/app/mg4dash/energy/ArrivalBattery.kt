@@ -10,7 +10,7 @@ import app.mg4dash.system.Prefs
  * faster road, nor the climate ahead are known, hence the "≈" on the card.
  */
 object ArrivalBattery {
-    /** The trip's own consumption once it has this many km, the average since the last charge before. */
+    /** The trip's own consumption, only when there is no average yet, once it has this many km. */
     const val MIN_TRIP_KM = 5
 
     /**
@@ -24,9 +24,12 @@ object ArrivalBattery {
         return Math.round(soc - used).coerceAtLeast(0)
     }
 
-    /** The consumption to use: the trip's from [MIN_TRIP_KM], else the one since the last charge. */
+    /**
+     * The consumption to use (Marc, 20/11): the average the energy card shows, since the last charge, which moves
+     * slowly; the trip's own, which swings with each climb and each start, only while there is no average yet.
+     */
     fun consumption(tripKm: Int, tripPer100: Float?, average: Float?): Float? =
-        tripPer100?.takeIf { tripKm >= MIN_TRIP_KM } ?: average
+        average ?: tripPer100?.takeIf { tripKm >= MIN_TRIP_KM }
 
     @Volatile private var capacity: Pair<Long, Float?> = 0L to null
 

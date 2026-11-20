@@ -49,6 +49,8 @@ import kotlinx.coroutines.launch
 import java.util.Locale
 
 class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
+    /** Grand affichage: this screen enlarged (BigDisplay), Android's own setting untouched. */
+    override fun attachBaseContext(newBase: android.content.Context) = super.attachBaseContext(app.mg4dash.ui.BigDisplay.wrap(newBase))
 
     private lateinit var b: ActivityMainBinding
     private lateinit var prefs: Prefs
@@ -103,6 +105,8 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         b.fanGauge.segments = VehicleState.FAN_MAX
         // Touched or slid along: that fan level, sent once when lifted
         b.fanGauge.onSegmentPick = { CarBridge.setFanLevel(it + 1) }
+        // Held still on the fan's levels (Marc, 20/11): the climate's settings, as on the temperature; a touch or a slide still sets the fan
+        b.fanGauge.onPickHold = { climateSettings() }
         b.kersGauge.segments = 4
         b.kersGauge.onColor = color(R.color.accent_energy)
         // Touch a segment = regeneration level; long press = one-pedal driving
@@ -421,27 +425,28 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
             f.current = HomeSlots.current(prefs, slotLayout, f.slot.id, f.cards)
         }
         // Smaller versions in a small place: consumption, map without + and −, one row of shortcuts
-        consumption.compact = frameOf(Card.CONSUMPTION)?.slot?.size == HomeSlots.Size.SMALL
-        trips.compact = frameOf(Card.TRIPS)?.slot?.size == HomeSlots.Size.SMALL
+        consumption.compact = frameOf(Card.CONSUMPTION)?.slot?.size?.form == HomeSlots.Size.SMALL
+        trips.compact = frameOf(Card.TRIPS)?.slot?.size?.form == HomeSlots.Size.SMALL
         // Tall place: more previous trips, to fill its height (owner's choice)
-        trips.previous = if (frameOf(Card.TRIPS)?.slot?.size == HomeSlots.Size.TALL) 14 else 2
-        driving.form = when (frameOf(Card.DRIVING)?.slot?.size) {
+        trips.previous = if (frameOf(Card.TRIPS)?.slot?.size?.form == HomeSlots.Size.TALL) 14 else 2
+        driving.form = when (frameOf(Card.DRIVING)?.slot?.size?.form) {
             HomeSlots.Size.SMALL -> app.mg4dash.ui.DrivingCard.Form.COMPACT
             HomeSlots.Size.TALL, HomeSlots.Size.LARGE -> app.mg4dash.ui.DrivingCard.Form.FULL
             HomeSlots.Size.WIDE -> app.mg4dash.ui.DrivingCard.Form.WIDE
             else -> app.mg4dash.ui.DrivingCard.Form.MEDIUM
         }
-        radar.form = when (frameOf(Card.RADAR)?.slot?.size) {
+        radar.form = when (frameOf(Card.RADAR)?.slot?.size?.form) {
             HomeSlots.Size.SMALL -> app.mg4dash.radar.RadarCard.Form.SMALL
             HomeSlots.Size.MEDIUM, null -> app.mg4dash.radar.RadarCard.Form.MEDIUM
             else -> app.mg4dash.radar.RadarCard.Form.FULL
         }
-        navCard.form = app.mg4dash.ui.NavCard.formFor(frameOf(Card.NAV)?.slot?.size)
+        navCard.form = app.mg4dash.ui.NavCard.formFor(frameOf(Card.NAV)?.slot?.size?.form)
         // The alerter works while its card is in a place, shown or not (its alerts go over Android Auto)
         if (frameOf(Card.RADAR) != null) app.mg4dash.radar.RadarRepo.start(this) else app.mg4dash.radar.RadarRepo.stop()
         applyMapButtons()
         placeMapInfo()
         applyFog()
+        applyBigForms()
         frames.values.forEach { showFrame(it) }
         // Cards left out: nothing of theirs runs
         Card.entries.filter { frameOf(it) == null && !(it == Card.WEB && webDetached) && !(it == Card.MAP && mapDetached) }.forEach { cardShown(it, false) }
@@ -671,7 +676,7 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         // still sits in the top left corner, over the top left place
         // The shortcuts menu hides the button: no room to keep
         val fog = if (!Dock.fogShown(this) || Dock.fogOnBar(Dock.vertical(this), Dock.rightSide(this))) 0 else dp(64)
-        ((b.climateCard.getChildAt(0) as LinearLayout).getChildAt(0).layoutParams as LinearLayout.LayoutParams).leftMargin =
+        (b.climHeader.getChildAt(0).layoutParams as LinearLayout.LayoutParams).leftMargin =
             if (tl != null && Card.CLIMATE in tl.cards) fog else 0
         weathers.forEach { (c, w) -> w.setLeftInset(if (tl != null && c in tl.cards) fog else 0) }
         fun pad(v: View, on: Boolean) {
@@ -689,7 +694,7 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
     /** Speed and guidance banner of the map: at the top left on the tall map of the Map layout (#6), otherwise at the bottom left. */
     private fun placeMapInfo() {
         val f = frameOf(Card.MAP)
-        val top = mapLayout && f?.slot?.size.let { it == HomeSlots.Size.TALL || it == HomeSlots.Size.LARGE }
+        val top = mapLayout && f?.slot?.size?.form.let { it == HomeSlots.Size.TALL || it == HomeSlots.Size.LARGE }
         val pill = b.mapSpeed.parent as View
         (pill.layoutParams as android.widget.FrameLayout.LayoutParams).gravity = if (top) Gravity.TOP or Gravity.START else Gravity.BOTTOM or Gravity.LEFT
         pill.requestLayout()
@@ -727,6 +732,119 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
             showFrame(f)
         }
         lastPlugged = plugged
+    }
+
+    // ── Grand affichage (step 3): the cards take the shape of their place, a quarter, a half or a band ──
+
+    /** The climate card's lines as built (view, its layout), to put them back after a band. */
+    private var climateLines: List<Pair<View, android.view.ViewGroup.LayoutParams>>? = null
+    private var climateBand: List<LinearLayout>? = null
+    private var climatePlus: TextView? = null
+    /** Energy card's own text sizes (sp) and gauge height (px), before a quarter shrinks them. */
+    private var energyBase: FloatArray? = null
+
+    /**
+     * Each card in the form of its place (study v4, "card by card"), applied again at each change of the edit mode.
+     * Climate: in a quarter the essentials (temperature, fan, on, A/C, AUTO) and "More" for the rest, in a band two
+     * lines, in a half the whole card. Media: no album line in a quarter. Energy: its compact numbers in a quarter.
+     * Weather: tight in a quarter or a band.
+     */
+    private fun applyBigForms() {
+        if (!slotLayout.big) return
+        climateForm(frameOf(Card.CLIMATE)?.slot?.size)
+        val media = frames.values.firstOrNull { it.fill == HomeSlots.Fill.Media }?.slot?.size
+        b.mediaAlbum.visibility = if (media == HomeSlots.Size.QUARTER) View.GONE else View.VISIBLE
+        // A quarter (Marc, 20/11): the title on one line, so a long title and its artist never push the buttons out of the place
+        b.mediaTitle.maxLines = if (media == HomeSlots.Size.QUARTER) 1 else 2
+        mediaQuarter(media == HomeSlots.Size.QUARTER)
+        energyForm(frameOf(Card.ENERGY)?.slot?.size == HomeSlots.Size.QUARTER)
+        weathers.forEach { (card, wc) ->
+            val tight = frameOf(card)?.slot?.size != HomeSlots.Size.HALF
+            if (wc.tight != tight) { wc.tight = tight; renderWeather(WeatherRepo.weather.value, CarBridge.state.value) }
+        }
+    }
+
+    private fun climateForm(size: HomeSlots.Size?) {
+        val card = b.climateCard
+        val dirRow = b.climDirRow
+        val powerRow = b.climPower.parent as LinearLayout
+        val tempRow = b.tempDown.parent as LinearLayout
+        val fanRow = b.fanDown.parent as LinearLayout
+        if (climateLines == null) climateLines = (0 until card.childCount).map { card.getChildAt(it).let { v -> v to v.layoutParams } }
+        // Back to the card as built
+        climateBand?.forEach { line -> line.removeAllViews(); card.removeView(line) }
+        climateBand = null
+        if ((0 until card.childCount).map { card.getChildAt(it) } != climateLines!!.map { it.first }) {
+            // The band's own spaces go too
+            card.removeAllViews()
+            climateLines!!.forEach { (v, _) -> (v.parent as? android.view.ViewGroup)?.removeView(v) }
+            climateLines!!.forEach { (v, lp) -> card.addView(v, lp) }
+        }
+        val quarter = size == HomeSlots.Size.QUARTER
+        dirRow.visibility = if (quarter) View.GONE else View.VISIBLE
+        b.chipEco.visibility = if (quarter) View.GONE else View.VISIBLE
+        // In a quarter, the heated seats are on the climate page ("More")
+        if (CarBridge.heatingShown(this)) b.climHeader.visibility = if (size == HomeSlots.Size.HALF || size == null) View.VISIBLE else View.GONE
+        val plus = climatePlus ?: TextView(this).apply {
+            text = getString(R.string.big_more); gravity = Gravity.CENTER; isAllCaps = true
+            setTextSize(TypedValue.COMPLEX_UNIT_PX, b.chipAc.textSize); typeface = b.chipAc.typeface
+            setTextColor(b.chipAc.textColors); background = b.chipAc.background.constantState?.newDrawable()?.mutate()
+            letterSpacing = b.chipAc.letterSpacing
+            setOnClickListener { startActivity(Intent(this@MainActivity, ClimateActivity::class.java)) }
+            powerRow.addView(this, LinearLayout.LayoutParams(b.chipAc.layoutParams as LinearLayout.LayoutParams))
+            climatePlus = this
+        }
+        plus.visibility = if (quarter) View.VISIBLE else View.GONE
+        if (size != HomeSlots.Size.BAND) return
+        // A band: temperature and fan on the first line, the eight buttons on the second
+        val spaces = climateLines!!.map { it.first }.filter { it is android.widget.Space }
+        spaces.forEach { card.removeView(it) }
+        listOf(tempRow, fanRow, dirRow, powerRow).forEach { card.removeView(it) }
+        fun line(vararg parts: View, gap: Int) = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL
+            parts.forEachIndexed { i, v -> addView(v, LinearLayout.LayoutParams(0, (v.layoutParams?.height ?: -2).let { if (it > 0) it else -2 }, 1f).apply { if (i > 0) leftMargin = gap }) }
+        }
+        val gap = dp(24)
+        val top = line(tempRow, fanRow, gap = gap)
+        val bottom = line(dirRow, powerRow, gap = dp(8))
+        (dirRow.layoutParams as LinearLayout.LayoutParams).topMargin = 0
+        (powerRow.layoutParams as LinearLayout.LayoutParams).topMargin = 0
+        card.addView(android.widget.Space(this), LinearLayout.LayoutParams(-1, 0, 1f))
+        card.addView(top, LinearLayout.LayoutParams(-1, -2))
+        card.addView(android.widget.Space(this), LinearLayout.LayoutParams(-1, 0, 1f))
+        card.addView(bottom, LinearLayout.LayoutParams(-1, -2))
+        climateBand = listOf(top, bottom)
+    }
+
+    /** The media card's own sizes (title sp, play button height px, controls' top padding px), before a quarter tightens them. */
+    private var mediaBase: FloatArray? = null
+
+    /** The media in a quarter: a smaller title and play button, the buttons closer, so that they never leave the place. */
+    private fun mediaQuarter(on: Boolean) {
+        val sp = resources.displayMetrics.scaledDensity
+        val base = mediaBase ?: floatArrayOf(b.mediaTitle.textSize / sp, b.mediaPlay.layoutParams.height.toFloat(), b.mediaControls.paddingTop.toFloat())
+            .also { mediaBase = it }
+        b.mediaTitle.setTextSize(TypedValue.COMPLEX_UNIT_SP, if (on) minOf(22f, base[0]) else base[0])
+        val h = if (on) minOf(dp(58).toFloat(), base[1]) else base[1]
+        if (b.mediaPlay.layoutParams.height != h.toInt()) b.mediaPlay.layoutParams = b.mediaPlay.layoutParams.apply { height = h.toInt() }
+        // Its icon as big as before: less padding in the lower button
+        val pad = (h * 14f / 72f).toInt()
+        b.mediaPlay.setPadding(pad, pad, pad, pad)
+        b.mediaControls.setPadding(b.mediaControls.paddingLeft, if (on) dp(4) else base[2].toInt(), b.mediaControls.paddingRight, b.mediaControls.paddingBottom)
+    }
+
+    private fun energyForm(quarter: Boolean) {
+        val sp = resources.displayMetrics.scaledDensity
+        val base = energyBase ?: floatArrayOf(b.battery.textSize / sp, b.range.textSize / sp, b.consumption.textSize / sp,
+            b.consAvgLabel.textSize / sp, b.batteryGauge.layoutParams.height.toFloat()).also { energyBase = it }
+        // The compact numbers of the bottom bar's energy card (#43), never bigger than the card's own
+        val want = if (quarter) floatArrayOf(minOf(46f, base[0]), minOf(25f, base[1]), minOf(25f, base[2]), minOf(16f, base[3]),
+            if (base[4] > 0) minOf(52 * resources.displayMetrics.density, base[4]) else base[4]) else base
+        b.battery.setTextSize(TypedValue.COMPLEX_UNIT_SP, want[0])
+        b.range.setTextSize(TypedValue.COMPLEX_UNIT_SP, want[1])
+        b.consumption.setTextSize(TypedValue.COMPLEX_UNIT_SP, want[2])
+        b.consAvgLabel.setTextSize(TypedValue.COMPLEX_UNIT_SP, want[3])
+        if (base[4] > 0) b.batteryGauge.layoutParams = b.batteryGauge.layoutParams.apply { height = want[4].toInt() }
     }
 
     /** Bottom bar (#88): the climate card is shorter, its buttons were cut at the bottom. */
@@ -1031,7 +1149,8 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         // temperature row is taller than its buttons (large number + outside); the extra below the buttons
         // is added above the air flow for equal gaps from button to button
         (b.tempDown.parent as View).addOnLayoutChangeListener { row, _, top, _, bottom, _, _, _, _ ->
-            val extra = ((bottom - top - b.tempDown.height) / 2).coerceAtLeast(0)
+            // In a band (Grand affichage) the air flow is on its own line below: no extra
+            val extra = if (climateBand != null) 0 else ((bottom - top - b.tempDown.height) / 2).coerceAtLeast(0)
             val lp = b.climDirRow.layoutParams as android.widget.LinearLayout.LayoutParams
             if (lp.topMargin != extra) row.post { lp.topMargin = extra; b.climDirRow.layoutParams = lp }
         }
@@ -1063,10 +1182,20 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
                 VehicleState.flowDirection(parts)?.let { CarBridge.setFanDirection(it) }
             }
         }
-        b.temp.setOnClickListener { startActivity(Intent(this, ClimateActivity::class.java)) }
-        // Long press: calibrate the displayed temperature
-        b.temp.setOnLongClickListener { app.mg4dash.ui.TempCalibration.show(this) { renderClimate(CarBridge.state.value) }; true }
+        // The whole temperature area between − and + (Marc, 20/11: not only the number), its full height: a touch opens the
+        // climate page, a long press the climate's settings (calibration of the displayed temperature)
+        val tempZone = b.temp.parent as LinearLayout
+        (tempZone.layoutParams as LinearLayout.LayoutParams).let { it.height = LinearLayout.LayoutParams.MATCH_PARENT; tempZone.layoutParams = it }
+        listOf<View>(tempZone, b.temp, b.climOutside).forEach { v ->
+            v.setOnClickListener { startActivity(Intent(this, ClimateActivity::class.java)) }
+            v.setOnLongClickListener { climateSettings(); true }
+        }
+        // The fan's icon and number below it too
+        listOf<View>(b.fanIcon, b.fanValue).forEach { it.setOnLongClickListener { climateSettings(); true } }
     }
+
+    /** The climate's settings: the calibration of the displayed temperature. */
+    private fun climateSettings() = app.mg4dash.ui.TempCalibration.show(this) { renderClimate(CarBridge.state.value) }
 
     /** Press = one step; hold = repeat every 350 ms. */
     private fun repeatOnHold(view: View, action: () -> Unit) {

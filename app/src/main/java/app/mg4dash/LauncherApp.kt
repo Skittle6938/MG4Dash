@@ -89,8 +89,14 @@ class LauncherApp : Application() {
     private fun startAll() {
         if (started) return
         started = true
+        // A profile switch cut by the car switching off: finished before anything reads the settings
+        app.mg4dash.system.Profiles.resume(this)
         installCrashGuard()
         if (!BuildConfig.MOCK && app.mg4dash.system.Maintenance.on(this)) { startMaintenance(); return }
+        // Profiles, not in maintenance mode (no switch there: it would set the drive and the brightness)
+        app.mg4dash.system.Profiles.onSwitch { afterProfileSwitch(it) }
+        // Each trip marked with the profile driving (step 12); the first profile's left unmarked, as the trips from before
+        app.mg4dash.energy.TripLog.profile = { app.mg4dash.system.Profiles.current(this).id.takeIf { it != "p1" } }
         // Shortcuts menu, and MG's fog light button hidden by the SystemUI overlay (installed and switched with the
         // setting): only once unlocked, as they read the settings (unreadable from the boot screen: MG4Dash crashed in
         // a loop at start and Android showed its launcher picker)
@@ -99,6 +105,8 @@ class LauncherApp : Application() {
         app.mg4dash.ui.ShortcutsPanel.GlobalStrip.update(this)
         // Brightness (automatic and its shift) put back as it was: the car resets it at each start (15/11)
         if (!BuildConfig.MOCK) app.mg4dash.system.BrightnessMemory.start(this)
+        // Smart brightness (off by default): MG4Dash sets the screen from the light estimated and the learnt curve
+        if (!BuildConfig.MOCK) app.mg4dash.brightness.SmartBrightness.start(this)
         // ADB at start (setting, off by default)
         if (!BuildConfig.MOCK && app.mg4dash.system.Prefs(this).adbAtStart) app.mg4dash.system.AdbSwitch.enable(this, "setting at start")
         Log.i("App", "start ${BuildConfig.VERSION_NAME} (${BuildConfig.FLAVOR})")
@@ -128,6 +136,8 @@ class LauncherApp : Application() {
         // Default home lost during an update (Android's chooser at the next Home): MG4Dash set as home again
         app.mg4dash.system.HomeSwitcher.ensureHome(this, "start")
         CarBridge.start(this)
+        // The paired phone's profile: once the car link is up (its drive memory reads the car)
+        if (!BuildConfig.MOCK) app.mg4dash.system.PhoneProfile.start(this)
         app.mg4dash.phone.PhoneBookAuto.start(this)
         app.mg4dash.car.CarProps.start(this)
         app.mg4dash.energy.EnergyMonitor.start(this)
@@ -155,6 +165,22 @@ class LauncherApp : Application() {
         // MG4Dash Rescue's sign of life: everything started, its code loads (home's first frame gives it too, for a
         // start hidden behind another app it is this one)
         app.mg4dash.system.Rescue.alive(this)
+    }
+
+    /**
+     * After a profile switch: the theme published again for MG4Radio, the profile's brightness put back, the shortcuts
+     * strip and the fog overlay as the profile wants them, and a short message; the open screens rebuild by themselves
+     * (the theme's signature includes the profile).
+     */
+    private fun afterProfileSwitch(p: app.mg4dash.system.Profiles.Profile) {
+        android.os.Handler(android.os.Looper.getMainLooper()).post {
+            app.mg4dash.ui.Themes.publish(this)
+            if (!BuildConfig.MOCK) app.mg4dash.system.BrightnessMemory.restore(this, "profile ${p.name}")
+            app.mg4dash.ui.ShortcutsPanel.GlobalStrip.update(this)
+            // The profile's own curve (and its mode)
+            if (!BuildConfig.MOCK && app.mg4dash.brightness.SmartBrightness.enabled(this)) app.mg4dash.brightness.SmartBrightness.refresh(this)
+            app.mg4dash.ui.Toasts.show(this, getString(R.string.pf_switched, p.name))
+        }
     }
 
     private fun startThemeWatch() {

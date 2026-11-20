@@ -5,6 +5,11 @@ import android.content.SharedPreferences
 
 /** Persistent launcher settings. */
 class Prefs(context: Context) {
+    companion object {
+        /** [homeStyle] of Grand affichage (2 is taken by the old Map style). */
+        const val STYLE_BIG = 3
+    }
+
     private val sp: SharedPreferences =
         context.applicationContext.getSharedPreferences("mg4launcher", Context.MODE_PRIVATE)
 
@@ -516,7 +521,10 @@ class Prefs(context: Context) {
         get() = sp.getBoolean("energy_log", false)   // off by default: a write every 5 s wears the storage
         set(v) = sp.edit().putBoolean("energy_log", v).apply()
 
-    /** Home style: 0 = full (3 columns), 1 = simple (3 panes + 2 shortcuts + weather). */
+    /**
+     * Home style: 0 = the layouts, 1 = simple (3 panes + 2 shortcuts + weather), [STYLE_BIG] = Grand affichage
+     * (everything bigger, BigDisplay). 2 is the old Map style, still stored on old installs (HomeSlots.layoutOf).
+     */
     var homeStyle: Int
         get() = sp.getInt("home_style", 0)
         set(v) = sp.edit().putInt("home_style", v).apply()
@@ -525,6 +533,21 @@ class Prefs(context: Context) {
     var homeLayout: String?
         get() = sp.getString("home_layout", null)
         set(v) = sp.edit().putString("home_layout", v).apply()
+
+    /** Profiles keep the drive mode and the regeneration (Settings › Vehicle, step 12): off by default, shared. */
+    var profilesDrive: Boolean
+        get() = sp.getBoolean("profiles_drive", false)
+        set(v) = sp.edit().putBoolean("profiles_drive", v).apply()
+
+    /** The style before Grand affichage (0 Standard, 1 Simple), which its shortcuts tile goes back to. */
+    var styleBeforeBig: Int
+        get() = sp.getInt("home_style_before_big", 0)
+        set(v) = sp.edit().putInt("home_style_before_big", v).apply()
+
+    /** Layout of Grand affichage (a HomeSlots.Layout key of two columns); null: Four. Kept apart from [homeLayout]. */
+    var homeLayoutBig: String?
+        get() = sp.getString("home_layout_big", null)
+        set(v) = sp.edit().putString("home_layout_big", v).apply()
 
     /** Theme: background (0 navy, 1 black, 2 charcoal, 3 dark green, 4 burgundy) and buttons (0 blue, 1 grey, 2 red, 3 green, 4 orange). */
     var themeBackground: Int

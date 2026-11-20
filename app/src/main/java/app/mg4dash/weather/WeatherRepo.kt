@@ -252,7 +252,7 @@ object WeatherRepo {
             Locale.US,
             "https://api.open-meteo.com/v1/forecast?latitude=%.4f&longitude=%.4f" +
                 "&current=temperature_2m,apparent_temperature,relative_humidity_2m,weather_code,wind_speed_10m,is_day" +
-                "&hourly=temperature_2m,weather_code,is_day&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max" +
+                "&hourly=temperature_2m,weather_code,is_day,shortwave_radiation,cloud_cover&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max" +
                 "&forecast_days=4&timezone=auto",
             lat, lon,
         ) + prefs.weatherModel.takeIf { it.isNotBlank() }?.let { "&models=$it" }.orEmpty()   // chosen model (#67)
@@ -263,7 +263,10 @@ object WeatherRepo {
             if (conn.responseCode != 200) { Log.w(TAG, "HTTP ${conn.responseCode}"); return false }
             conn.inputStream.bufferedReader().use { it.readText() }
         } finally { conn.disconnect() }
-        _weather.value = parse(JSONObject(body), place)
+        val json = JSONObject(body)
+        _weather.value = parse(json, place)
+        // The sky the smart brightness estimates the light with, kept for offline
+        try { app.mg4dash.brightness.SkyForecast.update(json) } catch (e: Exception) { Log.w(TAG, "sky: ${e.message}") }
         Log.i(TAG, "updated: ${_weather.value?.tempC}° in $place")
         fetchedAt = loc
         return true

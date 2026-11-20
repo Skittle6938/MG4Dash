@@ -80,6 +80,44 @@ class RadarSpeedTest {
         assertNull(s.shown(null, null))
     }
 
+    /**
+     * Marc, 20/11: the speed shown stopped for a few seconds, then went on. The worker was busy (tiles read from disk,
+     * the roads' graph rebuilt, the matching): the speed is read on a thread of its own and keeps following the car.
+     */
+    @Test fun speedFollowsWhileTheWorkerIsBusy() {
+        val ctx = org.robolectric.RuntimeEnvironment.getApplication()
+        ctx.getSharedPreferences("radar_speed", android.content.Context.MODE_PRIVATE).edit().putFloat("k", 1f).putInt("windows", 0).commit()
+        val before = RadarRepo.carSpeed
+        val v = java.util.concurrent.atomic.AtomicReference(50f)
+        RadarRepo.carSpeed = { v.get() }
+        RadarRepo.start(ctx)
+        try {
+            fun waitFor(want: Float, withinMs: Long) {
+                val until = System.currentTimeMillis() + withinMs
+                while (System.currentTimeMillis() < until) {
+                    org.robolectric.Shadows.shadowOf(android.os.Looper.getMainLooper()).idleFor(java.time.Duration.ofMillis(100))
+                    val got = RadarRepo.state.value.speedKmh
+                    if (got != null && Math.abs(got - want) < 0.01f) return
+                    Thread.sleep(30)
+                }
+                throw AssertionError("speed ${RadarRepo.state.value.speedKmh}, wanted $want within $withinMs ms")
+            }
+            waitFor(50f, 5_000)
+            // The worker busy for 4 s, as with a big tile rebuilt
+            val worker = RadarRepo::class.java.getDeclaredField("worker\$delegate").apply { isAccessible = true }.get(RadarRepo)
+                .let { (it as Lazy<*>).value as android.os.Handler }
+            val busy = java.util.concurrent.CountDownLatch(1)
+            worker.post { busy.countDown(); Thread.sleep(4_000) }
+            busy.await()
+            v.set(90f)
+            // Within a second, not after the worker's 4 s
+            waitFor(90f, 1_500)
+        } finally {
+            RadarRepo.stop()
+            RadarRepo.carSpeed = before
+        }
+    }
+
     /** Between the GPS fixes, the car's speed reaches the card at once, without any position. */
     @Test fun carSpeedReachesTheStateWithoutFixes() {
         val ctx = org.robolectric.RuntimeEnvironment.getApplication()

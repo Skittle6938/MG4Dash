@@ -43,10 +43,12 @@ class NavCardTest {
     }
 
     @Test fun consumptionUsed() {
-        // The trip's once it has 5 km, the one since the charge before
-        assertEquals(15f, ArrivalBattery.consumption(12, 15f, 17f)!!, 0f)
+        // The average since the last charge (Marc, 20/11), whatever the trip does
+        assertEquals(17f, ArrivalBattery.consumption(12, 15f, 17f)!!, 0f)
         assertEquals(17f, ArrivalBattery.consumption(3, 15f, 17f)!!, 0f)
         assertEquals(17f, ArrivalBattery.consumption(12, null, 17f)!!, 0f)
+        // No average yet: the trip's from 5 km
+        assertEquals(15f, ArrivalBattery.consumption(12, 15f, null)!!, 0f)
         assertNull(ArrivalBattery.consumption(3, 15f, null))
     }
 

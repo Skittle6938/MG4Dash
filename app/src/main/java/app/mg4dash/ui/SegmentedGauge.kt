@@ -51,13 +51,37 @@ class SegmentedGauge @JvmOverloads constructor(
         return ((x - paddingLeft) / w * segments).toInt().coerceIn(0, segments - 1)
     }
 
+    /**
+     * Held still on a gauge that picks a level (Marc, 20/11: the climate card's fan): this instead of a level, the level
+     * shown before put back. A touch or a slide still picks the level.
+     */
+    var onPickHold: (() -> Unit)? = null
+    private var before = 0
+    private var downX = 0f
+    private var downY = 0f
+    private val hold = Runnable {
+        val h = onPickHold ?: return@Runnable
+        if (picking < 0) return@Runnable
+        picking = -1; value = before
+        performHapticFeedback(android.view.HapticFeedbackConstants.LONG_PRESS)
+        h()
+    }
+
     override fun onTouchEvent(event: android.view.MotionEvent): Boolean {
         onSegmentPick?.let { pick ->
             when (event.actionMasked) {
-                android.view.MotionEvent.ACTION_DOWN -> { parent?.requestDisallowInterceptTouchEvent(true); picking = indexAt(event.x); value = picking + 1 }
-                android.view.MotionEvent.ACTION_MOVE -> if (picking >= 0) { picking = indexAt(event.x); value = picking + 1 }
-                android.view.MotionEvent.ACTION_UP -> { if (picking >= 0) pick(indexAt(event.x)); picking = -1 }
-                android.view.MotionEvent.ACTION_CANCEL -> picking = -1
+                android.view.MotionEvent.ACTION_DOWN -> {
+                    parent?.requestDisallowInterceptTouchEvent(true); before = value; downX = event.x; downY = event.y
+                    picking = indexAt(event.x); value = picking + 1
+                    if (onPickHold != null) postDelayed(hold, android.view.ViewConfiguration.getLongPressTimeout().toLong())
+                }
+                android.view.MotionEvent.ACTION_MOVE -> if (picking >= 0) {
+                    val slop = android.view.ViewConfiguration.get(context).scaledTouchSlop
+                    if (Math.abs(event.x - downX) > slop || Math.abs(event.y - downY) > slop) removeCallbacks(hold)
+                    picking = indexAt(event.x); value = picking + 1
+                }
+                android.view.MotionEvent.ACTION_UP -> { removeCallbacks(hold); if (picking >= 0) pick(indexAt(event.x)); picking = -1 }
+                android.view.MotionEvent.ACTION_CANCEL -> { removeCallbacks(hold); if (picking >= 0) value = before; picking = -1 }
             }
             return true
         }

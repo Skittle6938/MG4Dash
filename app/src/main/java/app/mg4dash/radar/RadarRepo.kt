@@ -126,6 +126,13 @@ object RadarRepo {
     private var job: Job? = null
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
     private val worker: Handler by lazy { Handler(HandlerThread("radar").apply { start() }.looper) }
+    /**
+     * The car's speed read between the fixes, on a thread of its own (Marc, 20/11): on the worker it waited behind
+     * the tiles read from disk, the roads' graph rebuilt and the matching, and the speed shown stopped for seconds.
+     */
+    private val speedWorker: Handler by lazy { Handler(HandlerThread("radar-speed").apply { start() }.looper) }
+    /** The speed's calibration and the state published: shared by the worker and the speed thread. */
+    private val speedLock = Any()
     private val net: Handler by lazy { Handler(HandlerThread("radar-net").apply { start() }.looper) }
 
     // Worker thread state
@@ -146,18 +153,18 @@ object RadarRepo {
     private var zoneCam: Camera? = null
     private var zoneEnd = 0.0
     private var zoneLimit: Int? = null
-    private var level = Level.NONE
+    @Volatile private var level = Level.NONE
     /** The speed shown and checked: the car's, set right on the GPS (worker thread). */
     private var speedCalib = RadarSpeed()
     /** The speed checked at the last fix (the zone's or the road's) and the thresholds then, for the speed between fixes. */
-    private var checkedLimit: Int? = null
-    private var thresholds: Thresholds? = null
+    @Volatile private var checkedLimit: Int? = null
+    @Volatile private var thresholds: Thresholds? = null
     /** The car's speed read now (tests: a speed of their own). */
     internal var carSpeed: () -> Float? = { CarBridge.readSpeed() }
     /** Last time the car moved, for the reading pace. */
-    private var movedAt = 0L
+    @Volatile private var movedAt = 0L
     private val speedTick = object : Runnable {
-        override fun run() { if (job != null) worker.postDelayed(this, onSpeedTick()) }
+        override fun run() { if (job != null) speedWorker.postDelayed(this, onSpeedTick()) }
     }
 
     val running: Boolean get() = job != null
@@ -173,9 +180,9 @@ object RadarRepo {
         }
         val sp = ctx!!.getSharedPreferences(SPEED_PREFS, Context.MODE_PRIVATE)
         worker.post {
-            speedCalib = RadarSpeed(sp.getFloat("k", 1f), sp.getInt("windows", 0))
+            synchronized(speedLock) { speedCalib = RadarSpeed(sp.getFloat("k", 1f), sp.getInt("windows", 0)) }
             movedAt = android.os.SystemClock.elapsedRealtime()
-            worker.removeCallbacks(speedTick); worker.post(speedTick)
+            speedWorker.removeCallbacks(speedTick); speedWorker.post(speedTick)
         }
         RadarAlert.start(context.applicationContext)
     }
@@ -184,8 +191,8 @@ object RadarRepo {
         if (job == null) return
         job?.cancel(); job = null
         RadarAlert.stop()
-        worker.removeCallbacks(speedTick)
-        worker.post { worker.removeCallbacks(speedTick); checkedLimit = null; thresholds = null; tiles.clear(); roads = emptyList(); cameras = emptyList(); graph = Ahead.Graph(emptyList()); loadedKeys = emptySet(); matcher.reset(); zoneCam = null }
+        speedWorker.removeCallbacks(speedTick)
+        worker.post { speedWorker.removeCallbacks(speedTick); checkedLimit = null; thresholds = null; tiles.clear(); roads = emptyList(); cameras = emptyList(); graph = Ahead.Graph(emptyList()); loadedKeys = emptySet(); matcher.reset(); zoneCam = null }
         _state.value = State()
         Log.i(TAG, "alerter off")
     }
@@ -234,13 +241,13 @@ object RadarRepo {
         // The car's speed read now, set right on the GPS's on steady stretches; the GPS's alone without it
         val car = carSpeed()?.takeIf { it >= 0f } ?: CarBridge.state.value.speedKmh?.takeIf { it >= 0f }
         val gps = loc.takeIf { it.hasSpeed() }?.speed?.times(3.6f)
-        if (speedCalib.gps(loc.elapsedRealtimeNanos / 1_000_000L, car, gps, loc.takeIf { it.hasAccuracy() }?.accuracy,
+        if (synchronized(speedLock) { speedCalib.gps(loc.elapsedRealtimeNanos / 1_000_000L, car, gps, loc.takeIf { it.hasAccuracy() }?.accuracy,
                 loc.takeIf { android.os.Build.VERSION.SDK_INT >= 26 && it.hasSpeedAccuracy() }?.speedAccuracyMetersPerSecond,
-                loc.takeIf { it.hasBearing() }?.bearing)) {
+                loc.takeIf { it.hasBearing() }?.bearing) }) {
             Log.i(TAG, "speed factor ${"%.3f".format(java.util.Locale.US, speedCalib.k)} (${speedCalib.windows} stretches)")
             c.getSharedPreferences(SPEED_PREFS, Context.MODE_PRIVATE).edit().putFloat("k", speedCalib.k).putInt("windows", speedCalib.windows).apply()
         }
-        val speed = speedCalib.shown(car, gps)
+        val speed = synchronized(speedLock) { speedCalib.shown(car, gps) }
         checkedLimit = null
         last?.let { p -> val d = Geo.dist(p.latitude, p.longitude, loc.latitude, loc.longitude); if (d < 300) odo += d }
         last = loc
@@ -291,11 +298,14 @@ object RadarRepo {
         val car = carSpeed()?.takeIf { it >= 0f }
         if (car != null) {
             if (car > 0.5f) movedAt = now
-            val speed = speedCalib.shown(car, null)
-            val cur = _state.value
-            val t = thresholds
-            if (cur.status == Status.OK && t != null) level = speed?.let { t.level(it, checkedLimit, level) } ?: Level.NONE
-            publish(cur.copy(speedKmh = speed, level = if (cur.status == Status.OK) level else cur.level))
+            // Read and published under the lock: a fix published meanwhile is never overwritten by this older state
+            synchronized(speedLock) {
+                val speed = speedCalib.shown(car, null)
+                val cur = _state.value
+                val t = thresholds
+                if (cur.status == Status.OK && t != null) level = speed?.let { t.level(it, checkedLimit, level) } ?: Level.NONE
+                publish(cur.copy(speedKmh = speed, level = if (cur.status == Status.OK) level else cur.level))
+            }
         }
         return if (now - movedAt > RadarSpeed.PARKED_MS) RadarSpeed.PARKED_TICK_MS else RadarSpeed.TICK_MS
     }
@@ -307,7 +317,7 @@ object RadarRepo {
         return InZone(cam.kind, zoneLimit, left, cam.id)
     }
 
-    private fun publish(s: State) {
+    private fun publish(s: State) = synchronized(speedLock) {
         if (s != _state.value) _state.value = s
     }
 

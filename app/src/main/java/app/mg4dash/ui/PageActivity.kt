@@ -16,6 +16,8 @@ import kotlinx.coroutines.launch
  * full screen, refreshed at each vehicle state.
  */
 abstract class PageActivity : AppCompatActivity() {
+    /** Grand affichage: this screen enlarged (BigDisplay), Android's own setting untouched. */
+    override fun attachBaseContext(newBase: android.content.Context) = super.attachBaseContext(app.mg4dash.ui.BigDisplay.wrap(newBase))
     private val twoFingerPull by lazy { TwoFingerPull(this) }
 
     override fun dispatchTouchEvent(ev: android.view.MotionEvent): Boolean =
@@ -34,6 +36,9 @@ abstract class PageActivity : AppCompatActivity() {
             body.postDelayed(this, 5000)
         }
     }
+
+    /** The whole body scrolls in Grand affichage when it does not fit; false for a page that scrolls its own lists. */
+    protected open val scrollsWhenBig: Boolean = true
 
     abstract val pageTitle: String
     abstract val page: Dock.Page
@@ -67,7 +72,13 @@ abstract class PageActivity : AppCompatActivity() {
         header.addView(title, kit.lp(0, kit.dp(52), 1f, l = 8))
         root.addView(header, kit.lp(-1, -2))
         body = kit.row().apply { isBaselineAligned = false }
-        root.addView(body, kit.lp(-1, 0, 1f, t = 8))
+        // Grand affichage: the panels that do not fit scroll, never cut (the page has 456 dp of height instead of 636),
+        // unless the page scrolls its own lists
+        if (BigDisplay.factor(this) > 1f && scrollsWhenBig) root.addView(android.widget.ScrollView(this).apply {
+            isFillViewport = true; isVerticalScrollBarEnabled = true; overScrollMode = android.view.View.OVER_SCROLL_NEVER
+            addView(body, android.widget.FrameLayout.LayoutParams(-1, -2))
+        }, kit.lp(-1, 0, 1f, t = 8))
+        else root.addView(body, kit.lp(-1, 0, 1f, t = 8))
         // Same dock as on home: move directly from one page to another.
         val dock = LinearLayout(this)   // appearance set by Dock.build(), as on home
         root.addView(dock, kit.lp(-1, kit.dp(84), t = 12))
