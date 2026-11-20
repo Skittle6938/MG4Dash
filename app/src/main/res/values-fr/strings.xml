@@ -1195,4 +1195,5 @@
     <string name="br_erase_msg">Cette courbe : celle affichée revient à 15 / 35 / 70 / 100 %. Tout effacer : les deux courbes de ce profil, claire et sombre.</string>
     <string name="br_erase_this">Cette courbe</string>
     <string name="br_erase_all">Tout effacer</string>
+    <string name="usb_read_on_computer">La voiture a refusé la racine de la clé, le fichier est donc dans le dossier propre à MG4Dash : un téléphone ne peut pas l’ouvrir, lisez la clé sur un ordinateur.</string>
 </resources>

@@ -1195,4 +1195,5 @@
     <string name="br_erase_msg">This curve: the one shown goes back to 15 / 35 / 70 / 100 %. Erase all: both curves of this profile, light and dark.</string>
     <string name="br_erase_this">This curve</string>
     <string name="br_erase_all">Erase all</string>
+    <string name="usb_read_on_computer">The car refused the stick’s root, so the file is in MG4Dash’s own folder: a phone cannot open it, read the stick on a computer.</string>
 </resources>

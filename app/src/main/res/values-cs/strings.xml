@@ -1193,4 +1193,5 @@
     <string name="br_erase_msg">Tato křivka: zobrazená se vrátí na 15 / 35 / 70 / 100 %. Smazat vše: obě křivky tohoto profilu, světlá i tmavá.</string>
     <string name="br_erase_this">Tato křivka</string>
     <string name="br_erase_all">Smazat vše</string>
+    <string name="usb_read_on_computer">Auto odmítlo kořen disku, soubor je proto ve vlastní složce MG4Dash: telefon ji neotevře, přečtěte disk v počítači.</string>
 </resources>
