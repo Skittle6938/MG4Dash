@@ -411,7 +411,7 @@ A short tour of the main gestures opens after a first install (*Skip* closes it 
 - Pinch the home screen with two fingers: choose the cards of each widget (see [Choosing the cards](#choosing-the-cards))
 - Long press the connection icons: choose which ones show, including USB-A and USB-C, which are off by default
 - One finger sliding in from the left or right edge (home, pages, settings): open Android Auto (MG4Link, CarPlay) when a phone is connected; either side, for the driver or the passenger
-- Two fingers sliding down from the very top, over any app: back to MG4Dash's home; three fingers over MG4Link's projection: end its session
+- Two fingers sliding down from the very top over another app: back to MG4Dash's home. Three fingers over MG4Link's projection end its session.
 - Settings › Look › Brightness, curve shown: slide a point up or down, touch the curve to add one, long press an empty part of the graph to erase the curve
 - Swipe the weather card: hourly ↔ daily forecast
 - Tap a segment of the KERS gauge: regeneration level; long press: one-pedal driving

@@ -120,6 +120,7 @@ class StripGestureTest {
         assertEquals(Action.NONE, stripAction(Action.DISCONNECT, linkInFront = false))
         // The others wherever they are
         assertEquals(Action.HOME, stripAction(Action.HOME, linkInFront = false))
+        assertEquals(Action.NONE, stripAction(Action.HOME, linkInFront = false, dashInFront = true))
         assertEquals(Action.MENU, stripAction(Action.MENU, linkInFront = true))
     }
 

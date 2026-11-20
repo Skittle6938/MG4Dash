@@ -3,10 +3,15 @@ package app.mg4dash
 import app.mg4dash.car.CarBridge
 
 import android.content.Context
+import android.view.View
+import android.view.ViewGroup
+import android.widget.FrameLayout
+import android.widget.TextView
 import app.mg4dash.system.Prefs
 import app.mg4dash.ui.Kit
 import app.mg4dash.ui.ShortcutTiles
 import app.mg4dash.ui.ShortcutTiles.Tile
+import app.mg4dash.ui.ShortcutsPanel
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -25,6 +30,29 @@ class ShortcutsMenuTest {
     private val prefs get() = Prefs(ctx)
 
     @Before fun clear() { prefs.raw.edit().clear().commit() }
+
+    @Test fun brightnessTileHidesAndRestoresTheBar() {
+        val decor = FrameLayout(ctx)
+        ShortcutsPanel.Panel(ctx, null, decor)
+        fun views(v: View): Sequence<View> = sequence {
+            yield(v)
+            if (v is ViewGroup) for (i in 0 until v.childCount) yieldAll(views(v.getChildAt(i)))
+        }
+        fun hasBar() = views(decor).any { it.javaClass.simpleName == "BrightnessBar" }
+        fun text(id: Int) = views(decor).filterIsInstance<TextView>().first { it.text == ctx.getString(id) }
+        val sheet = views(decor).first { it.isLongClickable }
+        assertTrue(hasBar())
+        sheet.performLongClick()
+        assertFalse(hasBar())
+        (text(R.string.br_title).parent as View).performClick()
+        assertFalse(prefs.shortcutsBrightness)
+        text(R.string.sc_done).performClick()
+        assertFalse(hasBar())
+        sheet.performLongClick()
+        (text(R.string.br_title).parent as View).performClick()
+        text(R.string.sc_done).performClick()
+        assertTrue(hasBar())
+    }
 
     @Test fun powerOffRequiresParkAndAValidNearZeroSpeed() {
         assertTrue(CarBridge.canPowerOff(true, 0f))
