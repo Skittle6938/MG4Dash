@@ -21,10 +21,10 @@ class BrightnessMemoryTest {
         // Automatic: the shift matters, not the level the sensor sets
         assertFalse(BrightnessMemory.differs(State(true, 0.4f, 30), State(true, 0.4f, 200)))
         assertTrue(BrightnessMemory.differs(State(true, 0f, 30), State(true, 0.4f, 30)))
-        assertTrue("back to manual by the car", BrightnessMemory.differs(State(false, 0.4f, 30), State(true, 0.4f, 30)))
-        // By hand: the level matters, not the shift
+        assertFalse("current manual mode", BrightnessMemory.differs(State(false, 0f, 30), State(true, 0.4f, 30)))
+        assertFalse("previous manual mode", BrightnessMemory.differs(State(true, 0f, 30), State(false, 0.4f, 30)))
         assertFalse(BrightnessMemory.differs(State(false, 0f, 51), State(false, 0.6f, 51)))
-        assertTrue(BrightnessMemory.differs(State(false, 0f, 128), State(false, 0f, 51)))
+        assertFalse(BrightnessMemory.differs(State(false, 0f, 128), State(false, 0f, 51)))
     }
 
     @Test fun rememberedThenPutBack() {
@@ -35,11 +35,31 @@ class BrightnessMemoryTest {
         Settings.System.putInt(cr, "screen_brightness_mode", 1)
         Settings.System.putFloat(cr, "screen_auto_brightness_adj", -0.4f)
         BrightnessMemory.chosen(ctx)
-        // The car's reset at start: manual, no shift
-        Settings.System.putInt(cr, "screen_brightness_mode", 0)
+        // The car's reset at start: automatic, no shift
         Settings.System.putFloat(cr, "screen_auto_brightness_adj", 0f)
         BrightnessMemory.restore(ctx, "test")
         assertEquals(1, Settings.System.getInt(cr, "screen_brightness_mode"))
         assertEquals(-0.4f, Settings.System.getFloat(cr, "screen_auto_brightness_adj"), 1e-6f)
+    }
+
+    @Test fun manualBrightnessIsLeftAloneAtStartupAndWake() {
+        val ctx = RuntimeEnvironment.getApplication()
+        val cr = ctx.contentResolver
+        Settings.System.putInt(cr, "screen_brightness_mode", 0)
+        Settings.System.putInt(cr, "screen_brightness", 51)
+        BrightnessMemory.chosen(ctx)
+        Settings.System.putInt(cr, "screen_brightness", 180)
+        BrightnessMemory.restore(ctx, "start")
+        assertEquals(180, Settings.System.getInt(cr, "screen_brightness"))
+
+        Settings.System.putInt(cr, "screen_brightness_mode", 1)
+        Settings.System.putFloat(cr, "screen_auto_brightness_adj", -0.4f)
+        BrightnessMemory.chosen(ctx)
+        Settings.System.putInt(cr, "screen_brightness_mode", 0)
+        Settings.System.putFloat(cr, "screen_auto_brightness_adj", 0f)
+        BrightnessMemory.restore(ctx, "screen on")
+        assertEquals(0, Settings.System.getInt(cr, "screen_brightness_mode"))
+        assertEquals(180, Settings.System.getInt(cr, "screen_brightness"))
+        assertEquals(0f, Settings.System.getFloat(cr, "screen_auto_brightness_adj"), 1e-6f)
     }
 }
