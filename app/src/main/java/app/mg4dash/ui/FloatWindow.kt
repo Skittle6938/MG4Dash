@@ -119,9 +119,9 @@ class FloatWindow(
         layer.addView(holder, FrameLayout.LayoutParams(0, 0))
         layer.addView(ghost, FrameLayout.LayoutParams(0, 0))
         ghost.visibility = View.GONE
-        // Just above home's screen: what comes later over it (edit mode, tutorial, alerts) stays above the page
-        content.addView(layer, (0 until content.childCount).firstOrNull { content.getChildAt(it) !== layer }?.let { it + 1 } ?: -1,
-            FrameLayout.LayoutParams(-1, -1))
+        // In the detached windows' own layer, just above home's screen: what comes later over it (edit mode, Keep climate
+        // on, tutorial, alerts) stays above the page
+        host().addView(layer, FrameLayout.LayoutParams(-1, -1))
         content.viewTreeObserver.addOnGlobalLayoutListener(follow)
         look()
         holder.visibility = View.INVISIBLE
@@ -135,7 +135,7 @@ class FloatWindow(
         content.viewTreeObserver.removeOnGlobalLayoutListener(follow)
         holder.removeView(panel)
         panel.setPadding(0, panel.paddingTop, panel.paddingRight, panel.paddingBottom)
-        content.removeView(layer)
+        (layer.parent as? ViewGroup)?.removeView(layer)
         Log.i(TAG, "web app back in the cards")
     }
 
@@ -324,6 +324,16 @@ class FloatWindow(
 
     /** In front of the other detached window (the last touched one); behind it otherwise. */
     fun front(on: Boolean) { layer.translationZ = if (on) d else 0f }
+
+    /**
+     * The layer of the web app's and the map's windows, shared, just above home's screen (#98). Their order (the last
+     * touched in front, [front]) is an elevation inside it: given straight to a child of the window's content, that
+     * elevation put the page over everything opened later over home, Keep climate on and the edit mode included, and
+     * took their touches.
+     */
+    private fun host(): ViewGroup = content.findViewWithTag<ViewGroup>(HOST) ?: FrameLayout(activity).apply {
+        tag = HOST; clipChildren = false; clipToPadding = false
+    }.also { h -> content.addView(h, (0 until content.childCount).firstOrNull { content.getChildAt(it) !== h }?.let { it + 1 } ?: -1, FrameLayout.LayoutParams(-1, -1)) }
 
     /** Docked: its card's outline, lit while the page is awake (the card's own is under the page, out of sight). */
     fun dockOutline(on: Boolean) {
@@ -575,6 +585,8 @@ class FloatWindow(
 
     companion object {
         private const val TAG = "FloatWeb"
+        /** The tag of the detached windows' shared layer. */
+        const val HOST = "mg4dash_float_host"
         /**
          * Where the move mode's hint ([w] × [h]) goes for the window [r] in a [width] × [height] screen: under it, else
          * above it, else in its middle (a window almost as tall as the screen), so never over its frame; centred on it.
