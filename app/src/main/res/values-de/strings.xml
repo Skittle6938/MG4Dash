@@ -247,7 +247,7 @@
     <string name="temp_cal_title">Temperaturkalibrierung</string>
     <string name="temp_cal_preview">Angezeigt: %1$s</string>
     <string name="temp_cal_reset">Zurücksetzen</string>
-    <string name="st_valet_msg">Der Original-Startbildschirm von SAIC wird wieder eingeschaltet und wieder zum Startbildschirm. MG4Dash bleibt installiert: „SAIC-Startbildschirm ersetzen“, um zurückzukehren. Fortfahren?</string>
+    <string name="st_valet_msg">Der Original-Startbildschirm von SAIC wird wieder eingeschaltet und wieder zum Startbildschirm. MG4Dash bleibt installiert, tut aber nichts mehr; um zurückzukehren, drei Finger vom oberen Bildschirmrand nach unten ziehen. Hat das Auto neben Radio Dash ein eigenes Radio, wird Radio Dash in dieser Zeit ausgeschaltet. Fortfahren?</string>
     <string name="activate">Aktivieren</string>
     <string name="st_home_changed">Startbildschirm geändert</string>
     <string name="st_failed">Fehlgeschlagen (siehe Protokoll)</string>

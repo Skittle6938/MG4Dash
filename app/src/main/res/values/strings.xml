@@ -247,7 +247,7 @@
     <string name="temp_cal_title">Temperature calibration</string>
     <string name="temp_cal_preview">Displayed: %1$s</string>
     <string name="temp_cal_reset">Reset</string>
-    <string name="st_valet_msg">The original SAIC home screen will be switched back on and become the home screen again. MG4Dash stays installed: tap “Replace SAIC home” to come back to it. Continue?</string>
+    <string name="st_valet_msg">The original SAIC home screen will be switched back on and become the home screen again. MG4Dash stays installed but does nothing meanwhile; to come back to it, slide three fingers down from the top of the screen. Where the car has its own radio beside Radio Dash, Radio Dash is switched off meanwhile. Continue?</string>
     <string name="activate">Activate</string>
     <string name="st_home_changed">Home screen changed</string>
     <string name="st_failed">Failed (see the log)</string>

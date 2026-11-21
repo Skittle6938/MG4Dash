@@ -67,6 +67,8 @@ class LauncherApp : Application() {
         app.mg4dash.ui.ShortcutsPanel.GlobalStrip.update(this)
         app.mg4dash.system.Rescue.start(this)
         app.mg4dash.system.Rescue.alive(this)
+        // Radio Dash kept off for the whole maintenance (the car switched off halfway included)
+        if (!app.mg4dash.system.Prefs(this).valetAuto) app.mg4dash.system.RadioDashGuard.maintenanceOn(this)
     }
 
     /**

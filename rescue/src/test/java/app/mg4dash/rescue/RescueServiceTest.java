@@ -195,6 +195,26 @@ public class RescueServiceTest {
         assertTrue(rescued(), rescued().startsWith("stock:"));
     }
 
+    @Test public void dashUninstalledDuringMaintenanceSwitchesRadioDashOnAgain() throws Exception {
+        // MG4Dash had switched Radio Dash off for its maintenance mode, then went (#123)
+        home(SAIC_HOME);
+        install("com.saicmotor.radio");
+        pm.setApplicationEnabledSetting("com.saicmotor.radio", PackageManager.COMPONENT_ENABLED_STATE_DISABLED_USER, 0);
+        Settings.Global.putString(cr, "mg4dash_radio_off", "1");
+        service.run(0);
+        assertEquals(PackageManager.COMPONENT_ENABLED_STATE_DEFAULT, pm.getApplicationEnabledSetting("com.saicmotor.radio"));
+        assertEquals("0", Settings.Global.getString(cr, "mg4dash_radio_off"));
+    }
+
+    @Test public void radioDashLeftAloneWithoutTheMark() throws Exception {
+        // Switched off by someone else (not MG4Dash's maintenance): never touched
+        home(SAIC_HOME);
+        install("com.saicmotor.radio");
+        pm.setApplicationEnabledSetting("com.saicmotor.radio", PackageManager.COMPONENT_ENABLED_STATE_DISABLED_USER, 0);
+        service.run(0);
+        assertEquals(PackageManager.COMPONENT_ENABLED_STATE_DISABLED_USER, pm.getApplicationEnabledSetting("com.saicmotor.radio"));
+    }
+
     // ── MG4Dash does not start ──
 
     @Test public void noSignOfLifeRecompilesAndRelaunches() throws Exception {

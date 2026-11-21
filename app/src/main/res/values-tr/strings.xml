@@ -247,7 +247,7 @@
     <string name="temp_cal_title">Sıcaklık kalibrasyonu</string>
     <string name="temp_cal_preview">Gösterilen: %1$s</string>
     <string name="temp_cal_reset">Sıfırla</string>
-    <string name="st_valet_msg">Orijinal SAIC ana ekranı yeniden açılacak ve tekrar ana ekran olacak. MG4Dash yüklü kalır: geri dönmek için “SAIC ana ekranını değiştir”. Devam edilsin mi?</string>
+    <string name="st_valet_msg">Orijinal SAIC ana ekranı yeniden açılacak ve tekrar ana ekran olacak. MG4Dash yüklü kalır ama bu sırada hiçbir şey yapmaz; geri dönmek için ekranın üstünden üç parmakla aşağı kaydırın. Araçta Radio Dash’in yanında kendi radyosu varsa, Radio Dash bu sırada kapatılır. Devam edilsin mi?</string>
     <string name="activate">Etkinleştir</string>
     <string name="st_home_changed">Ana ekran değişti</string>
     <string name="st_failed">Başarısız (günlüğe bakın)</string>
