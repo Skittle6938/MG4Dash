@@ -1195,5 +1195,5 @@
     <string name="br_erase_msg">Diese Kurve: die angezeigte kehrt zu 15 / 35 / 70 / 100 % zurück. Alles löschen: beide Kurven dieses Profils, hell und dunkel.</string>
     <string name="br_erase_this">Diese Kurve</string>
     <string name="br_erase_all">Alles löschen</string>
-    <string name="usb_read_on_computer">Das Auto hat das Stammverzeichnis des Sticks verweigert, die Datei liegt daher im eigenen Ordner von MG4Dash: Ein Telefon kann ihn nicht öffnen, lesen Sie den Stick an einem Computer.</string>
+    <string name="usb_saved_internal">Das Auto hat das Kopieren auf den USB-Stick nicht erlaubt: stattdessen im Speicher des Autos gespeichert, %1$s</string>
 </resources>

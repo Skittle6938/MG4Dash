@@ -1227,9 +1227,10 @@ class SettingsActivity : AppCompatActivity() {
         export.setOnClickListener {
             val text = LogExport.text(title, Compat.report(this), Log.snapshot(radioLines))
             val w = app.mg4dash.system.UsbExport.write(this, LogExport.fileName(System.currentTimeMillis()), text)
-            // In MG4Dash's own folder (the car refused the others): a phone cannot open it, say so (#110)
-            if (w != null) say(getString(R.string.st_log_exported, w.path) + if (w.hidden) "\n" + getString(R.string.usb_read_on_computer) else "", ok = true)
-            else paintStick()
+            // The car refused every place on the stick: saved in its own memory, and said so (#110, Marc 21/11)
+            if (w == null) paintStick()
+            else if (w.internal) say(getString(R.string.usb_saved_internal, w.path), ok = false)
+            else say(getString(R.string.st_log_exported, w.path), ok = true)
         }
         eject.setOnClickListener {
             ejecting = true; paintStick(); say(getString(R.string.st_log_ejecting), ok = false)
