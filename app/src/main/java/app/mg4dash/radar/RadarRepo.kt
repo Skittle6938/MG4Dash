@@ -671,7 +671,11 @@ object RadarRepo {
             prepThread = Thread.currentThread()
             fun left(): Int? = if (done < 8) null else (((System.currentTimeMillis() - started) / done) * (total - done) / 60_000L).toInt()
             var retryAt = 0L
-            fun show(phase: PrepPhase) { _prepare.value = Prep(done, total, failed, phase, bytes, left(), if (phase == PrepPhase.RETRY) retryAt else 0L) }
+            fun show(phase: PrepPhase) {
+                // Once stopped, only "cancelled" is shown: a wait for the Wi-Fi under way never comes back over it
+                if (prepCancelled && phase != PrepPhase.CANCELLED) return
+                _prepare.value = Prep(done, total, failed, phase, bytes, left(), if (phase == PrepPhase.RETRY) retryAt else 0L)
+            }
             // Waits for a Wi-Fi up to PREP_WIFI_WAIT_MS: false if none came back
             fun waitWifi(): Boolean {
                 if (onWifi()) return true
@@ -684,7 +688,8 @@ object RadarRepo {
             fun cancelled(): Boolean {
                 if (!prepCancelled) return false
                 prepThread = null
-                Log.i(TAG, "preparing cancelled ($done / $total)"); resume.edit().remove(PREP_RESUME_KEY).apply(); show(PrepPhase.CANCELLED); return true
+                // Shown stopped before the place is forgotten: whoever sees the place gone sees "cancelled" too
+                Log.i(TAG, "preparing cancelled ($done / $total)"); show(PrepPhase.CANCELLED); resume.edit().remove(PREP_RESUME_KEY).apply(); return true
             }
             // Blocks to fetch: the 4 x 4 ones first; one that fails or is too big comes back as its quarters
             val queue = ArrayDeque(boxes.map { it to PREP_TILES })
