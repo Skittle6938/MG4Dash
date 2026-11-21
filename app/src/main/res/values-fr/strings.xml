@@ -1194,4 +1194,6 @@
     <string name="br_erase_this">Cette courbe</string>
     <string name="br_erase_all">Tout effacer</string>
     <string name="usb_saved_internal">La voiture n’a pas donné la permission de copier sur la clé USB : enregistré à la place dans la mémoire de la voiture, %1$s</string>
+    <string name="fx_pick_hint">Cochez-en une ou plusieurs : à chaque fois, l’une des cochées est tirée au sort, jamais les autres. Aucune cochée : pas d’animation.</string>
+    <string name="fx_random_of">Aléatoire : %1$s</string>
 </resources>

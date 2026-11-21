@@ -1194,4 +1194,6 @@
     <string name="br_erase_this">Deze curve</string>
     <string name="br_erase_all">Alles wissen</string>
     <string name="usb_saved_internal">De auto gaf geen toestemming om naar de USB-stick te kopiëren: in plaats daarvan opgeslagen in het geheugen van de auto, %1$s</string>
+    <string name="fx_pick_hint">Vink er één of meer aan: telkens wordt een van de aangevinkte geloot, nooit de andere. Geen aangevinkt: geen animatie.</string>
+    <string name="fx_random_of">Willekeurig: %1$s</string>
 </resources>

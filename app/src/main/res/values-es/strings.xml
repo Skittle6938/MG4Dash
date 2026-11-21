@@ -1194,4 +1194,6 @@
     <string name="br_erase_this">Esta curva</string>
     <string name="br_erase_all">Borrar todo</string>
     <string name="usb_saved_internal">El coche no dio permiso para copiar en la memoria USB: guardado en su lugar en la memoria del coche, %1$s</string>
+    <string name="fx_pick_hint">Marca una o varias: cada vez se sortea una de las marcadas, nunca las demás. Ninguna marcada: sin animación.</string>
+    <string name="fx_random_of">Aleatorio: %1$s</string>
 </resources>

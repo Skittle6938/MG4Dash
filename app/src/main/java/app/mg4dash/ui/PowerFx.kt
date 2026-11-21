@@ -44,6 +44,16 @@ class PowerFx(private val context: Context) : Drawable() {
         }
         /** Settings choice only: one of the three animations, drawn at each trigger. */
         const val RANDOM = 4
+        /** The animations that can be ticked, in the settings' order. */
+        val STYLES = listOf(LIGHTNING, FLAMES, HYPERSPACE)
+        /** The old single choice as a set: random = all three, one = itself, none = none. */
+        fun fromSetting(setting: Int): Set<Int> = when (setting) {
+            NONE -> emptySet()
+            LIGHTNING, FLAMES, HYPERSPACE -> setOf(setting)
+            else -> STYLES.toSet()
+        }
+        /** Style played for the ticked ones: one of them drawn, never another; none ticked: none. */
+        fun pick(ticked: Set<Int>): Int = ticked.filter { it in STYLES }.randomOrNull() ?: NONE
         const val HOLD_MS = 10_000L
         private const val FADE_MS = 700L
         private const val MAX_STARS = 280
@@ -479,7 +489,8 @@ class PowerFx(private val context: Context) : Drawable() {
         paint.shader = null; paint.color = 0xFFFFFFFF.toInt(); paint.alpha = 255; c.drawPath(path, paint)
         if (veil > 0f) {
             paint.shader = null; paint.style = Paint.Style.FILL
-            paint.color = 0xFF02040B.toInt(); paint.alpha = (veil * (if (light) 235 else 185)).toInt()
+            // Lighter than before (Marc, 21/11): the road's screen still shows through, the stars stay bright on it
+            paint.color = 0xFF02040B.toInt(); paint.alpha = (veil * (if (light) 150 else 110)).toInt()
             c.drawRect(b, paint)
         }
         // Jump: brief bluish flash and shake of the screen, also at each new record (smaller)

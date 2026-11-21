@@ -234,6 +234,15 @@ class Prefs(context: Context) {
     var powerFx: Int
         get() = sp.getInt("power_fx", 4)
         set(v) = sp.edit().putInt("power_fx", v).apply()
+
+    /**
+     * The full power animations ticked (Marc, 21/11): one of them drawn at each trigger, never the others; none ticked,
+     * no animation. Until first set, the old single choice: random = all three, one = that one, none = none.
+     */
+    var powerFxSet: Set<Int>
+        get() = sp.getString("power_fx_on", null)?.let { s -> s.split(',').mapNotNull { it.trim().toIntOrNull() }.filter { it in app.mg4dash.ui.PowerFx.STYLES }.toSet() }
+            ?: app.mg4dash.ui.PowerFx.fromSetting(powerFx)
+        set(v) = sp.edit().putString("power_fx_on", v.filter { it in app.mg4dash.ui.PowerFx.STYLES }.sorted().joinToString(",")).apply()
     /** Size step of the shortcuts card in a place of [size] (Shortcuts.grid): 0 = 4 per row as before. */
     fun shortcutsDensity(size: app.mg4dash.ui.HomeSlots.Size?): Int = sp.getInt("sc_density_${size ?: "MEDIUM"}", 0).coerceIn(0, 2)
     fun setShortcutsDensity(size: app.mg4dash.ui.HomeSlots.Size?, d: Int) = sp.edit().putInt("sc_density_${size ?: "MEDIUM"}", d.coerceIn(0, 2)).apply()
