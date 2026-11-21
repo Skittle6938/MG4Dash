@@ -59,7 +59,7 @@ class SettingsActivity : AppCompatActivity() {
         prefs = Prefs(this)
         app.mg4dash.ui.Themes.apply(this)
         themeSig = app.mg4dash.ui.Themes.signature(this)
-        // The speed camera alerter's own page (Marc, 17/11): a long press on its card
+        // The speed camera alerter's own page (17/11): a long press on its card
         if (intent.getBooleanExtra(EXTRA_RADAR, false)) { radarPage(); return }
         // A single scrolling area: two columns of categories, under a fixed banner
         // (title, log, close) that leaves room for the fog light button.
@@ -201,7 +201,7 @@ class SettingsActivity : AppCompatActivity() {
             }
         }
         text(src, getString(R.string.st_aa_button_desc), 16f, R.color.text_title)
-        // The energy card's and the map's own options are now in popups on those widgets (Marc, 17/11)
+        // The energy card's and the map's own options are now in popups on those widgets (17/11)
         text(style, getString(R.string.st_widget_options_moved), 15f, R.color.text_sub)
 
         // ════ Vehicle tab: units, equipment, climate, and startup sound ════
@@ -220,7 +220,7 @@ class SettingsActivity : AppCompatActivity() {
 
         // ════ Appearance tab: theme and effects ════
         val theme = panel(lookL, getString(R.string.st_theme))
-        // Brightness (smart brightness, Marc 20/11): right under the theme, with the rest of the look
+        // Brightness (smart brightness, 20/11): right under the theme, with the rest of the look
         dropdown(theme, getString(R.string.st_theme_mode), listOf(R.string.st_mode_auto, R.string.st_mode_dark, R.string.st_mode_light).map { getString(it) }, { prefs.themeMode }) {
             if (prefs.themeMode != it) { prefs.themeMode = it; onThemeChanged() }
         }
@@ -316,7 +316,7 @@ class SettingsActivity : AppCompatActivity() {
         row(energy, priceBtn)
         text(energy, getString(R.string.st_kwh_price_desc), 15f, R.color.text_title)
         toggle(energy, R.string.st_cc_stopped, R.string.st_cc_stopped_desc, { prefs.raw.getBoolean("cc_stopped", true) }) { prefs.raw.edit().putBoolean("cc_stopped", it).apply() }
-        // Brightness at the top of the right column, above the live power (Marc, 20/11)
+        // Brightness at the top of the right column, above the live power (20/11)
         brightnessSetting(panel(lookR, getString(R.string.br_title)))
         // Speed × temperature consumption map (in testing, off by default)
         powerFxSetting(panel(lookR, getString(R.string.sw_power)))
@@ -420,7 +420,7 @@ class SettingsActivity : AppCompatActivity() {
             (if (engineShown) " " + getString(R.string.st_web_engine_note) else ""), 15f, R.color.text_title)
         toggle(upd, R.string.st_update_auto, R.string.st_update_auto_desc, { prefs.updateAuto }) { prefs.updateAuto = it }
         toggle(upd, R.string.st_update_beta, null, { prefs.updateBeta }) { prefs.updateBeta = it }
-        // Uninstalling MG4Dash, MG4Radio or MG4Link (Marc, 19/11, #111): one button, its window explains each one
+        // Uninstalling MG4Dash, MG4Radio or MG4Link (19/11, #111): one button, its window explains each one
         row(upd, button(getString(R.string.un_button)) { app.mg4dash.ui.UninstallWindow.show(this) { if (!isFinishing && !isDestroyed) recreate() } }.apply { setTextColor(color(R.color.accent_danger)) })
 
         // ── Weather ──
@@ -1041,7 +1041,7 @@ class SettingsActivity : AppCompatActivity() {
     private fun powerFxSetting(parent: LinearLayout) {
         // No preview: the surprise is for the road. Displayed order: random first (default).
         val fx = app.mg4dash.ui.PowerFx
-        // One or more ticked (Marc, 21/11): each time, one of those ticked is drawn, never another; none ticked, none
+        // One or more ticked (21/11): each time, one of those ticked is drawn, never another; none ticked, none
         val choices = listOf(fx.LIGHTNING to R.string.fx_lightning, fx.FLAMES to R.string.fx_flames,
             fx.HYPERSPACE to R.string.fx_hyperspace).map { it.first to getString(it.second) }
         lateinit var pick: Button
@@ -1053,7 +1053,7 @@ class SettingsActivity : AppCompatActivity() {
             val name = when {
                 names.isEmpty() -> getString(R.string.fx_none)
                 names.size == 1 -> names[0]
-                // Several ticked: just « Random », which ones are in the drop-down list (Marc, 21/11)
+                // Several ticked: just « Random », which ones are in the drop-down list (21/11)
                 else -> getString(R.string.fx_random)
             }
             pick.text = "$name   ${if (list.visibility == View.VISIBLE) "▴" else "▾"}"
@@ -1080,7 +1080,7 @@ class SettingsActivity : AppCompatActivity() {
             text = getString(R.string.fx_pick_hint); setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f); setTextColor(color(R.color.text_title))
         }, LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(6) })
         paint(); label()
-        // The choice button on the right of its label (Marc, 21/11), its list under it
+        // The choice button on the right of its label (21/11), its list under it
         val line = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
         line.addView(TextView(this).apply {
             text = getString(R.string.st_power_fx); setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f); setTextColor(color(R.color.text_value))
@@ -1098,7 +1098,7 @@ class SettingsActivity : AppCompatActivity() {
     /** Trials of the animations' sounds in the settings (random: each one in turn). */
     private var fxTrials = 0
 
-    /** The chosen animation's sound at [percent], to set the volume while parked (Marc, 15/11). */
+    /** The chosen animation's sound at [percent], to set the volume while parked (15/11). */
     private fun fxTrial(percent: Int = prefs.fxVolume) =
         app.mg4dash.ui.FxSound.play(this, app.mg4dash.ui.FxSound.trialStyle(prefs.powerFxSet, fxTrials++), percent)
 
@@ -1251,7 +1251,7 @@ class SettingsActivity : AppCompatActivity() {
         export.setOnClickListener {
             val text = LogExport.text(title, Compat.report(this), Log.snapshot(radioLines))
             val w = app.mg4dash.system.UsbExport.write(this, LogExport.fileName(System.currentTimeMillis()), text)
-            // The car refused every place on the stick: saved in its own memory, and said so (#110, Marc 21/11)
+            // The car refused every place on the stick: saved in its own memory, and said so (#110, 21/11)
             if (w == null) paintStick()
             else if (w.internal) say(getString(R.string.usb_saved_internal, w.path), ok = false)
             else say(getString(R.string.st_log_exported, w.path), ok = true)
@@ -1409,7 +1409,7 @@ class SettingsActivity : AppCompatActivity() {
     }
 
     /**
-     * The speed camera alerter's own page (Marc's mockups, 17/11), opened by a long press on its card, apart from the
+     * The speed camera alerter's own page (the owner's mockups, 17/11), opened by a long press on its card, apart from the
      * settings: three tabs (Alertes, Données, Voiture (ISA)) built by [app.mg4dash.radar.RadarPage].
      */
     private fun radarPage() {
@@ -1444,7 +1444,7 @@ class SettingsActivity : AppCompatActivity() {
     }
 
     /**
-     * Smart brightness (Marc, 20/11, mockup v3): compact lines, the text on the left and small buttons on the right.
+     * Smart brightness (20/11, mockup v3): compact lines, the text on the left and small buttons on the right.
      * The automatic mode, Android's own (default) or the smart one; the learnt curve, shown on demand for the dark or
      * the light look and edited by hand; a long press on the graph erases this curve or both of this profile.
      */

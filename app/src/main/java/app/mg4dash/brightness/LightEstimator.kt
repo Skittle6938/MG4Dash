@@ -10,7 +10,7 @@ import kotlin.math.pow
 import kotlin.math.sin
 
 /**
- * The light outside, estimated (Marc, 20/11): the car measures none (its light sensor reads 0 lux, its
+ * The light outside, estimated (20/11): the car measures none (its light sensor reads 0 lux, its
  * OUTSIDE_AMBIENT_LIGHT stays at 0), so it comes from the sun's height (position and time, computed offline), dimmed by
  * the clouds Open-Meteo forecasts (shortwave radiation, or cloud cover), and the position lights, the car's only real
  * light signal, which win when they say it is dark (tunnel, car park, storm). Pure: no Android, tested on its own.

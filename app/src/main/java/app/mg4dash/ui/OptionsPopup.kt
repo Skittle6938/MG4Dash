@@ -12,7 +12,7 @@ import app.mg4dash.R
 
 /**
  * A widget's own options in a popup, opened from the widget (a long press on the energy card, the gear next to the
- * OpenStreetMap map in its menu): the settings that were in Settings › Home (Marc, 17/11), in the radar page's style
+ * OpenStreetMap map in its menu): the settings that were in Settings › Home (17/11), in the radar page's style
  * (a title, lines of a title, a grey subtitle and an outlined control).
  */
 class OptionsPopup(private val a: Activity, title: String) {

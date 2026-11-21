@@ -105,7 +105,7 @@ class ProfilesTest {
         while (Profiles.list(ctx).size > 1) Profiles.delete(ctx, Profiles.list(ctx).last().id)
         assertEquals(Profiles.Refusal.LAST, Profiles.delete(ctx, Profiles.current(ctx).id))
         // Renamed, with a phone
-        assertNull(Profiles.update(ctx, Profiles.current(ctx).id, "Marc", "AA:BB:CC:DD:EE:FF"))
+        assertNull(Profiles.update(ctx, Profiles.current(ctx).id, "Alex", "AA:BB:CC:DD:EE:FF"))
         assertEquals("AA:BB:CC:DD:EE:FF", Profiles.current(ctx).phone)
     }
 

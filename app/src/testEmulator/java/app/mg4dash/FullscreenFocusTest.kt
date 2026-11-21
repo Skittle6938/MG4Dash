@@ -17,7 +17,7 @@ import org.robolectric.annotation.Config
 import java.util.concurrent.TimeUnit
 
 /**
- * The SAIC call window (Marc, 17/11 16:47): it takes the focus, the system shows the top bar, then it shrinks to its
+ * The SAIC call window (17/11 16:47): it takes the focus, the system shows the top bar, then it shrinks to its
  * floating card and gives the focus back. Home's flags are unchanged and no visibility change reaches it, yet the bar
  * is on screen: home must notice and hide it again, on the home screen and on the pages alike.
  */

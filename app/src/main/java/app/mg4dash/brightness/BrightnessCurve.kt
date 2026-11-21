@@ -7,7 +7,7 @@ import kotlin.math.exp
 import kotlin.math.log10
 
 /**
- * The learnt curve of the smart brightness (Marc, 20/11): the light outside (log10 of the lux) → the screen's
+ * The learnt curve of the smart brightness (20/11): the light outside (log10 of the lux) → the screen's
  * brightness (0 to 1 of the system's range). Without any correction, the default curve: 15 % at night (10 lux), 35 % at
  * twilight (400), 70 % on a grey day (10 000), 100 % in full sun (80 000). Each correction made with the slider is a
  * point; the curve follows the points near them and stays the default far from them, never falls when the light rises,
@@ -52,7 +52,7 @@ class BrightnessCurve(points: List<Point> = emptyList()) {
 
     /**
      * A correction at [level] (lights [lights]) to [value] (0 to 1), from the slider: not held between its neighbours.
-     * It replaces the point within [REPLACE] of it, and the newest choice wins (Marc, 20/11): an older point it
+     * It replaces the point within [REPLACE] of it, and the newest choice wins (20/11): an older point it
      * contradicts (darker light yet brighter, or lighter yet darker) is deleted; the oldest goes beyond [MAX_POINTS].
      */
     fun with(level: Double, lights: Boolean, value: Double, at: Long): BrightnessCurve {

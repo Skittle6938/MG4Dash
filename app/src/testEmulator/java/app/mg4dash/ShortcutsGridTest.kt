@@ -9,7 +9,7 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
-/** Shortcuts card size steps (Marc, 15/11): a row first, then a column, today's grid kept at step 0. */
+/** Shortcuts card size steps (15/11): a row first, then a column, today's grid kept at step 0. */
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [28])
 class ShortcutsGridTest {
@@ -38,7 +38,7 @@ class ShortcutsGridTest {
         assertTrue(Shortcuts.iconDp(133f, 238f) > 64)
     }
 
-    /** The icon side from the card's size equals the one of its tiles (no small first frame, Marc 15/11). */
+    /** The icon side from the card's size equals the one of its tiles (no small first frame, 15/11). */
     @Test fun iconFromTheCardSize() {
         // Medium place, 4 × 2: tiles of (562 - 30) / 4 × (378 - 4 - 10) / 2
         assertEquals(Shortcuts.iconDp(133f, 182f), Shortcuts.tileIcon(562f, 378f, 4, 2))

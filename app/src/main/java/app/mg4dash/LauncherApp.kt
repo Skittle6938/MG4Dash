@@ -53,7 +53,7 @@ class LauncherApp : Application() {
     }
 
     /**
-     * Maintenance mode (Marc, 19/11): nothing but the three-finger gesture and its "Back to MG4Dash" banner, what that
+     * Maintenance mode (19/11): nothing but the three-finger gesture and its "Back to MG4Dash" banner, what that
      * banner needs (SAIC home known), the fog button's overlay taken off, and the rescue app kept up to date. Neither the
      * car link, the media and radio, the guidance, the location, the speed cameras, the weather, the Wi-Fi first, the
      * star key, the V2L, the brightness, the SAIC launcher link nor the boot's adb.

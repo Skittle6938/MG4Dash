@@ -7,7 +7,7 @@ import kotlin.math.hypot
 import kotlin.math.roundToInt
 
 /**
- * Speed camera alerter (test, Marc 16/11), from OpenStreetMap data only: the roads with their limits, the speed
+ * Speed camera alerter (test, 16/11), from OpenStreetMap data only: the roads with their limits, the speed
  * cameras and their enforcement relations around the car. Pure logic here, no Android: map-matching, the camera
  * zones, the alert levels.
  */
@@ -263,7 +263,7 @@ class Matcher {
 
 /** Zones around the cameras: the exact position is never shown, only a stretch of road that contains it. */
 object Zones {
-    /** Length of the zone of a camera whose limit is [limit] on a road of type [highway] (Marc's rule, 16/11). */
+    /** Length of the zone of a camera whose limit is [limit] on a road of type [highway] (the owner's rule, 16/11). */
     fun length(limit: Int?, highway: String?): Int = when {
         limit != null && limit <= 50 -> 500
         (highway == "motorway" || highway == "trunk") && (limit ?: 0) >= 110 -> 4000

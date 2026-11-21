@@ -13,7 +13,7 @@ import app.mg4dash.map.NavRepo
 import java.util.Locale
 
 /**
- * The guidance card (Marc, 19/11): the Android Auto guidance alone, as MG4Link sends it, big enough to be read while
+ * The guidance card (19/11): the Android Auto guidance alone, as MG4Link sends it, big enough to be read while
  * driving. Every place shows everything: the manoeuvre, its distance, the exit, the street, the battery on arrival,
  * the time and km left and the arrival time; only the "then" line (when MG4Link sends one) stays out of the small
  * place. Sizes in sp, none under 22 for a useful text: what does not fit is cut (the street) rather than shrunk.
@@ -227,7 +227,7 @@ class NavCard(context: Context) : FrameLayout(context) {
             else -> Form.MEDIUM
         }
 
-        /** The battery on arrival in the text colour, orange under 20 %, red under 10 % (Marc's mockups, 19/11). */
+        /** The battery on arrival in the text colour, orange under 20 %, red under 10 % (the owner's mockups, 19/11). */
         fun batteryColor(p: Int): Int = when { p < 10 -> R.color.accent_danger; p < 20 -> R.color.accent_heat; else -> R.color.text_value }
     }
 }

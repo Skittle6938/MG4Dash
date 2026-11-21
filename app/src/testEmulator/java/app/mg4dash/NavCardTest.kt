@@ -43,7 +43,7 @@ class NavCardTest {
     }
 
     @Test fun consumptionUsed() {
-        // The average since the last charge (Marc, 20/11), whatever the trip does
+        // The average since the last charge (20/11), whatever the trip does
         assertEquals(17f, ArrivalBattery.consumption(12, 15f, 17f)!!, 0f)
         assertEquals(17f, ArrivalBattery.consumption(3, 15f, 17f)!!, 0f)
         assertEquals(17f, ArrivalBattery.consumption(12, null, 17f)!!, 0f)

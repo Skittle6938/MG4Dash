@@ -11,7 +11,7 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.RuntimeEnvironment
 import org.robolectric.annotation.Config
 
-/** The SAIC call window kept in full screen (Marc, 17/11): added to policy_control with the option, removed without it. */
+/** The SAIC call window kept in full screen (17/11): added to policy_control with the option, removed without it. */
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [28])
 class CallBarPolicyTest {

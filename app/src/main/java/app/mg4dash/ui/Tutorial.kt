@@ -194,7 +194,7 @@ object Tutorial {
             bubble.addView(text(context.getString(title), 34f, Themes.color(context, R.color.text_value), bold = true))
             if (step.images.isNotEmpty()) {
                 val row = LinearLayout(context).apply { orientation = LinearLayout.HORIZONTAL }
-                // Up to 264 × 99 dp each, smaller to fit 4 in the bubble (Simple and three layouts, Marc 14/11)
+                // Up to 264 × 99 dp each, smaller to fit 4 in the bubble (Simple and three layouts, 14/11)
                 val n = step.images.size
                 val imgW = minOf(264, (step.width - 56 - 16 * (n - 1)) / n)
                 step.images.forEachIndexed { i, (img, label) ->
@@ -221,7 +221,7 @@ object Tutorial {
             if (!last) bottom.addView(button(R.string.tu_skip, false) { done(activity) })
             bottom.addView(text(if (only) "" else "${index + 1} / ${STEPS.size}", 22f, Themes.color(context, R.color.text_title)).apply { gravity = Gravity.CENTER },
                 LinearLayout.LayoutParams(0, -2, 1f))
-            // Back to the previous step (Marc, 14/11)
+            // Back to the previous step (14/11)
             if (!only && index > 0) bottom.addView(button(R.string.tu_prev, false) { index--; render() },
                 LinearLayout.LayoutParams(-2, -2).apply { rightMargin = dp(16) })
             bottom.addView(button(if (last) R.string.tu_done else R.string.tu_next, true) {

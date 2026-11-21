@@ -105,7 +105,7 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         b.fanGauge.segments = VehicleState.FAN_MAX
         // Touched or slid along: that fan level, sent once when lifted
         b.fanGauge.onSegmentPick = { CarBridge.setFanLevel(it + 1) }
-        // Held still on the fan's levels (Marc, 20/11): the climate's settings, as on the temperature; a touch or a slide still sets the fan
+        // Held still on the fan's levels (20/11): the climate's settings, as on the temperature; a touch or a slide still sets the fan
         b.fanGauge.onPickHold = { climateSettings() }
         b.kersGauge.segments = 4
         b.kersGauge.onColor = color(R.color.accent_energy)
@@ -310,7 +310,7 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         web.visibility = View.GONE
         panels[Card.WEB] = frame(web).also { webPanel = it }
         panels[Card.ENERGY] = b.energyCard
-        // Its own options in a popup (Marc, 17/11): a long press on the card
+        // Its own options in a popup (17/11): a long press on the card
         b.energyCard.setOnLongClickListener { energyOptions(); true }
         mapOf(Card.TRIP to R.string.sw_energy, Card.POWER to R.string.sw_power, Card.PHONE to R.string.sw_phone).forEach { (card, title) ->
             val v = layoutInflater.inflate(R.layout.card_secondary, null, false)
@@ -513,7 +513,7 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         if (f.cards.size < 2) return
         cancelBoost(f)   // the driver changes card: no going back after the full power
         // Offline, the map and the web app give way to consumption, which has its own turn: skipped, or the
-        // swipe would land on consumption again and never reach the cards beyond (shortcuts, Marc 16/11)
+        // swipe would land on consumption again and never reach the cards beyond (shortcuts, 16/11)
         val next = HomeSlots.next(f.cards, f.shown, dir) { offlineInstead(f, it) != null } ?: return
         f.current = next
         HomeSlots.setCurrent(prefs, slotLayout, f.slot.id, next)
@@ -525,7 +525,7 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
 
     /**
      * A web page, an app or the map fills the card and takes its touches once woken (#41, #97, #98): at rest a
-     * one-finger swipe changes card, a touch wakes it. The map too (Marc, 14/11), as the web app and the apps:
+     * one-finger swipe changes card, a touch wakes it. The map too (14/11), as the web app and the apps:
      * no more two fingers to move it.
      */
     private fun covering(f: SlotFrame) = restsUntilTouched(f.shown)
@@ -686,7 +686,7 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         listOf(Card.ENERGY, Card.TRIP, Card.POWER, Card.PHONE, Card.CONSUMPTION, Card.SHORTCUTS, Card.WEB, Card.TRIPS, Card.DRIVING, Card.RADAR, Card.NAV).forEach { c ->
             panels[c]?.let { pad(it, tl != null && c in tl.cards) }
         }
-        // The media card keeps its full width (Marc, 15/11, #118): its cover goes to the edge, under the button if any
+        // The media card keeps its full width (15/11, #118): its cover goes to the edge, under the button if any
         pad(b.mediaCard, false)
     }
     private val basePad = HashMap<View, Int>()
@@ -754,7 +754,7 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         climateForm(frameOf(Card.CLIMATE)?.slot?.size)
         val media = frames.values.firstOrNull { it.fill == HomeSlots.Fill.Media }?.slot?.size
         b.mediaAlbum.visibility = if (media == HomeSlots.Size.QUARTER) View.GONE else View.VISIBLE
-        // A quarter (Marc, 20/11): the title on one line, so a long title and its artist never push the buttons out of the place
+        // A quarter (20/11): the title on one line, so a long title and its artist never push the buttons out of the place
         b.mediaTitle.maxLines = if (media == HomeSlots.Size.QUARTER) 1 else 2
         mediaQuarter(media == HomeSlots.Size.QUARTER)
         energyForm(frameOf(Card.ENERGY)?.slot?.size == HomeSlots.Size.QUARTER)
@@ -878,7 +878,7 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
 
     /**
      * Connection icons (#86): in the weather by default (to the right of the city, following the weather card shown),
-     * or at the top of the place chosen in the edit mode (Marc, 17/11): centred, at the height of the weather's line.
+     * or at the top of the place chosen in the edit mode (17/11): centred, at the height of the weather's line.
      * The bar belongs to the place: every card shown there in turn makes room for it inside, its frame unchanged.
      * Hidden when chosen so.
      */
@@ -894,7 +894,7 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         when {
             choice == HomeSlots.CONN_NONE || (choice != null && f == null) -> (row.parent as? android.view.ViewGroup)?.removeView(row)
             // On the weather shown: at the top of its place as on the other cards, over the weather, which keeps its
-            // whole height (Marc, 19/11: its layout leaves that room); no weather shown, no bar
+            // whole height (19/11: its layout leaves that room); no weather shown, no bar
             inWeather -> {
                 val card = listOf(Card.HOURLY, Card.DAILY).firstOrNull { isShown(it) }
                 val wf = card?.let { frameOf(it) }
@@ -936,7 +936,7 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         fx.set(shown?.level == 1, k)
     }
 
-    /** The OpenStreetMap map's options (Marc, 17/11, once in Settings › Home): zoom, colours, energy when offline. */
+    /** The OpenStreetMap map's options (17/11, once in Settings › Home): zoom, colours, energy when offline. */
     private fun mapOptions() {
         val zoom = prefs.mapZoom; val theme = prefs.mapTheme
         app.mg4dash.ui.OptionsPopup(this, getString(R.string.st_style_map))
@@ -946,7 +946,7 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
             .show { if (prefs.mapZoom != zoom || prefs.mapTheme != theme) app.mg4dash.ui.Themes.recreateSmooth(this) else refreshCards() }
     }
 
-    /** The energy card's options (Marc, 17/11, once in Settings › Home): live power in it, volts and amps, back to it plugged in. */
+    /** The energy card's options (17/11, once in Settings › Home): live power in it, volts and amps, back to it plugged in. */
     private fun energyOptions() {
         val power = prefs.energyCardPower
         val va = prefs.powerVa
@@ -955,14 +955,14 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
             .toggle(t(R.string.st_energy_card_power), getString(R.string.st_energy_card_power_desc), { prefs.energyCardPower }) { prefs.energyCardPower = it }
             .toggle(t(R.string.st_power_va), getString(R.string.st_power_va_desc), { prefs.powerVa }) { prefs.powerVa = it }
             .toggle(t(R.string.st_stack_auto), null, { prefs.stackAuto }) { prefs.stackAuto = it }
-            // The card is built with these two: rebuilt at once when either changed (Marc, 21/11: V / A did not show
+            // The card is built with these two: rebuilt at once when either changed (21/11: V / A did not show
             // until home was built again)
             .show { if (prefs.energyCardPower != power || prefs.powerVa != va) app.mg4dash.ui.Themes.recreateSmooth(this) }
     }
 
     /**
      * The content of [f]'s cards starts below the bar ([on]) or where it was: a top padding inside each card, so the
-     * cards keep their frame (Marc, 17/11: the places do not move).
+     * cards keep their frame (17/11: the places do not move).
      */
     private fun reserveConnections(f: SlotFrame, on: Boolean) {
         val room = resources.getDimensionPixelSize(R.dimen.panel_pad) + dp(connBarDp + 6)
@@ -1042,7 +1042,7 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
     override fun onNewIntent(intent: Intent?) {
         if (closedForMaintenance) { super.onNewIntent(intent); return }
         super.onNewIntent(intent)
-        // Home key while home is shown: the shortcuts menu closes too (Marc, 14/11)
+        // Home key while home is shown: the shortcuts menu closes too (14/11)
         if (intent?.hasCategory(Intent.CATEGORY_HOME) == true) app.mg4dash.ui.ShortcutsPanel.closeAll()
         if (!simpleMode) setMapFullscreen(false)
         if (intent?.getBooleanExtra(app.mg4dash.ui.Tutorial.EXTRA_SHOW, false) == true) b.root.post { app.mg4dash.ui.Tutorial.show(this) }
@@ -1183,7 +1183,7 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
                 VehicleState.flowDirection(parts)?.let { CarBridge.setFanDirection(it) }
             }
         }
-        // The whole temperature area between − and + (Marc, 20/11: not only the number), its full height: a touch opens the
+        // The whole temperature area between − and + (20/11: not only the number), its full height: a touch opens the
         // climate page, a long press the climate's settings (calibration of the displayed temperature)
         val tempZone = b.temp.parent as LinearLayout
         (tempZone.layoutParams as LinearLayout.LayoutParams).let { it.height = LinearLayout.LayoutParams.MATCH_PARENT; tempZone.layoutParams = it }
@@ -2165,7 +2165,7 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         }
         powerAvg = tv(26f, R.color.text_value, Gravity.END)
         // A tap anywhere on the card changes the consumption, and the range with it (#29); a long press anywhere opens
-        // its options (Marc, 21/11: before, only the right half took the tap, and there the long press was lost)
+        // its options (21/11: before, only the right half took the tap, and there the long press was lost)
         card.setOnClickListener { nextConsSource() }
         powerLabel = null
         row.addView(powerValue, LinearLayout.LayoutParams(-2, -2))
@@ -2625,7 +2625,7 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
     private fun color(res: Int) = app.mg4dash.ui.Themes.color(this, res)
     private fun dp(v: Int) = (v * resources.displayMetrics.density).toInt()
     internal companion object {
-        /** What waits for a touch before taking the touches: the web app, an app and the map (Marc, 14/11). */
+        /** What waits for a touch before taking the touches: the web app, an app and the map (14/11). */
         internal fun restsUntilTouched(shown: Card?) = shown == Card.WEB || shown == Card.MAP
         private const val KEY_MAP_FULL = "map_full"
         /** Width of the consumption's logo, in text sizes: before the kWh/100, before the km (#29). */

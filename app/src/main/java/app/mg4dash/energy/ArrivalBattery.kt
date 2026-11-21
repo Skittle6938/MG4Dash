@@ -5,7 +5,7 @@ import app.mg4dash.car.CarBridge
 import app.mg4dash.system.Prefs
 
 /**
- * The battery left at the end of the Android Auto route (guidance card, Marc 19/11): the charge now, less the
+ * The battery left at the end of the Android Auto route (guidance card, 19/11): the charge now, less the
  * distance left at the consumption so far, over the battery's usable capacity. An estimate: neither the climbs, nor a
  * faster road, nor the climate ahead are known, hence the "≈" on the card.
  */
@@ -25,7 +25,7 @@ object ArrivalBattery {
     }
 
     /**
-     * The consumption to use (Marc, 20/11): the average the energy card shows, since the last charge, which moves
+     * The consumption to use (20/11): the average the energy card shows, since the last charge, which moves
      * slowly; the trip's own, which swings with each climb and each start, only while there is no average yet.
      */
     fun consumption(tripKm: Int, tripPer100: Float?, average: Float?): Float? =

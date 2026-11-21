@@ -14,7 +14,7 @@ import org.robolectric.RuntimeEnvironment
 import org.robolectric.annotation.Config
 
 /**
- * A place's swipe goes through any card (Marc, 19/11: the guidance card could not be swiped): one that takes touches
+ * A place's swipe goes through any card (19/11: the guidance card could not be swiped): one that takes touches
  * (a tile, a button) and one with nothing to touch (the guidance card), the same way.
  */
 @RunWith(RobolectricTestRunner::class)

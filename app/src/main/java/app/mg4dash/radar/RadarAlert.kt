@@ -26,7 +26,7 @@ import kotlinx.coroutines.launch
 
 /**
  * The alerts. Over the high threshold inside a camera zone, a red flashing banner over every app (Android Auto too,
- * option on by default). Four kinds of sound, each with its own sound, volume and repeat (Marc, 17/11): a camera zone
+ * option on by default). Four kinds of sound, each with its own sound, volume and repeat (17/11): a camera zone
  * coming (once), a little over the limit, well over it, well over it inside a camera zone.
  */
 @SuppressLint("StaticFieldLeak")

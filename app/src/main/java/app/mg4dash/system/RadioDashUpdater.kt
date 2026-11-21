@@ -22,7 +22,7 @@ object RadioDashUpdater {
     const val TESTED_ON = "SWI69"
 
     /**
-     * Whether Radio Dash is offered on the firmware [raw] (Marc, 19/11, discussion #111: on SWI68 R46 it restarted the
+     * Whether Radio Dash is offered on the firmware [raw] (19/11, discussion #111: on SWI68 R46 it restarted the
      * head unit): SWI69 only, any revision, the firmware it is built from. Elsewhere it is neither offered nor updated;
      * one already installed can still be uninstalled.
      */

@@ -49,7 +49,7 @@ object TempCalibration {
         }
         durRow(R.string.ac_cycle_on, { prefs.acCycleOnSec }) { prefs.acCycleOnSec = it }
         durRow(R.string.ac_cycle_off, { prefs.acCycleOffSec }) { prefs.acCycleOffSec = it }
-        // Heating / cooling on the card (#34, Marc's choice C): none, the word only, the word and the animation
+        // Heating / cooling on the card (#34, the owner's choice C): none, the word only, the word and the animation
         box.addView(kit.text(activity.getString(R.string.clim_fx_title), 18f, R.color.text_title), kit.lp(-1, -2, t = 22))
         val (seg, pick) = kit.segmented(listOf(R.string.clim_fx_off, R.string.clim_fx_text, R.string.clim_fx_anim).map { activity.getString(it) }) { }
         fun pickMode(m: Int) { prefs.climateFxMode = m; pick(m); onChange() }

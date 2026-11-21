@@ -187,7 +187,7 @@ object ConsumptionCurve {
             sp.edit().remove("cc_open").remove("cc_open_d").apply()
         }
         trips.removeAll { System.currentTimeMillis() - it.first > YEAR_MS }
-        // Short trips let into the 12 months by #29 leave, once (Marc, 17/11)
+        // Short trips let into the 12 months by #29 leave, once (17/11)
         if (!sp.getBoolean("cc_short_cleaned", false)) {
             val kept = withoutShortTrips(trips, tripMixes, tripDists)
             Log.i(TAG, "12 months: ${trips.size - kept.size} short trips removed")

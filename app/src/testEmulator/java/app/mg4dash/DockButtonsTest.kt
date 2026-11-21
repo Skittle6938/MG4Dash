@@ -35,7 +35,7 @@ class DockButtonsTest {
         assertTrue(Dock.stockScreens(Dock.Page.APPS).isEmpty())
     }
 
-    /** Marc, 15/11: with no phone, the Android Auto button opens MG4Link (its Connect button), not a message. */
+    /** 15/11: with no phone, the Android Auto button opens MG4Link (its Connect button), not a message. */
     @Test fun mg4LinkOpensWithoutPhone() {
         org.junit.Assert.assertTrue(app.mg4dash.ui.Dock.openLinkWithoutPhone(carPlay = false, mg4Link = true))
         org.junit.Assert.assertFalse(app.mg4dash.ui.Dock.openLinkWithoutPhone(carPlay = false, mg4Link = false))

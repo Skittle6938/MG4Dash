@@ -22,7 +22,7 @@ class RescueHandOverTest {
     private val saic = ComponentName("com.saicmotor.launcher", "com.saicmotor.launcher.view.MainActivity")
 
     @Test fun homeWordForTheRescue() {
-        // SAIC home replaced, or MG4Dash the HOME resolved (SAIC home kept, Marc's car): it is home
+        // SAIC home replaced, or MG4Dash the HOME resolved (SAIC home kept, the owner's car): it is home
         assertEquals("1", HomeSwitcher.homeWord(false, true, saic, ours))
         assertEquals("1", HomeSwitcher.homeWord(false, false, ours, ours))
         // Maintenance mode, or SAIC home in use: not home

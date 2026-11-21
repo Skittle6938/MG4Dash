@@ -24,7 +24,7 @@ import org.robolectric.annotation.GraphicsMode
 import org.robolectric.shadows.ShadowToast
 import java.util.concurrent.TimeUnit
 
-/** Grand affichage, step 1 (Marc, 19/11): each enlarged screen has its own density, Android's own setting untouched. */
+/** Grand affichage, step 1 (19/11): each enlarged screen has its own density, Android's own setting untouched. */
 @RunWith(RobolectricTestRunner::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 @Config(sdk = [28], qualifiers = "w1920dp-h720dp-land-mdpi")

@@ -11,7 +11,7 @@ import app.mg4dash.system.Prefs
  * Sounds of the full power animations: the whoosh of the jump to light speed, the electric crackle of the
  * lightning and the fire of the flames. One volume for all of them (Settings › Look, under the animation), low by
  * default; the three files are levelled to the same loudness (about -12 dB RMS, soft-limited).
- * Mixed over whatever plays, which goes on at its own volume (Marc, 15/11): played as system sounds, on the car's
+ * Mixed over whatever plays, which goes on at its own volume (15/11): played as system sounds, on the car's
  * system channel, with no audio focus. The MG4 mixes that channel with the radio or the music without lowering or
  * pausing them (heard on the car, 15/11). A media sound needs the focus to be heard over the radio, and the focus
  * paused it (media) or lowered it (navigation prompt).
@@ -20,7 +20,7 @@ object FxSound {
     /** Default volume of the animation sounds, in % (low: the system channel is loud). */
     const val DEFAULT_VOLUME = 30
 
-    /** SoundPool volume at 100 %: the system channel is loud, a quarter of full gain is plenty (Marc, 15/11). */
+    /** SoundPool volume at 100 %: the system channel is loud, a quarter of full gain is plenty (15/11). */
     internal const val MAX_GAIN = 0.25f
 
     /** SoundPool volume (0..MAX_GAIN) for a setting in % (0..100). */
@@ -65,9 +65,9 @@ object FxSound {
     /** Gain of the speed camera alerter's beeps: the effects' volume, never under an audible minimum. */
     internal const val MIN_ALERT_GAIN = 0.12f
     /**
-     * The alerts' own scale, louder than the effects' (Marc, 17/11: too quiet in the car at 100 %): 100 % is SoundPool's
+     * The alerts' own scale, louder than the effects' (17/11: too quiet in the car at 100 %): 100 % is SoundPool's
      * full volume, four times the effects' top, on the same channel (mixed over the source, nothing lowered); then too
-     * loud at 100 % (Marc, 17/11): half of it, twice the effects' top (the sounds normalised to -0.5 dBFS).
+     * loud at 100 % (17/11): half of it, twice the effects' top (the sounds normalised to -0.5 dBFS).
      */
     internal const val ALERT_MAX_GAIN = 0.5f
     internal fun alertGain(percent: Int): Float = maxOf(percent.coerceIn(0, 100) / 100f * ALERT_MAX_GAIN, MIN_ALERT_GAIN)

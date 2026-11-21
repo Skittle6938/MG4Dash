@@ -7,7 +7,7 @@ import android.graphics.RectF
 import app.mg4dash.map.NavRepo
 
 /**
- * The guidance's manoeuvre drawings: plain thick lines with a head, a ring for the roundabouts (Marc, 19/11: the
+ * The guidance's manoeuvre drawings: plain thick lines with a head, a ring for the roundabouts (19/11: the
  * drawing as before, thicker, the exit number in the middle of the ring, the roundabouts balanced). Each drawing is laid
  * out in its own units (the entry road comes from below, y down), then scaled and centred to fit the view with a margin:
  * nothing ever goes past its edges, whatever the direction (the tip was cut before).
@@ -143,7 +143,7 @@ object NavGlyph {
 
     /**
      * The extent used for the layout: a roundabout is centred on its ring with the same room whatever its exit
-     * (Marc, 19/11: better balanced), so the ring never moves from one manoeuvre to the next.
+     * (19/11: better balanced), so the ring never moves from one manoeuvre to the next.
      */
     private fun layoutBounds(shape: Shape, ops: List<Op>): RectF {
         if (shape !is Shape.Round) return bounds(ops)
@@ -186,7 +186,7 @@ object NavGlyph {
      * Draws [shape] in [box] in [color]; everything stays within [box] minus [margin]. Every path, width and size is
      * worked out in the view's own pixels: the canvas is never scaled. On the car (Android 9, hardware drawing) a path
      * drawn in the drawing's small units on a canvas scaled about 80 times is rasterised at its small size and then
-     * stretched, which showed a blurred blob instead of the arrow (Marc, 19/11), and the roundabout's legs and number
+     * stretched, which showed a blurred blob instead of the arrow (19/11), and the roundabout's legs and number
      * did not show; the ring alone, a plain circle, came out right.
      */
     fun draw(c: Canvas, box: RectF, shape: Shape, color: Int, margin: Float = box.width() * 0.04f) {

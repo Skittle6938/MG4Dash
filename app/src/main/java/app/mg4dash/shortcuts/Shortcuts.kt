@@ -73,7 +73,7 @@ object Shortcuts {
     // ─── Vue ───
 
     /** Builds (or rebuilds) the grid in [holder]; [page] = displayed page. */
-    /** Shortcuts' size steps: today's grid, more, dense (Marc, 15/11). */
+    /** Shortcuts' size steps: today's grid, more, dense (15/11). */
     val DENSITIES = 0..2
 
     /**
@@ -113,7 +113,7 @@ object Shortcuts {
         shownSize = size
         val density = prefs.shortcutsDensity(size)
         val (cols, rows) = grid(size, density)
-        // Icon size known before the first drawing (Marc, 15/11: on Home they showed small, then grew): from the
+        // Icon size known before the first drawing (15/11: on Home they showed small, then grew): from the
         // card's size when it is laid out, else the last one found for this place and step
         val d = activity.resources.displayMetrics.density
         val key = "$size/$density"

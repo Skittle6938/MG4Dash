@@ -91,7 +91,7 @@ public class RescueV4Test {
         try { spm.addIntentFilterForActivity(c, f); } catch (Exception e) { throw new RuntimeException(e); }
     }
 
-    /** Marc's car: SAIC home enabled (its hub stays), MG4Dash the home chosen. */
+    /** the owner's car: SAIC home enabled (its hub stays), MG4Dash the home chosen. */
     private void dashHomeSaicEnabled(String said) {
         home(SAIC_HOME);
         home(DASH_HOME);
@@ -290,7 +290,7 @@ public class RescueV4Test {
     }
 
     @Test public void updatedInMaintenanceRecompiledNotRelaunched() throws Exception {
-        // Maintenance mode (Marc, 19/11): MG4Dash does nothing but wait for its gesture: recompiled, its background
+        // Maintenance mode (19/11): MG4Dash does nothing but wait for its gesture: recompiled, its background
         // woken for the gesture, no screen of it opened
         dashHomeSaicEnabled("0");
         service.run(0, RescueService.MODE_UPDATED, -1);

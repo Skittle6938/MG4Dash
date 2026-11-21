@@ -8,7 +8,7 @@ package app.mg4dash.radar
  * overpass.private.coffee no longer answers. ovp.dresel.systems (listed on the OSM wiki: free, no key, up to 4
  * queries at a time per address, updated every night) gave the same data in 7 s, and 3 x 3 tiles in 14 s, every time.
  * So by the region of the area asked: dresel's European or North American server first, then the official ones
- * (z, lz4, the main address; first elsewhere). Never maps.mail.ru (Marc's choice). The official servers need TLS 1.3,
+ * (z, lz4, the main address; first elsewhere). Never maps.mail.ru (the owner's choice). The official servers need TLS 1.3,
  * which Android 9 lacks: [RadarHttp] brings it with Conscrypt.
  */
 object Overpass {

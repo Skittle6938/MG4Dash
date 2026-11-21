@@ -22,7 +22,7 @@ import java.io.File
 import java.util.concurrent.TimeUnit
 
 /**
- * The full power animations' choice (Marc, 21/11): on the right of its label, "Random" alone with several ticked, its
+ * The full power animations' choice (21/11): on the right of its label, "Random" alone with several ticked, its
  * list open (build/screenshots/powerfx_*.png), fr/en/de/tr and Grand affichage.
  */
 @org.junit.experimental.categories.Category(Screenshot::class)

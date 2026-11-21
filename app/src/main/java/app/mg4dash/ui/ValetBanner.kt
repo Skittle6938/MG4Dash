@@ -50,7 +50,7 @@ internal object ValetGesture {
 }
 
 /**
- * Maintenance mode (Marc, 14/11, Discussion #111: "how do I get back to MG4Dash?"): MG4Dash is not in the SAIC app
+ * Maintenance mode (14/11, Discussion #111: "how do I get back to MG4Dash?"): MG4Dash is not in the SAIC app
  * list. A three finger slide from the top of the screen brings this small banner, over the SAIC home or any app:
  * Later, or MG4Dash back as the home screen in one tap. A touch beside it closes it.
  */

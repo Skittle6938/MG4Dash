@@ -12,7 +12,7 @@ import app.mg4dash.system.Profiles
 import app.mg4dash.ui.Themes
 
 /**
- * Profiles in Settings (study v4, step 10): the "Profile: Marc ▾" menu of the banner, on every tab: a profile to switch
+ * Profiles in Settings (study v4, step 10): the "Profile: Main ▾" menu of the banner, on every tab: a profile to switch
  * to, New profile, Edit the profile, Delete the profile; and the window to name a profile, start it from this profile or
  * from the default settings, and pair it with a phone.
  */

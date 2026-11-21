@@ -90,7 +90,7 @@ object SourceMenu {
     }
 
     /**
-     * A question with several answers (the curve's long press, Marc 20/11): [title], [message], then [choices] side by
+     * A question with several answers (the curve's long press, 20/11): [title], [message], then [choices] side by
      * side and Cancel last; centred on [anchor]. [onPick] gets the index of the choice, never called for Cancel.
      */
     fun ask(activity: Activity, anchor: View, title: String, message: String, choices: List<String>, onPick: (Int) -> Unit): android.widget.PopupWindow {

@@ -11,7 +11,7 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
-/** Sounds of the full power animations (Marc, 14/11): one per style, one low volume for all, set in the settings. */
+/** Sounds of the full power animations (14/11): one per style, one low volume for all, set in the settings. */
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [28])
 class FxSoundTest {
@@ -50,7 +50,7 @@ class FxSoundTest {
             (0..2).map { FxSound.trialStyle(setOf(PowerFx.HYPERSPACE, PowerFx.LIGHTNING), it) })
     }
 
-    /** Marc, 21/11: the draw only among the ticked ones; the old single choice carried over. */
+    /** 21/11: the draw only among the ticked ones; the old single choice carried over. */
     @Test fun drawnOnlyAmongTheTicked() {
         val prefs = app.mg4dash.system.Prefs(org.robolectric.RuntimeEnvironment.getApplication())
         val ticked = setOf(PowerFx.FLAMES, PowerFx.HYPERSPACE)

@@ -1,7 +1,7 @@
 package app.mg4dash.radar
 
 /**
- * The speed the alerter shows and checks (Marc, 18/11: "the car's speed, set right now and then on the GPS when both
+ * The speed the alerter shows and checks (18/11: "the car's speed, set right now and then on the GPS when both
  * are steady for a few seconds"): the car's own speed, read four times a second, times a factor learnt from the GPS.
  * The car's speed comes at once and never stops in a tunnel; the GPS gives the true speed, the one the cameras measure
  * (the dashboard's reads a few % high).

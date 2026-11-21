@@ -53,7 +53,7 @@ class EnergyEstimatesTest {
         assertNull(BatteryCapacity.weighted(emptyList()))
     }
 
-    /** Marc, 18/11: the median weighted by the % drop, so that one measurement far off no longer moves the result. */
+    /** 18/11: the median weighted by the % drop, so that one measurement far off no longer moves the result. */
     @Test fun weightedMedianIgnoresAnOutlier() {
         // Three close measurements and one far off (a BMS recalibration): the mean moved, the median stays
         val list = listOf(Sample(0, 47.8f, 15), Sample(0, 48.2f, 18), Sample(0, 48.0f, 16), Sample(0, 62f, 15))

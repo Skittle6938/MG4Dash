@@ -641,7 +641,7 @@ class ScreenshotTest {
         flow.value = flow.value.copy(chargeStatus = 0)
         repeat(5) { shadowOf(Looper.getMainLooper()).idleFor(200, TimeUnit.MILLISECONDS) }
         save(act.window.decorView, "power_cons_0.png")
-        // The whole card takes the tap (Marc, 21/11), the kWh/100 with it
+        // The whole card takes the tap (21/11), the kWh/100 with it
         val avg = act.findViewById<android.view.View>(R.id.energyCard)
         val seen = mutableListOf<Int>()
         for (n in 1..4) {
@@ -1411,7 +1411,7 @@ class ScreenshotTest {
 
     private var lastHome: org.robolectric.android.controller.ActivityController<MainActivity>? = null
 
-    /** Shortcuts card at its three size steps in each kind of place (Marc, 15/11), in build/screenshots/sc_grid/. */
+    /** Shortcuts card at its three size steps in each kind of place (15/11), in build/screenshots/sc_grid/. */
     @Test fun shortcutsGrid() {
         val names = listOf("cover.gate|Portail", "cover.garage_door|Garage", "light.allee|Allée", "lock.entree|Entrée",
             "scene.arriving_home|Arrivée", "script.chauffage|Chauffage", "switch.prise_garage|Prise", "light.salon|Salon",
@@ -1468,7 +1468,7 @@ class ScreenshotTest {
     }
 
     /**
-     * The gesture tour's miniatures of home (Marc, 14/11): Simple and three layouts, dark, 528 × 198 (264 × 99 dp at
+     * The gesture tour's miniatures of home (14/11): Simple and three layouts, dark, 528 × 198 (264 × 99 dp at
      * 2×), in build/screenshots/tutorial/, to copy into res/drawable-nodpi.
      */
     @Test fun tutorialMiniatures() {

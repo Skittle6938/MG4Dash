@@ -7,7 +7,7 @@ import android.content.Context
 import android.content.Intent
 
 /**
- * Maintenance mode (service mode, SAIC home back), Marc 19/11: MG4Dash then does nothing at all but wait for the
+ * Maintenance mode (service mode, SAIC home back), 19/11: MG4Dash then does nothing at all but wait for the
  * three-finger gesture and its "Back to MG4Dash" banner (#123: in maintenance mode, the stock launcher's radio arrow
  * brought MG4Dash back). Started light (the gesture, what the banner needs, its rescue app kept up to date), every
  * screen of it closes at once and silently, and leaving maintenance restarts it in full.
@@ -20,7 +20,7 @@ object Maintenance {
 
     /**
      * For a MG4Dash screen opened in maintenance mode (a Radio Dash shortcut, the stock radio's arrow, MG4Link's "Open
-     * MG4Dash"): closed at once and silently, nothing offered (Marc, 21/11, #123: in maintenance nothing of MG4Dash
+     * MG4Dash"): closed at once and silently, nothing offered (21/11, #123: in maintenance nothing of MG4Dash
      * reacts; the way back is the three-finger gesture, MG4Dash chosen again as the home in Android's settings, or
      * MG4Dash opened from an app list).
      * True when it closed (its onCreate then stops there).

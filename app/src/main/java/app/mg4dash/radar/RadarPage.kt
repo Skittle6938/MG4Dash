@@ -23,7 +23,7 @@ import app.mg4dash.system.Units
 import app.mg4dash.ui.Themes
 
 /**
- * The alerter's settings page (Marc's mockups, 17/11): three tabs on the left, Alertes (thresholds, banner, the sound of
+ * The alerter's settings page (the owner's mockups, 17/11): three tabs on the left, Alertes (thresholds, banner, the sound of
  * each alert), Données (prepared trips with their progress, while driving, storage), Voiture (ISA) (the car's limit read,
  * OSM's limit sent); the OpenStreetMap licence under the tabs. Built in code in MG4Dash's style (panels, outlined chips).
  */
@@ -202,7 +202,7 @@ class RadarPage(private val a: Activity, private val prefs: Prefs) {
         val soundNames = listOf(R.string.st_rad_snd_none, R.string.st_rad_snd_chime, R.string.st_rad_snd_beep, R.string.st_rad_snd_loud).map { a.getString(it) }
         val reps = RadarAlert.REPEATS
         // Column widths: alert, sound, volume, repeat, play
-        // The volume wide, for an easy setting (Marc, 17/11)
+        // The volume wide, for an easy setting (17/11)
         val w = intArrayOf(0, 190, 460, 160, 60)
         fun header() = LinearLayout(a).apply {
             orientation = LinearLayout.HORIZONTAL
@@ -327,7 +327,7 @@ class RadarPage(private val a: Activity, private val prefs: Prefs) {
             detail.text = p?.let { a.getString(R.string.rp_prep_detail, DataUsage.format(a, it.bytes)) +
                 (it.minutesLeft?.takeIf { _ -> running }?.let { m -> " · " + a.getString(R.string.rp_prep_left, Math.max(1, m)) } ?: "") } ?: ""
             failed.text = p?.takeIf { it.failed > 0 }?.let { a.getString(R.string.rp_prep_failed, it.failed) } ?: ""
-            // One button (Marc, 18/11: pause and stop did the same): Stop while it runs, Prepare otherwise; preparing
+            // One button (18/11: pause and stop did the same): Stop while it runs, Prepare otherwise; preparing
             // again skips the tiles already in, so it goes on where it stopped
             main.text = a.getString(if (running) R.string.rp_stop else R.string.st_rad_prepare)
             main.isSelected = true

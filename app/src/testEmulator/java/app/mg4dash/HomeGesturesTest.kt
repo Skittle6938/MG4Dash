@@ -137,7 +137,7 @@ class HomeGesturesTest {
         assertEquals(0, pinches)
     }
 
-    // ── One finger in from a side edge (Marc, 20/11): the phone's projection ──
+    // ── One finger in from a side edge (20/11): the phone's projection ──
 
     private var opened = 0
     private fun edge() = EdgeSwipe(activity) { opened++ }

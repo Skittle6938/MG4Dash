@@ -145,7 +145,7 @@ object EmbeddedApp {
         val prefs = app.mg4dash.system.Prefs(context)
         val wanted = buildMap {
             if (prefs.fullscreen && pkg != null) { put(self, setOf(ImmersiveMode.FULL)); put(pkg, setOf(ImmersiveMode.FULL)) }
-            // The SAIC phone's call window (Marc, 17/11): it does not ask for full screen, so the top bar came back over
+            // The SAIC phone's call window (17/11): it does not ask for full screen, so the top bar came back over
             // home for the whole call; forced like the map's app, the bar stays hidden (a swipe from the top still shows it)
             if (prefs.fullscreen && prefs.callBarHidden) put(SAIC_PHONE, setOf(ImmersiveMode.FULL))
         }

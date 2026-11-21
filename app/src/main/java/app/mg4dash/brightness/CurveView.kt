@@ -12,7 +12,7 @@ import app.mg4dash.R
 import app.mg4dash.ui.Themes
 
 /**
- * The smart brightness's curve in Settings › Look (Marc, 20/11, mockup v2): the default dashed, the learnt one, its
+ * The smart brightness's curve in Settings › Look (20/11, mockup v2): the default dashed, the learnt one, its
  * points, the light now. Edited by hand: a touch on a point selects it and a vertical slide moves it (kept between its
  * neighbours, the curve still rising); a touch elsewhere adds a point there; [deleteSelected] takes the selected one
  * off. Each change is saved once the finger is lifted ([onChange]).
@@ -95,7 +95,7 @@ class CurveView(context: Context, private var curve: BrightnessCurve, private va
 
     private var dragging: BrightnessCurve.Point? = null
 
-    /** A long press held still on an empty part of the graph (Marc, 20/11): the erase window. */
+    /** A long press held still on an empty part of the graph (20/11): the erase window. */
     var onLongPress: (() -> Unit)? = null
 
     // A touch away from the points: a new point once the finger moves or lifts, the erase window if held still

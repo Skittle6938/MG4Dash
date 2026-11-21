@@ -26,7 +26,7 @@ import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
 
 /**
- * Gestures from the top strip (Marc, 17/11): one finger the menu, two fingers MG4Dash's home, three fingers MG4Link's
+ * Gestures from the top strip (17/11): one finger the menu, two fingers MG4Dash's home, three fingers MG4Link's
  * disconnection; when the strip catches them; the two finger pull of MG4Dash's own screens; the contract with MG4Link.
  * Density 1 here, as on the car: dp = px. Two and three fingers need 120 px.
  */

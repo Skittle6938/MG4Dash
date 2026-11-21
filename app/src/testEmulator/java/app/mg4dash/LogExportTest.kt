@@ -40,7 +40,7 @@ class LogExportTest {
         assertEquals("hello", f!!.readText())
     }
 
-    /** #110: the places in order, the car's own memory only last (Marc, 21/11). */
+    /** #110: the places in order, the car's own memory only last (21/11). */
     @Test fun theOrderOfThePlaces() {
         val usb = java.io.File("/storage/ABCD-1234"); val raw = java.io.File("/mnt/media_rw/ABCD-1234")
         val inside = java.io.File("/sdcard/Download/MG4Dash")

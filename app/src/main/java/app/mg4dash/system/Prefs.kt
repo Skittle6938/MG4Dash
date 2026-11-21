@@ -236,7 +236,7 @@ class Prefs(context: Context) {
         set(v) = sp.edit().putInt("power_fx", v).apply()
 
     /**
-     * The full power animations ticked (Marc, 21/11): one of them drawn at each trigger, never the others; none ticked,
+     * The full power animations ticked (21/11): one of them drawn at each trigger, never the others; none ticked,
      * no animation. Until first set, the old single choice: random = all three, one = that one, none = none.
      */
     var powerFxSet: Set<Int>
@@ -247,7 +247,7 @@ class Prefs(context: Context) {
     fun shortcutsDensity(size: app.mg4dash.ui.HomeSlots.Size?): Int = sp.getInt("sc_density_${size ?: "MEDIUM"}", 0).coerceIn(0, 2)
     fun setShortcutsDensity(size: app.mg4dash.ui.HomeSlots.Size?, d: Int) = sp.edit().putInt("sc_density_${size ?: "MEDIUM"}", d.coerceIn(0, 2)).apply()
 
-    /** Sounds of the full power animations (Settings › Look, under the animation): off by default (Marc, 15/11). */
+    /** Sounds of the full power animations (Settings › Look, under the animation): off by default (15/11). */
     // ── Speed camera alerter (test, OpenStreetMap) ──
     /** Orange and red speed on the card when over the limit. */
     var radarVisual: Boolean

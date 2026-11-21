@@ -43,7 +43,7 @@ object ShortcutTiles {
         PROFILE("profile", R.drawable.ic_sc_profile, R.string.sc_profile),
     }
 
-    /** By default only the first row (Marc, 13/11): the users add the others. */
+    /** By default only the first row (13/11): the users add the others. */
     val DEFAULT = listOf(Tile.FOG, Tile.POWER, Tile.ESP, Tile.AIDS, Tile.DEFROST, Tile.MODE)
 
     /** Tiles chosen, in order; unknown ids (older or newer version) are skipped. */
@@ -136,7 +136,7 @@ object ShortcutTiles {
     }
 
     /**
-     * Tile lit in the theme's accent colour (Marc, 14/11, mockup A): what it switches is on / active, ESP active
+     * Tile lit in the theme's accent colour (14/11, mockup A): what it switches is on / active, ESP active
      * included (unlike [Shown.inverted], which marks the unusual state for the icons). Padlocks: locked. Android Auto:
      * connected. Levels (drive mode, regeneration) and actions (switch off, screen off) are never lit.
      */
@@ -336,7 +336,7 @@ object ShortcutTiles {
     private const val CLIM_HYSTERESIS = 0.5f
 
     /**
-     * Climate (Marc's mockup B): off = fan crossed out; on = snowflake ("Cooling") with the A/C on and a set point below
+     * Climate (mockup B): off = fan crossed out; on = snowflake ("Cooling") with the A/C on and a set point below
      * the outside temperature, otherwise heat waves ("Heating"); with no valid outside temperature, snowflake with the
      * A/C on. The state line: set point and outside temperature.
      */
@@ -371,7 +371,7 @@ object ShortcutTiles {
     private const val HEAT_MARGIN = 1f
 
     /**
-     * The climate switched on, shown at once (Marc, 17/11: the icon changed only seconds later): the car has no heating
+     * The climate switched on, shown at once (17/11: the icon changed only seconds later): the car has no heating
      * or cooling reading, the mode is the set point against the outside temperature, so it is known from the last
      * readings before the car confirms the switch-on. Before, the tile showed a plain "On" held [HOLD_MS] until the
      * car's state line came.

@@ -72,7 +72,7 @@ object UsbExport {
     private fun internalRoot(): File? = simulatedInternal ?: try { android.os.Environment.getExternalStorageDirectory() } catch (_: Exception) { null }
 
     /**
-     * The last resort when the car lets nothing be written on the stick (Marc, 21/11): an easy folder of the car's own
+     * The last resort when the car lets nothing be written on the stick (21/11): an easy folder of the car's own
      * memory, Download/MG4Dash, rather than a folder of the stick a phone cannot open.
      */
     internal fun internalFolder(root: File?): File? = root?.let { File(File(it, android.os.Environment.DIRECTORY_DOWNLOADS), FOLDER) }

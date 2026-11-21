@@ -15,7 +15,7 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.RuntimeEnvironment
 import org.robolectric.annotation.Config
 
-/** Uninstalling from the settings (#111), and Keep climate on's set point and fan (#26), Marc 19/11. */
+/** Uninstalling from the settings (#111), and Keep climate on's set point and fan (#26), 19/11. */
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [28])
 class UninstallAndClimateTest {

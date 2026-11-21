@@ -107,7 +107,7 @@ class BigDisplayShots {
             listOf("mg4launcher", "mg4_profiles").forEach { RuntimeEnvironment.getApplication().getSharedPreferences(it, 0).edit().clear().commit() }
             prefs.raw.edit().putBoolean("vertical_dock", true).putInt("theme_mode", 1).putBoolean("tutorial_shortcuts_seen", true).commit()
             val ctx = RuntimeEnvironment.getApplication()
-            app.mg4dash.system.Profiles.update(ctx, app.mg4dash.system.Profiles.current(ctx).id, "Marc", null)
+            app.mg4dash.system.Profiles.update(ctx, app.mg4dash.system.Profiles.current(ctx).id, "Alex", null)
             app.mg4dash.system.Profiles.create(ctx, "Sophie", fromCurrent = true)
             val a = Robolectric.buildActivity(app.mg4dash.settings.SettingsActivity::class.java).setup().get(); idle()
             save(a.window.decorView, "pf_settings_$lang.png")
@@ -125,7 +125,7 @@ class BigDisplayShots {
         }
     }
 
-    /** Marc's first car test (20/11): Keep climate on within the screen, the media in a quarter with Android Auto. */
+    /** the first car test (20/11): Keep climate on within the screen, the media in a quarter with Android Auto. */
     @Test fun carFixes() {
         val a = Robolectric.buildActivity(MainActivity::class.java).setup().get(); idle()
         app.mg4dash.climate.ClimateHoldPanel.show(a); idle()

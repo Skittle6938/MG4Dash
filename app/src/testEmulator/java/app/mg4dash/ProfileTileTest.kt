@@ -37,7 +37,7 @@ class ProfileTileTest {
         assertEquals("Principal", Profiles.current(ctx).name)
     }
 
-    private val list = listOf(Profiles.Profile("p1", "Marc", "AA:AA:AA:AA:AA:AA"), Profiles.Profile("p2", "Sophie", "BB:BB:BB:BB:BB:BB"), Profiles.Profile("p3", "Invité"))
+    private val list = listOf(Profiles.Profile("p1", "Alex", "AA:AA:AA:AA:AA:AA"), Profiles.Profile("p2", "Sophie", "BB:BB:BB:BB:BB:BB"), Profiles.Profile("p3", "Invité"))
 
     @Test fun pairedPhone() {
         assertEquals("p2", PhoneProfile.choose(list, "p1", "bb:bb:bb:bb:bb:bb", null, manual = false, decided = false))

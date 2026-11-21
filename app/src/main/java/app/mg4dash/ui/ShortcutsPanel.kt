@@ -99,7 +99,7 @@ object ShortcutsPanel : Application.ActivityLifecycleCallbacks {
 
     fun init(application: Application) {
         application.registerActivityLifecycleCallbacks(this)
-        // The car's Home key (Marc, 14/11) closes the menu, wherever it was pulled (over MG4Dash or another app):
+        // The car's Home key (14/11) closes the menu, wherever it was pulled (over MG4Dash or another app):
         // Android tells the system dialogs to close ("homekey"), and MainActivity gets the HOME intent too
         try {
             application.registerReceiver(object : android.content.BroadcastReceiver() {
@@ -218,7 +218,7 @@ object ShortcutsPanel : Application.ActivityLifecycleCallbacks {
         }
         private val panelBg = androidx.core.graphics.ColorUtils.compositeColors(
             Themes.color(ctx, R.color.panel), Themes.color(ctx, R.color.bg_top) or 0xFF000000.toInt()) or 0xFF000000.toInt()
-        // The theme's accent (Marc, 14/11, mockup A): what is on is tinted with it, as the climate buttons
+        // The theme's accent (14/11, mockup A): what is on is tinted with it, as the climate buttons
         private val light = Themes.isLight(ctx)
         private val accent = Themes.color(ctx, R.color.accent_action)
         /** Icon and state of a lit tile: the selection colour in dark, the accent itself in light (readable on white). */
@@ -233,7 +233,7 @@ object ShortcutsPanel : Application.ActivityLifecycleCallbacks {
         private val grid = LinearLayout(ctx).apply { orientation = LinearLayout.VERTICAL }
         private val headTitle = TextView(ctx)
         private val headRight = TextView(ctx)
-        /** Title row: only while editing (its title and Done); the menu itself has none, to stay short (Marc, 17/11). */
+        /** Title row: only while editing (its title and Done); the menu itself has none, to stay short (17/11). */
         private lateinit var headRow: View
         private var box: View? = null
         val dialogShown get() = box != null
@@ -534,7 +534,7 @@ object ShortcutsPanel : Application.ActivityLifecycleCallbacks {
 
             /** Lit as a tile that is on (accent tint, border and text) while the automatic brightness is on. */
             private fun showAuto() {
-                // Smart brightness (Marc, 20/11): always automatic, the slider adds a point; no − and + to shift a curve
+                // Smart brightness (20/11): always automatic, the slider adds a point; no − and + to shift a curve
                 val smart = app.mg4dash.brightness.SmartBrightness.enabled(ctx)
                 minus.visibility = if (smart) View.GONE else View.VISIBLE
                 plus.visibility = if (smart) View.GONE else View.VISIBLE
@@ -543,10 +543,10 @@ object ShortcutsPanel : Application.ActivityLifecycleCallbacks {
                 if (on) autoBg.setStroke(kit.dp(2), accentBorder) else autoBg.setStroke(1, c(R.color.panel_border))
                 auto.setTextColor(if (on) accentText else c(R.color.text_value))
                 auto.background = autoBg
-                // The smart mode's small star before AUTO (Marc's choice A), star and word centred together (Marc, 20/11:
+                // The smart mode's small star before AUTO (the owner's choice A), star and word centred together (20/11:
                 // as a compound drawable it sat at the button's far left edge)
                 val star = if (smart) androidx.core.content.ContextCompat.getDrawable(ctx, R.drawable.ic_smart)?.mutate()?.apply {
-                    setTint(if (on) accentText else c(R.color.text_value)); setBounds(0, 0, kit.dp(28), kit.dp(28))   // well visible: the smart mode (Marc, 20/11)
+                    setTint(if (on) accentText else c(R.color.text_value)); setBounds(0, 0, kit.dp(28), kit.dp(28))   // well visible: the smart mode (20/11)
                 } else null
                 auto.text = if (star != null) android.text.SpannableString("*AUTO").apply {
                     setSpan(CenteredIconSpan(star, kit.dp(8)), 0, 1, android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
@@ -737,7 +737,7 @@ object ShortcutsPanel : Application.ActivityLifecycleCallbacks {
     }
 
     /**
-     * Full screen with the shortcuts menu (Marc, 13/11): a strip a few pixels high, invisible, at the very top of the
+     * Full screen with the shortcuts menu (13/11): a strip a few pixels high, invisible, at the very top of the
      * screen above every app (Android Auto, CarPlay, radio, camera, calls, MG4Dash itself), from which a slide down
      * pulls the same menu, shown in a system window over the app in front. A touch on the strip without a slide does
      * nothing. Added once the user is unlocked, kept while the setting and the full screen are on.
@@ -751,7 +751,7 @@ object ShortcutsPanel : Application.ActivityLifecycleCallbacks {
         private var strip: View? = null
 
         /**
-         * Maintenance mode included (Marc, 14/11, Discussion #111): there the strip pulls no menu, a one finger slide is
+         * Maintenance mode included (14/11, Discussion #111): there the strip pulls no menu, a one finger slide is
          * given back to the car's own pull-down, and a three finger slide brings [ValetBanner] to put MG4Dash back as home.
          */
         fun wanted(context: Context): Boolean = Prefs(context).let { it.valetMode || (it.shortcutsMenu && it.fullscreen) }

@@ -16,7 +16,7 @@ import org.robolectric.annotation.Config
 import java.util.concurrent.TimeUnit
 
 /**
- * The energy card with the live power (Marc, 21/11): a tap anywhere changes the consumption, a long press anywhere opens
+ * The energy card with the live power (21/11): a tap anywhere changes the consumption, a long press anywhere opens
  * its options; no part of it (left half, power bar, the kW and V / A line) takes the touch for itself.
  */
 @RunWith(RobolectricTestRunner::class)

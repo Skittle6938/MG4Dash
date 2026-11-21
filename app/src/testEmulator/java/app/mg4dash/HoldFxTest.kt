@@ -22,7 +22,7 @@ import org.robolectric.annotation.GraphicsMode
 import java.io.File
 import java.util.concurrent.TimeUnit
 
-/** The Keep climate screen's warm / cold effect (Marc, 18/11, variant B): the climate card's, at screen scale. */
+/** The Keep climate screen's warm / cold effect (18/11, variant B): the climate card's, at screen scale. */
 @RunWith(RobolectricTestRunner::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 @Config(sdk = [28], qualifiers = "fr-w1920dp-h720dp-land-mdpi")

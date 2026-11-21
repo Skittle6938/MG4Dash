@@ -16,7 +16,7 @@ import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
 import java.io.File
 
-/** The smart mode's star sits with the word AUTO in the middle of its wide button (Marc, 20/11), not at its left edge. */
+/** The smart mode's star sits with the word AUTO in the middle of its wide button (20/11), not at its left edge. */
 @org.junit.experimental.categories.Category(Screenshot::class)
 @RunWith(RobolectricTestRunner::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)

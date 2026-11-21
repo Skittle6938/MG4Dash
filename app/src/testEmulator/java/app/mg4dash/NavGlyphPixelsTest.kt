@@ -14,7 +14,7 @@ import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
 
 /**
- * The manoeuvre drawings are worked out in the view's pixels, never on a scaled canvas (Marc, 19/11: on the car the
+ * The manoeuvre drawings are worked out in the view's pixels, never on a scaled canvas (19/11: on the car the
  * arrow was a blurred blob and a roundabout showed its ring alone, its legs, head and number drawn in small units and
  * stretched by Android 9's hardware drawing).
  */

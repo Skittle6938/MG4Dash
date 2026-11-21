@@ -19,7 +19,7 @@ import java.util.Calendar
 import java.util.TimeZone
 import kotlin.math.log10
 
-/** Smart brightness (Marc, 20/11): the light estimated, the learnt curve, the storage per profile and look. */
+/** Smart brightness (20/11): the light estimated, the learnt curve, the storage per profile and look. */
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [28])
 class SmartBrightnessTest {
@@ -135,7 +135,7 @@ class SmartBrightnessTest {
         raw.edit().putString("bright_curve_dark", BrightnessCurve().with(4.0, false, 0.9, 1).encode()).commit()
         Profiles.switchTo(ctx, "p1", "test")
         assertEquals(0.3, BrightnessCurve.decode(raw.getString("bright_curve_dark", null)).points.single().value, 0.0)
-        // Reset all: both looks of the current profile only (Marc, 20/11)
+        // Reset all: both looks of the current profile only (20/11)
         raw.edit().putString("bright_curve_light", BrightnessCurve().with(1.0, false, 0.5, 1).encode()).commit()
         SmartBrightness.reset(ctx, all = true)
         assertNull(raw.getString("bright_curve_dark", null))
@@ -145,7 +145,7 @@ class SmartBrightnessTest {
     }
 
     @Test fun targetCoversTheWholeRange() {
-        // 0 % is the car's own floor, 16 of 255 (below it the screen does not change, Marc 20/11)
+        // 0 % is the car's own floor, 16 of 255 (below it the screen does not change, 20/11)
         val dark = BrightnessCurve().with(0.0, true, 0.0, 1).with(0.5, true, 0.0, 2)
         assertTrue(SmartBrightness.target(dark, 1.0).let { it in SmartBrightness.FLOOR..SmartBrightness.FLOOR + 15 })
         assertEquals(0.0, SmartBrightness.fromSetting(5), 0.0)
@@ -225,7 +225,7 @@ class SmartBrightnessTest {
         assertTrue(saved!!.points[0].level > 3)
     }
 
-    // ── The slider beyond a neighbour (Marc, 20/11): the newest choice wins ──
+    // ── The slider beyond a neighbour (20/11): the newest choice wins ──
 
     private fun rising(c: BrightnessCurve) = c.points.sortedBy { it.level }.zipWithNext().all { (a, b) -> a.value <= b.value }
 

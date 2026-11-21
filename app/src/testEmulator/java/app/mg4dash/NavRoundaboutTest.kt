@@ -10,7 +10,7 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
 
-/** The roundabout drawn on the guidance banner: its exit where Android Auto says (Marc, 18/11: it never showed). */
+/** The roundabout drawn on the guidance banner: its exit where Android Auto says (18/11: it never showed). */
 @RunWith(RobolectricTestRunner::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 @Config(sdk = [28])
@@ -79,7 +79,7 @@ class NavRoundaboutTest {
         }
     }
 
-    /** The exit number exactly in the middle of the ring (Marc, 19/11): its ink centred within 1 px. */
+    /** The exit number exactly in the middle of the ring (19/11): its ink centred within 1 px. */
     @Test fun exitNumberCentred() {
         for (size in listOf(176, 220, 300)) for (n in listOf(1, 2, 3, 4, 7)) for (h in listOf(0f, 90f, 270f)) {
             val box = android.graphics.RectF(0f, 0f, size.toFloat(), size.toFloat())
@@ -100,7 +100,7 @@ class NavRoundaboutTest {
         }
     }
 
-    /** A roundabout balanced (Marc, 19/11): its ring in the middle whatever the exit, entry and exit legs alike. */
+    /** A roundabout balanced (19/11): its ring in the middle whatever the exit, entry and exit legs alike. */
     @Test fun roundaboutBalanced() {
 
         val tips = ArrayList<Double>()

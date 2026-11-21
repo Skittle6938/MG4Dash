@@ -16,7 +16,7 @@ import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
 import java.util.concurrent.TimeUnit
 
-/** Grand affichage, Marc's first car test (20/11): buttons wholly inside their window or their place. */
+/** Grand affichage, the first car test (20/11): buttons wholly inside their window or their place. */
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [28], qualifiers = "fr-w1920dp-h720dp-land-mdpi")
 class BigFitTest {
@@ -58,7 +58,7 @@ class BigFitTest {
     }
 
     /**
-     * The connection bar placed on another card than the weather (Marc, 20/11): shown at the top of that card, over it,
+     * The connection bar placed on another card than the weather (20/11): shown at the top of that card, over it,
      * in every size of place of the mode.
      */
     @Test fun connectionBarOnAnyCard() {
@@ -109,7 +109,7 @@ class BigFitTest {
         }
     }
 
-    /** Settings kept at their normal size in the mode, but their bar the same as home's: it does not jump (Marc, 20/11). */
+    /** Settings kept at their normal size in the mode, but their bar the same as home's: it does not jump (20/11). */
     @Test fun settingsBarSameAsHome() {
         val home = home()
         val homeBar = rect(home.findViewById(R.id.dock))

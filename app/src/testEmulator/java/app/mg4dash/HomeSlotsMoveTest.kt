@@ -173,7 +173,7 @@ class HomeSlotsMoveTest {
         assertNull(HomeSlots.next(emptyList(), Card.MAP, 1))
     }
 
-    /** Offline (Marc 16/11): the web app and the map give way to consumption; swiping back reaches the shortcuts. */
+    /** Offline (16/11): the web app and the map give way to consumption; swiping back reaches the shortcuts. */
     @Test fun nextSkipsCardsShownAsConsumptionOffline() {
         val cards = listOf(Card.SHORTCUTS, Card.WEB, Card.MAP, Card.CONSUMPTION)
         val offline: (Card) -> Boolean = { it == Card.WEB || it == Card.MAP }

@@ -18,7 +18,7 @@ import org.robolectric.shadows.ShadowDialog
 import java.util.concurrent.TimeUnit
 
 /**
- * The climate card's settings (Marc, 20/11): a long press anywhere on the temperature's area between − and +, not only on
+ * The climate card's settings (20/11): a long press anywhere on the temperature's area between − and +, not only on
  * its number, opens them; − and + keep their own action.
  */
 @RunWith(RobolectricTestRunner::class)
@@ -67,7 +67,7 @@ class ClimateTouchZoneTest {
         assertSame("$tag: − still answers", down, hit(a.window.decorView, d.centerX(), d.centerY()))
     }
 
-    /** The fan's levels (Marc, 20/11): held still, the settings and the level unchanged; a touch still picks a level. */
+    /** The fan's levels (20/11): held still, the settings and the level unchanged; a touch still picks a level. */
     @Test fun fanGaugeHoldAndTap() {
         val a = home(0, "home_layout", "full", "tl=climate;tc=map;tr=media;bl=energy;bc=hourly,daily;br=trip,power,phone")
         val g = a.findViewById<app.mg4dash.ui.SegmentedGauge>(R.id.fanGauge)

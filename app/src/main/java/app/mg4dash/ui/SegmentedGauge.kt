@@ -52,7 +52,7 @@ class SegmentedGauge @JvmOverloads constructor(
     }
 
     /**
-     * Held still on a gauge that picks a level (Marc, 20/11: the climate card's fan): this instead of a level, the level
+     * Held still on a gauge that picks a level (20/11: the climate card's fan): this instead of a level, the level
      * shown before put back. A touch or a slide still picks the level.
      */
     var onPickHold: (() -> Unit)? = null

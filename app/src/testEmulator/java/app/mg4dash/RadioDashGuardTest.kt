@@ -6,7 +6,7 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
-/** Radio Dash switched off for maintenance mode only beside the car's own radio (Marc, 21/11, #123). */
+/** Radio Dash switched off for maintenance mode only beside the car's own radio (21/11, #123). */
 class RadioDashGuardTest {
     @Test fun offOnlyBesideTheCarsOwnRadio() {
         // SWI68 / SWI133 / SWI165: the stock radio is another package, Radio Dash runs next to it

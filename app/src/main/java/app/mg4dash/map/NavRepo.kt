@@ -70,7 +70,7 @@ object NavRepo {
     private var lastRoundabout: String? = null
 
     /**
-     * Each roundabout's raw values as MG4Link sends them, once per roundabout (Marc, 18/11: its drawing did not show
+     * Each roundabout's raw values as MG4Link sends them, once per roundabout (18/11: its drawing did not show
      * the exit), with the heading drawn: nav_log.txt in the app's folder, 64 KB at most. No position, no road name.
      */
     private fun logRoundabout(context: Context, n: Nav) {

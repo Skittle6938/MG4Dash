@@ -6,7 +6,7 @@ import app.mg4dash.media.MediaHub
 
 /**
  * One finger sliding in from the left or the right edge of the screen opens the phone's projection (MG4Link, Android
- * Auto, CarPlay) when a phone is connected; otherwise the gesture does nothing (Marc, 20/11: in place of two fingers
+ * Auto, CarPlay) when a phone is connected; otherwise the gesture does nothing (20/11: in place of two fingers
  * from the top, awkward at times; either edge, so that it is within reach whichever side the wheel is, or of the
  * passenger). Read in the activity's own touch handling, with no strip over the screen: the touches keep reaching the
  * widgets until the gesture is recognised, then the widgets get a cancel. A second finger ends it, so pinching or

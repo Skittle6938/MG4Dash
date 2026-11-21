@@ -53,7 +53,7 @@ object HomeSlots {
         DRIVING("driving", R.string.wc_driving, R.drawable.ic_car),
         /** Speed camera alerter (test, OpenStreetMap): only where the driver places it, in any size. */
         RADAR("radar", R.string.wc_radar, R.drawable.ic_radar),
-        /** The Android Auto guidance alone (Marc, 19/11): only where the driver places it, in any size. */
+        /** The Android Auto guidance alone (19/11): only where the driver places it, in any size. */
         NAV("nav", R.string.wc_nav, R.drawable.ic_map);
 
         /** Fills a big place (two columns): the others would look lost in it, they are greyed there in the edit mode. */
@@ -140,7 +140,7 @@ object HomeSlots {
             Line(listOf(Slot("bl", Size.MEDIUM, 1f), Slot("w", Size.WIDE, 2f)), 60f),
         ), "tl=hourly,daily;tc=energy;tr=trip,power,phone;bl=climate;w=map,consumption,shortcuts", rows = true),
 
-        // ── Grand affichage (study v4, Marc 19/11): Four by default ──
+        // ── Grand affichage (study v4, 19/11): Four by default ──
         BIG_QUAD("big_quad", R.string.ly_big_quad, listOf(col(Q("tl"), Q("bl")), col(Q("tr"), Q("br"))),
             "tl=climate;tr=media;bl=energy,trip,power,phone;br=hourly,daily", columns = 2),
         /** The map (or the guidance) in a half on the left. */
@@ -417,7 +417,7 @@ object HomeSlots {
 
     private fun nowKey(layout: Layout, slot: String) = "slot_now_${layout.key}_$slot"
 
-    // ── The connection bar (Marc, 17/11): in the weather by default, or in the place chosen in the edit mode ──
+    // ── The connection bar (17/11): in the weather by default, or in the place chosen in the edit mode ──
 
     /** Stored for no bar at all. */
     const val CONN_NONE = "none"
@@ -452,7 +452,7 @@ object HomeSlots {
     }
 
     /**
-     * Whether [slot] can hold the bar: any place of the layout, cards or the media (Marc, 17/11: refused on the media
+     * Whether [slot] can hold the bar: any place of the layout, cards or the media (17/11: refused on the media
      * and the small places before); its content makes room below it.
      */
     fun canHoldConnections(config: Config, slot: String): Boolean = config.layout.slot(slot) != null

@@ -6,7 +6,7 @@ import app.mg4dash.system.Log
 import java.io.File
 
 /**
- * The car's speed limit assistance (ISA), studied from the alerter (Marc, 17/11). Two parts, both off by default:
+ * The car's speed limit assistance (ISA), studied from the alerter (17/11). Two parts, both off by default:
  * - [IsaLog], the read side: while driving, every change of the car's properties about speed limits, speed assistance
  *   and navigation goes to a file, with OSM's limit and the GPS speed beside it, to find a value that follows the signs;
  * - [IsaWrite], the write side: OSM's limit sent to the car as the navigation's speed limit. Its decision is complete
@@ -113,7 +113,7 @@ object IsaLog {
  */
 object IsaWrite {
     private const val TAG = "Isa"
-    /** Held back until Marc decides on a test in the car: with false, nothing is ever written, whatever the option. */
+    /** Held back until a test in the car is decided: with false, nothing is ever written, whatever the option. */
     const val WRITE_ALLOWED = false
     const val PROP = 0x2160a185          // NAVIGATION_SPEED_LIMIT_VALUE (float)
     const val ROAD_SPD = 0x2160a1a8      // NAVIGATION_ROAD_SPD (float)

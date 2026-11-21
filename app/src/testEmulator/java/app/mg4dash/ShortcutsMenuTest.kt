@@ -129,7 +129,7 @@ class ShortcutsMenuTest {
 
     @Test fun whatIsOnIsLitInTheAccentColourEspActiveIncluded() {
         fun sh(state: String, inv: Boolean, level: Int? = null) = ShortcutTiles.Shown(state, inv, level = level)
-        assertTrue("ESP active: lit (Marc, 14/11)", ShortcutTiles.lit(Tile.ESP, sh("Active", false)))
+        assertTrue("ESP active: lit (14/11)", ShortcutTiles.lit(Tile.ESP, sh("Active", false)))
         assertFalse("ESP off: not lit", ShortcutTiles.lit(Tile.ESP, sh("Off", true)))
         assertTrue("rear fog light on", ShortcutTiles.lit(Tile.FOG, sh("On", true)))
         assertFalse("rear fog light off", ShortcutTiles.lit(Tile.FOG, sh("Off", false)))

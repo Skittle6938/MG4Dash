@@ -280,14 +280,14 @@ class PowerFx(private val context: Context) : Drawable() {
     private fun drawBoltSet(c: Canvas, a: Float, scale: Float) {
         bolt.forEachIndexed { k, pts ->
             val w = if (k == 0) 1f else 0.55f
-            // Wider and brighter than at first (Marc, 14/11): seen at a glance on the car's screen
+            // Wider and brighter than at first (14/11): seen at a glance on the car's screen
             drawPoly(c, pts, cCold, (55 * a).toInt(), 38 * d * w * scale)
             drawPoly(c, pts, cCold, (140 * a).toInt(), 15 * d * w * scale)
             drawPoly(c, pts, 0xFFFFFFFF.toInt(), (255 * a).toInt(), 4.8f * d * w * scale)
         }
     }
 
-    /** Length of the lightning strike (3 bursts): 650 ms, longer than the first 450 ms (Marc, 14/11). */
+    /** Length of the lightning strike (3 bursts): 650 ms, longer than the first 450 ms (14/11). */
     private val STRIKE_MS = 650L
 
     private fun drawLightningScene(c: Canvas, now: Long, dt: Float) {
@@ -465,7 +465,7 @@ class PowerFx(private val context: Context) : Drawable() {
         val veilTarget = if (pushing || warp > 0.3f) 1f else 0f
         veil += (veilTarget - veil) * (1f - exp(-dt * (if (veilTarget > veil) 8f else 1.6f)))
         if (veil < 0.01f && !pushing) veil = 0f
-        // The peak badge behind the whole animation (Marc, 14/11 and 15/11): drawn first, under the dark veil and the
+        // The peak badge behind the whole animation (14/11 and 15/11): drawn first, under the dark veil and the
         // stars, so it only shows clearly once the jump is over and the veil goes
         sizeText()
         val text = peakText()
@@ -489,7 +489,7 @@ class PowerFx(private val context: Context) : Drawable() {
         paint.shader = null; paint.color = 0xFFFFFFFF.toInt(); paint.alpha = 255; c.drawPath(path, paint)
         if (veil > 0f) {
             paint.shader = null; paint.style = Paint.Style.FILL
-            // Lighter than before (Marc, 21/11): the road's screen still shows through, the stars stay bright on it
+            // Lighter than before (21/11): the road's screen still shows through, the stars stay bright on it
             paint.color = 0xFF02040B.toInt(); paint.alpha = (veil * (if (light) 150 else 110)).toInt()
             c.drawRect(b, paint)
         }

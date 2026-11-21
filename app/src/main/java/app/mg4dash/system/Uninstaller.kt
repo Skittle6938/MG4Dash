@@ -10,7 +10,7 @@ import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
 /**
- * Uninstalling MG4Dash, MG4Radio or MG4Link from MG4Dash's settings (Marc, 19/11, discussion #111). MG4Radio and MG4Link
+ * Uninstalling MG4Dash, MG4Radio or MG4Link from MG4Dash's settings (19/11, discussion #111). MG4Radio and MG4Link
  * are updates of the car's own radio and Android Auto: removing the update brings the car's own app back. MG4Dash
  * removes itself in an order that never leaves the car without a home: SAIC home back first (checked), then what it
  * added, then its rescue app (it would react to MG4Dash going), then itself; a step that fails stops it all.

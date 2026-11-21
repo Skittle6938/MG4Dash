@@ -5,7 +5,7 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
-/** Radio Dash offered only where it was validated (Marc, 19/11, discussion #111: SWI68 R46 restarted): SWI69 only. */
+/** Radio Dash offered only where it was validated (19/11, discussion #111: SWI68 R46 restarted): SWI69 only. */
 class RadioDashValidatedTest {
     @Test fun validatedFirmwares() {
         assertTrue(RadioDashUpdater.validatedOn("SWI69-29958-1300R70"))
@@ -13,7 +13,7 @@ class RadioDashValidatedTest {
     }
 
     @Test fun notValidatedFirmwares() {
-        // SWI69 only (Marc, 19/11): SWI68 R67 too is no longer offered
+        // SWI69 only (19/11): SWI68 R67 too is no longer offered
         assertFalse(RadioDashUpdater.validatedOn("SWI68-29958-1300R67"))
         assertFalse(RadioDashUpdater.validatedOn("SWI68-29958-1300R46"))
         assertFalse(RadioDashUpdater.validatedOn("SWI68-29958-1300R73"))

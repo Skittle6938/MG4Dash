@@ -11,7 +11,7 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
-/** The alerter's speed: the car's, read often, set right on the GPS on steady stretches (Marc, 18/11). */
+/** The alerter's speed: the car's, read often, set right on the GPS on steady stretches (18/11). */
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [28])
 class RadarSpeedTest {
@@ -81,7 +81,7 @@ class RadarSpeedTest {
     }
 
     /**
-     * Marc, 20/11: the speed shown stopped for a few seconds, then went on. The worker was busy (tiles read from disk,
+     * 20/11: the speed shown stopped for a few seconds, then went on. The worker was busy (tiles read from disk,
      * the roads' graph rebuilt, the matching): the speed is read on a thread of its own and keeps following the car.
      */
     @Test fun speedFollowsWhileTheWorkerIsBusy() {

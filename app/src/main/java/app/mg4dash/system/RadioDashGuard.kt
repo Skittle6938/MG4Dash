@@ -4,7 +4,7 @@ import android.content.Context
 import android.content.pm.PackageManager
 
 /**
- * Radio Dash switched off for the time of maintenance mode (Marc, 21/11, #123), where the car has its own radio beside
+ * Radio Dash switched off for the time of maintenance mode (21/11, #123), where the car has its own radio beside
  * it: on SWI68, SWI133, SWI165 the stock radio is com.saicmotor.hmi.radio and Radio Dash (com.saicmotor.radio) runs
  * next to it, its shortcuts then opening MG4Dash. On SWI69 Radio Dash replaces the stock radio (same package): never
  * touched there, or the car would have no radio at all. Nothing is uninstalled: Android's own "disabled" state, put

@@ -27,7 +27,7 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
 /**
- * Speed camera alerter (test, OSM only, Marc 16/11), on OpenStreetMap extracts (test resources in radar/, trimmed
+ * Speed camera alerter (test, OSM only, 16/11), on OpenStreetMap extracts (test resources in radar/, trimmed
  * Overpass answers): the north Boulevard Périphérique in Paris (both rings, 50), the Voie Pierre Mathis in Nice (50,
  * one way watched), Via Carlo Amoretti in Milan (untagged roads nearby) and Euston Road in London (20 mph).
  */
@@ -289,7 +289,7 @@ class RadarTest {
         assertEquals(RadarAlert.Kind.STRONG, RadarAlert.kindOf(Level.STRONG, critical = false))
         assertEquals(RadarAlert.Kind.LIGHT, RadarAlert.kindOf(Level.LIGHT, critical = false))
         assertNull(RadarAlert.kindOf(Level.NONE, critical = false))
-        // Defaults (Marc's mockup, 17/11): approach chime 60 % once, light silent, strong beep 70 % every 10 s, zone loud 100 % every 5 s
+        // Defaults (mockup, 17/11): approach chime 60 % once, light silent, strong beep 70 % every 10 s, zone loud 100 % every 5 s
         assertEquals(RadarAlert.Sound.CHIME, RadarAlert.Kind.APPROACH.sound); assertEquals(60, RadarAlert.Kind.APPROACH.volume); assertEquals(0, RadarAlert.Kind.APPROACH.repeat)
         assertEquals(RadarAlert.Sound.NONE, RadarAlert.Kind.LIGHT.sound)
         assertEquals(RadarAlert.Sound.BEEP, RadarAlert.Kind.STRONG.sound); assertEquals(70, RadarAlert.Kind.STRONG.volume); assertEquals(10, RadarAlert.Kind.STRONG.repeat)
@@ -405,7 +405,7 @@ class RadarTest {
         dir.deleteRecursively()
     }
 
-    /** 50 km at most (Marc, 17/11): a radius stored before (80) comes back as 50; the compressing server asked first. */
+    /** 50 km at most (17/11): a radius stored before (80) comes back as 50; the compressing server asked first. */
     @Test fun preparationRadiusClamped() {
         val r = app.mg4dash.radar.RadarRepo
         assertEquals(50, r.prepareRadius(80))
@@ -531,7 +531,7 @@ class RadarTest {
         assertEquals(16, r.subBlocks(sw, 4).flatMap { r.blockTiles(it.first, it.second) }.toSet().size)
     }
 
-    /** Saturated servers (Marc, 17/11: "29 s" stayed on screen): the wait counts down from the worker's absolute time. */
+    /** Saturated servers (17/11: "29 s" stayed on screen): the wait counts down from the worker's absolute time. */
     @Test fun retryCountdownFromAbsoluteTime() {
         val t0 = 1_000_000L
         val p = RadarRepo.Prep(3, 140, 0, RadarRepo.PrepPhase.RETRY, busyUntil = t0 + 29_500)
@@ -588,7 +588,7 @@ class RadarTest {
         assertTrue(keys.first() != sorted.first())
     }
 
-    /** Look-ahead (Marc, 18/11): the car's tile first and complete, then those along the heading, about 2 min of driving. */
+    /** Look-ahead (18/11): the car's tile first and complete, then those along the heading, about 2 min of driving. */
     @Test fun liveLookAhead() {
         val lat = 45.0101; val lon = 7.0105
         val here = RadarData.Key.of(lat, lon)
@@ -620,7 +620,7 @@ class RadarTest {
         assertFalse(RadarRepo.needsFetch(full, now, 3_600_000L, RadarData.Level.MAIN))
     }
 
-    /** Old tiles stay in use until a new one is in (Marc, 18/11): the three cases. */
+    /** Old tiles stay in use until a new one is in (18/11): the three cases. */
     @Test fun oldTilesKept() {
         val now = 100L * 86_400_000L
         val road = Road(1, "primary", longArrayOf(1L, 2L), doubleArrayOf(45.0, 45.001), doubleArrayOf(7.0, 7.001), 50)
@@ -642,7 +642,7 @@ class RadarTest {
     }
 
 
-    /** Stop (Marc, 18/11): the request in progress is cut at once and the page shows it stopped now. */
+    /** Stop (18/11): the request in progress is cut at once and the page shows it stopped now. */
     @Test fun stopCutsTheRequestAtOnce() {
         val server = java.net.ServerSocket(0)
         val accepted = java.util.concurrent.CountDownLatch(1)

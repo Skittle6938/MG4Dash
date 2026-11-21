@@ -20,7 +20,7 @@ import org.robolectric.annotation.GraphicsMode
 import java.io.File
 import java.util.concurrent.TimeUnit
 
-/** The connection bar's place (Marc, 17/11): the weather by default, any place of cards chosen in the edit mode, or none. */
+/** The connection bar's place (17/11): the weather by default, any place of cards chosen in the edit mode, or none. */
 @RunWith(RobolectricTestRunner::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 @Config(sdk = [28], qualifiers = "fr-w1920dp-h720dp-land-mdpi")
@@ -49,7 +49,7 @@ class ConnectionBarTest {
     }
 
     @Test fun anyPlaceButAMissingOne() {
-        // Every place of the layout can hold it, the media and the small ones too (Marc, 17/11); an unknown one cannot
+        // Every place of the layout can hold it, the media and the small ones too (17/11); an unknown one cannot
         assertTrue(HomeSlots.canHoldConnections(full, "tr"))
         assertTrue(HomeSlots.canHoldConnections(full, "tl"))
         assertTrue(HomeSlots.canHoldConnections(full, "bl"))
@@ -59,7 +59,7 @@ class ConnectionBarTest {
     }
 
     /**
-     * On the weather (Marc, 19/11): the bar at the top of its place exactly as on the other cards, over the weather,
+     * On the weather (19/11): the bar at the top of its place exactly as on the other cards, over the weather,
      * which keeps its whole height.
      */
     @Test fun weatherBarAtTheTopLikeTheOtherCards() {
@@ -96,7 +96,7 @@ class ConnectionBarTest {
         HomeSlots.setConnectionsChoice(prefs, HomeSlots.Layout.FULL, null)
     }
 
-    /** The weather with and without the bar (Marc, 19/11): same widget, the bar over its top. */
+    /** The weather with and without the bar (19/11): same widget, the bar over its top. */
     @org.junit.experimental.categories.Category(Screenshot::class)
     @Test fun weatherWithAndWithoutTheBar() {
         // Bar on the weather, bar off, bar on the card beside it (to compare where it sits)
@@ -140,7 +140,7 @@ class ConnectionBarTest {
     @org.junit.experimental.categories.Category(Screenshot::class)
     @Test fun editModeButton() = shoot("connections_edit_mode.png", edit = true)
 
-    // ── The bar belongs to the place: centred at its top, every card there makes room inside (Marc, 17/11) ──
+    // ── The bar belongs to the place: centred at its top, every card there makes room inside (17/11) ──
 
     private fun hostShots(place: String, prefix: String) {
         val layout = "full"
@@ -172,7 +172,7 @@ class ConnectionBarTest {
         HomeSlots.setConnectionsChoice(prefs, HomeSlots.Layout.FULL, null)
     }
 
-    /** On the media (Marc, 17/11): the bar at its top, the player a little lower in its frame. */
+    /** On the media (17/11): the bar at its top, the player a little lower in its frame. */
     @org.junit.experimental.categories.Category(Screenshot::class)
     @Test fun barOnTheMedia() {
         prefs.raw.edit().putBoolean("vertical_dock", true).putBoolean("tutorial_shortcuts_seen", true).putInt("theme_mode", 1)

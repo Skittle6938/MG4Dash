@@ -68,7 +68,7 @@ object BatteryCapacity {
     }
 
     /**
-     * The capacity in the middle of the measurements, each counting for its % drop (Marc, 18/11, instead of the
+     * The capacity in the middle of the measurements, each counting for its % drop (18/11, instead of the
      * mean): sorted by capacity, the one where half of all the % drop is reached; with two equal halves, between the
      * two. One measurement far off (a BMS recalibration) no longer moves the result.
      */

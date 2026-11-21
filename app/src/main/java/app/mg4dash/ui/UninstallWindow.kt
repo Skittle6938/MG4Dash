@@ -11,7 +11,7 @@ import app.mg4dash.system.RadioDashUpdater
 import app.mg4dash.system.Uninstaller
 
 /**
- * Settings › System › Updates: uninstalling MG4Dash, MG4Radio or MG4Link (Marc, 19/11, discussion #111): one line per
+ * Settings › System › Updates: uninstalling MG4Dash, MG4Radio or MG4Link (19/11, discussion #111): one line per
  * installed app, what its uninstall does, its button; each one confirmed, MG4Dash's with a long press.
  */
 object UninstallWindow {

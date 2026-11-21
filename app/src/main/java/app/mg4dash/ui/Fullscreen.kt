@@ -46,7 +46,7 @@ object Fullscreen {
     }
 
     /**
-     * Home has the focus again (Marc, 17/11: after the SAIC call window, the top bar stayed over home). Writing the same
+     * Home has the focus again (17/11: after the SAIC call window, the top bar stayed over home). Writing the same
      * flags again changes nothing and no visibility change reached home, so the bars are checked a moment later and
      * hidden once, as [restore] does. During a call the SAIC call window keeps the bar on screen whatever home does
      * (two tries in a row left it there, each one making home's side bar blink): nothing is tried until the call
@@ -85,7 +85,7 @@ object Fullscreen {
     /**
      * Whether the top bar is really on screen for [View]'s window: the system's own state of the bars, not the insets
      * (with LAYOUT_STABLE they always give the bars' room, hidden or not: the check said "shown" at every return of
-     * the focus and hid them again each time, making home's side bar blink, Marc 17/11).
+     * the focus and hid them again each time, making home's side bar blink, 17/11).
      */
     @Suppress("DEPRECATION")
     internal var barsShown: (View) -> Boolean = { decor -> decor.windowSystemUiVisibility and View.SYSTEM_UI_FLAG_FULLSCREEN == 0 }

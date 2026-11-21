@@ -5,7 +5,7 @@ import android.content.Intent
 import app.mg4dash.system.Firmware
 
 /**
- * Gestures from the top strip over every app (Marc, 17/11), recognised by the app that gets the first finger and told
+ * Gestures from the top strip over every app (17/11), recognised by the app that gets the first finger and told
  * to the other by a message, never by touches injected again. Only the first finger has to start in the strip, the
  * others land anywhere (the strip is not split-touch, so it gets them all):
  * - one finger down: the shortcuts menu, which follows the finger;

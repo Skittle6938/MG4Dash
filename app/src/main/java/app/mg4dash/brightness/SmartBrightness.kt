@@ -9,7 +9,7 @@ import app.mg4dash.system.Log
 import app.mg4dash.system.Prefs
 
 /**
- * Smart automatic brightness (Marc, 20/11), next to Android's own automatic mode ("D'origine", unchanged): the screen
+ * Smart automatic brightness (20/11), next to Android's own automatic mode ("D'origine", unchanged): the screen
  * set from the light outside (estimated: [LightEstimator], [SkyForecast]) through a curve learnt from the driver's
  * corrections ([BrightnessCurve]), one per profile and per light / dark look. Off by default.
  *
@@ -39,7 +39,7 @@ object SmartBrightness {
 
     private const val SIDE_LIGHTS = 557880099   // VEH_SIDE_LGHT: 0 off, 3 on
     /**
-     * The car's own floor (Marc, 20/11, checked on the screen): below 16 of 255 nothing changes, the display stays at 16.
+     * The car's own floor (20/11, checked on the screen): below 16 of 255 nothing changes, the display stays at 16.
      * The curve's 0 is that floor, its 1 the top: 0 % of the curve is the dimmest the screen can really be.
      */
     const val FLOOR = 16
@@ -74,7 +74,7 @@ object SmartBrightness {
         worker.post { retarget(LIGHTS_RAMP_MS) }
     }
 
-    /** Learning forgotten: this curve (current profile and look), or [all] of the current profile's (light and dark; Marc, 20/11). */
+    /** Learning forgotten: this curve (current profile and look), or [all] of the current profile's (light and dark; 20/11). */
     fun reset(c: Context, all: Boolean) {
         val raw = Prefs(c).raw
         if (all) raw.edit().apply { raw.all.keys.filter { it.startsWith(KEY_CURVE) }.forEach { remove(it) } }.apply()

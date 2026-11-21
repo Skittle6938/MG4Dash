@@ -14,7 +14,7 @@ import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
 
 /**
- * In maintenance mode nothing of MG4Dash reacts (Marc, 21/11, #123): any of its screens opened meanwhile closes at once
+ * In maintenance mode nothing of MG4Dash reacts (21/11, #123): any of its screens opened meanwhile closes at once
  * and silently, with no offer and nothing else opened. The way back is the three-finger gesture, or MG4Dash chosen
  * again as the home in Android's settings.
  */

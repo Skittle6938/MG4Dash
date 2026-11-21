@@ -39,7 +39,7 @@ object RadarRepo {
     /** A failed fetch waits this long before the next try. */
     /** After a failed live download, the next one waits this long (a whole minute left the car's tiles empty while driving). */
     private const val BACKOFF_MS = 10_000L
-    /** Prepared trips: radii offered around the car (km), 20 by default, 50 at most (Marc, 17/11). */
+    /** Prepared trips: radii offered around the car (km), 20 by default, 50 at most (17/11). */
     val PREPARE_RADII = listOf(10, 20, 30, 50)
     const val PREPARE_DEFAULT_KM = 20
 
@@ -112,7 +112,7 @@ object RadarRepo {
     @Volatile private var prepThread: Thread? = null
 
     /**
-     * Stops the preparation at once (Marc, 18/11: it waited for the request in progress, up to 90 s): the request is
+     * Stops the preparation at once (18/11: it waited for the request in progress, up to 90 s): the request is
      * cut, the page shows it stopped now; the tiles already in are kept.
      */
     fun cancelPrepare() {
@@ -129,7 +129,7 @@ object RadarRepo {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
     private val worker: Handler by lazy { Handler(HandlerThread("radar").apply { start() }.looper) }
     /**
-     * The car's speed read between the fixes, on a thread of its own (Marc, 20/11): on the worker it waited behind
+     * The car's speed read between the fixes, on a thread of its own (20/11): on the worker it waited behind
      * the tiles read from disk, the roads' graph rebuilt and the matching, and the speed shown stopped for seconds.
      */
     private val speedWorker: Handler by lazy { Handler(HandlerThread("radar-speed").apply { start() }.looper) }
@@ -355,7 +355,7 @@ object RadarRepo {
         if (changed || loadedKeys != tiles.keys) rebuild()
     }
 
-    /** Look-ahead: about this long of driving in the direction of travel (Marc, 18/11: at 130 km/h the next tile came too late). */
+    /** Look-ahead: about this long of driving in the direction of travel (18/11: at 130 km/h the next tile came too late). */
     private const val AHEAD_S = 120.0
     private const val AHEAD_MIN_M = 1_500.0
     private const val AHEAD_MAX_M = 5_000.0
@@ -408,7 +408,7 @@ object RadarRepo {
     private const val FETCH_GAP_MS = 5_000L
     private var lastFetch = 0L
 
-    /** Refresh ages offered for the tiles around the car (hours), 6 by default (Marc, 17/11). */
+    /** Refresh ages offered for the tiles around the car (hours), 6 by default (17/11). */
     val REFRESH_HOURS = listOf(1, 2, 6, 24, 168, 720)
     const val REFRESH_DEFAULT_HOURS = 6
 
@@ -427,7 +427,7 @@ object RadarRepo {
     }
 
     /**
-     * What a download brings for a tile already there (Marc, 18/11: the old tiles stay in use when the new ones do not
+     * What a download brings for a tile already there (18/11: the old tiles stay in use when the new ones do not
      * come): the new tile, or null to keep the old one. A tile past its 30 days stays in use until a new one is in; a
      * failed or stopped download brings nothing; a main-roads tile never replaces a complete one, even older; an
      * answer without any road never replaces a tile that had some.
@@ -450,7 +450,7 @@ object RadarRepo {
     const val LIVE_SPAN = 4
 
     /**
-     * The tiles fetched together with the first one wanted (Marc, 18/11: one request costs the busy servers 35 to 45 s
+     * The tiles fetched together with the first one wanted (18/11: one request costs the busy servers 35 to 45 s
      * whatever its size, so the tiles came one by one too late): those of the same level whose box with it stays
      * within [LIVE_SPAN] tiles across, in their order.
      */
@@ -655,7 +655,7 @@ object RadarRepo {
         val c = context.applicationContext
         val resume = Prefs(c).raw
         resume.edit().putString(PREP_RESUME_KEY, "$lat,$lon").apply()
-        // The complete data, all the streets, as around the car while driving (Marc, 17/11)
+        // The complete data, all the streets, as around the car while driving (17/11)
         val level = RadarData.Level.FULL
         val boxes = prepareBoxes(lat, lon, prepareRadius(Prefs(c).radarPrepareKm))
         // Progress in tiles (each block is split again if the server cannot answer it whole)

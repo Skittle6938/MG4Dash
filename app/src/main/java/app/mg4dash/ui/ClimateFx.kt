@@ -13,7 +13,7 @@ import kotlin.math.cos
 import kotlin.math.sin
 
 /**
- * The climate card's warm or cold effect (#122, Marc's variant C): heat haze rising from the bottom while heating,
+ * The climate card's warm or cold effect (#122, the owner's variant C): heat haze rising from the bottom while heating,
  * frost crystals in the corners while cooling. Its strength follows the gap between the set point and the outside
  * temperature, as the shortcut tile's mode does.
  */
@@ -32,7 +32,7 @@ object ClimateFx {
     const val HOLD_SCALE = 1.5f
 
     /**
-     * The Keep climate screen's effect (Marc, 18/11, variant B): heating ([first] true) or cooling and its strength, as
+     * The Keep climate screen's effect (18/11, variant B): heating ([first] true) or cooling and its strength, as
      * the climate card's; null with nothing to show: the climate not running (waiting for its time, finished), the
      * screen off, the option off, a temperature unknown, or within half a degree.
      */

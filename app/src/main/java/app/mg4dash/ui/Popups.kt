@@ -24,7 +24,7 @@ object Popups {
     }
 
     /**
-     * A panel drawn over home ([panel], a column: its title first, its buttons last) within the screen (Marc, 20/11: in
+     * A panel drawn over home ([panel], a column: its title first, its buttons last) within the screen (20/11: in
      * Grand affichage the Start and Close buttons of Keep climate on were below the screen): the children from [from]
      * until [until] go in a part that scrolls when the screen is too short, the title and the buttons stay in sight.
      * [margin]: kept around the panel, in pixels.

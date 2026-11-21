@@ -213,7 +213,7 @@ object Dock {
 
     /**
      * The context the vertical bar is sized with: in Grand affichage, the enlarged one even on a screen kept at its normal
-     * size (Settings, Marc 20/11), so that the bar is the same as on home and does not jump when Settings opens.
+     * size (Settings, 20/11), so that the bar is the same as on home and does not jump when Settings opens.
      */
     internal fun sized(activity: Activity): android.content.Context =
         if (BigDisplay.on(activity) && BigDisplay.factor(activity) <= 1f) BigDisplay.wrap(activity, big = true) else activity
