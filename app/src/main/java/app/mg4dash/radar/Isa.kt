@@ -113,7 +113,7 @@ object IsaLog {
  */
 object IsaWrite {
     private const val TAG = "Isa"
-    /** Held back until the owner decides on a test in the car: with false, nothing is ever written, whatever the option. */
+    /** Held back until a test in the car is decided: with false, nothing is ever written, whatever the option. */
     const val WRITE_ALLOWED = false
     const val PROP = 0x2160a185          // NAVIGATION_SPEED_LIMIT_VALUE (float)
     const val ROAD_SPD = 0x2160a1a8      // NAVIGATION_ROAD_SPD (float)
