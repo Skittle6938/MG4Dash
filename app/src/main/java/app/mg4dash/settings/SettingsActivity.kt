@@ -1439,6 +1439,7 @@ class SettingsActivity : AppCompatActivity() {
             while (true) {
                 kotlinx.coroutines.delay(1_000)
                 if (app.mg4dash.radar.RadarRepo.prepare.value?.phase == app.mg4dash.radar.RadarRepo.PrepPhase.RETRY) page.refresh()
+                else page.refreshSpeedCorrection()
             }
         }
     }

@@ -258,16 +258,27 @@ class Prefs(context: Context) {
         get() = sp.getInt("radar_sound", 0)
         set(v) = sp.edit().putInt("radar_sound", v.coerceIn(0, 2)).apply()
     /** Thresholds in % of the limit instead of the speed unit. */
-    var radarPercent: Boolean
-        get() = sp.getBoolean("radar_percent", false)
-        set(v) = sp.edit().putBoolean("radar_percent", v).apply()
-    /** Light and strong thresholds over the limit, in the speed unit or in % ([radarPercent]), each kept apart. */
-    var radarLow: Float
-        get() = sp.getFloat(if (radarPercent) "radar_low_pct" else "radar_low", if (radarPercent) 2f else app.mg4dash.radar.Thresholds.DEFAULT_LOW)
-        set(v) = sp.edit().putFloat(if (radarPercent) "radar_low_pct" else "radar_low", v.coerceIn(0f, 50f)).apply()
-    var radarHigh: Float
-        get() = sp.getFloat(if (radarPercent) "radar_high_pct" else "radar_high", if (radarPercent) 8f else app.mg4dash.radar.Thresholds.DEFAULT_HIGH)
-        set(v) = sp.edit().putFloat(if (radarPercent) "radar_high_pct" else "radar_high", v.coerceIn(0f, 50f)).apply()
+    var radarThresholdMode: app.mg4dash.radar.ThresholdMode
+        get() = app.mg4dash.radar.ThresholdMode.entries.firstOrNull { it.name == sp.getString("radar_threshold_mode", null) }
+            ?: if (sp.getBoolean("radar_percent", false)) app.mg4dash.radar.ThresholdMode.PERCENT else app.mg4dash.radar.ThresholdMode.SPEED
+        set(v) = sp.edit().putString("radar_threshold_mode", v.name).apply()
+    private fun radarMarginKey(strong: Boolean, percent: Boolean, mixed: Boolean): String =
+        "radar_" + (if (mixed) "mixed_" else "") + (if (strong) "high" else "low") + (if (percent) "_pct" else "")
+
+    fun radarMargin(strong: Boolean, percent: Boolean, mixed: Boolean): Float {
+        val default = when {
+            strong && mixed -> 5f
+            strong && percent -> 8f
+            strong -> app.mg4dash.radar.Thresholds.DEFAULT_HIGH
+            percent -> 2f
+            else -> app.mg4dash.radar.Thresholds.DEFAULT_LOW
+        }
+        return sp.getFloat(radarMarginKey(strong, percent, mixed), default)
+    }
+
+    fun setRadarMargin(strong: Boolean, percent: Boolean, mixed: Boolean, value: Float) {
+        sp.edit().putFloat(radarMarginKey(strong, percent, mixed), value.coerceIn(0f, 50f)).apply()
+    }
     /** The strong alert in a camera zone shows a banner over every app, Android Auto too. */
     var radarBanner: Boolean
         get() = sp.getBoolean("radar_banner", true)

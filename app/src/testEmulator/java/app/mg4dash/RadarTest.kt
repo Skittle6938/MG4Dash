@@ -231,6 +231,16 @@ class RadarTest {
         assertEquals(Level.NONE, t.level(200f, null, Level.STRONG))
     }
 
+    @Test fun mixedThresholdsUsePercentStartingAt100Kmh() {
+        val mixed = Thresholds(1f, 5f, percent = false, miles = false,
+            atOrAbove100 = Thresholds(2f, 5f, percent = true, miles = false))
+        assertEquals(Level.STRONG, mixed.level(95f, 90, Level.NONE))
+        assertEquals(Level.NONE, mixed.level(101f, 100, Level.NONE))
+        assertEquals(Level.LIGHT, mixed.level(102f, 100, Level.NONE))
+        assertEquals(Level.LIGHT, mixed.level(136f, 130, Level.NONE))
+        assertEquals(Level.STRONG, mixed.level(136.5f, 130, Level.NONE))
+    }
+
     @Test fun thresholdsInPercentAndMiles() {
         val pct = Thresholds(2f, 10f, percent = true, miles = false)
         assertEquals(11f, pct.marginKmh(10f, 110), 0.01f)

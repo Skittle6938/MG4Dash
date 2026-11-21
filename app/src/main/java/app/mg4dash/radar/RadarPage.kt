@@ -34,6 +34,7 @@ class RadarPage(private val a: Activity, private val prefs: Prefs) {
     private val medium = Typeface.create("sans-serif-medium", Typeface.NORMAL)
     private val tabs = ArrayList<Pair<View, View>>()
     private var dataSub: TextView? = null
+    private var correction: TextView? = null
     /** Repaints done by the preparation's progress and the storage figures. */
     private val refreshers = ArrayList<() -> Unit>()
 
@@ -81,6 +82,20 @@ class RadarPage(private val a: Activity, private val prefs: Prefs) {
         dataSub?.text = if (p?.running == true) "● " + a.getString(R.string.rp_tab_data_prep, p.done, p.total) else a.getString(R.string.rp_tab_data_sub)
         dataSub?.setTextColor(if (p?.running == true) accent else col(R.color.text_sub))
         refreshers.forEach { it() }
+        refreshSpeedCorrection()
+    }
+
+    fun refreshSpeedCorrection() {
+        correction?.text = RadarRepo.speedCorrection(a)?.let { value ->
+            val format = java.text.NumberFormat.getPercentInstance(a.resources.configuration.locales[0]).apply {
+                maximumFractionDigits = 1
+            }
+            when {
+                value <= -0.05f -> "−" + format.format(-value / 100f)
+                value >= 0.05f -> "+" + format.format(value / 100f)
+                else -> format.format(0f)
+            }
+        } ?: "—"
     }
 
     // ── Building blocks ──
@@ -163,25 +178,47 @@ class RadarPage(private val a: Activity, private val prefs: Prefs) {
         val unit = Units.speedUnit(a)
         // Thresholds, banner and colours on the card
         val th = panel(a.getString(R.string.rp_thresholds))
-        val row = LinearLayout(a).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL }
-        fun lows() = if (prefs.radarPercent) listOf(0f, 2f, 5f, 10f) else listOf(0f, 1f, 2f, 3f, 5f)
-        fun highs() = if (prefs.radarPercent) listOf(5f, 8f, 10f, 15f, 20f) else listOf(3f, 5f, 6f, 8f, 10f, 15f, 20f)
-        fun label(v: Float) = "+" + (if (v % 1f == 0f) v.toInt().toString() else v.toString()) + " " + (if (prefs.radarPercent) "%" else unit)
-        fun index(list: List<Float>, v: Float) = list.indices.minByOrNull { Math.abs(list[it] - v) } ?: 0
-        val low = dropdown({ lows().map { label(it) } }, { index(lows(), prefs.radarLow) }) { prefs.radarLow = lows()[it] }
-        val high = dropdown({ highs().map { label(it) } }, { index(highs(), prefs.radarHigh) }) { prefs.radarHigh = highs()[it] }
-        fun repaintThresholds() { low.text = label(lows()[index(lows(), prefs.radarLow)]) + "  ▾"; high.text = label(highs()[index(highs(), prefs.radarHigh)]) + "  ▾" }
-        row.addView(text(a.getString(R.string.rp_in), 18f, R.color.text_value), LinearLayout.LayoutParams(-2, -2).apply { rightMargin = dp(10) })
-        row.addView(segmented(listOf(unit, "%"), { if (prefs.radarPercent) 1 else 0 }) { prefs.radarPercent = it == 1; repaintThresholds() })
-        row.addView(View(a), LinearLayout.LayoutParams(dp(28), 1))
-        row.addView(dot(col(R.color.accent_heat)))
-        row.addView(text(a.getString(R.string.rp_light_over), 18f, R.color.text_value), LinearLayout.LayoutParams(-2, -2).apply { rightMargin = dp(10) })
-        row.addView(low, LinearLayout.LayoutParams(-2, dp(52)))
-        row.addView(View(a), LinearLayout.LayoutParams(dp(28), 1))
-        row.addView(dot(col(R.color.accent_danger)))
-        row.addView(text(a.getString(R.string.rp_strong_over), 18f, R.color.text_value), LinearLayout.LayoutParams(-2, -2).apply { rightMargin = dp(10) })
-        row.addView(high, LinearLayout.LayoutParams(-2, dp(52)))
-        th.addView(row, LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(14) })
+        val modes = ThresholdMode.entries
+        val groups = LinearLayout(a).apply { orientation = LinearLayout.HORIZONTAL }
+        fun showMargins() {
+            groups.removeAllViews()
+            val mixed = prefs.radarThresholdMode == ThresholdMode.MIXED
+            val bands = if (mixed) listOf(false, true) else listOf(prefs.radarThresholdMode == ThresholdMode.PERCENT)
+            bands.forEachIndexed { index, percent ->
+                val band = LinearLayout(a).apply { orientation = LinearLayout.VERTICAL }
+                val suffix = if (percent) "%" else if (mixed) "km/h" else unit
+                if (mixed) {
+                    val title = if (percent) R.string.rp_from_100 else R.string.rp_under_100
+                    band.addView(text(a.getString(title), 17f, R.color.text_sub, medium))
+                }
+                for (strong in listOf(false, true)) {
+                    val values = when {
+                        strong && percent -> listOf(5, 8, 10, 15, 20)
+                        strong -> listOf(3, 5, 6, 8, 10, 15, 20)
+                        percent && mixed -> listOf(0, 2, 5)
+                        percent -> listOf(0, 2, 5, 10)
+                        else -> listOf(0, 1, 2, 3, 5)
+                    }
+                    val control = dropdown({ values.map { "+$it $suffix" } }, {
+                        val value = prefs.radarMargin(strong, percent, mixed)
+                        values.indices.minBy { kotlin.math.abs(values[it] - value) }
+                    }) { prefs.setRadarMargin(strong, percent, mixed, values[it].toFloat()) }
+                    val title = if (strong) R.string.rp_strong_over else R.string.rp_light_over
+                    line(band, a.getString(title), null, control)
+                }
+                groups.addView(band, LinearLayout.LayoutParams(0, -2, 1f).apply { if (index > 0) leftMargin = dp(20) })
+            }
+        }
+        th.addView(segmented(listOf(unit, "%", a.getString(R.string.rp_mixed)), { prefs.radarThresholdMode.ordinal }) {
+            prefs.radarThresholdMode = modes[it]
+            showMargins()
+        }, LinearLayout.LayoutParams(-2, -2).apply { topMargin = dp(14) })
+        th.addView(groups, LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(14) })
+        showMargins()
+        correction = text("—", 18f, R.color.text_value, medium).apply {
+            gravity = Gravity.CENTER_VERTICAL
+            line(th, a.getString(R.string.rp_gps_correction), null, this)
+        }
         val two = LinearLayout(a).apply { orientation = LinearLayout.HORIZONTAL }
         val left = LinearLayout(a).apply { orientation = LinearLayout.VERTICAL }
         val right = LinearLayout(a).apply { orientation = LinearLayout.VERTICAL }

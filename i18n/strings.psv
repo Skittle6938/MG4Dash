@@ -947,6 +947,10 @@ rp_tab_data_sub|Trips, storage|Trajets, stockage|Fahrten, Speicher|Trayectos, al
 rp_tab_data_prep|Preparing %1$d / %2$d|Préparation %1$d / %2$d|Vorbereitung %1$d / %2$d|Preparando %1$d / %2$d|Preparazione %1$d / %2$d|Voorbereiden %1$d / %2$d|Hazırlanıyor %1$d / %2$d|Příprava %1$d / %2$d
 rp_osm_box|Speed limits and cameras: © OpenStreetMap contributors, ODbL. The road signs always come first.|Limitations et radars : © contributeurs OpenStreetMap, ODbL. La signalisation prime toujours.|Tempolimits und Blitzer: © OpenStreetMap-Mitwirkende, ODbL. Es gelten immer die Verkehrszeichen.|Límites y radares: © colaboradores de OpenStreetMap, ODbL. La señalización siempre prevalece.|Limiti e autovelox: © contributori di OpenStreetMap, ODbL. Prevale sempre la segnaletica.|Limieten en flitsers: © OpenStreetMap-bijdragers, ODbL. De verkeersborden gaan altijd voor.|Sınırlar ve radarlar: © OpenStreetMap katkıda bulunanlar, ODbL. Trafik işaretleri her zaman önceliklidir.|Limity a radary: © přispěvatelé OpenStreetMap, ODbL. Vždy platí dopravní značení.
 rp_thresholds|Thresholds|Seuils|Schwellen|Umbrales|Soglie|Drempels|Eşikler|Prahy
+rp_mixed|Mixed|Mixte|Gemischt|Mixto|Misto|Gemengd|Karma|Smíšený
+rp_under_100|Limits below 100 km/h|Limites sous 100 km/h|Limits unter 100 km/h|Límites por debajo de 100 km/h|Limiti sotto 100 km/h|Limieten onder 100 km/h|100 km/sa altındaki sınırlar|Limity pod 100 km/h
+rp_from_100|Limits from 100 km/h|Limites à partir de 100 km/h|Limits ab 100 km/h|Límites desde 100 km/h|Limiti da 100 km/h|Limieten vanaf 100 km/h|100 km/sa ve üzeri sınırlar|Limity od 100 km/h
+rp_gps_correction|GPS speed correction|Correction de vitesse GPS|GPS-Geschwindigkeitskorrektur|Corrección de velocidad GPS|Correzione velocità GPS|GPS-snelheidscorrectie|GPS hız düzeltmesi|Korekce rychlosti GPS
 rp_in|In|En|In|En|In|In|Birim|V
 rp_light_over|Light over|Légère au-delà de|Leicht über|Leve sobre|Leggero oltre|Licht boven|Hafif, şu kadar üstü|Mírné nad
 rp_strong_over|Strong over|Forte au-delà de|Stark über|Fuerte sobre|Forte oltre|Sterk boven|Güçlü, şu kadar üstü|Silné nad

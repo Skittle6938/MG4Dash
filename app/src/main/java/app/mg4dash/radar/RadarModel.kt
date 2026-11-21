@@ -299,11 +299,14 @@ object Zones {
 /** Alert level: none, light overspeed (orange), strong (red). */
 enum class Level { NONE, LIGHT, STRONG }
 
+enum class ThresholdMode { SPEED, PERCENT, MIXED }
+
 /**
  * Alert thresholds: [low] and [high] over the limit, in the display unit (km/h or mph) or in % of the limit; the level
  * goes down again only [HYSTERESIS_KMH] km/h under the threshold it crossed.
  */
-class Thresholds(val low: Float, val high: Float, val percent: Boolean, val miles: Boolean) {
+class Thresholds(val low: Float, val high: Float, val percent: Boolean, val miles: Boolean,
+                 private val atOrAbove100: Thresholds? = null) {
     companion object {
         const val HYSTERESIS_KMH = 2f
         const val KM_PER_MI = 1.609344f
@@ -320,6 +323,7 @@ class Thresholds(val low: Float, val high: Float, val percent: Boolean, val mile
 
     fun level(speedKmh: Float, limitKmh: Int?, previous: Level): Level {
         if (limitKmh == null) return Level.NONE
+        if (limitKmh >= 100 && atOrAbove100 != null) return atOrAbove100.level(speedKmh, limitKmh, previous)
         val over = speedKmh - limitKmh
         val lo = marginKmh(low, limitKmh); val hi = marginKmh(high, limitKmh)
         val h = HYSTERESIS_KMH

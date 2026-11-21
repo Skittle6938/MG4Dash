@@ -1024,6 +1024,10 @@
     <string name="rp_tab_data_prep">Préparation %1$d / %2$d</string>
     <string name="rp_osm_box">Limitations et radars : © contributeurs OpenStreetMap, ODbL. La signalisation prime toujours.</string>
     <string name="rp_thresholds">Seuils</string>
+    <string name="rp_mixed">Mixte</string>
+    <string name="rp_under_100">Limites sous 100 km/h</string>
+    <string name="rp_from_100">Limites à partir de 100 km/h</string>
+    <string name="rp_gps_correction">Correction de vitesse GPS</string>
     <string name="rp_in">En</string>
     <string name="rp_light_over">Légère au-delà de</string>
     <string name="rp_strong_over">Forte au-delà de</string>

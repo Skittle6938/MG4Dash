@@ -1024,6 +1024,10 @@
     <string name="rp_tab_data_prep">Vorbereitung %1$d / %2$d</string>
     <string name="rp_osm_box">Tempolimits und Blitzer: © OpenStreetMap-Mitwirkende, ODbL. Es gelten immer die Verkehrszeichen.</string>
     <string name="rp_thresholds">Schwellen</string>
+    <string name="rp_mixed">Gemischt</string>
+    <string name="rp_under_100">Limits unter 100 km/h</string>
+    <string name="rp_from_100">Limits ab 100 km/h</string>
+    <string name="rp_gps_correction">GPS-Geschwindigkeitskorrektur</string>
     <string name="rp_in">In</string>
     <string name="rp_light_over">Leicht über</string>
     <string name="rp_strong_over">Stark über</string>

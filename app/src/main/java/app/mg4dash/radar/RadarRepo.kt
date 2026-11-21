@@ -269,7 +269,15 @@ object RadarRepo {
         }
         val zone = activeZone()
         val p = Prefs(c)
-        val t = Thresholds(p.radarLow, p.radarHigh, p.radarPercent, Units.miles(c))
+        fun thresholds(percent: Boolean, mixed: Boolean, above: Thresholds? = null) = Thresholds(
+            p.radarMargin(false, percent, mixed), p.radarMargin(true, percent, mixed), percent,
+            !mixed && Units.miles(c), above,
+        )
+        val t = when (p.radarThresholdMode) {
+            ThresholdMode.SPEED -> thresholds(false, false)
+            ThresholdMode.PERCENT -> thresholds(true, false)
+            ThresholdMode.MIXED -> thresholds(false, true, thresholds(true, true))
+        }
         publishFix(before, State(
             status = Status.OK, speedKmh = speed, limit = m.limit, estimated = m.estimated, zone = zone,
             next = zones.filter { it.start > 0 && it.cam.id != zoneCam?.id }.take(3).map { NextZone(it.cam.kind, it.limit, it.start) },
@@ -394,6 +402,15 @@ object RadarRepo {
 
     /** Where the speed factor learnt from the GPS is kept between runs. */
     private const val SPEED_PREFS = "radar_speed"
+
+    internal fun speedCorrection(context: Context): Float? {
+        if (running) return synchronized(speedLock) {
+            if (speedCalib.windows < RadarSpeed.MIN_WINDOWS) null else (speedCalib.used - 1f) * 100f
+        }
+        val prefs = context.getSharedPreferences(SPEED_PREFS, Context.MODE_PRIVATE)
+        if (prefs.getInt("windows", 0) < RadarSpeed.MIN_WINDOWS) return null
+        return (prefs.getFloat("k", 1f).coerceIn(RadarSpeed.MIN_K, RadarSpeed.MAX_K) - 1f) * 100f
+    }
 
     /** Live downloads: one tile started at most every this long. */
     private const val FETCH_GAP_MS = 5_000L
