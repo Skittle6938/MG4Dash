@@ -59,6 +59,16 @@ class MaintenanceModeTest {
         assertFalse(app.mg4dash.system.Maintenance.chosenAsHome(ctx))
     }
 
+    @Test fun anAppListBringsMG4DashBackButNotAShortcut() {
+        val m = app.mg4dash.system.Maintenance
+        // A launcher's app drawer: the way back
+        assertTrue(m.openedFromAppList(android.content.Intent(android.content.Intent.ACTION_MAIN).addCategory(android.content.Intent.CATEGORY_LAUNCHER)))
+        // HOME (the car's Home key) or a page asked by another app: never
+        assertFalse(m.openedFromAppList(android.content.Intent(android.content.Intent.ACTION_MAIN).addCategory(android.content.Intent.CATEGORY_HOME)))
+        assertFalse(m.openedFromAppList(android.content.Intent().setClassName("app.mg4dash", "app.mg4dash.pages.ClimateActivity")))
+        assertFalse(m.openedFromAppList(null))
+    }
+
     @Test fun fogButtonOverlayOffInMaintenance() {
         val p = Prefs(ctx)
         p.shortcutsMenu = true

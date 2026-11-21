@@ -21,14 +21,16 @@ object Maintenance {
     /**
      * For a MG4Dash screen opened in maintenance mode (a Radio Dash shortcut, the stock radio's arrow, MG4Link's "Open
      * MG4Dash"): closed at once and silently, nothing offered (21/11, #123: in maintenance nothing of MG4Dash
-     * reacts; the way back is the three-finger gesture, or MG4Dash chosen again as the home in Android's settings).
+     * reacts; the way back is the three-finger gesture, MG4Dash chosen again as the home in Android's settings, or
+     * MG4Dash opened from an app list).
      * True when it closed (its onCreate then stops there).
      */
     fun closeIfOn(activity: Activity): Boolean {
         if (!on(activity)) return false
-        // The driver chose MG4Dash as the home again in Android's settings: maintenance left, MG4Dash back in full
-        if (activity is app.mg4dash.MainActivity && chosenAsHome(activity)) {
-            Log.i(TAG, "MG4Dash chosen as the home in Android's settings: leaving maintenance mode")
+        // The driver chose MG4Dash as the home again in Android's settings, or opened it from an app list (another
+        // launcher): maintenance left, MG4Dash back in full. The other apps' shortcuts open its pages, never this.
+        if (activity is app.mg4dash.MainActivity && (chosenAsHome(activity) || openedFromAppList(activity.intent))) {
+            Log.i(TAG, "MG4Dash chosen as the home or opened from an app list: leaving maintenance mode")
             activity.finish()
             backToDash(activity)
             return true
@@ -38,6 +40,10 @@ object Maintenance {
         activity.overridePendingTransition(0, 0)
         return true
     }
+
+    /** MG4Dash's own entry of an app list (a launcher's app drawer): MAIN with the LAUNCHER category. */
+    internal fun openedFromAppList(intent: Intent?): Boolean =
+        intent?.action == Intent.ACTION_MAIN && intent.hasCategory(Intent.CATEGORY_LAUNCHER)
 
     /** HOME resolves to MG4Dash although maintenance mode made SAIC's the home: the driver chose it again. */
     internal fun chosenAsHome(context: Context): Boolean = !MOCK && try {
