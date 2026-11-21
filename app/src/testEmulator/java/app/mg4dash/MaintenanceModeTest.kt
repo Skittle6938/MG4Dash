@@ -1,9 +1,7 @@
 package app.mg4dash
 
 import app.mg4dash.pages.ClimateActivity
-import app.mg4dash.system.MaintenanceActivity
 import app.mg4dash.system.Prefs
-import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
@@ -16,7 +14,9 @@ import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
 
 /**
- * In maintenance mode, settings and pages offer a way back to MG4Dash. The projection shortcut closes silently.
+ * In maintenance mode nothing of MG4Dash reacts (Marc, 21/11, #123): any of its screens opened meanwhile closes at once
+ * and silently, with no offer and nothing else opened. The way back is the three-finger gesture, or MG4Dash chosen
+ * again as the home in Android's settings.
  */
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [28])
@@ -25,18 +25,19 @@ class MaintenanceModeTest {
 
     private fun opened(a: android.app.Activity) = shadowOf(a).nextStartedActivity?.component?.className
 
-    @Test fun pagesCloseInMaintenance() {
+    @Test fun pagesCloseSilentlyInMaintenance() {
         Prefs(ctx).valetMode = true
         val page = Robolectric.buildActivity(ClimateActivity::class.java).setup().get()
         assertTrue("closed at once", page.isFinishing)
-        assertEquals(MaintenanceActivity::class.java.name, opened(page))
+        assertNull("nothing opened in its place", opened(page))
+        assertNull("no window", org.robolectric.shadows.ShadowDialog.getLatestDialog())
     }
 
-    @Test fun settingsCloseInMaintenance() {
+    @Test fun settingsCloseSilentlyInMaintenance() {
         Prefs(ctx).valetMode = true
         val s = Robolectric.buildActivity(app.mg4dash.settings.SettingsActivity::class.java).setup().get()
         assertTrue(s.isFinishing)
-        assertEquals(MaintenanceActivity::class.java.name, opened(s))
+        assertNull(opened(s))
     }
 
     @Test fun projectionShortcutDoesNothingInMaintenance() {
@@ -53,13 +54,9 @@ class MaintenanceModeTest {
         assertNull(opened(page))
     }
 
-    @Test fun theOfferIsOnlyForMaintenance() {
-        Prefs(ctx).valetMode = false
-        assertTrue(Robolectric.buildActivity(MaintenanceActivity::class.java).setup().get().isFinishing)
-        Prefs(ctx).valetMode = true
-        val m = Robolectric.buildActivity(MaintenanceActivity::class.java).setup().get()
-        assertFalse(m.isFinishing)
-        assertTrue("its offer shown", org.robolectric.shadows.ShadowDialog.getLatestDialog()?.isShowing == true)
+    @Test fun maintenanceNotLeftUnlessChosenAsHome() {
+        // The emulator build: never taken for the driver's choice (no HOME resolution to trust)
+        assertFalse(app.mg4dash.system.Maintenance.chosenAsHome(ctx))
     }
 
     @Test fun fogButtonOverlayOffInMaintenance() {

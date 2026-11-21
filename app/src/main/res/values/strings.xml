@@ -240,8 +240,6 @@
     <string name="st_title">Settings · MG4Dash %1$s</string>
     <string name="st_replace_msg">MG4Dash will open at startup and with the Home button.\n\nNothing is uninstalled: the original SAIC home screen is simply switched off as the home screen, and the car\'s other functions keep working normally.\n\nYou can go back at any time with Maintenance mode, in the same place. If MG4Dash ever crashed several times in a row, the original home screen would come back by itself.</string>
     <string name="st_replace_btn">Replace</string>
-    <string name="valet_back_msg">Maintenance mode is on: the original SAIC home screen is the home screen.\n\nMake MG4Dash the home screen again?</string>
-    <string name="valet_back_btn">MG4Dash as home</string>
     <string name="valet_banner_title">Maintenance mode on</string>
     <string name="valet_banner_sub">The original SAIC home screen is the home screen.</string>
     <string name="valet_banner_go">Back to MG4Dash</string>

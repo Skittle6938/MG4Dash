@@ -240,8 +240,6 @@
     <string name="st_title">Nastavení · MG4Dash %1$s</string>
     <string name="st_replace_msg">MG4Dash se otevře při spuštění a po stisknutí tlačítka Domů.\n\nNic se neodinstaluje: původní domovská obrazovka SAIC se pouze vypne jako domovská obrazovka a ostatní funkce vozu fungují normálně.\n\nKdykoli se můžete vrátit pomocí Režimu údržby na stejném místě. Pokud by MG4Dash několikrát za sebou spadl, původní domovská obrazovka se vrátí sama.</string>
     <string name="st_replace_btn">Nahradit</string>
-    <string name="valet_back_msg">Režim údržby je zapnutý: domovskou obrazovkou je původní obrazovka SAIC.\n\nNastavit znovu MG4Dash jako domovskou obrazovku?</string>
-    <string name="valet_back_btn">MG4Dash jako domovská</string>
     <string name="valet_banner_title">Režim údržby zapnut</string>
     <string name="valet_banner_sub">Domovskou obrazovkou je původní obrazovka SAIC.</string>
     <string name="valet_banner_go">Zpět na MG4Dash</string>
