@@ -160,6 +160,9 @@ class Prefs(context: Context) {
     var lyricsCacheMaxMb: Int
         get() = sp.getInt("lyrics_cache_max_mb", 20).coerceIn(5, 100)
         set(v) = sp.edit().putInt("lyrics_cache_max_mb", v.coerceIn(5, 100)).apply()
+    var lyricsNetworkBytes: Long
+        get() = sp.getLong("lyrics_network_bytes", 0L).coerceAtLeast(0L)
+        set(v) = sp.edit().putLong("lyrics_network_bytes", v.coerceAtLeast(0L)).apply()
 
     /** Heated seats / wheel: 0 = auto (64 / 77 kWh battery), 1 = show, 2 = hide. */
     var heatedSeats: Int

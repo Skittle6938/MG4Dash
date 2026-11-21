@@ -1192,4 +1192,6 @@
     <string name="ly_cache_used">Kullanılan: %1$.1f MB / %2$d MB · %3$d parça</string>
     <string name="ly_clear">Önbelleği temizle</string>
     <string name="ly_cleared">Şarkı sözü önbelleği temizlendi</string>
+    <string name="du_lyrics">Senkronize şarkı sözleri</string>
+    <string name="du_lyrics_payload">LRCLIB yanıt verisi (4G, sıfırlamadan beri): %1$s</string>
 </resources>

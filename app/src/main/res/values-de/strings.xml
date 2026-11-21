@@ -1192,4 +1192,6 @@
     <string name="ly_cache_used">Belegt: %1$.1f MB / %2$d MB · %3$d Titel</string>
     <string name="ly_clear">Cache leeren</string>
     <string name="ly_cleared">Liedtext-Cache geleert</string>
+    <string name="du_lyrics">Synchronisierte Liedtexte</string>
+    <string name="du_lyrics_payload">LRCLIB-Antwortdaten (4G, seit Zurücksetzen): %1$s</string>
 </resources>

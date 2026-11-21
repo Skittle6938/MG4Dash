@@ -1192,4 +1192,6 @@
     <string name="ly_cache_used">Used: %1$.1f MB / %2$d MB · %3$d tracks</string>
     <string name="ly_clear">Clear cache</string>
     <string name="ly_cleared">Lyrics cache cleared</string>
+    <string name="du_lyrics">Synchronized lyrics</string>
+    <string name="du_lyrics_payload">LRCLIB response payload (4G, since reset): %1$s</string>
 </resources>

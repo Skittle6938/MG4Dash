@@ -1192,4 +1192,6 @@
     <string name="ly_cache_used">Utilisé : %1$.1f Mo / %2$d Mo · %3$d titres</string>
     <string name="ly_clear">Vider le cache</string>
     <string name="ly_cleared">Cache des paroles vidé</string>
+    <string name="du_lyrics">Paroles synchronisées</string>
+    <string name="du_lyrics_payload">Données reçues de LRCLIB (4G, depuis la remise à zéro) : %1$s</string>
 </resources>

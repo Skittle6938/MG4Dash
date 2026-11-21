@@ -1190,4 +1190,6 @@
     <string name="ly_cache_used">Použito: %1$.1f MB / %2$d MB · %3$d skladeb</string>
     <string name="ly_clear">Vymazat cache</string>
     <string name="ly_cleared">Mezipaměť textů vymazána</string>
+    <string name="du_lyrics">Synchronizované texty</string>
+    <string name="du_lyrics_payload">Data odpovědi LRCLIB (4G od resetu): %1$s</string>
 </resources>

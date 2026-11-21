@@ -1192,4 +1192,6 @@
     <string name="ly_cache_used">Usati: %1$.1f MB / %2$d MB · %3$d brani</string>
     <string name="ly_clear">Svuota cache</string>
     <string name="ly_cleared">Cache testi svuotata</string>
+    <string name="du_lyrics">Testi sincronizzati</string>
+    <string name="du_lyrics_payload">Dati ricevuti da LRCLIB (4G, dal reset): %1$s</string>
 </resources>

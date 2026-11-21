@@ -35,6 +35,7 @@ object DataUsage {
         OTHER(0x4D470006, R.string.du_other, R.color.text_title),
         /** Speed camera alerter (OpenStreetMap through Overpass); last, the days stored keep their order. */
         RADARS(0x4D470007, R.string.du_radars, R.color.text_sub),
+        LYRICS(0x4D470008, R.string.du_lyrics, R.color.accent_action),
     }
 
     const val DAYS = 30
@@ -102,6 +103,14 @@ object DataUsage {
     fun show4g(context: Context): Boolean = sp(context).getBoolean("show_4g", true)
     fun showWifi(context: Context): Boolean = sp(context).getBoolean("show_wifi", false)
     fun setShown(context: Context, g: Boolean, w: Boolean) = sp(context).edit().putBoolean("show_4g", g).putBoolean("show_wifi", w).apply()
+
+    /** Approximate LRCLIB response payload + headers, counted only when fetched over the car's 4G. */
+    fun recordLyricsDownload(context: Context, bytes: Long) {
+        if (bytes <= 0L) return
+        val prefs = Prefs(context)
+        prefs.lyricsNetworkBytes = prefs.lyricsNetworkBytes + bytes
+        last?.let { snapshot -> main.post { listeners.forEach { it(snapshot) } } }
+    }
 
     /** True when the updates must wait for Wi-Fi now (option on and the car not on a Wi-Fi). */
     fun updatesBlocked(context: Context): Boolean = updatesWifiOnly(context) && !StatusMonitor.read(context).wifiConnected
@@ -201,6 +210,7 @@ object DataUsage {
 
     /** Counter back to zero: what was used before now is no longer counted. */
     fun reset(context: Context) {
+        Prefs(context).lyricsNetworkBytes = 0L
         val sp = sp(context)
         val e = sp.edit().putLong("reset_at", System.currentTimeMillis()).putInt("alert_level", 0)
         sp.all.keys.filter { isDayKey(it) }.forEach { e.remove(it) }
@@ -229,8 +239,8 @@ object DataUsage {
         val upd = when (i) { 6 -> 34; 13 -> 38; 22 -> 30; 27 -> 16; else -> 0 }
         return Day(date, longArrayOf(
             if (drive) ((2 + r.nextFloat() * 11) * mb).toLong() else 0L, upd * mb,
-            if (drive) ((0.5f + r.nextFloat() * 3) * mb).toLong() else 0L, 370_000L, 300_000L, 200_000L, if (drive) 400_000L else 0L),
-            longArrayOf((r.nextFloat() * 4 * mb).toLong(), if (i % 9 == 4) 36 * mb else 0L, (r.nextFloat() * 6 * mb).toLong(), 200_000L, 900_000L, 100_000L, 0L))
+            if (drive) ((0.5f + r.nextFloat() * 3) * mb).toLong() else 0L, 370_000L, 300_000L, 200_000L, if (drive) 400_000L else 0L, 0L),
+            longArrayOf((r.nextFloat() * 4 * mb).toLong(), if (i % 9 == 4) 36 * mb else 0L, (r.nextFloat() * 6 * mb).toLong(), 200_000L, 900_000L, 100_000L, 0L, 0L))
     }
 
     /**

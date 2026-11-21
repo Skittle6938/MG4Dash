@@ -7,6 +7,7 @@ import android.os.Build
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import app.mg4dash.system.Prefs
+import app.mg4dash.system.DataUsage
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
@@ -19,11 +20,17 @@ import java.util.Locale
 object LyricsRepo {
     data class Track(val key: String, val artist: String, val title: String, val synced: List<Pair<Long, String>>?, val plain: String?)
     data class CacheInfo(val bytes: Long, val tracks: Int)
+    private data class HttpResponse(val body: String)
 
     private const val BASE = "https://lrclib.net/api"
     @Volatile private var app: Context? = null
     private val memory = LinkedHashMap<String, Track>()
+    private val activeConnections = java.util.concurrent.ConcurrentHashMap.newKeySet<HttpURLConnection>()
     fun start(context: Context) { app = context.applicationContext }
+
+    fun cancelActiveRequest() {
+        activeConnections.toList().forEach { connection -> try { connection.disconnect() } catch (_: Exception) { } }
+    }
 
     fun key(artist: String, title: String) = "${artist.trim().lowercase(Locale.ROOT)}\u0000${title.trim().lowercase(Locale.ROOT)}"
 
@@ -58,7 +65,7 @@ object LyricsRepo {
         val exact = linkedMapOf("artist_name" to artist, "track_name" to title)
         if (durationMs > 0) exact["duration"] = String.format(Locale.US, "%.2f", durationMs / 1000.0)
         var missing = false
-        val found = try { request("$BASE/get?${query(exact)}")?.let { JSONObject(it) } } catch (e: HttpFailure) {
+        val found = try { request("$BASE/get?${query(exact)}")?.let { JSONObject(it.body) } } catch (e: HttpFailure) {
             if (e.code != 404) return@withContext null
             missing = true
             null
@@ -66,7 +73,7 @@ object LyricsRepo {
         val result = found ?: try {
             if (!missing) return@withContext null
             val q = listOf(artist, clean(title)).filter { it.isNotBlank() }.joinToString(" ")
-            val arr = JSONArray(request("$BASE/search?${query(mapOf("q" to q))}") ?: return@withContext null)
+            val arr = JSONArray(request("$BASE/search?${query(mapOf("q" to q))}")?.body ?: return@withContext null)
             best(arr, artist, title, durationMs)
         } catch (_: Exception) { null }
         if (result == null) return@withContext null
@@ -93,16 +100,20 @@ object LyricsRepo {
     }
 
     private class HttpFailure(val code: Int) : Exception()
-    private fun request(address: String): String? {
+    private fun request(address: String): HttpResponse = DataUsage.tag(DataUsage.Use.LYRICS) {
         val c = (URL(address).openConnection() as HttpURLConnection).apply {
             connectTimeout = 7000; readTimeout = 7000; requestMethod = "GET"
             setRequestProperty("User-Agent", "MG4Dash/1.7 Lyrics")
         }
-        return try {
+        activeConnections += c
+        try {
             val code = c.responseCode
             if (code !in 200..299) throw HttpFailure(code)
-            c.inputStream.bufferedReader(Charsets.UTF_8).use { it.readText() }
-        } finally { c.disconnect() }
+            val payload = c.inputStream.use { it.readBytes() }
+            val bytes = payload.size.toLong() + 450L
+            app?.takeIf { !wifiConnected(it) }?.let { DataUsage.recordLyricsDownload(it, bytes) }
+            HttpResponse(String(payload, Charsets.UTF_8))
+        } finally { activeConnections -= c; c.disconnect() }
     }
 
     private fun best(arr: JSONArray, artist: String, title: String, duration: Long): JSONObject? {

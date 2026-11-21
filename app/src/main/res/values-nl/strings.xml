@@ -1192,4 +1192,6 @@
     <string name="ly_cache_used">Gebruikt: %1$.1f MB / %2$d MB · %3$d nummers</string>
     <string name="ly_clear">Cache wissen</string>
     <string name="ly_cleared">Songteksten-cache gewist</string>
+    <string name="du_lyrics">Gesynchroniseerde songteksten</string>
+    <string name="du_lyrics_payload">LRCLIB-responsgegevens (4G, sinds reset): %1$s</string>
 </resources>
