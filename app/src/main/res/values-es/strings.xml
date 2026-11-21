@@ -240,8 +240,6 @@
     <string name="st_title">Ajustes · MG4Dash %1$s</string>
     <string name="st_replace_msg">MG4Dash se abrirá al arrancar y con el botón Inicio.\n\nNo se desinstala nada: el inicio original de SAIC simplemente se desactiva como pantalla de inicio y las demás funciones del coche siguen funcionando con normalidad.\n\nPuede volver atrás en cualquier momento con el Modo mantenimiento, en el mismo lugar. Si MG4Dash fallara varias veces seguidas, el inicio original volvería solo.</string>
     <string name="st_replace_btn">Sustituir</string>
-    <string name="valet_back_msg">El Modo mantenimiento está activo: el inicio original de SAIC es la pantalla de inicio.\n\n¿Volver a poner MG4Dash como pantalla de inicio?</string>
-    <string name="valet_back_btn">MG4Dash como inicio</string>
     <string name="valet_banner_title">Modo mantenimiento activo</string>
     <string name="valet_banner_sub">El inicio original de SAIC es la pantalla de inicio.</string>
     <string name="valet_banner_go">Volver a MG4Dash</string>

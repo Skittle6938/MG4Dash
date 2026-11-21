@@ -10,7 +10,7 @@ import android.content.Intent
  * Maintenance mode (service mode, SAIC home back), 19/11: MG4Dash then does nothing at all but wait for the
  * three-finger gesture and its "Back to MG4Dash" banner (#123: in maintenance mode, the stock launcher's radio arrow
  * brought MG4Dash back). Started light (the gesture, what the banner needs, its rescue app kept up to date), every
- * screen of it closes at once but the offer to become the home again, and leaving maintenance restarts it in full.
+ * screen of it closes at once and silently, and leaving maintenance restarts it in full.
  */
 object Maintenance {
     private const val TAG = "Maintenance"
@@ -19,17 +19,30 @@ object Maintenance {
     fun on(context: Context): Boolean = Prefs(context).valetMode
 
     /**
-     * For a MG4Dash screen opened in maintenance mode (a Radio Dash shortcut, MG4Link's "Open MG4Dash"): closed at
-     * once, the offer to become the home again opened instead. True when it closed (its onCreate then stops there).
+     * For a MG4Dash screen opened in maintenance mode (a Radio Dash shortcut, the stock radio's arrow, MG4Link's "Open
+     * MG4Dash"): closed at once and silently, nothing offered (21/11, #123: in maintenance nothing of MG4Dash
+     * reacts; the way back is the three-finger gesture, or MG4Dash chosen again as the home in Android's settings).
+     * True when it closed (its onCreate then stops there).
      */
     fun closeIfOn(activity: Activity): Boolean {
         if (!on(activity)) return false
-        Log.i(TAG, "${activity.javaClass.simpleName} opened in maintenance mode: closed, the way back offered")
-        try { activity.startActivity(Intent(activity, MaintenanceActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)) } catch (_: Exception) {}
+        // The driver chose MG4Dash as the home again in Android's settings: maintenance left, MG4Dash back in full
+        if (activity is app.mg4dash.MainActivity && chosenAsHome(activity)) {
+            Log.i(TAG, "MG4Dash chosen as the home in Android's settings: leaving maintenance mode")
+            activity.finish()
+            backToDash(activity)
+            return true
+        }
+        Log.i(TAG, "${activity.javaClass.simpleName} opened in maintenance mode: closed silently")
         activity.finish()
         activity.overridePendingTransition(0, 0)
         return true
     }
+
+    /** HOME resolves to MG4Dash although maintenance mode made SAIC's the home: the driver chose it again. */
+    internal fun chosenAsHome(context: Context): Boolean = !MOCK && try {
+        HomeSwitcher.currentHome(context) == HomeSwitcher.ours(context)
+    } catch (_: Exception) { false }
 
     /**
      * Back to MG4Dash (the banner, the offer): it becomes the home again and restarts in full, as only its light part

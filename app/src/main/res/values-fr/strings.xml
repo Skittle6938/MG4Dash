@@ -240,8 +240,6 @@
     <string name="st_title">Réglages · MG4Dash %1$s</string>
     <string name="st_replace_msg">MG4Dash s\'ouvrira au démarrage et avec le bouton Accueil.\n\nRien n\'est désinstallé : l\'accueil SAIC d\'origine est simplement désactivé en tant qu\'écran d\'accueil, et les autres fonctions de la voiture continuent de marcher normalement.\n\nVous pouvez revenir en arrière à tout moment avec le mode Entretien, au même endroit. Si MG4Dash plantait plusieurs fois de suite, l\'accueil d\'origine reviendrait de lui-même.</string>
     <string name="st_replace_btn">Remplacer</string>
-    <string name="valet_back_msg">Le mode Entretien est actif : l\'accueil SAIC d\'origine est l\'écran d\'accueil.\n\nRemettre MG4Dash comme écran d\'accueil ?</string>
-    <string name="valet_back_btn">MG4Dash en accueil</string>
     <string name="valet_banner_title">Mode Entretien actif</string>
     <string name="valet_banner_sub">L\'accueil SAIC d\'origine est l\'écran d\'accueil.</string>
     <string name="valet_banner_go">Remettre MG4Dash</string>

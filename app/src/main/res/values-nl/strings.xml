@@ -240,8 +240,6 @@
     <string name="st_title">Instellingen · MG4Dash %1$s</string>
     <string name="st_replace_msg">MG4Dash opent bij het starten en met de Home-knop.\n\nEr wordt niets verwijderd: het originele SAIC-startscherm wordt alleen uitgeschakeld als startscherm en de andere functies van de auto blijven normaal werken.\n\nU kunt altijd terug met de Onderhoudsmodus, op dezelfde plek. Als MG4Dash een paar keer achter elkaar zou vastlopen, komt het originele startscherm vanzelf terug.</string>
     <string name="st_replace_btn">Vervangen</string>
-    <string name="valet_back_msg">De Onderhoudsmodus staat aan: het originele SAIC-startscherm is het startscherm.\n\nMG4Dash weer als startscherm gebruiken?</string>
-    <string name="valet_back_btn">MG4Dash als start</string>
     <string name="valet_banner_title">Onderhoudsmodus aan</string>
     <string name="valet_banner_sub">Het originele SAIC-startscherm is het startscherm.</string>
     <string name="valet_banner_go">Terug naar MG4Dash</string>

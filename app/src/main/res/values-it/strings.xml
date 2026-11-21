@@ -240,8 +240,6 @@
     <string name="st_title">Impostazioni · MG4Dash %1$s</string>
     <string name="st_replace_msg">MG4Dash si aprirà all\'avvio e con il tasto Home.\n\nNon viene disinstallato nulla: la home originale SAIC è semplicemente disattivata come schermata iniziale e le altre funzioni dell\'auto continuano a funzionare normalmente.\n\nPuoi tornare indietro in qualsiasi momento con la Modalità manutenzione, nello stesso punto. Se MG4Dash si bloccasse più volte di seguito, la home originale tornerebbe da sola.</string>
     <string name="st_replace_btn">Sostituisci</string>
-    <string name="valet_back_msg">La Modalità manutenzione è attiva: la home originale SAIC è la schermata iniziale.\n\nRimettere MG4Dash come schermata iniziale?</string>
-    <string name="valet_back_btn">MG4Dash come home</string>
     <string name="valet_banner_title">Modalità manutenzione attiva</string>
     <string name="valet_banner_sub">La home originale SAIC è la schermata iniziale.</string>
     <string name="valet_banner_go">Torna a MG4Dash</string>
