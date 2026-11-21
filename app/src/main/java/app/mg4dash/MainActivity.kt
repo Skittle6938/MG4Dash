@@ -202,6 +202,7 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
     private lateinit var driving: app.mg4dash.ui.DrivingCard
     private lateinit var radar: app.mg4dash.radar.RadarCard
     private lateinit var navCard: app.mg4dash.ui.NavCard
+    private lateinit var lyricsCard: app.mg4dash.ui.LyricsCard
     private lateinit var shortcutsHolder: LinearLayout
 
     /** Trip energy, power and phone cards: same frame, title, page dots and content. */
@@ -304,6 +305,8 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         // The Android Auto guidance alone (19/11), only where the driver put it
         navCard = app.mg4dash.ui.NavCard(this)
         panels[Card.NAV] = frame(navCard)
+        lyricsCard = app.mg4dash.ui.LyricsCard(this)
+        panels[Card.LYRICS] = frame(lyricsCard)
         // Web app (#97): the page itself is only loaded when shown
         val web = app.mg4dash.ui.WebCard(this).also { webCard = it }
         web.keyboardSpan = { webKeyboardSpan(it) }
@@ -505,6 +508,7 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
             Card.PHONE -> if (on) renderPhoneFavs()
             Card.HOURLY, Card.DAILY -> if (on) renderWeather(WeatherRepo.shown.value, CarBridge.state.value)
             Card.CLIMATE -> if (on) renderClimate(CarBridge.state.value)
+            Card.LYRICS -> if (on) lyricsCard.show(MediaHub.now.value)
         }
     }
 
@@ -2553,7 +2557,7 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
                 // Driving choices (#38): pending, then confirmed; one the car did not take is said, discreetly
                 launch { CarBridge.drivePending.collect { if (isShown(Card.DRIVING)) driving.show() } }
                 launch { CarBridge.driveRefused.collect { app.mg4dash.ui.Toasts.show(this@MainActivity, R.string.dv_not_confirmed) } }
-                launch { MediaHub.now.collect { renderMedia(it) } }
+                launch { MediaHub.now.collect { renderMedia(it); if (isShown(Card.LYRICS)) lyricsCard.show(it) } }
                 launch { app.mg4dash.radar.RadarRepo.state.collect { if (isShown(Card.RADAR)) radar.show(it) } }
                 // Download mark of the alerter's card: the preparation's progress, tiles downloaded live
                 launch { app.mg4dash.radar.RadarRepo.prepare.collect { radar.downloads(it, app.mg4dash.radar.RadarRepo.live.value) } }

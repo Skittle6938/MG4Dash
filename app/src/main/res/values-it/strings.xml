@@ -1178,4 +1178,18 @@
     <string name="usb_saved_internal">L’auto non ha dato il permesso di copiare sulla chiavetta USB: salvato invece nella memoria dell’auto, %1$s</string>
     <string name="fx_pick_hint">Selezionane una o più: ogni volta ne viene estratta una tra quelle selezionate, mai le altre. Nessuna selezionata: nessuna animazione.</string>
     <string name="fx_random_of">Casuale: %1$s</string>
+    <string name="wc_lyrics">Testi sincronizzati</string>
+    <string name="ly_refresh">Aggiorna testo</string>
+    <string name="ly_waiting">In attesa del brano…</string>
+    <string name="ly_searching">Ricerca testo…</string>
+    <string name="ly_none">Nessun testo trovato</string>
+    <string name="ly_offline">Offline — testo non in cache</string>
+    <string name="ly_wifi_only">Modalità Solo Wi-Fi attiva</string>
+    <string name="ly_plain">Testo non sincronizzato</string>
+    <string name="ly_wifi">Solo Wi-Fi</string>
+    <string name="ly_cache">Attiva cache offline</string>
+    <string name="ly_max">Dimensione massima cache</string>
+    <string name="ly_cache_used">Usati: %1$.1f MB / %2$d MB · %3$d brani</string>
+    <string name="ly_clear">Svuota cache</string>
+    <string name="ly_cleared">Cache testi svuotata</string>
 </resources>

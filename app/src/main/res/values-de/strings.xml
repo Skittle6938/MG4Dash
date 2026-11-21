@@ -1178,4 +1178,18 @@
     <string name="usb_saved_internal">Das Auto hat das Kopieren auf den USB-Stick nicht erlaubt: stattdessen im Speicher des Autos gespeichert, %1$s</string>
     <string name="fx_pick_hint">Eine oder mehrere ankreuzen: Jedes Mal wird eine der angekreuzten ausgelost, nie die anderen. Keine angekreuzt: keine Animation.</string>
     <string name="fx_random_of">Zufällig: %1$s</string>
+    <string name="wc_lyrics">Liedtexte</string>
+    <string name="ly_refresh">Liedtexte aktualisieren</string>
+    <string name="ly_waiting">Warte auf Titel…</string>
+    <string name="ly_searching">Suche Liedtexte…</string>
+    <string name="ly_none">Kein Liedtext gefunden</string>
+    <string name="ly_offline">Offline — nicht gespeichert</string>
+    <string name="ly_wifi_only">Nur-WLAN-Modus aktiv</string>
+    <string name="ly_plain">Nicht synchronisierter Liedtext</string>
+    <string name="ly_wifi">Nur WLAN</string>
+    <string name="ly_cache">Offline-Cache aktivieren</string>
+    <string name="ly_max">Maximale Cachegröße</string>
+    <string name="ly_cache_used">Belegt: %1$.1f MB / %2$d MB · %3$d Titel</string>
+    <string name="ly_clear">Cache leeren</string>
+    <string name="ly_cleared">Liedtext-Cache geleert</string>
 </resources>

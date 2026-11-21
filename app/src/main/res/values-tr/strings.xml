@@ -1178,4 +1178,18 @@
     <string name="usb_saved_internal">Araç USB belleğe kopyalama izni vermedi: bunun yerine aracın belleğine kaydedildi, %1$s</string>
     <string name="fx_pick_hint">Bir veya birkaç tanesini işaretleyin: her seferinde işaretlenenlerden biri seçilir, diğerleri asla. Hiçbiri işaretli değilse animasyon yok.</string>
     <string name="fx_random_of">Rastgele: %1$s</string>
+    <string name="wc_lyrics">Şarkı sözleri</string>
+    <string name="ly_refresh">Şarkı sözlerini yenile</string>
+    <string name="ly_waiting">Parça bekleniyor…</string>
+    <string name="ly_searching">Şarkı sözleri aranıyor…</string>
+    <string name="ly_none">Şarkı sözü bulunamadı</string>
+    <string name="ly_offline">Çevrimdışı — önbellekte yok</string>
+    <string name="ly_wifi_only">Yalnızca Wi-Fi modu etkin</string>
+    <string name="ly_plain">Senkronize olmayan sözler</string>
+    <string name="ly_wifi">Yalnızca Wi-Fi</string>
+    <string name="ly_cache">Çevrimdışı önbelleği etkinleştir</string>
+    <string name="ly_max">Maksimum önbellek boyutu</string>
+    <string name="ly_cache_used">Kullanılan: %1$.1f MB / %2$d MB · %3$d parça</string>
+    <string name="ly_clear">Önbelleği temizle</string>
+    <string name="ly_cleared">Şarkı sözü önbelleği temizlendi</string>
 </resources>

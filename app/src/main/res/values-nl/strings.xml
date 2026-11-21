@@ -1178,4 +1178,18 @@
     <string name="usb_saved_internal">De auto gaf geen toestemming om naar de USB-stick te kopiëren: in plaats daarvan opgeslagen in het geheugen van de auto, %1$s</string>
     <string name="fx_pick_hint">Vink er één of meer aan: telkens wordt een van de aangevinkte geloot, nooit de andere. Geen aangevinkt: geen animatie.</string>
     <string name="fx_random_of">Willekeurig: %1$s</string>
+    <string name="wc_lyrics">Songteksten</string>
+    <string name="ly_refresh">Songteksten vernieuwen</string>
+    <string name="ly_waiting">Wachten op nummer…</string>
+    <string name="ly_searching">Songteksten zoeken…</string>
+    <string name="ly_none">Geen songtekst gevonden</string>
+    <string name="ly_offline">Offline — niet in cache</string>
+    <string name="ly_wifi_only">Alleen wifi-modus actief</string>
+    <string name="ly_plain">Niet-gesynchroniseerde songtekst</string>
+    <string name="ly_wifi">Alleen wifi</string>
+    <string name="ly_cache">Offlinecache inschakelen</string>
+    <string name="ly_max">Maximale cachegrootte</string>
+    <string name="ly_cache_used">Gebruikt: %1$.1f MB / %2$d MB · %3$d nummers</string>
+    <string name="ly_clear">Cache wissen</string>
+    <string name="ly_cleared">Songteksten-cache gewist</string>
 </resources>

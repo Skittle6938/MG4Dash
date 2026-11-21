@@ -151,6 +151,16 @@ class Prefs(context: Context) {
         get() = sp.getBoolean("map_offline_switch", true)
         set(v) = sp.edit().putBoolean("map_offline_switch", v).apply()
 
+    var lyricsWifiOnly: Boolean
+        get() = sp.getBoolean("wifi_only_mode", false)
+        set(v) = sp.edit().putBoolean("wifi_only_mode", v).apply()
+    var lyricsCacheEnabled: Boolean
+        get() = sp.getBoolean("lyrics_cache_enabled", true)
+        set(v) = sp.edit().putBoolean("lyrics_cache_enabled", v).apply()
+    var lyricsCacheMaxMb: Int
+        get() = sp.getInt("lyrics_cache_max_mb", 20).coerceIn(5, 100)
+        set(v) = sp.edit().putInt("lyrics_cache_max_mb", v.coerceIn(5, 100)).apply()
+
     /** Heated seats / wheel: 0 = auto (64 / 77 kWh battery), 1 = show, 2 = hide. */
     var heatedSeats: Int
         get() = sp.getInt("heated_seats", 0)

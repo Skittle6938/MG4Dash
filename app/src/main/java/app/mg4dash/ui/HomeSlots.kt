@@ -54,7 +54,8 @@ object HomeSlots {
         /** Speed camera alerter (test, OpenStreetMap): only where the driver places it, in any size. */
         RADAR("radar", R.string.wc_radar, R.drawable.ic_radar),
         /** The Android Auto guidance alone (19/11): only where the driver places it, in any size. */
-        NAV("nav", R.string.wc_nav, R.drawable.ic_map);
+        NAV("nav", R.string.wc_nav, R.drawable.ic_map),
+        LYRICS("lyrics", R.string.wc_lyrics, R.drawable.ic_music);
 
         /** Fills a big place (two columns): the others would look lost in it, they are greyed there in the edit mode. */
         val big: Boolean get() = this == MAP || this == WEB || this == CONSUMPTION || this == SHORTCUTS || this == DRIVING || this == RADAR || this == NAV

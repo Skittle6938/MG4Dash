@@ -1176,4 +1176,18 @@
     <string name="usb_saved_internal">Auto nepovolilo kopírování na USB disk: uloženo místo toho do paměti auta, %1$s</string>
     <string name="fx_pick_hint">Zaškrtněte jednu nebo více: pokaždé se vylosuje jedna ze zaškrtnutých, nikdy ostatní. Žádná zaškrtnutá: žádná animace.</string>
     <string name="fx_random_of">Náhodně: %1$s</string>
+    <string name="wc_lyrics">Texty</string>
+    <string name="ly_refresh">Obnovit texty</string>
+    <string name="ly_waiting">Čekám na skladbu…</string>
+    <string name="ly_searching">Hledám text…</string>
+    <string name="ly_none">Text nenalezen</string>
+    <string name="ly_offline">Offline — text není v mezipaměti</string>
+    <string name="ly_wifi_only">Aktivní režim pouze Wi-Fi</string>
+    <string name="ly_plain">Nesynchronizovaný text</string>
+    <string name="ly_wifi">Pouze Wi-Fi</string>
+    <string name="ly_cache">Povolit offline cache</string>
+    <string name="ly_max">Maximální velikost cache</string>
+    <string name="ly_cache_used">Použito: %1$.1f MB / %2$d MB · %3$d skladeb</string>
+    <string name="ly_clear">Vymazat cache</string>
+    <string name="ly_cleared">Mezipaměť textů vymazána</string>
 </resources>

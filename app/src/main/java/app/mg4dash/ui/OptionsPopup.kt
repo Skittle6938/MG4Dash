@@ -21,6 +21,7 @@ class OptionsPopup(private val a: Activity, title: String) {
     private fun col(res: Int) = Themes.color(a, res)
     private val medium = Typeface.create("sans-serif-medium", Typeface.NORMAL)
     private val body = LinearLayout(a).apply { orientation = LinearLayout.VERTICAL; setPadding(dp(30), dp(24), dp(30), dp(22)) }
+    private val refreshers = mutableListOf<() -> Unit>()
 
     init {
         body.addView(TextView(a).apply {
@@ -49,19 +50,31 @@ class OptionsPopup(private val a: Activity, title: String) {
     fun toggle(title: String, sub: String?, get: () -> Boolean, set: (Boolean) -> Unit): OptionsPopup {
         lateinit var v: TextView
         fun paint() { v.text = a.getString(if (get()) R.string.yes else R.string.no); v.isSelected = get() }
-        v = chip("") { set(!get()); paint() }
+        v = chip("") { set(!get()); refreshers.forEach { it() } }
+        refreshers += ::paint
         paint()
         line(title, sub, v, 130)
         return this
     }
 
     /** A choice in the same menu as the settings'. */
-    fun choice(title: String, sub: String?, labels: List<String>, current: () -> Int, onPick: (Int) -> Unit): OptionsPopup {
+    fun choice(title: String, sub: String?, labels: List<String>, current: () -> Int, enabled: () -> Boolean = { true }, onPick: (Int) -> Unit): OptionsPopup {
         lateinit var v: TextView
-        fun paint() { v.text = labels[current().coerceIn(0, labels.lastIndex)] + "  ▾" }
+        fun paint() { v.text = labels[current().coerceIn(0, labels.lastIndex)] + "  ▾"; v.isEnabled = enabled(); v.alpha = if (v.isEnabled) 1f else .45f }
         v = chip("") { SourceMenu.choose(a, v, labels, current()) { onPick(it); paint() } }.apply { isSelected = true }
+        refreshers += ::paint
         paint()
         line(title, sub, v, 240)
+        return this
+    }
+
+    fun note(view: android.view.View): OptionsPopup {
+        body.addView(view, LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(14) })
+        return this
+    }
+
+    fun action(label: String, onClick: () -> Unit): OptionsPopup {
+        body.addView(chip(label, onClick), LinearLayout.LayoutParams(-1, dp(56)).apply { topMargin = dp(12) })
         return this
     }
 

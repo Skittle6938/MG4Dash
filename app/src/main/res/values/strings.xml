@@ -1178,4 +1178,18 @@
     <string name="usb_saved_internal">The car did not give permission to copy to the USB stick: saved in the car’s memory instead, %1$s</string>
     <string name="fx_pick_hint">Tick one or more: each time, one of those ticked is drawn, never the others. None ticked: no animation.</string>
     <string name="fx_random_of">Random: %1$s</string>
+    <string name="wc_lyrics">Lyrics</string>
+    <string name="ly_refresh">Refresh lyrics</string>
+    <string name="ly_waiting">Waiting for track…</string>
+    <string name="ly_searching">Searching lyrics…</string>
+    <string name="ly_none">No lyrics found</string>
+    <string name="ly_offline">Offline — lyrics not cached</string>
+    <string name="ly_wifi_only">Wi-Fi only mode active</string>
+    <string name="ly_plain">Unsynced lyrics</string>
+    <string name="ly_wifi">Wi-Fi only</string>
+    <string name="ly_cache">Enable offline cache</string>
+    <string name="ly_max">Maximum cache size</string>
+    <string name="ly_cache_used">Used: %1$.1f MB / %2$d MB · %3$d tracks</string>
+    <string name="ly_clear">Clear cache</string>
+    <string name="ly_cleared">Lyrics cache cleared</string>
 </resources>
