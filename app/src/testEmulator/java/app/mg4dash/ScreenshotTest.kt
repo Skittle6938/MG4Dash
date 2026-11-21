@@ -641,7 +641,8 @@ class ScreenshotTest {
         flow.value = flow.value.copy(chargeStatus = 0)
         repeat(5) { shadowOf(Looper.getMainLooper()).idleFor(200, TimeUnit.MILLISECONDS) }
         save(act.window.decorView, "power_cons_0.png")
-        val avg = MainActivity::class.java.getDeclaredField("powerAvg").apply { isAccessible = true }.get(act) as android.widget.TextView
+        // The whole card takes the tap (Marc, 21/11), the kWh/100 with it
+        val avg = act.findViewById<android.view.View>(R.id.energyCard)
         val seen = mutableListOf<Int>()
         for (n in 1..4) {
             avg.performClick()
