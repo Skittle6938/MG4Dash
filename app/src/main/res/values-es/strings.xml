@@ -247,7 +247,7 @@
     <string name="temp_cal_title">Calibración de la temperatura</string>
     <string name="temp_cal_preview">Mostrado: %1$s</string>
     <string name="temp_cal_reset">Restablecer</string>
-    <string name="st_valet_msg">El inicio original de SAIC se reactivará y volverá a ser la pantalla de inicio. MG4Dash sigue instalado: «Sustituir inicio SAIC» para volver a él. ¿Continuar?</string>
+    <string name="st_valet_msg">El inicio original de SAIC se reactivará y volverá a ser la pantalla de inicio. MG4Dash sigue instalado pero no hace nada mientras tanto; para volver, desliza tres dedos hacia abajo desde la parte superior de la pantalla. Si el coche tiene su propia radio junto a Radio Dash, Radio Dash se desactiva mientras tanto. ¿Continuar?</string>
     <string name="activate">Activar</string>
     <string name="st_home_changed">Inicio cambiado</string>
     <string name="st_failed">Error (ver el registro)</string>

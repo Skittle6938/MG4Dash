@@ -76,6 +76,8 @@ object HomeSwitcher {
     fun replaceStock(context: Context): Boolean {
         Prefs(context).valetMode = false
         Prefs(context).valetAuto = false
+        // Out of maintenance mode, whatever the way: Radio Dash back if it was switched off for it
+        RadioDashGuard.maintenanceOff(context)
         setPreferred(context, ours(context))
         return try {
             context.packageManager.setComponentEnabledSetting(
@@ -164,6 +166,8 @@ object HomeSwitcher {
     fun switchToStock(context: Context, auto: Boolean = false): Boolean {
         Prefs(context).valetMode = true
         Prefs(context).valetAuto = auto
+        // The driver's maintenance mode: Radio Dash off where the car has its own radio (not for the crash guard's)
+        if (!auto) RadioDashGuard.maintenanceOn(context)
         val ok = try {
             context.packageManager.setComponentEnabledSetting(
                 STOCK, PackageManager.COMPONENT_ENABLED_STATE_DEFAULT, PackageManager.DONT_KILL_APP,
@@ -192,6 +196,7 @@ object HomeSwitcher {
      * maintenance mode; true only when HOME really resolves to it.
      */
     fun stockHomeBack(context: Context): Boolean = try {
+        RadioDashGuard.maintenanceOff(context)
         context.packageManager.setComponentEnabledSetting(STOCK, PackageManager.COMPONENT_ENABLED_STATE_DEFAULT, PackageManager.DONT_KILL_APP)
         setPreferred(context, STOCK)
         (currentHome(context) == STOCK).also { Log.i(TAG, "SAIC home back before the uninstall → $it") }

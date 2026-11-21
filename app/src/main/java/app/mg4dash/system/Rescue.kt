@@ -20,7 +20,7 @@ object Rescue {
     private const val TAG = "Rescue"
     const val PKG = "app.mg4dash.rescue"
     /** Version of the embedded rescue app (versionCode of rescue/build.gradle.kts). */
-    const val BUNDLED_VERSION = 7L
+    const val BUNDLED_VERSION = 8L
     /** The first rescue that takes over after MG4Dash's update (UPDATED). */
     const val HANDS_OVER_FROM = 4L
     private const val ASSET = "rescue.apk"

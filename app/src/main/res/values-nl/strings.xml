@@ -247,7 +247,7 @@
     <string name="temp_cal_title">Temperatuurkalibratie</string>
     <string name="temp_cal_preview">Weergegeven: %1$s</string>
     <string name="temp_cal_reset">Herstellen</string>
-    <string name="st_valet_msg">Het originele SAIC-startscherm wordt weer ingeschakeld en wordt weer het startscherm. MG4Dash blijft geïnstalleerd: „SAIC-start vervangen” om terug te gaan. Doorgaan?</string>
+    <string name="st_valet_msg">Het originele SAIC-startscherm wordt weer ingeschakeld en wordt weer het startscherm. MG4Dash blijft geïnstalleerd maar doet intussen niets; om terug te gaan, veeg met drie vingers omlaag vanaf de bovenkant van het scherm. Heeft de auto naast Radio Dash een eigen radio, dan wordt Radio Dash intussen uitgeschakeld. Doorgaan?</string>
     <string name="activate">Activeren</string>
     <string name="st_home_changed">Startscherm gewijzigd</string>
     <string name="st_failed">Mislukt (zie logboek)</string>

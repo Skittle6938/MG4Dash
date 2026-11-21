@@ -247,7 +247,7 @@
     <string name="temp_cal_title">Kalibrace teploty</string>
     <string name="temp_cal_preview">Zobrazeno: %1$s</string>
     <string name="temp_cal_reset">Obnovit výchozí</string>
-    <string name="st_valet_msg">Původní domovská obrazovka SAIC se znovu zapne a opět bude domovskou obrazovkou. MG4Dash zůstane nainstalován: pro návrat se dotkněte „Nahradit domovskou obrazovku SAIC“. Pokračovat?</string>
+    <string name="st_valet_msg">Původní domovská obrazovka SAIC se znovu zapne a opět bude domovskou obrazovkou. MG4Dash zůstane nainstalován, ale mezitím nic nedělá; pro návrat přejeďte třemi prsty dolů od horního okraje obrazovky. Má-li auto vedle Radio Dash vlastní rádio, Radio Dash se mezitím vypne. Pokračovat?</string>
     <string name="activate">Aktivovat</string>
     <string name="st_home_changed">Domovská obrazovka změněna</string>
     <string name="st_failed">Nezdařilo se (viz protokol)</string>

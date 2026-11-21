@@ -122,6 +122,7 @@ public class RescueService extends Service {
         // MG4Dash uninstalled while it had disabled SAIC home: restore it
         if (!dashInstalled) {
             if (stockDisabled) restoreStock(pm, stock, "MG4Dash not installed");
+            radioDashBack(pm);
             return;
         }
         // MG4Dash is not home (SAIC home or another launcher): nothing to do
@@ -395,6 +396,22 @@ public class RescueService extends Service {
             putGlobal(KEY_HOME, "1");
             Log.i(TAG, "MG4Dash is the home again");
         }
+    }
+
+    /** Set by MG4Dash while it keeps Radio Dash switched off for its maintenance mode (beside the car's own radio). */
+    static final String KEY_RADIO_OFF = "mg4dash_radio_off";
+    static final String RADIO_DASH = "com.saicmotor.radio";
+
+    /** MG4Dash gone during its maintenance mode: Radio Dash, which it had switched off, switched on again. */
+    void radioDashBack(PackageManager pm) {
+        String off = null;
+        try { off = android.provider.Settings.Global.getString(getContentResolver(), KEY_RADIO_OFF); } catch (Exception ignored) {}
+        if (!"1".equals(off)) return;
+        try {
+            pm.setApplicationEnabledSetting(RADIO_DASH, PackageManager.COMPONENT_ENABLED_STATE_DEFAULT, 0);
+            Log.i(TAG, "MG4Dash gone during its maintenance mode: Radio Dash switched on again");
+        } catch (Exception e) { Log.w(TAG, "Radio Dash back: " + e.getMessage()); }
+        putGlobal(KEY_RADIO_OFF, "0");
     }
 
     private void restoreStock(PackageManager pm, ComponentName stock, String why) {
