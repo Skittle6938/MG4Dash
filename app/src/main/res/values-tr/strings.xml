@@ -1195,5 +1195,5 @@
     <string name="br_erase_msg">Bu eğri: gösterilen eğri 15 / 35 / 70 / 100 % değerine döner. Tümünü sil: bu profilin açık ve koyu iki eğrisi.</string>
     <string name="br_erase_this">Bu eğri</string>
     <string name="br_erase_all">Tümünü sil</string>
-    <string name="usb_read_on_computer">Araç belleğin kök dizinini reddetti, bu yüzden dosya MG4Dash’in kendi klasöründe: telefon bu klasörü açamaz, belleği bir bilgisayarda okuyun.</string>
+    <string name="usb_saved_internal">Araç USB belleğe kopyalama izni vermedi: bunun yerine aracın belleğine kaydedildi, %1$s</string>
 </resources>

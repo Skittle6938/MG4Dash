@@ -119,7 +119,6 @@ object WebAddresses {
         val w = app.mg4dash.system.UsbExport.write(context, FILE, format(Prefs(context).webUrls))
         if (w == null) { Toasts.show(context, R.string.wc_urls_no_usb, long = true); return }
         Log.i(TAG, "addresses exported to ${w.path}")
-        Toasts.show(context, context.getString(R.string.wc_urls_exported, w.path) +
-            if (w.hidden) "\n" + context.getString(R.string.usb_read_on_computer) else "", long = true)
+        Toasts.show(context, context.getString(if (w.internal) R.string.usb_saved_internal else R.string.wc_urls_exported, w.path), long = true)
     }
 }
