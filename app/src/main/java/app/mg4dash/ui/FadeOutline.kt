@@ -86,7 +86,9 @@ class FadeOutline(private val d: Float, color: Int, private val fade: Boolean = 
                 val color = Themes.color(root.context, R.color.text_sub)
                 val fade = app.mg4dash.system.Prefs(root.context).panelFade
                 fun style(v: View) {
-                    v.background = FadeOutline(d, color, fade); v.elevation = 0f
+                    // Once only: a card drawn over its content (FRONT) has it as its foreground, not twice (its two
+                    // see-through strokes over each other made its frame look brighter than the others')
+                    v.background = if (v.tag == FRONT) null else FadeOutline(d, color, fade); v.elevation = 0f
                     if (v.tag == FRONT) {
                         v.outlineProvider = object : ViewOutlineProvider() {
                             override fun getOutline(v: View, o: android.graphics.Outline) { o.setRoundRect(0, 0, v.width, v.height, RADIUS * d) }
