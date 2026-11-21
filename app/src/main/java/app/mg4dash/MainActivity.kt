@@ -949,12 +949,15 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
     /** The energy card's options (Marc, 17/11, once in Settings › Home): live power in it, volts and amps, back to it plugged in. */
     private fun energyOptions() {
         val power = prefs.energyCardPower
+        val va = prefs.powerVa
         fun t(res: Int) = getString(res, "").trimEnd(' ', ':', ' ', ' ')
         app.mg4dash.ui.OptionsPopup(this, getString(R.string.wc_energy))
             .toggle(t(R.string.st_energy_card_power), getString(R.string.st_energy_card_power_desc), { prefs.energyCardPower }) { prefs.energyCardPower = it }
             .toggle(t(R.string.st_power_va), getString(R.string.st_power_va_desc), { prefs.powerVa }) { prefs.powerVa = it }
             .toggle(t(R.string.st_stack_auto), null, { prefs.stackAuto }) { prefs.stackAuto = it }
-            .show { if (prefs.energyCardPower != power) app.mg4dash.ui.Themes.recreateSmooth(this) }
+            // The card is built with these two: rebuilt at once when either changed (Marc, 21/11: V / A did not show
+            // until home was built again)
+            .show { if (prefs.energyCardPower != power || prefs.powerVa != va) app.mg4dash.ui.Themes.recreateSmooth(this) }
     }
 
     /**
@@ -2160,23 +2163,15 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
             maxLines = 1
             setAutoSizeTextTypeUniformWithConfiguration(12, 22, 1, TypedValue.COMPLEX_UNIT_SP)
         }
-        powerAvg = tv(26f, R.color.text_value, Gravity.END).apply {
-            // A tap changes the consumption, and the range with it (#29)
-            isClickable = true; setOnClickListener { nextConsSource() }
-        }
+        powerAvg = tv(26f, R.color.text_value, Gravity.END)
+        // A tap anywhere on the card changes the consumption, and the range with it (#29); a long press anywhere opens
+        // its options (Marc, 21/11: before, only the right half took the tap, and there the long press was lost)
+        card.setOnClickListener { nextConsSource() }
         powerLabel = null
         row.addView(powerValue, LinearLayout.LayoutParams(-2, -2))
         row.addView(powerExtra, LinearLayout.LayoutParams(0, -2, 1f))
         row.addView(powerAvg, LinearLayout.LayoutParams(-2, -2))
         card.addView(row, at + 1, LinearLayout.LayoutParams(-1, -2).apply { topMargin = (6 * d).toInt() })
-        // Touch zone larger than the consumption's text: the whole right half of the card, the range above
-        // included, as both change together (#29); the left half does nothing
-        card.addOnLayoutChangeListener { _, _, _, _, _, _, _, _, _ ->
-            val a = powerAvg ?: return@addOnLayoutChangeListener
-            if (a.width == 0) return@addOnLayoutChangeListener
-            val r = android.graphics.Rect(card.width / 2, 0, card.width, card.height)
-            if (r != consTouch) { consTouch = android.graphics.Rect(r); card.touchDelegate = android.view.TouchDelegate(r, a) }
-        }
         // V / A optional (#29): without them, kW and average consumption take the space and grow
         val va = prefs.powerVa
         if (!va) { powerExtra?.visibility = View.INVISIBLE; powerValue?.setTextSize(TypedValue.COMPLEX_UNIT_SP, 30f); powerAvg?.setTextSize(TypedValue.COMPLEX_UNIT_SP, 30f) }
@@ -2353,8 +2348,6 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
     }
 
     private var consPill: TextView? = null
-    /** Touch zone of the consumption, in the energy card. */
-    private var consTouch: android.graphics.Rect? = null
 
     /** Name of the consumption, with its logo, for 2 s above the kWh/100: the logos are learnt without a legend. */
     private fun showConsPill(src: ConsSource) {
