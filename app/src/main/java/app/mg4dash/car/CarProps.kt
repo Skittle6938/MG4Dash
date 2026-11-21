@@ -100,18 +100,19 @@ object CarProps {
 
     /**
      * Diagnostic: lists all properties exposed by the car with their value, in the
-     * log ("Props" tag). Used to find measurements (temperatures…) without changing anything.
+     * Android logcat ("MG4L.Props" tag), outside the in-app journal's limited buffer.
+     * Used to find measurements without changing the vehicle settings.
      */
     fun dumpAll() {
         val m = cpm ?: return
         try {
             @Suppress("UNCHECKED_CAST")
             val list = m.javaClass.getMethod("getPropertyList").invoke(m) as List<Any>
-            Log.i("Props", "${list.size} properties")
+            Log.i("Props", "compatibility scan: ${list.size} properties (details in logcat)")
             list.forEach { cfg ->
                 val id = cfg.javaClass.getMethod("getPropertyId").invoke(cfg) as Int
                 val areas = (cfg.javaClass.getMethod("getAreaIds").invoke(cfg) as? IntArray)?.joinToString(",") { "0x" + Integer.toHexString(it) } ?: ""
-                Log.i("Props", "0x${Integer.toHexString(id)} areas=[$areas] = ${readAny(id)}")
+                android.util.Log.i("MG4L.Props", "0x${Integer.toHexString(id)} areas=[$areas] = ${readAny(id)}")
             }
         } catch (e: Throwable) {
             Log.w("Props", "list failed: ${(e.cause ?: e).message}")
