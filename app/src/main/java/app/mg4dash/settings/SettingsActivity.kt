@@ -1039,7 +1039,6 @@ class SettingsActivity : AppCompatActivity() {
 
     /** Full power animation of the live Power widget: drop-down list, preview on a mini map. */
     private fun powerFxSetting(parent: LinearLayout) {
-        text(parent, getString(R.string.st_power_fx), 18f, R.color.text_value)
         // No preview: the surprise is for the road. Displayed order: random first (default).
         val fx = app.mg4dash.ui.PowerFx
         // One or more ticked (21/11): each time, one of those ticked is drawn, never another; none ticked, none
@@ -1054,7 +1053,8 @@ class SettingsActivity : AppCompatActivity() {
             val name = when {
                 names.isEmpty() -> getString(R.string.fx_none)
                 names.size == 1 -> names[0]
-                else -> getString(R.string.fx_random_of, names.joinToString(", "))
+                // Several ticked: just « Random », which ones are in the drop-down list (21/11)
+                else -> getString(R.string.fx_random)
             }
             pick.text = "$name   ${if (list.visibility == View.VISIBLE) "▴" else "▾"}"
         }
@@ -1080,13 +1080,16 @@ class SettingsActivity : AppCompatActivity() {
             text = getString(R.string.fx_pick_hint); setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f); setTextColor(color(R.color.text_title))
         }, LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(6) })
         paint(); label()
-        // Under the choice button only (left half of the line)
+        // The choice button on the right of its label (21/11), its list under it
         val line = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
-        val left = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
-        left.addView(pick, LinearLayout.LayoutParams(-1, dp(56)))
-        left.addView(list, LinearLayout.LayoutParams(-1, -2))
-        line.addView(left, LinearLayout.LayoutParams(0, -2, 1f))
-        line.addView(View(this), LinearLayout.LayoutParams(0, 1, 1f).apply { leftMargin = dp(10) })
+        line.addView(TextView(this).apply {
+            text = getString(R.string.st_power_fx); setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f); setTextColor(color(R.color.text_value))
+            gravity = Gravity.CENTER_VERTICAL; minHeight = dp(56)
+        }, LinearLayout.LayoutParams(0, -2, 1f).apply { rightMargin = dp(12) })
+        val right = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
+        right.addView(pick, LinearLayout.LayoutParams(-1, dp(56)))
+        right.addView(list, LinearLayout.LayoutParams(-1, -2))
+        line.addView(right, LinearLayout.LayoutParams(0, -2, 1f))
         parent.addView(line, LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(10) })
         text(parent, getString(R.string.st_power_fx_desc), 16f, R.color.text_title)
         fxVolumeSetting(parent)
