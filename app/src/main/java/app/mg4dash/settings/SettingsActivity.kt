@@ -1410,7 +1410,7 @@ class SettingsActivity : AppCompatActivity() {
 
     /**
      * The speed camera alerter's own page (the owner's mockups, 17/11), opened by a long press on its card, apart from the
-     * settings: three tabs (Alertes, Données, Voiture (ISA)) built by [app.mg4dash.radar.RadarPage].
+     * settings: two tabs (Alertes, Données) built by [app.mg4dash.radar.RadarPage].
      */
     private fun radarPage() {
         // The screen's margins as home's (Grand affichage: enlarged like its bar, which then sits where home's does)

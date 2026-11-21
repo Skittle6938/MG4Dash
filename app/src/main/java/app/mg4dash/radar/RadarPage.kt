@@ -23,9 +23,8 @@ import app.mg4dash.system.Units
 import app.mg4dash.ui.Themes
 
 /**
- * The alerter's settings page (the owner's mockups, 17/11): three tabs on the left, Alertes (thresholds, banner, the sound of
- * each alert), Données (prepared trips with their progress, while driving, storage), Voiture (ISA) (the car's limit read,
- * OSM's limit sent); the OpenStreetMap licence under the tabs. Built in code in MG4Dash's style (panels, outlined chips).
+ * The alerter's settings page: Alertes (thresholds, banner and sounds) and Données (prepared trips, live data and storage).
+ * The OpenStreetMap licence sits below the tabs.
  */
 class RadarPage(private val a: Activity, private val prefs: Prefs) {
     private val d = a.resources.displayMetrics.density
@@ -38,7 +37,7 @@ class RadarPage(private val a: Activity, private val prefs: Prefs) {
     /** Repaints done by the preparation's progress and the storage figures. */
     private val refreshers = ArrayList<() -> Unit>()
 
-    enum class Tab { ALERTS, DATA, CAR }
+    enum class Tab { ALERTS, DATA }
 
     /** The page's body: tabs on the left, the content on the right. [start]: the tab shown first. */
     fun build(start: Tab = Tab.ALERTS): View {
@@ -48,9 +47,9 @@ class RadarPage(private val a: Activity, private val prefs: Prefs) {
         val pages = FrameLayout(a)
         body.addView(pages, LinearLayout.LayoutParams(0, -1, 1f))
         fun page(content: View) = ScrollView(a).apply { isVerticalScrollBarEnabled = true; addView(content) }.also { pages.addView(it, FrameLayout.LayoutParams(-1, -1)) }
-        val alerts = page(alertsTab()); val data = page(dataTab()); val car = page(carTab())
-        listOf(Triple(Tab.ALERTS, R.string.rp_tab_alerts, R.string.rp_tab_alerts_sub), Triple(Tab.DATA, R.string.rp_tab_data, R.string.rp_tab_data_sub),
-            Triple(Tab.CAR, R.string.rp_tab_car, R.string.rp_tab_car_sub)).forEachIndexed { i, (t, title, sub) ->
+        val alerts = page(alertsTab()); val data = page(dataTab())
+        listOf(Triple(Tab.ALERTS, R.string.rp_tab_alerts, R.string.rp_tab_alerts_sub),
+            Triple(Tab.DATA, R.string.rp_tab_data, R.string.rp_tab_data_sub)).forEachIndexed { i, (t, title, sub) ->
             val card = LinearLayout(a).apply {
                 orientation = LinearLayout.VERTICAL; gravity = Gravity.CENTER_VERTICAL
                 setPadding(dp(22), dp(14), dp(18), dp(14)); setBackgroundResource(R.drawable.bg_chip); isClickable = true
@@ -60,7 +59,7 @@ class RadarPage(private val a: Activity, private val prefs: Prefs) {
             card.addView(s, LinearLayout.LayoutParams(-2, -2).apply { topMargin = dp(4) })
             if (t == Tab.DATA) dataSub = s
             side.addView(card, LinearLayout.LayoutParams(-1, dp(104)).apply { if (i > 0) topMargin = dp(12) })
-            tabs += card to listOf(alerts, data, car)[i]
+            tabs += card to listOf(alerts, data)[i]
             card.setOnClickListener { show(i) }
         }
         side.addView(View(a), LinearLayout.LayoutParams(-1, 0, 1f))
@@ -364,61 +363,6 @@ class RadarPage(private val a: Activity, private val prefs: Prefs) {
                 .setPositiveButton(R.string.st_rad_clear_btn) { _, _ -> RadarRepo.clearCache(a); space.postDelayed({ refresh() }, 500) }
                 .setNegativeButton(R.string.cancel, null).create().also { app.mg4dash.ui.Dialogs.show(it); app.mg4dash.ui.Dialogs.fix(it) }
         }.apply { setTextColor(col(R.color.accent_danger)) }, LinearLayout.LayoutParams(-1, dp(56)).apply { topMargin = dp(18) })
-        return two
-    }
-
-    // ── Voiture (ISA) ──
-
-    private fun carTab(): View {
-        val two = LinearLayout(a).apply { orientation = LinearLayout.HORIZONTAL }
-        val read = panel(a.getString(R.string.rp_read))
-        val send = panel(a.getString(R.string.rp_send))
-        two.addView(read, LinearLayout.LayoutParams(0, -2, 1f).apply { rightMargin = dp(8) })
-        two.addView(send, LinearLayout.LayoutParams(0, -2, 1f).apply { leftMargin = dp(8) })
-        line(read, a.getString(R.string.rp_isa_use), a.getString(R.string.rp_isa_use_sub), toggle({ prefs.radarIsaFallback }) { prefs.radarIsaFallback = it }, 130)
-        // Example: a sign with "ISA" under its number
-        val ex = LinearLayout(a).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL }
-        ex.addView(object : View(a) {
-            private val pt = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG)
-            override fun onDraw(c: android.graphics.Canvas) {
-                val r = width / 2f; val cx = r; val cy = height / 2f
-                pt.style = android.graphics.Paint.Style.FILL; pt.color = 0xFFFFFFFF.toInt(); c.drawCircle(cx, cy, r, pt)
-                pt.style = android.graphics.Paint.Style.STROKE; pt.strokeWidth = r * 0.2f; pt.color = 0xFFD32F2F.toInt(); c.drawCircle(cx, cy, r - pt.strokeWidth / 2, pt)
-                pt.style = android.graphics.Paint.Style.FILL; pt.color = 0xFF111111.toInt(); pt.textAlign = android.graphics.Paint.Align.CENTER
-                pt.typeface = Typeface.create("sans-serif", Typeface.BOLD); pt.textSize = r * 0.9f; c.drawText("70", cx, cy + pt.textSize * 0.3f, pt)
-                pt.textSize = r * 0.26f; c.drawText(a.getString(R.string.rad_isa), cx, cy + r * 0.64f, pt)
-            }
-        }, LinearLayout.LayoutParams(dp(96), dp(96)).apply { rightMargin = dp(18) })
-        ex.addView(text(a.getString(R.string.rp_isa_example), 15f, R.color.text_sub), LinearLayout.LayoutParams(0, -2, 1f))
-        read.addView(ex, LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(16) })
-        val logRow = line(read, a.getString(R.string.rp_isa_log), "", toggle({ prefs.radarIsaLog }) { prefs.radarIsaLog = it }, 130)
-        val logSub = ((logRow.getChildAt(0) as LinearLayout).getChildAt(1) as TextView)
-        refreshers += { logSub.text = a.getString(R.string.rp_isa_log_sub, DataUsage.format(a, IsaLog.file(a).let { if (it.exists()) it.length() else 0L })) }
-
-        // Send: experimental
-        (send.getChildAt(0) as TextView).let { title ->
-            send.removeView(title)
-            val h = LinearLayout(a).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL }
-            h.addView(title, LinearLayout.LayoutParams(0, -2, 1f))
-            h.addView(text(a.getString(R.string.rp_experimental).uppercase(), 13f, R.color.text_value, medium).apply {
-                setTextColor(col(R.color.accent_heat)); setPadding(dp(10), dp(4), dp(10), dp(4)); letterSpacing = 0.08f
-                background = GradientDrawable().apply { cornerRadius = dp(8).toFloat(); setStroke(dp(1), col(R.color.accent_heat)) }
-            })
-            send.addView(h, 0)
-        }
-        line(send, a.getString(R.string.rp_send_row), a.getString(R.string.rp_send_sub), toggle({ prefs.radarIsaWrite }) { prefs.radarIsaWrite = it }, 130)
-        send.addView(text(a.getString(R.string.rp_send_warn), 15f, R.color.text_value).apply {
-            setPadding(dp(16), dp(12), dp(16), dp(12))
-            background = GradientDrawable().apply { cornerRadius = dp(14).toFloat(); setColor((col(R.color.accent_heat) and 0x00FFFFFF) or 0x26000000); setStroke(dp(1), col(R.color.accent_heat)) }
-        }, LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(16) })
-        val last = text("", 17f, R.color.text_value)
-        line(send, a.getString(R.string.rp_last_send), null, last)
-        refreshers += {
-            last.text = IsaWrite.last?.let { (t, v, sent) ->
-                android.text.format.DateFormat.getTimeFormat(a).format(java.util.Date(t)) + " · " +
-                    (if (v == 0) a.getString(R.string.rp_cleared) else "$v km/h") + if (!sent) " (" + a.getString(R.string.rp_held) + ")" else ""
-            } ?: a.getString(R.string.rp_never)
-        }
         return two
     }
 }

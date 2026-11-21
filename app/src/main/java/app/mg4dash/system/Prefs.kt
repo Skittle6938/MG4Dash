@@ -281,18 +281,6 @@ class Prefs(context: Context) {
         get() = sp.getInt("radar_refresh_hours", app.mg4dash.radar.RadarRepo.REFRESH_DEFAULT_HOURS).let { h ->
             if (h in app.mg4dash.radar.RadarRepo.REFRESH_HOURS) h else app.mg4dash.radar.RadarRepo.REFRESH_DEFAULT_HOURS }
         set(v) = sp.edit().putInt("radar_refresh_hours", v).apply()
-    /** The car's own limit (ISA) shown where OSM has none, once its property is known. */
-    var radarIsaFallback: Boolean
-        get() = sp.getBoolean("radar_isa_fallback", true)
-        set(v) = sp.edit().putBoolean("radar_isa_fallback", v).apply()
-    /** ISA study: the car's speed limit properties logged while driving (off by default). */
-    var radarIsaLog: Boolean
-        get() = sp.getBoolean("radar_isa_log", false)
-        set(v) = sp.edit().putBoolean("radar_isa_log", v).apply()
-    /** OSM's limit sent to the car as the navigation's speed limit (off by default; held back in IsaWrite for now). */
-    var radarIsaWrite: Boolean
-        get() = sp.getBoolean("radar_isa_write", false)
-        set(v) = sp.edit().putBoolean("radar_isa_write", v).apply()
     /** Sound of each kind of alert. */
     fun radarSoundOf(kind: app.mg4dash.radar.RadarAlert.Kind): app.mg4dash.radar.RadarAlert.Sound =
         sp.getString("radar_snd_" + kind.key, null)?.let { k -> app.mg4dash.radar.RadarAlert.Sound.values().firstOrNull { it.key == k } } ?: kind.sound

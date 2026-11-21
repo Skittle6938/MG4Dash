@@ -119,29 +119,6 @@ object CarProps {
         }
     }
 
-    /** Ids of every property the car exposes (empty when the service is not ready). */
-    fun propertyIds(): List<Int> {
-        val m = cpm ?: return emptyList()
-        @Suppress("UNCHECKED_CAST")
-        val list = m.javaClass.getMethod("getPropertyList").invoke(m) as List<Any>
-        return list.map { cfg -> cfg.javaClass.getMethod("getPropertyId").invoke(cfg) as Int }
-    }
-
-    /** Float write (area 0). Used only by the speed limit sent to the car (IsaWrite), held back for now. */
-    fun setFloat(id: Int, value: Float, label: String): Boolean {
-        if (BuildConfig.MOCK) { mock[id] = value; return true }
-        val m = cpm ?: run { Log.w(TAG, "SET $label ignored: service not ready"); return false }
-        return try {
-            m.javaClass.getMethod("setFloatProperty", Int::class.javaPrimitiveType, Int::class.javaPrimitiveType, Float::class.javaPrimitiveType)
-                .invoke(m, id, 0, value)
-            Log.i(TAG, "SET $label = $value (0x${Integer.toHexString(id)})")
-            true
-        } catch (e: Throwable) {
-            Log.w(TAG, "SET $label failed: ${(e.cause ?: e).message}")
-            false
-        }
-    }
-
     fun getInt(id: Int): Int? {
         if (BuildConfig.MOCK) return mock[id]?.toInt()
         val m = cpm ?: return null

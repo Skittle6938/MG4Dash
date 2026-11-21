@@ -111,11 +111,7 @@ class RadarCard(context: Context) : View(context) {
         val txt = if (known) Speeds.toUnit(limit!!.toFloat(), miles).toString() else "?"
         p.textSize = rad * (if (txt.length >= 3) 0.78f else 0.95f)
         c.drawText(txt, cx, cy + p.textSize * 0.36f, p)
-        if (known && s.fromCar) {
-            // The car's own limit (ISA), OSM having none
-            p.typeface = bold; p.textSize = rad * 0.26f; p.color = 0xFF111111.toInt()
-            c.drawText(context.getString(R.string.rad_isa), cx, cy + rad * 0.64f, p)
-        } else if (known && grey) {
+        if (known && grey) {
             p.typeface = Typeface.DEFAULT; p.textSize = rad * 0.24f
             c.drawText(context.getString(R.string.rad_estimated), cx, cy + rad * 0.62f, p)
         }

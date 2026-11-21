@@ -7,7 +7,6 @@ import android.os.HandlerThread
 import android.os.Looper
 import app.mg4dash.BuildConfig
 import app.mg4dash.car.CarBridge
-import app.mg4dash.car.CarProps
 import app.mg4dash.map.LocationRepo
 import app.mg4dash.system.DataUsage
 import app.mg4dash.system.Log
@@ -77,8 +76,6 @@ object RadarRepo {
         val next: List<NextZone> = emptyList(),
         val nextLimit: Pair<Double, Int>? = null,
         val highway: String? = null,
-        /** The limit is the car's own (ISA), OSM having none. */
-        val fromCar: Boolean = false,
     ) {
         internal val checkedLimit: Int? get() = zone?.limit ?: limit
 
@@ -272,15 +269,9 @@ object RadarRepo {
         }
         val zone = activeZone()
         val p = Prefs(c)
-        // OSM's limit; the car's own (ISA) where OSM has none, once its property is known
-        val carLimit = if (m.tagged == null && p.radarIsaFallback) Isa.carLimit() else null
-        val limit = carLimit ?: m.limit
-        if (p.radarIsaLog) IsaLog.sample(c, now, m.tagged, speed)
-        if (p.radarIsaWrite) IsaWrite.apply(m.tagged, m.tagged == null, Isa.carLimit(), now, false, hasIsa = false) { w ->
-            w.f?.let { CarProps.setFloat(w.id, it, "navigation speed limit") } ?: CarProps.setInt(w.id, w.i ?: 0, "navigation speed limit") }
         val t = Thresholds(p.radarLow, p.radarHigh, p.radarPercent, Units.miles(c))
         publishFix(before, State(
-            status = Status.OK, speedKmh = speed, limit = limit, estimated = carLimit == null && m.estimated, zone = zone, fromCar = carLimit != null,
+            status = Status.OK, speedKmh = speed, limit = m.limit, estimated = m.estimated, zone = zone,
             next = zones.filter { it.start > 0 && it.cam.id != zoneCam?.id }.take(3).map { NextZone(it.cam.kind, it.limit, it.start) },
             nextLimit = Ahead.nextLimit(path), highway = m.road.highway,
         ), t)

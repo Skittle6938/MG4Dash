@@ -6,7 +6,6 @@ import app.mg4dash.radar.Camera
 import app.mg4dash.radar.Country
 import app.mg4dash.radar.DefaultLimits
 import app.mg4dash.radar.Geo
-import app.mg4dash.radar.IsaWrite
 import app.mg4dash.radar.Level
 import app.mg4dash.radar.Matcher
 import app.mg4dash.radar.RadarAlert
@@ -416,7 +415,7 @@ class RadarTest {
         assertEquals(50, prefs.radarPrepareKm)
     }
 
-    // ── Radar5: HTTP answers, live refresh, ISA ──
+    // ── Radar5: HTTP answers and live refresh ──
 
     private fun http(head: String, body: ByteArray) = (head.toByteArray(Charsets.ISO_8859_1) + body).inputStream()
 
@@ -453,55 +452,6 @@ class RadarTest {
         assertEquals(6, prefs.radarRefreshHours)
         prefs.raw.edit().putInt("radar_refresh_hours", 5).commit()
         assertEquals(6, prefs.radarRefreshHours)                                // not offered: the default
-    }
-
-    @Test fun isaWriteDecision() {
-        val w = app.mg4dash.radar.IsaWrite
-        // A tagged limit, nothing sent yet: sent; the same again: nothing; too soon after the last write: nothing
-        assertEquals(IsaWrite.Decision.Send(50f), w.decide(50, false, null, null, 0, 10_000, false))
-        assertEquals(IsaWrite.Decision.Nothing, w.decide(50, false, null, 50, 0, 10_000, false))
-        assertEquals(IsaWrite.Decision.Nothing, w.decide(70, false, null, 50, 8_000, 10_000, false))
-        assertEquals(IsaWrite.Decision.Send(70f), w.decide(70, false, null, 50, 0, 10_000, false))
-        // The car already says the same: nothing
-        assertEquals(IsaWrite.Decision.Nothing, w.decide(70, false, 70, 50, 0, 10_000, false))
-        // Estimated or unknown: cleared once, then nothing
-        assertEquals(IsaWrite.Decision.Clear, w.decide(50, true, null, 70, 0, 10_000, false))
-        assertEquals(IsaWrite.Decision.Clear, w.decide(null, false, null, 70, 0, 10_000, false))
-        assertEquals(IsaWrite.Decision.Nothing, w.decide(null, false, null, 0, 0, 10_000, false))
-        // mph: 113 km/h sent as 70
-        assertEquals(IsaWrite.Decision.Send(70f), w.decide(113, false, null, null, 0, 10_000, true))
-        // The writes mirror the stock map: value to both, status to both, then the unit
-        val ws = w.writes(IsaWrite.Decision.Send(50f), hasIsa = false, miles = false)
-        assertEquals(listOf(0x2160a185, 0x2160a1a8, 0x2140a183, 0x2140a1a9, 0x2140a184), ws.map { it.id })
-        assertEquals(50f, ws[0].f); assertEquals(50f, ws[1].f)
-        assertEquals(2, ws[4].i)                                                // km/h without the car's ISA: 2, as stock
-        assertEquals(1, w.writes(IsaWrite.Decision.Send(50f), hasIsa = true, miles = false)[4].i)
-        assertEquals(0f, w.writes(IsaWrite.Decision.Clear, false, false)[0].f)
-        assertTrue(w.writes(IsaWrite.Decision.Nothing, false, false).isEmpty())
-        // Held back: nothing reaches the car
-        assertFalse(w.WRITE_ALLOWED)
-        var written = 0
-        w.apply(50, false, null, 1_000_000, false, false) { written++; true }
-        assertEquals(0, written)
-    }
-
-    @Test fun isaLogChangesAndOsmSteps() {
-        val c = org.robolectric.RuntimeEnvironment.getApplication()
-        val log = app.mg4dash.radar.IsaLog
-        log.reset(); log.file(c).delete()
-        val values = HashMap<Int, String>()
-        var all = mapOf(1 to "0", 2 to "5")
-        log.sample(c, 1_000, 50, 48f, read = { values[it] ?: "" }, readAll = { all })
-        values[0x2160a212] = "50.0"
-        all = mapOf(1 to "0", 2 to "7")
-        log.sample(c, 2_000, 70, 66f, read = { values[it] ?: "" }, readAll = { all })
-        val text = log.file(c).readText()
-        assertTrue(text.startsWith("time,what,name,id,before,after,osm_kmh,gps_kmh"))
-        assertTrue(text.contains("prop,SPEED_AST_SYS_TRAGET_VCU,0x2160a212,,50.0,70,66"))
-        // Property 2 changed in step with OSM's limit (50 → 70): logged as a candidate
-        assertTrue(text.contains("with-osm,?,0x2,5,7,70,66"))
-        assertTrue(text.contains("osm,OSM,0x0,50,70,70,66"))
-        assertNull(app.mg4dash.radar.Isa.CAR_LIMIT_PROP)
     }
 
     // ── Radar5b: saturated servers, blocks split ──
