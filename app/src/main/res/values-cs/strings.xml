@@ -1192,4 +1192,6 @@
     <string name="br_erase_this">Tato křivka</string>
     <string name="br_erase_all">Smazat vše</string>
     <string name="usb_saved_internal">Auto nepovolilo kopírování na USB disk: uloženo místo toho do paměti auta, %1$s</string>
+    <string name="fx_pick_hint">Zaškrtněte jednu nebo více: pokaždé se vylosuje jedna ze zaškrtnutých, nikdy ostatní. Žádná zaškrtnutá: žádná animace.</string>
+    <string name="fx_random_of">Náhodně: %1$s</string>
 </resources>

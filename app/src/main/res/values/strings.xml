@@ -1194,4 +1194,6 @@
     <string name="br_erase_this">This curve</string>
     <string name="br_erase_all">Erase all</string>
     <string name="usb_saved_internal">The car did not give permission to copy to the USB stick: saved in the car’s memory instead, %1$s</string>
+    <string name="fx_pick_hint">Tick one or more: each time, one of those ticked is drawn, never the others. None ticked: no animation.</string>
+    <string name="fx_random_of">Random: %1$s</string>
 </resources>

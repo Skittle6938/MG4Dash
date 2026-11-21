@@ -26,12 +26,9 @@ object FxSound {
     /** SoundPool volume (0..MAX_GAIN) for a setting in % (0..100). */
     internal fun gain(percent: Int): Float = percent.coerceIn(0, 100) / 100f * MAX_GAIN
 
-    /** Sound tried in the settings for the chosen animation; random: each style in turn, one per trial. */
-    internal fun trialStyle(setting: Int, turn: Int): Int = when (setting) {
-        PowerFx.HYPERSPACE, PowerFx.LIGHTNING, PowerFx.FLAMES -> setting
-        PowerFx.NONE -> PowerFx.NONE
-        else -> listOf(PowerFx.LIGHTNING, PowerFx.FLAMES, PowerFx.HYPERSPACE)[Math.floorMod(turn, 3)]
-    }
+    /** Sound tried in the settings for the ticked animations: each one in turn, one per trial; none ticked, none. */
+    internal fun trialStyle(ticked: Set<Int>, turn: Int): Int =
+        PowerFx.STYLES.filter { it in ticked }.let { if (it.isEmpty()) PowerFx.NONE else it[Math.floorMod(turn, it.size)] }
 
     /** System sounds: the car's system channel, mixed over the source without taking it. */
     internal val ATTRIBUTES: AudioAttributes = AudioAttributes.Builder()

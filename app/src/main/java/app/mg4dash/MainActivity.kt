@@ -2414,7 +2414,7 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         }
         if (!cardPower && !isShown(Card.POWER)) {
             val peak = app.mg4dash.ui.PowerBar.peakFor(prefs.batteryModel, prefs.xpower)
-            if (prefs.powerFx == app.mg4dash.ui.PowerFx.NONE || plugged || kw == null || kw < peak * 0.8f) return
+            if (prefs.powerFxSet.isEmpty() || plugged || kw == null || kw < peak * 0.8f) return
             startBoost()
             if (!isShown(Card.POWER)) return
         }
@@ -2426,7 +2426,7 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         val bar = powerBar; val under = powerExtra
         if (bar != null && under != null) powerFx?.let { fx ->
             // Random: new draw as long as nothing plays, kept during the animation
-            if (!fx.isActive) fx.style = app.mg4dash.ui.PowerFx.pick(prefs.powerFx)
+            if (!fx.isActive) fx.style = app.mg4dash.ui.PowerFx.pick(prefs.powerFxSet)
             // Peak badge: only if the driver shows the Power widget themselves
             fx.badgeAllowed = cardPower || !fxBoost && isShown(Card.POWER)
             // Across the screen: the rocket arrives from the left edge, lightning and flames cover the home screen

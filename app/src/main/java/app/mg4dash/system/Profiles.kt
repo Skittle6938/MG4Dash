@@ -38,7 +38,7 @@ object Profiles {
         "stack_auto", "weather_page", "shortcuts_page", "energy_card_power", "conn_icons_hidden", "conn_usb_shown", "fav_phone_count",
         // Look: theme, background, colour, transitions, night at sunset, effects and their volume
         "theme_mode", "theme_bg", "theme_accent", "theme_smooth", "night_by_sun", "panel_fade", "climate_fx", "climate_fx_mode", "power_fx",
-        "fx_sound", "fx_volume", "power_va",
+        "fx_sound", "fx_volume", "power_va", "power_fx_on",
         // Bar: at the bottom or vertical, side, wide, the Android Auto button's app
         "vertical_dock", "bar_side", "wide_bar", "dock_aa_target", "dock_slot",
         // Shortcuts menu: its tiles and the brightness bar (the menu itself stays shared, for MG's fog button)

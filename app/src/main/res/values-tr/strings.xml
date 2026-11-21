@@ -1194,4 +1194,6 @@
     <string name="br_erase_this">Bu eğri</string>
     <string name="br_erase_all">Tümünü sil</string>
     <string name="usb_saved_internal">Araç USB belleğe kopyalama izni vermedi: bunun yerine aracın belleğine kaydedildi, %1$s</string>
+    <string name="fx_pick_hint">Bir veya birkaç tanesini işaretleyin: her seferinde işaretlenenlerden biri seçilir, diğerleri asla. Hiçbiri işaretli değilse animasyon yok.</string>
+    <string name="fx_random_of">Rastgele: %1$s</string>
 </resources>

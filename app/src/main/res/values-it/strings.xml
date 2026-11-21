@@ -1194,4 +1194,6 @@
     <string name="br_erase_this">Questa curva</string>
     <string name="br_erase_all">Cancella tutto</string>
     <string name="usb_saved_internal">L’auto non ha dato il permesso di copiare sulla chiavetta USB: salvato invece nella memoria dell’auto, %1$s</string>
+    <string name="fx_pick_hint">Selezionane una o più: ogni volta ne viene estratta una tra quelle selezionate, mai le altre. Nessuna selezionata: nessuna animazione.</string>
+    <string name="fx_random_of">Casuale: %1$s</string>
 </resources>

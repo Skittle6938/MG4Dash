@@ -1042,25 +1042,43 @@ class SettingsActivity : AppCompatActivity() {
         text(parent, getString(R.string.st_power_fx), 18f, R.color.text_value)
         // No preview: the surprise is for the road. Displayed order: random first (default).
         val fx = app.mg4dash.ui.PowerFx
-        val choices = listOf(fx.RANDOM to R.string.fx_random, fx.LIGHTNING to R.string.fx_lightning,
-            fx.FLAMES to R.string.fx_flames, fx.HYPERSPACE to R.string.fx_hyperspace, fx.NONE to R.string.fx_none).map { it.first to getString(it.second) }
+        // One or more ticked (21/11): each time, one of those ticked is drawn, never another; none ticked, none
+        val choices = listOf(fx.LIGHTNING to R.string.fx_lightning, fx.FLAMES to R.string.fx_flames,
+            fx.HYPERSPACE to R.string.fx_hyperspace).map { it.first to getString(it.second) }
         lateinit var pick: Button
         // Drop-down list in the page itself: a popup window would bring back the system bars
         val list = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; visibility = View.GONE }
         fun label() {
-            val name = choices.firstOrNull { it.first == prefs.powerFx }?.second ?: choices[0].second
+            val on = prefs.powerFxSet
+            val names = choices.filter { it.first in on }.map { it.second }
+            val name = when {
+                names.isEmpty() -> getString(R.string.fx_none)
+                names.size == 1 -> names[0]
+                else -> getString(R.string.fx_random_of, names.joinToString(", "))
+            }
             pick.text = "$name   ${if (list.visibility == View.VISIBLE) "▴" else "▾"}"
         }
-        fun paint() = choices.forEachIndexed { k, (v, _) ->
-            (list.getChildAt(k) as Button).apply { isSelected = v == prefs.powerFx; setTextColor(color(if (isSelected) R.color.accent_action else R.color.text_value)) }
+        fun paint() = choices.forEachIndexed { k, (v, n) ->
+            (list.getChildAt(k) as Button).apply {
+                isSelected = v in prefs.powerFxSet
+                text = (if (isSelected) "☑  " else "☐  ") + n
+                setTextColor(color(if (isSelected) R.color.accent_action else R.color.text_value))
+            }
         }
         pick = button("") { list.visibility = if (list.visibility == View.VISIBLE) View.GONE else View.VISIBLE; label() }
             .apply { setBackgroundResource(R.drawable.bg_chip); setTextColor(color(R.color.accent_action)) }
         choices.forEach { (v, n) ->
-            list.addView(button(n) { prefs.powerFx = v; list.visibility = View.GONE; label(); paint(); fxTrial() }
-                .apply { setBackgroundResource(R.drawable.bg_chip); gravity = Gravity.CENTER_VERTICAL or Gravity.START },
+            // A tap ticks or unticks it; the list stays open to tick others
+            list.addView(button(n) {
+                val on = prefs.powerFxSet
+                prefs.powerFxSet = if (v in on) on - v else on + v
+                label(); paint(); if (v in prefs.powerFxSet) fxTrialOf(v)
+            }.apply { setBackgroundResource(R.drawable.bg_chip); gravity = Gravity.CENTER_VERTICAL or Gravity.START },
                 LinearLayout.LayoutParams(-1, dp(56)).apply { topMargin = dp(6) })
         }
+        list.addView(TextView(this).apply {
+            text = getString(R.string.fx_pick_hint); setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f); setTextColor(color(R.color.text_title))
+        }, LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(6) })
         paint(); label()
         // Under the choice button only (left half of the line)
         val line = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
@@ -1079,7 +1097,10 @@ class SettingsActivity : AppCompatActivity() {
 
     /** The chosen animation's sound at [percent], to set the volume while parked (15/11). */
     private fun fxTrial(percent: Int = prefs.fxVolume) =
-        app.mg4dash.ui.FxSound.play(this, app.mg4dash.ui.FxSound.trialStyle(prefs.powerFx, fxTrials++), percent)
+        app.mg4dash.ui.FxSound.play(this, app.mg4dash.ui.FxSound.trialStyle(prefs.powerFxSet, fxTrials++), percent)
+
+    /** The sound of [style] just ticked. */
+    private fun fxTrialOf(style: Int) = app.mg4dash.ui.FxSound.play(this, style, prefs.fxVolume)
 
     /** Volume of the animations' sounds (whoosh, crackle, fire): one bar for all, a short trial when let go. */
     private fun fxVolumeSetting(parent: LinearLayout) {
