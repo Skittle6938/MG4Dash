@@ -277,7 +277,7 @@ object Updater {
     /** Restarts MG4Dash on the new version. */
     private fun restart(context: Context) {
         val intent = Intent(context, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
-        val pi = PendingIntent.getActivity(context, 1, intent, PendingIntent.FLAG_CANCEL_CURRENT)
+        val pi = PendingIntent.getActivity(context, 1, intent, PendingIntent.FLAG_CANCEL_CURRENT or PendingIntent.FLAG_IMMUTABLE)
         (context.getSystemService(Context.ALARM_SERVICE) as android.app.AlarmManager)
             .set(android.app.AlarmManager.RTC, System.currentTimeMillis() + 1500, pi)
         android.os.Process.killProcess(android.os.Process.myPid())

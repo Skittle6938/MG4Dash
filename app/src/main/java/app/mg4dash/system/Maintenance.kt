@@ -62,7 +62,7 @@ object Maintenance {
         try {
             val home = Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_HOME).setComponent(HomeSwitcher.ours(app))
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
-            val pi = PendingIntent.getActivity(app, 7, home, PendingIntent.FLAG_CANCEL_CURRENT)
+            val pi = PendingIntent.getActivity(app, 7, home, PendingIntent.FLAG_CANCEL_CURRENT or PendingIntent.FLAG_IMMUTABLE)
             (app.getSystemService(Context.ALARM_SERVICE) as AlarmManager).set(AlarmManager.RTC, System.currentTimeMillis() + 800, pi)
             if (!MOCK) android.os.Process.killProcess(android.os.Process.myPid())
         } catch (e: Exception) { Log.w(TAG, "restart: ${e.message}") }
@@ -77,7 +77,7 @@ object Maintenance {
         val app = context.applicationContext
         try {
             val wake = Intent(WakeReceiver.ACTION).setClass(app, WakeReceiver::class.java)
-            val pi = PendingIntent.getBroadcast(app, 8, wake, PendingIntent.FLAG_CANCEL_CURRENT)
+            val pi = PendingIntent.getBroadcast(app, 8, wake, PendingIntent.FLAG_CANCEL_CURRENT or PendingIntent.FLAG_IMMUTABLE)
             (app.getSystemService(Context.ALARM_SERVICE) as AlarmManager).set(AlarmManager.RTC, System.currentTimeMillis() + 1500, pi)
             Log.i(TAG, "maintenance mode: restarting with the gesture only")
             if (!MOCK) android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({ android.os.Process.killProcess(android.os.Process.myPid()) }, 600)
