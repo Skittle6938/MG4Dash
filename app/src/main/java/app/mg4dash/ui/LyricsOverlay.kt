@@ -31,6 +31,7 @@ object LyricsOverlay {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     private var mediaJob: Job? = null
     private var tickerJob: Job? = null
+    private var fetchJob: Job? = null
     private var track: LyricsRepo.Track? = null
     private var trackKey = ""
     private var latest = MediaHub.NowPlaying()
@@ -56,13 +57,13 @@ object LyricsOverlay {
             background = GradientDrawable().apply { setColor(0xE60D121D.toInt()); cornerRadius = dp(20).toFloat(); setStroke(dp(1), 0x26FFFFFF) }
         }
         val texts = LinearLayout(c).apply { orientation = LinearLayout.VERTICAL }
-        val activeLine = TextView(c).apply { setTextColor(-1); setTextSize(TypedValue.COMPLEX_UNIT_SP, 21f); typeface = Typeface.DEFAULT_BOLD; maxLines = 2; ellipsize = android.text.TextUtils.TruncateAt.END; text = current }
-        val nextLine = TextView(c).apply { setTextColor(-1); alpha = .65f; setTextSize(TypedValue.COMPLEX_UNIT_SP, 15f); maxLines = 1; ellipsize = android.text.TextUtils.TruncateAt.END; text = next }
+        val activeLine = TextView(c).apply { setTextColor(-1); setTextSize(TypedValue.COMPLEX_UNIT_SP, 25f); typeface = Typeface.DEFAULT_BOLD; maxLines = 2; ellipsize = android.text.TextUtils.TruncateAt.END; text = current }
+        val nextLine = TextView(c).apply { setTextColor(-1); alpha = .70f; setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f); maxLines = 1; ellipsize = android.text.TextUtils.TruncateAt.END; text = next }
         texts.addView(activeLine); texts.addView(nextLine)
         val screenWidth = c.resources.displayMetrics.widthPixels
-        val pillWidth = (screenWidth * .45f).toInt().coerceIn(dp(480), dp(540))
-        root.addView(texts, LinearLayout.LayoutParams(pillWidth - dp(62), -2))
-        root.addView(TextView(c).apply { text = "×"; gravity = Gravity.CENTER; setTextColor(-1); setTextSize(TypedValue.COMPLEX_UNIT_SP, 28f); setOnClickListener { stop() } }, LinearLayout.LayoutParams(dp(32), dp(42)))
+        val pillWidth = (screenWidth * .55f).toInt().coerceIn(dp(600), dp(680))
+        root.addView(texts, LinearLayout.LayoutParams(pillWidth - dp(74), -2))
+        root.addView(TextView(c).apply { text = "×"; gravity = Gravity.CENTER; setTextColor(-1); setTextSize(TypedValue.COMPLEX_UNIT_SP, 34f); setOnClickListener { stop() } }, LinearLayout.LayoutParams(dp(42), dp(42)))
         val lp = WindowManager.LayoutParams(-2, -2, WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
             WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
             PixelFormat.TRANSLUCENT).apply {
@@ -92,9 +93,10 @@ object LyricsOverlay {
                 if (!now.playing) { tickerJob?.cancel(); tickerJob=null; return@collect }
                 val nextKey = if (now.artist.isBlank() || now.title.isBlank()) "" else LyricsRepo.key(now.artist, now.title)
                 if (nextKey.isNotEmpty() && nextKey != trackKey) {
+                    tickerJob?.cancel(); tickerJob = null
+                    fetchJob?.cancel(); fetchJob = null
                     trackKey = nextKey; track = null; update("Caricamento…", "")
-                    tickerJob?.cancel()
-                    tickerJob = scope.launch {
+                    fetchJob = scope.launch {
                         val cached = LyricsRepo.cached(now.artist, now.title)
                         val found = cached ?: LyricsRepo.lookup(now.artist, now.title, now.durationMs)
                         if (active && trackKey == nextKey) {
@@ -119,5 +121,5 @@ object LyricsOverlay {
             }
         }
     }
-    fun stop() { active=false; mediaJob?.cancel(); mediaJob=null; tickerJob?.cancel(); tickerJob=null; val v=pill; pill=null; try { if(v!=null) wm?.removeViewImmediate(v) } catch (_:Exception){}; params=null }
+    fun stop() { active=false; mediaJob?.cancel(); mediaJob=null; tickerJob?.cancel(); tickerJob=null; fetchJob?.cancel(); fetchJob=null; track=null; trackKey=""; current=""; next=""; val v=pill; pill=null; try { if(v!=null) wm?.removeViewImmediate(v) } catch (_:Exception){}; params=null }
 }

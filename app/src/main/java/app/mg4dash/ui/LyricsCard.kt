@@ -90,7 +90,7 @@ class LyricsCard(private val activity: Activity) : LinearLayout(activity), Lifec
         override fun run() {
             if (!shouldRunTicker() || track?.synced == null) return
             val pos = position(latest)
-            drawLines(pos); drawKaraoke(pos); updateOverlay(pos)
+            drawLines(pos); drawKaraoke(pos)
             postDelayed(this, 250)
         }
     }
@@ -101,7 +101,9 @@ class LyricsCard(private val activity: Activity) : LinearLayout(activity), Lifec
         orientation = VERTICAL; gravity = Gravity.CENTER_VERTICAL
         setPadding(dp(18), dp(12), dp(18), dp(12))
         val top = LinearLayout(activity).apply { orientation = HORIZONTAL; gravity = Gravity.CENTER_VERTICAL }
-        top.addView(header, LayoutParams(0, -2, 1f)); top.addView(overlayButton, LayoutParams(dp(38), dp(38))); top.addView(refresh, LayoutParams(dp(38), dp(38)))
+        top.addView(header, LayoutParams(0, -2, 1f))
+        top.addView(overlayButton, LayoutParams(dp(42), dp(42)).apply { marginEnd = dp(8) })
+        top.addView(refresh, LayoutParams(dp(42), dp(42)))
         addView(top, LayoutParams(-1, -2))
         lines.forEachIndexed { i, line ->
             line.setTextSize(TypedValue.COMPLEX_UNIT_SP, if (i == 3) 25f else 17f)
@@ -177,6 +179,8 @@ class LyricsCard(private val activity: Activity) : LinearLayout(activity), Lifec
         val next = LyricsRepo.key(m.artist, m.title)
         if (next != key) {
             key = next; track = null; requestedKey = null; lastSyncedIndex = -1; karaokeActiveIndex = -1
+            requestJob?.cancel(); requestJob = null
+            lines.forEach { it.text = "" }
             karaokeTitle?.text = m.title
             karaokeArtist?.text = m.artist
             request(force = false, m = m)
@@ -303,13 +307,6 @@ class LyricsCard(private val activity: Activity) : LinearLayout(activity), Lifec
         LyricsOverlay.toggle(activity)
         overlayButton.alpha = if (LyricsOverlay.active) 1f else .6f
         updateActiveState()
-        updateOverlay(position(latest))
-    }
-    private fun updateOverlay(pos: Long) {
-        if (!LyricsOverlay.active || !latest.playing) return
-        val entries = track?.synced ?: return
-        val i = entries.indexOfLast { it.first <= pos }.coerceAtLeast(0)
-        LyricsOverlay.update(entries.getOrNull(i)?.second.orEmpty(), entries.getOrNull(i + 1)?.second.orEmpty())
     }
 
     private fun openKaraoke() {
@@ -328,7 +325,7 @@ class LyricsCard(private val activity: Activity) : LinearLayout(activity), Lifec
         }
         val artist = TextView(activity).apply {
             text = latest.artist; maxLines = 1; ellipsize = android.text.TextUtils.TruncateAt.END
-            setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f); setTextColor(Color.WHITE); alpha = .65f
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f); setTextColor(Color.WHITE); alpha = .7f
         }
         labels.addView(songTitle)
         labels.addView(artist, LayoutParams(-1, -2).apply { topMargin = dp(3) })
@@ -337,15 +334,16 @@ class LyricsCard(private val activity: Activity) : LinearLayout(activity), Lifec
             text = "×"; gravity = Gravity.CENTER; setTextSize(TypedValue.COMPLEX_UNIT_SP, 34f)
             setTextColor(Color.WHITE); setBackgroundResource(R.drawable.bg_chip)
             contentDescription = activity.getString(R.string.st_close)
-            setOnClickListener { closeKaraoke() }
+            setOnClickListener { closeKaraoke() }; setPadding(dp(8), dp(8), dp(8), dp(8)); setBackgroundResource(R.drawable.bg_chip)
         }
         val overlayToggle = TextView(activity).apply {
             text = "▣"; gravity = Gravity.CENTER; setTextSize(TypedValue.COMPLEX_UNIT_SP, 22f)
             setTextColor(Color.WHITE); alpha = if (LyricsOverlay.active) 1f else .65f
             setOnClickListener { toggleOverlay(); alpha = if (LyricsOverlay.active) 1f else .65f }
         }
-        header.addView(overlayToggle, LayoutParams(dp(48), dp(54)))
-        header.addView(close, LayoutParams(dp(54), dp(54)))
+        overlayToggle.setPadding(dp(8), dp(8), dp(8), dp(8)); overlayToggle.setBackgroundResource(R.drawable.bg_chip)
+        header.addView(overlayToggle, LayoutParams(dp(48), dp(48)).apply { marginEnd = dp(8) })
+        header.addView(close, LayoutParams(dp(48), dp(48)))
         header.setOnClickListener { closeKaraoke() }
         root.addView(header, LayoutParams(-1, -2))
 
@@ -354,14 +352,14 @@ class LyricsCard(private val activity: Activity) : LinearLayout(activity), Lifec
         val rows = (0 until 7).map { i -> TextView(activity).apply {
             gravity = Gravity.CENTER; setTextColor(Color.WHITE); includeFontPadding = false
             typeface = Typeface.create("sans-serif-medium", Typeface.BOLD)
-            setTextSize(TypedValue.COMPLEX_UNIT_SP, if (i == 3) 30f else 20f)
+            setTextSize(TypedValue.COMPLEX_UNIT_PX, if (i == 3) 1f else 1f)
             maxLines = if (i == 3) 2 else 1; ellipsize = android.text.TextUtils.TruncateAt.END
             alpha = when (kotlin.math.abs(i - 3)) { 0 -> 1f; 1 -> .50f; 2 -> .36f; else -> .25f }
             if (i == 3) setLineSpacing(0f, 1.08f)
         } }
         rows.forEachIndexed { i, line ->
             val lp = LayoutParams(-1, -2)
-            if (i == 3) { lp.topMargin = dp(10); lp.bottomMargin = dp(10) }
+            if (i == 3) { lp.topMargin = dp(18); lp.bottomMargin = dp(18) } else { lp.topMargin = dp(7); lp.bottomMargin = dp(7) }
             synced.addView(line, lp)
         }
         content.addView(synced, FrameLayout.LayoutParams(-1, -1))
@@ -403,6 +401,19 @@ class LyricsCard(private val activity: Activity) : LinearLayout(activity), Lifec
             setLayout(WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.MATCH_PARENT)
             addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
             attributes = attributes.apply { dimAmount = .18f }
+        }
+        dialog.window?.decorView?.post {
+            val dialogHeight = dialog.window?.decorView?.height ?: 0
+            if (dialogHeight > 0) {
+                val activePx = dialogHeight * .085f
+                karaokeTitle?.setTextSize(TypedValue.COMPLEX_UNIT_PX, dialogHeight * .042f)
+                karaokeArtist?.setTextSize(TypedValue.COMPLEX_UNIT_PX, dialogHeight * .030f)
+                karaokeRows.forEachIndexed { index, row ->
+                    row.setTextSize(TypedValue.COMPLEX_UNIT_PX, if (index == 3) activePx else activePx * .58f)
+                    val lp = row.layoutParams as? LayoutParams
+                    if (lp != null) { val gap=(dialogHeight*.012f).toInt(); lp.topMargin=gap; lp.bottomMargin=gap; row.layoutParams=lp }
+                }
+            }
         }
         root.alpha = .5f; root.scaleX = .97f; root.scaleY = .97f
         root.animate().alpha(1f).scaleX(1f).scaleY(1f).setDuration(180).start()
