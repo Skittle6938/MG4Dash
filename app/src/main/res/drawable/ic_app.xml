@@ -1,4 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<vector xmlns:android="http://schemas.android.com/apk/res/android" android:width="24dp" android:height="24dp" android:viewportWidth="24" android:viewportHeight="24">
-    <path android:fillColor="#FFFFFFFF" android:pathData="M12,2L4.5,20.29l0.71,0.71L12,18l6.79,3 0.71,-0.71z" />
+<vector xmlns:android="http://schemas.android.com/apk/res/android" android:width="108dp" android:height="108dp" android:viewportWidth="320" android:viewportHeight="320">
+    <path android:fillColor="#FF000000" android:pathData="M64,0 H256 Q320,0 320,64 V256 Q320,320 256,320 H64 Q0,320 0,256 V64 Q0,0 64,0 Z" />
+    <group android:translateX="32" android:translateY="32">
+        <path android:pathData="@string/brand_outline" android:fillColor="#00000000" android:strokeColor="#FFFFFFFF" android:strokeWidth="23" />
+        <path android:pathData="@string/brand_road" android:fillColor="#FFFFFFFF" />
+        <path android:pathData="@string/brand_accent" android:fillColor="#FF00E676" />
+    </group>
 </vector>
