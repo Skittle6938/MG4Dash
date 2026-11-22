@@ -164,6 +164,8 @@ object MediaHub {
     /** Shows the given source without opening its app. */
     fun select(pkg: String) {
         if (BuildConfig.MOCK) return
+        sourceRequest++
+        bandTarget = null
         userAction("source $pkg picked")
         remember(pkg); autoTarget = null
         pinnedPkg = pkg
@@ -853,6 +855,7 @@ object MediaHub {
     private val radioDashInstalled by lazy { appContext?.let { app.mg4dash.system.RadioDashUpdater.installed(it) } == true }
     /** Wanted band, until the radio gets there. */
     @Volatile private var bandTarget: String? = null
+    @Volatile private var sourceRequest = 0L
 
     private fun radioBandsSplit() = radioDashInstalled && prefs()?.radioDashBands == true
 
@@ -889,9 +892,9 @@ object MediaHub {
      * as the radio starting from another source could put its last band back over the first requests.
      * Each try is in the log, with the command sent, to tell the two cases apart.
      */
-    private fun reachBand(target: String, done: Int = 0, delayMs: Long = BAND_RETRY_MS) {
+    private fun reachBand(target: String, request: Long, done: Int = 0, delayMs: Long = BAND_RETRY_MS) {
         main.postDelayed({
-            if (bandTarget != target) return@postDelayed
+            if (sourceRequest != request || bandTarget != target) return@postDelayed
             val c = browserControllers[RADIO]
             val band = currentBandSource()
             val direct = c?.extras?.getBoolean(FLAG_SET_BAND) == true
@@ -909,7 +912,7 @@ object MediaHub {
                         putString("band", if (target == RADIO_DAB) "DAB" else "FM")
                     })
                 } else c.transportControls.sendCustomAction(ACTION_NEXT_BAND, null)
-                reachBand(target, done + 1)
+                reachBand(target, request, done + 1)
             }
         }, delayMs)
     }
@@ -939,15 +942,22 @@ object MediaHub {
      */
     fun switchTo(next: String, play: Boolean = true) {
         if (BuildConfig.MOCK) return
+        val request = ++sourceRequest
         userAction("source $next")
         if (next == RADIO_DAB || next == RADIO_FM) {
             bandTarget = next
             // Indicator right away, without waiting for the radio to confirm the band
             publish()
             // Already on the radio: no source change to the car, go directly to the band
-            if (current?.packageName == RADIO) reachBand(next, 0, 0) else { switchTo(RADIO); reachBand(next) }
+            if (current?.packageName == RADIO) reachBand(next, request, delayMs = 0)
+            else { switchSource(RADIO, false, request); reachBand(next, request) }
             return
         }
+        bandTarget = null
+        switchSource(next, play, request)
+    }
+
+    private fun switchSource(next: String, play: Boolean, request: Long) {
         Log.i(TAG, "source picked: $next")
         userPick = next; userPickAt = android.os.SystemClock.uptimeMillis(); userPickRetried = false
         wheelFrom = null; wheelBack = null // user's choice: no automatic return to the app
@@ -968,6 +978,7 @@ object MediaHub {
             io.launch {
                 val s = ctx?.let { app.mg4dash.system.Projection.session(it) }
                 main.post {
+                    if (sourceRequest != request) return@post
                     if (s is app.mg4dash.system.Projection.Session.Read && s.target == app.mg4dash.system.Apps.CARPLAY) {
                         carPlay = true; selectProjectionSource()
                     } else browserControllers[AA_MBS]?.let { aaControl(it, AA_PLAY, KeyEvent.KEYCODE_MEDIA_PLAY) }
@@ -981,6 +992,7 @@ object MediaHub {
         // The radio does not always lose the sound to the app (DiAuto does not ask for it): pause
         if (!carSource && (radioShown || sourcePkg == RADIO)) pauseRadio()
         if (play) main.postDelayed({
+            if (sourceRequest != request) return@postDelayed
             // Other app: "play" sent even if it thinks it is already playing. DiAuto stays playing
             // on the phone side when the radio takes the source from it; this "play" makes it resume
             (browserControllers[next] ?: lastCandidates.firstOrNull { it.packageName == next })
@@ -1099,7 +1111,13 @@ object MediaHub {
                                 pauseRadio()
                                 pinnedPkg = pick
                                 // The same choice again (switch and playback), once: not retried a second time
-                                main.postDelayed({ switchTo(pick!!); userPickRetried = true }, 300)
+                                val request = sourceRequest
+                                main.postDelayed({
+                                    if (sourceRequest == request) {
+                                        switchTo(pick!!)
+                                        userPickRetried = true
+                                    }
+                                }, 300)
                                 reevaluate()
                                 return@post
                             }
@@ -1897,6 +1915,7 @@ object MediaHub {
      */
     private fun selectProjectionSource(attempt: Int = 0) {
         val ctx = appContext ?: return
+        val request = sourceRequest
         val rescue = attempt > 0
         if (rescue) { Log.i(TAG, "CarPlay : secours #99 (la radio joue encore)"); pauseRadio() }
         val fromRadio = sourcePkg == RADIO || radioShown
@@ -1906,6 +1925,7 @@ object MediaHub {
         Thread {
             if (usbFirst) { Log.i(TAG, "CarPlay : lecteur USB mis en pause"); SaicMedia.usbPause(); Thread.sleep(300) }
             if (rescue) Thread.sleep(300)
+            if (sourceRequest != request) return@Thread
             if (!app.mg4dash.system.Projection.mediaKey(ctx, app.mg4dash.system.Projection.KEY_SELECT_SOURCE))
                 systemMediaKey(KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE)
             if (rescue) systemMediaKey(KeyEvent.KEYCODE_MEDIA_PLAY)
@@ -1915,6 +1935,7 @@ object MediaHub {
                 // What the SAIC media service (its top bar) has as the current source, not the one MG4Dash follows
                 val saic = if (serviceMedia) SaicMedia.currentSource() else null
                 main.post {
+                    if (sourceRequest != request) return@post
                     val taken = carPlayTaken(saic, sourcePkg)
                     if (taken) Log.i(TAG, "CarPlay : source prise" + (saic?.let { " (SAIC $it)" } ?: "") + if (rescue) " (secours #99)" else "")
                     else Log.i(TAG, "CarPlay audio after source key: still on ${saic?.let { "SAIC $it" } ?: sourcePkg}" + if (rescue) " (after the rescue)" else "")
