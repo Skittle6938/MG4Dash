@@ -402,6 +402,7 @@ A short tour of the main gestures opens after a first install (*Skip* closes it 
 - Long press the clock in the dock: clock or Wi-Fi settings button
 - Vertical bar: double tap Energy turns the screen off, long press Energy switches the car off (never while moving); double tap Vehicle locks / unlocks the doors, long press Vehicle turns ESC off / on
 - Long press "Android Auto" in the dock or the vertical bar: Android Auto, CarPlay or another app; double tap: cut / restore the phone connection (see [Media player](#media-player))
+- Long press a widget for its settings (radar, app, web app, climate, energy).
 - Tap or swipe the bottom-right widget (or the map layout stack): next page; long press a phone favourite to change it
 - Swipe the media card up / down: next audio source; left / right: next / previous track; tap its source name: source menu
 - Tap the temperature area: Climate page; long press it or the fan's levels: the climate's settings (temperature calibration); long press fan minus: lowest fan speed; long press A/C: intermittent A/C
@@ -453,3 +454,11 @@ For range, rely on the "0 % shown" values. These are the ones MG4Dash uses by de
 MG4Dash is free software under the [GNU General Public License v3](COPYING) or later. This applies to every published version, including the releases before 0.10.0. Parts of the firmware detection and of the SWI68 / SWI165 / SWI133 climate code are adapted from [MG4Control](https://github.com/SliDeeN/MG4Control) (GPL v3; earlier MG4Control code under the MIT licence, notice kept in [licenses/MG4Control-MIT.txt](licenses/MG4Control-MIT.txt)).
 
 Personal project, not affiliated with SAIC / MG. Use at your own risk.
+
+## GitHub Actions
+
+- **PR check** runs the unit tests, builds both emulator and car APKs, checks Android lint, translation generation and version progression. Its summary lists test results, lint findings and APK sizes; reports are downloadable for 14 days.
+- **UI previews** renders representative screens in dark, light and large-display modes plus the startup animation. Download the PNGs and GIF from the workflow artifact. These use simulated data.
+- **Publish beta** runs manually from the Actions tab on **main**. Enter a version such as `1.7.4-beta15` and release notes. It increments `versionCode`, validates and signs the car APK, pushes the version commit and publishes a prerelease. **dry_run** produces the signed artifact with no push or publication. A concurrent push to main stops publication so the run can be restarted on current main.
+- Signing uses the encrypted repository secret `PLATFORM_KEY_BASE64` (base64 of the existing platform PKCS#8 key). The public certificate stays in `keys/platform.x509.pem`; the workflow verifies the expected certificate and APK version before publication.
+- Translation changes belong in `i18n/strings.psv`. Run `python i18n/gen.py` and commit the generated XMLs. `python i18n/gen.py --check` verifies all eight languages and their format arguments.

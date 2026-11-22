@@ -183,7 +183,7 @@ object MediaHub {
     @Volatile private var btLive: Boolean? = null
 
     private fun btConnected(): Boolean? = try {
-        android.bluetooth.BluetoothAdapter.getDefaultAdapter()?.getProfileConnectionState(11) == android.bluetooth.BluetoothProfile.STATE_CONNECTED
+        android.bluetooth.BluetoothAdapter.getDefaultAdapter()?.getProfileConnectionState(11) == android.bluetooth.BluetoothAdapter.STATE_CONNECTED
     } catch (_: Exception) { null }
 
     // ── Automatic source ("Source at startup" setting) ──
@@ -950,7 +950,7 @@ object MediaHub {
             publish()
             // Already on the radio: no source change to the car, go directly to the band
             if (current?.packageName == RADIO) reachBand(next, request, delayMs = 0)
-            else { switchSource(RADIO, false, request); reachBand(next, request) }
+            else { switchSource(RADIO, play, request); reachBand(next, request) }
             return
         }
         bandTarget = null

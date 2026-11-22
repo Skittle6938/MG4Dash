@@ -83,7 +83,7 @@ object WebAddresses {
 
     /** The addresses of a file's lines: "address" or "name | address", blank lines and # comments left out. */
     internal fun parse(lines: List<String>): List<String> = lines.mapNotNull { raw ->
-        val line = raw.trim().trimStart('﻿')
+        val line = raw.trim().trimStart('\uFEFF')
         if (line.isEmpty() || line.startsWith("#")) return@mapNotNull null
         val url = line.substringAfterLast('|').trim()
         when {

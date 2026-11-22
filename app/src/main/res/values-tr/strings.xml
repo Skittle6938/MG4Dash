@@ -672,8 +672,8 @@
     <string name="st_edit_cards_desc">Her widget\'ın göstereceği kartları seçin, örneğin Uygulama kartı (harita veya başka bir uygulama) ve bir web uygulaması. Kısayol: ana ekranı iki parmakla kıstırın.</string>
     <string name="st_edit_cards_btn">Kartları düzenle</string>
     <string name="tu_cards_t">Ana ekranı düzenle</string>
-    <string name="tu_cards_1">Ana ekranı kıstırın: yerleşimi seçin, sonra her yerde bir karta dokunarak gösterin ya da kaldırın.</string>
-    <string name="tu_cards_2">Web uygulaması veya uygulamanın yerinde: adresi ya da uygulaması ve çift dokunuşun işlevi (tam ekran veya ayrı pencere).</string>
+    <string name="tu_cards_1">Düzeni ve widgetları seçmek için ana ekranı sıkıştırın.</string>
+    <string name="tu_cards_2">Web uygulamasını veya uygulamayı yerinde ayarlayın.</string>
     <string name="st_panel_outline">Ana ekran panel çerçevesi</string>
     <string name="st_clock">Saat</string>
     <string name="st_clock_24">24 sa</string>
@@ -780,6 +780,7 @@
     <string name="tu_widget_t">Birden fazla kartlı widget\'lar</string>
     <string name="tu_widget_1">Sola / sağa kaydır: sonraki kart (yolculuk, güç, telefon, hava…).</string>
     <string name="tu_widget_2">Değiştirmek için bir telefon kısayoluna uzun basın.</string>
+    <string name="tu_widget_3">Ayarlar için widget üzerine uzun basın (radar, uygulama, web uygulaması, klima, enerji).</string>
     <string name="tu_end_t">Bu kadar!</string>
     <string name="tu_end_1">Bu turu Ayarlar › Sistem\'de tekrar görebilirsiniz.</string>
     <string name="tu_skip">Atla</string>
@@ -887,8 +888,6 @@
     <string name="st_aa_installing">MG4Link yükleniyor…</string>
     <string name="st_aa_done">MG4Link güncellendi. Android Auto kendiliğinden yeniden bağlanır.</string>
     <string name="st_aa_session_warning">Yükleme sırasında Android Auto yaklaşık bir dakika durur.</string>
-
-    <!-- Shortcuts menu (pulled down from the top) -->
     <string name="st_shortcuts_menu">Kısayol menüsü</string>
     <string name="st_shortcuts_menu_desc">Ekranın üstünden aşağı kaydırınca kısayollar açılır (sis lambası, ESP, sürüş destekleri…). Orijinal sis lambası düğmesini de gizler ve köşesini boşaltır.</string>
     <string name="st_shortcuts_menu_restart">Orijinal sis lambası düğmesi, ünite bir sonraki açılışta değişir.</string>
@@ -925,8 +924,8 @@
     <string name="sc_cut">Kesildi</string>
     <string name="tu_shortcuts_t">Kısayol menüsü</string>
     <string name="tu_shortcuts_1">Ekranın en üstünden tek parmakla aşağı; her ekranda ve diğer uygulamaların üzerinde.</string>
-    <string name="tu_shortcuts_2">İşlem için bir kutucuğa dokunun; kutucukları seçmek için menüye uzun basın, parlaklık çubuğuna dokunarak onu gizleyin veya gösterin. Ana ekran tuşu menüyü kapatır.</string>
-    <string name="tu_shortcuts_3">Ayarlar › Ana ekran › Kısayol menüsü: orijinal sis lambası düğmesini de gizler (ünite yeniden başlatıldıktan sonra).</string>
+    <string name="tu_shortcuts_2">Kısayolları seçmek ve taşımak için menüye uzun basın.</string>
+    <string name="tu_shortcuts_3">Ana ekran tuşu menüyü kapatır.</string>
     <string name="sc_heating">Isıtma</string>
     <string name="sc_cooling">Klima</string>
     <string name="sc_clim_state">%1$s · dış %2$s</string>
@@ -1153,7 +1152,7 @@
     <string name="br_original">Orijinal</string>
     <string name="br_smart">Akıllı</string>
     <string name="br_reset">Öğrenmeyi sıfırla</string>
-    <string name="br_reset_desc">Varsayılan eğriye döner (15 / 35 / 70 / 100 %).</string>
+    <string name="br_reset_desc" formatted="false">Varsayılan eğriye döner (15 / 35 / 70 / 100 %).</string>
     <string name="br_reset_this">Bu eğri</string>
     <string name="br_reset_all">Tümü</string>
     <string name="br_reset_this_confirm">Bu profil için bu görünümde (açık veya koyu) öğrenilenler unutulsun mu?</string>
@@ -1172,7 +1171,7 @@
     <string name="br_look_light">Açık</string>
     <string name="br_curve_counts">Koyu: %1$d nokta · Açık: %2$d nokta</string>
     <string name="br_erase_title">Öğrenilenler silinsin mi?</string>
-    <string name="br_erase_msg">Bu eğri: gösterilen eğri 15 / 35 / 70 / 100 % değerine döner. Tümünü sil: bu profilin açık ve koyu iki eğrisi.</string>
+    <string name="br_erase_msg" formatted="false">Bu eğri: gösterilen eğri 15 / 35 / 70 / 100 % değerine döner. Tümünü sil: bu profilin açık ve koyu iki eğrisi.</string>
     <string name="br_erase_this">Bu eğri</string>
     <string name="br_erase_all">Tümünü sil</string>
     <string name="usb_saved_internal">Araç USB belleğe kopyalama izni vermedi: bunun yerine aracın belleğine kaydedildi, %1$s</string>
@@ -1194,4 +1193,6 @@
     <string name="ly_cleared">Şarkı sözü önbelleği temizlendi</string>
     <string name="du_lyrics">Senkronize şarkı sözleri</string>
     <string name="du_lyrics_payload">LRCLIB yanıt verisi (4G, sıfırlamadan beri): %1$s</string>
+    <string name="lyrics_shortcut_short">Şarkı sözü katmanı</string>
+    <string name="lyrics_shortcut_long">Senkronize şarkı sözü katmanı</string>
 </resources>

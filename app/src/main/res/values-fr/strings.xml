@@ -672,8 +672,8 @@
     <string name="st_edit_cards_desc">Choisir les cartes que fait défiler chaque widget, dont la carte Application (la carte OpenStreetMap ou une autre appli) et une web app. Raccourci : pincer l\'accueil avec deux doigts.</string>
     <string name="st_edit_cards_btn">Modifier les cartes</string>
     <string name="tu_cards_t">Modifier l\'accueil</string>
-    <string name="tu_cards_1">Pincez l\'accueil : choisissez la disposition, puis sur chaque emplacement touchez une carte pour l\'afficher ou la retirer.</string>
-    <string name="tu_cards_2">Sur l\'emplacement de la web app ou de l\'appli : son adresse ou son appli, et l\'effet du double appui (plein écran ou fenêtre détachée).</string>
+    <string name="tu_cards_1">Pincez l\'accueil pour choisir la disposition et les widgets.</string>
+    <string name="tu_cards_2">Configurez la web app ou l\'appli dans son emplacement.</string>
     <string name="st_panel_outline">Contour des panneaux de l\'accueil</string>
     <string name="st_clock">Horloge</string>
     <string name="st_clock_24">24 h</string>
@@ -780,6 +780,7 @@
     <string name="tu_widget_t">Widgets à plusieurs cartes</string>
     <string name="tu_widget_1">Glissez à gauche / droite : carte suivante (trajet, puissance, téléphone, météo…).</string>
     <string name="tu_widget_2">Appui long sur un raccourci téléphone pour le changer.</string>
+    <string name="tu_widget_3">Appui long sur un widget pour ses réglages (radar, application, web app, clim, énergie).</string>
     <string name="tu_end_t">C\'est tout !</string>
     <string name="tu_end_1">Vous retrouverez ce tuto dans Réglages › Système.</string>
     <string name="tu_skip">Passer</string>
@@ -887,8 +888,6 @@
     <string name="st_aa_installing">Installation de MG4Link…</string>
     <string name="st_aa_done">MG4Link est à jour. Android Auto se reconnecte tout seul.</string>
     <string name="st_aa_session_warning">Android Auto s\'arrête environ une minute pendant l\'installation.</string>
-
-    <!-- Shortcuts menu (pulled down from the top) -->
     <string name="st_shortcuts_menu">Menu de raccourcis</string>
     <string name="st_shortcuts_menu_desc">Glisser un doigt depuis le haut de l’écran ouvre des raccourcis (antibrouillard, ESP, aides…). Masque aussi le bouton antibrouillard d’origine et libère son coin.</string>
     <string name="st_shortcuts_menu_restart">Le bouton antibrouillard d’origine change au prochain démarrage de l’autoradio.</string>
@@ -925,8 +924,8 @@
     <string name="sc_cut">Coupé</string>
     <string name="tu_shortcuts_t">Menu de raccourcis</string>
     <string name="tu_shortcuts_1">Un doigt glissé vers le bas depuis tout en haut de l\'écran, sur tous les écrans et par-dessus les autres applis.</string>
-    <string name="tu_shortcuts_2">Touchez une tuile pour agir ; appui long sur le menu pour choisir ses tuiles, et touchez-y la barre de luminosité pour la masquer ou l’afficher. La touche Accueil le ferme.</string>
-    <string name="tu_shortcuts_3">Réglages › Accueil › Menu de raccourcis : il masque aussi le bouton antibrouillard SAIC (après un redémarrage de l\'autoradio).</string>
+    <string name="tu_shortcuts_2">Appui long sur le menu pour choisir et déplacer ses raccourcis.</string>
+    <string name="tu_shortcuts_3">La touche Accueil ferme le menu.</string>
     <string name="sc_heating">Chauffage</string>
     <string name="sc_cooling">Clim</string>
     <string name="sc_clim_state">%1$s · ext. %2$s</string>
@@ -1153,7 +1152,7 @@
     <string name="br_original">D\'origine</string>
     <string name="br_smart">Intelligente</string>
     <string name="br_reset">Réinitialiser l\'apprentissage</string>
-    <string name="br_reset_desc">Revient à la courbe par défaut (15 / 35 / 70 / 100 %).</string>
+    <string name="br_reset_desc" formatted="false">Revient à la courbe par défaut (15 / 35 / 70 / 100 %).</string>
     <string name="br_reset_this">Cette courbe</string>
     <string name="br_reset_all">Tout</string>
     <string name="br_reset_this_confirm">Oublier ce qui a été appris pour ce profil, dans cet affichage (clair ou sombre) ?</string>
@@ -1172,7 +1171,7 @@
     <string name="br_look_light">Clair</string>
     <string name="br_curve_counts">Sombre : %1$d points · Clair : %2$d points</string>
     <string name="br_erase_title">Effacer l’apprentissage ?</string>
-    <string name="br_erase_msg">Cette courbe : celle affichée revient à 15 / 35 / 70 / 100 %. Tout effacer : les deux courbes de ce profil, claire et sombre.</string>
+    <string name="br_erase_msg" formatted="false">Cette courbe : celle affichée revient à 15 / 35 / 70 / 100 %. Tout effacer : les deux courbes de ce profil, claire et sombre.</string>
     <string name="br_erase_this">Cette courbe</string>
     <string name="br_erase_all">Tout effacer</string>
     <string name="usb_saved_internal">La voiture n’a pas donné la permission de copier sur la clé USB : enregistré à la place dans la mémoire de la voiture, %1$s</string>
@@ -1194,4 +1193,6 @@
     <string name="ly_cleared">Cache des paroles vidé</string>
     <string name="du_lyrics">Paroles synchronisées</string>
     <string name="du_lyrics_payload">Données reçues de LRCLIB (4G, depuis la remise à zéro) : %1$s</string>
+    <string name="lyrics_shortcut_short">Superposition des paroles</string>
+    <string name="lyrics_shortcut_long">Superposition des paroles synchronisées</string>
 </resources>

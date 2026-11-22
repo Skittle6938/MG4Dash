@@ -946,7 +946,7 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         app.mg4dash.ui.OptionsPopup(this, getString(R.string.st_style_map))
             .choice(getString(R.string.st_map_zoom), null, listOf("14", "15", "16", "17", "18"), { prefs.mapZoom - 14 }) { prefs.mapZoom = 14 + it }
             .choice(getString(R.string.st_map_theme), null, listOf(R.string.st_mode_auto, R.string.st_mode_light, R.string.st_mode_dark).map { getString(it) }, { prefs.mapTheme }) { prefs.mapTheme = it }
-            .toggle(getString(R.string.st_map_offline_switch, "").trimEnd(' ', ':', ' ', ' '), getString(R.string.st_map_offline_switch_desc), { prefs.mapOfflineSwitch }) { prefs.mapOfflineSwitch = it }
+            .toggle(getString(R.string.st_map_offline_switch).trimEnd(' ', ':', ' ', ' '), getString(R.string.st_map_offline_switch_desc), { prefs.mapOfflineSwitch }) { prefs.mapOfflineSwitch = it }
             .show { if (prefs.mapZoom != zoom || prefs.mapTheme != theme) app.mg4dash.ui.Themes.recreateSmooth(this) else refreshCards() }
     }
 

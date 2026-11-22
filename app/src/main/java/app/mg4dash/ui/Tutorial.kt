@@ -77,7 +77,7 @@ object Tutorial {
         Step(R.id.mapCard, R.string.tu_map_t, listOf(R.string.tu_map_1, R.string.tu_map_2, R.string.tu_map_3), swipes = "H"),
         MUSIC_STEP,
         // Any widget with several cards (the trip, power and phone one first)
-        Step(R.id.secondaryCard, R.string.tu_widget_t, listOf(R.string.tu_widget_1, R.string.tu_widget_2), swipes = "H"),
+        Step(R.id.secondaryCard, R.string.tu_widget_t, listOf(R.string.tu_widget_1, R.string.tu_widget_2, R.string.tu_widget_3), swipes = "H"),
         // Edit mode (#97): pinch the home screen; the web app's and the App card's double tap, detached windows (#98)
         Step(null, R.string.tu_cards_t, listOf(R.string.tu_cards_1, R.string.tu_cards_2, R.string.tu_cards_3), wide = true),
         Step(null, R.string.tu_end_t, listOf(R.string.tu_end_1)),
