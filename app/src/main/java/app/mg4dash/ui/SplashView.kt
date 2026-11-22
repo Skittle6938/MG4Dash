@@ -56,9 +56,31 @@ class SplashView(context: Context) : View(context) {
         return t * t * (3 - 2 * t)
     }
 
+    /** When this screen was first drawn, for the boot animation's time limit. */
+    private var firstDraw = 0L
+    /** The car's own boot animation is over: once true, it stays true. */
+    private var bootAnimOver = false
+
+    /**
+     * Android's boot animation (the MG logo) is drawn over every window without taking their focus: the reveal waits
+     * for its end, or it would play unseen behind it. Read every 100 ms; past [BOOT_ANIM_WAIT_MS] it starts anyway.
+     */
+    private fun bootAnimationOver(now: Long): Boolean {
+        if (bootAnimOver) return true
+        if (firstDraw == 0L) firstDraw = now
+        bootAnimOver = bootAnimDone(prop("init.svc.bootanim"), prop("service.bootanim.exit"), now - firstDraw)
+        return bootAnimOver
+    }
+
+    private fun prop(name: String): String = try {
+        Class.forName("android.os.SystemProperties").getMethod("get", String::class.java).invoke(null, name) as? String ?: ""
+    } catch (_: Throwable) { "" }
+
     override fun onDraw(canvas: Canvas) {
         val visible = hasWindowFocus() && isShown && display?.state == android.view.Display.STATE_ON
-        if (running && visible) {
+        val ready = bootAnimationOver(android.os.SystemClock.uptimeMillis())
+        if (running && !ready) { lastFrame = 0L; postInvalidateDelayed(100) }
+        if (running && visible && ready) {
             val now = android.os.SystemClock.uptimeMillis()
             // A stalled boot frame must not consume the entire reveal before it is displayed.
             if (lastFrame != 0L) time += (now - lastFrame).coerceIn(0L, 32L) / 1000f
@@ -117,5 +139,14 @@ class SplashView(context: Context) : View(context) {
 
     companion object {
         const val CYCLE = 3f
+        /** At most this long waiting for the boot animation's end (a car where the property never changes). */
+        const val BOOT_ANIM_WAIT_MS = 20_000L
+
+        /**
+         * The boot animation is over: its service stopped ([state] "stopped") or told to exit ([exit] "1"). Neither
+         * readable (another firmware): nothing to wait for. Past [BOOT_ANIM_WAIT_MS], over whatever they say.
+         */
+        internal fun bootAnimDone(state: String, exit: String, waitedMs: Long): Boolean =
+            state == "stopped" || exit == "1" || (state.isEmpty() && exit.isEmpty()) || waitedMs >= BOOT_ANIM_WAIT_MS
     }
 }
