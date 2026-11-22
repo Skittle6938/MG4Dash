@@ -115,6 +115,29 @@
             android:theme="@android:style/Theme.Translucent.NoTitleBar" />
 
         <activity
+            android:name=".ui.LyricsOverlayShortcutActivity"
+            android:excludeFromRecents="true"
+            android:exported="true"
+            android:noHistory="true"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar">
+            <intent-filter>
+                <action android:name="com.mg4.control.action.SHORTCUT" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.CREATE_SHORTCUT" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        <receiver android:name=".ui.LyricsOverlayReceiver" android:exported="true">
+            <intent-filter>
+                <action android:name="app.mg4dash.action.TOGGLE_LYRICS_OVERLAY" />
+                <action android:name="app.mg4dash.action.SHOW_LYRICS_OVERLAY" />
+                <action android:name="app.mg4dash.action.HIDE_LYRICS_OVERLAY" />
+            </intent-filter>
+        </receiver>
+
+        <activity
             android:name=".pages.TripsActivity"
             android:exported="false"
             android:screenOrientation="landscape"

@@ -48,6 +48,13 @@ object LyricsOverlay {
         app = context.applicationContext; wm = app!!.getSystemService(Context.WINDOW_SERVICE) as WindowManager
         return start()
     }
+    fun show(context: Context): Boolean {
+        if (active) return true
+        if (!Settings.canDrawOverlays(context)) return false
+        app = context.applicationContext
+        wm = app!!.getSystemService(Context.WINDOW_SERVICE) as WindowManager
+        return start()
+    }
     fun start(): Boolean {
         val c = app ?: return false
         if (active) return true
