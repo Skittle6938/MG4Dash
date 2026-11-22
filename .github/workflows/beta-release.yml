@@ -92,7 +92,9 @@ jobs:
           PLATFORM_KEY_BASE64: ${{ secrets.PLATFORM_KEY_BASE64 }}
         run: |
           test -n "$PLATFORM_KEY_BASE64" || { echo 'Missing PLATFORM_KEY_BASE64 signing secret'; exit 1; }
-          sdkmanager 'build-tools;34.0.0' > /dev/null
+          if [ ! -x "$ANDROID_HOME/build-tools/34.0.0/apksigner" ]; then
+            "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" 'build-tools;34.0.0' > /dev/null
+          fi
           key="$RUNNER_TEMP/platform.pk8"
           trap 'rm -f "$key"' EXIT
           umask 077
