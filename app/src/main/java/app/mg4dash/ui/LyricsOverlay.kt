@@ -36,6 +36,7 @@ object LyricsOverlay {
     private var trackKey = ""
     private var latest = MediaHub.NowPlaying()
     private var positionAt = 0L
+    private var positionAnchorMs = 0L
     private fun dp(v: Int) = ((app?.resources?.displayMetrics?.density ?: 1f) * v).toInt()
 
     fun toggle(context: Context): Boolean {
@@ -88,7 +89,9 @@ object LyricsOverlay {
         mediaJob?.cancel()
         mediaJob = scope.launch {
             MediaHub.now.collect { now ->
-                latest = now; positionAt = android.os.SystemClock.elapsedRealtime()
+                latest = now
+                positionAnchorMs = now.positionMs.coerceAtLeast(0L)
+                positionAt = android.os.SystemClock.elapsedRealtime()
                 if (!active) return@collect
                 if (!now.playing) { tickerJob?.cancel(); tickerJob=null; return@collect }
                 val nextKey = if (now.artist.isBlank() || now.title.isBlank()) "" else LyricsRepo.key(now.artist, now.title)
@@ -113,7 +116,11 @@ object LyricsOverlay {
         tickerJob?.cancel()
         tickerJob = scope.launch {
             while (active && latest.playing && track?.synced != null) {
-                val pos = latest.positionMs + (android.os.SystemClock.elapsedRealtime() - positionAt)
+                // PlaybackState often publishes metadata/state without regular position callbacks.
+                // Keep a monotonic local clock anchored to the most recent MediaHub position sample.
+                val elapsed = (android.os.SystemClock.elapsedRealtime() - positionAt).coerceAtLeast(0L)
+                val duration = latest.durationMs.takeIf { it > 0L } ?: Long.MAX_VALUE
+                val pos = (positionAnchorMs + elapsed).coerceAtMost(duration)
                 val list = track!!.synced!!
                 val i = list.indexOfLast { it.first <= pos }.coerceAtLeast(0)
                 update(list.getOrNull(i)?.second.orEmpty(), list.getOrNull(i+1)?.second.orEmpty())
