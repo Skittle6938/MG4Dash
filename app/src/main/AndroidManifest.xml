@@ -6,6 +6,8 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.BLUETOOTH" />
+    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
+    <uses-feature android:name="android.hardware.telephony" android:required="false" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
@@ -40,6 +42,8 @@
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
     <!-- Talk with MG4Dash Web, the Web app card's page (keyboard, card shown or hidden, #98) -->
     <uses-permission android:name="app.mg4dash.web.permission.TALK" />
+    <!-- The system-UID car app addresses the Web companion in the current Android user. -->
+    <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS" />
     <!-- MG4Link's signature permission (declared by MG4Link, same platform key): lets MG4Dash ask it to disconnect
          (three fingers from the top strip). Harmless without MG4Link: the permission is then unknown and nothing is sent. -->
     <uses-permission android:name="com.allgo.app.androidauto.permission.USER_DISCONNECT" />

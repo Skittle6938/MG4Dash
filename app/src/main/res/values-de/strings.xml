@@ -780,6 +780,7 @@
     <string name="tu_widget_t">Widgets mit mehreren Karten</string>
     <string name="tu_widget_1">Nach links / rechts wischen: nächste Karte (Fahrt, Leistung, Telefon, Wetter…).</string>
     <string name="tu_widget_2">Telefonverknüpfung lang drücken, um sie zu ändern.</string>
+    <string name="tu_widget_3">Widget lange drücken für Einstellungen (Radar, App, Web-App, Klima, Energie).</string>
     <string name="tu_end_t">Das war\'s!</string>
     <string name="tu_end_1">Diese Tour finden Sie wieder unter Einstellungen › System.</string>
     <string name="tu_skip">Überspringen</string>
@@ -887,8 +888,6 @@
     <string name="st_aa_installing">MG4Link wird installiert…</string>
     <string name="st_aa_done">MG4Link ist aktualisiert. Android Auto verbindet sich von selbst wieder.</string>
     <string name="st_aa_session_warning">Android Auto stoppt während der Installation etwa eine Minute.</string>
-
-    <!-- Shortcuts menu (pulled down from the top) -->
     <string name="st_shortcuts_menu">Schnellzugriff-Menü</string>
     <string name="st_shortcuts_menu_desc">Von oben über den Bildschirm wischen öffnet Schnellzugriffe (Nebelschlussleuchte, ESP, Assistenten…). Blendet auch die originale Nebelleuchten-Taste aus und gibt ihre Ecke frei.</string>
     <string name="st_shortcuts_menu_restart">Die originale Nebelleuchten-Taste ändert sich beim nächsten Start des Radios.</string>
@@ -1153,7 +1152,7 @@
     <string name="br_original">Original</string>
     <string name="br_smart">Intelligent</string>
     <string name="br_reset">Lernen zurücksetzen</string>
-    <string name="br_reset_desc">Zurück zur Standardkurve (15 / 35 / 70 / 100 %).</string>
+    <string name="br_reset_desc" formatted="false">Zurück zur Standardkurve (15 / 35 / 70 / 100 %).</string>
     <string name="br_reset_this">Diese Kurve</string>
     <string name="br_reset_all">Alle</string>
     <string name="br_reset_this_confirm">Das für dieses Profil in dieser Darstellung (hell oder dunkel) Gelernte vergessen?</string>
@@ -1172,11 +1171,10 @@
     <string name="br_look_light">Hell</string>
     <string name="br_curve_counts">Dunkel: %1$d Punkte · Hell: %2$d Punkte</string>
     <string name="br_erase_title">Gelerntes löschen?</string>
-    <string name="br_erase_msg">Diese Kurve: die angezeigte kehrt zu 15 / 35 / 70 / 100 % zurück. Alles löschen: beide Kurven dieses Profils, hell und dunkel.</string>
+    <string name="br_erase_msg" formatted="false">Diese Kurve: die angezeigte kehrt zu 15 / 35 / 70 / 100 % zurück. Alles löschen: beide Kurven dieses Profils, hell und dunkel.</string>
     <string name="br_erase_this">Diese Kurve</string>
     <string name="br_erase_all">Alles löschen</string>
     <string name="usb_saved_internal">Das Auto hat das Kopieren auf den USB-Stick nicht erlaubt: stattdessen im Speicher des Autos gespeichert, %1$s</string>
     <string name="fx_pick_hint">Eine oder mehrere ankreuzen: Jedes Mal wird eine der angekreuzten ausgelost, nie die anderen. Keine angekreuzt: keine Animation.</string>
     <string name="fx_random_of">Zufällig: %1$s</string>
-    <string name="tu_widget_3">Widget lange drücken für Einstellungen (Radar, App, Web-App, Klima, Energie).</string>
 </resources>

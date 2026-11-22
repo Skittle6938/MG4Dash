@@ -888,8 +888,6 @@
     <string name="st_aa_installing">Installing MG4Link…</string>
     <string name="st_aa_done">MG4Link is updated. Android Auto connects again by itself.</string>
     <string name="st_aa_session_warning">Android Auto stops for about a minute while it installs.</string>
-
-    <!-- Shortcuts menu (pulled down from the top) -->
     <string name="st_shortcuts_menu">Shortcuts menu</string>
     <string name="st_shortcuts_menu_desc">Swipe down from the top of the screen to open shortcuts (fog light, ESP, driving aids…). Also hides the original fog light button and frees its corner.</string>
     <string name="st_shortcuts_menu_restart">The original fog light button changes at the next start of the head unit.</string>
@@ -1154,7 +1152,7 @@
     <string name="br_original">Original</string>
     <string name="br_smart">Smart</string>
     <string name="br_reset">Reset the learning</string>
-    <string name="br_reset_desc">Back to the default curve (15 / 35 / 70 / 100 %).</string>
+    <string name="br_reset_desc" formatted="false">Back to the default curve (15 / 35 / 70 / 100 %).</string>
     <string name="br_reset_this">This curve</string>
     <string name="br_reset_all">All</string>
     <string name="br_reset_this_confirm">Forget what was learnt for this profile, in this look (light or dark)?</string>
@@ -1173,7 +1171,7 @@
     <string name="br_look_light">Light</string>
     <string name="br_curve_counts">Dark: %1$d points · Light: %2$d points</string>
     <string name="br_erase_title">Erase what was learnt?</string>
-    <string name="br_erase_msg">This curve: the one shown goes back to 15 / 35 / 70 / 100 %. Erase all: both curves of this profile, light and dark.</string>
+    <string name="br_erase_msg" formatted="false">This curve: the one shown goes back to 15 / 35 / 70 / 100 %. Erase all: both curves of this profile, light and dark.</string>
     <string name="br_erase_this">This curve</string>
     <string name="br_erase_all">Erase all</string>
     <string name="usb_saved_internal">The car did not give permission to copy to the USB stick: saved in the car’s memory instead, %1$s</string>

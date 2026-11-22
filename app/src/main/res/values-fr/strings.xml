@@ -888,8 +888,6 @@
     <string name="st_aa_installing">Installation de MG4Link…</string>
     <string name="st_aa_done">MG4Link est à jour. Android Auto se reconnecte tout seul.</string>
     <string name="st_aa_session_warning">Android Auto s\'arrête environ une minute pendant l\'installation.</string>
-
-    <!-- Shortcuts menu (pulled down from the top) -->
     <string name="st_shortcuts_menu">Menu de raccourcis</string>
     <string name="st_shortcuts_menu_desc">Glisser un doigt depuis le haut de l’écran ouvre des raccourcis (antibrouillard, ESP, aides…). Masque aussi le bouton antibrouillard d’origine et libère son coin.</string>
     <string name="st_shortcuts_menu_restart">Le bouton antibrouillard d’origine change au prochain démarrage de l’autoradio.</string>
@@ -1154,7 +1152,7 @@
     <string name="br_original">D\'origine</string>
     <string name="br_smart">Intelligente</string>
     <string name="br_reset">Réinitialiser l\'apprentissage</string>
-    <string name="br_reset_desc">Revient à la courbe par défaut (15 / 35 / 70 / 100 %).</string>
+    <string name="br_reset_desc" formatted="false">Revient à la courbe par défaut (15 / 35 / 70 / 100 %).</string>
     <string name="br_reset_this">Cette courbe</string>
     <string name="br_reset_all">Tout</string>
     <string name="br_reset_this_confirm">Oublier ce qui a été appris pour ce profil, dans cet affichage (clair ou sombre) ?</string>
@@ -1173,7 +1171,7 @@
     <string name="br_look_light">Clair</string>
     <string name="br_curve_counts">Sombre : %1$d points · Clair : %2$d points</string>
     <string name="br_erase_title">Effacer l’apprentissage ?</string>
-    <string name="br_erase_msg">Cette courbe : celle affichée revient à 15 / 35 / 70 / 100 %. Tout effacer : les deux courbes de ce profil, claire et sombre.</string>
+    <string name="br_erase_msg" formatted="false">Cette courbe : celle affichée revient à 15 / 35 / 70 / 100 %. Tout effacer : les deux courbes de ce profil, claire et sombre.</string>
     <string name="br_erase_this">Cette courbe</string>
     <string name="br_erase_all">Tout effacer</string>
     <string name="usb_saved_internal">La voiture n’a pas donné la permission de copier sur la clé USB : enregistré à la place dans la mémoire de la voiture, %1$s</string>

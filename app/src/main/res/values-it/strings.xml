@@ -780,6 +780,7 @@
     <string name="tu_widget_t">Widget con più schede</string>
     <string name="tu_widget_1">Scorri a sinistra / destra: scheda successiva (viaggio, potenza, telefono, meteo…).</string>
     <string name="tu_widget_2">Pressione lunga su una scorciatoia telefono per cambiarla.</string>
+    <string name="tu_widget_3">Tieni premuto un widget per le impostazioni (radar, app, web app, clima, energia).</string>
     <string name="tu_end_t">È tutto!</string>
     <string name="tu_end_1">Puoi rivedere questo tour in Impostazioni › Sistema.</string>
     <string name="tu_skip">Salta</string>
@@ -887,8 +888,6 @@
     <string name="st_aa_installing">Installazione di MG4Link…</string>
     <string name="st_aa_done">MG4Link è aggiornato. Android Auto si ricollega da solo.</string>
     <string name="st_aa_session_warning">Android Auto si ferma per circa un minuto durante l\'installazione.</string>
-
-    <!-- Shortcuts menu (pulled down from the top) -->
     <string name="st_shortcuts_menu">Menu scorciatoie</string>
     <string name="st_shortcuts_menu_desc">Scorri dall’alto dello schermo per aprire le scorciatoie (retronebbia, ESP, assistenze…). Nasconde anche il pulsante retronebbia originale e libera il suo angolo.</string>
     <string name="st_shortcuts_menu_restart">Il pulsante retronebbia originale cambia al prossimo avvio dell’autoradio.</string>
@@ -1153,7 +1152,7 @@
     <string name="br_original">Originale</string>
     <string name="br_smart">Intelligente</string>
     <string name="br_reset">Reimposta l\'apprendimento</string>
-    <string name="br_reset_desc">Torna alla curva predefinita (15 / 35 / 70 / 100 %).</string>
+    <string name="br_reset_desc" formatted="false">Torna alla curva predefinita (15 / 35 / 70 / 100 %).</string>
     <string name="br_reset_this">Questa curva</string>
     <string name="br_reset_all">Tutto</string>
     <string name="br_reset_this_confirm">Dimenticare ciò che è stato appreso per questo profilo, in questo aspetto (chiaro o scuro)?</string>
@@ -1172,11 +1171,10 @@
     <string name="br_look_light">Chiaro</string>
     <string name="br_curve_counts">Scuro: %1$d punti · Chiaro: %2$d punti</string>
     <string name="br_erase_title">Cancellare ciò che è stato appreso?</string>
-    <string name="br_erase_msg">Questa curva: quella mostrata torna a 15 / 35 / 70 / 100 %. Cancella tutto: le due curve di questo profilo, chiara e scura.</string>
+    <string name="br_erase_msg" formatted="false">Questa curva: quella mostrata torna a 15 / 35 / 70 / 100 %. Cancella tutto: le due curve di questo profilo, chiara e scura.</string>
     <string name="br_erase_this">Questa curva</string>
     <string name="br_erase_all">Cancella tutto</string>
     <string name="usb_saved_internal">L’auto non ha dato il permesso di copiare sulla chiavetta USB: salvato invece nella memoria dell’auto, %1$s</string>
     <string name="fx_pick_hint">Selezionane una o più: ogni volta ne viene estratta una tra quelle selezionate, mai le altre. Nessuna selezionata: nessuna animazione.</string>
     <string name="fx_random_of">Casuale: %1$s</string>
-    <string name="tu_widget_3">Tieni premuto un widget per le impostazioni (radar, app, web app, clima, energia).</string>
 </resources>

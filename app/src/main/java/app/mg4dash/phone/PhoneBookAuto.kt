@@ -33,8 +33,8 @@ object PhoneBookAuto {
             while (true) {
                 try {
                     val a = BluetoothAdapter.getDefaultAdapter()
-                    val phone = a != null && (a.getProfileConnectionState(PBAP_CLIENT) == BluetoothProfile.STATE_CONNECTED ||
-                        a.getProfileConnectionState(HEADSET_CLIENT) == BluetoothProfile.STATE_CONNECTED)
+                    val phone = a != null && (a.getProfileConnectionState(PBAP_CLIENT) == BluetoothAdapter.STATE_CONNECTED ||
+                        a.getProfileConnectionState(HEADSET_CLIENT) == BluetoothAdapter.STATE_CONNECTED)
                     val now = System.currentTimeMillis()
                     if (phone && now - lastTry > RETRY_MS && PhoneActivity.contacts(app).isEmpty()) {
                         lastTry = now

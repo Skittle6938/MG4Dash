@@ -21,5 +21,6 @@ dist/
 .idea/
 *.iml
 .kotlin/
+__pycache__/
 !app/src/car/assets/rescue.apk
 !app/src/car/assets/web.apk

@@ -7,11 +7,16 @@ on:
   workflow_dispatch:
 permissions:
   contents: read
+concurrency:
+  group: checks-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
@@ -19,20 +24,31 @@ jobs:
       # Garde en cache la distribution Gradle du wrapper et les dépendances : plus de téléchargement
       # de services.gradle.org à chaque passage (échec « timeout (10000ms) » du 9 novembre)
       - uses: gradle/actions/setup-gradle@v4
-      - name: Build and test
-        run: chmod +x gradlew && ./gradlew --no-daemon -q testEmulatorDebugUnitTest :rescue:testDebugUnitTest assembleEmulatorDebug
-      - name: Failed tests
-        if: failure()
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Check translations
+        run: python i18n/gen.py --check
+      - name: Check version progression
+        env:
+          BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
         run: |
-          for f in app/build/test-results/*/TEST-*.xml rescue/build/test-results/*/TEST-*.xml; do
-            [ -f "$f" ] && grep -q "<failure" "$f" && { echo "== $f"; grep -A12 "<failure" "$f" | head -60; }
-          done || true
-      - name: Upload unit test report
-        if: failure()
+          if [ -n "$BASE" ]; then python scripts/ci_version.py --base "$BASE"; else python scripts/ci_version.py; fi
+      - name: Build and test
+        run: chmod +x gradlew && ./gradlew --no-daemon -q :app:testEmulatorDebugUnitTest :rescue:testDebugUnitTest :app:assembleEmulatorDebug :app:assembleCarRelease :app:lintCarRelease
+      - name: Validation summary
+        if: always()
+        run: python scripts/ci_summary.py --check-lint
+      - name: Upload test and lint reports
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: unit-test-report
           path: |
             app/build/reports/tests/testEmulatorDebugUnitTest
             rescue/build/reports/tests/testDebugUnitTest
+            app/build/test-results/testEmulatorDebugUnitTest
+            rescue/build/test-results/testDebugUnitTest
+            app/build/reports/lint-results-*
           if-no-files-found: ignore
+          retention-days: 14

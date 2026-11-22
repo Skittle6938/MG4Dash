@@ -16,7 +16,7 @@ object BtAudio {
     private const val HEADSET_CLIENT = 16
 
     private fun state(profile: Int) = try {
-        BluetoothAdapter.getDefaultAdapter()?.getProfileConnectionState(profile) == BluetoothProfile.STATE_CONNECTED
+        BluetoothAdapter.getDefaultAdapter()?.getProfileConnectionState(profile) == BluetoothAdapter.STATE_CONNECTED
     } catch (_: Exception) { false }
 
     fun musicConnected() = state(A2DP_SINK)

@@ -1,0 +1,58 @@
+name: UI previews
+on:
+  push:
+    branches: [main]
+    paths: ['app/src/**', 'app/build.gradle.kts', '.github/workflows/screenshots.yml', 'scripts/splash_gif.py']
+  pull_request:
+    paths: ['app/src/**', 'app/build.gradle.kts', '.github/workflows/screenshots.yml', 'scripts/splash_gif.py']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: previews-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Render representative screens
+        run: |
+          chmod +x gradlew
+          ./gradlew --no-daemon -q -Pscreenshots :app:testEmulatorDebugUnitTest \
+            --tests app.mg4dash.ScreenshotTest.home \
+            --tests app.mg4dash.ScreenshotTest.homeLight \
+            --tests app.mg4dash.ScreenshotTest.climateLight \
+            --tests app.mg4dash.ScreenshotTest.energyLight \
+            --tests app.mg4dash.ScreenshotTest.settingsLight \
+            --tests app.mg4dash.ScreenshotTest.splashFrames \
+            --tests app.mg4dash.BigDisplayShots.home
+      - name: Make startup animation preview
+        run: |
+          python -m pip install Pillow==11.3.0
+          python scripts/splash_gif.py
+      - name: Preview summary
+        if: always()
+        run: |
+          echo '## UI previews' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Download the ui-previews artifact for the PNG screens and startup GIF. These are simulated renders; car validation remains useful.' >> "$GITHUB_STEP_SUMMARY"
+          find app/build/screenshots -name '*.png' -printf '- %f\n' >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ui-previews
+          path: |
+            app/build/screenshots/*.png
+            app/build/screenshots/*.gif
+            app/build/reports/tests/testEmulatorDebugUnitTest
+          retention-days: 14
+          if-no-files-found: warn

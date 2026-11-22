@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- 3 column home, MG4 app area: 1778 × 640 dp (160 dpi), under the SAIC bar. -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -73,7 +74,7 @@
                         android:contentDescription="@string/cd_temp_down"
                         android:padding="18dp"
                         android:src="@drawable/ic_minus"
-                        android:tint="@color/accent_cold" />
+                        app:tint="@color/accent_cold" />
 
                     <LinearLayout
                         android:layout_width="0dp"
@@ -110,7 +111,7 @@
                         android:contentDescription="@string/cd_temp_up"
                         android:padding="18dp"
                         android:src="@drawable/ic_plus"
-                        android:tint="@color/accent_heat" />
+                        app:tint="@color/accent_heat" />
                 </LinearLayout>
 
                 <Space android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" />
@@ -145,7 +146,7 @@
                         android:layout_height="28dp"
                         android:layout_marginLeft="20dp"
                         android:src="@drawable/ic_fan"
-                        android:tint="@color/accent_cold" />
+                        app:tint="@color/accent_cold" />
 
                     <app.mg4dash.ui.SegmentedGauge
                         android:id="@+id/fanGauge"
@@ -198,16 +199,16 @@
                     android:orientation="horizontal">
 
                     <FrameLayout android:id="@+id/chipScreen" style="@style/Chip" android:layout_height="48dp" android:clickable="true" android:focusable="true" android:contentDescription="@string/cl_airflow">
-                        <ImageView android:layout_width="34dp" android:layout_height="34dp" android:layout_gravity="center" android:duplicateParentState="true" android:scaleType="fitCenter" android:src="@drawable/ic_flow_screen" android:tint="@color/chip_text" />
+                        <ImageView android:layout_width="34dp" android:layout_height="34dp" android:layout_gravity="center" android:duplicateParentState="true" android:scaleType="fitCenter" android:src="@drawable/ic_flow_screen" app:tint="@color/chip_text" />
                     </FrameLayout>
                     <FrameLayout android:id="@+id/chipFace" style="@style/Chip" android:layout_height="48dp" android:layout_marginLeft="8dp" android:clickable="true" android:focusable="true" android:contentDescription="@string/cl_face">
-                        <ImageView android:layout_width="34dp" android:layout_height="34dp" android:layout_gravity="center" android:duplicateParentState="true" android:scaleType="fitCenter" android:src="@drawable/ic_flow_face" android:tint="@color/chip_text" />
+                        <ImageView android:layout_width="34dp" android:layout_height="34dp" android:layout_gravity="center" android:duplicateParentState="true" android:scaleType="fitCenter" android:src="@drawable/ic_flow_face" app:tint="@color/chip_text" />
                     </FrameLayout>
                     <FrameLayout android:id="@+id/chipFeet" style="@style/Chip" android:layout_height="48dp" android:layout_marginLeft="8dp" android:clickable="true" android:focusable="true" android:contentDescription="@string/cl_feet">
-                        <ImageView android:layout_width="34dp" android:layout_height="34dp" android:layout_gravity="center" android:duplicateParentState="true" android:scaleType="fitCenter" android:src="@drawable/ic_flow_feet" android:tint="@color/chip_text" />
+                        <ImageView android:layout_width="34dp" android:layout_height="34dp" android:layout_gravity="center" android:duplicateParentState="true" android:scaleType="fitCenter" android:src="@drawable/ic_flow_feet" app:tint="@color/chip_text" />
                     </FrameLayout>
                     <FrameLayout android:id="@+id/chipRecirc" style="@style/Chip" android:layout_height="48dp" android:layout_marginLeft="8dp" android:clickable="true" android:focusable="true" android:contentDescription="@string/cl_recirc">
-                        <ImageView android:id="@+id/chipRecircIcon" android:layout_width="34dp" android:layout_height="34dp" android:layout_gravity="center" android:duplicateParentState="true" android:scaleType="fitCenter" android:src="@drawable/ic_air_outside" android:tint="@color/chip_text" />
+                        <ImageView android:id="@+id/chipRecircIcon" android:layout_width="34dp" android:layout_height="34dp" android:layout_gravity="center" android:duplicateParentState="true" android:scaleType="fitCenter" android:src="@drawable/ic_air_outside" app:tint="@color/chip_text" />
                         <TextView android:id="@+id/chipRecircAuto" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="top|right" android:layout_marginTop="1dp" android:layout_marginRight="8dp" android:text="A" android:textColor="?attr/mgSelect" android:textSize="13sp" android:fontFamily="sans-serif-medium" android:visibility="gone" />
                     </FrameLayout>
                 </LinearLayout>
@@ -312,7 +313,7 @@
                             android:layout_marginTop="4dp"
                             android:contentDescription="@string/range_label"
                             android:src="@drawable/ic_range_plug"
-                            android:tint="?attr/mgTextSub" />
+                            app:tint="?attr/mgTextSub" />
                     </LinearLayout>
 
                     <LinearLayout
@@ -492,7 +493,7 @@
                         android:layout_marginTop="8dp"
                         android:contentDescription="@string/cd_recenter"
                         android:src="@drawable/ic_navigation"
-                        android:tint="?attr/mgAction" />
+                        app:tint="?attr/mgAction" />
 
                     <ImageButton
                         android:id="@+id/mapZoomOut"
@@ -611,7 +612,7 @@
                             android:layout_height="112dp"
                             android:layout_gravity="center"
                             android:src="@drawable/ic_music"
-                            android:tint="?attr/mgTextTitle" />
+                            app:tint="?attr/mgTextTitle" />
 
                         <app.mg4dash.ui.RoundedFrame
                             android:layout_width="match_parent"
@@ -707,7 +708,7 @@
                                 android:padding="18dp"
                                 android:scaleType="fitCenter"
                                 android:src="@drawable/ic_play"
-                                android:tint="@color/on_action" />
+                                app:tint="@color/on_action" />
 
                             <ImageButton
                                 android:id="@+id/mediaNext"

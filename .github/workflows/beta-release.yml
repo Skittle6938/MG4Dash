@@ -1,0 +1,152 @@
+name: Publish beta
+run-name: Publish MG4Dash ${{ inputs.version }}
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version, for example 1.7.4-beta15 (versionCode increases automatically)'
+        required: true
+        type: string
+      notes:
+        description: 'Release notes (Markdown)'
+        required: true
+        type: string
+      dry_run:
+        description: 'Build and verify the signed APK without pushing or publishing'
+        type: boolean
+        default: false
+permissions:
+  contents: read
+concurrency:
+  group: beta-release
+  cancel-in-progress: false
+jobs:
+  release:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: write
+    env:
+      VERSION: ${{ inputs.version }}
+      NOTES: ${{ inputs.notes }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Prepare beta version
+        run: |
+          python scripts/ci_version.py --prepare-beta "$VERSION"
+          python i18n/gen.py --check
+          python - <<'PY'
+          import json, os, subprocess
+          from pathlib import Path
+          import sys
+          sys.path.insert(0, 'scripts')
+          from ci_version import read_version
+          tag = 'v' + os.environ['VERSION']
+          releases = json.loads(subprocess.check_output(['gh', 'api', '--paginate', '--slurp', f'repos/{os.environ["GITHUB_REPOSITORY"]}/releases']))
+          code, name = read_version(Path('app/build.gradle.kts').read_text(encoding='utf-8-sig'))
+          for release in [item for page in releases for item in page]:
+              if release['draft']:
+                  continue
+              if release['tag_name'] == tag:
+                  raise SystemExit('This version is already published')
+              source = subprocess.check_output(['git', 'show', release['tag_name'] + ':app/build.gradle.kts']).decode('utf-8-sig')
+              old_code, _ = read_version(source)
+              if code <= old_code:
+                  raise SystemExit('versionCode must exceed every published release')
+          notes = os.environ['NOTES'].strip()
+          if not notes:
+              raise SystemExit('Release notes are required')
+          Path(os.environ['RUNNER_TEMP'], 'release-notes.md').write_text(notes + '\n', encoding='utf-8')
+          PY
+      - name: Build, test and lint
+        run: |
+          chmod +x gradlew
+          ./gradlew --no-daemon -q :app:testEmulatorDebugUnitTest :rescue:testDebugUnitTest :app:assembleCarRelease :app:lintCarRelease
+      - name: Validation summary
+        if: always()
+        run: python scripts/ci_summary.py --check-lint
+      - name: Upload validation reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: beta-validation
+          path: |
+            app/build/reports/tests/testEmulatorDebugUnitTest
+            rescue/build/reports/tests/testDebugUnitTest
+            app/build/reports/lint-results-*
+          retention-days: 14
+      - name: Sign and verify car APK
+        env:
+          PLATFORM_KEY_BASE64: ${{ secrets.PLATFORM_KEY_BASE64 }}
+        run: |
+          test -n "$PLATFORM_KEY_BASE64" || { echo 'Missing PLATFORM_KEY_BASE64 signing secret'; exit 1; }
+          sdkmanager 'build-tools;34.0.0' > /dev/null
+          key="$RUNNER_TEMP/platform.pk8"
+          trap 'rm -f "$key"' EXIT
+          umask 077
+          printf '%s' "$PLATFORM_KEY_BASE64" | base64 --decode > "$key"
+          mkdir -p dist
+          apk="dist/MG4Dash-$VERSION.apk"
+          tools="$ANDROID_HOME/build-tools/34.0.0"
+          "$tools/apksigner" sign --key "$key" --cert keys/platform.x509.pem \
+            --v1-signing-enabled true --v2-signing-enabled true --v3-signing-enabled false \
+            --out "$apk" app/build/outputs/apk/car/release/app-car-release-unsigned.apk
+          python scripts/verify_apk.py "$apk" --build-tools "$tools"
+          (cd dist && sha256sum "MG4Dash-$VERSION.apk" > SHA256SUMS)
+      - name: Commit version and publish beta
+        if: ${{ !inputs.dry_run }}
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          if ! git diff --quiet -- app/build.gradle.kts; then
+            git add app/build.gradle.kts
+            git commit -m "Release $VERSION"
+          fi
+          # A concurrent main push must not be overwritten or receive an outdated release.
+          git fetch origin main
+          test "$(git rev-parse origin/main)" = "$GITHUB_SHA" || { echo 'main changed; rerun on the latest main'; exit 1; }
+          git push origin HEAD:main
+          sha="$(git rev-parse HEAD)"
+          # Assemble a draft before making it visible to the updater. A retry may resume its own draft.
+          if gh release view "v$VERSION" --json isDraft --jq .isDraft > "$RUNNER_TEMP/is-draft" 2>/dev/null; then
+            test "$(cat "$RUNNER_TEMP/is-draft")" = true || { echo 'Version already published'; exit 1; }
+            tag_sha="$(gh api "repos/$GITHUB_REPOSITORY/git/ref/tags/v$VERSION" --jq .object.sha)"
+            test "$tag_sha" = "$sha" || { echo 'Draft tag points at a different commit'; exit 1; }
+          else
+            gh release create "v$VERSION" --target "$sha" --draft --prerelease --latest=false \
+              --title "MG4Dash $VERSION" --notes-file "$RUNNER_TEMP/release-notes.md"
+          fi
+          gh release upload "v$VERSION" "dist/MG4Dash-$VERSION.apk" dist/SHA256SUMS --clobber
+          python - <<'PY'
+          import hashlib, json, os, subprocess
+          from pathlib import Path
+          version = os.environ['VERSION']
+          release = json.loads(subprocess.check_output(['gh', 'release', 'view', 'v' + version, '--json', 'assets']))
+          apk = Path('dist', 'MG4Dash-' + version + '.apk')
+          expected = 'sha256:' + hashlib.sha256(apk.read_bytes()).hexdigest()
+          matches = [a for a in release['assets'] if a['name'] == apk.name and a['digest'] == expected]
+          if len(matches) != 1:
+              raise SystemExit('Uploaded APK digest verification failed; release remains a draft')
+          PY
+          gh release edit "v$VERSION" --draft=false --prerelease --latest=false \
+            --notes-file "$RUNNER_TEMP/release-notes.md"
+          echo "## Published MG4Dash $VERSION" >> "$GITHUB_STEP_SUMMARY"
+          gh release view "v$VERSION" --json url --jq .url >> "$GITHUB_STEP_SUMMARY"
+      - name: Upload signed APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: beta-apk
+          path: dist/*
+          retention-days: 14

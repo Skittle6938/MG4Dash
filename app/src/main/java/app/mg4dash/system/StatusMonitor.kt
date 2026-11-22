@@ -18,7 +18,7 @@ object StatusMonitor {
         val bt = try { BluetoothAdapter.getDefaultAdapter() } catch (_: Exception) { null }
         val btOn = bt?.isEnabled == true
         val btConnected = btOn && PROFILES.any { p ->
-            try { bt?.getProfileConnectionState(p) == BluetoothProfile.STATE_CONNECTED } catch (_: Exception) { false }
+            try { bt?.getProfileConnectionState(p) == BluetoothAdapter.STATE_CONNECTED } catch (_: Exception) { false }
         }
         val wifi = context.applicationContext.getSystemService(Context.WIFI_SERVICE) as? WifiManager
         val cm = context.getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager

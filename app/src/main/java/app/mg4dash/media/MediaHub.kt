@@ -183,7 +183,7 @@ object MediaHub {
     @Volatile private var btLive: Boolean? = null
 
     private fun btConnected(): Boolean? = try {
-        android.bluetooth.BluetoothAdapter.getDefaultAdapter()?.getProfileConnectionState(11) == android.bluetooth.BluetoothProfile.STATE_CONNECTED
+        android.bluetooth.BluetoothAdapter.getDefaultAdapter()?.getProfileConnectionState(11) == android.bluetooth.BluetoothAdapter.STATE_CONNECTED
     } catch (_: Exception) { null }
 
     // ── Automatic source ("Source at startup" setting) ──
