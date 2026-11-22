@@ -128,19 +128,26 @@ class LyricsCard(private val activity: Activity) : LinearLayout(activity), Lifec
         lastMeasuredW = w
         lastMeasuredH = h
         post {
-            val widthDp = w / d
-            val heightDp = h / d
-            visibleLyricsRows = if (heightDp >= 560f && widthDp >= 850f) 5 else 3
-            val usableHeight = (heightDp - 86f).coerceAtLeast(90f)
+            val bodyHeight = lyricsArea.height.takeIf { it > 0 } ?: (h - dp(62)).coerceAtLeast(1)
+            val bodyWidth = lyricsArea.width.takeIf { it > 0 } ?: (w - paddingLeft - paddingRight)
+            visibleLyricsRows = if (bodyHeight >= h * .58f && bodyHeight >= 420) 5 else 3
             val count = visibleLyricsRows
-            activeFontSp = (usableHeight / (count * 1.35f)).coerceIn(20f, if (count == 5) 26f else 22f)
-            lyricsArea.setPadding(0, dp(if (count == 3) 14 else 7), 0, dp(if (count == 3) 14 else 7))
+            val activeTextSizePx = bodyHeight * if (count == 5) .125f else .22f
+            activeFontSp = activeTextSizePx
+            val sidePad = dp(8)
+            val verticalGap = (bodyHeight * .035f).toInt().coerceAtLeast(dp(8))
+            lyricsArea.setPadding(sidePad, verticalGap, sidePad, verticalGap)
             val radius = count / 2
             lines.forEachIndexed { index, line ->
                 val distance = kotlin.math.abs(index - 3)
                 line.visibility = if (distance <= radius) View.VISIBLE else View.GONE
-                line.setTextSize(TypedValue.COMPLEX_UNIT_SP, if (index == 3) activeFontSp else activeFontSp * .55f)
-                line.alpha = if (index == 3) 1f else .45f
+                line.setTextSize(TypedValue.COMPLEX_UNIT_PX, if (index == 3) activeTextSizePx else activeTextSizePx * .60f)
+                line.alpha = if (index == 3) 1f else .50f
+                val lp = line.layoutParams as? LayoutParams
+                if (lp != null) {
+                    val margin = if (index == 3) verticalGap else dp(2)
+                    if (lp.topMargin != margin || lp.bottomMargin != margin) { lp.topMargin = margin; lp.bottomMargin = margin; line.layoutParams = lp }
+                }
             }
             drawLines(position(latest))
         }
@@ -444,10 +451,9 @@ class LyricsCard(private val activity: Activity) : LinearLayout(activity), Lifec
         if (synced != null) {
             val i = synced.indexOfLast { it.first <= position }.coerceAtLeast(0)
             val radius = visibleLyricsRows / 2
-            val availableWidth = (measuredWidth - paddingLeft - paddingRight - dp(36)).coerceAtLeast(dp(80))
+            val availableWidth = (lyricsArea.width - lyricsArea.paddingLeft - lyricsArea.paddingRight).coerceAtLeast(1)
             val activeText = synced.getOrNull(i)?.second.orEmpty()
-            val estimatedLines = (activeText.length * activeFontSp * resources.displayMetrics.scaledDensity * .53f / availableWidth).coerceAtLeast(1f)
-            val activeSize = (activeFontSp * (1f - .18f * (1f - 1f / estimatedLines.coerceAtMost(1.22f)))).coerceAtLeast(activeFontSp * .82f)
+            val activePx = activeFontSp * (1f - .18f * ((activeText.length * activeFontSp * .53f / availableWidth).coerceAtLeast(1f) - 1f).coerceAtMost(1f))
             if (i != lastSyncedIndex) {
                 lastSyncedIndex = i
                 lines[1].alpha = .5f
@@ -458,7 +464,7 @@ class LyricsCard(private val activity: Activity) : LinearLayout(activity), Lifec
                 val ix = i + row - 3
                 lines[row].text = synced.getOrNull(ix)?.second.orEmpty()
                 lines[row].setTextColor(android.graphics.Color.WHITE)
-                lines[row].setTextSize(TypedValue.COMPLEX_UNIT_SP, if (row == 3) activeSize else activeFontSp * .55f)
+                lines[row].setTextSize(TypedValue.COMPLEX_UNIT_PX, if (row == 3) activePx else activeFontSp * .60f)
                 lines[row].maxLines = if (row == 3) 2 else 1
                 lines[row].ellipsize = android.text.TextUtils.TruncateAt.END
                 lines[row].alpha = if (row == 3) 1f else .45f
