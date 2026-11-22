@@ -672,8 +672,8 @@
     <string name="st_edit_cards_desc">Vyberte karty, kterými každý widget prochází, např. kartu Aplikace (mapa nebo jiná aplikace) a webovou aplikaci. Zkratka: sevřete domovskou obrazovku dvěma prsty.</string>
     <string name="st_edit_cards_btn">Upravit karty</string>
     <string name="tu_cards_t">Úprava domovské obrazovky</string>
-    <string name="tu_cards_1">Sevřete domovskou obrazovku: vyberte rozvržení, pak na každém místě se dotkněte karty pro zobrazení nebo odebrání.</string>
-    <string name="tu_cards_2">Na místě webové aplikace nebo aplikace: její adresa nebo aplikace a co dělá dvojité klepnutí (celá obrazovka nebo samostatné okno).</string>
+    <string name="tu_cards_1">Stažením prstů vyberte rozložení a widgety.</string>
+    <string name="tu_cards_2">Webovou aplikaci nebo aplikaci nastavte na jejím místě.</string>
     <string name="st_panel_outline">Obrys panelů domovské obrazovky</string>
     <string name="st_clock">Hodiny</string>
     <string name="st_clock_24">24 h</string>
@@ -923,8 +923,8 @@
     <string name="sc_cut">Odpojeno</string>
     <string name="tu_shortcuts_t">Nabídka zkratek</string>
     <string name="tu_shortcuts_1">Jedním prstem dolů od úplného horního okraje obrazovky, na každé obrazovce i přes ostatní aplikace.</string>
-    <string name="tu_shortcuts_2">Dotykem dlaždice ji ovládáte; dlouhým podržením nabídky vyberete její dlaždice a dotykem lišty jasu ji skryjete nebo zobrazíte. Tlačítko Domů ji zavře.</string>
-    <string name="tu_shortcuts_3">Nastavení › Domů › Nabídka zkratek: také skryje tlačítko mlhového světla MG (po restartu jednotky).</string>
+    <string name="tu_shortcuts_2">Podržením nabídky vyberete a přesunete zkratky.</string>
+    <string name="tu_shortcuts_3">Tlačítko Domů zavře nabídku.</string>
     <string name="sc_heating">Topení</string>
     <string name="sc_cooling">Chlazení</string>
     <string name="sc_clim_state">%1$s · venku %2$s</string>
@@ -1176,4 +1176,5 @@
     <string name="usb_saved_internal">Auto nepovolilo kopírování na USB disk: uloženo místo toho do paměti auta, %1$s</string>
     <string name="fx_pick_hint">Zaškrtněte jednu nebo více: pokaždé se vylosuje jedna ze zaškrtnutých, nikdy ostatní. Žádná zaškrtnutá: žádná animace.</string>
     <string name="fx_random_of">Náhodně: %1$s</string>
+    <string name="tu_widget_3">Podržením widgetu otevřete nastavení (radary, aplikace, web, klima, energie).</string>
 </resources>

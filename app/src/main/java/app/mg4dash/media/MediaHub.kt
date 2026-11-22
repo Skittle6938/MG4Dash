@@ -950,7 +950,7 @@ object MediaHub {
             publish()
             // Already on the radio: no source change to the car, go directly to the band
             if (current?.packageName == RADIO) reachBand(next, request, delayMs = 0)
-            else { switchSource(RADIO, false, request); reachBand(next, request) }
+            else { switchSource(RADIO, play, request); reachBand(next, request) }
             return
         }
         bandTarget = null

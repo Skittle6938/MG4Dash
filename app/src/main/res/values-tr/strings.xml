@@ -672,8 +672,8 @@
     <string name="st_edit_cards_desc">Her widget\'ın göstereceği kartları seçin, örneğin Uygulama kartı (harita veya başka bir uygulama) ve bir web uygulaması. Kısayol: ana ekranı iki parmakla kıstırın.</string>
     <string name="st_edit_cards_btn">Kartları düzenle</string>
     <string name="tu_cards_t">Ana ekranı düzenle</string>
-    <string name="tu_cards_1">Ana ekranı kıstırın: yerleşimi seçin, sonra her yerde bir karta dokunarak gösterin ya da kaldırın.</string>
-    <string name="tu_cards_2">Web uygulaması veya uygulamanın yerinde: adresi ya da uygulaması ve çift dokunuşun işlevi (tam ekran veya ayrı pencere).</string>
+    <string name="tu_cards_1">Düzeni ve widgetları seçmek için ana ekranı sıkıştırın.</string>
+    <string name="tu_cards_2">Web uygulamasını veya uygulamayı yerinde ayarlayın.</string>
     <string name="st_panel_outline">Ana ekran panel çerçevesi</string>
     <string name="st_clock">Saat</string>
     <string name="st_clock_24">24 sa</string>
@@ -925,8 +925,8 @@
     <string name="sc_cut">Kesildi</string>
     <string name="tu_shortcuts_t">Kısayol menüsü</string>
     <string name="tu_shortcuts_1">Ekranın en üstünden tek parmakla aşağı; her ekranda ve diğer uygulamaların üzerinde.</string>
-    <string name="tu_shortcuts_2">İşlem için bir kutucuğa dokunun; kutucukları seçmek için menüye uzun basın, parlaklık çubuğuna dokunarak onu gizleyin veya gösterin. Ana ekran tuşu menüyü kapatır.</string>
-    <string name="tu_shortcuts_3">Ayarlar › Ana ekran › Kısayol menüsü: orijinal sis lambası düğmesini de gizler (ünite yeniden başlatıldıktan sonra).</string>
+    <string name="tu_shortcuts_2">Kısayolları seçmek ve taşımak için menüye uzun basın.</string>
+    <string name="tu_shortcuts_3">Ana ekran tuşu menüyü kapatır.</string>
     <string name="sc_heating">Isıtma</string>
     <string name="sc_cooling">Klima</string>
     <string name="sc_clim_state">%1$s · dış %2$s</string>
@@ -1178,4 +1178,5 @@
     <string name="usb_saved_internal">Araç USB belleğe kopyalama izni vermedi: bunun yerine aracın belleğine kaydedildi, %1$s</string>
     <string name="fx_pick_hint">Bir veya birkaç tanesini işaretleyin: her seferinde işaretlenenlerden biri seçilir, diğerleri asla. Hiçbiri işaretli değilse animasyon yok.</string>
     <string name="fx_random_of">Rastgele: %1$s</string>
+    <string name="tu_widget_3">Ayarlar için widget üzerine uzun basın (radar, uygulama, web uygulaması, klima, enerji).</string>
 </resources>

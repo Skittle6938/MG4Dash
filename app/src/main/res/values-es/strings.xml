@@ -672,8 +672,8 @@
     <string name="st_edit_cards_desc">Elegir las tarjetas que muestra cada widget, como la tarjeta Aplicación (el mapa u otra app) y una web app. Atajo: pellizcar la pantalla de inicio con dos dedos.</string>
     <string name="st_edit_cards_btn">Editar las tarjetas</string>
     <string name="tu_cards_t">Editar el inicio</string>
-    <string name="tu_cards_1">Pellizca el inicio: elige la disposición y, en cada lugar, toca una tarjeta para mostrarla o quitarla.</string>
-    <string name="tu_cards_2">En el lugar de la web app o de la app: su dirección o app, y lo que hace el doble toque (pantalla completa o ventana separada).</string>
+    <string name="tu_cards_1">Pellizca el inicio para elegir disposición y widgets.</string>
+    <string name="tu_cards_2">Configura la aplicación o web en su espacio.</string>
     <string name="st_panel_outline">Contorno de los paneles de inicio</string>
     <string name="st_clock">Reloj</string>
     <string name="st_clock_24">24 h</string>
@@ -925,8 +925,8 @@
     <string name="sc_cut">Cortado</string>
     <string name="tu_shortcuts_t">Menú de accesos</string>
     <string name="tu_shortcuts_1">Un dedo hacia abajo desde lo más alto de la pantalla, en todas las pantallas y sobre las demás apps.</string>
-    <string name="tu_shortcuts_2">Toca una casilla para actuar; pulsación larga en el menú para elegir sus casillas, y toca allí la barra de brillo para ocultarla o mostrarla. La tecla Inicio lo cierra.</string>
-    <string name="tu_shortcuts_3">Ajustes › Inicio › Menú de accesos: también oculta el botón antiniebla original (tras reiniciar la radio).</string>
+    <string name="tu_shortcuts_2">Mantén pulsado el menú para elegir y mover accesos.</string>
+    <string name="tu_shortcuts_3">La tecla Inicio cierra el menú.</string>
     <string name="sc_heating">Calefacción</string>
     <string name="sc_cooling">Aire acond.</string>
     <string name="sc_clim_state">%1$s · ext. %2$s</string>
@@ -1178,4 +1178,5 @@
     <string name="usb_saved_internal">El coche no dio permiso para copiar en la memoria USB: guardado en su lugar en la memoria del coche, %1$s</string>
     <string name="fx_pick_hint">Marca una o varias: cada vez se sortea una de las marcadas, nunca las demás. Ninguna marcada: sin animación.</string>
     <string name="fx_random_of">Aleatorio: %1$s</string>
+    <string name="tu_widget_3">Mantén pulsado un widget para sus ajustes (radares, aplicación, web, clima, energía).</string>
 </resources>

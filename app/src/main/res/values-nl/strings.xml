@@ -672,8 +672,8 @@
     <string name="st_edit_cards_desc">De kaarten kiezen die elke widget toont, zoals de app-kaart (de kaart of een andere app) en een web-app. Snelkoppeling: het startscherm met twee vingers samenknijpen.</string>
     <string name="st_edit_cards_btn">Kaarten bewerken</string>
     <string name="tu_cards_t">Startscherm bewerken</string>
-    <string name="tu_cards_1">Knijp het startscherm samen: kies de indeling en tik op elke plek op een kaart om hem te tonen of weg te halen.</string>
-    <string name="tu_cards_2">Op de plek van de web-app of app: het adres of de app, en wat dubbeltikken doet (volledig scherm of los venster).</string>
+    <string name="tu_cards_1">Knijp op het beginscherm voor indeling en widgets.</string>
+    <string name="tu_cards_2">Stel de webapp of app in op zijn plek.</string>
     <string name="st_panel_outline">Rand van de startpanelen</string>
     <string name="st_clock">Klok</string>
     <string name="st_clock_24">24 u</string>
@@ -925,8 +925,8 @@
     <string name="sc_cut">Losgekoppeld</string>
     <string name="tu_shortcuts_t">Snelmenu</string>
     <string name="tu_shortcuts_1">Eén vinger omlaag vanaf de bovenrand van het scherm, op elk scherm en over andere apps.</string>
-    <string name="tu_shortcuts_2">Tik op een tegel om te schakelen; lang drukken op het menu om de tegels te kiezen, en tik daar op de helderheidsbalk om hem te verbergen of te tonen. De Home-toets sluit het.</string>
-    <string name="tu_shortcuts_3">Instellingen › Start › Snelmenu: verbergt ook de originele mistlichtknop (na een herstart van de radio).</string>
+    <string name="tu_shortcuts_2">Houd het menu ingedrukt om snelkoppelingen te kiezen en te verplaatsen.</string>
+    <string name="tu_shortcuts_3">De Home-knop sluit het menu.</string>
     <string name="sc_heating">Verwarming</string>
     <string name="sc_cooling">Koeling</string>
     <string name="sc_clim_state">%1$s · buiten %2$s</string>
@@ -1178,4 +1178,5 @@
     <string name="usb_saved_internal">De auto gaf geen toestemming om naar de USB-stick te kopiëren: in plaats daarvan opgeslagen in het geheugen van de auto, %1$s</string>
     <string name="fx_pick_hint">Vink er één of meer aan: telkens wordt een van de aangevinkte geloot, nooit de andere. Geen aangevinkt: geen animatie.</string>
     <string name="fx_random_of">Willekeurig: %1$s</string>
+    <string name="tu_widget_3">Houd een widget ingedrukt voor instellingen (radar, app, webapp, klimaat, energie).</string>
 </resources>

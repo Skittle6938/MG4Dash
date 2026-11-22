@@ -402,6 +402,7 @@ A short tour of the main gestures opens after a first install (*Skip* closes it 
 - Long press the clock in the dock: clock or Wi-Fi settings button
 - Vertical bar: double tap Energy turns the screen off, long press Energy switches the car off (never while moving); double tap Vehicle locks / unlocks the doors, long press Vehicle turns ESC off / on
 - Long press "Android Auto" in the dock or the vertical bar: Android Auto, CarPlay or another app; double tap: cut / restore the phone connection (see [Media player](#media-player))
+- Long press a widget for its settings (radar, app, web app, climate, energy).
 - Tap or swipe the bottom-right widget (or the map layout stack): next page; long press a phone favourite to change it
 - Swipe the media card up / down: next audio source; left / right: next / previous track; tap its source name: source menu
 - Tap the temperature area: Climate page; long press it or the fan's levels: the climate's settings (temperature calibration); long press fan minus: lowest fan speed; long press A/C: intermittent A/C

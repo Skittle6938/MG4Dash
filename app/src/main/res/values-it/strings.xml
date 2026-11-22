@@ -672,8 +672,8 @@
     <string name="st_edit_cards_desc">Scegliere le schede di ogni widget, come la scheda App (la mappa o un\'altra app) e una web app. Scorciatoia: pizzicare la schermata home con due dita.</string>
     <string name="st_edit_cards_btn">Modifica le schede</string>
     <string name="tu_cards_t">Modificare la home</string>
-    <string name="tu_cards_1">Pizzica la home: scegli la disposizione, poi in ogni posto tocca una scheda per mostrarla o toglierla.</string>
-    <string name="tu_cards_2">Sul posto della web app o dell\'app: il suo indirizzo o la sua app, e cosa fa il doppio tocco (schermo intero o finestra staccata).</string>
+    <string name="tu_cards_1">Pizzica la schermata iniziale per scegliere layout e widget.</string>
+    <string name="tu_cards_2">Configura la web app o app nel suo spazio.</string>
     <string name="st_panel_outline">Contorno dei pannelli della home</string>
     <string name="st_clock">Orologio</string>
     <string name="st_clock_24">24 h</string>
@@ -925,8 +925,8 @@
     <string name="sc_cut">Interrotto</string>
     <string name="tu_shortcuts_t">Menu scorciatoie</string>
     <string name="tu_shortcuts_1">Un dito verso il basso dal bordo superiore dello schermo, su tutte le schermate e sopra le altre app.</string>
-    <string name="tu_shortcuts_2">Tocca una casella per agire; pressione lunga sul menu per sceglierne le caselle, e tocca lì la barra della luminosità per nasconderla o mostrarla. Il tasto Home lo chiude.</string>
-    <string name="tu_shortcuts_3">Impostazioni › Home › Menu scorciatoie: nasconde anche il pulsante retronebbia originale (dopo un riavvio dell\'autoradio).</string>
+    <string name="tu_shortcuts_2">Tieni premuto il menu per scegliere e spostare le scorciatoie.</string>
+    <string name="tu_shortcuts_3">Il tasto Home chiude il menu.</string>
     <string name="sc_heating">Riscaldamento</string>
     <string name="sc_cooling">Clima</string>
     <string name="sc_clim_state">%1$s · est. %2$s</string>
@@ -1178,4 +1178,5 @@
     <string name="usb_saved_internal">L’auto non ha dato il permesso di copiare sulla chiavetta USB: salvato invece nella memoria dell’auto, %1$s</string>
     <string name="fx_pick_hint">Selezionane una o più: ogni volta ne viene estratta una tra quelle selezionate, mai le altre. Nessuna selezionata: nessuna animazione.</string>
     <string name="fx_random_of">Casuale: %1$s</string>
+    <string name="tu_widget_3">Tieni premuto un widget per le impostazioni (radar, app, web app, clima, energia).</string>
 </resources>

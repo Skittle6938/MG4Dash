@@ -672,8 +672,8 @@
     <string name="st_edit_cards_desc">Choose the cards each widget goes through, such as the App card (the map or another app) and a web app. Shortcut: pinch the home screen with two fingers.</string>
     <string name="st_edit_cards_btn">Edit the cards</string>
     <string name="tu_cards_t">Edit the home screen</string>
-    <string name="tu_cards_1">Pinch the home screen: choose the layout, then on each place touch a card to show or remove it.</string>
-    <string name="tu_cards_2">On the web app\'s or app\'s place: its address or app, and what a double tap does (full screen or detached window).</string>
+    <string name="tu_cards_1">Pinch the home screen to choose the layout and widgets.</string>
+    <string name="tu_cards_2">Set up the web app or app in its place.</string>
     <string name="st_panel_outline">Home panel outline</string>
     <string name="st_clock">Clock</string>
     <string name="st_clock_24">24 h</string>
@@ -780,6 +780,7 @@
     <string name="tu_widget_t">Widgets with several cards</string>
     <string name="tu_widget_1">Swipe left / right: next card (trip, power, phone, weather…).</string>
     <string name="tu_widget_2">Long press a phone shortcut to change it.</string>
+    <string name="tu_widget_3">Long press a widget for its settings (radar, app, web app, climate, energy).</string>
     <string name="tu_end_t">That\'s it!</string>
     <string name="tu_end_1">You can see this tour again in Settings › System.</string>
     <string name="tu_skip">Skip</string>
@@ -925,8 +926,8 @@
     <string name="sc_cut">Cut</string>
     <string name="tu_shortcuts_t">Shortcuts menu</string>
     <string name="tu_shortcuts_1">One finger down from the very top of the screen, on every screen and over the other apps.</string>
-    <string name="tu_shortcuts_2">Touch a tile to act; long press the menu to choose its tiles, and touch the brightness bar there to hide or show it. The Home key closes it.</string>
-    <string name="tu_shortcuts_3">Settings › Home › Shortcuts menu: it also hides MG\'s fog light button (after a head unit restart).</string>
+    <string name="tu_shortcuts_2">Long press the menu to choose and move its shortcuts.</string>
+    <string name="tu_shortcuts_3">The Home key closes the menu.</string>
     <string name="sc_heating">Heating</string>
     <string name="sc_cooling">Cooling</string>
     <string name="sc_clim_state">%1$s · out. %2$s</string>

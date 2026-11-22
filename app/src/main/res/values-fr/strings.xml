@@ -672,8 +672,8 @@
     <string name="st_edit_cards_desc">Choisir les cartes que fait défiler chaque widget, dont la carte Application (la carte OpenStreetMap ou une autre appli) et une web app. Raccourci : pincer l\'accueil avec deux doigts.</string>
     <string name="st_edit_cards_btn">Modifier les cartes</string>
     <string name="tu_cards_t">Modifier l\'accueil</string>
-    <string name="tu_cards_1">Pincez l\'accueil : choisissez la disposition, puis sur chaque emplacement touchez une carte pour l\'afficher ou la retirer.</string>
-    <string name="tu_cards_2">Sur l\'emplacement de la web app ou de l\'appli : son adresse ou son appli, et l\'effet du double appui (plein écran ou fenêtre détachée).</string>
+    <string name="tu_cards_1">Pincez l\'accueil pour choisir la disposition et les widgets.</string>
+    <string name="tu_cards_2">Configurez la web app ou l\'appli dans son emplacement.</string>
     <string name="st_panel_outline">Contour des panneaux de l\'accueil</string>
     <string name="st_clock">Horloge</string>
     <string name="st_clock_24">24 h</string>
@@ -780,6 +780,7 @@
     <string name="tu_widget_t">Widgets à plusieurs cartes</string>
     <string name="tu_widget_1">Glissez à gauche / droite : carte suivante (trajet, puissance, téléphone, météo…).</string>
     <string name="tu_widget_2">Appui long sur un raccourci téléphone pour le changer.</string>
+    <string name="tu_widget_3">Appui long sur un widget pour ses réglages (radar, application, web app, clim, énergie).</string>
     <string name="tu_end_t">C\'est tout !</string>
     <string name="tu_end_1">Vous retrouverez ce tuto dans Réglages › Système.</string>
     <string name="tu_skip">Passer</string>
@@ -925,8 +926,8 @@
     <string name="sc_cut">Coupé</string>
     <string name="tu_shortcuts_t">Menu de raccourcis</string>
     <string name="tu_shortcuts_1">Un doigt glissé vers le bas depuis tout en haut de l\'écran, sur tous les écrans et par-dessus les autres applis.</string>
-    <string name="tu_shortcuts_2">Touchez une tuile pour agir ; appui long sur le menu pour choisir ses tuiles, et touchez-y la barre de luminosité pour la masquer ou l’afficher. La touche Accueil le ferme.</string>
-    <string name="tu_shortcuts_3">Réglages › Accueil › Menu de raccourcis : il masque aussi le bouton antibrouillard SAIC (après un redémarrage de l\'autoradio).</string>
+    <string name="tu_shortcuts_2">Appui long sur le menu pour choisir et déplacer ses raccourcis.</string>
+    <string name="tu_shortcuts_3">La touche Accueil ferme le menu.</string>
     <string name="sc_heating">Chauffage</string>
     <string name="sc_cooling">Clim</string>
     <string name="sc_clim_state">%1$s · ext. %2$s</string>
