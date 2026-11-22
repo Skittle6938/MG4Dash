@@ -41,7 +41,7 @@ class LyricsCard(private val activity: Activity) : LinearLayout(activity), Lifec
         setBackgroundResource(R.drawable.bg_chip); contentDescription = activity.getString(R.string.ly_refresh)
         setOnClickListener { request(force = true) }
     }
-    private val lines = (0..2).map { TextView(activity).apply {
+    private val lines = (0..6).map { TextView(activity).apply {
         maxLines = 1; ellipsize = android.text.TextUtils.TruncateAt.END; gravity = Gravity.CENTER
         setTextColor(android.graphics.Color.WHITE)
         typeface = Typeface.create("sans-serif-medium", Typeface.BOLD)
@@ -56,6 +56,10 @@ class LyricsCard(private val activity: Activity) : LinearLayout(activity), Lifec
         orientation = VERTICAL; gravity = Gravity.CENTER
         setPadding(dp(0), dp(2), dp(0), dp(2))
     }
+    private var lastMeasuredW = 0
+    private var lastMeasuredH = 0
+    private var visibleLyricsRows = 3
+    private var activeFontSp = 25f
     private var track: LyricsRepo.Track? = null
     private var key = ""
     private var requestJob: Job? = null
@@ -94,9 +98,10 @@ class LyricsCard(private val activity: Activity) : LinearLayout(activity), Lifec
         top.addView(header, LayoutParams(0, -2, 1f)); top.addView(refresh, LayoutParams(dp(38), dp(38)))
         addView(top, LayoutParams(-1, -2))
         lines.forEachIndexed { i, line ->
-            line.setTextSize(TypedValue.COMPLEX_UNIT_SP, if (i == 1) 25f else 16f)
-            line.alpha = if (i == 0) .40f else if (i == 2) .45f else 1f
-            if (i == 1) {
+            line.setTextSize(TypedValue.COMPLEX_UNIT_SP, if (i == 3) 25f else 17f)
+            line.alpha = if (i == 3) 1f else .55f
+            line.visibility = if (i in 2..4) View.VISIBLE else View.GONE
+            if (i == 3) {
                 line.maxLines = 2
                 line.setLineSpacing(0f, 1.08f)
             }
@@ -109,6 +114,34 @@ class LyricsCard(private val activity: Activity) : LinearLayout(activity), Lifec
         setOnClickListener { openKaraoke() }
         setOnLongClickListener { settings(); true }
         drawLines(0)
+    }
+
+    override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
+        super.onSizeChanged(w, h, oldw, oldh)
+        if (w <= 0 || h <= 0 || (w == lastMeasuredW && h == lastMeasuredH)) return
+        lastMeasuredW = w
+        lastMeasuredH = h
+        post {
+            val widthDp = w / d
+            val heightDp = h / d
+            visibleLyricsRows = when {
+                heightDp >= 560f || (heightDp >= 400f && widthDp >= 850f) -> 7
+                heightDp >= 350f || widthDp >= 850f -> 5
+                else -> 3
+            }
+            val usableHeight = (heightDp - 86f).coerceAtLeast(90f)
+            val count = visibleLyricsRows
+            activeFontSp = (usableHeight / (count * 1.35f)).coerceIn(20f, when (count) { 7 -> 42f; 5 -> 34f; else -> 28f })
+            lyricsArea.setPadding(0, dp(if (count == 3) 14 else 7), 0, dp(if (count == 3) 14 else 7))
+            val radius = count / 2
+            lines.forEachIndexed { index, line ->
+                val distance = kotlin.math.abs(index - 3)
+                line.visibility = if (distance <= radius) View.VISIBLE else View.GONE
+                line.setTextSize(TypedValue.COMPLEX_UNIT_SP, if (index == 3) activeFontSp else activeFontSp * .68f)
+                line.alpha = if (index == 3) 1f else when (distance) { 1 -> .55f; 2 -> .35f; else -> .20f }
+            }
+            drawLines(position(latest))
+        }
     }
 
     private fun dp(v: Int) = (v * d).toInt()
@@ -376,27 +409,35 @@ class LyricsCard(private val activity: Activity) : LinearLayout(activity), Lifec
         val synced = t?.synced
         if (synced != null) {
             val i = synced.indexOfLast { it.first <= position }.coerceAtLeast(0)
+            val radius = visibleLyricsRows / 2
+            val availableWidth = (measuredWidth - paddingLeft - paddingRight - dp(36)).coerceAtLeast(dp(80))
+            val activeText = synced.getOrNull(i)?.second.orEmpty()
+            val estimatedLines = (activeText.length * activeFontSp * resources.displayMetrics.scaledDensity * .53f / availableWidth).coerceAtLeast(1f)
+            val activeSize = (activeFontSp / estimatedLines.coerceAtMost(2f)).coerceAtLeast(16f)
             if (i != lastSyncedIndex) {
                 lastSyncedIndex = i
                 lines[1].alpha = .5f
                 lines[1].animate().alpha(1f).setDuration(150).start()
             }
-            for (row in 0..2) {
-                val ix = i + row - 1
+            for (row in lines.indices) {
+                val distance = kotlin.math.abs(row - 3)
+                val ix = i + row - 3
                 lines[row].text = synced.getOrNull(ix)?.second.orEmpty()
                 lines[row].setTextColor(android.graphics.Color.WHITE)
-                lines[row].setTextSize(TypedValue.COMPLEX_UNIT_SP, if (row == 1) 25f else 16f)
-                lines[row].maxLines = if (row == 1) 2 else 1
-                if (row == 0) lines[row].alpha = .40f
-                if (row == 2) lines[row].alpha = .45f
+                lines[row].setTextSize(TypedValue.COMPLEX_UNIT_SP, if (row == 3) activeSize else activeFontSp * .68f)
+                lines[row].maxLines = if (row == 3) 2 else 1
+                lines[row].ellipsize = android.text.TextUtils.TruncateAt.END
+                lines[row].alpha = if (row == 3) 1f else when (distance) { 1 -> .55f; 2 -> .35f; else -> .20f }
+                lines[row].visibility = if (distance <= radius) View.VISIBLE else View.GONE
                 lines[row].typeface = Typeface.create("sans-serif-medium", Typeface.BOLD)
             }
             return
         }
         val plain = t?.plain?.lineSequence()?.filter { it.isNotBlank() }?.toList().orEmpty()
         val ix = if (plain.isEmpty()) -1 else (position / 5000).toInt().coerceAtMost(plain.lastIndex)
-        for (row in 0..2) {
-            lines[row].text = plain.getOrNull(ix + row - 1).orEmpty()
+        for (row in lines.indices) {
+            lines[row].text = plain.getOrNull(ix + row - 3).orEmpty()
+            lines[row].visibility = if (kotlin.math.abs(row - 3) <= visibleLyricsRows / 2) View.VISIBLE else View.GONE
             lines[row].setTextColor(android.graphics.Color.WHITE)
             lines[row].setTextSize(TypedValue.COMPLEX_UNIT_SP, 19f)
             lines[row].typeface = Typeface.create("sans-serif-medium", Typeface.BOLD)
