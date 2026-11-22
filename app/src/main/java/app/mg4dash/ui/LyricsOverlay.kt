@@ -15,6 +15,10 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import app.mg4dash.MainActivity
 import app.mg4dash.system.Prefs
+import app.mg4dash.media.MediaHub
+import app.mg4dash.media.LyricsRepo
+import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.collect
 
 /** Manually enabled, non-focusable lyrics pill; text is fed by LyricsCard's existing ticker. */
 object LyricsOverlay {
@@ -24,6 +28,13 @@ object LyricsOverlay {
     private var pill: View? = null
     private var params: WindowManager.LayoutParams? = null
     private var current = ""; private var next = ""
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
+    private var mediaJob: Job? = null
+    private var tickerJob: Job? = null
+    private var track: LyricsRepo.Track? = null
+    private var trackKey = ""
+    private var latest = MediaHub.NowPlaying()
+    private var positionAt = 0L
     private fun dp(v: Int) = ((app?.resources?.displayMetrics?.density ?: 1f) * v).toInt()
 
     fun toggle(context: Context): Boolean {
@@ -41,15 +52,17 @@ object LyricsOverlay {
         val p = Prefs(c)
         val root = LinearLayout(c).apply {
             orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL
-            setPadding(dp(14), dp(9), dp(7), dp(9))
-            background = GradientDrawable().apply { setColor(0xE60D121D.toInt()); cornerRadius = dp(18).toFloat(); setStroke(dp(1), 0x26FFFFFF) }
+            setPadding(dp(18), dp(12), dp(18), dp(12))
+            background = GradientDrawable().apply { setColor(0xE60D121D.toInt()); cornerRadius = dp(20).toFloat(); setStroke(dp(1), 0x26FFFFFF) }
         }
         val texts = LinearLayout(c).apply { orientation = LinearLayout.VERTICAL }
-        val activeLine = TextView(c).apply { setTextColor(-1); setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f); typeface = Typeface.DEFAULT_BOLD; maxLines = 2; ellipsize = android.text.TextUtils.TruncateAt.END; text = current }
-        val nextLine = TextView(c).apply { setTextColor(-1); alpha = .55f; setTextSize(TypedValue.COMPLEX_UNIT_SP, 12f); maxLines = 1; ellipsize = android.text.TextUtils.TruncateAt.END; text = next }
+        val activeLine = TextView(c).apply { setTextColor(-1); setTextSize(TypedValue.COMPLEX_UNIT_SP, 21f); typeface = Typeface.DEFAULT_BOLD; maxLines = 2; ellipsize = android.text.TextUtils.TruncateAt.END; text = current }
+        val nextLine = TextView(c).apply { setTextColor(-1); alpha = .65f; setTextSize(TypedValue.COMPLEX_UNIT_SP, 15f); maxLines = 1; ellipsize = android.text.TextUtils.TruncateAt.END; text = next }
         texts.addView(activeLine); texts.addView(nextLine)
-        root.addView(texts, LinearLayout.LayoutParams(dp(340), -2))
-        root.addView(TextView(c).apply { text = "×"; gravity = Gravity.CENTER; setTextColor(-1); setTextSize(TypedValue.COMPLEX_UNIT_SP, 24f); setPadding(dp(10), 0, dp(10), 0); setOnClickListener { stop() } })
+        val screenWidth = c.resources.displayMetrics.widthPixels
+        val pillWidth = (screenWidth * .45f).toInt().coerceIn(dp(480), dp(540))
+        root.addView(texts, LinearLayout.LayoutParams(pillWidth - dp(62), -2))
+        root.addView(TextView(c).apply { text = "×"; gravity = Gravity.CENTER; setTextColor(-1); setTextSize(TypedValue.COMPLEX_UNIT_SP, 28f); setOnClickListener { stop() } }, LinearLayout.LayoutParams(dp(32), dp(42)))
         val lp = WindowManager.LayoutParams(-2, -2, WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
             WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
             PixelFormat.TRANSLUCENT).apply {
@@ -67,8 +80,44 @@ object LyricsOverlay {
                 else -> true
             }
         })
-        return try { wm?.addView(root,lp); pill=root; params=lp; activeLine.tag="active"; nextLine.tag="next"; active=true; true } catch (_:Exception) { false }
+        return try { wm?.addView(root,lp); pill=root; params=lp; activeLine.tag="active"; nextLine.tag="next"; active=true; LyricsRepo.start(c); observeMedia(); true } catch (_:Exception) { false }
     }
     fun update(activeText: String, nextText: String) { current=activeText; next=nextText; val r=pill as? LinearLayout ?: return; (r.getChildAt(0) as? LinearLayout)?.let { (it.getChildAt(0) as? TextView)?.text=activeText; (it.getChildAt(1) as? TextView)?.text=nextText } }
-    fun stop() { val v=pill; pill=null; active=false; try { if(v!=null) wm?.removeViewImmediate(v) } catch (_:Exception){}; params=null }
+    private fun observeMedia() {
+        mediaJob?.cancel()
+        mediaJob = scope.launch {
+            MediaHub.now.collect { now ->
+                latest = now; positionAt = android.os.SystemClock.elapsedRealtime()
+                if (!active) return@collect
+                if (!now.playing) { tickerJob?.cancel(); tickerJob=null; return@collect }
+                val nextKey = if (now.artist.isBlank() || now.title.isBlank()) "" else LyricsRepo.key(now.artist, now.title)
+                if (nextKey.isNotEmpty() && nextKey != trackKey) {
+                    trackKey = nextKey; track = null; update("Caricamento…", "")
+                    tickerJob?.cancel()
+                    tickerJob = scope.launch {
+                        val cached = LyricsRepo.cached(now.artist, now.title)
+                        val found = cached ?: LyricsRepo.lookup(now.artist, now.title, now.durationMs)
+                        if (active && trackKey == nextKey) {
+                            track = found
+                            update(found?.synced?.firstOrNull()?.second ?: found?.plain?.lineSequence()?.firstOrNull().orEmpty().ifBlank { "Testo non trovato" }, found?.synced?.getOrNull(1)?.second.orEmpty())
+                            runTicker()
+                        }
+                    }
+                } else if (track?.synced != null && tickerJob?.isActive != true) runTicker()
+            }
+        }
+    }
+    private fun runTicker() {
+        tickerJob?.cancel()
+        tickerJob = scope.launch {
+            while (active && latest.playing && track?.synced != null) {
+                val pos = latest.positionMs + (android.os.SystemClock.elapsedRealtime() - positionAt)
+                val list = track!!.synced!!
+                val i = list.indexOfLast { it.first <= pos }.coerceAtLeast(0)
+                update(list.getOrNull(i)?.second.orEmpty(), list.getOrNull(i+1)?.second.orEmpty())
+                delay(250)
+            }
+        }
+    }
+    fun stop() { active=false; mediaJob?.cancel(); mediaJob=null; tickerJob?.cancel(); tickerJob=null; val v=pill; pill=null; try { if(v!=null) wm?.removeViewImmediate(v) } catch (_:Exception){}; params=null }
 }
