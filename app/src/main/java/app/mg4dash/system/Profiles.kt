@@ -56,6 +56,7 @@ object Profiles {
         "units", "pressure_unit", "clock_12", "consumption_period",
         // Speed cameras: sounds, visual alerts, volumes, thresholds
         "radar_sound", "radar_visual", "radar_banner", "radar_percent", "radar_prepare_km", "radar_high", "radar_high_pct", "radar_low", "radar_low_pct",
+        "radar_threshold_mode", "radar_mixed_low", "radar_mixed_low_pct", "radar_mixed_high", "radar_mixed_high_pct",
     )
 
     /** The settings that follow the profile, by family. */

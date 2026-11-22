@@ -263,7 +263,12 @@ class Prefs(context: Context) {
             ?: if (sp.getBoolean("radar_percent", false)) app.mg4dash.radar.ThresholdMode.PERCENT else app.mg4dash.radar.ThresholdMode.SPEED
         set(v) = sp.edit().putString("radar_threshold_mode", v.name).apply()
     private fun radarMarginKey(strong: Boolean, percent: Boolean, mixed: Boolean): String =
-        "radar_" + (if (mixed) "mixed_" else "") + (if (strong) "high" else "low") + (if (percent) "_pct" else "")
+        when {
+            mixed && strong -> if (percent) "radar_mixed_high_pct" else "radar_mixed_high"
+            mixed -> if (percent) "radar_mixed_low_pct" else "radar_mixed_low"
+            strong -> if (percent) "radar_high_pct" else "radar_high"
+            else -> if (percent) "radar_low_pct" else "radar_low"
+        }
 
     fun radarMargin(strong: Boolean, percent: Boolean, mixed: Boolean): Float {
         val default = when {
