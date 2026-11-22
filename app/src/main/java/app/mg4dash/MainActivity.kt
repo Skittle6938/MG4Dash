@@ -1186,7 +1186,7 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         // The whole temperature area between − and + (20/11: not only the number), its full height: a touch opens the
         // climate page, a long press the climate's settings (calibration of the displayed temperature)
         val tempZone = b.temp.parent as LinearLayout
-        (tempZone.layoutParams as LinearLayout.LayoutParams).let { it.height = LinearLayout.LayoutParams.MATCH_PARENT; tempZone.layoutParams = it }
+        tempZone.minimumHeight = b.tempDown.layoutParams.height
         listOf<View>(tempZone, b.temp, b.climOutside).forEach { v ->
             v.setOnClickListener { startActivity(Intent(this, ClimateActivity::class.java)) }
             v.setOnLongClickListener { climateSettings(); true }

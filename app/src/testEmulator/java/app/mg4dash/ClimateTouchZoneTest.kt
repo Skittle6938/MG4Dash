@@ -49,8 +49,18 @@ class ClimateTouchZoneTest {
 
     private fun check(a: MainActivity, tag: String) {
         val number = a.findViewById<View>(R.id.temp)
+        val outside = a.findViewById<android.widget.TextView>(R.id.climOutside)
+        outside.text = a.getString(R.string.cl_outside, 8)
+        val root = a.window.decorView
+        root.measure(View.MeasureSpec.makeMeasureSpec(1920, View.MeasureSpec.EXACTLY), View.MeasureSpec.makeMeasureSpec(720, View.MeasureSpec.EXACTLY))
+        root.layout(0, 0, 1920, 720)
         val zone = number.parent as View
+        val visibleOutside = Rect()
+        assertTrue("$tag: the outside label has room to display",
+            outside.height > 0 && outside.getGlobalVisibleRect(visibleOutside) && visibleOutside.height() == outside.height)
         val z = rect(zone); val n = rect(number)
+        val row = rect(zone.parent as View)
+        assertTrue("$tag: the touch zone fills the temperature row", z.top == row.top && z.bottom == row.bottom)
         assertTrue("$tag: the zone ${z} larger than the number $n", z.width() > n.width() && z.height() >= n.height())
         // Points of the zone away from the number: its corners, inside
         for ((x, y) in listOf(z.left + 4 to z.top + 4, z.right - 4 to z.bottom - 4, z.left + 4 to z.bottom - 4)) {
