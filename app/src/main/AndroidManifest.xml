@@ -118,6 +118,8 @@
             android:name=".ui.LyricsOverlayShortcutActivity"
             android:excludeFromRecents="true"
             android:exported="true"
+            android:icon="@mipmap/ic_launcher"
+            android:label="Testi sincronizzati (Overlay)"
             android:noHistory="true"
             android:theme="@android:style/Theme.Translucent.NoTitleBar">
             <intent-filter>
