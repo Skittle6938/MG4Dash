@@ -169,6 +169,9 @@ class Prefs(context: Context) {
     var lyricsOverlayY: Int
         get() = sp.getInt("lyrics_overlay_y", -1)
         set(v) = sp.edit().putInt("lyrics_overlay_y", v).apply()
+    var lyricsOverlayScale: Float
+        get() = sp.getFloat("lyrics_overlay_scale", 1f).coerceIn(.70f, 1.40f)
+        set(v) = sp.edit().putFloat("lyrics_overlay_scale", v.coerceIn(.70f, 1.40f)).apply()
 
     /** Heated seats / wheel: 0 = auto (64 / 77 kWh battery), 1 = show, 2 = hide. */
     var heatedSeats: Int

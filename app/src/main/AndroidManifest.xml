@@ -53,6 +53,8 @@
         android:theme="@style/Theme.MG4Launcher"
         android:usesCleartextTraffic="true">
 
+        <meta-data android:name="android.app.shortcuts" android:resource="@xml/shortcuts" />
+
         <uses-library android:name="android.car" android:required="false" />
 
         <activity

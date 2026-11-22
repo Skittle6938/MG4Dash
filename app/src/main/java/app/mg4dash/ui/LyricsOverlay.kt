@@ -37,6 +37,35 @@ object LyricsOverlay {
     private var latest = MediaHub.NowPlaying()
     private var positionAt = 0L
     private var positionAnchorMs = 0L
+    private var activeTextView: TextView? = null
+    private var nextTextView: TextView? = null
+    private var closeView: TextView? = null
+    private var rootView: LinearLayout? = null
+    private fun applyScale() {
+        val c = app ?: return
+        val s = Prefs(c).lyricsOverlayScale
+        val sw = c.resources.displayMetrics.widthPixels
+        val sh = c.resources.displayMetrics.heightPixels
+        val root = rootView ?: return
+        activeTextView?.setTextSize(TypedValue.COMPLEX_UNIT_SP, 25f * s)
+        nextTextView?.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f * s)
+        root.setPadding(dp((22*s).toInt()), dp((14*s).toInt()), dp((22*s).toInt()), dp((14*s).toInt()))
+        closeView?.let { val b=dp(maxOf(36f,42f*s).toInt()); it.layoutParams=LinearLayout.LayoutParams(b,b) }
+        val width=(sw*.55f).toInt().coerceAtMost((sw*.92f).toInt()).coerceIn(dp((600*s).toInt()), dp((680*s).toInt()).coerceAtMost((sw*.92f).toInt()))
+        val textColumn=root.getChildAt(0)
+        textColumn.layoutParams=LinearLayout.LayoutParams(width-dp((74*s).toInt()),-2)
+        params?.width=width
+        clampPosition(sh)
+        try { params?.let { wm?.updateViewLayout(root,it) } } catch (_:Exception) {}
+    }
+    private fun clampPosition(screenHeight: Int = app?.resources?.displayMetrics?.heightPixels ?: 0) {
+        val v=rootView ?: return; val lp=params ?: return
+        if(v.width<=0 || v.height<=0) return
+        val sw=app?.resources?.displayMetrics?.widthPixels ?: return
+        val nx=lp.x.coerceIn(0,(sw-v.width).coerceAtLeast(0)); val ny=lp.y.coerceIn(0,(screenHeight-v.height-dp(24)).coerceAtLeast(0))
+        if(nx!=lp.x || ny!=lp.y) { lp.x=nx; lp.y=ny; try { wm?.updateViewLayout(v,lp) } catch (_:Exception){} }
+    }
+    fun setScale(value: Float) { app?.let { Prefs(it).lyricsOverlayScale=value.coerceIn(.70f,1.40f) }; applyScale() }
     private fun dp(v: Int) = ((app?.resources?.displayMetrics?.density ?: 1f) * v).toInt()
 
     fun toggle(context: Context): Boolean {
@@ -89,7 +118,10 @@ object LyricsOverlay {
                 else -> true
             }
         })
-        return try { wm?.addView(root,lp); pill=root; params=lp; activeLine.tag="active"; nextLine.tag="next"; active=true; LyricsRepo.start(c); observeMedia(); true } catch (_:Exception) { false }
+        rootView=root; activeTextView=activeLine; nextTextView=nextLine
+        val closeButton=root.getChildAt(1) as TextView; closeView=closeButton
+        root.addOnLayoutChangeListener { _,_,_,_,_,_,_,_,_-> clampPosition() }
+        return try { wm?.addView(root,lp); pill=root; params=lp; activeLine.tag="active"; nextLine.tag="next"; active=true; LyricsRepo.start(c); applyScale(); observeMedia(); true } catch (_:Exception) { false }
     }
     fun update(activeText: String, nextText: String) { current=activeText; next=nextText; val r=pill as? LinearLayout ?: return; (r.getChildAt(0) as? LinearLayout)?.let { (it.getChildAt(0) as? TextView)?.text=activeText; (it.getChildAt(1) as? TextView)?.text=nextText } }
     private fun observeMedia() {
@@ -135,5 +167,5 @@ object LyricsOverlay {
             }
         }
     }
-    fun stop() { active=false; mediaJob?.cancel(); mediaJob=null; tickerJob?.cancel(); tickerJob=null; fetchJob?.cancel(); fetchJob=null; track=null; trackKey=""; current=""; next=""; val v=pill; pill=null; try { if(v!=null) wm?.removeViewImmediate(v) } catch (_:Exception){}; params=null }
+    fun stop() { active=false; mediaJob?.cancel(); mediaJob=null; tickerJob?.cancel(); tickerJob=null; fetchJob?.cancel(); fetchJob=null; track=null; trackKey=""; current=""; next=""; val v=pill; pill=null; try { if(v!=null) wm?.removeViewImmediate(v) } catch (_:Exception){}; params=null; rootView=null; activeTextView=null; nextTextView=null; closeView=null }
 }

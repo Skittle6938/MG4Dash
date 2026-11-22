@@ -134,7 +134,8 @@ class LyricsCard(private val activity: Activity) : LinearLayout(activity), Lifec
             val bodyWidth = lyricsArea.width.takeIf { it > 0 } ?: (w - paddingLeft - paddingRight)
             visibleLyricsRows = if (bodyHeight >= h * .58f && bodyHeight >= 420) 5 else 3
             val count = visibleLyricsRows
-            val activeTextSizePx = bodyHeight * if (count == 5) .125f else .22f
+            val heightBasedPx = bodyHeight * if (count == 5) .125f else .22f
+            val activeTextSizePx = minOf(heightBasedPx, bodyWidth * .068f)
             activeFontSp = activeTextSizePx
             val sidePad = dp(8)
             val verticalGap = (bodyHeight * .035f).toInt().coerceAtLeast(dp(8))
@@ -476,7 +477,7 @@ class LyricsCard(private val activity: Activity) : LinearLayout(activity), Lifec
                 lines[row].text = synced.getOrNull(ix)?.second.orEmpty()
                 lines[row].setTextColor(android.graphics.Color.WHITE)
                 lines[row].setTextSize(TypedValue.COMPLEX_UNIT_PX, if (row == 3) activePx else activeFontSp * .60f)
-                lines[row].maxLines = if (row == 3) 2 else 1
+                lines[row].maxLines = if (row == 3 || (visibleLyricsRows == 5 && distance == 1)) 2 else 1
                 lines[row].ellipsize = android.text.TextUtils.TruncateAt.END
                 lines[row].alpha = if (row == 3) 1f else .45f
                 lines[row].visibility = if (distance <= radius) View.VISIBLE else View.GONE
@@ -499,6 +500,21 @@ class LyricsCard(private val activity: Activity) : LinearLayout(activity), Lifec
     private fun settings() {
         val maxes = listOf(5, 10, 20, 25, 50, 100)
         val info = TextView(activity).apply { setTextColor(Themes.color(activity, R.color.text_sub)); setTextSize(TypedValue.COMPLEX_UNIT_SP, 15f) }
+        val scaleLabel = TextView(activity).apply { setTextColor(Themes.color(activity, R.color.text_value)); setTextSize(TypedValue.COMPLEX_UNIT_SP, 17f) }
+        val scaleSlider = android.widget.SeekBar(activity).apply {
+            max = 14; progress = ((prefs.lyricsOverlayScale - .70f) / .05f).toInt().coerceIn(0,14)
+            setOnSeekBarChangeListener(object : android.widget.SeekBar.OnSeekBarChangeListener {
+                override fun onProgressChanged(seek: android.widget.SeekBar, value: Int, fromUser: Boolean) {
+                    val scale = .70f + value * .05f; prefs.lyricsOverlayScale = scale
+                    scaleLabel.text = "${(scale * 100).toInt()}%"
+                    if (LyricsOverlay.active) LyricsOverlay.setScale(scale)
+                }
+                override fun onStartTrackingTouch(seek: android.widget.SeekBar) {}
+                override fun onStopTrackingTouch(seek: android.widget.SeekBar) {}
+            })
+        }
+        val scaleRow = LinearLayout(activity).apply { orientation = VERTICAL; addView(scaleLabel); addView(scaleSlider) }
+        scaleLabel.text = "${(prefs.lyricsOverlayScale * 100).toInt()}%"
         fun updateInfo() { launchView { val c = LyricsRepo.info(); info.text = activity.getString(R.string.ly_cache_used, c.bytes / (1024f * 1024f), prefs.lyricsCacheMaxMb, c.tracks) } }
         OptionsPopup(activity, activity.getString(R.string.wc_lyrics))
             .toggle(activity.getString(R.string.ly_wifi), null, { prefs.lyricsWifiOnly }) { prefs.lyricsWifiOnly = it }
@@ -508,6 +524,9 @@ class LyricsCard(private val activity: Activity) : LinearLayout(activity), Lifec
                 prefs.lyricsCacheMaxMb = maxes[it]; launchView { LyricsRepo.trim(maxes[it]); updateInfo() }
             }
             .note(info)
+            .note(TextView(activity).apply { text = "Dimensione overlay testi"; setTextColor(Themes.color(activity, R.color.text_value)); setTextSize(TypedValue.COMPLEX_UNIT_SP, 19f) })
+            .note(scaleRow)
+            .action("Reset overlay 100%") { prefs.lyricsOverlayScale = 1f; scaleSlider.progress = 6; if (LyricsOverlay.active) LyricsOverlay.setScale(1f) }
             .action(activity.getString(R.string.ly_clear)) {
                 launchView { LyricsRepo.clear(); updateInfo(); Toasts.show(activity, R.string.ly_cleared) }
             }
