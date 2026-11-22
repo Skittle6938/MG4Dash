@@ -163,6 +163,12 @@ class Prefs(context: Context) {
     var lyricsNetworkBytes: Long
         get() = sp.getLong("lyrics_network_bytes", 0L).coerceAtLeast(0L)
         set(v) = sp.edit().putLong("lyrics_network_bytes", v.coerceAtLeast(0L)).apply()
+    var lyricsOverlayX: Int
+        get() = sp.getInt("lyrics_overlay_x", -1)
+        set(v) = sp.edit().putInt("lyrics_overlay_x", v).apply()
+    var lyricsOverlayY: Int
+        get() = sp.getInt("lyrics_overlay_y", -1)
+        set(v) = sp.edit().putInt("lyrics_overlay_y", v).apply()
 
     /** Heated seats / wheel: 0 = auto (64 / 77 kWh battery), 1 = show, 2 = hide. */
     var heatedSeats: Int

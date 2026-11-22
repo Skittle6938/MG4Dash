@@ -20,6 +20,12 @@ object Fullscreen {
         View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or
         View.SYSTEM_UI_FLAG_FULLSCREEN
 
+    /** Apply the same SAIC immersive flags to secondary windows such as the karaoke dialog. */
+    @Suppress("DEPRECATION")
+    fun applyDecor(decor: View, enabled: Boolean) {
+        decor.systemUiVisibility = if (enabled) HIDDEN else View.SYSTEM_UI_FLAG_VISIBLE
+    }
+
     /** Bars shown again by the system: hidden again after this delay, the stock controls stay usable meanwhile. */
     private const val REHIDE_MS = 3_000L
 

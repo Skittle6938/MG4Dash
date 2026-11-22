@@ -9,6 +9,7 @@ import android.graphics.drawable.ColorDrawable
 import android.util.TypedValue
 import android.view.Gravity
 import android.view.WindowManager
+import android.view.Window
 import android.view.View
 import android.widget.ImageButton
 import android.widget.FrameLayout
@@ -40,6 +41,11 @@ class LyricsCard(private val activity: Activity) : LinearLayout(activity), Lifec
         setImageResource(R.drawable.ic_refresh_lyrics); imageTintList = android.content.res.ColorStateList.valueOf(Themes.color(activity, R.color.text_sub))
         setBackgroundResource(R.drawable.bg_chip); contentDescription = activity.getString(R.string.ly_refresh)
         setOnClickListener { request(force = true) }
+    }
+    private val overlayButton = TextView(activity).apply {
+        text = "▣"; gravity = Gravity.CENTER; setTextSize(TypedValue.COMPLEX_UNIT_SP, 19f)
+        setTextColor(Themes.color(activity, R.color.text_sub)); setBackgroundResource(R.drawable.bg_chip)
+        contentDescription = "Lyrics overlay"; setOnClickListener { toggleOverlay() }
     }
     private val lines = (0..6).map { TextView(activity).apply {
         maxLines = 1; ellipsize = android.text.TextUtils.TruncateAt.END; gravity = Gravity.CENTER
@@ -82,9 +88,9 @@ class LyricsCard(private val activity: Activity) : LinearLayout(activity), Lifec
     private var karaokeActiveIndex = -1
     private val ticker = object : Runnable {
         override fun run() {
-            if (!isActivelyDisplayed || track?.synced == null) return
+            if (!shouldRunTicker() || track?.synced == null) return
             val pos = position(latest)
-            drawLines(pos); drawKaraoke(pos)
+            drawLines(pos); drawKaraoke(pos); updateOverlay(pos)
             postDelayed(this, 250)
         }
     }
@@ -95,7 +101,7 @@ class LyricsCard(private val activity: Activity) : LinearLayout(activity), Lifec
         orientation = VERTICAL; gravity = Gravity.CENTER_VERTICAL
         setPadding(dp(18), dp(12), dp(18), dp(12))
         val top = LinearLayout(activity).apply { orientation = HORIZONTAL; gravity = Gravity.CENTER_VERTICAL }
-        top.addView(header, LayoutParams(0, -2, 1f)); top.addView(refresh, LayoutParams(dp(38), dp(38)))
+        top.addView(header, LayoutParams(0, -2, 1f)); top.addView(overlayButton, LayoutParams(dp(38), dp(38))); top.addView(refresh, LayoutParams(dp(38), dp(38)))
         addView(top, LayoutParams(-1, -2))
         lines.forEachIndexed { i, line ->
             line.setTextSize(TypedValue.COMPLEX_UNIT_SP, if (i == 3) 25f else 17f)
@@ -271,9 +277,12 @@ class LyricsCard(private val activity: Activity) : LinearLayout(activity), Lifec
 
     private fun updateActiveState() {
         val visible = activityStarted && (karaokeOpen || (attached && isShown && windowVisibility == View.VISIBLE))
-        if (visible == isActivelyDisplayed) return
-        isActivelyDisplayed = visible
-        if (visible) {
+        val should = visible || (LyricsOverlay.active && latest.playing)
+        val changed = should != isActivelyDisplayed
+        isActivelyDisplayed = should
+        overlayButton.alpha = if (LyricsOverlay.active) 1f else .6f
+        if (!changed) return
+        if (should) {
             LyricsRepo.start(activity)
             removeCallbacks(ticker)
             if (track?.synced != null) post(ticker)
@@ -284,6 +293,20 @@ class LyricsCard(private val activity: Activity) : LinearLayout(activity), Lifec
             requestedKey = null
             LyricsRepo.cancelActiveRequest()
         }
+    }
+
+    private fun shouldRunTicker() = isActivelyDisplayed && (activityStarted || (LyricsOverlay.active && latest.playing))
+    private fun toggleOverlay() {
+        LyricsOverlay.toggle(activity)
+        overlayButton.alpha = if (LyricsOverlay.active) 1f else .6f
+        updateActiveState()
+        updateOverlay(position(latest))
+    }
+    private fun updateOverlay(pos: Long) {
+        if (!LyricsOverlay.active || !latest.playing) return
+        val entries = track?.synced ?: return
+        val i = entries.indexOfLast { it.first <= pos }.coerceAtLeast(0)
+        LyricsOverlay.update(entries.getOrNull(i)?.second.orEmpty(), entries.getOrNull(i + 1)?.second.orEmpty())
     }
 
     private fun openKaraoke() {
@@ -313,6 +336,12 @@ class LyricsCard(private val activity: Activity) : LinearLayout(activity), Lifec
             contentDescription = activity.getString(R.string.st_close)
             setOnClickListener { closeKaraoke() }
         }
+        val overlayToggle = TextView(activity).apply {
+            text = "▣"; gravity = Gravity.CENTER; setTextSize(TypedValue.COMPLEX_UNIT_SP, 22f)
+            setTextColor(Color.WHITE); alpha = if (LyricsOverlay.active) 1f else .65f
+            setOnClickListener { toggleOverlay(); alpha = if (LyricsOverlay.active) 1f else .65f }
+        }
+        header.addView(overlayToggle, LayoutParams(dp(48), dp(54)))
         header.addView(close, LayoutParams(dp(54), dp(54)))
         header.setOnClickListener { closeKaraoke() }
         root.addView(header, LayoutParams(-1, -2))
@@ -356,8 +385,17 @@ class LyricsCard(private val activity: Activity) : LinearLayout(activity), Lifec
             updateActiveState()
         }
         karaoke = dialog
+        dialog.window?.apply {
+            addFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE)
+            decorView.systemUiVisibility = activity.window.decorView.systemUiVisibility
+            decorView.viewTreeObserver.addOnWindowFocusChangeListener { hasFocus ->
+                if (hasFocus && decorView.viewTreeObserver.isAlive) Fullscreen.applyDecor(decorView, Prefs(activity).fullscreen)
+            }
+        }
         dialog.show()
         dialog.window?.apply {
+            Fullscreen.applyDecor(decorView, Prefs(activity).fullscreen)
+            clearFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE)
             setBackgroundDrawable(ColorDrawable(0xEE0A0E17.toInt()))
             setLayout(WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.MATCH_PARENT)
             addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
