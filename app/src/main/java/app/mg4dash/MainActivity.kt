@@ -1751,6 +1751,8 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         setAwake(null)
         prefs.webFloating = true
         fw.setFloating(true)
+        // Just detached: in front of the other window, for its touches too
+        floatMap?.front(false); fw.front(true); webInFront = true
         applySlots()
         webCard?.let { it.visibility = View.VISIBLE; it.show() }
     }
@@ -1803,6 +1805,7 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         setAwake(null)
         prefs.mapFloating = true
         fw.setFloating(true)
+        floatWeb?.front(false); fw.front(true); webInFront = false
         applySlots()
         syncMapPan()
         cardShown(Card.MAP, true)
