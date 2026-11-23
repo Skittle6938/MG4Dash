@@ -423,6 +423,71 @@ class SettingsActivity : AppCompatActivity() {
         // Uninstalling MG4Dash, MG4Radio or MG4Link (19/11, #111): one button, its window explains each one
         row(upd, button(getString(R.string.un_button)) { app.mg4dash.ui.UninstallWindow.show(this) { if (!isFinishing && !isDestroyed) recreate() } }.apply { setTextColor(color(R.color.accent_danger)) })
 
+        // ── Settings backup on the USB stick (#129): under Update ──
+        val bk = panel(sysR, getString(R.string.bk_title))
+        text(bk, getString(R.string.bk_desc), 15f, R.color.text_title)
+        val bkStatus = text(bk, "", 15f, R.color.text_value).apply { visibility = View.GONE }
+        fun bkSay(s: String) { bkStatus.text = s; bkStatus.visibility = View.VISIBLE }
+        val bkSave = button(getString(R.string.bk_save)) {}
+        val bkRestore = button(getString(R.string.bk_restore)) {}
+        row(bk, bkSave, bkRestore)
+        toggle(bk, R.string.bk_history, R.string.bk_history_desc, { prefs.raw.getBoolean("backup_history", true) }) { prefs.raw.edit().putBoolean("backup_history", it).apply() }
+        toggle(bk, R.string.bk_token, R.string.bk_token_desc, { prefs.raw.getBoolean("backup_token", false) }) { prefs.raw.edit().putBoolean("backup_token", it).apply() }
+        // The status line under the options
+        (bkStatus.parent as LinearLayout).removeView(bkStatus); bk.addView(bkStatus)
+        fun paintBk() {
+            val stick = app.mg4dash.system.UsbExport.stick(this) != null
+            listOf(bkSave, bkRestore).forEach { it.isEnabled = stick; it.setTextColor(color(if (stick) R.color.text_value else R.color.text_disabled)) }
+            if (!stick && bkStatus.visibility != View.VISIBLE) bkSay(getString(R.string.bk_no_usb))
+            else if (stick && bkStatus.text == getString(R.string.bk_no_usb)) bkStatus.visibility = View.GONE
+        }
+        paintBk()
+        bk.viewTreeObserver.addOnWindowFocusChangeListener { if (it) paintBk() }
+        bkSave.setOnClickListener {
+            val o = app.mg4dash.system.SettingsBackup.Options(prefs.raw.getBoolean("backup_history", true), prefs.raw.getBoolean("backup_token", false))
+            bkSave.isEnabled = false
+            Thread {
+                val w = try { app.mg4dash.system.SettingsBackup.save(this, o, BuildConfig.VERSION_NAME) } catch (e: Exception) { Log.w("Backup", "save: ${e.message}"); null }
+                runOnUiThread {
+                    if (isFinishing || isDestroyed) return@runOnUiThread
+                    bkSave.isEnabled = true
+                    when {
+                        w == null -> { bkSay(getString(R.string.bk_failed)); paintBk() }
+                        w.internal -> bkSay(getString(R.string.usb_saved_internal, w.path))
+                        else -> bkSay(getString(R.string.bk_saved, w.path))
+                    }
+                }
+            }.start()
+        }
+        bkRestore.setOnClickListener {
+            val found = app.mg4dash.system.SettingsBackup.find(this)
+            if (found.isEmpty()) { bkSay(getString(R.string.bk_none)); return@setOnClickListener }
+            val df = java.text.DateFormat.getDateTimeInstance(java.text.DateFormat.LONG, java.text.DateFormat.SHORT)
+            val items = found.map { f ->
+                listOf(df.format(java.util.Date(f.created)), f.version.ifEmpty { "?" },
+                    (if (f.profiles == 1) getString(R.string.bk_profile_one) else getString(R.string.bk_profiles, f.profiles)),
+                    getString(if (f.history) R.string.bk_with_history else R.string.bk_settings_only),
+                    android.text.format.Formatter.formatShortFileSize(this, f.file.length())).joinToString("  ·  ")
+            }.toTypedArray()
+            var chosen = 0
+            AlertDialog.Builder(this).setTitle(R.string.bk_list_title)
+                .setSingleChoiceItems(items, 0) { _, w -> chosen = w }
+                .setNegativeButton(R.string.cancel, null)
+                .setPositiveButton(R.string.bk_restore_ok) { _, _ ->
+                    val f = found[chosen]
+                    val msg = getString(R.string.bk_confirm, df.format(java.util.Date(f.created))) +
+                        (if (!f.haToken) "\n\n" + getString(R.string.bk_confirm_token) else "")
+                    AlertDialog.Builder(this).setTitle(R.string.bk_confirm_title).setMessage(msg)
+                        .setNegativeButton(R.string.cancel, null)
+                        .setPositiveButton(R.string.bk_confirm_ok) { _, _ ->
+                            val ok = try { app.mg4dash.system.SettingsBackup.restore(this, org.json.JSONObject(f.file.readText())) } catch (e: Exception) { Log.w("Backup", "restore: ${e.message}"); false }
+                            if (ok) app.mg4dash.system.SettingsBackup.restart(this) else bkSay(getString(R.string.bk_unreadable))
+                        }
+                        .create().also { app.mg4dash.ui.Dialogs.show(it); app.mg4dash.ui.Dialogs.fix(it) }
+                }
+                .create().also { app.mg4dash.ui.Dialogs.show(it); app.mg4dash.ui.Dialogs.fix(it) }
+        }
+
         // ── Weather ──
         val weather = panel(netL, getString(R.string.title_weather))
         val city = text(weather, "", 18f, R.color.text_value)

@@ -1177,4 +1177,28 @@
     <string name="usb_saved_internal">De auto gaf geen toestemming om naar de USB-stick te kopiëren: in plaats daarvan opgeslagen in het geheugen van de auto, %1$s</string>
     <string name="fx_pick_hint">Vink er één of meer aan: telkens wordt een van de aangevinkte geloot, nooit de andere. Geen aangevinkt: geen animatie.</string>
     <string name="fx_random_of">Willekeurig: %1$s</string>
+    <!-- Settings backup on the USB stick (#129) -->
+    <string name="bk_title">BACK-UP VAN DE INSTELLINGEN</string>
+    <string name="bk_desc">Alle instellingen, de profielen, het opstartgeluid en de webadressen in één bestand op de USB-stick, om terug te zetten na een reset van de radio.</string>
+    <string name="bk_save">Opslaan op de USB-stick</string>
+    <string name="bk_restore">Terugzetten…</string>
+    <string name="bk_history">Geschiedenis meenemen</string>
+    <string name="bk_history_desc">Ritten, verbruik, accuconditie.</string>
+    <string name="bk_token">Home Assistant-token meenemen</string>
+    <string name="bk_token_desc">Het zou leesbaar op de stick staan.</string>
+    <string name="bk_saved">✓  Opgeslagen op de USB-stick: %1$s</string>
+    <string name="bk_no_usb">Steek een USB-stick in om de instellingen op te slaan of terug te zetten</string>
+    <string name="bk_failed">De back-up kon niet op de USB-stick worden geschreven.</string>
+    <string name="bk_none">Geen MG4Dash-back-up gevonden op de USB-stick.</string>
+    <string name="bk_unreadable">Deze back-up kon niet worden gelezen: er is niets gewijzigd.</string>
+    <string name="bk_list_title">Een back-up terugzetten</string>
+    <string name="bk_profile_one">1 profiel</string>
+    <string name="bk_profiles">%1$d profielen</string>
+    <string name="bk_with_history">met geschiedenis</string>
+    <string name="bk_settings_only">alleen instellingen</string>
+    <string name="bk_restore_ok">Terugzetten</string>
+    <string name="bk_confirm_title">Alle instellingen vervangen?</string>
+    <string name="bk_confirm">De instellingen, profielen, het opstartgeluid en de webadressen van de back-up van %1$s vervangen de huidige. Daarna start MG4Dash opnieuw.</string>
+    <string name="bk_confirm_token">Het Home Assistant-token zat niet in de back-up: voer het zo nodig opnieuw in bij Instellingen › Verbindingen.</string>
+    <string name="bk_confirm_ok">Vervangen en herstarten</string>
 </resources>
