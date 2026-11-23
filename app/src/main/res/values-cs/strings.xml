@@ -1200,4 +1200,27 @@
     <string name="lyrics_mg4control_copy">Kopírovat akci</string>
     <string name="lyrics_mg4control_copied">Akce zkopírována</string>
     <string name="lyrics_mg4control_open">Otevřít MG4Control</string>
+    <string name="bk_title">ZÁLOHA NASTAVENÍ</string>
+    <string name="bk_desc">Všechna nastavení, profily, zvuk při startu a webové adresy v jednom souboru na USB disku, k obnovení po resetu rádia.</string>
+    <string name="bk_save">Uložit na USB disk</string>
+    <string name="bk_restore">Obnovit…</string>
+    <string name="bk_history">Zahrnout historii</string>
+    <string name="bk_history_desc">Jízdy, spotřeba, stav baterie.</string>
+    <string name="bk_token">Zahrnout token Home Assistant</string>
+    <string name="bk_token_desc">Byl by na disku zapsán čitelně.</string>
+    <string name="bk_saved">✓  Uloženo na USB disk: %1$s</string>
+    <string name="bk_no_usb">Připojte USB disk pro uložení nebo obnovení nastavení</string>
+    <string name="bk_failed">Zálohu se nepodařilo zapsat na USB disk.</string>
+    <string name="bk_none">Na USB disku nebyla nalezena žádná záloha MG4Dash.</string>
+    <string name="bk_unreadable">Tuto zálohu se nepodařilo přečíst: nic nebylo změněno.</string>
+    <string name="bk_list_title">Obnovit zálohu</string>
+    <string name="bk_profile_one">1 profil</string>
+    <string name="bk_profiles">Profily: %1$d</string>
+    <string name="bk_with_history">s historií</string>
+    <string name="bk_settings_only">jen nastavení</string>
+    <string name="bk_restore_ok">Obnovit</string>
+    <string name="bk_confirm_title">Nahradit všechna nastavení?</string>
+    <string name="bk_confirm">Nastavení, profily, zvuk při startu a webové adresy ze zálohy z %1$s nahradí ty současné. MG4Dash se pak restartuje.</string>
+    <string name="bk_confirm_token">Token Home Assistant nebyl v záloze: pokud chybí, zadejte ho znovu v Nastavení › Připojení.</string>
+    <string name="bk_confirm_ok">Nahradit a restartovat</string>
 </resources>

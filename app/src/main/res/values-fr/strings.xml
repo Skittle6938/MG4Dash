@@ -1200,4 +1200,27 @@
     <string name="lyrics_mg4control_copy">Copier l\'action</string>
     <string name="lyrics_mg4control_copied">Action copiée</string>
     <string name="lyrics_mg4control_open">Ouvrir MG4Control</string>
+    <string name="bk_title">SAUVEGARDE DES RÉGLAGES</string>
+    <string name="bk_desc">Tous les réglages, les profils, le son de démarrage et les adresses web, dans un seul fichier sur la clé USB, à remettre après une réinitialisation de l’autoradio.</string>
+    <string name="bk_save">Sauvegarder sur la clé USB</string>
+    <string name="bk_restore">Restaurer…</string>
+    <string name="bk_history">Inclure l’historique</string>
+    <string name="bk_history_desc">Trajets, consommation, santé de la batterie.</string>
+    <string name="bk_token">Inclure le token Home Assistant</string>
+    <string name="bk_token_desc">Il serait écrit en clair sur la clé.</string>
+    <string name="bk_saved">✓  Sauvegardé sur la clé USB : %1$s</string>
+    <string name="bk_no_usb">Branchez une clé USB pour sauvegarder ou restaurer les réglages</string>
+    <string name="bk_failed">La sauvegarde n’a pas pu être écrite sur la clé USB.</string>
+    <string name="bk_none">Aucune sauvegarde MG4Dash trouvée sur la clé USB.</string>
+    <string name="bk_unreadable">Cette sauvegarde n’a pas pu être lue : rien n’a été changé.</string>
+    <string name="bk_list_title">Restaurer une sauvegarde</string>
+    <string name="bk_profile_one">1 profil</string>
+    <string name="bk_profiles">%1$d profils</string>
+    <string name="bk_with_history">avec l’historique</string>
+    <string name="bk_settings_only">réglages seulement</string>
+    <string name="bk_restore_ok">Restaurer</string>
+    <string name="bk_confirm_title">Remplacer tous les réglages ?</string>
+    <string name="bk_confirm">Les réglages, les profils, le son de démarrage et les adresses web de la sauvegarde du %1$s remplacent ceux d’aujourd’hui. MG4Dash redémarre ensuite.</string>
+    <string name="bk_confirm_token">Le token Home Assistant n’était pas dans la sauvegarde : à ressaisir dans Réglages › Connexions s’il manque.</string>
+    <string name="bk_confirm_ok">Remplacer et redémarrer</string>
 </resources>

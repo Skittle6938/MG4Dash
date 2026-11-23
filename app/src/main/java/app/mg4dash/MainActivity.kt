@@ -909,6 +909,8 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
                 reserveConnections(strip, true); connFrame = strip
             }
         }
+        // The energy card's charge line follows the bar (#29)
+        placeChargeOnBar(VehicleState.isPlugged(CarBridge.state.value.chargeStatus))
     }
 
     /** The bar at the top of [f]'s place, centred: the same place, size and margin on every card. */
@@ -1356,7 +1358,97 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
             s.chargeCtrl == 1 -> getString(R.string.stop_btn)
             else -> getString(R.string.charge_btn)
         })
+        placeChargeOnBar(VehicleState.isPlugged(s.chargeStatus))
     }
+
+    /**
+     * The charge line on the bar's own line (#29): the time on the left of the icons, on two lines when one is too
+     * wide, the button on the right. Room short (every icon shown): both go over the icons, the time on a solid
+     * background. The card never moves down, so the trip start marker stays under the battery bar.
+     */
+    private var chargeOverlay: LinearLayout? = null
+    private fun placeChargeOnBar(plugged: Boolean) {
+        val ev = panels[Card.ENERGY] ?: return
+        val bar = connections
+        val f = connFrame
+        val on = cardPower && plugged && f != null && f.shown == Card.ENERGY && bar != null && bar.parent === f.box &&
+            f.slot.size.form == HomeSlots.Size.SMALL   // only the small places: the others have room under the bar (#29, 23/11)
+        val rowV = b.chargeState.parent.let { if (it === chargeOverlay) chargeRow!! else it as LinearLayout }
+        chargeRow = rowV
+        val title = rowV.getChildAt(0)
+        if (on) {
+            if (bar!!.width == 0 || ev.width == 0) { ev.post { renderEnergy(CarBridge.state.value, ConsumptionEstimator.average.value) }; return }
+            if (!chargeOnBar) chargeTitleVis = title.visibility
+            chargeOnBar = true
+            val base = baseTopPad.getOrPut(ev) { ev.paddingTop }
+            if (ev.paddingTop != base) ev.setPadding(ev.paddingLeft, base, ev.paddingRight, ev.paddingBottom)
+            title.visibility = View.GONE
+            val btnH = b.chargeAction.layoutParams.height
+            rowV.minimumHeight = btnH
+            // The room under the bar kept: the trip start marker stays (#29, 23/11)
+            b.batteryGauge.tripStart = app.mg4dash.energy.EnergyMonitor.tripStartSoc.value?.toFloat()
+            (b.batteryGauge.layoutParams as LinearLayout.LayoutParams).let { g -> if (gaugeHeight != 0 && g.height != gaugeHeight) { g.height = gaugeHeight; b.batteryGauge.layoutParams = g } }
+            // Over the bar: an overlay in the place, above the icons
+            val box = f!!.box
+            val ov = chargeOverlay ?: LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL }.also { chargeOverlay = it }
+            if (b.chargeState.parent !== ov) {
+                (b.chargeState.parent as? android.view.ViewGroup)?.removeView(b.chargeState)
+                (b.chargeAction.parent as? android.view.ViewGroup)?.removeView(b.chargeAction)
+                ov.removeAllViews()
+                ov.addView(b.chargeState, LinearLayout.LayoutParams(-2, -2))
+                ov.addView(View(this), LinearLayout.LayoutParams(0, 1, 1f))
+                ov.addView(b.chargeAction, LinearLayout.LayoutParams(-2, btnH))
+            }
+            if (ov.parent !== box) { (ov.parent as? android.view.ViewGroup)?.removeView(ov); box.addView(ov) }
+            ov.elevation = bar.elevation + dp(1)
+            val barTop = (bar.layoutParams as android.widget.FrameLayout.LayoutParams).topMargin
+            ov.layoutParams = android.widget.FrameLayout.LayoutParams(-1, btnH, Gravity.TOP).apply {
+                topMargin = barTop - (btnH - dp(connBarDp)) / 2
+                leftMargin = ev.left + ev.paddingLeft; rightMargin = box.width - ev.right + ev.paddingRight
+            }
+            // One line if it fits left of the icons, else two; still too wide: over the icons, on a solid background
+            val st = b.chargeState
+            st.setAutoSizeTextTypeWithDefaults(TextView.AUTO_SIZE_TEXT_TYPE_NONE)
+            val full = st.text.toString().replace("\n", " · ")
+            val room = bar.left - ev.left - ev.paddingLeft - dp(10)
+            val p = android.graphics.Paint(st.paint)
+            fun w(t: String, sp: Float) = t.split("\n").maxOf { p.apply { textSize = sp * resources.displayMetrics.scaledDensity }.measureText(it) }
+            val split = full.replace(" · ", "\n").replace(", ", ",\n").replace(" : ", " :\n").replace(": ", ":\n")
+            // No natural break: at the space nearest the middle
+            val two = if ("\n" in split || ' ' !in full) split
+                else full.indices.filter { full[it] == ' ' }.minBy { kotlin.math.abs(it - full.length / 2) }.let { full.substring(0, it) + "\n" + full.substring(it + 1) }
+            val (text, sp) = when {
+                w(full, 19f) <= room -> full to 19f
+                w(two, 17f) <= room -> two to 17f
+                else -> two to 16f
+            }
+            if (st.text.toString() != text) st.text = text
+            st.setTextSize(TypedValue.COMPLEX_UNIT_SP, sp)
+            st.maxLines = 2; st.setLineSpacing(0f, 0.92f)
+            st.gravity = Gravity.START or Gravity.CENTER_VERTICAL
+            val over = w(text, sp) > room
+            st.background = if (!over) null else android.graphics.drawable.GradientDrawable().apply {
+                setColor(app.mg4dash.ui.Themes.attr(this@MainActivity, R.attr.mgPanel, 0xFF000000.toInt())); cornerRadius = dp(8).toFloat()
+            }
+            st.setPadding(0, 0, if (over) dp(10) else 0, 0)
+        } else if (chargeOnBar) {
+            chargeOnBar = false
+            chargeOverlay?.let { ov ->
+                ov.removeAllViews(); (ov.parent as? android.view.ViewGroup)?.removeView(ov)
+                rowV.addView(b.chargeState, 1, LinearLayout.LayoutParams(-2, -2).apply { gravity = Gravity.CENTER_VERTICAL; rightMargin = dp(10) })
+                rowV.addView(b.chargeAction, 2, LinearLayout.LayoutParams(-2, b.chargeAction.layoutParams?.height ?: dp(44)))
+            }
+            title.visibility = chargeTitleVis
+            rowV.minimumHeight = 0
+            if (cardPower && !plugged) rowV.visibility = View.GONE
+            b.chargeState.background = null; b.chargeState.setPadding(0, 0, 0, 0); b.chargeState.maxLines = 1
+            b.chargeState.setTextSize(TypedValue.COMPLEX_UNIT_SP, 19f)
+            if (f != null) reserveConnections(f, true)
+        }
+    }
+    private var chargeRow: LinearLayout? = null
+    private var chargeOnBar = false
+    private var chargeTitleVis = View.VISIBLE
 
     private fun onChargeAction() {
         val s = CarBridge.state.value

@@ -1200,4 +1200,27 @@
     <string name="lyrics_mg4control_copy">Copia azione</string>
     <string name="lyrics_mg4control_copied">Azione copiata</string>
     <string name="lyrics_mg4control_open">Apri MG4Control</string>
+    <string name="bk_title">BACKUP DELLE IMPOSTAZIONI</string>
+    <string name="bk_desc">Tutte le impostazioni, i profili, il suono di avvio e gli indirizzi web in un unico file sulla chiavetta USB, da ripristinare dopo un reset della radio.</string>
+    <string name="bk_save">Salva sulla chiavetta USB</string>
+    <string name="bk_restore">Ripristina…</string>
+    <string name="bk_history">Includi la cronologia</string>
+    <string name="bk_history_desc">Viaggi, consumi, stato della batteria.</string>
+    <string name="bk_token">Includi il token di Home Assistant</string>
+    <string name="bk_token_desc">Sarebbe scritto in chiaro sulla chiavetta.</string>
+    <string name="bk_saved">✓  Salvato sulla chiavetta USB: %1$s</string>
+    <string name="bk_no_usb">Collega una chiavetta USB per salvare o ripristinare le impostazioni</string>
+    <string name="bk_failed">Impossibile scrivere il backup sulla chiavetta USB.</string>
+    <string name="bk_none">Nessun backup di MG4Dash trovato sulla chiavetta USB.</string>
+    <string name="bk_unreadable">Impossibile leggere questo backup: nulla è stato modificato.</string>
+    <string name="bk_list_title">Ripristina un backup</string>
+    <string name="bk_profile_one">1 profilo</string>
+    <string name="bk_profiles">%1$d profili</string>
+    <string name="bk_with_history">con la cronologia</string>
+    <string name="bk_settings_only">solo impostazioni</string>
+    <string name="bk_restore_ok">Ripristina</string>
+    <string name="bk_confirm_title">Sostituire tutte le impostazioni?</string>
+    <string name="bk_confirm">Le impostazioni, i profili, il suono di avvio e gli indirizzi web del backup del %1$s sostituiscono quelli attuali. Poi MG4Dash si riavvia.</string>
+    <string name="bk_confirm_token">Il token di Home Assistant non era nel backup: reinseriscilo in Impostazioni › Connessioni se manca.</string>
+    <string name="bk_confirm_ok">Sostituisci e riavvia</string>
 </resources>

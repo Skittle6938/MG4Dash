@@ -1200,4 +1200,27 @@
     <string name="lyrics_mg4control_copy">Aktion kopieren</string>
     <string name="lyrics_mg4control_copied">Aktion kopiert</string>
     <string name="lyrics_mg4control_open">MG4Control öffnen</string>
+    <string name="bk_title">EINSTELLUNGEN SICHERN</string>
+    <string name="bk_desc">Alle Einstellungen, die Profile, der Startton und die Webadressen in einer Datei auf dem USB-Stick, um sie nach einem Zurücksetzen des Radios wiederherzustellen.</string>
+    <string name="bk_save">Auf USB-Stick sichern</string>
+    <string name="bk_restore">Wiederherstellen…</string>
+    <string name="bk_history">Verlauf einschließen</string>
+    <string name="bk_history_desc">Fahrten, Verbrauch, Batteriezustand.</string>
+    <string name="bk_token">Home-Assistant-Token einschließen</string>
+    <string name="bk_token_desc">Es stünde im Klartext auf dem Stick.</string>
+    <string name="bk_saved">✓  Auf dem USB-Stick gesichert: %1$s</string>
+    <string name="bk_no_usb">USB-Stick einstecken, um die Einstellungen zu sichern oder wiederherzustellen</string>
+    <string name="bk_failed">Die Sicherung konnte nicht auf den USB-Stick geschrieben werden.</string>
+    <string name="bk_none">Keine MG4Dash-Sicherung auf dem USB-Stick gefunden.</string>
+    <string name="bk_unreadable">Diese Sicherung konnte nicht gelesen werden: nichts wurde geändert.</string>
+    <string name="bk_list_title">Sicherung wiederherstellen</string>
+    <string name="bk_profile_one">1 Profil</string>
+    <string name="bk_profiles">%1$d Profile</string>
+    <string name="bk_with_history">mit Verlauf</string>
+    <string name="bk_settings_only">nur Einstellungen</string>
+    <string name="bk_restore_ok">Wiederherstellen</string>
+    <string name="bk_confirm_title">Alle Einstellungen ersetzen?</string>
+    <string name="bk_confirm">Die Einstellungen, Profile, der Startton und die Webadressen der Sicherung vom %1$s ersetzen die aktuellen. MG4Dash startet danach neu.</string>
+    <string name="bk_confirm_token">Das Home-Assistant-Token war nicht in der Sicherung: bei Bedarf unter Einstellungen › Verbindungen neu eingeben.</string>
+    <string name="bk_confirm_ok">Ersetzen und neu starten</string>
 </resources>

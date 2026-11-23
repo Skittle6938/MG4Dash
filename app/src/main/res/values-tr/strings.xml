@@ -1200,4 +1200,27 @@
     <string name="lyrics_mg4control_copy">Eylemi kopyala</string>
     <string name="lyrics_mg4control_copied">Eylem kopyalandı</string>
     <string name="lyrics_mg4control_open">MG4Control\'ü aç</string>
+    <string name="bk_title">AYARLARIN YEDEĞİ</string>
+    <string name="bk_desc">Tüm ayarlar, profiller, açılış sesi ve web adresleri USB bellekte tek bir dosyada; radyo sıfırlandıktan sonra geri yüklemek için.</string>
+    <string name="bk_save">USB belleğe kaydet</string>
+    <string name="bk_restore">Geri yükle…</string>
+    <string name="bk_history">Geçmişi dahil et</string>
+    <string name="bk_history_desc">Yolculuklar, tüketim, batarya sağlığı.</string>
+    <string name="bk_token">Home Assistant tokenini dahil et</string>
+    <string name="bk_token_desc">Bellekte açık metin olarak yazılır.</string>
+    <string name="bk_saved">✓  USB belleğe kaydedildi: %1$s</string>
+    <string name="bk_no_usb">Ayarları kaydetmek veya geri yüklemek için bir USB bellek takın</string>
+    <string name="bk_failed">Yedek USB belleğe yazılamadı.</string>
+    <string name="bk_none">USB bellekte MG4Dash yedeği bulunamadı.</string>
+    <string name="bk_unreadable">Bu yedek okunamadı: hiçbir şey değiştirilmedi.</string>
+    <string name="bk_list_title">Bir yedeği geri yükle</string>
+    <string name="bk_profile_one">1 profil</string>
+    <string name="bk_profiles">%1$d profil</string>
+    <string name="bk_with_history">geçmişle birlikte</string>
+    <string name="bk_settings_only">yalnızca ayarlar</string>
+    <string name="bk_restore_ok">Geri yükle</string>
+    <string name="bk_confirm_title">Tüm ayarlar değiştirilsin mi?</string>
+    <string name="bk_confirm">%1$s tarihli yedeğin ayarları, profilleri, açılış sesi ve web adresleri mevcut olanların yerini alır. Ardından MG4Dash yeniden başlar.</string>
+    <string name="bk_confirm_token">Home Assistant tokeni yedekte yoktu: eksikse Ayarlar › Bağlantılar bölümünde yeniden girin.</string>
+    <string name="bk_confirm_ok">Değiştir ve yeniden başlat</string>
 </resources>

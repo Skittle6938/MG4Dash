@@ -77,6 +77,9 @@ object UsbExport {
      */
     internal fun internalFolder(root: File?): File? = root?.let { File(File(it, android.os.Environment.DIRECTORY_DOWNLOADS), FOLDER) }
 
+    /** Download/MG4Dash of the car's memory, where a refused stick's files went (read by the settings restore). */
+    fun internalDir(): File? = internalFolder(internalRoot())
+
     /** A file written: its path (from the stick's root, or from the car's memory), and whether it is in the car's memory. */
     data class Written(val path: String, val internal: Boolean)
 

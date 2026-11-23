@@ -1200,4 +1200,27 @@
     <string name="lyrics_mg4control_copy">Copiar acción</string>
     <string name="lyrics_mg4control_copied">Acción copiada</string>
     <string name="lyrics_mg4control_open">Abrir MG4Control</string>
+    <string name="bk_title">COPIA DE LOS AJUSTES</string>
+    <string name="bk_desc">Todos los ajustes, los perfiles, el sonido de inicio y las direcciones web en un solo archivo en la memoria USB, para recuperarlos tras restablecer la radio.</string>
+    <string name="bk_save">Guardar en la memoria USB</string>
+    <string name="bk_restore">Restaurar…</string>
+    <string name="bk_history">Incluir el historial</string>
+    <string name="bk_history_desc">Trayectos, consumo, salud de la batería.</string>
+    <string name="bk_token">Incluir el token de Home Assistant</string>
+    <string name="bk_token_desc">Quedaría escrito sin cifrar en la memoria.</string>
+    <string name="bk_saved">✓  Guardado en la memoria USB: %1$s</string>
+    <string name="bk_no_usb">Conecte una memoria USB para guardar o restaurar los ajustes</string>
+    <string name="bk_failed">No se pudo escribir la copia en la memoria USB.</string>
+    <string name="bk_none">No se encontró ninguna copia de MG4Dash en la memoria USB.</string>
+    <string name="bk_unreadable">No se pudo leer esta copia: no se ha cambiado nada.</string>
+    <string name="bk_list_title">Restaurar una copia</string>
+    <string name="bk_profile_one">1 perfil</string>
+    <string name="bk_profiles">%1$d perfiles</string>
+    <string name="bk_with_history">con el historial</string>
+    <string name="bk_settings_only">solo ajustes</string>
+    <string name="bk_restore_ok">Restaurar</string>
+    <string name="bk_confirm_title">¿Reemplazar todos los ajustes?</string>
+    <string name="bk_confirm">Los ajustes, perfiles, sonido de inicio y direcciones web de la copia del %1$s sustituyen a los actuales. Después MG4Dash se reinicia.</string>
+    <string name="bk_confirm_token">El token de Home Assistant no estaba en la copia: vuelva a introducirlo en Ajustes › Conexiones si falta.</string>
+    <string name="bk_confirm_ok">Reemplazar y reiniciar</string>
 </resources>
