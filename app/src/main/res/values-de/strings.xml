@@ -1200,4 +1200,5 @@
     <string name="bk_confirm">Die Einstellungen, Profile, der Startton und die Webadressen der Sicherung vom %1$s ersetzen die aktuellen. MG4Dash startet danach neu.</string>
     <string name="bk_confirm_token">Das Home-Assistant-Token war nicht in der Sicherung: bei Bedarf unter Einstellungen › Verbindungen neu eingeben.</string>
     <string name="bk_confirm_ok">Ersetzen und neu starten</string>
+    <string name="card_no_data">Noch keine Daten</string>
 </resources>

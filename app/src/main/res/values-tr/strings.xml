@@ -1200,4 +1200,5 @@
     <string name="bk_confirm">%1$s tarihli yedeğin ayarları, profilleri, açılış sesi ve web adresleri mevcut olanların yerini alır. Ardından MG4Dash yeniden başlar.</string>
     <string name="bk_confirm_token">Home Assistant tokeni yedekte yoktu: eksikse Ayarlar › Bağlantılar bölümünde yeniden girin.</string>
     <string name="bk_confirm_ok">Değiştir ve yeniden başlat</string>
+    <string name="card_no_data">Henüz veri yok</string>
 </resources>

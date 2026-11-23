@@ -1200,4 +1200,5 @@
     <string name="bk_confirm">Los ajustes, perfiles, sonido de inicio y direcciones web de la copia del %1$s sustituyen a los actuales. Después MG4Dash se reinicia.</string>
     <string name="bk_confirm_token">El token de Home Assistant no estaba en la copia: vuelva a introducirlo en Ajustes › Conexiones si falta.</string>
     <string name="bk_confirm_ok">Reemplazar y reiniciar</string>
+    <string name="card_no_data">Aún no hay datos</string>
 </resources>

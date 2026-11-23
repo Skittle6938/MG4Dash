@@ -1200,4 +1200,5 @@
     <string name="bk_confirm">De instellingen, profielen, het opstartgeluid en de webadressen van de back-up van %1$s vervangen de huidige. Daarna start MG4Dash opnieuw.</string>
     <string name="bk_confirm_token">Het Home Assistant-token zat niet in de back-up: voer het zo nodig opnieuw in bij Instellingen › Verbindingen.</string>
     <string name="bk_confirm_ok">Vervangen en herstarten</string>
+    <string name="card_no_data">Nog geen gegevens</string>
 </resources>

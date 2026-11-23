@@ -62,7 +62,9 @@ object Profiles {
     /** The settings that follow the profile, by family. */
     val PERSONAL_PREFIXES = listOf("slots_", "slot_now_", "conn_slot_", "wc_", "sc_", "fav_phone_", "radar_snd_", "radar_vol_", "radar_rep_",
         // The smart brightness's learnt curves (one per light / dark look)
-        "bright_curve_")
+        "bright_curve_",
+        // The home cards' own settings (cards.CardPrefs: "card_<id>_<name>")
+        "card_")
 
     /** Shared by every profile (the car, the system, the data, the climate, the state of the moment), by name. */
     val SHARED = setOf(

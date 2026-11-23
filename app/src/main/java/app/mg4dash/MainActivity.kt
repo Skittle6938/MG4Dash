@@ -198,8 +198,8 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
     /** Row of the three columns: the full screen map hides everything else up to it. */
     private lateinit var columnsRow: LinearLayout
     private lateinit var consumption: app.mg4dash.ui.ConsumptionCard
-    private lateinit var trips: app.mg4dash.ui.TripsCard
-    private lateinit var driving: app.mg4dash.ui.DrivingCard
+    /** The cards built through the card contract ([app.mg4dash.cards.HomeCards]). */
+    private val homeCards = LinkedHashMap<Card, app.mg4dash.cards.HomeCard>()
     private lateinit var radar: app.mg4dash.radar.RadarCard
     private lateinit var navCard: app.mg4dash.ui.NavCard
     private lateinit var shortcutsHolder: LinearLayout
@@ -286,12 +286,17 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         panels[Card.CONSUMPTION] = frame(consumption)
         shortcutsHolder = LinearLayout(this, null, 0, R.style.Panel).apply { orientation = LinearLayout.VERTICAL; background = null; elevation = 0f }
         panels[Card.SHORTCUTS] = frame(shortcutsHolder)
-        // The last trips (#102), in a place only if the driver put it there
-        trips = app.mg4dash.ui.TripsCard(this)
-        panels[Card.TRIPS] = frame(trips)
-        // Driving settings (#38), also only where the driver put it
-        driving = app.mg4dash.ui.DrivingCard(this)
-        panels[Card.DRIVING] = frame(driving)
+        // The cards of the card contract (the last trips, driving settings…): built from their list, framed as the
+        // others, their options on a long press in the standard popup
+        homeCards.clear()
+        app.mg4dash.cards.HomeCards.factories.forEach { (card, make) ->
+            val h = make(this)
+            homeCards[card] = h
+            if (h.options(app.mg4dash.ui.OptionsPopup(this, getString(card.label))) != null) h.view.setOnLongClickListener {
+                h.options(app.mg4dash.ui.OptionsPopup(this, getString(card.label)))?.show(); true
+            }
+            panels[card] = frame(h.view)
+        }
         // Speed camera alerter (test): only where the driver put it; a long press opens its own settings page
         radar = app.mg4dash.radar.RadarCard(this).apply {
             setOnLongClickListener {
@@ -426,15 +431,8 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         }
         // Smaller versions in a small place: consumption, map without + and −, one row of shortcuts
         consumption.compact = frameOf(Card.CONSUMPTION)?.slot?.size?.form == HomeSlots.Size.SMALL
-        trips.compact = frameOf(Card.TRIPS)?.slot?.size?.form == HomeSlots.Size.SMALL
-        // Tall place: more previous trips, to fill its height (owner's choice)
-        trips.previous = if (frameOf(Card.TRIPS)?.slot?.size?.form == HomeSlots.Size.TALL) 14 else 2
-        driving.form = when (frameOf(Card.DRIVING)?.slot?.size?.form) {
-            HomeSlots.Size.SMALL -> app.mg4dash.ui.DrivingCard.Form.COMPACT
-            HomeSlots.Size.TALL, HomeSlots.Size.LARGE -> app.mg4dash.ui.DrivingCard.Form.FULL
-            HomeSlots.Size.WIDE -> app.mg4dash.ui.DrivingCard.Form.WIDE
-            else -> app.mg4dash.ui.DrivingCard.Form.MEDIUM
-        }
+        // The contract's cards: their place, in one common shape
+        homeCards.forEach { (c, h) -> frameOf(c)?.slot?.size?.let { h.place(app.mg4dash.cards.CardPlace(it)) } }
         radar.form = when (frameOf(Card.RADAR)?.slot?.size?.form) {
             HomeSlots.Size.SMALL -> app.mg4dash.radar.RadarCard.Form.SMALL
             HomeSlots.Size.MEDIUM, null -> app.mg4dash.radar.RadarCard.Form.MEDIUM
@@ -485,6 +483,8 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
 
     /** A card shown or hidden: what it starts or stops. */
     private fun cardShown(card: Card, on: Boolean) {
+        // A card of the contract runs only while shown and home in sight (see observe())
+        homeCards[card]?.let { it.shown(on && lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)); return }
         when (card) {
             Card.MAP -> {
                 if (!on) setMapFullscreen(false)
@@ -494,8 +494,7 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
             }
             Card.CONSUMPTION -> if (on) consumption.show()
             Card.SHORTCUTS -> if (on) renderShortcuts()
-            Card.TRIPS -> if (on) trips.show()
-            Card.DRIVING -> if (on) driving.show()
+            Card.TRIPS, Card.DRIVING -> {}   // the card contract's (above)
             Card.RADAR -> if (on) radar.show(app.mg4dash.radar.RadarRepo.state.value)
             Card.NAV -> if (on) showNavCard(app.mg4dash.map.NavRepo.nav.value)
             Card.WEB -> webCard?.let { w -> w.visibility = if (on) View.VISIBLE else View.GONE; if (on) w.show() else w.pause() }
@@ -707,12 +706,12 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         }
     }
 
-    /** Every 5 s: the map gives way to consumption with no connection, the trip and consumption cards follow. */
+    /** Every 5 s: the map gives way to consumption with no connection, the trip and consumption cards follow (the
+     *  card contract's cards refresh themselves). */
     private fun refreshCards() {
         frames.values.forEach { f -> if (insteadOf(f) != f.instead) showFrame(f) }
         if (isShown(Card.TRIP)) renderTripEnergy()
         if (isShown(Card.CONSUMPTION)) consumption.show()
-        if (isShown(Card.TRIPS)) trips.show()
     }
 
     private var lastPlugged: Boolean? = null
@@ -2655,12 +2654,16 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
                     CarBridge.state.collect { s ->
                         // Speed and odometer keep changing while driving, and these cards do not show them
                         val quiet = s.copy(speedKmh = null, odometerKm = null)
-                        if (quiet != shown) { shown = quiet; renderClimate(s); renderEnergy(s, ConsumptionEstimator.average.value); stackAuto(s); if (isShown(Card.DRIVING)) driving.show(s) }
+                        if (quiet != shown) { shown = quiet; renderClimate(s); renderEnergy(s, ConsumptionEstimator.average.value); stackAuto(s) }
                     }
                 }
                 launch { ConsumptionEstimator.average.collect { renderEnergy(CarBridge.state.value, it) } }
-                // Driving choices (#38): pending, then confirmed; one the car did not take is said, discreetly
-                launch { CarBridge.drivePending.collect { if (isShown(Card.DRIVING)) driving.show() } }
+                // The card contract's cards: shown while home is in sight, stopped when it goes
+                launch {
+                    try { homeCards.forEach { (c, h) -> if (isShown(c)) h.shown(true) }; kotlinx.coroutines.awaitCancellation() }
+                    finally { homeCards.values.forEach { it.shown(false) } }
+                }
+                // Driving choices (#38): one the car did not take is said, discreetly
                 launch { CarBridge.driveRefused.collect { app.mg4dash.ui.Toasts.show(this@MainActivity, R.string.dv_not_confirmed) } }
                 launch { MediaHub.now.collect { renderMedia(it) } }
                 launch { app.mg4dash.radar.RadarRepo.state.collect { if (isShown(Card.RADAR)) radar.show(it) } }

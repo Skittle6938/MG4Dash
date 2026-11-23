@@ -1200,4 +1200,5 @@
     <string name="bk_confirm">Nastavení, profily, zvuk při startu a webové adresy ze zálohy z %1$s nahradí ty současné. MG4Dash se pak restartuje.</string>
     <string name="bk_confirm_token">Token Home Assistant nebyl v záloze: pokud chybí, zadejte ho znovu v Nastavení › Připojení.</string>
     <string name="bk_confirm_ok">Nahradit a restartovat</string>
+    <string name="card_no_data">Zatím žádná data</string>
 </resources>

@@ -1200,4 +1200,5 @@
     <string name="bk_confirm">Les réglages, les profils, le son de démarrage et les adresses web de la sauvegarde du %1$s remplacent ceux d’aujourd’hui. MG4Dash redémarre ensuite.</string>
     <string name="bk_confirm_token">Le token Home Assistant n’était pas dans la sauvegarde : à ressaisir dans Réglages › Connexions s’il manque.</string>
     <string name="bk_confirm_ok">Remplacer et redémarrer</string>
+    <string name="card_no_data">Pas encore de données</string>
 </resources>

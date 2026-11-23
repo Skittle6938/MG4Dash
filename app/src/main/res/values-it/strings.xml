@@ -1200,4 +1200,5 @@
     <string name="bk_confirm">Le impostazioni, i profili, il suono di avvio e gli indirizzi web del backup del %1$s sostituiscono quelli attuali. Poi MG4Dash si riavvia.</string>
     <string name="bk_confirm_token">Il token di Home Assistant non era nel backup: reinseriscilo in Impostazioni › Connessioni se manca.</string>
     <string name="bk_confirm_ok">Sostituisci e riavvia</string>
+    <string name="card_no_data">Ancora nessun dato</string>
 </resources>
