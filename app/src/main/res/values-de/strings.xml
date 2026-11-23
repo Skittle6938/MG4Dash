@@ -1177,7 +1177,6 @@
     <string name="usb_saved_internal">Das Auto hat das Kopieren auf den USB-Stick nicht erlaubt: stattdessen im Speicher des Autos gespeichert, %1$s</string>
     <string name="fx_pick_hint">Eine oder mehrere ankreuzen: Jedes Mal wird eine der angekreuzten ausgelost, nie die anderen. Keine angekreuzt: keine Animation.</string>
     <string name="fx_random_of">Zufällig: %1$s</string>
-    <!-- Settings backup on the USB stick (#129) -->
     <string name="bk_title">EINSTELLUNGEN SICHERN</string>
     <string name="bk_desc">Alle Einstellungen, die Profile, der Startton und die Webadressen in einer Datei auf dem USB-Stick, um sie nach einem Zurücksetzen des Radios wiederherzustellen.</string>
     <string name="bk_save">Auf USB-Stick sichern</string>

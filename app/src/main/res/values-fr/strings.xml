@@ -1177,7 +1177,6 @@
     <string name="usb_saved_internal">La voiture n’a pas donné la permission de copier sur la clé USB : enregistré à la place dans la mémoire de la voiture, %1$s</string>
     <string name="fx_pick_hint">Cochez-en une ou plusieurs : à chaque fois, l’une des cochées est tirée au sort, jamais les autres. Aucune cochée : pas d’animation.</string>
     <string name="fx_random_of">Aléatoire : %1$s</string>
-    <!-- Settings backup on the USB stick (#129) -->
     <string name="bk_title">SAUVEGARDE DES RÉGLAGES</string>
     <string name="bk_desc">Tous les réglages, les profils, le son de démarrage et les adresses web, dans un seul fichier sur la clé USB, à remettre après une réinitialisation de l’autoradio.</string>
     <string name="bk_save">Sauvegarder sur la clé USB</string>

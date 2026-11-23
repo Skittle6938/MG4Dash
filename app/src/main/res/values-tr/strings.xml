@@ -1177,7 +1177,6 @@
     <string name="usb_saved_internal">Araç USB belleğe kopyalama izni vermedi: bunun yerine aracın belleğine kaydedildi, %1$s</string>
     <string name="fx_pick_hint">Bir veya birkaç tanesini işaretleyin: her seferinde işaretlenenlerden biri seçilir, diğerleri asla. Hiçbiri işaretli değilse animasyon yok.</string>
     <string name="fx_random_of">Rastgele: %1$s</string>
-    <!-- Settings backup on the USB stick (#129) -->
     <string name="bk_title">AYARLARIN YEDEĞİ</string>
     <string name="bk_desc">Tüm ayarlar, profiller, açılış sesi ve web adresleri USB bellekte tek bir dosyada; radyo sıfırlandıktan sonra geri yüklemek için.</string>
     <string name="bk_save">USB belleğe kaydet</string>

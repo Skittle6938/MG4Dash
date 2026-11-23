@@ -1177,7 +1177,6 @@
     <string name="usb_saved_internal">Auto nepovolilo kopírování na USB disk: uloženo místo toho do paměti auta, %1$s</string>
     <string name="fx_pick_hint">Zaškrtněte jednu nebo více: pokaždé se vylosuje jedna ze zaškrtnutých, nikdy ostatní. Žádná zaškrtnutá: žádná animace.</string>
     <string name="fx_random_of">Náhodně: %1$s</string>
-    <!-- Settings backup on the USB stick (#129) -->
     <string name="bk_title">ZÁLOHA NASTAVENÍ</string>
     <string name="bk_desc">Všechna nastavení, profily, zvuk při startu a webové adresy v jednom souboru na USB disku, k obnovení po resetu rádia.</string>
     <string name="bk_save">Uložit na USB disk</string>

@@ -1177,7 +1177,6 @@
     <string name="usb_saved_internal">L’auto non ha dato il permesso di copiare sulla chiavetta USB: salvato invece nella memoria dell’auto, %1$s</string>
     <string name="fx_pick_hint">Selezionane una o più: ogni volta ne viene estratta una tra quelle selezionate, mai le altre. Nessuna selezionata: nessuna animazione.</string>
     <string name="fx_random_of">Casuale: %1$s</string>
-    <!-- Settings backup on the USB stick (#129) -->
     <string name="bk_title">BACKUP DELLE IMPOSTAZIONI</string>
     <string name="bk_desc">Tutte le impostazioni, i profili, il suono di avvio e gli indirizzi web in un unico file sulla chiavetta USB, da ripristinare dopo un reset della radio.</string>
     <string name="bk_save">Salva sulla chiavetta USB</string>

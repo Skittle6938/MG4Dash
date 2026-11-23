@@ -1177,7 +1177,6 @@
     <string name="usb_saved_internal">The car did not give permission to copy to the USB stick: saved in the car’s memory instead, %1$s</string>
     <string name="fx_pick_hint">Tick one or more: each time, one of those ticked is drawn, never the others. None ticked: no animation.</string>
     <string name="fx_random_of">Random: %1$s</string>
-    <!-- Settings backup on the USB stick (#129) -->
     <string name="bk_title">SETTINGS BACKUP</string>
     <string name="bk_desc">All the settings, the profiles, the startup sound and the web addresses in one file on the USB stick, to put back after a reset of the head unit.</string>
     <string name="bk_save">Save to the USB stick</string>
