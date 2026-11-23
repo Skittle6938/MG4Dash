@@ -39,18 +39,34 @@ class StartupPlaybackTest {
     }
 
     /** MG4Radio #6: USB music with Android Auto for Waze only, phone unplugged: USB kept, not the radio. */
-    @Test fun androidAutoGoneGivesBackRecentCarMusic() {
-        val now = 1_000_000L
+    @Test fun androidAutoGoneGivesBackTheCarSourceUnderIt() {
+        val now = 10_000_000L
         val avail = listOf(radio, usb)
-        assertEquals("USB playing", usb, MediaHub.recentCarSource(aa, mapOf(usb to now), avail, now))
-        assertEquals("USB ducked or paused for a Waze announcement", usb, MediaHub.recentCarSource(aa, mapOf(usb to now - 8_000), avail, now))
-        assertEquals("USB paused during a Gemini answer", usb, MediaHub.recentCarSource(aa, mapOf(usb to now - 40_000), avail, now))
-        assertNull("nothing played: fallback order unchanged", MediaHub.recentCarSource(aa, emptyMap(), avail, now))
-        assertNull("played long ago", MediaHub.recentCarSource(aa, mapOf(usb to now - 5 * 60_000), avail, now))
-        assertNull("the radio is the fallback's job", MediaHub.recentCarSource(aa, mapOf(radio to now), avail, now))
-        assertNull("USB not there", MediaHub.recentCarSource(aa, mapOf(usb to now), listOf(radio), now))
-        assertNull("only for Android Auto lost", MediaHub.recentCarSource(bt, mapOf(usb to now), avail, now))
-        assertEquals("the most recent", bt, MediaHub.recentCarSource(aa, mapOf(usb to now - 30_000, bt to now - 2_000), listOf(radio, usb, bt), now))
+        fun under(played: Map<String, Long>, aaMedia: Long?, read: Boolean = true, av: List<String> = avail, cur: String = aa) =
+            MediaHub.carSourceUnderAa(cur, played, av, now, aaMedia, read)
+        assertEquals("USB playing, Waze guidance only", usb to true, under(mapOf(usb to now), null))
+        assertEquals("USB paused for a Gemini answer", usb to true, under(mapOf(usb to now - 20_000), null))
+        assertEquals("USB paused by the driver long ago, no AA music: back paused", usb to false, under(mapOf(usb to now - 30 * 60_000), null))
+        assertNull("real Android Auto music after USB: fallback order", under(mapOf(usb to now - 20_000), now - 5_000))
+        assertEquals("Android Auto music before USB played again", usb to true, under(mapOf(usb to now), now - 60_000))
+        assertNull("nothing played: fallback order unchanged", under(emptyMap(), null))
+        assertNull("the radio is the fallback's job", under(mapOf(radio to now), null))
+        assertNull("USB not there", under(mapOf(usb to now), null, av = listOf(radio)))
+        assertNull("only for Android Auto lost", under(mapOf(usb to now), null, cur = bt))
+        assertEquals("the most recent", bt to true, under(mapOf(usb to now - 30_000, bt to now - 2_000), null, av = listOf(radio, usb, bt)))
+        // Usages unreadable: the last minute only
+        assertEquals("unreadable, played just before", usb to true, under(mapOf(usb to now - 40_000), null, read = false))
+        assertNull("unreadable, played long ago", under(mapOf(usb to now - 5 * 60_000), null, read = false))
+    }
+
+    @Test fun androidAutoUsages() {
+        assertTrue("music", MediaHub.realMediaUsage(1))
+        assertTrue("game", MediaHub.realMediaUsage(14))
+        assertTrue("undeclared counts as music", MediaHub.realMediaUsage(0))
+        assertFalse("navigation guidance (Waze)", MediaHub.realMediaUsage(12))
+        assertFalse("assistant (Gemini)", MediaHub.realMediaUsage(16))
+        assertFalse("voice call", MediaHub.realMediaUsage(2))
+        assertFalse("sonification", MediaHub.realMediaUsage(13))
     }
 
     @Test fun betterSourceArrivingLater() {
