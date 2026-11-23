@@ -184,7 +184,7 @@ class ScreenshotTest {
         repeat(5) { shadowOf(Looper.getMainLooper()).idleFor(200, TimeUnit.MILLISECONDS) }
         // After the energy monitor's first pass (which closes the trip it found): the sample trips
         seedTrips()
-        (MainActivity::class.java.getDeclaredField("trips").apply { isAccessible = true }.get(act) as app.mg4dash.ui.TripsCard).show()
+        ((MainActivity::class.java.getDeclaredField("homeCards").apply { isAccessible = true }.get(act) as Map<*, *>)[app.mg4dash.ui.HomeSlots.Card.TRIPS] as app.mg4dash.ui.TripsCard).show()
         save(act.window.decorView, "trips_card_button_real.png")
     }
 
@@ -196,7 +196,7 @@ class ScreenshotTest {
         val home = Robolectric.buildActivity(MainActivity::class.java).setup().get()
         repeat(5) { shadowOf(Looper.getMainLooper()).idleFor(200, TimeUnit.MILLISECONDS) }
         seedTrips()
-        (MainActivity::class.java.getDeclaredField("trips").apply { isAccessible = true }.get(home) as app.mg4dash.ui.TripsCard).show()
+        ((MainActivity::class.java.getDeclaredField("homeCards").apply { isAccessible = true }.get(home) as Map<*, *>)[app.mg4dash.ui.HomeSlots.Card.TRIPS] as app.mg4dash.ui.TripsCard).show()
         save(home.window.decorView, "trips_card_cost2_real.png")
         val page = Robolectric.buildActivity(app.mg4dash.pages.TripsActivity::class.java).setup().get()
         repeat(5) { shadowOf(Looper.getMainLooper()).idleFor(200, TimeUnit.MILLISECONDS) }
@@ -1565,7 +1565,7 @@ class ScreenshotTest {
             org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE).edit().putString("slot_now_map_center_c", "trips").commit()
             val act = layoutHome(HL.MAP_CENTER, "tl=hourly,daily;bl=climate;c=trips,map;tr=media;br=energy,trip,power,phone", mode)
             seedTrips()
-            (MainActivity::class.java.getDeclaredField("trips").apply { isAccessible = true }.get(act) as app.mg4dash.ui.TripsCard).show()
+            ((MainActivity::class.java.getDeclaredField("homeCards").apply { isAccessible = true }.get(act) as Map<*, *>)[app.mg4dash.ui.HomeSlots.Card.TRIPS] as app.mg4dash.ui.TripsCard).show()
             save(act.window.decorView, "pinch_v2/trips_tall_${if (mode == 1) "dark" else "light"}.png")
         }
         shots.forEachIndexed { i, (mode, layout, slots) ->

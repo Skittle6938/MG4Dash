@@ -51,7 +51,7 @@ class DrivingSwipeTest {
         @Suppress("UNCHECKED_CAST")
         val f = (MainActivity::class.java.getDeclaredField("frames").apply { isAccessible = true }.get(act) as Map<String, Any>).getValue(slot)
         val box = f.javaClass.getDeclaredField("box").apply { isAccessible = true }.get(f) as ViewGroup
-        return box to (MainActivity::class.java.getDeclaredField("driving").apply { isAccessible = true }.get(act) as View)
+        return box to ((MainActivity::class.java.getDeclaredField("homeCards").apply { isAccessible = true }.get(act) as Map<*, *>)[app.mg4dash.ui.HomeSlots.Card.DRIVING] as View)
     }
 
     /** Centre of [v] in [box]'s coordinates, moved down by [dy]. */
@@ -89,7 +89,7 @@ class DrivingSwipeTest {
             .putString("slot_now_full_tc", "driving").commit()
         val act = Robolectric.buildActivity(MainActivity::class.java).setup().get()
         idle()
-        val card = MainActivity::class.java.getDeclaredField("driving").apply { isAccessible = true }.get(act) as View
+        val card = (MainActivity::class.java.getDeclaredField("homeCards").apply { isAccessible = true }.get(act) as Map<*, *>)[app.mg4dash.ui.HomeSlots.Card.DRIVING] as View
         chips(card).first { it.text.toString() == act.getString(R.string.dm_sport) }.performClick()
         assertEquals(4, app.mg4dash.car.CarBridge.state.value.driveMode)
         assertEquals("driving", sp.getString("slot_now_full_tc", null))
