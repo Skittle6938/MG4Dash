@@ -99,3 +99,5 @@ configurations.all { exclude(group = "androidx.profileinstaller", module = "prof
 tasks.configureEach {
     if (name.contains("ArtProfile", ignoreCase = true)) enabled = false
 }
+
+apply(from = rootProject.file("gradle/robolectric-offline.gradle.kts"))

@@ -51,3 +51,5 @@ tasks.withType<Test>().configureEach {
         showStandardStreams = false
     }
 }
+
+apply(from = rootProject.file("gradle/robolectric-offline.gradle.kts"))
