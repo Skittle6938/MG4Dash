@@ -50,6 +50,16 @@ class SettingsBackupTest {
         SoundTriggerSettings.soundDir(c).listFiles()?.forEach { it.delete() }
     }
 
+    /** The stick seen at /storage/<id> and /mnt/media_rw/<id>: each backup listed once (Marc 23/11). */
+    @Test fun aBackupSeenThroughTwoMountsListedOnce() {
+        val shared = File(tmp.root, "storage/0601-E14E").apply { mkdirs() }
+        val raw = File(tmp.root, "mnt/media_rw/0601-E14E").apply { mkdirs() }
+        val a = "mg4dash_settings_20261123_1940.json"; val b = "mg4dash_settings_20261122_0800.json"
+        for (d in listOf(shared, raw)) { File(d, a).writeText("{\"x\":1}"); File(d, b).writeText("{\"x\":22}") }
+        val files = listOf(File(shared, a), File(shared, b), File(raw, a), File(raw, b))
+        assertEquals(listOf(File(shared, a), File(shared, b)), SettingsBackup.distinctBackups(files))
+    }
+
     @Test fun fileName() {
         val at = java.util.Calendar.getInstance().apply { set(2026, java.util.Calendar.NOVEMBER, 23, 8, 52, 10) }.timeInMillis
         assertEquals("mg4dash_settings_20261123_0852.json", SettingsBackup.fileName(at))
