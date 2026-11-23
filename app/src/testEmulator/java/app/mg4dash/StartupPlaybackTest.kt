@@ -38,6 +38,21 @@ class StartupPlaybackTest {
         assertEquals("wired Android Auto may be", aa, MediaHub.replacement(listOf(bt, aa, radio), bt, listOf(aa, radio), carPlay = false))
     }
 
+    /** MG4Radio #6: USB music with Android Auto for Waze only, phone unplugged: USB kept, not the radio. */
+    @Test fun androidAutoGoneGivesBackRecentCarMusic() {
+        val now = 1_000_000L
+        val avail = listOf(radio, usb)
+        assertEquals("USB playing", usb, MediaHub.recentCarSource(aa, mapOf(usb to now), avail, now))
+        assertEquals("USB ducked or paused for a Waze announcement", usb, MediaHub.recentCarSource(aa, mapOf(usb to now - 8_000), avail, now))
+        assertEquals("USB paused during a Gemini answer", usb, MediaHub.recentCarSource(aa, mapOf(usb to now - 40_000), avail, now))
+        assertNull("nothing played: fallback order unchanged", MediaHub.recentCarSource(aa, emptyMap(), avail, now))
+        assertNull("played long ago", MediaHub.recentCarSource(aa, mapOf(usb to now - 5 * 60_000), avail, now))
+        assertNull("the radio is the fallback's job", MediaHub.recentCarSource(aa, mapOf(radio to now), avail, now))
+        assertNull("USB not there", MediaHub.recentCarSource(aa, mapOf(usb to now), listOf(radio), now))
+        assertNull("only for Android Auto lost", MediaHub.recentCarSource(bt, mapOf(usb to now), avail, now))
+        assertEquals("the most recent", bt, MediaHub.recentCarSource(aa, mapOf(usb to now - 30_000, bt to now - 2_000), listOf(radio, usb, bt), now))
+    }
+
     @Test fun betterSourceArrivingLater() {
         // After the 15 s of the startup, the phone over Bluetooth back: it takes over (the state kept by autoSwitch)
         assertEquals(bt, MediaHub.betterSource(listOf(bt, radio), radio) { it == bt || it == radio })

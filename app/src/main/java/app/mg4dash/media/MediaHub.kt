@@ -223,6 +223,8 @@ object MediaHub {
         recordPlayback(p)
         // Last time each car source was playing: used to restart after an announcement only what was playing
         for (pkg in CAR_SOURCES) if (browserControllers[pkg]?.let { isPlaying(it) } == true) playingAt[pkg] = now
+        // SWI68 (service media): the USB state comes from the media service, not always from its browser
+        if (SaicMedia.last?.playing == true) playingAt[USB] = now
         restoreAfterPrompt(now)
         // Type 70 (Android Auto) held by another app (DiAuto) while AllGo has no phone: the
         // real source is that app's player, not a "gone" Android Auto to replace. DiAuto
@@ -247,6 +249,9 @@ object MediaHub {
         if (toProjection && !goneToProjectionLogged) { goneToProjectionLogged = true; Log.i(TAG, "$cur gone: the phone's projection has the audio, no automatic source") }
         if (!curGone) goneToProjectionLogged = false
         if (toProjection) return
+        // Android Auto only guiding (Waze) over car music: the car source that played just before it goes back
+        // and keeps playing, instead of the fallback order that started the radio (MG4Radio #6)
+        if (curGone) recentCarSource(cur, playingAt, avail, now)?.let { Log.i(TAG, "$cur gone: $it was playing just before, kept"); autoSwitch(it, "$cur gone, $it was playing", play = true); return }
         if (curGone && !toProjection) { Log.i(TAG, "$cur gone: mode $mode, order $order, available $avail"); replacement(order, cur, avail, carPlay)?.let { autoSwitch(it, "$cur gone", play = playingState()) }; return }
         // As the car, or a fixed source: chosen once at startup (the sequence), then only replaced when lost
         if (mode >= 1) return
@@ -258,6 +263,19 @@ object MediaHub {
         // A better-ranked source back (the phone over Bluetooth…): it takes over in the current state, paused stays paused
         betterSource(order, cur) { stable(it) && !(it == BT && projecting) }?.let { autoSwitch(it, "$it back", play = playingState()) }
     }
+
+    /**
+     * Android Auto [cur] lost while USB or Bluetooth played in the car shortly before ([playedAt], uptime ms): that
+     * source, the most recent. "Shortly before" and not "now": the car pauses USB during a Waze announcement or a
+     * Gemini answer. Null otherwise (the usual fallback order).
+     */
+    internal fun recentCarSource(cur: String, playedAt: Map<String, Long>, avail: List<String>, now: Long): String? {
+        if (cur != AA_MBS) return null
+        return listOf(USB, BT).filter { it in avail }
+            .mapNotNull { pkg -> playedAt[pkg]?.takeIf { now - it in 0..RECENT_CAR_MS }?.let { pkg to it } }
+            .maxByOrNull { it.second }?.first
+    }
+    private const val RECENT_CAR_MS = 60_000L
 
     /** The source replacing [cur], lost: the first of [order] there, never CarPlay. */
     internal fun replacement(order: List<String>, cur: String, avail: List<String>, carPlay: Boolean): String? =
