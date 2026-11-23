@@ -94,6 +94,18 @@ object HomeSwitcher {
     }
 
     /**
+     * Out of maintenance mode with the SAIC home kept as the home (Discussion #111: MG4Dash used as an app, opened from
+     * MG4Swipe): nothing disabled, Radio Dash back if it was switched off for maintenance, the rescue told.
+     */
+    fun leaveMaintenanceKeepStock(context: Context) {
+        Prefs(context).valetMode = false
+        Prefs(context).valetAuto = false
+        RadioDashGuard.maintenanceOff(context)
+        noteHome(context)
+        Log.i(TAG, "maintenance mode left, SAIC home kept: MG4Dash used as an app")
+    }
+
+    /**
      * Should MG4Dash set itself as home again? Only when the driver chose it ([stockDisabled]: SAIC home replaced),
      * not in maintenance mode, and HOME no longer resolves to it ([current]: the chooser, or nothing).
      */

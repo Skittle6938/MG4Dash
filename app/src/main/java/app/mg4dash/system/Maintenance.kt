@@ -21,18 +21,27 @@ object Maintenance {
     /**
      * For a MG4Dash screen opened in maintenance mode (a Radio Dash shortcut, the stock radio's arrow, MG4Link's "Open
      * MG4Dash"): closed at once and silently, nothing offered (21/11, #123: in maintenance nothing of MG4Dash
-     * reacts; the way back is the three-finger gesture, MG4Dash chosen again as the home in Android's settings, or
-     * MG4Dash opened from an app list).
+     * reacts; the way back is the three-finger gesture or MG4Dash chosen again as the home in Android's settings;
+     * opened from an app list, it leaves maintenance as an app, the SAIC home kept).
      * True when it closed (its onCreate then stops there).
      */
     fun closeIfOn(activity: Activity): Boolean {
         if (!on(activity)) return false
-        // The driver chose MG4Dash as the home again in Android's settings, or opened it from an app list (another
-        // launcher): maintenance left, MG4Dash back in full. The other apps' shortcuts open its pages, never this.
-        if (activity is app.mg4dash.MainActivity && (chosenAsHome(activity) || openedFromAppList(activity.intent))) {
-            Log.i(TAG, "MG4Dash chosen as the home or opened from an app list: leaving maintenance mode")
+        // The driver chose MG4Dash as the home again in Android's settings: maintenance left, MG4Dash the home again.
+        // The other apps' shortcuts open its pages, never this.
+        if (activity is app.mg4dash.MainActivity && chosenAsHome(activity)) {
+            Log.i(TAG, "MG4Dash chosen as the home: leaving maintenance mode")
             activity.finish()
             backToDash(activity)
+            return true
+        }
+        // Opened from an app list (another launcher, MG4Swipe): maintenance left, the SAIC home kept, MG4Dash opened
+        // as a normal app (Discussion #111: used as an app, not as the home). Back as the home: the three-finger
+        // gesture, or Settings › System › Replace SAIC home.
+        if (activity is app.mg4dash.MainActivity && openedFromAppList(activity.intent)) {
+            Log.i(TAG, "MG4Dash opened from an app list: leaving maintenance mode, SAIC home kept")
+            activity.finish()
+            openAsApp(activity)
             return true
         }
         Log.i(TAG, "${activity.javaClass.simpleName} opened in maintenance mode: closed silently")
@@ -67,6 +76,22 @@ object Maintenance {
             if (!MOCK) android.os.Process.killProcess(android.os.Process.myPid())
         } catch (e: Exception) { Log.w(TAG, "restart: ${e.message}") }
         return true
+    }
+
+    /**
+     * Out of maintenance mode as an app, the SAIC home kept: restarted in full (only its light part runs in
+     * maintenance mode), its home screen opened a moment later as from an app list.
+     */
+    fun openAsApp(context: Context) {
+        val app = context.applicationContext
+        HomeSwitcher.leaveMaintenanceKeepStock(app)
+        try {
+            val main = Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER).setComponent(HomeSwitcher.ours(app))
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+            val pi = PendingIntent.getActivity(app, 9, main, PendingIntent.FLAG_CANCEL_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+            (app.getSystemService(Context.ALARM_SERVICE) as AlarmManager).set(AlarmManager.RTC, System.currentTimeMillis() + 800, pi)
+            if (!MOCK) android.os.Process.killProcess(android.os.Process.myPid())
+        } catch (e: Exception) { Log.w(TAG, "restart as an app: ${e.message}") }
     }
 
     /**
