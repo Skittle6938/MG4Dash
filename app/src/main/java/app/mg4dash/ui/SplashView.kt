@@ -65,7 +65,8 @@ class SplashView(context: Context) : View(context) {
             lastFrame = now
             postInvalidateOnAnimation()
         } else lastFrame = 0L
-        val revealTime = time / 2f
+        // No reveal (23/11): the logo, the name and the slogan shown at once, only the dots below them move
+        val revealTime = 2f
         canvas.drawColor(Color.BLACK)
         // Design coordinates keep the composition inside both wide and smaller displays.
         val scale = minOf(width / 960f, height / 360f)
