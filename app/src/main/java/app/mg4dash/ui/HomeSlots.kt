@@ -55,13 +55,14 @@ object HomeSlots {
         RADAR("radar", R.string.wc_radar, R.drawable.ic_radar),
         /** The Android Auto guidance alone (19/11): only where the driver places it, in any size. */
         NAV("nav", R.string.wc_nav, R.drawable.ic_map),
+        /** Synchronized lyrics: only placed by the driver, never used to fill an empty place automatically. */
         LYRICS("lyrics", R.string.wc_lyrics, R.drawable.ic_music);
 
         /** Fills a big place (two columns): the others would look lost in it, they are greyed there in the edit mode. */
         val big: Boolean get() = this == MAP || this == WEB || this == CONSUMPTION || this == SHORTCUTS || this == DRIVING || this == RADAR || this == NAV
 
         /** Only placed by the driver, never put in an empty place by itself. */
-        val manual: Boolean get() = this == TRIPS || this == DRIVING || this == CLIMATE || this == RADAR || this == NAV
+        val manual: Boolean get() = this == TRIPS || this == DRIVING || this == CLIMATE || this == RADAR || this == NAV || this == LYRICS
     }
 
     /**
