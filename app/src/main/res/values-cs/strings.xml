@@ -1201,4 +1201,8 @@
     <string name="bk_confirm_token">Token Home Assistant nebyl v záloze: pokud chybí, zadejte ho znovu v Nastavení › Připojení.</string>
     <string name="bk_confirm_ok">Nahradit a restartovat</string>
     <string name="card_no_data">Zatím žádná data</string>
+    <string name="st_cards_offered">Nabízené karty…</string>
+    <string name="st_cards_offered_note">Neoznačené karty se nezobrazují v režimu úprav ani na domovské obrazovce. Po opětovném označení se vrátí na své místo.</string>
+    <string name="opt_open">Otevřít</string>
+    <string name="opt_clear">Vymazat</string>
 </resources>

@@ -1,5 +1,6 @@
 package app.mg4dash.ui
 
+import kotlinx.coroutines.launch
 import android.content.Context
 import android.util.TypedValue
 import android.view.Gravity
@@ -18,7 +19,17 @@ import java.util.Locale
  * the time and km left and the arrival time; only the "then" line (when MG4Link sends one) stays out of the small
  * place. Sizes in sp, none under 22 for a useful text: what does not fit is cut (the street) rather than shrunk.
  */
-class NavCard(context: Context) : FrameLayout(context) {
+class NavCard(context: Context) : FrameLayout(context), app.mg4dash.cards.HomeCard {
+    override val card = HomeSlots.Card.NAV
+    override val view: View get() = this
+
+    override fun place(p: app.mg4dash.cards.CardPlace) { form = formFor(p.size) }
+
+    /** Shown: Android Auto's guidance followed, with the battery estimated on arrival from the distance left. */
+    private val follow = app.mg4dash.cards.CardScope()
+    override fun shown(on: Boolean) = follow.set(on) {
+        launch { NavRepo.nav.collect { n -> show(n, n?.let { app.mg4dash.energy.ArrivalBattery.now(context, it.totalMeters) }) } }
+    }
 
     enum class Form { SMALL, MEDIUM, TALL, WIDE }
 

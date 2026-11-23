@@ -408,6 +408,11 @@ class Prefs(context: Context) {
         get() = sp.getBoolean("power_va", false)
         set(v) = sp.edit().putBoolean("power_va", v).apply()
 
+    /** Cards switched off in Settings › Home › Cards offered (their ids): out of the edit mode and of the home screen. */
+    var cardsOff: Set<String>
+        get() = sp.getStringSet("cards_off", null)?.toSet() ?: emptySet()
+        set(v) = sp.edit().putStringSet("cards_off", v.toSet()).apply()
+
     var energyCardPower: Boolean
         get() = sp.getBoolean("energy_card_power", false)
         set(v) = sp.edit().putBoolean("energy_card_power", v).apply()

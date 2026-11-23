@@ -70,7 +70,28 @@ That's all. You don't need to touch `MainActivity` or the editor.
 - **Data.** Read car data from `CarBridge.state`, and media from `MediaHub`. Use mobile data sparingly: only while
   shown, and keep it small.
 
-### Existing cards
+### Switching cards off
 
-The **last trips** and **driving** cards already follow the contract (`ui/TripsCard.kt`, `ui/DrivingCard.kt`). The
-others are still built by the home screen itself and will be moved to the contract one by one.
+In Settings › Home › *Cards offered*, the driver can untick cards. An unticked card is no longer offered in the edit
+mode and is no longer shown on the home screen, but its places are kept: tick it again and it comes back where it was.
+A new card needs nothing for this: it is in the list as soon as it is in `HomeSlots.Card`.
+
+### Existing cards and exceptions
+
+These cards follow the contract fully, each in its own file: consumption, weather by hour and by day, last trips,
+driving, speed cameras and guidance.
+
+A few documented exceptions remain:
+
+- **Cards drawn by the home screen itself** (`cards/HostCard.kt`): climate, energy, trip, power, phone, shortcuts, map
+  and web app. Their views come from the home screen's layout and share its state (embedded apps, floating windows,
+  power effects, the fog light button). They go through the card list, the same life calls and the same options
+  window, but their code stays in `MainActivity`. Unlike the other cards, they keep running behind a page opened over
+  home, because the map's embedded app and the web page must stay as they are.
+- **Map and web app: their long press** opens the menu that chooses what they show (an app, OpenStreetMap, a web
+  address). Their options are behind the gear in that menu.
+- **Weather cards** are a touchable tile with their own panel, so they are not wrapped in the cards' frame
+  (`framed = false`).
+- **Speed cameras**: the alerter runs while its card is in a place, shown or not (its alerts go over Android Auto). The
+  home screen starts and stops it. Its settings are a whole page, which its options window opens.
+- **Media** is not a card: a place either shows the media alone or cards.

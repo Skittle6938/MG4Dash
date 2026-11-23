@@ -137,7 +137,9 @@ class SettingsActivity : AppCompatActivity() {
                 .addFlags(android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP or android.content.Intent.FLAG_ACTIVITY_SINGLE_TOP))
             finish()
         }
-        row(style, editBtn)
+        // Cards offered: the cards switched off leave the edit mode and the home screen (with many cards, a shorter list)
+        val cardsBtn = button(getString(R.string.st_cards_offered)) { cardsOffered() }
+        row(style, editBtn, cardsBtn)
         paintStyle = {
             simpleBtn.isSelected = prefs.homeStyle == 1
             layoutBtn.isSelected = prefs.homeStyle != 1 && prefs.homeStyle != Prefs.STYLE_BIG
@@ -1582,6 +1584,20 @@ class SettingsActivity : AppCompatActivity() {
         line(box, null, getString(R.string.br_curve_hint), deleteBtn)
         p.addView(box, LinearLayout.LayoutParams(-1, -2))
     }
+    /** Settings › Home › Cards offered: a box per card, all ticked at first; half of them in each column. */
+    private fun cardsOffered() {
+        val cards = app.mg4dash.ui.HomeSlots.Card.entries
+        val popup = app.mg4dash.ui.OptionsPopup(this, getString(R.string.st_cards_offered).trimEnd('…', '.', ' '))
+            .note(getString(R.string.st_cards_offered_note))
+        cards.forEachIndexed { i, card ->
+            if (i == (cards.size + 1) / 2) popup.column()
+            popup.check(getString(card.label), { card.id !in prefs.cardsOff }) { on ->
+                prefs.cardsOff = if (on) prefs.cardsOff - card.id else prefs.cardsOff + card.id
+            }
+        }
+        popup.show()
+    }
+
     private fun panel(parent: LinearLayout, title: String, fill: Boolean = false): LinearLayout {
         val p = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL

@@ -1201,4 +1201,8 @@
     <string name="bk_confirm_token">Het Home Assistant-token zat niet in de back-up: voer het zo nodig opnieuw in bij Instellingen › Verbindingen.</string>
     <string name="bk_confirm_ok">Vervangen en herstarten</string>
     <string name="card_no_data">Nog geen gegevens</string>
+    <string name="st_cards_offered">Aangeboden kaarten…</string>
+    <string name="st_cards_offered_note">Niet-aangevinkte kaarten verschijnen niet meer in de bewerkingsmodus of op het startscherm. Weer aangevinkt, keren ze terug naar hun plek.</string>
+    <string name="opt_open">Openen</string>
+    <string name="opt_clear">Wissen</string>
 </resources>

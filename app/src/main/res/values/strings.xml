@@ -1201,4 +1201,8 @@
     <string name="bk_confirm_token">The Home Assistant token was not in the backup: enter it again in Settings › Connections if it is missing.</string>
     <string name="bk_confirm_ok">Replace and restart</string>
     <string name="card_no_data">No data yet</string>
+    <string name="st_cards_offered">Cards offered…</string>
+    <string name="st_cards_offered_note">Unticked cards are left out of the edit mode and of the home screen. Ticked again, they come back where they were.</string>
+    <string name="opt_open">Open</string>
+    <string name="opt_clear">Clear</string>
 </resources>

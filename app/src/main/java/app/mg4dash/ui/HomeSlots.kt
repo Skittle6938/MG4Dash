@@ -75,6 +75,12 @@ object HomeSlots {
         else -> size.span == 1
     }
 
+    /**
+     * Cards switched off by the driver (Settings › Home › Cards offered): neither offered in the edit mode nor shown.
+     * Their places are kept: ticked again, a card comes back where it was.
+     */
+    fun switchedOff(prefs: Prefs): Set<Card> = prefs.cardsOff.mapNotNull { id -> Card.entries.firstOrNull { it.id == id } }.toSet()
+
     /** The media in a medium or tall place, alone: it uses the swipes for its sources and tracks. */
     fun mediaFits(size: Size): Boolean = size == Size.MEDIUM || size == Size.TALL || size.big
 

@@ -1201,4 +1201,8 @@
     <string name="bk_confirm_token">Das Home-Assistant-Token war nicht in der Sicherung: bei Bedarf unter Einstellungen › Verbindungen neu eingeben.</string>
     <string name="bk_confirm_ok">Ersetzen und neu starten</string>
     <string name="card_no_data">Noch keine Daten</string>
+    <string name="st_cards_offered">Angebotene Karten…</string>
+    <string name="st_cards_offered_note">Nicht angehakte Karten erscheinen weder im Bearbeitungsmodus noch auf dem Startbildschirm. Wieder angehakt, kehren sie an ihren Platz zurück.</string>
+    <string name="opt_open">Öffnen</string>
+    <string name="opt_clear">Löschen</string>
 </resources>

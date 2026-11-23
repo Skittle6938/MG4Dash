@@ -23,6 +23,12 @@ interface HomeCard {
     /** Its view, filling its place; the home screen wraps it in the cards' frame (corners, outline). */
     val view: View
 
+    /**
+     * Wrapped in the cards' frame (rounded corners, outline drawn over it). False only for a card that draws its own
+     * panel (exception: the weather cards, a touchable tile).
+     */
+    val framed: Boolean get() = true
+
     /** The place it is in now: called before it is first shown, and again when it moves. */
     fun place(p: CardPlace) {}
 
@@ -34,6 +40,15 @@ interface HomeCard {
 
     /** Its options, added to the standard popup opened by a long press on the card; null: no options, no long press. */
     fun options(popup: OptionsPopup): OptionsPopup? = null
+
+    /** Its options window closed: apply what changed (rebuild what is built with them). */
+    fun optionsClosed() {}
+
+    /**
+     * Stopped ([shown] false) while home is out of sight (a page or another app over it). Only the cards drawn by the
+     * home screen itself ([HostCard]) keep running.
+     */
+    val pausesWithHome: Boolean get() = true
 }
 
 /**

@@ -1,5 +1,6 @@
 package app.mg4dash.radar
 
+import kotlinx.coroutines.launch
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Paint
@@ -20,8 +21,37 @@ import kotlin.math.sin
  * medium one; in a wide or tall one, a dial with the limit marked in red, the sign, and the current zone, the next
  * limit and the zones ahead. White as long as the speed is under the limit, orange a little over, red well over.
  */
-class RadarCard(context: Context) : View(context) {
+class RadarCard(context: Context) : View(context), app.mg4dash.cards.HomeCard {
     enum class Form { SMALL, MEDIUM, FULL }
+
+    override val card = app.mg4dash.ui.HomeSlots.Card.RADAR
+    override val view: View get() = this
+
+    override fun place(p: app.mg4dash.cards.CardPlace) {
+        form = when {
+            p.small -> Form.SMALL
+            p.medium -> Form.MEDIUM
+            else -> Form.FULL
+        }
+    }
+
+    /**
+     * Shown: the alerter's state, the preparation and the live downloads followed. The alerter itself runs while the
+     * card is in a place, shown or not (its alerts go over Android Auto): the home screen starts and stops it.
+     */
+    private val follow = app.mg4dash.cards.CardScope()
+    override fun shown(on: Boolean) = follow.set(on) {
+        launch { RadarRepo.state.collect { show(it) } }
+        launch { RadarRepo.prepare.collect { downloads(it, RadarRepo.live.value) } }
+        launch { RadarRepo.live.collect { downloads(RadarRepo.prepare.value, it) } }
+    }
+
+    /** Its settings are a whole page (sounds, thresholds, data): the options window opens it. */
+    override fun options(popup: app.mg4dash.ui.OptionsPopup): app.mg4dash.ui.OptionsPopup =
+        popup.action(context.getString(R.string.wc_radar), null, context.getString(R.string.opt_open)) {
+            context.startActivity(android.content.Intent(context, app.mg4dash.settings.SettingsActivity::class.java)
+                .putExtra(app.mg4dash.settings.SettingsActivity.EXTRA_RADAR, true))
+        }
 
     var form = Form.MEDIUM
         set(v) { field = v; invalidate() }

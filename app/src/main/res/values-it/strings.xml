@@ -1201,4 +1201,8 @@
     <string name="bk_confirm_token">Il token di Home Assistant non era nel backup: reinseriscilo in Impostazioni › Connessioni se manca.</string>
     <string name="bk_confirm_ok">Sostituisci e riavvia</string>
     <string name="card_no_data">Ancora nessun dato</string>
+    <string name="st_cards_offered">Schede proposte…</string>
+    <string name="st_cards_offered_note">Le schede non spuntate non compaiono più nella modalità modifica né nella home. Spuntate di nuovo, tornano al loro posto.</string>
+    <string name="opt_open">Apri</string>
+    <string name="opt_clear">Cancella</string>
 </resources>

@@ -1201,4 +1201,8 @@
     <string name="bk_confirm_token">Home Assistant tokeni yedekte yoktu: eksikse Ayarlar › Bağlantılar bölümünde yeniden girin.</string>
     <string name="bk_confirm_ok">Değiştir ve yeniden başlat</string>
     <string name="card_no_data">Henüz veri yok</string>
+    <string name="st_cards_offered">Sunulan kartlar…</string>
+    <string name="st_cards_offered_note">İşareti kaldırılan kartlar düzenleme modunda ve ana ekranda görünmez. Yeniden işaretlenince yerlerine dönerler.</string>
+    <string name="opt_open">Aç</string>
+    <string name="opt_clear">Temizle</string>
 </resources>

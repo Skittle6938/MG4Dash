@@ -66,6 +66,36 @@ class OptionsPopup(private val a: Activity, title: String) {
         return this
     }
 
+    /** A box to tick, on a shorter line (lists of things to keep or leave out). */
+    fun check(title: String, get: () -> Boolean, set: (Boolean) -> Unit): OptionsPopup {
+        lateinit var v: TextView
+        fun paint() { v.text = if (get()) "✓" else ""; v.isSelected = get() }
+        v = chip("") { set(!get()); paint() }.apply { setPadding(0, 0, 0, 0); setTextSize(TypedValue.COMPLEX_UNIT_SP, 22f) }
+        paint()
+        val row = LinearLayout(a).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL; isClickable = true; setOnClickListener { v.performClick() } }
+        row.addView(v, LinearLayout.LayoutParams(dp(48), dp(48)))
+        row.addView(TextView(a).apply { text = title; setTextColor(col(R.color.text_value)); setTextSize(TypedValue.COMPLEX_UNIT_SP, 19f) },
+            LinearLayout.LayoutParams(0, -2, 1f).apply { leftMargin = dp(16) })
+        target += row to LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(12) }
+        return this
+    }
+
+    /** A button doing something at once ([button] on it): the window closes first. */
+    fun action(title: String, sub: String?, button: String, run: () -> Unit): OptionsPopup {
+        val v = chip(button) { closeNow(); run() }.apply { isSelected = true }
+        line(title, sub, v, 240)
+        return this
+    }
+
+    private var closeNow: () -> Unit = {}
+
+    /** A short explanation, in grey, on its own line. */
+    fun note(text: String): OptionsPopup {
+        target += TextView(a).apply { this.text = text; setTextColor(col(R.color.text_sub)); setTextSize(TypedValue.COMPLEX_UNIT_SP, 15f) } to
+            LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(10) }
+        return this
+    }
+
     /** A choice in the same menu as the settings'. */
     fun choice(title: String, sub: String?, labels: List<String>, current: () -> Int, onPick: (Int) -> Unit): OptionsPopup {
         lateinit var v: TextView
@@ -102,6 +132,7 @@ class OptionsPopup(private val a: Activity, title: String) {
         body.addView(close, LinearLayout.LayoutParams(-1, dp(56)).apply { topMargin = dp(24) })
         val dialog = AlertDialog.Builder(a).setView(body).create()
         close.setOnClickListener { dialog.dismiss() }
+        closeNow = { dialog.dismiss() }
         dialog.setOnDismissListener { onClose() }
         Dialogs.show(dialog)
         dialog.window?.setLayout(width, ViewGroup.LayoutParams.WRAP_CONTENT)

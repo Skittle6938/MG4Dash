@@ -1201,4 +1201,8 @@
     <string name="bk_confirm_token">Le token Home Assistant n’était pas dans la sauvegarde : à ressaisir dans Réglages › Connexions s’il manque.</string>
     <string name="bk_confirm_ok">Remplacer et redémarrer</string>
     <string name="card_no_data">Pas encore de données</string>
+    <string name="st_cards_offered">Cartes proposées…</string>
+    <string name="st_cards_offered_note">Les cartes décochées n\'apparaissent plus dans le mode édition ni sur l\'accueil. Recochées, elles reviennent à leur place.</string>
+    <string name="opt_open">Ouvrir</string>
+    <string name="opt_clear">Effacer</string>
 </resources>

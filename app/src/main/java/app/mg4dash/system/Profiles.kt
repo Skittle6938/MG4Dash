@@ -63,6 +63,8 @@ object Profiles {
     val PERSONAL_PREFIXES = listOf("slots_", "slot_now_", "conn_slot_", "wc_", "sc_", "fav_phone_", "radar_snd_", "radar_vol_", "radar_rep_",
         // The smart brightness's learnt curves (one per light / dark look)
         "bright_curve_",
+        // The cards switched off (Settings › Home › Cards offered)
+        "cards_off",
         // The home cards' own settings (cards.CardPrefs: "card_<id>_<name>")
         "card_")
 

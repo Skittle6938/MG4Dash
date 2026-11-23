@@ -1201,4 +1201,8 @@
     <string name="bk_confirm_token">El token de Home Assistant no estaba en la copia: vuelva a introducirlo en Ajustes › Conexiones si falta.</string>
     <string name="bk_confirm_ok">Reemplazar y reiniciar</string>
     <string name="card_no_data">Aún no hay datos</string>
+    <string name="st_cards_offered">Tarjetas disponibles…</string>
+    <string name="st_cards_offered_note">Las tarjetas desmarcadas ya no aparecen en el modo edición ni en el inicio. Marcadas de nuevo, vuelven a su lugar.</string>
+    <string name="opt_open">Abrir</string>
+    <string name="opt_clear">Borrar</string>
 </resources>

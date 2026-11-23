@@ -53,7 +53,7 @@ class RadarShotTest {
             .putString("slots_$layout", slots).commit()
         val act = Robolectric.buildActivity(MainActivity::class.java).setup().get()
         repeat(5) { shadowOf(Looper.getMainLooper()).idleFor(200, TimeUnit.MILLISECONDS) }
-        val card = MainActivity::class.java.getDeclaredField("radar").apply { isAccessible = true }.get(act) as RadarCard
+        val card = (MainActivity::class.java.getDeclaredField("homeCards").apply { isAccessible = true }.get(act) as Map<*, *>)[app.mg4dash.ui.HomeSlots.Card.RADAR] as RadarCard
         card.show(state)
         card.downloads(prep, 0)
         val root = act.window.decorView
