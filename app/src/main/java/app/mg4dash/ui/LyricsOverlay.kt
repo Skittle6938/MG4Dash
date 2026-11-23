@@ -37,6 +37,7 @@ object LyricsOverlay {
     private var latest = MediaHub.NowPlaying()
     private var positionAt = 0L
     private var positionAnchorMs = 0L
+    private var currentTopInset = 0
     private var activeTextView: TextView? = null
     private var nextTextView: TextView? = null
     private var closeView: TextView? = null
@@ -62,7 +63,9 @@ object LyricsOverlay {
         val v=rootView ?: return; val lp=params ?: return
         if(v.width<=0 || v.height<=0) return
         val sw=app?.resources?.displayMetrics?.widthPixels ?: return
-        val nx=lp.x.coerceIn(0,(sw-v.width).coerceAtLeast(0)); val ny=lp.y.coerceIn(0,(screenHeight-v.height-dp(24)).coerceAtLeast(0))
+        val nx=lp.x.coerceIn(0,(sw-v.width).coerceAtLeast(0))
+        val maxY=(screenHeight-v.height-dp(24)).coerceAtLeast(currentTopInset)
+        val ny=lp.y.coerceIn(currentTopInset,maxY)
         if(nx!=lp.x || ny!=lp.y) { lp.x=nx; lp.y=ny; try { wm?.updateViewLayout(v,lp) } catch (_:Exception){} }
     }
     fun setScale(value: Float) { app?.let { Prefs(it).lyricsOverlayScale=value.coerceIn(.70f,1.40f) }; applyScale() }
@@ -102,7 +105,7 @@ object LyricsOverlay {
         root.addView(texts, LinearLayout.LayoutParams(pillWidth - dp(74), -2))
         root.addView(TextView(c).apply { text = "×"; gravity = Gravity.CENTER; setTextColor(-1); setTextSize(TypedValue.COMPLEX_UNIT_SP, 34f); setOnClickListener { stop() } }, LinearLayout.LayoutParams(dp(42), dp(42)))
         val lp = WindowManager.LayoutParams(-2, -2, WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
-            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
+            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN,
             PixelFormat.TRANSLUCENT).apply {
             gravity = Gravity.TOP or Gravity.START
             x = if (p.lyricsOverlayX >= 0) p.lyricsOverlayX else 80
@@ -113,15 +116,24 @@ object LyricsOverlay {
             var sx=0f; var sy=0f; var ox=0; var oy=0; var dragged=false
             override fun onTouch(v: View, e: MotionEvent): Boolean = when(e.action) {
                 MotionEvent.ACTION_DOWN -> { sx=e.rawX; sy=e.rawY; ox=lp.x; oy=lp.y; dragged=false; true }
-                MotionEvent.ACTION_MOVE -> { val dx=(e.rawX-sx).toInt(); val dy=(e.rawY-sy).toInt(); if (kotlin.math.abs(dx)+kotlin.math.abs(dy)>dp(6)) dragged=true; lp.x=ox+dx; lp.y=oy+dy; try { wm?.updateViewLayout(root,lp) } catch (_:Exception){}; true }
+                MotionEvent.ACTION_MOVE -> { val dx=(e.rawX-sx).toInt(); val dy=(e.rawY-sy).toInt(); if (kotlin.math.abs(dx)+kotlin.math.abs(dy)>dp(6)) dragged=true; lp.x=ox+dx; val maxY=(c.resources.displayMetrics.heightPixels-root.height-dp(24)).coerceAtLeast(currentTopInset); lp.y=(oy+dy).coerceIn(currentTopInset,maxY); try { wm?.updateViewLayout(root,lp) } catch (_:Exception){}; true }
                 MotionEvent.ACTION_UP -> { if (dragged) { p.lyricsOverlayX=lp.x; p.lyricsOverlayY=lp.y } else c.startActivity(Intent(c, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)); true }
                 else -> true
             }
         })
         rootView=root; activeTextView=activeLine; nextTextView=nextLine
         val closeButton=root.getChildAt(1) as TextView; closeView=closeButton
+        @Suppress("DEPRECATION")
+        root.setOnApplyWindowInsetsListener { view, insets ->
+            val insetTop = insets.systemWindowInsetTop.coerceAtLeast(0)
+            if (insetTop != currentTopInset) {
+                currentTopInset = insetTop
+                clampPosition()
+            }
+            insets
+        }
         root.addOnLayoutChangeListener { _,_,_,_,_,_,_,_,_-> clampPosition() }
-        return try { wm?.addView(root,lp); pill=root; params=lp; activeLine.tag="active"; nextLine.tag="next"; active=true; LyricsRepo.start(c); applyScale(); observeMedia(); true } catch (_:Exception) { false }
+        return try { wm?.addView(root,lp); pill=root; params=lp; activeLine.tag="active"; nextLine.tag="next"; active=true; root.requestApplyInsets(); LyricsRepo.start(c); applyScale(); observeMedia(); true } catch (_:Exception) { false }
     }
     fun update(activeText: String, nextText: String) { current=activeText; next=nextText; val r=pill as? LinearLayout ?: return; (r.getChildAt(0) as? LinearLayout)?.let { (it.getChildAt(0) as? TextView)?.text=activeText; (it.getChildAt(1) as? TextView)?.text=nextText } }
     private fun observeMedia() {
