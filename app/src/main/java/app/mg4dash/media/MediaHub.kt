@@ -2055,6 +2055,10 @@ object MediaHub {
         return true
     }
 
+    /** Switching to [target]: Android Auto, playing, is paused first; never when going to it, nor CarPlay (toggle key only). */
+    internal fun pauseAaBeforeSwitch(target: String, aaPlaying: Boolean, carPlay: Boolean) =
+        aaPlaying && !carPlay && !isAndroidAuto(target)
+
     /** Command sent to the Android Auto service; otherwise, media key to its session. */
     private fun aaControl(c: MediaController, code: Int, fallbackKey: Int) {
         if (carPlay) {
@@ -2123,6 +2127,14 @@ object MediaHub {
         if (serviceMedia && pkg != USB && SaicMedia.last?.playing == true) {
             Log.i(TAG, "USB paused before switching to $pkg")
             usbCommand { SaicMedia.usbPause() }
+        }
+        // Android Auto left while playing: the phone paused first, otherwise its music kept coming and the
+        // Android Auto app took the car's audio back at the end of a guidance announcement (Marc 23/11)
+        val aa = (listOfNotNull(browserControllers[AA_MBS]) + lastCandidates.filter { isAndroidAuto(it.packageName) })
+            .firstOrNull { it.playbackState?.state == PlaybackState.STATE_PLAYING }
+        if (aa != null && pauseAaBeforeSwitch(pkg, aaPlaying = true, carPlay)) {
+            Log.i(TAG, "Android Auto paused before switching to $pkg")
+            aaControl(aa, AA_PAUSE, KeyEvent.KEYCODE_MEDIA_PAUSE)
         }
         if (pkg == RADIO && legacyRadio) { radioCommand { SaicRadio.play() }; return true }
         // SWI68 (issue #19): command 0x8001 does not change the source and the radio continued

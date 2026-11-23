@@ -59,6 +59,15 @@ class StartupPlaybackTest {
         assertNull("unreadable, played long ago", under(mapOf(usb to now - 5 * 60_000), null, read = false))
     }
 
+    /** Leaving Android Auto while it plays: paused first, so it does not take the audio back after an announcement. */
+    @Test fun androidAutoPausedWhenLeftForAnotherSource() {
+        assertTrue("to USB", MediaHub.pauseAaBeforeSwitch(usb, aaPlaying = true, carPlay = false))
+        assertTrue("to the radio", MediaHub.pauseAaBeforeSwitch(radio, aaPlaying = true, carPlay = false))
+        assertFalse("to Android Auto itself", MediaHub.pauseAaBeforeSwitch(aa, aaPlaying = true, carPlay = false))
+        assertFalse("not playing", MediaHub.pauseAaBeforeSwitch(usb, aaPlaying = false, carPlay = false))
+        assertFalse("CarPlay: its key only toggles", MediaHub.pauseAaBeforeSwitch(usb, aaPlaying = true, carPlay = true))
+    }
+
     @Test fun androidAutoUsages() {
         assertTrue("music", MediaHub.realMediaUsage(1))
         assertTrue("game", MediaHub.realMediaUsage(14))
