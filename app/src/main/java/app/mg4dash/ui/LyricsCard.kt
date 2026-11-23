@@ -43,8 +43,9 @@ class LyricsCard(private val activity: Activity) : LinearLayout(activity), Lifec
         setOnClickListener { request(force = true) }
     }
     private val overlayButton = TextView(activity).apply {
-        text = "▣"; gravity = Gravity.CENTER; setTextSize(TypedValue.COMPLEX_UNIT_SP, 19f)
-        setTextColor(Themes.color(activity, R.color.text_sub)); setBackgroundResource(R.drawable.bg_chip)
+        text = "▣"; gravity = Gravity.CENTER; setTextSize(TypedValue.COMPLEX_UNIT_SP, 23f)
+        setTextColor(Color.WHITE); setBackgroundResource(R.drawable.bg_chip); includeFontPadding = false
+        alpha = 1f
         contentDescription = "Lyrics overlay"; setOnClickListener { toggleOverlay() }
     }
     private val lines = (0..6).map { TextView(activity).apply {
@@ -102,8 +103,8 @@ class LyricsCard(private val activity: Activity) : LinearLayout(activity), Lifec
         setPadding(dp(18), dp(12), dp(18), dp(12))
         val top = LinearLayout(activity).apply { orientation = HORIZONTAL; gravity = Gravity.CENTER_VERTICAL }
         top.addView(header, LayoutParams(0, -2, 1f))
-        top.addView(overlayButton, LayoutParams(dp(42), dp(42)).apply { marginEnd = dp(8) })
-        top.addView(refresh, LayoutParams(dp(42), dp(42)))
+        top.addView(overlayButton, LayoutParams(dp(48), dp(48)).apply { marginEnd = dp(8) })
+        top.addView(refresh, LayoutParams(dp(48), dp(48)))
         addView(top, LayoutParams(-1, -2))
         lines.forEachIndexed { i, line ->
             line.setTextSize(TypedValue.COMPLEX_UNIT_SP, if (i == 3) 25f else 17f)
@@ -288,7 +289,7 @@ class LyricsCard(private val activity: Activity) : LinearLayout(activity), Lifec
         val should = visible || (LyricsOverlay.active && latest.playing)
         val changed = should != isActivelyDisplayed
         isActivelyDisplayed = should
-        overlayButton.alpha = if (LyricsOverlay.active) 1f else .6f
+        overlayButton.alpha = 1f
         if (!changed) return
         if (should) {
             LyricsRepo.start(activity)
@@ -306,7 +307,7 @@ class LyricsCard(private val activity: Activity) : LinearLayout(activity), Lifec
     private fun shouldRunTicker() = isActivelyDisplayed && (activityStarted || (LyricsOverlay.active && latest.playing))
     private fun toggleOverlay() {
         LyricsOverlay.toggle(activity)
-        overlayButton.alpha = if (LyricsOverlay.active) 1f else .6f
+        overlayButton.alpha = 1f
         updateActiveState()
     }
 
@@ -332,19 +333,19 @@ class LyricsCard(private val activity: Activity) : LinearLayout(activity), Lifec
         labels.addView(artist, LayoutParams(-1, -2).apply { topMargin = dp(3) })
         header.addView(labels, LayoutParams(0, -2, 1f))
         val close = TextView(activity).apply {
-            text = "×"; gravity = Gravity.CENTER; setTextSize(TypedValue.COMPLEX_UNIT_SP, 34f)
+            text = "×"; gravity = Gravity.CENTER; setTextSize(TypedValue.COMPLEX_UNIT_SP, 34f); includeFontPadding = false
             setTextColor(Color.WHITE); setBackgroundResource(R.drawable.bg_chip)
             contentDescription = activity.getString(R.string.st_close)
-            setOnClickListener { closeKaraoke() }; setPadding(dp(8), dp(8), dp(8), dp(8)); setBackgroundResource(R.drawable.bg_chip)
+            setOnClickListener { closeKaraoke() }; setBackgroundResource(R.drawable.bg_chip)
         }
         val overlayToggle = TextView(activity).apply {
-            text = "▣"; gravity = Gravity.CENTER; setTextSize(TypedValue.COMPLEX_UNIT_SP, 22f)
-            setTextColor(Color.WHITE); alpha = if (LyricsOverlay.active) 1f else .65f
-            setOnClickListener { toggleOverlay(); alpha = if (LyricsOverlay.active) 1f else .65f }
+            text = "▣"; gravity = Gravity.CENTER; setTextSize(TypedValue.COMPLEX_UNIT_SP, 24f); includeFontPadding = false
+            setTextColor(Color.WHITE); alpha = 1f
+            setOnClickListener { toggleOverlay(); alpha = 1f }
         }
-        overlayToggle.setPadding(dp(8), dp(8), dp(8), dp(8)); overlayToggle.setBackgroundResource(R.drawable.bg_chip)
-        header.addView(overlayToggle, LayoutParams(dp(48), dp(48)).apply { marginEnd = dp(8) })
-        header.addView(close, LayoutParams(dp(48), dp(48)))
+        overlayToggle.setBackgroundResource(R.drawable.bg_chip)
+        header.addView(overlayToggle, LayoutParams(dp(56), dp(56)).apply { marginEnd = dp(10) })
+        header.addView(close, LayoutParams(dp(56), dp(56)))
         header.setOnClickListener { closeKaraoke() }
         root.addView(header, LayoutParams(-1, -2))
 
