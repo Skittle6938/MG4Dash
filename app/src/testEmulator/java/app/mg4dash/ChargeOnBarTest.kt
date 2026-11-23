@@ -43,11 +43,11 @@ class ChargeOnBarTest {
         fun inCard(v: View): Boolean { var p = v.parent; while (p != null) { if (p === card) return true; p = p.parent }; return false }
     }
 
-    private fun home(slots: String, layout: String, slot: String, bar: Boolean, status: Int, all: Boolean = false, shot: String? = null): Home {
+    private fun home(slots: String, layout: String, slot: String, bar: Boolean, status: Int, all: Boolean = false, shot: String? = null, cons: Int = 1): Home {
         val prefs = Prefs(RuntimeEnvironment.getApplication())
         prefs.raw.edit().clear().putBoolean("vertical_dock", true).putBoolean("tutorial_shortcuts_seen", true).putInt("theme_mode", 1)
             .putInt("home_style", 0).putString("home_layout", layout).putString("slots_$layout", slots)
-            .putBoolean("energy_card_power", true).putBoolean("power_va", true).commit()
+            .putBoolean("energy_card_power", true).putBoolean("power_va", true).putInt("power_cons_source", cons).commit()
         if (all) prefs.raw.edit().putStringSet("conn_icons_hidden", emptySet()).putStringSet("conn_usb_shown", setOf("usb_a", "usb_c")).commit()
         HomeSlots.setConnectionsChoice(prefs, HomeSlots.Layout.values().first { it.key == layout }, if (bar) slot else HomeSlots.CONN_NONE)
         val tf = app.mg4dash.energy.EnergyMonitor::class.java.getDeclaredField("_tripStartSoc").apply { isAccessible = true }
@@ -57,7 +57,8 @@ class ChargeOnBarTest {
         val sf = app.mg4dash.car.CarBridge::class.java.getDeclaredField("_state").apply { isAccessible = true }
         @Suppress("UNCHECKED_CAST")
         val flow = sf.get(app.mg4dash.car.CarBridge) as kotlinx.coroutines.flow.MutableStateFlow<app.mg4dash.car.VehicleState>
-        flow.value = flow.value.copy(chargeStatus = status, chargeRemainMin = 448, chargeCtrl = if (status == 1) 1 else 0)
+        flow.value = flow.value.copy(chargeStatus = status, chargeRemainMin = 448, chargeCtrl = if (status == 1) 1 else 0,
+            socPrecise = if (cons == 3) 17.9f else flow.value.socPrecise, rangeKm = if (cons == 3) 50 else flow.value.rangeKm)
         repeat(8) { shadowOf(Looper.getMainLooper()).idleFor(300, TimeUnit.MILLISECONDS) }
         val frames = MainActivity::class.java.getDeclaredField("frames").apply { isAccessible = true }.get(act) as Map<*, *>
         val frame = frames[slot]!!
@@ -97,6 +98,30 @@ class ChargeOnBarTest {
         val h = home(small, "map", "tl", bar = true, status = 6, all = true, shot = "charge_on_bar_over_it.png")
         assertEquals("Connesso,\nnon riconosciuto", h.state.text.toString())
         assertNotNull(h.state.background)
+    }
+
+    /** The baseline of [id] in the window. */
+    private fun baseline(h: Home, id: Int): Int { val v = h.act.findViewById<TextView>(id); val a = IntArray(2); v.getLocationInWindow(a); return a[1] + v.baseline }
+
+    /** Marc 23/11: the km always on the % line, plugged or not, in every place; the bar moves, never the km alone. */
+    @Test fun rangeAlwaysOnThePercentLine() {
+        for ((name, h) in listOf(
+            "small, bar, scheduled, car range (photo 23/11)" to home(small, "map", "tl", bar = true, status = 9, cons = 3, shot = "range_small_bar_scheduled_car.png"),
+            "small, bar, charging" to home(small, "map", "tl", bar = true, status = 1, shot = "range_small_bar_charging.png"),
+            "small, bar, plugged" to home(small, "map", "tl", bar = true, status = 2, shot = "range_small_bar_plugged.png"),
+            "small, no bar, charging" to home(small, "map", "tl", bar = false, status = 1, shot = "range_small_nobar_charging.png"),
+            "small, bar, unplugged" to home(small, "map", "tl", bar = true, status = 0, shot = "range_small_bar_unplugged.png"),
+            "medium, charging" to home(medium, "full", "tc", bar = true, status = 1, shot = "range_medium_charging.png"),
+        )) assertEquals(name, baseline(h, R.id.battery), baseline(h, R.id.range))
+    }
+
+    /** Plugging in moves nothing on the card: the %, the km and the battery bar stay where they are unplugged. */
+    @Test fun pluggingInMovesNothing() {
+        fun top(h: Home, id: Int): Int { val a = IntArray(2); h.act.findViewById<View>(id).getLocationInWindow(a); return a[1] }
+        val off = home(small, "map", "tl", bar = true, status = 0)
+        val ids = listOf(R.id.battery, R.id.batteryGauge).map { top(off, it) } + baseline(off, R.id.range)
+        val on = home(small, "map", "tl", bar = true, status = 9, cons = 3)
+        assertEquals(ids, listOf(R.id.battery, R.id.batteryGauge).map { top(on, it) } + baseline(on, R.id.range))
     }
 
     @Test fun mediumPlaceUnchanged() {

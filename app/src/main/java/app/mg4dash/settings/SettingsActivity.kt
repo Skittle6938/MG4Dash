@@ -652,7 +652,6 @@ class SettingsActivity : AppCompatActivity() {
             Triple(u, bar, value)
         }
         val note = text(total, "", 15f, R.color.text_title).apply { (layoutParams as LinearLayout.LayoutParams).topMargin = dp(8) }
-        val lyricsPayload = text(total, "", 15f, R.color.text_sub).apply { (layoutParams as LinearLayout.LayoutParams).topMargin = dp(4) }
         val unavailable = text(total, getString(R.string.du_unavailable), 16f, R.color.accent_heat).apply { visibility = View.GONE }
 
         // Day by day
@@ -719,7 +718,6 @@ class SettingsActivity : AppCompatActivity() {
             val shownTotal = s.total(g, w)
             detailTotal.text = DataUsage.format(this, shownTotal)
             note.text = getString(if (w) R.string.du_note_wifi else R.string.du_note)
-            lyricsPayload.text = getString(R.string.du_lyrics_payload, DataUsage.format(this, Prefs(this).lyricsNetworkBytes))
             unavailable.visibility = if (s.available) View.GONE else View.VISIBLE
             chart.net4g = g; chart.netWifi = w
             chart.days = s.days

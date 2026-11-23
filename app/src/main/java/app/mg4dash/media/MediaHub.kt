@@ -223,6 +223,9 @@ object MediaHub {
         recordPlayback(p)
         // Last time each car source was playing: used to restart after an announcement only what was playing
         for (pkg in CAR_SOURCES) if (browserControllers[pkg]?.let { isPlaying(it) } == true) playingAt[pkg] = now
+        // SWI68 (service media): the USB state comes from the media service, not always from its browser
+        if (SaicMedia.last?.playing == true) playingAt[USB] = now
+        watchAaPlayers(now)
         restoreAfterPrompt(now)
         // Type 70 (Android Auto) held by another app (DiAuto) while AllGo has no phone: the
         // real source is that app's player, not a "gone" Android Auto to replace. DiAuto
@@ -247,6 +250,12 @@ object MediaHub {
         if (toProjection && !goneToProjectionLogged) { goneToProjectionLogged = true; Log.i(TAG, "$cur gone: the phone's projection has the audio, no automatic source") }
         if (!curGone) goneToProjectionLogged = false
         if (toProjection) return
+        // Android Auto only guiding (Waze) or answering (Gemini) over car music: the car source under it goes back,
+        // instead of the fallback order that started the radio (MG4Radio #6)
+        if (curGone) carSourceUnderAa(cur, playingAt, avail, now, aaMediaAt, aaUsagesRead)?.let { (pkg, play) ->
+            Log.i(TAG, "$cur gone: Android Auto had no music of its own, back to $pkg (${if (play) "playing" else "paused"})")
+            autoSwitch(pkg, "$cur gone, $pkg under it", play = play); return
+        }
         if (curGone && !toProjection) { Log.i(TAG, "$cur gone: mode $mode, order $order, available $avail"); replacement(order, cur, avail, carPlay)?.let { autoSwitch(it, "$cur gone", play = playingState()) }; return }
         // As the car, or a fixed source: chosen once at startup (the sequence), then only replaced when lost
         if (mode >= 1) return
@@ -257,6 +266,61 @@ object MediaHub {
         if (now - userPickAt < USER_PICK_MS) return
         // A better-ranked source back (the phone over Bluetooth…): it takes over in the current state, paused stays paused
         betterSource(order, cur) { stable(it) && !(it == BT && projecting) }?.let { autoSwitch(it, "$it back", play = playingState()) }
+    }
+
+    /**
+     * Android Auto [cur] lost while a car source (USB, Bluetooth) was under it, Android Auto only guiding (Waze) or
+     * answering (Gemini), MG4Radio #6: that source, the most recent in [playedAt] (uptime ms), and whether it plays again.
+     * It counts when Android Auto had no real music ([aaMediaAt], from its players' audio usage) since that source
+     * last played. Usages unreadable ([usagesRead] false): the source must have played in the last minute (the car
+     * pauses USB during an announcement or an answer). Null otherwise: the usual fallback order.
+     */
+    internal fun carSourceUnderAa(cur: String, playedAt: Map<String, Long>, avail: List<String>, now: Long,
+                                  aaMediaAt: Long?, usagesRead: Boolean): Pair<String, Boolean>? {
+        if (cur != AA_MBS) return null
+        val (pkg, at) = listOf(USB, BT).filter { it in avail }
+            .mapNotNull { p -> playedAt[p]?.takeIf { it <= now }?.let { p to it } }
+            .maxByOrNull { it.second } ?: return null
+        val recent = now - at <= RECENT_CAR_MS
+        val under = if (usagesRead) aaMediaAt == null || aaMediaAt < at else recent
+        return if (under) pkg to recent else null
+    }
+    private const val RECENT_CAR_MS = 60_000L
+
+    /** Audio usages that are not music: voice call, ringtone, alarm, notifications, accessibility, guidance, sounds, assistant. */
+    private val NOT_MUSIC = setOf(2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 16)
+    /** A started player with this usage is real Android Auto playback (music, game, or undeclared). */
+    internal fun realMediaUsage(usage: Int) = usage !in NOT_MUSIC
+
+    /** Last time an Android Auto (AllGo) player played real music, and whether the usages could be read. */
+    @Volatile private var aaMediaAt: Long? = null
+    @Volatile private var aaUsagesRead = true
+    private var aaUsagesSeen: List<Int>? = null
+
+    private fun watchAaPlayers(now: Long) {
+        // Its media session playing is real music too, in case its sound does not show as a player of its own
+        if (browserControllers[AA_MBS]?.playbackState?.state == PlaybackState.STATE_PLAYING) aaMediaAt = now
+        val usages = aaUsages()
+        aaUsagesRead = usages != null
+        if (usages == null) return
+        if (usages != aaUsagesSeen) { aaUsagesSeen = usages; Log.i(TAG, "Android Auto players: usages $usages") }
+        if (usages.any(::realMediaUsage)) aaMediaAt = now
+    }
+
+    /** Usages of the started players of the AllGo processes (Android Auto, CarPlay), sorted; null if unreadable. */
+    private fun aaUsages(): List<Int>? = try {
+        val ctx = appContext ?: throw IllegalStateException("no context")
+        val am = ctx.getSystemService(Context.ACTIVITY_SERVICE) as android.app.ActivityManager
+        val pids = am.runningAppProcesses.orEmpty().filter { it.processName.startsWith("com.allgo.") }.map { it.pid }.toSet()
+        val audio = ctx.getSystemService(Context.AUDIO_SERVICE) as android.media.AudioManager
+        audio.activePlaybackConfigurations.filter { cfg ->
+            val pid = cfg.javaClass.getMethod("getClientPid").invoke(cfg) as Int
+            val state = cfg.javaClass.getMethod("getPlayerState").invoke(cfg) as Int
+            pid in pids && state == 2   // PLAYER_STATE_STARTED
+        }.map { it.audioAttributes.usage }.sorted()
+    } catch (e: Throwable) {
+        if (aaUsagesRead) Log.w(TAG, "Android Auto players unreadable: ${(e.cause ?: e).message}")
+        null
     }
 
     /** The source replacing [cur], lost: the first of [order] there, never CarPlay. */
@@ -1991,6 +2055,10 @@ object MediaHub {
         return true
     }
 
+    /** Switching to [target]: Android Auto, playing, is paused first; never when going to it, nor CarPlay (toggle key only). */
+    internal fun pauseAaBeforeSwitch(target: String, aaPlaying: Boolean, carPlay: Boolean) =
+        aaPlaying && !carPlay && !isAndroidAuto(target)
+
     /** Command sent to the Android Auto service; otherwise, media key to its session. */
     private fun aaControl(c: MediaController, code: Int, fallbackKey: Int) {
         if (carPlay) {
@@ -2059,6 +2127,14 @@ object MediaHub {
         if (serviceMedia && pkg != USB && SaicMedia.last?.playing == true) {
             Log.i(TAG, "USB paused before switching to $pkg")
             usbCommand { SaicMedia.usbPause() }
+        }
+        // Android Auto left while playing: the phone paused first, otherwise its music kept coming and the
+        // Android Auto app took the car's audio back at the end of a guidance announcement (Marc 23/11)
+        val aa = (listOfNotNull(browserControllers[AA_MBS]) + lastCandidates.filter { isAndroidAuto(it.packageName) })
+            .firstOrNull { it.playbackState?.state == PlaybackState.STATE_PLAYING }
+        if (aa != null && pauseAaBeforeSwitch(pkg, aaPlaying = true, carPlay)) {
+            Log.i(TAG, "Android Auto paused before switching to $pkg")
+            aaControl(aa, AA_PAUSE, KeyEvent.KEYCODE_MEDIA_PAUSE)
         }
         if (pkg == RADIO && legacyRadio) { radioCommand { SaicRadio.play() }; return true }
         // SWI68 (issue #19): command 0x8001 does not change the source and the radio continued

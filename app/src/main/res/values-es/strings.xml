@@ -1192,7 +1192,6 @@
     <string name="ly_clear">Vaciar caché</string>
     <string name="ly_cleared">Caché de letras vaciado</string>
     <string name="du_lyrics">Letras sincronizadas</string>
-    <string name="du_lyrics_payload">Datos recibidos de LRCLIB (4G, desde el reinicio): %1$s</string>
     <string name="lyrics_shortcut_short">Superposición de letras</string>
     <string name="lyrics_shortcut_long">Superposición de letras sincronizadas</string>
     <string name="lyrics_mg4control_title">Acceso directo MG4Control (Broadcast)</string>

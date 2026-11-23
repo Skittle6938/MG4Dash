@@ -5,6 +5,8 @@ import android.app.AlertDialog
 import android.graphics.Typeface
 import android.util.TypedValue
 import android.view.Gravity
+import android.view.View
+import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.core.content.ContextCompat
@@ -13,15 +15,21 @@ import app.mg4dash.R
 /**
  * A widget's own options in a popup, opened from the widget (a long press on the energy card, the gear next to the
  * OpenStreetMap map in its menu): the settings that were in Settings › Home (17/11), in the radar page's style
- * (a title, lines of a title, a grey subtitle and an outlined control).
+ * (a title, lines of a title, a grey subtitle and an outlined control). Too tall for the screen, it becomes twice as
+ * wide and what follows [column] goes on the right.
  */
-class OptionsPopup(private val a: Activity, title: String, private val scrollable: Boolean = false) {
+class OptionsPopup(private val a: Activity, title: String) {
     private val d = a.resources.displayMetrics.density
     private fun dp(v: Int) = (v * d).toInt()
     private fun col(res: Int) = Themes.color(a, res)
     private val medium = Typeface.create("sans-serif-medium", Typeface.NORMAL)
     private val body = LinearLayout(a).apply { orientation = LinearLayout.VERTICAL; setPadding(dp(30), dp(24), dp(30), dp(22)) }
+    private val first = mutableListOf<Pair<View, LinearLayout.LayoutParams>>()
+    private val second = mutableListOf<Pair<View, LinearLayout.LayoutParams>>()
+    private var target = first
     private val refreshers = mutableListOf<() -> Unit>()
+    /** True once shown in two columns. */
+    var twoColumns = false; private set
 
     init {
         body.addView(TextView(a).apply {
@@ -43,8 +51,11 @@ class OptionsPopup(private val a: Activity, title: String, private val scrollabl
             LinearLayout.LayoutParams(-2, -2).apply { topMargin = dp(2) }) }
         row.addView(texts, LinearLayout.LayoutParams(0, -2, 1f).apply { rightMargin = dp(18) })
         row.addView(control, LinearLayout.LayoutParams(dp(width), dp(56)))
-        body.addView(row, LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(18) })
+        target += row to LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(18) }
     }
+
+    /** What follows goes in the right column when the whole is too tall for the screen in one. */
+    fun column(): OptionsPopup { target = second; return this }
 
     /** OUI / NON. */
     fun toggle(title: String, sub: String?, get: () -> Boolean, set: (Boolean) -> Unit): OptionsPopup {
@@ -69,29 +80,43 @@ class OptionsPopup(private val a: Activity, title: String, private val scrollabl
     }
 
     fun note(view: android.view.View): OptionsPopup {
-        body.addView(view, LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(14) })
+        target += view to LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(14) }
         return this
     }
 
     fun action(label: String, onClick: () -> Unit): OptionsPopup {
-        body.addView(chip(label, onClick), LinearLayout.LayoutParams(-1, dp(56)).apply { topMargin = dp(12) })
+        target += chip(label, onClick) to LinearLayout.LayoutParams(-1, dp(56)).apply { topMargin = dp(12) }
         return this
     }
 
     /** Shows it; [onClose] once it goes (to apply what changed). */
     fun show(onClose: () -> Unit = {}) {
         val close = chip(a.getString(R.string.st_close)) {}
+        fun place(into: LinearLayout, items: List<Pair<View, LinearLayout.LayoutParams>>) =
+            items.forEach { (v, lp) -> (v.parent as? ViewGroup)?.removeView(v); into.addView(v, lp) }
+        // One column when it fits in the screen's height (title, Fermer and the dialog's margins: 200 dp)
+        val probe = LinearLayout(a).apply { orientation = LinearLayout.VERTICAL }
+        place(probe, first + second)
+        probe.measure(View.MeasureSpec.makeMeasureSpec(dp(840), View.MeasureSpec.EXACTLY), View.MeasureSpec.UNSPECIFIED)
+        val screen = a.resources.displayMetrics
+        twoColumns = second.isNotEmpty() && probe.measuredHeight + dp(200) > screen.heightPixels
+        probe.removeAllViews()
+        val width = if (twoColumns) minOf(dp(1640), screen.widthPixels - dp(120)) else dp(900)
+        if (twoColumns) {
+            val left = LinearLayout(a).apply { orientation = LinearLayout.VERTICAL }
+            val right = LinearLayout(a).apply { orientation = LinearLayout.VERTICAL }
+            place(left, first); place(right, second)
+            body.addView(LinearLayout(a).apply {
+                orientation = LinearLayout.HORIZONTAL
+                addView(left, LinearLayout.LayoutParams(0, -2, 1f).apply { rightMargin = dp(28) })
+                addView(right, LinearLayout.LayoutParams(0, -2, 1f).apply { leftMargin = dp(28) })
+            }, LinearLayout.LayoutParams(-1, -2))
+        } else place(body, first + second)
         body.addView(close, LinearLayout.LayoutParams(-1, dp(56)).apply { topMargin = dp(24) })
-        val content: android.view.View = if (scrollable) android.widget.ScrollView(a).apply {
-            isFillViewport = true
-            setPadding(0, 0, 0, dp(28))
-            clipToPadding = false
-            addView(body, android.widget.FrameLayout.LayoutParams(-1, -2))
-        } else body
-        val dialog = AlertDialog.Builder(a).setView(content).create()
+        val dialog = AlertDialog.Builder(a).setView(body).create()
         close.setOnClickListener { dialog.dismiss() }
         dialog.setOnDismissListener { onClose() }
         Dialogs.show(dialog)
-        dialog.window?.setLayout(dp(900), android.view.ViewGroup.LayoutParams.WRAP_CONTENT)
+        dialog.window?.setLayout(width, ViewGroup.LayoutParams.WRAP_CONTENT)
     }
 }

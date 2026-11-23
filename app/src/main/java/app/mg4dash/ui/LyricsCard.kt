@@ -216,7 +216,7 @@ class LyricsCard(private val activity: Activity) : LinearLayout(activity), Lifec
                     return@launch
                 }
             }
-            if (prefs.lyricsWifiOnly && !LyricsRepo.wifiConnected(activity)) {
+            if (!LyricsRepo.networkAllowed(activity)) {
                 setStatus(activity.getString(R.string.ly_wifi_only)); drawLines(0); return@launch
             }
             if (!networkAvailable()) { setStatus(activity.getString(R.string.ly_offline)); drawLines(0); return@launch }
@@ -525,7 +525,7 @@ class LyricsCard(private val activity: Activity) : LinearLayout(activity), Lifec
             setBackgroundResource(R.drawable.bg_chip)
         }
         val launchControl = activity.packageManager.getLaunchIntentForPackage("com.mg4.control")
-        val popup = OptionsPopup(activity, activity.getString(R.string.wc_lyrics), scrollable = true)
+        val popup = OptionsPopup(activity, activity.getString(R.string.wc_lyrics))
             .toggle(activity.getString(R.string.ly_wifi), null, { prefs.lyricsWifiOnly }) { prefs.lyricsWifiOnly = it }
             .toggle(activity.getString(R.string.ly_cache), null, { prefs.lyricsCacheEnabled }) { prefs.lyricsCacheEnabled = it }
             .choice(activity.getString(R.string.ly_max), null, maxes.map { "$it MB" },
@@ -539,6 +539,7 @@ class LyricsCard(private val activity: Activity) : LinearLayout(activity), Lifec
             .action(activity.getString(R.string.ly_clear)) {
                 launchView { LyricsRepo.clear(); updateInfo(); Toasts.show(activity, R.string.ly_cleared) }
             }
+            .column()
             .note(TextView(activity).apply {
                 text = activity.getString(R.string.lyrics_mg4control_title)
                 setTextColor(Themes.color(activity, R.color.text_title)); setTextSize(TypedValue.COMPLEX_UNIT_SP, 19f)

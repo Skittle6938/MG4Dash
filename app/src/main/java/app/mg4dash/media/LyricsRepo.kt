@@ -41,6 +41,9 @@ object LyricsRepo {
         caps?.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) == true
     } catch (_: Exception) { false }
 
+    /** Shared network policy for every lyrics client, including the background overlay. */
+    fun networkAllowed(context: Context): Boolean = !Prefs(context).lyricsWifiOnly || wifiConnected(context)
+
     suspend fun cached(artist: String, title: String): Track? = withContext(Dispatchers.IO) {
         val k = key(artist, title)
         val ctx = app ?: return@withContext null
@@ -62,6 +65,7 @@ object LyricsRepo {
         val ctx = app ?: return@withContext null
         val k = key(artist, title)
         if (!force) cached(artist, title)?.let { return@withContext it }
+        if (!networkAllowed(ctx)) return@withContext null
         val exact = linkedMapOf("artist_name" to artist, "track_name" to title)
         if (durationMs > 0) exact["duration"] = String.format(Locale.US, "%.2f", durationMs / 1000.0)
         var missing = false
@@ -110,8 +114,6 @@ object LyricsRepo {
             val code = c.responseCode
             if (code !in 200..299) throw HttpFailure(code)
             val payload = c.inputStream.use { it.readBytes() }
-            val bytes = payload.size.toLong() + 450L
-            app?.takeIf { !wifiConnected(it) }?.let { DataUsage.recordLyricsDownload(it, bytes) }
             HttpResponse(String(payload, Charsets.UTF_8))
         } finally { activeConnections -= c; c.disconnect() }
     }

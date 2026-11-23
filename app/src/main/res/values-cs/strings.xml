@@ -1192,7 +1192,6 @@
     <string name="ly_clear">Vymazat cache</string>
     <string name="ly_cleared">Mezipaměť textů vymazána</string>
     <string name="du_lyrics">Synchronizované texty</string>
-    <string name="du_lyrics_payload">Data odpovědi LRCLIB (4G od resetu): %1$s</string>
     <string name="lyrics_shortcut_short">Překryv textu</string>
     <string name="lyrics_shortcut_long">Překryv synchronizovaných textů</string>
     <string name="lyrics_mg4control_title">Zkratka MG4Control (Broadcast)</string>

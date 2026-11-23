@@ -69,6 +69,15 @@ class MaintenanceModeTest {
         assertFalse(m.openedFromAppList(null))
     }
 
+    /** Discussion #111: MG4Dash used as an app (MG4Swipe), opened from an app list: maintenance left, SAIC home kept. */
+    @Test fun leavingMaintenanceAsAnAppKeepsTheSaicHome() {
+        val p = Prefs(ctx)
+        p.valetMode = true; p.valetAuto = true
+        app.mg4dash.system.HomeSwitcher.leaveMaintenanceKeepStock(ctx)
+        assertFalse(p.valetMode); assertFalse(p.valetAuto)
+        assertTrue("the SAIC home stays enabled", app.mg4dash.system.HomeSwitcher.isStockEnabled(ctx))
+    }
+
     @Test fun fogButtonOverlayOffInMaintenance() {
         val p = Prefs(ctx)
         p.shortcutsMenu = true

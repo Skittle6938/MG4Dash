@@ -100,10 +100,17 @@ object SettingsBackup {
     fun find(c: Context): List<Found> {
         val dirs = UsbExport.readDirs(c) + listOfNotNull(UsbExport.internalDir())
         return dirs.flatMap { d -> d.listFiles { f -> f.isFile && f.name.startsWith(PREFIX) && f.name.endsWith(".json") }?.toList().orEmpty() }
-            .distinctBy { it.canonicalPath }
+            .let(::distinctBackups)
             .mapNotNull { f -> try { describe(f, JSONObject(f.readText())) } catch (e: Exception) { Log.w(TAG, "${f.name}: ${e.message}"); null } }
             .sortedByDescending { it.created }
     }
+
+    /**
+     * One entry per backup: the stick is seen through its shared view (/storage/<id>) and its raw mount
+     * (/mnt/media_rw/<id>), two paths for the same file, so each backup was listed twice (Marc 23/11).
+     * Same name and size: the same backup, the first path kept.
+     */
+    internal fun distinctBackups(files: List<File>): List<File> = files.distinctBy { it.name to it.length() }
 
     internal fun describe(f: File, j: JSONObject): Found? {
         if (j.optString("app") != "MG4Dash" || j.optInt("format", 0) !in 1..FORMAT) return null

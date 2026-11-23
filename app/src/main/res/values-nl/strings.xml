@@ -1192,7 +1192,6 @@
     <string name="ly_clear">Cache wissen</string>
     <string name="ly_cleared">Songteksten-cache gewist</string>
     <string name="du_lyrics">Gesynchroniseerde songteksten</string>
-    <string name="du_lyrics_payload">LRCLIB-responsgegevens (4G, sinds reset): %1$s</string>
     <string name="lyrics_shortcut_short">Songtekst-overlay</string>
     <string name="lyrics_shortcut_long">Overlay gesynchroniseerde songteksten</string>
     <string name="lyrics_mg4control_title">MG4Control-snelkoppeling (Broadcast)</string>

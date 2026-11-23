@@ -1192,7 +1192,6 @@
     <string name="ly_clear">Vider le cache</string>
     <string name="ly_cleared">Cache des paroles vidé</string>
     <string name="du_lyrics">Paroles synchronisées</string>
-    <string name="du_lyrics_payload">Données reçues de LRCLIB (4G, depuis la remise à zéro) : %1$s</string>
     <string name="lyrics_shortcut_short">Superposition des paroles</string>
     <string name="lyrics_shortcut_long">Superposition des paroles synchronisées</string>
     <string name="lyrics_mg4control_title">Raccourci MG4Control (Broadcast)</string>

@@ -1192,7 +1192,6 @@
     <string name="ly_clear">Svuota cache</string>
     <string name="ly_cleared">Cache testi svuotata</string>
     <string name="du_lyrics">Testi sincronizzati</string>
-    <string name="du_lyrics_payload">Dati ricevuti da LRCLIB (4G, dal reset): %1$s</string>
     <string name="lyrics_shortcut_short">Overlay testi</string>
     <string name="lyrics_shortcut_long">Overlay testi sincronizzati</string>
     <string name="lyrics_mg4control_title">Tasto rapido su MG4Control (Broadcast)</string>

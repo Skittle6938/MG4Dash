@@ -1192,7 +1192,6 @@
     <string name="ly_clear">Clear cache</string>
     <string name="ly_cleared">Lyrics cache cleared</string>
     <string name="du_lyrics">Synchronized lyrics</string>
-    <string name="du_lyrics_payload">LRCLIB response payload (4G, since reset): %1$s</string>
     <string name="lyrics_shortcut_short">Lyrics overlay</string>
     <string name="lyrics_shortcut_long">Synchronized lyrics overlay</string>
     <string name="lyrics_mg4control_title">MG4Control Shortcut (Broadcast)</string>

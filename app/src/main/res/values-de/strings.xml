@@ -1192,7 +1192,6 @@
     <string name="ly_clear">Cache leeren</string>
     <string name="ly_cleared">Liedtext-Cache geleert</string>
     <string name="du_lyrics">Synchronisierte Liedtexte</string>
-    <string name="du_lyrics_payload">LRCLIB-Antwortdaten (4G, seit Zurücksetzen): %1$s</string>
     <string name="lyrics_shortcut_short">Liedtext-Overlay</string>
     <string name="lyrics_shortcut_long">Overlay synchronisierter Liedtexte</string>
     <string name="lyrics_mg4control_title">MG4Control-Kurzbefehl (Broadcast)</string>

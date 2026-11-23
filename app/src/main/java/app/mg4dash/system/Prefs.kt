@@ -13,6 +13,12 @@ class Prefs(context: Context) {
     private val sp: SharedPreferences =
         context.applicationContext.getSharedPreferences("mg4launcher", Context.MODE_PRIVATE)
 
+    init {
+        if (sp.contains("wifi_only_mode") && !sp.contains("lyrics_wifi_only")) {
+            sp.edit().putBoolean("lyrics_wifi_only", sp.getBoolean("wifi_only_mode", false)).remove("wifi_only_mode").apply()
+        }
+    }
+
     /** Usable battery capacity, for the consumption estimate; with no measurement, the chosen model's (51 kWh: 49 from 100 % to 0 % displayed). */
     var batteryKwh: Float
         get() = sp.getFloat("battery_kwh", app.mg4dash.energy.BatteryCapacity.MODELS.firstOrNull { it.first == batteryModel }?.second ?: 49f)
@@ -152,17 +158,14 @@ class Prefs(context: Context) {
         set(v) = sp.edit().putBoolean("map_offline_switch", v).apply()
 
     var lyricsWifiOnly: Boolean
-        get() = sp.getBoolean("wifi_only_mode", false)
-        set(v) = sp.edit().putBoolean("wifi_only_mode", v).apply()
+        get() = sp.getBoolean("lyrics_wifi_only", false)
+        set(v) = sp.edit().putBoolean("lyrics_wifi_only", v).apply()
     var lyricsCacheEnabled: Boolean
         get() = sp.getBoolean("lyrics_cache_enabled", true)
         set(v) = sp.edit().putBoolean("lyrics_cache_enabled", v).apply()
     var lyricsCacheMaxMb: Int
         get() = sp.getInt("lyrics_cache_max_mb", 20).coerceIn(5, 100)
         set(v) = sp.edit().putInt("lyrics_cache_max_mb", v.coerceIn(5, 100)).apply()
-    var lyricsNetworkBytes: Long
-        get() = sp.getLong("lyrics_network_bytes", 0L).coerceAtLeast(0L)
-        set(v) = sp.edit().putLong("lyrics_network_bytes", v.coerceAtLeast(0L)).apply()
     var lyricsOverlayX: Int
         get() = sp.getInt("lyrics_overlay_x", -1)
         set(v) = sp.edit().putInt("lyrics_overlay_x", v).apply()

@@ -58,7 +58,9 @@ object Profiles {
         "radar_sound", "radar_visual", "radar_banner", "radar_percent", "radar_prepare_km", "radar_high", "radar_high_pct", "radar_low", "radar_low_pct",
         "radar_threshold_mode", "radar_mixed_low", "radar_mixed_low_pct", "radar_mixed_high", "radar_mixed_high_pct",
         // Synchronized lyrics: cache/network options and the overlay's size and position follow the driver
-        "lyrics_cache_enabled", "lyrics_cache_max_mb", "lyrics_overlay_scale", "lyrics_overlay_x", "lyrics_overlay_y", "wifi_only_mode",
+        "lyrics_cache_enabled", "lyrics_cache_max_mb", "lyrics_overlay_scale", "lyrics_overlay_x", "lyrics_overlay_y", "lyrics_wifi_only",
+        // Legacy key migrated by Prefs when old settings are read
+        "wifi_only_mode",
     )
 
     /** The settings that follow the profile, by family. */
@@ -83,7 +85,7 @@ object Profiles {
         // The data
         "energy_log", "source_history", "stop_frozen", "trip_rd_end", "trip_rd_km", "trip_rd_km1", "trip_rd_t", "radar_isa_fallback",
         "radar_isa_log", "radar_isa_write", "radar_refresh_hours", "radar_wifi_only", "sun_lat", "sun_lon", "city_lang", "city_lat",
-        "city_lon", "city_name", "weather_code", "lyrics_network_bytes",
+        "city_lon", "city_name", "weather_code",
         // The climate: keep climate on, its cycles, the SAIC climate hidden
         "climhold_enabled", "climhold_fan", "climhold_gap_min", "climhold_lock_sec", "climhold_max_min", "climhold_run_min", "climhold_runs",
         "climhold_scheduled", "climhold_screen_off", "climhold_start_min", "climhold_temp", "ac_cycle_active", "ac_cycle_off", "ac_cycle_on",

@@ -1380,11 +1380,12 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
             if (bar!!.width == 0 || ev.width == 0) { ev.post { renderEnergy(CarBridge.state.value, ConsumptionEstimator.average.value) }; return }
             if (!chargeOnBar) chargeTitleVis = title.visibility
             chargeOnBar = true
-            val base = baseTopPad.getOrPut(ev) { ev.paddingTop }
-            if (ev.paddingTop != base) ev.setPadding(ev.paddingLeft, base, ev.paddingRight, ev.paddingBottom)
+            // The card exactly as unplugged (Marc 23/11): the same room kept for the bar, the emptied charge row gone,
+            // so the %, the km and the battery bar never move when plugging in
+            reserveConnections(f!!, true)
             title.visibility = View.GONE
             val btnH = b.chargeAction.layoutParams.height
-            rowV.minimumHeight = btnH
+            rowV.visibility = View.GONE
             // The room under the bar kept: the trip start marker stays (#29, 23/11)
             b.batteryGauge.tripStart = app.mg4dash.energy.EnergyMonitor.tripStartSoc.value?.toFloat()
             (b.batteryGauge.layoutParams as LinearLayout.LayoutParams).let { g -> if (gaugeHeight != 0 && g.height != gaugeHeight) { g.height = gaugeHeight; b.batteryGauge.layoutParams = g } }
@@ -1439,8 +1440,7 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
                 rowV.addView(b.chargeAction, 2, LinearLayout.LayoutParams(-2, b.chargeAction.layoutParams?.height ?: dp(44)))
             }
             title.visibility = chargeTitleVis
-            rowV.minimumHeight = 0
-            if (cardPower && !plugged) rowV.visibility = View.GONE
+            rowV.visibility = if (cardPower && !plugged) View.GONE else View.VISIBLE
             b.chargeState.background = null; b.chargeState.setPadding(0, 0, 0, 0); b.chargeState.maxLines = 1
             b.chargeState.setTextSize(TypedValue.COMPLEX_UNIT_SP, 19f)
             if (f != null) reserveConnections(f, true)
@@ -1755,6 +1755,8 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         setAwake(null)
         prefs.webFloating = true
         fw.setFloating(true)
+        // Just detached: in front of the other window, for its touches too
+        floatMap?.front(false); fw.front(true); webInFront = true
         applySlots()
         webCard?.let { it.visibility = View.VISIBLE; it.show() }
     }
@@ -1807,6 +1809,7 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         setAwake(null)
         prefs.mapFloating = true
         fw.setFloating(true)
+        floatWeb?.front(false); fw.front(true); webInFront = false
         applySlots()
         syncMapPan()
         cardShown(Card.MAP, true)
@@ -2239,6 +2242,10 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         b.batteryGauge.smallSp = 16f; b.batteryGauge.tickSp = 15f
         // No icon before the km (#29)
         b.rangePlug.visibility = View.GONE
+        // The km always on the % line (Marc 23/11): with little height both texts are cut to the row, and the km's
+        // logo moved its line down; its baseline is set on the %'s after each layout
+        (b.battery.parent as View).addOnLayoutChangeListener { _, _, _, _, _, _, _, _, _ -> alignRange() }
+        b.range.addOnLayoutChangeListener { _, _, _, _, _, _, _, _, _ -> alignRange() }
         (b.batteryGauge.layoutParams as LinearLayout.LayoutParams).apply { height = (62 * d).toInt(); bottomMargin = (-2 * d).toInt() }
         val card = b.energyCard
         val at = card.indexOfChild(b.batteryGauge) + 1
@@ -2287,6 +2294,16 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
             val sz = if (va) 22f else 28f
             powerValue?.setTextSize(TypedValue.COMPLEX_UNIT_SP, sz); powerAvg?.setTextSize(TypedValue.COMPLEX_UNIT_SP, sz)
         }
+    }
+
+    /** The km's baseline on the %'s (power card): a shift only, the row's layout untouched. */
+    private fun alignRange() {
+        val r = b.range; val p = r.parent as? View ?: return
+        if (b.battery.height == 0 || r.height == 0) return
+        val want = b.battery.top + b.battery.baseline
+        val has = p.top + r.top + r.baseline
+        val dy = (want - has).toFloat()
+        if (r.translationY != dy) r.translationY = dy
     }
 
     /**

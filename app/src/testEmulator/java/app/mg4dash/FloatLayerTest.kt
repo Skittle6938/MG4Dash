@@ -64,6 +64,52 @@ class FloatLayerTest {
         assertTrue("the edit mode drawn last: ${top.javaClass.name}", top.javaClass.name.contains("CardsEditor"))
     }
 
+    private fun map(a: MainActivity): FloatWindow? =
+        MainActivity::class.java.getDeclaredField("floatMap").apply { isAccessible = true }.get(a) as FloatWindow?
+
+    private fun layerOf(a: MainActivity, fw: FloatWindow): View {
+        var v: View = fw.frameView
+        while ((v.parent as View).tag != FloatWindow.HOST) v = v.parent as View
+        return v
+    }
+
+    private fun detach(a: MainActivity, name: String) {
+        MainActivity::class.java.getDeclaredMethod(name).apply { isAccessible = true }.invoke(a); idle()
+    }
+
+    /** #98 (23/11): detached, a window is drawn over the other one docked in its card, with no touch needed. */
+    @Test fun detachedWebOverDockedMap() {
+        val a = home()
+        val web = web(a)!!; val map = map(a)!!
+        // The map touched last while both were in their cards
+        web.front(false); map.front(true)
+        detach(a, "detachWeb")
+        assertTrue(web.floating && !map.floating)
+        assertTrue("web ${layerOf(a, web).z} over map ${layerOf(a, map).z}", layerOf(a, web).z > layerOf(a, map).z)
+    }
+
+    @Test fun detachedMapOverDockedWeb() {
+        val a = home()
+        val web = web(a)!!; val map = map(a)!!
+        map.front(false); web.front(true)
+        detach(a, "detachMap")
+        assertTrue(map.floating && !web.floating)
+        assertTrue("map ${layerOf(a, map).z} over web ${layerOf(a, web).z}", layerOf(a, map).z > layerOf(a, web).z)
+        // The docked web app touched afterwards stays under the detached map
+        web.front(true); map.front(false)
+        assertTrue(layerOf(a, map).z > layerOf(a, web).z)
+    }
+
+    /** Both detached: the last touched in front. */
+    @Test fun bothDetachedLastTouchedInFront() {
+        val a = home()
+        val web = web(a)!!; val map = map(a)!!
+        detach(a, "detachWeb"); detach(a, "detachMap")
+        assertTrue(layerOf(a, map).z > layerOf(a, web).z)
+        map.front(false); web.front(true)
+        assertTrue(layerOf(a, web).z > layerOf(a, map).z)
+    }
+
     /** The two windows keep their order between them: the last touched in front. */
     @Test fun lastTouchedWindowInFront() {
         val a = home()

@@ -146,6 +146,7 @@ class FloatWindow(
         floating = on
         setAwake(false)
         look()
+        stack()
         if (on) {
             holder.visibility = View.VISIBLE
             // A kept place nearly on a card (300 against 298): set on it, the card's outline no longer shows
@@ -322,8 +323,17 @@ class FloatWindow(
     /** The awake outline is shown. */
     val outlineLit: Boolean get() = glow.background != null
 
-    /** In front of the other detached window (the last touched one); behind it otherwise. */
-    fun front(on: Boolean) { layer.translationZ = if (on) d else 0f }
+    /** The last touched of the two windows. */
+    private var inFront = false
+
+    /** In front of the other window (the last touched one); behind it otherwise. */
+    fun front(on: Boolean) { inFront = on; stack() }
+
+    /**
+     * Its place among the two windows: a detached one always over a docked one, whichever was touched last (#98,
+     * 23/11: the web app detached stayed under the map docked in its card, until a touch on it brought it in front).
+     */
+    private fun stack() { layer.translationZ = (if (floating) 2 * d else 0f) + if (inFront) d else 0f }
 
     /**
      * The layer of the web app's and the map's windows, shared, just above home's screen (#98). Their order (the last

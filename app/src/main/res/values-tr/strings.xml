@@ -1192,7 +1192,6 @@
     <string name="ly_clear">Önbelleği temizle</string>
     <string name="ly_cleared">Şarkı sözü önbelleği temizlendi</string>
     <string name="du_lyrics">Senkronize şarkı sözleri</string>
-    <string name="du_lyrics_payload">LRCLIB yanıt verisi (4G, sıfırlamadan beri): %1$s</string>
     <string name="lyrics_shortcut_short">Şarkı sözü katmanı</string>
     <string name="lyrics_shortcut_long">Senkronize şarkı sözü katmanı</string>
     <string name="lyrics_mg4control_title">MG4Control Kısayolu (Broadcast)</string>
