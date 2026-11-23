@@ -1195,4 +1195,9 @@
     <string name="du_lyrics_payload">LRCLIB yanıt verisi (4G, sıfırlamadan beri): %1$s</string>
     <string name="lyrics_shortcut_short">Şarkı sözü katmanı</string>
     <string name="lyrics_shortcut_long">Senkronize şarkı sözü katmanı</string>
+    <string name="lyrics_mg4control_title">MG4Control Kısayolu (Broadcast)</string>
+    <string name="lyrics_mg4control_guide">1. MG4Control\'ü aç -&gt; Kısayollar -&gt; Özel kısayollar -&gt; Oluştur\n2. Eylem türü olarak Broadcast gönder\'i seç\n3. Eylem: app.mg4dash.action.TOGGLE_LYRICS_OVERLAY\n4. Hedef uygulama: listeden MG4Dash\'i seç\n5. Kaydet ve kısayolu direksiyon düğmesine veya kayan balona ata</string>
+    <string name="lyrics_mg4control_copy">Eylemi kopyala</string>
+    <string name="lyrics_mg4control_copied">Eylem kopyalandı</string>
+    <string name="lyrics_mg4control_open">MG4Control\'ü aç</string>
 </resources>

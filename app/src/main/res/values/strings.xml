@@ -1195,4 +1195,9 @@
     <string name="du_lyrics_payload">LRCLIB response payload (4G, since reset): %1$s</string>
     <string name="lyrics_shortcut_short">Lyrics overlay</string>
     <string name="lyrics_shortcut_long">Synchronized lyrics overlay</string>
+    <string name="lyrics_mg4control_title">MG4Control Shortcut (Broadcast)</string>
+    <string name="lyrics_mg4control_guide">1. Open MG4Control -&gt; Shortcuts -&gt; Custom shortcuts -&gt; Create\n2. Choose Send a broadcast as the action type\n3. Action: app.mg4dash.action.TOGGLE_LYRICS_OVERLAY\n4. Target app: select MG4Dash from the list\n5. Save and assign the shortcut to a steering-wheel button or floating bubble</string>
+    <string name="lyrics_mg4control_copy">Copy action</string>
+    <string name="lyrics_mg4control_copied">Action copied</string>
+    <string name="lyrics_mg4control_open">Open MG4Control</string>
 </resources>

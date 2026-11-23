@@ -516,7 +516,15 @@ class LyricsCard(private val activity: Activity) : LinearLayout(activity), Lifec
         val scaleRow = LinearLayout(activity).apply { orientation = VERTICAL; addView(scaleLabel); addView(scaleSlider) }
         scaleLabel.text = "${(prefs.lyricsOverlayScale * 100).toInt()}%"
         fun updateInfo() { launchView { val c = LyricsRepo.info(); info.text = activity.getString(R.string.ly_cache_used, c.bytes / (1024f * 1024f), prefs.lyricsCacheMaxMb, c.tracks) } }
-        OptionsPopup(activity, activity.getString(R.string.wc_lyrics))
+        val guide = TextView(activity).apply {
+            text = activity.getString(R.string.lyrics_mg4control_guide)
+            setTextColor(Themes.color(activity, R.color.text_sub))
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
+            setPadding(dp(14), dp(12), dp(14), dp(12))
+            setBackgroundResource(R.drawable.bg_chip)
+        }
+        val launchControl = activity.packageManager.getLaunchIntentForPackage("com.mg4.control")
+        val popup = OptionsPopup(activity, activity.getString(R.string.wc_lyrics), scrollable = true)
             .toggle(activity.getString(R.string.ly_wifi), null, { prefs.lyricsWifiOnly }) { prefs.lyricsWifiOnly = it }
             .toggle(activity.getString(R.string.ly_cache), null, { prefs.lyricsCacheEnabled }) { prefs.lyricsCacheEnabled = it }
             .choice(activity.getString(R.string.ly_max), null, maxes.map { "$it MB" },
@@ -530,7 +538,21 @@ class LyricsCard(private val activity: Activity) : LinearLayout(activity), Lifec
             .action(activity.getString(R.string.ly_clear)) {
                 launchView { LyricsRepo.clear(); updateInfo(); Toasts.show(activity, R.string.ly_cleared) }
             }
-            .show()
+            .note(TextView(activity).apply {
+                text = activity.getString(R.string.lyrics_mg4control_title)
+                setTextColor(Themes.color(activity, R.color.text_title)); setTextSize(TypedValue.COMPLEX_UNIT_SP, 19f)
+                typeface = Typeface.create("sans-serif-medium", Typeface.BOLD)
+            })
+            .note(guide)
+            .action(activity.getString(R.string.lyrics_mg4control_copy)) {
+                val clipboard = activity.getSystemService(Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
+                clipboard.setPrimaryClip(android.content.ClipData.newPlainText("MG4Dash overlay action", LyricsOverlayReceiver.ACTION_TOGGLE))
+                Toasts.show(activity, R.string.lyrics_mg4control_copied)
+            }
+        if (launchControl != null) popup.action(activity.getString(R.string.lyrics_mg4control_open)) {
+            activity.startActivity(launchControl)
+        }
+        popup.show()
         updateInfo()
     }
 

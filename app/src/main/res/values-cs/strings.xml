@@ -1195,4 +1195,9 @@
     <string name="du_lyrics_payload">Data odpovědi LRCLIB (4G od resetu): %1$s</string>
     <string name="lyrics_shortcut_short">Překryv textu</string>
     <string name="lyrics_shortcut_long">Překryv synchronizovaných textů</string>
+    <string name="lyrics_mg4control_title">Zkratka MG4Control (Broadcast)</string>
+    <string name="lyrics_mg4control_guide">1. Otevřete MG4Control -&gt; Zkratky -&gt; Vlastní zkratky -&gt; Vytvořit\n2. Jako typ akce vyberte Odeslat broadcast\n3. Akce: app.mg4dash.action.TOGGLE_LYRICS_OVERLAY\n4. Cílová aplikace: vyberte MG4Dash ze seznamu\n5. Uložte a přiřaďte zkratku tlačítku na volantu nebo plovoucí bublině</string>
+    <string name="lyrics_mg4control_copy">Kopírovat akci</string>
+    <string name="lyrics_mg4control_copied">Akce zkopírována</string>
+    <string name="lyrics_mg4control_open">Otevřít MG4Control</string>
 </resources>

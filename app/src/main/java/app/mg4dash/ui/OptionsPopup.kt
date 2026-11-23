@@ -15,7 +15,7 @@ import app.mg4dash.R
  * OpenStreetMap map in its menu): the settings that were in Settings › Home (17/11), in the radar page's style
  * (a title, lines of a title, a grey subtitle and an outlined control).
  */
-class OptionsPopup(private val a: Activity, title: String) {
+class OptionsPopup(private val a: Activity, title: String, private val scrollable: Boolean = false) {
     private val d = a.resources.displayMetrics.density
     private fun dp(v: Int) = (v * d).toInt()
     private fun col(res: Int) = Themes.color(a, res)
@@ -82,7 +82,13 @@ class OptionsPopup(private val a: Activity, title: String) {
     fun show(onClose: () -> Unit = {}) {
         val close = chip(a.getString(R.string.st_close)) {}
         body.addView(close, LinearLayout.LayoutParams(-1, dp(56)).apply { topMargin = dp(24) })
-        val dialog = AlertDialog.Builder(a).setView(body).create()
+        val content: android.view.View = if (scrollable) android.widget.ScrollView(a).apply {
+            isFillViewport = true
+            setPadding(0, 0, 0, dp(28))
+            clipToPadding = false
+            addView(body, android.widget.FrameLayout.LayoutParams(-1, -2))
+        } else body
+        val dialog = AlertDialog.Builder(a).setView(content).create()
         close.setOnClickListener { dialog.dismiss() }
         dialog.setOnDismissListener { onClose() }
         Dialogs.show(dialog)

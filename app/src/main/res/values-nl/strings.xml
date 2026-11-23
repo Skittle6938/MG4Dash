@@ -1195,4 +1195,9 @@
     <string name="du_lyrics_payload">LRCLIB-responsgegevens (4G, sinds reset): %1$s</string>
     <string name="lyrics_shortcut_short">Songtekst-overlay</string>
     <string name="lyrics_shortcut_long">Overlay gesynchroniseerde songteksten</string>
+    <string name="lyrics_mg4control_title">MG4Control-snelkoppeling (Broadcast)</string>
+    <string name="lyrics_mg4control_guide">1. Open MG4Control -&gt; Snelkoppelingen -&gt; Aangepaste snelkoppelingen -&gt; Maken\n2. Kies Broadcast verzenden als actietype\n3. Actie: app.mg4dash.action.TOGGLE_LYRICS_OVERLAY\n4. Doel-app: selecteer MG4Dash uit de lijst\n5. Sla op en koppel de snelkoppeling aan een stuurknop of zwevende bubbel</string>
+    <string name="lyrics_mg4control_copy">Actie kopiëren</string>
+    <string name="lyrics_mg4control_copied">Actie gekopieerd</string>
+    <string name="lyrics_mg4control_open">MG4Control openen</string>
 </resources>

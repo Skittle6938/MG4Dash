@@ -1195,4 +1195,9 @@
     <string name="du_lyrics_payload">LRCLIB-Antwortdaten (4G, seit Zurücksetzen): %1$s</string>
     <string name="lyrics_shortcut_short">Liedtext-Overlay</string>
     <string name="lyrics_shortcut_long">Overlay synchronisierter Liedtexte</string>
+    <string name="lyrics_mg4control_title">MG4Control-Kurzbefehl (Broadcast)</string>
+    <string name="lyrics_mg4control_guide">1. MG4Control öffnen -&gt; Kurzbefehle -&gt; Benutzerdefinierte Kurzbefehle -&gt; Erstellen\n2. Als Aktion Broadcast senden wählen\n3. Aktion: app.mg4dash.action.TOGGLE_LYRICS_OVERLAY\n4. Ziel-App: MG4Dash aus der Liste auswählen\n5. Speichern und einer Lenkradtaste oder schwebenden Blase zuweisen</string>
+    <string name="lyrics_mg4control_copy">Aktion kopieren</string>
+    <string name="lyrics_mg4control_copied">Aktion kopiert</string>
+    <string name="lyrics_mg4control_open">MG4Control öffnen</string>
 </resources>

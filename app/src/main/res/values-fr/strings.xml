@@ -1195,4 +1195,9 @@
     <string name="du_lyrics_payload">Données reçues de LRCLIB (4G, depuis la remise à zéro) : %1$s</string>
     <string name="lyrics_shortcut_short">Superposition des paroles</string>
     <string name="lyrics_shortcut_long">Superposition des paroles synchronisées</string>
+    <string name="lyrics_mg4control_title">Raccourci MG4Control (Broadcast)</string>
+    <string name="lyrics_mg4control_guide">1. Ouvrez MG4Control -&gt; Raccourcis -&gt; Raccourcis personnalisés -&gt; Créer\n2. Choisissez Envoyer un broadcast comme type d\'action\n3. Action : app.mg4dash.action.TOGGLE_LYRICS_OVERLAY\n4. Application cible : sélectionnez MG4Dash dans la liste\n5. Enregistrez et associez le raccourci à un bouton du volant ou à une bulle flottante</string>
+    <string name="lyrics_mg4control_copy">Copier l\'action</string>
+    <string name="lyrics_mg4control_copied">Action copiée</string>
+    <string name="lyrics_mg4control_open">Ouvrir MG4Control</string>
 </resources>
