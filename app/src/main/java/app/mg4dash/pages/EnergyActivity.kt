@@ -493,7 +493,7 @@ class EnergyActivity : PageActivity() {
             ?: getString(R.string.st_cap_none)
         lateinit var popup: app.mg4dash.ui.OptionsPopup
         popup = app.mg4dash.ui.OptionsPopup(this, getString(R.string.vh_battery), R.drawable.ic_battery)
-            .choice(getString(R.string.st_battery_model).trimEnd(' ', ':', '\u00a0', '\u202f'), getString(R.string.en_battery_model_desc),
+            .choice(getString(R.string.en_battery_model), getString(R.string.en_battery_model_desc),
                 models.map { "$it kWh" }, { models.indexOf(prefs.batteryModel).coerceAtLeast(0) }) { prefs.batteryModel = models[it] }
             .choice(getString(R.string.st_new_cap).trimEnd(' ', ':', '\u00a0', '\u202f'), getString(R.string.en_new_cap_desc),
                 listOf(getString(R.string.st_new_cap_default, f(bc.modelNominal(this))), getString(R.string.st_new_cap_item_custom)),
