@@ -59,11 +59,12 @@ class LyricsCardTest {
         val card = LyricsCard(activity)
         assertTrue("the whole card must accept touches so swipes can change cards", card.isClickable)
         card.shown(true)
-        idle(100)
         assertContains(card, activity.getString(R.string.ly_waiting))
 
-        setNow(trackNow())
-        idle(100)
+        val now = trackNow()
+        setNow(now)
+        // Assert the immediate state before the one-second debounce can reach the offline result.
+        card.show(now)
         assertContains(card, activity.getString(R.string.ly_searching))
         card.shown(false)
     }
