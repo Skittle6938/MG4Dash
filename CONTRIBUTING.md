@@ -64,6 +64,10 @@ That's all. You don't need to touch `MainActivity` or the editor.
   Never use a fixed colour: the light theme, the dark theme and the accent the driver chose then work by themselves.
 - **Building blocks.** Use `CardKit` for margins (20 dp / 16 dp), the title, text lines (17, 44, 22 and 18 sp),
   dividers and buttons, so all cards look alike.
+- **Options and windows.** Use `OptionsPopup` (a card's options) and `ui/Windows.kt` (any other window, and
+  `Windows.confirm` for a question): they bring the title bar with the round close button, the groups of rows with
+  switches, and close with a touch outside or the car's back key. No "Close" button. The Settings page uses the same
+  rows (`ui/Rows.kt`).
 - **Touch.** A touch can open the related page. A long press opens the options. Swipes belong to the place: they change
   card, so make the whole card clickable (`isClickable = true`) so that a swipe starting on it still changes card.
 - **Safety.** Nothing that needs reading or typing while driving, and no animation that grabs the eye.

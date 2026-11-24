@@ -109,9 +109,12 @@ class OptionsPopup(private val a: Activity, private val title: String, private v
         probe.removeAllViews()
         val width = if (twoColumns) minOf(dp(1640), screen.widthPixels - dp(120)) else dp(900)
         if (twoColumns) {
+            // A note before every row explains the whole window: across both columns
+            val lead = first.takeWhile { it.tag != Rows.TAG_ROW }
+            if (lead.isNotEmpty()) body.addView(build(lead), LinearLayout.LayoutParams(-1, -2))
             body.addView(LinearLayout(a).apply {
                 orientation = LinearLayout.HORIZONTAL
-                addView(build(first), LinearLayout.LayoutParams(0, -2, 1f).apply { rightMargin = dp(14) })
+                addView(build(first.drop(lead.size)), LinearLayout.LayoutParams(0, -2, 1f).apply { rightMargin = dp(14) })
                 addView(build(second), LinearLayout.LayoutParams(0, -2, 1f).apply { leftMargin = dp(14) })
             }, LinearLayout.LayoutParams(-1, -2))
         } else body.addView(build(first + second), LinearLayout.LayoutParams(-1, -2))
