@@ -743,8 +743,6 @@
     <string name="du_last30">Posledních 30 dní</string>
     <string name="du_detail_open">Zobrazit podrobnosti</string>
     <string name="du_detail_open_desc">Den po dni, upozornění a jeho práh, vynulování</string>
-    <string name="st_theme_smooth">Plynulé přepínání světlý / tmavý</string>
-    <string name="st_theme_smooth_desc">Čeká 5 s stabilních světel (žádné přepínání pod mosty) a prolne se za 2 s. Vypnuto: přepne hned, jak se světla změní.</string>
     <string name="st_night_sun">Noc po západu slunce</string>
     <string name="st_night_sun_desc">Automatický režim: tmavý od západu do východu slunce v místě vozu, i s vypnutými obrysovými světly. Počítá se v jednotce, bez sítě.</string>
     <string name="st_night_sun_today">Dnes zde: západ %1$s, východ %2$s</string>
@@ -1190,6 +1188,8 @@
     <string name="sc_profile">Profil</string>
     <string name="pf_drive">Profily si pamatují jízdní režim a rekuperaci</string>
     <string name="pf_drive_desc">Při opuštění profilu si MG4Dash zapamatuje jízdní režim a rekuperaci; při přechodu na profil je vrátí, ve stoje i za jízdy. Ve výchozím stavu vypnuto.</string>
+    <string name="dv_profiles_drive">Každý profil si pamatuje režim a rekuperaci</string>
+    <string name="dv_profiles_drive_desc">Při změně profilu se převezme jízdní režim a rekuperace profilu</string>
     <string name="br_title">Jas</string>
     <string name="br_auto">Automatický jas</string>
     <string name="br_auto_desc">Chytrý: učí se z vašich nastavení posuvníkem podle odhadovaného denního světla a světel. Původní: režim Androidu s − a +.</string>

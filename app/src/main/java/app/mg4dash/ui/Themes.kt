@@ -65,11 +65,7 @@ object Themes {
             if (sp.getBoolean("last_night", !raw) != raw) sp.edit().putBoolean("last_night", raw).apply()
             return raw
         }
-        // "Immediate transition" setting: no wait, the lights state is followed at once
-        if (!sp.getBoolean("theme_smooth", true)) {
-            if (stableNight != raw) { stableNight = raw; sp.edit().putBoolean("last_night", raw).apply() }
-            pendingSince = 0L; return raw
-        }
+        // The lights must be stable a few seconds first: always (24/11, the "smooth transition" setting is gone)
         val now = android.os.SystemClock.elapsedRealtime()
         val stable = stableNight ?: sp.getBoolean("last_night", raw).also { stableNight = it }
         if (raw == stable) { pendingSince = 0L; return stable }
@@ -204,7 +200,7 @@ object Themes {
     }
 
     fun recreateSmooth(activity: Activity) {
-        if (!Prefs(activity).themeSmooth) { activity.recreate(); return }
+        // Always the smooth transition (24/11: its setting is gone)
         if (recreating) return
         recreating = true
         val v = activity.window.decorView

@@ -22,9 +22,11 @@ class OptionsPopup(private val a: Activity, private val title: String, private v
     private fun dp(v: Int) = (v * d).toInt()
     private fun col(res: Int) = Themes.color(a, res)
     /** What goes in each column; rows next to each other share a group. */
-    private val first = mutableListOf<View>()
-    private val second = mutableListOf<View>()
-    private var target = first
+    /** What goes in each column, in order (24/11: up to three, the cards offered). */
+    private val cols = mutableListOf(mutableListOf<View>())
+    private var target = cols[0]
+    private val first get() = cols[0]
+    private val all get() = cols.flatten()
     /** True once shown in two columns. */
     var twoColumns = false; private set
     private var closeNow: () -> Unit = {}
@@ -34,7 +36,7 @@ class OptionsPopup(private val a: Activity, private val title: String, private v
     fun refresh() = repaints.forEach { it() }
 
     /** What follows goes in the right column when the whole is too tall for the screen in one. */
-    fun column(): OptionsPopup { target = second; return this }
+    fun column(): OptionsPopup { target = mutableListOf<View>().also { cols += it }; return this }
 
     /** Yes / no: a switch; the whole row toggles it. */
     fun toggle(title: String, sub: String?, get: () -> Boolean, set: (Boolean) -> Unit): OptionsPopup {
@@ -147,12 +149,13 @@ class OptionsPopup(private val a: Activity, private val title: String, private v
         }
         body.addView(Rows.titleBar(a, icon, title) { dialog.dismiss() }, LinearLayout.LayoutParams(-1, -2).apply { bottomMargin = dp(4) })
         // One column when it fits in the screen's height (title bar and the dialog's margins: 170 dp)
-        val probe = build(first + second)
+        val probe = build(all)
         probe.measure(View.MeasureSpec.makeMeasureSpec(dp(836), View.MeasureSpec.EXACTLY), View.MeasureSpec.UNSPECIFIED)
         val screen = a.resources.displayMetrics
-        twoColumns = second.isNotEmpty() && probe.measuredHeight + dp(170) > screen.heightPixels
+        twoColumns = cols.count { it.isNotEmpty() } > 1 && probe.measuredHeight + dp(170) > screen.heightPixels
         probe.removeAllViews()
-        val width = if (widthDp > 0) minOf(dp(widthDp), screen.widthPixels - dp(80)) else if (twoColumns) minOf(dp(1640), screen.widthPixels - dp(120)) else dp(900)
+        val width = if (widthDp > 0) minOf(dp(widthDp), screen.widthPixels - dp(80))
+            else if (twoColumns) minOf(dp(if (cols.count { it.isNotEmpty() } > 2) 1760 else 1640), screen.widthPixels - dp(120)) else dp(900)
         // Everything under the title bar scrolls when taller than the screen (24/11), the cross always in sight
         val content = LinearLayout(a).apply { orientation = LinearLayout.VERTICAL }
         if (twoColumns) {
@@ -161,12 +164,16 @@ class OptionsPopup(private val a: Activity, private val title: String, private v
             if (lead.isNotEmpty()) content.addView(build(lead), LinearLayout.LayoutParams(-1, -2))
             content.addView(LinearLayout(a).apply {
                 orientation = LinearLayout.HORIZONTAL
-                addView(build(first.drop(lead.size)), LinearLayout.LayoutParams(0, -2, 1f).apply { rightMargin = dp(14) })
-                addView(build(second), LinearLayout.LayoutParams(0, -2, 1f).apply { leftMargin = dp(14) })
+                val used = cols.filter { it.isNotEmpty() }
+                used.forEachIndexed { i, c ->
+                    addView(build(if (i == 0) c.drop(lead.size) else c), LinearLayout.LayoutParams(0, -2, 1f).apply {
+                        if (i > 0) leftMargin = dp(14); if (i < used.lastIndex) rightMargin = dp(14)
+                    })
+                }
             }, LinearLayout.LayoutParams(-1, -2))
-        } else content.addView(build(first + second), LinearLayout.LayoutParams(-1, -2))
+        } else content.addView(build(all), LinearLayout.LayoutParams(-1, -2))
         // A card's own content that scrolls by itself (the alerter) is not wrapped twice
-        val single = (first + second).singleOrNull()
+        val single = all.singleOrNull()
         body.addView(if (single is android.widget.ScrollView) content else Rows.scrolling(a, content, Rows.contentRoom(a)), LinearLayout.LayoutParams(-1, -2))
         dialog = AlertDialog.Builder(a).setView(body).create()
         dialog.setCanceledOnTouchOutside(true)

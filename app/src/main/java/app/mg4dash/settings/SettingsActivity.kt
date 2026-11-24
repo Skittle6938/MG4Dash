@@ -105,7 +105,11 @@ class SettingsActivity : AppCompatActivity() {
             val r = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
             cols.addView(l, LinearLayout.LayoutParams(0, -2, 1f).apply { rightMargin = dp(8) })
             cols.addView(r, LinearLayout.LayoutParams(0, -2, 1f).apply { leftMargin = dp(8) })
-            val sv = ScrollView(this).apply { isVerticalScrollBarEnabled = true; addView(cols) }
+            // Room under the last panel (24/11: its bottom edge was cut), its outline and shadow in sight at the end
+            val sv = ScrollView(this).apply {
+                isVerticalScrollBarEnabled = true; isVerticalFadingEdgeEnabled = true; setFadingEdgeLength(dp(28))
+                addView(cols); setPadding(0, 0, 0, dp(24)); clipToPadding = false
+            }
             pages.addView(sv, android.widget.FrameLayout.LayoutParams(-1, -1)); tabViews += sv
             val chip = tabLabel(getString(label)).apply { setOnClickListener { showTab(i) } }
             tabBar.addView(chip, LinearLayout.LayoutParams(-2, -1).apply { if (i > 0) leftMargin = dp(10) }); tabChips += chip
@@ -249,8 +253,9 @@ class SettingsActivity : AppCompatActivity() {
             }
         } ?: getString(R.string.st_night_sun_nopos), 15f, R.color.text_sub)
         // Only in Automatic (24/11): greyed in Light or Dark
-        theme.getChildAt(theme.childCount - 1).apply { val auto = prefs.themeMode == 0; alpha = if (auto) 1f else 0.4f; isEnabled = auto }
-        toggle(theme, R.string.st_theme_smooth, R.string.st_theme_smooth_desc, { prefs.themeSmooth }) { prefs.themeSmooth = it }
+        // the night row and today's times under it
+        val auto = prefs.themeMode == 0
+        listOf(theme.getChildAt(theme.childCount - 2), theme.getChildAt(theme.childCount - 1)).forEach { it.alpha = if (auto) 1f else 0.4f; it.isEnabled = auto }
         dropdown(theme, getString(R.string.st_panel_outline), listOf(R.string.st_panel_fade, R.string.st_panel_full).map { getString(it) }, { if (prefs.panelFade) 0 else 1 }) {
             if (prefs.panelFade != (it == 0)) { prefs.panelFade = it == 0; recreate() }
         }
@@ -987,11 +992,11 @@ class SettingsActivity : AppCompatActivity() {
         val volumeHeader = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL }
         volumeHeader.addView(LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            addView(TextView(this@SettingsActivity).apply { text = getString(R.string.st_sound_volume); setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f); setTextColor(color(R.color.text_value)) })
-            addView(TextView(this@SettingsActivity).apply { text = getString(R.string.st_sound_volume_desc); setTextSize(TypedValue.COMPLEX_UNIT_SP, 15f); setTextColor(color(R.color.text_title)) })
+            addView(TextView(this@SettingsActivity).apply { text = getString(R.string.st_sound_volume); setTextSize(TypedValue.COMPLEX_UNIT_SP, app.mg4dash.ui.Rows.TITLE_SP); setTextColor(color(R.color.text_value)) })
+            addView(TextView(this@SettingsActivity).apply { text = getString(R.string.st_sound_volume_desc); setTextSize(TypedValue.COMPLEX_UNIT_SP, app.mg4dash.ui.Rows.SUB_SP); setTextColor(color(R.color.text_sub)) })
         }, LinearLayout.LayoutParams(0, -2, 1f))
         val volumeValue = TextView(this).apply {
-            setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f)
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, app.mg4dash.ui.Rows.VALUE_SP)
             setTextColor(color(R.color.accent_action))
         }
         volumeHeader.addView(volumeValue)
@@ -1333,22 +1338,23 @@ class SettingsActivity : AppCompatActivity() {
      */
     private fun brightnessSetting(p: LinearLayout) {
         val smart = app.mg4dash.brightness.SmartBrightness
+        // The same buttons as everywhere (24/11: they were smaller here)
         fun small(v: TextView) = v.apply {
-            setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f); minHeight = 0; minimumHeight = 0; minWidth = 0; minimumWidth = 0
-            setPadding(dp(16), 0, dp(16), 0)
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, app.mg4dash.ui.Rows.BUTTON_SP); minWidth = 0; minimumWidth = 0
+            setPadding(dp(20), 0, dp(20), 0)
         }
         /** A line: [title] and [sub] on the left, [views] (40 dp high) on the right; returns the sub text. */
         fun line(parent: LinearLayout, title: String?, sub: String?, vararg views: View): TextView {
-            val l = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL; minimumHeight = dp(56) }
+            val l = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL; minimumHeight = dp(app.mg4dash.ui.Rows.ROW_DP); setPadding(0, dp(12), 0, dp(12)) }
             val texts = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
-            title?.let { texts.addView(TextView(this).apply { text = it; setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f); setTextColor(color(R.color.text_value)) }) }
+            title?.let { texts.addView(TextView(this).apply { text = it; setTextSize(TypedValue.COMPLEX_UNIT_SP, app.mg4dash.ui.Rows.TITLE_SP); setTextColor(color(R.color.text_value)) }) }
             val s = TextView(this).apply {
-                text = sub ?: ""; setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f); setTextColor(color(R.color.text_title))
+                text = sub ?: ""; setTextSize(TypedValue.COMPLEX_UNIT_SP, app.mg4dash.ui.Rows.SUB_SP); setTextColor(color(R.color.text_sub))
                 visibility = if (sub == null) View.GONE else View.VISIBLE
             }
             texts.addView(s)
             l.addView(texts, LinearLayout.LayoutParams(0, -2, 1f).apply { rightMargin = dp(12) })
-            views.forEach { v -> l.addView(v, LinearLayout.LayoutParams(-2, dp(40)).apply { leftMargin = dp(8) }) }
+            views.forEach { v -> l.addView(v, LinearLayout.LayoutParams(-2, dp(app.mg4dash.ui.Rows.CONTROL_DP)).apply { leftMargin = dp(8) }) }
             parent.addView(l, LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(2) })
             return s
         }
@@ -1401,11 +1407,14 @@ class SettingsActivity : AppCompatActivity() {
     }
     /** Settings › Home › Cards offered: a box per card, all ticked at first; half of them in each column. */
     private fun cardsOffered() {
-        val cards = app.mg4dash.ui.HomeSlots.Card.entries
+        // By their names, accents sorted with their letter (Énergie with E), in three columns (24/11)
+        val collator = java.text.Collator.getInstance(resources.configuration.locales[0]).apply { strength = java.text.Collator.PRIMARY }
+        val cards = app.mg4dash.ui.HomeSlots.Card.entries.sortedWith { x, y -> collator.compare(getString(x.label), getString(y.label)) }
         val popup = app.mg4dash.ui.OptionsPopup(this, getString(R.string.st_cards_offered).trimEnd('…', '.', ' '), R.drawable.ic_apps)
             .note(getString(R.string.st_cards_offered_note))
+        val per = (cards.size + 2) / 3
         cards.forEachIndexed { i, card ->
-            if (i == (cards.size + 1) / 2) popup.column()
+            if (i > 0 && i % per == 0) popup.column()
             popup.check(getString(card.label), { card.id !in prefs.cardsOff }) { on ->
                 prefs.cardsOff = if (on) prefs.cardsOff - card.id else prefs.cardsOff + card.id
             }
@@ -1421,8 +1430,8 @@ class SettingsActivity : AppCompatActivity() {
             setPadding(dp(20), dp(16), dp(20), dp(16))
         }
         p.addView(TextView(this).apply {
-            text = title; setTextColor(color(R.color.text_title)); setTextSize(TypedValue.COMPLEX_UNIT_SP, 17f)
-            letterSpacing = 0.12f; typeface = Typeface.create("sans-serif-medium", Typeface.NORMAL)
+            text = title.uppercase(); setTextColor(color(R.color.text_title)); setTextSize(TypedValue.COMPLEX_UNIT_SP, app.mg4dash.ui.Rows.HEADER_SP)
+            letterSpacing = 0.14f; typeface = Typeface.create("sans-serif-medium", Typeface.NORMAL)
         })
         parent.addView(p, LinearLayout.LayoutParams(-1, if (fill) -1 else -2).apply { bottomMargin = dp(12) })
         return p
@@ -1430,15 +1439,16 @@ class SettingsActivity : AppCompatActivity() {
 
     private fun text(parent: LinearLayout, value: String, sp: Float, colorRes: Int): TextView =
         TextView(this).apply {
-            text = value; setTextColor(color(colorRes)); setTextSize(TypedValue.COMPLEX_UNIT_SP, sp)
+            // The rows' sizes everywhere (24/11): 20 sp for a title or a value, 15 sp for a description
+            text = value; setTextColor(color(colorRes)); setTextSize(TypedValue.COMPLEX_UNIT_SP, app.mg4dash.ui.Rows.textSp(sp))
             setPadding(0, dp(6), 0, dp(2))
         }.also { parent.addView(it) }
 
     private fun button(label: String, onClick: () -> Unit): Button =
         Button(this).apply {
             // White text on every button, the close one too: no accent colour in the settings (#98)
-            text = label; isAllCaps = false; setTextColor(color(R.color.text_value)); setTextSize(TypedValue.COMPLEX_UNIT_SP, 19f)
-            setBackgroundResource(R.drawable.bg_button); minHeight = dp(56); setPadding(dp(20), 0, dp(20), 0)
+            text = label; isAllCaps = false; setTextColor(color(R.color.text_value)); setTextSize(TypedValue.COMPLEX_UNIT_SP, app.mg4dash.ui.Rows.BUTTON_SP)
+            setBackgroundResource(R.drawable.bg_button); minHeight = dp(app.mg4dash.ui.Rows.CONTROL_DP); setPadding(dp(20), 0, dp(20), 0)
             stateListAnimator = null; elevation = 0f   // no relief or shadow (Material style), like the other buttons
             setOnClickListener { onClick() }
         }

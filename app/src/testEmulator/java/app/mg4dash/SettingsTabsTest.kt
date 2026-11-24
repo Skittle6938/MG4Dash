@@ -30,7 +30,7 @@ class SettingsTabsTest {
     /** The settings of the old Home, Appearance, Vehicle, 4G data and System tabs still in the Settings page. */
     private val settings = listOf(
         R.string.ly_edit, R.string.st_cards_offered, R.string.tu_show, R.string.st_bar, R.string.st_wide_bar, R.string.st_shortcuts_menu,
-        R.string.st_fullscreen, R.string.st_call_bar, R.string.st_theme_mode, R.string.st_night_sun, R.string.st_theme_smooth, R.string.st_panel_outline,
+        R.string.st_fullscreen, R.string.st_call_bar, R.string.st_theme_mode, R.string.st_night_sun, R.string.st_panel_outline,
         R.string.st_theme_bg, R.string.st_theme_accent, R.string.st_start_source, R.string.st_start_playback, R.string.st_aa_button,
         R.string.st_sound_boot_trigger, R.string.st_sound_volume, R.string.st_units, R.string.st_pressure, R.string.st_clock, R.string.st_own_keyboard,
         R.string.du_last30, R.string.du_detail_open, R.string.st_replace, R.string.st_valet, R.string.st_update_auto, R.string.st_update_beta,
@@ -46,6 +46,17 @@ class SettingsTabsTest {
             val label = a.getString(id, "").substringBefore("%").trimEnd(' ', ':', ' ', ' ', '…', '›')
             assertEquals("« $label » once", 1, all.count { it == label || it.startsWith(label) && (it.length - label.length) <= 3 })
         }
+    }
+
+    /** One set of sizes (24/11): no text in the old in-between sizes (16, 17, 18 sp) in any tab. */
+    @Test fun kitSizesOnly() {
+        prefs.raw.edit().clear().putBoolean("vertical_dock", true).putInt("theme_mode", 1).commit()
+        val a = Robolectric.buildActivity(SettingsActivity::class.java).setup().get().also { idle() }
+        val sd = a.resources.displayMetrics.scaledDensity
+        fun views(v: View): List<TextView> = if (v is ViewGroup) (0 until v.childCount).flatMap { views(v.getChildAt(it)) } else listOfNotNull(v as? TextView)
+        val odd = views(a.window.decorView).filter { it.text.isNotBlank() }.map { it.text.toString().take(30) to it.textSize / sd }
+            .filter { (_, sp) -> sp in listOf(16f, 17f, 18f) }
+        assertEquals("texts off the kit: $odd", 0, odd.size)
     }
 
     /** A tab saved before the five tabs opens the same settings (Vehicle and 4G data: General). */

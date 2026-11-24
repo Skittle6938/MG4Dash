@@ -743,8 +743,6 @@
     <string name="du_last30">30 derniers jours</string>
     <string name="du_detail_open">Voir le détail</string>
     <string name="du_detail_open_desc">Jour par jour, l\'alerte et son seuil, la remise à zéro</string>
-    <string name="st_theme_smooth">Transition douce clair / sombre</string>
-    <string name="st_theme_smooth_desc">Attend 5 s de feux stables (pas de bascule sous les ponts) et passe en fondu sur 2 s. Désactivé : bascule dès que les feux changent.</string>
     <string name="st_night_sun">Nuit après le coucher du soleil</string>
     <string name="st_night_sun_desc">Mode automatique : sombre du coucher au lever du soleil à la position de la voiture, même feux de position éteints. Calculé sur l\'autoradio, sans réseau.</string>
     <string name="st_night_sun_today">Aujourd\'hui ici : coucher %1$s, lever %2$s</string>
@@ -1190,6 +1188,8 @@
     <string name="sc_profile">Profil</string>
     <string name="pf_drive">Les profils retiennent le mode de conduite et la régénération</string>
     <string name="pf_drive_desc">En quittant un profil, MG4Dash note le mode de conduite et la régénération de la voiture ; en arrivant sur un profil, il les remet, à l\'arrêt comme en roulant. Éteint par défaut.</string>
+    <string name="dv_profiles_drive">Chaque profil retient le mode et la régénération</string>
+    <string name="dv_profiles_drive_desc">Au changement de profil, le mode de conduite et la régénération du profil sont repris</string>
     <string name="br_title">Luminosité</string>
     <string name="br_auto">Luminosité automatique</string>
     <string name="br_auto_desc">Intelligente : apprend de tes réglages au curseur, selon la lumière du jour estimée et les feux. D\'origine : le mode d\'Android, avec − et +.</string>

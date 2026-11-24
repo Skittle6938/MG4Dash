@@ -743,8 +743,6 @@
     <string name="du_last30">Últimos 30 días</string>
     <string name="du_detail_open">Ver el detalle</string>
     <string name="du_detail_open_desc">Día a día, la alerta y su umbral, el reinicio</string>
-    <string name="st_theme_smooth">Transición suave claro / oscuro</string>
-    <string name="st_theme_smooth_desc">Espera 5 s con luces estables (sin cambio bajo puentes) y funde en 2 s. Desactivado: cambia en cuanto cambian las luces.</string>
     <string name="st_night_sun">Noche tras la puesta de sol</string>
     <string name="st_night_sun_desc">Modo automático: oscuro desde la puesta hasta la salida del sol en la posición del coche, incluso con las luces de posición apagadas. Calculado en la radio, sin red.</string>
     <string name="st_night_sun_today">Hoy aquí: puesta %1$s, salida %2$s</string>
@@ -1190,6 +1188,8 @@
     <string name="sc_profile">Perfil</string>
     <string name="pf_drive">Los perfiles guardan el modo de conducción y la regeneración</string>
     <string name="pf_drive_desc">Al salir de un perfil, MG4Dash anota el modo de conducción y la regeneración; al llegar a un perfil, los vuelve a poner, parado o en marcha. Apagado por defecto.</string>
+    <string name="dv_profiles_drive">Cada perfil recuerda el modo y la regeneración</string>
+    <string name="dv_profiles_drive_desc">Al cambiar de perfil, se recuperan el modo de conducción y la regeneración del perfil</string>
     <string name="br_title">Brillo</string>
     <string name="br_auto">Brillo automático</string>
     <string name="br_auto_desc">Inteligente: aprende de tus ajustes con el control, según la luz del día estimada y las luces. Original: el modo de Android, con − y +.</string>

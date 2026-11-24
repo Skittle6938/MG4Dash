@@ -79,6 +79,11 @@ class WindowsFitTest {
             ShadowDialog.reset(); app.mg4dash.ui.DrivingCard.openAll(a); check(a, "driving_all$tag")
             ShadowDialog.reset(); app.mg4dash.settings.ProfileWindow.edit(a, null) {}; check(a, "profile$tag")
             ShadowDialog.reset(); app.mg4dash.ui.UninstallWindow.show(a); check(a, "uninstall$tag")
+            // The Settings page's own windows (24/11: Cards offered was cut on the car and this test did not open it)
+            val s = Robolectric.buildActivity(app.mg4dash.settings.SettingsActivity::class.java).setup().get().also { idle() }
+            ShadowDialog.reset()
+            app.mg4dash.settings.SettingsActivity::class.java.getDeclaredMethod("cardsOffered").apply { isAccessible = true }.invoke(s)
+            check(s, "cards_offered$tag")
         }
         File("build/screenshots/fit/scrolled.txt").writeText(scrolled.joinToString("\n"))
     }

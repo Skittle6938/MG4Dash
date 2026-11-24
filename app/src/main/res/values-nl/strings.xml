@@ -743,8 +743,6 @@
     <string name="du_last30">Laatste 30 dagen</string>
     <string name="du_detail_open">Details bekijken</string>
     <string name="du_detail_open_desc">Dag voor dag, de waarschuwing en de drempel, het resetten</string>
-    <string name="st_theme_smooth">Zachte overgang licht / donker</string>
-    <string name="st_theme_smooth_desc">Wacht 5 s op stabiele verlichting (geen wissel onder bruggen) en vervaagt in 2 s. Uit: wisselt zodra de verlichting verandert.</string>
     <string name="st_night_sun">Nacht na zonsondergang</string>
     <string name="st_night_sun_desc">Automatische modus: donker van zonsondergang tot zonsopgang op de plek van de auto, ook met de stadslichten uit. Berekend op de radio, zonder netwerk.</string>
     <string name="st_night_sun_today">Vandaag hier: zonsondergang %1$s, zonsopgang %2$s</string>
@@ -1190,6 +1188,8 @@
     <string name="sc_profile">Profiel</string>
     <string name="pf_drive">Profielen onthouden de rijmodus en de regeneratie</string>
     <string name="pf_drive_desc">Bij het verlaten van een profiel noteert MG4Dash rijmodus en regeneratie; bij het wisselen naar een profiel zet het ze terug, stilstaand of rijdend. Standaard uit.</string>
+    <string name="dv_profiles_drive">Elk profiel onthoudt modus en regeneratie</string>
+    <string name="dv_profiles_drive_desc">Bij het wisselen van profiel worden de rijmodus en regeneratie van het profiel overgenomen</string>
     <string name="br_title">Helderheid</string>
     <string name="br_auto">Automatische helderheid</string>
     <string name="br_auto_desc">Slim: leert van je instellingen met de schuif, volgens het geschatte daglicht en de lichten. Origineel: de Android-modus, met − en +.</string>

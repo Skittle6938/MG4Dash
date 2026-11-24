@@ -743,8 +743,6 @@
     <string name="du_last30">Ultimi 30 giorni</string>
     <string name="du_detail_open">Vedi il dettaglio</string>
     <string name="du_detail_open_desc">Giorno per giorno, l\'avviso e la sua soglia, l\'azzeramento</string>
-    <string name="st_theme_smooth">Transizione morbida chiaro / scuro</string>
-    <string name="st_theme_smooth_desc">Attende 5 s di luci stabili (nessun cambio sotto i ponti) e sfuma in 2 s. Disattivato: cambia appena cambiano le luci.</string>
     <string name="st_night_sun">Notte dopo il tramonto</string>
     <string name="st_night_sun_desc">Modalità automatica: scuro dal tramonto all\'alba nella posizione dell\'auto, anche a luci di posizione spente. Calcolato sull\'autoradio, senza rete.</string>
     <string name="st_night_sun_today">Oggi qui: tramonto %1$s, alba %2$s</string>
@@ -1190,6 +1188,8 @@
     <string name="sc_profile">Profilo</string>
     <string name="pf_drive">I profili ricordano la modalità di guida e la rigenerazione</string>
     <string name="pf_drive_desc">Lasciando un profilo, MG4Dash annota modalità di guida e rigenerazione; arrivando su un profilo, le rimette, da fermo o in marcia. Spento per impostazione predefinita.</string>
+    <string name="dv_profiles_drive">Ogni profilo ricorda modalità e rigenerazione</string>
+    <string name="dv_profiles_drive_desc">Al cambio di profilo, vengono ripresi la modalità di guida e la rigenerazione del profilo</string>
     <string name="br_title">Luminosità</string>
     <string name="br_auto">Luminosità automatica</string>
     <string name="br_auto_desc">Intelligente: impara dalle tue regolazioni con il cursore, secondo la luce del giorno stimata e le luci. Originale: la modalità di Android, con − e +.</string>

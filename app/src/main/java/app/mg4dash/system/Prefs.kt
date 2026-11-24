@@ -478,9 +478,6 @@ class Prefs(context: Context) {
         get() = sp.getInt("bar_side", 0)
         set(v) = sp.edit().putInt("bar_side", v).apply()
 
-    var themeSmooth: Boolean
-        get() = sp.getBoolean("theme_smooth", true)
-        set(v) = sp.edit().putBoolean("theme_smooth", v).apply()
 
     var homeWidget: Int
         get() = sp.getInt("home_widget", 0)

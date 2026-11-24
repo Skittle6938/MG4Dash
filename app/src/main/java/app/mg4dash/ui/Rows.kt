@@ -24,6 +24,16 @@ import app.mg4dash.R
  */
 object Rows {
     const val ROW_DP = 88
+    /** The one set of sizes (24/11): a row's title, its description, a value, a button, a section title; controls 56 dp high. */
+    const val TITLE_SP = 20f
+    const val SUB_SP = 15f
+    const val VALUE_SP = 20f
+    const val BUTTON_SP = 19f
+    const val HEADER_SP = 14f
+    const val CONTROL_DP = 56
+
+    /** A text's size in the kit: 20 sp for a title or a value, 15 sp for a description, the large figures as they are. */
+    fun textSp(sp: Float) = when { sp <= 16f -> SUB_SP; sp < 21f -> TITLE_SP; else -> sp }
     const val TAG_ROW = "mg4dash.row"
     private val medium: Typeface = Typeface.create("sans-serif-medium", Typeface.NORMAL)
 
@@ -153,13 +163,21 @@ object Rows {
         return object : android.widget.ScrollView(c) {
             override fun onMeasure(w: Int, h: Int) = super.onMeasure(w, View.MeasureSpec.makeMeasureSpec(maxPx, View.MeasureSpec.AT_MOST))
         }.apply {
-            isVerticalScrollBarEnabled = true; isVerticalFadingEdgeEnabled = true; setFadingEdgeLength(dp(c, 36)); overScrollMode = View.OVER_SCROLL_NEVER
+            isVerticalScrollBarEnabled = true; isScrollbarFadingEnabled = false; scrollBarStyle = View.SCROLLBARS_OUTSIDE_INSET
+            isVerticalFadingEdgeEnabled = true; setFadingEdgeLength(dp(c, 36)); overScrollMode = View.OVER_SCROLL_NEVER
             addView(content, android.widget.FrameLayout.LayoutParams(-1, -2))
+            // Room under the last row (24/11: windows looked cut at the bottom): its rounded edge in sight once at the end,
+            // where the fade is gone
+            setPadding(0, 0, 0, dp(c, 20)); clipToPadding = false
         }
     }
 
     /** The height left to a window's content on this screen: title bar, margins and [buttons] row taken off. */
-    fun contentRoom(c: Context, buttons: Boolean = false) = c.resources.displayMetrics.heightPixels - dp(c, 84 + 28 + 40) - (if (buttons) dp(c, 80) else 0)
+    fun contentRoom(c: Context, buttons: Boolean = false): Int {
+        // The height the activity really has (24/11: on the car the window was taller than this and was cut)
+        val screen = (c as? android.app.Activity)?.window?.decorView?.height?.takeIf { it > 0 } ?: c.resources.displayMetrics.heightPixels
+        return screen - dp(c, 84 + 28 + 64) - (if (buttons) dp(c, 80) else 0)
+    }
 
     /** A window's background: the panel colour made opaque, large corners, thin outline. */
     fun windowBackground(c: Context) = GradientDrawable().apply {

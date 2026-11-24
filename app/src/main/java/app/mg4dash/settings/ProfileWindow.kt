@@ -21,7 +21,7 @@ object ProfileWindow {
     fun button(activity: Activity, onSwitched: () -> Unit): TextView = TextView(activity).apply {
         val d = activity.resources.displayMetrics.density
         text = activity.getString(R.string.pf_menu, Profiles.current(activity).name) + "  ▾"
-        setTextSize(TypedValue.COMPLEX_UNIT_SP, 17f); gravity = Gravity.CENTER; maxLines = 1
+        setTextSize(TypedValue.COMPLEX_UNIT_SP, app.mg4dash.ui.Rows.BUTTON_SP); gravity = Gravity.CENTER; maxLines = 1
         setTextColor(androidx.core.content.ContextCompat.getColorStateList(activity, R.color.chip_text))
         setBackgroundResource(R.drawable.bg_chip); setPadding((20 * d).toInt(), 0, (20 * d).toInt(), 0)
         setOnClickListener { menu(activity, it, onSwitched) }
@@ -100,15 +100,7 @@ object ProfileWindow {
             text = activity.getString(R.string.pf_phone_desc); setTextSize(TypedValue.COMPLEX_UNIT_SP, 15f)
             setTextColor(Themes.color(activity, R.color.text_title)); setPadding(0, dp(6), 0, 0)
         })
-        // Every profile (24/11, once in Settings › Vehicle): each one keeps the drive mode and the regeneration
-        val prefs = app.mg4dash.system.Prefs(activity)
-        box.addView(label(R.string.pf_all))
-        val drive = app.mg4dash.ui.Rows.group(activity)
-        val sw = app.mg4dash.ui.SwitchView(activity).apply { on = prefs.profilesDrive }
-        app.mg4dash.ui.Rows.add(drive, app.mg4dash.ui.Rows.row(activity, activity.getString(R.string.pf_drive), activity.getString(R.string.pf_drive_desc), sw) {
-            prefs.profilesDrive = !prefs.profilesDrive; sw.on = prefs.profilesDrive
-        })
-        box.addView(drive, LinearLayout.LayoutParams(-1, -2))
+        // The drive mode by profile: in the driving card's options (24/11), where the mode and regeneration are changed
         val error = TextView(activity).apply { setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f); setTextColor(Themes.color(activity, R.color.accent_heat)); setPadding(0, dp(8), 0, 0) }
         box.addView(error)
         lateinit var dialog: android.app.AlertDialog

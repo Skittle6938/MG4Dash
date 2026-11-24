@@ -743,8 +743,6 @@
     <string name="du_last30">Last 30 days</string>
     <string name="du_detail_open">See the detail</string>
     <string name="du_detail_open_desc">Day by day, the alert and its threshold, the reset</string>
-    <string name="st_theme_smooth">Smooth light / dark switch</string>
-    <string name="st_theme_smooth_desc">Waits 5 s of stable lights (no switch under bridges) and fades over 2 s. Off: switches as soon as the lights change.</string>
     <string name="st_night_sun">Night after sunset</string>
     <string name="st_night_sun_desc">Automatic mode: dark from sunset to sunrise at the car\'s position, even with the side lights off. Computed on the head unit, no network needed.</string>
     <string name="st_night_sun_today">Today here: sunset %1$s, sunrise %2$s</string>
@@ -1190,6 +1188,8 @@
     <string name="sc_profile">Profile</string>
     <string name="pf_drive">Profiles keep the drive mode and the regeneration</string>
     <string name="pf_drive_desc">Leaving a profile, MG4Dash notes the car\'s drive mode and regeneration; arriving on a profile, it puts them back, stopped or driving. Off by default.</string>
+    <string name="dv_profiles_drive">Each profile keeps its mode and regeneration</string>
+    <string name="dv_profiles_drive_desc">When the profile changes, the profile\'s drive mode and regeneration are taken back</string>
     <string name="br_title">Brightness</string>
     <string name="br_auto">Automatic brightness</string>
     <string name="br_auto_desc">Smart: learns from your settings with the slider, according to the estimated daylight and the lights. Original: Android\'s own mode, with − and +.</string>

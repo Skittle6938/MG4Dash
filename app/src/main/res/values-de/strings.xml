@@ -743,8 +743,6 @@
     <string name="du_last30">Letzte 30 Tage</string>
     <string name="du_detail_open">Details anzeigen</string>
     <string name="du_detail_open_desc">Tag für Tag, die Warnung und ihre Schwelle, das Zurücksetzen</string>
-    <string name="st_theme_smooth">Sanfter Hell / Dunkel-Wechsel</string>
-    <string name="st_theme_smooth_desc">Wartet 5 s mit stabilem Licht (kein Wechsel unter Brücken) und blendet über 2 s über. Aus: wechselt sofort, wenn sich das Licht ändert.</string>
     <string name="st_night_sun">Nacht nach Sonnenuntergang</string>
     <string name="st_night_sun_desc">Automatikmodus: dunkel von Sonnenuntergang bis Sonnenaufgang am Standort des Autos, auch bei ausgeschaltetem Standlicht. Im Radio berechnet, ohne Netz.</string>
     <string name="st_night_sun_today">Heute hier: Sonnenuntergang %1$s, Sonnenaufgang %2$s</string>
@@ -1190,6 +1188,8 @@
     <string name="sc_profile">Profil</string>
     <string name="pf_drive">Profile merken sich Fahrmodus und Rekuperation</string>
     <string name="pf_drive_desc">Beim Verlassen eines Profils merkt sich MG4Dash Fahrmodus und Rekuperation; beim Wechsel zu einem Profil stellt es sie wieder ein, im Stand wie während der Fahrt. Standardmäßig aus.</string>
+    <string name="dv_profiles_drive">Jedes Profil merkt sich Modus und Rekuperation</string>
+    <string name="dv_profiles_drive_desc">Beim Profilwechsel werden Fahrmodus und Rekuperation des Profils übernommen</string>
     <string name="br_title">Helligkeit</string>
     <string name="br_auto">Automatische Helligkeit</string>
     <string name="br_auto_desc">Intelligent: lernt aus Ihren Einstellungen mit dem Regler, je nach geschätztem Tageslicht und Licht. Original: der Android-Modus, mit − und +.</string>

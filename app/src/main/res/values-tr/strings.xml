@@ -743,8 +743,6 @@
     <string name="du_last30">Son 30 gün</string>
     <string name="du_detail_open">Ayrıntıyı gör</string>
     <string name="du_detail_open_desc">Gün gün, uyarı ve eşiği, sıfırlama</string>
-    <string name="st_theme_smooth">Yumuşak açık / koyu geçişi</string>
-    <string name="st_theme_smooth_desc">Farların 5 sn sabit kalmasını bekler (köprü altında geçiş yok) ve 2 sn\'de geçiş yapar. Kapalı: farlar değişir değişmez geçer.</string>
     <string name="st_night_sun">Gün batımından sonra gece</string>
     <string name="st_night_sun_desc">Otomatik mod: aracın konumunda gün batımından gün doğumuna kadar koyu, park lambaları kapalıyken bile. Radyoda hesaplanır, ağ gerekmez.</string>
     <string name="st_night_sun_today">Bugün burada: gün batımı %1$s, gün doğumu %2$s</string>
@@ -1190,6 +1188,8 @@
     <string name="sc_profile">Profil</string>
     <string name="pf_drive">Profiller sürüş modunu ve rejenerasyonu hatırlar</string>
     <string name="pf_drive_desc">MG4Dash bir profilden çıkarken sürüş modunu ve rejenerasyonu kaydeder; bir profile geçerken bunları geri koyar, dururken de sürerken de. Varsayılan olarak kapalı.</string>
+    <string name="dv_profiles_drive">Her profil mod ve rejenerasyonu hatırlar</string>
+    <string name="dv_profiles_drive_desc">Profil değişince profilin sürüş modu ve rejenerasyonu geri alınır</string>
     <string name="br_title">Parlaklık</string>
     <string name="br_auto">Otomatik parlaklık</string>
     <string name="br_auto_desc">Akıllı: tahmini gün ışığına ve farlara göre kaydırıcıyla yaptığınız ayarlardan öğrenir. Orijinal: − ve + ile Android modu.</string>
