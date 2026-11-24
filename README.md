@@ -47,7 +47,6 @@ It runs on every MG4 head unit firmware (SWI69, SWI131/132/173, SWI68, SWI133, S
 | You need | Why |
 |---|---|
 | An MG4 with the 1920 × 720 head unit | The layout is made for that screen. |
-| ADB access to the head unit over its USB port, and a PC with [platform-tools](https://developer.android.com/tools/releases/platform-tools) | The **first** install goes through ADB. After that, MG4Dash updates itself from the app. |
 | A data connection in the car (4G or Wi-Fi) | Only for the map, weather, updates and the speed camera data. Everything about the car works offline. |
 
 **Firmware support**: MG4Dash reads the firmware at startup (`ro.build.mt2712.version`) and talks to the car the way that firmware allows. A feature the firmware does not expose is hidden instead of failing.
@@ -77,42 +76,14 @@ To help support your firmware, open Settings › **System** › *Diagnostics* �
 
 ## Install MG4Dash
 
-1. **Download** the latest `MG4Dash-<version>.apk` from the [releases](https://github.com/Skittle6938/MG4Dash/releases).
-2. **Connect** the PC to the head unit's USB port with ADB enabled.
-3. **Install** it as a system app update. `adb install` is refused on this head unit, so push it first:
-
-   ```powershell
-   adb push MG4Dash-<version>.apk /data/local/tmp/x.apk
-   adb shell pm install -r -f /data/local/tmp/x.apk
-   adb shell rm /data/local/tmp/x.apk
-   adb shell am force-stop app.mg4dash
-   adb shell cmd package compile -m speed -f app.mg4dash
-   adb shell am force-stop app.mg4dash
-   ```
-
-   From a clone of this repository, `.\scripts\install-car.ps1 MG4Dash-<version>.apk` does the same and checks that MG4Dash starts.
-4. **Try it** without changing anything: `adb shell am start -n app.mg4dash/.MainActivity`.
-5. **Make it the home screen**: in MG4Dash, tap the **gear** on the bar, open the **System** tab and tap **Replace SAIC home**. MG4Dash now opens at startup and with the car's Home button.
+1. **Download** the latest `MG4Dash-<version>.apk` from the [releases](https://github.com/Skittle6938/MG4Dash/releases) and install it on the head unit.
+2. **Make it the home screen**: in MG4Dash, tap the **gear** on the bar, open the **System** tab and tap **Replace SAIC home**. MG4Dash now opens at startup and with the car's Home button.
+3. **Updates** then come from the app itself: Settings › **System** › *Install* ([Updates](#updates-backups-and-companion-apps)).
 
 **Nothing is uninstalled.** *Replace SAIC home* only stops the SAIC home screen from being the home screen. The SAIC launcher app stays installed, and its service keeps running the camera, the audio sources and the system bar. You can go back at any time with [Maintenance mode](#maintenance-mode-and-going-back-to-the-saic-home).
 
 > [!IMPORTANT]
 > **MG4Dash Rescue**, a tiny companion app, is installed by MG4Dash itself. If MG4Dash is your home screen and does not start after a boot or an update, Rescue recompiles and relaunches it, and puts the SAIC home back if that is not enough. While it optimizes MG4Dash after an update, it shows an *Updating MG4Dash…* screen in your theme's colours (from Rescue 9). If MG4Dash is not your home screen, Rescue does nothing.
-
-<details>
-<summary>Why recompile after installing, and how to check that MG4Dash starts</summary>
-
-The compilation Android does at install uses the usage profile the car has recorded ("speed-profile"), and that code sometimes does not load (`ClassNotFoundException: app.mg4dash.LauncherApp` at each start). Recompile while MG4Dash is stopped, never while it runs. Then check:
-
-- press Home: `adb shell pidof app.mg4dash` gives a pid;
-- `adb logcat -d | grep "FATAL EXCEPTION"` shows nothing new;
-- `adb shell dumpsys package dexopt | grep -A1 "\[app.mg4dash\]"` no longer says `speed-profile`.
-
-Updates installed from the app don't need any of this: MG4Dash hands them to Rescue, which recompiles and relaunches it.
-
-The SAIC home activity has a HOME priority that cannot be beaten otherwise, so *Replace SAIC home* disables that activity only. The SAIC launcher package (`com.saicmotor.launcher`) is never disabled.
-
-</details>
 
 ## First steps
 
@@ -526,16 +497,7 @@ That is Android's own waiting screen, shown while MG4Dash is stopped and optimiz
 <details>
 <summary>MG4Dash no longer starts after an install</summary>
 
-If logcat shows `ClassNotFoundException` or `oat_file ... Check failed`, stop it, recompile it while stopped, then make it the home screen again:
-
-```powershell
-adb shell am force-stop app.mg4dash
-adb shell cmd package compile -m speed -f app.mg4dash
-adb shell am force-stop app.mg4dash
-adb shell cmd package set-home-activity --user 0 app.mg4dash/.MainActivity
-```
-
-Never compile while MG4Dash runs. `adb shell pm enable com.saicmotor.launcher/.view.MainActivity` is refused on this head unit: only MG4Dash's Maintenance mode can re-enable the SAIC home. To uninstall: `adb uninstall app.mg4dash`.
+MG4Dash Rescue repairs it by itself: it recompiles and relaunches MG4Dash, and puts the SAIC home back if that is not enough. To uninstall MG4Dash, put the SAIC home back with Maintenance mode, then use Settings › **System** › *Uninstall MG4Dash, MG4Radio or MG4Link…*.
 
 </details>
 

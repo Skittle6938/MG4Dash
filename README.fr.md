@@ -47,7 +47,6 @@ Il fonctionne sur tous les firmwares d'autoradio de la MG4 (SWI69, SWI131/132/17
 | Il faut | Pourquoi |
 |---|---|
 | Une MG4 avec l'autoradio 1920 × 720 | L'affichage est conçu pour cet écran. |
-| Un accès ADB à l'autoradio par son port USB, et un PC avec les [platform-tools](https://developer.android.com/tools/releases/platform-tools) | La **première** installation passe par ADB. Ensuite, MG4Dash se met à jour depuis l'appli. |
 | Une connexion de données dans la voiture (4G ou Wi-Fi) | Seulement pour la carte, la météo, les mises à jour et les données radars. Tout ce qui concerne la voiture marche hors ligne. |
 
 **Firmwares pris en charge** : MG4Dash lit le firmware au démarrage (`ro.build.mt2712.version`) et parle à la voiture comme ce firmware le permet. Une fonction que le firmware n'expose pas est masquée au lieu d'échouer.
@@ -77,42 +76,14 @@ Pour aider à prendre en charge votre firmware, ouvrez Réglages › **Système*
 
 ## Installer MG4Dash
 
-1. **Téléchargez** le dernier `MG4Dash-<version>.apk` dans les [versions](https://github.com/Skittle6938/MG4Dash/releases).
-2. **Branchez** le PC sur le port USB de l'autoradio, avec ADB activé.
-3. **Installez-le** comme mise à jour d'appli système. `adb install` est refusé sur cet autoradio, il faut donc d'abord copier l'APK :
-
-   ```powershell
-   adb push MG4Dash-<version>.apk /data/local/tmp/x.apk
-   adb shell pm install -r -f /data/local/tmp/x.apk
-   adb shell rm /data/local/tmp/x.apk
-   adb shell am force-stop app.mg4dash
-   adb shell cmd package compile -m speed -f app.mg4dash
-   adb shell am force-stop app.mg4dash
-   ```
-
-   Depuis un clone de ce dépôt, `.\scripts\install-car.ps1 MG4Dash-<version>.apk` fait la même chose et vérifie que MG4Dash démarre.
-4. **Essayez-le** sans rien changer : `adb shell am start -n app.mg4dash/.MainActivity`.
-5. **Faites-en l'écran d'accueil** : dans MG4Dash, touchez la **roue dentée** de la barre, ouvrez l'onglet **Système** et touchez **Remplacer l'accueil SAIC**. MG4Dash s'ouvre maintenant au démarrage et avec le bouton Accueil de la voiture.
+1. **Téléchargez** le dernier `MG4Dash-<version>.apk` dans les [versions](https://github.com/Skittle6938/MG4Dash/releases) et installez-le sur l'autoradio.
+2. **Faites-en l'écran d'accueil** : dans MG4Dash, touchez la **roue dentée** de la barre, ouvrez l'onglet **Système** et touchez **Remplacer l'accueil SAIC**. MG4Dash s'ouvre maintenant au démarrage et avec le bouton Accueil de la voiture.
+3. **Les mises à jour** viennent ensuite de l'appli elle-même : Réglages › **Système** › *Installer* ([Mises à jour](#mises-à-jour-sauvegardes-et-applis-compagnons)).
 
 **Rien n'est désinstallé.** *Remplacer l'accueil SAIC* empêche seulement l'accueil SAIC d'être l'écran d'accueil. L'appli du launcher SAIC reste installée, et son service continue de gérer la caméra, les sources audio et la barre système. Vous pouvez revenir en arrière à tout moment avec le [Mode Entretien](#mode-entretien-et-retour-à-laccueil-saic).
 
 > [!IMPORTANT]
 > **MG4Dash Rescue**, une petite appli compagnon, est installée par MG4Dash lui-même. Si MG4Dash est votre écran d'accueil et ne démarre pas après un démarrage ou une mise à jour, Rescue le recompile et le relance, et remet l'accueil SAIC si cela ne suffit pas. Pendant qu'il optimise MG4Dash après une mise à jour, il affiche un écran *Mise à jour de MG4Dash…* aux couleurs de votre thème (à partir de Rescue 9). Si MG4Dash n'est pas votre écran d'accueil, Rescue ne fait rien.
-
-<details>
-<summary>Pourquoi recompiler après l'installation, et comment vérifier que MG4Dash démarre</summary>
-
-La compilation faite par Android à l'installation utilise le profil d'utilisation enregistré par la voiture (« speed-profile »), et ce code ne se charge parfois pas (`ClassNotFoundException: app.mg4dash.LauncherApp` à chaque démarrage). Recompilez pendant que MG4Dash est arrêté, jamais pendant qu'il tourne. Vérifiez ensuite :
-
-- appuyez sur Accueil : `adb shell pidof app.mg4dash` donne un pid ;
-- `adb logcat -d | grep "FATAL EXCEPTION"` ne montre rien de nouveau ;
-- `adb shell dumpsys package dexopt | grep -A1 "\[app.mg4dash\]"` n'indique plus `speed-profile`.
-
-Les mises à jour installées depuis l'appli n'ont besoin de rien de tout cela : MG4Dash les confie à Rescue, qui le recompile et le relance.
-
-L'activité d'accueil SAIC a une priorité HOME impossible à battre autrement : *Remplacer l'accueil SAIC* désactive donc cette seule activité. Le paquet du launcher SAIC (`com.saicmotor.launcher`) n'est jamais désactivé.
-
-</details>
 
 ## Premiers pas
 
@@ -526,16 +497,7 @@ C'est l'écran d'attente d'Android lui-même, affiché pendant que MG4Dash est a
 <details>
 <summary>MG4Dash ne démarre plus après une installation</summary>
 
-Si logcat affiche `ClassNotFoundException` ou `oat_file ... Check failed`, arrêtez-le, recompilez-le pendant qu'il est arrêté, puis refaites-en l'écran d'accueil :
-
-```powershell
-adb shell am force-stop app.mg4dash
-adb shell cmd package compile -m speed -f app.mg4dash
-adb shell am force-stop app.mg4dash
-adb shell cmd package set-home-activity --user 0 app.mg4dash/.MainActivity
-```
-
-Ne compilez jamais pendant que MG4Dash tourne. `adb shell pm enable com.saicmotor.launcher/.view.MainActivity` est refusé sur cet autoradio : seul le Mode Entretien de MG4Dash peut réactiver l'accueil SAIC. Pour désinstaller : `adb uninstall app.mg4dash`.
+MG4Dash Rescue le répare tout seul : il recompile et relance MG4Dash, et remet l'accueil SAIC si cela ne suffit pas. Pour désinstaller MG4Dash, remettez l'accueil SAIC avec le Mode Entretien, puis utilisez Réglages › **Système** › *Désinstaller MG4Dash, MG4Radio ou MG4Link…*.
 
 </details>
 
