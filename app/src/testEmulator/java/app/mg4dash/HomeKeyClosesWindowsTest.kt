@@ -22,6 +22,9 @@ import org.robolectric.annotation.Config
 class HomeKeyClosesWindowsTest {
     @Test
     fun everyWindowCloses() {
+        // Windows other tests of this run left open are not this test's
+        Dialogs.closeAll()
+        shadowOf(Looper.getMainLooper()).idle()
         val a = Robolectric.buildActivity(Activity::class.java).setup().get()
         a.setTheme(R.style.Theme_MG4Launcher)
         var closed = 0

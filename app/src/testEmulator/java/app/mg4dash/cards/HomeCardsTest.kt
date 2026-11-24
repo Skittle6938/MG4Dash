@@ -49,7 +49,7 @@ class HomeCardsTest {
     }
 
     @Test fun flagsKept() {
-        assertEquals(setOf(Card.MAP, Card.WEB, Card.CONSUMPTION, Card.SHORTCUTS, Card.DRIVING, Card.RADAR, Card.NAV), Card.entries.filter { it.big }.toSet())
-        assertEquals(setOf(Card.TRIPS, Card.DRIVING, Card.CLIMATE, Card.RADAR, Card.NAV), Card.entries.filter { it.manual }.toSet())
+        assertEquals(setOf(Card.MAP, Card.WEB, Card.CONSUMPTION, Card.SHORTCUTS, Card.DRIVING, Card.RADAR, Card.NAV, Card.CHRONO, Card.MEMO), Card.entries.filter { it.big }.toSet())
+        assertEquals(setOf(Card.TRIPS, Card.DRIVING, Card.CLIMATE, Card.RADAR, Card.NAV, Card.CHRONO, Card.MEMO), Card.entries.filter { it.manual }.toSet())
     }
 }
