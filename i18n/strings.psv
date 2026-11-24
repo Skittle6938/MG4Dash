@@ -1290,3 +1290,67 @@ opt_import|Import|Importer|Importieren|Importar|Importa|Importeren|İçe aktar|I
 opt_clear|Clear|Effacer|Löschen|Borrar|Cancella|Wissen|Temizle|Vymazat
 rescueapp_updating|Updating MG4Dash…|Mise à jour de MG4Dash…|MG4Dash wird aktualisiert…|Actualizando MG4Dash…|Aggiornamento di MG4Dash…|MG4Dash wordt bijgewerkt…|MG4Dash güncelleniyor…|Aktualizace MG4Dash…
 rescueapp_updating_sub|A few seconds, MG4Dash comes back by itself|Quelques secondes, MG4Dash revient tout seul|Ein paar Sekunden, MG4Dash kommt von selbst zurück|Unos segundos, MG4Dash vuelve solo|Pochi secondi, MG4Dash torna da solo|Een paar seconden, MG4Dash komt vanzelf terug|Birkaç saniye, MG4Dash kendiliğinden geri gelir|Pár sekund, MG4Dash se vrátí sám
+wc_chrono|Chrono|Chrono|Stoppuhr|Cronómetro|Cronometro|Chrono|Kronometre|Stopky
+ch_title|CHRONO|CHRONO|STOPPUHR|CRONO|CRONO|CHRONO|KRONO|STOPKY
+ch_arm|ARM|ARMER|SCHARF|ARMAR|ARMA|ACTIEF|KUR|PŘIPRAVIT
+ch_ready|READY|PRÊT|BEREIT|LISTO|PRONTO|KLAAR|HAZIR|PŘIPRAVENO
+ch_replay|AGAIN|REJOUER|NOCHMAL|OTRA VEZ|ANCORA|OPNIEUW|TEKRAR|ZNOVU
+ch_starts_move|Starts as soon as the car moves|Démarre dès que la voiture bouge|Startet, sobald das Auto rollt|Empieza en cuanto el coche se mueve|Parte appena l'auto si muove|Start zodra de auto rijdt|Araç hareket eder etmez başlar|Spustí se, jakmile se auto pohne
+ch_starts_at|Starts at %1$s|Démarre à %1$s|Startet bei %1$s|Empieza a %1$s|Parte a %1$s|Start bij %1$s|%1$s hızda başlar|Spustí se při %1$s
+ch_tap_cancel|Touch the chrono to cancel|Touche le chrono pour annuler|Stoppuhr berühren zum Abbrechen|Toca el cronómetro para cancelar|Tocca il cronometro per annullare|Raak de chrono aan om te annuleren|İptal için kronometreye dokunun|Zrušíte dotykem stopek
+ch_climate_off|Climate off|Clim coupée|Klima aus|Clima apagado|Clima spento|Klimaat uit|Klima kapalı|Klimatizace vypnuta
+ch_not_available|To arm: car in READY, stopped|Pour armer : voiture en READY, à l'arrêt|Zum Scharfschalten: READY, im Stand|Para armar: coche en READY, parado|Per armare: auto in READY, ferma|Om te activeren: auto op READY, stilstaand|Kurmak için: araç READY, duruyor|Pro přípravu: auto v READY, stojící
+ch_cancelled|Run cancelled|Mesure annulée|Messung abgebrochen|Medición cancelada|Misura annullata|Meting geannuleerd|Ölçüm iptal edildi|Měření zrušeno
+ch_nothing_kept|Nothing is saved|Rien n'est enregistré|Nichts wird gespeichert|No se guarda nada|Non viene salvato nulla|Er wordt niets bewaard|Hiçbir şey kaydedilmez|Nic se neukládá
+ch_cancel_brake|Speed dropped at %1$s|Ralentissement à %1$s|Langsamer geworden bei %1$s|Bajada de velocidad a %1$s|Rallentamento a %1$s|Snelheid daalde bij %1$s|%1$s hızda yavaşlama|Zpomalení při %1$s
+ch_cancel_gear|Gear changed|Rapport changé|Fahrstufe gewechselt|Marcha cambiada|Marcia cambiata|Versnelling gewijzigd|Vites değişti|Změna převodového stupně
+ch_cancel_ready|READY off|READY coupé|READY aus|READY apagado|READY spento|READY uit|READY kapalı|READY vypnuto
+ch_cancel_timeout|Longer than 20 s|Plus de 20 s|Länger als 20 s|Más de 20 s|Oltre 20 s|Langer dan 20 s|20 sn'den uzun|Déle než 20 s
+ch_cancel_button_reason|Cancelled by the driver|Annulée par le conducteur|Vom Fahrer abgebrochen|Cancelada por el conductor|Annullata dal conducente|Geannuleerd door de bestuurder|Sürücü tarafından iptal edildi|Zrušeno řidičem
+ch_restored_mode|back to %1$s|retour en %1$s|zurück auf %1$s|vuelta a %1$s|ritorno a %1$s|terug naar %1$s|%1$s moduna dönüldü|zpět na %1$s
+ch_restored_climate|climate back on|clim rallumée|Klima wieder an|clima encendido de nuevo|clima riacceso|klimaat weer aan|klima yeniden açık|klimatizace znovu zapnuta
+ch_restored|Settings restored: %1$s|Réglages remis : %1$s|Einstellungen zurückgesetzt: %1$s|Ajustes restaurados: %1$s|Impostazioni ripristinate: %1$s|Instellingen hersteld: %1$s|Ayarlar geri alındı: %1$s|Nastavení obnoveno: %1$s
+ch_no_run|No run yet|Aucune mesure|Noch keine Messung|Ninguna medición|Nessuna misura|Nog geen meting|Henüz ölçüm yok|Zatím žádné měření
+ch_record|Record %1$s|Record %1$s|Rekord %1$s|Récord %1$s|Record %1$s|Record %1$s|Rekor %1$s|Rekord %1$s
+ch_new_record|NEW RECORD|NOUVEAU RECORD|NEUER REKORD|NUEVO RÉCORD|NUOVO RECORD|NIEUW RECORD|YENİ REKOR|NOVÝ REKORD
+ch_vs_record|%1$s s vs record|%1$s s sur le record|%1$s s zum Rekord|%1$s s frente al récord|%1$s s sul record|%1$s s t.o.v. record|rekora göre %1$s sn|%1$s s proti rekordu
+ch_speed|SPEED|VITESSE|TEMPO|VELOCIDAD|VELOCITÀ|SNELHEID|HIZ|RYCHLOST
+ch_power|POWER|PUISSANCE|LEISTUNG|POTENCIA|POTENZA|VERMOGEN|GÜÇ|VÝKON
+ch_max|max %1$s|max %1$s|max. %1$s|máx. %1$s|max %1$s|max %1$s|maks. %1$s|max. %1$s
+ch_rearm|Arm again|Réarmer|Neu scharf|Rearmar|Riarma|Opnieuw|Yeniden kur|Znovu připravit
+ch_close|Close|Fermer|Schließen|Cerrar|Chiudi|Sluiten|Kapat|Zavřít
+ch_peak_kw|Peak power|Puissance max|Max. Leistung|Potencia máx.|Potenza max|Max. vermogen|Maks. güç|Max. výkon
+ch_distance|Distance|Distance|Strecke|Distancia|Distanza|Afstand|Mesafe|Vzdálenost
+ch_battery|Battery|Batterie|Batterie|Batería|Batteria|Batterij|Batarya|Baterie
+ch_outside|Outside|Extérieur|Außen|Exterior|Esterno|Buiten|Dış|Venku
+ch_climb|Elevation|Dénivelé|Höhenunterschied|Desnivel|Dislivello|Hoogteverschil|Yükseklik farkı|Převýšení
+ch_during|During the run|Pendant la mesure|Während der Messung|Durante la medición|Durante la misura|Tijdens de meting|Ölçüm sırasında|Během měření
+ch_this_run|this run|cette mesure|diese Messung|esta medición|questa misura|deze meting|bu ölçüm|toto měření
+ch_record_run|record|record|Rekord|récord|record|record|rekor|rekord
+ch_peak_at|Peak %1$s kW at %2$s|Pic %1$s kW à %2$s|Spitze %1$s kW bei %2$s|Pico %1$s kW a %2$s|Picco %1$s kW a %2$s|Piek %1$s kW bij %2$s|%2$s hızda %1$s kW tepe|Špička %1$s kW při %2$s
+ch_records|All-time records|Records depuis toujours|Rekorde aller Zeiten|Récords de siempre|Record di sempre|Records aller tijden|Tüm zamanların rekorları|Rekordy všech dob
+ch_last_runs|Last 10 runs|10 dernières mesures|Letzte 10 Messungen|Últimas 10 mediciones|Ultime 10 misure|Laatste 10 metingen|Son 10 ölçüm|Posledních 10 měření
+ch_opt_sport|Switch to Sport|Passer en Sport|In Sport schalten|Pasar a Sport|Passa a Sport|Naar Sport|Sport moduna geç|Přepnout na Sport
+ch_opt_sport_sub|The previous mode comes back after|Le mode d'avant revient après|Der vorherige Modus kommt danach zurück|El modo anterior vuelve después|Il modo precedente torna dopo|De vorige modus komt daarna terug|Önceki mod sonra geri gelir|Předchozí režim se pak vrátí
+ch_opt_climate|Switch the climate and heating off|Couper la clim et le chauffage|Klima und Heizung ausschalten|Apagar clima y calefacción|Spegnere clima e riscaldamento|Klimaat en verwarming uit|Klima ve ısıtmayı kapat|Vypnout klimatizaci a topení
+ch_opt_climate_sub|More power for the motor; back on after|Plus de puissance pour le moteur ; rallumés après|Mehr Leistung für den Motor; danach wieder an|Más potencia para el motor; se encienden después|Più potenza al motore; riaccesi dopo|Meer vermogen voor de motor; daarna weer aan|Motora daha fazla güç; sonra yeniden açılır|Více výkonu pro motor; pak znovu zapnuto
+ch_opt_fullscreen|Chrono full screen|Chrono en plein écran|Stoppuhr im Vollbild|Cronómetro a pantalla completa|Cronometro a schermo intero|Chrono schermvullend|Kronometre tam ekran|Stopky na celou obrazovku
+ch_opt_fullscreen_sub|Over the whole screen during the run|Par-dessus tout l'écran pendant la mesure|Über den ganzen Bildschirm während der Messung|Sobre toda la pantalla durante la medición|Su tutto lo schermo durante la misura|Over het hele scherm tijdens de meting|Ölçüm sırasında tüm ekranın üzerinde|Přes celou obrazovku během měření
+ch_opt_beep|Beep at %1$s and %2$s|Bip à %1$s et %2$s|Piepton bei %1$s und %2$s|Pitido a %1$s y %2$s|Bip a %1$s e %2$s|Piep bij %1$s en %2$s|%1$s ve %2$s hızda bip|Pípnutí při %1$s a %2$s
+ch_opt_measure|Measure|Mesure|Messung|Medición|Misura|Meting|Ölçüm|Měření
+ch_opt_gps|Speed corrected by the GPS|Vitesse corrigée par le GPS|Tempo per GPS korrigiert|Velocidad corregida por GPS|Velocità corretta dal GPS|Snelheid gecorrigeerd met GPS|GPS ile düzeltilmiş hız|Rychlost opravená podle GPS
+ch_opt_gps_sub|The speed camera alerter's correction: the dashboard reads a few % high|La correction de l'avertisseur : le compteur affiche quelques % de trop|Die Korrektur des Blitzerwarners: der Tacho zeigt einige % zu viel|La corrección del avisador: el velocímetro marca unos % de más|La correzione dell'avvisatore: il tachimetro segna qualche % in più|De correctie van de flitsmelder: de teller wijst enkele % te hoog aan|Radar uyarıcının düzeltmesi: gösterge birkaç % fazla gösterir|Oprava z varování před radary: tachometr ukazuje o pár % víc
+ch_opt_rolling|Reprise %1$s|Reprise %1$s|Durchzug %1$s|Recuperación %1$s|Ripresa %1$s|Tussenacceleratie %1$s|Ara hızlanma %1$s|Akcelerace %1$s
+ch_opt_rolling_sub|Touch the chrono while rolling below %1$s|Touchez le chrono en roulant sous %1$s|Stoppuhr berühren, wenn unter %1$s gefahren wird|Toca el cronómetro circulando por debajo de %1$s|Tocca il cronometro viaggiando sotto %1$s|Raak de chrono aan als u onder %1$s rijdt|%1$s altında giderken kronometreye dokunun|Dotkněte se stopek při jízdě pod %1$s
+ch_clear|Erase the history|Effacer l'historique|Verlauf löschen|Borrar el historial|Cancella la cronologia|Geschiedenis wissen|Geçmişi sil|Vymazat historii
+ch_clear_sub|The records are kept|Les records sont gardés|Die Rekorde bleiben|Los récords se mantienen|I record restano|De records blijven|Rekorlar korunur|Rekordy zůstanou
+ch_clear_all|Also erase the records|Effacer aussi les records|Auch die Rekorde löschen|Borrar también los récords|Cancella anche i record|Ook de records wissen|Rekorları da sil|Vymazat i rekordy
+ch_clear_all_q|Erase every run and every record?|Effacer toutes les mesures et tous les records ?|Alle Messungen und Rekorde löschen?|¿Borrar todas las mediciones y récords?|Cancellare tutte le misure e i record?|Alle metingen en records wissen?|Tüm ölçümler ve rekorlar silinsin mi?|Vymazat všechna měření a rekordy?
+ch_erase|Erase|Effacer|Löschen|Borrar|Cancella|Wissen|Sil|Vymazat
+ch_delete_run|Delete this run|Supprimer cette mesure|Diese Messung löschen|Eliminar esta medición|Elimina questa misura|Deze meting verwijderen|Bu ölçümü sil|Smazat toto měření
+ch_col_date|Date|Date|Datum|Fecha|Data|Datum|Tarih|Datum
+ch_col_gap|Gap|Écart|Abstand|Diferencia|Distacco|Verschil|Fark|Rozdíl
+ch_speed_time|Speed over time|Vitesse dans le temps|Tempo über die Zeit|Velocidad en el tiempo|Velocità nel tempo|Snelheid in de tijd|Zamana göre hız|Rychlost v čase
+ch_slope|downhill|pente|Gefälle|pendiente|discesa|helling|eğim|svah
+ch_downhill|Not a record: slope %1$s|Hors record : pente de %1$s|Kein Rekord: Gefälle %1$s|Fuera de récord: pendiente %1$s|Fuori record: discesa %1$s|Geen record: helling %1$s|Rekor dışı: eğim %1$s|Mimo rekord: svah %1$s
+ch_mode_kept|Mode unchanged|Mode inchangé|Modus unverändert|Modo sin cambios|Modo invariato|Modus ongewijzigd|Mod değişmedi|Režim beze změny
