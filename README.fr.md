@@ -76,7 +76,7 @@ Pour aider à prendre en charge votre firmware, ouvrez Réglages › **Système*
 
 ## Installer MG4Dash
 
-1. **Téléchargez** le dernier `MG4Dash-<version>.apk` dans les [versions](https://github.com/Skittle6938/MG4Dash/releases) et installez-le sur l'autoradio.
+1. **La première installation** : le dernier `MG4Dash-<version>.apk` des [versions](https://github.com/Skittle6938/MG4Dash/releases) doit être posé une fois sur l'autoradio par un développeur ayant un accès ADB. Ensuite, tout passe par les boutons de l'appli.
 2. **Faites-en l'écran d'accueil** : dans MG4Dash, touchez la **roue dentée** de la barre, ouvrez l'onglet **Système** et touchez **Remplacer l'accueil SAIC**. MG4Dash s'ouvre maintenant au démarrage et avec le bouton Accueil de la voiture.
 3. **Les mises à jour** viennent ensuite de l'appli elle-même : Réglages › **Système** › *Installer* ([Mises à jour](#mises-à-jour-sauvegardes-et-applis-compagnons)).
 
@@ -435,7 +435,7 @@ Placez la carte **Avertisseur** sur l'accueil (pincez l'accueil). Elle affiche l
 
 - **[MG4Radio](https://github.com/Skittle6938/MG4Radio)** est la radio redessinée dans le style de MG4Dash. Elle s'installe depuis la même page, **sur SWI69 uniquement**, où elle remplace la radio d'origine. Redémarrez ensuite l'autoradio en maintenant Accueil environ 20 s.
 - **Moteur web récent** : une troisième ligne installe Chromium 138 à la place de la WebView de la voiture (Chromium 66), pour que les sites d'aujourd'hui s'ouvrent dans la carte Web app (ABRP, Waze…). C'est un téléchargement de 243 Mo depuis [MG4Dash-WebView](https://github.com/Skittle6938/MG4Dash-WebView), de préférence en Wi-Fi. *Remettre l'origine* remet le moteur de la voiture ; les données des sites sont perdues dans les deux sens.
-- *Désinstaller MG4Dash, MG4Radio ou MG4Link…* est sur la même page. Remettez d'abord l'accueil SAIC avec le Mode Entretien.
+- **Désinstaller** : *Désinstaller MG4Dash, MG4Radio ou MG4Link…* sur la même page, puis *Maintenir pour désinstaller*. Pour MG4Dash, il remet d'abord l'accueil SAIC, puis supprime MG4Dash, son appli de secours et tous ses réglages ; MG4Radio et MG4Link restent installés. Pour réinstaller MG4Dash ensuite, il faut refaire une première installation.
 
 </details>
 
@@ -443,7 +443,7 @@ Placez la carte **Avertisseur** sur l'accueil (pincez l'accueil). Elle affiche l
 
 ![Réglages, Système](docs/screenshots/settings_system.png)
 
-Réglages › **Système** › **Mode Entretien** remet l'accueil SAIC en un geste, exactement comme avant : pour un passage chez le concessionnaire, un problème, ou avant de désinstaller.
+Réglages › **Système** › **Mode Entretien** remet l'accueil SAIC en un geste, exactement comme avant : pour un passage chez le concessionnaire ou un problème.
 
 - **Revenir à MG4Dash** : glissez **trois doigts** vers le bas depuis le haut de l'écran, sur l'accueil SAIC ou n'importe quelle appli, et touchez **Remettre MG4Dash** sur le petit bandeau. Choisir MG4Dash comme appli d'accueil dans les paramètres d'Android marche aussi.
 - En Mode Entretien, rien de MG4Dash ne réagit : un raccourci ou une autre appli qui ouvre un de ses écrans le voit se refermer aussitôt.
@@ -497,7 +497,7 @@ C'est l'écran d'attente d'Android lui-même, affiché pendant que MG4Dash est a
 <details>
 <summary>MG4Dash ne démarre plus après une installation</summary>
 
-MG4Dash Rescue le répare tout seul : il recompile et relance MG4Dash, et remet l'accueil SAIC si cela ne suffit pas. Pour désinstaller MG4Dash, remettez l'accueil SAIC avec le Mode Entretien, puis utilisez Réglages › **Système** › *Désinstaller MG4Dash, MG4Radio ou MG4Link…*.
+MG4Dash Rescue le répare tout seul : il recompile et relance MG4Dash, et remet l'accueil SAIC si cela ne suffit pas. Pour supprimer MG4Dash : Réglages › **Système** › *Désinstaller MG4Dash, MG4Radio ou MG4Link…*, puis *Maintenir pour désinstaller*.
 
 </details>
 

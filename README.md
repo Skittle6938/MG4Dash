@@ -76,7 +76,7 @@ To help support your firmware, open Settings › **System** › *Diagnostics* �
 
 ## Install MG4Dash
 
-1. **Download** the latest `MG4Dash-<version>.apk` from the [releases](https://github.com/Skittle6938/MG4Dash/releases) and install it on the head unit.
+1. **The first install**: the latest `MG4Dash-<version>.apk` from the [releases](https://github.com/Skittle6938/MG4Dash/releases) has to be put on the head unit once by a developer with ADB access. After that, everything goes through the app's buttons.
 2. **Make it the home screen**: in MG4Dash, tap the **gear** on the bar, open the **System** tab and tap **Replace SAIC home**. MG4Dash now opens at startup and with the car's Home button.
 3. **Updates** then come from the app itself: Settings › **System** › *Install* ([Updates](#updates-backups-and-companion-apps)).
 
@@ -435,7 +435,7 @@ Place the **Speed cameras** card on the home screen (pinch the home screen). It 
 
 - **[MG4Radio](https://github.com/Skittle6938/MG4Radio)** is the radio redesigned in the MG4Dash style. It installs from the same page on **SWI69 only**, where it replaces the stock radio. Restart the head unit afterwards by holding Home about 20 s.
 - **Recent web engine**: a third line installs Chromium 138 over the car's own WebView (Chromium 66), so that today's sites open in the web app card (ABRP, Waze…). It is a 243 MB download from [MG4Dash-WebView](https://github.com/Skittle6938/MG4Dash-WebView), best over Wi-Fi. *Back to the original* puts the car's engine back; site data is lost either way.
-- *Uninstall MG4Dash, MG4Radio or MG4Link…* is on the same page. Put the SAIC home back first with Maintenance mode.
+- **Uninstall**: *Uninstall MG4Dash, MG4Radio or MG4Link…* on the same page, then *Hold to uninstall*. For MG4Dash, it puts the SAIC home back first, then removes MG4Dash, its rescue app and all its settings; MG4Radio and MG4Link stay installed. Reinstalling MG4Dash afterwards means a first install again.
 
 </details>
 
@@ -443,7 +443,7 @@ Place the **Speed cameras** card on the home screen (pinch the home screen). It 
 
 ![Settings, System](docs/screenshots/settings_system.png)
 
-Settings › **System** › **Maintenance mode** puts the SAIC home screen back in one tap, exactly as before: for a dealer visit, a problem, or before uninstalling.
+Settings › **System** › **Maintenance mode** puts the SAIC home screen back in one tap, exactly as before: for a dealer visit or a problem.
 
 - **Back to MG4Dash**: slide **three fingers** down from the top of the screen, over the SAIC home or any app, and tap **Back to MG4Dash** on the small banner. Choosing MG4Dash as the home app in Android's settings works too.
 - While in maintenance mode, nothing of MG4Dash reacts: a shortcut or another app that opens one of its screens has it close at once.
@@ -497,7 +497,7 @@ That is Android's own waiting screen, shown while MG4Dash is stopped and optimiz
 <details>
 <summary>MG4Dash no longer starts after an install</summary>
 
-MG4Dash Rescue repairs it by itself: it recompiles and relaunches MG4Dash, and puts the SAIC home back if that is not enough. To uninstall MG4Dash, put the SAIC home back with Maintenance mode, then use Settings › **System** › *Uninstall MG4Dash, MG4Radio or MG4Link…*.
+MG4Dash Rescue repairs it by itself: it recompiles and relaunches MG4Dash, and puts the SAIC home back if that is not enough. To remove MG4Dash: Settings › **System** › *Uninstall MG4Dash, MG4Radio or MG4Link…*, then *Hold to uninstall*.
 
 </details>
 
