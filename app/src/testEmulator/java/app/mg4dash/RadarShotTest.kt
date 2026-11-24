@@ -79,23 +79,37 @@ class RadarShotTest {
     /** The alerter's page while a preparation runs. */
     @Test fun settingsPageDownloading() {
         setPrepare(preparing)
-        try { settingsPage("radar_settings_download.png", 1) } finally { setPrepare(null) }
+        try { settingsWindow("radar_settings_download.png") } finally { setPrepare(null) }
     }
 
-    @Test fun settingsPage() = settingsPage("radar_settings_page.png")
-    @Test fun settingsDataTab() = settingsPage("radar_settings_data.png", 1)
-    @Test fun settingsCarTab() = settingsPage("radar_settings_car.png", 2)
+    @Test fun settingsPage() = settingsWindow("radar_settings_page.png")
+    @Test fun settingsPageLight() = settingsWindow("radar_settings_light.png", theme = 2)
+    /** Scrolled to its end: the sounds and the storage. */
+    @Test fun settingsPageScrolled() = settingsWindow("radar_settings_scrolled.png", scrolled = true)
 
-    private fun settingsPage(name: String, tab: Int = 0) {
-        org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE).edit()
-            .putBoolean("vertical_dock", true).putBoolean("tutorial_shortcuts_seen", true).putInt("theme_mode", 1).commit()
-        val act = Robolectric.buildActivity(app.mg4dash.settings.SettingsActivity::class.java,
-            android.content.Intent().putExtra(app.mg4dash.settings.SettingsActivity.EXTRA_RADAR, true)
-                .putExtra(app.mg4dash.settings.SettingsActivity.EXTRA_RADAR_TAB, tab)).setup().get()
+    /** The whole alerter in the card's options window (24/11): a long press on the card, home behind. */
+    private fun settingsWindow(name: String, theme: Int = 1, scrolled: Boolean = false) {
+        org.robolectric.RuntimeEnvironment.getApplication().getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE).edit().clear()
+            .putBoolean("vertical_dock", true).putBoolean("tutorial_shortcuts_seen", true).putInt("theme_mode", theme)
+            .putInt("home_style", 0).putString("home_layout", "full").putString("slots_full", "tl=climate;tc=consumption,map;tr=media;bl=energy;bc=radar;br=trip,power,phone").commit()
+        val act = Robolectric.buildActivity(app.mg4dash.MainActivity::class.java).setup().get()
         repeat(3) { shadowOf(Looper.getMainLooper()).idleFor(200, TimeUnit.MILLISECONDS) }
-        val root = act.window.decorView
-        val bmp = Bitmap.createBitmap(root.width, root.height, Bitmap.Config.ARGB_8888)
-        root.draw(Canvas(bmp))
+        @Suppress("UNCHECKED_CAST")
+        val cards = app.mg4dash.MainActivity::class.java.getDeclaredField("homeCards").apply { isAccessible = true }.get(act) as Map<app.mg4dash.ui.HomeSlots.Card, app.mg4dash.cards.HomeCard>
+        cards.getValue(app.mg4dash.ui.HomeSlots.Card.RADAR).view.performLongClick()
+        repeat(3) { shadowOf(Looper.getMainLooper()).idleFor(200, TimeUnit.MILLISECONDS) }
+        val w = org.robolectric.shadows.ShadowDialog.getLatestDialog().window!!
+        val dv = w.decorView
+        dv.measure(android.view.View.MeasureSpec.makeMeasureSpec(w.attributes.width, android.view.View.MeasureSpec.EXACTLY),
+            android.view.View.MeasureSpec.makeMeasureSpec(act.window.decorView.height, android.view.View.MeasureSpec.AT_MOST))
+        dv.layout(0, 0, dv.measuredWidth, dv.measuredHeight)
+        if (scrolled) {
+            fun find(v: android.view.View): android.widget.ScrollView? = (v as? android.widget.ScrollView)?.takeIf { it.childCount > 0 && it.getChildAt(0).height > it.height }
+                ?: (v as? android.view.ViewGroup)?.let { g -> (0 until g.childCount).firstNotNullOfOrNull { find(g.getChildAt(it)) } }
+            find(dv)?.let { it.scrollTo(0, it.getChildAt(0).height) }
+        }
+        val bmp = Bitmap.createBitmap(dv.measuredWidth, dv.measuredHeight, Bitmap.Config.ARGB_8888)
+        dv.draw(Canvas(bmp))
         val dir = File("build/screenshots").apply { mkdirs() }
         File(dir, name).outputStream().use { bmp.compress(Bitmap.CompressFormat.PNG, 100, it) }
     }

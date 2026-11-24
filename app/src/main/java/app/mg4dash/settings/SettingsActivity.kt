@@ -52,7 +52,6 @@ class SettingsActivity : AppCompatActivity() {
         app.mg4dash.ui.Themes.apply(this)
         themeSig = app.mg4dash.ui.Themes.signature(this)
         // The speed camera alerter's own page (17/11): a long press on its card
-        if (intent.getBooleanExtra(EXTRA_RADAR, false)) { radarPage(); return }
         if (intent.getBooleanExtra(EXTRA_HA, false)) { haPage(); return }
         // A single scrolling area: two columns of categories, under a fixed banner
         // (title, log, close) that leaves room for the fog light button.
@@ -479,14 +478,10 @@ class SettingsActivity : AppCompatActivity() {
         const val EXTRA_TAB = "tab"
         const val TAB_DATA = 3
         const val TAB_CAR = 2
-        /** Opens the speed camera alerter's own page instead of the settings (long press on its card). */
-        const val EXTRA_RADAR = "radar"
         /** Opens the Home Assistant page (address, token, test) instead of the settings. */
         const val EXTRA_HA = "ha"
 
         fun openHa(context: android.content.Context) = context.startActivity(android.content.Intent(context, SettingsActivity::class.java).putExtra(EXTRA_HA, true))
-        /** Tab of the alerter's page to open (RadarPage.Tab ordinal), Alertes by default. */
-        const val EXTRA_RADAR_TAB = "radar_tab"
     }
 
     // ── 4G data: total over 30 days, by use, day by day, alert ──
@@ -1305,38 +1300,6 @@ class SettingsActivity : AppCompatActivity() {
         app.mg4dash.ui.Dock.mount(this, root, dock, app.mg4dash.ui.Dock.Page.SETTINGS)
         setContentView(root)
         app.mg4dash.ui.FadeOutline.applyTo(root)
-    }
-
-    private fun radarPage() {
-        // The screen's margins as home's (Grand affichage: enlarged like its bar, which then sits where home's does)
-        val bd = app.mg4dash.ui.Dock.sized(this).resources.displayMetrics.density
-        val root = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; setPadding((16 * bd).toInt(), (12 * bd).toInt(), (16 * bd).toInt(), (12 * bd).toInt()) }
-        val vertical = app.mg4dash.ui.Dock.vertical(this)
-        val top = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL }
-        top.addView(TextView(this).apply {
-            text = getString(R.string.st_rad_title); setTextColor(color(R.color.text_value))
-            setTextSize(TypedValue.COMPLEX_UNIT_SP, 26f); typeface = Typeface.create("sans-serif-medium", Typeface.NORMAL)
-        }, LinearLayout.LayoutParams(0, -2, 1f).apply { leftMargin = if (vertical) dp(12) else dp(app.mg4dash.ui.Kit.fogSafeDp(this@SettingsActivity) - 8) })
-        top.addView(app.mg4dash.ui.Rows.closeButton(this) { finish() })
-        root.addView(top, LinearLayout.LayoutParams(-1, -2).apply { bottomMargin = dp(12) })
-        val page = app.mg4dash.radar.RadarPage(this, prefs)
-        val tab = app.mg4dash.radar.RadarPage.Tab.values().getOrElse(intent.getIntExtra(EXTRA_RADAR_TAB, 0)) { app.mg4dash.radar.RadarPage.Tab.ALERTS }
-        root.addView(page.build(tab), LinearLayout.LayoutParams(-1, 0, 1f))
-        val dock = LinearLayout(this)
-        root.addView(dock, LinearLayout.LayoutParams(-1, dp(84)).apply { topMargin = dp(12) })
-        app.mg4dash.ui.Dock.mount(this, root, dock, app.mg4dash.ui.Dock.Page.SETTINGS)
-        setContentView(root)
-        app.mg4dash.ui.FadeOutline.applyTo(root)
-        // The preparation's progress, live (it goes on with the page closed)
-        lifecycleScope.launch { app.mg4dash.radar.RadarRepo.prepare.collect { page.refresh() } }
-        // The wait for saturated servers counts down every second: nothing else changes meanwhile
-        lifecycleScope.launch {
-            while (true) {
-                kotlinx.coroutines.delay(1_000)
-                if (app.mg4dash.radar.RadarRepo.prepare.value?.phase == app.mg4dash.radar.RadarRepo.PrepPhase.RETRY) page.refresh()
-                else page.refreshSpeedCorrection()
-            }
-        }
     }
 
     /**

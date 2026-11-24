@@ -1039,6 +1039,9 @@
     <string name="rp_tab_data_prep">Preparazione %1$d / %2$d</string>
     <string name="rp_osm_box">Limiti e autovelox: © contributori di OpenStreetMap, ODbL. Prevale sempre la segnaletica.</string>
     <string name="rp_thresholds">Soglie</string>
+    <string name="rp_threshold_unit">Soglie in</string>
+    <string name="rp_display">Visualizzazione</string>
+    <string name="rp_gps_correction_sub">Misurata durante la guida</string>
     <string name="rp_mixed">Misto</string>
     <string name="rp_under_100">Limiti sotto 100 km/h</string>
     <string name="rp_from_100">Limiti da 100 km/h</string>

@@ -93,6 +93,11 @@ class OptionsPopup(private val a: Activity, private val title: String, private v
         return this
     }
 
+    private var widthDp = 0
+
+    /** A card's own content laid out by itself (the alerter's two columns), [widthDp] wide. */
+    fun content(v: View, widthDp: Int): OptionsPopup { target += v; this.widthDp = widthDp; return this }
+
     /** A short explanation, in grey, on its own line (between groups). */
     fun note(text: String): OptionsPopup {
         target += TextView(a).apply {
@@ -140,7 +145,7 @@ class OptionsPopup(private val a: Activity, private val title: String, private v
         val screen = a.resources.displayMetrics
         twoColumns = second.isNotEmpty() && probe.measuredHeight + dp(170) > screen.heightPixels
         probe.removeAllViews()
-        val width = if (twoColumns) minOf(dp(1640), screen.widthPixels - dp(120)) else dp(900)
+        val width = if (widthDp > 0) minOf(dp(widthDp), screen.widthPixels - dp(80)) else if (twoColumns) minOf(dp(1640), screen.widthPixels - dp(120)) else dp(900)
         if (twoColumns) {
             // A note before every row explains the whole window: across both columns
             val lead = first.takeWhile { it.tag != Rows.TAG_ROW }

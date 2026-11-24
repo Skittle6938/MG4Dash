@@ -1039,6 +1039,9 @@
     <string name="rp_tab_data_prep">Voorbereiden %1$d / %2$d</string>
     <string name="rp_osm_box">Limieten en flitsers: © OpenStreetMap-bijdragers, ODbL. De verkeersborden gaan altijd voor.</string>
     <string name="rp_thresholds">Drempels</string>
+    <string name="rp_threshold_unit">Drempels in</string>
+    <string name="rp_display">Weergave</string>
+    <string name="rp_gps_correction_sub">Gemeten tijdens het rijden</string>
     <string name="rp_mixed">Gemengd</string>
     <string name="rp_under_100">Limieten onder 100 km/h</string>
     <string name="rp_from_100">Limieten vanaf 100 km/h</string>

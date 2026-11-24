@@ -47,11 +47,21 @@ class RadarCard(context: Context) : View(context), app.mg4dash.cards.HomeCard {
     }
 
     /** Its settings are a whole page (sounds, thresholds, data): the options window opens it. */
-    override fun options(popup: app.mg4dash.ui.OptionsPopup): app.mg4dash.ui.OptionsPopup =
-        popup.action(context.getString(R.string.wc_radar), null, context.getString(R.string.opt_open)) {
-            context.startActivity(android.content.Intent(context, app.mg4dash.settings.SettingsActivity::class.java)
-                .putExtra(app.mg4dash.settings.SettingsActivity.EXTRA_RADAR, true))
+    /** The whole alerter at once (24/11, once a page with tabs): its settings and its data, following the preparation live. */
+    override fun options(popup: app.mg4dash.ui.OptionsPopup): app.mg4dash.ui.OptionsPopup? {
+        val a = context as? android.app.Activity ?: return null
+        val page = RadarPage(a, Prefs(a))
+        optionsScope?.coroutineContext?.get(kotlinx.coroutines.Job)?.cancel()
+        optionsScope = kotlinx.coroutines.MainScope().also { s ->
+            s.launch { RadarRepo.prepare.collect { page.refresh() } }
+            s.launch { while (true) { kotlinx.coroutines.delay(1_000); page.refresh() } }
         }
+        return popup.content(page.window(), 1800)
+    }
+
+    private var optionsScope: kotlinx.coroutines.CoroutineScope? = null
+
+    override fun optionsClosed() { optionsScope?.coroutineContext?.get(kotlinx.coroutines.Job)?.cancel(); optionsScope = null }
 
     var form = Form.MEDIUM
         set(v) { field = v; invalidate() }

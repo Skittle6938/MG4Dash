@@ -1039,6 +1039,9 @@
     <string name="rp_tab_data_prep">Hazırlanıyor %1$d / %2$d</string>
     <string name="rp_osm_box">Sınırlar ve radarlar: © OpenStreetMap katkıda bulunanlar, ODbL. Trafik işaretleri her zaman önceliklidir.</string>
     <string name="rp_thresholds">Eşikler</string>
+    <string name="rp_threshold_unit">Eşik birimi</string>
+    <string name="rp_display">Görüntü</string>
+    <string name="rp_gps_correction_sub">Sürüşte ölçülür</string>
     <string name="rp_mixed">Karma</string>
     <string name="rp_under_100">100 km/sa altındaki sınırlar</string>
     <string name="rp_from_100">100 km/sa ve üzeri sınırlar</string>

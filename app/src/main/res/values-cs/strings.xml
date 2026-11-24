@@ -1039,6 +1039,9 @@
     <string name="rp_tab_data_prep">Příprava %1$d / %2$d</string>
     <string name="rp_osm_box">Limity a radary: © přispěvatelé OpenStreetMap, ODbL. Vždy platí dopravní značení.</string>
     <string name="rp_thresholds">Prahy</string>
+    <string name="rp_threshold_unit">Prahy v</string>
+    <string name="rp_display">Zobrazení</string>
+    <string name="rp_gps_correction_sub">Měřeno za jízdy</string>
     <string name="rp_mixed">Smíšený</string>
     <string name="rp_under_100">Limity pod 100 km/h</string>
     <string name="rp_from_100">Limity od 100 km/h</string>
