@@ -42,8 +42,10 @@ object RadarRepo {
     val PREPARE_RADII = listOf(10, 20, 30, 50)
     const val PREPARE_DEFAULT_KM = 20
 
-    /** A radius stored before (80 km) or out of the list: the nearest one offered, at most the largest. */
-    fun prepareRadius(stored: Int): Int = PREPARE_RADII.lastOrNull { it <= stored } ?: PREPARE_RADII.first()
+    const val PREPARE_MIN_KM = 5
+    const val PREPARE_MAX_KM = 50
+    /** Any radius from 5 to 50 km by 5 (24/11, once 10, 20, 30 or 50): one stored before (80 km) comes back to 50. */
+    fun prepareRadius(stored: Int): Int = (stored.coerceIn(PREPARE_MIN_KM, PREPARE_MAX_KM) / 5) * 5
     /**
      * Typical size of one tile (0.02°) with all its streets, for a mix of countryside, suburbs and city (measured on 17/11:
      * about 9 kB, 330 kB and 650 kB uncompressed); the official server compresses it to about a fifth.

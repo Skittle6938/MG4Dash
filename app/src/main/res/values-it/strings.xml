@@ -1111,6 +1111,8 @@
     <string name="rp_wifi_sub">Niente 4G durante la guida: si usano solo strade e autovelox già scaricati</string>
     <string name="rp_refresh">Aggiorna la zona intorno all\'auto</string>
     <string name="rp_refresh_sub">Se più vecchia di…</string>
+    <string name="unit_day_short">g</string>
+    <string name="rp_repeat_sub">Finché dura l\'avviso; 0: una volta</string>
     <string name="rp_storage">Memoria</string>
     <string name="rp_space">Spazio occupato</string>
     <string name="rp_space_sub">Zone salvate 30 giorni</string>

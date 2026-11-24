@@ -1111,6 +1111,8 @@
     <string name="rp_wifi_sub">Geen 4G tijdens het rijden: alleen al gedownloade wegen en flitsers worden gebruikt</string>
     <string name="rp_refresh">Gebied rond de auto vernieuwen</string>
     <string name="rp_refresh_sub">Als ouder dan…</string>
+    <string name="unit_day_short">d</string>
+    <string name="rp_repeat_sub">Zolang de waarschuwing duurt; 0: één keer</string>
     <string name="rp_storage">Opslag</string>
     <string name="rp_space">Gebruikte ruimte</string>
     <string name="rp_space_sub">Gebieden 30 dagen bewaard</string>

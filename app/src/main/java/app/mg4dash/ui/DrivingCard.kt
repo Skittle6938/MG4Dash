@@ -28,12 +28,6 @@ class DrivingCard(context: Context) : LinearLayout(context), HomeCard {
     override val card = HomeSlots.Card.DRIVING
     override val view: View get() = this
 
-    /** Its options (24/11): each profile keeping its own drive mode and regeneration (once in the profiles' window). */
-    override fun options(popup: OptionsPopup): OptionsPopup {
-        val prefs = app.mg4dash.system.Prefs(context)
-        return popup.toggle(context.getString(R.string.dv_profiles_drive), context.getString(R.string.dv_profiles_drive_desc), { prefs.profilesDrive }) { prefs.profilesDrive = it }
-    }
-
     override fun place(p: CardPlace) {
         form = when {
             p.small -> Form.COMPACT

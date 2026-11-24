@@ -1111,6 +1111,8 @@
     <string name="rp_wifi_sub">Sin 4G al circular: solo se usan las carreteras y radares ya descargados</string>
     <string name="rp_refresh">Actualizar la zona alrededor del coche</string>
     <string name="rp_refresh_sub">Si tiene más de…</string>
+    <string name="unit_day_short">d</string>
+    <string name="rp_repeat_sub">Mientras dure la alerta; 0: una vez</string>
     <string name="rp_storage">Almacenamiento</string>
     <string name="rp_space">Espacio ocupado</string>
     <string name="rp_space_sub">Zonas guardadas 30 días</string>

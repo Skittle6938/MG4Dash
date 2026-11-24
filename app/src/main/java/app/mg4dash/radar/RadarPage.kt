@@ -95,11 +95,7 @@ class RadarPage(private val a: Activity, private val prefs: Prefs) {
         Rows.add(group, Rows.row(a, title, sub, value, null))
     }
 
-    private fun repLabel(sec: Int) = when {
-        sec == 0 -> a.getString(R.string.st_rad_rep_never)
-        sec < 60 -> a.getString(R.string.rp_rep_s, sec)
-        else -> a.getString(R.string.rp_rep_min, sec / 60)
-    }
+    private fun repLabel(sec: Int) = if (sec == 0) a.getString(R.string.st_rad_rep_never) else app.mg4dash.ui.Stepper.duration(sec)
 
     // ── Alertes ──
 
@@ -125,19 +121,12 @@ class RadarPage(private val a: Activity, private val prefs: Prefs) {
             val bands = if (mixed) listOf(false, true) else listOf(prefs.radarThresholdMode == ThresholdMode.PERCENT)
             for (percent in bands) for (strong in listOf(false, true)) {
                 val suffix = if (percent) "%" else if (mixed) "km/h" else unit
-                val values = when {
-                    strong && percent -> listOf(5, 8, 10, 15, 20)
-                    strong -> listOf(3, 5, 6, 8, 10, 15, 20)
-                    percent && mixed -> listOf(0, 2, 5)
-                    percent -> listOf(0, 2, 5, 10)
-                    else -> listOf(0, 1, 2, 3, 5)
-                }
                 val title = a.getString(if (strong) R.string.rp_strong_over else R.string.rp_light_over)
                 val band = if (mixed) a.getString(if (percent) R.string.rp_from_100 else R.string.rp_under_100) else null
-                choiceRow(margins, title, band, { values.map { "+$it $suffix" } }, {
-                    val value = prefs.radarMargin(strong, percent, mixed)
-                    values.indices.minBy { kotlin.math.abs(values[it] - value) }
-                }) { prefs.setRadarMargin(strong, percent, mixed, values[it].toFloat()) }
+                // Any value (24/11, once a list): − and +, or typed
+                val st = app.mg4dash.ui.Stepper(a, 0, if (percent) 30 else 30, label = { "+$it $suffix" }, typedTitle = title,
+                    get = { kotlin.math.round(prefs.radarMargin(strong, percent, mixed)).toInt() }) { prefs.setRadarMargin(strong, percent, mixed, it.toFloat()) }
+                Rows.add(margins, Rows.row(a, title, band, st.view, null))
             }
             // The margins' rows move into the group, after the unit's row
             while (th.childCount > 1) th.removeViewAt(th.childCount - 1)
@@ -188,8 +177,11 @@ class RadarPage(private val a: Activity, private val prefs: Prefs) {
                     .slider(a.getString(R.string.rp_col_volume), 100, { prefs.radarVolume(k) }, { "$it %" }, { prefs.radarSoundOf(k) != RadarAlert.Sound.NONE }) {
                         prefs.setRadarVolume(k, it); RadarAlert.play(a, k)
                     }
-                if (k != RadarAlert.Kind.APPROACH) w.choice(a.getString(R.string.rp_col_repeat), null, RadarAlert.REPEATS.map { repLabel(it) },
-                    { RadarAlert.REPEATS.indexOf(prefs.radarRepeat(k)).coerceAtLeast(0) }) { prefs.setRadarRepeat(k, RadarAlert.REPEATS[it]) }
+                // Every so many seconds while the alert lasts, 0: once (24/11, any value)
+                if (k != RadarAlert.Kind.APPROACH) w.stepper(a.getString(R.string.rp_col_repeat), a.getString(R.string.rp_repeat_sub),
+                    app.mg4dash.ui.Stepper(a, 0, 600, step = app.mg4dash.ui.Stepper::durationStep, label = { repLabel(it) },
+                        typedTitle = a.getString(R.string.rp_col_repeat), parse = app.mg4dash.ui.Stepper::parseDuration,
+                        get = { prefs.radarRepeat(k) }) { prefs.setRadarRepeat(k, it) })
                 w.show { paint() }
             }
             row.addView(View(a).apply { background = GradientDrawable().apply { cornerRadius = dp(4).toFloat(); setColor(color) } },
@@ -213,14 +205,13 @@ class RadarPage(private val a: Activity, private val prefs: Prefs) {
         val column = LinearLayout(a).apply { orientation = LinearLayout.VERTICAL }
         // Usual trips: the radius (and what it costs), the preparation's progress and its button
         val trips = section(column, a.getString(R.string.rp_trips))
-        val radii = RadarRepo.PREPARE_RADII
         fun estimate(): String = RadarRepo.prepareEstimate(prefs.radarPrepareKm).let { e ->
             a.getString(R.string.st_rad_estimate, e.boxes, DataUsage.format(a, e.download), DataUsage.format(a, e.kept), e.minutes)
         }
         lateinit var radiusRow: LinearLayout
-        val radiusValue = choiceRow(trips, a.getString(R.string.rp_radius), estimate(), { radii.map { "$it km" } },
-            { radii.indexOf(prefs.radarPrepareKm).coerceAtLeast(0) }) { prefs.radarPrepareKm = radii[it]; refresh() }
-        radiusRow = radiusValue.parent as LinearLayout
+        val radius = app.mg4dash.ui.Stepper(a, RadarRepo.PREPARE_MIN_KM, RadarRepo.PREPARE_MAX_KM, step = { _, _ -> 5 }, label = { "$it km" },
+            typedTitle = a.getString(R.string.rp_radius), get = { prefs.radarPrepareKm }) { prefs.radarPrepareKm = it; refresh() }
+        radiusRow = Rows.row(a, a.getString(R.string.rp_radius), estimate(), radius.view, null).also { Rows.add(trips, it) }
         refreshers += { ((radiusRow.getChildAt(0) as LinearLayout).getChildAt(1) as? TextView)?.text = estimate() }
         val state = text("", 19f, R.color.text_value, medium)
         val detail = text("", 14f, R.color.text_sub)
@@ -268,10 +259,10 @@ class RadarPage(private val a: Activity, private val prefs: Prefs) {
         // While driving
         val driving = section(column, a.getString(R.string.rp_driving))
         toggleRow(driving, a.getString(R.string.st_rad_wifi), a.getString(R.string.rp_wifi_sub), { prefs.radarWifiOnly }) { prefs.radarWifiOnly = it }
-        val ages = RadarRepo.REFRESH_HOURS
-        fun ageLabel(h: Int) = if (h < 24) a.getString(R.string.st_rad_age_hours, h) else a.getString(R.string.st_rad_age_days, h / 24)
-        choiceRow(driving, a.getString(R.string.rp_refresh), a.getString(R.string.rp_refresh_sub), { ages.map { ageLabel(it) } },
-            { ages.indexOf(prefs.radarRefreshHours).coerceAtLeast(0) }) { prefs.radarRefreshHours = ages[it] }
+        val day = a.getString(R.string.unit_day_short)
+        val age = app.mg4dash.ui.Stepper(a, 1, 720, step = app.mg4dash.ui.Stepper::hoursStep, label = { app.mg4dash.ui.Stepper.hours(it, day) },
+            typedTitle = a.getString(R.string.rp_refresh), get = { prefs.radarRefreshHours }) { prefs.radarRefreshHours = it }
+        Rows.add(driving, Rows.row(a, a.getString(R.string.rp_refresh), a.getString(R.string.rp_refresh_sub), age.view, null))
         // Storage
         val storage = section(column, a.getString(R.string.rp_storage))
         val space = TextView(a); val month = TextView(a)

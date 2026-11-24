@@ -105,22 +105,8 @@ object ProcessDialog {
                 handler.postDelayed(this, 2_000)
             }
         }
-        val dlg = AlertDialog.Builder(activity)
-            // Title drawn by MG4Dash: the system's came out very large and greyed on the car (#69)
-            .setCustomTitle(kit.text(activity.getString(R.string.ps_title), 22f).apply {
-                typeface = android.graphics.Typeface.create("sans-serif-medium", android.graphics.Typeface.NORMAL)
-                setPadding(kit.dp(24), kit.dp(20), kit.dp(24), kit.dp(4))
-            })
-            .setView(box)
-            .setPositiveButton(android.R.string.ok, null)
-            .setOnDismissListener { open = false; handler.removeCallbacks(tick) }
-            .create()
-        // Full screen kept: window shown without taking focus, same screen settings as the page,
-        // then focus given back (otherwise the SAIC bars reappear on opening)
-        dlg.window?.setFlags(android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE, android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE)
-        dlg.show(); app.mg4dash.ui.Dialogs.fix(dlg)
-        dlg.window?.decorView?.systemUiVisibility = activity.window.decorView.systemUiVisibility
-        dlg.window?.clearFlags(android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE)
+        // The settings' window (24/11): title, round close button, a touch outside closes it; no OK
+        val dlg = Windows.show(activity, activity.getString(R.string.ps_title), box, widthDp = 1300) { open = false; handler.removeCallbacks(tick) }
         tick.run()
     }
 }

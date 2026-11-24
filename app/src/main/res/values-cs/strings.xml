@@ -1111,6 +1111,8 @@
     <string name="rp_wifi_sub">Žádné 4G při jízdě: použijí se jen již stažené silnice a radary</string>
     <string name="rp_refresh">Obnovit oblast kolem vozu</string>
     <string name="rp_refresh_sub">Pokud je starší než…</string>
+    <string name="unit_day_short">d</string>
+    <string name="rp_repeat_sub">Dokud upozornění trvá; 0: jednou</string>
     <string name="rp_storage">Úložiště</string>
     <string name="rp_space">Obsazené místo</string>
     <string name="rp_space_sub">Oblasti uloženy 30 dní</string>

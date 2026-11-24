@@ -27,25 +27,48 @@ object ProfileWindow {
         setOnClickListener { menu(activity, it, onSwitched) }
     }
 
-    fun menu(activity: Activity, anchor: View, onSwitched: () -> Unit) {
+    /**
+     * The profiles' window (24/11): a row per profile (the current one marked), new / edit / delete, and for every
+     * profile the drive mode kept by each one, a switch right here.
+     */
+    fun menu(activity: Activity, @Suppress("UNUSED_PARAMETER") anchor: View, onSwitched: () -> Unit) {
         val list = Profiles.list(activity)
         val cur = list.indexOfFirst { it.id == Profiles.current(activity).id }
-        val labels = list.map { it.name } + listOf("+  " + activity.getString(R.string.pf_new), activity.getString(R.string.pf_edit), activity.getString(R.string.pf_delete))
-        app.mg4dash.ui.SourceMenu.choose(activity, anchor, labels, cur) { i ->
-            when {
-                i < list.size -> if (Profiles.switchTo(activity, list[i].id, "Settings")) onSwitched()
-                i == list.size -> if (list.size >= Profiles.MAX) app.mg4dash.ui.Toasts.show(activity, R.string.pf_refused_full) else edit(activity, null, onSwitched)
-                i == list.size + 1 -> edit(activity, Profiles.current(activity), onSwitched)
-                else -> {
-                    val p = Profiles.current(activity)
-                    if (list.size <= 1) { app.mg4dash.ui.Toasts.show(activity, R.string.pf_refused_last); return@choose }
-                    app.mg4dash.ui.SourceMenu.confirm(activity, anchor, activity.getString(R.string.pf_delete_confirm, p.name), activity.getString(R.string.pf_delete)) {
-                        Profiles.delete(activity, p.id); onSwitched()
-                    }
-                }
+        val d = activity.resources.displayMetrics.density
+        fun dp(v: Int) = (v * d).toInt()
+        lateinit var dlg: android.app.AlertDialog
+        val box = LinearLayout(activity).apply { orientation = LinearLayout.VERTICAL }
+        val profiles = app.mg4dash.ui.Rows.group(activity)
+        list.forEachIndexed { i, p ->
+            val mark = TextView(activity).apply { text = if (i == cur) "✓" else ""; setTextColor(Themes.select(activity)); setTextSize(TypedValue.COMPLEX_UNIT_SP, 22f) }
+            app.mg4dash.ui.Rows.add(profiles, app.mg4dash.ui.Rows.row(activity, p.name, phoneName(p), mark) {
+                dlg.dismiss(); if (i != cur && Profiles.switchTo(activity, p.id, "Settings")) onSwitched()
+            })
+        }
+        fun action(title: String, run: () -> Unit) = app.mg4dash.ui.Rows.add(profiles, app.mg4dash.ui.Rows.row(activity, title, null, app.mg4dash.ui.Rows.chevron(activity)) { dlg.dismiss(); run() })
+        action("+  " + activity.getString(R.string.pf_new)) { if (list.size >= Profiles.MAX) app.mg4dash.ui.Toasts.show(activity, R.string.pf_refused_full) else edit(activity, null, onSwitched) }
+        action(activity.getString(R.string.pf_edit)) { edit(activity, Profiles.current(activity), onSwitched) }
+        action(activity.getString(R.string.pf_delete)) {
+            val p = Profiles.current(activity)
+            if (list.size <= 1) app.mg4dash.ui.Toasts.show(activity, R.string.pf_refused_last)
+            else app.mg4dash.ui.Windows.confirm(activity, activity.getString(R.string.pf_delete), activity.getString(R.string.pf_delete_confirm, p.name), activity.getString(R.string.pf_delete)) {
+                Profiles.delete(activity, p.id); onSwitched()
             }
         }
+        box.addView(profiles, LinearLayout.LayoutParams(-1, -2))
+        box.addView(app.mg4dash.ui.Rows.header(activity, activity.getString(R.string.pf_all)))
+        val prefs = app.mg4dash.system.Prefs(activity)
+        val drive = app.mg4dash.ui.Rows.group(activity)
+        val sw = app.mg4dash.ui.SwitchView(activity).apply { on = prefs.profilesDrive }
+        app.mg4dash.ui.Rows.add(drive, app.mg4dash.ui.Rows.row(activity, activity.getString(R.string.dv_profiles_drive), activity.getString(R.string.dv_profiles_drive_desc), sw) {
+            prefs.profilesDrive = !prefs.profilesDrive; sw.on = prefs.profilesDrive
+        })
+        box.addView(drive, LinearLayout.LayoutParams(-1, -2))
+        dlg = app.mg4dash.ui.Windows.show(activity, activity.getString(R.string.pf_title), box, widthDp = 900)
     }
+
+    /** The phone that switches to [p], if any, for its row. */
+    private fun phoneName(p: Profiles.Profile): String? = p.phone?.let { ph -> pairedPhones().firstOrNull { it.first == ph }?.second ?: ph }
 
     /** Phones paired with the head unit: (address, name). */
     internal fun pairedPhones(): List<Pair<String, String>> = try {

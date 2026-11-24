@@ -294,8 +294,7 @@ class Prefs(context: Context) {
         set(v) = sp.edit().putInt("radar_prepare_km", v).apply()
     /** Age after which the tiles around the car are downloaded again (hours), one of [app.mg4dash.radar.RadarRepo.REFRESH_HOURS]. */
     var radarRefreshHours: Int
-        get() = sp.getInt("radar_refresh_hours", app.mg4dash.radar.RadarRepo.REFRESH_DEFAULT_HOURS).let { h ->
-            if (h in app.mg4dash.radar.RadarRepo.REFRESH_HOURS) h else app.mg4dash.radar.RadarRepo.REFRESH_DEFAULT_HOURS }
+        get() = sp.getInt("radar_refresh_hours", app.mg4dash.radar.RadarRepo.REFRESH_DEFAULT_HOURS).coerceIn(1, 720)   // any hour (24/11)
         set(v) = sp.edit().putInt("radar_refresh_hours", v).apply()
     /** Sound of each kind of alert. */
     fun radarSoundOf(kind: app.mg4dash.radar.RadarAlert.Kind): app.mg4dash.radar.RadarAlert.Sound =

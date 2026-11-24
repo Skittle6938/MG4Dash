@@ -58,14 +58,11 @@ object Dock {
         // Left slot: clock or Wi-Fi shortcut, chosen by long press
         val wifi = app.mg4dash.system.Prefs(activity).dockSlot == 1
         clockCell.setOnLongClickListener {
-            android.app.AlertDialog.Builder(activity)
-                .setTitle(R.string.dock_slot_pick)
-                .setItems(arrayOf(activity.getString(R.string.dock_slot_clock), activity.getString(R.string.dock_slot_wifi))) { _, w ->
-                    app.mg4dash.system.Prefs(activity).dockSlot = w
-                    build(activity, dock, current, simple)
-                }
-                .setNegativeButton(R.string.cancel, null)
-                .create().also { app.mg4dash.ui.Dialogs.show(it); app.mg4dash.ui.Dialogs.fix(it) }
+            Windows.pick(activity, activity.getString(R.string.dock_slot_pick),
+                listOf(activity.getString(R.string.dock_slot_clock), activity.getString(R.string.dock_slot_wifi)), selected = app.mg4dash.system.Prefs(activity).dockSlot) { w ->
+                app.mg4dash.system.Prefs(activity).dockSlot = w
+                build(activity, dock, current, simple)
+            }
             true
         }
         if (wifi) {
@@ -399,18 +396,13 @@ object Dock {
             Themes.publish(activity)   // Radio Dash's bars follow the choice (MG4Radio #5)
             onDone()
         }
-        android.app.AlertDialog.Builder(activity)
-            .setTitle(R.string.dock_aa_pick)
-            .setItems(choices) { _, w ->
-                when (w) {
-                    0 -> choose(null)
-                    1 -> choose(Apps.CARPLAY.flattenToString())
-                    else -> Shortcuts.pickApp(activity, activity.getString(R.string.dock_aa_pick)) { cn -> if (cn != null) choose(cn.flattenToString()) }
-                }
+        Windows.pick(activity, activity.getString(R.string.dock_aa_pick), choices.toList()) { w ->
+            when (w) {
+                0 -> choose(null)
+                1 -> choose(Apps.CARPLAY.flattenToString())
+                else -> Shortcuts.pickApp(activity, activity.getString(R.string.dock_aa_pick)) { cn -> if (cn != null) choose(cn.flattenToString()) }
             }
-            .setNegativeButton(R.string.cancel, null)
-            .setOnDismissListener { Fullscreen.apply(activity) }
-            .create().also { app.mg4dash.ui.Dialogs.show(it); app.mg4dash.ui.Dialogs.fix(it) }
+        }.setOnDismissListener { Fullscreen.apply(activity) }
     }
 
     private fun connectionName(activity: Activity): String = customAa(activity)?.let {

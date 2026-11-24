@@ -419,7 +419,9 @@ class RadarTest {
         val r = app.mg4dash.radar.RadarRepo
         assertEquals(50, r.prepareRadius(80))
         assertEquals(30, r.prepareRadius(30))
-        assertEquals(10, r.prepareRadius(5))
+        assertEquals(5, r.prepareRadius(5))                                     // 5 to 50 km by 5 since 24/11
+        assertEquals(25, r.prepareRadius(27))
+        assertEquals(5, r.prepareRadius(1))
         val prefs = app.mg4dash.system.Prefs(org.robolectric.RuntimeEnvironment.getApplication())
         prefs.raw.edit().putInt("radar_prepare_km", 80).commit()
         assertEquals(50, prefs.radarPrepareKm)
@@ -461,7 +463,9 @@ class RadarTest {
         val prefs = app.mg4dash.system.Prefs(org.robolectric.RuntimeEnvironment.getApplication())
         assertEquals(6, prefs.radarRefreshHours)
         prefs.raw.edit().putInt("radar_refresh_hours", 5).commit()
-        assertEquals(6, prefs.radarRefreshHours)                                // not offered: the default
+        assertEquals(5, prefs.radarRefreshHours)                                // any hour since 24/11
+        prefs.raw.edit().putInt("radar_refresh_hours", 9999).commit()
+        assertEquals(720, prefs.radarRefreshHours)                              // within 1 h – 30 days
     }
 
     // ── Radar5b: saturated servers, blocks split ──

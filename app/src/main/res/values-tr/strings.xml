@@ -1111,6 +1111,8 @@
     <string name="rp_wifi_sub">Sürüşte 4G yok: yalnızca önceden indirilmiş yollar ve radarlar kullanılır</string>
     <string name="rp_refresh">Aracın çevresini yenile</string>
     <string name="rp_refresh_sub">Şundan eskiyse…</string>
+    <string name="unit_day_short">g</string>
+    <string name="rp_repeat_sub">Uyarı sürdükçe; 0: bir kez</string>
     <string name="rp_storage">Depolama</string>
     <string name="rp_space">Kullanılan alan</string>
     <string name="rp_space_sub">Bölgeler 30 gün saklanır</string>

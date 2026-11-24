@@ -1111,6 +1111,8 @@
     <string name="rp_wifi_sub">Pas de 4G en roulant : seules les routes et radars déjà téléchargés sont utilisés</string>
     <string name="rp_refresh">Rafraîchir la zone autour de la voiture</string>
     <string name="rp_refresh_sub">Si elle date de plus de…</string>
+    <string name="unit_day_short">j</string>
+    <string name="rp_repeat_sub">Tant que l\'alerte dure ; 0 : une seule fois</string>
     <string name="rp_storage">Stockage</string>
     <string name="rp_space">Espace occupé</string>
     <string name="rp_space_sub">Zones gardées 30 jours</string>

@@ -1,8 +1,6 @@
 package app.mg4dash.ui
 
 import android.app.Activity
-import android.app.AlertDialog
-import android.view.Gravity
 import app.mg4dash.R
 import app.mg4dash.car.CarBridge
 import app.mg4dash.car.VehicleState
@@ -13,61 +11,31 @@ import app.mg4dash.system.Prefs
  * does not always match how it feels. Offset from −5 to +5 °, by degree, on the display only.
  */
 object TempCalibration {
-    fun show(activity: Activity, onChange: () -> Unit) {
-        val kit = Kit(activity)
+    /** The climate's settings in one window (24/11: the calibration was a menu of its own): the long press on the temperature. */
+    fun show(activity: Activity, onChange: () -> Unit) =
+        OptionsPopup(activity, activity.getString(R.string.clim_settings_title), R.drawable.ic_fan).also { addTo(activity, it, onChange) }.show()
+
+    /** The fine adjustments as rows of [popup]: the displayed temperature's offset, the intermittent A/C, heating / cooling on the card. */
+    fun addTo(activity: Activity, popup: OptionsPopup, onChange: () -> Unit): OptionsPopup {
         val prefs = Prefs(activity)
-        val box = kit.column().apply { setPadding(kit.dp(24), kit.dp(16), kit.dp(24), kit.dp(8)) }
-        val preview = kit.text("", 19f, R.color.text_sub).apply { gravity = Gravity.CENTER }
-        val value = kit.text("", 30f).apply { gravity = Gravity.CENTER }
-        fun refresh() {
-            val o = prefs.tempOffset
-            value.text = when { o > 0 -> "+$o°"; o < 0 -> "−${-o}°"; else -> "0°" }
-            preview.text = activity.getString(R.string.temp_cal_preview, VehicleState.tempLabel(CarBridge.state.value.driverTemp))
+        val offsets = (-5..5).toList()
+        fun deg(o: Int) = when { o > 0 -> "+$o°"; o < 0 -> "−${-o}°"; else -> "0°" }
+        popup.choice(activity.getString(R.string.temp_cal_title),
+            { activity.getString(R.string.temp_cal_preview, VehicleState.tempLabel(CarBridge.state.value.driverTemp)) },
+            { offsets.map { deg(it) } }, { offsets.indexOf(prefs.tempOffset.coerceIn(-5, 5)) }) { i ->
+            prefs.tempOffset = offsets[i]; VehicleState.tempOffset = prefs.tempOffset; onChange()
         }
-        fun step(d: Int) {
-            prefs.tempOffset = prefs.tempOffset + d
-            VehicleState.tempOffset = prefs.tempOffset
-            refresh(); onChange()
-        }
-        val r = kit.row().apply { gravity = Gravity.CENTER }
-        r.addView(kit.roundButton(R.drawable.ic_minus, 64) { step(-1) })
-        r.addView(value, kit.lp(kit.dp(140), -2))
-        r.addView(kit.roundButton(R.drawable.ic_plus, 64) { step(1) })
-        box.addView(r)
-        box.addView(preview, kit.lp(-1, -2, t = 14))
-        // Intermittent A/C (#34): on and off durations, set in 30 s steps
-        box.addView(kit.text(activity.getString(R.string.ac_cycle_title), 18f, R.color.text_title), kit.lp(-1, -2, t = 22))
+        // Intermittent A/C (#34): how long the compressor runs, then rests
+        val steps = listOf(30, 60, 90, 120, 180, 240, 300, 420, 600, 900, 1200, 1800)
         fun mmss(sec: Int) = String.format(java.util.Locale.getDefault(), "%d:%02d", sec / 60, sec % 60)
-        fun durRow(label: Int, get: () -> Int, set: (Int) -> Unit) {
-            val row = kit.row().apply { gravity = Gravity.CENTER_VERTICAL }
-            row.addView(kit.text(activity.getString(label), 18f), kit.lp(0, -2, 1f))
-            val v = kit.text(mmss(get()), 22f).apply { gravity = Gravity.CENTER }
-            row.addView(kit.roundButton(R.drawable.ic_minus, 52) { set(get() - 30); v.text = mmss(get()) })
-            row.addView(v, kit.lp(kit.dp(100), -2))
-            row.addView(kit.roundButton(R.drawable.ic_plus, 52) { set(get() + 30); v.text = mmss(get()) })
-            box.addView(row, kit.lp(-1, -2, t = 8))
+        fun near(v: Int) = steps.indices.minBy { kotlin.math.abs(steps[it] - v) }
+        popup.note(activity.getString(R.string.ac_cycle_title))
+            .choice(activity.getString(R.string.ac_cycle_on), null, steps.map { mmss(it) }, { near(prefs.acCycleOnSec) }) { prefs.acCycleOnSec = steps[it] }
+            .choice(activity.getString(R.string.ac_cycle_off), null, steps.map { mmss(it) }, { near(prefs.acCycleOffSec) }) { prefs.acCycleOffSec = steps[it] }
+        // Heating / cooling on the card (#34): none, the word only, the word and the animation
+        return popup.choice(activity.getString(R.string.clim_fx_title), null,
+            listOf(R.string.clim_fx_off, R.string.clim_fx_text, R.string.clim_fx_anim).map { activity.getString(it) }, { prefs.climateFxMode }) {
+            prefs.climateFxMode = it; onChange()
         }
-        durRow(R.string.ac_cycle_on, { prefs.acCycleOnSec }) { prefs.acCycleOnSec = it }
-        durRow(R.string.ac_cycle_off, { prefs.acCycleOffSec }) { prefs.acCycleOffSec = it }
-        // Heating / cooling on the card (#34, the owner's choice C): none, the word only, the word and the animation
-        box.addView(kit.text(activity.getString(R.string.clim_fx_title), 18f, R.color.text_title), kit.lp(-1, -2, t = 22))
-        val (seg, pick) = kit.segmented(listOf(R.string.clim_fx_off, R.string.clim_fx_text, R.string.clim_fx_anim).map { activity.getString(it) }) { }
-        fun pickMode(m: Int) { prefs.climateFxMode = m; pick(m); onChange() }
-        for (i in 0 until seg.childCount) seg.getChildAt(i).setOnClickListener { pickMode(i) }
-        pick(prefs.climateFxMode)
-        box.addView(seg, kit.lp(-1, -2, t = 8))
-        refresh()
-        // All of it drawn by MG4Dash, title and buttons too (#34, 18/11: on another head unit the car's own dialog
-        // style replaced ours: a huge title, its buttons in capitals), shown like the other MG4Dash menus
-        val title = kit.text(activity.getString(R.string.clim_settings_title), 22f).apply { typeface = android.graphics.Typeface.DEFAULT_BOLD }
-        box.addView(title, 0, kit.lp(-1, -2, b = 14))
-        val dlg = AlertDialog.Builder(activity).setView(box).create()
-        val buttons = kit.row().apply { gravity = Gravity.CENTER_VERTICAL }
-        buttons.addView(kit.toggleTile(activity.getString(R.string.temp_cal_reset)) { step(-prefs.tempOffset) }, kit.lp(0, kit.dp(56), 1f))
-        buttons.addView(kit.toggleTile(activity.getString(android.R.string.ok)) { dlg.dismiss() }.apply { isSelected = true }, kit.lp(0, kit.dp(56), 1f, l = 12))
-        box.addView(buttons, kit.lp(-1, -2, t = 22))
-        box.setPadding(kit.dp(28), kit.dp(22), kit.dp(28), kit.dp(22))
-        Dialogs.show(dlg)
-        dlg.window?.setLayout(kit.dp(900), android.view.ViewGroup.LayoutParams.WRAP_CONTENT)
     }
 }

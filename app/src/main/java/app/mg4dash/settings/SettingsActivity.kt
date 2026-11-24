@@ -360,12 +360,9 @@ class SettingsActivity : AppCompatActivity() {
                             })
                         })
                     }
-                    AlertDialog.Builder(this@SettingsActivity)
-                        .setTitle(getString(R.string.st_update_available, BuildConfig.VERSION_NAME, newer.version))
-                        .setView(notes)
-                        .setPositiveButton(R.string.st_update_install) { _, _ -> install(newer) }
-                        .setNegativeButton(R.string.cancel, null)
-                        .create().also { app.mg4dash.ui.Dialogs.show(it); app.mg4dash.ui.Dialogs.fix(it) }
+                    lateinit var w: android.app.AlertDialog
+                    w = app.mg4dash.ui.Windows.show(this@SettingsActivity, getString(R.string.st_update_available, BuildConfig.VERSION_NAME, newer.version), notes,
+                        widthDp = 1100, buttons = listOf(app.mg4dash.ui.Rows.actionButton(this@SettingsActivity, getString(R.string.st_update_install)) { w.dismiss(); install(newer) }))
                 }
             }
         }
@@ -425,23 +422,15 @@ class SettingsActivity : AppCompatActivity() {
                     getString(if (f.history) R.string.bk_with_history else R.string.bk_settings_only),
                     android.text.format.Formatter.formatShortFileSize(this, f.file.length())).joinToString("  ·  ")
             }.toTypedArray()
-            var chosen = 0
-            AlertDialog.Builder(this).setTitle(R.string.bk_list_title)
-                .setSingleChoiceItems(items, 0) { _, w -> chosen = w }
-                .setNegativeButton(R.string.cancel, null)
-                .setPositiveButton(R.string.bk_restore_ok) { _, _ ->
-                    val f = found[chosen]
-                    val msg = getString(R.string.bk_confirm, df.format(java.util.Date(f.created))) +
-                        (if (!f.haToken) "\n\n" + getString(R.string.bk_confirm_token) else "")
-                    AlertDialog.Builder(this).setTitle(R.string.bk_confirm_title).setMessage(msg)
-                        .setNegativeButton(R.string.cancel, null)
-                        .setPositiveButton(R.string.bk_confirm_ok) { _, _ ->
-                            val ok = try { app.mg4dash.system.SettingsBackup.restore(this, org.json.JSONObject(f.file.readText())) } catch (e: Exception) { Log.w("Backup", "restore: ${e.message}"); false }
-                            if (ok) app.mg4dash.system.SettingsBackup.restart(this) else bkSay(getString(R.string.bk_unreadable))
-                        }
-                        .create().also { app.mg4dash.ui.Dialogs.show(it); app.mg4dash.ui.Dialogs.fix(it) }
+            app.mg4dash.ui.Windows.pick(this, getString(R.string.bk_list_title), items.toList()) { chosen ->
+                val f = found[chosen]
+                val msg = getString(R.string.bk_confirm, df.format(java.util.Date(f.created))) +
+                    (if (!f.haToken) "\n\n" + getString(R.string.bk_confirm_token) else "")
+                app.mg4dash.ui.Windows.confirm(this, getString(R.string.bk_confirm_title), msg, getString(R.string.bk_confirm_ok), danger = false) {
+                    val ok = try { app.mg4dash.system.SettingsBackup.restore(this, org.json.JSONObject(f.file.readText())) } catch (e: Exception) { Log.w("Backup", "restore: ${e.message}"); false }
+                    if (ok) app.mg4dash.system.SettingsBackup.restart(this) else bkSay(getString(R.string.bk_unreadable))
                 }
-                .create().also { app.mg4dash.ui.Dialogs.show(it); app.mg4dash.ui.Dialogs.fix(it) }
+            }
         }
 
         // Weather (the cards' options) and Home Assistant (its own page) left the Connections tab, which is gone (24/11)
@@ -606,9 +595,7 @@ class SettingsActivity : AppCompatActivity() {
         toggle(alert, R.string.du_popup, null, { DataUsage.popup(this) }) { DataUsage.setPopup(this, it) }
         toggle(alert, R.string.du_wifi_updates, R.string.du_wifi_updates_desc, { DataUsage.updatesWifiOnly(this) }) { DataUsage.setUpdatesWifiOnly(this, it) }
         row(alert, button(getString(R.string.du_reset)) {
-            AlertDialog.Builder(this).setMessage(R.string.du_reset_confirm)
-                .setPositiveButton(R.string.du_reset) { _, _ -> DataUsage.reset(this) }
-                .setNegativeButton(android.R.string.cancel, null).create().also { app.mg4dash.ui.Dialogs.show(it); app.mg4dash.ui.Dialogs.fix(it); app.mg4dash.ui.Dialogs.hideBars(it) }
+            app.mg4dash.ui.Windows.confirm(this, getString(R.string.du_reset), getString(R.string.du_reset_confirm), getString(R.string.du_reset)) { DataUsage.reset(this) }
         })
 
         val dayFormat = java.text.SimpleDateFormat("EEEE d MMMM", Locale.getDefault())
@@ -815,13 +802,13 @@ class SettingsActivity : AppCompatActivity() {
                 if (!app.mg4dash.system.Updater.isNewer(r.version, cur!!)) { A.end(); state.text = getString(R.string.st_upd_current, cur); return@launch }
                 showState()
                 var started = false
-                AlertDialog.Builder(this@SettingsActivity)
-                    .setTitle(getString(R.string.st_aa_available, r.version))
-                    .setMessage(android.text.SpannableStringBuilder(app.mg4dash.system.Updater.dataWarning(this@SettingsActivity, r) + "\n" + getString(R.string.st_aa_session_warning)).apply {
+                run { var dialogRef: android.app.AlertDialog? = null; dialogRef = app.mg4dash.ui.Windows.show(this@SettingsActivity, getString(R.string.st_aa_available, r.version),
+                    app.mg4dash.ui.Windows.message(this@SettingsActivity, android.text.SpannableStringBuilder(app.mg4dash.system.Updater.dataWarning(this@SettingsActivity, r) + "\n" + getString(R.string.st_aa_session_warning)).apply {
                         setSpan(android.text.style.ForegroundColorSpan(color(R.color.accent_heat)), 0, length, 0)
                         append("\n\n").append(app.mg4dash.system.Updater.plainNotes(r.notes))
-                    })
-                    .setPositiveButton(R.string.st_update_install) { _, _ ->
+                    }), widthDp = 1100,
+                    onDismiss = { if (!started) { A.end(); showState() } },
+                    buttons = listOf(app.mg4dash.ui.Rows.actionButton(this@SettingsActivity, getString(R.string.st_update_install)) { dialogRef?.dismiss();
                         started = true
                         lifecycleScope.launch {
                             try {
@@ -832,9 +819,8 @@ class SettingsActivity : AppCompatActivity() {
                                 A.listener = { ok -> runOnUiThread {
                                     cur = A.installedVersion(this@SettingsActivity) ?: cur
                                     showState()
-                                    if (!isFinishing) AlertDialog.Builder(this@SettingsActivity)
-                                        .setMessage(if (ok) R.string.st_aa_done else R.string.st_update_error)
-                                        .setPositiveButton(android.R.string.ok, null).create().also { app.mg4dash.ui.Dialogs.show(it); app.mg4dash.ui.Dialogs.fix(it) }
+                                    if (!isFinishing) app.mg4dash.ui.Windows.show(this@SettingsActivity, getString(R.string.st_update),
+                                        app.mg4dash.ui.Windows.message(this@SettingsActivity, getString(if (ok) R.string.st_aa_done else R.string.st_update_error)), widthDp = 760)
                                 } }
                                 withContext(Dispatchers.IO) { A.install(this@SettingsActivity, apk, r.version) }
                             } catch (e: Exception) {
@@ -843,10 +829,7 @@ class SettingsActivity : AppCompatActivity() {
                                 state.text = getString(R.string.st_update_error)
                             }
                         }
-                    }
-                    .setNegativeButton(R.string.cancel, null)
-                    .setOnDismissListener { if (!started) { A.end(); showState() } }
-                    .create().also { app.mg4dash.ui.Dialogs.show(it); app.mg4dash.ui.Dialogs.fix(it) }
+                    })) }
             }
         }
     }
@@ -880,13 +863,13 @@ class SettingsActivity : AppCompatActivity() {
                 val cur = R2.installedVersion(this@SettingsActivity)
                 if (cur != null && !app.mg4dash.system.Updater.isNewer(r.version, cur)) { state.text = getString(R.string.st_upd_current, cur); return@launch }
                 showState()
-                AlertDialog.Builder(this@SettingsActivity)
-                    .setTitle(getString(R.string.st_rd_available, r.version))
-                    .setMessage(android.text.SpannableStringBuilder(app.mg4dash.system.Updater.dataWarning(this@SettingsActivity, r)).apply {
+                run { var dialogRef: android.app.AlertDialog? = null; dialogRef = app.mg4dash.ui.Windows.show(this@SettingsActivity, getString(R.string.st_rd_available, r.version),
+                    app.mg4dash.ui.Windows.message(this@SettingsActivity, android.text.SpannableStringBuilder(app.mg4dash.system.Updater.dataWarning(this@SettingsActivity, r)).apply {
                         setSpan(android.text.style.ForegroundColorSpan(color(R.color.accent_heat)), 0, length, 0)
                         append("\n\n").append(app.mg4dash.system.Updater.plainNotes(r.notes))
-                    })
-                    .setPositiveButton(R.string.st_update_install) { _, _ ->
+                    }), widthDp = 1100,
+                    onDismiss = {},
+                    buttons = listOf(app.mg4dash.ui.Rows.actionButton(this@SettingsActivity, getString(R.string.st_update_install)) { dialogRef?.dismiss();
                         lifecycleScope.launch {
                             try {
                                 val apk = withContext(Dispatchers.IO) {
@@ -895,9 +878,8 @@ class SettingsActivity : AppCompatActivity() {
                                 state.text = getString(R.string.st_rd_installing)
                                 R2.listener = { ok -> runOnUiThread {
                                     showState()
-                                    if (!isFinishing) AlertDialog.Builder(this@SettingsActivity)
-                                        .setMessage(if (ok) R.string.st_rd_done else R.string.st_update_error)
-                                        .setPositiveButton(android.R.string.ok, null).create().also { app.mg4dash.ui.Dialogs.show(it); app.mg4dash.ui.Dialogs.fix(it) }
+                                    if (!isFinishing) app.mg4dash.ui.Windows.show(this@SettingsActivity, getString(R.string.st_update),
+                                        app.mg4dash.ui.Windows.message(this@SettingsActivity, getString(if (ok) R.string.st_rd_done else R.string.st_update_error)), widthDp = 760)
                                 } }
                                 withContext(Dispatchers.IO) { R2.install(this@SettingsActivity, apk, r.version) }
                             } catch (e: Exception) {
@@ -905,9 +887,7 @@ class SettingsActivity : AppCompatActivity() {
                                 state.text = getString(R.string.st_update_error)
                             }
                         }
-                    }
-                    .setNegativeButton(R.string.cancel, null)
-                    .create().also { app.mg4dash.ui.Dialogs.show(it); app.mg4dash.ui.Dialogs.fix(it) }
+                    })) }
             }
         }
     }
@@ -939,13 +919,11 @@ class SettingsActivity : AppCompatActivity() {
                         return@runOnUiThread
                     }
                     val titles = items.map { "${it.file.name} (${it.durationMs / 1000}s)" }.toTypedArray()
-                    AlertDialog.Builder(this)
-                        .setTitle(R.string.st_sound_pick_file)
-                        .setItems(titles) { _, which ->
+                    app.mg4dash.ui.Windows.pick(this, getString(R.string.st_sound_pick_file), titles.toList()) { which ->
                             val chosen = items[which]
                             if (chosen.file.length() > app.mg4dash.sound.SoundImporter.MAX_FILE_SIZE_BYTES) {
                                 app.mg4dash.ui.Toasts.show(this, R.string.st_sound_file_too_large)
-                                return@setItems
+                                return@pick
                             }
                             val imported = app.mg4dash.sound.SoundImporter.importSound(this, chosen.file)
                             if (imported != null) {
@@ -954,9 +932,7 @@ class SettingsActivity : AppCompatActivity() {
                             } else {
                                 app.mg4dash.ui.Toasts.show(this, R.string.st_sound_import_failed, long = true)
                             }
-                        }
-                        .setNegativeButton(R.string.cancel, null)
-                        .create().also { app.mg4dash.ui.Dialogs.show(it); app.mg4dash.ui.Dialogs.fix(it); app.mg4dash.ui.Dialogs.fullHeight(it) }
+                    }
                 }
             }.start()
         }
@@ -1256,14 +1232,13 @@ class SettingsActivity : AppCompatActivity() {
         b.setOnClickListener {
             if (busy) return@setOnClickListener
             if (on) {
-                AlertDialog.Builder(this).setMessage(R.string.st_web_engine_revert_confirm)
-                    .setPositiveButton(R.string.st_web_engine_revert_ok) { _, _ -> busy = true; we.revert(this) { finished(it) } }
-                    .setNegativeButton(R.string.cancel, null).create().also { app.mg4dash.ui.Dialogs.show(it); app.mg4dash.ui.Dialogs.fix(it); app.mg4dash.ui.Dialogs.hideBars(it) }
+                app.mg4dash.ui.Windows.confirm(this, getString(R.string.st_web_engine_revert_ok), getString(R.string.st_web_engine_revert_confirm), getString(R.string.st_web_engine_revert_ok), danger = false) {
+                    busy = true; we.revert(this) { finished(it) }
+                }
                 return@setOnClickListener
             }
             if (app.mg4dash.system.DataUsage.updatesBlocked(this)) { state.text = getString(R.string.du_updates_wait); return@setOnClickListener }
-            AlertDialog.Builder(this).setMessage(getString(R.string.st_web_engine_confirm, we.VERSION, we.SIZE / 1_000_000))
-                .setPositiveButton(R.string.st_update_install) { _, _ ->
+            app.mg4dash.ui.Windows.confirm(this, getString(R.string.st_update_install), getString(R.string.st_web_engine_confirm, we.VERSION, we.SIZE / 1_000_000), getString(R.string.st_update_install), danger = false) {
                     busy = true
                     we.install(this, { step, pct ->
                         runOnUiThread {
@@ -1274,7 +1249,6 @@ class SettingsActivity : AppCompatActivity() {
                         }
                     }) { finished(it) }
                 }
-                .setNegativeButton(R.string.cancel, null).create().also { app.mg4dash.ui.Dialogs.show(it); app.mg4dash.ui.Dialogs.fix(it); app.mg4dash.ui.Dialogs.hideBars(it) }
         }
     }
 

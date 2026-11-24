@@ -1111,6 +1111,8 @@
     <string name="rp_wifi_sub">Kein 4G beim Fahren: nur bereits heruntergeladene Straßen und Blitzer werden genutzt</string>
     <string name="rp_refresh">Gebiet um das Auto aktualisieren</string>
     <string name="rp_refresh_sub">Wenn älter als…</string>
+    <string name="unit_day_short">T</string>
+    <string name="rp_repeat_sub">Solange die Warnung dauert; 0: einmal</string>
     <string name="rp_storage">Speicher</string>
     <string name="rp_space">Belegter Speicher</string>
     <string name="rp_space_sub">Gebiete 30 Tage gespeichert</string>

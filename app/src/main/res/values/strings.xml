@@ -1111,6 +1111,8 @@
     <string name="rp_wifi_sub">No 4G while driving: only roads and speed cameras already downloaded are used</string>
     <string name="rp_refresh">Refresh the area around the car</string>
     <string name="rp_refresh_sub">If it is older than…</string>
+    <string name="unit_day_short">d</string>
+    <string name="rp_repeat_sub">While the alert lasts; 0: once</string>
     <string name="rp_storage">Storage</string>
     <string name="rp_space">Space used</string>
     <string name="rp_space_sub">Areas kept 30 days</string>

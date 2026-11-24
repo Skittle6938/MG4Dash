@@ -1220,9 +1220,8 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
             .toggle(getString(R.string.st_climhold), getString(R.string.st_climhold_desc), { prefs.climateHoldEnabled }) { prefs.climateHoldEnabled = it }
         if (app.mg4dash.system.Firmware.family == app.mg4dash.system.Firmware.Family.LEGACY)
             popup.toggle(getString(R.string.st_hide_saic_climate), getString(R.string.st_hide_saic_climate_desc), { prefs.hideSaicClimate }) { prefs.hideSaicClimate = it }
-        return popup.action(getString(R.string.temp_cal_title), null, getString(R.string.opt_open)) {
-            app.mg4dash.ui.TempCalibration.show(this) { renderClimate(CarBridge.state.value) }
-        }
+        // The fine adjustments right here (24/11, once a menu of their own)
+        return app.mg4dash.ui.TempCalibration.addTo(this, popup) { renderClimate(CarBridge.state.value) }
     }
 
     private var climateBuiltWith: Int? = null

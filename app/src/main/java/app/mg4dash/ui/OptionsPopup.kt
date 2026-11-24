@@ -100,6 +100,13 @@ class OptionsPopup(private val a: Activity, private val title: String, private v
     /** A card's own content laid out by itself (the alerter's two columns), [widthDp] wide. */
     fun content(v: View, widthDp: Int): OptionsPopup { target += v; this.widthDp = widthDp; return this }
 
+    /** A number set exactly with − and + (and typed by touching it): a [Stepper] at the end of its row. */
+    fun stepper(title: String, sub: String?, s: Stepper): OptionsPopup {
+        target += Rows.row(a, title, sub, s.view, null)
+        repaints += { s.paint() }
+        return this
+    }
+
     /** A short explanation, in grey, on its own line (between groups). */
     fun note(text: String): OptionsPopup {
         target += TextView(a).apply {
