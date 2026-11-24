@@ -6,7 +6,8 @@ PKG=app.mg4dash.emu
 APK=${1:-app/build/outputs/apk/emulator/release/app-emulator-release.apk}
 adb root >/dev/null 2>&1; sleep 3; adb wait-for-device
 # root: the pages are not exported, only root can open them directly
-adb install -r "$APK" || exit 1
+# -g: runtime permissions granted, as the car grants them to the system app
+adb install -r -g "$APK" || exit 1
 adb logcat -c
 fail=0
 for a in .MainActivity .pages.ClimateActivity .pages.VehicleActivity .pages.TripsActivity .pages.SoundActivity \
