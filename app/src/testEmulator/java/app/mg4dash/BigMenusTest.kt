@@ -58,8 +58,12 @@ class BigMenusTest {
         val (w, h) = Popups.room(a)
         app.mg4dash.ui.SourceMenu.confirm(a, a.window.decorView, "Remettre la disposition et les cartes d'origine ? ".repeat(8), "OK") {}
         idle()
-        val p = latest()
-        assertTrue("confirmation ${p.width} × ${p.height} within $w × $h", p.width <= w && p.height <= h)
+        // A window now (same confirmation everywhere, 24/11): its width and height within the screen
+        val win = org.robolectric.shadows.ShadowDialog.getLatestDialog().window!!
+        val dv = win.decorView
+        dv.measure(android.view.View.MeasureSpec.makeMeasureSpec(win.attributes.width, android.view.View.MeasureSpec.EXACTLY),
+            android.view.View.MeasureSpec.makeMeasureSpec(0, android.view.View.MeasureSpec.UNSPECIFIED))
+        assertTrue("confirmation ${win.attributes.width} × ${dv.measuredHeight} within $w × $h", win.attributes.width <= w && dv.measuredHeight <= h)
     }
 
     /** A short menu is left as it is. */

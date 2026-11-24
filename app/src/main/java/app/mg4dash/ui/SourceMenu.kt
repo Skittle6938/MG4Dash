@@ -48,7 +48,7 @@ object SourceMenu {
 
     /** Confirmation in the menu style, centred on [anchor]: [message], Cancel and [ok] (coloured). */
     fun confirm(activity: Activity, @Suppress("UNUSED_PARAMETER") anchor: View, message: String, ok: String, onOk: () -> Unit) {
-        Windows.confirm(activity, message, null, ok, danger = true, onOk = onOk)
+        Windows.confirm(activity, ok, message, ok, danger = true, onOk = onOk)
     }
 
     /**
