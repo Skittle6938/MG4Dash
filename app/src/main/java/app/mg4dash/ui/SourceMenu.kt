@@ -5,6 +5,7 @@ import android.util.TypedValue
 import android.view.Gravity
 import android.view.View
 import android.widget.LinearLayout
+import android.widget.ScrollView
 import android.widget.TextView
 import app.mg4dash.R
 import app.mg4dash.media.MediaHub
@@ -131,10 +132,46 @@ object SourceMenu {
         // Height measured explicitly: when opening downwards (music card at the top of the screen),
         // "wrap_content" height cut the bottom of the last line.
         list.measure(View.MeasureSpec.makeMeasureSpec(popup.width, View.MeasureSpec.EXACTLY), View.MeasureSpec.UNSPECIFIED)
-        popup.height = list.measuredHeight + (6 * d).toInt()
+        val full = list.measuredHeight + (6 * d).toInt()
+        popup.height = full
         Popups.fit(activity, popup)
-        // In the middle of the screen (a tile of the shortcuts menu, no button to hang it under)
-        if (centred) popup.showAtLocation(anchor.rootView, Gravity.CENTER, 0, 0) else popup.showAsDropDown(anchor, 0, (4 * d).toInt())
+        if (centred) {
+            // In the middle of the screen (a tile of the shortcuts menu, no button to hang it under)
+            popup.showAtLocation(anchor.rootView, Gravity.CENTER, 0, 0)
+        } else {
+            // Under the anchor when it fits, above it otherwise; too long for both (24/11: the weather models showed 3 of 7
+            // and did not scroll): the larger side, the list scrolling with faded edges, the chosen line in sight
+            // On the screen, not in the window holding the anchor (an options window is shorter than the screen)
+            val at = IntArray(2).also { anchor.getLocationOnScreen(it) }
+            val screen = activity.window?.decorView?.height?.takeIf { it > 0 } ?: activity.resources.displayMetrics.heightPixels
+            val gap = (4 * d).toInt(); val margin = (12 * d).toInt()
+            val below = screen - (at[1] + anchor.height + gap) - margin
+            val above = at[1] - gap - margin
+            val h = popup.height
+            when {
+                // A whole page as the anchor (no row to hang it on): as before, Android places it
+                anchor.height > screen / 2 -> popup.showAsDropDown(anchor, 0, gap)
+                h <= below -> popup.showAsDropDown(anchor, 0, gap)
+                h <= above -> popup.showAsDropDown(anchor, 0, -(anchor.height + gap + h))
+                else -> {
+                    val room = maxOf(below, above)
+                    val scroll = (popup.contentView as? ScrollView) ?: ScrollView(activity).also { sv ->
+                        val content = popup.contentView
+                        popup.contentView = sv
+                        sv.addView(content, android.widget.FrameLayout.LayoutParams(-1, -2))
+                    }
+                    // A scroll bar that stays (more lines below or above), faded edges; up to about eight lines tall
+                    scroll.isVerticalScrollBarEnabled = true; scroll.isScrollbarFadingEnabled = false
+                    scroll.scrollBarStyle = View.SCROLLBARS_INSIDE_INSET
+                    scroll.isVerticalFadingEdgeEnabled = true
+                    scroll.setFadingEdgeLength((40 * d).toInt()); scroll.overScrollMode = View.OVER_SCROLL_NEVER
+                    popup.height = room
+                    if (below >= above) popup.showAsDropDown(anchor, 0, gap) else popup.showAsDropDown(anchor, 0, -(anchor.height + gap + room))
+                    // The chosen line in sight
+                    if (current >= 0) scroll.post { scroll.scrollTo(0, ((list.getChildAt(current)?.top ?: 0) - room / 3).coerceAtLeast(0)) }
+                }
+            }
+        }
         Themes.track(popup)
     }
 

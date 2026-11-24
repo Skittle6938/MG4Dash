@@ -153,7 +153,7 @@ class RadarPage(private val a: Activity, private val prefs: Prefs) {
         showMargins()
         // Display
         val show = section(column, a.getString(R.string.rp_display))
-        toggleRow(show, a.getString(R.string.rp_visual), null, { prefs.radarVisual }) { prefs.radarVisual = it }
+        toggleRow(show, a.getString(R.string.rp_visual), a.getString(R.string.rp_visual_sub), { prefs.radarVisual }) { prefs.radarVisual = it }
         toggleRow(show, a.getString(R.string.rp_banner), null, { prefs.radarBanner }) { prefs.radarBanner = it }
         // Each alert's sound: the sound on the row, its volume and repeat by touching the row
         val snd = section(column, a.getString(R.string.rp_sounds))
@@ -254,6 +254,8 @@ class RadarPage(private val a: Activity, private val prefs: Prefs) {
                 RadarRepo.PrepPhase.NO_WIFI, RadarRepo.PrepPhase.CANCELLED -> R.string.rp_prep_stopped
                 null -> R.string.rp_prep_none
             })) + (p?.takeIf { it.total > 0 }?.let { "   ${it.done} / ${it.total}" } ?: "")
+            // Nothing run in this session: what is stored (zones, and when they were prepared)
+            if (p == null) state.text = RadarRepo.storedPreparation(a, RadarRepo.cacheSize(a).first, RadarRepo.preparedAt(a))
             bar.progress = p?.takeIf { it.total > 0 }?.let { it.done * 1000 / it.total } ?: 0
             detail.text = listOfNotNull(
                 p?.let { a.getString(R.string.rp_prep_detail, DataUsage.format(a, it.bytes)) },

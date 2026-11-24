@@ -57,44 +57,56 @@ class WeatherCard(context: Context, private val daily: Boolean) : HomeCard {
     override fun options(popup: OptionsPopup): OptionsPopup {
         val a = popup.let { view.context as? android.app.Activity } ?: return popup
         val prefs = app.mg4dash.system.Prefs(a)
-        val models = MODELS.map { if (it.first.isEmpty()) a.getString(R.string.st_wx_model_auto) else it.second }
-        val here = a.getString(R.string.st_use_location)
-        val cityLabels = CITIES.map { it.first } + here
+        val models = MODELS.map { a.getString(it.second) }
         return popup
-            .choice(a.getString(R.string.st_wx_model, "").trimEnd(' ', ':', '\u00a0', '\u202f'), null, models,
+            .choice(a.getString(R.string.st_wx_model, "").trimEnd(' ', ':', '\u00a0', '\u202f'), a.getString(R.string.wx_model_desc), models,
                 { MODELS.indexOfFirst { it.first == prefs.weatherModel }.coerceAtLeast(0) }) { i ->
                 prefs.weatherModel = MODELS[i].first; WeatherRepo.refreshNow(a)
             }
-            .choice(a.getString(R.string.st_wx_city), a.getString(R.string.st_wx_city_desc, prefs.weatherCity), cityLabels,
-                { CITIES.indexOfFirst { it.first == prefs.weatherCity }.let { if (it < 0) cityLabels.lastIndex else it } }) { i ->
-                if (i < CITIES.size) {
-                    val c = CITIES[i]; prefs.weatherCity = c.first; prefs.weatherLat = c.second; prefs.weatherLon = c.third
-                    WeatherRepo.refreshNow(a)
-                } else {
-                    val loc = app.mg4dash.map.LocationRepo.location.value
-                    if (loc == null) Toasts.show(a, R.string.st_no_location, long = true)
-                    else {
-                        prefs.weatherLat = loc.latitude.toFloat(); prefs.weatherLon = loc.longitude.toFloat()
-                        prefs.weatherCity = WeatherRepo.weather.value?.place?.takeIf { it.isNotBlank() } ?: a.getString(R.string.weather_here)
-                        WeatherRepo.refreshNow(a)
+            // The city used without a position (24/11): the car's position now, or one searched by its name
+            .choice(a.getString(R.string.st_wx_city), { a.getString(R.string.st_wx_city_desc, prefs.weatherCity) },
+                { listOf(prefs.weatherCity, a.getString(R.string.wx_city_here), a.getString(R.string.wx_city_search)) }, { 0 }) { i ->
+                when (i) {
+                    1 -> {
+                        val loc = app.mg4dash.map.LocationRepo.location.value
+                        if (loc == null) Toasts.show(a, R.string.st_no_location, long = true)
+                        else {
+                            prefs.weatherLat = loc.latitude.toFloat(); prefs.weatherLon = loc.longitude.toFloat()
+                            prefs.weatherCity = WeatherRepo.weather.value?.place?.takeIf { it.isNotBlank() } ?: a.getString(R.string.weather_here)
+                            WeatherRepo.refreshNow(a); popup.refresh()
+                        }
                     }
+                    2 -> searchCity(a) { popup.refresh() }
                 }
             }
     }
 
+    /** A city searched by its name with the car's keyboard, then picked among the places found. */
+    private fun searchCity(a: android.app.Activity, found: () -> Unit) {
+        Ask.show(a, a.getString(R.string.wx_city_search), "", secret = false) { query ->
+            if (query.isBlank()) return@show
+            Thread {
+                val found = app.mg4dash.weather.Geocoding.search(a, query)
+                a.runOnUiThread {
+                    when {
+                        found == null -> Toasts.show(a, R.string.wx_city_offline, long = true)
+                        found.isEmpty() -> Toasts.show(a, a.getString(R.string.wx_city_none, query), long = true)
+                        else -> Windows.pick(a, a.getString(R.string.st_wx_city), found.map { it.label }) { k ->
+                            val p = found[k]
+                            app.mg4dash.system.Prefs(a).apply { weatherCity = p.name; weatherLat = p.lat.toFloat(); weatherLon = p.lon.toFloat() }
+                            WeatherRepo.refreshNow(a); found()
+                        }
+                    }
+                }
+            }.start()
+        }
+    }
+
     companion object {
         /** Forecast models (#67): another one can better match the weather seen, depending on the region. */
-        val MODELS = listOf("" to "Auto", "ecmwf_ifs025" to "ECMWF", "icon_seamless" to "DWD ICON", "meteofrance_seamless" to "Météo-France",
-            "ukmo_seamless" to "UK Met Office", "gfs_seamless" to "NOAA GFS", "gem_seamless" to "GEM (Canada)")
-        /** Fallback cities when the car gives no position. */
-        val CITIES = listOf(
-            Triple("Paris", 48.8566f, 2.3522f), Triple("Lyon", 45.764f, 4.8357f),
-            Triple("Marseille", 43.2965f, 5.3698f), Triple("Toulouse", 43.6047f, 1.4442f),
-            Triple("Bordeaux", 44.8378f, -0.5792f), Triple("Lille", 50.6292f, 3.0573f),
-            Triple("Nantes", 47.2184f, -1.5536f), Triple("Strasbourg", 48.5734f, 7.7521f),
-            Triple("Nice", 43.7102f, 7.262f), Triple("Bruxelles", 50.8503f, 4.3517f),
-            Triple("Genève", 46.2044f, 6.1432f),
-        )
+        /** Stored value (unchanged) to its name; Automatic first, then Météo-France (24/11). */
+        val MODELS = listOf("" to R.string.wx_model_auto, "meteofrance_seamless" to R.string.wx_model_meteofrance, "ecmwf_ifs025" to R.string.wx_model_ecmwf,
+            "icon_seamless" to R.string.wx_model_dwd, "ukmo_seamless" to R.string.wx_model_ukmo, "gfs_seamless" to R.string.wx_model_noaa, "gem_seamless" to R.string.wx_model_gem)
     }
 
     private fun render(w: WeatherRepo.Weather?) {

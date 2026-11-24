@@ -26,7 +26,8 @@ object Windows {
             orientation = LinearLayout.VERTICAL; background = Rows.windowBackground(a); setPadding(dp(a, 32), 0, dp(a, 32), dp(a, 28))
         }
         body.addView(Rows.titleBar(a, icon, title, sub) { dialog.dismiss() }, LinearLayout.LayoutParams(-1, -2).apply { bottomMargin = dp(a, 4) })
-        content?.let { body.addView(it, it.layoutParams as? LinearLayout.LayoutParams ?: LinearLayout.LayoutParams(-1, -2)) }
+        // The content scrolls when taller than the screen allows (the title bar and the buttons stay in sight)
+        content?.let { body.addView(Rows.scrolling(a, it, Rows.contentRoom(a, buttons.isNotEmpty())), LinearLayout.LayoutParams(-1, -2)) }
         if (buttons.isNotEmpty()) {
             val row = LinearLayout(a).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.END or Gravity.CENTER_VERTICAL }
             buttons.forEachIndexed { i, b -> row.addView(b, LinearLayout.LayoutParams(-2, dp(a, 56)).apply { if (i > 0) leftMargin = dp(a, 14) }) }

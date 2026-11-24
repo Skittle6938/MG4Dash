@@ -143,6 +143,24 @@ object Rows {
         return bar
     }
 
+    /**
+     * [content] in a scrolling area no taller than [maxPx] (24/11: the driving window did not fit the screen and did
+     * not scroll); left as it is when it scrolls by itself already. Faded edges say there is more.
+     */
+    fun scrolling(c: Context, content: View, maxPx: Int): View {
+        if (content is android.widget.ScrollView) return content
+        (content.parent as? ViewGroup)?.removeView(content)
+        return object : android.widget.ScrollView(c) {
+            override fun onMeasure(w: Int, h: Int) = super.onMeasure(w, View.MeasureSpec.makeMeasureSpec(maxPx, View.MeasureSpec.AT_MOST))
+        }.apply {
+            isVerticalScrollBarEnabled = true; isVerticalFadingEdgeEnabled = true; setFadingEdgeLength(dp(c, 36)); overScrollMode = View.OVER_SCROLL_NEVER
+            addView(content, android.widget.FrameLayout.LayoutParams(-1, -2))
+        }
+    }
+
+    /** The height left to a window's content on this screen: title bar, margins and [buttons] row taken off. */
+    fun contentRoom(c: Context, buttons: Boolean = false) = c.resources.displayMetrics.heightPixels - dp(c, 84 + 28 + 40) - (if (buttons) dp(c, 80) else 0)
+
     /** A window's background: the panel colour made opaque, large corners, thin outline. */
     fun windowBackground(c: Context) = GradientDrawable().apply {
         setColor(col(c, R.color.panel) or 0xFF000000.toInt()); cornerRadius = dp(c, 28).toFloat()

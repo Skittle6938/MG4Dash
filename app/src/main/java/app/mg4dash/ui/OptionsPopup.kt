@@ -107,11 +107,18 @@ class OptionsPopup(private val a: Activity, private val title: String, private v
     }
 
     /** A choice in the same menu as the settings': the value in the theme's colour, the whole row opens the menu. */
-    fun choice(title: String, sub: String?, labels: List<String>, current: () -> Int, onPick: (Int) -> Unit): OptionsPopup {
-        val v = Rows.value(a, labels[current().coerceIn(0, labels.lastIndex)])
-        target += Rows.row(a, title, sub, v) {
-            SourceMenu.choose(a, v, labels, current()) { onPick(it); v.text = labels[it.coerceIn(0, labels.lastIndex)] + "  ▾" }
+    fun choice(title: String, sub: String?, labels: List<String>, current: () -> Int, onPick: (Int) -> Unit): OptionsPopup =
+        choice(title, { sub }, { labels }, current, onPick)
+
+    /** A choice whose labels and subtitle follow a value changed elsewhere (a city found by a search). */
+    fun choice(title: String, sub: () -> String?, labels: () -> List<String>, current: () -> Int, onPick: (Int) -> Unit): OptionsPopup {
+        val v = Rows.value(a, labels()[current().coerceIn(0, labels().lastIndex)])
+        val row = Rows.row(a, title, sub(), v) {
+            SourceMenu.choose(a, v, labels(), current()) { onPick(it); refresh() }
         }
+        val subView = ((row.getChildAt(0) as LinearLayout).let { if (it.childCount > 1) it.getChildAt(1) as TextView else null })
+        repaints += { v.text = labels()[current().coerceIn(0, labels().lastIndex)] + "  ▾"; subView?.text = sub() }
+        target += row
         return this
     }
 
@@ -146,16 +153,21 @@ class OptionsPopup(private val a: Activity, private val title: String, private v
         twoColumns = second.isNotEmpty() && probe.measuredHeight + dp(170) > screen.heightPixels
         probe.removeAllViews()
         val width = if (widthDp > 0) minOf(dp(widthDp), screen.widthPixels - dp(80)) else if (twoColumns) minOf(dp(1640), screen.widthPixels - dp(120)) else dp(900)
+        // Everything under the title bar scrolls when taller than the screen (24/11), the cross always in sight
+        val content = LinearLayout(a).apply { orientation = LinearLayout.VERTICAL }
         if (twoColumns) {
             // A note before every row explains the whole window: across both columns
             val lead = first.takeWhile { it.tag != Rows.TAG_ROW }
-            if (lead.isNotEmpty()) body.addView(build(lead), LinearLayout.LayoutParams(-1, -2))
-            body.addView(LinearLayout(a).apply {
+            if (lead.isNotEmpty()) content.addView(build(lead), LinearLayout.LayoutParams(-1, -2))
+            content.addView(LinearLayout(a).apply {
                 orientation = LinearLayout.HORIZONTAL
                 addView(build(first.drop(lead.size)), LinearLayout.LayoutParams(0, -2, 1f).apply { rightMargin = dp(14) })
                 addView(build(second), LinearLayout.LayoutParams(0, -2, 1f).apply { leftMargin = dp(14) })
             }, LinearLayout.LayoutParams(-1, -2))
-        } else body.addView(build(first + second), LinearLayout.LayoutParams(-1, -2))
+        } else content.addView(build(first + second), LinearLayout.LayoutParams(-1, -2))
+        // A card's own content that scrolls by itself (the alerter) is not wrapped twice
+        val single = (first + second).singleOrNull()
+        body.addView(if (single is android.widget.ScrollView) content else Rows.scrolling(a, content, Rows.contentRoom(a)), LinearLayout.LayoutParams(-1, -2))
         dialog = AlertDialog.Builder(a).setView(body).create()
         dialog.setCanceledOnTouchOutside(true)
         closeNow = { dialog.dismiss() }
