@@ -1260,3 +1260,5 @@ st_cards_offered_note|Unticked cards are left out of the edit mode and of the ho
 opt_open|Open|Ouvrir|Öffnen|Abrir|Apri|Openen|Aç|Otevřít
 opt_import|Import|Importer|Importieren|Importar|Importa|Importeren|İçe aktar|Importovat
 opt_clear|Clear|Effacer|Löschen|Borrar|Cancella|Wissen|Temizle|Vymazat
+rescueapp_updating|Updating MG4Dash…|Mise à jour de MG4Dash…|MG4Dash wird aktualisiert…|Actualizando MG4Dash…|Aggiornamento di MG4Dash…|MG4Dash wordt bijgewerkt…|MG4Dash güncelleniyor…|Aktualizace MG4Dash…
+rescueapp_updating_sub|A few seconds, MG4Dash comes back by itself|Quelques secondes, MG4Dash revient tout seul|Ein paar Sekunden, MG4Dash kommt von selbst zurück|Unos segundos, MG4Dash vuelve solo|Pochi secondi, MG4Dash torna da solo|Een paar seconden, MG4Dash komt vanzelf terug|Birkaç saniye, MG4Dash kendiliğinden geri gelir|Pár sekund, MG4Dash se vrátí sám

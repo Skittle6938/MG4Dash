@@ -311,9 +311,21 @@ object Themes {
     fun publish(context: Context) {
         try {
             Settings.Global.putString(context.contentResolver, GLOBAL_KEY, published(context))
+            Settings.Global.putString(context.contentResolver, RESCUE_COLORS_KEY, rescueColors(context))
         } catch (e: Exception) {
             Log.w("Theme", "publishing for Radio Dash failed: ${e.message}")
         }
+    }
+
+    /** The theme's colours for MG4Dash Rescue's update screen (#132), which cannot read MG4Dash's resources meanwhile. */
+    const val RESCUE_COLORS_KEY = "mg4dash_rescue_colors"
+
+    /** "bgTop,bgBottom,text,sub,accent" as #AARRGGBB, from the current theme. */
+    fun rescueColors(context: Context): String {
+        val t = themed(context, big = false)
+        fun hex(c: Int) = String.format("#%08X", c)
+        return listOf(color(t, R.color.bg_top), color(t, R.color.bg_bottom), color(t, R.color.text_value), color(t, R.color.text_sub), select(t))
+            .joinToString(",") { hex(it) }
     }
 
     private val ATTRS = mapOf(
