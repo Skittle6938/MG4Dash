@@ -3,12 +3,12 @@
     <shortcut
         android:shortcutId="toggle_lyrics_overlay"
         android:enabled="true"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@drawable/ic_app"
         android:shortcutShortLabel="@string/lyrics_shortcut_short"
         android:shortcutLongLabel="@string/lyrics_shortcut_long">
         <intent
             android:action="app.mg4dash.action.TOGGLE_LYRICS_OVERLAY"
             android:targetPackage="app.mg4dash"
-            android:targetClass="app.mg4dash.MainActivity" />
+            android:targetClass="app.mg4dash.ui.LyricsOverlayShortcutActivity" />
     </shortcut>
 </shortcuts>

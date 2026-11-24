@@ -1199,6 +1199,12 @@
     <string name="lyrics_mg4control_copy">Actie kopiëren</string>
     <string name="lyrics_mg4control_copied">Actie gekopieerd</string>
     <string name="lyrics_mg4control_open">MG4Control openen</string>
+    <string name="lyrics_overlay_shortcut_name">Gesynchroniseerde songteksten (overlay)</string>
+    <string name="ly_overlay_loading">Laden…</string>
+    <string name="ly_overlay_not_found">Songtekst niet gevonden</string>
+    <string name="ly_overlay_permission_error">Instellingen voor overlaymachtiging kunnen niet worden geopend</string>
+    <string name="ly_overlay_size">Grootte van songtekst-overlay</string>
+    <string name="ly_overlay_reset" formatted="false">Overlay resetten naar 100%</string>
     <string name="bk_title">BACK-UP VAN DE INSTELLINGEN</string>
     <string name="bk_desc">Alle instellingen, de profielen, het opstartgeluid en de webadressen in één bestand op de USB-stick, om terug te zetten na een reset van de radio.</string>
     <string name="bk_save">Opslaan op de USB-stick</string>

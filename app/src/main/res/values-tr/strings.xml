@@ -1199,6 +1199,12 @@
     <string name="lyrics_mg4control_copy">Eylemi kopyala</string>
     <string name="lyrics_mg4control_copied">Eylem kopyalandı</string>
     <string name="lyrics_mg4control_open">MG4Control\'ü aç</string>
+    <string name="lyrics_overlay_shortcut_name">Senkronize şarkı sözleri (yer paylaşımı)</string>
+    <string name="ly_overlay_loading">Yükleniyor…</string>
+    <string name="ly_overlay_not_found">Şarkı sözü bulunamadı</string>
+    <string name="ly_overlay_permission_error">Yer paylaşımı izin ayarları açılamıyor</string>
+    <string name="ly_overlay_size">Şarkı sözü katmanı boyutu</string>
+    <string name="ly_overlay_reset" formatted="false">Katmanı %100\'e sıfırla</string>
     <string name="bk_title">AYARLARIN YEDEĞİ</string>
     <string name="bk_desc">Tüm ayarlar, profiller, açılış sesi ve web adresleri USB bellekte tek bir dosyada; radyo sıfırlandıktan sonra geri yüklemek için.</string>
     <string name="bk_save">USB belleğe kaydet</string>

@@ -95,7 +95,14 @@ class SettingsActivity : AppCompatActivity() {
             val r = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
             cols.addView(l, LinearLayout.LayoutParams(0, -2, 1f).apply { rightMargin = dp(8) })
             cols.addView(r, LinearLayout.LayoutParams(0, -2, 1f).apply { leftMargin = dp(8) })
-            val sv = ScrollView(this).apply { isVerticalScrollBarEnabled = true; addView(cols) }
+            val sv = ScrollView(this).apply {
+                isVerticalScrollBarEnabled = true
+                isFillViewport = true
+                isNestedScrollingEnabled = true
+                clipToPadding = false
+                setPadding(0, 0, 0, dp(24))
+                addView(cols, android.widget.FrameLayout.LayoutParams(-1, -2))
+            }
             pages.addView(sv, android.widget.FrameLayout.LayoutParams(-1, -1)); tabViews += sv
             val chip = app.mg4dash.ui.Kit(this).toggleTile(getString(label)) { showTab(i) }.apply { textSize = 17f; setPadding(dp(22), 0, dp(22), 0) }
             tabBar.addView(chip, LinearLayout.LayoutParams(-2, -1).apply { if (i > 0) leftMargin = dp(8) }); tabChips += chip

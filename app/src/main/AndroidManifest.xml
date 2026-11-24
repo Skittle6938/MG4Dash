@@ -124,8 +124,8 @@
             android:name=".ui.LyricsOverlayShortcutActivity"
             android:excludeFromRecents="true"
             android:exported="true"
-            android:icon="@mipmap/ic_launcher"
-            android:label="Testi sincronizzati (Overlay)"
+            android:icon="@drawable/ic_app"
+            android:label="@string/lyrics_overlay_shortcut_name"
             android:noHistory="true"
             android:theme="@android:style/Theme.Translucent.NoTitleBar">
             <intent-filter>

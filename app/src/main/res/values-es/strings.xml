@@ -1199,6 +1199,12 @@
     <string name="lyrics_mg4control_copy">Copiar acción</string>
     <string name="lyrics_mg4control_copied">Acción copiada</string>
     <string name="lyrics_mg4control_open">Abrir MG4Control</string>
+    <string name="lyrics_overlay_shortcut_name">Letras sincronizadas (Overlay)</string>
+    <string name="ly_overlay_loading">Cargando…</string>
+    <string name="ly_overlay_not_found">No se encontraron letras</string>
+    <string name="ly_overlay_permission_error">No se pueden abrir los ajustes del permiso de superposición</string>
+    <string name="ly_overlay_size">Tamaño del overlay de letras</string>
+    <string name="ly_overlay_reset" formatted="false">Restablecer el overlay al 100 %</string>
     <string name="bk_title">COPIA DE LOS AJUSTES</string>
     <string name="bk_desc">Todos los ajustes, los perfiles, el sonido de inicio y las direcciones web en un solo archivo en la memoria USB, para recuperarlos tras restablecer la radio.</string>
     <string name="bk_save">Guardar en la memoria USB</string>

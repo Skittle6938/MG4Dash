@@ -1199,6 +1199,12 @@
     <string name="lyrics_mg4control_copy">Copia azione</string>
     <string name="lyrics_mg4control_copied">Azione copiata</string>
     <string name="lyrics_mg4control_open">Apri MG4Control</string>
+    <string name="lyrics_overlay_shortcut_name">Testi sincronizzati (Overlay)</string>
+    <string name="ly_overlay_loading">Caricamento…</string>
+    <string name="ly_overlay_not_found">Testo non trovato</string>
+    <string name="ly_overlay_permission_error">Impossibile aprire le impostazioni overlay</string>
+    <string name="ly_overlay_size">Dimensione overlay testi</string>
+    <string name="ly_overlay_reset" formatted="false">Reset overlay 100%</string>
     <string name="bk_title">BACKUP DELLE IMPOSTAZIONI</string>
     <string name="bk_desc">Tutte le impostazioni, i profili, il suono di avvio e gli indirizzi web in un unico file sulla chiavetta USB, da ripristinare dopo un reset della radio.</string>
     <string name="bk_save">Salva sulla chiavetta USB</string>

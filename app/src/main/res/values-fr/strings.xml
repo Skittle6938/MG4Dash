@@ -1199,6 +1199,12 @@
     <string name="lyrics_mg4control_copy">Copier l\'action</string>
     <string name="lyrics_mg4control_copied">Action copiée</string>
     <string name="lyrics_mg4control_open">Ouvrir MG4Control</string>
+    <string name="lyrics_overlay_shortcut_name">Paroles synchronisées (overlay)</string>
+    <string name="ly_overlay_loading">Chargement…</string>
+    <string name="ly_overlay_not_found">Paroles introuvables</string>
+    <string name="ly_overlay_permission_error">Impossible d\'ouvrir les paramètres de superposition</string>
+    <string name="ly_overlay_size">Taille de l\'overlay des paroles</string>
+    <string name="ly_overlay_reset" formatted="false">Réinitialiser l\'overlay à 100 %</string>
     <string name="bk_title">SAUVEGARDE DES RÉGLAGES</string>
     <string name="bk_desc">Tous les réglages, les profils, le son de démarrage et les adresses web, dans un seul fichier sur la clé USB, à remettre après une réinitialisation de l’autoradio.</string>
     <string name="bk_save">Sauvegarder sur la clé USB</string>

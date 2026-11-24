@@ -104,7 +104,13 @@ object ProfileWindow {
         box.addView(error)
         val dialog = android.app.AlertDialog.Builder(activity)
             .setTitle(if (profile == null) R.string.pf_new else R.string.pf_edit)
-            .setView(android.widget.ScrollView(activity).apply { addView(box) })
+            .setView(android.widget.ScrollView(activity).apply {
+                isFillViewport = true
+                isNestedScrollingEnabled = true
+                clipToPadding = false
+                setPadding(0, 0, 0, dp(16))
+                addView(box, android.widget.FrameLayout.LayoutParams(-1, -2))
+            })
             .setPositiveButton(R.string.pf_save, null)
             .setNegativeButton(R.string.cancel, null)
             .create()

@@ -1199,6 +1199,12 @@
     <string name="lyrics_mg4control_copy">Copy action</string>
     <string name="lyrics_mg4control_copied">Action copied</string>
     <string name="lyrics_mg4control_open">Open MG4Control</string>
+    <string name="lyrics_overlay_shortcut_name">Synchronized lyrics (Overlay)</string>
+    <string name="ly_overlay_loading">Loading…</string>
+    <string name="ly_overlay_not_found">Lyrics not found</string>
+    <string name="ly_overlay_permission_error">Can\'t open overlay permission settings</string>
+    <string name="ly_overlay_size">Lyrics overlay size</string>
+    <string name="ly_overlay_reset" formatted="false">Reset overlay to 100%</string>
     <string name="bk_title">SETTINGS BACKUP</string>
     <string name="bk_desc">All the settings, the profiles, the startup sound and the web addresses in one file on the USB stick, to put back after a reset of the head unit.</string>
     <string name="bk_save">Save to the USB stick</string>

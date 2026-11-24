@@ -1199,6 +1199,12 @@
     <string name="lyrics_mg4control_copy">Kopírovat akci</string>
     <string name="lyrics_mg4control_copied">Akce zkopírována</string>
     <string name="lyrics_mg4control_open">Otevřít MG4Control</string>
+    <string name="lyrics_overlay_shortcut_name">Synchronizované texty (překryv)</string>
+    <string name="ly_overlay_loading">Načítání…</string>
+    <string name="ly_overlay_not_found">Text nenalezen</string>
+    <string name="ly_overlay_permission_error">Nelze otevřít nastavení oprávnění překryvu</string>
+    <string name="ly_overlay_size">Velikost překryvu textu</string>
+    <string name="ly_overlay_reset" formatted="false">Obnovit překryv na 100 %</string>
     <string name="bk_title">ZÁLOHA NASTAVENÍ</string>
     <string name="bk_desc">Všechna nastavení, profily, zvuk při startu a webové adresy v jednom souboru na USB disku, k obnovení po resetu rádia.</string>
     <string name="bk_save">Uložit na USB disk</string>

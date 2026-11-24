@@ -4,7 +4,6 @@ import android.app.Activity
 import android.app.Dialog
 import android.content.Context
 import android.graphics.Typeface
-import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.util.TypedValue
 import android.view.Gravity
@@ -42,20 +41,21 @@ class LyricsCard(private val activity: Activity) : LinearLayout(activity), Lifec
         setBackgroundResource(R.drawable.bg_chip); contentDescription = activity.getString(R.string.ly_refresh)
         setOnClickListener { request(force = true) }
     }
-    private val overlayButton = TextView(activity).apply {
-        text = "▣"; gravity = Gravity.CENTER; setTextSize(TypedValue.COMPLEX_UNIT_SP, 23f)
-        setTextColor(Color.WHITE); setBackgroundResource(R.drawable.bg_chip); includeFontPadding = false
-        alpha = 1f
-        contentDescription = "Lyrics overlay"; setOnClickListener { toggleOverlay() }
+    private val overlayButton = ImageButton(activity).apply {
+        setImageResource(R.drawable.ic_lyrics_overlay); scaleType = android.widget.ImageView.ScaleType.CENTER_INSIDE
+        setPadding(dp(11), dp(11), dp(11), dp(11)); setBackgroundResource(R.drawable.bg_chip)
+        imageTintList = android.content.res.ColorStateList.valueOf(Themes.color(activity, R.color.text_value))
+        isSelected = LyricsOverlay.active
+        contentDescription = activity.getString(R.string.lyrics_shortcut_short); setOnClickListener { toggleOverlay() }
     }
     private val lines = (0..6).map { TextView(activity).apply {
         maxLines = 1; ellipsize = android.text.TextUtils.TruncateAt.END; gravity = Gravity.CENTER
-        setTextColor(android.graphics.Color.WHITE)
+        setTextColor(Themes.color(activity, R.color.text_sub))
         typeface = Typeface.create("sans-serif-medium", Typeface.BOLD)
         includeFontPadding = false
     } }
     private val status = TextView(activity).apply {
-        setTextSize(TypedValue.COMPLEX_UNIT_SP, 19f); setTextColor(android.graphics.Color.WHITE)
+        setTextSize(TypedValue.COMPLEX_UNIT_SP, 19f); setTextColor(Themes.color(activity, R.color.text_sub))
         typeface = Typeface.create("sans-serif-medium", Typeface.BOLD); gravity = Gravity.CENTER
         alpha = .60f; maxLines = 2; visibility = View.GONE
     }
@@ -72,7 +72,6 @@ class LyricsCard(private val activity: Activity) : LinearLayout(activity), Lifec
     private var requestJob: Job? = null
     private var latest = MediaHub.NowPlaying()
     private var positionAt = 0L
-    private var lastSyncedIndex = -1
     private var requestedKey: String? = null
     private var attached = false
     private var activityStarted = (activity as? LifecycleOwner)?.lifecycle?.currentState?.isAtLeast(Lifecycle.State.STARTED) == true
@@ -81,6 +80,7 @@ class LyricsCard(private val activity: Activity) : LinearLayout(activity), Lifec
     private var karaoke: Dialog? = null
     private var karaokeRoot: View? = null
     private var karaokeRows: List<TextView> = emptyList()
+    private var karaokeOverlayButton: ImageButton? = null
     private var karaokeTitle: TextView? = null
     private var karaokeArtist: TextView? = null
     private var karaokeSynced: LinearLayout? = null
@@ -133,7 +133,7 @@ class LyricsCard(private val activity: Activity) : LinearLayout(activity), Lifec
         post {
             val bodyHeight = lyricsArea.height.takeIf { it > 0 } ?: (h - dp(62)).coerceAtLeast(1)
             val bodyWidth = lyricsArea.width.takeIf { it > 0 } ?: (w - paddingLeft - paddingRight)
-            visibleLyricsRows = if (bodyHeight >= h * .58f && bodyHeight >= 420) 5 else 3
+            visibleLyricsRows = if (bodyHeight >= h * .58f && bodyHeight >= 300) 5 else 3
             val count = visibleLyricsRows
             val heightBasedPx = bodyHeight * if (count == 5) .125f else .22f
             val activeTextSizePx = minOf(heightBasedPx, bodyWidth * .068f)
@@ -163,6 +163,7 @@ class LyricsCard(private val activity: Activity) : LinearLayout(activity), Lifec
 
     fun show(m: MediaHub.NowPlaying) {
         latest = m
+        paintOverlayButtons()
         positionAt = android.os.SystemClock.elapsedRealtime()
         if (!isActivelyDisplayed) return
         showCurrentTrack()
@@ -180,7 +181,7 @@ class LyricsCard(private val activity: Activity) : LinearLayout(activity), Lifec
         }
         val next = LyricsRepo.key(m.artist, m.title)
         if (next != key) {
-            key = next; track = null; requestedKey = null; lastSyncedIndex = -1; karaokeActiveIndex = -1
+            key = next; track = null; requestedKey = null; karaokeActiveIndex = -1
             requestJob?.cancel(); requestJob = null
             lines.forEach { it.text = "" }
             karaokeTitle?.text = m.title
@@ -259,6 +260,7 @@ class LyricsCard(private val activity: Activity) : LinearLayout(activity), Lifec
             }
             else -> Unit
         }
+        paintOverlayButtons()
         updateActiveState()
     }
 
@@ -307,8 +309,17 @@ class LyricsCard(private val activity: Activity) : LinearLayout(activity), Lifec
     private fun shouldRunTicker() = isActivelyDisplayed && (activityStarted || (LyricsOverlay.active && latest.playing))
     private fun toggleOverlay() {
         LyricsOverlay.toggle(activity)
-        overlayButton.alpha = 1f
+        paintOverlayButtons()
         updateActiveState()
+    }
+
+    private fun paintOverlayButtons() {
+        val selected = LyricsOverlay.active
+        val tint = if (selected) Themes.select(activity) else Themes.color(activity, R.color.text_value)
+        listOfNotNull(overlayButton, karaokeOverlayButton).forEach {
+            it.isSelected = selected
+            it.imageTintList = android.content.res.ColorStateList.valueOf(tint)
+        }
     }
 
     private fun openKaraoke() {
@@ -316,35 +327,45 @@ class LyricsCard(private val activity: Activity) : LinearLayout(activity), Lifec
         val dialog = Dialog(activity)
         val root = LinearLayout(activity).apply {
             orientation = VERTICAL; setPadding(dp(32), dp(24), dp(32), dp(24))
-            setBackgroundColor(0xEE0A0E17.toInt())
+            setBackgroundColor(Themes.color(activity, R.color.bg_bottom))
         }
         val header = LinearLayout(activity).apply { orientation = HORIZONTAL; gravity = Gravity.CENTER_VERTICAL }
         val labels = LinearLayout(activity).apply { orientation = VERTICAL }
         val songTitle = TextView(activity).apply {
             text = latest.title.ifBlank { activity.getString(R.string.wc_lyrics) }; maxLines = 1
             ellipsize = android.text.TextUtils.TruncateAt.END; setTextSize(TypedValue.COMPLEX_UNIT_SP, 22f)
-            setTextColor(Color.WHITE); typeface = Typeface.create("sans-serif-medium", Typeface.BOLD)
+            setTextColor(Themes.color(activity, R.color.text_value)); typeface = Typeface.create("sans-serif-medium", Typeface.BOLD)
         }
         val artist = TextView(activity).apply {
             text = latest.artist; maxLines = 1; ellipsize = android.text.TextUtils.TruncateAt.END
-            setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f); setTextColor(Color.WHITE); alpha = .7f
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f); setTextColor(Themes.color(activity, R.color.text_sub)); alpha = .7f
         }
         labels.addView(songTitle)
         labels.addView(artist, LayoutParams(-1, -2).apply { topMargin = dp(3) })
         header.addView(labels, LayoutParams(0, -2, 1f))
         val close = TextView(activity).apply {
             text = "×"; gravity = Gravity.CENTER; setTextSize(TypedValue.COMPLEX_UNIT_SP, 34f); includeFontPadding = false
-            setTextColor(Color.WHITE); setBackgroundResource(R.drawable.bg_chip)
+            setTextColor(Themes.color(activity, R.color.text_value)); setBackgroundResource(R.drawable.bg_chip)
             contentDescription = activity.getString(R.string.st_close)
             setOnClickListener { closeKaraoke() }; setBackgroundResource(R.drawable.bg_chip)
         }
-        val overlayToggle = TextView(activity).apply {
-            text = "▣"; gravity = Gravity.CENTER; setTextSize(TypedValue.COMPLEX_UNIT_SP, 24f); includeFontPadding = false
-            setTextColor(Color.WHITE); alpha = 1f
-            setOnClickListener { toggleOverlay(); alpha = 1f }
+        val overlayToggle = ImageButton(activity).apply {
+            setImageResource(R.drawable.ic_lyrics_overlay); scaleType = android.widget.ImageView.ScaleType.CENTER_INSIDE
+            setPadding(dp(14), dp(14), dp(14), dp(14)); setBackgroundResource(R.drawable.bg_chip)
+            isSelected = LyricsOverlay.active
+            imageTintList = android.content.res.ColorStateList.valueOf(if (isSelected) Themes.select(activity) else Themes.color(activity, R.color.text_value))
+            contentDescription = activity.getString(R.string.lyrics_shortcut_short)
+            setOnClickListener { toggleOverlay() }
         }
-        overlayToggle.setBackgroundResource(R.drawable.bg_chip)
-        header.addView(overlayToggle, LayoutParams(dp(56), dp(56)).apply { marginEnd = dp(10) })
+        val refreshKaraoke = ImageButton(activity).apply {
+            setImageResource(R.drawable.ic_refresh_lyrics); scaleType = android.widget.ImageView.ScaleType.CENTER_INSIDE
+            setPadding(dp(14), dp(14), dp(14), dp(14)); setBackgroundResource(R.drawable.bg_chip)
+            imageTintList = android.content.res.ColorStateList.valueOf(Themes.color(activity, R.color.text_value))
+            contentDescription = activity.getString(R.string.ly_refresh)
+            setOnClickListener { request(force = true, m = latest) }
+        }
+        header.addView(overlayToggle, LayoutParams(dp(56), dp(56)).apply { marginEnd = dp(8) })
+        header.addView(refreshKaraoke, LayoutParams(dp(56), dp(56)).apply { marginEnd = dp(8) })
         header.addView(close, LayoutParams(dp(56), dp(56)))
         header.setOnClickListener { closeKaraoke() }
         root.addView(header, LayoutParams(-1, -2))
@@ -352,7 +373,7 @@ class LyricsCard(private val activity: Activity) : LinearLayout(activity), Lifec
         val content = FrameLayout(activity)
         val synced = LinearLayout(activity).apply { orientation = VERTICAL; gravity = Gravity.CENTER }
         val rows = (0 until 7).map { i -> TextView(activity).apply {
-            gravity = Gravity.CENTER; setTextColor(Color.WHITE); includeFontPadding = false
+            gravity = Gravity.CENTER; setTextColor(if (i == 3) Themes.color(activity, R.color.text_value) else Themes.color(activity, R.color.text_sub)); includeFontPadding = false
             typeface = Typeface.create("sans-serif-medium", Typeface.BOLD)
             setTextSize(TypedValue.COMPLEX_UNIT_PX, if (i == 3) 1f else 1f)
             maxLines = if (i == 3) 2 else 1; ellipsize = android.text.TextUtils.TruncateAt.END
@@ -367,7 +388,7 @@ class LyricsCard(private val activity: Activity) : LinearLayout(activity), Lifec
         content.addView(synced, FrameLayout.LayoutParams(-1, -1))
         val scroll = ScrollView(activity).apply { isFillViewport = true; visibility = View.GONE }
         val plain = TextView(activity).apply {
-            setTextSize(TypedValue.COMPLEX_UNIT_SP, 22f); setTextColor(Color.WHITE)
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, 22f); setTextColor(Themes.color(activity, R.color.text_value))
             typeface = Typeface.create("sans-serif-medium", Typeface.BOLD); gravity = Gravity.CENTER_HORIZONTAL
             setLineSpacing(dp(7).toFloat(), 1.12f); setPadding(dp(12), dp(24), dp(12), dp(32))
         }
@@ -384,10 +405,13 @@ class LyricsCard(private val activity: Activity) : LinearLayout(activity), Lifec
         dialog.setOnDismissListener {
             karaokeOpen = false; karaoke = null; karaokeRows = emptyList(); karaokeRoot = null
             karaokeTitle = null; karaokeArtist = null
+            karaokeOverlayButton = null
             karaokeSynced = null; karaokePlain = null; karaokePlainText = null; karaokeActiveIndex = -1
+            paintOverlayButtons()
             updateActiveState()
         }
         karaoke = dialog
+        karaokeOverlayButton = overlayToggle
         dialog.window?.apply {
             addFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE)
             decorView.systemUiVisibility = activity.window.decorView.systemUiVisibility
@@ -399,7 +423,7 @@ class LyricsCard(private val activity: Activity) : LinearLayout(activity), Lifec
         dialog.window?.apply {
             Fullscreen.applyDecor(decorView, Prefs(activity).fullscreen)
             clearFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE)
-            setBackgroundDrawable(ColorDrawable(0xEE0A0E17.toInt()))
+            setBackgroundDrawable(ColorDrawable(Themes.color(activity, R.color.bg_bottom)))
             setLayout(WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.MATCH_PARENT)
             addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
             attributes = attributes.apply { dimAmount = .18f }
@@ -454,6 +478,7 @@ class LyricsCard(private val activity: Activity) : LinearLayout(activity), Lifec
             val lyric = synced.getOrNull(index + row - 3)?.second.orEmpty()
             line.text = lyric
             val distance = kotlin.math.abs(row - 3)
+            line.setTextColor(Themes.color(activity, if (row == 3) R.color.text_value else R.color.text_sub))
             if (row != 3) line.alpha = when (distance) { 1 -> .50f; 2 -> .36f; else -> .25f }
         }
     }
@@ -467,16 +492,11 @@ class LyricsCard(private val activity: Activity) : LinearLayout(activity), Lifec
             val availableWidth = (lyricsArea.width - lyricsArea.paddingLeft - lyricsArea.paddingRight).coerceAtLeast(1)
             val activeText = synced.getOrNull(i)?.second.orEmpty()
             val activePx = activeFontSp * (1f - .18f * ((activeText.length * activeFontSp * .53f / availableWidth).coerceAtLeast(1f) - 1f).coerceAtMost(1f))
-            if (i != lastSyncedIndex) {
-                lastSyncedIndex = i
-                lines[1].alpha = .5f
-                lines[1].animate().alpha(1f).setDuration(150).start()
-            }
             for (row in lines.indices) {
                 val distance = kotlin.math.abs(row - 3)
                 val ix = i + row - 3
                 lines[row].text = synced.getOrNull(ix)?.second.orEmpty()
-                lines[row].setTextColor(android.graphics.Color.WHITE)
+                lines[row].setTextColor(Themes.color(activity, if (row == 3) R.color.text_value else R.color.text_sub))
                 lines[row].setTextSize(TypedValue.COMPLEX_UNIT_PX, if (row == 3) activePx else activeFontSp * .60f)
                 lines[row].maxLines = if (row == 3 || (visibleLyricsRows == 5 && distance == 1)) 2 else 1
                 lines[row].ellipsize = android.text.TextUtils.TruncateAt.END
@@ -491,7 +511,7 @@ class LyricsCard(private val activity: Activity) : LinearLayout(activity), Lifec
         for (row in lines.indices) {
             lines[row].text = plain.getOrNull(ix + row - 3).orEmpty()
             lines[row].visibility = if (kotlin.math.abs(row - 3) <= visibleLyricsRows / 2) View.VISIBLE else View.GONE
-            lines[row].setTextColor(android.graphics.Color.WHITE)
+            lines[row].setTextColor(Themes.color(activity, if (row == 3) R.color.text_value else R.color.text_sub))
             lines[row].setTextSize(TypedValue.COMPLEX_UNIT_SP, 19f)
             lines[row].typeface = Typeface.create("sans-serif-medium", Typeface.BOLD)
             lines[row].alpha = .85f
@@ -533,9 +553,9 @@ class LyricsCard(private val activity: Activity) : LinearLayout(activity), Lifec
                 prefs.lyricsCacheMaxMb = maxes[it]; launchView { LyricsRepo.trim(maxes[it]); updateInfo() }
             }
             .note(info)
-            .note(TextView(activity).apply { text = "Dimensione overlay testi"; setTextColor(Themes.color(activity, R.color.text_value)); setTextSize(TypedValue.COMPLEX_UNIT_SP, 19f) })
+            .note(TextView(activity).apply { text = activity.getString(R.string.ly_overlay_size); setTextColor(Themes.color(activity, R.color.text_value)); setTextSize(TypedValue.COMPLEX_UNIT_SP, 19f) })
             .note(scaleRow)
-            .action("Reset overlay 100%") { prefs.lyricsOverlayScale = 1f; scaleSlider.progress = 6; if (LyricsOverlay.active) LyricsOverlay.setScale(1f) }
+            .action(activity.getString(R.string.ly_overlay_reset)) { prefs.lyricsOverlayScale = 1f; scaleSlider.progress = 6; if (LyricsOverlay.active) LyricsOverlay.setScale(1f) }
             .action(activity.getString(R.string.ly_clear)) {
                 launchView { LyricsRepo.clear(); updateInfo(); Toasts.show(activity, R.string.ly_cleared) }
             }
