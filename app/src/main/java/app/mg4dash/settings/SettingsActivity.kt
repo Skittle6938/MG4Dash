@@ -90,7 +90,7 @@ class SettingsActivity : AppCompatActivity() {
         val tabViews = mutableListOf<View>(); val tabChips = mutableListOf<TextView>()
         fun showTab(i: Int) {
             tabViews.forEachIndexed { k, v -> v.visibility = if (k == i) View.VISIBLE else View.GONE }
-            tabChips.forEachIndexed { k, c -> c.isSelected = k == i }
+            tabChips.forEachIndexed { k, c -> c.isSelected = k == i; c.typeface = Typeface.create(if (k == i) "sans-serif-medium" else "sans-serif", Typeface.NORMAL) }
             prefs.raw.edit().putInt("settings_tab", i).apply()
         }
         /** A tab: two columns of panels in a scrolling area. */
@@ -1642,14 +1642,14 @@ class SettingsActivity : AppCompatActivity() {
     }
 
     /** A tab's name in the banner: grey, white and underlined in the theme's colour when chosen. */
-    private fun tabLabel(label: String): TextView = object : TextView(this) {
-        private val bar = android.graphics.Paint().apply { color = app.mg4dash.ui.Themes.select(this@SettingsActivity) }
-        override fun setSelected(selected: Boolean) { super.setSelected(selected); typeface = Typeface.create(if (selected) "sans-serif-medium" else "sans-serif", Typeface.NORMAL); invalidate() }
-        override fun onDraw(canvas: android.graphics.Canvas) {
-            super.onDraw(canvas)
-            if (isSelected) canvas.drawRect(0f, height - dp(3).toFloat(), width.toFloat(), height.toFloat(), bar)
+    private fun tabLabel(label: String): TextView = TextView(this).apply {
+        val line = android.graphics.drawable.LayerDrawable(arrayOf(android.graphics.drawable.ColorDrawable(app.mg4dash.ui.Themes.select(this@SettingsActivity)))).apply {
+            setLayerGravity(0, Gravity.BOTTOM or Gravity.FILL_HORIZONTAL); setLayerHeight(0, dp(3))
         }
-    }.apply {
+        background = android.graphics.drawable.StateListDrawable().apply {
+            addState(intArrayOf(android.R.attr.state_selected), line)
+            addState(intArrayOf(), android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT))
+        }
         text = label; gravity = Gravity.CENTER; setTextSize(TypedValue.COMPLEX_UNIT_SP, 19f); setPadding(dp(8), 0, dp(8), 0)
         setTextColor(android.content.res.ColorStateList(arrayOf(intArrayOf(android.R.attr.state_selected), intArrayOf()),
             intArrayOf(color(R.color.text_value), color(R.color.text_sub))))
