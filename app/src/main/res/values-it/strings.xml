@@ -970,8 +970,8 @@
     <string name="rad_off_road">Strada non riconosciuta</string>
     <string name="rad_banner">%1$s · %2$s</string>
     <string name="rad_banner_sub">Rallenta · %1$s · fine zona tra %2$s</string>
-    <string name="st_rad_title">Avvisatore autovelox (test)</string>
-    <string name="st_rad_desc">Limite della strada e zone autovelox solo dai dati OpenStreetMap. Metti la scheda Avvisatore autovelox (test) in un posto della schermata iniziale (pizzica la schermata). Una pressione lunga sulla scheda apre queste impostazioni.</string>
+    <string name="st_rad_title">Avvisatore autovelox</string>
+    <string name="st_rad_desc">Limite della strada e zone autovelox solo dai dati OpenStreetMap. Metti la scheda Avvisatore autovelox in un posto della schermata iniziale (pizzica la schermata). Una pressione lunga sulla scheda apre queste impostazioni.</string>
     <string name="st_rad_visual">Avvisi visivi (arancione, rosso)</string>
     <string name="st_rad_sound">Suono</string>
     <string name="st_rad_sound_none">Nessuno</string>

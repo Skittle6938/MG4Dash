@@ -970,8 +970,8 @@
     <string name="rad_off_road">Silnice nerozpoznána</string>
     <string name="rad_banner">%1$s · %2$s</string>
     <string name="rad_banner_sub">Zpomalte · %1$s · konec zóny za %2$s</string>
-    <string name="st_rad_title">Varování před radary (test)</string>
-    <string name="st_rad_desc">Rychlostní limit silnice a zóny radarů pouze z dat OpenStreetMap. Pro použití umístěte kartu Varování před radary (test) na místo domovské obrazovky (sevřete domovskou obrazovku). Dlouhý stisk karty otevře tato nastavení.</string>
+    <string name="st_rad_title">Varování před radary</string>
+    <string name="st_rad_desc">Rychlostní limit silnice a zóny radarů pouze z dat OpenStreetMap. Pro použití umístěte kartu Varování před radary na místo domovské obrazovky (sevřete domovskou obrazovku). Dlouhý stisk karty otevře tato nastavení.</string>
     <string name="st_rad_visual">Vizuální upozornění (oranžová, červená)</string>
     <string name="st_rad_sound">Zvuk</string>
     <string name="st_rad_sound_none">Žádný</string>

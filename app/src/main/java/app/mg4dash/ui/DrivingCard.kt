@@ -237,7 +237,7 @@ class DrivingCard(context: Context) : LinearLayout(context), HomeCard {
 
         /** The whole card in a window over home ("All ›" of a smaller place), following the car while open. */
         fun openAll(context: Context) {
-            val card = DrivingCard(context).apply { form = Form.FULL }
+            val card = DrivingCard(context).apply { form = Form.FULL; getChildAt(0)?.visibility = View.GONE }   // the window's title bar names it
             val activity = context as? android.app.Activity ?: return
             // The settings' window (title, round close button), shown like every window over home: the car's bars stay hidden
             val dialog = Windows.show(activity, context.getString(R.string.wc_driving), card, icon = R.drawable.ic_car, widthDp = 1100)

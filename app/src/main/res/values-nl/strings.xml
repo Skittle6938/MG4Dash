@@ -970,8 +970,8 @@
     <string name="rad_off_road">Weg niet herkend</string>
     <string name="rad_banner">%1$s · %2$s</string>
     <string name="rad_banner_sub">Rem af · %1$s · einde zone over %2$s</string>
-    <string name="st_rad_title">Flitsmelder (test)</string>
-    <string name="st_rad_desc">Snelheidslimiet van de weg en flitszones alleen uit OpenStreetMap-gegevens. Zet de kaart Flitsmelder (test) op een plek van het startscherm (knijp in het startscherm). Lang drukken op de kaart opent deze instellingen.</string>
+    <string name="st_rad_title">Flitsmelder</string>
+    <string name="st_rad_desc">Snelheidslimiet van de weg en flitszones alleen uit OpenStreetMap-gegevens. Zet de kaart Flitsmelder op een plek van het startscherm (knijp in het startscherm). Lang drukken op de kaart opent deze instellingen.</string>
     <string name="st_rad_visual">Visuele waarschuwingen (oranje, rood)</string>
     <string name="st_rad_sound">Geluid</string>
     <string name="st_rad_sound_none">Geen</string>

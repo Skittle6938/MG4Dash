@@ -970,8 +970,8 @@
     <string name="rad_off_road">Carretera no reconocida</string>
     <string name="rad_banner">%1$s · %2$s</string>
     <string name="rad_banner_sub">Reduzca · %1$s · fin de zona en %2$s</string>
-    <string name="st_rad_title">Avisador de radares (prueba)</string>
-    <string name="st_rad_desc">Límite de la carretera y zonas de radar solo a partir de datos de OpenStreetMap. Coloque la tarjeta Avisador de radares (prueba) en un lugar de la pantalla de inicio (pellizque la pantalla). Una pulsación larga en la tarjeta abre estos ajustes.</string>
+    <string name="st_rad_title">Avisador de radares</string>
+    <string name="st_rad_desc">Límite de la carretera y zonas de radar solo a partir de datos de OpenStreetMap. Coloque la tarjeta Avisador de radares en un lugar de la pantalla de inicio (pellizque la pantalla). Una pulsación larga en la tarjeta abre estos ajustes.</string>
     <string name="st_rad_visual">Alertas visuales (naranja, rojo)</string>
     <string name="st_rad_sound">Sonido</string>
     <string name="st_rad_sound_none">Ninguno</string>

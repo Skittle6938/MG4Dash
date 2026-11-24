@@ -970,8 +970,8 @@
     <string name="rad_off_road">Road not recognised</string>
     <string name="rad_banner">%1$s · %2$s</string>
     <string name="rad_banner_sub">Slow down · %1$s · zone ends in %2$s</string>
-    <string name="st_rad_title">Speed camera alerter (test)</string>
-    <string name="st_rad_desc">Speed limit of the road and speed camera zones from OpenStreetMap data only. Place the Speed cameras (test) card in a home place to use it (pinch the home screen). A long press on the card opens these settings.</string>
+    <string name="st_rad_title">Speed camera alerter</string>
+    <string name="st_rad_desc">Speed limit of the road and speed camera zones from OpenStreetMap data only. Place the Speed cameras card in a home place to use it (pinch the home screen). A long press on the card opens these settings.</string>
     <string name="st_rad_visual">Visual alerts (orange, red)</string>
     <string name="st_rad_sound">Sound</string>
     <string name="st_rad_sound_none">None</string>

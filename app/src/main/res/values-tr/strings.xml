@@ -970,8 +970,8 @@
     <string name="rad_off_road">Yol tanınmadı</string>
     <string name="rad_banner">%1$s · %2$s</string>
     <string name="rad_banner_sub">Yavaşlayın · %1$s · bölge %2$s sonra bitiyor</string>
-    <string name="st_rad_title">Radar uyarıcı (test)</string>
-    <string name="st_rad_desc">Yolun hız sınırı ve radar bölgeleri yalnızca OpenStreetMap verilerinden. Kullanmak için Radar uyarıcı (test) kartını ana ekranda bir yere koyun (ana ekranı kıstırın). Karta uzun basmak bu ayarları açar.</string>
+    <string name="st_rad_title">Radar uyarıcı</string>
+    <string name="st_rad_desc">Yolun hız sınırı ve radar bölgeleri yalnızca OpenStreetMap verilerinden. Kullanmak için Radar uyarıcı kartını ana ekranda bir yere koyun (ana ekranı kıstırın). Karta uzun basmak bu ayarları açar.</string>
     <string name="st_rad_visual">Görsel uyarılar (turuncu, kırmızı)</string>
     <string name="st_rad_sound">Ses</string>
     <string name="st_rad_sound_none">Yok</string>

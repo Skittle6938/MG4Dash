@@ -970,8 +970,8 @@
     <string name="rad_off_road">Route non reconnue</string>
     <string name="rad_banner">%1$s · %2$s</string>
     <string name="rad_banner_sub">Ralentissez · %1$s · fin de zone dans %2$s</string>
-    <string name="st_rad_title">Avertisseur de radars (test)</string>
-    <string name="st_rad_desc">Vitesse limite de la route et zones de radars à partir des seules données OpenStreetMap. Placez la carte Avertisseur (test) dans un emplacement de l\'accueil pour l\'utiliser (pincez l\'écran d\'accueil). Un appui long sur la carte ouvre ces réglages.</string>
+    <string name="st_rad_title">Avertisseur de radars</string>
+    <string name="st_rad_desc">Vitesse limite de la route et zones de radars à partir des seules données OpenStreetMap. Placez la carte Avertisseur dans un emplacement de l\'accueil pour l\'utiliser (pincez l\'écran d\'accueil). Un appui long sur la carte ouvre ces réglages.</string>
     <string name="st_rad_visual">Alertes visuelles (orange, rouge)</string>
     <string name="st_rad_sound">Son</string>
     <string name="st_rad_sound_none">Aucun</string>

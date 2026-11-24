@@ -970,8 +970,8 @@
     <string name="rad_off_road">Straße nicht erkannt</string>
     <string name="rad_banner">%1$s · %2$s</string>
     <string name="rad_banner_sub">Langsamer · %1$s · Zonenende in %2$s</string>
-    <string name="st_rad_title">Blitzerwarner (Test)</string>
-    <string name="st_rad_desc">Tempolimit der Straße und Blitzerzonen nur aus OpenStreetMap-Daten. Legen Sie die Karte Blitzerwarner (Test) auf einen Platz des Startbildschirms (Startbildschirm zusammenziehen). Langes Drücken auf die Karte öffnet diese Einstellungen.</string>
+    <string name="st_rad_title">Blitzerwarner</string>
+    <string name="st_rad_desc">Tempolimit der Straße und Blitzerzonen nur aus OpenStreetMap-Daten. Legen Sie die Karte Blitzerwarner auf einen Platz des Startbildschirms (Startbildschirm zusammenziehen). Langes Drücken auf die Karte öffnet diese Einstellungen.</string>
     <string name="st_rad_visual">Optische Warnungen (orange, rot)</string>
     <string name="st_rad_sound">Ton</string>
     <string name="st_rad_sound_none">Keiner</string>
