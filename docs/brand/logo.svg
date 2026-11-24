@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 320" width="320" height="320" role="img" aria-label="MG4Dash">
+  <!-- The app icon (app/src/main/res/drawable/ic_app.xml, paths in res/values/brand.xml) -->
+  <path fill="#000000" d="M64,0 H256 Q320,0 320,64 V256 Q320,320 256,320 H64 Q0,320 0,256 V64 Q0,0 64,0 Z"/>
+  <g transform="translate(32,32)">
+    <path fill="none" stroke="#FFFFFF" stroke-width="23" d="M40,70 L40,40 L130,40 C246,40 246,216 130,216 L40,216"/>
+    <path fill="#FFFFFF" d="M40,216 C72,151 155,148 202,105 C183,155 105,170 78,216 Z"/>
+    <path fill="#00E676" d="M40,143 C87,120 162,121 202,97 C182,132 92,140 40,175 Z"/>
+  </g>
+</svg>

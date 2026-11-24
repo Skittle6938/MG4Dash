@@ -24,6 +24,12 @@ driving. Before you start something big, open an issue or a discussion so we can
 A *card* is a widget placed in one of the home screen's places. A card follows the **card contract**
 (`app/src/main/java/app/mg4dash/cards/HomeCard.kt`), so the home screen handles it like every other card.
 
+The README chapter [Build and propose a home card (widget)](README.md#build-and-propose-a-home-card-widget) walks
+through a real card (Guidance) step by step, with the tests to add and how to submit it. This page is the short
+reference.
+
+**Before coding**, open an issue to agree on what the card shows, what it does in each size and which data it needs.
+
 ### Steps
 
 1. **Copy the template.** Copy `app/src/testEmulator/java/app/mg4dash/cards/TemplateCard.kt` into
@@ -39,6 +45,22 @@ A *card* is a widget placed in one of the home screen's places. A card follows t
    these pictures in your PR.
 
 That's all. You don't need to touch `MainActivity` or the editor.
+
+### Tests
+
+Cover the card's states: no data yet, loading, with data, an error, every size it accepts, and shown / hidden (nothing
+runs when hidden). Add a unit test for its logic, and run:
+
+```powershell
+.\gradlew.bat testEmulatorDebugUnitTest
+.\gradlew.bat testEmulatorDebugUnitTest -Pscreenshots --tests app.mg4dash.cards.CardGalleryShots
+.\gradlew.bat testEmulatorDebugUnitTest --tests app.mg4dash.WindowsFitTest
+python i18n/gen.py --check
+```
+
+`CardGalleryShots` renders every registered card in every size, dark and light; `WindowsFitTest` checks that every
+card's settings window fits the screen. In the PR, say what the card adds, how to try it, which tests you ran, and add
+a screenshot when it helps.
 
 ### The contract
 
