@@ -38,6 +38,18 @@ object SoundTrigger {
     private var volumeWritten = -1
     private var isPlaying = false
     private var bootTriggered = false
+    /** The startup sound asked while the car was not in use yet (#133). */
+    @Volatile private var deferred = false
+
+    /** The car was never in use (#133): the startup sound asked meanwhile is dropped, and nothing waits for it. */
+    fun useGivenUp() { deferred = false; holdFocusAfterBoot = false }
+
+    /** The car is in use (#133): the startup sound asked meanwhile plays now. */
+    fun useStarted(context: Context) {
+        if (!deferred) return
+        deferred = false
+        onBootOrAppStart(context)
+    }
     @Volatile private var appCtx: Context? = null
 
     /** A startup sound is to play at this start (on, with a file): the sources wait for its end (#36). */
@@ -127,6 +139,11 @@ object SoundTrigger {
     fun onBootOrAppStart(context: Context) {
         val ctx = context.applicationContext.also { appCtx = it }
         if (bootTriggered) return
+        // A car start whose car is not in use yet (#133: the boot opened, the screen dark): it plays once it is
+        if (app.mg4dash.media.MediaHub.waitingForUse) {
+            if (!deferred) { deferred = true; Log.i(TAG, "startup sound waits for the car in use") }
+            return
+        }
         bootTriggered = true
         bootSoundExpected = SoundTriggerSettings.isBootTriggerEnabled(ctx) && !SoundTriggerSettings.getSelectedSoundPath(ctx).isNullOrEmpty()
 
