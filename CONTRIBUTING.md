@@ -47,7 +47,7 @@ That's all. You don't need to touch `MainActivity` or the editor.
 | **Identity** | `card`: its entry in `HomeSlots.Card`. `view`: its view, which fills its place. The home screen adds the frame (rounded corners, outline). |
 | **Size** | `place(p)`: it adapts to the shape of its place. `p.small` is a small place, `p.medium` a medium one, `p.tall` a full-height one, `p.wide` one two columns wide, and `p.big` a place in the larger display mode (Grand affichage), where text is already larger. A card never measures the screen itself. |
 | **Life** | `shown(true)`: show the data at once, then follow it. `shown(false)`: stop everything (collectors, timers, network). It may be called twice in a row. |
-| **Options** | `options(popup)`: add its settings to the standard options window, which a long press on the card opens. Return `null` if the card has no options. |
+| **Options** | `options(popup)`: add its settings to the standard options window, which a long press on the card opens. Return `null` if the card has no options. It is also called once when home is built, only to see whether the card has options: start nothing there; something live in the window starts when its view is attached and stops when it is detached. |
 | **Settings** | `CardPrefs(context, card)`: keys `card_<id>_<name>`. They follow the profile and go in the settings backup by themselves. |
 | **No data** | `CardKit.empty(context)` shows "No data yet" instead of an empty card. |
 

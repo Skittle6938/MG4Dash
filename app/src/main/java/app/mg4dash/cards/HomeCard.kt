@@ -38,7 +38,11 @@ interface HomeCard {
      */
     fun shown(on: Boolean) {}
 
-    /** Its options, added to the standard popup opened by a long press on the card; null: no options, no long press. */
+    /**
+     * Its options, added to the standard popup opened by a long press on the card; null: no options, no long press.
+     * Also called once when home is built, only to know whether the card has options (that popup is never shown):
+     * start nothing here. Anything live in the window starts when its view is attached and stops when it is detached.
+     */
     fun options(popup: OptionsPopup): OptionsPopup? = null
 
     /** Its options window closed: apply what changed (rebuild what is built with them). */
