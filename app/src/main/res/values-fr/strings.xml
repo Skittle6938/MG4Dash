@@ -733,6 +733,16 @@
     <string name="st_tab_car">Véhicule</string>
     <string name="st_tab_net">Connexions</string>
     <string name="st_tab_system">Système</string>
+    <string name="st_tab_screen">Écran</string>
+    <string name="st_tab_media">Média et sons</string>
+    <string name="st_tab_general">Général</string>
+    <string name="st_bar_section">BARRE</string>
+    <string name="st_full_section">PLEIN ÉCRAN</string>
+    <string name="st_formats">FORMATS</string>
+    <string name="st_input">SAISIE</string>
+    <string name="du_last30">30 derniers jours</string>
+    <string name="du_detail_open">Voir le détail</string>
+    <string name="du_detail_open_desc">Jour par jour, l\'alerte et son seuil, la remise à zéro</string>
     <string name="st_theme_smooth">Transition douce clair / sombre</string>
     <string name="st_theme_smooth_desc">Attend 5 s de feux stables (pas de bascule sous les ponts) et passe en fondu sur 2 s. Désactivé : bascule dès que les feux changent.</string>
     <string name="st_night_sun">Nuit après le coucher du soleil</string>

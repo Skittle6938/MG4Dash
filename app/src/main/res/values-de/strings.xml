@@ -733,6 +733,16 @@
     <string name="st_tab_car">Fahrzeug</string>
     <string name="st_tab_net">Verbindungen</string>
     <string name="st_tab_system">System</string>
+    <string name="st_tab_screen">Bildschirm</string>
+    <string name="st_tab_media">Medien und Klänge</string>
+    <string name="st_tab_general">Allgemein</string>
+    <string name="st_bar_section">LEISTE</string>
+    <string name="st_full_section">VOLLBILD</string>
+    <string name="st_formats">FORMATE</string>
+    <string name="st_input">EINGABE</string>
+    <string name="du_last30">Letzte 30 Tage</string>
+    <string name="du_detail_open">Details anzeigen</string>
+    <string name="du_detail_open_desc">Tag für Tag, die Warnung und ihre Schwelle, das Zurücksetzen</string>
     <string name="st_theme_smooth">Sanfter Hell / Dunkel-Wechsel</string>
     <string name="st_theme_smooth_desc">Wartet 5 s mit stabilem Licht (kein Wechsel unter Brücken) und blendet über 2 s über. Aus: wechselt sofort, wenn sich das Licht ändert.</string>
     <string name="st_night_sun">Nacht nach Sonnenuntergang</string>

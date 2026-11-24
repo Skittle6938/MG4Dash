@@ -111,10 +111,12 @@ class SettingsActivity : AppCompatActivity() {
             tabBar.addView(chip, LinearLayout.LayoutParams(-2, -1).apply { if (i > 0) leftMargin = dp(10) }); tabChips += chip
             return l to r
         }
-        val (homeL, homeR) = tab(R.string.st_tab_home)
+        // Five tabs (24/11), one rule each: Screen = what home shows and how; Appearance = colours, light, day and
+        // night; Media and sounds = what plays and what is heard; General = formats, typing, mobile data; System = the app
+        val (homeL, homeR) = tab(R.string.st_tab_screen)
         val (lookL, lookR) = tab(R.string.st_tab_look)
-        val (carL, carR) = tab(R.string.st_tab_car)
-        val (dataL, dataR) = tab(R.string.du_tab)
+        val (mediaL, mediaR) = tab(R.string.st_tab_media)
+        val (genL, genR) = tab(R.string.st_tab_general)
         val (sysL, sysR) = tab(R.string.st_tab_system)
         // Same dock (or vertical bar) as the other pages
         val dock = LinearLayout(this)
@@ -161,28 +163,29 @@ class SettingsActivity : AppCompatActivity() {
         }
         paintStyle()
         // Menu bar: at the bottom, or vertical on the driver's side (read from the car), left or right (#75)
-        dropdown(style, getString(R.string.st_bar), listOf(R.string.st_bar_bottom, R.string.st_bar_auto, R.string.st_bar_left, R.string.st_bar_right).map { getString(it) },
+        val barP = panel(homeR, getString(R.string.st_bar_section))
+        dropdown(barP, getString(R.string.st_bar), listOf(R.string.st_bar_bottom, R.string.st_bar_auto, R.string.st_bar_left, R.string.st_bar_right).map { getString(it) },
             { if (!prefs.verticalDock) 0 else 1 + prefs.barSide.coerceIn(0, 2) }) {
             prefs.verticalDock = it > 0
             if (it > 0) prefs.barSide = it - 1
             app.mg4dash.ui.Themes.publish(this); recreate()
         }
-        toggle(style, R.string.st_wide_bar, R.string.st_wide_bar_desc, { prefs.wideBar }) { prefs.wideBar = it; recreate() }
+        toggle(barP, R.string.st_wide_bar, R.string.st_wide_bar_desc, { prefs.wideBar }) { prefs.wideBar = it; recreate() }
         // Shortcuts menu pulled down from the top; also hides MG's fog light button (gives its corner back)
-        toggle(style, R.string.st_shortcuts_menu, R.string.st_shortcuts_menu_desc, { prefs.shortcutsMenu }) {
+        toggle(barP, R.string.st_shortcuts_menu, R.string.st_shortcuts_menu_desc, { prefs.shortcutsMenu }) {
             prefs.shortcutsMenu = it; app.mg4dash.system.FogOverlay.settingChanged(this); app.mg4dash.ui.ShortcutsPanel.GlobalStrip.update(this)
             app.mg4dash.ui.Toasts.show(this, getString(R.string.st_shortcuts_menu_restart), long = true)
             app.mg4dash.ui.Themes.publish(this); recreate()
         }
         // Shared by every profile: MG's fog button is hidden by an overlay the car only reads at its start
-        text(style, getString(R.string.pf_all), 14f, R.color.text_title)
-        toggle(style, R.string.st_fullscreen, null, { prefs.fullscreen }) { prefs.fullscreen = it; Fullscreen.apply(this); app.mg4dash.ui.ShortcutsPanel.GlobalStrip.update(this); app.mg4dash.ui.EmbeddedApp.refreshImmersive(this) }
+        text(barP, getString(R.string.pf_all), 14f, R.color.text_title)
+        val fullP = panel(homeR, getString(R.string.st_full_section))
+        toggle(fullP, R.string.st_fullscreen, null, { prefs.fullscreen }) { prefs.fullscreen = it; Fullscreen.apply(this); app.mg4dash.ui.ShortcutsPanel.GlobalStrip.update(this); app.mg4dash.ui.EmbeddedApp.refreshImmersive(this) }
         // The SAIC call window in full screen too: no top bar during calls
-        toggle(style, R.string.st_call_bar, R.string.st_call_bar_desc, { prefs.callBarHidden }) { prefs.callBarHidden = it; app.mg4dash.ui.EmbeddedApp.refreshImmersive(this) }
-        toggle(style, R.string.st_own_keyboard, R.string.st_own_keyboard_desc, { prefs.ownKeyboard }) { prefs.ownKeyboard = it }
+        toggle(fullP, R.string.st_call_bar, R.string.st_call_bar_desc, { prefs.callBarHidden }) { prefs.callBarHidden = it; app.mg4dash.ui.EmbeddedApp.refreshImmersive(this) }
         // Audio source: drop-down menu (same style as the card menus)
         // Media (24/11): the source and the playback at startup, and the bar's Android Auto button
-        val src = panel(homeR, getString(R.string.st_media).uppercase())
+        val src = panel(mediaL, getString(R.string.st_media).uppercase())
         val srcLabels = listOf(getString(R.string.st_src_auto), getString(R.string.st_src_car), "Radio", "Bluetooth", "USB", "CarPlay / Android Auto")
         dropdown(src, getString(R.string.st_start_source), srcLabels, { prefs.startSource }) { prefs.startSource = it }
         text(src, getString(R.string.st_start_source_desc), 16f, R.color.text_title)
@@ -213,15 +216,22 @@ class SettingsActivity : AppCompatActivity() {
             }
         }
         text(src, getString(R.string.st_aa_button_desc), 16f, R.color.text_title)
-        // The energy card's and the map's own options are now in popups on those widgets (17/11)
-        text(style, getString(R.string.st_widget_options_moved), 15f, R.color.text_sub)
+        row(style, button(getString(R.string.tu_show)) {
+            startActivity(android.content.Intent(this, app.mg4dash.MainActivity::class.java)
+                .putExtra(app.mg4dash.ui.Tutorial.EXTRA_SHOW, true)
+                .addFlags(android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP or android.content.Intent.FLAG_ACTIVITY_SINGLE_TOP))
+            finish()
+        })
 
         // ════ Vehicle tab: units, equipment, climate, and startup sound ════
-        val units = panel(carL, getString(R.string.st_tab_car).uppercase())
+        val units = panel(genL, getString(R.string.st_formats))
         dropdown(units, getString(R.string.st_units), listOf(getString(R.string.st_units_car), "km · kWh/100 km", "miles · mi/kWh"), { prefs.units }) { prefs.units = it }
         dropdown(units, getString(R.string.st_pressure), listOf(getString(R.string.st_mode_auto_short), "bar", "psi", "kPa"), { prefs.pressureUnit }) { prefs.pressureUnit = it }
         // Heated seats and wheel, climate hold, SAIC climate window: in the climate card's options (24/11)
         // Drive mode and regeneration by profile: in the profiles' window (24/11)
+        dropdown(units, getString(R.string.st_clock), listOf(R.string.st_clock_24, R.string.st_clock_12).map { getString(it) }, { if (prefs.clock12) 1 else 0 }) { prefs.clock12 = it == 1 }
+        val typing = panel(genL, getString(R.string.st_input))
+        toggle(typing, R.string.st_own_keyboard, R.string.st_own_keyboard_desc, { prefs.ownKeyboard }) { prefs.ownKeyboard = it }
 
 
         // ════ Appearance tab: theme and effects ════
@@ -230,7 +240,6 @@ class SettingsActivity : AppCompatActivity() {
         dropdown(theme, getString(R.string.st_theme_mode), listOf(R.string.st_mode_auto, R.string.st_mode_dark, R.string.st_mode_light).map { getString(it) }, { prefs.themeMode }) {
             if (prefs.themeMode != it) { prefs.themeMode = it; onThemeChanged() }
         }
-        toggle(theme, R.string.st_theme_smooth, R.string.st_theme_smooth_desc, { prefs.themeSmooth }) { prefs.themeSmooth = it }
         toggle(theme, R.string.st_night_sun, R.string.st_night_sun_desc, { prefs.nightBySun }) { prefs.nightBySun = it; app.mg4dash.ui.Themes.publish(this) }
         // Today's times at the car's position, for information
         text(theme, app.mg4dash.system.SunTimes.position(this)?.let { (lat, lon) ->
@@ -239,7 +248,9 @@ class SettingsActivity : AppCompatActivity() {
                 getString(R.string.st_night_sun_today, f.format(java.util.Date(set)), f.format(java.util.Date(rise)))
             }
         } ?: getString(R.string.st_night_sun_nopos), 15f, R.color.text_sub)
-        dropdown(theme, getString(R.string.st_clock), listOf(R.string.st_clock_24, R.string.st_clock_12).map { getString(it) }, { if (prefs.clock12) 1 else 0 }) { prefs.clock12 = it == 1 }
+        // Only in Automatic (24/11): greyed in Light or Dark
+        theme.getChildAt(theme.childCount - 1).apply { val auto = prefs.themeMode == 0; alpha = if (auto) 1f else 0.4f; isEnabled = auto }
+        toggle(theme, R.string.st_theme_smooth, R.string.st_theme_smooth_desc, { prefs.themeSmooth }) { prefs.themeSmooth = it }
         dropdown(theme, getString(R.string.st_panel_outline), listOf(R.string.st_panel_fade, R.string.st_panel_full).map { getString(it) }, { if (prefs.panelFade) 0 else 1 }) {
             if (prefs.panelFade != (it == 0)) { prefs.panelFade = it == 0; recreate() }
         }
@@ -263,7 +274,7 @@ class SettingsActivity : AppCompatActivity() {
         // Brightness at the top of the right column, above the live power (20/11)
         brightnessSetting(panel(lookR, getString(R.string.br_title)))
         // The live power's effects and sounds: in the power card's options (24/11); the startup sound here, under Sounds
-        soundTriggersSetting(panel(lookR, getString(R.string.st_sounds)))
+        soundTriggersSetting(panel(mediaR, getString(R.string.st_sound_trigger).uppercase()))
 
         // ════ Right column: system, connections, diagnostic ════
 
@@ -276,13 +287,9 @@ class SettingsActivity : AppCompatActivity() {
             button(getString(R.string.st_valet)) { confirmValet() },
         )
         text(valet, getString(R.string.st_rescue_note), 14f, R.color.text_title)
-        // ADB over the USB port at each start (as the adbutil app), off by default
-        toggle(valet, R.string.st_adb_start, R.string.st_adb_start_desc, { prefs.adbAtStart }) {
-            prefs.adbAtStart = it; if (it) app.mg4dash.system.AdbSwitch.enable(this, "setting turned on")
-        }
 
         // ── Update from GitHub ──
-        val upd = panel(sysR, getString(R.string.st_update))
+        val upd = panel(sysL, getString(R.string.st_update))
         val appNew = prefs.raw.getString("upd_new_app", null)?.takeIf { app.mg4dash.system.Updater.isNewer(it) }
         val checked = prefs.raw.getLong("upd_checked_at", 0L) > 0L
         val (updState, updButton) = updateLine(upd, "MG4Dash", when {
@@ -437,7 +444,7 @@ class SettingsActivity : AppCompatActivity() {
         // Home Assistant: its own page, from the shortcuts card's options and a shortcut's menu (24/11)
 
         // ── Diagnostic: compatibility, log, recorder ──
-        val diag = panel(sysL, getString(R.string.st_diag))
+        val diag = panel(sysR, getString(R.string.st_diag))
         text(diag, getString(R.string.st_compat_fw, app.mg4dash.system.Firmware.version, app.mg4dash.system.Firmware.gen.name), 18f, R.color.text_value)
             .apply { setOnLongClickListener { sprChrgTest(); true } }   // hidden test, reserved for trials
         text(diag, getString(if (app.mg4dash.system.Firmware.tested) R.string.st_compat_tested else R.string.st_compat_beta), 16f, R.color.text_title)
@@ -445,29 +452,45 @@ class SettingsActivity : AppCompatActivity() {
             button(getString(R.string.st_compat_run)) { Thread { app.mg4dash.car.CarProps.dumpAll() }.start(); Compat.show(this) },
             button(getString(R.string.st_log)) { showLogDialog() },
         )
-        row(diag, button(getString(R.string.tu_show)) {
-            startActivity(android.content.Intent(this, app.mg4dash.MainActivity::class.java)
-                .putExtra(app.mg4dash.ui.Tutorial.EXTRA_SHOW, true)
-                .addFlags(android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP or android.content.Intent.FLAG_ACTIVITY_SINGLE_TOP))
-            finish()
-        })
+        // ADB over the USB port at each start (as the adbutil app), off by default
+        toggle(diag, R.string.st_adb_start, R.string.st_adb_start_desc, { prefs.adbAtStart }) {
+            prefs.adbAtStart = it; if (it) app.mg4dash.system.AdbSwitch.enable(this, "setting turned on")
+        }
         // Diagnostic only (24/11): shown in the diagnostic mode, five touches on the version in the banner
         if (prefs.raw.getBoolean("diag_mode", false) || prefs.energyLog)
             toggle(diag, R.string.st_energy_log, R.string.st_energy_log_desc, { prefs.energyLog }) { prefs.energyLog = it }
 
-        // ════ 4G data tab ════
-        dataTab(dataL, dataR)
+        // ════ 4G data (24/11, once a tab): the last 30 days here, the whole detail (days, alert, reset) in a window ════
+        val data = panel(genR, getString(R.string.du_tab).uppercase())
+        val last30 = TextView(this)
+        app.mg4dash.ui.Rows.add(data, app.mg4dash.ui.Rows.row(this, getString(R.string.du_last30), null, last30.apply {
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, 20f); setTextColor(color(R.color.text_value))
+            text = DataUsage.last?.let { DataUsage.format(this@SettingsActivity, it.total) } ?: "—"
+        }, null))
+        app.mg4dash.ui.Rows.add(data, app.mg4dash.ui.Rows.row(this, getString(R.string.du_detail_open), getString(R.string.du_detail_open_desc), app.mg4dash.ui.Rows.chevron(this)) {
+            val cols = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
+            val l = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
+            val r = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
+            cols.addView(l, LinearLayout.LayoutParams(0, -2, 1f).apply { rightMargin = dp(8) })
+            cols.addView(r, LinearLayout.LayoutParams(0, -2, 1f).apply { leftMargin = dp(8) })
+            dataTab(l, r)
+            app.mg4dash.ui.Windows.show(this, getString(R.string.du_tab), cols, widthDp = 1760)
+        })
 
         refreshHome()
         // The 4G data tab comes before System (1.7.3): a saved System tab stays System
         if (!prefs.raw.contains("settings_tabs_v2")) {
             val t = prefs.raw.getInt("settings_tab", 0)
-            prefs.raw.edit().putBoolean("settings_tabs_v2", true).putInt("settings_tab", if (t >= TAB_DATA) t + 1 else t).apply()
+            prefs.raw.edit().putBoolean("settings_tabs_v2", true).putInt("settings_tab", if (t >= 4) t + 1 else t).apply()
         }
         // The Connections tab is gone (24/11): a saved later tab stays the same tab, a saved Connections opens Home
         if (!prefs.raw.contains("settings_tabs_v3")) {
             val t = prefs.raw.getInt("settings_tab", 0)
             prefs.raw.edit().putBoolean("settings_tabs_v3", true).putInt("settings_tab", if (t > 3) t - 1 else if (t == 3) 0 else t).apply()
+        }
+        if (!prefs.raw.contains("settings_tabs_v4")) {
+            val t = prefs.raw.getInt("settings_tab", 0)
+            prefs.raw.edit().putBoolean("settings_tabs_v4", true).putInt("settings_tab", if (t == 2) 3 else t).apply()
         }
         val asked = intent.getIntExtra(EXTRA_TAB, -1)
         showTab((if (asked >= 0) asked else prefs.raw.getInt("settings_tab", 0)).coerceIn(0, tabViews.size - 1))
@@ -476,6 +499,7 @@ class SettingsActivity : AppCompatActivity() {
     companion object {
         /** Tab to open (index), e.g. [TAB_DATA] from the 4G data alert. */
         const val EXTRA_TAB = "tab"
+        /** The 4G data's settings, in General (24/11). */
         const val TAB_DATA = 3
         const val TAB_CAR = 2
         /** Opens the Home Assistant page (address, token, test) instead of the settings. */

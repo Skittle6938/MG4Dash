@@ -733,6 +733,16 @@
     <string name="st_tab_car">Vozidlo</string>
     <string name="st_tab_net">Připojení</string>
     <string name="st_tab_system">Systém</string>
+    <string name="st_tab_screen">Obrazovka</string>
+    <string name="st_tab_media">Média a zvuky</string>
+    <string name="st_tab_general">Obecné</string>
+    <string name="st_bar_section">LIŠTA</string>
+    <string name="st_full_section">CELÁ OBRAZOVKA</string>
+    <string name="st_formats">FORMÁTY</string>
+    <string name="st_input">PSANÍ</string>
+    <string name="du_last30">Posledních 30 dní</string>
+    <string name="du_detail_open">Zobrazit podrobnosti</string>
+    <string name="du_detail_open_desc">Den po dni, upozornění a jeho práh, vynulování</string>
     <string name="st_theme_smooth">Plynulé přepínání světlý / tmavý</string>
     <string name="st_theme_smooth_desc">Čeká 5 s stabilních světel (žádné přepínání pod mosty) a prolne se za 2 s. Vypnuto: přepne hned, jak se světla změní.</string>
     <string name="st_night_sun">Noc po západu slunce</string>

@@ -733,6 +733,16 @@
     <string name="st_tab_car">Vehículo</string>
     <string name="st_tab_net">Conexiones</string>
     <string name="st_tab_system">Sistema</string>
+    <string name="st_tab_screen">Pantalla</string>
+    <string name="st_tab_media">Multimedia y sonidos</string>
+    <string name="st_tab_general">General</string>
+    <string name="st_bar_section">BARRA</string>
+    <string name="st_full_section">PANTALLA COMPLETA</string>
+    <string name="st_formats">FORMATOS</string>
+    <string name="st_input">ESCRITURA</string>
+    <string name="du_last30">Últimos 30 días</string>
+    <string name="du_detail_open">Ver el detalle</string>
+    <string name="du_detail_open_desc">Día a día, la alerta y su umbral, el reinicio</string>
     <string name="st_theme_smooth">Transición suave claro / oscuro</string>
     <string name="st_theme_smooth_desc">Espera 5 s con luces estables (sin cambio bajo puentes) y funde en 2 s. Desactivado: cambia en cuanto cambian las luces.</string>
     <string name="st_night_sun">Noche tras la puesta de sol</string>

@@ -731,6 +731,16 @@ st_tab_look|Look|Apparence|Aussehen|Aspecto|Aspetto|Weergave|Görünüm|Vzhled
 st_tab_car|Vehicle|Véhicule|Fahrzeug|Vehículo|Veicolo|Voertuig|Araç|Vozidlo
 st_tab_net|Connections|Connexions|Verbindungen|Conexiones|Connessioni|Verbindingen|Bağlantılar|Připojení
 st_tab_system|System|Système|System|Sistema|Sistema|Systeem|Sistem|Systém
+st_tab_screen|Screen|Écran|Bildschirm|Pantalla|Schermo|Scherm|Ekran|Obrazovka
+st_tab_media|Media and sounds|Média et sons|Medien und Klänge|Multimedia y sonidos|Media e suoni|Media en geluid|Medya ve sesler|Média a zvuky
+st_tab_general|General|Général|Allgemein|General|Generale|Algemeen|Genel|Obecné
+st_bar_section|BAR|BARRE|LEISTE|BARRA|BARRA|BALK|ÇUBUK|LIŠTA
+st_full_section|FULL SCREEN|PLEIN ÉCRAN|VOLLBILD|PANTALLA COMPLETA|SCHERMO INTERO|VOLLEDIG SCHERM|TAM EKRAN|CELÁ OBRAZOVKA
+st_formats|FORMATS|FORMATS|FORMATE|FORMATOS|FORMATI|NOTATIES|BİÇİMLER|FORMÁTY
+st_input|TYPING|SAISIE|EINGABE|ESCRITURA|DIGITAZIONE|INVOER|YAZMA|PSANÍ
+du_last30|Last 30 days|30 derniers jours|Letzte 30 Tage|Últimos 30 días|Ultimi 30 giorni|Laatste 30 dagen|Son 30 gün|Posledních 30 dní
+du_detail_open|See the detail|Voir le détail|Details anzeigen|Ver el detalle|Vedi il dettaglio|Details bekijken|Ayrıntıyı gör|Zobrazit podrobnosti
+du_detail_open_desc|Day by day, the alert and its threshold, the reset|Jour par jour, l'alerte et son seuil, la remise à zéro|Tag für Tag, die Warnung und ihre Schwelle, das Zurücksetzen|Día a día, la alerta y su umbral, el reinicio|Giorno per giorno, l'avviso e la sua soglia, l'azzeramento|Dag voor dag, de waarschuwing en de drempel, het resetten|Gün gün, uyarı ve eşiği, sıfırlama|Den po dni, upozornění a jeho práh, vynulování
 st_theme_smooth|Smooth light / dark switch|Transition douce clair / sombre|Sanfter Hell / Dunkel-Wechsel|Transición suave claro / oscuro|Transizione morbida chiaro / scuro|Zachte overgang licht / donker|Yumuşak açık / koyu geçişi|Plynulé přepínání světlý / tmavý
 st_theme_smooth_desc|Waits 5 s of stable lights (no switch under bridges) and fades over 2 s. Off: switches as soon as the lights change.|Attend 5 s de feux stables (pas de bascule sous les ponts) et passe en fondu sur 2 s. Désactivé : bascule dès que les feux changent.|Wartet 5 s mit stabilem Licht (kein Wechsel unter Brücken) und blendet über 2 s über. Aus: wechselt sofort, wenn sich das Licht ändert.|Espera 5 s con luces estables (sin cambio bajo puentes) y funde en 2 s. Desactivado: cambia en cuanto cambian las luces.|Attende 5 s di luci stabili (nessun cambio sotto i ponti) e sfuma in 2 s. Disattivato: cambia appena cambiano le luci.|Wacht 5 s op stabiele verlichting (geen wissel onder bruggen) en vervaagt in 2 s. Uit: wisselt zodra de verlichting verandert.|Farların 5 sn sabit kalmasını bekler (köprü altında geçiş yok) ve 2 sn'de geçiş yapar. Kapalı: farlar değişir değişmez geçer.|Čeká 5 s stabilních světel (žádné přepínání pod mosty) a prolne se za 2 s. Vypnuto: přepne hned, jak se světla změní.
 st_night_sun|Night after sunset|Nuit après le coucher du soleil|Nacht nach Sonnenuntergang|Noche tras la puesta de sol|Notte dopo il tramonto|Nacht na zonsondergang|Gün batımından sonra gece|Noc po západu slunce

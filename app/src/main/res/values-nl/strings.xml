@@ -733,6 +733,16 @@
     <string name="st_tab_car">Voertuig</string>
     <string name="st_tab_net">Verbindingen</string>
     <string name="st_tab_system">Systeem</string>
+    <string name="st_tab_screen">Scherm</string>
+    <string name="st_tab_media">Media en geluid</string>
+    <string name="st_tab_general">Algemeen</string>
+    <string name="st_bar_section">BALK</string>
+    <string name="st_full_section">VOLLEDIG SCHERM</string>
+    <string name="st_formats">NOTATIES</string>
+    <string name="st_input">INVOER</string>
+    <string name="du_last30">Laatste 30 dagen</string>
+    <string name="du_detail_open">Details bekijken</string>
+    <string name="du_detail_open_desc">Dag voor dag, de waarschuwing en de drempel, het resetten</string>
     <string name="st_theme_smooth">Zachte overgang licht / donker</string>
     <string name="st_theme_smooth_desc">Wacht 5 s op stabiele verlichting (geen wissel onder bruggen) en vervaagt in 2 s. Uit: wisselt zodra de verlichting verandert.</string>
     <string name="st_night_sun">Nacht na zonsondergang</string>
