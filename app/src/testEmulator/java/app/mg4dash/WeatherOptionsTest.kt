@@ -79,19 +79,28 @@ class WeatherOptionsTest {
         val model = texts(d.window!!.decorView).first { it.startsWith(a.getString(R.string.wx_model_auto)) }
         fun find(v: View): View? = if (v is TextView && v.text.toString() == model) v else (v as? ViewGroup)?.let { g -> (0 until g.childCount).firstNotNullOfOrNull { find(g.getChildAt(it)) } }
         val anchor = find(d.window!!.decorView)!!
-        // The menu as if the row sat low on the screen
+        // Touching the row: the seven models in a window over the whole screen, titled with the row
+        (anchor.parent as View).let { it.performClick() }; idle()
+        val models = ShadowDialog.getLatestDialog()
+        val mt = texts(models.window!!.decorView)
+        assertTrue(mt.toString(), mt.contains(a.getString(R.string.wx_model_gem)) && mt.contains(a.getString(R.string.wx_model_auto)))
+        models.dismiss(); idle()
+        // A longer list (twelve), from the same row: within the screen, it scrolls
         val items = (1..12).map { "Choix $it" }
         app.mg4dash.ui.SourceMenu.choose(a, anchor, items, 6) {}
         idle()
-        val p = shadowOf(RuntimeEnvironment.getApplication()).latestPopupWindow
-        assertTrue("within the screen: ${p.height}", p.height <= a.window.decorView.height)
-        val v = p.contentView
-        v.measure(View.MeasureSpec.makeMeasureSpec(p.width, View.MeasureSpec.EXACTLY), View.MeasureSpec.makeMeasureSpec(p.height, View.MeasureSpec.EXACTLY))
-        v.layout(0, 0, v.measuredWidth, v.measuredHeight)
-        val bmp = Bitmap.createBitmap(v.measuredWidth, v.measuredHeight, Bitmap.Config.ARGB_8888).also { val c = Canvas(it); c.drawColor(0xFF0E0E10.toInt()); v.draw(c) }
+        val w = ShadowDialog.getLatestDialog().window!!
+        val dv = w.decorView
+        dv.measure(View.MeasureSpec.makeMeasureSpec(w.attributes.width, View.MeasureSpec.EXACTLY), View.MeasureSpec.makeMeasureSpec(a.window.decorView.height, View.MeasureSpec.AT_MOST))
+        dv.layout(0, 0, dv.measuredWidth, dv.measuredHeight)
+        assertTrue("within the screen: ${dv.measuredHeight}", dv.measuredHeight <= a.window.decorView.height)
+        val bmp = Bitmap.createBitmap(dv.measuredWidth, dv.measuredHeight, Bitmap.Config.ARGB_8888).also { dv.draw(Canvas(it)) }
         File(File("build/screenshots/moves").apply { mkdirs() }, "long_choice.png").outputStream().use { bmp.compress(Bitmap.CompressFormat.PNG, 100, it) }
-        assertTrue("it scrolls", v is ScrollView)
-        val sv = v as ScrollView
+        fun scroller(v: View): ScrollView? = (v as? ScrollView)?.takeIf { it.childCount > 0 && it.getChildAt(0).height > it.height }
+            ?: (v as? ViewGroup)?.let { g -> (0 until g.childCount).firstNotNullOfOrNull { scroller(g.getChildAt(it)) } }
+        val sv = scroller(dv)
+        assertTrue("it scrolls", sv != null)
+        sv!!
         assertTrue("its scroll bar stays", !sv.isScrollbarFadingEnabled)
         // A finger dragged up moves the list
         sv.scrollTo(0, 0)

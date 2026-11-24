@@ -70,8 +70,18 @@ object Windows {
         val screen = a.resources.displayMetrics.heightPixels
         val scroll = object : android.widget.ScrollView(a) {
             override fun onMeasure(w: Int, h: Int) = super.onMeasure(w, View.MeasureSpec.makeMeasureSpec(screen - dp(a, 190), View.MeasureSpec.AT_MOST))
-        }.apply { isVerticalScrollBarEnabled = false; addView(group) }
+        }.apply {
+            // A long list: a scroll bar that stays, faded edges (24/11)
+            isVerticalScrollBarEnabled = true; isScrollbarFadingEnabled = false; scrollBarStyle = View.SCROLLBARS_INSIDE_INSET
+            isVerticalFadingEdgeEnabled = true; setFadingEdgeLength(dp(a, 36)); overScrollMode = View.OVER_SCROLL_NEVER
+            addView(group)
+        }
         d = show(a, title, scroll, widthDp = 820)
+        // The chosen row in sight
+        if (selected >= 0) scroll.post {
+            val rows = (0 until group.childCount).map { group.getChildAt(it) }.filter { it.tag == Rows.TAG_ROW }
+            rows.getOrNull(selected)?.let { r -> scroll.scrollTo(0, (r.top - scroll.height / 3).coerceAtLeast(0)) }
+        }
         return d
     }
 

@@ -104,75 +104,28 @@ object SourceMenu {
     }
 
     /** Generic choice menu under [anchor]; [current] is coloured. */
-    fun choose(activity: Activity, anchor: View, labels: List<String>, current: Int, centred: Boolean = false, onPick: (Int) -> Unit) {
-        val d = activity.resources.displayMetrics.density
-        val list = LinearLayout(activity).apply {
-            orientation = LinearLayout.VERTICAL
-            setBackgroundResource(R.drawable.bg_panel)
-            setPadding((8 * d).toInt(), (6 * d).toInt(), (8 * d).toInt(), (16 * d).toInt())   // bottom margin: the outline of the last highlighted line is no longer cut
-            elevation = 12 * d
-        }
-        val popup = android.widget.PopupWindow(list, (340 * d).toInt(), LinearLayout.LayoutParams.WRAP_CONTENT, false).apply {
-            isOutsideTouchable = true
-            setOnDismissListener { Fullscreen.apply(activity) }
-        }
-        labels.forEachIndexed { i, label ->
-            list.addView(TextView(activity).apply {
-                text = label
-                setTextSize(TypedValue.COMPLEX_UNIT_SP, 21f)
-                setTextColor(Themes.color(activity, if (i == current) R.color.accent_action else R.color.text_value))
-                setPadding((18 * d).toInt(), 0, (18 * d).toInt(), 0)
-                gravity = Gravity.CENTER_VERTICAL
-                setBackgroundResource(R.drawable.bg_chip)
-                isSelected = i == current
-                setOnClickListener { popup.dismiss(); onPick(i) }
-            }, LinearLayout.LayoutParams(-1, (60 * d).toInt()).apply { topMargin = (4 * d).toInt() })
-        }
-        popup.setBackgroundDrawable(android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT))
-        // Height measured explicitly: when opening downwards (music card at the top of the screen),
-        // "wrap_content" height cut the bottom of the last line.
-        list.measure(View.MeasureSpec.makeMeasureSpec(popup.width, View.MeasureSpec.EXACTLY), View.MeasureSpec.UNSPECIFIED)
-        val full = list.measuredHeight + (6 * d).toInt()
-        popup.height = full
-        Popups.fit(activity, popup)
-        if (centred) {
-            // In the middle of the screen (a tile of the shortcuts menu, no button to hang it under)
-            popup.showAtLocation(anchor.rootView, Gravity.CENTER, 0, 0)
-        } else {
-            // Under the anchor when it fits, above it otherwise; too long for both (24/11: the weather models showed 3 of 7
-            // and did not scroll): the larger side, the list scrolling with faded edges, the chosen line in sight
-            // On the screen, not in the window holding the anchor (an options window is shorter than the screen)
-            val at = IntArray(2).also { anchor.getLocationOnScreen(it) }
-            val screen = activity.window?.decorView?.height?.takeIf { it > 0 } ?: activity.resources.displayMetrics.heightPixels
-            val gap = (4 * d).toInt(); val margin = (12 * d).toInt()
-            val below = screen - (at[1] + anchor.height + gap) - margin
-            val above = at[1] - gap - margin
-            val h = popup.height
-            when {
-                // A whole page as the anchor (no row to hang it on): as before, Android places it
-                anchor.height > screen / 2 -> popup.showAsDropDown(anchor, 0, gap)
-                h <= below -> popup.showAsDropDown(anchor, 0, gap)
-                h <= above -> popup.showAsDropDown(anchor, 0, -(anchor.height + gap + h))
-                else -> {
-                    val room = maxOf(below, above)
-                    val scroll = (popup.contentView as? ScrollView) ?: ScrollView(activity).also { sv ->
-                        val content = popup.contentView
-                        popup.contentView = sv
-                        sv.addView(content, android.widget.FrameLayout.LayoutParams(-1, -2))
-                    }
-                    // A scroll bar that stays (more lines below or above), faded edges; up to about eight lines tall
-                    scroll.isVerticalScrollBarEnabled = true; scroll.isScrollbarFadingEnabled = false
-                    scroll.scrollBarStyle = View.SCROLLBARS_INSIDE_INSET
-                    scroll.isVerticalFadingEdgeEnabled = true
-                    scroll.setFadingEdgeLength((40 * d).toInt()); scroll.overScrollMode = View.OVER_SCROLL_NEVER
-                    popup.height = room
-                    if (below >= above) popup.showAsDropDown(anchor, 0, gap) else popup.showAsDropDown(anchor, 0, -(anchor.height + gap + room))
-                    // The chosen line in sight
-                    if (current >= 0) scroll.post { scroll.scrollTo(0, ((list.getChildAt(current)?.top ?: 0) - room / 3).coerceAtLeast(0)) }
-                }
+    /**
+     * A choice among [labels] in a window of its own, over the whole screen (24/11: a menu hanging from [anchor] was
+     * cut at the edge of the options window holding it, on the car): the chosen one marked and in sight, the list
+     * scrolling with its bar. [title] names it; by default the title of the row holding [anchor].
+     */
+    @Suppress("UNUSED_PARAMETER")
+    fun choose(activity: Activity, anchor: View, labels: List<String>, current: Int, centred: Boolean = false, title: String? = null, onPick: (Int) -> Unit) {
+        Windows.pick(activity, title ?: rowTitle(anchor) ?: "", labels, selected = current) { onPick(it) }
+    }
+
+    /** The first text of the settings row holding [v] (its title), if it is in one. */
+    private fun rowTitle(v: View): String? {
+        var p = v.parent as? android.view.ViewGroup
+        while (p != null) {
+            if (p.tag == Rows.TAG_ROW) {
+                fun first(g: View): TextView? = (g as? TextView)?.takeIf { it !== v && it.text.isNotBlank() }
+                    ?: (g as? android.view.ViewGroup)?.let { gg -> (0 until gg.childCount).firstNotNullOfOrNull { first(gg.getChildAt(it)) } }
+                return first(p)?.text?.toString()
             }
+            p = p.parent as? android.view.ViewGroup
         }
-        Themes.track(popup)
+        return null
     }
 
     /** Prepares a card title as a source selector. */
