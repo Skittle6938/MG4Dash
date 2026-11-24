@@ -1,0 +1,50 @@
+package app.mg4dash.media
+
+import org.json.JSONArray
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotNull
+import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
+
+/** Offline tests for LRCLIB's LRC parsing and search-result ranking. */
+@RunWith(RobolectricTestRunner::class)
+@Config(sdk = [28])
+class LyricsRepoTest {
+    @Test fun parseSortsTimestampsAndSupportsOneToThreeFractionDigits() {
+        val parsed = LyricsRepo.parse(
+            """
+            [00:02.5]Later
+            [00:01.20][00:03.000]Same line
+            [00:04]Whole second
+            [00:00.00]
+            [invalid]Ignored
+            """.trimIndent()
+        )
+
+        assertEquals(
+            listOf(1_200L to "Same line", 2_500L to "Later", 3_000L to "Same line", 4_000L to "Whole second"),
+            parsed,
+        )
+    }
+
+    @Test fun bestSearchResultPrefersArtistTitleAndDurationMatchWithLyrics() {
+        val results = JSONArray(
+            """
+            [
+              {"artistName":"Test Artist","trackName":"Song","duration":180,"syncedLyrics":""},
+              {"artistName":"Other Artist","trackName":"Song","duration":180,"plainLyrics":"wrong artist"},
+              {"artistName":"Test Artist","trackName":"Other Song","duration":180,"plainLyrics":"wrong title"},
+              {"artistName":"Test Artist","trackName":"Song [Remastered]","duration":182,"plainLyrics":"best match"}
+            ]
+            """.trimIndent()
+        )
+
+        val best = LyricsRepo.best(results, "Test Artist", "Song (Official Video)", 180_000)
+
+        assertNotNull(best)
+        assertEquals("Song [Remastered]", best!!.optString("trackName"))
+        assertEquals("best match", best.optString("plainLyrics"))
+    }
+}

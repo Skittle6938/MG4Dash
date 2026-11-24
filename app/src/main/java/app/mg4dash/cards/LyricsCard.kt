@@ -78,6 +78,7 @@ class LyricsCard(context: Context) : LinearLayout(context), HomeCard {
     private var latest = MediaHub.NowPlaying()
     private var positionAt = 0L
     private var requestedKey: String? = null
+    private var tickerScheduled = false
     private val live = CardScope()
     private var liveScope: CoroutineScope? = null
     private var cardIsShown = false
@@ -96,10 +97,10 @@ class LyricsCard(context: Context) : LinearLayout(context), HomeCard {
     private var karaokeActiveIndex = -1
     private val ticker = object : Runnable {
         override fun run() {
-            if (!shouldRunTicker() || track?.synced == null) return
+            if (!shouldRunTicker() || track?.synced == null) { tickerScheduled = false; return }
             val pos = position(latest)
             drawLines(pos); drawKaraoke(pos)
-            postDelayed(this, 250)
+            tickerScheduled = postDelayed(this, 250)
         }
     }
 
@@ -232,7 +233,7 @@ class LyricsCard(context: Context) : LinearLayout(context), HomeCard {
                 drawLines(position(MediaHub.now.value))
                 if (!force) {
                     drawKaraoke(position(latest))
-                    if (cached.synced != null && isActivelyDisplayed) { removeCallbacks(ticker); post(ticker) }
+                    if (cached.synced != null && isActivelyDisplayed) startTicker()
                     return@launch
                 }
             }
@@ -252,7 +253,7 @@ class LyricsCard(context: Context) : LinearLayout(context), HomeCard {
             drawLines(position(MediaHub.now.value))
             drawKaraoke(position(MediaHub.now.value))
             if (track?.synced != null && isActivelyDisplayed) {
-                removeCallbacks(ticker); post(ticker)
+                startTicker()
             }
         }
     }
@@ -273,6 +274,7 @@ class LyricsCard(context: Context) : LinearLayout(context), HomeCard {
         cardIsShown = on
         if (!on) {
             removeCallbacks(ticker)
+            tickerScheduled = false
             requestJob?.cancel(); requestJob = null
             requestedKey = null
             isActivelyDisplayed = false
@@ -292,6 +294,13 @@ class LyricsCard(context: Context) : LinearLayout(context), HomeCard {
     }
 
     private fun shouldRunTicker() = isActivelyDisplayed
+
+    private fun startTicker() {
+        removeCallbacks(ticker)
+        tickerScheduled = true
+        tickerScheduled = post(ticker)
+    }
+
     private fun toggleOverlay() {
         LyricsOverlay.toggle(activity)
         paintOverlayButtons()

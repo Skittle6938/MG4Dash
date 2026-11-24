@@ -258,6 +258,10 @@ The media card follows the car's active source (DAB / FM radio, Bluetooth, USB, 
 
 **At startup** (Settings › **Media and sounds**): the *Source at startup* is *Automatic* by default (back to the last source still available), the car's choice, or a fixed source. *Playback at startup* resumes as when the car was switched off, always paused or always playing. The startup sequence and the startup sound wait until the car is really in use: screen on, and READY, the doors unlocked or a touch on the screen. Opening the boot of a locked car plays nothing ([#133](https://github.com/Skittle6938/MG4Dash/issues/133)).
 
+### Synchronized lyrics
+
+Place the optional **Lyrics** card from the home screen's edit mode. When a song is not cached, MG4Dash sends its artist, title and duration to LRCLIB to find synchronized or plain lyrics. Downloaded lyrics are cached on the head unit; the cache size and Wi-Fi-only option are in the card's long-press settings, and cached songs remain available offline. In MG4Control, create a custom shortcut with **Send a broadcast**, action `app.mg4dash.action.TOGGLE_LYRICS_OVERLAY`, and MG4Dash as the target app to toggle the floating lyrics pill from a steering-wheel button or shortcut bubble.
+
 <details>
 <summary>Steering wheel, other apps and the Android Auto button</summary>
 

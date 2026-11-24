@@ -118,7 +118,7 @@ object LyricsRepo {
         } finally { activeConnections -= c; c.disconnect() }
     }
 
-    private fun best(arr: JSONArray, artist: String, title: String, duration: Long): JSONObject? {
+    internal fun best(arr: JSONArray, artist: String, title: String, duration: Long): JSONObject? {
         val a = artist.lowercase(Locale.ROOT).trim()
         val t = clean(title).lowercase(Locale.ROOT).trim()
         return (0 until arr.length()).mapNotNull { arr.optJSONObject(it) }

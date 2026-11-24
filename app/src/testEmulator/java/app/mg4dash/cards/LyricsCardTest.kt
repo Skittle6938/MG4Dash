@@ -13,6 +13,7 @@ import app.mg4dash.system.Prefs
 import app.mg4dash.system.Profiles
 import app.mg4dash.system.SettingsBackup
 import app.mg4dash.ui.HomeSlots
+import app.mg4dash.ui.LyricsOverlay
 import app.mg4dash.ui.OptionsPopup
 import kotlinx.coroutines.runBlocking
 import org.json.JSONObject
@@ -140,6 +141,25 @@ class LyricsCardTest {
         assertEquals("no new track request was queued while hidden", null, privateValue(card, "requestedKey"))
     }
 
+    @Test fun hiddenCardStopsItsTickerWhileOverlayRemainsActive() {
+        val now = trackNow()
+        writeCachedTrack(now.artist, now.title)
+        setNow(now)
+        val card = LyricsCard(activity)
+        card.shown(true)
+        idle(1500)
+        assertTrue("the visible card schedules its lyrics ticker", privateValue(card, "tickerScheduled") as Boolean)
+
+        setOverlayActive(true)
+        try {
+            card.shown(false)
+            assertFalse("the hidden card ticker is stopped even while overlay remains active", privateValue(card, "tickerScheduled") as Boolean)
+            assertTrue("overlay keeps its independent lifecycle", LyricsOverlay.active)
+        } finally {
+            setOverlayActive(false)
+        }
+    }
+
     @Test fun optionsAreAvailableWithoutStartingCardWork() {
         val card = LyricsCard(activity)
         val popup = OptionsPopup(activity, activity.getString(card.card.label), card.card.icon)
@@ -199,6 +219,10 @@ class LyricsCardTest {
         val field = MediaHub::class.java.getDeclaredField("_now").apply { isAccessible = true }
         @Suppress("UNCHECKED_CAST")
         (field.get(MediaHub) as kotlinx.coroutines.flow.MutableStateFlow<MediaHub.NowPlaying>).value = value
+    }
+
+    private fun setOverlayActive(value: Boolean) {
+        LyricsOverlay::class.java.getDeclaredField("active").apply { isAccessible = true }.setBoolean(LyricsOverlay, value)
     }
 
     private fun writeCachedTrack(artist: String, title: String) {
