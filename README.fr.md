@@ -741,7 +741,7 @@ Les versions publiées sont réduites et optimisées avec R8, en gardant tous le
 
 ## Remerciements, soutien et licence
 
-- [MG4Control](https://github.com/SliDeeN/MG4Control) (SliDeeN) : le chemin de l'API voiture A9, les plages de la clim et l'accès voiture par firmware.
+- [MG4Control](https://github.com/SliDeeN/MG4Control) (SliDeeN) : le chemin de l'API voiture A9.
 - [MG4-Custom-Launcher](https://github.com/adammcdonagh/MG4-Custom-Launcher) (adammcdonagh) : les pochettes Bluetooth, les clés de test AOSP et le SDK du launcher d'origine sur SWI68.
 - [MG4_Simple_Launcher](https://github.com/Tommasov/MG4_Simple_Launcher) (Tommasov) : notes sur le service d'adaptation véhicule des autres firmwares.
 - Cartes et données radars © contributeurs [OpenStreetMap](https://www.openstreetmap.org/copyright) ([ODbL](https://opendatacommons.org/licenses/odbl/)), via osmdroid et l'[API Overpass](https://wiki.openstreetmap.org/wiki/Overpass_API). Météo par [Open-Meteo](https://open-meteo.com/).
