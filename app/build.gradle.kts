@@ -39,7 +39,10 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            // R8 (24/11): shrinks the libraries and optimises, keeps every name (app/proguard-rules.pro)
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
     }
 
