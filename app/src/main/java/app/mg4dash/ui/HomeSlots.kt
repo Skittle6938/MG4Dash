@@ -59,7 +59,9 @@ object HomeSlots {
         /** Speed camera alerter (test, OpenStreetMap): only where the driver places it, in any size. */
         RADAR("radar", R.string.wc_radar, R.drawable.ic_radar, big = true, manual = true),
         /** The Android Auto guidance alone (19/11): only where the driver places it, in any size. */
-        NAV("nav", R.string.wc_nav, R.drawable.ic_map, big = true, manual = true);
+        NAV("nav", R.string.wc_nav, R.drawable.ic_map, big = true, manual = true),
+        /** 0-50 / 0-100 chrono (24/11): only where the driver places it, in any size. */
+        CHRONO("chrono", R.string.wc_chrono, R.drawable.ic_chrono, big = true, manual = true);
     }
 
     /**

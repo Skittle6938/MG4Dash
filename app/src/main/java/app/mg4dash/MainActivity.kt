@@ -70,6 +70,8 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         // MG4Dash Rescue's sign of life: once this screen is drawn, the code really loads
         app.mg4dash.system.Rescue.aliveAtFirstFrame(this)
         prefs = Prefs(this)
+        // A chrono run cut short (MG4Dash killed): its drive mode and climate put back
+        app.mg4dash.chrono.ChronoEngine.restorePending(this)
         app.mg4dash.ui.Themes.apply(this)
         themeSig = app.mg4dash.ui.Themes.signature(this)
         // Heated seats read after the screen was built (app restart): rebuild
@@ -888,7 +890,8 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
      * shortcut tile's own mode; none with the climate off, the option off or no outside temperature.
      */
     private fun renderClimateFx(s: VehicleState) {
-        val shown = if (!prefs.climateFx || s.hvacOn != true) null
+        // The chrono armed or measuring: its own animation only
+        val shown = if (!prefs.climateFx || s.hvacOn != true || app.mg4dash.chrono.ChronoEngine.busy || app.mg4dash.chrono.ChronoScreen.showing) null
             else app.mg4dash.ui.ShortcutTiles.climate(this, s).takeIf { it.inverted && (it.level == 1 || it.level == 2) }
         val set = s.driverTemp; val out = s.outsideTemp?.takeIf { it > -60f && it < 70f }
         val k = if (shown == null || set == null || out == null) 0f else app.mg4dash.ui.ClimateFx.intensity(set - out)
@@ -2549,6 +2552,7 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         if (!cardPower && !isShown(Card.POWER)) {
             val peak = app.mg4dash.ui.PowerBar.peakFor(prefs.batteryModel, prefs.xpower)
             if (prefs.powerFxSet.isEmpty() || plugged || kw == null || kw < peak * 0.8f) return
+            if (app.mg4dash.chrono.ChronoEngine.busy || app.mg4dash.chrono.ChronoScreen.showing) return
             startBoost()
             if (!isShown(Card.POWER)) return
         }
@@ -2573,7 +2577,9 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
                 fx.attach(host, bar, under)
                 fx.shake = b.root
             }
-            fx.update(if (plugged) 0f else kw ?: 0f, bar.peakKw * 0.8f, bar.peakKw)
+            // The chrono's run: no power animation over it (0 kW: nothing starts)
+            val chrono = app.mg4dash.chrono.ChronoEngine.busy || app.mg4dash.chrono.ChronoScreen.showing
+            fx.update(if (plugged || chrono) 0f else kw ?: 0f, bar.peakKw * 0.8f, bar.peakKw)
         }
         val avg = app.mg4dash.energy.EnergyMonitor.sinceStart.value.per100
         if (cardPower) putPowerCons()
