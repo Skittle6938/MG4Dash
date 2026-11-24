@@ -72,6 +72,8 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         prefs = Prefs(this)
         // A chrono run cut short (MG4Dash killed): its drive mode and climate put back
         app.mg4dash.chrono.ChronoEngine.restorePending(this)
+        // A voice memo cut short (power cut): made an .m4a and kept
+        app.mg4dash.memo.MemoRecorder.recover(this)
         app.mg4dash.ui.Themes.apply(this)
         themeSig = app.mg4dash.ui.Themes.signature(this)
         // Heated seats read after the screen was built (app restart): rebuild

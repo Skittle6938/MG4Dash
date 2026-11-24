@@ -61,7 +61,9 @@ object HomeSlots {
         /** The Android Auto guidance alone (19/11): only where the driver places it, in any size. */
         NAV("nav", R.string.wc_nav, R.drawable.ic_map, big = true, manual = true),
         /** 0-50 / 0-100 chrono (24/11): only where the driver places it, in any size. */
-        CHRONO("chrono", R.string.wc_chrono, R.drawable.ic_chrono, big = true, manual = true);
+        CHRONO("chrono", R.string.wc_chrono, R.drawable.ic_chrono, big = true, manual = true),
+        /** Voice memos (24/11): only where the driver places it, in any size. */
+        MEMO("memo", R.string.wc_memo, R.drawable.ic_mic, big = true, manual = true);
     }
 
     /**

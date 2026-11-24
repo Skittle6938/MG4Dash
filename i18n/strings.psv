@@ -1326,3 +1326,50 @@ ch_speed_time|Speed over time|Vitesse dans le temps|Tempo über die Zeit|Velocid
 ch_slope|downhill|pente|Gefälle|pendiente|discesa|helling|eğim|svah
 ch_downhill|Not a record: slope %1$s|Hors record : pente de %1$s|Kein Rekord: Gefälle %1$s|Fuera de récord: pendiente %1$s|Fuori record: discesa %1$s|Geen record: helling %1$s|Rekor dışı: eğim %1$s|Mimo rekord: svah %1$s
 ch_mode_kept|Mode unchanged|Mode inchangé|Modus unverändert|Modo sin cambios|Modo invariato|Modus ongewijzigd|Mod değişmedi|Režim beze změny
+wc_memo|Voice memos|Mémos|Sprachnotizen|Notas de voz|Promemoria vocali|Spraakmemo's|Sesli notlar|Hlasové poznámky
+mm_title|MEMOS|MÉMOS|NOTIZEN|NOTAS|PROMEMORIA|MEMO'S|NOTLAR|POZNÁMKY
+mm_word_one|memo|mémo|Notiz|nota|promemoria|memo|not|poznámka
+mm_word_many|memos|mémos|Notizen|notas|promemoria|memo's|not|poznámek
+mm_total|%1$d min in all|%1$d min au total|%1$d Min. insgesamt|%1$d min en total|%1$d min in totale|%1$d min in totaal|toplam %1$d dk|celkem %1$d min
+mm_last|Last: %1$s · %2$s|Dernier : %1$s · %2$s|Letzte: %1$s · %2$s|Última: %1$s · %2$s|Ultimo: %1$s · %2$s|Laatste: %1$s · %2$s|Son: %1$s · %2$s|Poslední: %1$s · %2$s
+mm_none|No memo yet|Aucun mémo|Noch keine Notiz|Ninguna nota|Nessun promemoria|Nog geen memo|Henüz not yok|Zatím žádná poznámka
+mm_usb_hint|USB stick in · long press to move|Clé USB branchée · appui long pour déplacer|USB-Stick erkannt · lange drücken zum Verschieben|Memoria USB conectada · pulsación larga para mover|Chiavetta USB inserita · pressione lunga per spostare|USB-stick aanwezig · lang drukken om te verplaatsen|USB bellek takılı · taşımak için uzun basın|USB disk připojen · dlouhým stiskem přesunete
+mm_record|RECORD|ENREGISTRER|AUFNEHMEN|GRABAR|REGISTRA|OPNEMEN|KAYDET|NAHRÁT
+mm_stop|STOP|STOP|STOPP|PARAR|STOP|STOP|DURDUR|STOP
+mm_recording|Recording a memo|Enregistrement d'un mémo|Notiz wird aufgenommen|Grabando una nota|Registrazione di un promemoria|Memo wordt opgenomen|Not kaydediliyor|Nahrává se poznámka
+mm_goes_on|Goes on even if you change screens|Continue même si tu changes d'écran|Läuft weiter, auch bei Bildschirmwechsel|Sigue aunque cambies de pantalla|Continua anche se cambi schermata|Gaat door, ook op een ander scherm|Ekran değiştirseniz de devam eder|Pokračuje i při změně obrazovky
+mm_paused_call|Paused during the call|En pause pendant l'appel|Pausiert während des Anrufs|En pausa durante la llamada|In pausa durante la chiamata|Gepauzeerd tijdens het gesprek|Arama sırasında duraklatıldı|Pozastaveno během hovoru
+mm_saved|Memo saved · %1$s|Mémo enregistré · %1$s|Notiz gespeichert · %1$s|Nota guardada · %1$s|Promemoria salvato · %1$s|Memo bewaard · %1$s|Not kaydedildi · %1$s|Poznámka uložena · %1$s
+mm_car_off|The last memo stopped when the car switched off. It is kept: %1$s|Le dernier mémo s'est arrêté à l'extinction de la voiture. Il est gardé : %1$s|Die letzte Notiz endete beim Ausschalten des Autos. Sie ist gespeichert: %1$s|La última nota se detuvo al apagar el coche. Se ha guardado: %1$s|L'ultimo promemoria si è fermato allo spegnimento dell'auto. È conservato: %1$s|Het laatste memo stopte toen de auto uitging. Het is bewaard: %1$s|Son not araç kapanınca durdu. Kaydedildi: %1$s|Poslední poznámka skončila při vypnutí auta. Je uložena: %1$s
+mm_mic_busy|Microphone busy with a call|Micro occupé par un appel|Mikrofon durch Anruf belegt|Micrófono ocupado por una llamada|Microfono occupato da una chiamata|Microfoon bezet door een gesprek|Mikrofon arama ile meşgul|Mikrofon je obsazen hovorem
+mm_stats|%1$s · %2$d min · %3$s MB|%1$s · %2$d min · %3$s Mo|%1$s · %2$d Min. · %3$s MB|%1$s · %2$d min · %3$s MB|%1$s · %2$d min · %3$s MB|%1$s · %2$d min · %3$s MB|%1$s · %2$d dk · %3$s MB|%1$s · %2$d min · %3$s MB
+mm_rename|Rename|Renommer|Umbenennen|Renombrar|Rinomina|Hernoemen|Yeniden adlandır|Přejmenovat
+mm_keep|Keep|Garder|Behalten|Conservar|Tieni|Bewaren|Sakla|Ponechat
+mm_delete|Delete|Supprimer|Löschen|Eliminar|Elimina|Verwijderen|Sil|Smazat
+mm_delete_all|Delete all|Tout supprimer|Alle löschen|Eliminar todo|Elimina tutto|Alles verwijderen|Tümünü sil|Smazat vše
+mm_delete_all_q|Delete every memo kept in the car?|Supprimer tous les mémos de la voiture ?|Alle Notizen im Auto löschen?|¿Eliminar todas las notas del coche?|Eliminare tutti i promemoria dell'auto?|Alle memo's in de auto verwijderen?|Araçtaki tüm notlar silinsin mi?|Smazat všechny poznámky v autě?
+mm_usb|USB stick|Clé USB|USB-Stick|Memoria USB|Chiavetta USB|USB-stick|USB bellek|USB disk
+mm_usb_stick|Stick|Clé|Stick|Memoria|Chiavetta|Stick|Bellek|Disk
+mm_usb_none|No USB stick|Aucune clé USB|Kein USB-Stick|Ninguna memoria USB|Nessuna chiavetta USB|Geen USB-stick|USB bellek yok|Žádný USB disk
+mm_usb_free|%1$s · %2$s GB free|%1$s · %2$s Go libres|%1$s · %2$s GB frei|%1$s · %2$s GB libres|%1$s · %2$s GB liberi|%1$s · %2$s GB vrij|%1$s · %2$s GB boş|%1$s · %2$s GB volných
+mm_copy|Copy to the stick|Copier sur la clé|Auf den Stick kopieren|Copiar a la memoria|Copia sulla chiavetta|Naar de stick kopiëren|Belleğe kopyala|Kopírovat na disk
+mm_copy_sub|The memos stay in the car|Les mémos restent dans la voiture|Die Notizen bleiben im Auto|Las notas se quedan en el coche|I promemoria restano nell'auto|De memo's blijven in de auto|Notlar araçta kalır|Poznámky zůstanou v autě
+mm_copy_button|Copy|Copier|Kopieren|Copiar|Copia|Kopiëren|Kopyala|Kopírovat
+mm_move|Move to the stick|Déplacer sur la clé|Auf den Stick verschieben|Mover a la memoria|Sposta sulla chiavetta|Naar de stick verplaatsen|Belleğe taşı|Přesunout na disk
+mm_move_sub|Copied, checked, then deleted from the car|Copiés, vérifiés, puis effacés de la voiture|Kopiert, geprüft, dann im Auto gelöscht|Copiadas, comprobadas y borradas del coche|Copiati, verificati, poi eliminati dall'auto|Gekopieerd, gecontroleerd, dan uit de auto gewist|Kopyalanır, doğrulanır, sonra araçtan silinir|Zkopírovány, ověřeny a pak smazány z auta
+mm_move_button|Move|Déplacer|Verschieben|Mover|Sposta|Verplaatsen|Taşı|Přesunout
+mm_copied|Memos copied: %1$d|Mémos copiés : %1$d|Notizen kopiert: %1$d|Notas copiadas: %1$d|Promemoria copiati: %1$d|Memo's gekopieerd: %1$d|Kopyalanan notlar: %1$d|Zkopírované poznámky: %1$d
+mm_moved|Memos moved: %1$d|Mémos déplacés : %1$d|Notizen verschoben: %1$d|Notas movidas: %1$d|Promemoria spostati: %1$d|Memo's verplaatst: %1$d|Taşınan notlar: %1$d|Přesunuté poznámky: %1$d
+mm_recording_group|Recording|Enregistrement|Aufnahme|Grabación|Registrazione|Opname|Kayıt|Nahrávání
+mm_music|Music while recording|Musique pendant l'enregistrement|Musik während der Aufnahme|Música durante la grabación|Musica durante la registrazione|Muziek tijdens de opname|Kayıt sırasında müzik|Hudba během nahrávání
+mm_music_cut|Cut|Couper|Stumm|Silenciar|Interrompi|Uit|Kes|Vypnout
+mm_music_duck|Lower|Baisser|Leiser|Bajar|Abbassa|Zachter|Kıs|Ztlumit
+mm_music_none|Nothing|Rien|Nichts|Nada|Niente|Niets|Hiçbir şey|Nic
+mm_calls|Also record during calls|Enregistrer aussi pendant les appels|Auch während Anrufen aufnehmen|Grabar también durante las llamadas|Registra anche durante le chiamate|Ook tijdens gesprekken opnemen|Aramalarda da kaydet|Nahrávat i během hovorů
+mm_calls_sub|Off: the memo pauses during a call and goes on after|Désactivé : le mémo se met en pause pendant l'appel et reprend après|Aus: die Notiz pausiert während des Anrufs und läuft danach weiter|Desactivado: la nota se pausa durante la llamada y sigue después|Disattivato: il promemoria va in pausa durante la chiamata e riprende dopo|Uit: het memo pauzeert tijdens het gesprek en gaat daarna verder|Kapalı: not arama sırasında duraklar ve sonra devam eder|Vypnuto: poznámka se během hovoru pozastaví a pak pokračuje
+mm_quality|Quality|Qualité|Qualität|Calidad|Qualità|Kwaliteit|Kalite|Kvalita
+mm_quality_sub|Voice: about 15 MB an hour|Voix : environ 15 Mo par heure|Sprache: etwa 15 MB pro Stunde|Voz: unos 15 MB por hora|Voce: circa 15 MB all'ora|Spraak: ongeveer 15 MB per uur|Ses: saatte yaklaşık 15 MB|Hlas: asi 15 MB za hodinu
+mm_quality_voice|Voice|Voix|Sprache|Voz|Voce|Spraak|Ses|Hlas
+mm_quality_high|High|Haute|Hoch|Alta|Alta|Hoog|Yüksek|Vysoká
+mm_today|Today|Aujourd'hui|Heute|Hoy|Oggi|Vandaag|Bugün|Dnes
+mm_mb|MB|Mo|MB|MB|MB|MB|MB|MB
