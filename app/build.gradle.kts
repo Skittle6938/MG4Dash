@@ -33,6 +33,8 @@ android {
         create("emulator") {
             dimension = "target"
             applicationIdSuffix = ".emu"
+            // Debug key on its release build too, so the shrunk APK installs in an emulator (scripts/r8_smoke.sh)
+            signingConfig = signingConfigs.getByName("debug")
             buildConfigField("boolean", "MOCK", "true")
         }
     }
