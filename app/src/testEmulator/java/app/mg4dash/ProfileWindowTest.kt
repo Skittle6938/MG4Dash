@@ -54,14 +54,14 @@ class ProfileWindowTest {
         val d = ShadowDialog.getLatestDialog() as android.app.AlertDialog
         val name = texts(d.window!!.decorView).filterIsInstance<EditText>().first()
         // Empty: refused, the window stays
-        d.getButton(android.app.AlertDialog.BUTTON_POSITIVE).performClick(); idle()
+        texts(d.window!!.decorView).first { it.text.toString() == a.getString(app.mg4dash.R.string.pf_save) }.performClick(); idle()
         assertTrue(d.isShowing)
         assertTrue(texts(d.window!!.decorView).any { it.text.toString() == "Donnez un nom au profil." })
         // The same name as another: refused
-        name.setText("principal"); d.getButton(android.app.AlertDialog.BUTTON_POSITIVE).performClick(); idle()
+        name.setText("principal"); texts(d.window!!.decorView).first { it.text.toString() == a.getString(app.mg4dash.R.string.pf_save) }.performClick(); idle()
         assertTrue(d.isShowing)
         // A new name: created, switched to, closed
-        name.setText("Sophie"); d.getButton(android.app.AlertDialog.BUTTON_POSITIVE).performClick(); idle()
+        name.setText("Sophie"); texts(d.window!!.decorView).first { it.text.toString() == a.getString(app.mg4dash.R.string.pf_save) }.performClick(); idle()
         assertTrue(!d.isShowing)
         assertEquals("Sophie", Profiles.current(ctx).name)
         assertEquals(1, switched)

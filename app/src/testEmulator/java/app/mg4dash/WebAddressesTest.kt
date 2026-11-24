@@ -47,8 +47,8 @@ class WebAddressesTest {
         val root = ShadowDialog.getLatestDialog().window!!.decorView
         val out = mutableListOf<String>()
         fun walk(v: View) {
-            // The titles (21 sp), not the marks nor the end buttons
-            if (v is TextView && Math.abs(v.textSize - 21f * v.resources.displayMetrics.scaledDensity) < 0.5f) out += v.text.toString()
+            // The titles (20 sp), not the marks nor the end buttons
+            if (v is TextView && Math.abs(v.textSize - 20f * v.resources.displayMetrics.scaledDensity) < 0.5f) out += v.text.toString()
             if (v is ViewGroup) for (i in 0 until v.childCount) walk(v.getChildAt(i))
         }
         walk(root)

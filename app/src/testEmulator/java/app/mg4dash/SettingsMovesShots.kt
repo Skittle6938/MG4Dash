@@ -87,6 +87,13 @@ class SettingsMovesShots {
         }
     }
 
+    @Test fun energyPage() {
+        for ((theme, look) in looks) {
+            base(theme).commit()
+            page(Robolectric.buildActivity(app.mg4dash.pages.EnergyActivity::class.java).setup().get().also { idle() }, "energy_$look.png")
+        }
+    }
+
     @Test fun pages() {
         for ((theme, look) in looks) {
             base(theme).putBoolean("settings_tabs_v2", true).putInt("settings_tab", 2).commit()
