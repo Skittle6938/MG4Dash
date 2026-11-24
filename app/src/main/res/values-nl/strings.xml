@@ -302,6 +302,7 @@
     <string name="st_ha_no_token">Token: niet ingesteld</string>
     <string name="st_ha_token_set">Token: ingesteld</string>
     <string name="st_ha_desc">Maak een langlevend toegangstoken aan in je Home Assistant-profiel. Snelkoppelingen kunnen dan scripts, automatiseringen, scènes, knoppen en afdekkingen (poort, garagedeur) starten. De knop rechtsboven op de kaart toont de snelkoppelingen.</string>
+    <string name="st_ha_settings">Home Assistant-instellingen</string>
     <string name="st_ha_set_url">Adres</string>
     <string name="st_ha_set_token">Token</string>
     <string name="st_ha_test">Testen</string>
@@ -341,6 +342,7 @@
     <string name="st_theme">THEMA</string>
     <string name="st_theme_bg">Achtergrond</string>
     <string name="st_theme_accent">Knopkleur</string>
+    <string name="st_more_colors">Meer kleuren…</string>
     <string name="st_theme_desc">Accugroen, verwarmingsoranje, koelingscyaan en waarschuwingsrood behouden hun betekenis bij elk thema. MG4Radio volgt het thema bij de volgende keer dat de radio opent.</string>
     <string name="st_update">UPDATE</string>
     <string name="st_update_installed">Geïnstalleerde versie: %1$s</string>
@@ -983,7 +985,7 @@
     <string name="st_rad_high">Sterke waarschuwing (rood) boven de limiet</string>
     <string name="st_rad_banner">Banner boven andere apps</string>
     <string name="st_rad_banner_desc">Een rood knipperende banner ruim boven de limiet in een flitszone, ook over Android Auto.</string>
-    <string name="st_rad_wifi">Alleen wifi</string>
+    <string name="st_rad_wifi">Alleen via wifi downloaden</string>
     <string name="st_rad_wifi_desc">Geen download via de 4G van de auto: alleen al bewaarde gebieden worden gebruikt.</string>
     <string name="st_rad_cache">%1$d gebieden bewaard · %2$s</string>
     <string name="st_rad_preparing">Voorbereiden: %1$d / %2$d</string>
@@ -1069,7 +1071,7 @@
     <string name="rp_resume">Hervatten</string>
     <string name="rp_pause">Pauzeren</string>
     <string name="rp_cancel">Annuleren</string>
-    <string name="rp_wifi_sub">Nooit 4G: alleen bewaarde gebieden worden gebruikt</string>
+    <string name="rp_wifi_sub">Geen 4G tijdens het rijden: alleen al gedownloade wegen en flitsers worden gebruikt</string>
     <string name="rp_refresh">Gebied rond de auto vernieuwen</string>
     <string name="rp_refresh_sub">Als ouder dan…</string>
     <string name="rp_storage">Opslag</string>

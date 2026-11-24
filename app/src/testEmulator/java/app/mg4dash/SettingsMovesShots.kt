@@ -63,9 +63,9 @@ class SettingsMovesShots {
     @Test fun cardWindows() {
         for ((theme, look) in looks) {
             base(theme).putInt("home_style", 0).putString("home_layout", "full")
-                .putString("slots_full", "tl=hourly;tc=consumption,map;tr=media;bl=energy;bc=climate;br=trip,power,phone").commit()
+                .putString("slots_full", "tl=hourly;tc=consumption,map;tr=shortcuts;bl=energy;bc=climate;br=trip,power,phone").commit()
             val a = Robolectric.buildActivity(MainActivity::class.java).setup().get().also { idle() }
-            for (card in listOf(Card.HOURLY, Card.CLIMATE, Card.ENERGY, Card.CONSUMPTION)) {
+            for (card in listOf(Card.HOURLY, Card.CLIMATE, Card.ENERGY, Card.CONSUMPTION, Card.SHORTCUTS)) {
                 ShadowDialog.reset()
                 cards(a)[card]?.view?.performLongClick(); window(a, "options_${card.id}_$look.png")
             }
@@ -84,8 +84,21 @@ class SettingsMovesShots {
         for ((theme, look) in looks) {
             base(theme).putBoolean("settings_tabs_v2", true).putInt("settings_tab", 2).commit()
             page(Robolectric.buildActivity(SettingsActivity::class.java).setup().get().also { idle() }, "page_car_$look.png")
-            base(theme).putBoolean("settings_tabs_v2", true).putInt("settings_tab", 3).commit()
-            page(Robolectric.buildActivity(SettingsActivity::class.java).setup().get().also { idle() }, "page_net_$look.png")
+            base(theme).commit()
+            page(Robolectric.buildActivity(SettingsActivity::class.java, android.content.Intent().putExtra(SettingsActivity.EXTRA_HA, true)).setup().get().also { idle() }, "page_ha_$look.png")
+            // The 24 colours' grid (accent), the current one circled
+            base(theme).putInt("theme_accent", 0).commit()
+            val s = Robolectric.buildActivity(SettingsActivity::class.java).setup().get().also { idle() }
+            ShadowDialog.reset()
+            SettingsActivity::class.java.getDeclaredMethod("colorGrid", IntArray::class.java, Int::class.javaPrimitiveType, String::class.java, kotlin.jvm.functions.Function1::class.java)
+                .apply { isAccessible = true }.invoke(s, app.mg4dash.ui.Themes.ACCENT_SWATCHES, 0, s.getString(R.string.st_theme_accent), { _: Int -> })
+            window(s, "color_grid_accent_$look.png")
+            ShadowDialog.reset()
+            SettingsActivity::class.java.getDeclaredMethod("colorGrid", IntArray::class.java, Int::class.javaPrimitiveType, String::class.java, kotlin.jvm.functions.Function1::class.java)
+                .apply { isAccessible = true }.invoke(s, app.mg4dash.ui.Themes.BACKGROUND_SWATCHES, 1, s.getString(R.string.st_theme_bg), { _: Int -> })
+            window(s, "color_grid_bg_$look.png")
+            base(theme).putBoolean("settings_tabs_v2", true).putBoolean("settings_tabs_v3", true).putInt("settings_tab", 1).commit()
+            page(Robolectric.buildActivity(SettingsActivity::class.java).setup().get().also { idle() }, "page_look_$look.png")
             base(theme).putFloat("kwh_price", 0.25f).commit()
             page(Robolectric.buildActivity(app.mg4dash.pages.TripsActivity::class.java).setup().get().also { idle() }, "trips_$look.png")
         }

@@ -53,6 +53,7 @@ class SettingsActivity : AppCompatActivity() {
         themeSig = app.mg4dash.ui.Themes.signature(this)
         // The speed camera alerter's own page (17/11): a long press on its card
         if (intent.getBooleanExtra(EXTRA_RADAR, false)) { radarPage(); return }
+        if (intent.getBooleanExtra(EXTRA_HA, false)) { haPage(); return }
         // A single scrolling area: two columns of categories, under a fixed banner
         // (title, log, close) that leaves room for the fog light button.
         // The screen's margins as home's (Grand affichage: enlarged like its bar, which then sits where home's does)
@@ -102,7 +103,6 @@ class SettingsActivity : AppCompatActivity() {
         val (homeL, homeR) = tab(R.string.st_tab_home)
         val (lookL, lookR) = tab(R.string.st_tab_look)
         val (carL, carR) = tab(R.string.st_tab_car)
-        val (netL, netR) = tab(R.string.st_tab_net)
         val (dataL, dataR) = tab(R.string.du_tab)
         val (sysL, sysR) = tab(R.string.st_tab_system)
         // Same dock (or vertical bar) as the other pages
@@ -242,9 +242,9 @@ class SettingsActivity : AppCompatActivity() {
         colors.addView(accentCol, LinearLayout.LayoutParams(0, -2, 1f))
         theme.addView(colors, LinearLayout.LayoutParams(-1, -2))
         text(bgCol, getString(R.string.st_theme_bg), 18f, R.color.text_value)
-        swatches(bgCol, app.mg4dash.ui.Themes.BACKGROUND_SWATCHES, prefs.themeBackground) { prefs.themeBackground = it; onThemeChanged() }
+        swatches(bgCol, app.mg4dash.ui.Themes.BACKGROUND_SWATCHES, prefs.themeBackground, getString(R.string.st_theme_bg)) { prefs.themeBackground = it; onThemeChanged() }
         text(accentCol, getString(R.string.st_theme_accent), 18f, R.color.text_value)
-        swatches(accentCol, app.mg4dash.ui.Themes.ACCENT_SWATCHES, prefs.themeAccent) { prefs.themeAccent = it; onThemeChanged() }
+        swatches(accentCol, app.mg4dash.ui.Themes.ACCENT_SWATCHES, prefs.themeAccent, getString(R.string.st_theme_accent)) { prefs.themeAccent = it; onThemeChanged() }
         text(theme, getString(R.string.st_theme_desc), 16f, R.color.text_title)
 
         // ── Energy ──
@@ -463,33 +463,9 @@ class SettingsActivity : AppCompatActivity() {
                 .create().also { app.mg4dash.ui.Dialogs.show(it); app.mg4dash.ui.Dialogs.fix(it) }
         }
 
-        // Weather: model and fallback city in the weather cards' options (24/11)
+        // Weather (the cards' options) and Home Assistant (its own page) left the Connections tab, which is gone (24/11)
 
-        // ── Home Assistant ──
-        val ha = panel(netR, "HOME ASSISTANT")
-        val haState = text(ha, "", 18f, R.color.text_value)
-        fun showHa() {
-            haState.text = getString(R.string.st_ha_url, prefs.haUrl.ifBlank { "—" }) + "\n" +
-                getString(if (prefs.haToken.isBlank()) R.string.st_ha_no_token else R.string.st_ha_token_set)
-        }
-        showHa()
-        text(ha, getString(R.string.st_ha_desc), 16f, R.color.text_title)
-        row(ha,
-            button(getString(R.string.st_ha_set_url)) {
-                ask(getString(R.string.st_ha_set_url), prefs.haUrl.ifBlank { "http://homeassistant.local:8123" }, secret = false) { prefs.haUrl = it; showHa() }
-            },
-            button(getString(R.string.st_ha_set_token)) {
-                ask(getString(R.string.st_ha_set_token), "", secret = true) { prefs.haToken = it; showHa() }
-            },
-            button(getString(R.string.st_ha_test)) {
-                app.mg4dash.shortcuts.Shortcuts.testHa(this) { ok ->
-                    app.mg4dash.ui.Toasts.show(this, if (ok) R.string.st_ha_ok else R.string.ha_error, long = true)
-                }
-            },
-        )
-        // #63: keyboard without "paste" (SWI68): address and token read from a text file on the USB stick
-        row(ha, button(getString(R.string.st_ha_import)) { importHa { showHa() } })
-        text(ha, getString(R.string.st_ha_import_desc), 14f, R.color.text_title)
+        // Home Assistant: its own page, from the shortcuts card's options and a shortcut's menu (24/11)
 
         // ── Diagnostic: compatibility, log, recorder ──
         val diag = panel(sysL, getString(R.string.st_diag))
@@ -517,6 +493,11 @@ class SettingsActivity : AppCompatActivity() {
             val t = prefs.raw.getInt("settings_tab", 0)
             prefs.raw.edit().putBoolean("settings_tabs_v2", true).putInt("settings_tab", if (t >= TAB_DATA) t + 1 else t).apply()
         }
+        // The Connections tab is gone (24/11): a saved later tab stays the same tab, a saved Connections opens Home
+        if (!prefs.raw.contains("settings_tabs_v3")) {
+            val t = prefs.raw.getInt("settings_tab", 0)
+            prefs.raw.edit().putBoolean("settings_tabs_v3", true).putInt("settings_tab", if (t > 3) t - 1 else if (t == 3) 0 else t).apply()
+        }
         val asked = intent.getIntExtra(EXTRA_TAB, -1)
         showTab((if (asked >= 0) asked else prefs.raw.getInt("settings_tab", 0)).coerceIn(0, tabViews.size - 1))
     }
@@ -524,10 +505,14 @@ class SettingsActivity : AppCompatActivity() {
     companion object {
         /** Tab to open (index), e.g. [TAB_DATA] from the 4G data alert. */
         const val EXTRA_TAB = "tab"
-        const val TAB_DATA = 4
+        const val TAB_DATA = 3
         const val TAB_CAR = 2
         /** Opens the speed camera alerter's own page instead of the settings (long press on its card). */
         const val EXTRA_RADAR = "radar"
+        /** Opens the Home Assistant page (address, token, test) instead of the settings. */
+        const val EXTRA_HA = "ha"
+
+        fun openHa(context: android.content.Context) = context.startActivity(android.content.Intent(context, SettingsActivity::class.java).putExtra(EXTRA_HA, true))
         /** Tab of the alerter's page to open (RadarPage.Tab ordinal), Alertes by default. */
         const val EXTRA_RADAR_TAB = "radar_tab"
     }
@@ -1268,22 +1253,49 @@ class SettingsActivity : AppCompatActivity() {
         recreate()
     }
 
-    /** Row of colour dots; the chosen dot is circled in white. */
-    private fun swatches(parent: LinearLayout, colors: IntArray, selected: Int, onPick: (Int) -> Unit) {
+    /**
+     * Row of colour dots (the first five, and the chosen one when it comes from the grid), circled in white when
+     * chosen; "More colours…" opens the grid of all 24 (24/11).
+     */
+    private fun swatches(parent: LinearLayout, colors: IntArray, selected: Int, title: String, onPick: (Int) -> Unit) {
         val r = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL }
-        colors.forEachIndexed { i, c ->
-            val v = View(this).apply {
-                background = android.graphics.drawable.GradientDrawable().apply {
-                    shape = android.graphics.drawable.GradientDrawable.OVAL
-                    setColor(c)
-                    setStroke(dp(if (i == selected) 4 else 1), if (i == selected) 0xFFFFFFFF.toInt() else 0xFF4A5366.toInt())
-                }
-                isClickable = true
-                setOnClickListener { if (i != selected) onPick(i) }
-            }
-            r.addView(v, LinearLayout.LayoutParams(dp(56), dp(56)).apply { if (i > 0) leftMargin = dp(18) })
+        val shown = (0 until app.mg4dash.ui.Themes.FIRST_SWATCHES) + listOfNotNull(selected.takeIf { it >= app.mg4dash.ui.Themes.FIRST_SWATCHES })
+        shown.forEachIndexed { k, i ->
+            r.addView(dot(colors[i], i == selected) { if (i != selected) onPick(i) }, LinearLayout.LayoutParams(dp(56), dp(56)).apply { if (k > 0) leftMargin = dp(14) })
         }
-        parent.addView(r, LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(8); bottomMargin = dp(6) })
+        parent.addView(r, LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(8) })
+        parent.addView(TextView(this).apply {
+            text = getString(R.string.st_more_colors) + "  ›"; setTextColor(app.mg4dash.ui.Themes.select(this@SettingsActivity)); setTextSize(TypedValue.COMPLEX_UNIT_SP, 19f)
+            gravity = Gravity.CENTER_VERTICAL; setPadding(dp(4), 0, dp(14), 0); app.mg4dash.ui.Rows.touchable(this)
+            setOnClickListener { colorGrid(colors, selected, title, onPick) }
+        }, LinearLayout.LayoutParams(-2, dp(56)).apply { topMargin = dp(4); bottomMargin = dp(6) })
+    }
+
+    private fun dot(c: Int, chosen: Boolean, onClick: () -> Unit) = View(this).apply {
+        background = android.graphics.drawable.GradientDrawable().apply {
+            shape = android.graphics.drawable.GradientDrawable.OVAL
+            setColor(c)
+            setStroke(dp(if (chosen) 4 else 1), if (chosen) color(R.color.text_value) else 0xFF4A5366.toInt())
+        }
+        contentDescription = String.format("#%06X", c and 0xFFFFFF)
+        isClickable = true
+        setOnClickListener { onClick() }
+    }
+
+    /** All 24 colours in the settings' window, six by row: a touch picks one and closes it. */
+    private fun colorGrid(colors: IntArray, selected: Int, title: String, onPick: (Int) -> Unit) {
+        lateinit var d: android.app.AlertDialog
+        val grid = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; setPadding(0, dp(4), 0, dp(4)) }
+        colors.toList().chunked(6).forEachIndexed { rowIndex, line ->
+            val r = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER }
+            line.forEachIndexed { k, c ->
+                val i = rowIndex * 6 + k
+                r.addView(dot(c, i == selected) { d.dismiss(); if (i != selected) onPick(i) }, LinearLayout.LayoutParams(dp(72), dp(72)).apply { setMargins(dp(14), dp(10), dp(14), dp(10)) })
+            }
+            grid.addView(r, LinearLayout.LayoutParams(-1, -2))
+        }
+        val group = app.mg4dash.ui.Rows.group(this).apply { addView(grid, LinearLayout.LayoutParams(-1, -2)) }
+        d = app.mg4dash.ui.Windows.show(this, title, group, widthDp = 820)
     }
 
     // ── Petites briques d'UI ──
@@ -1375,6 +1387,55 @@ class SettingsActivity : AppCompatActivity() {
      * The speed camera alerter's own page (the owner's mockups, 17/11), opened by a long press on its card, apart from the
      * settings: two tabs (Alertes, Données) built by [app.mg4dash.radar.RadarPage].
      */
+    /** Home Assistant's page (24/11): the address, the token, a test and the import from a USB stick. */
+    private fun haPage() {
+        val bd = app.mg4dash.ui.Dock.sized(this).resources.displayMetrics.density
+        val root = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; setPadding((16 * bd).toInt(), (12 * bd).toInt(), (16 * bd).toInt(), (12 * bd).toInt()) }
+        val vertical = app.mg4dash.ui.Dock.vertical(this)
+        val top = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL }
+        top.addView(TextView(this).apply {
+            text = "Home Assistant"; setTextColor(color(R.color.text_value))
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, 26f); typeface = Typeface.create("sans-serif-medium", Typeface.NORMAL)
+        }, LinearLayout.LayoutParams(0, -2, 1f).apply { leftMargin = if (vertical) dp(12) else dp(app.mg4dash.ui.Kit.fogSafeDp(this@SettingsActivity) - 8) })
+        top.addView(app.mg4dash.ui.Rows.closeButton(this) { finish() })
+        root.addView(top, LinearLayout.LayoutParams(-1, -2).apply { bottomMargin = dp(12) })
+        val cols = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
+        val parent = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
+        cols.addView(parent, LinearLayout.LayoutParams(0, -2, 1f))
+        cols.addView(View(this), LinearLayout.LayoutParams(0, 1, 1f))
+        root.addView(ScrollView(this).apply { addView(cols) }, LinearLayout.LayoutParams(-1, 0, 1f))
+        val ha = panel(parent, "HOME ASSISTANT")
+        val haState = text(ha, "", 18f, R.color.text_value)
+        fun showHa() {
+            haState.text = getString(R.string.st_ha_url, prefs.haUrl.ifBlank { "—" }) + "\n" +
+                getString(if (prefs.haToken.isBlank()) R.string.st_ha_no_token else R.string.st_ha_token_set)
+        }
+        showHa()
+        text(ha, getString(R.string.st_ha_desc), 16f, R.color.text_title)
+        row(ha,
+            button(getString(R.string.st_ha_set_url)) {
+                ask(getString(R.string.st_ha_set_url), prefs.haUrl.ifBlank { "http://homeassistant.local:8123" }, secret = false) { prefs.haUrl = it; showHa() }
+            },
+            button(getString(R.string.st_ha_set_token)) {
+                ask(getString(R.string.st_ha_set_token), "", secret = true) { prefs.haToken = it; showHa() }
+            },
+            button(getString(R.string.st_ha_test)) {
+                app.mg4dash.shortcuts.Shortcuts.testHa(this) { ok ->
+                    app.mg4dash.ui.Toasts.show(this, if (ok) R.string.st_ha_ok else R.string.ha_error, long = true)
+                }
+            },
+        )
+        // #63: keyboard without "paste" (SWI68): address and token read from a text file on the USB stick
+        row(ha, button(getString(R.string.st_ha_import)) { importHa { showHa() } })
+        text(ha, getString(R.string.st_ha_import_desc), 14f, R.color.text_title)
+
+        val dock = LinearLayout(this)
+        root.addView(dock, LinearLayout.LayoutParams(-1, dp(84)).apply { topMargin = dp(12) })
+        app.mg4dash.ui.Dock.mount(this, root, dock, app.mg4dash.ui.Dock.Page.SETTINGS)
+        setContentView(root)
+        app.mg4dash.ui.FadeOutline.applyTo(root)
+    }
+
     private fun radarPage() {
         // The screen's margins as home's (Grand affichage: enlarged like its bar, which then sits where home's does)
         val bd = app.mg4dash.ui.Dock.sized(this).resources.displayMetrics.density

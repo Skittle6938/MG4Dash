@@ -313,6 +313,7 @@ object Shortcuts {
             ha?.let { activity.getString(R.string.sc_state) },
             activity.getString(R.string.sc_clear),
             activity.getString(R.string.sw_fav_count),
+            activity.getString(R.string.st_ha_settings),
         ).toTypedArray()
         app.mg4dash.ui.Windows.pick(activity, activity.getString(R.string.sc_edit), choices.toList()) { w ->
                 when (choices[w]) {
@@ -321,6 +322,7 @@ object Shortcuts {
                     activity.getString(R.string.sc_clear) -> { set(prefs, i, Slot.Empty); refresh() }
                     activity.getString(R.string.sc_adb) -> { set(prefs, i, Slot.Adb); refresh() }
                     activity.getString(R.string.sw_fav_count) -> pickDensity(activity, refresh)
+                    activity.getString(R.string.st_ha_settings) -> app.mg4dash.settings.SettingsActivity.openHa(activity)
                     else -> if (ha != null) pickState(activity, i, ha, refresh)
                 }
         }

@@ -308,7 +308,7 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
                     navBanner?.show(app.mg4dash.map.NavRepo.nav.value?.takeIf { on })
                     if (on) renderLocation(LocationRepo.location.value, CarBridge.state.value)
                 })
-                Card.SHORTCUTS -> host(card, shortcutsHolder, true, { if (it) renderShortcuts() })
+                Card.SHORTCUTS -> host(card, shortcutsHolder, true, { if (it) renderShortcuts() }, ::shortcutsOptions)
                 Card.WEB -> host(card, web, true, { on -> web.visibility = if (on) View.VISIBLE else View.GONE; if (on) web.show() else web.pause() })
                 // Its own options in a popup (17/11): a long press on the card
                 Card.ENERGY -> host(card, b.energyCard, false, {}, ::energyOptions, ::energyOptionsClosed)
@@ -1174,6 +1174,12 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
     }
 
     /** The climate card's options: the temperature calibration (it opens its own window). */
+    /** The shortcuts card's options (24/11): Home Assistant, which its shortcuts use. */
+    private fun shortcutsOptions(popup: app.mg4dash.ui.OptionsPopup): app.mg4dash.ui.OptionsPopup =
+        popup.action(getString(R.string.st_ha_settings), getString(R.string.st_ha_desc), getString(R.string.opt_open)) {
+            app.mg4dash.settings.SettingsActivity.openHa(this)
+        }
+
     private fun climateOptions(popup: app.mg4dash.ui.OptionsPopup): app.mg4dash.ui.OptionsPopup {
         climateBuiltWith = prefs.heatedSeats
         // From Settings › Vehicle (24/11): what belongs to the climate is set on its card

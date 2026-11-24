@@ -302,6 +302,7 @@
     <string name="st_ha_no_token">Token: no definido</string>
     <string name="st_ha_token_set">Token: definido</string>
     <string name="st_ha_desc">Cree un token de acceso de larga duración en su perfil de Home Assistant. Los accesos podrán ejecutar scripts, automatizaciones, escenas, botones y cubiertas (portón, puerta de garaje). El botón arriba a la derecha del mapa muestra los accesos.</string>
+    <string name="st_ha_settings">Ajustes de Home Assistant</string>
     <string name="st_ha_set_url">Dirección</string>
     <string name="st_ha_set_token">Token</string>
     <string name="st_ha_test">Probar</string>
@@ -341,6 +342,7 @@
     <string name="st_theme">TEMA</string>
     <string name="st_theme_bg">Fondo</string>
     <string name="st_theme_accent">Color de los botones</string>
+    <string name="st_more_colors">Más colores…</string>
     <string name="st_theme_desc">El verde de la batería, el naranja de la calefacción, el cian del frío y el rojo de las alertas mantienen su significado con cualquier tema. MG4Radio sigue el tema la próxima vez que se abra la radio.</string>
     <string name="st_update">ACTUALIZACIÓN</string>
     <string name="st_update_installed">Versión instalada: %1$s</string>
@@ -983,7 +985,7 @@
     <string name="st_rad_high">Alerta fuerte (rojo) sobre el límite</string>
     <string name="st_rad_banner">Banner sobre las otras apps</string>
     <string name="st_rad_banner_desc">Un banner rojo intermitente muy por encima del límite en una zona de radar, también sobre Android Auto.</string>
-    <string name="st_rad_wifi">Solo Wi-Fi</string>
+    <string name="st_rad_wifi">Descargar solo por Wi-Fi</string>
     <string name="st_rad_wifi_desc">Ninguna descarga por el 4G del coche: solo se usan las zonas ya guardadas.</string>
     <string name="st_rad_cache">%1$d zonas guardadas · %2$s</string>
     <string name="st_rad_preparing">Preparando: %1$d / %2$d</string>
@@ -1069,7 +1071,7 @@
     <string name="rp_resume">Reanudar</string>
     <string name="rp_pause">Pausar</string>
     <string name="rp_cancel">Cancelar</string>
-    <string name="rp_wifi_sub">Nunca 4G: solo se usan las zonas guardadas</string>
+    <string name="rp_wifi_sub">Sin 4G al circular: solo se usan las carreteras y radares ya descargados</string>
     <string name="rp_refresh">Actualizar la zona alrededor del coche</string>
     <string name="rp_refresh_sub">Si tiene más de…</string>
     <string name="rp_storage">Almacenamiento</string>

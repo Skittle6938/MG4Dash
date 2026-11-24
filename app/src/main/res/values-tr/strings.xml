@@ -302,6 +302,7 @@
     <string name="st_ha_no_token">Token: ayarlanmadı</string>
     <string name="st_ha_token_set">Token: ayarlandı</string>
     <string name="st_ha_desc">Home Assistant profilinizde uzun ömürlü bir erişim tokenı oluşturun. Kısayollar daha sonra komut dosyalarını, otomasyonları, sahneleri, düğmeleri ve kapakları (bahçe kapısı, garaj kapısı) çalıştırabilir. Kısayolları göstermek için haritanın sağ üstündeki düğmeyi kullanın.</string>
+    <string name="st_ha_settings">Home Assistant ayarları</string>
     <string name="st_ha_set_url">Adres</string>
     <string name="st_ha_set_token">Token</string>
     <string name="st_ha_test">Test et</string>
@@ -341,6 +342,7 @@
     <string name="st_theme">TEMA</string>
     <string name="st_theme_bg">Arka plan</string>
     <string name="st_theme_accent">Düğme rengi</string>
+    <string name="st_more_colors">Daha fazla renk…</string>
     <string name="st_theme_desc">Batarya yeşili, ısıtma turuncusu, soğutma camgöbeği ve uyarı kırmızısı tema ne olursa olsun anlamlarını korur. MG4Radio, radyo bir sonraki açılışında temaya uyar.</string>
     <string name="st_update">GÜNCELLEME</string>
     <string name="st_update_installed">Yüklü sürüm: %1$s</string>
@@ -983,7 +985,7 @@
     <string name="st_rad_high">Güçlü uyarı (kırmızı), sınırın üzeri</string>
     <string name="st_rad_banner">Diğer uygulamaların üzerinde şerit</string>
     <string name="st_rad_banner_desc">Radar bölgesinde sınırın çok üzerindeyken Android Auto dahil yanıp sönen kırmızı şerit.</string>
-    <string name="st_rad_wifi">Yalnızca Wi-Fi</string>
+    <string name="st_rad_wifi">Yalnızca Wi-Fi ile indir</string>
     <string name="st_rad_wifi_desc">Aracın 4G\'si üzerinden indirme yok: yalnızca kayıtlı bölgeler kullanılır.</string>
     <string name="st_rad_cache">%1$d bölge kayıtlı · %2$s</string>
     <string name="st_rad_preparing">Hazırlanıyor: %1$d / %2$d</string>
@@ -1069,7 +1071,7 @@
     <string name="rp_resume">Devam et</string>
     <string name="rp_pause">Duraklat</string>
     <string name="rp_cancel">İptal</string>
-    <string name="rp_wifi_sub">Asla 4G: yalnızca kayıtlı bölgeler kullanılır</string>
+    <string name="rp_wifi_sub">Sürüşte 4G yok: yalnızca önceden indirilmiş yollar ve radarlar kullanılır</string>
     <string name="rp_refresh">Aracın çevresini yenile</string>
     <string name="rp_refresh_sub">Şundan eskiyse…</string>
     <string name="rp_storage">Depolama</string>

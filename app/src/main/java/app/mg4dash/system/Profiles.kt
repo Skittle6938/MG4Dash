@@ -78,7 +78,7 @@ object Profiles {
         "shortcuts_menu", "shortcut_fcw", "shortcut_lane_mode",
         // The system: updates, ADB, maintenance mode, Settings' tab, the option of the drive mode per profile
         "update_auto", "update_beta", "update_skipped", "upd_checked_at", "upd_new_app", "upd_new_rd", "radio_dash_pending", "radio_dash_version",
-        "adb_at_start", "valet_mode", "valet_auto", "settings_tab", "settings_tabs_v2", "defaults_v1", "fell_back", "stock_home", "alive_at",
+        "adb_at_start", "valet_mode", "valet_auto", "settings_tab", "settings_tabs_v2", "settings_tabs_v3", "defaults_v1", "fell_back", "stock_home", "alive_at",
         "warmup_boot", "conn_migrated", "connection_icons", "connection_off", "last_night", "profiles_drive", "mock_offline",
         // The settings backup's two options (#129)
         "backup_history", "backup_token",

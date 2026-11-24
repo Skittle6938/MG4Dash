@@ -302,6 +302,7 @@
     <string name="st_ha_no_token">Token: nenastaven</string>
     <string name="st_ha_token_set">Token: nastaven</string>
     <string name="st_ha_desc">Ve svém profilu Home Assistant vytvořte dlouhodobý přístupový token. Zkratky pak mohou spouštět skripty, automatizace, scény, tlačítka a clony (brána, garážová vrata). Zkratky zobrazíte tlačítkem vpravo nahoře na mapě.</string>
+    <string name="st_ha_settings">Nastavení Home Assistant</string>
     <string name="st_ha_set_url">Adresa</string>
     <string name="st_ha_set_token">Token</string>
     <string name="st_ha_test">Test</string>
@@ -341,6 +342,7 @@
     <string name="st_theme">MOTIV</string>
     <string name="st_theme_bg">Pozadí</string>
     <string name="st_theme_accent">Barva tlačítek</string>
+    <string name="st_more_colors">Další barvy…</string>
     <string name="st_theme_desc">Zelená baterie, oranžový ohřev, azurové chlazení a červené upozornění si zachovávají svůj význam v jakémkoli motivu. MG4Radio převezme motiv při příštím otevření rádia.</string>
     <string name="st_update">AKTUALIZACE</string>
     <string name="st_update_installed">Nainstalovaná verze: %1$s</string>
@@ -983,7 +985,7 @@
     <string name="st_rad_high">Silné upozornění (červená) nad limit</string>
     <string name="st_rad_banner">Pruh přes ostatní aplikace</string>
     <string name="st_rad_banner_desc">Červeně blikající pruh výrazně nad limitem v zóně radaru, i přes Android Auto.</string>
-    <string name="st_rad_wifi">Jen Wi-Fi</string>
+    <string name="st_rad_wifi">Stahovat jen přes Wi-Fi</string>
     <string name="st_rad_wifi_desc">Žádné stahování přes 4G vozu: použijí se jen již uložené oblasti.</string>
     <string name="st_rad_cache">%1$d uložených oblastí · %2$s</string>
     <string name="st_rad_preparing">Příprava: %1$d / %2$d</string>
@@ -1069,7 +1071,7 @@
     <string name="rp_resume">Pokračovat</string>
     <string name="rp_pause">Pozastavit</string>
     <string name="rp_cancel">Zrušit</string>
-    <string name="rp_wifi_sub">Nikdy 4G: použijí se jen uložené oblasti</string>
+    <string name="rp_wifi_sub">Žádné 4G při jízdě: použijí se jen již stažené silnice a radary</string>
     <string name="rp_refresh">Obnovit oblast kolem vozu</string>
     <string name="rp_refresh_sub">Pokud je starší než…</string>
     <string name="rp_storage">Úložiště</string>

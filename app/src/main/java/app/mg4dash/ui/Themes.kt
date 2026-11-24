@@ -19,10 +19,15 @@ import app.mg4dash.system.Prefs
  * Radio Dash, running in the SAIC radio app, follows the same theme.
  */
 object Themes {
-    val BACKGROUNDS = listOf(R.style.MgBg_Night, R.style.MgBg_Black, R.style.MgBg_Charcoal, R.style.MgBg_Forest, R.style.MgBg_Burgundy)
-    val ACCENTS = listOf(R.style.MgAccent_Blue, R.style.MgAccent_Grey, R.style.MgAccent_Red, R.style.MgAccent_Green, R.style.MgAccent_Orange)
-    val BACKGROUNDS_LIGHT = listOf(R.style.MgBgLight_Night, R.style.MgBgLight_Black, R.style.MgBgLight_Charcoal, R.style.MgBgLight_Forest, R.style.MgBgLight_Burgundy)
-    val ACCENTS_LIGHT = listOf(R.style.MgAccentLight_Blue, R.style.MgAccentLight_Grey, R.style.MgAccentLight_Red, R.style.MgAccentLight_Green, R.style.MgAccentLight_Orange)
+    // The first five of each list are the ones offered first; the others (24/11) in the "More colours" grid (themes_palette.xml)
+    val BACKGROUNDS = listOf(R.style.MgBg_Night, R.style.MgBg_Black, R.style.MgBg_Charcoal, R.style.MgBg_Forest, R.style.MgBg_Burgundy,
+        R.style.MgBg_Slate, R.style.MgBg_Petrol, R.style.MgBg_Teal, R.style.MgBg_Emerald, R.style.MgBg_Moss, R.style.MgBg_Olive, R.style.MgBg_Sand, R.style.MgBg_Bronze, R.style.MgBg_Brown, R.style.MgBg_Rust, R.style.MgBg_DeepRed, R.style.MgBg_Wine, R.style.MgBg_Plum, R.style.MgBg_Purple, R.style.MgBg_Indigo, R.style.MgBg_Midnight, R.style.MgBg_Steel, R.style.MgBg_Graphite, R.style.MgBg_WarmGrey)
+    val ACCENTS = listOf(R.style.MgAccent_Blue, R.style.MgAccent_Grey, R.style.MgAccent_Red, R.style.MgAccent_Green, R.style.MgAccent_Orange,
+        R.style.MgAccent_Cyan, R.style.MgAccent_Teal, R.style.MgAccent_Turquoise, R.style.MgAccent_LightGreen, R.style.MgAccent_Lime, R.style.MgAccent_Yellow, R.style.MgAccent_Gold, R.style.MgAccent_Amber, R.style.MgAccent_DeepOrange, R.style.MgAccent_Coral, R.style.MgAccent_Rose, R.style.MgAccent_Pink, R.style.MgAccent_Magenta, R.style.MgAccent_Purple, R.style.MgAccent_DeepPurple, R.style.MgAccent_Lavender, R.style.MgAccent_Indigo, R.style.MgAccent_LightBlue, R.style.MgAccent_Sky)
+    val BACKGROUNDS_LIGHT = listOf(R.style.MgBgLight_Night, R.style.MgBgLight_Black, R.style.MgBgLight_Charcoal, R.style.MgBgLight_Forest, R.style.MgBgLight_Burgundy,
+        R.style.MgBgLight_Slate, R.style.MgBgLight_Petrol, R.style.MgBgLight_Teal, R.style.MgBgLight_Emerald, R.style.MgBgLight_Moss, R.style.MgBgLight_Olive, R.style.MgBgLight_Sand, R.style.MgBgLight_Bronze, R.style.MgBgLight_Brown, R.style.MgBgLight_Rust, R.style.MgBgLight_DeepRed, R.style.MgBgLight_Wine, R.style.MgBgLight_Plum, R.style.MgBgLight_Purple, R.style.MgBgLight_Indigo, R.style.MgBgLight_Midnight, R.style.MgBgLight_Steel, R.style.MgBgLight_Graphite, R.style.MgBgLight_WarmGrey)
+    val ACCENTS_LIGHT = listOf(R.style.MgAccentLight_Blue, R.style.MgAccentLight_Grey, R.style.MgAccentLight_Red, R.style.MgAccentLight_Green, R.style.MgAccentLight_Orange,
+        R.style.MgAccentLight_Cyan, R.style.MgAccentLight_Teal, R.style.MgAccentLight_Turquoise, R.style.MgAccentLight_LightGreen, R.style.MgAccentLight_Lime, R.style.MgAccentLight_Yellow, R.style.MgAccentLight_Gold, R.style.MgAccentLight_Amber, R.style.MgAccentLight_DeepOrange, R.style.MgAccentLight_Coral, R.style.MgAccentLight_Rose, R.style.MgAccentLight_Pink, R.style.MgAccentLight_Magenta, R.style.MgAccentLight_Purple, R.style.MgAccentLight_DeepPurple, R.style.MgAccentLight_Lavender, R.style.MgAccentLight_Indigo, R.style.MgAccentLight_LightBlue, R.style.MgAccentLight_Sky)
 
     /**
      * Light mode? Setting: 0 = auto, 1 = dark, 2 = light. In auto, follow the car's day/night
@@ -93,15 +98,21 @@ object Themes {
     }
 
     /** Colours of the selector's dots (same order as the lists). */
-    val BACKGROUND_SWATCHES = intArrayOf(0xFF141B29.toInt(), 0xFF0E0E10.toInt(), 0xFF2B2F35.toInt(), 0xFF16271F.toInt(), 0xFF29161C.toInt())
-    val ACCENT_SWATCHES = intArrayOf(0xFF2979FF.toInt(), 0xFF8E99A8.toInt(), 0xFFE53935.toInt(), 0xFF00C853.toInt(), 0xFFFF8F00.toInt())
+    val BACKGROUND_SWATCHES = intArrayOf(0xFF141B29.toInt(), 0xFF0E0E10.toInt(), 0xFF2B2F35.toInt(), 0xFF16271F.toInt(), 0xFF29161C.toInt(),
+        0xFF171C26.toInt(), 0xFF12252B.toInt(), 0xFF142928.toInt(), 0xFF15281F.toInt(), 0xFF1D2518.toInt(), 0xFF242617.toInt(), 0xFF23201A.toInt(), 0xFF292014.toInt(), 0xFF281D15.toInt(), 0xFF2B1812.toInt(), 0xFF2B1212.toInt(), 0xFF28151F.toInt(), 0xFF261726.toInt(), 0xFF201528.toInt(), 0xFF161429.toInt(), 0xFF11152C.toInt(), 0xFF1A1F23.toInt(), 0xFF1F1F1F.toInt(), 0xFF211F1C.toInt())
+    val ACCENT_SWATCHES = intArrayOf(0xFF2979FF.toInt(), 0xFF8E99A8.toInt(), 0xFFE53935.toInt(), 0xFF00C853.toInt(), 0xFFFF8F00.toInt(),
+        0xFF00B8D4.toInt(), 0xFF00BFA5.toInt(), 0xFF1DE9B6.toInt(), 0xFF64DD17.toInt(), 0xFFAEEA00.toInt(), 0xFFFFD600.toInt(), 0xFFFFC400.toInt(), 0xFFFFAB00.toInt(), 0xFFFF6D00.toInt(), 0xFFFF6E40.toInt(), 0xFFFF4081.toInt(), 0xFFF50057.toInt(), 0xFFD500F9.toInt(), 0xFFAA00FF.toInt(), 0xFF7C4DFF.toInt(), 0xFFB388FF.toInt(), 0xFF536DFE.toInt(), 0xFF00B0FF.toInt(), 0xFF40C4FF.toInt())
+    /** How many of each are offered first (the rest in the grid). */
+    const val FIRST_SWATCHES = 5
 
     private const val GLOBAL_KEY = "mg4dash_theme"
 
     /** Signature of the current theme: used to know if a screen must redraw. */
-    fun signature(context: Context): Int = Prefs(context).let { it.themeBackground * 10 + it.themeAccent + (if (isLight(context)) 100 else 0) + (if (it.verticalDock) 1000 else 0) + (if (it.panelFade) 0 else 10000) + (if (it.wideBar) 100000 else 0) + (if (it.homeStyle == Prefs.STYLE_BIG) 1000000 else 0) +
-        // A profile switch rebuilds the open screens even when both profiles have the same theme
-        app.mg4dash.system.Profiles.generation(context) * 10_000_000 }
+    fun signature(context: Context): Int = Prefs(context).let {
+        // Every part distinct (24 colours each since 24/11: no sum that two choices could share)
+        listOf(it.themeBackground, it.themeAccent, isLight(context), it.verticalDock, it.panelFade, it.wideBar, it.homeStyle == Prefs.STYLE_BIG,
+            // A profile switch rebuilds the open screens even when both profiles have the same theme
+            app.mg4dash.system.Profiles.generation(context)).hashCode() }
 
     /**
      * A context with MG4Dash's theme (background and buttons chosen), for windows outside the screens; enlarged in

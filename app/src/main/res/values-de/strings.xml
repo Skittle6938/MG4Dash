@@ -302,6 +302,7 @@
     <string name="st_ha_no_token">Token: nicht festgelegt</string>
     <string name="st_ha_token_set">Token: festgelegt</string>
     <string name="st_ha_desc">Erstellen Sie in Ihrem Home-Assistant-Profil ein langlebiges Zugriffstoken. Verknüpfungen können dann Skripte, Automationen, Szenen, Tasten und Abdeckungen (Tor, Garagentor) auslösen. Die Taste oben rechts auf der Karte zeigt die Verknüpfungen.</string>
+    <string name="st_ha_settings">Home-Assistant-Einstellungen</string>
     <string name="st_ha_set_url">Adresse</string>
     <string name="st_ha_set_token">Token</string>
     <string name="st_ha_test">Testen</string>
@@ -341,6 +342,7 @@
     <string name="st_theme">DESIGN</string>
     <string name="st_theme_bg">Hintergrund</string>
     <string name="st_theme_accent">Tastenfarbe</string>
+    <string name="st_more_colors">Mehr Farben…</string>
     <string name="st_theme_desc">Batteriegrün, Heizungsorange, Kühlungscyan und Warnrot behalten ihre Bedeutung unabhängig vom Design. MG4Radio übernimmt das Design beim nächsten Öffnen des Radios.</string>
     <string name="st_update">AKTUALISIERUNG</string>
     <string name="st_update_installed">Installierte Version: %1$s</string>
@@ -983,7 +985,7 @@
     <string name="st_rad_high">Starke Warnung (rot) über dem Limit</string>
     <string name="st_rad_banner">Banner über anderen Apps</string>
     <string name="st_rad_banner_desc">Ein rot blinkendes Banner deutlich über dem Limit in einer Blitzerzone, auch über Android Auto.</string>
-    <string name="st_rad_wifi">Nur WLAN</string>
+    <string name="st_rad_wifi">Nur über WLAN herunterladen</string>
     <string name="st_rad_wifi_desc">Kein Download über das 4G des Autos: nur bereits gespeicherte Gebiete werden genutzt.</string>
     <string name="st_rad_cache">%1$d Gebiete gespeichert · %2$s</string>
     <string name="st_rad_preparing">Vorbereitung: %1$d / %2$d</string>
@@ -1069,7 +1071,7 @@
     <string name="rp_resume">Fortsetzen</string>
     <string name="rp_pause">Pausieren</string>
     <string name="rp_cancel">Abbrechen</string>
-    <string name="rp_wifi_sub">Nie 4G: nur gespeicherte Gebiete werden genutzt</string>
+    <string name="rp_wifi_sub">Kein 4G beim Fahren: nur bereits heruntergeladene Straßen und Blitzer werden genutzt</string>
     <string name="rp_refresh">Gebiet um das Auto aktualisieren</string>
     <string name="rp_refresh_sub">Wenn älter als…</string>
     <string name="rp_storage">Speicher</string>

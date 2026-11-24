@@ -302,6 +302,7 @@
     <string name="st_ha_no_token">Token: not set</string>
     <string name="st_ha_token_set">Token: set</string>
     <string name="st_ha_desc">Create a long-lived access token in your Home Assistant profile. Shortcuts can then run scripts, automations, scenes, buttons and covers (gate, garage door). Use the button at the top right of the map to show the shortcuts.</string>
+    <string name="st_ha_settings">Home Assistant settings</string>
     <string name="st_ha_set_url">Address</string>
     <string name="st_ha_set_token">Token</string>
     <string name="st_ha_test">Test</string>
@@ -341,6 +342,7 @@
     <string name="st_theme">THEME</string>
     <string name="st_theme_bg">Background</string>
     <string name="st_theme_accent">Button colour</string>
+    <string name="st_more_colors">More colours…</string>
     <string name="st_theme_desc">Battery green, heating orange, cooling cyan and alert red keep their meaning whatever the theme. MG4Radio follows the theme the next time the radio opens.</string>
     <string name="st_update">UPDATE</string>
     <string name="st_update_installed">Installed version: %1$s</string>
@@ -983,7 +985,7 @@
     <string name="st_rad_high">Strong alert (red) over the limit</string>
     <string name="st_rad_banner">Banner over the other apps</string>
     <string name="st_rad_banner_desc">A red flashing banner when well over the limit in a speed camera zone, Android Auto included.</string>
-    <string name="st_rad_wifi">Wi-Fi only</string>
+    <string name="st_rad_wifi">Download over Wi-Fi only</string>
     <string name="st_rad_wifi_desc">No download on the car\'s 4G: only the areas already kept are used.</string>
     <string name="st_rad_cache">%1$d areas kept · %2$s</string>
     <string name="st_rad_preparing">Preparing: %1$d / %2$d</string>
@@ -1069,7 +1071,7 @@
     <string name="rp_resume">Resume</string>
     <string name="rp_pause">Pause</string>
     <string name="rp_cancel">Cancel</string>
-    <string name="rp_wifi_sub">Never the 4G: only the areas kept are used</string>
+    <string name="rp_wifi_sub">No 4G while driving: only roads and speed cameras already downloaded are used</string>
     <string name="rp_refresh">Refresh the area around the car</string>
     <string name="rp_refresh_sub">If it is older than…</string>
     <string name="rp_storage">Storage</string>
