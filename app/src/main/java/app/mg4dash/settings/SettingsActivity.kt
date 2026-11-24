@@ -44,14 +44,6 @@ class SettingsActivity : AppCompatActivity() {
     private lateinit var prefs: Prefs
     private lateinit var homeState: TextView
 
-    private val cities = listOf(
-        Triple("Paris", 48.8566f, 2.3522f), Triple("Lyon", 45.764f, 4.8357f),
-        Triple("Marseille", 43.2965f, 5.3698f), Triple("Toulouse", 43.6047f, 1.4442f),
-        Triple("Bordeaux", 44.8378f, -0.5792f), Triple("Lille", 50.6292f, 3.0573f),
-        Triple("Nantes", 47.2184f, -1.5536f), Triple("Strasbourg", 48.5734f, 7.7521f),
-        Triple("Nice", 43.7102f, 7.262f), Triple("Bruxelles", 50.8503f, 4.3517f),
-        Triple("Genève", 46.2044f, 6.1432f),
-    )
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -216,10 +208,7 @@ class SettingsActivity : AppCompatActivity() {
         val units = panel(carL, getString(R.string.st_tab_car).uppercase())
         dropdown(units, getString(R.string.st_units), listOf(getString(R.string.st_units_car), "km · kWh/100 km", "miles · mi/kWh"), { prefs.units }) { prefs.units = it }
         dropdown(units, getString(R.string.st_pressure), listOf(getString(R.string.st_mode_auto_short), "bar", "psi", "kPa"), { prefs.pressureUnit }) { prefs.pressureUnit = it }
-        dropdown(units, getString(R.string.st_heated), listOf(getString(R.string.st_mode_auto_short), getString(R.string.yes), getString(R.string.no)), { prefs.heatedSeats }) { prefs.heatedSeats = it }
-        toggle(units, R.string.st_climhold, R.string.st_climhold_desc, { prefs.climateHoldEnabled }) { prefs.climateHoldEnabled = it }
-        if (app.mg4dash.system.Firmware.family == app.mg4dash.system.Firmware.Family.LEGACY)
-            toggle(units, R.string.st_hide_saic_climate, R.string.st_hide_saic_climate_desc, { prefs.hideSaicClimate }) { prefs.hideSaicClimate = it }
+        // Heated seats and wheel, climate hold, SAIC climate window: in the climate card's options (24/11)
         // Profiles (step 12): each one keeps the drive mode and the regeneration; shared, off by default
         toggle(units, R.string.pf_drive, R.string.pf_drive_desc, { prefs.profilesDrive }) { prefs.profilesDrive = it }
         text(units, getString(R.string.pf_all), 14f, R.color.text_title)
@@ -301,29 +290,7 @@ class SettingsActivity : AppCompatActivity() {
         }
         paintNewCap()
         toggle(energy, R.string.st_xpower, R.string.st_xpower_desc, { prefs.xpower }) { prefs.xpower = it }
-        // V2L on plugging in (#82): warning on enabling, the discharge will start with no other action
-        var repaintV2l: () -> Unit = {}
-        repaintV2l = toggle(energy, R.string.st_v2l_auto, R.string.st_v2l_auto_desc, { prefs.v2lAuto }) { on ->
-            if (!on) prefs.v2lAuto = false
-            else AlertDialog.Builder(this)
-                .setTitle(R.string.st_v2l_auto)
-                .setMessage(R.string.st_v2l_auto_warning)
-                .setPositiveButton(R.string.st_v2l_auto_enable) { _, _ -> prefs.v2lAuto = true; repaintV2l() }
-                .setNegativeButton(R.string.cancel, null)
-                .create().also { app.mg4dash.ui.Dialogs.show(it); app.mg4dash.ui.Dialogs.fix(it) }
-        }
-        // Price of a kWh (#102): the cost of each trip and reading in the Trips page; empty: none
-        lateinit var priceBtn: Button
-        fun priceLabel() = getString(R.string.st_kwh_price, if (prefs.kwhPrice > 0f) app.mg4dash.ui.TripText.money(prefs.kwhPrice) else getString(R.string.st_kwh_price_none))
-        priceBtn = button(priceLabel()) {
-            ask(getString(R.string.st_kwh_price_title), if (prefs.kwhPrice > 0f) prefs.kwhPrice.toString() else "", secret = false, number = true) { v ->
-                prefs.kwhPrice = v.replace(',', '.').trim().toFloatOrNull()?.takeIf { it > 0f && it < 100f } ?: 0f
-                priceBtn.text = priceLabel()
-            }
-        }
-        row(energy, priceBtn)
-        text(energy, getString(R.string.st_kwh_price_desc), 15f, R.color.text_title)
-        toggle(energy, R.string.st_cc_stopped, R.string.st_cc_stopped_desc, { prefs.raw.getBoolean("cc_stopped", true) }) { prefs.raw.edit().putBoolean("cc_stopped", it).apply() }
+        // V2L on plugging in, consumption when stopped and the kWh price: in the energy and consumption cards' options and the Trips page (24/11)
         // Brightness at the top of the right column, above the live power (20/11)
         brightnessSetting(panel(lookR, getString(R.string.br_title)))
         // Speed × temperature consumption map (in testing, off by default)
@@ -496,39 +463,7 @@ class SettingsActivity : AppCompatActivity() {
                 .create().also { app.mg4dash.ui.Dialogs.show(it); app.mg4dash.ui.Dialogs.fix(it) }
         }
 
-        // ── Weather ──
-        val weather = panel(netL, getString(R.string.title_weather))
-        val city = text(weather, "", 18f, R.color.text_value)
-        fun showCity() { city.text = getString(R.string.st_city, prefs.weatherCity) }
-        showCity()
-        row(weather, button(getString(R.string.st_change_city)) {
-            val idx = (cities.indexOfFirst { it.first == prefs.weatherCity } + 1) % cities.size
-            val c = cities[idx]
-            prefs.weatherCity = c.first; prefs.weatherLat = c.second; prefs.weatherLon = c.third
-            showCity(); WeatherRepo.refreshNow(this)
-        }, button(getString(R.string.st_use_location)) {
-            // Fallback city = current position (#7); city name already found by the weather if it exists
-            val loc = app.mg4dash.map.LocationRepo.location.value
-            if (loc == null) {
-                app.mg4dash.ui.Toasts.show(this, R.string.st_no_location, long = true)
-            } else {
-                prefs.weatherLat = loc.latitude.toFloat(); prefs.weatherLon = loc.longitude.toFloat()
-                prefs.weatherCity = WeatherRepo.weather.value?.place?.takeIf { it.isNotBlank() } ?: getString(R.string.weather_here)
-                showCity(); WeatherRepo.refreshNow(this)
-            }
-        })
-        // Weather model (#67): another model can better match observed weather depending on the region
-        val wxModels = listOf("" to getString(R.string.st_wx_model_auto), "ecmwf_ifs025" to "ECMWF", "icon_seamless" to "DWD ICON",
-            "meteofrance_seamless" to "Météo-France", "ukmo_seamless" to "UK Met Office", "gfs_seamless" to "NOAA GFS", "gem_seamless" to "GEM (Canada)")
-        lateinit var modelBtn: Button
-        fun modelLabel() = getString(R.string.st_wx_model, wxModels.firstOrNull { it.first == prefs.weatherModel }?.second ?: wxModels[0].second)
-        modelBtn = button(modelLabel()) {
-            app.mg4dash.ui.SourceMenu.choose(this, modelBtn, wxModels.map { it.second }, wxModels.indexOfFirst { it.first == prefs.weatherModel }.coerceAtLeast(0)) { i ->
-                prefs.weatherModel = wxModels[i].first
-                modelBtn.text = modelLabel(); WeatherRepo.refreshNow(this)
-            }
-        }
-        row(weather, modelBtn)
+        // Weather: model and fallback city in the weather cards' options (24/11)
 
         // ── Home Assistant ──
         val ha = panel(netR, "HOME ASSISTANT")
@@ -1354,35 +1289,8 @@ class SettingsActivity : AppCompatActivity() {
     // ── Petites briques d'UI ──
 
     /** Entry of a text (address, masked token) or a number. */
-    private fun ask(title: String, initial: String, secret: Boolean, number: Boolean = false, onOk: (String) -> Unit) {
-        val input = android.widget.EditText(this).apply {
-            setText(initial); setSingleLine()
-            setTextColor(color(R.color.text_value))
-            inputType = if (number) android.text.InputType.TYPE_CLASS_NUMBER or android.text.InputType.TYPE_NUMBER_FLAG_DECIMAL
-            else android.text.InputType.TYPE_CLASS_TEXT or
-                (if (secret) android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD else android.text.InputType.TYPE_TEXT_VARIATION_URI)
-            setSelection(text.length)
-        }
-        val box = android.widget.LinearLayout(this).apply {
-            orientation = android.widget.LinearLayout.VERTICAL; setPadding(dp(24), dp(8), dp(24), 0); addView(input)
-        }
-        // Some keyboards (SWI68) have no "paste" (#63): dedicated button if the clipboard contains text
-        val clip = (getSystemService(CLIPBOARD_SERVICE) as android.content.ClipboardManager).primaryClip
-            ?.takeIf { it.itemCount > 0 }?.getItemAt(0)?.coerceToText(this)?.toString()?.trim()
-        if (!clip.isNullOrEmpty()) box.addView(TextView(this).apply {
-            text = getString(R.string.st_paste); setTextColor(color(R.color.accent_action)); setTextSize(TypedValue.COMPLEX_UNIT_SP, 20f)
-            setPadding(0, dp(12), 0, dp(4))
-            setOnClickListener { input.setText(clip); input.setSelection(input.text.length) }
-        })
-        android.app.AlertDialog.Builder(this)
-            .setTitle(title).setView(box)
-            .setPositiveButton(android.R.string.ok) { _, _ -> onOk(input.text.toString()) }
-            .setNegativeButton(R.string.cancel, null)
-            .show().also { d ->
-                app.mg4dash.ui.Dialogs.fix(d)
-                app.mg4dash.ui.CarKeyboard.attachInDialog(input, d, box, onDone = { d.getButton(android.app.AlertDialog.BUTTON_POSITIVE).performClick() })
-            }
-    }
+    private fun ask(title: String, initial: String, secret: Boolean, number: Boolean = false, onOk: (String) -> Unit) =
+        app.mg4dash.ui.Ask.show(this, title, initial, secret, number, onOk)
 
     /**
      * Home Assistant address and token read from mg4dash_ha.txt at the root of a USB stick: the line that

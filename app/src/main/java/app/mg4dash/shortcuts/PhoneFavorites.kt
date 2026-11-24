@@ -54,17 +54,13 @@ object PhoneFavorites {
         val prefs = Prefs(activity)
         val choices = arrayOf(activity.getString(R.string.sw_fav_pick), activity.getString(R.string.sc_clear),
             activity.getString(R.string.sw_fav_count))
-        AlertDialog.Builder(activity)
-            .setTitle(R.string.sw_phone)
-            .setItems(choices) { _, w ->
-                when (w) {
-                    0 -> pick(activity) { e -> set(prefs, i, Fav(e.name, e.number)); refresh() }
-                    1 -> { set(prefs, i, null); refresh() }
-                    2 -> chooseCount(activity, refresh)
-                }
+        app.mg4dash.ui.Windows.pick(activity, activity.getString(R.string.sw_phone), choices.toList()) { w ->
+            when (w) {
+                0 -> pick(activity) { e -> set(prefs, i, Fav(e.name, e.number)); refresh() }
+                1 -> { set(prefs, i, null); refresh() }
+                2 -> chooseCount(activity, refresh)
             }
-            .setNegativeButton(R.string.cancel, null)
-            .create().also { app.mg4dash.ui.Dialogs.show(it); app.mg4dash.ui.Dialogs.fix(it) }
+        }
     }
 
     /**
@@ -118,11 +114,7 @@ object PhoneFavorites {
             }, android.widget.LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(8) })
             row.addView(tile, android.widget.LinearLayout.LayoutParams(-2, -2).apply { setMargins(dp(8), 0, dp(8), 0) })
         }
-        dialog = AlertDialog.Builder(activity)
-            .setTitle(R.string.sw_fav_count)
-            .setView(row)
-            .setNegativeButton(R.string.cancel, null)
-            .create().also { app.mg4dash.ui.Dialogs.show(it); app.mg4dash.ui.Dialogs.fix(it) }
+        dialog = app.mg4dash.ui.Windows.show(activity, activity.getString(R.string.sw_fav_count), row, widthDp = 1000)
     }
 
     /**

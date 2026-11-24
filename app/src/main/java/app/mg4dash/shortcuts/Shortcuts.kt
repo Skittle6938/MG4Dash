@@ -271,36 +271,14 @@ object Shortcuts {
         val apps = pm.queryIntentActivities(Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER), 0)
             .filter { it.activityInfo.packageName != activity.packageName }
             .sortedBy { it.loadLabel(pm).toString().lowercase() }
-        val kit = Kit(activity)
-        val count = apps.size + (if (extraFirst != null) 1 else 0)
-        val adapter = object : BaseAdapter() {
-            override fun getCount() = count
-            override fun getItem(p: Int) = p
-            override fun getItemId(p: Int) = p.toLong()
-            override fun getView(p: Int, convert: View?, parent: ViewGroup?): View {
-                val row = kit.row().apply { setPadding(kit.dp(20), kit.dp(10), kit.dp(20), kit.dp(10)) }
-                val icon = ImageView(activity)
-                val label = kit.text("", 20f)
-                if (extraFirst != null && p == 0) {
-                    icon.setImageResource(R.drawable.ic_navigation); icon.setColorFilter(kit.color(R.color.accent_action))
-                    label.text = extraFirst
-                } else {
-                    val ri = apps[p - (if (extraFirst != null) 1 else 0)]
-                    icon.setImageDrawable(ri.loadIcon(pm)); label.text = ri.loadLabel(pm)
-                }
-                row.addView(icon, LinearLayout.LayoutParams(kit.dp(48), kit.dp(48)))
-                row.addView(label, kit.lp(0, -2, 1f, l = 18))
-                return row
-            }
+        // The settings' list window (24/11): a row per app, the round close button instead of Cancel
+        val labels = (listOfNotNull(extraFirst) + apps.map { it.loadLabel(pm).toString() })
+        val icons = (if (extraFirst != null) listOf(activity.getDrawable(R.drawable.ic_navigation)) else emptyList()) + apps.map { it.loadIcon(pm) }
+        val tint = (if (extraFirst != null) listOf(app.mg4dash.ui.Themes.color(activity, R.color.accent_action)) else emptyList()) + apps.map { null }
+        app.mg4dash.ui.Windows.pick(activity, title, labels, icons, iconTint = tint) { p ->
+            if (extraFirst != null && p == 0) onPick(null)
+            else apps[p - (if (extraFirst != null) 1 else 0)].activityInfo.let { onPick(ComponentName(it.packageName, it.name)) }
         }
-        AlertDialog.Builder(activity)
-            .setTitle(title)
-            .setAdapter(adapter) { _, p ->
-                if (extraFirst != null && p == 0) onPick(null)
-                else apps[p - (if (extraFirst != null) 1 else 0)].activityInfo.let { onPick(ComponentName(it.packageName, it.name)) }
-            }
-            .setNegativeButton(R.string.cancel, null)
-            .create().also { app.mg4dash.ui.Dialogs.show(it); app.mg4dash.ui.Dialogs.fix(it); app.mg4dash.ui.Dialogs.fullHeight(it) }
     }
 
     /** ADB state under the tile: [now] shown at once, otherwise the reading (then again after a few seconds). */
@@ -336,9 +314,7 @@ object Shortcuts {
             activity.getString(R.string.sc_clear),
             activity.getString(R.string.sw_fav_count),
         ).toTypedArray()
-        AlertDialog.Builder(activity)
-            .setTitle(R.string.sc_edit)
-            .setItems(choices) { _, w ->
+        app.mg4dash.ui.Windows.pick(activity, activity.getString(R.string.sc_edit), choices.toList()) { w ->
                 when (choices[w]) {
                     choices[0] -> pickApp(activity, choices[0]) { cn -> if (cn != null) { set(prefs, i, Slot.App(cn)); refresh() } }
                     choices[1] -> pickHa(activity) { id, label -> set(prefs, i, Slot.Ha(id, label)); refresh() }
@@ -347,9 +323,7 @@ object Shortcuts {
                     activity.getString(R.string.sw_fav_count) -> pickDensity(activity, refresh)
                     else -> if (ha != null) pickState(activity, i, ha, refresh)
                 }
-            }
-            .setNegativeButton(R.string.cancel, null)
-            .create().also { app.mg4dash.ui.Dialogs.show(it); app.mg4dash.ui.Dialogs.fix(it) }
+        }
     }
 
     /** Number of shortcuts in this place: the three steps of [grid], shown as their counts. */
@@ -357,13 +331,9 @@ object Shortcuts {
         val prefs = Prefs(activity)
         val size = shownSize
         val counts = DENSITIES.map { grid(size, it).let { (c, r) -> c * r } }
-        AlertDialog.Builder(activity)
-            .setTitle(R.string.sw_fav_count)
-            .setSingleChoiceItems(counts.map { it.toString() }.toTypedArray(), prefs.shortcutsDensity(size)) { d, w ->
-                prefs.setShortcutsDensity(size, w); d.dismiss(); refresh()
-            }
-            .setNegativeButton(R.string.cancel, null)
-            .create().also { app.mg4dash.ui.Dialogs.show(it); app.mg4dash.ui.Dialogs.fix(it) }
+        app.mg4dash.ui.Windows.pick(activity, activity.getString(R.string.sw_fav_count), counts.map { it.toString() }, selected = prefs.shortcutsDensity(size)) { w ->
+            prefs.setShortcutsDensity(size, w); refresh()
+        }
     }
 
     // ─── Home Assistant ───
@@ -469,10 +439,8 @@ object Shortcuts {
             val screen = android.util.DisplayMetrics().also { activity.windowManager.defaultDisplay.getRealMetrics(it) }
             addView(list, LinearLayout.LayoutParams(-1, screen.heightPixels - kit.dp(SEARCH_LIST_CHROME_DP)))
         }
-        val dialog = AlertDialog.Builder(activity)
-            .setTitle(title).setView(box)
-            .setNegativeButton(R.string.cancel, null)
-            .create()
+        box.setPadding(0, 0, 0, 0)
+        lateinit var dialog: android.app.AlertDialog
         search.addTextChangedListener(object : android.text.TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, a: Int, b: Int, c: Int) {}
             override fun onTextChanged(s: CharSequence?, a: Int, b: Int, c: Int) {}
@@ -483,9 +451,8 @@ object Shortcuts {
             }
         })
         list.setOnItemClickListener { _, _, pos, _ -> dialog.dismiss(); onPick(shown[pos]) }
-        app.mg4dash.ui.Dialogs.show(dialog); app.mg4dash.ui.Dialogs.fix(dialog)
-        app.mg4dash.ui.Dialogs.compact(dialog)
-        app.mg4dash.ui.Dialogs.fullHeight(dialog)
+        dialog = app.mg4dash.ui.Windows.show(activity, title, box, widthDp = 1800)
+        app.mg4dash.ui.Dialogs.hideBars(dialog)
         app.mg4dash.ui.CarKeyboard.attachInDialog(search, dialog, box)
     }
 

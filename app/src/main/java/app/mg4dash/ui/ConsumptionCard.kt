@@ -32,6 +32,9 @@ class ConsumptionCard(context: Context) : LinearLayout(context), HomeCard {
     override fun options(popup: OptionsPopup): OptionsPopup {
         val period = prefs.consumptionPeriod.coerceIn(0, 2)
         val name = context.getString(listOf(R.string.en_since_charge, R.string.en_trip, R.string.en_last_year)[period])
+        // From Settings › Vehicle (24/11)
+        popup.toggle(context.getString(R.string.st_cc_stopped), context.getString(R.string.st_cc_stopped_desc),
+            { prefs.raw.getBoolean("cc_stopped", true) }) { prefs.raw.edit().putBoolean("cc_stopped", it).apply() }
         return popup.action(context.getString(R.string.en_clear_curve), name, context.getString(R.string.opt_clear)) {
             (context as? android.app.Activity)?.let { confirmClear(it, chart, period) }
         }

@@ -479,6 +479,8 @@
     <string name="st_map_offline_switch_desc">Veri bağlantısı yokken, gösterilen haritanın tamamı çevrimdışı önbellekte değilse</string>
     <string name="st_use_location">Konumumu kullan</string>
     <string name="st_wx_model">Hava modeli: %1$s</string>
+    <string name="st_wx_city">Yedek şehir</string>
+    <string name="st_wx_city_desc">%1$s, araç konum vermezse</string>
     <string name="st_wx_model_auto">Otomatik</string>
     <string name="st_no_location">Konum henüz mevcut değil</string>
     <string name="st_heated">Isıtmalı koltuklar ve direksiyon</string>
@@ -945,7 +947,7 @@
     <string name="st_fx_sound">Ses efektleri</string>
     <string name="st_fx_volume">Ses efektleri seviyesi</string>
     <string name="st_fx_volume_off">Kapalı</string>
-    <string name="wc_radar">Radar uyarıcı (test)</string>
+    <string name="wc_radar">Radar uyarıcı</string>
     <string name="du_radars">Radarlar</string>
     <string name="rad_osm">© OpenStreetMap katkıda bulunanlar</string>
     <string name="rad_osm_licence">Hız sınırları ve radarlar: © OpenStreetMap katkıda bulunanlar, ODbL lisansı. Veriler eksik veya eski olabilir: trafik işaretleri her zaman önceliklidir.</string>

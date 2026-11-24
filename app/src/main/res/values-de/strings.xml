@@ -479,6 +479,8 @@
     <string name="st_map_offline_switch_desc">Ohne Datenverbindung, außer die gesamte angezeigte Karte ist im Offline-Cache</string>
     <string name="st_use_location">Meine Position verwenden</string>
     <string name="st_wx_model">Wettermodell: %1$s</string>
+    <string name="st_wx_city">Ersatzstadt</string>
+    <string name="st_wx_city_desc">%1$s, wenn das Auto keine Position liefert</string>
     <string name="st_wx_model_auto">Automatisch</string>
     <string name="st_no_location">Position noch nicht verfügbar</string>
     <string name="st_heated">Sitz- und Lenkradheizung</string>
@@ -945,7 +947,7 @@
     <string name="st_fx_sound">Soundeffekte</string>
     <string name="st_fx_volume">Lautstärke der Soundeffekte</string>
     <string name="st_fx_volume_off">Aus</string>
-    <string name="wc_radar">Blitzerwarner (Test)</string>
+    <string name="wc_radar">Blitzerwarner</string>
     <string name="du_radars">Blitzer</string>
     <string name="rad_osm">© OpenStreetMap-Mitwirkende</string>
     <string name="rad_osm_licence">Tempolimits und Blitzer: © OpenStreetMap-Mitwirkende, Lizenz ODbL. Die Daten können unvollständig oder veraltet sein: es gelten immer die Verkehrszeichen.</string>

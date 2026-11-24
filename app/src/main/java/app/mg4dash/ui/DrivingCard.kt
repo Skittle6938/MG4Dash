@@ -238,27 +238,13 @@ class DrivingCard(context: Context) : LinearLayout(context), HomeCard {
         /** The whole card in a window over home ("All ›" of a smaller place), following the car while open. */
         fun openAll(context: Context) {
             val card = DrivingCard(context).apply { form = Form.FULL }
-            val d = context.resources.displayMetrics.density
-            val dialog = android.app.Dialog(context, android.R.style.Theme_Translucent_NoTitleBar)
-            val panel = android.widget.FrameLayout(context).apply {
-                background = GradientDrawable().apply {
-                    cornerRadius = FadeOutline.radius(context); setColor(Themes.color(context, R.color.panel_raised).let { it or (0xFF shl 24) })
-                    setStroke((1.5f * d).toInt(), Themes.color(context, R.color.panel_border))
-                }
-                addView(card, android.widget.FrameLayout.LayoutParams(-1, -2))
-                isClickable = true
-            }
-            val root = android.widget.FrameLayout(context).apply {
-                setBackgroundColor(0x99000000.toInt())
-                setOnClickListener { dialog.dismiss() }
-                addView(panel, android.widget.FrameLayout.LayoutParams((1100 * d).toInt(), -2, Gravity.CENTER))
-            }
-            dialog.setContentView(root)
+            val activity = context as? android.app.Activity ?: return
+            // The settings' window (title, round close button), shown like every window over home: the car's bars stay hidden
+            val dialog = Windows.show(activity, context.getString(R.string.wc_driving), card, icon = R.drawable.ic_car, widthDp = 1100)
             val scope = kotlinx.coroutines.MainScope()
             scope.launch { CarBridge.state.collect { card.show(it) } }
             scope.launch { CarBridge.drivePending.collect { card.show() } }
             dialog.setOnDismissListener { scope.cancel() }
-            dialog.show()
         }
     }
 }

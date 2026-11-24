@@ -41,6 +41,39 @@ object Windows {
         return dialog
     }
 
+    /**
+     * A list to choose from, in rows ([icons] optional, [selected] marked in the theme's colour): a touch on a row
+     * picks it and closes the window. A long list scrolls within the screen's height.
+     */
+    fun pick(a: Activity, title: String, labels: List<CharSequence>, icons: List<android.graphics.drawable.Drawable?>? = null,
+             selected: Int = -1, iconTint: List<Int?>? = null, onPick: (Int) -> Unit): AlertDialog {
+        lateinit var d: AlertDialog
+        val group = Rows.group(a)
+        labels.forEachIndexed { i, label ->
+            val row = LinearLayout(a).apply {
+                orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL; tag = Rows.TAG_ROW; minimumHeight = dp(a, 72)
+                Rows.touchable(this); setOnClickListener { d.dismiss(); onPick(i) }
+            }
+            icons?.getOrNull(i)?.let { ic ->
+                row.addView(android.widget.ImageView(a).apply { setImageDrawable(ic); iconTint?.getOrNull(i)?.let { t -> setColorFilter(t) } },
+                    LinearLayout.LayoutParams(dp(a, 44), dp(a, 44)).apply { rightMargin = dp(a, 18) })
+            }
+            row.addView(TextView(a).apply {
+                text = label; setTextSize(TypedValue.COMPLEX_UNIT_SP, 20f)
+                setTextColor(if (i == selected) Themes.select(a) else Themes.color(a, R.color.text_value))
+                if (i == selected) typeface = android.graphics.Typeface.create("sans-serif-medium", android.graphics.Typeface.NORMAL)
+            }, LinearLayout.LayoutParams(0, -2, 1f))
+            if (i == selected) row.addView(TextView(a).apply { text = "✓"; setTextColor(Themes.select(a)); setTextSize(TypedValue.COMPLEX_UNIT_SP, 22f) })
+            Rows.add(group, row)
+        }
+        val screen = a.resources.displayMetrics.heightPixels
+        val scroll = object : android.widget.ScrollView(a) {
+            override fun onMeasure(w: Int, h: Int) = super.onMeasure(w, View.MeasureSpec.makeMeasureSpec(screen - dp(a, 190), View.MeasureSpec.AT_MOST))
+        }.apply { isVerticalScrollBarEnabled = false; addView(group) }
+        d = show(a, title, scroll, widthDp = 820)
+        return d
+    }
+
     /** Grey text for a window's message. */
     fun message(a: Activity, text: CharSequence) = TextView(a).apply {
         this.text = text; setTextColor(Themes.color(a, R.color.text_sub)); setTextSize(TypedValue.COMPLEX_UNIT_SP, 20f); setLineSpacing(0f, 1.15f)

@@ -479,6 +479,8 @@
     <string name="st_map_offline_switch_desc">Sin conexión de datos, salvo si todo el mapa mostrado está en la caché sin conexión</string>
     <string name="st_use_location">Usar mi posición</string>
     <string name="st_wx_model">Modelo meteorológico: %1$s</string>
+    <string name="st_wx_city">Ciudad de reserva</string>
+    <string name="st_wx_city_desc">%1$s, si el coche no da su posición</string>
     <string name="st_wx_model_auto">Automático</string>
     <string name="st_no_location">Posición aún no disponible</string>
     <string name="st_heated">Asientos y volante calefactados</string>
@@ -945,7 +947,7 @@
     <string name="st_fx_sound">Efectos de sonido</string>
     <string name="st_fx_volume">Volumen de los efectos de sonido</string>
     <string name="st_fx_volume_off">Desactivado</string>
-    <string name="wc_radar">Avisador de radares (prueba)</string>
+    <string name="wc_radar">Avisador de radares</string>
     <string name="du_radars">Radares</string>
     <string name="rad_osm">© colaboradores de OpenStreetMap</string>
     <string name="rad_osm_licence">Límites y radares: © colaboradores de OpenStreetMap, licencia ODbL. Los datos pueden estar incompletos o desactualizados: la señalización siempre prevalece.</string>

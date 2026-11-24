@@ -301,7 +301,7 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         Card.entries.forEach { card ->
             val h = app.mg4dash.cards.HomeCards.create(card, this) ?: when (card) {
                 // The climate (pinch mode v2): a card like the others, swiped with the other cards of its place
-                Card.CLIMATE -> host(card, climatePanel, false, { if (it) renderClimate(CarBridge.state.value) }, ::climateOptions)
+                Card.CLIMATE -> host(card, climatePanel, false, { if (it) renderClimate(CarBridge.state.value) }, ::climateOptions, ::climateOptionsClosed)
                 Card.MAP -> host(card, b.mapCard, false, { on ->
                     if (!on) setMapFullscreen(false)
                     applyMapApp(on)
@@ -919,6 +919,12 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
             .toggle(t(R.string.st_energy_card_power), getString(R.string.st_energy_card_power_desc), { prefs.energyCardPower }) { prefs.energyCardPower = it }
             .toggle(t(R.string.st_power_va), getString(R.string.st_power_va_desc), { prefs.powerVa }) { prefs.powerVa = it }
             .toggle(t(R.string.st_stack_auto), null, { prefs.stackAuto }) { prefs.stackAuto = it }
+            // V2L on plugging in (#82, here since 24/11): a warning on enabling, the discharge then starts with no other action
+            .toggle(getString(R.string.st_v2l_auto), getString(R.string.st_v2l_auto_desc), { prefs.v2lAuto }) { on ->
+                if (!on) prefs.v2lAuto = false
+                else app.mg4dash.ui.Windows.confirm(this, getString(R.string.st_v2l_auto), getString(R.string.st_v2l_auto_warning),
+                    getString(R.string.st_v2l_auto_enable), danger = false) { prefs.v2lAuto = true; popup.refresh() }
+            }
     }
 
     /** The card is built with these two: rebuilt at once when either changed (21/11: V / A did not show until home was built again). */
@@ -1168,10 +1174,25 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
     }
 
     /** The climate card's options: the temperature calibration (it opens its own window). */
-    private fun climateOptions(popup: app.mg4dash.ui.OptionsPopup): app.mg4dash.ui.OptionsPopup =
-        popup.action(getString(R.string.temp_cal_title), null, getString(R.string.opt_open)) {
+    private fun climateOptions(popup: app.mg4dash.ui.OptionsPopup): app.mg4dash.ui.OptionsPopup {
+        climateBuiltWith = prefs.heatedSeats
+        // From Settings › Vehicle (24/11): what belongs to the climate is set on its card
+        popup.choice(getString(R.string.st_heated), null, listOf(getString(R.string.st_mode_auto_short), getString(R.string.yes), getString(R.string.no)),
+            { prefs.heatedSeats }) { prefs.heatedSeats = it }
+            .toggle(getString(R.string.st_climhold), getString(R.string.st_climhold_desc), { prefs.climateHoldEnabled }) { prefs.climateHoldEnabled = it }
+        if (app.mg4dash.system.Firmware.family == app.mg4dash.system.Firmware.Family.LEGACY)
+            popup.toggle(getString(R.string.st_hide_saic_climate), getString(R.string.st_hide_saic_climate_desc), { prefs.hideSaicClimate }) { prefs.hideSaicClimate = it }
+        return popup.action(getString(R.string.temp_cal_title), null, getString(R.string.opt_open)) {
             app.mg4dash.ui.TempCalibration.show(this) { renderClimate(CarBridge.state.value) }
         }
+    }
+
+    private var climateBuiltWith: Int? = null
+
+    /** The seats' and wheel's buttons follow the setting at once. */
+    private fun climateOptionsClosed() {
+        if (climateBuiltWith?.let { it != prefs.heatedSeats } == true) app.mg4dash.ui.Themes.recreateSmooth(this)
+    }
 
     /** Press = one step; hold = repeat every 350 ms. */
     private fun repeatOnHold(view: View, action: () -> Unit) {

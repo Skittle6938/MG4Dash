@@ -28,6 +28,10 @@ class OptionsPopup(private val a: Activity, private val title: String, private v
     /** True once shown in two columns. */
     var twoColumns = false; private set
     private var closeNow: () -> Unit = {}
+    private val repaints = mutableListOf<() -> Unit>()
+
+    /** Repaints every switch from its value (after a change confirmed in another window). */
+    fun refresh() = repaints.forEach { it() }
 
     /** What follows goes in the right column when the whole is too tall for the screen in one. */
     fun column(): OptionsPopup { target = second; return this }
@@ -35,6 +39,7 @@ class OptionsPopup(private val a: Activity, private val title: String, private v
     /** Yes / no: a switch; the whole row toggles it. */
     fun toggle(title: String, sub: String?, get: () -> Boolean, set: (Boolean) -> Unit): OptionsPopup {
         val sw = SwitchView(a).apply { on = get() }
+        repaints += { sw.on = get() }
         target += Rows.row(a, title, sub, sw) { set(!get()); sw.on = get() }
         return this
     }

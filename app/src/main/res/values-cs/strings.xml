@@ -479,6 +479,8 @@
     <string name="st_map_offline_switch_desc">Bez datového připojení, pokud celá zobrazená mapa není v offline mezipaměti</string>
     <string name="st_use_location">Použít moji polohu</string>
     <string name="st_wx_model">Model počasí: %1$s</string>
+    <string name="st_wx_city">Záložní město</string>
+    <string name="st_wx_city_desc">%1$s, pokud auto neposkytne polohu</string>
     <string name="st_wx_model_auto">Automaticky</string>
     <string name="st_no_location">Poloha zatím není k dispozici</string>
     <string name="st_heated">Vyhřívání sedadel a volantu</string>
@@ -945,7 +947,7 @@
     <string name="st_fx_sound">Zvukové efekty</string>
     <string name="st_fx_volume">Hlasitost zvukových efektů</string>
     <string name="st_fx_volume_off">Vypnuto</string>
-    <string name="wc_radar">Varování před radary (test)</string>
+    <string name="wc_radar">Varování před radary</string>
     <string name="du_radars">Radary</string>
     <string name="rad_osm">© přispěvatelé OpenStreetMap</string>
     <string name="rad_osm_licence">Limity a radary: © přispěvatelé OpenStreetMap, licence ODbL. Data mohou být neúplná nebo zastaralá: vždy platí dopravní značení.</string>
