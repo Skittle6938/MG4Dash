@@ -52,7 +52,6 @@ class SettingsActivity : AppCompatActivity() {
         app.mg4dash.ui.Themes.apply(this)
         themeSig = app.mg4dash.ui.Themes.signature(this)
         // The speed camera alerter's own page (17/11): a long press on its card
-        if (intent.getBooleanExtra(EXTRA_HA, false)) { haPage(); return }
         // A single scrolling area: two columns of categories, under a fixed banner
         // (title, log, close) that leaves room for the fog light button.
         // The screen's margins as home's (Grand affichage: enlarged like its bar, which then sits where home's does)
@@ -494,9 +493,9 @@ class SettingsActivity : AppCompatActivity() {
         const val TAB_DATA = 3
         const val TAB_CAR = 2
         /** Opens the Home Assistant page (address, token, test) instead of the settings. */
-        const val EXTRA_HA = "ha"
 
-        fun openHa(context: android.content.Context) = context.startActivity(android.content.Intent(context, SettingsActivity::class.java).putExtra(EXTRA_HA, true))
+        /** Home Assistant's settings (24/11: a window like the others, no longer a page). */
+        fun openHa(context: android.content.Context) { (context as? android.app.Activity)?.let { HaWindow.show(it) } }
     }
 
     // ── 4G data: total over 30 days, by use, day by day, alert ──
@@ -1173,29 +1172,6 @@ class SettingsActivity : AppCompatActivity() {
         app.mg4dash.ui.Ask.show(this, title, initial, secret, number, onOk)
 
     /**
-     * Home Assistant address and token read from mg4dash_ha.txt at the root of a USB stick: the line that
-     * starts with http is the address, the longest of the others the token.
-     */
-    private fun importHa(done: () -> Unit) {
-        val sm = getSystemService(STORAGE_SERVICE) as android.os.storage.StorageManager
-        val file = sm.storageVolumes.filter { it.isRemovable && it.state == android.os.Environment.MEDIA_MOUNTED }
-            .mapNotNull { v -> try { v.javaClass.getMethod("getPathFile").invoke(v) as? java.io.File } catch (_: Throwable) { null } }
-            .flatMap { dir -> dir.listFiles()?.toList().orEmpty() }
-            .firstOrNull { it.isFile && it.name.equals("mg4dash_ha.txt", ignoreCase = true) }
-        if (file == null) { app.mg4dash.ui.Toasts.show(this, R.string.st_ha_import_none, long = true); return }
-        val lines = try { file.readLines().map { it.trim().trimStart('\uFEFF') }.filter { it.isNotEmpty() } } catch (_: Exception) { emptyList() }
-        val url = lines.firstOrNull { it.startsWith("http", ignoreCase = true) }
-        val token = lines.filter { it != url && !it.contains(' ') }.maxByOrNull { it.length }
-        if (url != null) prefs.haUrl = url.trimEnd('/')
-        if (token != null) prefs.haToken = token
-        Log.i("Settings", "Home Assistant imported from ${file.name}: address ${url != null}, token ${token != null}")
-        val found = listOfNotNull(url?.let { getString(R.string.st_ha_set_url) }, token?.let { getString(R.string.st_ha_set_token) })
-        if (found.isEmpty()) { app.mg4dash.ui.Toasts.show(this, R.string.st_ha_import_none, long = true); return }
-        app.mg4dash.ui.Toasts.show(this, getString(R.string.st_ha_import_done, found.joinToString(", ")), long = true)
-        done()
-    }
-
-    /**
      * Recent web engine (#98): the car's WebView or Chromium 138 for the web app card, downloaded from the
      * MG4Dash-WebView repository; the way back to the car's own. Only on head units that can take it.
      */
@@ -1247,59 +1223,6 @@ class SettingsActivity : AppCompatActivity() {
                     }) { finished(it) }
                 }
         }
-    }
-
-    /**
-     * The speed camera alerter's own page (the owner's mockups, 17/11), opened by a long press on its card, apart from the
-     * settings: two tabs (Alertes, Données) built by [app.mg4dash.radar.RadarPage].
-     */
-    /** Home Assistant's page (24/11): the address, the token, a test and the import from a USB stick. */
-    private fun haPage() {
-        val bd = app.mg4dash.ui.Dock.sized(this).resources.displayMetrics.density
-        val root = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; setPadding((16 * bd).toInt(), (12 * bd).toInt(), (16 * bd).toInt(), (12 * bd).toInt()) }
-        val vertical = app.mg4dash.ui.Dock.vertical(this)
-        val top = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL }
-        top.addView(TextView(this).apply {
-            text = "Home Assistant"; setTextColor(color(R.color.text_value))
-            setTextSize(TypedValue.COMPLEX_UNIT_SP, 26f); typeface = Typeface.create("sans-serif-medium", Typeface.NORMAL)
-        }, LinearLayout.LayoutParams(0, -2, 1f).apply { leftMargin = if (vertical) dp(12) else dp(app.mg4dash.ui.Kit.fogSafeDp(this@SettingsActivity) - 8) })
-        top.addView(app.mg4dash.ui.Rows.closeButton(this) { finish() })
-        root.addView(top, LinearLayout.LayoutParams(-1, -2).apply { bottomMargin = dp(12) })
-        val cols = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
-        val parent = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
-        cols.addView(parent, LinearLayout.LayoutParams(0, -2, 1f))
-        cols.addView(View(this), LinearLayout.LayoutParams(0, 1, 1f))
-        root.addView(ScrollView(this).apply { addView(cols) }, LinearLayout.LayoutParams(-1, 0, 1f))
-        val ha = panel(parent, "HOME ASSISTANT")
-        val haState = text(ha, "", 18f, R.color.text_value)
-        fun showHa() {
-            haState.text = getString(R.string.st_ha_url, prefs.haUrl.ifBlank { "—" }) + "\n" +
-                getString(if (prefs.haToken.isBlank()) R.string.st_ha_no_token else R.string.st_ha_token_set)
-        }
-        showHa()
-        text(ha, getString(R.string.st_ha_desc), 16f, R.color.text_title)
-        row(ha,
-            button(getString(R.string.st_ha_set_url)) {
-                ask(getString(R.string.st_ha_set_url), prefs.haUrl.ifBlank { "http://homeassistant.local:8123" }, secret = false) { prefs.haUrl = it; showHa() }
-            },
-            button(getString(R.string.st_ha_set_token)) {
-                ask(getString(R.string.st_ha_set_token), "", secret = true) { prefs.haToken = it; showHa() }
-            },
-            button(getString(R.string.st_ha_test)) {
-                app.mg4dash.shortcuts.Shortcuts.testHa(this) { ok ->
-                    app.mg4dash.ui.Toasts.show(this, if (ok) R.string.st_ha_ok else R.string.ha_error, long = true)
-                }
-            },
-        )
-        // #63: keyboard without "paste" (SWI68): address and token read from a text file on the USB stick
-        row(ha, button(getString(R.string.st_ha_import)) { importHa { showHa() } })
-        text(ha, getString(R.string.st_ha_import_desc), 14f, R.color.text_title)
-
-        val dock = LinearLayout(this)
-        root.addView(dock, LinearLayout.LayoutParams(-1, dp(84)).apply { topMargin = dp(12) })
-        app.mg4dash.ui.Dock.mount(this, root, dock, app.mg4dash.ui.Dock.Page.SETTINGS)
-        setContentView(root)
-        app.mg4dash.ui.FadeOutline.applyTo(root)
     }
 
     /**

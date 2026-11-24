@@ -317,6 +317,11 @@
     <string name="st_ha_import_desc">¿Su teclado no permite pegar? Ponga un archivo mg4dash_ha.txt en la raíz de una memoria USB, con la dirección en una línea y el token en otra.</string>
     <string name="st_ha_import_done">Leído de la memoria USB: %1$s</string>
     <string name="st_ha_import_none">No hay ningún archivo mg4dash_ha.txt en la raíz de una memoria USB</string>
+    <string name="ha_connection">Conexión</string>
+    <string name="ha_token_on">Guardado</string>
+    <string name="ha_token_off">Sin definir</string>
+    <string name="ha_test_title">Probar la conexión</string>
+    <string name="ha_usb">Memoria USB</string>
     <string name="st_paste">Pegar</string>
     <string name="st_diag">DIAGNÓSTICO</string>
     <string name="st_diag_on">Modo diagnóstico activado</string>
@@ -1255,5 +1260,6 @@
     <string name="st_cards_offered">Tarjetas disponibles…</string>
     <string name="st_cards_offered_note">Las tarjetas desmarcadas ya no aparecen en el modo edición ni en el inicio. Marcadas de nuevo, vuelven a su lugar.</string>
     <string name="opt_open">Abrir</string>
+    <string name="opt_import">Importar</string>
     <string name="opt_clear">Borrar</string>
 </resources>

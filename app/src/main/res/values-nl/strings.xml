@@ -317,6 +317,11 @@
     <string name="st_ha_import_desc">Geen plakken op uw toetsenbord? Zet een bestand mg4dash_ha.txt in de hoofdmap van een USB-stick, met het adres op één regel en het token op een andere.</string>
     <string name="st_ha_import_done">Gelezen van de USB-stick: %1$s</string>
     <string name="st_ha_import_none">Geen bestand mg4dash_ha.txt in de hoofdmap van een USB-stick</string>
+    <string name="ha_connection">Verbinding</string>
+    <string name="ha_token_on">Opgeslagen</string>
+    <string name="ha_token_off">Niet ingesteld</string>
+    <string name="ha_test_title">Verbinding testen</string>
+    <string name="ha_usb">USB-stick</string>
     <string name="st_paste">Plakken</string>
     <string name="st_diag">DIAGNOSE</string>
     <string name="st_diag_on">Diagnosemodus aan</string>
@@ -1255,5 +1260,6 @@
     <string name="st_cards_offered">Aangeboden kaarten…</string>
     <string name="st_cards_offered_note">Niet-aangevinkte kaarten verschijnen niet meer in de bewerkingsmodus of op het startscherm. Weer aangevinkt, keren ze terug naar hun plek.</string>
     <string name="opt_open">Openen</string>
+    <string name="opt_import">Importeren</string>
     <string name="opt_clear">Wissen</string>
 </resources>

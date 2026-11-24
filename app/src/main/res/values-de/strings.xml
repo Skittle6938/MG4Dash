@@ -317,6 +317,11 @@
     <string name="st_ha_import_desc">Kein Einfügen auf Ihrer Tastatur? Legen Sie eine Datei mg4dash_ha.txt ins Hauptverzeichnis eines USB-Sticks, mit der Adresse in einer Zeile und dem Token in einer anderen.</string>
     <string name="st_ha_import_done">Vom USB-Stick gelesen: %1$s</string>
     <string name="st_ha_import_none">Keine Datei mg4dash_ha.txt im Hauptverzeichnis eines USB-Sticks</string>
+    <string name="ha_connection">Verbindung</string>
+    <string name="ha_token_on">Gespeichert</string>
+    <string name="ha_token_off">Nicht festgelegt</string>
+    <string name="ha_test_title">Verbindung testen</string>
+    <string name="ha_usb">USB-Stick</string>
     <string name="st_paste">Einfügen</string>
     <string name="st_diag">DIAGNOSE</string>
     <string name="st_diag_on">Diagnosemodus an</string>
@@ -1255,5 +1260,6 @@
     <string name="st_cards_offered">Angebotene Karten…</string>
     <string name="st_cards_offered_note">Nicht angehakte Karten erscheinen weder im Bearbeitungsmodus noch auf dem Startbildschirm. Wieder angehakt, kehren sie an ihren Platz zurück.</string>
     <string name="opt_open">Öffnen</string>
+    <string name="opt_import">Importieren</string>
     <string name="opt_clear">Löschen</string>
 </resources>

@@ -317,6 +317,11 @@
     <string name="st_ha_import_desc">Klavyenizde yapıştır yok mu? Bir USB belleğin köküne, adres bir satırda ve belirteç başka bir satırda olacak şekilde mg4dash_ha.txt dosyası koyun.</string>
     <string name="st_ha_import_done">USB bellekten okundu: %1$s</string>
     <string name="st_ha_import_none">USB belleğin kökünde mg4dash_ha.txt dosyası yok</string>
+    <string name="ha_connection">Bağlantı</string>
+    <string name="ha_token_on">Kayıtlı</string>
+    <string name="ha_token_off">Ayarlanmadı</string>
+    <string name="ha_test_title">Bağlantıyı test et</string>
+    <string name="ha_usb">USB bellek</string>
     <string name="st_paste">Yapıştır</string>
     <string name="st_diag">TANILAMA</string>
     <string name="st_diag_on">Tanılama modu açık</string>
@@ -1255,5 +1260,6 @@
     <string name="st_cards_offered">Sunulan kartlar…</string>
     <string name="st_cards_offered_note">İşareti kaldırılan kartlar düzenleme modunda ve ana ekranda görünmez. Yeniden işaretlenince yerlerine dönerler.</string>
     <string name="opt_open">Aç</string>
+    <string name="opt_import">İçe aktar</string>
     <string name="opt_clear">Temizle</string>
 </resources>

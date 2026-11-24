@@ -105,7 +105,9 @@ class SettingsMovesShots {
             base(theme).putBoolean("settings_tabs_v2", true).putInt("settings_tab", 2).commit()
             page(Robolectric.buildActivity(SettingsActivity::class.java).setup().get().also { idle() }, "page_car_$look.png")
             base(theme).commit()
-            page(Robolectric.buildActivity(SettingsActivity::class.java, android.content.Intent().putExtra(SettingsActivity.EXTRA_HA, true)).setup().get().also { idle() }, "page_ha_$look.png")
+            // Home Assistant: a window like the others (24/11)
+            ShadowDialog.reset()
+            Robolectric.buildActivity(SettingsActivity::class.java).setup().get().also { app.mg4dash.settings.HaWindow.show(it); idle(); window(it, "ha_$look.png") }
             // The 24 colours' grid (accent), the current one circled
             base(theme).putInt("theme_accent", 0).commit()
             val s = Robolectric.buildActivity(SettingsActivity::class.java).setup().get().also { idle() }

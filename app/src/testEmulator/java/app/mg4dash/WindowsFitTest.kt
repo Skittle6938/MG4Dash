@@ -84,6 +84,9 @@ class WindowsFitTest {
             ShadowDialog.reset()
             app.mg4dash.settings.SettingsActivity::class.java.getDeclaredMethod("cardsOffered").apply { isAccessible = true }.invoke(s)
             check(s, "cards_offered$tag")
+            ShadowDialog.reset()
+            app.mg4dash.settings.HaWindow.show(s); idle()
+            check(s, "home_assistant$tag")
         }
         File("build/screenshots/fit/scrolled.txt").writeText(scrolled.joinToString("\n"))
     }

@@ -317,6 +317,11 @@
     <string name="st_ha_import_desc">Pas de « coller » sur votre clavier ? Mettez un fichier mg4dash_ha.txt à la racine d\'une clé USB, avec l\'adresse sur une ligne et le jeton sur une autre.</string>
     <string name="st_ha_import_done">Lu sur la clé USB : %1$s</string>
     <string name="st_ha_import_none">Aucun fichier mg4dash_ha.txt à la racine d\'une clé USB</string>
+    <string name="ha_connection">Connexion</string>
+    <string name="ha_token_on">Enregistré</string>
+    <string name="ha_token_off">Non défini</string>
+    <string name="ha_test_title">Tester la connexion</string>
+    <string name="ha_usb">Clé USB</string>
     <string name="st_paste">Coller</string>
     <string name="st_diag">DIAGNOSTIC</string>
     <string name="st_diag_on">Mode diagnostic activé</string>
@@ -1255,5 +1260,6 @@
     <string name="st_cards_offered">Cartes proposées…</string>
     <string name="st_cards_offered_note">Les cartes décochées n\'apparaissent plus dans le mode édition ni sur l\'accueil. Recochées, elles reviennent à leur place.</string>
     <string name="opt_open">Ouvrir</string>
+    <string name="opt_import">Importer</string>
     <string name="opt_clear">Effacer</string>
 </resources>

@@ -317,6 +317,11 @@
     <string name="st_ha_import_desc">Klávesnice neumí vkládat? Uložte do kořene USB disku soubor mg4dash_ha.txt s adresou na jednom řádku a tokenem na dalším.</string>
     <string name="st_ha_import_done">Načteno z USB disku: %1$s</string>
     <string name="st_ha_import_none">V kořeni USB disku není soubor mg4dash_ha.txt</string>
+    <string name="ha_connection">Připojení</string>
+    <string name="ha_token_on">Uloženo</string>
+    <string name="ha_token_off">Nenastaveno</string>
+    <string name="ha_test_title">Otestovat připojení</string>
+    <string name="ha_usb">USB disk</string>
     <string name="st_paste">Vložit</string>
     <string name="st_diag">DIAGNOSTIKA</string>
     <string name="st_diag_on">Diagnostický režim zapnut</string>
@@ -1255,5 +1260,6 @@
     <string name="st_cards_offered">Nabízené karty…</string>
     <string name="st_cards_offered_note">Neoznačené karty se nezobrazují v režimu úprav ani na domovské obrazovce. Po opětovném označení se vrátí na své místo.</string>
     <string name="opt_open">Otevřít</string>
+    <string name="opt_import">Importovat</string>
     <string name="opt_clear">Vymazat</string>
 </resources>

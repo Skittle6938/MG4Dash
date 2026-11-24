@@ -317,6 +317,11 @@
     <string name="st_ha_import_desc">La tastiera non permette di incollare? Metti un file mg4dash_ha.txt nella radice di una chiavetta USB, con l\'indirizzo su una riga e il token su un\'altra.</string>
     <string name="st_ha_import_done">Letto dalla chiavetta USB: %1$s</string>
     <string name="st_ha_import_none">Nessun file mg4dash_ha.txt nella radice di una chiavetta USB</string>
+    <string name="ha_connection">Connessione</string>
+    <string name="ha_token_on">Salvato</string>
+    <string name="ha_token_off">Non impostato</string>
+    <string name="ha_test_title">Prova la connessione</string>
+    <string name="ha_usb">Chiavetta USB</string>
     <string name="st_paste">Incolla</string>
     <string name="st_diag">DIAGNOSTICA</string>
     <string name="st_diag_on">Modalità diagnostica attiva</string>
@@ -1255,5 +1260,6 @@
     <string name="st_cards_offered">Schede proposte…</string>
     <string name="st_cards_offered_note">Le schede non spuntate non compaiono più nella modalità modifica né nella home. Spuntate di nuovo, tornano al loro posto.</string>
     <string name="opt_open">Apri</string>
+    <string name="opt_import">Importa</string>
     <string name="opt_clear">Cancella</string>
 </resources>

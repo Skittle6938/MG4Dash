@@ -317,6 +317,11 @@
     <string name="st_ha_import_desc">No paste on your keyboard? Put a file named mg4dash_ha.txt at the root of a USB stick, with the address on one line and the token on another.</string>
     <string name="st_ha_import_done">Read from the USB stick: %1$s</string>
     <string name="st_ha_import_none">No mg4dash_ha.txt file at the root of a USB stick</string>
+    <string name="ha_connection">Connection</string>
+    <string name="ha_token_on">Saved</string>
+    <string name="ha_token_off">Not set</string>
+    <string name="ha_test_title">Test the connection</string>
+    <string name="ha_usb">USB stick</string>
     <string name="st_paste">Paste</string>
     <string name="st_diag">DIAGNOSTICS</string>
     <string name="st_diag_on">Diagnostic mode on</string>
@@ -1255,5 +1260,6 @@
     <string name="st_cards_offered">Cards offered…</string>
     <string name="st_cards_offered_note">Unticked cards are left out of the edit mode and of the home screen. Ticked again, they come back where they were.</string>
     <string name="opt_open">Open</string>
+    <string name="opt_import">Import</string>
     <string name="opt_clear">Clear</string>
 </resources>
