@@ -1076,7 +1076,7 @@
     <string name="rp_visual">Snelheid in kleur</string>
     <string name="rp_visual_sub">Op de kaart wordt de snelheid oranje net boven de limiet, rood ruim erboven</string>
     <string name="rp_banner">Banner boven de apps</string>
-    <string name="rp_banner_sub">Alleen bij een flinke overschrijding in een flitszone</string>
+    <string name="rp_banner_sub">Verschijnt alleen als je te snel rijdt in een flitszone (sterke waarschuwing)</string>
     <string name="rp_sounds">Geluid per waarschuwing</string>
     <string name="rp_col_alert">Waarschuwing</string>
     <string name="rp_col_sound">Geluid</string>

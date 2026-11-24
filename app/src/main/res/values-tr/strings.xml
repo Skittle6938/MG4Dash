@@ -1076,7 +1076,7 @@
     <string name="rp_visual">Renkli hız</string>
     <string name="rp_visual_sub">Kartta hız, sınırın biraz üstünde turuncu, çok üstünde kırmızı olur</string>
     <string name="rp_banner">Uygulamaların üzerinde şerit</string>
-    <string name="rp_banner_sub">Yalnızca radar bölgesinde sınır belirgin aşıldığında</string>
+    <string name="rp_banner_sub">Yalnızca radar bölgesinde hız aşıldığında görünür (güçlü uyarı)</string>
     <string name="rp_sounds">Her uyarının sesi</string>
     <string name="rp_col_alert">Uyarı</string>
     <string name="rp_col_sound">Ses</string>

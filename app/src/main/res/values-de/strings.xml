@@ -1076,7 +1076,7 @@
     <string name="rp_visual">Farbige Geschwindigkeit</string>
     <string name="rp_visual_sub">Auf der Karte wird die Geschwindigkeit leicht über dem Limit orange, deutlich darüber rot</string>
     <string name="rp_banner">Banner über den Apps</string>
-    <string name="rp_banner_sub">Nur bei deutlicher Überschreitung in einer Blitzerzone</string>
+    <string name="rp_banner_sub">Erscheint nur, wenn man in einer Blitzerzone zu schnell fährt (starke Warnung)</string>
     <string name="rp_sounds">Ton jeder Warnung</string>
     <string name="rp_col_alert">Warnung</string>
     <string name="rp_col_sound">Ton</string>

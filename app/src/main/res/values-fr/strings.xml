@@ -1076,7 +1076,7 @@
     <string name="rp_visual">Vitesse en couleur</string>
     <string name="rp_visual_sub">Sur la carte, la vitesse passe en orange un peu au-dessus de la limite, en rouge nettement au-dessus</string>
     <string name="rp_banner">Bandeau par-dessus les applis</string>
-    <string name="rp_banner_sub">Seulement en cas de fort dépassement de vitesse dans une zone radar</string>
+    <string name="rp_banner_sub">Apparaît seulement quand on dépasse la vitesse dans une zone radar (alerte forte)</string>
     <string name="rp_sounds">Son de chaque alerte</string>
     <string name="rp_col_alert">Alerte</string>
     <string name="rp_col_sound">Son</string>

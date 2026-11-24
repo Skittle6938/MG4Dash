@@ -1076,7 +1076,7 @@
     <string name="rp_visual">Barevná rychlost</string>
     <string name="rp_visual_sub">Na kartě se rychlost mírně nad limitem zbarví oranžově, výrazně nad ním červeně</string>
     <string name="rp_banner">Pruh přes aplikace</string>
-    <string name="rp_banner_sub">Jen při výrazném překročení v zóně radaru</string>
+    <string name="rp_banner_sub">Zobrazí se jen při překročení rychlosti v zóně radaru (silné varování)</string>
     <string name="rp_sounds">Zvuk každého upozornění</string>
     <string name="rp_col_alert">Upozornění</string>
     <string name="rp_col_sound">Zvuk</string>

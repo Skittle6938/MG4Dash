@@ -1076,7 +1076,7 @@
     <string name="rp_visual">Velocidad en color</string>
     <string name="rp_visual_sub">En la tarjeta, la velocidad se pone naranja un poco por encima del límite y roja muy por encima</string>
     <string name="rp_banner">Banner sobre las apps</string>
-    <string name="rp_banner_sub">Solo al superar claramente el límite en una zona de radar</string>
+    <string name="rp_banner_sub">Solo aparece al superar la velocidad en una zona de radar (alerta fuerte)</string>
     <string name="rp_sounds">Sonido de cada alerta</string>
     <string name="rp_col_alert">Alerta</string>
     <string name="rp_col_sound">Sonido</string>
