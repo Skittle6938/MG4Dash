@@ -140,6 +140,35 @@ class EnergyActivity : PageActivity() {
         currentRow = cRow
         c1.addView(cRow, kit.lp(-1, -2, t = 8))
 
+        // ── Battery (24/11, once in Settings › Vehicle): health, capacities; its settings in the options window ──
+        c1.addView(android.view.View(this), kit.lp(-1, 0, 1f))
+        val battery = kit.column().apply { isClickable = true }
+        battery.addView(kit.title(getString(R.string.title_battery)))
+        val health = kit.text("", 44f, light = true)
+        val healthRow = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = android.view.Gravity.BOTTOM }
+        healthRow.addView(health)
+        healthRow.addView(kit.text(getString(R.string.en_health), 18f, R.color.text_sub), kit.lp(-2, -2, l = 14, b = 8))
+        battery.addView(healthRow, kit.lp(-1, -2, t = 6))
+        val caps = kit.text("", 17f, R.color.text_sub).apply { maxLines = 2 }
+        battery.addView(caps, kit.lp(-1, -2, t = 2))
+        fun showBattery() {
+            val f = { v: Float -> String.format(java.util.Locale.getDefault(), "%.1f", v) }
+            val bc = app.mg4dash.energy.BatteryCapacity
+            bc.apply(this)
+            health.text = bc.health(this)?.let { String.format(java.util.Locale.getDefault(), "%.0f %%", it.percent) } ?: "—"
+            caps.text = getString(R.string.en_battery_caps, f(app.mg4dash.system.Prefs(this).batteryKwh), f(bc.nominal(this)), app.mg4dash.system.Prefs(this).batteryModel)
+        }
+        showBattery()
+        val open = { batteryOptions { showBattery() } }
+        battery.setOnLongClickListener { open(); true }
+        battery.setOnClickListener { open() }
+        val settingsBtn = kit.text(getString(R.string.en_battery_settings) + "   ›", 19f, R.color.text_value).apply {
+            gravity = android.view.Gravity.CENTER_VERTICAL; setPadding(kit.dp(22), 0, kit.dp(22), 0)
+            setBackgroundResource(R.drawable.bg_button); setOnClickListener { open() }
+        }
+        battery.addView(settingsBtn, kit.lp(-1, kit.dp(56), t = 12))
+        c1.addView(battery, kit.lp(-1, -2, t = 14))
+
         // ── Colonne 2 : programmation + V2L ──
         val c2 = kit.panel(getString(R.string.en_scheduled))
         val tRow = kit.row()
@@ -447,6 +476,36 @@ class EnergyActivity : PageActivity() {
             s.chargeCtrl == 1 -> CarBridge.stopCharge()
             else -> CarBridge.startCharge()
         }
+    }
+
+    /**
+     * The battery's settings (24/11): its model (the reference of the estimated health) and the new capacity used
+     * for the health, with what MG4Dash measured. [closed] once it goes.
+     */
+    private fun batteryOptions(closed: () -> Unit) {
+        val prefs = app.mg4dash.system.Prefs(this)
+        val bc = app.mg4dash.energy.BatteryCapacity
+        val f = { v: Float -> String.format(java.util.Locale.getDefault(), "%.1f", v) }
+        val models = bc.MODELS.map { it.first }
+        val measured = bc.fromCar()?.let { getString(R.string.st_cap_car, f(it)) }
+            ?: bc.estimate(this)?.let { getString(R.string.st_cap_est, f(it.first), it.second) }
+            ?: bc.progress(this).provisional?.let { getString(R.string.st_cap_est_current, f(it)) }
+            ?: getString(R.string.st_cap_none)
+        lateinit var popup: app.mg4dash.ui.OptionsPopup
+        popup = app.mg4dash.ui.OptionsPopup(this, getString(R.string.vh_battery), R.drawable.ic_battery)
+            .choice(getString(R.string.st_battery_model).trimEnd(' ', ':', '\u00a0', '\u202f'), getString(R.string.en_battery_model_desc),
+                models.map { "$it kWh" }, { models.indexOf(prefs.batteryModel).coerceAtLeast(0) }) { prefs.batteryModel = models[it] }
+            .choice(getString(R.string.st_new_cap).trimEnd(' ', ':', '\u00a0', '\u202f'), getString(R.string.en_new_cap_desc),
+                listOf(getString(R.string.st_new_cap_default, f(bc.modelNominal(this))), getString(R.string.st_new_cap_item_custom)),
+                { if (prefs.batteryNewKwh > 0f) 1 else 0 }) { choice ->
+                if (choice == 0) prefs.batteryNewKwh = 0f
+                else app.mg4dash.ui.Ask.show(this, getString(R.string.st_new_cap_title), if (prefs.batteryNewKwh > 0f) prefs.batteryNewKwh.toString() else "", secret = false, number = true) { typed ->
+                    typed.trim().replace(',', '.').toFloatOrNull()?.takeIf { it in 30f..120f }?.let { prefs.batteryNewKwh = Math.round(it * 10f) / 10f }
+                    closed()
+                }
+            }
+            .note(measured)
+        popup.show { closed() }
     }
 
     /** Touching the time: hour / minute wheels, like "climate at a set time". */

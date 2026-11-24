@@ -12,9 +12,11 @@ def mix(c, d, t): return tuple(x + (y - x) * t for x, y in zip(c, d))
 def parse(h): h = h.lstrip('#'); return (int(h[0:2], 16), int(h[2:4], 16), int(h[4:6], 16))
 
 # (name, hue, saturation) of the extra backgrounds; lightness is set by the derivation
-BGS = [('Slate', 220, .25), ('Petrol', 195, .40), ('Teal', 175, .35), ('Emerald', 150, .30), ('Moss', 100, .20), ('Olive', 70, .25),
-       ('Sand', 40, .15), ('Bronze', 35, .35), ('Brown', 25, .30), ('Rust', 15, .40), ('DeepRed', 0, .40), ('Wine', 330, .30),
-       ('Plum', 300, .25), ('Purple', 275, .30), ('Indigo', 245, .35), ('Midnight', 230, .45), ('Steel', 210, .15), ('Graphite', 0, 0.0),
+# The four first ones replace the hand-made Night, Charcoal, Forest and Burgundy (24/11: too alike); Black stays hand-made
+BASE = [('Night', 225, .30), ('Charcoal', 216, .08), ('Forest', 160, .26), ('Burgundy', 345, .32)]
+BGS = BASE + [('Slate', 205, .18), ('Petrol', 195, .40), ('Teal', 175, .35), ('Emerald', 140, .38), ('Moss', 100, .20), ('Olive', 70, .25),
+       ('Sand', 40, .15), ('Bronze', 35, .35), ('Brown', 25, .30), ('Rust', 15, .40), ('DeepRed', 0, .40), ('Wine', 322, .30),
+       ('Plum', 300, .25), ('Purple', 275, .30), ('Indigo', 245, .35), ('Midnight', 230, .45), ('Steel', 200, .22), ('Graphite', 0, 0.0),
        ('WarmGrey', 30, .08)]
 ACS = [('Cyan', '00B8D4'), ('Teal', '00BFA5'), ('Turquoise', '1DE9B6'), ('LightGreen', '64DD17'), ('Lime', 'AEEA00'), ('Yellow', 'FFD600'),
        ('Gold', 'FFC400'), ('Amber', 'FFAB00'), ('DeepOrange', 'FF6D00'), ('Coral', 'FF6E40'), ('Rose', 'FF4081'), ('Pink', 'F50057'),
@@ -28,18 +30,20 @@ swatches_bg, swatches_ac = [], []
 def style(name, items): xml.append(f'    <style name="{name}" parent="">'); xml.extend('        ' + i for i in items); xml.append('    </style>')
 
 for n, h, s in BGS:
-    L = lambda l: hls(h, l, s)
-    idle = L(.12); swatches_bg.append(hx(idle))
-    style(f'MgBg.{n}', [f'<item name="mgBgTop">{hx(L(.055))}</item>', f'<item name="mgBgBottom">{hx(L(.10))}</item>', f'<item name="mgBgEnd">{hx(L(.07))}</item>',
-        f'<item name="mgPanel">{hx(L(.085), 0xD9)}</item>', f'<item name="mgPanelBorder">{hx(L(.175))}</item>', f'<item name="mgButtonIdle">{hx(idle)}</item>',
-        f'<item name="mgButtonPressed">{hx(L(.17))}</item>', f'<item name="mgGaugeOff">{hx(L(.145))}</item>', f'<item name="mgPill">{hx(L(.085), 0xCC)}</item>',
+    # Clearly tinted (24/11: the first try looked all alike): more saturation, a little more light
+    sd = min(.85, s * 1.6 + .12) if s > 0 else 0.0
+    L = lambda l: hls(h, l, sd)
+    idle = L(.14); swatches_bg.append(hx(idle))
+    style(f'MgBg.{n}', [f'<item name="mgBgTop">{hx(L(.065))}</item>', f'<item name="mgBgBottom">{hx(L(.12))}</item>', f'<item name="mgBgEnd">{hx(L(.085))}</item>',
+        f'<item name="mgPanel">{hx(L(.10), 0xD9)}</item>', f'<item name="mgPanelBorder">{hx(L(.20))}</item>', f'<item name="mgButtonIdle">{hx(idle)}</item>',
+        f'<item name="mgButtonPressed">{hx(L(.19))}</item>', f'<item name="mgGaugeOff">{hx(L(.165))}</item>', f'<item name="mgPill">{hx(L(.10), 0xCC)}</item>',
         f'<item name="mgButtonDisabled">{hx(idle, 0x80)}</item>'] + TEXT_D)
-    sl = min(s, .30)
+    sl = min(.60, s * 1.5 + .15) if s > 0 else 0.0
     LL = lambda l: hls(h, l, sl)
-    style(f'MgBgLight.{n}', [f'<item name="mgBgTop">{hx(LL(.93))}</item>', f'<item name="mgBgBottom">{hx(LL(.975))}</item>', f'<item name="mgBgEnd">{hx(LL(.945))}</item>',
-        '<item name="mgPanel">#E6FFFFFF</item>', f'<item name="mgPanelBorder">{hx(LL(.82))}</item>', f'<item name="mgButtonIdle">{hx(LL(.905))}</item>',
-        f'<item name="mgButtonPressed">{hx(LL(.85))}</item>', f'<item name="mgGaugeOff">{hx(LL(.87))}</item>', '<item name="mgPill">#CCFFFFFF</item>',
-        f'<item name="mgButtonDisabled">{hx(LL(.905), 0x80)}</item>'] + TEXT_L)
+    style(f'MgBgLight.{n}', [f'<item name="mgBgTop">{hx(LL(.885))}</item>', f'<item name="mgBgBottom">{hx(LL(.94))}</item>', f'<item name="mgBgEnd">{hx(LL(.91))}</item>',
+        f'<item name="mgPanel">{hx(LL(.975), 0xE6)}</item>', f'<item name="mgPanelBorder">{hx(LL(.76))}</item>', f'<item name="mgButtonIdle">{hx(LL(.865))}</item>',
+        f'<item name="mgButtonPressed">{hx(LL(.81))}</item>', f'<item name="mgGaugeOff">{hx(LL(.83))}</item>', f'<item name="mgPill">{hx(LL(.975), 0xCC)}</item>',
+        f'<item name="mgButtonDisabled">{hx(LL(.865), 0x80)}</item>'] + TEXT_L)
 
 W, K = (255, 255, 255), (0, 0, 0)
 for n, a in ACS:
@@ -59,3 +63,4 @@ xml.append('</resources>')
 open(os.path.join(R, 'res', 'values', 'themes_palette.xml'), 'w', encoding='utf-8', newline='\n').write('\n'.join(xml) + '\n')
 
 print('themes_palette.xml written; the Kotlin lists in ui/Themes.kt follow the same order')
+print('BACKGROUND_SWATCHES (0, 2, 3, 4, then 5-23):', ', '.join(swatches_bg))

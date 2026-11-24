@@ -211,6 +211,12 @@
     <string name="st_valet">Modo mantenimiento</string>
     <string name="st_rescue_note">Red de seguridad: si MG4Dash ya no arranca o falla varias veces seguidas, MG4Dash Rescue lo repara en el siguiente arranque o restaura la pantalla de inicio original de SAIC.</string>
     <string name="st_battery_line">Nueva: %1$s kWh  ·  Actual: %2$s kWh  ·  Salud: %3$s</string>
+    <string name="en_battery_caps">%1$s kWh medidos · %2$s kWh nueva (modelo %3$d kWh)</string>
+    <string name="en_health">salud estimada</string>
+    <string name="en_battery_settings">Ajustes de la batería</string>
+    <string name="en_battery_model">Modelo de batería</string>
+    <string name="en_battery_model_desc">Referencia para la salud estimada</string>
+    <string name="en_new_cap_desc">Sin valor oficial: el coche no lo da</string>
     <string name="st_battery_model">Modelo de batería (referencia de la salud estimada, página Vehículo):</string>
     <string name="st_new_cap">Capacidad nueva para el cálculo de salud:</string>
     <string name="st_new_cap_default">%1$s kWh (por defecto)</string>
@@ -416,7 +422,7 @@
     <string name="dock_slot_wifi_short">Wi-Fi</string>
     <string name="st_cap_car">Leída del coche: %1$s kWh.</string>
     <string name="st_cap_none" formatted="false">El coche no la indica: MG4Dash la medirá conduciendo, tras un 15 % de descenso (sumado en varios trayectos).</string>
-    <string name="st_cap_est">Medida por MG4Dash: %1$s kWh (%2$d medición(es) entre cargas, suavizadas en 30 días).</string>
+    <string name="st_cap_est">Estimada al circular por MG4Dash: %1$s kWh (%2$d medición(es) de las últimas descargas, suavizadas en 30 días).</string>
     <string name="st_cap_est_current">En medición por MG4Dash: %1$s kWh (provisional).</string>
     <string name="sw_batt_temp">Batería %1$d °C</string>
     <string name="st_map_vdock">Barra vertical a la izquierda (todas las pantallas y MG4Radio): %1$s</string>

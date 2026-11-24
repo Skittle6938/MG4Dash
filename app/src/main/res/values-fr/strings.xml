@@ -211,6 +211,12 @@
     <string name="st_valet">Mode Entretien</string>
     <string name="st_rescue_note">Filet de sécurité : si MG4Dash ne démarre plus ou plante plusieurs fois de suite, MG4Dash Rescue le répare au démarrage suivant, ou remet l\'accueil SAIC d\'origine.</string>
     <string name="st_battery_line">Neuve : %1$s kWh  ·  Actuelle : %2$s kWh  ·  Santé : %3$s</string>
+    <string name="en_battery_caps">%1$s kWh mesurés · %2$s kWh neuve (modèle %3$d kWh)</string>
+    <string name="en_health">santé estimée</string>
+    <string name="en_battery_settings">Réglages de la batterie</string>
+    <string name="en_battery_model">Modèle de batterie</string>
+    <string name="en_battery_model_desc">Référence pour la santé estimée</string>
+    <string name="en_new_cap_desc">Pas de valeur officielle : la voiture ne la donne pas</string>
     <string name="st_battery_model">Modèle de batterie (référence de la santé estimée, page Véhicule) :</string>
     <string name="st_new_cap">Capacité neuve pour le calcul de santé :</string>
     <string name="st_new_cap_default">%1$s kWh (par défaut)</string>
@@ -416,7 +422,7 @@
     <string name="dock_slot_wifi_short">Wi-Fi</string>
     <string name="st_cap_car">Lue sur la voiture : %1$s kWh.</string>
     <string name="st_cap_none" formatted="false">La voiture ne la fournit pas : MG4Dash la mesurera en roulant, après 15 % de baisse (cumulée sur plusieurs trajets).</string>
-    <string name="st_cap_est">Mesurée par MG4Dash : %1$s kWh (%2$d mesure(s) entre deux recharges, lissées sur 30 jours).</string>
+    <string name="st_cap_est">Estimée en roulant par MG4Dash : %1$s kWh (%2$d mesure(s) sur les dernières décharges, lissées sur 30 jours).</string>
     <string name="st_cap_est_current">En cours de mesure par MG4Dash : %1$s kWh (provisoire).</string>
     <string name="sw_batt_temp">Batterie %1$d °C</string>
     <string name="st_map_vdock">Barre verticale à gauche (tous les écrans et MG4Radio) : %1$s</string>

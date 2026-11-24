@@ -211,6 +211,12 @@
     <string name="st_valet">Onderhoudsmodus</string>
     <string name="st_rescue_note">Vangnet: start MG4Dash niet meer of crasht het meerdere keren achter elkaar, dan herstelt MG4Dash Rescue het bij de volgende start of zet het originele SAIC-startscherm terug.</string>
     <string name="st_battery_line">Nieuw: %1$s kWh  ·  Huidig: %2$s kWh  ·  Gezondheid: %3$s</string>
+    <string name="en_battery_caps">%1$s kWh gemeten · %2$s kWh nieuw (model %3$d kWh)</string>
+    <string name="en_health">geschatte gezondheid</string>
+    <string name="en_battery_settings">Accu-instellingen</string>
+    <string name="en_battery_model">Accumodel</string>
+    <string name="en_battery_model_desc">Referentie voor de geschatte gezondheid</string>
+    <string name="en_new_cap_desc">Geen officiële waarde: de auto geeft die niet</string>
     <string name="st_battery_model">Batterijmodel (referentie voor de geschatte gezondheid op de voertuigpagina):</string>
     <string name="st_new_cap">Nieuwe capaciteit voor de gezondheidsberekening:</string>
     <string name="st_new_cap_default">%1$s kWh (standaard)</string>
@@ -416,7 +422,7 @@
     <string name="dock_slot_wifi_short">Wifi</string>
     <string name="st_cap_car">Uitgelezen uit de auto: %1$s kWh.</string>
     <string name="st_cap_none" formatted="false">De auto geeft hem niet: MG4Dash meet hem tijdens het rijden, na 15 % daling (opgeteld over meerdere ritten).</string>
-    <string name="st_cap_est">Gemeten door MG4Dash: %1$s kWh (%2$d meting(en) tussen twee laadbeurten, afgevlakt over 30 dagen).</string>
+    <string name="st_cap_est">Tijdens het rijden geschat door MG4Dash: %1$s kWh (%2$d meting(en) uit recente ontladingen, afgevlakt over 30 dagen).</string>
     <string name="st_cap_est_current">Wordt gemeten door MG4Dash: %1$s kWh (voorlopig).</string>
     <string name="sw_batt_temp">Batterij %1$d °C</string>
     <string name="st_map_vdock">Verticale balk links (alle schermen en MG4Radio): %1$s</string>

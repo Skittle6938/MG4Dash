@@ -90,7 +90,13 @@ class SettingsMovesShots {
     @Test fun energyPage() {
         for ((theme, look) in looks) {
             base(theme).commit()
-            page(Robolectric.buildActivity(app.mg4dash.pages.EnergyActivity::class.java).setup().get().also { idle() }, "energy_$look.png")
+            val e = Robolectric.buildActivity(app.mg4dash.pages.EnergyActivity::class.java).setup().get().also { idle() }
+            page(e, "energy_$look.png")
+            // The battery's settings (24/11), from its section on the Energy page
+            ShadowDialog.reset()
+            runCatching { app.mg4dash.pages.EnergyActivity::class.java.getDeclaredMethod("batteryOptions", kotlin.jvm.functions.Function0::class.java)
+                .apply { isAccessible = true }.invoke(e, { }) }
+            window(e, "battery_$look.png")
         }
     }
 
@@ -109,7 +115,7 @@ class SettingsMovesShots {
             window(s, "color_grid_accent_$look.png")
             ShadowDialog.reset()
             SettingsActivity::class.java.getDeclaredMethod("colorGrid", IntArray::class.java, Int::class.javaPrimitiveType, String::class.java, kotlin.jvm.functions.Function1::class.java)
-                .apply { isAccessible = true }.invoke(s, app.mg4dash.ui.Themes.BACKGROUND_SWATCHES, 1, s.getString(R.string.st_theme_bg), { _: Int -> })
+                .apply { isAccessible = true }.invoke(s, app.mg4dash.ui.Themes.backgroundDots(s), 1, s.getString(R.string.st_theme_bg), { _: Int -> })
             window(s, "color_grid_bg_$look.png")
             base(theme).putBoolean("settings_tabs_v2", true).putBoolean("settings_tabs_v3", true).putInt("settings_tab", 1).commit()
             page(Robolectric.buildActivity(SettingsActivity::class.java).setup().get().also { idle() }, "page_look_$look.png")

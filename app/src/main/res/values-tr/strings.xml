@@ -211,6 +211,12 @@
     <string name="st_valet">Bakım modu</string>
     <string name="st_rescue_note">Güvenlik ağı: MG4Dash artık açılmazsa veya art arda birkaç kez çökerse, MG4Dash Rescue bir sonraki açılışta onu onarır ya da orijinal SAIC ana ekranını geri getirir.</string>
     <string name="st_battery_line">Yeni: %1$s kWh  ·  Mevcut: %2$s kWh  ·  Sağlık: %3$s</string>
+    <string name="en_battery_caps">%1$s kWh ölçülen · %2$s kWh yeni (model %3$d kWh)</string>
+    <string name="en_health">tahmini sağlık</string>
+    <string name="en_battery_settings">Batarya ayarları</string>
+    <string name="en_battery_model">Batarya modeli</string>
+    <string name="en_battery_model_desc">Tahmini sağlık için referans</string>
+    <string name="en_new_cap_desc">Resmi değer yok: araç bunu vermiyor</string>
     <string name="st_battery_model">Batarya modeli (Araç sayfasındaki tahmini sağlık için referans):</string>
     <string name="st_new_cap">Sağlık hesabı için yeni kapasite:</string>
     <string name="st_new_cap_default">%1$s kWh (varsayılan)</string>
@@ -416,7 +422,7 @@
     <string name="dock_slot_wifi_short">Wi-Fi</string>
     <string name="st_cap_car">Araçtan okundu: %1$s kWh.</string>
     <string name="st_cap_none" formatted="false">Araç bunu bildirmiyor: MG4Dash sürüş sırasında %15\'lik bir düşüşten sonra ölçecek (birkaç yolculuk boyunca toplanır).</string>
-    <string name="st_cap_est">MG4Dash tarafından ölçüldü: %1$s kWh (%2$d şarjdan şarja ölçüm, 30 gün boyunca yumuşatıldı).</string>
+    <string name="st_cap_est">MG4Dash tarafından sürüşte tahmin edildi: %1$s kWh (son deşarjlardan %2$d ölçüm, 30 güne yayılmış).</string>
     <string name="st_cap_est_current">MG4Dash tarafından ölçülüyor: %1$s kWh (geçici).</string>
     <string name="sw_batt_temp">Batarya %1$d °C</string>
     <string name="st_map_vdock">Solda dikey çubuk (tüm ekranlar ve MG4Radio): %1$s</string>

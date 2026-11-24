@@ -211,6 +211,12 @@
     <string name="st_valet">Režim údržby</string>
     <string name="st_rescue_note">Záchranná síť: pokud se MG4Dash přestane spouštět nebo několikrát za sebou spadne, MG4Dash Rescue jej při dalším spuštění opraví, nebo vrátí původní domovskou obrazovku SAIC.</string>
     <string name="st_battery_line">Nová: %1$s kWh  ·  Aktuální: %2$s kWh  ·  Stav: %3$s</string>
+    <string name="en_battery_caps">%1$s kWh naměřeno · %2$s kWh nová (model %3$d kWh)</string>
+    <string name="en_health">odhadovaný stav</string>
+    <string name="en_battery_settings">Nastavení baterie</string>
+    <string name="en_battery_model">Model baterie</string>
+    <string name="en_battery_model_desc">Reference pro odhadovaný stav</string>
+    <string name="en_new_cap_desc">Žádná oficiální hodnota: auto ji neposkytuje</string>
     <string name="st_battery_model">Model baterie (reference pro odhad stavu na stránce Vozidlo):</string>
     <string name="st_new_cap">Nová kapacita použitá pro výpočet stavu:</string>
     <string name="st_new_cap_default">%1$s kWh (výchozí)</string>
@@ -416,7 +422,7 @@
     <string name="dock_slot_wifi_short">Wi-Fi</string>
     <string name="st_cap_car">Načteno z vozu: %1$s kWh.</string>
     <string name="st_cap_none" formatted="false">Vůz tuto hodnotu neposkytuje: MG4Dash ji změří během jízdy po poklesu o 15 % (sečteno z více jízd).</string>
-    <string name="st_cap_est">Změřeno MG4Dash: %1$s kWh (%2$d měření mezi nabíjeními, vyhlazeno za 30 dní).</string>
+    <string name="st_cap_est">Odhadnuto MG4Dash za jízdy: %1$s kWh (%2$d měření z posledních vybíjení, vyhlazeno za 30 dní).</string>
     <string name="st_cap_est_current">Měří MG4Dash: %1$s kWh (předběžně).</string>
     <string name="sw_batt_temp">Baterie %1$d °C</string>
     <string name="st_map_vdock">Svislá lišta vlevo (všechny obrazovky a MG4Radio): %1$s</string>

@@ -98,10 +98,23 @@ object Themes {
     }
 
     /** Colours of the selector's dots (same order as the lists). */
-    val BACKGROUND_SWATCHES = intArrayOf(0xFF141B29.toInt(), 0xFF0E0E10.toInt(), 0xFF2B2F35.toInt(), 0xFF16271F.toInt(), 0xFF29161C.toInt(),
-        0xFF171C26.toInt(), 0xFF12252B.toInt(), 0xFF142928.toInt(), 0xFF15281F.toInt(), 0xFF1D2518.toInt(), 0xFF242617.toInt(), 0xFF23201A.toInt(), 0xFF292014.toInt(), 0xFF281D15.toInt(), 0xFF2B1812.toInt(), 0xFF2B1212.toInt(), 0xFF28151F.toInt(), 0xFF261726.toInt(), 0xFF201528.toInt(), 0xFF161429.toInt(), 0xFF11152C.toInt(), 0xFF1A1F23.toInt(), 0xFF1F1F1F.toInt(), 0xFF211F1C.toInt())
+    val BACKGROUND_SWATCHES = intArrayOf(
+        0xFF0E1939.toInt(), 0xFF0E0E10.toInt(), 0xFF1B222D.toInt(), 0xFF11372A.toInt(), 0xFF3A0D18.toInt(), 0xFF152632.toInt(), 0xFF09313F.toInt(), 0xFF0B3C38.toInt(), 0xFF0A3E1B.toInt(), 0xFF1E3314.toInt(), 0xFF303611.toInt(), 0xFF312817.toInt(), 0xFF3C280B.toInt(), 0xFF39200E.toInt(), 0xFF3F1609.toInt(), 0xFF3F0909.toInt(), 0xFF390E29.toInt(), 0xFF361136.toInt(), 0xFF270E39.toInt(), 0xFF0F0B3C.toInt(), 0xFF061042.toInt(), 0xFF132935.toInt(), 0xFF242424.toInt(), 0xFF2D241B.toInt())
     val ACCENT_SWATCHES = intArrayOf(0xFF2979FF.toInt(), 0xFF8E99A8.toInt(), 0xFFE53935.toInt(), 0xFF00C853.toInt(), 0xFFFF8F00.toInt(),
         0xFF00B8D4.toInt(), 0xFF00BFA5.toInt(), 0xFF1DE9B6.toInt(), 0xFF64DD17.toInt(), 0xFFAEEA00.toInt(), 0xFFFFD600.toInt(), 0xFFFFC400.toInt(), 0xFFFFAB00.toInt(), 0xFFFF6D00.toInt(), 0xFFFF6E40.toInt(), 0xFFFF4081.toInt(), 0xFFF50057.toInt(), 0xFFD500F9.toInt(), 0xFFAA00FF.toInt(), 0xFF7C4DFF.toInt(), 0xFFB388FF.toInt(), 0xFF536DFE.toInt(), 0xFF00B0FF.toInt(), 0xFF40C4FF.toInt())
+    /**
+     * The dots of the background choice as they look in the current mode (24/11: in light mode the dark colours
+     * hid the differences): each background's button colour, dark or light.
+     */
+    fun backgroundDots(context: Context): IntArray {
+        val styles = if (isLight(context)) BACKGROUNDS_LIGHT else BACKGROUNDS
+        return IntArray(styles.size) { i ->
+            val t = context.resources.newTheme().apply { applyStyle(styles[i], true) }
+            val a = t.obtainStyledAttributes(intArrayOf(R.attr.mgButtonIdle))
+            try { a.getColor(0, BACKGROUND_SWATCHES[i]) } finally { a.recycle() }
+        }
+    }
+
     /** How many of each are offered first (the rest in the grid). */
     const val FIRST_SWATCHES = 5
 

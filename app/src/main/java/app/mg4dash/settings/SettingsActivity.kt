@@ -252,53 +252,13 @@ class SettingsActivity : AppCompatActivity() {
         colors.addView(accentCol, LinearLayout.LayoutParams(0, -2, 1f))
         theme.addView(colors, LinearLayout.LayoutParams(-1, -2))
         text(bgCol, getString(R.string.st_theme_bg), 18f, R.color.text_value)
-        swatches(bgCol, app.mg4dash.ui.Themes.BACKGROUND_SWATCHES, prefs.themeBackground, getString(R.string.st_theme_bg)) { prefs.themeBackground = it; onThemeChanged() }
+        swatches(bgCol, app.mg4dash.ui.Themes.backgroundDots(this), prefs.themeBackground, getString(R.string.st_theme_bg)) { prefs.themeBackground = it; onThemeChanged() }
         text(accentCol, getString(R.string.st_theme_accent), 18f, R.color.text_value)
         swatches(accentCol, app.mg4dash.ui.Themes.ACCENT_SWATCHES, prefs.themeAccent, getString(R.string.st_theme_accent)) { prefs.themeAccent = it; onThemeChanged() }
         text(theme, getString(R.string.st_theme_desc), 16f, R.color.text_title)
 
-        // ── Energy ──
-        val energy = panel(carR, getString(R.string.title_energy))
-        // One line: new capacity (unofficial reference, editable), current (measured, wear included) and health
-        val cap = text(energy, "", 18f, R.color.text_value)
-        val capSrc = text(energy, "", 15f, R.color.text_title)
-        fun showCap() {
-            val f = { v: Float -> String.format(Locale.getDefault(), "%.1f", v) }
-            cap.text = getString(R.string.st_battery_line, f(app.mg4dash.energy.BatteryCapacity.nominal(this)), f(prefs.batteryKwh),
-                app.mg4dash.energy.BatteryCapacity.health(this)?.let { String.format(Locale.getDefault(), "%.0f %%", it.percent) } ?: "—")
-            val car = app.mg4dash.energy.BatteryCapacity.fromCar()
-            val est = app.mg4dash.energy.BatteryCapacity.estimate(this)
-            capSrc.text = when {
-                car != null -> getString(R.string.st_cap_car, String.format(Locale.getDefault(), "%.1f", car))
-                est != null -> getString(R.string.st_cap_est, String.format(Locale.getDefault(), "%.1f", est.first), est.second)
-                else -> app.mg4dash.energy.BatteryCapacity.progress(this).provisional
-                    ?.let { getString(R.string.st_cap_est_current, String.format(Locale.getDefault(), "%.1f", it)) }
-                    ?: getString(R.string.st_cap_none)
-            }
-        }
+        // Battery (model, reference capacity, health): on the Energy page (24/11)
         app.mg4dash.energy.BatteryCapacity.apply(this)
-        showCap()
-        // Battery model: reference for the estimated health (shown on the Vehicle page)
-        val models = app.mg4dash.energy.BatteryCapacity.MODELS.map { it.first }
-        lateinit var newCapDrop: TextView
-        fun newCapLabel(): String {
-            val f = { v: Float -> String.format(Locale.getDefault(), "%.1f", v) }
-            return if (prefs.batteryNewKwh > 0f) getString(R.string.st_new_cap_custom, f(prefs.batteryNewKwh))
-            else getString(R.string.st_new_cap_default, f(app.mg4dash.energy.BatteryCapacity.modelNominal(this)))
-        }
-        fun paintNewCap() { newCapDrop.text = newCapLabel() + "   ▾" }
-        dropdown(energy, getString(R.string.st_battery_model), models.map { "$it kWh" }, { models.indexOf(prefs.batteryModel).coerceAtLeast(0) }) { prefs.batteryModel = models[it]; showCap(); paintNewCap() }
-        // New reference capacity for health (#77): no official value, and the car does not give it
-        newCapDrop = dropdown(energy, getString(R.string.st_new_cap), listOf(getString(R.string.st_new_cap_item_default), getString(R.string.st_new_cap_item_custom)),
-            { if (prefs.batteryNewKwh > 0f) 1 else 0 }) { choice ->
-            if (choice == 0) { prefs.batteryNewKwh = 0f; showCap() }
-            else ask(getString(R.string.st_new_cap_title), if (prefs.batteryNewKwh > 0f) prefs.batteryNewKwh.toString() else "", false, number = true) { typed ->
-                typed.trim().replace(',', '.').toFloatOrNull()?.takeIf { it in 30f..120f }?.let { prefs.batteryNewKwh = Math.round(it * 10f) / 10f }
-                showCap(); paintNewCap()
-            }
-            newCapDrop.post { paintNewCap() }
-        }
-        paintNewCap()
         // MG4 XPower: in the power card's options (24/11)
         // V2L on plugging in, consumption when stopped and the kWh price: in the energy and consumption cards' options and the Trips page (24/11)
         // Brightness at the top of the right column, above the live power (20/11)
