@@ -175,6 +175,7 @@ object RadarRepo {
         if (job != null) return
         ctx = context.applicationContext
         Log.i(TAG, "alerter on")
+        cacheSize(ctx!!)   // counted once in the background, ready for its window
         resumePrepare(ctx!!)
         job = scope.launch {
             LocationRepo.location.collect { loc -> if (loc != null) worker.post { onLocation(loc) } }
@@ -781,10 +782,24 @@ object RadarRepo {
 
     fun clearCache(context: Context) {
         val c = context.applicationContext
-        worker.post { tiles.clear(); rebuild(); RadarData.clear(c.filesDir); Log.i(TAG, "cache cleared") }
+        worker.post { tiles.clear(); rebuild(); RadarData.clear(c.filesDir); sizeAt = 0L; Log.i(TAG, "cache cleared") }
     }
 
-    fun cacheSize(context: Context): Pair<Int, Long> = RadarData.size(context.filesDir)
+    /**
+     * Number of stored zones and their bytes. Listing thousands of files takes ~150 ms on the car: the value
+     * given is the last one counted, recounted in the background when older than 10 s (0 zones until the first count).
+     */
+    fun cacheSize(context: Context): Pair<Int, Long> {
+        val now = android.os.SystemClock.elapsedRealtime()
+        if (sizeAt == 0L || now - sizeAt > 10_000) {
+            sizeAt = now
+            val dir = context.applicationContext.filesDir
+            worker.post { size = RadarData.size(dir) }
+        }
+        return size
+    }
+    @Volatile private var size: Pair<Int, Long> = 0 to 0L
+    @Volatile private var sizeAt = 0L
 
     /** When the usual trips were last prepared to the end (0: not known, before 24/11 or never). */
     const val PREPARED_AT_KEY = "radar_prepared_at"

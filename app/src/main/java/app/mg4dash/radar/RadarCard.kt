@@ -51,12 +51,19 @@ class RadarCard(context: Context) : View(context), app.mg4dash.cards.HomeCard {
     override fun options(popup: app.mg4dash.ui.OptionsPopup): app.mg4dash.ui.OptionsPopup? {
         val a = context as? android.app.Activity ?: return null
         val page = RadarPage(a, Prefs(a))
-        optionsScope?.coroutineContext?.get(kotlinx.coroutines.Job)?.cancel()
-        optionsScope = kotlinx.coroutines.MainScope().also { s ->
-            s.launch { RadarRepo.prepare.collect { page.refresh() } }
-            s.launch { while (true) { kotlinx.coroutines.delay(1_000); page.refresh() } }
-        }
-        return popup.content(page.window(), 1800)
+        val view = page.window()
+        // Live only while the window is on screen
+        view.addOnAttachStateChangeListener(object : View.OnAttachStateChangeListener {
+            override fun onViewAttachedToWindow(v: View) {
+                optionsScope?.coroutineContext?.get(kotlinx.coroutines.Job)?.cancel()
+                optionsScope = kotlinx.coroutines.MainScope().also { s ->
+                    s.launch { RadarRepo.prepare.collect { page.refresh() } }
+                    s.launch { while (true) { kotlinx.coroutines.delay(1_000); page.refresh() } }
+                }
+            }
+            override fun onViewDetachedFromWindow(v: View) = optionsClosed()
+        })
+        return popup.content(view, 1800)
     }
 
     private var optionsScope: kotlinx.coroutines.CoroutineScope? = null
