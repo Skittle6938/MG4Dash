@@ -68,17 +68,23 @@ class SettingsActivity : AppCompatActivity() {
         val root = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; setPadding((16 * bd).toInt(), (12 * bd).toInt(), (16 * bd).toInt(), (12 * bd).toInt()) }
         val vertical = app.mg4dash.ui.Dock.vertical(this)
         val top = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL }
-        top.addView(TextView(this).apply {
-            text = getString(R.string.st_title, BuildConfig.VERSION_NAME); setTextColor(color(R.color.text_value))
-            setTextSize(TypedValue.COMPLEX_UNIT_SP, 22f); typeface = Typeface.create("sans-serif-medium", Typeface.NORMAL)
-        }, LinearLayout.LayoutParams(0, -2, 1f).apply { leftMargin = if (vertical) dp(12) else dp(app.mg4dash.ui.Kit.fogSafeDp(this@SettingsActivity) - 8) })
-        // Tabs (setting themes) in the banner, next to the title
+        val titleBox = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
+        titleBox.addView(TextView(this).apply {
+            text = getString(R.string.st_settings); setTextColor(color(R.color.text_value))
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, 26f); typeface = Typeface.create("sans-serif-medium", Typeface.NORMAL)
+        })
+        titleBox.addView(TextView(this).apply {
+            text = "MG4Dash " + BuildConfig.VERSION_NAME; setTextColor(color(R.color.text_title)); setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f)
+        })
+        top.addView(titleBox, LinearLayout.LayoutParams(-2, -2).apply { leftMargin = if (vertical) dp(12) else dp(app.mg4dash.ui.Kit.fogSafeDp(this@SettingsActivity) - 8); rightMargin = dp(36) })
+        // Tabs (setting themes) in the banner, next to the title: text underlined in the theme's colour when chosen
         val tabBar = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL }
+        top.addView(tabBar, LinearLayout.LayoutParams(0, dp(72), 1f))
         // Profiles (study v4, step 10): the current one, its menu on every tab
-        top.addView(ProfileWindow.button(this) { recreate() }, LinearLayout.LayoutParams(-2, dp(52)).apply { rightMargin = dp(12) })
-        top.addView(tabBar, LinearLayout.LayoutParams(-2, dp(52)).apply { rightMargin = dp(16) })
-        top.addView(button(getString(R.string.st_close)) { finish() }, LinearLayout.LayoutParams(dp(160), dp(52)))
-        root.addView(top, LinearLayout.LayoutParams(-1, -2).apply { bottomMargin = dp(12) })
+        top.addView(ProfileWindow.button(this) { recreate() }, LinearLayout.LayoutParams(-2, dp(52)).apply { rightMargin = dp(16) })
+        top.addView(app.mg4dash.ui.Rows.closeButton(this) { finish() })
+        root.addView(top, LinearLayout.LayoutParams(-1, -2))
+        root.addView(app.mg4dash.ui.Rows.divider(this), LinearLayout.LayoutParams(-1, maxOf(1, dp(1))).apply { bottomMargin = dp(12) })
         val pages = android.widget.FrameLayout(this)
         root.addView(pages, LinearLayout.LayoutParams(-1, 0, 1f))
         val tabViews = mutableListOf<View>(); val tabChips = mutableListOf<TextView>()
@@ -97,8 +103,8 @@ class SettingsActivity : AppCompatActivity() {
             cols.addView(r, LinearLayout.LayoutParams(0, -2, 1f).apply { leftMargin = dp(8) })
             val sv = ScrollView(this).apply { isVerticalScrollBarEnabled = true; addView(cols) }
             pages.addView(sv, android.widget.FrameLayout.LayoutParams(-1, -1)); tabViews += sv
-            val chip = app.mg4dash.ui.Kit(this).toggleTile(getString(label)) { showTab(i) }.apply { textSize = 17f; setPadding(dp(22), 0, dp(22), 0) }
-            tabBar.addView(chip, LinearLayout.LayoutParams(-2, -1).apply { if (i > 0) leftMargin = dp(8) }); tabChips += chip
+            val chip = tabLabel(getString(label)).apply { setOnClickListener { showTab(i) } }
+            tabBar.addView(chip, LinearLayout.LayoutParams(-2, -1).apply { if (i > 0) leftMargin = dp(10) }); tabChips += chip
             return l to r
         }
         val (homeL, homeR) = tab(R.string.st_tab_home)
@@ -699,12 +705,9 @@ class SettingsActivity : AppCompatActivity() {
                 val lines = DataUsage.Use.values().filter { bytes[it.ordinal] > 0 }
                     .joinToString("\n") { getString(R.string.du_day_line, getString(it.label), DataUsage.format(this, bytes[it.ordinal])) }
                     .ifEmpty { getString(R.string.du_day_none) }
-                AlertDialog.Builder(this)
-                    .setTitle(dayFormat.format(DataUsage.calendarOf(day.date).time).replaceFirstChar { it.uppercase() } + " · " + netName(g, w) + " · " + DataUsage.format(this, bytes.sum()))
-                    .setMessage(lines)
-                    .setPositiveButton(R.string.st_close, null)
-                    .setOnDismissListener { chart.selected = -1 }
-                    .create().also { app.mg4dash.ui.Dialogs.show(it); app.mg4dash.ui.Dialogs.fix(it); app.mg4dash.ui.Dialogs.hideBars(it) }
+                app.mg4dash.ui.Windows.show(this, dayFormat.format(DataUsage.calendarOf(day.date).time).replaceFirstChar { it.uppercase() },
+                    app.mg4dash.ui.Windows.message(this, lines), sub = netName(g, w) + " · " + DataUsage.format(this, bytes.sum()), widthDp = 760) { chart.selected = -1 }
+                    .also { app.mg4dash.ui.Dialogs.hideBars(it) }
             }
         }
         val render: (DataUsage.Snapshot) -> Unit = { s ->
@@ -809,8 +812,7 @@ class SettingsActivity : AppCompatActivity() {
         }
         row(col, button("Relire") { show() })
         show()
-        AlertDialog.Builder(this).setTitle("Tests (charge)").setView(ScrollView(this).apply { addView(col) })
-            .setPositiveButton(R.string.st_close, null).create().also { app.mg4dash.ui.Dialogs.show(it); app.mg4dash.ui.Dialogs.fix(it) }
+        app.mg4dash.ui.Windows.show(this, "Tests (charge)", ScrollView(this).apply { addView(col) })
     }
 
     /** Name and state on the left, a single button on the right: Check, or Install when a newer version is known. */
@@ -1207,35 +1209,25 @@ class SettingsActivity : AppCompatActivity() {
     }
 
     private fun confirmReplace() {
-        AlertDialog.Builder(this)
-            .setTitle(R.string.st_replace)
-            .setMessage(R.string.st_replace_msg)
-            .setPositiveButton(R.string.st_replace_btn) { _, _ ->
-                val ok = HomeSwitcher.replaceStock(this)
-                Log.i("Valet", "replacing SAIC home → $ok")
-                app.mg4dash.ui.ShortcutsPanel.GlobalStrip.update(this)
-                refreshHome(); toastState(ok)
-            }
-            .setNegativeButton(R.string.cancel, null)
-            .create().also { app.mg4dash.ui.Dialogs.show(it); app.mg4dash.ui.Dialogs.fix(it) }
+        app.mg4dash.ui.Windows.confirm(this, getString(R.string.st_replace), getString(R.string.st_replace_msg), getString(R.string.st_replace_btn), danger = false) {
+            val ok = HomeSwitcher.replaceStock(this)
+            Log.i("Valet", "replacing SAIC home → $ok")
+            app.mg4dash.ui.ShortcutsPanel.GlobalStrip.update(this)
+            refreshHome(); toastState(ok)
+        }
     }
 
     private fun confirmValet() {
-        AlertDialog.Builder(this)
-            .setTitle(R.string.st_valet)
-            .setMessage(R.string.st_valet_msg)
-            .setPositiveButton(R.string.activate) { _, _ ->
-                val ok = HomeSwitcher.switchToStock(this)
-                // Phone connection cut by a long press: restored for the dealership
-                app.mg4dash.system.ConnectionToggle.restore(this)
-                Log.i("Valet", "Maintenance mode → $ok")
-                app.mg4dash.ui.ShortcutsPanel.GlobalStrip.update(this)
-                refreshHome(); toastState(ok)
-                // From now on nothing but the three-finger gesture (19/11): restarted in its light form
-                if (ok) app.mg4dash.system.Maintenance.restartLight(this)
-            }
-            .setNegativeButton(R.string.cancel, null)
-            .create().also { app.mg4dash.ui.Dialogs.show(it); app.mg4dash.ui.Dialogs.fix(it) }
+        app.mg4dash.ui.Windows.confirm(this, getString(R.string.st_valet), getString(R.string.st_valet_msg), getString(R.string.activate), danger = false) {
+            val ok = HomeSwitcher.switchToStock(this)
+            // Phone connection cut by a long press: restored for the dealership
+            app.mg4dash.system.ConnectionToggle.restore(this)
+            Log.i("Valet", "Maintenance mode → $ok")
+            app.mg4dash.ui.ShortcutsPanel.GlobalStrip.update(this)
+            refreshHome(); toastState(ok)
+            // From now on nothing but the three-finger gesture (19/11): restarted in its light form
+            if (ok) app.mg4dash.system.Maintenance.restartLight(this)
+        }
     }
 
     private fun toastState(ok: Boolean) {
@@ -1272,21 +1264,18 @@ class SettingsActivity : AppCompatActivity() {
             setPadding(dp(16), dp(8), dp(16), dp(8))
         }
         val refresh = button(R.string.st_refresh); val export = button(R.string.st_log_export)
-        val eject = button(R.string.st_log_eject); val close = button(R.string.st_close)
+        val eject = button(R.string.st_log_eject)
         fun space() = View(this).apply { layoutParams = LinearLayout.LayoutParams(0, 1, 1f) }
         val row = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL; setPadding(dp(8), dp(4), dp(8), dp(8))
-            addView(refresh); addView(space()); addView(export); addView(eject); addView(space()); addView(close)
+            addView(refresh); addView(space()); addView(export); addView(eject)
         }
-        val d = AlertDialog.Builder(this)
-            .setTitle(title)
-            .setView(LinearLayout(this).apply {
-                orientation = LinearLayout.VERTICAL
-                addView(ScrollView(this@SettingsActivity).apply { addView(view) }, LinearLayout.LayoutParams(-1, 0, 1f))
-                addView(status)
-                addView(row, LinearLayout.LayoutParams(-1, -2))
-            })
-            .create().also { app.mg4dash.ui.Dialogs.show(it); app.mg4dash.ui.Dialogs.fix(it) }
+        val d = app.mg4dash.ui.Windows.show(this, getString(R.string.st_log), LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            addView(ScrollView(this@SettingsActivity).apply { addView(view) }, LinearLayout.LayoutParams(-1, dp(430)))
+            addView(status)
+            addView(row, LinearLayout.LayoutParams(-1, -2))
+        }, sub = "MG4Dash ${BuildConfig.VERSION_NAME} · ${BuildConfig.FLAVOR}", widthDp = 1500)
         logDialog = d
         var radioLines: List<Pair<Long, String>> = emptyList()
         // Radio Dash's lines among ours (#80): read from logcat, which takes a moment
@@ -1314,7 +1303,6 @@ class SettingsActivity : AppCompatActivity() {
         val watch = object : Runnable { override fun run() { if (!d.isShowing) return; paintStick(); view.postDelayed(this, 2_000) } }
         view.postDelayed(watch, 2_000)
         refresh.setOnClickListener { view.text = Log.snapshot().joinToString("\n"); withRadio(); paintStick() }
-        close.setOnClickListener { d.dismiss() }
         export.setOnClickListener {
             val text = LogExport.text(title, Compat.report(this), Log.snapshot(radioLines))
             val w = app.mg4dash.system.UsbExport.write(this, LogExport.fileName(System.currentTimeMillis()), text)
@@ -1487,9 +1475,9 @@ class SettingsActivity : AppCompatActivity() {
         val top = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL }
         top.addView(TextView(this).apply {
             text = getString(R.string.st_rad_title); setTextColor(color(R.color.text_value))
-            setTextSize(TypedValue.COMPLEX_UNIT_SP, 22f); typeface = Typeface.create("sans-serif-medium", Typeface.NORMAL)
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, 26f); typeface = Typeface.create("sans-serif-medium", Typeface.NORMAL)
         }, LinearLayout.LayoutParams(0, -2, 1f).apply { leftMargin = if (vertical) dp(12) else dp(app.mg4dash.ui.Kit.fogSafeDp(this@SettingsActivity) - 8) })
-        top.addView(button(getString(R.string.st_close)) { finish() }, LinearLayout.LayoutParams(dp(160), dp(52)))
+        top.addView(app.mg4dash.ui.Rows.closeButton(this) { finish() })
         root.addView(top, LinearLayout.LayoutParams(-1, -2).apply { bottomMargin = dp(12) })
         val page = app.mg4dash.radar.RadarPage(this, prefs)
         val tab = app.mg4dash.radar.RadarPage.Tab.values().getOrElse(intent.getIntExtra(EXTRA_RADAR_TAB, 0)) { app.mg4dash.radar.RadarPage.Tab.ALERTS }
@@ -1587,7 +1575,7 @@ class SettingsActivity : AppCompatActivity() {
     /** Settings › Home › Cards offered: a box per card, all ticked at first; half of them in each column. */
     private fun cardsOffered() {
         val cards = app.mg4dash.ui.HomeSlots.Card.entries
-        val popup = app.mg4dash.ui.OptionsPopup(this, getString(R.string.st_cards_offered).trimEnd('…', '.', ' '))
+        val popup = app.mg4dash.ui.OptionsPopup(this, getString(R.string.st_cards_offered).trimEnd('…', '.', ' '), R.drawable.ic_apps)
             .note(getString(R.string.st_cards_offered_note))
         cards.forEachIndexed { i, card ->
             if (i == (cards.size + 1) / 2) popup.column()
@@ -1634,46 +1622,38 @@ class SettingsActivity : AppCompatActivity() {
      */
     /** Returns what is needed to repaint the button, for a choice confirmed later in a window. */
     private fun toggle(parent: LinearLayout, labelRes: Int, descRes: Int?, get: () -> Boolean, set: (Boolean) -> Unit): () -> Unit {
-        val line = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL }
-        val texts = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
-        text(texts, getString(labelRes, "").trimEnd(' ', ':', '\u00a0', '\u202f'), 18f, R.color.text_value)
-        descRes?.let { text(texts, getString(it), 15f, R.color.text_title) }
-        line.addView(texts, LinearLayout.LayoutParams(0, -2, 1f).apply { rightMargin = dp(16) })
-        lateinit var btn: Button
-        fun paint() {
-            val on = get()
-            btn.text = getString(if (on) R.string.yes else R.string.no)
-            btn.isSelected = on
+        val sw = app.mg4dash.ui.SwitchView(this).apply { on = get() }
+        val line = app.mg4dash.ui.Rows.row(this, getString(labelRes, "").trimEnd(' ', ':', ' ', ' '), descRes?.let { getString(it) }, sw) {
+            set(!get()); sw.on = get()
         }
-        btn = button("") { set(!get()); paint() }.apply {
-            setBackgroundResource(R.drawable.bg_chip)
-            setTextColor(androidx.core.content.ContextCompat.getColorStateList(this@SettingsActivity, R.color.chip_text))
-            typeface = Typeface.create("sans-serif-medium", Typeface.NORMAL); letterSpacing = 0.04f
-        }
-        paint()
-        line.addView(btn, LinearLayout.LayoutParams(dp(130), dp(56)))
-        parent.addView(line, LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(12) })
-        return { paint() }
+        app.mg4dash.ui.Rows.add(parent, line)
+        return { sw.on = get() }
     }
 
     /** Single choice buttons: the active one is coloured, and the colour follows the choice at once. */
     /** "Label — drop-down menu" line (same menu as the card's sources). */
     private fun dropdown(parent: LinearLayout, label: String, labels: List<String>, current: () -> Int, onPick: (Int) -> Unit): TextView {
-        val dp = resources.displayMetrics.density
-        val row = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = android.view.Gravity.CENTER_VERTICAL }
-        row.addView(TextView(this).apply {
-            text = label; setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f)
-            setTextColor(app.mg4dash.ui.Themes.color(this@SettingsActivity, R.color.text_value))
-        }, LinearLayout.LayoutParams(0, -2, 1f))
-        val drop = TextView(this).apply {
-            text = labels[current().coerceIn(0, labels.lastIndex)] + "   ▾"; setTextSize(TypedValue.COMPLEX_UNIT_SP, 19f); gravity = android.view.Gravity.CENTER
-            setBackgroundResource(R.drawable.bg_chip); isSelected = true
-            setTextColor(androidx.core.content.ContextCompat.getColorStateList(this@SettingsActivity, R.color.chip_text))
+        val drop = app.mg4dash.ui.Rows.value(this, labels[current().coerceIn(0, labels.lastIndex)])
+        val line = app.mg4dash.ui.Rows.row(this, label, null, drop) {
+            app.mg4dash.ui.SourceMenu.choose(this, drop, labels, current()) { onPick(it); drop.text = labels[it] + "  ▾" }
         }
-        drop.setOnClickListener { v -> app.mg4dash.ui.SourceMenu.choose(this, v, labels, current()) { onPick(it); drop.text = labels[it] + "   ▾" } }
-        row.addView(drop, LinearLayout.LayoutParams((340 * dp).toInt(), (56 * dp).toInt()))
-        parent.addView(row, LinearLayout.LayoutParams(-1, -2).apply { topMargin = (8 * dp).toInt() })
+        app.mg4dash.ui.Rows.add(parent, line)
         return drop
+    }
+
+    /** A tab's name in the banner: grey, white and underlined in the theme's colour when chosen. */
+    private fun tabLabel(label: String): TextView = object : TextView(this) {
+        private val bar = android.graphics.Paint().apply { color = app.mg4dash.ui.Themes.select(this@SettingsActivity) }
+        override fun setSelected(selected: Boolean) { super.setSelected(selected); typeface = Typeface.create(if (selected) "sans-serif-medium" else "sans-serif", Typeface.NORMAL); invalidate() }
+        override fun onDraw(canvas: android.graphics.Canvas) {
+            super.onDraw(canvas)
+            if (isSelected) canvas.drawRect(0f, height - dp(3).toFloat(), width.toFloat(), height.toFloat(), bar)
+        }
+    }.apply {
+        text = label; gravity = Gravity.CENTER; setTextSize(TypedValue.COMPLEX_UNIT_SP, 19f); setPadding(dp(8), 0, dp(8), 0)
+        setTextColor(android.content.res.ColorStateList(arrayOf(intArrayOf(android.R.attr.state_selected), intArrayOf()),
+            intArrayOf(color(R.color.text_value), color(R.color.text_sub))))
+        isClickable = true
     }
 
     private fun choiceButtons(labels: List<String>, current: () -> Int, onPick: (Int) -> Unit): Array<Button> {

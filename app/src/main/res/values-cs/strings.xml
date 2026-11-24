@@ -227,7 +227,7 @@
     <string name="st_fullscreen_desc">Přejetím od levého nebo horního okraje lišty SAIC znovu zobrazíte.</string>
     <string name="yes">ANO</string>
     <string name="no">NE</string>
-    <string name="st_log">PROTOKOL</string>
+    <string name="st_log">Protokol</string>
     <string name="st_refresh">Obnovit</string>
     <string name="st_log_export">Exportovat na USB disk</string>
     <string name="st_log_exported">✓  Protokol uložen na USB disk: %1$s</string>
@@ -238,6 +238,7 @@
     <string name="st_log_eject_failed">USB disk nelze vysunout: některá aplikace jej možná stále používá. Zkuste to za chvíli znovu.</string>
     <string name="st_close">Zavřít</string>
     <string name="st_title">Nastavení · MG4Dash %1$s</string>
+    <string name="st_settings">Nastavení</string>
     <string name="st_replace_msg">MG4Dash se otevře při spuštění a po stisknutí tlačítka Domů.\n\nNic se neodinstaluje: původní domovská obrazovka SAIC se pouze vypne jako domovská obrazovka a ostatní funkce vozu fungují normálně.\n\nKdykoli se můžete vrátit pomocí Režimu údržby na stejném místě. Pokud by MG4Dash několikrát za sebou spadl, původní domovská obrazovka se vrátí sama.</string>
     <string name="st_replace_btn">Nahradit</string>
     <string name="valet_banner_title">Režim údržby zapnut</string>

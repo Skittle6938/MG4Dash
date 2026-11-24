@@ -227,7 +227,7 @@
     <string name="st_fullscreen_desc">Swipe from the left or top edge to bring the SAIC bars back.</string>
     <string name="yes">YES</string>
     <string name="no">NO</string>
-    <string name="st_log">LOG</string>
+    <string name="st_log">Log</string>
     <string name="st_refresh">Refresh</string>
     <string name="st_log_export">Export to the USB stick</string>
     <string name="st_log_exported">✓  Log saved on the USB stick: %1$s</string>
@@ -238,6 +238,7 @@
     <string name="st_log_eject_failed">The USB stick could not be ejected: an app may still be using it. Try again in a moment.</string>
     <string name="st_close">Close</string>
     <string name="st_title">Settings · MG4Dash %1$s</string>
+    <string name="st_settings">Settings</string>
     <string name="st_replace_msg">MG4Dash will open at startup and with the Home button.\n\nNothing is uninstalled: the original SAIC home screen is simply switched off as the home screen, and the car\'s other functions keep working normally.\n\nYou can go back at any time with Maintenance mode, in the same place. If MG4Dash ever crashed several times in a row, the original home screen would come back by itself.</string>
     <string name="st_replace_btn">Replace</string>
     <string name="valet_banner_title">Maintenance mode on</string>

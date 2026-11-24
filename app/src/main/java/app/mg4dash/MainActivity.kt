@@ -321,8 +321,8 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
             }
             homeCards[card] = h
             // Its options on a long press, in the standard window
-            if (h.options(app.mg4dash.ui.OptionsPopup(this, getString(card.label))) != null) h.view.setOnLongClickListener {
-                h.options(app.mg4dash.ui.OptionsPopup(this, getString(card.label)))?.show { h.optionsClosed() }; true
+            if (h.options(app.mg4dash.ui.OptionsPopup(this, getString(card.label), card.icon)) != null) h.view.setOnLongClickListener {
+                h.options(app.mg4dash.ui.OptionsPopup(this, getString(card.label), card.icon))?.show { h.optionsClosed() }; true
             }
             panels[card] = if (h.framed) frame(h.view) else h.view
         }
@@ -902,7 +902,7 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
     /** The OpenStreetMap map's options (17/11, once in Settings › Home): zoom, colours, energy when offline. */
     private fun mapOptions() {
         val zoom = prefs.mapZoom; val theme = prefs.mapTheme
-        app.mg4dash.ui.OptionsPopup(this, getString(R.string.st_style_map))
+        app.mg4dash.ui.OptionsPopup(this, getString(R.string.st_style_map), R.drawable.ic_map)
             .choice(getString(R.string.st_map_zoom), null, listOf("14", "15", "16", "17", "18"), { prefs.mapZoom - 14 }) { prefs.mapZoom = 14 + it }
             .choice(getString(R.string.st_map_theme), null, listOf(R.string.st_mode_auto, R.string.st_mode_light, R.string.st_mode_dark).map { getString(it) }, { prefs.mapTheme }) { prefs.mapTheme = it }
             .toggle(getString(R.string.st_map_offline_switch).trimEnd(' ', ':', ' ', ' '), getString(R.string.st_map_offline_switch_desc), { prefs.mapOfflineSwitch }) { prefs.mapOfflineSwitch = it }
@@ -1164,7 +1164,7 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
     /** The climate's settings: the calibration of the displayed temperature. */
     /** A long press on the temperature or the fan: the climate card's options, as a long press on the card. */
     private fun climateSettings() {
-        homeCards[Card.CLIMATE]?.let { h -> h.options(app.mg4dash.ui.OptionsPopup(this, getString(Card.CLIMATE.label)))?.show { h.optionsClosed() } }
+        homeCards[Card.CLIMATE]?.let { h -> h.options(app.mg4dash.ui.OptionsPopup(this, getString(Card.CLIMATE.label), Card.CLIMATE.icon))?.show { h.optionsClosed() } }
     }
 
     /** The climate card's options: the temperature calibration (it opens its own window). */

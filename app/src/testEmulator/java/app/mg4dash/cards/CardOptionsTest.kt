@@ -75,7 +75,7 @@ class CardOptionsTest {
             val d = ShadowDialog.getLatestDialog()
             assertNotNull("${card.id}: a window", d?.takeIf { it.isShowing })
             val t = texts(d.window!!.decorView)
-            assertTrue("${card.id}: titled with its name ($t)", a.getString(card.label).uppercase() in t)
+            assertTrue("${card.id}: titled with its name ($t)", a.getString(card.label) in t)
             d.dismiss(); idle(1)
         }
         // A card without options takes no long press

@@ -149,11 +149,9 @@ object Compat {
             this.text = a.getString(R.string.st_compat_scan); setTextSize(TypedValue.COMPLEX_UNIT_SP, 15f)
         }, LinearLayout.LayoutParams((380 * d).toInt(), -2))
         box.addView(col, LinearLayout.LayoutParams(-2, -2))
-        AlertDialog.Builder(a)
-            .setTitle(R.string.st_compat_report).setView(box)
-            .setPositiveButton(R.string.st_close, null)
-            // In MG4Dash Web on the car: its browser refuses pages on some head units (#95)
-            .setNeutralButton(R.string.st_compat_open) { _, _ -> app.mg4dash.system.WebViewer.open(a, url) }
-            .create().also { app.mg4dash.ui.Dialogs.show(it); app.mg4dash.ui.Dialogs.fix(it) }
+        // In MG4Dash Web on the car: its browser refuses pages on some head units (#95)
+        lateinit var dlg: AlertDialog
+        val open = app.mg4dash.ui.Rows.actionButton(a, a.getString(R.string.st_compat_open)) { dlg.dismiss(); app.mg4dash.system.WebViewer.open(a, url) }
+        dlg = app.mg4dash.ui.Windows.show(a, a.getString(R.string.st_compat_report), box, widthDp = 1300, buttons = listOf(open))
     }
 }

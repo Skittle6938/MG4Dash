@@ -227,7 +227,7 @@
     <string name="st_fullscreen_desc">SAIC çubuklarını geri getirmek için sol veya üst kenardan kaydırın.</string>
     <string name="yes">EVET</string>
     <string name="no">HAYIR</string>
-    <string name="st_log">GÜNLÜK</string>
+    <string name="st_log">Günlük</string>
     <string name="st_refresh">Yenile</string>
     <string name="st_log_export">USB belleğe aktar</string>
     <string name="st_log_exported">✓  Günlük USB belleğe kaydedildi: %1$s</string>
@@ -238,6 +238,7 @@
     <string name="st_log_eject_failed">USB bellek çıkarılamadı: bir uygulama hâlâ kullanıyor olabilir. Biraz sonra tekrar deneyin.</string>
     <string name="st_close">Kapat</string>
     <string name="st_title">Ayarlar · MG4Dash %1$s</string>
+    <string name="st_settings">Ayarlar</string>
     <string name="st_replace_msg">MG4Dash başlangıçta ve Ana ekran düğmesiyle açılacak.\n\nHiçbir şey kaldırılmaz: orijinal SAIC ana ekranı yalnızca ana ekran olarak kapatılır, aracın diğer işlevleri normal şekilde çalışmaya devam eder.\n\nAynı yerdeki Bakım modu ile istediğiniz zaman geri dönebilirsiniz. MG4Dash art arda birkaç kez çökerse orijinal ana ekran kendiliğinden geri gelir.</string>
     <string name="st_replace_btn">Değiştir</string>
     <string name="valet_banner_title">Bakım modu açık</string>
