@@ -42,8 +42,10 @@ object RadarRepo {
     val PREPARE_RADII = listOf(10, 20, 30, 50)
     const val PREPARE_DEFAULT_KM = 20
 
-    /** A radius stored before (80 km) or out of the list: the nearest one offered, at most the largest. */
-    fun prepareRadius(stored: Int): Int = PREPARE_RADII.lastOrNull { it <= stored } ?: PREPARE_RADII.first()
+    const val PREPARE_MIN_KM = 5
+    const val PREPARE_MAX_KM = 50
+    /** Any radius from 5 to 50 km by 5 (24/11, once 10, 20, 30 or 50): one stored before (80 km) comes back to 50. */
+    fun prepareRadius(stored: Int): Int = (stored.coerceIn(PREPARE_MIN_KM, PREPARE_MAX_KM) / 5) * 5
     /**
      * Typical size of one tile (0.02°) with all its streets, for a mix of countryside, suburbs and city (measured on 17/11:
      * about 9 kB, 330 kB and 650 kB uncompressed); the official server compresses it to about a fifth.
@@ -173,6 +175,7 @@ object RadarRepo {
         if (job != null) return
         ctx = context.applicationContext
         Log.i(TAG, "alerter on")
+        cacheSize(ctx!!)   // counted once in the background, ready for its window
         resumePrepare(ctx!!)
         job = scope.launch {
             LocationRepo.location.collect { loc -> if (loc != null) worker.post { onLocation(loc) } }
@@ -756,7 +759,8 @@ object RadarRepo {
             }
             prepThread = null
             Log.i(TAG, "preparing trips done: ${done - failed} / $total tiles, $failed failed")
-            resume.edit().remove(PREP_RESUME_KEY).apply()
+            // When it was done (24/11): the window says so after a restart, from what is stored
+            resume.edit().remove(PREP_RESUME_KEY).putLong(PREPARED_AT_KEY, System.currentTimeMillis()).apply()
             show(PrepPhase.DONE)
         }
         return true
@@ -778,8 +782,37 @@ object RadarRepo {
 
     fun clearCache(context: Context) {
         val c = context.applicationContext
-        worker.post { tiles.clear(); rebuild(); RadarData.clear(c.filesDir); Log.i(TAG, "cache cleared") }
+        worker.post { tiles.clear(); rebuild(); RadarData.clear(c.filesDir); sizeAt = 0L; Log.i(TAG, "cache cleared") }
     }
 
-    fun cacheSize(context: Context): Pair<Int, Long> = RadarData.size(context.filesDir)
+    /**
+     * Number of stored zones and their bytes. Listing thousands of files takes ~150 ms on the car: the value
+     * given is the last one counted, recounted in the background when older than 10 s (0 zones until the first count).
+     */
+    fun cacheSize(context: Context): Pair<Int, Long> {
+        val now = android.os.SystemClock.elapsedRealtime()
+        if (sizeAt == 0L || now - sizeAt > 10_000) {
+            sizeAt = now
+            val dir = context.applicationContext.filesDir
+            worker.post { size = RadarData.size(dir) }
+        }
+        return size
+    }
+    @Volatile private var size: Pair<Int, Long> = 0 to 0L
+    @Volatile private var sizeAt = 0L
+
+    /** When the usual trips were last prepared to the end (0: not known, before 24/11 or never). */
+    const val PREPARED_AT_KEY = "radar_prepared_at"
+    fun preparedAt(context: Context): Long = Prefs(context).raw.getLong(PREPARED_AT_KEY, 0L)
+
+    /**
+     * What the preparation row says with no preparation running in this session (24/11: "no preparation yet" showed
+     * although zones were stored): from the zones stored, with the day of the last one when it is known.
+     */
+    fun storedPreparation(context: Context, zones: Int, at: Long): String = when {
+        zones <= 0 -> context.getString(app.mg4dash.R.string.rp_prep_none)
+        at > 0L -> context.getString(app.mg4dash.R.string.rp_prep_stored_at,
+            java.text.DateFormat.getDateInstance(java.text.DateFormat.MEDIUM).format(java.util.Date(at)), zones)
+        else -> context.getString(app.mg4dash.R.string.rp_prep_stored, zones)
+    }
 }

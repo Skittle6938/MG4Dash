@@ -7,15 +7,45 @@ import android.view.View
 import android.widget.LinearLayout
 import android.widget.TextView
 import app.mg4dash.R
+import app.mg4dash.cards.CardPlace
+import app.mg4dash.cards.CardScope
+import app.mg4dash.cards.HomeCard
 import app.mg4dash.energy.EnergyMonitor
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import java.util.Locale
 
 /**
  * "Consumption" page of the map widget (issue #6): same content as on the Energy page,
  * since the last charge: total, driving / climate / accessories breakdown, recovered
- * energy, and curve of the last km. Shown automatically when the map has no connection.
+ * energy, and curve of the last km. Shown automatically when the map has no connection. A [HomeCard]: while
+ * shown, read again every 5 s and with each new curve.
  */
-class ConsumptionCard(context: Context) : LinearLayout(context) {
+class ConsumptionCard(context: Context) : LinearLayout(context), HomeCard {
+    override val card = HomeSlots.Card.CONSUMPTION
+    override val view: View get() = this
+
+    /** Small place: the totals on the period's line, the curve keeps its height. */
+    override fun place(p: CardPlace) { compact = p.small }
+
+    /** Its options: erase the curve of the period shown (#44), confirmed first. */
+    override fun options(popup: OptionsPopup): OptionsPopup {
+        val period = prefs.consumptionPeriod.coerceIn(0, 2)
+        val name = context.getString(listOf(R.string.en_since_charge, R.string.en_trip, R.string.en_last_year)[period])
+        // From Settings › Vehicle (24/11)
+        popup.toggle(context.getString(R.string.st_cc_stopped), context.getString(R.string.st_cc_stopped_desc),
+            { prefs.raw.getBoolean("cc_stopped", true) }) { prefs.raw.edit().putBoolean("cc_stopped", it).apply() }
+        return popup.action(context.getString(R.string.en_clear_curve), name, context.getString(R.string.opt_clear)) {
+            (context as? android.app.Activity)?.let { confirmClear(it, chart, period) }
+        }
+    }
+
+    private val live = CardScope()
+    override fun shown(on: Boolean) = live.set(on) {
+        launch { while (true) { show(); delay(5_000) } }
+        launch { app.mg4dash.energy.ConsumptionCurve.curves.collect { show() } }
+    }
+
     private val d = resources.displayMetrics.density
     private fun c(res: Int) = Themes.color(context, res)
     private fun tv(sp: Float, colorRes: Int) = TextView(context).apply {
@@ -31,8 +61,8 @@ class ConsumptionCard(context: Context) : LinearLayout(context) {
     private val nextPeriod = OnClickListener { prefs.consumptionPeriod = (prefs.consumptionPeriod.coerceIn(0, 2) + 1) % 3; show() }
     private val chart = LineChart(context).apply {
         setOnClickListener(nextPeriod)
-        // Long press on the curve: erase it (#44)
-        setOnLongClickListener { v -> (context as? android.app.Activity)?.let { confirmClear(it, v, prefs.consumptionPeriod.coerceIn(0, 2)) }; true }
+        // Long press on the curve: the card's options (erasing the curve, #44), as anywhere on the card
+        setOnLongClickListener { this@ConsumptionCard.performLongClick() }
     }
 
     private val note = tv(15f, R.color.text_sub)

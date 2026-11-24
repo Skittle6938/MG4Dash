@@ -181,8 +181,12 @@ public class RescueService extends Service {
         ComponentName stock = findStock(pm);
         boolean stockDisabled = stock != null && pm.getComponentEnabledSetting(stock) == PackageManager.COMPONENT_ENABLED_STATE_DISABLED;
         boolean home = dashIsHome(pm, stockDisabled);
+        boolean shown = false;
+        try {
         if (!recompiledForThisInstall(pm)) {
             Log.i(TAG, "install (" + (updated ? "update" : "package replaced") + "): clean recompilation of MG4Dash (home " + home + ")");
+            // #132: "Updating MG4Dash…" instead of Android's black "Phone is starting" while MG4Dash, the home, is stopped
+            if (home) shown = showUpdating(pm, true);
             recompileStopped(pm);
         } else if (!updated) {
             Log.i(TAG, "install: already recompiled for this install, nothing to do");
@@ -211,6 +215,31 @@ public class RescueService extends Service {
         }
         if (home) restoreStock(pm, stock, "MG4Dash not starting after its install");
         else Log.w(TAG, "install: MG4Dash not starting, it is not home: left as it is");
+        } finally {
+            if (shown) showUpdating(pm, false);
+        }
+    }
+
+    /**
+     * The "Updating MG4Dash…" screen ([UpdatingActivity], #132): a home of its own enabled and opened for the
+     * recompilation, disabled again after it (never a home otherwise). Returns whether it was shown.
+     */
+    boolean showUpdating(PackageManager pm, boolean on) {
+        ComponentName c = new ComponentName(this, UpdatingActivity.class);
+        try {
+            if (on) {
+                pm.setComponentEnabledSetting(c, PackageManager.COMPONENT_ENABLED_STATE_ENABLED, PackageManager.DONT_KILL_APP);
+                startActivity(new Intent(Intent.ACTION_MAIN).setComponent(c).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+                Log.i(TAG, "update screen shown");
+            } else {
+                pm.setComponentEnabledSetting(c, PackageManager.COMPONENT_ENABLED_STATE_DEFAULT, PackageManager.DONT_KILL_APP);
+                Log.i(TAG, "update screen off");
+            }
+            return true;
+        } catch (Exception e) {
+            Log.w(TAG, "update screen: " + e.getMessage());
+            return false;
+        }
     }
 
     /** MG4Dash's current install already recompiled by the rescue (this boot or an earlier one). */

@@ -1,33 +1,30 @@
 package app.mg4dash.ui
 
 import android.content.Context
-import android.util.TypedValue
 import android.view.Gravity
 import android.view.View
 import android.widget.LinearLayout
 import android.widget.TextView
 import app.mg4dash.R
 import app.mg4dash.car.CarBridge
+import app.mg4dash.cards.CardKit
+import app.mg4dash.cards.CardPlace
+import app.mg4dash.cards.HomeCard
 import app.mg4dash.energy.TripLog
 
 /**
  * "Recent trips" card (#102), placed in a widget's place from the edit mode: the trip in progress, the two before
- * it and today's totals. A touch opens the Trips page.
+ * it and today's totals. A touch opens the Trips page. A [HomeCard]: refreshed every 5 s while shown.
  */
-class TripsCard(context: Context) : LinearLayout(context) {
+class TripsCard(context: Context) : LinearLayout(context), HomeCard {
+    override val card = HomeSlots.Card.TRIPS
+    override val view: View get() = this
+
     private val d = resources.displayMetrics.density
     private fun dp(v: Int) = (v * d).toInt()
-    private fun tv(sp: Float, colorRes: Int, light: Boolean = false) = TextView(context).apply {
-        setTextColor(Themes.color(context, colorRes)); setTextSize(TypedValue.COMPLEX_UNIT_SP, sp); maxLines = 1
-        includeFontPadding = false
-        if (light) typeface = Themes.valueFont(context)
-    }
-    private fun line(left: TextView, right: TextView) = LinearLayout(context).apply {
-        orientation = HORIZONTAL; gravity = Gravity.CENTER_VERTICAL
-        addView(left, LayoutParams(0, LayoutParams.WRAP_CONTENT, 1f))
-        addView(right.apply { gravity = Gravity.END })
-    }
-    private fun divider() = View(context).apply { setBackgroundColor(Themes.color(context, R.color.panel_border)) }
+    private fun tv(sp: Float, colorRes: Int, light: Boolean = false) = CardKit.text(context, sp, colorRes, value = light)
+    private fun line(left: TextView, right: TextView) = CardKit.row(left, right)
+    private fun divider() = CardKit.divider(context)
 
     private val nowLabel = tv(18f, R.color.text_sub)
     private val nowOdo = tv(18f, R.color.text_sub)
@@ -74,18 +71,33 @@ class TripsCard(context: Context) : LinearLayout(context) {
 
     companion object {
         const val MAX_PREVIOUS = 14
+        private const val REFRESH_MS = 5_000L
+    }
+
+    /** Small place: the trip in progress and today only; tall place: more previous trips, to fill its height. */
+    override fun place(p: CardPlace) {
+        compact = p.small
+        previous = if (p.form == HomeSlots.Size.TALL) MAX_PREVIOUS else 2
+    }
+
+    private var running = false
+    private val tick = object : Runnable {
+        override fun run() { show(); postDelayed(this, REFRESH_MS) }
+    }
+
+    override fun shown(on: Boolean) {
+        if (on == running) return
+        running = on
+        removeCallbacks(tick)
+        if (on) tick.run()
     }
 
     init {
         orientation = VERTICAL
-        setPadding(dp(20), dp(16), dp(20), dp(16))
+        CardKit.pad(this)
         isClickable = true
         setOnClickListener { context.startActivity(android.content.Intent(context, app.mg4dash.pages.TripsActivity::class.java)) }
-        addView(TextView(context).apply {
-            text = context.getString(R.string.title_trips); setTextColor(Themes.color(context, R.color.text_title))
-            setTextSize(TypedValue.COMPLEX_UNIT_SP, 17f); letterSpacing = 0.12f; maxLines = 1
-            typeface = android.graphics.Typeface.create("sans-serif-medium", android.graphics.Typeface.NORMAL)
-        })
+        addView(CardKit.title(context, context.getString(R.string.title_trips)))
         addView(line(nowLabel, nowOdo), LayoutParams(-1, -2).apply { topMargin = dp(10) })
         addView(LinearLayout(context).apply {
             orientation = HORIZONTAL; gravity = Gravity.BOTTOM
@@ -137,9 +149,6 @@ class TripsCard(context: Context) : LinearLayout(context) {
         todayFrom.text = day.firstKm?.let { c.getString(R.string.tr_since_km, TripText.odo(c, it)) } ?: ""
         val r = TripLog.reading(sp)?.takeIf { it.running }
         readingButton.text = if (r != null) "■  " + app.mg4dash.system.Units.distText(c, (r.km(odo) ?: 0).toFloat()) else "●  " + c.getString(R.string.tr_reading_row)
-        readingButton.background = android.graphics.drawable.GradientDrawable().apply {
-            cornerRadius = dp(24).toFloat(); setColor(Themes.color(c, R.color.button_idle))
-            setStroke((1.5f * d).toInt().coerceAtLeast(1), Themes.color(c, if (r != null) R.color.text_value else R.color.panel_border))
-        }
+        readingButton.background = CardKit.buttonBackground(c, on = r != null)
     }
 }

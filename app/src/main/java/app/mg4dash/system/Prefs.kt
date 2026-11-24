@@ -13,12 +13,6 @@ class Prefs(context: Context) {
     private val sp: SharedPreferences =
         context.applicationContext.getSharedPreferences("mg4launcher", Context.MODE_PRIVATE)
 
-    init {
-        if (sp.contains("wifi_only_mode") && !sp.contains("lyrics_wifi_only")) {
-            sp.edit().putBoolean("lyrics_wifi_only", sp.getBoolean("wifi_only_mode", false)).remove("wifi_only_mode").apply()
-        }
-    }
-
     /** Usable battery capacity, for the consumption estimate; with no measurement, the chosen model's (51 kWh: 49 from 100 % to 0 % displayed). */
     var batteryKwh: Float
         get() = sp.getFloat("battery_kwh", app.mg4dash.energy.BatteryCapacity.MODELS.firstOrNull { it.first == batteryModel }?.second ?: 49f)
@@ -156,25 +150,6 @@ class Prefs(context: Context) {
     var mapOfflineSwitch: Boolean
         get() = sp.getBoolean("map_offline_switch", true)
         set(v) = sp.edit().putBoolean("map_offline_switch", v).apply()
-
-    var lyricsWifiOnly: Boolean
-        get() = sp.getBoolean("lyrics_wifi_only", false)
-        set(v) = sp.edit().putBoolean("lyrics_wifi_only", v).apply()
-    var lyricsCacheEnabled: Boolean
-        get() = sp.getBoolean("lyrics_cache_enabled", true)
-        set(v) = sp.edit().putBoolean("lyrics_cache_enabled", v).apply()
-    var lyricsCacheMaxMb: Int
-        get() = sp.getInt("lyrics_cache_max_mb", 20).coerceIn(5, 100)
-        set(v) = sp.edit().putInt("lyrics_cache_max_mb", v.coerceIn(5, 100)).apply()
-    var lyricsOverlayX: Int
-        get() = sp.getInt("lyrics_overlay_x", -1)
-        set(v) = sp.edit().putInt("lyrics_overlay_x", v).apply()
-    var lyricsOverlayY: Int
-        get() = sp.getInt("lyrics_overlay_y", -1)
-        set(v) = sp.edit().putInt("lyrics_overlay_y", v).apply()
-    var lyricsOverlayScale: Float
-        get() = sp.getFloat("lyrics_overlay_scale", 1f).coerceIn(.70f, 1.40f)
-        set(v) = sp.edit().putFloat("lyrics_overlay_scale", v.coerceIn(.70f, 1.40f)).apply()
 
     /** Heated seats / wheel: 0 = auto (64 / 77 kWh battery), 1 = show, 2 = hide. */
     var heatedSeats: Int
@@ -319,8 +294,7 @@ class Prefs(context: Context) {
         set(v) = sp.edit().putInt("radar_prepare_km", v).apply()
     /** Age after which the tiles around the car are downloaded again (hours), one of [app.mg4dash.radar.RadarRepo.REFRESH_HOURS]. */
     var radarRefreshHours: Int
-        get() = sp.getInt("radar_refresh_hours", app.mg4dash.radar.RadarRepo.REFRESH_DEFAULT_HOURS).let { h ->
-            if (h in app.mg4dash.radar.RadarRepo.REFRESH_HOURS) h else app.mg4dash.radar.RadarRepo.REFRESH_DEFAULT_HOURS }
+        get() = sp.getInt("radar_refresh_hours", app.mg4dash.radar.RadarRepo.REFRESH_DEFAULT_HOURS).coerceIn(1, 720)   // any hour (24/11)
         set(v) = sp.edit().putInt("radar_refresh_hours", v).apply()
     /** Sound of each kind of alert. */
     fun radarSoundOf(kind: app.mg4dash.radar.RadarAlert.Kind): app.mg4dash.radar.RadarAlert.Sound =
@@ -433,6 +407,11 @@ class Prefs(context: Context) {
         get() = sp.getBoolean("power_va", false)
         set(v) = sp.edit().putBoolean("power_va", v).apply()
 
+    /** Cards switched off in Settings › Home › Cards offered (their ids): out of the edit mode and of the home screen. */
+    var cardsOff: Set<String>
+        get() = sp.getStringSet("cards_off", null)?.toSet() ?: emptySet()
+        set(v) = sp.edit().putStringSet("cards_off", v.toSet()).apply()
+
     var energyCardPower: Boolean
         get() = sp.getBoolean("energy_card_power", false)
         set(v) = sp.edit().putBoolean("energy_card_power", v).apply()
@@ -473,13 +452,11 @@ class Prefs(context: Context) {
         get() = sp.getBoolean("own_keyboard", true)
         set(v) = sp.edit().putBoolean("own_keyboard", v).apply()
     /** The SAIC call window kept full screen too, so the top bar stays hidden during calls (on by default). */
-    var callBarHidden: Boolean
-        get() = sp.getBoolean("call_bar_hidden", true)
-        set(v) = sp.edit().putBoolean("call_bar_hidden", v).apply()
+    /** The top bar hidden during calls too: always (24/11, its setting is gone). */
+    val callBarHidden: Boolean get() = true
 
-    var fullscreen: Boolean
-        get() = sp.getBoolean("fullscreen", true)
-        set(v) = sp.edit().putBoolean("fullscreen", v).apply()
+    /** Full screen (the car's bars hidden): always (24/11, its setting is gone). */
+    val fullscreen: Boolean get() = true
 
     /** Widget central haut : 0 = carte OpenStreetMap, 1 = raccourcis. */
     /** Old SDK: bring MG4Dash back in front when the SAIC launcher opens its climate screen (#48). */
@@ -498,9 +475,6 @@ class Prefs(context: Context) {
         get() = sp.getInt("bar_side", 0)
         set(v) = sp.edit().putInt("bar_side", v).apply()
 
-    var themeSmooth: Boolean
-        get() = sp.getBoolean("theme_smooth", true)
-        set(v) = sp.edit().putBoolean("theme_smooth", v).apply()
 
     var homeWidget: Int
         get() = sp.getInt("home_widget", 0)

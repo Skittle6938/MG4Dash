@@ -5,6 +5,7 @@ import android.util.TypedValue
 import android.view.Gravity
 import android.view.View
 import android.widget.LinearLayout
+import android.widget.ScrollView
 import android.widget.TextView
 import app.mg4dash.R
 import app.mg4dash.media.MediaHub
@@ -47,46 +48,8 @@ object SourceMenu {
     }
 
     /** Confirmation in the menu style, centred on [anchor]: [message], Cancel and [ok] (coloured). */
-    fun confirm(activity: Activity, anchor: View, message: String, ok: String, onOk: () -> Unit) {
-        val d = activity.resources.displayMetrics.density
-        val box = LinearLayout(activity).apply {
-            orientation = LinearLayout.VERTICAL
-            setBackgroundResource(R.drawable.bg_panel)
-            setPadding((24 * d).toInt(), (20 * d).toInt(), (24 * d).toInt(), (20 * d).toInt())
-            elevation = 12 * d
-        }
-        val popup = android.widget.PopupWindow(box, (520 * d).toInt(), LinearLayout.LayoutParams.WRAP_CONTENT, false).apply {
-            isOutsideTouchable = true
-            setOnDismissListener { Fullscreen.apply(activity) }
-        }
-        box.addView(TextView(activity).apply {
-            text = message
-            setTextSize(TypedValue.COMPLEX_UNIT_SP, 22f)
-            setTextColor(Themes.color(activity, R.color.text_value))
-        })
-        val row = LinearLayout(activity).apply { gravity = Gravity.END }
-        for ((label, action) in listOf(activity.getString(R.string.cancel) to false, ok to true)) {
-            row.addView(TextView(activity).apply {
-                text = label
-                setTextSize(TypedValue.COMPLEX_UNIT_SP, 21f)
-                setTextColor(Themes.color(activity, if (action) R.color.accent_action else R.color.text_value))
-                setPadding((22 * d).toInt(), 0, (22 * d).toInt(), 0)
-                gravity = Gravity.CENTER
-                setBackgroundResource(R.drawable.bg_chip)
-                isSelected = action
-                setOnClickListener { popup.dismiss(); if (action) onOk() }
-            }, LinearLayout.LayoutParams(-2, (60 * d).toInt()).apply { marginStart = (12 * d).toInt() })
-        }
-        box.addView(row, LinearLayout.LayoutParams(-1, -2).apply { topMargin = (18 * d).toInt() })
-        popup.setBackgroundDrawable(android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT))
-        // Centred on the touched view (the curve), without overflowing the screen
-        box.measure(View.MeasureSpec.makeMeasureSpec(popup.width, View.MeasureSpec.EXACTLY), View.MeasureSpec.UNSPECIFIED)
-        val at = IntArray(2).also { anchor.getLocationOnScreen(it) }
-        val screenW = anchor.rootView.width
-        val x = (at[0] + anchor.width / 2 - popup.width / 2).coerceIn(0, (screenW - popup.width).coerceAtLeast(0))
-        val y = at[1] + anchor.height / 2 - box.measuredHeight / 2
-        popup.height = box.measuredHeight; Popups.fit(activity, popup)
-        popup.showAtLocation(anchor.rootView, Gravity.TOP or Gravity.START, x, y.coerceIn(0, (anchor.rootView.height - popup.height).coerceAtLeast(0))); Themes.track(popup)
+    fun confirm(activity: Activity, @Suppress("UNUSED_PARAMETER") anchor: View, message: String, ok: String, onOk: () -> Unit) {
+        Windows.confirm(activity, ok, message, ok, danger = true, onOk = onOk)
     }
 
     /**
@@ -141,39 +104,28 @@ object SourceMenu {
     }
 
     /** Generic choice menu under [anchor]; [current] is coloured. */
-    fun choose(activity: Activity, anchor: View, labels: List<String>, current: Int, centred: Boolean = false, onPick: (Int) -> Unit) {
-        val d = activity.resources.displayMetrics.density
-        val list = LinearLayout(activity).apply {
-            orientation = LinearLayout.VERTICAL
-            setBackgroundResource(R.drawable.bg_panel)
-            setPadding((8 * d).toInt(), (6 * d).toInt(), (8 * d).toInt(), (16 * d).toInt())   // bottom margin: the outline of the last highlighted line is no longer cut
-            elevation = 12 * d
+    /**
+     * A choice among [labels] in a window of its own, over the whole screen (24/11: a menu hanging from [anchor] was
+     * cut at the edge of the options window holding it, on the car): the chosen one marked and in sight, the list
+     * scrolling with its bar. [title] names it; by default the title of the row holding [anchor].
+     */
+    @Suppress("UNUSED_PARAMETER")
+    fun choose(activity: Activity, anchor: View, labels: List<String>, current: Int, centred: Boolean = false, title: String? = null, onPick: (Int) -> Unit) {
+        Windows.pick(activity, title ?: rowTitle(anchor) ?: "", labels, selected = current) { onPick(it) }
+    }
+
+    /** The first text of the settings row holding [v] (its title), if it is in one. */
+    private fun rowTitle(v: View): String? {
+        var p = v.parent as? android.view.ViewGroup
+        while (p != null) {
+            if (p.tag == Rows.TAG_ROW) {
+                fun first(g: View): TextView? = (g as? TextView)?.takeIf { it !== v && it.text.isNotBlank() }
+                    ?: (g as? android.view.ViewGroup)?.let { gg -> (0 until gg.childCount).firstNotNullOfOrNull { first(gg.getChildAt(it)) } }
+                return first(p)?.text?.toString()
+            }
+            p = p.parent as? android.view.ViewGroup
         }
-        val popup = android.widget.PopupWindow(list, (340 * d).toInt(), LinearLayout.LayoutParams.WRAP_CONTENT, false).apply {
-            isOutsideTouchable = true
-            setOnDismissListener { Fullscreen.apply(activity) }
-        }
-        labels.forEachIndexed { i, label ->
-            list.addView(TextView(activity).apply {
-                text = label
-                setTextSize(TypedValue.COMPLEX_UNIT_SP, 21f)
-                setTextColor(Themes.color(activity, if (i == current) R.color.accent_action else R.color.text_value))
-                setPadding((18 * d).toInt(), 0, (18 * d).toInt(), 0)
-                gravity = Gravity.CENTER_VERTICAL
-                setBackgroundResource(R.drawable.bg_chip)
-                isSelected = i == current
-                setOnClickListener { popup.dismiss(); onPick(i) }
-            }, LinearLayout.LayoutParams(-1, (60 * d).toInt()).apply { topMargin = (4 * d).toInt() })
-        }
-        popup.setBackgroundDrawable(android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT))
-        // Height measured explicitly: when opening downwards (music card at the top of the screen),
-        // "wrap_content" height cut the bottom of the last line.
-        list.measure(View.MeasureSpec.makeMeasureSpec(popup.width, View.MeasureSpec.EXACTLY), View.MeasureSpec.UNSPECIFIED)
-        popup.height = list.measuredHeight + (6 * d).toInt()
-        Popups.fit(activity, popup)
-        // In the middle of the screen (a tile of the shortcuts menu, no button to hang it under)
-        if (centred) popup.showAtLocation(anchor.rootView, Gravity.CENTER, 0, 0) else popup.showAsDropDown(anchor, 0, (4 * d).toInt())
-        Themes.track(popup)
+        return null
     }
 
     /** Prepares a card title as a source selector. */

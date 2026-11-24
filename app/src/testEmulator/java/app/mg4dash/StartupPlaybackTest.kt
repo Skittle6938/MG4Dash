@@ -28,6 +28,18 @@ class StartupPlaybackTest {
         assertFalse("on for 6 min: MG4Dash restarted while driving (update, crash), nothing done", MediaHub.isCarStart(6 * 60_000))
     }
 
+    /** #133: the boot of a locked car opened, the head unit awake with its screen dark: nothing starts. */
+    @Test fun startupWaitsForTheCarInUse() {
+        assertFalse("screen dark, car locked", MediaHub.carInUse(interactive = false, ready = null, doorsLocked = true, touched = false))
+        assertFalse("screen dark, even READY", MediaHub.carInUse(interactive = false, ready = true, doorsLocked = false, touched = true))
+        assertFalse("screen on, locked, not READY, no touch", MediaHub.carInUse(interactive = true, ready = false, doorsLocked = true, touched = false))
+        assertFalse("screen on, nothing readable", MediaHub.carInUse(interactive = true, ready = null, doorsLocked = null, touched = false))
+        assertTrue("READY", MediaHub.carInUse(interactive = true, ready = true, doorsLocked = true, touched = false))
+        assertTrue("doors unlocked", MediaHub.carInUse(interactive = true, ready = false, doorsLocked = false, touched = false))
+        assertTrue("a touch on the screen", MediaHub.carInUse(interactive = true, ready = null, doorsLocked = null, touched = true))
+        assertEquals("waits as long as a car start lasts", 5 * 60_000L, MediaHub.USE_WAIT_MS)
+    }
+
     @Test fun sourceLostWhileDriving() {
         assertEquals("the first of the order there", radio, MediaHub.replacement(listOf(bt, usb, radio), bt, listOf(radio), carPlay = false))
         assertEquals(usb, MediaHub.replacement(listOf(bt, usb, radio), bt, listOf(usb, radio), carPlay = false))

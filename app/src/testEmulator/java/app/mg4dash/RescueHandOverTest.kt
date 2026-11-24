@@ -82,7 +82,7 @@ class RescueHandOverTest {
         assertFalse(Rescue.handsOver(3))
         assertTrue(Rescue.handsOver(4))
         assertTrue(Rescue.handsOver(5))
-        assertEquals(8L, Rescue.BUNDLED_VERSION)
+        assertEquals(9L, Rescue.BUNDLED_VERSION)
     }
 
     @Test fun rescueRecompiledAndAnsweringAfterItsInstall() {

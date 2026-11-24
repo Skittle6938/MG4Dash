@@ -33,13 +33,18 @@ android {
         create("emulator") {
             dimension = "target"
             applicationIdSuffix = ".emu"
+            // Debug key on its release build too, so the shrunk APK installs in an emulator (scripts/r8_smoke.sh)
+            signingConfig = signingConfigs.getByName("debug")
             buildConfigField("boolean", "MOCK", "true")
         }
     }
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            // R8 (24/11): shrinks the libraries and optimises, keeps every name (app/proguard-rules.pro)
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
     }
 

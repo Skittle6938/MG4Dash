@@ -33,14 +33,19 @@ object HomeSlots {
         val form: Size get() = when (this) { QUARTER -> SMALL; HALF -> TALL; BAND -> WIDE; else -> this }
     }
 
-    /** Cards, in the order they go by in a place. [icon]: on the button that changes card over a web page or an app. */
-    enum class Card(val id: String, val label: Int, val icon: Int) {
+    /**
+     * Cards, in the order they go by in a place: the list every card is declared in (identity). [label]: its name in the
+     * menus; [icon]: on the button that changes card over a web page or an app; [big]: it fills a big place (two
+     * columns): the others would look lost in it, they are greyed there in the edit mode; [manual]: only placed by the
+     * driver, never put in an empty place by itself (new cards: true).
+     */
+    enum class Card(val id: String, val label: Int, val icon: Int, val big: Boolean = false, val manual: Boolean = false) {
         /** The climate (pinch mode v2): a card like the others, swiped with the other cards of its place. */
-        CLIMATE("climate", R.string.wc_kind_climate, R.drawable.ic_fan),
-        MAP("map", R.string.wc_map, R.drawable.ic_map),
-        CONSUMPTION("consumption", R.string.wc_consumption, R.drawable.ic_bolt),
-        SHORTCUTS("shortcuts", R.string.wc_shortcuts, R.drawable.ic_apps),
-        WEB("web", R.string.wc_web, R.drawable.ic_web),
+        CLIMATE("climate", R.string.wc_kind_climate, R.drawable.ic_fan, manual = true),
+        MAP("map", R.string.wc_map, R.drawable.ic_map, big = true),
+        CONSUMPTION("consumption", R.string.wc_consumption, R.drawable.ic_bolt, big = true),
+        SHORTCUTS("shortcuts", R.string.wc_shortcuts, R.drawable.ic_apps, big = true),
+        WEB("web", R.string.wc_web, R.drawable.ic_web, big = true),
         ENERGY("energy", R.string.wc_energy, R.drawable.ic_battery),
         TRIP("trip", R.string.wc_trip, R.drawable.ic_car),
         POWER("power", R.string.wc_power, R.drawable.ic_bolt),
@@ -48,21 +53,15 @@ object HomeSlots {
         HOURLY("hourly", R.string.wc_hourly, R.drawable.ic_sun),
         DAILY("daily", R.string.wc_daily, R.drawable.ic_cloud),
         /** The last trips (#102): only where the driver places it, never put in a place by itself. */
-        TRIPS("trips", R.string.wc_trips, R.drawable.ic_car),
+        TRIPS("trips", R.string.wc_trips, R.drawable.ic_car, manual = true),
         /** Driving settings (#38): only where the driver places it, as the last trips. */
-        DRIVING("driving", R.string.wc_driving, R.drawable.ic_car),
+        DRIVING("driving", R.string.wc_driving, R.drawable.ic_car, big = true, manual = true),
         /** Speed camera alerter (test, OpenStreetMap): only where the driver places it, in any size. */
-        RADAR("radar", R.string.wc_radar, R.drawable.ic_radar),
+        RADAR("radar", R.string.wc_radar, R.drawable.ic_radar, big = true, manual = true),
         /** The Android Auto guidance alone (19/11): only where the driver places it, in any size. */
-        NAV("nav", R.string.wc_nav, R.drawable.ic_map),
+        NAV("nav", R.string.wc_nav, R.drawable.ic_map, big = true, manual = true),
         /** Synchronized lyrics: only placed by the driver, never used to fill an empty place automatically. */
-        LYRICS("lyrics", R.string.wc_lyrics, R.drawable.ic_music);
-
-        /** Fills a big place (two columns): the others would look lost in it, they are greyed there in the edit mode. */
-        val big: Boolean get() = this == MAP || this == WEB || this == CONSUMPTION || this == SHORTCUTS || this == DRIVING || this == RADAR || this == NAV
-
-        /** Only placed by the driver, never put in an empty place by itself. */
-        val manual: Boolean get() = this == TRIPS || this == DRIVING || this == CLIMATE || this == RADAR || this == NAV || this == LYRICS
+        LYRICS("lyrics", R.string.wc_lyrics, R.drawable.ic_music, big = true, manual = true);
     }
 
     /**
@@ -77,6 +76,12 @@ object HomeSlots {
         card.big -> true
         else -> size.span == 1
     }
+
+    /**
+     * Cards switched off by the driver (Settings › Home › Cards offered): neither offered in the edit mode nor shown.
+     * Their places are kept: ticked again, a card comes back where it was.
+     */
+    fun switchedOff(prefs: Prefs): Set<Card> = prefs.cardsOff.mapNotNull { id -> Card.entries.firstOrNull { it.id == id } }.toSet()
 
     /** The media in a medium or tall place, alone: it uses the swipes for its sources and tracks. */
     fun mediaFits(size: Size): Boolean = size == Size.MEDIUM || size == Size.TALL || size.big

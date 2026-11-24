@@ -184,6 +184,7 @@
     <string name="ps_col_cpu">CPU</string>
     <string name="ps_col_ram">RAM</string>
     <string name="ps_service">servicio</string>
+    <string name="ps_self">incluida la visualización de esta lista</string>
     <string name="ps_hint">Detalle por aplicación ›</string>
     <string name="ps_note">≈ : media reciente del sistema, para las aplicaciones que no se pueden leer en directo.</string>
     <string name="unit_mb">MB</string>
@@ -211,6 +212,12 @@
     <string name="st_valet">Modo mantenimiento</string>
     <string name="st_rescue_note">Red de seguridad: si MG4Dash ya no arranca o falla varias veces seguidas, MG4Dash Rescue lo repara en el siguiente arranque o restaura la pantalla de inicio original de SAIC.</string>
     <string name="st_battery_line">Nueva: %1$s kWh  ·  Actual: %2$s kWh  ·  Salud: %3$s</string>
+    <string name="en_battery_caps">%1$s kWh medidos · %2$s kWh nueva (modelo %3$d kWh)</string>
+    <string name="en_health">salud estimada</string>
+    <string name="en_battery_settings">Ajustes de la batería</string>
+    <string name="en_battery_model">Modelo de batería</string>
+    <string name="en_battery_model_desc">Referencia para la salud estimada</string>
+    <string name="en_new_cap_desc">Sin valor oficial: el coche no lo da</string>
     <string name="st_battery_model">Modelo de batería (referencia de la salud estimada, página Vehículo):</string>
     <string name="st_new_cap">Capacidad nueva para el cálculo de salud:</string>
     <string name="st_new_cap_default">%1$s kWh (por defecto)</string>
@@ -223,11 +230,10 @@
     <string name="st_startup">ARRANQUE</string>
     <string name="st_toggle">Cambiar</string>
     <string name="st_display">PANTALLA</string>
-    <string name="st_fullscreen">Pantalla completa (oculta la barra lateral y el banner SAIC): %1$s</string>
     <string name="st_fullscreen_desc">Deslice desde el borde izquierdo o superior para mostrar las barras SAIC.</string>
     <string name="yes">SÍ</string>
     <string name="no">NO</string>
-    <string name="st_log">REGISTRO</string>
+    <string name="st_log">Registro</string>
     <string name="st_refresh">Actualizar</string>
     <string name="st_log_export">Exportar a la memoria USB</string>
     <string name="st_log_exported">✓  Registro guardado en la memoria USB: %1$s</string>
@@ -238,6 +244,7 @@
     <string name="st_log_eject_failed">No se pudo expulsar la memoria USB: puede que una aplicación aún la esté usando. Vuelva a intentarlo en un momento.</string>
     <string name="st_close">Cerrar</string>
     <string name="st_title">Ajustes · MG4Dash %1$s</string>
+    <string name="st_settings">Ajustes</string>
     <string name="st_replace_msg">MG4Dash se abrirá al arrancar y con el botón Inicio.\n\nNo se desinstala nada: el inicio original de SAIC simplemente se desactiva como pantalla de inicio y las demás funciones del coche siguen funcionando con normalidad.\n\nPuede volver atrás en cualquier momento con el Modo mantenimiento, en el mismo lugar. Si MG4Dash fallara varias veces seguidas, el inicio original volvería solo.</string>
     <string name="st_replace_btn">Sustituir</string>
     <string name="valet_banner_title">Modo mantenimiento activo</string>
@@ -301,6 +308,7 @@
     <string name="st_ha_no_token">Token: no definido</string>
     <string name="st_ha_token_set">Token: definido</string>
     <string name="st_ha_desc">Cree un token de acceso de larga duración en su perfil de Home Assistant. Los accesos podrán ejecutar scripts, automatizaciones, escenas, botones y cubiertas (portón, puerta de garaje). El botón arriba a la derecha del mapa muestra los accesos.</string>
+    <string name="st_ha_settings">Ajustes de Home Assistant</string>
     <string name="st_ha_set_url">Dirección</string>
     <string name="st_ha_set_token">Token</string>
     <string name="st_ha_test">Probar</string>
@@ -309,8 +317,15 @@
     <string name="st_ha_import_desc">¿Su teclado no permite pegar? Ponga un archivo mg4dash_ha.txt en la raíz de una memoria USB, con la dirección en una línea y el token en otra.</string>
     <string name="st_ha_import_done">Leído de la memoria USB: %1$s</string>
     <string name="st_ha_import_none">No hay ningún archivo mg4dash_ha.txt en la raíz de una memoria USB</string>
+    <string name="ha_connection">Conexión</string>
+    <string name="ha_token_on">Guardado</string>
+    <string name="ha_token_off">Sin definir</string>
+    <string name="ha_test_title">Probar la conexión</string>
+    <string name="ha_usb">Memoria USB</string>
     <string name="st_paste">Pegar</string>
     <string name="st_diag">DIAGNÓSTICO</string>
+    <string name="st_diag_on">Modo diagnóstico activado</string>
+    <string name="st_diag_off">Modo diagnóstico desactivado</string>
     <string name="st_energy_log">Registro de datos de energía: %1$s</string>
     <string name="st_energy_log_desc">Cada 5 s anota la potencia de la batería, los contadores de consumo y el estado de los equipos en Android/data/app.mg4dash/files/energy_log.csv (solo lectura, no se envía nada al coche). Se guarda cada 5 min para limitar el desgaste de la memoria de la radio. Solo para diagnóstico: si no, déjelo desactivado.</string>
     <string name="sc_search">Buscar…</string>
@@ -340,6 +355,7 @@
     <string name="st_theme">TEMA</string>
     <string name="st_theme_bg">Fondo</string>
     <string name="st_theme_accent">Color de los botones</string>
+    <string name="st_more_colors">Más colores…</string>
     <string name="st_theme_desc">El verde de la batería, el naranja de la calefacción, el cian del frío y el rojo de las alertas mantienen su significado con cualquier tema. MG4Radio sigue el tema la próxima vez que se abra la radio.</string>
     <string name="st_update">ACTUALIZACIÓN</string>
     <string name="st_update_installed">Versión instalada: %1$s</string>
@@ -411,7 +427,7 @@
     <string name="dock_slot_wifi_short">Wi-Fi</string>
     <string name="st_cap_car">Leída del coche: %1$s kWh.</string>
     <string name="st_cap_none" formatted="false">El coche no la indica: MG4Dash la medirá conduciendo, tras un 15 % de descenso (sumado en varios trayectos).</string>
-    <string name="st_cap_est">Medida por MG4Dash: %1$s kWh (%2$d medición(es) entre cargas, suavizadas en 30 días).</string>
+    <string name="st_cap_est">Estimada al circular por MG4Dash: %1$s kWh (%2$d medición(es) de las últimas descargas, suavizadas en 30 días).</string>
     <string name="st_cap_est_current">En medición por MG4Dash: %1$s kWh (provisional).</string>
     <string name="sw_batt_temp">Batería %1$d °C</string>
     <string name="st_map_vdock">Barra vertical a la izquierda (todas las pantallas y MG4Radio): %1$s</string>
@@ -478,6 +494,20 @@
     <string name="st_map_offline_switch_desc">Sin conexión de datos, salvo si todo el mapa mostrado está en la caché sin conexión</string>
     <string name="st_use_location">Usar mi posición</string>
     <string name="st_wx_model">Modelo meteorológico: %1$s</string>
+    <string name="wx_model_auto">Automático (recomendado)</string>
+    <string name="wx_model_meteofrance">Météo-France</string>
+    <string name="wx_model_ecmwf">Europeo (ECMWF)</string>
+    <string name="wx_model_dwd">Alemán (DWD)</string>
+    <string name="wx_model_ukmo">Británico (Met Office)</string>
+    <string name="wx_model_noaa">Estadounidense (NOAA)</string>
+    <string name="wx_model_gem">Canadiense (GEM)</string>
+    <string name="wx_model_desc">Automático elige el mejor modelo según el lugar. Fuerce uno solo si la previsión suele fallar.</string>
+    <string name="st_wx_city">Ciudad de reserva</string>
+    <string name="st_wx_city_desc">%1$s, si el coche no da su posición</string>
+    <string name="wx_city_here">Posición actual</string>
+    <string name="wx_city_search">Buscar una ciudad…</string>
+    <string name="wx_city_offline">Sin conexión: la ciudad no cambia</string>
+    <string name="wx_city_none">Ninguna ciudad encontrada para «%1$s»</string>
     <string name="st_wx_model_auto">Automático</string>
     <string name="st_no_location">Posición aún no disponible</string>
     <string name="st_heated">Asientos y volante calefactados</string>
@@ -708,8 +738,15 @@
     <string name="st_tab_car">Vehículo</string>
     <string name="st_tab_net">Conexiones</string>
     <string name="st_tab_system">Sistema</string>
-    <string name="st_theme_smooth">Transición suave claro / oscuro</string>
-    <string name="st_theme_smooth_desc">Espera 5 s con luces estables (sin cambio bajo puentes) y funde en 2 s. Desactivado: cambia en cuanto cambian las luces.</string>
+    <string name="st_tab_screen">Pantalla</string>
+    <string name="st_tab_media">Multimedia y sonidos</string>
+    <string name="st_tab_general">General</string>
+    <string name="st_bar_section">BARRA</string>
+    <string name="st_formats">FORMATOS</string>
+    <string name="st_input">ESCRITURA</string>
+    <string name="du_last30">Últimos 30 días</string>
+    <string name="du_detail_open">Ver el detalle</string>
+    <string name="du_detail_open_desc">Día a día, la alerta y su umbral, el reinicio</string>
     <string name="st_night_sun">Noche tras la puesta de sol</string>
     <string name="st_night_sun_desc">Modo automático: oscuro desde la puesta hasta la salida del sol en la posición del coche, incluso con las luces de posición apagadas. Calculado en la radio, sin red.</string>
     <string name="st_night_sun_today">Hoy aquí: puesta %1$s, salida %2$s</string>
@@ -732,6 +769,7 @@
     <string name="st_v2l_auto_warning">Atención: en cuanto se conecte un cable V2L, la descarga se pondrá en marcha sola, sin otra acción, y lo que esté conectado al cable recibirá corriente.</string>
     <string name="st_v2l_auto_enable">Activar</string>
     <string name="st_audio_source">Fuente de audio</string>
+    <string name="st_media">Multimedia</string>
     <string name="st_start_source">Fuente al arrancar</string>
     <string name="st_src_auto">Automática</string>
     <string name="st_src_car">Como el coche</string>
@@ -815,6 +853,7 @@
     <string name="conn_usb_count">%1$d conectado(s)</string>
     <string name="en_time_note">Según la fecha y suavizada · media (puntos)</string>
     <string name="st_sound_trigger">Sonido de inicio</string>
+    <string name="st_sounds">SONIDOS</string>
     <string name="st_sound_trigger_desc">Elige un archivo de audio de una memoria USB o del almacenamiento interno. Se copia en la app y seguirá disponible al retirar la memoria.</string>
     <string name="st_sound_boot_trigger">Reproducir al inicio</string>
     <string name="st_sound_pick_file">Elegir audio</string>
@@ -826,7 +865,8 @@
     <string name="st_sound_imported">Audio importado: %1$s</string>
     <string name="st_sound_test">Probar</string>
     <string name="st_sound_stop">Detener</string>
-    <string name="st_sound_volume">Volumen multimedia del coche</string>
+    <string name="st_sound_volume">Volumen del sonido de inicio</string>
+    <string name="st_sound_volume_desc">Solo para el sonido de inicio</string>
     <string name="st_sound_vol_default">Volumen actual del coche</string>
     <string name="st_sound_volume_level">%1$d / 32</string>
     <string name="du_tab">Datos 4G</string>
@@ -944,7 +984,7 @@
     <string name="st_fx_sound">Efectos de sonido</string>
     <string name="st_fx_volume">Volumen de los efectos de sonido</string>
     <string name="st_fx_volume_off">Desactivado</string>
-    <string name="wc_radar">Avisador de radares (prueba)</string>
+    <string name="wc_radar">Avisador de radares</string>
     <string name="du_radars">Radares</string>
     <string name="rad_osm">© colaboradores de OpenStreetMap</string>
     <string name="rad_osm_licence">Límites y radares: © colaboradores de OpenStreetMap, licencia ODbL. Los datos pueden estar incompletos o desactualizados: la señalización siempre prevalece.</string>
@@ -967,8 +1007,8 @@
     <string name="rad_off_road">Carretera no reconocida</string>
     <string name="rad_banner">%1$s · %2$s</string>
     <string name="rad_banner_sub">Reduzca · %1$s · fin de zona en %2$s</string>
-    <string name="st_rad_title">Avisador de radares (prueba)</string>
-    <string name="st_rad_desc">Límite de la carretera y zonas de radar solo a partir de datos de OpenStreetMap. Coloque la tarjeta Avisador de radares (prueba) en un lugar de la pantalla de inicio (pellizque la pantalla). Una pulsación larga en la tarjeta abre estos ajustes.</string>
+    <string name="st_rad_title">Avisador de radares</string>
+    <string name="st_rad_desc">Límite de la carretera y zonas de radar solo a partir de datos de OpenStreetMap. Coloque la tarjeta Avisador de radares en un lugar de la pantalla de inicio (pellizque la pantalla). Una pulsación larga en la tarjeta abre estos ajustes.</string>
     <string name="st_rad_visual">Alertas visuales (naranja, rojo)</string>
     <string name="st_rad_sound">Sonido</string>
     <string name="st_rad_sound_none">Ninguno</string>
@@ -980,7 +1020,7 @@
     <string name="st_rad_high">Alerta fuerte (rojo) sobre el límite</string>
     <string name="st_rad_banner">Banner sobre las otras apps</string>
     <string name="st_rad_banner_desc">Un banner rojo intermitente muy por encima del límite en una zona de radar, también sobre Android Auto.</string>
-    <string name="st_rad_wifi">Solo Wi-Fi</string>
+    <string name="st_rad_wifi">Descargar solo por Wi-Fi</string>
     <string name="st_rad_wifi_desc">Ninguna descarga por el 4G del coche: solo se usan las zonas ya guardadas.</string>
     <string name="st_rad_cache">%1$d zonas guardadas · %2$s</string>
     <string name="st_rad_preparing">Preparando: %1$d / %2$d</string>
@@ -1016,6 +1056,12 @@
     <string name="st_rad_snd_chime">Campanilla</string>
     <string name="st_rad_snd_beep">Pitido</string>
     <string name="st_rad_snd_loud">Pitido fuerte</string>
+    <string name="st_rad_snd_marimba">Marimba</string>
+    <string name="st_rad_snd_dingdong">Din-don</string>
+    <string name="st_rad_snd_sonar">Sonar</string>
+    <string name="st_rad_snd_pulse">Triple pulso</string>
+    <string name="st_rad_snd_blip">Bip retro</string>
+    <string name="st_rad_snd_hum">Zumbido grave</string>
     <string name="rp_tab_alerts">Alertas</string>
     <string name="rp_tab_alerts_sub">Umbrales, sonidos, banner</string>
     <string name="rp_tab_data">Datos</string>
@@ -1023,6 +1069,9 @@
     <string name="rp_tab_data_prep">Preparando %1$d / %2$d</string>
     <string name="rp_osm_box">Límites y radares: © colaboradores de OpenStreetMap, ODbL. La señalización siempre prevalece.</string>
     <string name="rp_thresholds">Umbrales</string>
+    <string name="rp_threshold_unit">Umbrales en</string>
+    <string name="rp_display">Visualización</string>
+    <string name="rp_gps_correction_sub">Medida al circular</string>
     <string name="rp_mixed">Mixto</string>
     <string name="rp_under_100">Límites por debajo de 100 km/h</string>
     <string name="rp_from_100">Límites desde 100 km/h</string>
@@ -1030,8 +1079,10 @@
     <string name="rp_in">En</string>
     <string name="rp_light_over">Leve sobre</string>
     <string name="rp_strong_over">Fuerte sobre</string>
-    <string name="rp_visual">Colores en la tarjeta</string>
+    <string name="rp_visual">Velocidad en color</string>
+    <string name="rp_visual_sub">En la tarjeta, la velocidad se pone naranja un poco por encima del límite y roja muy por encima</string>
     <string name="rp_banner">Banner sobre las apps</string>
+    <string name="rp_banner_sub">Solo aparece al superar la velocidad en una zona de radar (alerta fuerte)</string>
     <string name="rp_sounds">Sonido de cada alerta</string>
     <string name="rp_col_alert">Alerta</string>
     <string name="rp_col_sound">Sonido</string>
@@ -1059,6 +1110,8 @@
     <string name="rp_prep_done">Última preparación terminada</string>
     <string name="rp_prep_stopped">Preparación detenida</string>
     <string name="rp_prep_none">Aún no hay preparación</string>
+    <string name="rp_prep_stored_at">Preparado el %1$s · %2$d zonas</string>
+    <string name="rp_prep_stored">%1$d zonas ya descargadas</string>
     <string name="rp_prep_detail">Wi-Fi · %1$s recibidos</string>
     <string name="rp_prep_left">quedan ≈ %1$d min</string>
     <string name="rp_prep_failed">%1$d zonas fallidas, nuevo intento</string>
@@ -1066,9 +1119,11 @@
     <string name="rp_resume">Reanudar</string>
     <string name="rp_pause">Pausar</string>
     <string name="rp_cancel">Cancelar</string>
-    <string name="rp_wifi_sub">Nunca 4G: solo se usan las zonas guardadas</string>
+    <string name="rp_wifi_sub">Sin 4G al circular: solo se usan las carreteras y radares ya descargados</string>
     <string name="rp_refresh">Actualizar la zona alrededor del coche</string>
     <string name="rp_refresh_sub">Si tiene más de…</string>
+    <string name="unit_day_short">d</string>
+    <string name="rp_repeat_sub">Mientras dure la alerta; 0: una vez</string>
     <string name="rp_storage">Almacenamiento</string>
     <string name="rp_space">Espacio ocupado</string>
     <string name="rp_space_sub">Zonas guardadas 30 días</string>
@@ -1083,8 +1138,6 @@
     <string name="wc_conn_small">Lugar demasiado pequeño para la barra de conexión</string>
     <string name="st_climate_fx">Animación cálido/frío de la tarjeta de clima</string>
     <string name="st_climate_fx_desc">Ondas de calor al calentar, escarcha al enfriar, más marcadas cuanto más lejos está la consigna de la temperatura exterior. Desactivada: solo desaparece la animación, Calefacción / Refrigeración sigue visible.</string>
-    <string name="st_call_bar">Ocultar la barra superior durante las llamadas</string>
-    <string name="st_call_bar_desc">La ventana de llamada del coche también queda a pantalla completa. Deslizar desde arriba sigue mostrando la barra; también se oculta en la app Teléfono de SAIC.</string>
     <string name="rp_stop">Detener</string>
     <string name="clim_settings_title">Ajustes del clima</string>
     <string name="clim_fx_title">Calefacción / refrigeración en la tarjeta</string>
@@ -1146,6 +1199,9 @@
     <string name="sc_profile">Perfil</string>
     <string name="pf_drive">Los perfiles guardan el modo de conducción y la regeneración</string>
     <string name="pf_drive_desc">Al salir de un perfil, MG4Dash anota el modo de conducción y la regeneración; al llegar a un perfil, los vuelve a poner, parado o en marcha. Apagado por defecto.</string>
+    <string name="dv_profiles_drive_desc">Al cambiar de perfil, se recuperan el modo de conducción y la regeneración del perfil</string>
+    <string name="pf_drive_one">Recuperar el modo de conducción y la regeneración de este perfil</string>
+    <string name="pf_drive_one_desc">Se aplican al pasar a este perfil</string>
     <string name="br_title">Brillo</string>
     <string name="br_auto">Brillo automático</string>
     <string name="br_auto_desc">Inteligente: aprende de tus ajustes con el control, según la luz del día estimada y las luces. Original: el modo de Android, con − y +.</string>
@@ -1228,4 +1284,10 @@
     <string name="bk_confirm">Los ajustes, perfiles, sonido de inicio y direcciones web de la copia del %1$s sustituyen a los actuales. Después MG4Dash se reinicia.</string>
     <string name="bk_confirm_token">El token de Home Assistant no estaba en la copia: vuelva a introducirlo en Ajustes › Conexiones si falta.</string>
     <string name="bk_confirm_ok">Reemplazar y reiniciar</string>
+    <string name="card_no_data">Aún no hay datos</string>
+    <string name="st_cards_offered">Tarjetas disponibles…</string>
+    <string name="st_cards_offered_note">Las tarjetas desmarcadas ya no aparecen en el modo edición ni en el inicio. Marcadas de nuevo, vuelven a su lugar.</string>
+    <string name="opt_open">Abrir</string>
+    <string name="opt_import">Importar</string>
+    <string name="opt_clear">Borrar</string>
 </resources>

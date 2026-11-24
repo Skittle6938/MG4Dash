@@ -2,121 +2,192 @@ package app.mg4dash.ui
 
 import android.app.Activity
 import android.app.AlertDialog
-import android.graphics.Typeface
 import android.util.TypedValue
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.TextView
-import androidx.core.content.ContextCompat
 import app.mg4dash.R
 
 /**
- * A widget's own options in a popup, opened from the widget (a long press on the energy card, the gear next to the
- * OpenStreetMap map in its menu): the settings that were in Settings › Home (17/11), in the radar page's style
- * (a title, lines of a title, a grey subtitle and an outlined control). Too tall for the screen, it becomes twice as
- * wide and what follows [column] goes on the right.
+ * A widget's own options in a window, opened from the widget (a long press on a card, the gear next to the
+ * OpenStreetMap map in its menu). Same look as the Settings page ([Rows]): a title bar with the card's icon, its name
+ * and the round close button, then groups of rows where the whole row is the touch target. It closes with the cross,
+ * a touch outside or the car's back / home key. Too tall for the screen, it becomes twice as wide and what follows
+ * [column] goes on the right.
  */
-class OptionsPopup(private val a: Activity, title: String) {
+class OptionsPopup(private val a: Activity, private val title: String, private val icon: Int? = null) {
     private val d = a.resources.displayMetrics.density
     private fun dp(v: Int) = (v * d).toInt()
     private fun col(res: Int) = Themes.color(a, res)
-    private val medium = Typeface.create("sans-serif-medium", Typeface.NORMAL)
-    private val body = LinearLayout(a).apply { orientation = LinearLayout.VERTICAL; setPadding(dp(30), dp(24), dp(30), dp(22)) }
-    private val first = mutableListOf<Pair<View, LinearLayout.LayoutParams>>()
-    private val second = mutableListOf<Pair<View, LinearLayout.LayoutParams>>()
-    private var target = first
-    private val refreshers = mutableListOf<() -> Unit>()
+    /** What goes in each column; rows next to each other share a group. */
+    /** What goes in each column, in order (24/11: up to three, the cards offered). */
+    private val cols = mutableListOf(mutableListOf<View>())
+    private var target = cols[0]
+    private val first get() = cols[0]
+    private val all get() = cols.flatten()
     /** True once shown in two columns. */
     var twoColumns = false; private set
+    private var closeNow: () -> Unit = {}
+    private val repaints = mutableListOf<() -> Unit>()
 
-    init {
-        body.addView(TextView(a).apply {
-            text = title.uppercase(); setTextColor(col(R.color.text_title)); setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f); typeface = medium; letterSpacing = 0.12f
-        })
-    }
-
-    private fun chip(label: String, onClick: () -> Unit) = TextView(a).apply {
-        text = label; gravity = Gravity.CENTER; setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f); typeface = medium
-        setBackgroundResource(R.drawable.bg_chip); setTextColor(ContextCompat.getColorStateList(a, R.color.chip_text))
-        setPadding(dp(18), 0, dp(18), 0); setOnClickListener { onClick() }
-    }
-
-    private fun line(title: String, sub: String?, control: TextView, width: Int) {
-        val row = LinearLayout(a).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL }
-        val texts = LinearLayout(a).apply { orientation = LinearLayout.VERTICAL }
-        texts.addView(TextView(a).apply { text = title; setTextColor(col(R.color.text_value)); setTextSize(TypedValue.COMPLEX_UNIT_SP, 19f) })
-        sub?.let { texts.addView(TextView(a).apply { text = it; setTextColor(col(R.color.text_sub)); setTextSize(TypedValue.COMPLEX_UNIT_SP, 15f) },
-            LinearLayout.LayoutParams(-2, -2).apply { topMargin = dp(2) }) }
-        row.addView(texts, LinearLayout.LayoutParams(0, -2, 1f).apply { rightMargin = dp(18) })
-        row.addView(control, LinearLayout.LayoutParams(dp(width), dp(56)))
-        target += row to LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(18) }
-    }
+    /** Repaints every switch from its value (after a change confirmed in another window). */
+    fun refresh() = repaints.forEach { it() }
 
     /** What follows goes in the right column when the whole is too tall for the screen in one. */
-    fun column(): OptionsPopup { target = second; return this }
+    fun column(): OptionsPopup { target = mutableListOf<View>().also { cols += it }; return this }
 
-    /** OUI / NON. */
+    /** Yes / no: a switch; the whole row toggles it. */
     fun toggle(title: String, sub: String?, get: () -> Boolean, set: (Boolean) -> Unit): OptionsPopup {
-        lateinit var v: TextView
-        fun paint() { v.text = a.getString(if (get()) R.string.yes else R.string.no); v.isSelected = get() }
-        v = chip("") { set(!get()); refreshers.forEach { it() } }
-        refreshers += ::paint
+        val sw = SwitchView(a).apply { on = get() }
+        repaints += { sw.on = get() }
+        target += Rows.row(a, title, sub, sw) { set(!get()); sw.on = get(); refresh() }
+        return this
+    }
+
+    /** A box to tick, on a shorter line (lists of things to keep or leave out). */
+    fun check(title: String, get: () -> Boolean, set: (Boolean) -> Unit): OptionsPopup {
+        val box = CheckView(a).apply { on = get() }
+        val row = LinearLayout(a).apply {
+            orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL; tag = Rows.TAG_ROW; minimumHeight = dp(64)
+            Rows.touchable(this); setOnClickListener { set(!get()); box.on = get() }
+        }
+        row.addView(box)
+        row.addView(TextView(a).apply { text = title; setTextColor(col(R.color.text_value)); setTextSize(TypedValue.COMPLEX_UNIT_SP, 20f) },
+            LinearLayout.LayoutParams(0, -2, 1f).apply { leftMargin = dp(18) })
+        target += row
+        return this
+    }
+
+    /** A button doing something at once ([button] on it): the window closes first. */
+    fun action(title: String, sub: String?, button: String, run: () -> Unit): OptionsPopup {
+        val b = Rows.actionButton(a, button) { closeNow(); run() }
+        target += Rows.row(a, title, sub, b, null)
+        return this
+    }
+
+    /**
+     * A value set with a slider (0 to [max]): its title and the value in the theme's colour on one line, the slider
+     * under them; [label] writes the value, [set] is called when the finger lets go.
+     */
+    fun slider(title: String, max: Int, get: () -> Int, label: (Int) -> String, enabled: () -> Boolean = { true }, set: (Int) -> Unit): OptionsPopup {
+        val value = TextView(a).apply { setTextColor(Themes.select(a)); setTextSize(TypedValue.COMPLEX_UNIT_SP, 20f) }
+        val bar = android.widget.SeekBar(a).apply {
+            this.max = max; progress = get()
+            progressTintList = android.content.res.ColorStateList.valueOf(Themes.select(a)); thumbTintList = progressTintList
+        }
+        val row = Rows.row(a, title, null, value, null).apply { orientation = LinearLayout.VERTICAL; gravity = Gravity.NO_GRAVITY }
+        // Title and value on the first line, the slider under them
+        val head = LinearLayout(a).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL }
+        (0 until row.childCount).map { row.getChildAt(it) }.also { row.removeAllViews() }.forEach { head.addView(it, it.layoutParams) }
+        row.addView(head, LinearLayout.LayoutParams(-1, -2))
+        row.addView(bar, LinearLayout.LayoutParams(-1, dp(48)))
+        fun paint() { value.text = label(bar.progress); val on = enabled(); bar.isEnabled = on; row.alpha = if (on) 1f else 0.45f }
+        repaints += { paint() }
+        bar.setOnSeekBarChangeListener(object : android.widget.SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(s: android.widget.SeekBar, p: Int, fromUser: Boolean) { value.text = label(p) }
+            override fun onStartTrackingTouch(s: android.widget.SeekBar) = Unit
+            override fun onStopTrackingTouch(s: android.widget.SeekBar) = set(s.progress)
+        })
         paint()
-        line(title, sub, v, 130)
+        target += row
         return this
     }
 
-    /** A choice in the same menu as the settings'. */
-    fun choice(title: String, sub: String?, labels: List<String>, current: () -> Int, enabled: () -> Boolean = { true }, onPick: (Int) -> Unit): OptionsPopup {
-        lateinit var v: TextView
-        fun paint() { v.text = labels[current().coerceIn(0, labels.lastIndex)] + "  ▾"; v.isEnabled = enabled(); v.alpha = if (v.isEnabled) 1f else .45f }
-        v = chip("") { SourceMenu.choose(a, v, labels, current()) { onPick(it); paint() } }.apply { isSelected = true }
-        refreshers += ::paint
-        paint()
-        line(title, sub, v, 240)
+    private var widthDp = 0
+
+    /** A card's own content laid out by itself (the alerter's two columns), [widthDp] wide. */
+    fun content(v: View, widthDp: Int): OptionsPopup { target += v; this.widthDp = widthDp; return this }
+
+    /** A number set exactly with − and + (and typed by touching it): a [Stepper] at the end of its row. */
+    fun stepper(title: String, sub: String?, s: Stepper): OptionsPopup {
+        target += Rows.row(a, title, sub, s.view, null)
+        repaints += { s.paint() }
         return this
     }
 
-    fun note(view: android.view.View): OptionsPopup {
-        target += view to LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(14) }
+    /** A short explanation, in grey, on its own line (between groups). */
+    fun note(text: String): OptionsPopup {
+        target += TextView(a).apply {
+            this.text = text; setTextColor(col(R.color.text_sub)); setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f); setPadding(dp(4), 0, dp(4), dp(14))
+        }
         return this
     }
 
-    fun action(label: String, onClick: () -> Unit): OptionsPopup {
-        target += chip(label, onClick) to LinearLayout.LayoutParams(-1, dp(56)).apply { topMargin = dp(12) }
+    /** A choice in the same menu as the settings': the value in the theme's colour, the whole row opens the menu. */
+    fun choice(title: String, sub: String?, labels: List<String>, current: () -> Int, onPick: (Int) -> Unit): OptionsPopup =
+        choice(title, { sub }, { labels }, current, onPick)
+
+    /** A choice whose labels and subtitle follow a value changed elsewhere (a city found by a search). */
+    fun choice(title: String, sub: () -> String?, labels: () -> List<String>, current: () -> Int, onPick: (Int) -> Unit): OptionsPopup {
+        val v = Rows.value(a, labels()[current().coerceIn(0, labels().lastIndex)])
+        val row = Rows.row(a, title, sub(), v) {
+            SourceMenu.choose(a, v, labels(), current()) { onPick(it); refresh() }
+        }
+        val subView = ((row.getChildAt(0) as LinearLayout).let { if (it.childCount > 1) it.getChildAt(1) as TextView else null })
+        repaints += { v.text = labels()[current().coerceIn(0, labels().lastIndex)] + "  ▾"; subView?.text = sub() }
+        target += row
         return this
+    }
+
+    /** The views of one column: rows next to each other in a rounded group, other views between groups. */
+    private fun build(items: List<View>): LinearLayout {
+        val column = LinearLayout(a).apply { orientation = LinearLayout.VERTICAL }
+        var group: LinearLayout? = null
+        for (v in items) {
+            (v.parent as? ViewGroup)?.removeView(v)
+            if (v.tag == Rows.TAG_ROW) {
+                val g = group ?: Rows.group(a).also { group = it; column.addView(it, LinearLayout.LayoutParams(-1, -2).apply { if (column.childCount > 0) topMargin = dp(12) }) }
+                Rows.add(g, v)
+            } else {
+                group = null
+                column.addView(v, LinearLayout.LayoutParams(-1, -2).apply { if (column.childCount > 0) topMargin = dp(12) })
+            }
+        }
+        return column
     }
 
     /** Shows it; [onClose] once it goes (to apply what changed). */
     fun show(onClose: () -> Unit = {}) {
-        val close = chip(a.getString(R.string.st_close)) {}
-        fun place(into: LinearLayout, items: List<Pair<View, LinearLayout.LayoutParams>>) =
-            items.forEach { (v, lp) -> (v.parent as? ViewGroup)?.removeView(v); into.addView(v, lp) }
-        // One column when it fits in the screen's height (title, Fermer and the dialog's margins: 200 dp)
-        val probe = LinearLayout(a).apply { orientation = LinearLayout.VERTICAL }
-        place(probe, first + second)
-        probe.measure(View.MeasureSpec.makeMeasureSpec(dp(840), View.MeasureSpec.EXACTLY), View.MeasureSpec.UNSPECIFIED)
+        lateinit var dialog: AlertDialog
+        val body = LinearLayout(a).apply {
+            orientation = LinearLayout.VERTICAL; background = Rows.windowBackground(a); setPadding(dp(32), 0, dp(32), dp(28))
+        }
+        body.addView(Rows.titleBar(a, icon, title) { dialog.dismiss() }, LinearLayout.LayoutParams(-1, -2).apply { bottomMargin = dp(4) })
+        // One column when it fits in the screen's height (title bar and the dialog's margins: 170 dp)
+        val probe = build(all)
+        probe.measure(View.MeasureSpec.makeMeasureSpec(dp(836), View.MeasureSpec.EXACTLY), View.MeasureSpec.UNSPECIFIED)
         val screen = a.resources.displayMetrics
-        twoColumns = second.isNotEmpty() && probe.measuredHeight + dp(200) > screen.heightPixels
+        twoColumns = cols.count { it.isNotEmpty() } > 1 && probe.measuredHeight + dp(170) > screen.heightPixels
         probe.removeAllViews()
-        val width = if (twoColumns) minOf(dp(1640), screen.widthPixels - dp(120)) else dp(900)
+        val width = if (widthDp > 0) minOf(dp(widthDp), screen.widthPixels - dp(80))
+            else if (twoColumns) minOf(dp(if (cols.count { it.isNotEmpty() } > 2) 1760 else 1640), screen.widthPixels - dp(120)) else dp(900)
+        // Everything under the title bar scrolls when taller than the screen (24/11), the cross always in sight
+        val content = LinearLayout(a).apply { orientation = LinearLayout.VERTICAL }
         if (twoColumns) {
-            val left = LinearLayout(a).apply { orientation = LinearLayout.VERTICAL }
-            val right = LinearLayout(a).apply { orientation = LinearLayout.VERTICAL }
-            place(left, first); place(right, second)
-            body.addView(LinearLayout(a).apply {
+            // A note before every row explains the whole window: across both columns
+            val lead = first.takeWhile { it.tag != Rows.TAG_ROW }
+            if (lead.isNotEmpty()) content.addView(build(lead), LinearLayout.LayoutParams(-1, -2))
+            content.addView(LinearLayout(a).apply {
                 orientation = LinearLayout.HORIZONTAL
-                addView(left, LinearLayout.LayoutParams(0, -2, 1f).apply { rightMargin = dp(28) })
-                addView(right, LinearLayout.LayoutParams(0, -2, 1f).apply { leftMargin = dp(28) })
+                val used = cols.filter { it.isNotEmpty() }
+                used.forEachIndexed { i, c ->
+                    addView(build(if (i == 0) c.drop(lead.size) else c), LinearLayout.LayoutParams(0, -2, 1f).apply {
+                        if (i > 0) leftMargin = dp(14); if (i < used.lastIndex) rightMargin = dp(14)
+                    })
+                }
             }, LinearLayout.LayoutParams(-1, -2))
-        } else place(body, first + second)
-        body.addView(close, LinearLayout.LayoutParams(-1, dp(56)).apply { topMargin = dp(24) })
-        val dialog = AlertDialog.Builder(a).setView(body).create()
-        close.setOnClickListener { dialog.dismiss() }
+        } else content.addView(build(all), LinearLayout.LayoutParams(-1, -2))
+        // A card's own content that scrolls by itself (the alerter) is not wrapped twice
+        val single = all.singleOrNull()
+        body.addView(if (single is android.widget.ScrollView) content else Rows.scrolling(a, content, Rows.contentRoom(a)), LinearLayout.LayoutParams(-1, -2))
+        dialog = AlertDialog.Builder(a).setView(body).create()
+        dialog.setCanceledOnTouchOutside(true)
+        closeNow = { dialog.dismiss() }
         dialog.setOnDismissListener { onClose() }
         Dialogs.show(dialog)
+        dialog.window?.setBackgroundDrawable(android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT))
         dialog.window?.setLayout(width, ViewGroup.LayoutParams.WRAP_CONTENT)
     }
 }

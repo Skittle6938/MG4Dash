@@ -114,10 +114,13 @@ class SmartBrightnessTest {
 
     // ── Storage, modes, profiles ──
 
-    @Test fun offByDefaultAndModeSwitchKeepsTheLearning() {
+    /** On by default (24/11), and a choice made (off included) is kept. */
+    @Test fun onByDefaultAndModeSwitchKeepsTheLearning() {
         listOf("mg4launcher", Profiles.FILE).forEach { ctx.getSharedPreferences(it, Context.MODE_PRIVATE).edit().clear().commit() }
-        assertFalse("the original mode by default", SmartBrightness.enabled(ctx))
+        assertTrue("smart by default", SmartBrightness.enabled(ctx))
         val raw = ctx.getSharedPreferences("mg4launcher", Context.MODE_PRIVATE)
+        raw.edit().putBoolean(SmartBrightness.KEY_ON, false).commit()
+        assertFalse("a driver who chose the original mode keeps it", SmartBrightness.enabled(ctx))
         raw.edit().putBoolean(SmartBrightness.KEY_ON, true).putString(SmartBrightness.curveKey(ctx), BrightnessCurve().with(2.0, false, 0.3, 1).encode()).commit()
         raw.edit().putBoolean(SmartBrightness.KEY_ON, false).commit()
         raw.edit().putBoolean(SmartBrightness.KEY_ON, true).commit()

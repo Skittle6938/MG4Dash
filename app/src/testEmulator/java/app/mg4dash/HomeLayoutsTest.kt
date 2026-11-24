@@ -78,7 +78,7 @@ class HomeLayoutsTest {
         val all = Size.entries.filter { !it.big }
         fun only(card: Card, vararg sizes: Size) = all.forEach { s -> assertEquals("$card in $s", s in sizes, HomeSlots.fits(card, s)) }
         only(Card.CLIMATE, Size.MEDIUM, Size.TALL)
-        listOf(Card.MAP, Card.WEB, Card.CONSUMPTION, Card.SHORTCUTS, Card.DRIVING).forEach { only(it, *all.toTypedArray()) }
+        listOf(Card.MAP, Card.WEB, Card.CONSUMPTION, Card.SHORTCUTS, Card.DRIVING, Card.LYRICS).forEach { only(it, *all.toTypedArray()) }
         listOf(Card.ENERGY, Card.TRIP, Card.POWER, Card.PHONE, Card.HOURLY, Card.DAILY, Card.TRIPS).forEach { only(it, Size.SMALL, Size.MEDIUM, Size.TALL) }
         assertEquals(listOf(Size.MEDIUM, Size.TALL), all.filter { HomeSlots.mediaFits(it) })
     }

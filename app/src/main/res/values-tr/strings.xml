@@ -184,6 +184,7 @@
     <string name="ps_col_cpu">CPU</string>
     <string name="ps_col_ram">RAM</string>
     <string name="ps_service">hizmet</string>
+    <string name="ps_self">bu listenin gösterimi dahil</string>
     <string name="ps_hint">Uygulama başına ayrıntı ›</string>
     <string name="ps_note">≈ : canlı okunamayan uygulamalar için sistemin son ortalaması.</string>
     <string name="unit_mb">MB</string>
@@ -211,6 +212,12 @@
     <string name="st_valet">Bakım modu</string>
     <string name="st_rescue_note">Güvenlik ağı: MG4Dash artık açılmazsa veya art arda birkaç kez çökerse, MG4Dash Rescue bir sonraki açılışta onu onarır ya da orijinal SAIC ana ekranını geri getirir.</string>
     <string name="st_battery_line">Yeni: %1$s kWh  ·  Mevcut: %2$s kWh  ·  Sağlık: %3$s</string>
+    <string name="en_battery_caps">%1$s kWh ölçülen · %2$s kWh yeni (model %3$d kWh)</string>
+    <string name="en_health">tahmini sağlık</string>
+    <string name="en_battery_settings">Batarya ayarları</string>
+    <string name="en_battery_model">Batarya modeli</string>
+    <string name="en_battery_model_desc">Tahmini sağlık için referans</string>
+    <string name="en_new_cap_desc">Resmi değer yok: araç bunu vermiyor</string>
     <string name="st_battery_model">Batarya modeli (Araç sayfasındaki tahmini sağlık için referans):</string>
     <string name="st_new_cap">Sağlık hesabı için yeni kapasite:</string>
     <string name="st_new_cap_default">%1$s kWh (varsayılan)</string>
@@ -223,11 +230,10 @@
     <string name="st_startup">BAŞLANGIÇ</string>
     <string name="st_toggle">Değiştir</string>
     <string name="st_display">EKRAN</string>
-    <string name="st_fullscreen">Tam ekran (SAIC yan çubuğunu ve şeridini gizler): %1$s</string>
     <string name="st_fullscreen_desc">SAIC çubuklarını geri getirmek için sol veya üst kenardan kaydırın.</string>
     <string name="yes">EVET</string>
     <string name="no">HAYIR</string>
-    <string name="st_log">GÜNLÜK</string>
+    <string name="st_log">Günlük</string>
     <string name="st_refresh">Yenile</string>
     <string name="st_log_export">USB belleğe aktar</string>
     <string name="st_log_exported">✓  Günlük USB belleğe kaydedildi: %1$s</string>
@@ -238,6 +244,7 @@
     <string name="st_log_eject_failed">USB bellek çıkarılamadı: bir uygulama hâlâ kullanıyor olabilir. Biraz sonra tekrar deneyin.</string>
     <string name="st_close">Kapat</string>
     <string name="st_title">Ayarlar · MG4Dash %1$s</string>
+    <string name="st_settings">Ayarlar</string>
     <string name="st_replace_msg">MG4Dash başlangıçta ve Ana ekran düğmesiyle açılacak.\n\nHiçbir şey kaldırılmaz: orijinal SAIC ana ekranı yalnızca ana ekran olarak kapatılır, aracın diğer işlevleri normal şekilde çalışmaya devam eder.\n\nAynı yerdeki Bakım modu ile istediğiniz zaman geri dönebilirsiniz. MG4Dash art arda birkaç kez çökerse orijinal ana ekran kendiliğinden geri gelir.</string>
     <string name="st_replace_btn">Değiştir</string>
     <string name="valet_banner_title">Bakım modu açık</string>
@@ -301,6 +308,7 @@
     <string name="st_ha_no_token">Token: ayarlanmadı</string>
     <string name="st_ha_token_set">Token: ayarlandı</string>
     <string name="st_ha_desc">Home Assistant profilinizde uzun ömürlü bir erişim tokenı oluşturun. Kısayollar daha sonra komut dosyalarını, otomasyonları, sahneleri, düğmeleri ve kapakları (bahçe kapısı, garaj kapısı) çalıştırabilir. Kısayolları göstermek için haritanın sağ üstündeki düğmeyi kullanın.</string>
+    <string name="st_ha_settings">Home Assistant ayarları</string>
     <string name="st_ha_set_url">Adres</string>
     <string name="st_ha_set_token">Token</string>
     <string name="st_ha_test">Test et</string>
@@ -309,8 +317,15 @@
     <string name="st_ha_import_desc">Klavyenizde yapıştır yok mu? Bir USB belleğin köküne, adres bir satırda ve belirteç başka bir satırda olacak şekilde mg4dash_ha.txt dosyası koyun.</string>
     <string name="st_ha_import_done">USB bellekten okundu: %1$s</string>
     <string name="st_ha_import_none">USB belleğin kökünde mg4dash_ha.txt dosyası yok</string>
+    <string name="ha_connection">Bağlantı</string>
+    <string name="ha_token_on">Kayıtlı</string>
+    <string name="ha_token_off">Ayarlanmadı</string>
+    <string name="ha_test_title">Bağlantıyı test et</string>
+    <string name="ha_usb">USB bellek</string>
     <string name="st_paste">Yapıştır</string>
     <string name="st_diag">TANILAMA</string>
+    <string name="st_diag_on">Tanılama modu açık</string>
+    <string name="st_diag_off">Tanılama modu kapalı</string>
     <string name="st_energy_log">Enerji veri kaydedici: %1$s</string>
     <string name="st_energy_log_desc">Her 5 sn\'de batarya gücünü, tüketim sayaçlarını ve ekipman durumlarını Android/data/app.mg4dash/files/energy_log.csv dosyasına yazar (yalnızca okuma, araca hiçbir şey gönderilmez). Radyo belleğinin yıpranmasını sınırlamak için 5 dakikada bir kaydedilir. Yalnızca sorun giderme için: aksi halde kapalı bırakın.</string>
     <string name="sc_search">Ara…</string>
@@ -340,6 +355,7 @@
     <string name="st_theme">TEMA</string>
     <string name="st_theme_bg">Arka plan</string>
     <string name="st_theme_accent">Düğme rengi</string>
+    <string name="st_more_colors">Daha fazla renk…</string>
     <string name="st_theme_desc">Batarya yeşili, ısıtma turuncusu, soğutma camgöbeği ve uyarı kırmızısı tema ne olursa olsun anlamlarını korur. MG4Radio, radyo bir sonraki açılışında temaya uyar.</string>
     <string name="st_update">GÜNCELLEME</string>
     <string name="st_update_installed">Yüklü sürüm: %1$s</string>
@@ -411,7 +427,7 @@
     <string name="dock_slot_wifi_short">Wi-Fi</string>
     <string name="st_cap_car">Araçtan okundu: %1$s kWh.</string>
     <string name="st_cap_none" formatted="false">Araç bunu bildirmiyor: MG4Dash sürüş sırasında %15\'lik bir düşüşten sonra ölçecek (birkaç yolculuk boyunca toplanır).</string>
-    <string name="st_cap_est">MG4Dash tarafından ölçüldü: %1$s kWh (%2$d şarjdan şarja ölçüm, 30 gün boyunca yumuşatıldı).</string>
+    <string name="st_cap_est">MG4Dash tarafından sürüşte tahmin edildi: %1$s kWh (son deşarjlardan %2$d ölçüm, 30 güne yayılmış).</string>
     <string name="st_cap_est_current">MG4Dash tarafından ölçülüyor: %1$s kWh (geçici).</string>
     <string name="sw_batt_temp">Batarya %1$d °C</string>
     <string name="st_map_vdock">Solda dikey çubuk (tüm ekranlar ve MG4Radio): %1$s</string>
@@ -478,6 +494,20 @@
     <string name="st_map_offline_switch_desc">Veri bağlantısı yokken, gösterilen haritanın tamamı çevrimdışı önbellekte değilse</string>
     <string name="st_use_location">Konumumu kullan</string>
     <string name="st_wx_model">Hava modeli: %1$s</string>
+    <string name="wx_model_auto">Otomatik (önerilen)</string>
+    <string name="wx_model_meteofrance">Météo-France</string>
+    <string name="wx_model_ecmwf">Avrupa (ECMWF)</string>
+    <string name="wx_model_dwd">Alman (DWD)</string>
+    <string name="wx_model_ukmo">İngiliz (Met Office)</string>
+    <string name="wx_model_noaa">Amerikan (NOAA)</string>
+    <string name="wx_model_gem">Kanada (GEM)</string>
+    <string name="wx_model_desc">Otomatik, konumunuz için en iyi modeli seçer. Yalnızca tahmin sık sık yanlışsa birini zorlayın.</string>
+    <string name="st_wx_city">Yedek şehir</string>
+    <string name="st_wx_city_desc">%1$s, araç konum vermezse</string>
+    <string name="wx_city_here">Mevcut konum</string>
+    <string name="wx_city_search">Şehir ara…</string>
+    <string name="wx_city_offline">Bağlantı yok: şehir değişmedi</string>
+    <string name="wx_city_none">“%1$s” için şehir bulunamadı</string>
     <string name="st_wx_model_auto">Otomatik</string>
     <string name="st_no_location">Konum henüz mevcut değil</string>
     <string name="st_heated">Isıtmalı koltuklar ve direksiyon</string>
@@ -708,8 +738,15 @@
     <string name="st_tab_car">Araç</string>
     <string name="st_tab_net">Bağlantılar</string>
     <string name="st_tab_system">Sistem</string>
-    <string name="st_theme_smooth">Yumuşak açık / koyu geçişi</string>
-    <string name="st_theme_smooth_desc">Farların 5 sn sabit kalmasını bekler (köprü altında geçiş yok) ve 2 sn\'de geçiş yapar. Kapalı: farlar değişir değişmez geçer.</string>
+    <string name="st_tab_screen">Ekran</string>
+    <string name="st_tab_media">Medya ve sesler</string>
+    <string name="st_tab_general">Genel</string>
+    <string name="st_bar_section">ÇUBUK</string>
+    <string name="st_formats">BİÇİMLER</string>
+    <string name="st_input">YAZMA</string>
+    <string name="du_last30">Son 30 gün</string>
+    <string name="du_detail_open">Ayrıntıyı gör</string>
+    <string name="du_detail_open_desc">Gün gün, uyarı ve eşiği, sıfırlama</string>
     <string name="st_night_sun">Gün batımından sonra gece</string>
     <string name="st_night_sun_desc">Otomatik mod: aracın konumunda gün batımından gün doğumuna kadar koyu, park lambaları kapalıyken bile. Radyoda hesaplanır, ağ gerekmez.</string>
     <string name="st_night_sun_today">Bugün burada: gün batımı %1$s, gün doğumu %2$s</string>
@@ -732,6 +769,7 @@
     <string name="st_v2l_auto_warning">Dikkat: bir V2L kablosu takılır takılmaz deşarj başka bir işlem olmadan kendiliğinden başlar ve kabloya bağlı olan her şeye güç verilir.</string>
     <string name="st_v2l_auto_enable">Etkinleştir</string>
     <string name="st_audio_source">Ses kaynağı</string>
+    <string name="st_media">Medya</string>
     <string name="st_start_source">Başlangıçtaki kaynak</string>
     <string name="st_src_auto">Otomatik</string>
     <string name="st_src_car">Araçtaki gibi</string>
@@ -815,6 +853,7 @@
     <string name="conn_usb_count">%1$d bağlı</string>
     <string name="en_time_note">Tarihe göre ve yumuşatılmış · ortalama (kesikli)</string>
     <string name="st_sound_trigger">Başlangıç Sesi</string>
+    <string name="st_sounds">SESLER</string>
     <string name="st_sound_trigger_desc">USB bellekten veya dahili depolamadan bir ses dosyası seçin. Dosya uygulamaya kopyalanır ve bellek çıkarıldıktan sonra da kullanılabilir.</string>
     <string name="st_sound_boot_trigger">Başlangıçta çal</string>
     <string name="st_sound_pick_file">Ses seç</string>
@@ -826,7 +865,8 @@
     <string name="st_sound_imported">İçe aktarılan ses: %1$s</string>
     <string name="st_sound_test">Test Et</string>
     <string name="st_sound_stop">Durdur</string>
-    <string name="st_sound_volume">Araç medya ses düzeyi</string>
+    <string name="st_sound_volume">Açılış sesi düzeyi</string>
+    <string name="st_sound_volume_desc">Yalnızca açılış sesi için</string>
     <string name="st_sound_vol_default">Mevcut araç sesi</string>
     <string name="st_sound_volume_level">%1$d / 32</string>
     <string name="du_tab">4G verisi</string>
@@ -944,7 +984,7 @@
     <string name="st_fx_sound">Ses efektleri</string>
     <string name="st_fx_volume">Ses efektleri seviyesi</string>
     <string name="st_fx_volume_off">Kapalı</string>
-    <string name="wc_radar">Radar uyarıcı (test)</string>
+    <string name="wc_radar">Radar uyarıcı</string>
     <string name="du_radars">Radarlar</string>
     <string name="rad_osm">© OpenStreetMap katkıda bulunanlar</string>
     <string name="rad_osm_licence">Hız sınırları ve radarlar: © OpenStreetMap katkıda bulunanlar, ODbL lisansı. Veriler eksik veya eski olabilir: trafik işaretleri her zaman önceliklidir.</string>
@@ -967,8 +1007,8 @@
     <string name="rad_off_road">Yol tanınmadı</string>
     <string name="rad_banner">%1$s · %2$s</string>
     <string name="rad_banner_sub">Yavaşlayın · %1$s · bölge %2$s sonra bitiyor</string>
-    <string name="st_rad_title">Radar uyarıcı (test)</string>
-    <string name="st_rad_desc">Yolun hız sınırı ve radar bölgeleri yalnızca OpenStreetMap verilerinden. Kullanmak için Radar uyarıcı (test) kartını ana ekranda bir yere koyun (ana ekranı kıstırın). Karta uzun basmak bu ayarları açar.</string>
+    <string name="st_rad_title">Radar uyarıcı</string>
+    <string name="st_rad_desc">Yolun hız sınırı ve radar bölgeleri yalnızca OpenStreetMap verilerinden. Kullanmak için Radar uyarıcı kartını ana ekranda bir yere koyun (ana ekranı kıstırın). Karta uzun basmak bu ayarları açar.</string>
     <string name="st_rad_visual">Görsel uyarılar (turuncu, kırmızı)</string>
     <string name="st_rad_sound">Ses</string>
     <string name="st_rad_sound_none">Yok</string>
@@ -980,7 +1020,7 @@
     <string name="st_rad_high">Güçlü uyarı (kırmızı), sınırın üzeri</string>
     <string name="st_rad_banner">Diğer uygulamaların üzerinde şerit</string>
     <string name="st_rad_banner_desc">Radar bölgesinde sınırın çok üzerindeyken Android Auto dahil yanıp sönen kırmızı şerit.</string>
-    <string name="st_rad_wifi">Yalnızca Wi-Fi</string>
+    <string name="st_rad_wifi">Yalnızca Wi-Fi ile indir</string>
     <string name="st_rad_wifi_desc">Aracın 4G\'si üzerinden indirme yok: yalnızca kayıtlı bölgeler kullanılır.</string>
     <string name="st_rad_cache">%1$d bölge kayıtlı · %2$s</string>
     <string name="st_rad_preparing">Hazırlanıyor: %1$d / %2$d</string>
@@ -1016,6 +1056,12 @@
     <string name="st_rad_snd_chime">Zil</string>
     <string name="st_rad_snd_beep">Bip</string>
     <string name="st_rad_snd_loud">Yüksek bip</string>
+    <string name="st_rad_snd_marimba">Marimba</string>
+    <string name="st_rad_snd_dingdong">Ding-dong</string>
+    <string name="st_rad_snd_sonar">Sonar</string>
+    <string name="st_rad_snd_pulse">Üçlü darbe</string>
+    <string name="st_rad_snd_blip">Retro bip</string>
+    <string name="st_rad_snd_hum">Alçak uğultu</string>
     <string name="rp_tab_alerts">Uyarılar</string>
     <string name="rp_tab_alerts_sub">Eşikler, sesler, şerit</string>
     <string name="rp_tab_data">Veriler</string>
@@ -1023,6 +1069,9 @@
     <string name="rp_tab_data_prep">Hazırlanıyor %1$d / %2$d</string>
     <string name="rp_osm_box">Sınırlar ve radarlar: © OpenStreetMap katkıda bulunanlar, ODbL. Trafik işaretleri her zaman önceliklidir.</string>
     <string name="rp_thresholds">Eşikler</string>
+    <string name="rp_threshold_unit">Eşik birimi</string>
+    <string name="rp_display">Görüntü</string>
+    <string name="rp_gps_correction_sub">Sürüşte ölçülür</string>
     <string name="rp_mixed">Karma</string>
     <string name="rp_under_100">100 km/sa altındaki sınırlar</string>
     <string name="rp_from_100">100 km/sa ve üzeri sınırlar</string>
@@ -1030,8 +1079,10 @@
     <string name="rp_in">Birim</string>
     <string name="rp_light_over">Hafif, şu kadar üstü</string>
     <string name="rp_strong_over">Güçlü, şu kadar üstü</string>
-    <string name="rp_visual">Kartta renkler</string>
+    <string name="rp_visual">Renkli hız</string>
+    <string name="rp_visual_sub">Kartta hız, sınırın biraz üstünde turuncu, çok üstünde kırmızı olur</string>
     <string name="rp_banner">Uygulamaların üzerinde şerit</string>
+    <string name="rp_banner_sub">Yalnızca radar bölgesinde hız aşıldığında görünür (güçlü uyarı)</string>
     <string name="rp_sounds">Her uyarının sesi</string>
     <string name="rp_col_alert">Uyarı</string>
     <string name="rp_col_sound">Ses</string>
@@ -1059,6 +1110,8 @@
     <string name="rp_prep_done">Son hazırlık tamamlandı</string>
     <string name="rp_prep_stopped">Hazırlık durduruldu</string>
     <string name="rp_prep_none">Henüz hazırlık yok</string>
+    <string name="rp_prep_stored_at">%1$s tarihinde hazırlandı · %2$d bölge</string>
+    <string name="rp_prep_stored">%1$d bölge zaten indirildi</string>
     <string name="rp_prep_detail">Wi-Fi · %1$s alındı</string>
     <string name="rp_prep_left">≈ %1$d dk kaldı</string>
     <string name="rp_prep_failed">%1$d bölge başarısız, yeniden denenecek</string>
@@ -1066,9 +1119,11 @@
     <string name="rp_resume">Devam et</string>
     <string name="rp_pause">Duraklat</string>
     <string name="rp_cancel">İptal</string>
-    <string name="rp_wifi_sub">Asla 4G: yalnızca kayıtlı bölgeler kullanılır</string>
+    <string name="rp_wifi_sub">Sürüşte 4G yok: yalnızca önceden indirilmiş yollar ve radarlar kullanılır</string>
     <string name="rp_refresh">Aracın çevresini yenile</string>
     <string name="rp_refresh_sub">Şundan eskiyse…</string>
+    <string name="unit_day_short">g</string>
+    <string name="rp_repeat_sub">Uyarı sürdükçe; 0: bir kez</string>
     <string name="rp_storage">Depolama</string>
     <string name="rp_space">Kullanılan alan</string>
     <string name="rp_space_sub">Bölgeler 30 gün saklanır</string>
@@ -1083,8 +1138,6 @@
     <string name="wc_conn_small">Bu alan bağlantı çubuğu için çok küçük</string>
     <string name="st_climate_fx">Klima kartında sıcak/soğuk animasyonu</string>
     <string name="st_climate_fx_desc">Isıtırken sıcak dalgaları, soğuturken kırağı; ayar dış sıcaklıktan ne kadar uzaksa o kadar belirgin. Kapalı: yalnızca animasyon kalkar, Isıtma / Soğutma görünür kalır.</string>
-    <string name="st_call_bar">Aramalar sırasında üst çubuğu gizle</string>
-    <string name="st_call_bar_desc">Aracın arama penceresi de tam ekran kalır. Yukarıdan kaydırmak çubuğu yine gösterir; SAIC Telefon uygulamasında da gizlenir.</string>
     <string name="rp_stop">Durdur</string>
     <string name="clim_settings_title">Klima ayarları</string>
     <string name="clim_fx_title">Kartta ısıtma / soğutma</string>
@@ -1146,6 +1199,9 @@
     <string name="sc_profile">Profil</string>
     <string name="pf_drive">Profiller sürüş modunu ve rejenerasyonu hatırlar</string>
     <string name="pf_drive_desc">MG4Dash bir profilden çıkarken sürüş modunu ve rejenerasyonu kaydeder; bir profile geçerken bunları geri koyar, dururken de sürerken de. Varsayılan olarak kapalı.</string>
+    <string name="dv_profiles_drive_desc">Profil değişince profilin sürüş modu ve rejenerasyonu geri alınır</string>
+    <string name="pf_drive_one">Bu profilin sürüş modunu ve rejenerasyonunu geri al</string>
+    <string name="pf_drive_one_desc">Bu profile geçildiğinde uygulanır</string>
     <string name="br_title">Parlaklık</string>
     <string name="br_auto">Otomatik parlaklık</string>
     <string name="br_auto_desc">Akıllı: tahmini gün ışığına ve farlara göre kaydırıcıyla yaptığınız ayarlardan öğrenir. Orijinal: − ve + ile Android modu.</string>
@@ -1228,4 +1284,10 @@
     <string name="bk_confirm">%1$s tarihli yedeğin ayarları, profilleri, açılış sesi ve web adresleri mevcut olanların yerini alır. Ardından MG4Dash yeniden başlar.</string>
     <string name="bk_confirm_token">Home Assistant tokeni yedekte yoktu: eksikse Ayarlar › Bağlantılar bölümünde yeniden girin.</string>
     <string name="bk_confirm_ok">Değiştir ve yeniden başlat</string>
+    <string name="card_no_data">Henüz veri yok</string>
+    <string name="st_cards_offered">Sunulan kartlar…</string>
+    <string name="st_cards_offered_note">İşareti kaldırılan kartlar düzenleme modunda ve ana ekranda görünmez. Yeniden işaretlenince yerlerine dönerler.</string>
+    <string name="opt_open">Aç</string>
+    <string name="opt_import">İçe aktar</string>
+    <string name="opt_clear">Temizle</string>
 </resources>

@@ -48,7 +48,8 @@ object SmartBrightness {
     @Volatile private var ctx: Context? = null
     private val worker: Handler by lazy { Handler(HandlerThread("smart-brightness").apply { start() }.looper) }
 
-    fun enabled(c: Context): Boolean = Prefs(c).raw.getBoolean(KEY_ON, false)
+    /** On by default (24/11): a choice made in Settings (on or off) is kept as it is. */
+    fun enabled(c: Context): Boolean = Prefs(c).raw.getBoolean(KEY_ON, true)
 
     /** The mode chosen in Settings: on, MG4Dash sets the brightness; off, Android's automatic mode is put back. */
     fun setEnabled(c: Context, on: Boolean) {

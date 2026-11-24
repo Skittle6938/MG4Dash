@@ -21,31 +21,46 @@ object ProfileWindow {
     fun button(activity: Activity, onSwitched: () -> Unit): TextView = TextView(activity).apply {
         val d = activity.resources.displayMetrics.density
         text = activity.getString(R.string.pf_menu, Profiles.current(activity).name) + "  ▾"
-        setTextSize(TypedValue.COMPLEX_UNIT_SP, 17f); gravity = Gravity.CENTER; maxLines = 1
+        setTextSize(TypedValue.COMPLEX_UNIT_SP, app.mg4dash.ui.Rows.BUTTON_SP); gravity = Gravity.CENTER; maxLines = 1
         setTextColor(androidx.core.content.ContextCompat.getColorStateList(activity, R.color.chip_text))
         setBackgroundResource(R.drawable.bg_chip); setPadding((20 * d).toInt(), 0, (20 * d).toInt(), 0)
         setOnClickListener { menu(activity, it, onSwitched) }
     }
 
-    fun menu(activity: Activity, anchor: View, onSwitched: () -> Unit) {
+    /**
+     * The profiles' window (24/11): a row per profile (the current one marked), new / edit / delete, and for every
+     * profile the drive mode kept by each one, a switch right here.
+     */
+    fun menu(activity: Activity, @Suppress("UNUSED_PARAMETER") anchor: View, onSwitched: () -> Unit) {
         val list = Profiles.list(activity)
         val cur = list.indexOfFirst { it.id == Profiles.current(activity).id }
-        val labels = list.map { it.name } + listOf("+  " + activity.getString(R.string.pf_new), activity.getString(R.string.pf_edit), activity.getString(R.string.pf_delete))
-        app.mg4dash.ui.SourceMenu.choose(activity, anchor, labels, cur) { i ->
-            when {
-                i < list.size -> if (Profiles.switchTo(activity, list[i].id, "Settings")) onSwitched()
-                i == list.size -> if (list.size >= Profiles.MAX) app.mg4dash.ui.Toasts.show(activity, R.string.pf_refused_full) else edit(activity, null, onSwitched)
-                i == list.size + 1 -> edit(activity, Profiles.current(activity), onSwitched)
-                else -> {
-                    val p = Profiles.current(activity)
-                    if (list.size <= 1) { app.mg4dash.ui.Toasts.show(activity, R.string.pf_refused_last); return@choose }
-                    app.mg4dash.ui.SourceMenu.confirm(activity, anchor, activity.getString(R.string.pf_delete_confirm, p.name), activity.getString(R.string.pf_delete)) {
-                        Profiles.delete(activity, p.id); onSwitched()
-                    }
-                }
+        val d = activity.resources.displayMetrics.density
+        fun dp(v: Int) = (v * d).toInt()
+        lateinit var dlg: android.app.AlertDialog
+        val box = LinearLayout(activity).apply { orientation = LinearLayout.VERTICAL }
+        val profiles = app.mg4dash.ui.Rows.group(activity)
+        list.forEachIndexed { i, p ->
+            val mark = TextView(activity).apply { text = if (i == cur) "✓" else ""; setTextColor(Themes.select(activity)); setTextSize(TypedValue.COMPLEX_UNIT_SP, 22f) }
+            app.mg4dash.ui.Rows.add(profiles, app.mg4dash.ui.Rows.row(activity, p.name, phoneName(p), mark) {
+                dlg.dismiss(); if (i != cur && Profiles.switchTo(activity, p.id, "Settings")) onSwitched()
+            })
+        }
+        fun action(title: String, run: () -> Unit) = app.mg4dash.ui.Rows.add(profiles, app.mg4dash.ui.Rows.row(activity, title, null, app.mg4dash.ui.Rows.chevron(activity)) { dlg.dismiss(); run() })
+        action("+  " + activity.getString(R.string.pf_new)) { if (list.size >= Profiles.MAX) app.mg4dash.ui.Toasts.show(activity, R.string.pf_refused_full) else edit(activity, null, onSwitched) }
+        action(activity.getString(R.string.pf_edit)) { edit(activity, Profiles.current(activity), onSwitched) }
+        action(activity.getString(R.string.pf_delete)) {
+            val p = Profiles.current(activity)
+            if (list.size <= 1) app.mg4dash.ui.Toasts.show(activity, R.string.pf_refused_last)
+            else app.mg4dash.ui.Windows.confirm(activity, activity.getString(R.string.pf_delete), activity.getString(R.string.pf_delete_confirm, p.name), activity.getString(R.string.pf_delete)) {
+                Profiles.delete(activity, p.id); onSwitched()
             }
         }
+        box.addView(profiles, LinearLayout.LayoutParams(-1, -2))
+        dlg = app.mg4dash.ui.Windows.show(activity, activity.getString(R.string.pf_title), box, widthDp = 900)
     }
+
+    /** The phone that switches to [p], if any, for its row. */
+    private fun phoneName(p: Profiles.Profile): String? = p.phone?.let { ph -> pairedPhones().firstOrNull { it.first == ph }?.second ?: ph }
 
     /** Phones paired with the head unit: (address, name). */
     internal fun pairedPhones(): List<Pair<String, String>> = try {
@@ -100,33 +115,31 @@ object ProfileWindow {
             text = activity.getString(R.string.pf_phone_desc); setTextSize(TypedValue.COMPLEX_UNIT_SP, 15f)
             setTextColor(Themes.color(activity, R.color.text_title)); setPadding(0, dp(6), 0, 0)
         })
+        // The drive mode by profile: in the driving card's options (24/11), where the mode and regeneration are changed
+        // This profile keeps its drive mode and regeneration (24/11: each profile's own choice)
+        var keepDrive = profile?.let { app.mg4dash.system.DriveMemory.enabled(activity, it.id) } ?: false
+        val drive = app.mg4dash.ui.Rows.group(activity)
+        val sw = app.mg4dash.ui.SwitchView(activity).apply { on = keepDrive }
+        app.mg4dash.ui.Rows.add(drive, app.mg4dash.ui.Rows.row(activity, activity.getString(R.string.pf_drive_one), activity.getString(R.string.pf_drive_one_desc), sw) {
+            keepDrive = !keepDrive; sw.on = keepDrive
+        })
+        box.addView(drive, LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(16) })
         val error = TextView(activity).apply { setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f); setTextColor(Themes.color(activity, R.color.accent_heat)); setPadding(0, dp(8), 0, 0) }
         box.addView(error)
-        val dialog = android.app.AlertDialog.Builder(activity)
-            .setTitle(if (profile == null) R.string.pf_new else R.string.pf_edit)
-            .setView(android.widget.ScrollView(activity).apply {
-                isFillViewport = true
-                isNestedScrollingEnabled = true
-                clipToPadding = false
-                setPadding(0, 0, 0, dp(16))
-                addView(box, android.widget.FrameLayout.LayoutParams(-1, -2))
-            })
-            .setPositiveButton(R.string.pf_save, null)
-            .setNegativeButton(R.string.cancel, null)
-            .create()
-        dialog.setOnShowListener {
-            app.mg4dash.ui.Dialogs.fix(dialog)
-            dialog.getButton(android.app.AlertDialog.BUTTON_POSITIVE).setOnClickListener {
-                val n = name.text.toString()
-                val refused = if (profile == null) Profiles.create(activity, n, fromCurrent, phone).let { (p, r) ->
-                    if (p != null) Profiles.switchTo(activity, p.id, "created"); r
-                } else Profiles.update(activity, profile.id, n, phone)
-                if (refused != null) { error.text = activity.getString(refusalText(refused)); return@setOnClickListener }
-                dialog.dismiss(); onSwitched()
-            }
+        lateinit var dialog: android.app.AlertDialog
+        fun save() {
+            val n = name.text.toString()
+            val refused = if (profile == null) Profiles.create(activity, n, fromCurrent, phone).let { (p, r) ->
+                if (p != null) { app.mg4dash.system.DriveMemory.setEnabled(activity, p.id, keepDrive); Profiles.switchTo(activity, p.id, "created") }; r
+            } else Profiles.update(activity, profile.id, n, phone).also { if (it == null) app.mg4dash.system.DriveMemory.setEnabled(activity, profile.id, keepDrive) }
+            if (refused != null) { error.text = activity.getString(refusalText(refused)); return }
+            dialog.dismiss(); onSwitched()
         }
-        dialog.show()
-        app.mg4dash.ui.CarKeyboard.attachInDialog(name, dialog, box, onDone = { dialog.getButton(android.app.AlertDialog.BUTTON_POSITIVE).performClick() })
+        box.setPadding(0, 0, 0, 0)
+        val holder = LinearLayout(activity).apply { orientation = LinearLayout.VERTICAL; addView(android.widget.ScrollView(activity).apply { addView(box) }, LinearLayout.LayoutParams(-1, -2)) }
+        dialog = app.mg4dash.ui.Windows.show(activity, activity.getString(if (profile == null) R.string.pf_new else R.string.pf_edit), holder, widthDp = 900,
+            buttons = listOf(app.mg4dash.ui.Rows.actionButton(activity, activity.getString(R.string.pf_save)) { save() }))
+        app.mg4dash.ui.CarKeyboard.attachInDialog(name, dialog, box, onDone = { save() })
     }
 
     fun refusalText(r: Profiles.Refusal): Int = when (r) {

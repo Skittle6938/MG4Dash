@@ -34,14 +34,26 @@ class BigMenusTest {
 
     private fun latest() = shadowOf(RuntimeEnvironment.getApplication()).latestPopupWindow
 
+    /** A choice is a window of its own over the screen (24/11): within it, its long list scrolling. */
     @Test fun longChoiceMenuScrollsWithinTheScreen() {
         val a = home()
         val (_, h) = Popups.room(a)
         app.mg4dash.ui.SourceMenu.choose(a, a.window.decorView, (1..14).map { "Choix $it" }, 2) {}
         idle()
-        val p = latest()
-        assertTrue("menu ${p.height} within $h", p.height <= h)
-        assertTrue("its list scrolls", p.contentView is ScrollView)
+        val (height, scroll) = choiceWindow(a)
+        assertTrue("window $height within $h", height <= h)
+        assertTrue("its list scrolls", scroll != null && scroll.getChildAt(0).height > scroll.height)
+    }
+
+    /** The latest window laid out on the screen: its height, and its scrolling list. */
+    private fun choiceWindow(a: MainActivity): Pair<Int, ScrollView?> {
+        val win = org.robolectric.shadows.ShadowDialog.getLatestDialog().window!!
+        val dv = win.decorView
+        dv.measure(View.MeasureSpec.makeMeasureSpec(win.attributes.width, View.MeasureSpec.EXACTLY), View.MeasureSpec.makeMeasureSpec(a.window.decorView.height, View.MeasureSpec.AT_MOST))
+        dv.layout(0, 0, dv.measuredWidth, dv.measuredHeight)
+        fun all(v: View): List<ScrollView> = listOfNotNull(v as? ScrollView) + ((v as? android.view.ViewGroup)?.let { g -> (0 until g.childCount).flatMap { all(g.getChildAt(it)) } } ?: emptyList())
+        fun find(v: View): ScrollView? = all(v).filter { it.childCount > 0 }.maxByOrNull { it.getChildAt(0).height }
+        return dv.measuredHeight to find(dv)
     }
 
     @Test fun layoutMenuWithinTheScreen() {
@@ -58,15 +70,20 @@ class BigMenusTest {
         val (w, h) = Popups.room(a)
         app.mg4dash.ui.SourceMenu.confirm(a, a.window.decorView, "Remettre la disposition et les cartes d'origine ? ".repeat(8), "OK") {}
         idle()
-        val p = latest()
-        assertTrue("confirmation ${p.width} × ${p.height} within $w × $h", p.width <= w && p.height <= h)
+        // A window now (same confirmation everywhere, 24/11): its width and height within the screen
+        val win = org.robolectric.shadows.ShadowDialog.getLatestDialog().window!!
+        val dv = win.decorView
+        dv.measure(android.view.View.MeasureSpec.makeMeasureSpec(win.attributes.width, android.view.View.MeasureSpec.EXACTLY),
+            android.view.View.MeasureSpec.makeMeasureSpec(0, android.view.View.MeasureSpec.UNSPECIFIED))
+        assertTrue("confirmation ${win.attributes.width} × ${dv.measuredHeight} within $w × $h", win.attributes.width <= w && dv.measuredHeight <= h)
     }
 
-    /** A short menu is left as it is. */
+    /** A short choice: no scrolling needed. */
     @Test fun shortMenuUnchanged() {
         val a = home()
         app.mg4dash.ui.SourceMenu.choose(a, a.window.decorView, listOf("Un", "Deux"), 0) {}
         idle()
-        assertTrue(latest().contentView !is ScrollView)
+        val (_, scroll) = choiceWindow(a)
+        assertTrue(scroll == null || scroll.getChildAt(0).height <= scroll.height)
     }
 }

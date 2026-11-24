@@ -184,6 +184,7 @@
     <string name="ps_col_cpu">CPU</string>
     <string name="ps_col_ram">RAM</string>
     <string name="ps_service">service</string>
+    <string name="ps_self">including the display of this list</string>
     <string name="ps_hint">Details per app ›</string>
     <string name="ps_note">≈ : recent average from the system, for apps that can\'t be read live.</string>
     <string name="unit_mb">MB</string>
@@ -211,6 +212,12 @@
     <string name="st_valet">Maintenance mode</string>
     <string name="st_rescue_note">Safety net: if MG4Dash no longer starts or crashes several times in a row, MG4Dash Rescue repairs it at the next start, or puts the stock SAIC home back.</string>
     <string name="st_battery_line">New: %1$s kWh  ·  Current: %2$s kWh  ·  Health: %3$s</string>
+    <string name="en_battery_caps">%1$s kWh measured · %2$s kWh new (model %3$d kWh)</string>
+    <string name="en_health">estimated health</string>
+    <string name="en_battery_settings">Battery settings</string>
+    <string name="en_battery_model">Battery model</string>
+    <string name="en_battery_model_desc">Reference for the estimated health</string>
+    <string name="en_new_cap_desc">No official value: the car does not give it</string>
     <string name="st_battery_model">Battery model (reference for the estimated health on the Vehicle page):</string>
     <string name="st_new_cap">New capacity used for the health figure:</string>
     <string name="st_new_cap_default">%1$s kWh (default)</string>
@@ -223,11 +230,10 @@
     <string name="st_startup">STARTUP</string>
     <string name="st_toggle">Toggle</string>
     <string name="st_display">DISPLAY</string>
-    <string name="st_fullscreen">Full screen (hides the SAIC side bar and banner): %1$s</string>
     <string name="st_fullscreen_desc">Swipe from the left or top edge to bring the SAIC bars back.</string>
     <string name="yes">YES</string>
     <string name="no">NO</string>
-    <string name="st_log">LOG</string>
+    <string name="st_log">Log</string>
     <string name="st_refresh">Refresh</string>
     <string name="st_log_export">Export to the USB stick</string>
     <string name="st_log_exported">✓  Log saved on the USB stick: %1$s</string>
@@ -238,6 +244,7 @@
     <string name="st_log_eject_failed">The USB stick could not be ejected: an app may still be using it. Try again in a moment.</string>
     <string name="st_close">Close</string>
     <string name="st_title">Settings · MG4Dash %1$s</string>
+    <string name="st_settings">Settings</string>
     <string name="st_replace_msg">MG4Dash will open at startup and with the Home button.\n\nNothing is uninstalled: the original SAIC home screen is simply switched off as the home screen, and the car\'s other functions keep working normally.\n\nYou can go back at any time with Maintenance mode, in the same place. If MG4Dash ever crashed several times in a row, the original home screen would come back by itself.</string>
     <string name="st_replace_btn">Replace</string>
     <string name="valet_banner_title">Maintenance mode on</string>
@@ -301,6 +308,7 @@
     <string name="st_ha_no_token">Token: not set</string>
     <string name="st_ha_token_set">Token: set</string>
     <string name="st_ha_desc">Create a long-lived access token in your Home Assistant profile. Shortcuts can then run scripts, automations, scenes, buttons and covers (gate, garage door). Use the button at the top right of the map to show the shortcuts.</string>
+    <string name="st_ha_settings">Home Assistant settings</string>
     <string name="st_ha_set_url">Address</string>
     <string name="st_ha_set_token">Token</string>
     <string name="st_ha_test">Test</string>
@@ -309,8 +317,15 @@
     <string name="st_ha_import_desc">No paste on your keyboard? Put a file named mg4dash_ha.txt at the root of a USB stick, with the address on one line and the token on another.</string>
     <string name="st_ha_import_done">Read from the USB stick: %1$s</string>
     <string name="st_ha_import_none">No mg4dash_ha.txt file at the root of a USB stick</string>
+    <string name="ha_connection">Connection</string>
+    <string name="ha_token_on">Saved</string>
+    <string name="ha_token_off">Not set</string>
+    <string name="ha_test_title">Test the connection</string>
+    <string name="ha_usb">USB stick</string>
     <string name="st_paste">Paste</string>
     <string name="st_diag">DIAGNOSTICS</string>
+    <string name="st_diag_on">Diagnostic mode on</string>
+    <string name="st_diag_off">Diagnostic mode off</string>
     <string name="st_energy_log">Energy data recorder: %1$s</string>
     <string name="st_energy_log_desc">Every 5 s, writes battery power, consumption counters and equipment states to Android/data/app.mg4dash/files/energy_log.csv (read only, nothing is sent to the car). Saved every 5 min to limit wear of the head unit\'s memory. For troubleshooting only: leave it off otherwise.</string>
     <string name="sc_search">Search…</string>
@@ -340,6 +355,7 @@
     <string name="st_theme">THEME</string>
     <string name="st_theme_bg">Background</string>
     <string name="st_theme_accent">Button colour</string>
+    <string name="st_more_colors">More colours…</string>
     <string name="st_theme_desc">Battery green, heating orange, cooling cyan and alert red keep their meaning whatever the theme. MG4Radio follows the theme the next time the radio opens.</string>
     <string name="st_update">UPDATE</string>
     <string name="st_update_installed">Installed version: %1$s</string>
@@ -411,7 +427,7 @@
     <string name="dock_slot_wifi_short">Wi-Fi</string>
     <string name="st_cap_car">Read from the car: %1$s kWh.</string>
     <string name="st_cap_none" formatted="false">The car does not report it: MG4Dash will measure it while driving, after a 15 % drop (added up over several trips).</string>
-    <string name="st_cap_est">Measured by MG4Dash: %1$s kWh (%2$d charge-to-charge measurement(s), smoothed over 30 days).</string>
+    <string name="st_cap_est">Estimated while driving by MG4Dash: %1$s kWh (%2$d measurement(s) from recent discharges, smoothed over 30 days).</string>
     <string name="st_cap_est_current">Being measured by MG4Dash: %1$s kWh (provisional).</string>
     <string name="sw_batt_temp">Battery %1$d °C</string>
     <string name="st_map_vdock">Vertical bar on the left (all screens and MG4Radio): %1$s</string>
@@ -478,6 +494,20 @@
     <string name="st_map_offline_switch_desc">Without data connection, unless all of the displayed map is in the offline cache</string>
     <string name="st_use_location">Use my position</string>
     <string name="st_wx_model">Weather model: %1$s</string>
+    <string name="wx_model_auto">Automatic (recommended)</string>
+    <string name="wx_model_meteofrance">Météo-France</string>
+    <string name="wx_model_ecmwf">European (ECMWF)</string>
+    <string name="wx_model_dwd">German (DWD)</string>
+    <string name="wx_model_ukmo">British (Met Office)</string>
+    <string name="wx_model_noaa">American (NOAA)</string>
+    <string name="wx_model_gem">Canadian (GEM)</string>
+    <string name="wx_model_desc">Automatic picks the best model for your location. Only force one if the forecast is often wrong.</string>
+    <string name="st_wx_city">Fallback city</string>
+    <string name="st_wx_city_desc">%1$s, when the car gives no position</string>
+    <string name="wx_city_here">Current position</string>
+    <string name="wx_city_search">Search for a city…</string>
+    <string name="wx_city_offline">No connection: the city is unchanged</string>
+    <string name="wx_city_none">No city found for « %1$s »</string>
     <string name="st_wx_model_auto">Automatic</string>
     <string name="st_no_location">Position not available yet</string>
     <string name="st_heated">Heated seats and steering wheel</string>
@@ -708,8 +738,15 @@
     <string name="st_tab_car">Vehicle</string>
     <string name="st_tab_net">Connections</string>
     <string name="st_tab_system">System</string>
-    <string name="st_theme_smooth">Smooth light / dark switch</string>
-    <string name="st_theme_smooth_desc">Waits 5 s of stable lights (no switch under bridges) and fades over 2 s. Off: switches as soon as the lights change.</string>
+    <string name="st_tab_screen">Screen</string>
+    <string name="st_tab_media">Media and sounds</string>
+    <string name="st_tab_general">General</string>
+    <string name="st_bar_section">BAR</string>
+    <string name="st_formats">FORMATS</string>
+    <string name="st_input">TYPING</string>
+    <string name="du_last30">Last 30 days</string>
+    <string name="du_detail_open">See the detail</string>
+    <string name="du_detail_open_desc">Day by day, the alert and its threshold, the reset</string>
     <string name="st_night_sun">Night after sunset</string>
     <string name="st_night_sun_desc">Automatic mode: dark from sunset to sunrise at the car\'s position, even with the side lights off. Computed on the head unit, no network needed.</string>
     <string name="st_night_sun_today">Today here: sunset %1$s, sunrise %2$s</string>
@@ -732,6 +769,7 @@
     <string name="st_v2l_auto_warning">Warning: as soon as a V2L cable is plugged in, discharge will start by itself, with no other action, and whatever is connected to the cable will be powered.</string>
     <string name="st_v2l_auto_enable">Enable</string>
     <string name="st_audio_source">Audio source</string>
+    <string name="st_media">Media</string>
     <string name="st_start_source">Source at startup</string>
     <string name="st_src_auto">Automatic</string>
     <string name="st_src_car">Same as the car</string>
@@ -815,6 +853,7 @@
     <string name="conn_usb_count">%1$d connected</string>
     <string name="en_time_note">Placed by date and smoothed · average (dashed)</string>
     <string name="st_sound_trigger">Startup Sound</string>
+    <string name="st_sounds">SOUNDS</string>
     <string name="st_sound_trigger_desc">Choose an audio file from a USB stick (or internal storage). It is copied into the app and stays available after the stick is removed.</string>
     <string name="st_sound_boot_trigger">Play at startup</string>
     <string name="st_sound_pick_file">Choose audio</string>
@@ -826,7 +865,8 @@
     <string name="st_sound_imported">Imported audio: %1$s</string>
     <string name="st_sound_test">Test</string>
     <string name="st_sound_stop">Stop</string>
-    <string name="st_sound_volume">Car media volume</string>
+    <string name="st_sound_volume">Startup sound volume</string>
+    <string name="st_sound_volume_desc">Only for the startup sound</string>
     <string name="st_sound_vol_default">Current car volume</string>
     <string name="st_sound_volume_level">%1$d / 32</string>
     <string name="du_tab">4G data</string>
@@ -944,7 +984,7 @@
     <string name="st_fx_sound">Sound effects</string>
     <string name="st_fx_volume">Sound effects volume</string>
     <string name="st_fx_volume_off">Off</string>
-    <string name="wc_radar">Speed cameras (test)</string>
+    <string name="wc_radar">Speed cameras</string>
     <string name="du_radars">Speed cameras</string>
     <string name="rad_osm">© OpenStreetMap contributors</string>
     <string name="rad_osm_licence">Speed limits and speed cameras: © OpenStreetMap contributors, Open Database License (ODbL). The data can be incomplete or out of date: the road signs always come first.</string>
@@ -967,8 +1007,8 @@
     <string name="rad_off_road">Road not recognised</string>
     <string name="rad_banner">%1$s · %2$s</string>
     <string name="rad_banner_sub">Slow down · %1$s · zone ends in %2$s</string>
-    <string name="st_rad_title">Speed camera alerter (test)</string>
-    <string name="st_rad_desc">Speed limit of the road and speed camera zones from OpenStreetMap data only. Place the Speed cameras (test) card in a home place to use it (pinch the home screen). A long press on the card opens these settings.</string>
+    <string name="st_rad_title">Speed camera alerter</string>
+    <string name="st_rad_desc">Speed limit of the road and speed camera zones from OpenStreetMap data only. Place the Speed cameras card in a home place to use it (pinch the home screen). A long press on the card opens these settings.</string>
     <string name="st_rad_visual">Visual alerts (orange, red)</string>
     <string name="st_rad_sound">Sound</string>
     <string name="st_rad_sound_none">None</string>
@@ -980,7 +1020,7 @@
     <string name="st_rad_high">Strong alert (red) over the limit</string>
     <string name="st_rad_banner">Banner over the other apps</string>
     <string name="st_rad_banner_desc">A red flashing banner when well over the limit in a speed camera zone, Android Auto included.</string>
-    <string name="st_rad_wifi">Wi-Fi only</string>
+    <string name="st_rad_wifi">Download over Wi-Fi only</string>
     <string name="st_rad_wifi_desc">No download on the car\'s 4G: only the areas already kept are used.</string>
     <string name="st_rad_cache">%1$d areas kept · %2$s</string>
     <string name="st_rad_preparing">Preparing: %1$d / %2$d</string>
@@ -1016,6 +1056,12 @@
     <string name="st_rad_snd_chime">Chime</string>
     <string name="st_rad_snd_beep">Beep</string>
     <string name="st_rad_snd_loud">Loud beep</string>
+    <string name="st_rad_snd_marimba">Marimba</string>
+    <string name="st_rad_snd_dingdong">Ding-dong</string>
+    <string name="st_rad_snd_sonar">Sonar</string>
+    <string name="st_rad_snd_pulse">Triple pulse</string>
+    <string name="st_rad_snd_blip">Retro blip</string>
+    <string name="st_rad_snd_hum">Low hum</string>
     <string name="rp_tab_alerts">Alerts</string>
     <string name="rp_tab_alerts_sub">Thresholds, sounds, banner</string>
     <string name="rp_tab_data">Data</string>
@@ -1023,6 +1069,9 @@
     <string name="rp_tab_data_prep">Preparing %1$d / %2$d</string>
     <string name="rp_osm_box">Speed limits and cameras: © OpenStreetMap contributors, ODbL. The road signs always come first.</string>
     <string name="rp_thresholds">Thresholds</string>
+    <string name="rp_threshold_unit">Thresholds in</string>
+    <string name="rp_display">Display</string>
+    <string name="rp_gps_correction_sub">Measured while driving</string>
     <string name="rp_mixed">Mixed</string>
     <string name="rp_under_100">Limits below 100 km/h</string>
     <string name="rp_from_100">Limits from 100 km/h</string>
@@ -1030,8 +1079,10 @@
     <string name="rp_in">In</string>
     <string name="rp_light_over">Light over</string>
     <string name="rp_strong_over">Strong over</string>
-    <string name="rp_visual">Colours on the card</string>
+    <string name="rp_visual">Coloured speed</string>
+    <string name="rp_visual_sub">On the card, the speed turns orange slightly over the limit, red well over it</string>
     <string name="rp_banner">Banner over the apps</string>
+    <string name="rp_banner_sub">Shown only when you are over the speed limit in a speed camera zone (strong alert)</string>
     <string name="rp_sounds">Sound of each alert</string>
     <string name="rp_col_alert">Alert</string>
     <string name="rp_col_sound">Sound</string>
@@ -1059,6 +1110,8 @@
     <string name="rp_prep_done">Last preparation done</string>
     <string name="rp_prep_stopped">Preparation stopped</string>
     <string name="rp_prep_none">No preparation yet</string>
+    <string name="rp_prep_stored_at">Prepared on %1$s · %2$d zones</string>
+    <string name="rp_prep_stored">%1$d zones already downloaded</string>
     <string name="rp_prep_detail">Wi-Fi · %1$s received</string>
     <string name="rp_prep_left">≈ %1$d min left</string>
     <string name="rp_prep_failed">%1$d areas failed, tried again later</string>
@@ -1066,9 +1119,11 @@
     <string name="rp_resume">Resume</string>
     <string name="rp_pause">Pause</string>
     <string name="rp_cancel">Cancel</string>
-    <string name="rp_wifi_sub">Never the 4G: only the areas kept are used</string>
+    <string name="rp_wifi_sub">No 4G while driving: only roads and speed cameras already downloaded are used</string>
     <string name="rp_refresh">Refresh the area around the car</string>
     <string name="rp_refresh_sub">If it is older than…</string>
+    <string name="unit_day_short">d</string>
+    <string name="rp_repeat_sub">While the alert lasts; 0: once</string>
     <string name="rp_storage">Storage</string>
     <string name="rp_space">Space used</string>
     <string name="rp_space_sub">Areas kept 30 days</string>
@@ -1083,8 +1138,6 @@
     <string name="wc_conn_small">This place is too small for the connection bar</string>
     <string name="st_climate_fx">Climate card warm / cold animation</string>
     <string name="st_climate_fx_desc">Heat haze while heating, frost while cooling, stronger as the set point is far from outside. Off: only the animation goes, Heating / Cooling stays.</string>
-    <string name="st_call_bar">Hide the top bar during calls</string>
-    <string name="st_call_bar_desc">The car\'s call window stays in full screen too. A swipe from the top still shows the bar; it is also hidden in the SAIC Phone app.</string>
     <string name="rp_stop">Stop</string>
     <string name="clim_settings_title">Climate settings</string>
     <string name="clim_fx_title">Heating / cooling on the card</string>
@@ -1146,6 +1199,9 @@
     <string name="sc_profile">Profile</string>
     <string name="pf_drive">Profiles keep the drive mode and the regeneration</string>
     <string name="pf_drive_desc">Leaving a profile, MG4Dash notes the car\'s drive mode and regeneration; arriving on a profile, it puts them back, stopped or driving. Off by default.</string>
+    <string name="dv_profiles_drive_desc">When the profile changes, the profile\'s drive mode and regeneration are taken back</string>
+    <string name="pf_drive_one">Take back this profile\'s drive mode and regeneration</string>
+    <string name="pf_drive_one_desc">Applied when switching to this profile</string>
     <string name="br_title">Brightness</string>
     <string name="br_auto">Automatic brightness</string>
     <string name="br_auto_desc">Smart: learns from your settings with the slider, according to the estimated daylight and the lights. Original: Android\'s own mode, with − and +.</string>
@@ -1228,4 +1284,10 @@
     <string name="bk_confirm">The settings, profiles, startup sound and web addresses of the backup of %1$s replace the current ones. MG4Dash then restarts.</string>
     <string name="bk_confirm_token">The Home Assistant token was not in the backup: enter it again in Settings › Connections if it is missing.</string>
     <string name="bk_confirm_ok">Replace and restart</string>
+    <string name="card_no_data">No data yet</string>
+    <string name="st_cards_offered">Cards offered…</string>
+    <string name="st_cards_offered_note">Unticked cards are left out of the edit mode and of the home screen. Ticked again, they come back where they were.</string>
+    <string name="opt_open">Open</string>
+    <string name="opt_import">Import</string>
+    <string name="opt_clear">Clear</string>
 </resources>

@@ -17,51 +17,47 @@ object CardMenu {
     class Row(val mark: String, val title: String, val detail: String?, val on: Boolean,
               val edit: (() -> Unit)? = null, val delete: (() -> Unit)? = null, val settings: (() -> Unit)? = null, val click: () -> Unit)
 
-    fun show(activity: Activity, rows: List<Row>) {
-        val d = activity.resources.displayMetrics.density
-        fun dp(v: Int) = (v * d).toInt()
-        val accent = Themes.color(activity, R.color.accent_action)
+    fun show(activity: Activity, rows: List<Row>, title: String) {
+        fun dp(v: Int) = (v * activity.resources.displayMetrics.density).toInt()
+        val sel = Themes.select(activity)
         val sub = Themes.color(activity, R.color.text_sub)
-        var dialog: android.app.Dialog? = null
-        val list = LinearLayout(activity).apply { orientation = LinearLayout.VERTICAL; setPadding(dp(24), dp(16), dp(24), dp(8)) }
+        lateinit var dialog: android.app.AlertDialog
+        val group = Rows.group(activity)
         rows.forEach { row ->
             val r = LinearLayout(activity).apply {
-                orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL
-                minimumHeight = dp(72); setPadding(dp(18), dp(6), dp(18), dp(6))
-                background = android.graphics.drawable.GradientDrawable().apply {
-                    cornerRadius = dp(18).toFloat()
-                    setColor(if (row.on) (accent and 0x00FFFFFF) or 0x40000000 else Themes.color(activity, R.color.bg_top))
-                    if (row.on) setStroke(dp(2), accent)
-                }
-                setOnClickListener { dialog?.dismiss(); row.click() }
+                orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL; tag = Rows.TAG_ROW; minimumHeight = dp(80)
+                Rows.touchable(this); setOnClickListener { dialog.dismiss(); row.click() }
             }
             r.addView(TextView(activity).apply {
-                text = row.mark; setTextColor(if (row.on || row.detail == null) accent else sub); setTextSize(TypedValue.COMPLEX_UNIT_SP, 26f)
-                setPadding(0, 0, dp(18), 0)
-            })
+                text = row.mark; setTextColor(if (row.on || row.detail == null) sel else sub); setTextSize(TypedValue.COMPLEX_UNIT_SP, 24f)
+                gravity = Gravity.CENTER
+            }, LinearLayout.LayoutParams(dp(40), -2).apply { rightMargin = dp(16) })
             r.addView(LinearLayout(activity).apply {
                 orientation = LinearLayout.VERTICAL
-                addView(TextView(activity).apply { text = row.title; setTextColor(Themes.color(activity, R.color.text_title)); setTextSize(TypedValue.COMPLEX_UNIT_SP, 21f); maxLines = 1 })
+                addView(TextView(activity).apply {
+                    text = row.title; setTextSize(TypedValue.COMPLEX_UNIT_SP, 20f); maxLines = 1
+                    setTextColor(if (row.on) sel else Themes.color(activity, R.color.text_value))
+                    if (row.on) typeface = android.graphics.Typeface.create("sans-serif-medium", android.graphics.Typeface.NORMAL)
+                })
                 if (row.detail != null) addView(TextView(activity).apply {
-                    text = row.detail; setTextColor(sub); setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f); maxLines = 1; ellipsize = android.text.TextUtils.TruncateAt.MIDDLE
+                    text = row.detail; setTextColor(sub); setTextSize(TypedValue.COMPLEX_UNIT_SP, 15f); maxLines = 1; ellipsize = android.text.TextUtils.TruncateAt.MIDDLE
                 })
             }, LinearLayout.LayoutParams(0, -2, 1f))
             fun end(glyph: String, action: () -> Unit) = r.addView(TextView(activity).apply {
-                text = glyph; setTextColor(sub); setTextSize(TypedValue.COMPLEX_UNIT_SP, 24f); gravity = Gravity.CENTER
+                text = glyph; setTextColor(Themes.color(activity, R.color.text_value)); setTextSize(TypedValue.COMPLEX_UNIT_SP, 22f); gravity = Gravity.CENTER
                 contentDescription = glyph
-                background = android.graphics.drawable.GradientDrawable().apply {
-                    shape = android.graphics.drawable.GradientDrawable.OVAL; setColor((sub and 0x00FFFFFF) or 0x30000000)
-                }
-                setOnClickListener { dialog?.dismiss(); action() }
-            }, LinearLayout.LayoutParams(dp(60), dp(60)).apply { leftMargin = dp(10) })
+                background = android.graphics.drawable.GradientDrawable().apply { shape = android.graphics.drawable.GradientDrawable.OVAL; setColor(Themes.color(activity, R.color.button_idle)) }
+                setOnClickListener { dialog.dismiss(); action() }
+            }, LinearLayout.LayoutParams(dp(56), dp(56)).apply { leftMargin = dp(10) })
             row.settings?.let { end("⚙", it) }
             row.edit?.let { end("✎", it) }
             row.delete?.let { end("✕", it) }
-            list.addView(r, LinearLayout.LayoutParams(-1, -2).apply { bottomMargin = dp(10) })
+            Rows.add(group, r)
         }
-        dialog = android.app.AlertDialog.Builder(activity)
-            .setView(android.widget.ScrollView(activity).apply { isVerticalScrollBarEnabled = false; addView(list) })
-            .create().also { Dialogs.show(it); Dialogs.hideBars(it) }
-        dialog.window?.setLayout(dp(560), -2)
+        val screen = activity.resources.displayMetrics.heightPixels
+        val scroll = object : android.widget.ScrollView(activity) {
+            override fun onMeasure(w: Int, h: Int) = super.onMeasure(w, android.view.View.MeasureSpec.makeMeasureSpec(screen - dp(190), android.view.View.MeasureSpec.AT_MOST))
+        }.apply { isVerticalScrollBarEnabled = false; addView(group) }
+        dialog = Windows.show(activity, title, scroll, widthDp = 760)
     }
 }

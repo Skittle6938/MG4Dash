@@ -27,7 +27,7 @@ object FxSound {
     internal fun gain(percent: Int): Float = percent.coerceIn(0, 100) / 100f * MAX_GAIN
 
     /** Sound tried in the settings for the ticked animations: each one in turn, one per trial; none ticked, none. */
-    internal fun trialStyle(ticked: Set<Int>, turn: Int): Int =
+    fun trialStyle(ticked: Set<Int>, turn: Int): Int =
         PowerFx.STYLES.filter { it in ticked }.let { if (it.isEmpty()) PowerFx.NONE else it[Math.floorMod(turn, it.size)] }
 
     /** System sounds: the car's system channel, mixed over the source without taking it. */

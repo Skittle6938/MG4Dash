@@ -15,8 +15,8 @@ import android.util.TypedValue
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
-import app.mg4dash.system.Prefs
 import app.mg4dash.system.Maintenance
+import app.mg4dash.cards.LyricsCardPrefs
 import app.mg4dash.R
 import app.mg4dash.ui.Themes
 import app.mg4dash.media.MediaHub
@@ -50,7 +50,7 @@ object LyricsOverlay {
     private var rootView: LinearLayout? = null
     private fun applyScale() {
         val c = themedContext ?: app ?: return
-        val s = Prefs(c).lyricsOverlayScale
+        val s = LyricsCardPrefs(c).overlayScale
         val sw = c.resources.displayMetrics.widthPixels
         val sh = c.resources.displayMetrics.heightPixels
         val root = rootView ?: return
@@ -83,7 +83,7 @@ object LyricsOverlay {
         val ny=lp.y.coerceIn(0,maxY)
         if(nx!=lp.x || ny!=lp.y) { lp.x=nx; lp.y=ny; try { wm?.updateViewLayout(v,lp) } catch (_:Exception){} }
     }
-    fun setScale(value: Float) { app?.let { Prefs(it).lyricsOverlayScale=value.coerceIn(.70f,1.40f) }; applyScale() }
+    fun setScale(value: Float) { app?.let { LyricsCardPrefs(it).overlayScale=value.coerceIn(.70f,1.40f) }; applyScale() }
     private fun dp(v: Int) = ((app?.resources?.displayMetrics?.density ?: 1f) * v).toInt()
 
     private fun requestPermission(context: Context): Boolean {
@@ -123,7 +123,7 @@ object LyricsOverlay {
     fun start(): Boolean {
         val c = themedContext ?: app ?: return false
         if (active) return true
-        val p = Prefs(c)
+        val p = LyricsCardPrefs(c)
         val root = LinearLayout(c).apply {
             orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL
             setPadding(dp(18), dp(12), dp(18), dp(12))
@@ -144,8 +144,8 @@ object LyricsOverlay {
             WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN,
             PixelFormat.TRANSLUCENT).apply {
             gravity = Gravity.TOP or Gravity.START
-            x = if (p.lyricsOverlayX >= 0) p.lyricsOverlayX else 80
-            y = if (p.lyricsOverlayY >= 0) p.lyricsOverlayY else dp(40)
+            x = if (p.overlayX >= 0) p.overlayX else 80
+            y = if (p.overlayY >= 0) p.overlayY else dp(40)
             title = "MG4Dash lyrics"
         }
         root.setOnTouchListener(object : View.OnTouchListener {
@@ -161,7 +161,7 @@ object LyricsOverlay {
                     true
                 }
                 MotionEvent.ACTION_UP -> {
-                    if (dragged) { clampPosition(); p.lyricsOverlayX=lp.x; p.lyricsOverlayY=lp.y }
+                    if (dragged) { clampPosition(); p.overlayX=lp.x; p.overlayY=lp.y }
                     true
                 }
                 else -> true

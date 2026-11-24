@@ -18,6 +18,7 @@ object ProcessStats {
     private var lastTotal = -1L
     private var averages: Map<Int, Float> = emptyMap()
     private var averagesAt = 0L
+    private val names = HashMap<String, Pair<String, Boolean>>()
 
     private fun totalTicks(): Long? = try {
         File("/proc/stat").bufferedReader().use { it.readLine() }.trim().split(Regex("\\s+")).drop(1).mapNotNull { it.toLongOrNull() }.sum()
@@ -62,10 +63,13 @@ object ProcessStats {
             val live = if (ticks != null && prev != null && dTotal > 0) (100f * (ticks - prev) / dTotal).coerceIn(0f, 100f) else null
             val average = if (ticks == null) (avg ?: recentAverages().also { avg = it })[p.pid] ?: 0f else null
             val pkg = p.pkgList?.firstOrNull() ?: p.processName.substringBefore(':')
-            val appLabel = try { pm.getApplicationInfo(pkg, 0).loadLabel(pm).toString() } catch (_: Exception) { pkg }
-            // Secondary process (":service"): its name after the app's label
-            val label = if (p.processName.contains(':')) "$appLabel (${p.processName.substringAfter(':')})" else appLabel
-            val service = pm.getLaunchIntentForPackage(pkg) == null || p.processName.contains(':')
+            // Name and kind asked of the system once per process name (24/11: two calls per line every refresh before)
+            val (label, service) = names.getOrPut(pkg + "/" + p.processName) {
+                val appLabel = try { pm.getApplicationInfo(pkg, 0).loadLabel(pm).toString() } catch (_: Exception) { pkg }
+                // Secondary process (":service"): its name after the app's label
+                (if (p.processName.contains(':')) "$appLabel (${p.processName.substringAfter(':')})" else appLabel) to
+                    (pm.getLaunchIntentForPackage(pkg) == null || p.processName.contains(':'))
+            }
             Proc(p.pid, pkg, label, service, live ?: average, live == null && average != null, mem?.getOrNull(i)?.totalPss?.let { it / 1024 })
         }
         lastTicks.keys.retainAll(seen)

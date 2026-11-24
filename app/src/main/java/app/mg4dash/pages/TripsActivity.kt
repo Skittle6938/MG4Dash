@@ -40,6 +40,21 @@ class TripsActivity : PageActivity() {
     private var priced = false
 
     override fun buildBody() {
+        // Price of a kWh (#102, here since 24/11): the cost of each trip and reading; empty: none
+        val prefs = app.mg4dash.system.Prefs(this)
+        lateinit var price: TextView
+        fun priceLabel() = getString(R.string.st_kwh_price, if (prefs.kwhPrice > 0f) app.mg4dash.ui.TripText.money(prefs.kwhPrice) else getString(R.string.st_kwh_price_none))
+        price = kit.text(priceLabel(), 19f, R.color.text_sub).apply {
+            setPadding(kit.dp(16), kit.dp(12), kit.dp(16), kit.dp(12))
+            setBackgroundResource(R.drawable.bg_button)
+            setOnClickListener {
+                app.mg4dash.ui.Ask.show(this@TripsActivity, getString(R.string.st_kwh_price_title), if (prefs.kwhPrice > 0f) prefs.kwhPrice.toString() else "", secret = false, number = true) { v ->
+                    prefs.kwhPrice = v.replace(',', '.').trim().toFloatOrNull()?.takeIf { it > 0f && it < 100f } ?: 0f
+                    price.text = priceLabel(); refresh()
+                }
+            }
+        }
+        header.addView(price, LinearLayout.LayoutParams(-2, -2).apply { rightMargin = kit.dp(12) })
         header.addView(kit.text(getString(R.string.tr_clear), 19f, R.color.text_sub).apply {
             setPadding(kit.dp(16), kit.dp(12), kit.dp(16), kit.dp(12))
             setBackgroundResource(R.drawable.bg_button)
@@ -214,11 +229,9 @@ class TripsActivity : PageActivity() {
     }
 
     private fun confirmClear() {
-        android.app.AlertDialog.Builder(this)
-            .setMessage(R.string.tr_clear_all_confirm)
-            .setPositiveButton(R.string.tr_clear) { _, _ -> TripLog.clearAll(sp); refresh() }
-            .setNegativeButton(android.R.string.cancel, null)
-            .create().also { app.mg4dash.ui.Dialogs.show(it); app.mg4dash.ui.Dialogs.hideBars(it) }
+        app.mg4dash.ui.Windows.confirm(this, getString(R.string.tr_clear), getString(R.string.tr_clear_all_confirm), getString(R.string.tr_clear)) {
+            TripLog.clearAll(sp); refresh()
+        }
     }
 
     companion object {

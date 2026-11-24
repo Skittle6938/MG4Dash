@@ -12,6 +12,9 @@ import app.mg4dash.R
 import app.mg4dash.car.CarBridge
 import app.mg4dash.car.DriveSettings
 import app.mg4dash.car.VehicleState
+import app.mg4dash.cards.CardKit
+import app.mg4dash.cards.CardPlace
+import app.mg4dash.cards.HomeCard
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 
@@ -19,9 +22,41 @@ import kotlinx.coroutines.launch
  * "Driving" card (#38): drive mode, regeneration, Custom mode steering and brake pedal, lane keeping and front
  * collision, read and changed with MG4Control's commands ([DriveSettings]). Never locked while driving.
  * A setting the car does not answer is greyed ("not available"); steering and pedal only in Custom mode, as the
- * stock screen. Its content follows the place: [Form].
+ * stock screen. Its content follows the place: [Form]. A [HomeCard]: it follows the car's state while shown.
  */
-class DrivingCard(context: Context) : LinearLayout(context) {
+class DrivingCard(context: Context) : LinearLayout(context), HomeCard {
+    override val card = HomeSlots.Card.DRIVING
+    override val view: View get() = this
+
+    override fun place(p: CardPlace) {
+        form = when {
+            p.small -> Form.COMPACT
+            p.tall -> Form.FULL
+            p.wide -> Form.WIDE
+            else -> Form.MEDIUM
+        }
+    }
+
+    private var scope: kotlinx.coroutines.CoroutineScope? = null
+
+    /** Shown: the car's state followed (speed and odometer left out: the card does not show them), and the choices pending. */
+    override fun shown(on: Boolean) {
+        if (on == (scope != null)) return
+        scope?.cancel(); scope = null
+        if (!on) return
+        show()
+        scope = kotlinx.coroutines.MainScope().also { s ->
+            s.launch {
+                var seen: VehicleState? = null
+                CarBridge.state.collect { st ->
+                    val quiet = st.copy(speedKmh = null, odometerKm = null)
+                    if (quiet != seen) { seen = quiet; show(st) }
+                }
+            }
+            s.launch { CarBridge.drivePending.collect { show() } }
+        }
+    }
+
     /**
      * COMPACT: small place, mode and regeneration. MEDIUM: + steering and pedal side by side, the aids summed up.
      * FULL: big square or tall place, everything in one column. WIDE: wide band, two columns (front collision in "All").
@@ -43,7 +78,7 @@ class DrivingCard(context: Context) : LinearLayout(context) {
 
     init {
         orientation = VERTICAL
-        setPadding(dp(20), dp(16), dp(20), dp(16))
+        CardKit.pad(this)
         // The whole card takes the touch, as the other cards: a swipe starting between the buttons is then seen by its
         // place (SwipeBox only sees a swipe while a child holds the touch), and still changes card
         isClickable = true
@@ -202,28 +237,14 @@ class DrivingCard(context: Context) : LinearLayout(context) {
 
         /** The whole card in a window over home ("All ›" of a smaller place), following the car while open. */
         fun openAll(context: Context) {
-            val card = DrivingCard(context).apply { form = Form.FULL }
-            val d = context.resources.displayMetrics.density
-            val dialog = android.app.Dialog(context, android.R.style.Theme_Translucent_NoTitleBar)
-            val panel = android.widget.FrameLayout(context).apply {
-                background = GradientDrawable().apply {
-                    cornerRadius = FadeOutline.radius(context); setColor(Themes.color(context, R.color.panel_raised).let { it or (0xFF shl 24) })
-                    setStroke((1.5f * d).toInt(), Themes.color(context, R.color.panel_border))
-                }
-                addView(card, android.widget.FrameLayout.LayoutParams(-1, -2))
-                isClickable = true
-            }
-            val root = android.widget.FrameLayout(context).apply {
-                setBackgroundColor(0x99000000.toInt())
-                setOnClickListener { dialog.dismiss() }
-                addView(panel, android.widget.FrameLayout.LayoutParams((1100 * d).toInt(), -2, Gravity.CENTER))
-            }
-            dialog.setContentView(root)
+            val card = DrivingCard(context).apply { form = Form.FULL; getChildAt(0)?.visibility = View.GONE }   // the window's title bar names it
+            val activity = context as? android.app.Activity ?: return
+            // The settings' window (title, round close button), shown like every window over home: the car's bars stay hidden
+            val dialog = Windows.show(activity, context.getString(R.string.wc_driving), card, icon = R.drawable.ic_car, widthDp = 1100)
             val scope = kotlinx.coroutines.MainScope()
             scope.launch { CarBridge.state.collect { card.show(it) } }
             scope.launch { CarBridge.drivePending.collect { card.show() } }
             dialog.setOnDismissListener { scope.cancel() }
-            dialog.show()
         }
     }
 }

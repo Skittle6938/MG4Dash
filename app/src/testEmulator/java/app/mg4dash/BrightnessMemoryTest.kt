@@ -30,7 +30,7 @@ class BrightnessMemoryTest {
     @Test fun rememberedThenPutBack() {
         val ctx = RuntimeEnvironment.getApplication()
         val cr = ctx.contentResolver
-        ctx.getSharedPreferences("mg4launcher", 0).edit().clear().commit()
+        ctx.getSharedPreferences("mg4launcher", 0).edit().clear().putBoolean("bright_smart", false).commit()   // the original mode (smart is on by default since 24/11)
         assertNull("nothing chosen yet: nothing put back", BrightnessMemory.saved(ctx))
         Settings.System.putInt(cr, "screen_brightness_mode", 1)
         Settings.System.putFloat(cr, "screen_auto_brightness_adj", -0.4f)

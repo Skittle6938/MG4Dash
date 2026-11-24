@@ -6,7 +6,7 @@ import android.net.NetworkCapabilities
 import android.os.Build
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import app.mg4dash.system.Prefs
+import app.mg4dash.cards.LyricsCardPrefs
 import app.mg4dash.system.DataUsage
 import org.json.JSONArray
 import org.json.JSONObject
@@ -26,7 +26,7 @@ object LyricsRepo {
     @Volatile private var app: Context? = null
     private val memory = LinkedHashMap<String, Track>()
     private val activeConnections = java.util.concurrent.ConcurrentHashMap.newKeySet<HttpURLConnection>()
-    fun start(context: Context) { app = context.applicationContext }
+    fun start(context: Context) { app = context.applicationContext; LyricsCardPrefs(context) }
 
     fun cancelActiveRequest() {
         activeConnections.toList().forEach { connection -> try { connection.disconnect() } catch (_: Exception) { } }
@@ -42,12 +42,12 @@ object LyricsRepo {
     } catch (_: Exception) { false }
 
     /** Shared network policy for every lyrics client, including the background overlay. */
-    fun networkAllowed(context: Context): Boolean = !Prefs(context).lyricsWifiOnly || wifiConnected(context)
+    fun networkAllowed(context: Context): Boolean = !LyricsCardPrefs(context).wifiOnly || wifiConnected(context)
 
     suspend fun cached(artist: String, title: String): Track? = withContext(Dispatchers.IO) {
         val k = key(artist, title)
         val ctx = app ?: return@withContext null
-        if (!Prefs(ctx).lyricsCacheEnabled) return@withContext null
+        if (!LyricsCardPrefs(ctx).cacheEnabled) return@withContext null
         val f = file(ctx, k)
         val inMemory = synchronized(memory) { memory[k] }
         if (inMemory != null) { f.setLastModified(System.currentTimeMillis()); return@withContext inMemory }
@@ -89,8 +89,8 @@ object LyricsRepo {
 
     private fun contextPrefs(): Pair<Boolean, Int> {
         val ctx = app ?: return false to 20
-        val p = Prefs(ctx)
-        return p.lyricsCacheEnabled to p.lyricsCacheMaxMb
+        val p = LyricsCardPrefs(ctx)
+        return p.cacheEnabled to p.cacheMaxMb
     }
 
     private fun clean(s: String) = s

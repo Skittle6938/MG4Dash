@@ -36,5 +36,23 @@
         </receiver>
 
         <service android:name=".RescueService" android:exported="false" />
+
+        <!-- "Updating MG4Dash…" (#132): a home only while the rescue recompiles MG4Dash after an update (enabled then,
+             disabled after), so Android shows it instead of its black "Phone is starting"; below MG4Dash's homes (0, -1) -->
+        <activity
+            android:name=".UpdatingActivity"
+            android:enabled="false"
+            android:exported="true"
+            android:excludeFromRecents="true"
+            android:launchMode="singleTask"
+            android:screenOrientation="landscape"
+            android:stateNotNeeded="true"
+            android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen">
+            <intent-filter android:priority="-2">
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.HOME" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
     </application>
 </manifest>

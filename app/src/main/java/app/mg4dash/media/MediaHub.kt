@@ -496,6 +496,73 @@ object MediaHub {
 
     /** The head unit turned on less than 5 minutes ago: a car start, not MG4Dash restarted while driving. */
     internal fun isCarStart(elapsedMs: Long) = elapsedMs < 5 * 60_000
+
+    /**
+     * The car really in use (#133): the screen on, and READY, or the doors unlocked, or a touch on the screen.
+     * Opening the boot of a locked car wakes the head unit with its screen dark: the startup sequence and the startup
+     * sound then wait, and play nothing if the head unit goes back to sleep first.
+     */
+    internal fun carInUse(interactive: Boolean, ready: Boolean?, doorsLocked: Boolean?, touched: Boolean) =
+        interactive && (ready == true || doorsLocked == false || touched)
+
+    /** How long a car start waits for the car in use before giving up its startup sequence and sound (#133). */
+    internal const val USE_WAIT_MS = 5 * 60_000L
+
+    /** The startup sequence armed: the car in use was seen (#133). */
+    @Volatile private var armed = false
+    @Volatile private var useGivenUp = false
+    /** A startup sequence made, waiting for the car in use (MediaHub starts with the app, before the home screen). */
+    @Volatile private var useWaited = false
+    @Volatile private var touchedAt: Long? = null
+    /** When the startup sequence was armed (uptime): its times count from there. */
+    private var seqT0 = 0L
+
+    /** A car start still waiting for the car in use: the startup sound waits too ([app.mg4dash.sound.SoundTrigger]). */
+    val waitingForUse: Boolean get() = useWaited && !armed && !useGivenUp
+
+    /** A touch on MG4Dash's screen: the driver is there (#133). */
+    fun driverTouched() { if (!armed && touchedAt == null) touchedAt = android.os.SystemClock.uptimeMillis() }
+
+    private fun arm(why: String) {
+        if (armed) return
+        armed = true
+        seqT0 = android.os.SystemClock.uptimeMillis()
+        Log.i(TAG, "car in use ($why): startup sequence armed")
+        appContext?.let { app.mg4dash.sound.SoundTrigger.useStarted(it) }
+        seqStep()
+    }
+
+    /** Every second until the car is in use, for at most [USE_WAIT_MS]; blocking reads off the main thread. */
+    private fun waitForUse() {
+        val ctx = appContext ?: return
+        val pm = ctx.getSystemService(Context.POWER_SERVICE) as android.os.PowerManager
+        useWaited = true
+        io.launch {
+            var logged = false
+            while (!armed) {
+                if (android.os.SystemClock.uptimeMillis() - startedAt > USE_WAIT_MS) {
+                    main.post {
+                        if (armed) return@post
+                        useGivenUp = true; seq = null
+                        app.mg4dash.sound.SoundTrigger.useGivenUp()
+                        Log.i(TAG, "car never in use within 5 min: no startup sequence, no startup sound (#133)")
+                    }
+                    return@launch
+                }
+                val interactive = try { pm.isInteractive } catch (_: Exception) { true }
+                val ready = if (interactive) try { app.mg4dash.car.ReadyState.ready() } catch (_: Exception) { null } else null
+                val locked = if (interactive && ready != true) try { app.mg4dash.car.CarBridge.doorsLocked() } catch (_: Exception) { null } else null
+                val touched = touchedAt != null
+                if (carInUse(interactive, ready, locked, touched)) {
+                    val why = when { ready == true -> "READY"; locked == false -> "doors unlocked"; else -> "touch" }
+                    main.post { arm(why) }
+                    return@launch
+                }
+                if (!logged) { logged = true; Log.i(TAG, "startup sequence waits for the car in use (screen ${if (interactive) "on" else "off"}, READY $ready, locked $locked)") }
+                kotlinx.coroutines.delay(1_000)
+            }
+        }
+    }
     private var seq: StartupSequence? = null
     private var stepping = false
     /** MG4Dash's startup sound is set for this start (read when the sequence starts). */
@@ -530,6 +597,8 @@ object MediaHub {
         app.mg4dash.sound.SoundTrigger.holdFocusAfterBoot = soundConfigured && !want
         Log.i(TAG, "startup sequence: source $mode, ${if (want) "play" else "pause"} (setting ${p.startPlayback}, " +
             "last ${p.lastPlaying}, before ${p.playingBefore}, frozen at READY off ${p.stopFrozen})")
+        // Nothing before the car is really in use (#133: the boot opened, the screen dark, the radio played)
+        waitForUse()
     }
 
     /** Playing wanted at car start: the setting, or as when the car stopped ([StartupSequence.lastState]). */
@@ -555,23 +624,23 @@ object MediaHub {
     /** One step of the startup sequence, at each reread of the players and every second. */
     private fun seqStep() {
         val s = seq ?: return
-        if (s.done || stepping) return
+        if (s.done || stepping || !armed) return
         stepping = true
         try {
             val up = android.os.SystemClock.uptimeMillis()
             val snd = app.mg4dash.sound.SoundTrigger
             val shown = _now.value.packageName
             val input = StartupSequence.Input(
-                now = up - startedAt,
+                now = up - seqT0,
                 soundExpected = soundConfigured || snd.bootSoundExpected,
                 // Set but not triggered yet (home not shown yet): it is to come
                 soundBusy = if (soundConfigured && !snd.bootSoundExpected) true else snd.bootSoundBusy(up),
-                soundEndAt = snd.bootSoundUntil.takeIf { snd.bootSoundExpected && it != 0L && up >= it }?.let { it - startedAt },
+                soundEndAt = snd.bootSoundUntil.takeIf { snd.bootSoundExpected && it != 0L && up >= it }?.let { it - seqT0 },
                 available = availableSources().filterNot { it == AA_MBS && carPlay },
                 carSource = effectiveSource(),
                 projectionLast = projectionLastAtStart,
                 playing = _now.value.available && realPlaying() && !phoneDecides(shown) && !phoneDecides(sourcePkg),
-                userAt = userAt?.let { it - startedAt },
+                userAt = userAt?.let { it - seqT0 },
                 phoneDecides = { phoneDecides(it) || handlesWheelKeys(sourcePkg) },
             )
             for (a in s.step(input)) when (a) {

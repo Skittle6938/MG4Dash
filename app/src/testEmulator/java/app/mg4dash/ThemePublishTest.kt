@@ -4,6 +4,7 @@ import app.mg4dash.system.Apps
 import app.mg4dash.system.Prefs
 import app.mg4dash.ui.Themes
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -22,6 +23,13 @@ class ThemePublishTest {
     private fun prefs() = app.getSharedPreferences("mg4launcher", android.content.Context.MODE_PRIVATE)
     /** vertical, 0, wide, right */
     private fun bar(f: List<String>) = f.subList(3, 7)
+
+    /** #132: the theme's real colours for MG4Dash Rescue's update screen, five #AARRGGBB. */
+    @Test fun rescueScreenColours() {
+        val c = Themes.rescueColors(app).split(",")
+        assertEquals(5, c.size)
+        c.forEach { assertTrue(it, Regex("#[0-9A-F]{8}").matches(it)) }
+    }
 
     @Test fun narrowBarOnTheLeft() {
         prefs().edit().putBoolean("vertical_dock", true).putBoolean("wide_bar", false).putInt("bar_side", 1).commit()

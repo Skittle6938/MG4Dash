@@ -217,12 +217,16 @@ class ConnectionBarTest {
 
     // ── The widgets' own options ──
 
-    private fun popupShot(method: String, name: String) {
+    private fun popupShot(method: String, name: String) = popupShot(name) { act ->
+        MainActivity::class.java.getDeclaredMethod(method).apply { isAccessible = true }.invoke(act)
+    }
+
+    private fun popupShot(name: String, open: (MainActivity) -> Unit) {
         prefs.raw.edit().putBoolean("vertical_dock", true).putBoolean("tutorial_shortcuts_seen", true).putInt("theme_mode", 1)
             .putInt("home_style", 0).putString("home_layout", "full").commit()
         val act = Robolectric.buildActivity(MainActivity::class.java).setup().get()
         repeat(4) { shadowOf(Looper.getMainLooper()).idleFor(200, TimeUnit.MILLISECONDS) }
-        MainActivity::class.java.getDeclaredMethod(method).apply { isAccessible = true }.invoke(act)
+        open(act)
         repeat(2) { shadowOf(Looper.getMainLooper()).idleFor(200, TimeUnit.MILLISECONDS) }
         val dialog = org.robolectric.shadows.ShadowDialog.getLatestDialog()!!
         val v = dialog.window!!.decorView
@@ -232,7 +236,7 @@ class ConnectionBarTest {
     }
 
     @org.junit.experimental.categories.Category(Screenshot::class)
-    @Test fun energyOptionsPopup() = popupShot("energyOptions", "popup_energy_options.png")
+    @Test fun energyOptionsPopup() = popupShot("popup_energy_options.png") { it.findViewById<android.view.View>(R.id.energyCard).performLongClick() }
     @org.junit.experimental.categories.Category(Screenshot::class)
     @Test fun mapOptionsPopup() = popupShot("mapOptions", "popup_map_options.png")
 

@@ -38,8 +38,22 @@ object RadarAlert {
     /** Repeats are checked this often. */
     private const val TICK_MS = 1_000L
 
-    /** Sounds offered: none, a chime, a beep, a loud beep. */
-    enum class Sound(val key: String) { NONE("none"), CHIME("chime"), BEEP("beep"), LOUD("loud") }
+    /**
+     * Sounds offered: none, a chime, a beep, a loud beep, and since 24/11 six more made by scripts/radar_sounds.py
+     * (marimba, ding-dong, sonar, triple pulse, 8-bit blip, low hum). [res]: its file, [label]: its name.
+     */
+    enum class Sound(val key: String, val res: Int?, val label: Int) {
+        NONE("none", null, app.mg4dash.R.string.st_rad_snd_none),
+        CHIME("chime", app.mg4dash.R.raw.fx_radar_chime, app.mg4dash.R.string.st_rad_snd_chime),
+        BEEP("beep", app.mg4dash.R.raw.fx_radar_light, app.mg4dash.R.string.st_rad_snd_beep),
+        LOUD("loud", app.mg4dash.R.raw.fx_radar_strong, app.mg4dash.R.string.st_rad_snd_loud),
+        MARIMBA("marimba", app.mg4dash.R.raw.fx_radar_marimba, app.mg4dash.R.string.st_rad_snd_marimba),
+        DINGDONG("dingdong", app.mg4dash.R.raw.fx_radar_dingdong, app.mg4dash.R.string.st_rad_snd_dingdong),
+        SONAR("sonar", app.mg4dash.R.raw.fx_radar_sonar, app.mg4dash.R.string.st_rad_snd_sonar),
+        PULSE("pulse", app.mg4dash.R.raw.fx_radar_pulse, app.mg4dash.R.string.st_rad_snd_pulse),
+        BLIP("blip", app.mg4dash.R.raw.fx_radar_blip, app.mg4dash.R.string.st_rad_snd_blip),
+        HUM("hum", app.mg4dash.R.raw.fx_radar_hum, app.mg4dash.R.string.st_rad_snd_hum),
+    }
 
     /** Kinds of alert, with their defaults: sound, volume (%), repeat (s, 0 = never). */
     enum class Kind(val key: String, val sound: Sound, val volume: Int, val repeat: Int) {
@@ -117,12 +131,7 @@ object RadarAlert {
     /** Plays the sound of [kind] as set (the settings' ▶ too); nothing with no sound. */
     fun play(c: Context, kind: Kind) {
         val p = Prefs(c)
-        val res = when (p.radarSoundOf(kind)) {
-            Sound.NONE -> return
-            Sound.CHIME -> app.mg4dash.R.raw.fx_radar_chime
-            Sound.BEEP -> app.mg4dash.R.raw.fx_radar_light
-            Sound.LOUD -> app.mg4dash.R.raw.fx_radar_strong
-        }
+        val res = p.radarSoundOf(kind).res ?: return
         FxSound.alertRaw(c, res, p.radarVolume(kind))
     }
 

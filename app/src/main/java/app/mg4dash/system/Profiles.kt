@@ -57,16 +57,16 @@ object Profiles {
         // Speed cameras: sounds, visual alerts, volumes, thresholds
         "radar_sound", "radar_visual", "radar_banner", "radar_percent", "radar_prepare_km", "radar_high", "radar_high_pct", "radar_low", "radar_low_pct",
         "radar_threshold_mode", "radar_mixed_low", "radar_mixed_low_pct", "radar_mixed_high", "radar_mixed_high_pct",
-        // Synchronized lyrics: cache/network options and the overlay's size and position follow the driver
-        "lyrics_cache_enabled", "lyrics_cache_max_mb", "lyrics_overlay_scale", "lyrics_overlay_x", "lyrics_overlay_y", "lyrics_wifi_only",
-        // Legacy key migrated by Prefs when old settings are read
-        "wifi_only_mode",
     )
 
     /** The settings that follow the profile, by family. */
     val PERSONAL_PREFIXES = listOf("slots_", "slot_now_", "conn_slot_", "wc_", "sc_", "fav_phone_", "radar_snd_", "radar_vol_", "radar_rep_",
         // The smart brightness's learnt curves (one per light / dark look)
-        "bright_curve_")
+        "bright_curve_",
+        // The cards switched off (Settings › Home › Cards offered)
+        "cards_off",
+        // The home cards' own settings (cards.CardPrefs: "card_<id>_<name>")
+        "card_")
 
     /** Shared by every profile (the car, the system, the data, the climate, the state of the moment), by name. */
     val SHARED = setOf(
@@ -78,7 +78,7 @@ object Profiles {
         "shortcuts_menu", "shortcut_fcw", "shortcut_lane_mode",
         // The system: updates, ADB, maintenance mode, Settings' tab, the option of the drive mode per profile
         "update_auto", "update_beta", "update_skipped", "upd_checked_at", "upd_new_app", "upd_new_rd", "radio_dash_pending", "radio_dash_version",
-        "adb_at_start", "valet_mode", "valet_auto", "settings_tab", "settings_tabs_v2", "defaults_v1", "fell_back", "stock_home", "alive_at",
+        "adb_at_start", "valet_mode", "valet_auto", "settings_tab", "settings_tabs_v2", "settings_tabs_v3", "settings_tabs_v4", "diag_mode", "radar_prepared_at", "defaults_v1", "fell_back", "stock_home", "alive_at",
         "warmup_boot", "conn_migrated", "connection_icons", "connection_off", "last_night", "profiles_drive", "mock_offline",
         // The settings backup's two options (#129)
         "backup_history", "backup_token",
@@ -95,7 +95,9 @@ object Profiles {
     )
 
     /** Shared, by family: the energy monitor, the consumption curve, the trips list, the tutorial's steps seen. */
-    val SHARED_PREFIXES = listOf("em_", "cc_", "trip_", "trips_", "tutorial_", "profile_")
+    val SHARED_PREFIXES = listOf("em_", "cc_", "trip_", "trips_", "tutorial_", "profile_",
+        // Each profile's own drive choice (24/11), kept in the profiles' file with the profile
+        "drive_on_")
 
     /** [key] follows the profile; anything else in the settings stays shared. */
     fun isPersonal(key: String): Boolean = key in PERSONAL || PERSONAL_PREFIXES.any { key.startsWith(it) }

@@ -116,6 +116,7 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         slotLayout = HomeSlots.layoutOf(prefs)
         mapLayout = slotLayout != HomeSlots.Layout.FULL
         builtCardPower = cardPower
+        builtCardsOff = prefs.cardsOff
         if (cardPower) buildPowerEnergyCard()
         else if (!mapLayout && !Dock.vertical(this)) compactEnergyCard()
         if (!mapLayout && !Dock.vertical(this)) compactClimateCard(b.climateCard)
@@ -197,18 +198,15 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
     private lateinit var mediaPanel: View
     /** Row of the three columns: the full screen map hides everything else up to it. */
     private lateinit var columnsRow: LinearLayout
-    private lateinit var consumption: app.mg4dash.ui.ConsumptionCard
-    private lateinit var trips: app.mg4dash.ui.TripsCard
-    private lateinit var driving: app.mg4dash.ui.DrivingCard
-    private lateinit var radar: app.mg4dash.radar.RadarCard
-    private lateinit var navCard: app.mg4dash.ui.NavCard
-    private lateinit var lyricsCard: app.mg4dash.ui.LyricsCard
+    /** The cards built through the card contract ([app.mg4dash.cards.HomeCards]). */
+    private val homeCards = LinkedHashMap<Card, app.mg4dash.cards.HomeCard>()
     private lateinit var shortcutsHolder: LinearLayout
 
     /** Trip energy, power and phone cards: same frame, title, page dots and content. */
     private class Secondary(val title: TextView, val dots: TextView, val grid: LinearLayout)
     private val secondary = HashMap<Card, Secondary>()
-    private val weathers = LinkedHashMap<Card, app.mg4dash.ui.WeatherCompact>()
+    /** The weather cards' content (moved clear of MG's fog light button). */
+    private val weathers get() = homeCards.values.filterIsInstance<app.mg4dash.ui.WeatherCard>().associate { it.card to it.weather }
 
     /** A place on screen: its frame (swipes, and the outline of a web page or an app awake) and what it shows. */
     private inner class SlotFrame(val slot: HomeSlots.Slot) {
@@ -265,8 +263,6 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
     /** One view per card, placed later in its place; a card left out keeps its view, out of the screen. */
     private fun buildPanels() {
         climatePanel = b.climateCard
-        // The climate (pinch mode v2): a card like the others, swiped with the other cards of its place
-        panels[Card.CLIMATE] = climatePanel
         // Media: vertical swipe = source (issue #6), left / right = next / previous track, like the buttons
         mediaPanel = app.mg4dash.ui.SwipeBox(this, vertical = true, horizontal = false) { MediaHub.cycleSource(it) }.apply {
             onHorizontal = { if (it > 0) MediaHub.next() else MediaHub.previous() }
@@ -282,40 +278,12 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         // The map's own clip at the cards' corners: rounder (20 dp), it showed under the card's outline and differed
         // from its detached window (#15)
         b.mapHolder.radiusDp = app.mg4dash.ui.FadeOutline.RADIUS
-        panels[Card.MAP] = b.mapCard
-        consumption = app.mg4dash.ui.ConsumptionCard(this)
-        panels[Card.CONSUMPTION] = frame(consumption)
         shortcutsHolder = LinearLayout(this, null, 0, R.style.Panel).apply { orientation = LinearLayout.VERTICAL; background = null; elevation = 0f }
-        panels[Card.SHORTCUTS] = frame(shortcutsHolder)
-        // The last trips (#102), in a place only if the driver put it there
-        trips = app.mg4dash.ui.TripsCard(this)
-        panels[Card.TRIPS] = frame(trips)
-        // Driving settings (#38), also only where the driver put it
-        driving = app.mg4dash.ui.DrivingCard(this)
-        panels[Card.DRIVING] = frame(driving)
-        // Speed camera alerter (test): only where the driver put it; a long press opens its own settings page
-        radar = app.mg4dash.radar.RadarCard(this).apply {
-            setOnLongClickListener {
-                startActivity(android.content.Intent(this@MainActivity, app.mg4dash.settings.SettingsActivity::class.java)
-                    .putExtra(app.mg4dash.settings.SettingsActivity.EXTRA_RADAR, true))
-                true
-            }
-        }
-        panels[Card.RADAR] = frame(radar)
-        // The Android Auto guidance alone (19/11), only where the driver put it
-        navCard = app.mg4dash.ui.NavCard(this)
-        panels[Card.NAV] = frame(navCard)
-        lyricsCard = app.mg4dash.ui.LyricsCard(this)
-        panels[Card.LYRICS] = frame(lyricsCard)
         // Web app (#97): the page itself is only loaded when shown
         val web = app.mg4dash.ui.WebCard(this).also { webCard = it }
         web.keyboardSpan = { webKeyboardSpan(it) }
         web.visibility = View.GONE
-        panels[Card.WEB] = frame(web).also { webPanel = it }
-        panels[Card.ENERGY] = b.energyCard
-        // Its own options in a popup (17/11): a long press on the card
-        b.energyCard.setOnLongClickListener { energyOptions(); true }
-        mapOf(Card.TRIP to R.string.sw_energy, Card.POWER to R.string.sw_power, Card.PHONE to R.string.sw_phone).forEach { (card, title) ->
+        val secondaries = mapOf(Card.TRIP to R.string.sw_energy, Card.POWER to R.string.sw_power, Card.PHONE to R.string.sw_phone).mapValues { (card, title) ->
             val v = layoutInflater.inflate(R.layout.card_secondary, null, false)
             if (card != Card.TRIP) v.id = View.NO_ID   // the tutorial points at the trip card
             val s = Secondary(v.findViewById(R.id.secondaryTitle), v.findViewById(R.id.secondaryDots), v.findViewById(R.id.secondaryGrid))
@@ -323,17 +291,42 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
             secondary[card] = s
             // A touch: the next card of its place
             v.setOnClickListener { frameOf(card)?.let { swipeSlot(it, 1) } }
-            panels[card] = v
+            v
         }
-        // Widget-style weather (issue #6): forecast by hour or by day, the date, time and connections with it
-        listOf(Card.HOURLY, Card.DAILY).forEach { card ->
-            val tile = layoutInflater.inflate(R.layout.card_tile, null, false) as LinearLayout
-            val wc = app.mg4dash.ui.WeatherCompact(this).apply { tight = !Dock.vertical(this@MainActivity) }
-            tile.addView(wc, LinearLayout.LayoutParams(-1, -1))
-            tile.setOnClickListener { WeatherRepo.refreshNow(this) }
-            weathers[card] = wc
-            panels[card] = tile
+        // Every card from the card list (app.mg4dash.cards): those of the card contract built by their own code, those
+        // still drawn by the home screen ([HostCard], exception) from its layout; in the list's order
+        homeCards.clear()
+        fun host(card: Card, view: View, framed: Boolean, shown: (Boolean) -> Unit = {}, options: ((app.mg4dash.ui.OptionsPopup) -> app.mg4dash.ui.OptionsPopup)? = null, closed: () -> Unit = {}) =
+            app.mg4dash.cards.HostCard(card, view, framed, shown, options, closed)
+        Card.entries.forEach { card ->
+            val h = app.mg4dash.cards.HomeCards.create(card, this) ?: when (card) {
+                // The climate (pinch mode v2): a card like the others, swiped with the other cards of its place
+                Card.CLIMATE -> host(card, climatePanel, false, { if (it) renderClimate(CarBridge.state.value) }, ::climateOptions, ::climateOptionsClosed)
+                Card.MAP -> host(card, b.mapCard, false, { on ->
+                    if (!on) setMapFullscreen(false)
+                    applyMapApp(on)
+                    navBanner?.show(app.mg4dash.map.NavRepo.nav.value?.takeIf { on })
+                    if (on) renderLocation(LocationRepo.location.value, CarBridge.state.value)
+                })
+                Card.SHORTCUTS -> host(card, shortcutsHolder, true, { if (it) renderShortcuts() }, ::shortcutsOptions)
+                Card.WEB -> host(card, web, true, { on -> web.visibility = if (on) View.VISIBLE else View.GONE; if (on) web.show() else web.pause() })
+                // Its own options in a popup (17/11): a long press on the card
+                Card.ENERGY -> host(card, b.energyCard, false, {}, ::energyOptions, ::energyOptionsClosed)
+                Card.TRIP -> host(card, secondaries.getValue(card), false, { if (it) renderTripEnergy() })
+                Card.POWER -> host(card, secondaries.getValue(card), false, { on ->
+                    if (on) { if (!powerBuilt) buildPower(); ensurePowerFx(); lifecycleScope.launch { updatePower() } } else if (!cardPower) dropPowerFx()
+                }, ::powerOptions, ::powerOptionsClosed)
+                Card.PHONE -> host(card, secondaries.getValue(card), false, { if (it) renderPhoneFavs() })
+                else -> error("card ${card.id} has no builder: add it to HomeCards")
+            }
+            homeCards[card] = h
+            // Its options on a long press, in the standard window
+            if (h.options(app.mg4dash.ui.OptionsPopup(this, getString(card.label), card.icon)) != null) h.view.setOnLongClickListener {
+                h.options(app.mg4dash.ui.OptionsPopup(this, getString(card.label), card.icon))?.show { h.optionsClosed() }; true
+            }
+            panels[card] = if (h.framed) frame(h.view) else h.view
         }
+        webPanel = panels[Card.WEB]
     }
 
     /** Titles hidden (less busy, always), and the Map layout's finish. */
@@ -391,7 +384,7 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
     private fun isShown(card: Card) = frameOf(card)?.shown == card
 
     /** Power shown in the energy card (#29): no Power card. */
-    private fun unavailable(): Set<Card> = if (cardPower) setOf(Card.POWER) else emptySet()
+    private fun unavailable(): Set<Card> = (if (cardPower) setOf(Card.POWER) else emptySet()) + HomeSlots.switchedOff(prefs)
 
     /** What each place shows: at start, and at once after each change in the edit mode. */
     private fun applySlots() {
@@ -428,22 +421,8 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
             f.current = HomeSlots.current(prefs, slotLayout, f.slot.id, f.cards)
         }
         // Smaller versions in a small place: consumption, map without + and −, one row of shortcuts
-        consumption.compact = frameOf(Card.CONSUMPTION)?.slot?.size?.form == HomeSlots.Size.SMALL
-        trips.compact = frameOf(Card.TRIPS)?.slot?.size?.form == HomeSlots.Size.SMALL
-        // Tall place: more previous trips, to fill its height (owner's choice)
-        trips.previous = if (frameOf(Card.TRIPS)?.slot?.size?.form == HomeSlots.Size.TALL) 14 else 2
-        driving.form = when (frameOf(Card.DRIVING)?.slot?.size?.form) {
-            HomeSlots.Size.SMALL -> app.mg4dash.ui.DrivingCard.Form.COMPACT
-            HomeSlots.Size.TALL, HomeSlots.Size.LARGE -> app.mg4dash.ui.DrivingCard.Form.FULL
-            HomeSlots.Size.WIDE -> app.mg4dash.ui.DrivingCard.Form.WIDE
-            else -> app.mg4dash.ui.DrivingCard.Form.MEDIUM
-        }
-        radar.form = when (frameOf(Card.RADAR)?.slot?.size?.form) {
-            HomeSlots.Size.SMALL -> app.mg4dash.radar.RadarCard.Form.SMALL
-            HomeSlots.Size.MEDIUM, null -> app.mg4dash.radar.RadarCard.Form.MEDIUM
-            else -> app.mg4dash.radar.RadarCard.Form.FULL
-        }
-        navCard.form = app.mg4dash.ui.NavCard.formFor(frameOf(Card.NAV)?.slot?.size?.form)
+        // The contract's cards: their place, in one common shape
+        homeCards.forEach { (c, h) -> frameOf(c)?.slot?.size?.let { h.place(app.mg4dash.cards.CardPlace(it)) } }
         // The alerter works while its card is in a place, shown or not (its alerts go over Android Auto)
         if (frameOf(Card.RADAR) != null) app.mg4dash.radar.RadarRepo.start(this) else app.mg4dash.radar.RadarRepo.stop()
         applyMapButtons()
@@ -488,28 +467,10 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
 
     /** A card shown or hidden: what it starts or stops. */
     private fun cardShown(card: Card, on: Boolean) {
-        when (card) {
-            Card.MAP -> {
-                if (!on) setMapFullscreen(false)
-                applyMapApp(on)
-                navBanner?.show(app.mg4dash.map.NavRepo.nav.value?.takeIf { on })
-                if (on) renderLocation(LocationRepo.location.value, CarBridge.state.value)
-            }
-            Card.CONSUMPTION -> if (on) consumption.show()
-            Card.SHORTCUTS -> if (on) renderShortcuts()
-            Card.TRIPS -> if (on) trips.show()
-            Card.DRIVING -> if (on) driving.show()
-            Card.RADAR -> if (on) radar.show(app.mg4dash.radar.RadarRepo.state.value)
-            Card.NAV -> if (on) showNavCard(app.mg4dash.map.NavRepo.nav.value)
-            Card.WEB -> webCard?.let { w -> w.visibility = if (on) View.VISIBLE else View.GONE; if (on) w.show() else w.pause() }
-            Card.ENERGY -> {}
-            Card.TRIP -> if (on) renderTripEnergy()
-            Card.POWER -> if (on) { if (!powerBuilt) buildPower(); ensurePowerFx(); lifecycleScope.launch { updatePower() } } else if (!cardPower) dropPowerFx()
-            Card.PHONE -> if (on) renderPhoneFavs()
-            Card.HOURLY, Card.DAILY -> if (on) renderWeather(WeatherRepo.shown.value, CarBridge.state.value)
-            Card.CLIMATE -> if (on) renderClimate(CarBridge.state.value)
-            Card.LYRICS -> if (on) lyricsCard.show(MediaHub.now.value)
-        }
+        // The cards of the contract run only while shown and home in sight (see observe()); those drawn by the home
+        // screen itself as before
+        val h = homeCards[card] ?: return
+        h.shown(on && (!h.pausesWithHome || lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)))
     }
 
     /** Swipe or touch on a place: its next card, kept for the next time. */
@@ -711,18 +672,18 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         }
     }
 
-    /** Every 5 s: the map gives way to consumption with no connection, the trip and consumption cards follow. */
+    /** Every 5 s: the map gives way to consumption with no connection, the trip and consumption cards follow (the
+     *  card contract's cards refresh themselves). */
     private fun refreshCards() {
         frames.values.forEach { f -> if (insteadOf(f) != f.instead) showFrame(f) }
         if (isShown(Card.TRIP)) renderTripEnergy()
-        if (isShown(Card.CONSUMPTION)) consumption.show()
-        if (isShown(Card.TRIPS)) trips.show()
     }
 
     private var lastPlugged: Boolean? = null
     private var navBanner: app.mg4dash.ui.NavBanner? = null
 
     private var builtCardPower = false
+    private var builtCardsOff: Set<String> = emptySet()
 
     /** "Power" energy card (#29): the Power card is no longer among the cards. */
     private val cardPower: Boolean get() = prefs.energyCardPower && !simpleMode
@@ -762,10 +723,6 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         b.mediaTitle.maxLines = if (media == HomeSlots.Size.QUARTER) 1 else 2
         mediaQuarter(media == HomeSlots.Size.QUARTER)
         energyForm(frameOf(Card.ENERGY)?.slot?.size == HomeSlots.Size.QUARTER)
-        weathers.forEach { (card, wc) ->
-            val tight = frameOf(card)?.slot?.size != HomeSlots.Size.HALF
-            if (wc.tight != tight) { wc.tight = tight; renderWeather(WeatherRepo.weather.value, CarBridge.state.value) }
-        }
     }
 
     private fun climateForm(size: HomeSlots.Size?) {
@@ -945,7 +902,7 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
     /** The OpenStreetMap map's options (17/11, once in Settings › Home): zoom, colours, energy when offline. */
     private fun mapOptions() {
         val zoom = prefs.mapZoom; val theme = prefs.mapTheme
-        app.mg4dash.ui.OptionsPopup(this, getString(R.string.st_style_map))
+        app.mg4dash.ui.OptionsPopup(this, getString(R.string.st_style_map), R.drawable.ic_map)
             .choice(getString(R.string.st_map_zoom), null, listOf("14", "15", "16", "17", "18"), { prefs.mapZoom - 14 }) { prefs.mapZoom = 14 + it }
             .choice(getString(R.string.st_map_theme), null, listOf(R.string.st_mode_auto, R.string.st_mode_light, R.string.st_mode_dark).map { getString(it) }, { prefs.mapTheme }) { prefs.mapTheme = it }
             .toggle(getString(R.string.st_map_offline_switch).trimEnd(' ', ':', ' ', ' '), getString(R.string.st_map_offline_switch_desc), { prefs.mapOfflineSwitch }) { prefs.mapOfflineSwitch = it }
@@ -953,17 +910,26 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
     }
 
     /** The energy card's options (17/11, once in Settings › Home): live power in it, volts and amps, back to it plugged in. */
-    private fun energyOptions() {
-        val power = prefs.energyCardPower
-        val va = prefs.powerVa
+    private var energyBuiltWith: Pair<Boolean, Boolean>? = null
+
+    private fun energyOptions(popup: app.mg4dash.ui.OptionsPopup): app.mg4dash.ui.OptionsPopup {
+        energyBuiltWith = prefs.energyCardPower to prefs.powerVa
         fun t(res: Int) = getString(res, "").trimEnd(' ', ':', ' ', ' ')
-        app.mg4dash.ui.OptionsPopup(this, getString(R.string.wc_energy))
+        return popup
             .toggle(t(R.string.st_energy_card_power), getString(R.string.st_energy_card_power_desc), { prefs.energyCardPower }) { prefs.energyCardPower = it }
             .toggle(t(R.string.st_power_va), getString(R.string.st_power_va_desc), { prefs.powerVa }) { prefs.powerVa = it }
             .toggle(t(R.string.st_stack_auto), null, { prefs.stackAuto }) { prefs.stackAuto = it }
-            // The card is built with these two: rebuilt at once when either changed (21/11: V / A did not show
-            // until home was built again)
-            .show { if (prefs.energyCardPower != power || prefs.powerVa != va) app.mg4dash.ui.Themes.recreateSmooth(this) }
+            // V2L on plugging in (#82, here since 24/11): a warning on enabling, the discharge then starts with no other action
+            .toggle(getString(R.string.st_v2l_auto), getString(R.string.st_v2l_auto_desc), { prefs.v2lAuto }) { on ->
+                if (!on) prefs.v2lAuto = false
+                else app.mg4dash.ui.Windows.confirm(this, getString(R.string.st_v2l_auto), getString(R.string.st_v2l_auto_warning),
+                    getString(R.string.st_v2l_auto_enable), danger = false) { prefs.v2lAuto = true; popup.refresh() }
+            }
+    }
+
+    /** The card is built with these two: rebuilt at once when either changed (21/11: V / A did not show until home was built again). */
+    private fun energyOptionsClosed() {
+        if (energyBuiltWith?.let { it != (prefs.energyCardPower to prefs.powerVa) } == true) app.mg4dash.ui.Themes.recreateSmooth(this)
     }
 
     /**
@@ -994,7 +960,7 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         app.mg4dash.system.Rescue.notice?.let { app.mg4dash.system.Rescue.notice = null; app.mg4dash.ui.Toasts.show(this, it, long = true) }
         // Home layout changed in the settings: rebuild the screen
         if ((prefs.homeStyle == 1) != simpleMode || (!simpleMode && HomeSlots.layoutOf(prefs) != slotLayout) || Dock.vertical(this) != builtVertical || (builtVertical && Dock.rightSide(this) != builtRight) || prefs.shortcutsMenu != builtShortcuts || prefs.hideTitles != builtHideTitles ||
-            CarBridge.heatingShown(this) != builtHeating || (!simpleMode && cardPower != builtCardPower) ||
+            CarBridge.heatingShown(this) != builtHeating || (!simpleMode && cardPower != builtCardPower) || (!simpleMode && prefs.cardsOff != builtCardsOff) ||
             prefs.connectionIcons != builtConnections ||
             app.mg4dash.ui.Themes.signature(this) != themeSig) { app.mg4dash.ui.Themes.recreateSmooth(this); return }
         // Map app uninstalled in the meantime (#54): back to the OpenStreetMap map
@@ -1202,7 +1168,68 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
     }
 
     /** The climate's settings: the calibration of the displayed temperature. */
-    private fun climateSettings() = app.mg4dash.ui.TempCalibration.show(this) { renderClimate(CarBridge.state.value) }
+    /** A long press on the temperature or the fan: the climate card's options, as a long press on the card. */
+    private fun climateSettings() {
+        homeCards[Card.CLIMATE]?.let { h -> h.options(app.mg4dash.ui.OptionsPopup(this, getString(Card.CLIMATE.label), Card.CLIMATE.icon))?.show { h.optionsClosed() } }
+    }
+
+    /** The climate card's options: the temperature calibration (it opens its own window). */
+    /**
+     * The power card's options (24/11, once in Settings): MG4 XPower (the power's scale), the effects of a full
+     * throttle (one or more ticked, one drawn each time; none: none) and their sounds.
+     */
+    private fun powerOptions(popup: app.mg4dash.ui.OptionsPopup): app.mg4dash.ui.OptionsPopup {
+        powerBuiltXpower = prefs.xpower
+        val fx = app.mg4dash.ui.PowerFx
+        popup.toggle(getString(R.string.st_xpower), getString(R.string.st_xpower_desc), { prefs.xpower }) { prefs.xpower = it }
+            .note(getString(R.string.st_power_fx_desc))
+        listOf(fx.LIGHTNING to R.string.fx_lightning, fx.FLAMES to R.string.fx_flames, fx.HYPERSPACE to R.string.fx_hyperspace).forEach { (v, name) ->
+            popup.check(getString(name), { v in prefs.powerFxSet }) { on ->
+                prefs.powerFxSet = if (on) prefs.powerFxSet + v else prefs.powerFxSet - v
+                if (on) app.mg4dash.ui.FxSound.play(this, v, prefs.fxVolume)
+            }
+        }
+        var trials = 0
+        return popup.toggle(getString(R.string.st_fx_sound), null, { prefs.fxSound }) { on ->
+            prefs.fxSound = on
+            if (on) app.mg4dash.ui.FxSound.play(this, app.mg4dash.ui.FxSound.trialStyle(prefs.powerFxSet, trials++), prefs.fxVolume)
+        }.slider(getString(R.string.st_fx_volume), 100, { prefs.fxVolume }, { if (it == 0) getString(R.string.st_fx_volume_off) else "$it %" }, { prefs.fxSound }) { v ->
+            prefs.fxVolume = v
+            app.mg4dash.ui.FxSound.play(this, app.mg4dash.ui.FxSound.trialStyle(prefs.powerFxSet, trials++), v)
+        }
+    }
+
+    private var powerBuiltXpower: Boolean? = null
+
+    /** XPower changes the power's scale: the card is built again. */
+    private fun powerOptionsClosed() {
+        if (powerBuiltXpower?.let { it != prefs.xpower } == true) app.mg4dash.ui.Themes.recreateSmooth(this)
+    }
+
+    /** The shortcuts card's options (24/11): Home Assistant, which its shortcuts use. */
+    private fun shortcutsOptions(popup: app.mg4dash.ui.OptionsPopup): app.mg4dash.ui.OptionsPopup =
+        popup.action(getString(R.string.st_ha_settings), getString(R.string.st_ha_desc), getString(R.string.opt_open)) {
+            app.mg4dash.settings.SettingsActivity.openHa(this)
+        }
+
+    private fun climateOptions(popup: app.mg4dash.ui.OptionsPopup): app.mg4dash.ui.OptionsPopup {
+        climateBuiltWith = prefs.heatedSeats
+        // From Settings › Vehicle (24/11): what belongs to the climate is set on its card
+        popup.choice(getString(R.string.st_heated), null, listOf(getString(R.string.st_mode_auto_short), getString(R.string.yes), getString(R.string.no)),
+            { prefs.heatedSeats }) { prefs.heatedSeats = it }
+            .toggle(getString(R.string.st_climhold), getString(R.string.st_climhold_desc), { prefs.climateHoldEnabled }) { prefs.climateHoldEnabled = it }
+        if (app.mg4dash.system.Firmware.family == app.mg4dash.system.Firmware.Family.LEGACY)
+            popup.toggle(getString(R.string.st_hide_saic_climate), getString(R.string.st_hide_saic_climate_desc), { prefs.hideSaicClimate }) { prefs.hideSaicClimate = it }
+        // The fine adjustments right here (24/11, once a menu of their own)
+        return app.mg4dash.ui.TempCalibration.addTo(this, popup) { renderClimate(CarBridge.state.value) }
+    }
+
+    private var climateBuiltWith: Int? = null
+
+    /** The seats' and wheel's buttons follow the setting at once. */
+    private fun climateOptionsClosed() {
+        if (climateBuiltWith?.let { it != prefs.heatedSeats } == true) app.mg4dash.ui.Themes.recreateSmooth(this)
+    }
 
     /** Press = one step; hold = repeat every 350 ms. */
     private fun repeatOnHold(view: View, action: () -> Unit) {
@@ -1297,11 +1324,6 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
 
     /** Height of the power card's battery bar, unplugged (start marker included). */
     private var gaugeHeight = 0
-
-    /** The guidance card: the manoeuvre, and the battery estimated on arrival from the distance left. */
-    private fun showNavCard(n: app.mg4dash.map.NavRepo.Nav?) {
-        navCard.show(n, n?.let { app.mg4dash.energy.ArrivalBattery.now(this, it.totalMeters) })
-    }
 
     private fun renderEnergy(s: VehicleState, avg: Float?) {
         val pct = s.batteryPercent
@@ -1508,9 +1530,6 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
 
     // ── Weather ──────────────────────────────────────────────────────────────
 
-    private fun renderWeather(w: WeatherRepo.Weather?, s: VehicleState) {
-        weathers.forEach { (card, wc) -> wc.show(w, s.outsideTemp, prefs.weatherCity, if (card == Card.DAILY) 1 else 0) }
-    }
 
     // ── Cards ────────────────────────────────────────────────────────────────
 
@@ -1857,7 +1876,7 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         rows += app.mg4dash.ui.CardMenu.Row("＋", getString(R.string.wc_other_app), null, false) {
             app.mg4dash.shortcuts.Shortcuts.pickApp(this, getString(R.string.map_app_pick), getString(R.string.map_app_osm)) { picked -> use(picked) }
         }
-        app.mg4dash.ui.CardMenu.show(this, rows)
+        app.mg4dash.ui.CardMenu.show(this, rows, getString(Card.MAP.label))
     }
 
     /** App embedded in the map widget (#41, trial) and its component. */
@@ -1966,6 +1985,8 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
     }
 
     override fun dispatchTouchEvent(ev: android.view.MotionEvent): Boolean {
+        // A touch: the driver is there, the startup sequence may start (#133)
+        if (ev.actionMasked == android.view.MotionEvent.ACTION_DOWN) MediaHub.driverTouched()
         if (panelOver() || app.mg4dash.ui.ShortcutsPanel.covers(this)) {
             // The card gestures under it end there
             if (ev.actionMasked == android.view.MotionEvent.ACTION_DOWN) { pressFrame = null; handler.removeCallbacks(longPressed); restFrame = null }
@@ -2659,24 +2680,21 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
                     CarBridge.state.collect { s ->
                         // Speed and odometer keep changing while driving, and these cards do not show them
                         val quiet = s.copy(speedKmh = null, odometerKm = null)
-                        if (quiet != shown) { shown = quiet; renderClimate(s); renderEnergy(s, ConsumptionEstimator.average.value); stackAuto(s); if (isShown(Card.DRIVING)) driving.show(s) }
+                        if (quiet != shown) { shown = quiet; renderClimate(s); renderEnergy(s, ConsumptionEstimator.average.value); stackAuto(s) }
                     }
                 }
                 launch { ConsumptionEstimator.average.collect { renderEnergy(CarBridge.state.value, it) } }
-                // Driving choices (#38): pending, then confirmed; one the car did not take is said, discreetly
-                launch { CarBridge.drivePending.collect { if (isShown(Card.DRIVING)) driving.show() } }
+                // The card contract's cards: shown while home is in sight, stopped when it goes
+                launch {
+                    try { homeCards.forEach { (c, h) -> if (h.pausesWithHome && isShown(c)) h.shown(true) }; kotlinx.coroutines.awaitCancellation() }
+                    finally { homeCards.values.forEach { if (it.pausesWithHome) it.shown(false) } }
+                }
+                // Driving choices (#38): one the car did not take is said, discreetly
                 launch { CarBridge.driveRefused.collect { app.mg4dash.ui.Toasts.show(this@MainActivity, R.string.dv_not_confirmed) } }
-                launch { MediaHub.now.collect { renderMedia(it); if (isShown(Card.LYRICS)) lyricsCard.show(it) } }
-                launch { app.mg4dash.radar.RadarRepo.state.collect { if (isShown(Card.RADAR)) radar.show(it) } }
-                // Download mark of the alerter's card: the preparation's progress, tiles downloaded live
-                launch { app.mg4dash.radar.RadarRepo.prepare.collect { radar.downloads(it, app.mg4dash.radar.RadarRepo.live.value) } }
-                launch { app.mg4dash.radar.RadarRepo.live.collect { radar.downloads(app.mg4dash.radar.RadarRepo.prepare.value, it) } }
-                launch { WeatherRepo.shown.collect { renderWeather(it, CarBridge.state.value) } }
+                launch { MediaHub.now.collect { renderMedia(it) } }
                 launch { LocationRepo.location.collect { renderLocation(it, CarBridge.state.value) } }
                 // DiAuto guidance: banner on the map (not on the shortcuts)
-                launch { app.mg4dash.energy.ConsumptionCurve.curves.collect { if (isShown(Card.CONSUMPTION)) consumption.show() } }
                 launch { app.mg4dash.map.NavRepo.nav.collect { n -> navBanner?.show(n?.takeIf { isShown(Card.MAP) }) } }
-                launch { app.mg4dash.map.NavRepo.nav.collect { n -> if (isShown(Card.NAV)) showNavCard(n) } }
                 launch { while (true) { updatePower(); delay(1_000) } }
                 // Startup (#64): home is built with the last known theme; as soon as the car
                 // answers, the lights state is read and the theme changed at once, without waiting for the 5 s loop
@@ -2693,7 +2711,6 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
                         if (isFinishing) return@launch
                         if (app.mg4dash.ui.Themes.signature(this@MainActivity) != themeSig && !app.mg4dash.ui.Themes.popupOpen(this@MainActivity)) { app.mg4dash.ui.Themes.publish(this@MainActivity); app.mg4dash.ui.Themes.recreateSmooth(this@MainActivity); return@launch }
                         refreshCards()
-                        renderWeatherFallbackOnly()
                         val recircNow = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
                             app.mg4dash.car.CarProps.readAny(354419976).let { v -> when (v) { "true", "1" -> true; "false", "0" -> false; else -> null } }
                         }
@@ -2703,10 +2720,6 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
                 }
             }
         }
-    }
-
-    private fun renderWeatherFallbackOnly() {
-        if (WeatherRepo.shown.value == null) renderWeather(null, CarBridge.state.value)
     }
 
     // ── Startup: let the SAIC launcher register its interface ────────────────

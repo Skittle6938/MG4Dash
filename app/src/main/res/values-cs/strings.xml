@@ -184,6 +184,7 @@
     <string name="ps_col_cpu">CPU</string>
     <string name="ps_col_ram">RAM</string>
     <string name="ps_service">služba</string>
+    <string name="ps_self">včetně zobrazení tohoto seznamu</string>
     <string name="ps_hint">Podrobnosti aplikací ›</string>
     <string name="ps_note">≈ : nedávný průměr ze systému u aplikací, které nelze číst živě.</string>
     <string name="unit_mb">MB</string>
@@ -211,6 +212,12 @@
     <string name="st_valet">Režim údržby</string>
     <string name="st_rescue_note">Záchranná síť: pokud se MG4Dash přestane spouštět nebo několikrát za sebou spadne, MG4Dash Rescue jej při dalším spuštění opraví, nebo vrátí původní domovskou obrazovku SAIC.</string>
     <string name="st_battery_line">Nová: %1$s kWh  ·  Aktuální: %2$s kWh  ·  Stav: %3$s</string>
+    <string name="en_battery_caps">%1$s kWh naměřeno · %2$s kWh nová (model %3$d kWh)</string>
+    <string name="en_health">odhadovaný stav</string>
+    <string name="en_battery_settings">Nastavení baterie</string>
+    <string name="en_battery_model">Model baterie</string>
+    <string name="en_battery_model_desc">Reference pro odhadovaný stav</string>
+    <string name="en_new_cap_desc">Žádná oficiální hodnota: auto ji neposkytuje</string>
     <string name="st_battery_model">Model baterie (reference pro odhad stavu na stránce Vozidlo):</string>
     <string name="st_new_cap">Nová kapacita použitá pro výpočet stavu:</string>
     <string name="st_new_cap_default">%1$s kWh (výchozí)</string>
@@ -223,11 +230,10 @@
     <string name="st_startup">SPUŠTĚNÍ</string>
     <string name="st_toggle">Přepnout</string>
     <string name="st_display">ZOBRAZENÍ</string>
-    <string name="st_fullscreen">Celá obrazovka (skryje boční lištu a pruh SAIC): %1$s</string>
     <string name="st_fullscreen_desc">Přejetím od levého nebo horního okraje lišty SAIC znovu zobrazíte.</string>
     <string name="yes">ANO</string>
     <string name="no">NE</string>
-    <string name="st_log">PROTOKOL</string>
+    <string name="st_log">Protokol</string>
     <string name="st_refresh">Obnovit</string>
     <string name="st_log_export">Exportovat na USB disk</string>
     <string name="st_log_exported">✓  Protokol uložen na USB disk: %1$s</string>
@@ -238,6 +244,7 @@
     <string name="st_log_eject_failed">USB disk nelze vysunout: některá aplikace jej možná stále používá. Zkuste to za chvíli znovu.</string>
     <string name="st_close">Zavřít</string>
     <string name="st_title">Nastavení · MG4Dash %1$s</string>
+    <string name="st_settings">Nastavení</string>
     <string name="st_replace_msg">MG4Dash se otevře při spuštění a po stisknutí tlačítka Domů.\n\nNic se neodinstaluje: původní domovská obrazovka SAIC se pouze vypne jako domovská obrazovka a ostatní funkce vozu fungují normálně.\n\nKdykoli se můžete vrátit pomocí Režimu údržby na stejném místě. Pokud by MG4Dash několikrát za sebou spadl, původní domovská obrazovka se vrátí sama.</string>
     <string name="st_replace_btn">Nahradit</string>
     <string name="valet_banner_title">Režim údržby zapnut</string>
@@ -301,6 +308,7 @@
     <string name="st_ha_no_token">Token: nenastaven</string>
     <string name="st_ha_token_set">Token: nastaven</string>
     <string name="st_ha_desc">Ve svém profilu Home Assistant vytvořte dlouhodobý přístupový token. Zkratky pak mohou spouštět skripty, automatizace, scény, tlačítka a clony (brána, garážová vrata). Zkratky zobrazíte tlačítkem vpravo nahoře na mapě.</string>
+    <string name="st_ha_settings">Nastavení Home Assistant</string>
     <string name="st_ha_set_url">Adresa</string>
     <string name="st_ha_set_token">Token</string>
     <string name="st_ha_test">Test</string>
@@ -309,8 +317,15 @@
     <string name="st_ha_import_desc">Klávesnice neumí vkládat? Uložte do kořene USB disku soubor mg4dash_ha.txt s adresou na jednom řádku a tokenem na dalším.</string>
     <string name="st_ha_import_done">Načteno z USB disku: %1$s</string>
     <string name="st_ha_import_none">V kořeni USB disku není soubor mg4dash_ha.txt</string>
+    <string name="ha_connection">Připojení</string>
+    <string name="ha_token_on">Uloženo</string>
+    <string name="ha_token_off">Nenastaveno</string>
+    <string name="ha_test_title">Otestovat připojení</string>
+    <string name="ha_usb">USB disk</string>
     <string name="st_paste">Vložit</string>
     <string name="st_diag">DIAGNOSTIKA</string>
+    <string name="st_diag_on">Diagnostický režim zapnut</string>
+    <string name="st_diag_off">Diagnostický režim vypnut</string>
     <string name="st_energy_log">Záznam energetických dat: %1$s</string>
     <string name="st_energy_log_desc">Každých 5 s zapisuje výkon baterie, počítadla spotřeby a stavy zařízení do Android/data/app.mg4dash/files/energy_log.csv (pouze čtení, do vozu se nic neodesílá). Ukládá se každých 5 min, aby se šetřila paměť jednotky. Pouze pro řešení problémů: jinak nechte vypnuté.</string>
     <string name="sc_search">Hledat…</string>
@@ -340,6 +355,7 @@
     <string name="st_theme">MOTIV</string>
     <string name="st_theme_bg">Pozadí</string>
     <string name="st_theme_accent">Barva tlačítek</string>
+    <string name="st_more_colors">Další barvy…</string>
     <string name="st_theme_desc">Zelená baterie, oranžový ohřev, azurové chlazení a červené upozornění si zachovávají svůj význam v jakémkoli motivu. MG4Radio převezme motiv při příštím otevření rádia.</string>
     <string name="st_update">AKTUALIZACE</string>
     <string name="st_update_installed">Nainstalovaná verze: %1$s</string>
@@ -411,7 +427,7 @@
     <string name="dock_slot_wifi_short">Wi-Fi</string>
     <string name="st_cap_car">Načteno z vozu: %1$s kWh.</string>
     <string name="st_cap_none" formatted="false">Vůz tuto hodnotu neposkytuje: MG4Dash ji změří během jízdy po poklesu o 15 % (sečteno z více jízd).</string>
-    <string name="st_cap_est">Změřeno MG4Dash: %1$s kWh (%2$d měření mezi nabíjeními, vyhlazeno za 30 dní).</string>
+    <string name="st_cap_est">Odhadnuto MG4Dash za jízdy: %1$s kWh (%2$d měření z posledních vybíjení, vyhlazeno za 30 dní).</string>
     <string name="st_cap_est_current">Měří MG4Dash: %1$s kWh (předběžně).</string>
     <string name="sw_batt_temp">Baterie %1$d °C</string>
     <string name="st_map_vdock">Svislá lišta vlevo (všechny obrazovky a MG4Radio): %1$s</string>
@@ -478,6 +494,20 @@
     <string name="st_map_offline_switch_desc">Bez datového připojení, pokud celá zobrazená mapa není v offline mezipaměti</string>
     <string name="st_use_location">Použít moji polohu</string>
     <string name="st_wx_model">Model počasí: %1$s</string>
+    <string name="wx_model_auto">Automaticky (doporučeno)</string>
+    <string name="wx_model_meteofrance">Météo-France</string>
+    <string name="wx_model_ecmwf">Evropský (ECMWF)</string>
+    <string name="wx_model_dwd">Německý (DWD)</string>
+    <string name="wx_model_ukmo">Britský (Met Office)</string>
+    <string name="wx_model_noaa">Americký (NOAA)</string>
+    <string name="wx_model_gem">Kanadský (GEM)</string>
+    <string name="wx_model_desc">Automaticky vybere nejlepší model pro dané místo. Vynuťte jiný jen tehdy, když je předpověď často špatná.</string>
+    <string name="st_wx_city">Záložní město</string>
+    <string name="st_wx_city_desc">%1$s, pokud auto neposkytne polohu</string>
+    <string name="wx_city_here">Aktuální poloha</string>
+    <string name="wx_city_search">Hledat město…</string>
+    <string name="wx_city_offline">Žádné připojení: město se nemění</string>
+    <string name="wx_city_none">Pro „%1$s“ nebylo nalezeno žádné město</string>
     <string name="st_wx_model_auto">Automaticky</string>
     <string name="st_no_location">Poloha zatím není k dispozici</string>
     <string name="st_heated">Vyhřívání sedadel a volantu</string>
@@ -708,8 +738,15 @@
     <string name="st_tab_car">Vozidlo</string>
     <string name="st_tab_net">Připojení</string>
     <string name="st_tab_system">Systém</string>
-    <string name="st_theme_smooth">Plynulé přepínání světlý / tmavý</string>
-    <string name="st_theme_smooth_desc">Čeká 5 s stabilních světel (žádné přepínání pod mosty) a prolne se za 2 s. Vypnuto: přepne hned, jak se světla změní.</string>
+    <string name="st_tab_screen">Obrazovka</string>
+    <string name="st_tab_media">Média a zvuky</string>
+    <string name="st_tab_general">Obecné</string>
+    <string name="st_bar_section">LIŠTA</string>
+    <string name="st_formats">FORMÁTY</string>
+    <string name="st_input">PSANÍ</string>
+    <string name="du_last30">Posledních 30 dní</string>
+    <string name="du_detail_open">Zobrazit podrobnosti</string>
+    <string name="du_detail_open_desc">Den po dni, upozornění a jeho práh, vynulování</string>
     <string name="st_night_sun">Noc po západu slunce</string>
     <string name="st_night_sun_desc">Automatický režim: tmavý od západu do východu slunce v místě vozu, i s vypnutými obrysovými světly. Počítá se v jednotce, bez sítě.</string>
     <string name="st_night_sun_today">Dnes zde: západ %1$s, východ %2$s</string>
@@ -732,6 +769,7 @@
     <string name="st_v2l_auto_warning">Upozornění: jakmile se připojí kabel V2L, vybíjení se spustí samo, bez dalšího zásahu, a vše připojené ke kabelu bude napájeno.</string>
     <string name="st_v2l_auto_enable">Zapnout</string>
     <string name="st_audio_source">Zdroj zvuku</string>
+    <string name="st_media">Média</string>
     <string name="st_start_source">Zdroj při spuštění</string>
     <string name="st_src_auto">Automaticky</string>
     <string name="st_src_car">Stejný jako vůz</string>
@@ -815,6 +853,7 @@
     <string name="conn_usb_count">Připojeno: %1$d</string>
     <string name="en_time_note">Řazeno podle data a vyhlazeno · průměr (čárkovaně)</string>
     <string name="st_sound_trigger">Zvuk při spuštění</string>
+    <string name="st_sounds">ZVUKY</string>
     <string name="st_sound_trigger_desc">Vyberte zvukový soubor z flash disku USB (nebo z interního úložiště). Zkopíruje se do aplikace a zůstane dostupný i po odpojení disku.</string>
     <string name="st_sound_boot_trigger">Přehrát při spuštění</string>
     <string name="st_sound_pick_file">Vybrat zvuk</string>
@@ -826,7 +865,8 @@
     <string name="st_sound_imported">Importovaný zvuk: %1$s</string>
     <string name="st_sound_test">Test</string>
     <string name="st_sound_stop">Zastavit</string>
-    <string name="st_sound_volume">Hlasitost médií vozu</string>
+    <string name="st_sound_volume">Hlasitost zvuku při startu</string>
+    <string name="st_sound_volume_desc">Jen pro zvuk při startu</string>
     <string name="st_sound_vol_default">Aktuální hlasitost vozu</string>
     <string name="st_sound_volume_level">%1$d / 32</string>
     <string name="du_tab">Data 4G</string>
@@ -944,7 +984,7 @@
     <string name="st_fx_sound">Zvukové efekty</string>
     <string name="st_fx_volume">Hlasitost zvukových efektů</string>
     <string name="st_fx_volume_off">Vypnuto</string>
-    <string name="wc_radar">Varování před radary (test)</string>
+    <string name="wc_radar">Varování před radary</string>
     <string name="du_radars">Radary</string>
     <string name="rad_osm">© přispěvatelé OpenStreetMap</string>
     <string name="rad_osm_licence">Limity a radary: © přispěvatelé OpenStreetMap, licence ODbL. Data mohou být neúplná nebo zastaralá: vždy platí dopravní značení.</string>
@@ -967,8 +1007,8 @@
     <string name="rad_off_road">Silnice nerozpoznána</string>
     <string name="rad_banner">%1$s · %2$s</string>
     <string name="rad_banner_sub">Zpomalte · %1$s · konec zóny za %2$s</string>
-    <string name="st_rad_title">Varování před radary (test)</string>
-    <string name="st_rad_desc">Rychlostní limit silnice a zóny radarů pouze z dat OpenStreetMap. Pro použití umístěte kartu Varování před radary (test) na místo domovské obrazovky (sevřete domovskou obrazovku). Dlouhý stisk karty otevře tato nastavení.</string>
+    <string name="st_rad_title">Varování před radary</string>
+    <string name="st_rad_desc">Rychlostní limit silnice a zóny radarů pouze z dat OpenStreetMap. Pro použití umístěte kartu Varování před radary na místo domovské obrazovky (sevřete domovskou obrazovku). Dlouhý stisk karty otevře tato nastavení.</string>
     <string name="st_rad_visual">Vizuální upozornění (oranžová, červená)</string>
     <string name="st_rad_sound">Zvuk</string>
     <string name="st_rad_sound_none">Žádný</string>
@@ -980,7 +1020,7 @@
     <string name="st_rad_high">Silné upozornění (červená) nad limit</string>
     <string name="st_rad_banner">Pruh přes ostatní aplikace</string>
     <string name="st_rad_banner_desc">Červeně blikající pruh výrazně nad limitem v zóně radaru, i přes Android Auto.</string>
-    <string name="st_rad_wifi">Jen Wi-Fi</string>
+    <string name="st_rad_wifi">Stahovat jen přes Wi-Fi</string>
     <string name="st_rad_wifi_desc">Žádné stahování přes 4G vozu: použijí se jen již uložené oblasti.</string>
     <string name="st_rad_cache">%1$d uložených oblastí · %2$s</string>
     <string name="st_rad_preparing">Příprava: %1$d / %2$d</string>
@@ -1016,6 +1056,12 @@
     <string name="st_rad_snd_chime">Gong</string>
     <string name="st_rad_snd_beep">Pípnutí</string>
     <string name="st_rad_snd_loud">Hlasité pípnutí</string>
+    <string name="st_rad_snd_marimba">Marimba</string>
+    <string name="st_rad_snd_dingdong">Ding-dong</string>
+    <string name="st_rad_snd_sonar">Sonar</string>
+    <string name="st_rad_snd_pulse">Trojitý puls</string>
+    <string name="st_rad_snd_blip">Retro pípnutí</string>
+    <string name="st_rad_snd_hum">Hluboké bzučení</string>
     <string name="rp_tab_alerts">Upozornění</string>
     <string name="rp_tab_alerts_sub">Prahy, zvuky, pruh</string>
     <string name="rp_tab_data">Data</string>
@@ -1023,6 +1069,9 @@
     <string name="rp_tab_data_prep">Příprava %1$d / %2$d</string>
     <string name="rp_osm_box">Limity a radary: © přispěvatelé OpenStreetMap, ODbL. Vždy platí dopravní značení.</string>
     <string name="rp_thresholds">Prahy</string>
+    <string name="rp_threshold_unit">Prahy v</string>
+    <string name="rp_display">Zobrazení</string>
+    <string name="rp_gps_correction_sub">Měřeno za jízdy</string>
     <string name="rp_mixed">Smíšený</string>
     <string name="rp_under_100">Limity pod 100 km/h</string>
     <string name="rp_from_100">Limity od 100 km/h</string>
@@ -1030,8 +1079,10 @@
     <string name="rp_in">V</string>
     <string name="rp_light_over">Mírné nad</string>
     <string name="rp_strong_over">Silné nad</string>
-    <string name="rp_visual">Barvy na kartě</string>
+    <string name="rp_visual">Barevná rychlost</string>
+    <string name="rp_visual_sub">Na kartě se rychlost mírně nad limitem zbarví oranžově, výrazně nad ním červeně</string>
     <string name="rp_banner">Pruh přes aplikace</string>
+    <string name="rp_banner_sub">Zobrazí se jen při překročení rychlosti v zóně radaru (silné varování)</string>
     <string name="rp_sounds">Zvuk každého upozornění</string>
     <string name="rp_col_alert">Upozornění</string>
     <string name="rp_col_sound">Zvuk</string>
@@ -1059,6 +1110,8 @@
     <string name="rp_prep_done">Poslední příprava dokončena</string>
     <string name="rp_prep_stopped">Příprava zastavena</string>
     <string name="rp_prep_none">Zatím žádná příprava</string>
+    <string name="rp_prep_stored_at">Připraveno %1$s · %2$d oblastí</string>
+    <string name="rp_prep_stored">%1$d oblastí již staženo</string>
     <string name="rp_prep_detail">Wi-Fi · přijato %1$s</string>
     <string name="rp_prep_left">zbývá ≈ %1$d min</string>
     <string name="rp_prep_failed">%1$d oblastí selhalo, nový pokus</string>
@@ -1066,9 +1119,11 @@
     <string name="rp_resume">Pokračovat</string>
     <string name="rp_pause">Pozastavit</string>
     <string name="rp_cancel">Zrušit</string>
-    <string name="rp_wifi_sub">Nikdy 4G: použijí se jen uložené oblasti</string>
+    <string name="rp_wifi_sub">Žádné 4G při jízdě: použijí se jen již stažené silnice a radary</string>
     <string name="rp_refresh">Obnovit oblast kolem vozu</string>
     <string name="rp_refresh_sub">Pokud je starší než…</string>
+    <string name="unit_day_short">d</string>
+    <string name="rp_repeat_sub">Dokud upozornění trvá; 0: jednou</string>
     <string name="rp_storage">Úložiště</string>
     <string name="rp_space">Obsazené místo</string>
     <string name="rp_space_sub">Oblasti uloženy 30 dní</string>
@@ -1083,8 +1138,6 @@
     <string name="wc_conn_small">Místo je pro lištu připojení příliš malé</string>
     <string name="st_climate_fx">Animace teplo/chlad na kartě klimatizace</string>
     <string name="st_climate_fx_desc">Vlnění tepla při topení, jinovatka při chlazení, výraznější čím dál je nastavená teplota od venkovní. Vypnuto: zmizí jen animace, Topení / Chlazení zůstane.</string>
-    <string name="st_call_bar">Skrýt horní lištu během hovorů</string>
-    <string name="st_call_bar_desc">Okno hovoru vozu zůstane také na celou obrazovku. Přejetí shora lištu stále zobrazí; skryje se i v aplikaci Telefon SAIC.</string>
     <string name="rp_stop">Zastavit</string>
     <string name="clim_settings_title">Nastavení klimatizace</string>
     <string name="clim_fx_title">Topení / chlazení na kartě</string>
@@ -1146,6 +1199,9 @@
     <string name="sc_profile">Profil</string>
     <string name="pf_drive">Profily si pamatují jízdní režim a rekuperaci</string>
     <string name="pf_drive_desc">Při opuštění profilu si MG4Dash zapamatuje jízdní režim a rekuperaci; při přechodu na profil je vrátí, ve stoje i za jízdy. Ve výchozím stavu vypnuto.</string>
+    <string name="dv_profiles_drive_desc">Při změně profilu se převezme jízdní režim a rekuperace profilu</string>
+    <string name="pf_drive_one">Převzít jízdní režim a rekuperaci tohoto profilu</string>
+    <string name="pf_drive_one_desc">Použije se při přepnutí na tento profil</string>
     <string name="br_title">Jas</string>
     <string name="br_auto">Automatický jas</string>
     <string name="br_auto_desc">Chytrý: učí se z vašich nastavení posuvníkem podle odhadovaného denního světla a světel. Původní: režim Androidu s − a +.</string>
@@ -1228,4 +1284,10 @@
     <string name="bk_confirm">Nastavení, profily, zvuk při startu a webové adresy ze zálohy z %1$s nahradí ty současné. MG4Dash se pak restartuje.</string>
     <string name="bk_confirm_token">Token Home Assistant nebyl v záloze: pokud chybí, zadejte ho znovu v Nastavení › Připojení.</string>
     <string name="bk_confirm_ok">Nahradit a restartovat</string>
+    <string name="card_no_data">Zatím žádná data</string>
+    <string name="st_cards_offered">Nabízené karty…</string>
+    <string name="st_cards_offered_note">Neoznačené karty se nezobrazují v režimu úprav ani na domovské obrazovce. Po opětovném označení se vrátí na své místo.</string>
+    <string name="opt_open">Otevřít</string>
+    <string name="opt_import">Importovat</string>
+    <string name="opt_clear">Vymazat</string>
 </resources>
