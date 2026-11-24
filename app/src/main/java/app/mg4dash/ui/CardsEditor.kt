@@ -366,17 +366,16 @@ object CardsEditor {
                 setSelection(text.length)
             }
             val box = LinearLayout(context).apply { orientation = LinearLayout.VERTICAL; setPadding(dp(24), dp(8), dp(24), 0); addView(input) }
-            android.app.AlertDialog.Builder(activity)
-                .setTitle(R.string.wc_web_address).setView(box)
-                .setPositiveButton(android.R.string.ok) { _, _ ->
-                    val v = input.text.toString().trim()
-                    done(if (v == "http://" || v == "https://") "" else if (v.isNotEmpty() && !v.contains("://")) "http://$v" else v)
-                }
-                .setNegativeButton(R.string.cancel, null)
-                .show().also { dlg ->
-                    Dialogs.fix(dlg)
-                    CarKeyboard.attachInDialog(input, dlg, box, onDone = { dlg.getButton(android.app.AlertDialog.BUTTON_POSITIVE).performClick() })
-                }
+            box.setPadding(0, 0, 0, 0)
+            lateinit var dlg: android.app.AlertDialog
+            fun ok() {
+                val v = input.text.toString().trim()
+                dlg.dismiss()
+                done(if (v == "http://" || v == "https://") "" else if (v.isNotEmpty() && !v.contains("://")) "http://$v" else v)
+            }
+            dlg = Windows.show(activity, activity.getString(R.string.wc_web_address), box, widthDp = 900,
+                buttons = listOf(Rows.actionButton(activity, activity.getString(android.R.string.ok)) { ok() }))
+            CarKeyboard.attachInDialog(input, dlg, box, onDone = { ok() })
     }
 
     /** The layout's places in miniature ([cells] from 0 to 1), the one at [at] filled: where a card is now. */

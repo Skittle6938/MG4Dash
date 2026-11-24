@@ -37,29 +37,21 @@ class PowerFxSettingShots {
         root.layout(0, 0, 1920, 720)
     }
 
-    @Test fun choiceOnTheRightOfItsLabel() {
-        for ((lang, big) in listOf("fr" to false, "en" to false, "de" to false, "tr" to false, "fr" to true)) {
-            RuntimeEnvironment.setQualifiers("$lang-w1920dp-h720dp-land-mdpi")
-            prefs.raw.edit().clear().putBoolean("vertical_dock", true).putInt("theme_mode", 1).putInt("settings_tab", 1)
-                .putString("power_fx_on", "2,5").apply { if (big) putInt("home_style", Prefs.STYLE_BIG) }.commit()
-            val a = Robolectric.buildActivity(app.mg4dash.settings.SettingsActivity::class.java).setup().get()
-            shadowOf(Looper.getMainLooper()).idleFor(1, TimeUnit.SECONDS)
-            val root = a.window.decorView
-            layout(root)
-            val random = a.getString(R.string.fx_random)
-            val pick = all(root).filterIsInstance<Button>().first { it.text.startsWith(random) }
-            assertTrue("only « Random »: ${pick.text}", pick.text.toString().substringBefore("  ").trim() == random)
-            // Same line as its label
-            val label = all(root).filterIsInstance<TextView>().first { it.text == a.getString(R.string.st_power_fx) }
-            assertTrue(label.parent === (pick.parent as View).parent)
-            pick.performClick(); layout(root)
-            val sv = all(root).filterIsInstance<ScrollView>().first { it.isShown }
-            var y = 0; var v: View = pick
-            while (v !== sv) { y += v.top; v = v.parent as View }
-            sv.scrollTo(0, (y - 120).coerceAtLeast(0)); layout(root)
-            val bmp = Bitmap.createBitmap(1920, 720, Bitmap.Config.ARGB_8888)
-            root.draw(Canvas(bmp))
-            File(File("build/screenshots").apply { mkdirs() }, "powerfx_$lang${if (big) "_big" else ""}.png").outputStream().use { bmp.compress(Bitmap.CompressFormat.PNG, 100, it) }
-        }
+    /** The effects and their sounds are in the power card's options (24/11): a box per effect, the sounds' switch and volume. */
+    @Test fun inThePowerCardsOptions() {
+        prefs.raw.edit().clear().putBoolean("vertical_dock", true).putBoolean("tutorial_shortcuts_seen", true).putInt("theme_mode", 1)
+            .putInt("home_style", 0).putString("home_layout", "full").putString("slots_full", "tl=climate;tc=consumption,map;tr=media;bl=energy;bc=radar;br=power,trip,phone")
+            .putString("power_fx_on", "2,5").commit()
+        val a = Robolectric.buildActivity(app.mg4dash.MainActivity::class.java).setup().get()
+        shadowOf(Looper.getMainLooper()).idleFor(1, TimeUnit.SECONDS)
+        @Suppress("UNCHECKED_CAST")
+        val cards = app.mg4dash.MainActivity::class.java.getDeclaredField("homeCards").apply { isAccessible = true }.get(a) as Map<app.mg4dash.ui.HomeSlots.Card, app.mg4dash.cards.HomeCard>
+        assertTrue(cards.getValue(app.mg4dash.ui.HomeSlots.Card.POWER).view.performLongClick())
+        shadowOf(Looper.getMainLooper()).idleFor(1, TimeUnit.SECONDS)
+        val d = org.robolectric.shadows.ShadowDialog.getLatestDialog()
+        val texts = all(d.window!!.decorView).filterIsInstance<TextView>().map { it.text.toString() }
+        for (n in listOf(R.string.fx_lightning, R.string.fx_flames, R.string.fx_hyperspace, R.string.st_fx_sound, R.string.st_xpower))
+            assertTrue(a.getString(n), a.getString(n) in texts)
+        assertTrue(all(d.window!!.decorView).any { it is android.widget.SeekBar })
     }
 }

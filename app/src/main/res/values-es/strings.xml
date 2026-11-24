@@ -313,6 +313,8 @@
     <string name="st_ha_import_none">No hay ningún archivo mg4dash_ha.txt en la raíz de una memoria USB</string>
     <string name="st_paste">Pegar</string>
     <string name="st_diag">DIAGNÓSTICO</string>
+    <string name="st_diag_on">Modo diagnóstico activado</string>
+    <string name="st_diag_off">Modo diagnóstico desactivado</string>
     <string name="st_energy_log">Registro de datos de energía: %1$s</string>
     <string name="st_energy_log_desc">Cada 5 s anota la potencia de la batería, los contadores de consumo y el estado de los equipos en Android/data/app.mg4dash/files/energy_log.csv (solo lectura, no se envía nada al coche). Se guarda cada 5 min para limitar el desgaste de la memoria de la radio. Solo para diagnóstico: si no, déjelo desactivado.</string>
     <string name="sc_search">Buscar…</string>
@@ -737,6 +739,7 @@
     <string name="st_v2l_auto_warning">Atención: en cuanto se conecte un cable V2L, la descarga se pondrá en marcha sola, sin otra acción, y lo que esté conectado al cable recibirá corriente.</string>
     <string name="st_v2l_auto_enable">Activar</string>
     <string name="st_audio_source">Fuente de audio</string>
+    <string name="st_media">Multimedia</string>
     <string name="st_start_source">Fuente al arrancar</string>
     <string name="st_src_auto">Automática</string>
     <string name="st_src_car">Como el coche</string>
@@ -820,6 +823,7 @@
     <string name="conn_usb_count">%1$d conectado(s)</string>
     <string name="en_time_note">Según la fecha y suavizada · media (puntos)</string>
     <string name="st_sound_trigger">Sonido de inicio</string>
+    <string name="st_sounds">SONIDOS</string>
     <string name="st_sound_trigger_desc">Elige un archivo de audio de una memoria USB o del almacenamiento interno. Se copia en la app y seguirá disponible al retirar la memoria.</string>
     <string name="st_sound_boot_trigger">Reproducir al inicio</string>
     <string name="st_sound_pick_file">Elegir audio</string>
@@ -831,7 +835,8 @@
     <string name="st_sound_imported">Audio importado: %1$s</string>
     <string name="st_sound_test">Probar</string>
     <string name="st_sound_stop">Detener</string>
-    <string name="st_sound_volume">Volumen multimedia del coche</string>
+    <string name="st_sound_volume">Volumen del sonido de inicio</string>
+    <string name="st_sound_volume_desc">Solo para el sonido de inicio</string>
     <string name="st_sound_vol_default">Volumen actual del coche</string>
     <string name="st_sound_volume_level">%1$d / 32</string>
     <string name="du_tab">Datos 4G</string>

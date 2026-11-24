@@ -313,6 +313,8 @@
     <string name="st_ha_import_none">No mg4dash_ha.txt file at the root of a USB stick</string>
     <string name="st_paste">Paste</string>
     <string name="st_diag">DIAGNOSTICS</string>
+    <string name="st_diag_on">Diagnostic mode on</string>
+    <string name="st_diag_off">Diagnostic mode off</string>
     <string name="st_energy_log">Energy data recorder: %1$s</string>
     <string name="st_energy_log_desc">Every 5 s, writes battery power, consumption counters and equipment states to Android/data/app.mg4dash/files/energy_log.csv (read only, nothing is sent to the car). Saved every 5 min to limit wear of the head unit\'s memory. For troubleshooting only: leave it off otherwise.</string>
     <string name="sc_search">Search…</string>
@@ -737,6 +739,7 @@
     <string name="st_v2l_auto_warning">Warning: as soon as a V2L cable is plugged in, discharge will start by itself, with no other action, and whatever is connected to the cable will be powered.</string>
     <string name="st_v2l_auto_enable">Enable</string>
     <string name="st_audio_source">Audio source</string>
+    <string name="st_media">Media</string>
     <string name="st_start_source">Source at startup</string>
     <string name="st_src_auto">Automatic</string>
     <string name="st_src_car">Same as the car</string>
@@ -820,6 +823,7 @@
     <string name="conn_usb_count">%1$d connected</string>
     <string name="en_time_note">Placed by date and smoothed · average (dashed)</string>
     <string name="st_sound_trigger">Startup Sound</string>
+    <string name="st_sounds">SOUNDS</string>
     <string name="st_sound_trigger_desc">Choose an audio file from a USB stick (or internal storage). It is copied into the app and stays available after the stick is removed.</string>
     <string name="st_sound_boot_trigger">Play at startup</string>
     <string name="st_sound_pick_file">Choose audio</string>
@@ -831,7 +835,8 @@
     <string name="st_sound_imported">Imported audio: %1$s</string>
     <string name="st_sound_test">Test</string>
     <string name="st_sound_stop">Stop</string>
-    <string name="st_sound_volume">Car media volume</string>
+    <string name="st_sound_volume">Startup sound volume</string>
+    <string name="st_sound_volume_desc">Only for the startup sound</string>
     <string name="st_sound_vol_default">Current car volume</string>
     <string name="st_sound_volume_level">%1$d / 32</string>
     <string name="du_tab">4G data</string>

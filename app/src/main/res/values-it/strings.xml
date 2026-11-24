@@ -313,6 +313,8 @@
     <string name="st_ha_import_none">Nessun file mg4dash_ha.txt nella radice di una chiavetta USB</string>
     <string name="st_paste">Incolla</string>
     <string name="st_diag">DIAGNOSTICA</string>
+    <string name="st_diag_on">Modalità diagnostica attiva</string>
+    <string name="st_diag_off">Modalità diagnostica disattivata</string>
     <string name="st_energy_log">Registratore dati energia: %1$s</string>
     <string name="st_energy_log_desc">Ogni 5 s annota la potenza della batteria, i contatori dei consumi e lo stato delle apparecchiature in Android/data/app.mg4dash/files/energy_log.csv (sola lettura, nulla viene inviato all\'auto). Salvato ogni 5 min per limitare l\'usura della memoria dell\'autoradio. Solo per la diagnosi: altrimenti lascialo disattivato.</string>
     <string name="sc_search">Cerca…</string>
@@ -737,6 +739,7 @@
     <string name="st_v2l_auto_warning">Attenzione: appena si collega un cavo V2L, la scarica partirà da sola, senza altre azioni, e ciò che è collegato al cavo sarà alimentato.</string>
     <string name="st_v2l_auto_enable">Attiva</string>
     <string name="st_audio_source">Sorgente audio</string>
+    <string name="st_media">Multimedia</string>
     <string name="st_start_source">Sorgente all\'avvio</string>
     <string name="st_src_auto">Automatica</string>
     <string name="st_src_car">Come l\'auto</string>
@@ -820,6 +823,7 @@
     <string name="conn_usb_count">%1$d collegato/i</string>
     <string name="en_time_note">Per data e livellata · media (tratteggiata)</string>
     <string name="st_sound_trigger">Audio all\'avvio</string>
+    <string name="st_sounds">SUONI</string>
     <string name="st_sound_trigger_desc">Scegli un file audio dalla chiavetta USB o dalla memoria interna. Viene copiato nell’app e resta disponibile anche dopo aver rimosso la chiavetta.</string>
     <string name="st_sound_boot_trigger">Riproduci all’avvio</string>
     <string name="st_sound_pick_file">Scegli audio</string>
@@ -831,7 +835,8 @@
     <string name="st_sound_imported">Audio importato: %1$s</string>
     <string name="st_sound_test">Ascolta</string>
     <string name="st_sound_stop">Ferma</string>
-    <string name="st_sound_volume">Volume media auto</string>
+    <string name="st_sound_volume">Volume del suono di avvio</string>
+    <string name="st_sound_volume_desc">Solo per il suono di avvio</string>
     <string name="st_sound_vol_default">Volume attuale dell\'auto</string>
     <string name="st_sound_volume_level">%1$d / 32</string>
     <string name="du_tab">Dati 4G</string>

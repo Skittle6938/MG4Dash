@@ -315,7 +315,7 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
                 Card.TRIP -> host(card, secondaries.getValue(card), false, { if (it) renderTripEnergy() })
                 Card.POWER -> host(card, secondaries.getValue(card), false, { on ->
                     if (on) { if (!powerBuilt) buildPower(); ensurePowerFx(); lifecycleScope.launch { updatePower() } } else if (!cardPower) dropPowerFx()
-                })
+                }, ::powerOptions, ::powerOptionsClosed)
                 Card.PHONE -> host(card, secondaries.getValue(card), false, { if (it) renderPhoneFavs() })
                 else -> error("card ${card.id} has no builder: add it to HomeCards")
             }
@@ -1174,6 +1174,38 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
     }
 
     /** The climate card's options: the temperature calibration (it opens its own window). */
+    /**
+     * The power card's options (24/11, once in Settings): MG4 XPower (the power's scale), the effects of a full
+     * throttle (one or more ticked, one drawn each time; none: none) and their sounds.
+     */
+    private fun powerOptions(popup: app.mg4dash.ui.OptionsPopup): app.mg4dash.ui.OptionsPopup {
+        powerBuiltXpower = prefs.xpower
+        val fx = app.mg4dash.ui.PowerFx
+        popup.toggle(getString(R.string.st_xpower), getString(R.string.st_xpower_desc), { prefs.xpower }) { prefs.xpower = it }
+            .note(getString(R.string.st_power_fx_desc))
+        listOf(fx.LIGHTNING to R.string.fx_lightning, fx.FLAMES to R.string.fx_flames, fx.HYPERSPACE to R.string.fx_hyperspace).forEach { (v, name) ->
+            popup.check(getString(name), { v in prefs.powerFxSet }) { on ->
+                prefs.powerFxSet = if (on) prefs.powerFxSet + v else prefs.powerFxSet - v
+                if (on) app.mg4dash.ui.FxSound.play(this, v, prefs.fxVolume)
+            }
+        }
+        var trials = 0
+        return popup.toggle(getString(R.string.st_fx_sound), null, { prefs.fxSound }) { on ->
+            prefs.fxSound = on
+            if (on) app.mg4dash.ui.FxSound.play(this, app.mg4dash.ui.FxSound.trialStyle(prefs.powerFxSet, trials++), prefs.fxVolume)
+        }.slider(getString(R.string.st_fx_volume), 100, { prefs.fxVolume }, { if (it == 0) getString(R.string.st_fx_volume_off) else "$it %" }, { prefs.fxSound }) { v ->
+            prefs.fxVolume = v
+            app.mg4dash.ui.FxSound.play(this, app.mg4dash.ui.FxSound.trialStyle(prefs.powerFxSet, trials++), v)
+        }
+    }
+
+    private var powerBuiltXpower: Boolean? = null
+
+    /** XPower changes the power's scale: the card is built again. */
+    private fun powerOptionsClosed() {
+        if (powerBuiltXpower?.let { it != prefs.xpower } == true) app.mg4dash.ui.Themes.recreateSmooth(this)
+    }
+
     /** The shortcuts card's options (24/11): Home Assistant, which its shortcuts use. */
     private fun shortcutsOptions(popup: app.mg4dash.ui.OptionsPopup): app.mg4dash.ui.OptionsPopup =
         popup.action(getString(R.string.st_ha_settings), getString(R.string.st_ha_desc), getString(R.string.opt_open)) {
@@ -1845,7 +1877,7 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         rows += app.mg4dash.ui.CardMenu.Row("＋", getString(R.string.wc_other_app), null, false) {
             app.mg4dash.shortcuts.Shortcuts.pickApp(this, getString(R.string.map_app_pick), getString(R.string.map_app_osm)) { picked -> use(picked) }
         }
-        app.mg4dash.ui.CardMenu.show(this, rows)
+        app.mg4dash.ui.CardMenu.show(this, rows, getString(Card.MAP.label))
     }
 
     /** App embedded in the map widget (#41, trial) and its component. */

@@ -313,6 +313,8 @@
     <string name="st_ha_import_none">V kořeni USB disku není soubor mg4dash_ha.txt</string>
     <string name="st_paste">Vložit</string>
     <string name="st_diag">DIAGNOSTIKA</string>
+    <string name="st_diag_on">Diagnostický režim zapnut</string>
+    <string name="st_diag_off">Diagnostický režim vypnut</string>
     <string name="st_energy_log">Záznam energetických dat: %1$s</string>
     <string name="st_energy_log_desc">Každých 5 s zapisuje výkon baterie, počítadla spotřeby a stavy zařízení do Android/data/app.mg4dash/files/energy_log.csv (pouze čtení, do vozu se nic neodesílá). Ukládá se každých 5 min, aby se šetřila paměť jednotky. Pouze pro řešení problémů: jinak nechte vypnuté.</string>
     <string name="sc_search">Hledat…</string>
@@ -737,6 +739,7 @@
     <string name="st_v2l_auto_warning">Upozornění: jakmile se připojí kabel V2L, vybíjení se spustí samo, bez dalšího zásahu, a vše připojené ke kabelu bude napájeno.</string>
     <string name="st_v2l_auto_enable">Zapnout</string>
     <string name="st_audio_source">Zdroj zvuku</string>
+    <string name="st_media">Média</string>
     <string name="st_start_source">Zdroj při spuštění</string>
     <string name="st_src_auto">Automaticky</string>
     <string name="st_src_car">Stejný jako vůz</string>
@@ -820,6 +823,7 @@
     <string name="conn_usb_count">Připojeno: %1$d</string>
     <string name="en_time_note">Řazeno podle data a vyhlazeno · průměr (čárkovaně)</string>
     <string name="st_sound_trigger">Zvuk při spuštění</string>
+    <string name="st_sounds">ZVUKY</string>
     <string name="st_sound_trigger_desc">Vyberte zvukový soubor z flash disku USB (nebo z interního úložiště). Zkopíruje se do aplikace a zůstane dostupný i po odpojení disku.</string>
     <string name="st_sound_boot_trigger">Přehrát při spuštění</string>
     <string name="st_sound_pick_file">Vybrat zvuk</string>
@@ -831,7 +835,8 @@
     <string name="st_sound_imported">Importovaný zvuk: %1$s</string>
     <string name="st_sound_test">Test</string>
     <string name="st_sound_stop">Zastavit</string>
-    <string name="st_sound_volume">Hlasitost médií vozu</string>
+    <string name="st_sound_volume">Hlasitost zvuku při startu</string>
+    <string name="st_sound_volume_desc">Jen pro zvuk při startu</string>
     <string name="st_sound_vol_default">Aktuální hlasitost vozu</string>
     <string name="st_sound_volume_level">%1$d / 32</string>
     <string name="du_tab">Data 4G</string>

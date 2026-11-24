@@ -66,8 +66,20 @@ class SettingsActivity : AppCompatActivity() {
             text = getString(R.string.st_settings); setTextColor(color(R.color.text_value))
             setTextSize(TypedValue.COMPLEX_UNIT_SP, 26f); typeface = Typeface.create("sans-serif-medium", Typeface.NORMAL)
         })
+        var touches = 0; var firstTouch = 0L
         titleBox.addView(TextView(this).apply {
             text = "MG4Dash " + BuildConfig.VERSION_NAME; setTextColor(color(R.color.text_title)); setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f)
+            // Five touches within 3 s: the diagnostic mode on or off (the energy recorder in System)
+            setOnClickListener {
+                val now = android.os.SystemClock.uptimeMillis()
+                if (now - firstTouch > 3_000) { firstTouch = now; touches = 0 }
+                if (++touches == 5) {
+                    val on = !prefs.raw.getBoolean("diag_mode", false)
+                    prefs.raw.edit().putBoolean("diag_mode", on).apply()
+                    app.mg4dash.ui.Toasts.show(this@SettingsActivity, if (on) R.string.st_diag_on else R.string.st_diag_off)
+                    recreate()
+                }
+            }
         })
         top.addView(titleBox, LinearLayout.LayoutParams(-2, -2).apply { leftMargin = if (vertical) dp(12) else dp(app.mg4dash.ui.Kit.fogSafeDp(this@SettingsActivity) - 8); rightMargin = dp(36) })
         // Tabs (setting themes) in the banner, next to the title: text underlined in the theme's colour when chosen
@@ -170,7 +182,8 @@ class SettingsActivity : AppCompatActivity() {
         toggle(style, R.string.st_call_bar, R.string.st_call_bar_desc, { prefs.callBarHidden }) { prefs.callBarHidden = it; app.mg4dash.ui.EmbeddedApp.refreshImmersive(this) }
         toggle(style, R.string.st_own_keyboard, R.string.st_own_keyboard_desc, { prefs.ownKeyboard }) { prefs.ownKeyboard = it }
         // Audio source: drop-down menu (same style as the card menus)
-        val src = panel(homeR, getString(R.string.st_audio_source).uppercase())
+        // Media (24/11): the source and the playback at startup, and the bar's Android Auto button
+        val src = panel(homeR, getString(R.string.st_media).uppercase())
         val srcLabels = listOf(getString(R.string.st_src_auto), getString(R.string.st_src_car), "Radio", "Bluetooth", "USB", "CarPlay / Android Auto")
         dropdown(src, getString(R.string.st_start_source), srcLabels, { prefs.startSource }) { prefs.startSource = it }
         text(src, getString(R.string.st_start_source_desc), 16f, R.color.text_title)
@@ -209,11 +222,8 @@ class SettingsActivity : AppCompatActivity() {
         dropdown(units, getString(R.string.st_units), listOf(getString(R.string.st_units_car), "km · kWh/100 km", "miles · mi/kWh"), { prefs.units }) { prefs.units = it }
         dropdown(units, getString(R.string.st_pressure), listOf(getString(R.string.st_mode_auto_short), "bar", "psi", "kPa"), { prefs.pressureUnit }) { prefs.pressureUnit = it }
         // Heated seats and wheel, climate hold, SAIC climate window: in the climate card's options (24/11)
-        // Profiles (step 12): each one keeps the drive mode and the regeneration; shared, off by default
-        toggle(units, R.string.pf_drive, R.string.pf_drive_desc, { prefs.profilesDrive }) { prefs.profilesDrive = it }
-        text(units, getString(R.string.pf_all), 14f, R.color.text_title)
+        // Drive mode and regeneration by profile: in the profiles' window (24/11)
 
-        soundTriggersSetting(panel(carL, getString(R.string.st_sound_trigger).uppercase()))
 
         // ════ Appearance tab: theme and effects ════
         val theme = panel(lookL, getString(R.string.st_theme))
@@ -289,12 +299,12 @@ class SettingsActivity : AppCompatActivity() {
             newCapDrop.post { paintNewCap() }
         }
         paintNewCap()
-        toggle(energy, R.string.st_xpower, R.string.st_xpower_desc, { prefs.xpower }) { prefs.xpower = it }
+        // MG4 XPower: in the power card's options (24/11)
         // V2L on plugging in, consumption when stopped and the kWh price: in the energy and consumption cards' options and the Trips page (24/11)
         // Brightness at the top of the right column, above the live power (20/11)
         brightnessSetting(panel(lookR, getString(R.string.br_title)))
-        // Speed × temperature consumption map (in testing, off by default)
-        powerFxSetting(panel(lookR, getString(R.string.sw_power)))
+        // The live power's effects and sounds: in the power card's options (24/11); the startup sound here, under Sounds
+        soundTriggersSetting(panel(lookR, getString(R.string.st_sounds)))
 
         // ════ Right column: system, connections, diagnostic ════
 
@@ -482,7 +492,9 @@ class SettingsActivity : AppCompatActivity() {
                 .addFlags(android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP or android.content.Intent.FLAG_ACTIVITY_SINGLE_TOP))
             finish()
         })
-        toggle(diag, R.string.st_energy_log, R.string.st_energy_log_desc, { prefs.energyLog }) { prefs.energyLog = it }
+        // Diagnostic only (24/11): shown in the diagnostic mode, five touches on the version in the banner
+        if (prefs.raw.getBoolean("diag_mode", false) || prefs.energyLog)
+            toggle(diag, R.string.st_energy_log, R.string.st_energy_log_desc, { prefs.energyLog }) { prefs.energyLog = it }
 
         // ════ 4G data tab ════
         dataTab(dataL, dataR)
@@ -994,10 +1006,10 @@ class SettingsActivity : AppCompatActivity() {
         val savedVolume = app.mg4dash.sound.SoundTriggerSettings.getVolumeLevel(this)
         val volumeLine = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
         val volumeHeader = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL }
-        volumeHeader.addView(TextView(this).apply {
-            text = getString(R.string.st_sound_volume)
-            setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f)
-            setTextColor(color(R.color.text_value))
+        volumeHeader.addView(LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            addView(TextView(this@SettingsActivity).apply { text = getString(R.string.st_sound_volume); setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f); setTextColor(color(R.color.text_value)) })
+            addView(TextView(this@SettingsActivity).apply { text = getString(R.string.st_sound_volume_desc); setTextSize(TypedValue.COMPLEX_UNIT_SP, 15f); setTextColor(color(R.color.text_title)) })
         }, LinearLayout.LayoutParams(0, -2, 1f))
         val volumeValue = TextView(this).apply {
             setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f)
@@ -1027,107 +1039,6 @@ class SettingsActivity : AppCompatActivity() {
     }
 
     /** Full power animation of the live Power widget: drop-down list, preview on a mini map. */
-    private fun powerFxSetting(parent: LinearLayout) {
-        // No preview: the surprise is for the road. Displayed order: random first (default).
-        val fx = app.mg4dash.ui.PowerFx
-        // One or more ticked (21/11): each time, one of those ticked is drawn, never another; none ticked, none
-        val choices = listOf(fx.LIGHTNING to R.string.fx_lightning, fx.FLAMES to R.string.fx_flames,
-            fx.HYPERSPACE to R.string.fx_hyperspace).map { it.first to getString(it.second) }
-        lateinit var pick: Button
-        // Drop-down list in the page itself: a popup window would bring back the system bars
-        val list = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; visibility = View.GONE }
-        fun label() {
-            val on = prefs.powerFxSet
-            val names = choices.filter { it.first in on }.map { it.second }
-            val name = when {
-                names.isEmpty() -> getString(R.string.fx_none)
-                names.size == 1 -> names[0]
-                // Several ticked: just « Random », which ones are in the drop-down list (21/11)
-                else -> getString(R.string.fx_random)
-            }
-            pick.text = "$name   ${if (list.visibility == View.VISIBLE) "▴" else "▾"}"
-        }
-        fun paint() = choices.forEachIndexed { k, (v, n) ->
-            (list.getChildAt(k) as Button).apply {
-                isSelected = v in prefs.powerFxSet
-                text = (if (isSelected) "☑  " else "☐  ") + n
-                setTextColor(color(if (isSelected) R.color.accent_action else R.color.text_value))
-            }
-        }
-        pick = button("") { list.visibility = if (list.visibility == View.VISIBLE) View.GONE else View.VISIBLE; label() }
-            .apply { setBackgroundResource(R.drawable.bg_chip); setTextColor(color(R.color.accent_action)) }
-        choices.forEach { (v, n) ->
-            // A tap ticks or unticks it; the list stays open to tick others
-            list.addView(button(n) {
-                val on = prefs.powerFxSet
-                prefs.powerFxSet = if (v in on) on - v else on + v
-                label(); paint(); if (v in prefs.powerFxSet) fxTrialOf(v)
-            }.apply { setBackgroundResource(R.drawable.bg_chip); gravity = Gravity.CENTER_VERTICAL or Gravity.START },
-                LinearLayout.LayoutParams(-1, dp(56)).apply { topMargin = dp(6) })
-        }
-        list.addView(TextView(this).apply {
-            text = getString(R.string.fx_pick_hint); setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f); setTextColor(color(R.color.text_title))
-        }, LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(6) })
-        paint(); label()
-        // The choice button on the right of its label (21/11), its list under it
-        val line = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
-        line.addView(TextView(this).apply {
-            text = getString(R.string.st_power_fx); setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f); setTextColor(color(R.color.text_value))
-            gravity = Gravity.CENTER_VERTICAL; minHeight = dp(56)
-        }, LinearLayout.LayoutParams(0, -2, 1f).apply { rightMargin = dp(12) })
-        val right = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
-        right.addView(pick, LinearLayout.LayoutParams(-1, dp(56)))
-        right.addView(list, LinearLayout.LayoutParams(-1, -2))
-        line.addView(right, LinearLayout.LayoutParams(0, -2, 1f))
-        parent.addView(line, LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(10) })
-        text(parent, getString(R.string.st_power_fx_desc), 16f, R.color.text_title)
-        fxVolumeSetting(parent)
-    }
-
-    /** Trials of the animations' sounds in the settings (random: each one in turn). */
-    private var fxTrials = 0
-
-    /** The chosen animation's sound at [percent], to set the volume while parked (15/11). */
-    private fun fxTrial(percent: Int = prefs.fxVolume) =
-        app.mg4dash.ui.FxSound.play(this, app.mg4dash.ui.FxSound.trialStyle(prefs.powerFxSet, fxTrials++), percent)
-
-    /** The sound of [style] just ticked. */
-    private fun fxTrialOf(style: Int) = app.mg4dash.ui.FxSound.play(this, style, prefs.fxVolume)
-
-    /** Volume of the animations' sounds (whoosh, crackle, fire): one bar for all, a short trial when let go. */
-    private fun fxVolumeSetting(parent: LinearLayout) {
-        lateinit var volume: List<View>
-        fun shade() = volume.forEach { it.alpha = if (prefs.fxSound) 1f else 0.4f; it.isEnabled = prefs.fxSound }
-        toggle(parent, R.string.st_fx_sound, null, { prefs.fxSound }) { on -> prefs.fxSound = on; shade(); if (on) fxTrial() }
-        val header = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL }
-        header.addView(TextView(this).apply {
-            text = getString(R.string.st_fx_volume)
-            setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f)
-            setTextColor(color(R.color.text_value))
-        }, LinearLayout.LayoutParams(0, -2, 1f))
-        val value = TextView(this).apply { setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f); setTextColor(color(R.color.accent_action)) }
-        header.addView(value)
-        fun show(v: Int) { value.text = if (v == 0) getString(R.string.st_fx_volume_off) else "$v %" }
-        val slider = SeekBar(this).apply {
-            max = 100
-            progress = prefs.fxVolume
-            progressTintList = android.content.res.ColorStateList.valueOf(color(R.color.accent_action))
-            thumbTintList = android.content.res.ColorStateList.valueOf(color(R.color.accent_action))
-        }
-        show(prefs.fxVolume)
-        slider.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
-            override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) = show(progress)
-            override fun onStartTrackingTouch(seekBar: SeekBar) = Unit
-            override fun onStopTrackingTouch(seekBar: SeekBar) {
-                prefs.fxVolume = seekBar.progress
-                fxTrial(seekBar.progress)
-            }
-        })
-        parent.addView(header, LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(16) })
-        parent.addView(slider, LinearLayout.LayoutParams(-1, dp(48)))
-        volume = listOf(header, slider); shade()
-    }
-
     private fun confirmReplace() {
         app.mg4dash.ui.Windows.confirm(this, getString(R.string.st_replace), getString(R.string.st_replace_msg), getString(R.string.st_replace_btn), danger = false) {
             val ok = HomeSwitcher.replaceStock(this)

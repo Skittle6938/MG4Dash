@@ -453,12 +453,9 @@ class EnergyActivity : PageActivity() {
     private fun pickTime(start: Boolean) {
         val cur = if (start) stH * 60 + stM else spH * 60 + spM
         val (view, read) = kit.timeWheels(cur)
-        android.app.AlertDialog.Builder(this)
-            .setTitle(if (start) R.string.en_start else R.string.en_end)
-            .setView(view)
-            .setPositiveButton(android.R.string.ok) { _, _ -> setTime(start, read()) }
-            .setNegativeButton(R.string.cancel, null)
-            .create().also { app.mg4dash.ui.Dialogs.show(it); app.mg4dash.ui.Dialogs.fix(it) }
+        lateinit var d: android.app.AlertDialog
+        d = app.mg4dash.ui.Windows.show(this, getString(if (start) R.string.en_start else R.string.en_end), view, widthDp = 640,
+            buttons = listOf(app.mg4dash.ui.Rows.actionButton(this, getString(android.R.string.ok)) { d.dismiss(); setTime(start, read()) }))
     }
 
     private fun shiftTime(start: Boolean, deltaMin: Int) {

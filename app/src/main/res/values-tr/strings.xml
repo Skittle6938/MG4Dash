@@ -313,6 +313,8 @@
     <string name="st_ha_import_none">USB belleğin kökünde mg4dash_ha.txt dosyası yok</string>
     <string name="st_paste">Yapıştır</string>
     <string name="st_diag">TANILAMA</string>
+    <string name="st_diag_on">Tanılama modu açık</string>
+    <string name="st_diag_off">Tanılama modu kapalı</string>
     <string name="st_energy_log">Enerji veri kaydedici: %1$s</string>
     <string name="st_energy_log_desc">Her 5 sn\'de batarya gücünü, tüketim sayaçlarını ve ekipman durumlarını Android/data/app.mg4dash/files/energy_log.csv dosyasına yazar (yalnızca okuma, araca hiçbir şey gönderilmez). Radyo belleğinin yıpranmasını sınırlamak için 5 dakikada bir kaydedilir. Yalnızca sorun giderme için: aksi halde kapalı bırakın.</string>
     <string name="sc_search">Ara…</string>
@@ -737,6 +739,7 @@
     <string name="st_v2l_auto_warning">Dikkat: bir V2L kablosu takılır takılmaz deşarj başka bir işlem olmadan kendiliğinden başlar ve kabloya bağlı olan her şeye güç verilir.</string>
     <string name="st_v2l_auto_enable">Etkinleştir</string>
     <string name="st_audio_source">Ses kaynağı</string>
+    <string name="st_media">Medya</string>
     <string name="st_start_source">Başlangıçtaki kaynak</string>
     <string name="st_src_auto">Otomatik</string>
     <string name="st_src_car">Araçtaki gibi</string>
@@ -820,6 +823,7 @@
     <string name="conn_usb_count">%1$d bağlı</string>
     <string name="en_time_note">Tarihe göre ve yumuşatılmış · ortalama (kesikli)</string>
     <string name="st_sound_trigger">Başlangıç Sesi</string>
+    <string name="st_sounds">SESLER</string>
     <string name="st_sound_trigger_desc">USB bellekten veya dahili depolamadan bir ses dosyası seçin. Dosya uygulamaya kopyalanır ve bellek çıkarıldıktan sonra da kullanılabilir.</string>
     <string name="st_sound_boot_trigger">Başlangıçta çal</string>
     <string name="st_sound_pick_file">Ses seç</string>
@@ -831,7 +835,8 @@
     <string name="st_sound_imported">İçe aktarılan ses: %1$s</string>
     <string name="st_sound_test">Test Et</string>
     <string name="st_sound_stop">Durdur</string>
-    <string name="st_sound_volume">Araç medya ses düzeyi</string>
+    <string name="st_sound_volume">Açılış sesi düzeyi</string>
+    <string name="st_sound_volume_desc">Yalnızca açılış sesi için</string>
     <string name="st_sound_vol_default">Mevcut araç sesi</string>
     <string name="st_sound_volume_level">%1$d / 32</string>
     <string name="du_tab">4G verisi</string>

@@ -313,6 +313,8 @@
     <string name="st_ha_import_none">Keine Datei mg4dash_ha.txt im Hauptverzeichnis eines USB-Sticks</string>
     <string name="st_paste">Einfügen</string>
     <string name="st_diag">DIAGNOSE</string>
+    <string name="st_diag_on">Diagnosemodus an</string>
+    <string name="st_diag_off">Diagnosemodus aus</string>
     <string name="st_energy_log">Energiedaten-Rekorder: %1$s</string>
     <string name="st_energy_log_desc">Schreibt alle 5 s Batterieleistung, Verbrauchszähler und Gerätezustände in Android/data/app.mg4dash/files/energy_log.csv (nur lesend, nichts wird an das Auto gesendet). Wird alle 5 min gespeichert, um den Speicher des Radios zu schonen. Nur zur Fehlersuche, sonst bitte ausgeschaltet lassen.</string>
     <string name="sc_search">Suchen…</string>
@@ -737,6 +739,7 @@
     <string name="st_v2l_auto_warning">Achtung: Sobald ein V2L-Kabel eingesteckt wird, startet die Entladung von selbst, ohne weitere Aktion, und alles, was am Kabel hängt, wird mit Strom versorgt.</string>
     <string name="st_v2l_auto_enable">Aktivieren</string>
     <string name="st_audio_source">Audioquelle</string>
+    <string name="st_media">Medien</string>
     <string name="st_start_source">Quelle beim Start</string>
     <string name="st_src_auto">Automatisch</string>
     <string name="st_src_car">Wie das Auto</string>
@@ -820,6 +823,7 @@
     <string name="conn_usb_count">%1$d verbunden</string>
     <string name="en_time_note">Nach Datum und geglättet · Durchschnitt (gestrichelt)</string>
     <string name="st_sound_trigger">Startton</string>
+    <string name="st_sounds">KLÄNGE</string>
     <string name="st_sound_trigger_desc">Wählen Sie eine Audiodatei vom USB-Stick oder aus dem internen Speicher. Sie wird in die App kopiert und bleibt auch nach dem Entfernen des Sticks verfügbar.</string>
     <string name="st_sound_boot_trigger">Bei Start abspielen</string>
     <string name="st_sound_pick_file">Audio auswählen</string>
@@ -831,7 +835,8 @@
     <string name="st_sound_imported">Audiodatei importiert: %1$s</string>
     <string name="st_sound_test">Testen</string>
     <string name="st_sound_stop">Stopp</string>
-    <string name="st_sound_volume">Medienlautstärke des Autos</string>
+    <string name="st_sound_volume">Lautstärke des Startklangs</string>
+    <string name="st_sound_volume_desc">Nur für den Startklang</string>
     <string name="st_sound_vol_default">Aktuelle Lautstärke</string>
     <string name="st_sound_volume_level">%1$d / 32</string>
     <string name="du_tab">4G-Daten</string>

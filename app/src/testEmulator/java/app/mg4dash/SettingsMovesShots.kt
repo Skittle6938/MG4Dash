@@ -63,14 +63,21 @@ class SettingsMovesShots {
     @Test fun cardWindows() {
         for ((theme, look) in looks) {
             base(theme).putInt("home_style", 0).putString("home_layout", "full")
-                .putString("slots_full", "tl=hourly;tc=consumption,map;tr=shortcuts;bl=energy;bc=climate;br=trip,power,phone").commit()
+                .putString("slots_full", "tl=hourly;tc=consumption,map;tr=shortcuts;bl=energy;bc=climate;br=power,trip,phone").commit()
             val a = Robolectric.buildActivity(MainActivity::class.java).setup().get().also { idle() }
-            for (card in listOf(Card.HOURLY, Card.CLIMATE, Card.ENERGY, Card.CONSUMPTION, Card.SHORTCUTS)) {
+            for (card in listOf(Card.HOURLY, Card.CLIMATE, Card.ENERGY, Card.CONSUMPTION, Card.SHORTCUTS, Card.POWER)) {
                 ShadowDialog.reset()
                 cards(a)[card]?.view?.performLongClick(); window(a, "options_${card.id}_$look.png")
             }
             ShadowDialog.reset()
             app.mg4dash.ui.DrivingCard.openAll(a); window(a, "driving_all_$look.png")
+            ShadowDialog.reset()
+            MainActivity::class.java.getDeclaredMethod("mapMenu", kotlin.jvm.functions.Function0::class.java).apply { isAccessible = true }.invoke(a, null)
+            window(a, "map_menu_$look.png")
+            ShadowDialog.reset()
+            app.mg4dash.settings.ProfileWindow.edit(a, app.mg4dash.system.Profiles.current(a)) {}; window(a, "profile_$look.png")
+            ShadowDialog.reset()
+            app.mg4dash.ui.CardsEditor.askUrl(a, "") {}; window(a, "web_address_$look.png")
             ShadowDialog.reset()
             app.mg4dash.shortcuts.Shortcuts.edit(a, 0) {}; window(a, "shortcut_menu_$look.png")
             ShadowDialog.reset()
@@ -99,6 +106,16 @@ class SettingsMovesShots {
             window(s, "color_grid_bg_$look.png")
             base(theme).putBoolean("settings_tabs_v2", true).putBoolean("settings_tabs_v3", true).putInt("settings_tab", 1).commit()
             page(Robolectric.buildActivity(SettingsActivity::class.java).setup().get().also { idle() }, "page_look_$look.png")
+            base(theme).putBoolean("settings_tabs_v2", true).putBoolean("settings_tabs_v3", true).putInt("settings_tab", 0).commit()
+            page(Robolectric.buildActivity(SettingsActivity::class.java).setup().get().also { idle() }, "page_home_$look.png")
+            base(theme).putBoolean("settings_tabs_v2", true).putBoolean("settings_tabs_v3", true).putInt("settings_tab", 4).commit()
+            page(Robolectric.buildActivity(SettingsActivity::class.java).setup().get().also { idle() }, "page_system_$look.png")
+            base(theme).putFloat("kwh_price", 0.25f).commit()
+            Robolectric.buildActivity(app.mg4dash.pages.TripsActivity::class.java).setup().get().also { idle() }.let { t ->
+                ShadowDialog.reset()
+                app.mg4dash.pages.TripsActivity::class.java.getDeclaredMethod("confirmClear").apply { isAccessible = true }.invoke(t)
+                window(t, "trips_clear_$look.png")
+            }
             base(theme).putFloat("kwh_price", 0.25f).commit()
             page(Robolectric.buildActivity(app.mg4dash.pages.TripsActivity::class.java).setup().get().also { idle() }, "trips_$look.png")
         }

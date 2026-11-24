@@ -29,13 +29,10 @@ object Ask {
             setPadding(0, dp(a, 12), 0, dp(a, 4))
             setOnClickListener { input.setText(clip); input.setSelection(input.text.length) }
         })
-        android.app.AlertDialog.Builder(a)
-            .setTitle(title).setView(box)
-            .setPositiveButton(android.R.string.ok) { _, _ -> onOk(input.text.toString()) }
-            .setNegativeButton(R.string.cancel, null)
-            .show().also { d ->
-                app.mg4dash.ui.Dialogs.fix(d)
-                app.mg4dash.ui.CarKeyboard.attachInDialog(input, d, box, onDone = { d.getButton(android.app.AlertDialog.BUTTON_POSITIVE).performClick() })
-            }
+        box.setPadding(0, 0, 0, 0)
+        lateinit var d: android.app.AlertDialog
+        fun ok() { d.dismiss(); onOk(input.text.toString()) }
+        d = Windows.show(a, title, box, widthDp = 900, buttons = listOf(Rows.actionButton(a, a.getString(android.R.string.ok)) { ok() }))
+        CarKeyboard.attachInDialog(input, d, box, onDone = { ok() })
     }
 }

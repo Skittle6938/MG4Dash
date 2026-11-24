@@ -100,27 +100,31 @@ object ProfileWindow {
             text = activity.getString(R.string.pf_phone_desc); setTextSize(TypedValue.COMPLEX_UNIT_SP, 15f)
             setTextColor(Themes.color(activity, R.color.text_title)); setPadding(0, dp(6), 0, 0)
         })
+        // Every profile (24/11, once in Settings › Vehicle): each one keeps the drive mode and the regeneration
+        val prefs = app.mg4dash.system.Prefs(activity)
+        box.addView(label(R.string.pf_all))
+        val drive = app.mg4dash.ui.Rows.group(activity)
+        val sw = app.mg4dash.ui.SwitchView(activity).apply { on = prefs.profilesDrive }
+        app.mg4dash.ui.Rows.add(drive, app.mg4dash.ui.Rows.row(activity, activity.getString(R.string.pf_drive), activity.getString(R.string.pf_drive_desc), sw) {
+            prefs.profilesDrive = !prefs.profilesDrive; sw.on = prefs.profilesDrive
+        })
+        box.addView(drive, LinearLayout.LayoutParams(-1, -2))
         val error = TextView(activity).apply { setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f); setTextColor(Themes.color(activity, R.color.accent_heat)); setPadding(0, dp(8), 0, 0) }
         box.addView(error)
-        val dialog = android.app.AlertDialog.Builder(activity)
-            .setTitle(if (profile == null) R.string.pf_new else R.string.pf_edit)
-            .setView(android.widget.ScrollView(activity).apply { addView(box) })
-            .setPositiveButton(R.string.pf_save, null)
-            .setNegativeButton(R.string.cancel, null)
-            .create()
-        dialog.setOnShowListener {
-            app.mg4dash.ui.Dialogs.fix(dialog)
-            dialog.getButton(android.app.AlertDialog.BUTTON_POSITIVE).setOnClickListener {
-                val n = name.text.toString()
-                val refused = if (profile == null) Profiles.create(activity, n, fromCurrent, phone).let { (p, r) ->
-                    if (p != null) Profiles.switchTo(activity, p.id, "created"); r
-                } else Profiles.update(activity, profile.id, n, phone)
-                if (refused != null) { error.text = activity.getString(refusalText(refused)); return@setOnClickListener }
-                dialog.dismiss(); onSwitched()
-            }
+        lateinit var dialog: android.app.AlertDialog
+        fun save() {
+            val n = name.text.toString()
+            val refused = if (profile == null) Profiles.create(activity, n, fromCurrent, phone).let { (p, r) ->
+                if (p != null) Profiles.switchTo(activity, p.id, "created"); r
+            } else Profiles.update(activity, profile.id, n, phone)
+            if (refused != null) { error.text = activity.getString(refusalText(refused)); return }
+            dialog.dismiss(); onSwitched()
         }
-        dialog.show()
-        app.mg4dash.ui.CarKeyboard.attachInDialog(name, dialog, box, onDone = { dialog.getButton(android.app.AlertDialog.BUTTON_POSITIVE).performClick() })
+        box.setPadding(0, 0, 0, 0)
+        val holder = LinearLayout(activity).apply { orientation = LinearLayout.VERTICAL; addView(android.widget.ScrollView(activity).apply { addView(box) }, LinearLayout.LayoutParams(-1, -2)) }
+        dialog = app.mg4dash.ui.Windows.show(activity, activity.getString(if (profile == null) R.string.pf_new else R.string.pf_edit), holder, widthDp = 900,
+            buttons = listOf(app.mg4dash.ui.Rows.actionButton(activity, activity.getString(R.string.pf_save)) { save() }))
+        app.mg4dash.ui.CarKeyboard.attachInDialog(name, dialog, box, onDone = { save() })
     }
 
     fun refusalText(r: Profiles.Refusal): Int = when (r) {

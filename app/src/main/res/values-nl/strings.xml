@@ -313,6 +313,8 @@
     <string name="st_ha_import_none">Geen bestand mg4dash_ha.txt in de hoofdmap van een USB-stick</string>
     <string name="st_paste">Plakken</string>
     <string name="st_diag">DIAGNOSE</string>
+    <string name="st_diag_on">Diagnosemodus aan</string>
+    <string name="st_diag_off">Diagnosemodus uit</string>
     <string name="st_energy_log">Energiegegevensrecorder: %1$s</string>
     <string name="st_energy_log_desc">Schrijft elke 5 s het batterijvermogen, de verbruikstellers en de status van de apparatuur naar Android/data/app.mg4dash/files/energy_log.csv (alleen lezen, er wordt niets naar de auto gestuurd). Wordt elke 5 min opgeslagen om slijtage van het radiogeheugen te beperken. Alleen voor foutopsporing: laat het anders uit.</string>
     <string name="sc_search">Zoeken…</string>
@@ -737,6 +739,7 @@
     <string name="st_v2l_auto_warning">Let op: zodra een V2L-kabel wordt aangesloten, start het ontladen vanzelf, zonder verdere actie, en alles wat op de kabel is aangesloten krijgt stroom.</string>
     <string name="st_v2l_auto_enable">Inschakelen</string>
     <string name="st_audio_source">Audiobron</string>
+    <string name="st_media">Media</string>
     <string name="st_start_source">Bron bij het starten</string>
     <string name="st_src_auto">Automatisch</string>
     <string name="st_src_car">Zoals de auto</string>
@@ -820,6 +823,7 @@
     <string name="conn_usb_count">%1$d verbonden</string>
     <string name="en_time_note">Op datum en afgevlakt · gemiddelde (gestippeld)</string>
     <string name="st_sound_trigger">Opstartgeluid</string>
+    <string name="st_sounds">GELUIDEN</string>
     <string name="st_sound_trigger_desc">Kies een audiobestand van een USB-stick of uit de interne opslag. Het wordt naar de app gekopieerd en blijft beschikbaar nadat de stick is verwijderd.</string>
     <string name="st_sound_boot_trigger">Afspelen bij opstarten</string>
     <string name="st_sound_pick_file">Audio kiezen</string>
@@ -831,7 +835,8 @@
     <string name="st_sound_imported">Audio geïmporteerd: %1$s</string>
     <string name="st_sound_test">Test</string>
     <string name="st_sound_stop">Stoppen</string>
-    <string name="st_sound_volume">Mediavolume auto</string>
+    <string name="st_sound_volume">Volume van het opstartgeluid</string>
+    <string name="st_sound_volume_desc">Alleen voor het opstartgeluid</string>
     <string name="st_sound_vol_default">Huidig autovolume</string>
     <string name="st_sound_volume_level">%1$d / 32</string>
     <string name="du_tab">4G-data</string>

@@ -40,7 +40,7 @@ class OptionsPopup(private val a: Activity, private val title: String, private v
     fun toggle(title: String, sub: String?, get: () -> Boolean, set: (Boolean) -> Unit): OptionsPopup {
         val sw = SwitchView(a).apply { on = get() }
         repaints += { sw.on = get() }
-        target += Rows.row(a, title, sub, sw) { set(!get()); sw.on = get() }
+        target += Rows.row(a, title, sub, sw) { set(!get()); sw.on = get(); refresh() }
         return this
     }
 
@@ -62,6 +62,34 @@ class OptionsPopup(private val a: Activity, private val title: String, private v
     fun action(title: String, sub: String?, button: String, run: () -> Unit): OptionsPopup {
         val b = Rows.actionButton(a, button) { closeNow(); run() }
         target += Rows.row(a, title, sub, b, null)
+        return this
+    }
+
+    /**
+     * A value set with a slider (0 to [max]): its title and the value in the theme's colour on one line, the slider
+     * under them; [label] writes the value, [set] is called when the finger lets go.
+     */
+    fun slider(title: String, max: Int, get: () -> Int, label: (Int) -> String, enabled: () -> Boolean = { true }, set: (Int) -> Unit): OptionsPopup {
+        val value = TextView(a).apply { setTextColor(Themes.select(a)); setTextSize(TypedValue.COMPLEX_UNIT_SP, 20f) }
+        val bar = android.widget.SeekBar(a).apply {
+            this.max = max; progress = get()
+            progressTintList = android.content.res.ColorStateList.valueOf(Themes.select(a)); thumbTintList = progressTintList
+        }
+        val row = Rows.row(a, title, null, value, null).apply { orientation = LinearLayout.VERTICAL; gravity = Gravity.NO_GRAVITY }
+        // Title and value on the first line, the slider under them
+        val head = LinearLayout(a).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL }
+        (0 until row.childCount).map { row.getChildAt(it) }.also { row.removeAllViews() }.forEach { head.addView(it, it.layoutParams) }
+        row.addView(head, LinearLayout.LayoutParams(-1, -2))
+        row.addView(bar, LinearLayout.LayoutParams(-1, dp(48)))
+        fun paint() { value.text = label(bar.progress); val on = enabled(); bar.isEnabled = on; row.alpha = if (on) 1f else 0.45f }
+        repaints += { paint() }
+        bar.setOnSeekBarChangeListener(object : android.widget.SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(s: android.widget.SeekBar, p: Int, fromUser: Boolean) { value.text = label(p) }
+            override fun onStartTrackingTouch(s: android.widget.SeekBar) = Unit
+            override fun onStopTrackingTouch(s: android.widget.SeekBar) = set(s.progress)
+        })
+        paint()
+        target += row
         return this
     }
 

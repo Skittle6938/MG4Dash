@@ -229,11 +229,9 @@ class TripsActivity : PageActivity() {
     }
 
     private fun confirmClear() {
-        android.app.AlertDialog.Builder(this)
-            .setMessage(R.string.tr_clear_all_confirm)
-            .setPositiveButton(R.string.tr_clear) { _, _ -> TripLog.clearAll(sp); refresh() }
-            .setNegativeButton(android.R.string.cancel, null)
-            .create().also { app.mg4dash.ui.Dialogs.show(it); app.mg4dash.ui.Dialogs.hideBars(it) }
+        app.mg4dash.ui.Windows.confirm(this, getString(R.string.tr_clear), getString(R.string.tr_clear_all_confirm), getString(R.string.tr_clear)) {
+            TripLog.clearAll(sp); refresh()
+        }
     }
 
     companion object {

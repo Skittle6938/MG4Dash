@@ -74,7 +74,7 @@ object WebAddresses {
             }
         }
         rows += CardMenu.Row("⇧", activity.getString(R.string.wc_urls_export), FILE, false) { exportUsb(activity) }
-        CardMenu.show(activity, rows)
+        CardMenu.show(activity, rows, activity.getString(R.string.wc_web))
     }
 
     /** [list] with [old] replaced by [new], in its place; [new] once. */
