@@ -1050,6 +1050,12 @@
     <string name="st_rad_snd_chime">Carillon</string>
     <string name="st_rad_snd_beep">Bip</string>
     <string name="st_rad_snd_loud">Bip fort</string>
+    <string name="st_rad_snd_marimba">Marimba</string>
+    <string name="st_rad_snd_dingdong">Ding-dong</string>
+    <string name="st_rad_snd_sonar">Sonar</string>
+    <string name="st_rad_snd_pulse">Triple impulsion</string>
+    <string name="st_rad_snd_blip">Bip rétro</string>
+    <string name="st_rad_snd_hum">Bourdon grave</string>
     <string name="rp_tab_alerts">Alertes</string>
     <string name="rp_tab_alerts_sub">Seuils, sons, bandeau</string>
     <string name="rp_tab_data">Données</string>
@@ -1070,6 +1076,7 @@
     <string name="rp_visual">Vitesse en couleur</string>
     <string name="rp_visual_sub">Sur la carte, la vitesse passe en orange un peu au-dessus de la limite, en rouge nettement au-dessus</string>
     <string name="rp_banner">Bandeau par-dessus les applis</string>
+    <string name="rp_banner_sub">Seulement en cas de fort dépassement de vitesse dans une zone radar</string>
     <string name="rp_sounds">Son de chaque alerte</string>
     <string name="rp_col_alert">Alerte</string>
     <string name="rp_col_sound">Son</string>

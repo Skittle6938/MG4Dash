@@ -1050,6 +1050,12 @@
     <string name="st_rad_snd_chime">Gong</string>
     <string name="st_rad_snd_beep">Piepton</string>
     <string name="st_rad_snd_loud">Lauter Piepton</string>
+    <string name="st_rad_snd_marimba">Marimba</string>
+    <string name="st_rad_snd_dingdong">Ding-Dong</string>
+    <string name="st_rad_snd_sonar">Sonar</string>
+    <string name="st_rad_snd_pulse">Dreifacher Impuls</string>
+    <string name="st_rad_snd_blip">Retro-Piep</string>
+    <string name="st_rad_snd_hum">Tiefes Brummen</string>
     <string name="rp_tab_alerts">Warnungen</string>
     <string name="rp_tab_alerts_sub">Schwellen, Töne, Banner</string>
     <string name="rp_tab_data">Daten</string>
@@ -1070,6 +1076,7 @@
     <string name="rp_visual">Farbige Geschwindigkeit</string>
     <string name="rp_visual_sub">Auf der Karte wird die Geschwindigkeit leicht über dem Limit orange, deutlich darüber rot</string>
     <string name="rp_banner">Banner über den Apps</string>
+    <string name="rp_banner_sub">Nur bei deutlicher Überschreitung in einer Blitzerzone</string>
     <string name="rp_sounds">Ton jeder Warnung</string>
     <string name="rp_col_alert">Warnung</string>
     <string name="rp_col_sound">Ton</string>

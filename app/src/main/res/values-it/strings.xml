@@ -1050,6 +1050,12 @@
     <string name="st_rad_snd_chime">Campanello</string>
     <string name="st_rad_snd_beep">Bip</string>
     <string name="st_rad_snd_loud">Bip forte</string>
+    <string name="st_rad_snd_marimba">Marimba</string>
+    <string name="st_rad_snd_dingdong">Din-don</string>
+    <string name="st_rad_snd_sonar">Sonar</string>
+    <string name="st_rad_snd_pulse">Triplo impulso</string>
+    <string name="st_rad_snd_blip">Bip retrò</string>
+    <string name="st_rad_snd_hum">Ronzio basso</string>
     <string name="rp_tab_alerts">Avvisi</string>
     <string name="rp_tab_alerts_sub">Soglie, suoni, banner</string>
     <string name="rp_tab_data">Dati</string>
@@ -1070,6 +1076,7 @@
     <string name="rp_visual">Velocità a colori</string>
     <string name="rp_visual_sub">Sulla scheda la velocità diventa arancione poco sopra il limite, rossa ben sopra</string>
     <string name="rp_banner">Banner sopra le app</string>
+    <string name="rp_banner_sub">Solo in caso di forte superamento in una zona autovelox</string>
     <string name="rp_sounds">Suono di ogni avviso</string>
     <string name="rp_col_alert">Avviso</string>
     <string name="rp_col_sound">Suono</string>

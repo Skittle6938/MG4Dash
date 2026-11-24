@@ -1050,6 +1050,12 @@
     <string name="st_rad_snd_chime">Gong</string>
     <string name="st_rad_snd_beep">Piep</string>
     <string name="st_rad_snd_loud">Harde piep</string>
+    <string name="st_rad_snd_marimba">Marimba</string>
+    <string name="st_rad_snd_dingdong">Ding-dong</string>
+    <string name="st_rad_snd_sonar">Sonar</string>
+    <string name="st_rad_snd_pulse">Driedubbele puls</string>
+    <string name="st_rad_snd_blip">Retro-piep</string>
+    <string name="st_rad_snd_hum">Laag gezoem</string>
     <string name="rp_tab_alerts">Waarschuwingen</string>
     <string name="rp_tab_alerts_sub">Drempels, geluiden, banner</string>
     <string name="rp_tab_data">Gegevens</string>
@@ -1070,6 +1076,7 @@
     <string name="rp_visual">Snelheid in kleur</string>
     <string name="rp_visual_sub">Op de kaart wordt de snelheid oranje net boven de limiet, rood ruim erboven</string>
     <string name="rp_banner">Banner boven de apps</string>
+    <string name="rp_banner_sub">Alleen bij een flinke overschrijding in een flitszone</string>
     <string name="rp_sounds">Geluid per waarschuwing</string>
     <string name="rp_col_alert">Waarschuwing</string>
     <string name="rp_col_sound">Geluid</string>

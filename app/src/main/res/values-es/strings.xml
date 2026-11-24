@@ -1050,6 +1050,12 @@
     <string name="st_rad_snd_chime">Campanilla</string>
     <string name="st_rad_snd_beep">Pitido</string>
     <string name="st_rad_snd_loud">Pitido fuerte</string>
+    <string name="st_rad_snd_marimba">Marimba</string>
+    <string name="st_rad_snd_dingdong">Din-don</string>
+    <string name="st_rad_snd_sonar">Sonar</string>
+    <string name="st_rad_snd_pulse">Triple pulso</string>
+    <string name="st_rad_snd_blip">Bip retro</string>
+    <string name="st_rad_snd_hum">Zumbido grave</string>
     <string name="rp_tab_alerts">Alertas</string>
     <string name="rp_tab_alerts_sub">Umbrales, sonidos, banner</string>
     <string name="rp_tab_data">Datos</string>
@@ -1070,6 +1076,7 @@
     <string name="rp_visual">Velocidad en color</string>
     <string name="rp_visual_sub">En la tarjeta, la velocidad se pone naranja un poco por encima del límite y roja muy por encima</string>
     <string name="rp_banner">Banner sobre las apps</string>
+    <string name="rp_banner_sub">Solo al superar claramente el límite en una zona de radar</string>
     <string name="rp_sounds">Sonido de cada alerta</string>
     <string name="rp_col_alert">Alerta</string>
     <string name="rp_col_sound">Sonido</string>

@@ -1050,6 +1050,12 @@
     <string name="st_rad_snd_chime">Gong</string>
     <string name="st_rad_snd_beep">Pípnutí</string>
     <string name="st_rad_snd_loud">Hlasité pípnutí</string>
+    <string name="st_rad_snd_marimba">Marimba</string>
+    <string name="st_rad_snd_dingdong">Ding-dong</string>
+    <string name="st_rad_snd_sonar">Sonar</string>
+    <string name="st_rad_snd_pulse">Trojitý puls</string>
+    <string name="st_rad_snd_blip">Retro pípnutí</string>
+    <string name="st_rad_snd_hum">Hluboké bzučení</string>
     <string name="rp_tab_alerts">Upozornění</string>
     <string name="rp_tab_alerts_sub">Prahy, zvuky, pruh</string>
     <string name="rp_tab_data">Data</string>
@@ -1070,6 +1076,7 @@
     <string name="rp_visual">Barevná rychlost</string>
     <string name="rp_visual_sub">Na kartě se rychlost mírně nad limitem zbarví oranžově, výrazně nad ním červeně</string>
     <string name="rp_banner">Pruh přes aplikace</string>
+    <string name="rp_banner_sub">Jen při výrazném překročení v zóně radaru</string>
     <string name="rp_sounds">Zvuk každého upozornění</string>
     <string name="rp_col_alert">Upozornění</string>
     <string name="rp_col_sound">Zvuk</string>

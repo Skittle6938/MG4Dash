@@ -143,11 +143,11 @@ class RadarPage(private val a: Activity, private val prefs: Prefs) {
         // Display
         val show = section(column, a.getString(R.string.rp_display))
         toggleRow(show, a.getString(R.string.rp_visual), a.getString(R.string.rp_visual_sub), { prefs.radarVisual }) { prefs.radarVisual = it }
-        toggleRow(show, a.getString(R.string.rp_banner), null, { prefs.radarBanner }) { prefs.radarBanner = it }
+        toggleRow(show, a.getString(R.string.rp_banner), a.getString(R.string.rp_banner_sub), { prefs.radarBanner }) { prefs.radarBanner = it }
         // Each alert's sound: the sound on the row, its volume and repeat by touching the row
         val snd = section(column, a.getString(R.string.rp_sounds))
         val sounds = RadarAlert.Sound.values().toList()
-        val soundNames = listOf(R.string.st_rad_snd_none, R.string.st_rad_snd_chime, R.string.st_rad_snd_beep, R.string.st_rad_snd_loud).map { a.getString(it) }
+        val soundNames = sounds.map { a.getString(it.label) }
         listOf(
             Triple(RadarAlert.Kind.APPROACH, R.string.rp_kind_approach to R.string.rp_kind_approach_sub, col(R.color.accent_action)),
             Triple(RadarAlert.Kind.LIGHT, R.string.rp_kind_light to R.string.rp_kind_light_sub, col(R.color.accent_heat)),

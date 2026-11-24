@@ -1048,6 +1048,12 @@ st_rad_snd_none|No sound|Aucun son|Kein Ton|Sin sonido|Nessun suono|Geen geluid|
 st_rad_snd_chime|Chime|Carillon|Gong|Campanilla|Campanello|Gong|Zil|Gong
 st_rad_snd_beep|Beep|Bip|Piepton|Pitido|Bip|Piep|Bip|Pípnutí
 st_rad_snd_loud|Loud beep|Bip fort|Lauter Piepton|Pitido fuerte|Bip forte|Harde piep|Yüksek bip|Hlasité pípnutí
+st_rad_snd_marimba|Marimba|Marimba|Marimba|Marimba|Marimba|Marimba|Marimba|Marimba
+st_rad_snd_dingdong|Ding-dong|Ding-dong|Ding-Dong|Din-don|Din-don|Ding-dong|Ding-dong|Ding-dong
+st_rad_snd_sonar|Sonar|Sonar|Sonar|Sonar|Sonar|Sonar|Sonar|Sonar
+st_rad_snd_pulse|Triple pulse|Triple impulsion|Dreifacher Impuls|Triple pulso|Triplo impulso|Driedubbele puls|Üçlü darbe|Trojitý puls
+st_rad_snd_blip|Retro blip|Bip rétro|Retro-Piep|Bip retro|Bip retrò|Retro-piep|Retro bip|Retro pípnutí
+st_rad_snd_hum|Low hum|Bourdon grave|Tiefes Brummen|Zumbido grave|Ronzio basso|Laag gezoem|Alçak uğultu|Hluboké bzučení
 rp_tab_alerts|Alerts|Alertes|Warnungen|Alertas|Avvisi|Waarschuwingen|Uyarılar|Upozornění
 rp_tab_alerts_sub|Thresholds, sounds, banner|Seuils, sons, bandeau|Schwellen, Töne, Banner|Umbrales, sonidos, banner|Soglie, suoni, banner|Drempels, geluiden, banner|Eşikler, sesler, şerit|Prahy, zvuky, pruh
 rp_tab_data|Data|Données|Daten|Datos|Dati|Gegevens|Veriler|Data
@@ -1068,6 +1074,7 @@ rp_strong_over|Strong over|Forte au-delà de|Stark über|Fuerte sobre|Forte oltr
 rp_visual|Coloured speed|Vitesse en couleur|Farbige Geschwindigkeit|Velocidad en color|Velocità a colori|Snelheid in kleur|Renkli hız|Barevná rychlost
 rp_visual_sub|On the card, the speed turns orange slightly over the limit, red well over it|Sur la carte, la vitesse passe en orange un peu au-dessus de la limite, en rouge nettement au-dessus|Auf der Karte wird die Geschwindigkeit leicht über dem Limit orange, deutlich darüber rot|En la tarjeta, la velocidad se pone naranja un poco por encima del límite y roja muy por encima|Sulla scheda la velocità diventa arancione poco sopra il limite, rossa ben sopra|Op de kaart wordt de snelheid oranje net boven de limiet, rood ruim erboven|Kartta hız, sınırın biraz üstünde turuncu, çok üstünde kırmızı olur|Na kartě se rychlost mírně nad limitem zbarví oranžově, výrazně nad ním červeně
 rp_banner|Banner over the apps|Bandeau par-dessus les applis|Banner über den Apps|Banner sobre las apps|Banner sopra le app|Banner boven de apps|Uygulamaların üzerinde şerit|Pruh přes aplikace
+rp_banner_sub|Only when well over the limit inside a speed camera zone|Seulement en cas de fort dépassement de vitesse dans une zone radar|Nur bei deutlicher Überschreitung in einer Blitzerzone|Solo al superar claramente el límite en una zona de radar|Solo in caso di forte superamento in una zona autovelox|Alleen bij een flinke overschrijding in een flitszone|Yalnızca radar bölgesinde sınır belirgin aşıldığında|Jen při výrazném překročení v zóně radaru
 rp_sounds|Sound of each alert|Son de chaque alerte|Ton jeder Warnung|Sonido de cada alerta|Suono di ogni avviso|Geluid per waarschuwing|Her uyarının sesi|Zvuk každého upozornění
 rp_col_alert|Alert|Alerte|Warnung|Alerta|Avviso|Waarschuwing|Uyarı|Upozornění
 rp_col_sound|Sound|Son|Ton|Sonido|Suono|Geluid|Ses|Zvuk

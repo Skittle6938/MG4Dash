@@ -1050,6 +1050,12 @@
     <string name="st_rad_snd_chime">Chime</string>
     <string name="st_rad_snd_beep">Beep</string>
     <string name="st_rad_snd_loud">Loud beep</string>
+    <string name="st_rad_snd_marimba">Marimba</string>
+    <string name="st_rad_snd_dingdong">Ding-dong</string>
+    <string name="st_rad_snd_sonar">Sonar</string>
+    <string name="st_rad_snd_pulse">Triple pulse</string>
+    <string name="st_rad_snd_blip">Retro blip</string>
+    <string name="st_rad_snd_hum">Low hum</string>
     <string name="rp_tab_alerts">Alerts</string>
     <string name="rp_tab_alerts_sub">Thresholds, sounds, banner</string>
     <string name="rp_tab_data">Data</string>
@@ -1070,6 +1076,7 @@
     <string name="rp_visual">Coloured speed</string>
     <string name="rp_visual_sub">On the card, the speed turns orange slightly over the limit, red well over it</string>
     <string name="rp_banner">Banner over the apps</string>
+    <string name="rp_banner_sub">Only when well over the limit inside a speed camera zone</string>
     <string name="rp_sounds">Sound of each alert</string>
     <string name="rp_col_alert">Alert</string>
     <string name="rp_col_sound">Sound</string>
