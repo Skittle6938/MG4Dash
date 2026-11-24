@@ -88,10 +88,11 @@ class BigDisplayTest {
 
     /** SAIC bars shown (#43): the reduction multiplies the enlargement, once. */
     @Config(qualifiers = "w1920dp-h640dp-land-mdpi")
-    @Test fun barsReductionMultipliesTheFactor() {
+    /** Full screen is always on (24/11): a stored "off" no longer shrinks the screen for the car's bars. */
+    @Test fun storedFullscreenOffIgnored() {
         prefs.raw.edit().putBoolean("fullscreen", false).commit()
-        assertEquals(big * 640 / 720f, density(open(MainActivity::class.java)), 0.002f)
-        assertEquals(640 / 720f, density(open(SettingsActivity::class.java)), 0.002f)
+        assertEquals(big, density(open(MainActivity::class.java)), 0.002f)
+        assertEquals(1f, density(open(SettingsActivity::class.java)), 0.002f)
     }
 
     /** What sits under MG's own buttons keeps its pixels. */
