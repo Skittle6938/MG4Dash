@@ -3,7 +3,7 @@ package app.mg4dash.system
 import android.content.Context
 
 /**
- * Profiles, step 12 (option, off by default, shared): each profile keeps the car's drive mode and regeneration. Leaving
+ * Profiles, step 12 (each profile's own option since 24/11, off by default): a profile keeps the car's drive mode and regeneration. Leaving
  * a profile, MG4Dash notes them; arriving on a profile, it puts them back, stopped or driving. Nothing is sent when the
  * car is already there.
  */
@@ -28,11 +28,16 @@ object DriveMemory {
 
     private fun now(): Drive = app.mg4dash.car.CarBridge.state.value.let { Drive(it.driveMode, it.regenLevel, it.onePedal) }
 
-    fun enabled(c: Context) = Prefs(c).profilesDrive
+    /** [profile] keeps its drive (24/11: a choice of each profile; the shared switch it once was is the starting value). */
+    fun enabled(c: Context, profile: String) =
+        c.getSharedPreferences(Profiles.FILE, Context.MODE_PRIVATE).getBoolean("drive_on_$profile", Prefs(c).profilesDrive)
+
+    fun setEnabled(c: Context, profile: String, on: Boolean) =
+        c.getSharedPreferences(Profiles.FILE, Context.MODE_PRIVATE).edit().putBoolean("drive_on_$profile", on).apply()
 
     /** Leaving [from]: the car's drive noted for it; not while the car has not said it yet (its memory kept). */
     fun note(c: Context, from: String) {
-        if (!enabled(c)) return
+        if (!enabled(c, from)) return
         if (now().mode == null) return
         c.getSharedPreferences(Profiles.FILE, Context.MODE_PRIVATE).edit().putString("drive_$from", now().encode()).apply()
     }
@@ -41,7 +46,7 @@ object DriveMemory {
 
     /** Arriving on [to]: its drive put back, what differs only; once the car says its drive (up to a minute). */
     fun putBack(c: Context, to: String, tries: Int = 30) {
-        if (!enabled(c)) return
+        if (!enabled(c, to)) return
         if (now().mode == null) { if (tries > 0) main.postDelayed({ if (Profiles.current(c).id == to) putBack(c, to, tries - 1) }, 2_000); return }
         val stored = Drive.decode(c.getSharedPreferences(Profiles.FILE, Context.MODE_PRIVATE).getString("drive_$to", null))
         commands(stored, now()).forEach { (what, v) ->

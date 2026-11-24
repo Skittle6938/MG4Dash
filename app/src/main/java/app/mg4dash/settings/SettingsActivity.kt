@@ -183,10 +183,7 @@ class SettingsActivity : AppCompatActivity() {
         }
         // Shared by every profile: MG's fog button is hidden by an overlay the car only reads at its start
         text(barP, getString(R.string.pf_all), 14f, R.color.text_title)
-        val fullP = panel(homeR, getString(R.string.st_full_section))
-        toggle(fullP, R.string.st_fullscreen, null, { prefs.fullscreen }) { prefs.fullscreen = it; Fullscreen.apply(this); app.mg4dash.ui.ShortcutsPanel.GlobalStrip.update(this); app.mg4dash.ui.EmbeddedApp.refreshImmersive(this) }
-        // The SAIC call window in full screen too: no top bar during calls
-        toggle(fullP, R.string.st_call_bar, R.string.st_call_bar_desc, { prefs.callBarHidden }) { prefs.callBarHidden = it; app.mg4dash.ui.EmbeddedApp.refreshImmersive(this) }
+        // Full screen and the top bar hidden during calls: always (24/11, their settings are gone)
         // Audio source: drop-down menu (same style as the card menus)
         // Media (24/11): the source and the playback at startup, and the bar's Android Auto button
         val src = panel(mediaL, getString(R.string.st_media).uppercase())

@@ -229,7 +229,6 @@
     <string name="st_startup">BAŞLANGIÇ</string>
     <string name="st_toggle">Değiştir</string>
     <string name="st_display">EKRAN</string>
-    <string name="st_fullscreen">Tam ekran (SAIC yan çubuğunu ve şeridini gizler): %1$s</string>
     <string name="st_fullscreen_desc">SAIC çubuklarını geri getirmek için sol veya üst kenardan kaydırın.</string>
     <string name="yes">EVET</string>
     <string name="no">HAYIR</string>
@@ -737,7 +736,6 @@
     <string name="st_tab_media">Medya ve sesler</string>
     <string name="st_tab_general">Genel</string>
     <string name="st_bar_section">ÇUBUK</string>
-    <string name="st_full_section">TAM EKRAN</string>
     <string name="st_formats">BİÇİMLER</string>
     <string name="st_input">YAZMA</string>
     <string name="du_last30">Son 30 gün</string>
@@ -1127,8 +1125,6 @@
     <string name="wc_conn_small">Bu alan bağlantı çubuğu için çok küçük</string>
     <string name="st_climate_fx">Klima kartında sıcak/soğuk animasyonu</string>
     <string name="st_climate_fx_desc">Isıtırken sıcak dalgaları, soğuturken kırağı; ayar dış sıcaklıktan ne kadar uzaksa o kadar belirgin. Kapalı: yalnızca animasyon kalkar, Isıtma / Soğutma görünür kalır.</string>
-    <string name="st_call_bar">Aramalar sırasında üst çubuğu gizle</string>
-    <string name="st_call_bar_desc">Aracın arama penceresi de tam ekran kalır. Yukarıdan kaydırmak çubuğu yine gösterir; SAIC Telefon uygulamasında da gizlenir.</string>
     <string name="rp_stop">Durdur</string>
     <string name="clim_settings_title">Klima ayarları</string>
     <string name="clim_fx_title">Kartta ısıtma / soğutma</string>
@@ -1190,8 +1186,9 @@
     <string name="sc_profile">Profil</string>
     <string name="pf_drive">Profiller sürüş modunu ve rejenerasyonu hatırlar</string>
     <string name="pf_drive_desc">MG4Dash bir profilden çıkarken sürüş modunu ve rejenerasyonu kaydeder; bir profile geçerken bunları geri koyar, dururken de sürerken de. Varsayılan olarak kapalı.</string>
-    <string name="dv_profiles_drive">Her profil mod ve rejenerasyonu hatırlar</string>
     <string name="dv_profiles_drive_desc">Profil değişince profilin sürüş modu ve rejenerasyonu geri alınır</string>
+    <string name="pf_drive_one">Bu profilin sürüş modunu ve rejenerasyonunu geri al</string>
+    <string name="pf_drive_one_desc">Bu profile geçildiğinde uygulanır</string>
     <string name="br_title">Parlaklık</string>
     <string name="br_auto">Otomatik parlaklık</string>
     <string name="br_auto_desc">Akıllı: tahmini gün ışığına ve farlara göre kaydırıcıyla yaptığınız ayarlardan öğrenir. Orijinal: − ve + ile Android modu.</string>

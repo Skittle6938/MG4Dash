@@ -229,7 +229,6 @@
     <string name="st_startup">ARRANQUE</string>
     <string name="st_toggle">Cambiar</string>
     <string name="st_display">PANTALLA</string>
-    <string name="st_fullscreen">Pantalla completa (oculta la barra lateral y el banner SAIC): %1$s</string>
     <string name="st_fullscreen_desc">Deslice desde el borde izquierdo o superior para mostrar las barras SAIC.</string>
     <string name="yes">SÍ</string>
     <string name="no">NO</string>
@@ -737,7 +736,6 @@
     <string name="st_tab_media">Multimedia y sonidos</string>
     <string name="st_tab_general">General</string>
     <string name="st_bar_section">BARRA</string>
-    <string name="st_full_section">PANTALLA COMPLETA</string>
     <string name="st_formats">FORMATOS</string>
     <string name="st_input">ESCRITURA</string>
     <string name="du_last30">Últimos 30 días</string>
@@ -1127,8 +1125,6 @@
     <string name="wc_conn_small">Lugar demasiado pequeño para la barra de conexión</string>
     <string name="st_climate_fx">Animación cálido/frío de la tarjeta de clima</string>
     <string name="st_climate_fx_desc">Ondas de calor al calentar, escarcha al enfriar, más marcadas cuanto más lejos está la consigna de la temperatura exterior. Desactivada: solo desaparece la animación, Calefacción / Refrigeración sigue visible.</string>
-    <string name="st_call_bar">Ocultar la barra superior durante las llamadas</string>
-    <string name="st_call_bar_desc">La ventana de llamada del coche también queda a pantalla completa. Deslizar desde arriba sigue mostrando la barra; también se oculta en la app Teléfono de SAIC.</string>
     <string name="rp_stop">Detener</string>
     <string name="clim_settings_title">Ajustes del clima</string>
     <string name="clim_fx_title">Calefacción / refrigeración en la tarjeta</string>
@@ -1190,8 +1186,9 @@
     <string name="sc_profile">Perfil</string>
     <string name="pf_drive">Los perfiles guardan el modo de conducción y la regeneración</string>
     <string name="pf_drive_desc">Al salir de un perfil, MG4Dash anota el modo de conducción y la regeneración; al llegar a un perfil, los vuelve a poner, parado o en marcha. Apagado por defecto.</string>
-    <string name="dv_profiles_drive">Cada perfil recuerda el modo y la regeneración</string>
     <string name="dv_profiles_drive_desc">Al cambiar de perfil, se recuperan el modo de conducción y la regeneración del perfil</string>
+    <string name="pf_drive_one">Recuperar el modo de conducción y la regeneración de este perfil</string>
+    <string name="pf_drive_one_desc">Se aplican al pasar a este perfil</string>
     <string name="br_title">Brillo</string>
     <string name="br_auto">Brillo automático</string>
     <string name="br_auto_desc">Inteligente: aprende de tus ajustes con el control, según la luz del día estimada y las luces. Original: el modo de Android, con − y +.</string>

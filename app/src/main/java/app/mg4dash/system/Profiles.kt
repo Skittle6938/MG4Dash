@@ -95,7 +95,9 @@ object Profiles {
     )
 
     /** Shared, by family: the energy monitor, the consumption curve, the trips list, the tutorial's steps seen. */
-    val SHARED_PREFIXES = listOf("em_", "cc_", "trip_", "trips_", "tutorial_", "profile_")
+    val SHARED_PREFIXES = listOf("em_", "cc_", "trip_", "trips_", "tutorial_", "profile_",
+        // Each profile's own drive choice (24/11), kept in the profiles' file with the profile
+        "drive_on_")
 
     /** [key] follows the profile; anything else in the settings stays shared. */
     fun isPersonal(key: String): Boolean = key in PERSONAL || PERSONAL_PREFIXES.any { key.startsWith(it) }

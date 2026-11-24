@@ -452,13 +452,11 @@ class Prefs(context: Context) {
         get() = sp.getBoolean("own_keyboard", true)
         set(v) = sp.edit().putBoolean("own_keyboard", v).apply()
     /** The SAIC call window kept full screen too, so the top bar stays hidden during calls (on by default). */
-    var callBarHidden: Boolean
-        get() = sp.getBoolean("call_bar_hidden", true)
-        set(v) = sp.edit().putBoolean("call_bar_hidden", v).apply()
+    /** The top bar hidden during calls too: always (24/11, its setting is gone). */
+    val callBarHidden: Boolean get() = true
 
-    var fullscreen: Boolean
-        get() = sp.getBoolean("fullscreen", true)
-        set(v) = sp.edit().putBoolean("fullscreen", v).apply()
+    /** Full screen (the car's bars hidden): always (24/11, its setting is gone). */
+    val fullscreen: Boolean get() = true
 
     /** Widget central haut : 0 = carte OpenStreetMap, 1 = raccourcis. */
     /** Old SDK: bring MG4Dash back in front when the SAIC launcher opens its climate screen (#48). */

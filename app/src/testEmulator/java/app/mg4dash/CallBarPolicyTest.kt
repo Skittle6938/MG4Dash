@@ -2,8 +2,6 @@ package app.mg4dash
 
 import android.provider.Settings
 import app.mg4dash.ui.EmbeddedApp
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -11,7 +9,7 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.RuntimeEnvironment
 import org.robolectric.annotation.Config
 
-/** The SAIC call window kept in full screen (17/11): added to policy_control with the option, removed without it. */
+/** The SAIC call window kept in full screen (17/11), always since 24/11. */
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [28])
 class CallBarPolicyTest {
@@ -27,24 +25,12 @@ class CallBarPolicyTest {
         assertTrue(policy, policy.contains(EmbeddedApp.SAIC_PHONE))
     }
 
-    @Test fun addedThenRemovedCleanly() {
-        // Another app's entry is kept whatever happens
+    /** Always (24/11, the settings are gone): an "off" stored before is ignored, another app's entry is kept. */
+    @Test fun alwaysOnAndOthersKept() {
         Settings.Global.putString(ctx.contentResolver, "policy_control", "immersive.full=com.iternio.abrpapp")
-        set(fullscreen = true, callBar = true)
+        set(fullscreen = false, callBar = false)
         EmbeddedApp.refreshImmersive(ctx)
         assertTrue(policy, policy.contains(EmbeddedApp.SAIC_PHONE))
         assertTrue(policy, policy.contains("com.iternio.abrpapp"))
-        set(fullscreen = true, callBar = false)
-        EmbeddedApp.refreshImmersive(ctx)
-        assertFalse(policy, policy.contains(EmbeddedApp.SAIC_PHONE))
-        assertTrue(policy, policy.contains("com.iternio.abrpapp"))
-    }
-
-    @Test fun notWithoutFullScreen() {
-        Settings.Global.putString(ctx.contentResolver, "policy_control", null)
-        set(fullscreen = false, callBar = true)
-        EmbeddedApp.refreshImmersive(ctx)
-        assertFalse(policy, policy.contains(EmbeddedApp.SAIC_PHONE))
-        assertEquals(false, policy.contains("app.mg4dash"))
     }
 }

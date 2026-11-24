@@ -229,7 +229,6 @@
     <string name="st_startup">SPUŠTĚNÍ</string>
     <string name="st_toggle">Přepnout</string>
     <string name="st_display">ZOBRAZENÍ</string>
-    <string name="st_fullscreen">Celá obrazovka (skryje boční lištu a pruh SAIC): %1$s</string>
     <string name="st_fullscreen_desc">Přejetím od levého nebo horního okraje lišty SAIC znovu zobrazíte.</string>
     <string name="yes">ANO</string>
     <string name="no">NE</string>
@@ -737,7 +736,6 @@
     <string name="st_tab_media">Média a zvuky</string>
     <string name="st_tab_general">Obecné</string>
     <string name="st_bar_section">LIŠTA</string>
-    <string name="st_full_section">CELÁ OBRAZOVKA</string>
     <string name="st_formats">FORMÁTY</string>
     <string name="st_input">PSANÍ</string>
     <string name="du_last30">Posledních 30 dní</string>
@@ -1127,8 +1125,6 @@
     <string name="wc_conn_small">Místo je pro lištu připojení příliš malé</string>
     <string name="st_climate_fx">Animace teplo/chlad na kartě klimatizace</string>
     <string name="st_climate_fx_desc">Vlnění tepla při topení, jinovatka při chlazení, výraznější čím dál je nastavená teplota od venkovní. Vypnuto: zmizí jen animace, Topení / Chlazení zůstane.</string>
-    <string name="st_call_bar">Skrýt horní lištu během hovorů</string>
-    <string name="st_call_bar_desc">Okno hovoru vozu zůstane také na celou obrazovku. Přejetí shora lištu stále zobrazí; skryje se i v aplikaci Telefon SAIC.</string>
     <string name="rp_stop">Zastavit</string>
     <string name="clim_settings_title">Nastavení klimatizace</string>
     <string name="clim_fx_title">Topení / chlazení na kartě</string>
@@ -1190,8 +1186,9 @@
     <string name="sc_profile">Profil</string>
     <string name="pf_drive">Profily si pamatují jízdní režim a rekuperaci</string>
     <string name="pf_drive_desc">Při opuštění profilu si MG4Dash zapamatuje jízdní režim a rekuperaci; při přechodu na profil je vrátí, ve stoje i za jízdy. Ve výchozím stavu vypnuto.</string>
-    <string name="dv_profiles_drive">Každý profil si pamatuje režim a rekuperaci</string>
     <string name="dv_profiles_drive_desc">Při změně profilu se převezme jízdní režim a rekuperace profilu</string>
+    <string name="pf_drive_one">Převzít jízdní režim a rekuperaci tohoto profilu</string>
+    <string name="pf_drive_one_desc">Použije se při přepnutí na tento profil</string>
     <string name="br_title">Jas</string>
     <string name="br_auto">Automatický jas</string>
     <string name="br_auto_desc">Chytrý: učí se z vašich nastavení posuvníkem podle odhadovaného denního světla a světel. Původní: režim Androidu s − a +.</string>

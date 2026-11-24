@@ -229,7 +229,6 @@
     <string name="st_startup">DÉMARRAGE</string>
     <string name="st_toggle">Basculer</string>
     <string name="st_display">AFFICHAGE</string>
-    <string name="st_fullscreen">Plein écran (masque la barre latérale et le bandeau SAIC) : %1$s</string>
     <string name="st_fullscreen_desc">Un glissement depuis le bord gauche ou le haut de l\'écran fait réapparaître les barres SAIC.</string>
     <string name="yes">OUI</string>
     <string name="no">NON</string>
@@ -737,7 +736,6 @@
     <string name="st_tab_media">Média et sons</string>
     <string name="st_tab_general">Général</string>
     <string name="st_bar_section">BARRE</string>
-    <string name="st_full_section">PLEIN ÉCRAN</string>
     <string name="st_formats">FORMATS</string>
     <string name="st_input">SAISIE</string>
     <string name="du_last30">30 derniers jours</string>
@@ -1127,8 +1125,6 @@
     <string name="wc_conn_small">Case trop petite pour la barre de connexion</string>
     <string name="st_climate_fx">Animation chaud/froid de la carte clim</string>
     <string name="st_climate_fx_desc">Ondulations de chaleur quand ça chauffe, givre quand ça refroidit, plus marqués quand la consigne est loin de la température extérieure. Désactivée : seule l\'animation disparaît, Chauffage / Clim reste affiché.</string>
-    <string name="st_call_bar">Cacher la barre du haut pendant les appels</string>
-    <string name="st_call_bar_desc">La fenêtre d\'appel de la voiture reste aussi en plein écran. Un glissement depuis le haut affiche toujours la barre ; elle est aussi cachée dans l\'appli Téléphone SAIC.</string>
     <string name="rp_stop">Arrêter</string>
     <string name="clim_settings_title">Réglages de la clim</string>
     <string name="clim_fx_title">Chauffage / clim sur la carte</string>
@@ -1190,8 +1186,9 @@
     <string name="sc_profile">Profil</string>
     <string name="pf_drive">Les profils retiennent le mode de conduite et la régénération</string>
     <string name="pf_drive_desc">En quittant un profil, MG4Dash note le mode de conduite et la régénération de la voiture ; en arrivant sur un profil, il les remet, à l\'arrêt comme en roulant. Éteint par défaut.</string>
-    <string name="dv_profiles_drive">Chaque profil retient le mode et la régénération</string>
     <string name="dv_profiles_drive_desc">Au changement de profil, le mode de conduite et la régénération du profil sont repris</string>
+    <string name="pf_drive_one">Reprendre le mode de conduite et la régénération de ce profil</string>
+    <string name="pf_drive_one_desc">Appliqués quand on passe sur ce profil</string>
     <string name="br_title">Luminosité</string>
     <string name="br_auto">Luminosité automatique</string>
     <string name="br_auto_desc">Intelligente : apprend de tes réglages au curseur, selon la lumière du jour estimée et les feux. D\'origine : le mode d\'Android, avec − et +.</string>

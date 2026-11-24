@@ -229,7 +229,6 @@
     <string name="st_startup">STARTUP</string>
     <string name="st_toggle">Toggle</string>
     <string name="st_display">DISPLAY</string>
-    <string name="st_fullscreen">Full screen (hides the SAIC side bar and banner): %1$s</string>
     <string name="st_fullscreen_desc">Swipe from the left or top edge to bring the SAIC bars back.</string>
     <string name="yes">YES</string>
     <string name="no">NO</string>
@@ -737,7 +736,6 @@
     <string name="st_tab_media">Media and sounds</string>
     <string name="st_tab_general">General</string>
     <string name="st_bar_section">BAR</string>
-    <string name="st_full_section">FULL SCREEN</string>
     <string name="st_formats">FORMATS</string>
     <string name="st_input">TYPING</string>
     <string name="du_last30">Last 30 days</string>
@@ -1127,8 +1125,6 @@
     <string name="wc_conn_small">This place is too small for the connection bar</string>
     <string name="st_climate_fx">Climate card warm / cold animation</string>
     <string name="st_climate_fx_desc">Heat haze while heating, frost while cooling, stronger as the set point is far from outside. Off: only the animation goes, Heating / Cooling stays.</string>
-    <string name="st_call_bar">Hide the top bar during calls</string>
-    <string name="st_call_bar_desc">The car\'s call window stays in full screen too. A swipe from the top still shows the bar; it is also hidden in the SAIC Phone app.</string>
     <string name="rp_stop">Stop</string>
     <string name="clim_settings_title">Climate settings</string>
     <string name="clim_fx_title">Heating / cooling on the card</string>
@@ -1190,8 +1186,9 @@
     <string name="sc_profile">Profile</string>
     <string name="pf_drive">Profiles keep the drive mode and the regeneration</string>
     <string name="pf_drive_desc">Leaving a profile, MG4Dash notes the car\'s drive mode and regeneration; arriving on a profile, it puts them back, stopped or driving. Off by default.</string>
-    <string name="dv_profiles_drive">Each profile keeps its mode and regeneration</string>
     <string name="dv_profiles_drive_desc">When the profile changes, the profile\'s drive mode and regeneration are taken back</string>
+    <string name="pf_drive_one">Take back this profile\'s drive mode and regeneration</string>
+    <string name="pf_drive_one_desc">Applied when switching to this profile</string>
     <string name="br_title">Brightness</string>
     <string name="br_auto">Automatic brightness</string>
     <string name="br_auto_desc">Smart: learns from your settings with the slider, according to the estimated daylight and the lights. Original: Android\'s own mode, with − and +.</string>

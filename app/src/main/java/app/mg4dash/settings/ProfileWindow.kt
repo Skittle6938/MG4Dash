@@ -56,14 +56,6 @@ object ProfileWindow {
             }
         }
         box.addView(profiles, LinearLayout.LayoutParams(-1, -2))
-        box.addView(app.mg4dash.ui.Rows.header(activity, activity.getString(R.string.pf_all)))
-        val prefs = app.mg4dash.system.Prefs(activity)
-        val drive = app.mg4dash.ui.Rows.group(activity)
-        val sw = app.mg4dash.ui.SwitchView(activity).apply { on = prefs.profilesDrive }
-        app.mg4dash.ui.Rows.add(drive, app.mg4dash.ui.Rows.row(activity, activity.getString(R.string.dv_profiles_drive), activity.getString(R.string.dv_profiles_drive_desc), sw) {
-            prefs.profilesDrive = !prefs.profilesDrive; sw.on = prefs.profilesDrive
-        })
-        box.addView(drive, LinearLayout.LayoutParams(-1, -2))
         dlg = app.mg4dash.ui.Windows.show(activity, activity.getString(R.string.pf_title), box, widthDp = 900)
     }
 
@@ -124,14 +116,22 @@ object ProfileWindow {
             setTextColor(Themes.color(activity, R.color.text_title)); setPadding(0, dp(6), 0, 0)
         })
         // The drive mode by profile: in the driving card's options (24/11), where the mode and regeneration are changed
+        // This profile keeps its drive mode and regeneration (24/11: each profile's own choice)
+        var keepDrive = profile?.let { app.mg4dash.system.DriveMemory.enabled(activity, it.id) } ?: false
+        val drive = app.mg4dash.ui.Rows.group(activity)
+        val sw = app.mg4dash.ui.SwitchView(activity).apply { on = keepDrive }
+        app.mg4dash.ui.Rows.add(drive, app.mg4dash.ui.Rows.row(activity, activity.getString(R.string.pf_drive_one), activity.getString(R.string.pf_drive_one_desc), sw) {
+            keepDrive = !keepDrive; sw.on = keepDrive
+        })
+        box.addView(drive, LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(16) })
         val error = TextView(activity).apply { setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f); setTextColor(Themes.color(activity, R.color.accent_heat)); setPadding(0, dp(8), 0, 0) }
         box.addView(error)
         lateinit var dialog: android.app.AlertDialog
         fun save() {
             val n = name.text.toString()
             val refused = if (profile == null) Profiles.create(activity, n, fromCurrent, phone).let { (p, r) ->
-                if (p != null) Profiles.switchTo(activity, p.id, "created"); r
-            } else Profiles.update(activity, profile.id, n, phone)
+                if (p != null) { app.mg4dash.system.DriveMemory.setEnabled(activity, p.id, keepDrive); Profiles.switchTo(activity, p.id, "created") }; r
+            } else Profiles.update(activity, profile.id, n, phone).also { if (it == null) app.mg4dash.system.DriveMemory.setEnabled(activity, profile.id, keepDrive) }
             if (refused != null) { error.text = activity.getString(refusalText(refused)); return }
             dialog.dismiss(); onSwitched()
         }

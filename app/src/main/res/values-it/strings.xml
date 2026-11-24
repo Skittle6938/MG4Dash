@@ -229,7 +229,6 @@
     <string name="st_startup">AVVIO</string>
     <string name="st_toggle">Cambia</string>
     <string name="st_display">DISPLAY</string>
-    <string name="st_fullscreen">Schermo intero (nasconde la barra laterale e il banner SAIC): %1$s</string>
     <string name="st_fullscreen_desc">Scorri dal bordo sinistro o superiore per mostrare le barre SAIC.</string>
     <string name="yes">SÌ</string>
     <string name="no">NO</string>
@@ -737,7 +736,6 @@
     <string name="st_tab_media">Media e suoni</string>
     <string name="st_tab_general">Generale</string>
     <string name="st_bar_section">BARRA</string>
-    <string name="st_full_section">SCHERMO INTERO</string>
     <string name="st_formats">FORMATI</string>
     <string name="st_input">DIGITAZIONE</string>
     <string name="du_last30">Ultimi 30 giorni</string>
@@ -1127,8 +1125,6 @@
     <string name="wc_conn_small">Posto troppo piccolo per la barra di connessione</string>
     <string name="st_climate_fx">Animazione caldo/freddo della scheda clima</string>
     <string name="st_climate_fx_desc">Ondulazioni di calore quando riscalda, brina quando raffredda, più marcate quanto più la temperatura impostata è lontana da quella esterna. Disattivata: sparisce solo l\'animazione, Riscaldamento / Raffreddamento resta.</string>
-    <string name="st_call_bar">Nascondi la barra superiore durante le chiamate</string>
-    <string name="st_call_bar_desc">Anche la finestra di chiamata dell\'auto resta a schermo intero. Uno scorrimento dall\'alto mostra comunque la barra; è nascosta anche nell\'app Telefono SAIC.</string>
     <string name="rp_stop">Interrompi</string>
     <string name="clim_settings_title">Impostazioni clima</string>
     <string name="clim_fx_title">Riscaldamento / raffreddamento sulla scheda</string>
@@ -1190,8 +1186,9 @@
     <string name="sc_profile">Profilo</string>
     <string name="pf_drive">I profili ricordano la modalità di guida e la rigenerazione</string>
     <string name="pf_drive_desc">Lasciando un profilo, MG4Dash annota modalità di guida e rigenerazione; arrivando su un profilo, le rimette, da fermo o in marcia. Spento per impostazione predefinita.</string>
-    <string name="dv_profiles_drive">Ogni profilo ricorda modalità e rigenerazione</string>
     <string name="dv_profiles_drive_desc">Al cambio di profilo, vengono ripresi la modalità di guida e la rigenerazione del profilo</string>
+    <string name="pf_drive_one">Riprendere la modalità di guida e la rigenerazione di questo profilo</string>
+    <string name="pf_drive_one_desc">Applicati quando si passa a questo profilo</string>
     <string name="br_title">Luminosità</string>
     <string name="br_auto">Luminosità automatica</string>
     <string name="br_auto_desc">Intelligente: impara dalle tue regolazioni con il cursore, secondo la luce del giorno stimata e le luci. Originale: la modalità di Android, con − e +.</string>

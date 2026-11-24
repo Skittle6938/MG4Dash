@@ -30,7 +30,7 @@ class SettingsTabsTest {
     /** The settings of the old Home, Appearance, Vehicle, 4G data and System tabs still in the Settings page. */
     private val settings = listOf(
         R.string.ly_edit, R.string.st_cards_offered, R.string.tu_show, R.string.st_bar, R.string.st_wide_bar, R.string.st_shortcuts_menu,
-        R.string.st_fullscreen, R.string.st_call_bar, R.string.st_theme_mode, R.string.st_night_sun, R.string.st_panel_outline,
+        R.string.st_theme_mode, R.string.st_night_sun, R.string.st_panel_outline,
         R.string.st_theme_bg, R.string.st_theme_accent, R.string.st_start_source, R.string.st_start_playback, R.string.st_aa_button,
         R.string.st_sound_boot_trigger, R.string.st_sound_volume, R.string.st_units, R.string.st_pressure, R.string.st_clock, R.string.st_own_keyboard,
         R.string.du_last30, R.string.du_detail_open, R.string.st_replace, R.string.st_valet, R.string.st_update_auto, R.string.st_update_beta,

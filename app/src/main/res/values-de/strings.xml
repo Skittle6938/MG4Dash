@@ -229,7 +229,6 @@
     <string name="st_startup">START</string>
     <string name="st_toggle">Umschalten</string>
     <string name="st_display">ANZEIGE</string>
-    <string name="st_fullscreen">Vollbild (blendet SAIC-Seitenleiste und Banner aus): %1$s</string>
     <string name="st_fullscreen_desc">Vom linken oder oberen Rand wischen, um die SAIC-Leisten einzublenden.</string>
     <string name="yes">JA</string>
     <string name="no">NEIN</string>
@@ -737,7 +736,6 @@
     <string name="st_tab_media">Medien und Klänge</string>
     <string name="st_tab_general">Allgemein</string>
     <string name="st_bar_section">LEISTE</string>
-    <string name="st_full_section">VOLLBILD</string>
     <string name="st_formats">FORMATE</string>
     <string name="st_input">EINGABE</string>
     <string name="du_last30">Letzte 30 Tage</string>
@@ -1127,8 +1125,6 @@
     <string name="wc_conn_small">Platz zu klein für die Verbindungsleiste</string>
     <string name="st_climate_fx">Warm-/Kalt-Animation der Klimakarte</string>
     <string name="st_climate_fx_desc">Hitzeflimmern beim Heizen, Reif beim Kühlen, stärker je weiter der Sollwert von der Außentemperatur entfernt ist. Aus: nur die Animation verschwindet, Heizen / Kühlen bleibt.</string>
-    <string name="st_call_bar">Obere Leiste bei Anrufen ausblenden</string>
-    <string name="st_call_bar_desc">Auch das Anruffenster des Autos bleibt im Vollbild. Ein Wischen von oben zeigt die Leiste weiterhin; auch in der SAIC-Telefon-App ist sie ausgeblendet.</string>
     <string name="rp_stop">Stoppen</string>
     <string name="clim_settings_title">Klimaeinstellungen</string>
     <string name="clim_fx_title">Heizen / Kühlen auf der Karte</string>
@@ -1190,8 +1186,9 @@
     <string name="sc_profile">Profil</string>
     <string name="pf_drive">Profile merken sich Fahrmodus und Rekuperation</string>
     <string name="pf_drive_desc">Beim Verlassen eines Profils merkt sich MG4Dash Fahrmodus und Rekuperation; beim Wechsel zu einem Profil stellt es sie wieder ein, im Stand wie während der Fahrt. Standardmäßig aus.</string>
-    <string name="dv_profiles_drive">Jedes Profil merkt sich Modus und Rekuperation</string>
     <string name="dv_profiles_drive_desc">Beim Profilwechsel werden Fahrmodus und Rekuperation des Profils übernommen</string>
+    <string name="pf_drive_one">Fahrmodus und Rekuperation dieses Profils übernehmen</string>
+    <string name="pf_drive_one_desc">Beim Wechsel zu diesem Profil angewendet</string>
     <string name="br_title">Helligkeit</string>
     <string name="br_auto">Automatische Helligkeit</string>
     <string name="br_auto_desc">Intelligent: lernt aus Ihren Einstellungen mit dem Regler, je nach geschätztem Tageslicht und Licht. Original: der Android-Modus, mit − und +.</string>

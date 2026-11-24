@@ -229,7 +229,6 @@
     <string name="st_startup">OPSTARTEN</string>
     <string name="st_toggle">Wisselen</string>
     <string name="st_display">WEERGAVE</string>
-    <string name="st_fullscreen">Volledig scherm (verbergt de SAIC-zijbalk en -banner): %1$s</string>
     <string name="st_fullscreen_desc">Veeg vanaf de linker- of bovenrand om de SAIC-balken terug te halen.</string>
     <string name="yes">JA</string>
     <string name="no">NEE</string>
@@ -737,7 +736,6 @@
     <string name="st_tab_media">Media en geluid</string>
     <string name="st_tab_general">Algemeen</string>
     <string name="st_bar_section">BALK</string>
-    <string name="st_full_section">VOLLEDIG SCHERM</string>
     <string name="st_formats">NOTATIES</string>
     <string name="st_input">INVOER</string>
     <string name="du_last30">Laatste 30 dagen</string>
@@ -1127,8 +1125,6 @@
     <string name="wc_conn_small">Plek te klein voor de verbindingsbalk</string>
     <string name="st_climate_fx">Warm/koud-animatie van de klimaatkaart</string>
     <string name="st_climate_fx_desc">Hittegolven bij verwarmen, rijp bij koelen, sterker naarmate de ingestelde temperatuur verder van buiten ligt. Uit: alleen de animatie verdwijnt, Verwarmen / Koelen blijft.</string>
-    <string name="st_call_bar">Bovenste balk verbergen tijdens gesprekken</string>
-    <string name="st_call_bar_desc">Ook het belvenster van de auto blijft schermvullend. Vegen vanaf boven toont de balk nog steeds; hij is ook verborgen in de SAIC-telefoonapp.</string>
     <string name="rp_stop">Stoppen</string>
     <string name="clim_settings_title">Klimaatinstellingen</string>
     <string name="clim_fx_title">Verwarmen / koelen op de kaart</string>
@@ -1190,8 +1186,9 @@
     <string name="sc_profile">Profiel</string>
     <string name="pf_drive">Profielen onthouden de rijmodus en de regeneratie</string>
     <string name="pf_drive_desc">Bij het verlaten van een profiel noteert MG4Dash rijmodus en regeneratie; bij het wisselen naar een profiel zet het ze terug, stilstaand of rijdend. Standaard uit.</string>
-    <string name="dv_profiles_drive">Elk profiel onthoudt modus en regeneratie</string>
     <string name="dv_profiles_drive_desc">Bij het wisselen van profiel worden de rijmodus en regeneratie van het profiel overgenomen</string>
+    <string name="pf_drive_one">De rijmodus en regeneratie van dit profiel overnemen</string>
+    <string name="pf_drive_one_desc">Toegepast bij het wisselen naar dit profiel</string>
     <string name="br_title">Helderheid</string>
     <string name="br_auto">Automatische helderheid</string>
     <string name="br_auto_desc">Slim: leert van je instellingen met de schuif, volgens het geschatte daglicht en de lichten. Origineel: de Android-modus, met − en +.</string>
