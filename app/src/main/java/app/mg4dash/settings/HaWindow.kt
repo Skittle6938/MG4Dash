@@ -68,7 +68,7 @@ object HaWindow {
             .flatMap { dir -> dir.listFiles()?.toList().orEmpty() }
             .firstOrNull { it.isFile && it.name.equals("mg4dash_ha.txt", ignoreCase = true) }
         if (file == null) { app.mg4dash.ui.Toasts.show(a, R.string.st_ha_import_none, long = true); return }
-        val lines = try { file.readLines().map { it.trim().trimStart('﻿') }.filter { it.isNotEmpty() } } catch (_: Exception) { emptyList() }
+        val lines = try { file.readLines().map { it.trim().trimStart('\uFEFF') }.filter { it.isNotEmpty() } } catch (_: Exception) { emptyList() }
         val url = lines.firstOrNull { it.startsWith("http", ignoreCase = true) }
         val token = lines.filter { it != url && !it.contains(' ') }.maxByOrNull { it.length }
         if (url != null) prefs.haUrl = url.trimEnd('/')
