@@ -29,8 +29,25 @@ object Dialogs {
      * a dialog takes the focus as it opens, before its own flags are set, and the bars came back for it. It opens
      * without the focus and with home's full screen flags already set, then takes the focus back.
      */
+    /** Every window shown through [show], followed without retaining it: the car's Home key closes them all. */
+    private val open = java.util.WeakHashMap<Dialog, Boolean>()
+
+    /** Windows still open (tests). */
+    internal fun openCount() = open.keys.count { it.isShowing }
+
+    /**
+     * The car's Home key (24/11): every settings window, popup, menu and question closes, back to the home screen.
+     * Each window's own close handling runs (its dismiss listener), as with its cross.
+     */
+    fun closeAll() {
+        open.keys.toList().forEach { if (it.isShowing) runCatching { it.dismiss() } }
+        open.clear()
+        Themes.closePopups()
+    }
+
     @Suppress("DEPRECATION")
     fun show(d: Dialog) {
+        open[d] = true
         val w = d.window
         w?.addFlags(android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE)
         hideBars(d)

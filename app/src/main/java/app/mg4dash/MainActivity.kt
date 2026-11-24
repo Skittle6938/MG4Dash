@@ -1018,7 +1018,12 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         if (closedForMaintenance) { super.onNewIntent(intent); return }
         super.onNewIntent(intent)
         // Home key while home is shown: the shortcuts menu closes too (14/11)
-        if (intent?.hasCategory(Intent.CATEGORY_HOME) == true) app.mg4dash.ui.ShortcutsPanel.closeAll()
+        if (intent?.hasCategory(Intent.CATEGORY_HOME) == true) {
+            app.mg4dash.ui.ShortcutsPanel.closeAll()
+            // Every settings window, popup and menu closes too (24/11), and a chrono run stops as with Cancel
+            app.mg4dash.ui.Dialogs.closeAll()
+            app.mg4dash.chrono.ChronoEngine.home()
+        }
         if (!simpleMode) setMapFullscreen(false)
         if (intent?.getBooleanExtra(app.mg4dash.ui.Tutorial.EXTRA_SHOW, false) == true) b.root.post { app.mg4dash.ui.Tutorial.show(this) }
         if (intent?.getBooleanExtra(app.mg4dash.ui.CardsEditor.EXTRA_EDIT, false) == true) b.root.post { editCards() }

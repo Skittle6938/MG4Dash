@@ -173,6 +173,9 @@ object Themes {
     /** Menus and confirmations placed by the app (floating windows), followed without retaining them. */
     private val popups = java.util.WeakHashMap<android.widget.PopupWindow, Boolean>()
     fun track(p: android.widget.PopupWindow) { popups[p] = true }
+
+    /** Closes every menu or panel the app placed (the car's Home key, 24/11). */
+    fun closePopups() = popups.keys.toList().forEach { if (it.isShowing) runCatching { it.dismiss() } }
     private var lastOpen = false
 
     /**

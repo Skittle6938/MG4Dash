@@ -130,6 +130,7 @@ object ChronoEngine {
     /** The dial touched: arms, or disarms / cancels what is going on. */
     fun tap(c: Context) {
         val ctx = c.applicationContext
+        appContext = ctx
         load(ctx)
         when (_phase.value) {
             is Phase.Armed -> disarm(ctx)
@@ -139,7 +140,19 @@ object ChronoEngine {
     }
 
     /** The Cancel button of the full screen or the card. */
-    fun cancel() { cancelAsked = true; if (_phase.value is Phase.Armed) job?.cancel() }
+    fun cancel() {
+        cancelAsked = true
+        // Armed: nothing measured yet, back to idle at once (the settings put back)
+        if (_phase.value is Phase.Armed) appContext?.let { disarm(it) }
+    }
+
+    private var appContext: Context? = null
+
+    /** The car's Home key: an armed or running chrono stops as with Cancel, a result or a cancellation closes. */
+    fun home() = when (_phase.value) {
+        is Phase.Armed, is Phase.Running -> cancel()
+        else -> dismiss()
+    }
 
     /** Back to idle (the result or the cancellation closed). */
     fun dismiss() { if (_phase.value is Phase.Done || _phase.value is Phase.Cancelled) _phase.value = Phase.Idle }
@@ -212,7 +225,11 @@ object ChronoEngine {
                 delay(if (kind == ChronoMath.Kind.STANDING) 15 else 30)
             }
         } catch (e: kotlinx.coroutines.CancellationException) { cancelled = "" }
-        if (cancelled != null || startAt == null) { finishCancelled(c, kind, null); return }
+        if (cancelled != null || startAt == null) {
+            // Disarmed from outside (the dial, Cancel, Home): that already put everything back
+            if (!scope.isActive || job?.isCancelled == true) return
+            finishCancelled(c, kind, null); return
+        }
 
         // ── Running: every reading kept when it changes, the power every other one ──
         var start = if (kind == ChronoMath.Kind.STANDING) (ChronoMath.start(samples, lastZero) ?: startAt) else startAt
@@ -315,9 +332,9 @@ object ChronoEngine {
      */
     suspend fun restore(c: Context): String? {
         val sp = Prefs(c).raw
-        val raw = sp.getString(RESTORE_KEY, null) ?: return null
+        // Taken and removed at once: two calls (disarm and the measure ending) never put it back twice
+        val raw = synchronized(this) { sp.getString(RESTORE_KEY, null)?.also { sp.edit().remove(RESTORE_KEY).commit() } } ?: return null
         val o = try { JSONObject(raw) } catch (_: Exception) { null }
-        sp.edit().remove(RESTORE_KEY).apply()
         o ?: return null
         val parts = ArrayList<String>()
         if (o.has("mode")) {
