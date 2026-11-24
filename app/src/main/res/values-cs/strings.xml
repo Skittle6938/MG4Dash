@@ -184,6 +184,7 @@
     <string name="ps_col_cpu">CPU</string>
     <string name="ps_col_ram">RAM</string>
     <string name="ps_service">služba</string>
+    <string name="ps_self">včetně zobrazení tohoto seznamu</string>
     <string name="ps_hint">Podrobnosti aplikací ›</string>
     <string name="ps_note">≈ : nedávný průměr ze systému u aplikací, které nelze číst živě.</string>
     <string name="unit_mb">MB</string>

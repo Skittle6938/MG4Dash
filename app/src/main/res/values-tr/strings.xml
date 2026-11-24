@@ -184,6 +184,7 @@
     <string name="ps_col_cpu">CPU</string>
     <string name="ps_col_ram">RAM</string>
     <string name="ps_service">hizmet</string>
+    <string name="ps_self">bu listenin gösterimi dahil</string>
     <string name="ps_hint">Uygulama başına ayrıntı ›</string>
     <string name="ps_note">≈ : canlı okunamayan uygulamalar için sistemin son ortalaması.</string>
     <string name="unit_mb">MB</string>

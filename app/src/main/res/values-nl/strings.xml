@@ -184,6 +184,7 @@
     <string name="ps_col_cpu">CPU</string>
     <string name="ps_col_ram">RAM</string>
     <string name="ps_service">dienst</string>
+    <string name="ps_self">inclusief de weergave van deze lijst</string>
     <string name="ps_hint">Details per app ›</string>
     <string name="ps_note">≈ : recent gemiddelde van het systeem, voor apps die niet live gelezen kunnen worden.</string>
     <string name="unit_mb">MB</string>

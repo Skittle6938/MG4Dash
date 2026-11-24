@@ -184,6 +184,7 @@
     <string name="ps_col_cpu">CPU</string>
     <string name="ps_col_ram">RAM</string>
     <string name="ps_service">servizio</string>
+    <string name="ps_self">inclusa la visualizzazione di questo elenco</string>
     <string name="ps_hint">Dettaglio per app ›</string>
     <string name="ps_note">≈ : media recente del sistema, per le app non leggibili dal vivo.</string>
     <string name="unit_mb">MB</string>

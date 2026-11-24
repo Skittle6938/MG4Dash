@@ -184,6 +184,7 @@
     <string name="ps_col_cpu">CPU</string>
     <string name="ps_col_ram">RAM</string>
     <string name="ps_service">service</string>
+    <string name="ps_self">dont l\'affichage de cette liste</string>
     <string name="ps_hint">Détail par appli ›</string>
     <string name="ps_note">≈ : moyenne récente donnée par le système, pour les applis qu\'on ne peut pas lire en direct.</string>
     <string name="unit_mb">Mo</string>

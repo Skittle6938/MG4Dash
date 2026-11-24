@@ -182,6 +182,7 @@ ps_col_app|Application|Application|Anwendung|Aplicación|Applicazione|Applicatie
 ps_col_cpu|CPU|CPU|CPU|CPU|CPU|CPU|CPU|CPU
 ps_col_ram|RAM|RAM|RAM|RAM|RAM|RAM|RAM|RAM
 ps_service|service|service|Dienst|servicio|servizio|dienst|hizmet|služba
+ps_self|including the display of this list|dont l'affichage de cette liste|einschließlich der Anzeige dieser Liste|incluida la visualización de esta lista|inclusa la visualizzazione di questo elenco|inclusief de weergave van deze lijst|bu listenin gösterimi dahil|včetně zobrazení tohoto seznamu
 ps_hint|Details per app ›|Détail par appli ›|Details pro App ›|Detalle por aplicación ›|Dettaglio per app ›|Details per app ›|Uygulama başına ayrıntı ›|Podrobnosti aplikací ›
 ps_note|≈ : recent average from the system, for apps that can't be read live.|≈ : moyenne récente donnée par le système, pour les applis qu'on ne peut pas lire en direct.|≈ : aktueller Durchschnitt des Systems, für Apps, die nicht live gelesen werden können.|≈ : media reciente del sistema, para las aplicaciones que no se pueden leer en directo.|≈ : media recente del sistema, per le app non leggibili dal vivo.|≈ : recent gemiddelde van het systeem, voor apps die niet live gelezen kunnen worden.|≈ : canlı okunamayan uygulamalar için sistemin son ortalaması.|≈ : nedávný průměr ze systému u aplikací, které nelze číst živě.
 unit_mb|MB|Mo|MB|MB|MB|MB|MB|MB
