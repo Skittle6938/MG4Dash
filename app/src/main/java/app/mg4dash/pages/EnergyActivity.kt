@@ -141,7 +141,7 @@ class EnergyActivity : PageActivity() {
         c1.addView(cRow, kit.lp(-1, -2, t = 8))
 
         // ── Battery (24/11, once in Settings › Vehicle): health, capacities; its settings in the options window ──
-        c1.addView(android.view.View(this), kit.lp(-1, 0, 1f))
+        if (!app.mg4dash.system.Firmware.nativeChargeLimit) c1.addView(android.view.View(this), kit.lp(-1, 0, 1f))
         val battery = kit.column().apply { isClickable = true }
         battery.addView(kit.title(getString(R.string.title_battery)))
         val health = kit.text("", 44f, light = true)
@@ -167,7 +167,22 @@ class EnergyActivity : PageActivity() {
             setBackgroundResource(R.drawable.bg_button); setOnClickListener { open() }
         }
         battery.addView(settingsBtn, kit.lp(-1, kit.dp(56), t = 12))
-        c1.addView(battery, kit.lp(-1, -2, t = 14))
+        // With the charge limit's rows (old SDK, #123: the block was cut at the bottom) the column has no room left:
+        // the battery is a button of the page's header instead, its health on it, the same window behind
+        if (app.mg4dash.system.Firmware.nativeChargeLimit) {
+            val headerBtn = kit.text("", 19f, R.color.text_value).apply {
+                setPadding(kit.dp(20), kit.dp(12), kit.dp(20), kit.dp(12)); setBackgroundResource(R.drawable.bg_button)
+                setOnClickListener { open() }
+            }
+            fun label() { headerBtn.text = getString(R.string.en_battery_header, health.text) + "   ›" }
+            label()
+            health.addTextChangedListener(object : android.text.TextWatcher {
+                override fun afterTextChanged(e: android.text.Editable?) = label()
+                override fun beforeTextChanged(t: CharSequence?, a: Int, b: Int, c: Int) {}
+                override fun onTextChanged(t: CharSequence?, a: Int, b: Int, c: Int) {}
+            })
+            header.addView(headerBtn, header.indexOfChild(heating), kit.lp(-2, -2, r = 12))
+        } else c1.addView(battery, kit.lp(-1, -2, t = 14))
 
         // ── Colonne 2 : programmation + V2L ──
         val c2 = kit.panel(getString(R.string.en_scheduled))

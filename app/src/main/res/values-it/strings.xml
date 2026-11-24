@@ -1373,4 +1373,5 @@
     <string name="mm_quality_high">Alta</string>
     <string name="mm_today">Oggi</string>
     <string name="mm_mb">MB</string>
+    <string name="en_battery_header">Batteria %1$s</string>
 </resources>
