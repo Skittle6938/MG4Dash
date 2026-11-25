@@ -373,6 +373,11 @@ class Prefs(context: Context) {
         get() = sp.getInt("start_playback", 0)
         set(v) = sp.edit().putInt("start_playback", v).apply()
 
+    /** Playback paused when the car leaves READY (25/11), off by default. */
+    var pauseOutOfReady: Boolean
+        get() = sp.getBoolean("pause_out_of_ready", false)
+        set(v) = sp.edit().putBoolean("pause_out_of_ready", v).apply()
+
     /** Last playback state seen (#36), recorded at each change, with its time ([lastPlayingAt], wall clock). */
     var lastPlaying: Boolean
         get() = sp.getBoolean("last_playing", true)

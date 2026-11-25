@@ -782,6 +782,8 @@
     <string name="st_play_resume">Comme à l\'arrêt de la voiture</string>
     <string name="st_play_pause">Toujours en pause</string>
     <string name="st_play_play">Toujours en lecture</string>
+    <string name="st_pause_ready">Pause en sortie du mode READY</string>
+    <string name="st_pause_ready_desc">Met la lecture en pause quand la voiture quitte le mode READY.</string>
     <string name="st_aa_button">Bouton Android Auto de la barre</string>
     <string name="st_aa_button_desc">Double toucher sur le bouton pour couper la connexion du téléphone (l\'appli est désactivée, l\'icône passe en rouge) ; nouveau double toucher pour la rétablir. Appui long : choix de l\'appli.</string>
     <string name="dock_conn_disabled">%1$s désactivé : le téléphone ne se connectera plus. Nouvel appui long pour le rétablir.</string>

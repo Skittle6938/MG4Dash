@@ -782,6 +782,8 @@
     <string name="st_play_resume">As when the car was switched off</string>
     <string name="st_play_pause">Always paused</string>
     <string name="st_play_play">Always playing</string>
+    <string name="st_pause_ready">Pause when leaving READY</string>
+    <string name="st_pause_ready_desc">Pauses playback when the car leaves READY.</string>
     <string name="st_aa_button">Android Auto button of the bar</string>
     <string name="st_aa_button_desc">Double tap the button to cut the phone connection (the app is disabled, the icon turns red); double tap again to restore it. Long press: choose the app.</string>
     <string name="dock_conn_disabled">%1$s disabled: the phone will no longer connect. Long press again to restore it.</string>

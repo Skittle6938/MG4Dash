@@ -46,7 +46,7 @@ object Profiles {
         // Screen: full screen, top bar during calls, MG4Dash's keyboard; the brightness
         "fullscreen", "call_bar_hidden", "own_keyboard", "bright_auto", "bright_adj", "bright_value", "bright_smart",
         // Media: start source and playback, MG4Radio's bands
-        "start_source", "start_playback", "radio_dash_bands", "radio_dash_am",
+        "start_source", "start_playback", "pause_out_of_ready", "radio_dash_bands", "radio_dash_am",
         // Map and web
         "map_app", "map_apps_recent", "map_zoom", "map_heading_up", "map_theme", "map_auto_hide", "map_float", "map_float_rect",
         "map_floating", "map_offline_switch", "web_url", "web_urls", "web_float", "web_float_rect", "web_floating", "web_wake_s",

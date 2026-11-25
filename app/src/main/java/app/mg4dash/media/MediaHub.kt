@@ -578,6 +578,7 @@ object MediaHub {
 
     /** Something the driver did: the startup sequence stops and keeps the driver's choice. */
     private fun userAction(why: String) {
+        readyPause.driverActed()
         if (seq?.done != false) return
         userAt = android.os.SystemClock.uptimeMillis()
         Log.i(TAG, "startup sequence: driver's action ($why)")
@@ -704,6 +705,7 @@ object MediaHub {
     // ── The state at the last stop ("As at switch-off") ──
     private var lastReady: Boolean? = null
     private var aliveWrittenAt = 0L
+    private val readyPause = ReadyPause()
 
     /** Every playback change recorded at once, with its time (the old "a pause counts after 30 s" rule is gone). */
     private fun recordPlayback(p: app.mg4dash.system.Prefs) {
@@ -731,6 +733,13 @@ object MediaHub {
             Log.i(TAG, "car out of READY in P: playback state kept as ${if (p.lastPlaying) "playing" else "paused"}")
         }
         lastReady = r
+        // After the state above is frozen: the option's pause does not count as the state at switch-off
+        val inCall = appContext?.let { try { app.mg4dash.ui.Fullscreen.inCall(it) } catch (_: Exception) { false } } == true
+        when (readyPause.step(p.pauseOutOfReady, r, _now.value.available && _now.value.playing, inCall, p.startPlayback)) {
+            ReadyPause.Do.PAUSE -> main.post { setPlaying(false, "car out of READY") }
+            ReadyPause.Do.RESUME -> main.post { setPlaying(true, "READY again after its pause") }
+            null -> {}
+        }
     }
 
     /** USB announced while the startup sound plays (or just after) with no stick mounted: not shown (#36). */

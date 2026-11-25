@@ -199,6 +199,7 @@ class SettingsActivity : AppCompatActivity() {
         // Play at startup (replaces Radio Dash's automatic resume)
         dropdown(src, getString(R.string.st_start_playback),
             listOf(getString(R.string.st_play_resume), getString(R.string.st_play_pause), getString(R.string.st_play_play)), { prefs.startPlayback }) { prefs.startPlayback = it }
+        toggle(src, R.string.st_pause_ready, R.string.st_pause_ready_desc, { prefs.pauseOutOfReady }) { prefs.pauseOutOfReady = it }
         // Bar's Android Auto button: the app it opens (long press cuts its connection)
         val aaLabels = listOf(getString(R.string.dock_aa_stock), getString(R.string.dock_cp_stock), getString(R.string.dock_other_app))
         fun aaIndex(): Int = when (val t = prefs.dockAaTarget) { null -> 0; app.mg4dash.system.Apps.CARPLAY.flattenToString() -> 1; else -> 2 }

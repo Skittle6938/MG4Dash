@@ -782,6 +782,8 @@
     <string name="st_play_resume">Araç kapatıldığındaki gibi</string>
     <string name="st_play_pause">Her zaman duraklatılmış</string>
     <string name="st_play_play">Her zaman oynat</string>
+    <string name="st_pause_ready">READY\'den çıkınca duraklat</string>
+    <string name="st_pause_ready_desc">Araç READY modundan çıktığında oynatmayı duraklatır.</string>
     <string name="st_aa_button">Çubuktaki Android Auto düğmesi</string>
     <string name="st_aa_button_desc">Telefon bağlantısını kesmek için düğmeye iki kez dokunun (uygulama devre dışı kalır, simge kırmızı olur); geri getirmek için tekrar iki kez dokunun. Uzun basma: uygulamayı seçin.</string>
     <string name="dock_conn_disabled">%1$s devre dışı: telefon artık bağlanmayacak. Geri getirmek için tekrar uzun basın.</string>

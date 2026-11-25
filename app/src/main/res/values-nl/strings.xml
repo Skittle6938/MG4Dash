@@ -782,6 +782,8 @@
     <string name="st_play_resume">Zoals bij het uitzetten</string>
     <string name="st_play_pause">Altijd gepauzeerd</string>
     <string name="st_play_play">Altijd afspelen</string>
+    <string name="st_pause_ready">Pauze bij het verlaten van READY</string>
+    <string name="st_pause_ready_desc">Pauzeert het afspelen wanneer de auto READY verlaat.</string>
     <string name="st_aa_button">Android Auto-knop van de balk</string>
     <string name="st_aa_button_desc">Dubbeltik op de knop om de telefoonverbinding te verbreken (de app wordt uitgeschakeld, het pictogram wordt rood); nogmaals dubbeltikken om ze te herstellen. Lang drukken: app kiezen.</string>
     <string name="dock_conn_disabled">%1$s uitgeschakeld: de telefoon maakt geen verbinding meer. Nogmaals lang drukken om te herstellen.</string>

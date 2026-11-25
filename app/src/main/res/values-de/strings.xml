@@ -782,6 +782,8 @@
     <string name="st_play_resume">Wie beim Ausschalten</string>
     <string name="st_play_pause">Immer pausiert</string>
     <string name="st_play_play">Immer abspielen</string>
+    <string name="st_pause_ready">Pause beim Verlassen von READY</string>
+    <string name="st_pause_ready_desc">Pausiert die Wiedergabe, wenn das Auto READY verlässt.</string>
     <string name="st_aa_button">Android-Auto-Taste der Leiste</string>
     <string name="st_aa_button_desc">Doppeltippen, um die Telefonverbindung zu trennen (die App wird deaktiviert, das Symbol wird rot); erneut doppeltippen, um sie wiederherzustellen. Lange drücken: App wählen.</string>
     <string name="dock_conn_disabled">%1$s deaktiviert: Das Telefon verbindet sich nicht mehr. Erneut lange drücken zum Wiederherstellen.</string>

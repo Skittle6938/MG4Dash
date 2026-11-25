@@ -782,6 +782,8 @@
     <string name="st_play_resume">Como al apagar el coche</string>
     <string name="st_play_pause">Siempre en pausa</string>
     <string name="st_play_play">Siempre reproduciendo</string>
+    <string name="st_pause_ready">Pausa al salir de READY</string>
+    <string name="st_pause_ready_desc">Pausa la reproducción cuando el coche sale de READY.</string>
     <string name="st_aa_button">Botón Android Auto de la barra</string>
     <string name="st_aa_button_desc">Toca dos veces el botón para cortar la conexión del teléfono (la app se desactiva, el icono se pone rojo); vuelve a tocar dos veces para restablecerla. Pulsación larga: elegir la app.</string>
     <string name="dock_conn_disabled">%1$s desactivado: el teléfono ya no se conectará. Mantén pulsado de nuevo para restablecerlo.</string>

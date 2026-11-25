@@ -782,6 +782,8 @@
     <string name="st_play_resume">Come allo spegnimento</string>
     <string name="st_play_pause">Sempre in pausa</string>
     <string name="st_play_play">Sempre in riproduzione</string>
+    <string name="st_pause_ready">Pausa all\'uscita da READY</string>
+    <string name="st_pause_ready_desc">Mette in pausa la riproduzione quando l\'auto esce da READY.</string>
     <string name="st_aa_button">Pulsante Android Auto della barra</string>
     <string name="st_aa_button_desc">Tocca due volte il pulsante per interrompere la connessione del telefono (l\'app viene disattivata, l\'icona diventa rossa); tocca di nuovo due volte per ripristinarla. Pressione lunga: scegli l\'app.</string>
     <string name="dock_conn_disabled">%1$s disattivato: il telefono non si collegherà più. Tieni premuto di nuovo per ripristinarlo.</string>

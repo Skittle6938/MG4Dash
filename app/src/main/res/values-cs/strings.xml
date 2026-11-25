@@ -782,6 +782,8 @@
     <string name="st_play_resume">Jako při vypnutí vozu</string>
     <string name="st_play_pause">Vždy pozastaveno</string>
     <string name="st_play_play">Vždy přehrávat</string>
+    <string name="st_pause_ready">Pozastavit při opuštění READY</string>
+    <string name="st_pause_ready_desc">Pozastaví přehrávání, když auto opustí režim READY.</string>
     <string name="st_aa_button">Tlačítko Android Auto na liště</string>
     <string name="st_aa_button_desc">Dvojitým klepnutím na tlačítko přerušíte připojení telefonu (aplikace se zakáže, ikona zčervená); dalším dvojitým klepnutím ho obnovíte. Dlouhý stisk: výběr aplikace.</string>
     <string name="dock_conn_disabled">%1$s zakázáno: telefon se už nepřipojí. Dalším dlouhým stiskem obnovíte.</string>
