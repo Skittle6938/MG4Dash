@@ -1,6 +1,7 @@
 package app.mg4dash.media
 
 import org.json.JSONArray
+import org.json.JSONObject
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Test
@@ -46,5 +47,29 @@ class LyricsRepoTest {
         assertNotNull(best)
         assertEquals("Song [Remastered]", best!!.optString("trackName"))
         assertEquals("best match", best.optString("plainLyrics"))
+    }
+
+    @Test fun instrumentalSearchResultWithNullLyricsIsAcceptedAndDecodesWithoutNullText() {
+        val results = JSONArray(
+            """
+            [{"artistName":"Richard Strauss","trackName":"Also sprach Zarathustra","duration":500,"instrumental":true,"syncedLyrics":null,"plainLyrics":null}]
+            """.trimIndent()
+        )
+
+        val best = LyricsRepo.best(results, "Richard Strauss", "Also sprach Zarathustra", 500_000)
+        assertNotNull(best)
+        val track = LyricsRepo.decode("key", "Richard Strauss", "Also sprach Zarathustra", best!!)
+        assertEquals(null, track.synced)
+        assertEquals(null, track.plain)
+    }
+
+    @Test fun nullLyricsFieldsDecodeAsAbsentText() {
+        val track = LyricsRepo.decode(
+            "key", "Artist", "Instrumental",
+            JSONObject("""{"instrumental":true,"syncedLyrics":null,"plainLyrics":null}""")
+        )
+
+        assertEquals(null, track.synced)
+        assertEquals(null, track.plain)
     }
 }

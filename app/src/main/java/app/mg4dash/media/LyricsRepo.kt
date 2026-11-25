@@ -18,7 +18,7 @@ import java.util.Locale
 
 /** LRCLIB lookup and size bounded LRU cache. All public disk/network operations run on IO. */
 object LyricsRepo {
-    data class Track(val key: String, val artist: String, val title: String, val synced: List<Pair<Long, String>>?, val plain: String?)
+    data class Track(val key: String, val artist: String, val title: String, val synced: List<Pair<Long, String>>?, val plain: String?, val instrumental: Boolean = false)
     data class CacheInfo(val bytes: Long, val tracks: Int)
     private data class HttpResponse(val body: String)
 
@@ -123,20 +123,22 @@ object LyricsRepo {
         val t = clean(title).lowercase(Locale.ROOT).trim()
         return (0 until arr.length()).mapNotNull { arr.optJSONObject(it) }
             .sortedBy { o ->
-                val oa = o.optString("artistName").lowercase(Locale.ROOT)
-                val ot = clean(o.optString("trackName")).lowercase(Locale.ROOT)
+                val oa = o.text("artistName").lowercase(Locale.ROOT)
+                val ot = clean(o.text("trackName")).lowercase(Locale.ROOT)
                 val dur = (o.optDouble("duration", 0.0) * 1000).toLong()
                 (if (ot == t) 0 else if (ot.contains(t) || t.contains(ot)) 2 else 8) +
                     (if (oa == a) 0 else if (oa.contains(a) || a.contains(oa)) 2 else 8) +
                     if (duration > 0 && dur > 0) (kotlin.math.abs(duration - dur) / 15000).toInt().coerceAtMost(8) else 0
-            }.firstOrNull { it.optString("syncedLyrics").isNotBlank() || it.optString("plainLyrics").isNotBlank() }
+            }.firstOrNull { it.optBoolean("instrumental", false) || it.text("syncedLyrics").isNotBlank() || it.text("plainLyrics").isNotBlank() }
     }
 
-    private fun decode(key: String, artist: String, title: String, o: JSONObject): Track {
-        val syncedText = o.optString("syncedLyrics").takeIf { it.isNotBlank() }
+    internal fun decode(key: String, artist: String, title: String, o: JSONObject): Track {
+        val syncedText = o.text("syncedLyrics").takeIf { it.isNotBlank() }
         val synced = syncedText?.let { parse(it) }
-        return Track(key, artist, title, synced?.takeIf { it.isNotEmpty() }, o.optString("plainLyrics").takeIf { it.isNotBlank() })
+        return Track(key, artist, title, synced?.takeIf { it.isNotEmpty() }, o.text("plainLyrics").takeIf { it.isNotBlank() }, o.optBoolean("instrumental", false))
     }
+
+    private fun JSONObject.text(key: String): String = if (isNull(key)) "" else optString(key, "").takeUnless { it == "null" }.orEmpty()
 
     internal fun parse(lrc: String): List<Pair<Long, String>> = lrc.lineSequence().flatMap { line ->
         val matches = Regex("\\[(\\d{1,2}):(\\d{2})(?:\\.(\\d{1,3}))?]").findAll(line).toList()

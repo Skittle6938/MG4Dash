@@ -169,6 +169,8 @@ class LyricsCardTest {
         val columns = privateValue(popup, "cols") as List<List<View>>
         assertEquals("lyrics controls and the MG4Control guide use the standard two-column popup", 2, columns.size)
         assertTrue(columns.all { it.isNotEmpty() })
+        val cacheUsage = activity.getString(R.string.ly_cache_used, 0f, LyricsCardPrefs(app).cacheMaxMb, 0)
+        assertTrue("cache usage appears in Lyrics options: $cacheUsage", columns.flatten().filterIsInstance<TextView>().any { it.text.toString() == cacheUsage })
         assertNull("probing options must not start the card scope", privateValue(card, "liveScope"))
         assertFalse("probing options must not mark the card visible", privateValue(card, "isActivelyDisplayed") as Boolean)
         assertTrue("options probing must not start a repository request", activeConnectionCount() == 0)

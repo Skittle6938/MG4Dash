@@ -51,8 +51,7 @@ object LyricsOverlay {
     private fun applyScale() {
         val c = themedContext ?: app ?: return
         val s = LyricsCardPrefs(c).overlayScale
-        val sw = c.resources.displayMetrics.widthPixels
-        val sh = c.resources.displayMetrics.heightPixels
+        val (sw, sh) = screenSize(c)
         val root = rootView ?: return
         (root.background as? GradientDrawable)?.apply {
             setColor(Themes.color(c, R.color.panel_raised))
@@ -66,7 +65,7 @@ object LyricsOverlay {
         val closeSize = dp(maxOf(36f, 42f*s).toInt())
         val gap = dp((12f*s).toInt())
         closeView?.let { it.layoutParams=LinearLayout.LayoutParams(closeSize,closeSize) }
-        val width=(sw*.55f).toInt().coerceAtMost((sw*.92f).toInt()).coerceIn(dp((600*s).toInt()), dp((680*s).toInt()).coerceAtMost((sw*.92f).toInt()))
+        val width=pillWidth(sw, s)
         val textColumn=root.getChildAt(0)
         val textWidth = (width - root.paddingLeft - root.paddingRight - closeSize - gap).coerceAtLeast(dp(100))
         textColumn.layoutParams=LinearLayout.LayoutParams(textWidth,-2).apply { marginEnd = gap }
@@ -74,10 +73,29 @@ object LyricsOverlay {
         clampPosition(sh)
         try { params?.let { wm?.updateViewLayout(root,it) } } catch (_:Exception) {}
     }
-    private fun clampPosition(screenHeight: Int = app?.resources?.displayMetrics?.heightPixels ?: 0) {
+    private fun screenSize(context: Context): Pair<Int, Int> {
+        val manager = wm
+        if (android.os.Build.VERSION.SDK_INT >= 30 && manager != null) {
+            try {
+                val bounds = manager.currentWindowMetrics.bounds
+                if (bounds.width() > 0 && bounds.height() > 0) return bounds.width() to bounds.height()
+            } catch (_: Exception) { }
+        }
+        return context.resources.displayMetrics.widthPixels to context.resources.displayMetrics.heightPixels
+    }
+
+    private fun pillWidth(screenWidth: Int, scale: Float): Int {
+        val max = (screenWidth * .92f).toInt().coerceAtLeast(1)
+        val min = dp((600f * scale).toInt()).coerceAtMost(max)
+        val preferred = (screenWidth * .55f).toInt().coerceAtMost(max)
+        val scaledMax = dp((680f * scale).toInt()).coerceAtMost(max)
+        return preferred.coerceIn(min, scaledMax.coerceAtLeast(min))
+    }
+
+    private fun clampPosition(screenHeight: Int = app?.let { screenSize(it).second } ?: 0) {
         val v=rootView ?: return; val lp=params ?: return
         if(v.width<=0 || v.height<=0) return
-        val sw=app?.resources?.displayMetrics?.widthPixels ?: return
+        val sw=app?.let { screenSize(it).first } ?: return
         val nx=lp.x.coerceIn(0,(sw-v.width).coerceAtLeast(0))
         val maxY=(screenHeight-v.height).coerceAtLeast(0)
         val ny=lp.y.coerceIn(0,maxY)
@@ -136,11 +154,11 @@ object LyricsOverlay {
         val activeLine = TextView(c).apply { setTextColor(Themes.color(c, R.color.text_value)); setTextSize(TypedValue.COMPLEX_UNIT_SP, 25f); typeface = Typeface.DEFAULT_BOLD; maxLines = 2; ellipsize = android.text.TextUtils.TruncateAt.END; text = current }
         val nextLine = TextView(c).apply { setTextColor(Themes.color(c, R.color.text_sub)); alpha = .70f; setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f); maxLines = 1; ellipsize = android.text.TextUtils.TruncateAt.END; text = next }
         texts.addView(activeLine); texts.addView(nextLine)
-        val screenWidth = c.resources.displayMetrics.widthPixels
-        val pillWidth = (screenWidth * .55f).toInt().coerceIn(dp(600), dp(680))
-        root.addView(texts, LinearLayout.LayoutParams(pillWidth - dp(74), -2))
+        val screenWidth = screenSize(c).first
+        val pillWidth = pillWidth(screenWidth, p.overlayScale)
+        root.addView(texts, LinearLayout.LayoutParams((pillWidth - dp(74)).coerceAtLeast(dp(100)), -2))
         root.addView(TextView(c).apply { text = "×"; gravity = Gravity.CENTER; setTextColor(Themes.color(c, R.color.text_value)); setTextSize(TypedValue.COMPLEX_UNIT_SP, 34f); setOnClickListener { stop() } }, LinearLayout.LayoutParams(dp(42), dp(42)))
-        val lp = WindowManager.LayoutParams(-2, -2, WindowManager.LayoutParams.TYPE_SYSTEM_ERROR,
+        val lp = WindowManager.LayoutParams(pillWidth, -2, WindowManager.LayoutParams.TYPE_SYSTEM_ERROR,
             WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN,
             PixelFormat.TRANSLUCENT).apply {
             gravity = Gravity.TOP or Gravity.START
@@ -155,8 +173,11 @@ object LyricsOverlay {
                 MotionEvent.ACTION_MOVE -> {
                     val dx=(e.rawX-sx).toInt(); val dy=(e.rawY-sy).toInt()
                     if (kotlin.math.abs(dx)+kotlin.math.abs(dy)>dp(6)) dragged=true
-                    lp.x=(ox+dx).coerceIn(0,(c.resources.displayMetrics.widthPixels-root.width).coerceAtLeast(0))
-                    lp.y=(oy+dy).coerceIn(0,(c.resources.displayMetrics.heightPixels-root.height).coerceAtLeast(0))
+                    val (availableWidth, availableHeight) = screenSize(c)
+                    val measuredWidth = root.width.takeIf { it > 0 } ?: lp.width
+                    val measuredHeight = root.height
+                    lp.x=(ox+dx).coerceIn(0,(availableWidth-measuredWidth).coerceAtLeast(0))
+                    lp.y=(oy+dy).coerceIn(0,(availableHeight-measuredHeight).coerceAtLeast(0))
                     try { wm?.updateViewLayout(root,lp) } catch (_:Exception){}
                     true
                 }
@@ -253,7 +274,7 @@ object LyricsOverlay {
                         val found = cached ?: LyricsRepo.lookup(now.artist, now.title, now.durationMs)
                         if (active && trackKey == nextKey) {
                             track = found
-                            update(found?.synced?.firstOrNull()?.second ?: found?.plain?.lineSequence()?.firstOrNull().orEmpty().ifBlank { c.getString(R.string.ly_overlay_not_found) }, found?.synced?.getOrNull(1)?.second ?: found?.plain?.lineSequence()?.drop(1)?.firstOrNull().orEmpty())
+                            update(if (found?.instrumental == true) c.getString(R.string.ly_none) else found?.synced?.firstOrNull()?.second ?: found?.plain?.lineSequence()?.firstOrNull().orEmpty().ifBlank { c.getString(R.string.ly_overlay_not_found) }, found?.synced?.getOrNull(1)?.second ?: found?.plain?.lineSequence()?.drop(1)?.firstOrNull().orEmpty())
                             runTicker()
                         }
                     }
@@ -269,7 +290,7 @@ object LyricsOverlay {
                         val found = cached ?: LyricsRepo.lookup(now.artist, now.title, now.durationMs)
                         if (active && trackKey == resumeKey) {
                             track = found
-                            update(found?.synced?.firstOrNull()?.second ?: found?.plain?.lineSequence()?.firstOrNull().orEmpty().ifBlank { c.getString(R.string.ly_overlay_not_found) }, found?.synced?.getOrNull(1)?.second ?: found?.plain?.lineSequence()?.drop(1)?.firstOrNull().orEmpty())
+                            update(if (found?.instrumental == true) c.getString(R.string.ly_none) else found?.synced?.firstOrNull()?.second ?: found?.plain?.lineSequence()?.firstOrNull().orEmpty().ifBlank { c.getString(R.string.ly_overlay_not_found) }, found?.synced?.getOrNull(1)?.second ?: found?.plain?.lineSequence()?.drop(1)?.firstOrNull().orEmpty())
                             runTicker()
                         }
                     }

@@ -95,6 +95,7 @@ class LyricsCard(context: Context) : LinearLayout(context), HomeCard {
     private var karaokePlain: ScrollView? = null
     private var karaokePlainText: TextView? = null
     private var karaokeActiveIndex = -1
+    private var lyricsCacheInfo = LyricsRepo.CacheInfo(0, 0)
     private val ticker = object : Runnable {
         override fun run() {
             if (!shouldRunTicker() || track?.synced == null) { tickerScheduled = false; return }
@@ -229,7 +230,7 @@ class LyricsCard(context: Context) : LinearLayout(context), HomeCard {
             val cached = LyricsRepo.cached(m.artist, m.title)
             if (cached != null) {
                 track = cached
-                setStatus(if (cached.synced == null) activity.getString(R.string.ly_plain) else "")
+                setStatus(when { cached.instrumental -> activity.getString(R.string.ly_none); cached.synced == null -> activity.getString(R.string.ly_plain); else -> "" })
                 drawLines(position(MediaHub.now.value))
                 if (!force) {
                     drawKaraoke(position(latest))
@@ -247,6 +248,7 @@ class LyricsCard(context: Context) : LinearLayout(context), HomeCard {
             track = found ?: cached
             setStatus(when {
                 track == null -> activity.getString(R.string.ly_none)
+                track?.instrumental == true -> activity.getString(R.string.ly_none)
                 track?.synced == null -> activity.getString(R.string.ly_plain)
                 else -> ""
             })
@@ -530,8 +532,10 @@ class LyricsCard(context: Context) : LinearLayout(context), HomeCard {
                 { maxes.indexOf(prefs.cacheMaxMb).coerceAtLeast(0) }, { "${maxes[it.coerceIn(0, maxes.lastIndex)]} MB" },
                 enabled = { prefs.cacheEnabled }) { value ->
                 prefs.cacheMaxMb = maxes[value.coerceIn(0, maxes.lastIndex)]
-                launchView { LyricsRepo.trim(prefs.cacheMaxMb) }
+                launchView { LyricsRepo.trim(prefs.cacheMaxMb); lyricsCacheInfo = LyricsRepo.info(); popup.refresh() }
             }
+            .note { cacheUsageText() }
+            .also { popup -> launchView { lyricsCacheInfo = LyricsRepo.info(); popup.refresh() } }
             .slider(activity.getString(R.string.ly_overlay_size), 14,
                 { ((prefs.overlayScale - .70f) / .05f).toInt().coerceIn(0, 14) }, { "${70 + it * 5}%" }) { value ->
                 val scale = (.70f + value * .05f).coerceIn(.70f, 1.40f)
@@ -543,7 +547,7 @@ class LyricsCard(context: Context) : LinearLayout(context), HomeCard {
                 if (LyricsOverlay.active) LyricsOverlay.setScale(1f)
             }
             .action(activity.getString(R.string.ly_clear), null, activity.getString(R.string.ly_clear)) {
-                launchView { LyricsRepo.clear(); Toasts.show(activity, R.string.ly_cleared) }
+                launchView { LyricsRepo.clear(); lyricsCacheInfo = LyricsRepo.info(); popup.refresh(); Toasts.show(activity, R.string.ly_cleared) }
             }
             .column()
             .note(activity.getString(R.string.lyrics_mg4control_title))
@@ -557,6 +561,11 @@ class LyricsCard(context: Context) : LinearLayout(context), HomeCard {
             hostActivity()?.startActivity(launchControl)
         }
         return popup
+    }
+
+    private fun cacheUsageText(): String {
+        val info = lyricsCacheInfo
+        return activity.getString(R.string.ly_cache_used, info.bytes / (1024f * 1024f), prefs.cacheMaxMb, info.tracks)
     }
 
 }
