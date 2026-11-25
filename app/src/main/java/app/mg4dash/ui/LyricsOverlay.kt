@@ -60,8 +60,8 @@ object LyricsOverlay {
         }
         activeTextView?.setTextSize(TypedValue.COMPLEX_UNIT_SP, 25f * s)
         activeTextView?.setTextColor(Themes.color(c, R.color.text_value))
-        nextTextView?.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f * s)
-        nextTextView?.setTextColor(Themes.color(c, R.color.text_sub))
+        nextTextView?.setTextSize(TypedValue.COMPLEX_UNIT_SP, 25f * s)
+        nextTextView?.setTextColor(Themes.color(c, R.color.text_value))
         root.setPadding(dp((22*s).toInt()), dp((14*s).toInt()), dp((22*s).toInt()), dp((14*s).toInt()))
         val closeSize = dp(maxOf(36f, 42f*s).toInt())
         val gap = dp((12f*s).toInt())
@@ -165,7 +165,7 @@ object LyricsOverlay {
         }
         val texts = LinearLayout(c).apply { orientation = LinearLayout.VERTICAL }
         val activeLine = TextView(c).apply { setTextColor(Themes.color(c, R.color.text_value)); setTextSize(TypedValue.COMPLEX_UNIT_SP, 25f); typeface = Typeface.DEFAULT_BOLD; maxLines = 2; ellipsize = android.text.TextUtils.TruncateAt.END; text = current }
-        val nextLine = TextView(c).apply { setTextColor(Themes.color(c, R.color.text_sub)); alpha = .70f; setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f); maxLines = 1; ellipsize = android.text.TextUtils.TruncateAt.END; text = next }
+        val nextLine = TextView(c).apply { setTextColor(Themes.color(c, R.color.text_value)); alpha = .72f; setTextSize(TypedValue.COMPLEX_UNIT_SP, 25f); typeface = Typeface.DEFAULT_BOLD; maxLines = 1; ellipsize = android.text.TextUtils.TruncateAt.END; text = next }
         texts.addView(activeLine); texts.addView(nextLine)
         val screenWidth = screenSize(c).first
         val pillWidth = pillWidth(screenWidth, p.overlayScale, c.resources.displayMetrics.density)

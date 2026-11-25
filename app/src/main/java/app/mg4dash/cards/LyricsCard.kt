@@ -157,8 +157,8 @@ class LyricsCard(context: Context) : LinearLayout(context), HomeCard {
             lines.forEachIndexed { index, line ->
                 val distance = kotlin.math.abs(index - 3)
                 line.visibility = if (distance <= radius) View.VISIBLE else View.GONE
-                line.setTextSize(TypedValue.COMPLEX_UNIT_PX, if (index == 3) activeTextSizePx else activeTextSizePx * .60f)
-                line.alpha = if (index == 3) 1f else .50f
+                line.setTextSize(TypedValue.COMPLEX_UNIT_PX, if (index == 3 || index == NEXT) activeTextSizePx else activeTextSizePx * .60f)
+                line.alpha = when (index) { 3 -> 1f; NEXT -> NEXT_ALPHA; else -> .50f }
                 val lp = line.layoutParams as? LayoutParams
                 if (lp != null) {
                     val margin = if (index == 3) verticalGap else dp(2)
@@ -177,6 +177,13 @@ class LyricsCard(context: Context) : LinearLayout(context), HomeCard {
     }
 
     private fun dp(v: Int) = (v * d).toInt()
+
+    /** Karaoke rows: the current one, the next one in the main text colour (read in advance), the others fading. */
+    private fun rowAlpha(i: Int) = when {
+        i == 3 -> 1f
+        i == NEXT -> NEXT_ALPHA
+        else -> when (kotlin.math.abs(i - 3)) { 1 -> .50f; 2 -> .36f; else -> .25f }
+    }
     private fun launchView(block: suspend () -> Unit): Job? =
         liveScope?.launch { block() }
 
@@ -372,10 +379,10 @@ class LyricsCard(context: Context) : LinearLayout(context), HomeCard {
         val rows = (0 until 7).map { i -> TextView(activity).apply {
             gravity = Gravity.CENTER; setTextColor(if (i == 3) Themes.color(activity, R.color.text_value) else Themes.color(activity, R.color.text_sub)); includeFontPadding = false
             typeface = Typeface.create("sans-serif-medium", Typeface.BOLD)
-            setTextSize(TypedValue.COMPLEX_UNIT_PX, if (i == 3) 1f else 1f)
-            maxLines = if (i == 3) 2 else 1; ellipsize = android.text.TextUtils.TruncateAt.END
-            alpha = when (kotlin.math.abs(i - 3)) { 0 -> 1f; 1 -> .50f; 2 -> .36f; else -> .25f }
-            if (i == 3) setLineSpacing(0f, 1.08f)
+            setTextSize(TypedValue.COMPLEX_UNIT_PX, 1f)
+            maxLines = if (i == 3 || i == NEXT) 2 else 1; ellipsize = android.text.TextUtils.TruncateAt.END
+            alpha = rowAlpha(i)
+            if (i == 3 || i == NEXT) setLineSpacing(0f, 1.08f)
         } }
         rows.forEachIndexed { i, line ->
             val lp = LayoutParams(-1, -2)
@@ -423,7 +430,7 @@ class LyricsCard(context: Context) : LinearLayout(context), HomeCard {
                         karaokeTitle?.setTextSize(TypedValue.COMPLEX_UNIT_PX, dialogHeight * .042f)
                         karaokeArtist?.setTextSize(TypedValue.COMPLEX_UNIT_PX, dialogHeight * .030f)
                         karaokeRows.forEachIndexed { index, row ->
-                            row.setTextSize(TypedValue.COMPLEX_UNIT_PX, if (index == 3) activePx else activePx * .58f)
+                            row.setTextSize(TypedValue.COMPLEX_UNIT_PX, if (index == 3 || index == NEXT) activePx else activePx * .58f)
                             val lp = row.layoutParams as? LayoutParams
                             if (lp != null) { val gap=(dialogHeight*.012f).toInt(); lp.topMargin=gap; lp.bottomMargin=gap; row.layoutParams=lp }
                         }
@@ -483,9 +490,8 @@ class LyricsCard(context: Context) : LinearLayout(context), HomeCard {
         karaokeRows.forEachIndexed { row, line ->
             val lyric = synced.getOrNull(index + row - 3)?.second.orEmpty()
             line.text = lyric
-            val distance = kotlin.math.abs(row - 3)
-            line.setTextColor(Themes.color(activity, if (row == 3) R.color.text_value else R.color.text_sub))
-            if (row != 3) line.alpha = when (distance) { 1 -> .50f; 2 -> .36f; else -> .25f }
+            line.setTextColor(Themes.color(activity, if (row == 3 || row == NEXT) R.color.text_value else R.color.text_sub))
+            if (row != 3) line.alpha = rowAlpha(row)
         }
     }
 
@@ -502,11 +508,12 @@ class LyricsCard(context: Context) : LinearLayout(context), HomeCard {
                 val distance = kotlin.math.abs(row - 3)
                 val ix = i + row - 3
                 lines[row].text = synced.getOrNull(ix)?.second.orEmpty()
-                lines[row].setTextColor(Themes.color(activity, if (row == 3) R.color.text_value else R.color.text_sub))
-                lines[row].setTextSize(TypedValue.COMPLEX_UNIT_PX, if (row == 3) activePx else activeFontSp * .60f)
+                lines[row].setTextColor(Themes.color(activity, if (row == 3 || row == NEXT) R.color.text_value else R.color.text_sub))
+                // The next line as big as the current one, to be read in advance (25/11)
+                lines[row].setTextSize(TypedValue.COMPLEX_UNIT_PX, if (row == 3 || row == NEXT) activePx else activeFontSp * .60f)
                 lines[row].maxLines = if (row == 3 || (visibleLyricsRows == 5 && distance == 1)) 2 else 1
                 lines[row].ellipsize = android.text.TextUtils.TruncateAt.END
-                lines[row].alpha = if (row == 3) 1f else .45f
+                lines[row].alpha = when (row) { 3 -> 1f; NEXT -> NEXT_ALPHA; else -> .45f }
                 lines[row].visibility = if (distance <= radius) View.VISIBLE else View.GONE
                 lines[row].typeface = Typeface.create("sans-serif-medium", Typeface.BOLD)
             }
@@ -570,3 +577,7 @@ class LyricsCard(context: Context) : LinearLayout(context), HomeCard {
     }
 
 }
+
+/** The row of the next lyric line, under the current one (3), and its strength (25/11: too small and dark to read ahead). */
+private const val NEXT = 4
+private const val NEXT_ALPHA = .72f
