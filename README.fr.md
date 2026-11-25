@@ -169,6 +169,11 @@ Chaque emplacement de l'accueil contient une ou plusieurs cartes ; un balayage s
 | **Conduite** | Mode de conduite, régénération, direction et pédale de frein du mode Custom, maintien de voie et alerte de collision, modifiables depuis la carte | |
 | **Avertisseur** | Limitation de vitesse et zones de radars | [tout l'avertisseur](#avertisseur-de-radars) |
 | **Guidage** | Guidage pas à pas de MG4Link / Headunit Revived | |
+| **Paroles** | Paroles de la chanson en cours, synchronisées quand c'est possible ; un toucher ouvre la vue karaoké | Wi-Fi uniquement, cache, décalage des paroles, pastille flottante et sa ligne précédente |
+| **Chrono** | Chronométrage du 0-50, 0-100 et 80-120 km/h, 10 derniers essais et records | mode Sport et clim coupée pendant l'essai, historique, courbe de puissance de chaque essai |
+| **Mémos vocaux** | Enregistre des mémos vocaux, même quand un autre écran est affiché | réécouter, renommer, supprimer, copier ou déplacer sur une clé USB, réglages d'enregistrement |
+
+Paroles, Chrono et Mémos vocaux sont optionnelles : placez-les depuis le mode édition de l'accueil.
 
 | | | |
 |---|---|---|
@@ -256,7 +261,7 @@ La carte média suit la source active de la voiture (radio DAB / FM, Bluetooth, 
 - **Ouvrir Android Auto de partout** : avec un téléphone connecté, glissez un doigt depuis le bord gauche ou droit de l'écran.
 - **Couper la connexion du téléphone** : double appui sur le bouton Android Auto de la barre. L'icône passe au rouge et le téléphone reste en Bluetooth pour les appels et la musique ; un nouveau double appui ramène Android Auto.
 
-**Au démarrage** (Réglages › **Média et sons**) : la *Source au démarrage* est *Automatique* par défaut (retour à la dernière source encore disponible), *Comme la voiture*, ou une source fixe. La *Lecture au démarrage* reprend *Comme à l'arrêt de la voiture*, *Toujours en pause* ou *Toujours en lecture*. La séquence de démarrage et le son de démarrage attendent que la voiture soit vraiment utilisée : écran allumé, et READY ou un toucher sur l'écran (déverrouiller ou ouvrir une portière ne suffit pas). Ouvrir le coffre d'une voiture verrouillée ne fait rien jouer ([#133](https://github.com/Skittle6938/MG4Dash/issues/133)). *Pause en sortie du mode READY* (désactivée par défaut) met la lecture en pause quand la voiture quitte le mode READY ; elle reprend quand la voiture repasse en READY.
+**Au démarrage** (Réglages › **Média et sons**) : la *Source au démarrage* est *Automatique* par défaut (retour à la dernière source encore disponible), *Comme la voiture*, ou une source fixe. La *Lecture au démarrage* reprend *Comme à l'arrêt de la voiture*, *Toujours en pause* ou *Toujours en lecture*. La séquence de démarrage et le son de démarrage attendent que la voiture soit vraiment utilisée : écran allumé, et READY, ou une lecture que vous lancez vous-même (déverrouiller ou ouvrir une portière ne suffit pas). Ouvrir le coffre d'une voiture verrouillée ne fait rien jouer ([#133](https://github.com/Skittle6938/MG4Dash/issues/133)). *Pause en sortie du mode READY* (désactivée par défaut) met la lecture en pause quand la voiture quitte le mode READY ; elle reprend quand la voiture repasse en READY.
 
 ### Paroles synchronisées
 

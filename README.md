@@ -169,6 +169,11 @@ Every place of the home screen holds one or more cards; a swipe on a place shows
 | **Driving** | Drive mode, regeneration, Custom mode steering and brake pedal, lane keeping and collision warning, changed from the card | |
 | **Speed cameras** | Speed limit and speed camera zones | [the whole alerter](#speed-camera-alerter) |
 | **Guidance** | Turn-by-turn from MG4Link / Headunit Revived | |
+| **Lyrics** | Lyrics of the song playing, synchronized when available; a tap opens the karaoke view | Wi-Fi only, cache, lyrics timing, floating pill and its previous line |
+| **Chrono** | 0-50, 0-100 and 80-120 km/h timing, last 10 runs and records | Sport mode and climate off during a run, history, each run's power curve |
+| **Voice memos** | Records voice memos, even when another screen is shown | play back, rename, delete, copy or move to a USB stick, recording settings |
+
+Lyrics, Chrono and Voice memos are optional: place them from the home screen's edit mode.
 
 | | | |
 |---|---|---|
@@ -256,11 +261,11 @@ The media card follows the car's active source (DAB / FM radio, Bluetooth, USB, 
 - **Open Android Auto from anywhere**: with a phone connected, slide one finger in from the left or right edge of the screen.
 - **Cut the phone connection**: double tap the Android Auto button of the bar. The icon turns red and the phone stays on Bluetooth for calls and music; double tap again to bring Android Auto back.
 
-**At startup** (Settings › **Media and sounds**): the *Source at startup* is *Automatic* by default (back to the last source still available), the car's choice, or a fixed source. *Playback at startup* resumes as when the car was switched off, always paused or always playing. The startup sequence and the startup sound wait until the car is really in use: screen on, and READY or a touch on the screen (unlocking or opening a door is not enough). Opening the boot of a locked car plays nothing ([#133](https://github.com/Skittle6938/MG4Dash/issues/133)). *Pause when leaving READY* (off by default) pauses playback when the car leaves READY; it plays again when READY comes back.
+**At startup** (Settings › **Media and sounds**): the *Source at startup* is *Automatic* by default (back to the last source still available), the car's choice, or a fixed source. *Playback at startup* resumes as when the car was switched off, always paused or always playing. The startup sequence and the startup sound wait until the car is really in use: screen on, and READY, or playback started by you (unlocking or opening a door is not enough). Opening the boot of a locked car plays nothing ([#133](https://github.com/Skittle6938/MG4Dash/issues/133)). *Pause when leaving READY* (off by default) pauses playback when the car leaves READY; it plays again when READY comes back.
 
 ### Synchronized lyrics
 
-Place the optional **Lyrics** card from the home screen's edit mode. When a song is not cached, MG4Dash sends its artist, title and duration to LRCLIB to find synchronized or plain lyrics. Downloaded lyrics are cached on the head unit; the cache size and Wi-Fi-only option are in the card's long-press settings, and cached songs remain available offline. The radio (FM, AM, DAB) has no lyrics. In MG4Control, create a custom shortcut with **Send a broadcast**, action `app.mg4dash.action.TOGGLE_LYRICS_OVERLAY`, and MG4Dash as the target app to toggle the floating lyrics pill from a steering-wheel button or shortcut bubble.
+Place the optional **Lyrics** card from the home screen's edit mode. When a song is not cached, MG4Dash sends its artist, title and duration to LRCLIB to find synchronized or plain lyrics. Downloaded lyrics are cached on the head unit; the cache size and Wi-Fi-only option are in the card's long-press settings, and cached songs remain available offline. The radio (FM, AM, DAB) has no lyrics. The text size follows the place and the song, the next line is as big as the current one, and *Lyrics timing* (0.4 s early by default, in 0.1 s steps) shows each line a little before it is sung. In MG4Control, create a custom shortcut with **Send a broadcast**, action `app.mg4dash.action.TOGGLE_LYRICS_OVERLAY`, and MG4Dash as the target app to toggle the floating lyrics pill from a steering-wheel button or shortcut bubble.
 
 <details>
 <summary>Steering wheel, other apps and the Android Auto button</summary>
