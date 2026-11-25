@@ -1602,8 +1602,12 @@ object MediaHub {
             album = album,
             art = bmp ?: _now.value.art.takeIf { lastArtKey == "$title|$artist" },
             playing = shownPlaying(c),
-            durationMs = md?.getLong(MediaMetadata.METADATA_KEY_DURATION) ?: 0,
-            positionMs = st?.let { LyricsClock.projected(it.position, it.lastPositionUpdateTime, it.playbackSpeed, it.state == PlaybackState.STATE_PLAYING, android.os.SystemClock.elapsedRealtime()) } ?: 0,
+            // Seconds too when it is that small (a song is never under 10 s in ms terms there)
+            durationMs = (md?.getLong(MediaMetadata.METADATA_KEY_DURATION) ?: 0).let { if (c.packageName == AA_MBS && it in 1 until 10_000) it * 1000 else it },
+            // AllGo's media service (Android Auto, CarPlay) gives its position in seconds, the others in ms (25/11: the
+            // karaoke stayed on its first line)
+            positionMs = st?.let { LyricsClock.projected(if (c.packageName == AA_MBS && it.position > 0) it.position * 1000 else it.position,
+                it.lastPositionUpdateTime, it.playbackSpeed, it.state == PlaybackState.STATE_PLAYING, android.os.SystemClock.elapsedRealtime()) } ?: 0,
             analog = analog,
             radioText = if (analog) rdsText else "",
             androidAuto = androidAutoAvailable(),
