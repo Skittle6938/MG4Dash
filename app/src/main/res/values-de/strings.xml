@@ -1239,6 +1239,7 @@
     <string name="wc_lyrics">Liedtexte</string>
     <string name="ly_refresh">Liedtexte aktualisieren</string>
     <string name="ly_waiting">Warte auf Titel…</string>
+    <string name="ly_radio">Für das Radio sind keine Liedtexte verfügbar</string>
     <string name="ly_searching">Suche Liedtexte…</string>
     <string name="ly_none">Kein Liedtext gefunden</string>
     <string name="ly_offline">Offline — nicht gespeichert</string>

@@ -225,7 +225,7 @@ object LyricsOverlay {
                 latest = now
                 if (!active) return@collect
                 val c = themedContext ?: app ?: return@collect
-                val nextKey = if (!now.available || now.analog || now.artist.isBlank() || now.title.isBlank()) "" else LyricsRepo.key(now.artist, now.title)
+                val nextKey = if (!LyricsRepo.searchable(now)) "" else LyricsRepo.key(now.artist, now.title)
                 if (nextKey.isNotEmpty()) {
                     positionAnchorMs = now.positionMs.coerceAtLeast(0L)
                     positionAt = android.os.SystemClock.elapsedRealtime()
@@ -244,8 +244,9 @@ object LyricsOverlay {
                     tickerJob?.cancel(); tickerJob = null
                     fetchJob?.cancel(); fetchJob = null
                     trackKey = ""; track = null
-                    rootView?.visibility = View.VISIBLE
+                    // No song (the radio, a source without a title): hidden rather than empty, back with the next song
                     update("", "")
+                    rootView?.visibility = View.GONE
                     return@collect
                 }
                 if (!now.playing) {

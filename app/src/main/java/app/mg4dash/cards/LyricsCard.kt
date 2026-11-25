@@ -144,8 +144,8 @@ class LyricsCard(context: Context) : LinearLayout(context), HomeCard {
         post {
             val bodyHeight = lyricsArea.height.takeIf { it > 0 } ?: (h - dp(62)).coerceAtLeast(1)
             val bodyWidth = lyricsArea.width.takeIf { it > 0 } ?: (w - paddingLeft - paddingRight)
-            val tallPlace = place.tall || (place.big && place.form == HomeSlots.Size.TALL)
-            visibleLyricsRows = if (tallPlace && bodyHeight >= h * .58f && bodyHeight >= 300) 5 else 3
+            // Five lines on a medium or tall place, three on a small or wide one
+            visibleLyricsRows = if (place.tall || place.medium) 5 else 3
             val count = visibleLyricsRows
             val heightBasedPx = bodyHeight * if (count == 5) .125f else .22f
             val activeTextSizePx = minOf(heightBasedPx, bodyWidth * .068f)
@@ -190,13 +190,14 @@ class LyricsCard(context: Context) : LinearLayout(context), HomeCard {
 
     private fun showCurrentTrack() {
         val m = latest
-        if (!m.available || m.artist.isBlank() || m.title.isBlank() || m.analog) {
+        if (!LyricsRepo.searchable(m)) {
             if (key.isNotEmpty()) {
                 key = ""; track = null; requestedKey = null
                 requestJob?.cancel(); requestJob = null
                 if (!LyricsOverlay.active) LyricsRepo.cancelActiveRequest()
             }
-            setStatus(activity.getString(R.string.ly_waiting))
+            // On the radio, said plainly instead of waiting for a song that never comes (25/11)
+            setStatus(activity.getString(if (m.available && LyricsRepo.radio(m)) R.string.ly_radio else R.string.ly_waiting))
             drawLines(0); drawKaraoke(0); return
         }
         val next = LyricsRepo.key(m.artist, m.title)
@@ -217,7 +218,7 @@ class LyricsCard(context: Context) : LinearLayout(context), HomeCard {
 
     private fun request(force: Boolean, m: MediaHub.NowPlaying = MediaHub.now.value) {
         if (!isActivelyDisplayed) return
-        if (m.artist.isBlank() || m.title.isBlank()) { setStatus(activity.getString(R.string.ly_waiting)); return }
+        if (!LyricsRepo.searchable(m)) { showCurrentTrack(); return }
         val targetKey = LyricsRepo.key(m.artist, m.title)
         key = targetKey
         requestedKey = targetKey

@@ -1239,6 +1239,7 @@
     <string name="wc_lyrics">Paroles</string>
     <string name="ly_refresh">Actualiser les paroles</string>
     <string name="ly_waiting">En attente du morceau…</string>
+    <string name="ly_radio">Paroles indisponibles pour la radio</string>
     <string name="ly_searching">Recherche des paroles…</string>
     <string name="ly_none">Aucune parole trouvée</string>
     <string name="ly_offline">Hors ligne — paroles non mises en cache</string>

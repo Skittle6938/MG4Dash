@@ -1239,6 +1239,7 @@
     <string name="wc_lyrics">Songteksten</string>
     <string name="ly_refresh">Songteksten vernieuwen</string>
     <string name="ly_waiting">Wachten op nummer…</string>
+    <string name="ly_radio">Songteksten niet beschikbaar voor de radio</string>
     <string name="ly_searching">Songteksten zoeken…</string>
     <string name="ly_none">Geen songtekst gevonden</string>
     <string name="ly_offline">Offline — niet in cache</string>

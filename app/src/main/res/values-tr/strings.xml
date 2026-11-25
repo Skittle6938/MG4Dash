@@ -1239,6 +1239,7 @@
     <string name="wc_lyrics">Şarkı sözleri</string>
     <string name="ly_refresh">Şarkı sözlerini yenile</string>
     <string name="ly_waiting">Parça bekleniyor…</string>
+    <string name="ly_radio">Radyo için şarkı sözü yok</string>
     <string name="ly_searching">Şarkı sözleri aranıyor…</string>
     <string name="ly_none">Şarkı sözü bulunamadı</string>
     <string name="ly_offline">Çevrimdışı — önbellekte yok</string>

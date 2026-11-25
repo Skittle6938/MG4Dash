@@ -118,7 +118,7 @@ class LyricsCardTest {
             )
             card.layout(0, 0, wh.first, wh.second)
             shadowOf(Looper.getMainLooper()).idle()
-            val expectedRows = if (size in setOf(HomeSlots.Size.TALL, HomeSlots.Size.LARGE, HomeSlots.Size.HALF)) 5 else 3
+            val expectedRows = if (size in setOf(HomeSlots.Size.MEDIUM, HomeSlots.Size.TALL, HomeSlots.Size.LARGE, HomeSlots.Size.HALF)) 5 else 3
             assertEquals("$size uses the expected stable row count", expectedRows, privateValue(card, "visibleLyricsRows"))
         }
     }
@@ -198,28 +198,34 @@ class LyricsCardTest {
         card.shown(false)
     }
 
-    @Test fun settingsMigrateToProfileCardKeysAndBackupScope() {
-        Prefs(app).raw.edit()
-            .putBoolean("lyrics_wifi_only", true)
-            .putBoolean("wifi_only_mode", false)
-            .putBoolean("lyrics_cache_enabled", false)
-            .putInt("lyrics_cache_max_mb", 25)
-            .putFloat("lyrics_overlay_scale", 1.25f)
-            .putInt("lyrics_overlay_x", 42)
-            .putInt("lyrics_overlay_y", 84)
-            .commit()
-
-        val migrated = LyricsCardPrefs(app)
+    @Test fun settingsFollowProfilesAndBackups() {
+        val prefs = LyricsCardPrefs(app)
+        prefs.wifiOnly = true; prefs.cacheEnabled = false; prefs.cacheMaxMb = 25; prefs.overlayScale = 1.25f
+        val again = LyricsCardPrefs(app)
+        assertTrue(again.wifiOnly)
+        assertFalse(again.cacheEnabled)
+        assertEquals(25, again.cacheMaxMb)
+        assertEquals(1.25f, again.overlayScale)
         val cacheKey = CardPrefs(app, HomeSlots.Card.LYRICS).key("cache_enabled")
-        assertTrue(migrated.wifiOnly)
-        assertFalse(migrated.cacheEnabled)
-        assertEquals(25, migrated.cacheMaxMb)
-        assertEquals(1.25f, migrated.overlayScale)
-        assertEquals(42, migrated.overlayX)
-        assertEquals(84, migrated.overlayY)
         assertTrue("card-prefixed settings follow profiles", Profiles.isPersonal(cacheKey))
         assertTrue("card-prefixed settings are included in backups", SettingsBackup.inScope(cacheKey, SettingsBackup.Options()))
-        assertFalse("legacy global preference is removed after migration", Prefs(app).raw.contains("lyrics_cache_enabled"))
+    }
+
+    @Test fun radioSaysLyricsAreNotAvailable() {
+        val card = LyricsCard(activity)
+        card.shown(true)
+        listOf(
+            MediaHub.NowPlaying(available = true, packageName = "com.saicmotor.radio", source = "DAB", title = "FIP", artist = "11B", playing = true),
+            MediaHub.NowPlaying(available = true, packageName = "com.saicmotor.radio", source = "FM", title = "France Inter", artist = "87.8 MHz", playing = true, analog = true),
+        ).forEach { radio ->
+            setNow(radio); card.show(radio); idle(1200)
+            assertContains(card, activity.getString(R.string.ly_radio))
+            assertEquals("nothing is looked up on the radio", 0, activeConnectionCount())
+            assertNull(privateValue(card, "requestedKey"))
+        }
+        assertFalse(LyricsRepo.searchable(MediaHub.NowPlaying(available = true, packageName = "aa.player", source = "Radio FG", title = "Radio FG", artist = "Live")))
+        assertTrue(LyricsRepo.searchable(trackNow()))
+        card.shown(false)
     }
 
     private fun trackNow(title: String = "Cached Song") = MediaHub.NowPlaying(

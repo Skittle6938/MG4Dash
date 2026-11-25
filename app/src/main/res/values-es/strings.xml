@@ -1239,6 +1239,7 @@
     <string name="wc_lyrics">Letras</string>
     <string name="ly_refresh">Actualizar letras</string>
     <string name="ly_waiting">Esperando la canción…</string>
+    <string name="ly_radio">Letras no disponibles para la radio</string>
     <string name="ly_searching">Buscando letras…</string>
     <string name="ly_none">No se encontraron letras</string>
     <string name="ly_offline">Sin conexión — letras no guardadas</string>

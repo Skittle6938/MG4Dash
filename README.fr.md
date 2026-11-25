@@ -258,6 +258,10 @@ La carte média suit la source active de la voiture (radio DAB / FM, Bluetooth, 
 
 **Au démarrage** (Réglages › **Média et sons**) : la *Source au démarrage* est *Automatique* par défaut (retour à la dernière source encore disponible), *Comme la voiture*, ou une source fixe. La *Lecture au démarrage* reprend *Comme à l'arrêt de la voiture*, *Toujours en pause* ou *Toujours en lecture*. La séquence de démarrage et le son de démarrage attendent que la voiture soit vraiment utilisée : écran allumé, et READY, portes déverrouillées ou un toucher sur l'écran. Ouvrir le coffre d'une voiture verrouillée ne fait rien jouer ([#133](https://github.com/Skittle6938/MG4Dash/issues/133)).
 
+### Paroles synchronisées
+
+Placez la carte facultative **Paroles** depuis le mode édition de l'accueil. Quand un morceau n'est pas en cache, MG4Dash envoie son artiste, son titre et sa durée à LRCLIB pour trouver des paroles synchronisées ou simples. Les paroles téléchargées sont gardées en cache dans l'écran ; la taille du cache et l'option Wi-Fi uniquement sont dans les réglages de la carte (appui long), et les morceaux en cache restent disponibles hors connexion. Sur la radio (FM, AM, DAB), il n'y a pas de paroles. Dans MG4Control, créez un raccourci personnalisé avec **Envoyer un broadcast**, l'action `app.mg4dash.action.TOGGLE_LYRICS_OVERLAY` et MG4Dash comme appli cible pour afficher ou cacher la bulle de paroles flottante depuis un bouton du volant ou une bulle de raccourci.
+
 <details>
 <summary>Volant, autres applis et bouton Android Auto</summary>
 

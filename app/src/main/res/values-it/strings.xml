@@ -1239,6 +1239,7 @@
     <string name="wc_lyrics">Testi sincronizzati</string>
     <string name="ly_refresh">Aggiorna testo</string>
     <string name="ly_waiting">In attesa del brano…</string>
+    <string name="ly_radio">Testi non disponibili per la radio</string>
     <string name="ly_searching">Ricerca testo…</string>
     <string name="ly_none">Nessun testo trovato</string>
     <string name="ly_offline">Offline — testo non in cache</string>

@@ -260,7 +260,7 @@ The media card follows the car's active source (DAB / FM radio, Bluetooth, USB, 
 
 ### Synchronized lyrics
 
-Place the optional **Lyrics** card from the home screen's edit mode. When a song is not cached, MG4Dash sends its artist, title and duration to LRCLIB to find synchronized or plain lyrics. Downloaded lyrics are cached on the head unit; the cache size and Wi-Fi-only option are in the card's long-press settings, and cached songs remain available offline. In MG4Control, create a custom shortcut with **Send a broadcast**, action `app.mg4dash.action.TOGGLE_LYRICS_OVERLAY`, and MG4Dash as the target app to toggle the floating lyrics pill from a steering-wheel button or shortcut bubble.
+Place the optional **Lyrics** card from the home screen's edit mode. When a song is not cached, MG4Dash sends its artist, title and duration to LRCLIB to find synchronized or plain lyrics. Downloaded lyrics are cached on the head unit; the cache size and Wi-Fi-only option are in the card's long-press settings, and cached songs remain available offline. The radio (FM, AM, DAB) has no lyrics. In MG4Control, create a custom shortcut with **Send a broadcast**, action `app.mg4dash.action.TOGGLE_LYRICS_OVERLAY`, and MG4Dash as the target app to toggle the floating lyrics pill from a steering-wheel button or shortcut bubble.
 
 <details>
 <summary>Steering wheel, other apps and the Android Auto button</summary>

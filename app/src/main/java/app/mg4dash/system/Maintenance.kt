@@ -19,13 +19,10 @@ object Maintenance {
     private const val TAG = "Maintenance"
     private val MOCK = app.mg4dash.BuildConfig.MOCK
 
-    fun on(context: Context): Boolean {
-        val enabled = Prefs(context).valetMode
-        if (enabled) hideLyricsOverlay()
-        return enabled
-    }
+    fun on(context: Context): Boolean = Prefs(context).valetMode
 
-    private fun hideLyricsOverlay() {
+    /** The floating lyrics pill closed as maintenance mode starts: nothing of MG4Dash stays on screen. */
+    fun hideLyricsOverlay() {
         val main = Handler(Looper.getMainLooper())
         if (Looper.myLooper() == main.looper) LyricsOverlay.stop() else main.post { LyricsOverlay.stop() }
     }

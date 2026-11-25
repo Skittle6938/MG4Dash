@@ -1237,6 +1237,7 @@ fx_random_of|Random: %1$s|Aléatoire : %1$s|Zufällig: %1$s|Aleatorio: %1$s|Casu
 wc_lyrics|Lyrics|Paroles|Liedtexte|Letras|Testi sincronizzati|Songteksten|Şarkı sözleri|Texty
 ly_refresh|Refresh lyrics|Actualiser les paroles|Liedtexte aktualisieren|Actualizar letras|Aggiorna testo|Songteksten vernieuwen|Şarkı sözlerini yenile|Obnovit texty
 ly_waiting|Waiting for track…|En attente du morceau…|Warte auf Titel…|Esperando la canción…|In attesa del brano…|Wachten op nummer…|Parça bekleniyor…|Čekám na skladbu…
+ly_radio|Lyrics not available for the radio|Paroles indisponibles pour la radio|Für das Radio sind keine Liedtexte verfügbar|Letras no disponibles para la radio|Testi non disponibili per la radio|Songteksten niet beschikbaar voor de radio|Radyo için şarkı sözü yok|Texty nejsou pro rádio k dispozici
 ly_searching|Searching lyrics…|Recherche des paroles…|Suche Liedtexte…|Buscando letras…|Ricerca testo…|Songteksten zoeken…|Şarkı sözleri aranıyor…|Hledám text…
 ly_none|No lyrics found|Aucune parole trouvée|Kein Liedtext gefunden|No se encontraron letras|Nessun testo trovato|Geen songtekst gevonden|Şarkı sözü bulunamadı|Text nenalezen
 ly_offline|Offline — lyrics not cached|Hors ligne — paroles non mises en cache|Offline — nicht gespeichert|Sin conexión — letras no guardadas|Offline — testo non in cache|Offline — niet in cache|Çevrimdışı — önbellekte yok|Offline — text není v mezipaměti

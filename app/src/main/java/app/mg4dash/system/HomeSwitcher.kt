@@ -178,6 +178,7 @@ object HomeSwitcher {
     fun switchToStock(context: Context, auto: Boolean = false): Boolean {
         Prefs(context).valetMode = true
         Prefs(context).valetAuto = auto
+        Maintenance.hideLyricsOverlay()
         // The driver's maintenance mode: Radio Dash off where the car has its own radio (not for the crash guard's)
         if (!auto) RadioDashGuard.maintenanceOn(context)
         val ok = try {

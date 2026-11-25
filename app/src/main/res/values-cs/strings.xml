@@ -1239,6 +1239,7 @@
     <string name="wc_lyrics">Texty</string>
     <string name="ly_refresh">Obnovit texty</string>
     <string name="ly_waiting">Čekám na skladbu…</string>
+    <string name="ly_radio">Texty nejsou pro rádio k dispozici</string>
     <string name="ly_searching">Hledám text…</string>
     <string name="ly_none">Text nenalezen</string>
     <string name="ly_offline">Offline — text není v mezipaměti</string>

@@ -1239,6 +1239,7 @@
     <string name="wc_lyrics">Lyrics</string>
     <string name="ly_refresh">Refresh lyrics</string>
     <string name="ly_waiting">Waiting for track…</string>
+    <string name="ly_radio">Lyrics not available for the radio</string>
     <string name="ly_searching">Searching lyrics…</string>
     <string name="ly_none">No lyrics found</string>
     <string name="ly_offline">Offline — lyrics not cached</string>

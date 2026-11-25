@@ -32,6 +32,18 @@ object LyricsRepo {
         activeConnections.toList().forEach { connection -> try { connection.disconnect() } catch (_: Exception) { } }
     }
 
+    /**
+     * A radio (FM, AM, DAB): its title is the station's name, not a song's, so no lyrics are looked up for it
+     * (25/11). The car's radio app, or a title that only repeats the source's name.
+     */
+    fun radio(m: MediaHub.NowPlaying): Boolean = m.analog || m.packageName?.substringBefore('#') == RADIO_PKG ||
+        (m.source.isNotBlank() && m.title.trim().equals(m.source.trim(), ignoreCase = true))
+
+    /** Lyrics can be looked up for [m]: a song with an artist and a title, not a radio. */
+    fun searchable(m: MediaHub.NowPlaying): Boolean = m.available && !radio(m) && m.artist.isNotBlank() && m.title.isNotBlank()
+
+    private const val RADIO_PKG = "com.saicmotor.radio"
+
     fun key(artist: String, title: String) = "${artist.trim().lowercase(Locale.ROOT)}\u0000${title.trim().lowercase(Locale.ROOT)}"
 
     fun wifiConnected(context: Context): Boolean = try {
