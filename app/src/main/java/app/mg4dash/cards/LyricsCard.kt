@@ -221,7 +221,7 @@ class LyricsCard(context: Context) : LinearLayout(context), HomeCard {
     }
 
     @Suppress("UNUSED_PARAMETER")
-    private fun position(m: MediaHub.NowPlaying): Long = clock.position(android.os.SystemClock.elapsedRealtime())
+    private fun position(m: MediaHub.NowPlaying): Long = clock.lyricsAt(android.os.SystemClock.elapsedRealtime())
 
     private fun request(force: Boolean, m: MediaHub.NowPlaying = MediaHub.now.value) {
         if (!isActivelyDisplayed) return

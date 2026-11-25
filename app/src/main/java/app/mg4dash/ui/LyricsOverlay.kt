@@ -44,7 +44,7 @@ object LyricsOverlay {
     private var trackKey = ""
     private var latest = MediaHub.NowPlaying()
     private val clock = LyricsClock()
-    private fun clockNow() = clock.position(android.os.SystemClock.elapsedRealtime())
+    private fun clockNow() = clock.lyricsAt(android.os.SystemClock.elapsedRealtime())
     private var activeTextView: TextView? = null
     private var nextTextView: TextView? = null
     private var closeView: TextView? = null
