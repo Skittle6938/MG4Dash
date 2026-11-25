@@ -1267,6 +1267,9 @@
     <string name="ly_overlay_permission_error">Can\'t open overlay permission settings</string>
     <string name="ly_overlay_size">Lyrics overlay size</string>
     <string name="ly_overlay_reset" formatted="false">Reset overlay to 100%</string>
+    <string name="ly_offset">Lyrics timing</string>
+    <string name="ly_offset_sub">Below 0 the lines appear before they are sung</string>
+    <string name="ly_overlay_previous">Previous line in the overlay</string>
     <string name="bk_title">SETTINGS BACKUP</string>
     <string name="bk_desc">All the settings, the profiles, the startup sound and the web addresses in one file on the USB stick, to put back after a reset of the head unit.</string>
     <string name="bk_save">Save to the USB stick</string>

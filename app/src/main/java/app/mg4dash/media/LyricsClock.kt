@@ -36,11 +36,11 @@ internal class LyricsClock {
         return if (duration > 0) p.coerceAtMost(duration) else p
     }
 
-    /** Where the lyrics are: a little ahead of the song, so a line is read in time to be sung. */
-    fun lyricsAt(now: Long): Long = position(now) + LEAD_MS
+    /** Where the lyrics are: [leadMs] ahead of the song (the setting, 0.4 s by default), so a line is read in time to be sung. */
+    fun lyricsAt(now: Long, leadMs: Long = LEAD_MS): Long = (position(now) + leadMs).coerceAtLeast(0L)
 
     companion object {
-        /** The lyrics' lead on the song (25/11: hard to sing on time). */
+        /** The lyrics' default lead on the song (25/11: hard to sing on time). */
         const val LEAD_MS = 400L
 
         /**

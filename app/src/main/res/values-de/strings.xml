@@ -1267,6 +1267,9 @@
     <string name="ly_overlay_permission_error">Overlay-Berechtigungseinstellungen können nicht geöffnet werden</string>
     <string name="ly_overlay_size">Größe des Liedtext-Overlays</string>
     <string name="ly_overlay_reset" formatted="false">Overlay auf 100 % zurücksetzen</string>
+    <string name="ly_offset">Zeitversatz des Liedtexts</string>
+    <string name="ly_offset_sub">Unter 0 erscheinen die Zeilen, bevor sie gesungen werden</string>
+    <string name="ly_overlay_previous">Vorherige Zeile im Overlay</string>
     <string name="bk_title">EINSTELLUNGEN SICHERN</string>
     <string name="bk_desc">Alle Einstellungen, die Profile, der Startton und die Webadressen in einer Datei auf dem USB-Stick, um sie nach einem Zurücksetzen des Radios wiederherzustellen.</string>
     <string name="bk_save">Auf USB-Stick sichern</string>

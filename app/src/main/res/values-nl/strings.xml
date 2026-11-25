@@ -1267,6 +1267,9 @@
     <string name="ly_overlay_permission_error">Instellingen voor overlaymachtiging kunnen niet worden geopend</string>
     <string name="ly_overlay_size">Grootte van songtekst-overlay</string>
     <string name="ly_overlay_reset" formatted="false">Overlay resetten naar 100%</string>
+    <string name="ly_offset">Verschuiving songtekst</string>
+    <string name="ly_offset_sub">Onder 0 verschijnen de regels voordat ze gezongen worden</string>
+    <string name="ly_overlay_previous">Vorige regel in de overlay</string>
     <string name="bk_title">BACK-UP VAN DE INSTELLINGEN</string>
     <string name="bk_desc">Alle instellingen, de profielen, het opstartgeluid en de webadressen in één bestand op de USB-stick, om terug te zetten na een reset van de radio.</string>
     <string name="bk_save">Opslaan op de USB-stick</string>

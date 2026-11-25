@@ -44,9 +44,11 @@ object LyricsOverlay {
     private var trackKey = ""
     private var latest = MediaHub.NowPlaying()
     private val clock = LyricsClock()
-    private fun clockNow() = clock.lyricsAt(android.os.SystemClock.elapsedRealtime())
+    private fun clockNow() = clock.lyricsAt(android.os.SystemClock.elapsedRealtime(), (app ?: themedContext)?.let { LyricsCardPrefs(it).leadMs } ?: LyricsClock.LEAD_MS)
     private var activeTextView: TextView? = null
     private var nextTextView: TextView? = null
+    private var previousTextView: TextView? = null
+    private var previous = ""
     private var closeView: TextView? = null
     private var rootView: LinearLayout? = null
     private fun applyScale() {
@@ -62,6 +64,8 @@ object LyricsOverlay {
         activeTextView?.setTextColor(Themes.color(c, R.color.text_value))
         nextTextView?.setTextSize(TypedValue.COMPLEX_UNIT_SP, 25f * s)
         nextTextView?.setTextColor(Themes.color(c, R.color.text_value))
+        previousTextView?.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20f * s)
+        previousTextView?.setTextColor(Themes.color(c, R.color.text_sub))
         root.setPadding(dp((22*s).toInt()), dp((14*s).toInt()), dp((22*s).toInt()), dp((14*s).toInt()))
         val closeSize = dp(maxOf(36f, 42f*s).toInt())
         val gap = dp((12f*s).toInt())
@@ -166,7 +170,10 @@ object LyricsOverlay {
         val texts = LinearLayout(c).apply { orientation = LinearLayout.VERTICAL }
         val activeLine = TextView(c).apply { setTextColor(Themes.color(c, R.color.text_value)); setTextSize(TypedValue.COMPLEX_UNIT_SP, 25f); typeface = Typeface.DEFAULT_BOLD; maxLines = 2; ellipsize = android.text.TextUtils.TruncateAt.END; text = current }
         val nextLine = TextView(c).apply { setTextColor(Themes.color(c, R.color.text_value)); alpha = .72f; setTextSize(TypedValue.COMPLEX_UNIT_SP, 25f); typeface = Typeface.DEFAULT_BOLD; maxLines = 1; ellipsize = android.text.TextUtils.TruncateAt.END; text = next }
-        texts.addView(activeLine); texts.addView(nextLine)
+        // The line before, above the current one: an option, off by default (25/11)
+        val previousLine = TextView(c).apply { setTextColor(Themes.color(c, R.color.text_sub)); alpha = .8f; setTextSize(TypedValue.COMPLEX_UNIT_SP, 20f); typeface = Typeface.DEFAULT_BOLD; maxLines = 1; ellipsize = android.text.TextUtils.TruncateAt.END; text = previous
+            visibility = if (LyricsCardPrefs(c).overlayPrevious) View.VISIBLE else View.GONE }
+        texts.addView(previousLine); texts.addView(activeLine); texts.addView(nextLine)
         val screenWidth = screenSize(c).first
         val pillWidth = pillWidth(screenWidth, p.overlayScale, c.resources.displayMetrics.density)
         root.addView(texts, LinearLayout.LayoutParams((pillWidth - dp(74)).coerceAtLeast(dp(100)), -2))
@@ -201,7 +208,7 @@ object LyricsOverlay {
                 else -> true
             }
         })
-        rootView=root; activeTextView=activeLine; nextTextView=nextLine
+        rootView=root; activeTextView=activeLine; nextTextView=nextLine; previousTextView=previousLine
         val closeButton=root.getChildAt(1) as TextView; closeView=closeButton
         root.addOnLayoutChangeListener { _,_,_,_,_,_,_,_,_-> clampPosition() }
         return try {
@@ -218,7 +225,16 @@ object LyricsOverlay {
             LyricsRepo.start(app ?: c); applyScale(); observeMedia(); true
         } catch (_:Exception) { false }
     }
-    fun update(activeText: String, nextText: String) { current=activeText; next=nextText; val r=pill as? LinearLayout ?: return; (r.getChildAt(0) as? LinearLayout)?.let { (it.getChildAt(0) as? TextView)?.text=activeText; (it.getChildAt(1) as? TextView)?.text=nextText } }
+    fun update(activeText: String, nextText: String, previousText: String = "") {
+        current = activeText; next = nextText; previous = previousText
+        activeTextView?.text = activeText; nextTextView?.text = nextText; previousTextView?.text = previousText
+    }
+
+    /** The "line before" setting changed: shown or hidden at once. */
+    fun refreshPrevious() {
+        val c = themedContext ?: app ?: return
+        previousTextView?.visibility = if (LyricsCardPrefs(c).overlayPrevious) View.VISIBLE else View.GONE
+    }
     private fun observeMedia() {
         mediaJob?.cancel()
         mediaJob = scope.launch {
@@ -328,12 +344,12 @@ object LyricsOverlay {
         val synced = currentTrack.synced
         if (synced != null) {
             val i = synced.indexOfLast { it.first <= positionMs }.coerceAtLeast(0)
-            update(synced.getOrNull(i)?.second.orEmpty(), synced.getOrNull(i + 1)?.second.orEmpty())
+            update(synced.getOrNull(i)?.second.orEmpty(), synced.getOrNull(i + 1)?.second.orEmpty(), synced.getOrNull(i - 1)?.second.orEmpty())
         } else {
             val plain = currentTrack.plain?.lineSequence()?.filter { it.isNotBlank() }?.toList().orEmpty()
             val i = if (plain.isEmpty()) -1 else (positionMs / 5_000L).toInt().coerceAtMost(plain.lastIndex)
-            update(plain.getOrNull(i).orEmpty(), plain.getOrNull(i + 1).orEmpty())
+            update(plain.getOrNull(i).orEmpty(), plain.getOrNull(i + 1).orEmpty(), plain.getOrNull(i - 1).orEmpty())
         }
     }
-    fun stop() { active=false; mediaJob?.cancel(); mediaJob=null; tickerJob?.cancel(); tickerJob=null; fetchJob?.cancel(); fetchJob=null; pauseJob?.cancel(); pauseJob=null; pauseExpired=false; track=null; trackKey=""; current=""; next=""; val v=pill; pill=null; try { if(v!=null) wm?.removeViewImmediate(v) } catch (_:Exception){}; params=null; rootView=null; activeTextView=null; nextTextView=null; closeView=null; themedContext=null }
+    fun stop() { active=false; mediaJob?.cancel(); mediaJob=null; tickerJob?.cancel(); tickerJob=null; fetchJob?.cancel(); fetchJob=null; pauseJob?.cancel(); pauseJob=null; pauseExpired=false; track=null; trackKey=""; current=""; next=""; val v=pill; pill=null; try { if(v!=null) wm?.removeViewImmediate(v) } catch (_:Exception){}; params=null; rootView=null; activeTextView=null; nextTextView=null; previousTextView=null; previous=""; closeView=null; themedContext=null }
 }

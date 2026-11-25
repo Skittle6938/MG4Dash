@@ -1267,6 +1267,9 @@
     <string name="ly_overlay_permission_error">Yer paylaşımı izin ayarları açılamıyor</string>
     <string name="ly_overlay_size">Şarkı sözü katmanı boyutu</string>
     <string name="ly_overlay_reset" formatted="false">Katmanı %100\'e sıfırla</string>
+    <string name="ly_offset">Şarkı sözü zamanlaması</string>
+    <string name="ly_offset_sub">0\'ın altında satırlar söylenmeden önce görünür</string>
+    <string name="ly_overlay_previous">Katmanda önceki satır</string>
     <string name="bk_title">AYARLARIN YEDEĞİ</string>
     <string name="bk_desc">Tüm ayarlar, profiller, açılış sesi ve web adresleri USB bellekte tek bir dosyada; radyo sıfırlandıktan sonra geri yüklemek için.</string>
     <string name="bk_save">USB belleğe kaydet</string>

@@ -1267,6 +1267,9 @@
     <string name="ly_overlay_permission_error">No se pueden abrir los ajustes del permiso de superposición</string>
     <string name="ly_overlay_size">Tamaño del overlay de letras</string>
     <string name="ly_overlay_reset" formatted="false">Restablecer el overlay al 100 %</string>
+    <string name="ly_offset">Desfase de la letra</string>
+    <string name="ly_offset_sub">Por debajo de 0, las líneas aparecen antes de cantarse</string>
+    <string name="ly_overlay_previous">Línea anterior en el overlay</string>
     <string name="bk_title">COPIA DE LOS AJUSTES</string>
     <string name="bk_desc">Todos los ajustes, los perfiles, el sonido de inicio y las direcciones web en un solo archivo en la memoria USB, para recuperarlos tras restablecer la radio.</string>
     <string name="bk_save">Guardar en la memoria USB</string>

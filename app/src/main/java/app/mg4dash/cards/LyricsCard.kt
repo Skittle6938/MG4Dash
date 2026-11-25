@@ -72,6 +72,11 @@ class LyricsCard(context: Context) : LinearLayout(context), HomeCard {
     private var lastMeasuredH = 0
     private var visibleLyricsRows = 3
     private var activeFontSp = 25f
+    /** The room of the lyrics (inside their padding) and the lines a long one may take there. */
+    private var fitW = 0
+    private var fitH = 0
+    private var fitGap = 0
+    private var wrapLines = 2
     private var track: LyricsRepo.Track? = null
     private var key = ""
     private var requestJob: Job? = null
@@ -147,12 +152,12 @@ class LyricsCard(context: Context) : LinearLayout(context), HomeCard {
             // Five lines on a medium or tall place, three on a small or wide one
             visibleLyricsRows = if (place.tall || place.medium) 5 else 3
             val count = visibleLyricsRows
-            val heightBasedPx = bodyHeight * if (count == 5) .125f else .22f
-            val activeTextSizePx = minOf(heightBasedPx, bodyWidth * .068f)
-            activeFontSp = activeTextSizePx
             val sidePad = dp(8)
             val verticalGap = (bodyHeight * .035f).toInt().coerceAtLeast(dp(8))
             lyricsArea.setPadding(sidePad, verticalGap, sidePad, verticalGap)
+            fitW = bodyWidth - 2 * sidePad; fitH = bodyHeight - 2 * verticalGap; fitGap = verticalGap
+            fitText()
+            val activeTextSizePx = activeFontSp
             val radius = count / 2
             lines.forEachIndexed { index, line ->
                 val distance = kotlin.math.abs(index - 3)
@@ -167,6 +172,19 @@ class LyricsCard(context: Context) : LinearLayout(context), HomeCard {
             }
             drawLines(position(latest))
         }
+    }
+
+    /** The text size from the room and the song (25/11): once per place and song, never line by line. */
+    private fun fitText() {
+        if (fitW <= 0 || fitH <= 0) return
+        val count = visibleLyricsRows
+        wrapLines = if (place.tall) 3 else 2
+        val t = track
+        val lyrics = t?.synced?.map { it.second } ?: t?.plain?.lines().orEmpty()
+        // Margins: the current line's, two small ones for each other row; a little room left besides
+        val margins = 2 * fitGap + (count - 1) * 2 * dp(2) + dp(6)
+        activeFontSp = LyricsFit.size(fitW, fitH - margins, lyrics, wrapLines, count - 2, .6f, 0,
+            minPx = dp(14).toFloat(), maxPx = fitH * .32f)
     }
 
     override fun place(p: CardPlace) {
@@ -221,7 +239,7 @@ class LyricsCard(context: Context) : LinearLayout(context), HomeCard {
     }
 
     @Suppress("UNUSED_PARAMETER")
-    private fun position(m: MediaHub.NowPlaying): Long = clock.lyricsAt(android.os.SystemClock.elapsedRealtime())
+    private fun position(m: MediaHub.NowPlaying): Long = clock.lyricsAt(android.os.SystemClock.elapsedRealtime(), prefs.leadMs)
 
     private fun request(force: Boolean, m: MediaHub.NowPlaying = MediaHub.now.value) {
         if (!isActivelyDisplayed) return
@@ -237,7 +255,7 @@ class LyricsCard(context: Context) : LinearLayout(context), HomeCard {
             if (!force) delay(1000)
             val cached = LyricsRepo.cached(m.artist, m.title)
             if (cached != null) {
-                track = cached
+                track = cached; fitText(); fitKaraoke()
                 setStatus(when { cached.instrumental -> activity.getString(R.string.ly_none); cached.synced == null -> activity.getString(R.string.ly_plain); else -> "" })
                 drawLines(position(MediaHub.now.value))
                 if (!force) {
@@ -253,7 +271,7 @@ class LyricsCard(context: Context) : LinearLayout(context), HomeCard {
             if (!isActivelyDisplayed) return@launch
             val found = LyricsRepo.lookup(m.artist, m.title, m.durationMs, force)
             if (!isActivelyDisplayed || key != targetKey) return@launch
-            track = found ?: cached
+            track = found ?: cached; fitText(); fitKaraoke()
             setStatus(when {
                 track == null -> activity.getString(R.string.ly_none)
                 track?.instrumental == true -> activity.getString(R.string.ly_none)
@@ -426,14 +444,14 @@ class LyricsCard(context: Context) : LinearLayout(context), HomeCard {
                 dialog.window?.decorView?.post {
                     val dialogHeight = dialog.window?.decorView?.height ?: 0
                     if (dialogHeight > 0) {
-                        val activePx = dialogHeight * .085f
                         karaokeTitle?.setTextSize(TypedValue.COMPLEX_UNIT_PX, dialogHeight * .042f)
                         karaokeArtist?.setTextSize(TypedValue.COMPLEX_UNIT_PX, dialogHeight * .030f)
-                        karaokeRows.forEachIndexed { index, row ->
-                            row.setTextSize(TypedValue.COMPLEX_UNIT_PX, if (index == 3 || index == NEXT) activePx else activePx * .58f)
+                        karaokeGap = (dialogHeight * .012f).toInt()
+                        karaokeRows.forEach { row ->
                             val lp = row.layoutParams as? LayoutParams
-                            if (lp != null) { val gap=(dialogHeight*.012f).toInt(); lp.topMargin=gap; lp.bottomMargin=gap; row.layoutParams=lp }
+                            if (lp != null) { lp.topMargin = karaokeGap; lp.bottomMargin = karaokeGap; row.layoutParams = lp }
                         }
+                        karaokeSynced?.post { fitKaraoke() }
                     }
                 }
                 root.alpha = .5f; root.scaleX = .97f; root.scaleY = .97f
@@ -449,6 +467,23 @@ class LyricsCard(context: Context) : LinearLayout(context), HomeCard {
                 isActivelyDisplayed = cardIsShown
             }
         )
+    }
+
+    private var karaokeGap = 0
+
+    /** The karaoke's text size from its room and the song, as for the card. */
+    private fun fitKaraoke() {
+        val area = karaokeSynced ?: return
+        val w = area.width; val h = area.height
+        if (w <= 0 || h <= 0) return
+        val t = track
+        val lyrics = t?.synced?.map { it.second } ?: t?.plain?.lines().orEmpty()
+        val others = karaokeRows.size - 2
+        val px = LyricsFit.size(w - dp(24), h - karaokeRows.size * 2 * karaokeGap - dp(12), lyrics, 2, others, .58f, 0,
+            minPx = dp(18).toFloat(), maxPx = h * .2f)
+        karaokeRows.forEachIndexed { index, row ->
+            row.setTextSize(TypedValue.COMPLEX_UNIT_PX, if (index == 3 || index == NEXT) px else px * .58f)
+        }
     }
 
     private fun hostActivity(): Activity? {
@@ -501,9 +536,7 @@ class LyricsCard(context: Context) : LinearLayout(context), HomeCard {
         if (synced != null) {
             val i = synced.indexOfLast { it.first <= position }.coerceAtLeast(0)
             val radius = visibleLyricsRows / 2
-            val availableWidth = (lyricsArea.width - lyricsArea.paddingLeft - lyricsArea.paddingRight).coerceAtLeast(1)
-            val activeText = synced.getOrNull(i)?.second.orEmpty()
-            val activePx = activeFontSp * (1f - .18f * ((activeText.length * activeFontSp * .53f / availableWidth).coerceAtLeast(1f) - 1f).coerceAtMost(1f))
+            val activePx = activeFontSp
             for (row in lines.indices) {
                 val distance = kotlin.math.abs(row - 3)
                 val ix = i + row - 3
@@ -511,7 +544,7 @@ class LyricsCard(context: Context) : LinearLayout(context), HomeCard {
                 lines[row].setTextColor(Themes.color(activity, if (row == 3 || row == NEXT) R.color.text_value else R.color.text_sub))
                 // The next line as big as the current one, to be read in advance (25/11)
                 lines[row].setTextSize(TypedValue.COMPLEX_UNIT_PX, if (row == 3 || row == NEXT) activePx else activeFontSp * .60f)
-                lines[row].maxLines = if (row == 3 || (visibleLyricsRows == 5 && distance == 1)) 2 else 1
+                lines[row].maxLines = if (row == 3 || row == NEXT) wrapLines else 1
                 lines[row].ellipsize = android.text.TextUtils.TruncateAt.END
                 lines[row].alpha = when (row) { 3 -> 1f; NEXT -> NEXT_ALPHA; else -> .45f }
                 lines[row].visibility = if (distance <= radius) View.VISIBLE else View.GONE
@@ -544,6 +577,14 @@ class LyricsCard(context: Context) : LinearLayout(context), HomeCard {
             }
             .note { cacheUsageText() }
             .also { popup -> launchView { lyricsCacheInfo = LyricsRepo.info(); popup.refresh() } }
+            .stepper(activity.getString(R.string.ly_offset), activity.getString(R.string.ly_offset_sub), app.mg4dash.ui.Stepper(hostActivity() ?: return popup, -30, 30,
+                label = { offsetLabel(it) }, typedTitle = activity.getString(R.string.ly_offset),
+                parse = { t -> t.trim().removeSuffix("s").trim().replace(',', '.').toFloatOrNull()?.let { kotlin.math.round(it * 10).toInt() } },
+                get = { prefs.offsetTenths }, set = { prefs.offsetTenths = it; drawLines(position(latest)); drawKaraoke(position(latest)) }))
+            .toggle(activity.getString(R.string.ly_overlay_previous), null, { prefs.overlayPrevious }) {
+                prefs.overlayPrevious = it
+                if (LyricsOverlay.active) LyricsOverlay.refreshPrevious()
+            }
             .slider(activity.getString(R.string.ly_overlay_size), 14,
                 { ((prefs.overlayScale - .70f) / .05f).toInt().coerceIn(0, 14) }, { "${70 + it * 5}%" }) { value ->
                 val scale = (.70f + value * .05f).coerceIn(.70f, 1.40f)
@@ -569,6 +610,12 @@ class LyricsCard(context: Context) : LinearLayout(context), HomeCard {
             hostActivity()?.startActivity(launchControl)
         }
         return popup
+    }
+
+    /** "-0,4 s": the offset in the head unit's decimal style. */
+    private fun offsetLabel(tenths: Int): String {
+        val v = String.format(java.util.Locale.getDefault(), "%.1f", tenths / 10f)
+        return (if (tenths > 0) "+" else "") + v + " s"
     }
 
     private fun cacheUsageText(): String {

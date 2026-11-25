@@ -23,6 +23,19 @@ class LyricsCardPrefs(context: Context) {
         get() = card.int("overlay_scale_percent", 100).coerceIn(70, 140) / 100f
         set(value) = card.setInt("overlay_scale_percent", (value.coerceIn(.70f, 1.40f) * 100).toInt())
 
+    /** The line before the current one in the floating pill (off by default). */
+    var overlayPrevious: Boolean
+        get() = card.bool("overlay_previous", false)
+        set(value) = card.setBool("overlay_previous", value)
+
+    /** The lyrics' offset on the song, in tenths of a second: -4 shows each line 0.4 s early. */
+    var offsetTenths: Int
+        get() = card.int("offset_tenths", -4).coerceIn(-30, 30)
+        set(value) = card.setInt("offset_tenths", value.coerceIn(-30, 30))
+
+    /** How far ahead of the song the lyrics are, in ms. */
+    val leadMs: Long get() = -offsetTenths * 100L
+
     var overlayX: Int
         get() = card.int("overlay_x", -1)
         set(value) = card.setInt("overlay_x", value)
