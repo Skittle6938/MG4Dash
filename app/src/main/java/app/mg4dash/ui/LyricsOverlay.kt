@@ -65,7 +65,7 @@ object LyricsOverlay {
         val closeSize = dp(maxOf(36f, 42f*s).toInt())
         val gap = dp((12f*s).toInt())
         closeView?.let { it.layoutParams=LinearLayout.LayoutParams(closeSize,closeSize) }
-        val width=pillWidth(sw, s)
+        val width=pillWidth(sw, s, c.resources.displayMetrics.density)
         val textColumn=root.getChildAt(0)
         val textWidth = (width - root.paddingLeft - root.paddingRight - closeSize - gap).coerceAtLeast(dp(100))
         textColumn.layoutParams=LinearLayout.LayoutParams(textWidth,-2).apply { marginEnd = gap }
@@ -84,19 +84,22 @@ object LyricsOverlay {
         return context.resources.displayMetrics.widthPixels to context.resources.displayMetrics.heightPixels
     }
 
-    private fun pillWidth(screenWidth: Int, scale: Float): Int {
+    internal fun pillWidth(screenWidth: Int, scale: Float, density: Float): Int {
+        fun dp(value: Float) = (density * value).toInt()
         val max = (screenWidth * .92f).toInt().coerceAtLeast(1)
-        val min = dp((600f * scale).toInt()).coerceAtMost(max)
+        val min = dp((600f * scale).toInt().toFloat()).coerceAtMost(max)
         val preferred = (screenWidth * .55f).toInt().coerceAtMost(max)
-        val scaledMax = dp((680f * scale).toInt()).coerceAtMost(max)
+        val scaledMax = dp((680f * scale).toInt().toFloat()).coerceAtMost(max)
         return preferred.coerceIn(min, scaledMax.coerceAtLeast(min))
     }
+
+    internal fun maxX(screenWidth: Int, pillWidth: Int): Int = (screenWidth - pillWidth).coerceAtLeast(0)
 
     private fun clampPosition(screenHeight: Int = app?.let { screenSize(it).second } ?: 0) {
         val v=rootView ?: return; val lp=params ?: return
         if(v.width<=0 || v.height<=0) return
         val sw=app?.let { screenSize(it).first } ?: return
-        val nx=lp.x.coerceIn(0,(sw-v.width).coerceAtLeast(0))
+        val nx=lp.x.coerceIn(0,maxX(sw,v.width))
         val maxY=(screenHeight-v.height).coerceAtLeast(0)
         val ny=lp.y.coerceIn(0,maxY)
         if(nx!=lp.x || ny!=lp.y) { lp.x=nx; lp.y=ny; try { wm?.updateViewLayout(v,lp) } catch (_:Exception){} }
@@ -155,7 +158,7 @@ object LyricsOverlay {
         val nextLine = TextView(c).apply { setTextColor(Themes.color(c, R.color.text_sub)); alpha = .70f; setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f); maxLines = 1; ellipsize = android.text.TextUtils.TruncateAt.END; text = next }
         texts.addView(activeLine); texts.addView(nextLine)
         val screenWidth = screenSize(c).first
-        val pillWidth = pillWidth(screenWidth, p.overlayScale)
+        val pillWidth = pillWidth(screenWidth, p.overlayScale, c.resources.displayMetrics.density)
         root.addView(texts, LinearLayout.LayoutParams((pillWidth - dp(74)).coerceAtLeast(dp(100)), -2))
         root.addView(TextView(c).apply { text = "×"; gravity = Gravity.CENTER; setTextColor(Themes.color(c, R.color.text_value)); setTextSize(TypedValue.COMPLEX_UNIT_SP, 34f); setOnClickListener { stop() } }, LinearLayout.LayoutParams(dp(42), dp(42)))
         val lp = WindowManager.LayoutParams(pillWidth, -2, WindowManager.LayoutParams.TYPE_SYSTEM_ERROR,
@@ -176,7 +179,7 @@ object LyricsOverlay {
                     val (availableWidth, availableHeight) = screenSize(c)
                     val measuredWidth = root.width.takeIf { it > 0 } ?: lp.width
                     val measuredHeight = root.height
-                    lp.x=(ox+dx).coerceIn(0,(availableWidth-measuredWidth).coerceAtLeast(0))
+                    lp.x=(ox+dx).coerceIn(0,maxX(availableWidth,measuredWidth))
                     lp.y=(oy+dy).coerceIn(0,(availableHeight-measuredHeight).coerceAtLeast(0))
                     try { wm?.updateViewLayout(root,lp) } catch (_:Exception){}
                     true

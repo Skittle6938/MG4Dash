@@ -185,22 +185,26 @@ class Match(val road: Road, val forward: Boolean, val seg: Int, val t: Double, v
 
 /**
  * Map-matching: the nearest road within [MAX_DIST] m whose direction follows the heading (±[MAX_ANGLE]°), keeping the
- * previous road while it is still one of them. A connected continuation can take over at the endpoint;
- * ambiguous changes wait [SWITCH_MS].
+ * previous road while it is still about as near as the best one. A connected continuation can take over at the
+ * endpoint; another road clearly nearer (parallel roads, a service road beside the main one) is taken once it has
+ * stayed so for [SWITCH_MS] and [SWITCH_FIXES] positions in a row, so crossing a junction does not flicker the limit.
  */
 class Matcher {
     companion object {
         const val MAX_DIST = 25.0
         const val MAX_ANGLE = 35f
         const val SWITCH_MS = 3_000L
-        /** The previous road wins over a nearer one by up to this many metres (parallel carriageways, ramps). */
-        const val KEEP_BONUS = 8.0
+        /** The previous road is kept while another is nearer by no more than this (GPS noise, metres). */
+        const val KEEP_BONUS = 4.0
+        /** Positions in a row another road must stay the clearly nearer one before it is taken. */
+        const val SWITCH_FIXES = 3
     }
 
     var current: Match? = null
         private set
     private var pending: Match? = null
     private var pendingSince = 0L
+    private var pendingFixes = 0
 
     /** Candidates near the point, best first. */
     fun candidates(roads: Collection<Road>, lat: Double, lon: Double, heading: Float?): List<Match> {
@@ -239,8 +243,9 @@ class Matcher {
         }
         if (same != null && same.dist <= best.dist + KEEP_BONUS) { current = same; pending = null; return same }
         // Another road: taken once it has stayed the best for a while (the previous one meanwhile, if still near)
-        if (pending?.road?.id != best.road.id || pending?.forward != best.forward) { pending = best; pendingSince = now }
-        if (now - pendingSince >= SWITCH_MS) {
+        if (pending?.road?.id != best.road.id || pending?.forward != best.forward) { pending = best; pendingSince = now; pendingFixes = 0 }
+        pendingFixes++
+        if (now - pendingSince >= SWITCH_MS && pendingFixes >= SWITCH_FIXES) {
             current = best; pending = null; return best
         }
         current = same ?: cur

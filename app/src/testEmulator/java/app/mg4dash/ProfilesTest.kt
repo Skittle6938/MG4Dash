@@ -153,7 +153,7 @@ class ProfilesTest {
             "android", "band", "radio", "source", "browser_download_url", "name", "tag_name", "chunked", "gzip", "d", "t", "dresel", "error",
             "entity_id", "HfpClientConnectionService", "id", "ref", "k", "windows", "key_car_source_type", "lenspicker", "Resolver", "setupwizard",
             "mCurrentFocus", "mg4dash", "relative_humidity_2m", "time", "list", "current", "generation", "switching",
-            // Chrono JSON fields, not SharedPreferences settings
+            // Chrono runs and pending restore are JSON fields, not SharedPreferences settings
             "at", "kind", "mode",
             // the profiles' own file
             "drive_")

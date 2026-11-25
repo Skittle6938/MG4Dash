@@ -2,6 +2,7 @@ package app.mg4dash.cards
 
 import android.content.Context
 import app.mg4dash.chrono.ChronoCard
+import app.mg4dash.memo.MemoCard
 import app.mg4dash.radar.RadarCard
 import app.mg4dash.ui.ConsumptionCard
 import app.mg4dash.ui.DrivingCard
@@ -28,6 +29,7 @@ object HomeCards {
         Card.NAV to ::NavCard,
         Card.CHRONO to ::ChronoCard,
         Card.LYRICS to ::LyricsCard,
+        Card.MEMO to ::MemoCard,
     )
 
     fun create(card: Card, context: Context): HomeCard? = factories[card]?.invoke(context)

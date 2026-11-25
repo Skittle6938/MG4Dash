@@ -72,6 +72,8 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         prefs = Prefs(this)
         // A chrono run cut short (MG4Dash killed): its drive mode and climate put back
         app.mg4dash.chrono.ChronoEngine.restorePending(this)
+        // A voice memo cut short (power cut): made an .m4a and kept
+        app.mg4dash.memo.MemoRecorder.recover(this)
         app.mg4dash.ui.Themes.apply(this)
         themeSig = app.mg4dash.ui.Themes.signature(this)
         // Heated seats read after the screen was built (app restart): rebuild
@@ -1011,6 +1013,13 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         floatWeb?.rest()
         webCard?.closeKeyboard()
         super.onStop()
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        // The microphone asked by the voice memos card on its first recording
+        if (requestCode == app.mg4dash.memo.MemoRecorder.PERMISSION_REQUEST)
+            app.mg4dash.memo.MemoRecorder.permissionResult(this, grantResults.firstOrNull() == android.content.pm.PackageManager.PERMISSION_GRANTED)
     }
 
     /** HOME pressed while already home: nothing is recreated, the map goes back to its widget size. */

@@ -168,6 +168,30 @@ class RadarTest {
         assertEquals(2L, m.update(listOf(a, b), lat, 2.005, 90f, 4_100)!!.road.id)
     }
 
+    @Test fun parallelRoadTakenWhenClearlyNearer() {
+        // A main road and a service road 10 m north of it, same way (25/11: the limit stayed on the main road)
+        val main = road(1, "primary", 80, 0, 48.0 to 2.0, 48.0 to 2.02)
+        val side = road(2, "residential", 30, 0, 48.0 + 10 / Geo.M_PER_LAT to 2.0, 48.0 + 10 / Geo.M_PER_LAT to 2.02)
+        val roads = listOf(main, side)
+        val m = Matcher()
+        assertEquals(80, m.update(roads, 48.0 + 1 / Geo.M_PER_LAT, 2.002, 90f, 0)!!.limit)
+        // A few metres off for one position (GPS noise, a junction): kept
+        assertEquals(80, m.update(roads, 48.0 + 7 / Geo.M_PER_LAT, 2.003, 90f, 1_000)!!.limit)
+        assertEquals(80, m.update(roads, 48.0 + 1 / Geo.M_PER_LAT, 2.004, 90f, 2_000)!!.limit)
+        assertEquals(80, m.update(roads, 48.0 + 8 / Geo.M_PER_LAT, 2.005, 90f, 3_000)!!.limit)
+        assertEquals(80, m.update(roads, 48.0 + 1 / Geo.M_PER_LAT, 2.006, 90f, 4_000)!!.limit)
+        // On the service road: 1 m from it, 9 m from the main road, taken after 3 s and 3 positions
+        val lat = 48.0 + 9 / Geo.M_PER_LAT
+        assertEquals(80, m.update(roads, lat, 2.007, 90f, 5_000)!!.limit)
+        assertEquals(80, m.update(roads, lat, 2.008, 90f, 6_000)!!.limit)
+        assertEquals(80, m.update(roads, lat, 2.009, 90f, 7_000)!!.limit)
+        assertEquals(30, m.update(roads, lat, 2.010, 90f, 8_000)!!.limit)
+        // And back on the main road the same way
+        assertEquals(30, m.update(roads, 48.0 + 1 / Geo.M_PER_LAT, 2.011, 90f, 9_000)!!.limit)
+        assertEquals(30, m.update(roads, 48.0 + 1 / Geo.M_PER_LAT, 2.012, 90f, 11_000)!!.limit)
+        assertEquals(80, m.update(roads, 48.0 + 1 / Geo.M_PER_LAT, 2.013, 90f, 12_000)!!.limit)
+    }
+
     @Test fun switchesLimitAtAConnectedRoadBoundary() {
         val west = road(1, "primary", 50, 0, 48.0 to 2.0, 48.0 to 2.001, first = 10)
         val east = road(2, "primary", 70, 0, 48.0 to 2.001, 48.0 to 2.002, first = 11)

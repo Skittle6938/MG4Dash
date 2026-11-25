@@ -176,6 +176,14 @@ class LyricsCardTest {
         assertTrue("options probing must not start a repository request", activeConnectionCount() == 0)
     }
 
+    @Test fun overlayCanReachTheExactRightEdgeAtSeventyPercentScale() {
+        val screenWidth = 1920
+        val pillWidthAtSeventyPercent = LyricsOverlay.pillWidth(screenWidth, .70f, 1f)
+        val maxX = LyricsOverlay.maxX(screenWidth, pillWidthAtSeventyPercent)
+        assertEquals(screenWidth, maxX + pillWidthAtSeventyPercent)
+        assertEquals(0, LyricsOverlay.maxX(800, 900))
+    }
+
     @Test fun karaokeUsesTheSharedFullscreenWindowHelper() {
         val card = LyricsCard(activity)
         card.shown(true)
