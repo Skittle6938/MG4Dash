@@ -1,5 +1,6 @@
 package app.mg4dash.ui
 
+import app.mg4dash.media.LyricsClock
 import android.content.Context
 import android.content.Intent
 import android.content.ActivityNotFoundException
@@ -42,8 +43,8 @@ object LyricsOverlay {
     private var track: LyricsRepo.Track? = null
     private var trackKey = ""
     private var latest = MediaHub.NowPlaying()
-    private var positionAt = 0L
-    private var positionAnchorMs = 0L
+    private val clock = LyricsClock()
+    private fun clockNow() = clock.position(android.os.SystemClock.elapsedRealtime())
     private var activeTextView: TextView? = null
     private var nextTextView: TextView? = null
     private var closeView: TextView? = null
@@ -226,17 +227,14 @@ object LyricsOverlay {
                 if (!active) return@collect
                 val c = themedContext ?: app ?: return@collect
                 val nextKey = if (!LyricsRepo.searchable(now)) "" else LyricsRepo.key(now.artist, now.title)
-                if (nextKey.isNotEmpty()) {
-                    positionAnchorMs = now.positionMs.coerceAtLeast(0L)
-                    positionAt = android.os.SystemClock.elapsedRealtime()
-                }
+                if (nextKey.isNotEmpty()) clock.update(now, android.os.SystemClock.elapsedRealtime())
                 if (nextKey.isEmpty()) {
                     if (now.androidAutoSpeaking && trackKey.isNotEmpty()) {
                         pauseJob?.cancel(); pauseJob = null
                         tickerJob?.cancel(); tickerJob = null
                         pauseExpired = false
                         rootView?.visibility = View.VISIBLE
-                        renderTrackAt(positionAnchorMs)
+                        renderTrackAt(clockNow())
                         return@collect
                     }
                     pauseJob?.cancel(); pauseJob = null
@@ -255,7 +253,7 @@ object LyricsOverlay {
                         pauseJob?.cancel(); pauseJob = null
                         pauseExpired = false
                         rootView?.visibility = View.VISIBLE
-                        renderTrackAt(positionAnchorMs)
+                        renderTrackAt(clockNow())
                         return@collect
                     }
                     if (!pauseExpired && pauseJob?.isActive != true) {
@@ -317,11 +315,8 @@ object LyricsOverlay {
         tickerJob?.cancel()
         tickerJob = scope.launch {
             while (active && latest.playing && track != null) {
-                // PlaybackState often publishes metadata/state without regular position callbacks.
-                // Keep a monotonic local clock anchored to the most recent MediaHub position sample.
-                val elapsed = (android.os.SystemClock.elapsedRealtime() - positionAt).coerceAtLeast(0L)
-                val duration = latest.durationMs.takeIf { it > 0L } ?: Long.MAX_VALUE
-                val pos = (positionAnchorMs + elapsed).coerceAtMost(duration)
+                // The song's clock (LyricsClock): runs between the player's reports, and without any
+                val pos = clockNow()
                 val currentTrack = track ?: break
                 renderTrackAt(pos)
                 delay(250)

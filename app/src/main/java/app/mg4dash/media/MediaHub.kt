@@ -1603,7 +1603,7 @@ object MediaHub {
             art = bmp ?: _now.value.art.takeIf { lastArtKey == "$title|$artist" },
             playing = shownPlaying(c),
             durationMs = md?.getLong(MediaMetadata.METADATA_KEY_DURATION) ?: 0,
-            positionMs = st?.position ?: 0,
+            positionMs = st?.let { LyricsClock.projected(it.position, it.lastPositionUpdateTime, it.playbackSpeed, it.state == PlaybackState.STATE_PLAYING, android.os.SystemClock.elapsedRealtime()) } ?: 0,
             analog = analog,
             radioText = if (analog) rdsText else "",
             androidAuto = androidAutoAvailable(),

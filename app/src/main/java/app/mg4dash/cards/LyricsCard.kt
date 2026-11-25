@@ -76,7 +76,7 @@ class LyricsCard(context: Context) : LinearLayout(context), HomeCard {
     private var key = ""
     private var requestJob: Job? = null
     private var latest = MediaHub.NowPlaying()
-    private var positionAt = 0L
+    private val clock = app.mg4dash.media.LyricsClock()
     private var requestedKey: String? = null
     private var tickerScheduled = false
     private val live = CardScope()
@@ -183,7 +183,7 @@ class LyricsCard(context: Context) : LinearLayout(context), HomeCard {
     fun show(m: MediaHub.NowPlaying) {
         latest = m
         paintOverlayButtons()
-        positionAt = android.os.SystemClock.elapsedRealtime()
+        clock.update(m, android.os.SystemClock.elapsedRealtime())
         if (!isActivelyDisplayed) return
         showCurrentTrack()
     }
@@ -213,8 +213,8 @@ class LyricsCard(context: Context) : LinearLayout(context), HomeCard {
         } else if (requestedKey != next) request(force = false, m = m)
     }
 
-    private fun position(m: MediaHub.NowPlaying): Long = (m.positionMs + if (m.playing) android.os.SystemClock.elapsedRealtime() - positionAt else 0L)
-        .coerceAtMost(if (m.durationMs > 0) m.durationMs else Long.MAX_VALUE)
+    @Suppress("UNUSED_PARAMETER")
+    private fun position(m: MediaHub.NowPlaying): Long = clock.position(android.os.SystemClock.elapsedRealtime())
 
     private fun request(force: Boolean, m: MediaHub.NowPlaying = MediaHub.now.value) {
         if (!isActivelyDisplayed) return
