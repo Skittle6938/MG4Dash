@@ -1172,6 +1172,9 @@
     <string name="dm_note_now_set">De klimaatregeling start meteen op %1$s, ventilatie %2$d, daarna vergrendelen de deuren na de wachttijd. Stopt onder 20 %% accu, bij ontgrendelen of als de auto rijdt.</string>
     <string name="dm_note_at_set">De auto blijft aan (klimaat uit, ongeveer 0,2 kW) en vergrendeld tot de eerste cyclus en start dan de klimaatregeling op %1$s, ventilatie %2$d. Hij schakelt uit na de laatste cyclus of onder 20 %% accu, en alles stopt bij ontgrendelen.</string>
     <string name="st_rd_not_validated">Niet gevalideerd op deze firmware</string>
+    <string name="st_rd_not_validated_how">Niet gevalideerd op deze firmware. Om ze te laten valideren: plaats je compatibiliteitsrapport op GitHub</string>
+    <string name="st_rd_install_anyway">Toch installeren</string>
+    <string name="st_rd_anyway_msg">Radio Dash is niet officieel getest op deze firmware.</string>
     <string name="un_data_kept">De gegevens (favorieten, instellingen) blijven bewaard.</string>
     <string name="un_data_lost">De gegevens (favorieten, instellingen) worden gewist.</string>
     <string name="pf_main">Hoofd</string>

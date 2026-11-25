@@ -18,15 +18,30 @@ object RadioDashUpdater {
     private const val TAG = "RadioDashUpdate"
     const val PKG = "com.saicmotor.radio"
     private const val API = "https://api.github.com/repos/Skittle6938/MG4Radio/releases?per_page=10"
-    /** Firmwares on which Radio Dash has been tested, named in Settings. */
-    const val TESTED_ON = "SWI69"
+    /**
+     * Firmwares on which Radio Dash has been tested, named in Settings: a whole generation ("SWI69", any revision,
+     * the firmware it is built from), or one revision confirmed by a driver's compatibility report on GitHub after a
+     * few days of use ("SWI133 R30"). One line per firmware.
+     */
+    val TESTED = listOf("SWI69")
+    val TESTED_ON: String get() = TESTED.joinToString(", ")
 
     /**
-     * Whether Radio Dash is offered on the firmware [raw] (19/11, discussion #111: on SWI68 R46 it restarted the
-     * head unit): SWI69 only, any revision, the firmware it is built from. Elsewhere it is neither offered nor updated;
-     * one already installed can still be uninstalled.
+     * Whether Radio Dash is validated on the firmware [raw] (19/11, discussion #111: on SWI68 R46 it restarted the
+     * head unit). Elsewhere it is offered only after a clear warning (25/11, #110), and one already installed still
+     * gets its updates.
      */
-    fun validatedOn(raw: String?): Boolean = Firmware.parse(raw) == Firmware.Gen.SWI69
+    fun validatedOn(raw: String?, tested: List<String> = TESTED): Boolean = tested.any { matches(it, raw) }
+
+    /** [entry] ("SWI69", "SWI133 R30") covers the firmware [raw] ("SWI133-29958-1300R30"). */
+    internal fun matches(entry: String, raw: String?): Boolean {
+        val fw = raw?.trim()?.takeIf { it.isNotEmpty() } ?: return false
+        val parts = entry.trim().split(Regex("\\s+"))
+        if (!fw.substringBefore('-').equals(parts[0], ignoreCase = true)) return false
+        if (parts.size == 1) return true
+        val rev = Regex("R(\\d+)$", RegexOption.IGNORE_CASE).find(fw)?.groupValues?.get(1) ?: return false
+        return parts[1].trimStart('R', 'r').toIntOrNull() == rev.toInt()
+    }
 
     /** Radio Dash validated on this car's firmware. */
     val validated: Boolean get() = validatedOn(Firmware.version)

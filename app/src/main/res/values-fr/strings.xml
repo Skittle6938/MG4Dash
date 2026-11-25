@@ -1172,6 +1172,9 @@
     <string name="dm_note_now_set">La clim démarre tout de suite à %1$s, ventilation %2$d, puis les portes se verrouillent après le délai. Arrêt sous 20 %% de batterie, au déverrouillage des portes ou si la voiture roule.</string>
     <string name="dm_note_at_set">La voiture reste allumée (clim coupée, environ 0,2 kW) et verrouillée jusqu\'au premier cycle, puis lance la clim à %1$s, ventilation %2$d. Elle s\'éteint après le dernier cycle ou sous 20 %% de batterie, et tout s\'arrête au déverrouillage des portes.</string>
     <string name="st_rd_not_validated">Non validée sur ce firmware</string>
+    <string name="st_rd_not_validated_how">Non validée sur ce firmware. Pour la faire valider : publie ton rapport de compatibilité sur GitHub</string>
+    <string name="st_rd_install_anyway">Installer quand même</string>
+    <string name="st_rd_anyway_msg">Radio Dash n\'est pas officiellement testée sur ce firmware.</string>
     <string name="un_data_kept">Ses données (favoris, réglages) sont conservées.</string>
     <string name="un_data_lost">Ses données (favoris, réglages) sont effacées.</string>
     <string name="pf_main">Principal</string>

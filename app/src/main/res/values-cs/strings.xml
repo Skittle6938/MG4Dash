@@ -1172,6 +1172,9 @@
     <string name="dm_note_now_set">Klimatizace se spustí hned na %1$s, ventilátor %2$d, poté se dveře po prodlevě zamknou. Zastaví se pod 20 %% baterie, při odemčení dveří nebo když se vůz rozjede.</string>
     <string name="dm_note_at_set">Vůz zůstane zapnutý (klimatizace vypnutá, asi 0,2 kW) a zamčený až do prvního cyklu, pak spustí klimatizaci na %1$s, ventilátor %2$d. Vypne se po posledním cyklu nebo pod 20 %% baterie a vše se zastaví při odemčení dveří.</string>
     <string name="st_rd_not_validated">Na tomto firmwaru neověřeno</string>
+    <string name="st_rd_not_validated_how">Na tomto firmwaru neověřeno. Pro ověření: zveřejněte svou zprávu o kompatibilitě na GitHubu</string>
+    <string name="st_rd_install_anyway">Přesto nainstalovat</string>
+    <string name="st_rd_anyway_msg">Radio Dash není na tomto firmwaru oficiálně otestována.</string>
     <string name="un_data_kept">Jeho data (oblíbené, nastavení) zůstanou zachována.</string>
     <string name="un_data_lost">Jeho data (oblíbené, nastavení) budou smazána.</string>
     <string name="pf_main">Hlavní</string>

@@ -1172,6 +1172,9 @@
     <string name="dm_note_now_set">The climate starts now at %1$s, fan %2$d, then the doors lock after the delay. Stops below 20 %% battery, when the doors are unlocked or if the car moves.</string>
     <string name="dm_note_at_set">The car stays on (climate off, about 0.2 kW) and locked until the first run, then runs the climate at %1$s, fan %2$d. It switches off after the last run, below 20 %% battery, and stops when the doors are unlocked.</string>
     <string name="st_rd_not_validated">Not validated on this firmware</string>
+    <string name="st_rd_not_validated_how">Not validated on this firmware. To get it validated: post your compatibility report on GitHub</string>
+    <string name="st_rd_install_anyway">Install anyway</string>
+    <string name="st_rd_anyway_msg">Radio Dash is not officially tested on this firmware.</string>
     <string name="un_data_kept">Its data (favourites, settings) is kept.</string>
     <string name="un_data_lost">Its data (favourites, settings) is erased.</string>
     <string name="pf_main">Main</string>

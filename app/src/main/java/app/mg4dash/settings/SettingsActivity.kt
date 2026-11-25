@@ -836,21 +836,31 @@ class SettingsActivity : AppCompatActivity() {
         val installed = R2.installed(this)
         val cur = R2.installedVersion(this)
         val rdNew = prefs.raw.getString("upd_new_rd", null)?.takeIf { !installed || cur == null || app.mg4dash.system.Updater.isNewer(it, cur) }
-        fun stateText() = when {
-            !installed && rdNew != null -> getString(R.string.st_upd_none_new, rdNew)
-            !installed -> getString(R.string.st_rd_none)
-            cur == null -> getString(R.string.st_rd_unknown)
-            rdNew != null -> updateAvailable(cur, rdNew)
-            prefs.raw.getLong("upd_checked_at", 0L) > 0L -> getString(R.string.st_upd_current, cur)
-            else -> cur
+        val validated = R2.validated
+        fun stateText(): CharSequence {
+            val base: CharSequence = when {
+                !installed && rdNew != null -> getString(R.string.st_upd_none_new, rdNew)
+                !installed -> getString(R.string.st_rd_none)
+                cur == null -> getString(R.string.st_rd_unknown)
+                rdNew != null -> updateAvailable(cur, rdNew)
+                prefs.raw.getLong("upd_checked_at", 0L) > 0L -> getString(R.string.st_upd_current, cur)
+                else -> cur
+            }
+            // Installed anyway on a firmware not validated (#110): updated as elsewhere, said discreetly
+            return if (installed && !validated) android.text.SpannableStringBuilder(base).append(" · ").append(getString(R.string.st_rd_not_validated)) else base
         }
-        // Not validated on this firmware (#111): neither offered nor updated
-        val blocker = if (!R2.validated) R.string.st_rd_not_validated else R2.blocker(this)
-        val (state, rdButton) = updateLine(parent, "MG4Radio", blocker?.let { getString(it) } ?: stateText(), rdNew.takeIf { blocker == null })
+        // What Android would refuse anyway comes first (a newer stock radio, another signing key)
+        val blocker = R2.blocker(this)
+        // Not validated on this firmware (#111) and not installed: offered only after a clear warning (#110)
+        val anyway = blocker == null && !validated && !installed
+        val (state, rdButton) = updateLine(parent, "MG4Radio",
+            blocker?.let { getString(it) } ?: if (anyway) getString(R.string.st_rd_not_validated_how) else stateText(),
+            rdNew.takeIf { blocker == null && !anyway })
         fun showState() { state.text = stateText() }
         if (blocker != null) { rdButton.isEnabled = false; rdButton.alpha = 0.4f; return }
-        rdButton.setOnClickListener {
-            if (app.mg4dash.system.DataUsage.updatesBlocked(this)) { state.text = getString(R.string.du_updates_wait); return@setOnClickListener }
+        if (anyway) rdButton.text = getString(R.string.st_rd_install_anyway)
+        fun offer() {
+            if (app.mg4dash.system.DataUsage.updatesBlocked(this)) { state.text = getString(R.string.du_updates_wait); return }
             state.text = getString(R.string.st_update_checking)
             lifecycleScope.launch {
                 val r = withContext(Dispatchers.IO) { try { R2.latest(prefs.updateBeta) } catch (e: Exception) { Log.w("Update", "Radio Dash: ${e.message}"); null } }
@@ -885,6 +895,11 @@ class SettingsActivity : AppCompatActivity() {
                         }
                     })) }
             }
+        }
+        rdButton.setOnClickListener {
+            if (anyway && !R2.installed(this)) app.mg4dash.ui.Windows.confirm(this, "MG4Radio",
+                getString(R.string.st_rd_anyway_msg), getString(R.string.st_rd_install_anyway)) { offer() }
+            else offer()
         }
     }
 

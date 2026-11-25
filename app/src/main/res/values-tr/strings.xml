@@ -1172,6 +1172,9 @@
     <string name="dm_note_now_set">Klima hemen %1$s, fan %2$d ile başlar, ardından kapılar gecikmeden sonra kilitlenir. Batarya %%20\'nin altına düşünce, kapılar açılınca veya araç hareket edince durur.</string>
     <string name="dm_note_at_set">Araç ilk döngüye kadar açık (klima kapalı, yaklaşık 0,2 kW) ve kilitli kalır, ardından klimayı %1$s, fan %2$d ile çalıştırır. Son döngüden sonra veya batarya %%20\'nin altında kapanır, kapılar açılınca her şey durur.</string>
     <string name="st_rd_not_validated">Bu yazılımda doğrulanmadı</string>
+    <string name="st_rd_not_validated_how">Bu yazılımda doğrulanmadı. Doğrulatmak için: uyumluluk raporunuzu GitHub\'da paylaşın</string>
+    <string name="st_rd_install_anyway">Yine de yükle</string>
+    <string name="st_rd_anyway_msg">Radio Dash bu yazılımda resmi olarak test edilmedi.</string>
     <string name="un_data_kept">Verileri (favoriler, ayarlar) korunur.</string>
     <string name="un_data_lost">Verileri (favoriler, ayarlar) silinir.</string>
     <string name="pf_main">Ana</string>

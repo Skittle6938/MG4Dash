@@ -1172,6 +1172,9 @@
     <string name="dm_note_now_set">Il clima parte subito a %1$s, ventilazione %2$d, poi le porte si bloccano dopo il ritardo. Si ferma sotto il 20 %% di batteria, allo sblocco delle porte o se l\'auto si muove.</string>
     <string name="dm_note_at_set">L\'auto resta accesa (clima spento, circa 0,2 kW) e bloccata fino al primo ciclo, poi avvia il clima a %1$s, ventilazione %2$d. Si spegne dopo l\'ultimo ciclo o sotto il 20 %% di batteria, e tutto si ferma allo sblocco delle porte.</string>
     <string name="st_rd_not_validated">Non convalidata su questo firmware</string>
+    <string name="st_rd_not_validated_how">Non convalidata su questo firmware. Per farla convalidare: pubblica il tuo rapporto di compatibilità su GitHub</string>
+    <string name="st_rd_install_anyway">Installa comunque</string>
+    <string name="st_rd_anyway_msg">Radio Dash non è ufficialmente testata su questo firmware.</string>
     <string name="un_data_kept">I suoi dati (preferiti, impostazioni) vengono conservati.</string>
     <string name="un_data_lost">I suoi dati (preferiti, impostazioni) vengono cancellati.</string>
     <string name="pf_main">Principale</string>
