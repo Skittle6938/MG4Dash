@@ -229,4 +229,12 @@ class StartupSequenceTest {
         val c = run(seq(Mode.Car), 0, 16_000) { t -> Input(t, available = listOf(radio, bt), carSource = null) }
         assertTrue(c.any { it.second == Action.Switch(radio) })
     }
+
+    /** 25/11: the driver's own media action before READY arms the sequence, which then keeps the driver's choice. */
+    @Test fun driversActionBeforeReadyIsKept() {
+        val s = seq(play = false)
+        val a = s.step(Input(0, available = listOf(radio, bt), carSource = bt, playing = true, userAt = 0))
+        assertTrue("nothing switched, nothing paused: ${a}", a.isEmpty())
+        assertTrue(s.done)
+    }
 }

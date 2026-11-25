@@ -256,7 +256,7 @@ La carte média suit la source active de la voiture (radio DAB / FM, Bluetooth, 
 - **Ouvrir Android Auto de partout** : avec un téléphone connecté, glissez un doigt depuis le bord gauche ou droit de l'écran.
 - **Couper la connexion du téléphone** : double appui sur le bouton Android Auto de la barre. L'icône passe au rouge et le téléphone reste en Bluetooth pour les appels et la musique ; un nouveau double appui ramène Android Auto.
 
-**Au démarrage** (Réglages › **Média et sons**) : la *Source au démarrage* est *Automatique* par défaut (retour à la dernière source encore disponible), *Comme la voiture*, ou une source fixe. La *Lecture au démarrage* reprend *Comme à l'arrêt de la voiture*, *Toujours en pause* ou *Toujours en lecture*. La séquence de démarrage et le son de démarrage attendent que la voiture soit vraiment utilisée : écran allumé, et READY, portes déverrouillées ou un toucher sur l'écran. Ouvrir le coffre d'une voiture verrouillée ne fait rien jouer ([#133](https://github.com/Skittle6938/MG4Dash/issues/133)).
+**Au démarrage** (Réglages › **Média et sons**) : la *Source au démarrage* est *Automatique* par défaut (retour à la dernière source encore disponible), *Comme la voiture*, ou une source fixe. La *Lecture au démarrage* reprend *Comme à l'arrêt de la voiture*, *Toujours en pause* ou *Toujours en lecture*. La séquence de démarrage et le son de démarrage attendent que la voiture soit vraiment utilisée : écran allumé, et READY ou un toucher sur l'écran (déverrouiller ou ouvrir une portière ne suffit pas). Ouvrir le coffre d'une voiture verrouillée ne fait rien jouer ([#133](https://github.com/Skittle6938/MG4Dash/issues/133)).
 
 ### Paroles synchronisées
 

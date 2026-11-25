@@ -30,13 +30,12 @@ class StartupPlaybackTest {
 
     /** #133: the boot of a locked car opened, the head unit awake with its screen dark: nothing starts. */
     @Test fun startupWaitsForTheCarInUse() {
-        assertFalse("screen dark, car locked", MediaHub.carInUse(interactive = false, ready = null, doorsLocked = true, touched = false))
-        assertFalse("screen dark, even READY", MediaHub.carInUse(interactive = false, ready = true, doorsLocked = false, touched = true))
-        assertFalse("screen on, locked, not READY, no touch", MediaHub.carInUse(interactive = true, ready = false, doorsLocked = true, touched = false))
-        assertFalse("screen on, nothing readable", MediaHub.carInUse(interactive = true, ready = null, doorsLocked = null, touched = false))
-        assertTrue("READY", MediaHub.carInUse(interactive = true, ready = true, doorsLocked = true, touched = false))
-        assertTrue("doors unlocked", MediaHub.carInUse(interactive = true, ready = false, doorsLocked = false, touched = false))
-        assertTrue("a touch on the screen", MediaHub.carInUse(interactive = true, ready = null, doorsLocked = null, touched = true))
+        assertFalse("boot of a locked car: screen dark", MediaHub.carInUse(interactive = false, ready = null))
+        assertFalse("screen dark, even READY", MediaHub.carInUse(interactive = false, ready = true))
+        // 25/11: the doors unlocked or opened, the screen on, not READY: nothing resumes
+        assertFalse("doors unlocked, not READY", MediaHub.carInUse(interactive = true, ready = false))
+        assertFalse("screen on, nothing readable", MediaHub.carInUse(interactive = true, ready = null))
+        assertTrue("READY", MediaHub.carInUse(interactive = true, ready = true))
         assertEquals("waits as long as a car start lasts", 5 * 60_000L, MediaHub.USE_WAIT_MS)
     }
 

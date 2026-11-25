@@ -256,7 +256,7 @@ The media card follows the car's active source (DAB / FM radio, Bluetooth, USB, 
 - **Open Android Auto from anywhere**: with a phone connected, slide one finger in from the left or right edge of the screen.
 - **Cut the phone connection**: double tap the Android Auto button of the bar. The icon turns red and the phone stays on Bluetooth for calls and music; double tap again to bring Android Auto back.
 
-**At startup** (Settings › **Media and sounds**): the *Source at startup* is *Automatic* by default (back to the last source still available), the car's choice, or a fixed source. *Playback at startup* resumes as when the car was switched off, always paused or always playing. The startup sequence and the startup sound wait until the car is really in use: screen on, and READY, the doors unlocked or a touch on the screen. Opening the boot of a locked car plays nothing ([#133](https://github.com/Skittle6938/MG4Dash/issues/133)).
+**At startup** (Settings › **Media and sounds**): the *Source at startup* is *Automatic* by default (back to the last source still available), the car's choice, or a fixed source. *Playback at startup* resumes as when the car was switched off, always paused or always playing. The startup sequence and the startup sound wait until the car is really in use: screen on, and READY or a touch on the screen (unlocking or opening a door is not enough). Opening the boot of a locked car plays nothing ([#133](https://github.com/Skittle6938/MG4Dash/issues/133)).
 
 ### Synchronized lyrics
 

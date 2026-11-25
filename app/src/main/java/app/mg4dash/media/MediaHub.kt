@@ -498,12 +498,13 @@ object MediaHub {
     internal fun isCarStart(elapsedMs: Long) = elapsedMs < 5 * 60_000
 
     /**
-     * The car really in use (#133): the screen on, and READY, or the doors unlocked, or a touch on the screen.
+     * The car really in use (#133): the screen on, and READY. Unlocking or opening a door is not enough, nor a touch
+     * on the screen (25/11): the startup source and playback come with READY, or at once with the driver's own media
+     * action ([userAction]: play, a source picked, the wheel's buttons), which keeps the driver's choice.
      * Opening the boot of a locked car wakes the head unit with its screen dark: the startup sequence and the startup
      * sound then wait, and play nothing if the head unit goes back to sleep first.
      */
-    internal fun carInUse(interactive: Boolean, ready: Boolean?, doorsLocked: Boolean?, touched: Boolean) =
-        interactive && (ready == true || doorsLocked == false || touched)
+    internal fun carInUse(interactive: Boolean, ready: Boolean?) = interactive && ready == true
 
     /** How long a car start waits for the car in use before giving up its startup sequence and sound (#133). */
     internal const val USE_WAIT_MS = 5 * 60_000L
@@ -513,22 +514,25 @@ object MediaHub {
     @Volatile private var useGivenUp = false
     /** A startup sequence made, waiting for the car in use (MediaHub starts with the app, before the home screen). */
     @Volatile private var useWaited = false
-    @Volatile private var touchedAt: Long? = null
     /** When the startup sequence was armed (uptime): its times count from there. */
     private var seqT0 = 0L
 
     /** A car start still waiting for the car in use: the startup sound waits too ([app.mg4dash.sound.SoundTrigger]). */
     val waitingForUse: Boolean get() = useWaited && !armed && !useGivenUp
 
-    /** A touch on MG4Dash's screen: the driver is there (#133). */
-    fun driverTouched() { if (!armed && touchedAt == null) touchedAt = android.os.SystemClock.uptimeMillis() }
-
-    private fun arm(why: String) {
+    /**
+     * The car in use: READY, or [byDriver] the driver's own media action before it (25/11), which ends the startup
+     * sequence at once with the driver's choice kept, the startup sound dropped rather than played over it.
+     */
+    private fun arm(why: String, byDriver: Boolean = false) {
         if (armed) return
         armed = true
         seqT0 = android.os.SystemClock.uptimeMillis()
         Log.i(TAG, "car in use ($why): startup sequence armed")
-        appContext?.let { app.mg4dash.sound.SoundTrigger.useStarted(it) }
+        if (byDriver) {
+            userAt = seqT0
+            app.mg4dash.sound.SoundTrigger.useGivenUp()
+        } else appContext?.let { app.mg4dash.sound.SoundTrigger.useStarted(it) }
         seqStep()
     }
 
@@ -551,14 +555,11 @@ object MediaHub {
                 }
                 val interactive = try { pm.isInteractive } catch (_: Exception) { true }
                 val ready = if (interactive) try { app.mg4dash.car.ReadyState.ready() } catch (_: Exception) { null } else null
-                val locked = if (interactive && ready != true) try { app.mg4dash.car.CarBridge.doorsLocked() } catch (_: Exception) { null } else null
-                val touched = touchedAt != null
-                if (carInUse(interactive, ready, locked, touched)) {
-                    val why = when { ready == true -> "READY"; locked == false -> "doors unlocked"; else -> "touch" }
-                    main.post { arm(why) }
+                if (carInUse(interactive, ready)) {
+                    main.post { arm("READY") }
                     return@launch
                 }
-                if (!logged) { logged = true; Log.i(TAG, "startup sequence waits for the car in use (screen ${if (interactive) "on" else "off"}, READY $ready, locked $locked)") }
+                if (!logged) { logged = true; Log.i(TAG, "startup sequence waits for the car in use (screen ${if (interactive) "on" else "off"}, READY $ready)") }
                 kotlinx.coroutines.delay(1_000)
             }
         }
@@ -580,6 +581,8 @@ object MediaHub {
         if (seq?.done != false) return
         userAt = android.os.SystemClock.uptimeMillis()
         Log.i(TAG, "startup sequence: driver's action ($why)")
+        // Before READY: the driver's choice is the startup, kept as it is (25/11)
+        if (!armed && !useGivenUp) main.post { arm("driver's action: $why", byDriver = true) }
     }
 
     private fun startSequence() {
