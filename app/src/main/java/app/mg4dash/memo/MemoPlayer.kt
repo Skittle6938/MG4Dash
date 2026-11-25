@@ -2,16 +2,20 @@ package app.mg4dash.memo
 
 import android.content.Context
 import android.media.AudioAttributes
-import android.media.MediaPlayer
 import app.mg4dash.system.Log
 import app.mg4dash.system.UsbExport
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import java.io.File
 
-/** Plays a memo back (the card's and the window's ▶): one at a time; touched again, it pauses or goes on. */
+/**
+ * Plays a memo back (the card's and the window's ▶): one at a time; touched again, it pauses or goes on. Decoded and
+ * played in MG4Dash's own process (25/11: MediaPlayer reads through the media server, which SELinux keeps out of a
+ * platform app's files: "Prepare failed").
+ */
 object MemoPlayer {
-    private var player: MediaPlayer? = null
+    private var playback: Playback? = null
+    private val main = android.os.Handler(android.os.Looper.getMainLooper())
     private val _file = MutableStateFlow<File?>(null)
     /** The memo loaded (playing or paused), or null. */
     val file: StateFlow<File?> = _file
@@ -19,29 +23,127 @@ object MemoPlayer {
     val playing: StateFlow<Boolean> = _playing
 
     fun toggle(f: File) {
-        val p = player
+        val p = playback
         if (p != null && _file.value == f) {
-            if (p.isPlaying) p.pause() else p.start()
-            _playing.value = p.isPlaying
+            p.paused = !p.paused
+            _playing.value = !p.paused
             return
         }
         stop()
         try {
-            player = MediaPlayer().apply {
-                setAudioAttributes(AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_MEDIA).setContentType(AudioAttributes.CONTENT_TYPE_SPEECH).build())
-                setDataSource(f.absolutePath); prepare(); start()
-                setOnCompletionListener { stop() }
-            }
+            lateinit var pb: Playback
+            pb = Playback(f) { main.post { if (playback === pb) stop() } }
+            pb.start()
+            playback = pb
             _file.value = f; _playing.value = true
-        } catch (e: Exception) { Log.w("Memo", "play ${f.name}: ${e.message}"); stop() }
+        } catch (e: Exception) { Log.w("Memo", "play ${f.name}: ${e.javaClass.simpleName}: ${e.message}"); stop() }
     }
 
     /** Where it is (ms) in the memo loaded. */
-    fun position(): Int = runCatching { player?.currentPosition ?: 0 }.getOrDefault(0)
+    fun position(): Int = playback?.positionMs() ?: 0
 
     fun stop() {
-        runCatching { player?.stop() }; runCatching { player?.release() }
-        player = null; _file.value = null; _playing.value = false
+        playback?.stop()
+        playback = null; _file.value = null; _playing.value = false
+    }
+
+    /** One memo decoded (MediaExtractor, MediaCodec) to an AudioTrack, on its own thread. */
+    private class Playback(private val file: File, private val ended: () -> Unit) {
+        @Volatile var paused = false
+        @Volatile private var running = false
+        @Volatile private var track: android.media.AudioTrack? = null
+        @Volatile private var rate = 16000
+        private var thread: Thread? = null
+        private val extractor = android.media.MediaExtractor()
+        private var codec: android.media.MediaCodec? = null
+
+        fun start() {
+            extractor.setDataSource(file.absolutePath)
+            val index = (0 until extractor.trackCount).firstOrNull {
+                extractor.getTrackFormat(it).getString(android.media.MediaFormat.KEY_MIME)?.startsWith("audio/") == true
+            } ?: run { extractor.release(); throw IllegalStateException("no sound in the file") }
+            extractor.selectTrack(index)
+            val format = extractor.getTrackFormat(index)
+            rate = format.getInteger(android.media.MediaFormat.KEY_SAMPLE_RATE)
+            val c = android.media.MediaCodec.createDecoderByType(format.getString(android.media.MediaFormat.KEY_MIME)!!)
+            try { c.configure(format, null, null, 0); c.start() } catch (e: Exception) { c.release(); extractor.release(); throw e }
+            codec = c
+            running = true
+            thread = Thread({ loop(c) }, "memo-player").apply { start() }
+        }
+
+        private fun newTrack(rate: Int, channels: Int): android.media.AudioTrack {
+            val mask = if (channels >= 2) android.media.AudioFormat.CHANNEL_OUT_STEREO else android.media.AudioFormat.CHANNEL_OUT_MONO
+            val min = android.media.AudioTrack.getMinBufferSize(rate, mask, android.media.AudioFormat.ENCODING_PCM_16BIT)
+            return android.media.AudioTrack.Builder()
+                .setAudioAttributes(AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_MEDIA).setContentType(AudioAttributes.CONTENT_TYPE_SPEECH).build())
+                .setAudioFormat(android.media.AudioFormat.Builder().setEncoding(android.media.AudioFormat.ENCODING_PCM_16BIT).setSampleRate(rate).setChannelMask(mask).build())
+                .setBufferSizeInBytes(maxOf(min, 8192) * 2).setTransferMode(android.media.AudioTrack.MODE_STREAM).build()
+        }
+
+        private fun loop(c: android.media.MediaCodec) {
+            val info = android.media.MediaCodec.BufferInfo()
+            var inputDone = false
+            var channels = 1
+            var written = 0L
+            var finished = false
+            try {
+                while (running) {
+                    val t = track
+                    if (paused) { if (t?.playState == android.media.AudioTrack.PLAYSTATE_PLAYING) t.pause(); Thread.sleep(40); continue }
+                    if (t != null && t.playState != android.media.AudioTrack.PLAYSTATE_PLAYING) t.play()
+                    if (!inputDone) {
+                        val ii = c.dequeueInputBuffer(10_000)
+                        if (ii >= 0) {
+                            val n = extractor.readSampleData(c.getInputBuffer(ii)!!, 0)
+                            if (n < 0) { c.queueInputBuffer(ii, 0, 0, 0, android.media.MediaCodec.BUFFER_FLAG_END_OF_STREAM); inputDone = true }
+                            else { c.queueInputBuffer(ii, 0, n, extractor.sampleTime, 0); extractor.advance() }
+                        }
+                    }
+                    val oi = c.dequeueOutputBuffer(info, 10_000)
+                    if (oi == android.media.MediaCodec.INFO_OUTPUT_FORMAT_CHANGED) {
+                        val f = c.outputFormat
+                        rate = f.getInteger(android.media.MediaFormat.KEY_SAMPLE_RATE); channels = f.getInteger(android.media.MediaFormat.KEY_CHANNEL_COUNT)
+                    } else if (oi >= 0) {
+                        if (info.size > 0) {
+                            val tr = track ?: newTrack(rate, channels).also { track = it; it.play() }
+                            val ob = c.getOutputBuffer(oi)!!
+                            val pcm = ByteArray(info.size)
+                            ob.position(info.offset); ob.get(pcm)
+                            tr.write(pcm, 0, pcm.size)
+                            written += pcm.size / (2 * channels)
+                        }
+                        c.releaseOutputBuffer(oi, false)
+                        if (info.flags and android.media.MediaCodec.BUFFER_FLAG_END_OF_STREAM != 0) { finished = true; break }
+                    }
+                }
+                // The last sound played out before it ends
+                val tr = track
+                if (finished && tr != null) {
+                    val until = System.currentTimeMillis() + 5_000
+                    while (running && tr.playbackHeadPosition < written && System.currentTimeMillis() < until) Thread.sleep(30)
+                }
+            } catch (e: Exception) {
+                Log.w("Memo", "play ${file.name}: ${e.javaClass.simpleName}: ${e.message}")
+            } finally {
+                close()
+                if (running) { running = false; ended() }
+            }
+        }
+
+        fun positionMs(): Int = track?.let { (it.playbackHeadPosition.toLong() * 1000 / rate).toInt() } ?: 0
+
+        fun stop() {
+            running = false
+            thread?.let { if (it !== Thread.currentThread()) it.join(1000) }
+            close()
+        }
+
+        @Synchronized private fun close() {
+            runCatching { track?.pause(); track?.flush() }; runCatching { track?.release() }; track = null
+            runCatching { codec?.stop() }; runCatching { codec?.release() }; codec = null
+            runCatching { extractor.release() }
+        }
     }
 }
 

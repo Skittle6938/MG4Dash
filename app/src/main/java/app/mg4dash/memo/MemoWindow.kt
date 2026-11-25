@@ -138,8 +138,20 @@ class MemoWindow(private val a: Activity) {
             k.p.color = col(R.color.text_sub)
             val cx = w / 2; val cy = h / 2
             if (icon == Icon.EDIT) {
-                cv.drawLine(cx - s, cy + s, cx + s, cy - s, k.p); cv.drawLine(cx - s, cy + s, cx - s * 0.4f, cy + s, k.p)
-                cv.drawLine(cx + s * 0.55f, cy - s * 1.45f, cx + s * 1.45f, cy - s * 0.55f, k.p)
+                // A pencil along the diagonal: its point at the bottom left, the wood's edge and the eraser's band (25/11)
+                val r = 0.7071f
+                val tx = cx - 1.3f * s; val ty = cy + 1.3f * s
+                fun at(along: Float, side: Float) = floatArrayOf(tx + (along + side) * r, ty + (-along + side) * r)
+                val hw = 0.42f * s; val wood = 0.75f * s; val end = 2.6f * s; val band = end - 0.6f * s
+                val path = android.graphics.Path()
+                at(0f, 0f).let { path.moveTo(it[0], it[1]) }
+                listOf(at(wood, hw), at(end, hw), at(end, -hw), at(wood, -hw)).forEach { path.lineTo(it[0], it[1]) }
+                path.close()
+                cv.drawPath(path, k.p)
+                val w1 = at(wood, hw); val w2 = at(wood, -hw)
+                cv.drawLine(w1[0], w1[1], w2[0], w2[1], k.p)
+                val b1 = at(band, hw); val b2 = at(band, -hw)
+                cv.drawLine(b1[0], b1[1], b2[0], b2[1], k.p)
             } else {
                 cv.drawLine(cx - s * 1.2f, cy - s, cx + s * 1.2f, cy - s, k.p)
                 cv.drawRect(cx - s * 0.85f, cy - s, cx + s * 0.85f, cy + s * 1.3f, k.p)
