@@ -157,21 +157,26 @@ object Rows {
      * [content] in a scrolling area no taller than [maxPx] (24/11: the driving window did not fit the screen and did
      * not scroll); left as it is when it scrolls by itself already. Faded edges say there is more.
      */
-    fun scrolling(c: Context, content: View, maxPx: Int): View {
+    fun scrolling(c: Context, content: View, maxPx: Int): Bounded {
         (content.parent as? ViewGroup)?.removeView(content)
         // A content that scrolls by itself still gets the bound (25/11: long release notes pushed Install off screen)
-        if (content is android.widget.ScrollView) return object : android.widget.FrameLayout(c) {
-            override fun onMeasure(w: Int, h: Int) = super.onMeasure(w, View.MeasureSpec.makeMeasureSpec(maxPx, View.MeasureSpec.AT_MOST))
-        }.apply { addView(content, android.widget.FrameLayout.LayoutParams(-1, -2)) }
-        return object : android.widget.ScrollView(c) {
-            override fun onMeasure(w: Int, h: Int) = super.onMeasure(w, View.MeasureSpec.makeMeasureSpec(maxPx, View.MeasureSpec.AT_MOST))
-        }.apply {
+        if (content is android.widget.ScrollView) return Bounded(c, maxPx).apply { addView(content, android.widget.FrameLayout.LayoutParams(-1, -2)) }
+        val scroll = android.widget.ScrollView(c).apply {
             isVerticalScrollBarEnabled = true; isScrollbarFadingEnabled = false; scrollBarStyle = View.SCROLLBARS_OUTSIDE_INSET
             isVerticalFadingEdgeEnabled = true; setFadingEdgeLength(dp(c, 36)); overScrollMode = View.OVER_SCROLL_NEVER
             addView(content, android.widget.FrameLayout.LayoutParams(-1, -2))
             // Room under the last row (24/11: windows looked cut at the bottom): its rounded edge in sight once at the end,
             // where the fade is gone
             setPadding(0, 0, 0, dp(c, 20)); clipToPadding = false
+        }
+        return Bounded(c, maxPx).apply { addView(scroll, android.widget.FrameLayout.LayoutParams(-1, -2)) }
+    }
+
+    /** A box no taller than [maxPx], nor than its parent allows; [maxPx] can be lowered once the real room is known. */
+    class Bounded(c: Context, var maxPx: Int) : android.widget.FrameLayout(c) {
+        override fun onMeasure(w: Int, h: Int) {
+            val parent = if (View.MeasureSpec.getMode(h) == View.MeasureSpec.UNSPECIFIED) Int.MAX_VALUE else View.MeasureSpec.getSize(h)
+            super.onMeasure(w, View.MeasureSpec.makeMeasureSpec(minOf(maxPx, parent).coerceAtLeast(0), View.MeasureSpec.AT_MOST))
         }
     }
 

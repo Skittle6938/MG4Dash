@@ -41,7 +41,10 @@ object Windows {
         }
         body.addView(Rows.titleBar(a, icon, title, sub) { dialog.dismiss() }, LinearLayout.LayoutParams(-1, -2).apply { bottomMargin = dp(a, 4) })
         // The content scrolls when taller than the screen allows (the title bar and the buttons stay in sight)
-        content?.let { body.addView(Rows.scrolling(a, it, Rows.contentRoom(a, buttons.isNotEmpty())), LinearLayout.LayoutParams(-1, -2)) }
+        val area = content?.let { Rows.scrolling(a, it, Rows.contentRoom(a, buttons.isNotEmpty())) }
+        // Weighted: when the window gets less height than the guess (the car's bars, the dialog's own frame) the content
+        // gives up the difference, never the buttons row nor the bottom margin (25/11: Install looked cut at the bottom)
+        area?.let { body.addView(it, LinearLayout.LayoutParams(-1, -2, 1f)) }
         if (buttons.isNotEmpty()) {
             val row = LinearLayout(a).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.END or Gravity.CENTER_VERTICAL }
             buttons.forEachIndexed { i, b -> row.addView(b, LinearLayout.LayoutParams(-2, dp(a, 56)).apply { if (i > 0) leftMargin = dp(a, 14) }) }
