@@ -284,4 +284,3 @@ class RadarPage(private val a: Activity, private val prefs: Prefs) {
         return column
     }
 }
-

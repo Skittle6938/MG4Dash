@@ -18,6 +18,20 @@ import app.mg4dash.R
 object Windows {
     private fun dp(a: Activity, v: Int) = (v * a.resources.displayMetrics.density).toInt()
 
+    /** A full-screen surface for a focused task such as karaoke; its window is prepared before it is shown. */
+    fun fullscreen(a: Activity, content: View, prepare: (android.app.Dialog) -> Unit = {}, shown: (android.app.Dialog) -> Unit = {},
+                   onDismiss: () -> Unit = {}): android.app.Dialog {
+        val dialog = android.app.Dialog(a)
+        dialog.setContentView(content)
+        dialog.setCancelable(true)
+        dialog.setCanceledOnTouchOutside(false)
+        dialog.setOnDismissListener { onDismiss() }
+        prepare(dialog)
+        Dialogs.show(dialog)
+        shown(dialog)
+        return dialog
+    }
+
     /** A window around [content]; [buttons] (optional) at the bottom right. */
     fun show(a: Activity, title: String, content: View?, icon: Int? = null, widthDp: Int = 900, sub: String? = null,
              buttons: List<View> = emptyList(), onDismiss: () -> Unit = {}): AlertDialog {

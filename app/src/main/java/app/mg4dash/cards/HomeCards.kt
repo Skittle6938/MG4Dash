@@ -28,6 +28,7 @@ object HomeCards {
         Card.RADAR to ::RadarCard,
         Card.NAV to ::NavCard,
         Card.CHRONO to ::ChronoCard,
+        Card.LYRICS to ::LyricsCard,
         Card.MEMO to ::MemoCard,
     )
 

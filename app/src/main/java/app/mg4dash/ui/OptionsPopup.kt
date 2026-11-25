@@ -115,6 +115,16 @@ class OptionsPopup(private val a: Activity, private val title: String, private v
         return this
     }
 
+    /** A short note whose value can be refreshed after background work. */
+    fun note(text: () -> String): OptionsPopup {
+        val view = TextView(a).apply {
+            this.text = text(); setTextColor(col(R.color.text_sub)); setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f); setPadding(dp(4), 0, dp(4), dp(14))
+        }
+        repaints += { view.text = text() }
+        target += view
+        return this
+    }
+
     /** A choice in the same menu as the settings': the value in the theme's colour, the whole row opens the menu. */
     fun choice(title: String, sub: String?, labels: List<String>, current: () -> Int, onPick: (Int) -> Unit): OptionsPopup =
         choice(title, { sub }, { labels }, current, onPick)

@@ -5,6 +5,9 @@ import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.os.Handler
+import android.os.Looper
+import app.mg4dash.ui.LyricsOverlay
 
 /**
  * Maintenance mode (service mode, SAIC home back), 19/11: MG4Dash then does nothing at all but wait for the
@@ -16,7 +19,16 @@ object Maintenance {
     private const val TAG = "Maintenance"
     private val MOCK = app.mg4dash.BuildConfig.MOCK
 
-    fun on(context: Context): Boolean = Prefs(context).valetMode
+    fun on(context: Context): Boolean {
+        val enabled = Prefs(context).valetMode
+        if (enabled) hideLyricsOverlay()
+        return enabled
+    }
+
+    private fun hideLyricsOverlay() {
+        val main = Handler(Looper.getMainLooper())
+        if (Looper.myLooper() == main.looper) LyricsOverlay.stop() else main.post { LyricsOverlay.stop() }
+    }
 
     /**
      * For a MG4Dash screen opened in maintenance mode (a Radio Dash shortcut, the stock radio's arrow, MG4Link's "Open
@@ -99,6 +111,7 @@ object Maintenance {
      * later, woken by its own WakeReceiver; nothing of it is opened.
      */
     fun restartLight(context: Context) {
+        hideLyricsOverlay()
         val app = context.applicationContext
         try {
             val wake = Intent(WakeReceiver.ACTION).setClass(app, WakeReceiver::class.java)

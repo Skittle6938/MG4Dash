@@ -39,6 +39,7 @@ class CardGalleryShots {
     private val dpSizes = mapOf(
         Size.SMALL to (594 to 274), Size.MEDIUM to (594 to 410), Size.TALL to (595 to 696),
         Size.WIDE to (1197 to 410), Size.LARGE to (1189 to 696),
+        Size.QUARTER to (659 to 252), Size.HALF to (659 to 516), Size.BAND to (1330 to 252),
     )
 
     private fun shoot(name: String, make: (Context) -> HomeCard) {

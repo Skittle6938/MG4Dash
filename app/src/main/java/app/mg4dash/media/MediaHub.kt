@@ -52,6 +52,8 @@ object MediaHub {
         val radioText: String = "",
         /** Android Auto connected (its player has something to show): the AA chip is offered. */
         val androidAuto: Boolean = false,
+        /** Android Auto is currently playing navigation guidance or assistant speech. */
+        val androidAutoSpeaking: Boolean = false,
     )
 
     private val _now = MutableStateFlow(NowPlaying())
@@ -295,6 +297,7 @@ object MediaHub {
     /** Last time an Android Auto (AllGo) player played real music, and whether the usages could be read. */
     @Volatile private var aaMediaAt: Long? = null
     @Volatile private var aaUsagesRead = true
+    @Volatile private var androidAutoSpeaking = false
     private var aaUsagesSeen: List<Int>? = null
 
     private fun watchAaPlayers(now: Long) {
@@ -304,6 +307,14 @@ object MediaHub {
         aaUsagesRead = usages != null
         if (usages == null) return
         if (usages != aaUsagesSeen) { aaUsagesSeen = usages; Log.i(TAG, "Android Auto players: usages $usages") }
+        val speaking = usages.any {
+            it == android.media.AudioAttributes.USAGE_ASSISTANCE_NAVIGATION_GUIDANCE ||
+                it == android.media.AudioAttributes.USAGE_ASSISTANT
+        }
+        if (speaking != androidAutoSpeaking) {
+            androidAutoSpeaking = speaking
+            publish()
+        }
         if (usages.any(::realMediaUsage)) aaMediaAt = now
     }
 
@@ -1549,7 +1560,7 @@ object MediaHub {
         if (radioShown) { publishRadio(); return }
         if (usbShown) { publishUsb(); return }
         val c = current
-        if (c == null) { _now.value = NowPlaying(); return }
+        if (c == null) { _now.value = NowPlaying(androidAutoSpeaking = androidAutoSpeaking); return }
         val md = c.metadata
         val st = c.playbackState
         val rawTitle = md?.getString(MediaMetadata.METADATA_KEY_TITLE)
@@ -1584,6 +1595,7 @@ object MediaHub {
             analog = analog,
             radioText = if (analog) rdsText else "",
             androidAuto = androidAutoAvailable(),
+            androidAutoSpeaking = androidAutoSpeaking,
         )
         _now.value = np
         // CarPlay (#94): what its session really gives, to tell a car limit from a reading problem
@@ -1731,6 +1743,7 @@ object MediaHub {
             artist = if (name.isBlank()) "" else freq,
             playing = st?.playing == true,
             androidAuto = androidAutoAvailable(),
+            androidAutoSpeaking = androidAutoSpeaking,
         )
     }
 
@@ -1746,6 +1759,7 @@ object MediaHub {
             album = st?.track?.album.orEmpty(),
             playing = st?.playing == true,
             androidAuto = androidAutoAvailable(),
+            androidAutoSpeaking = androidAutoSpeaking,
         )
     }
 
