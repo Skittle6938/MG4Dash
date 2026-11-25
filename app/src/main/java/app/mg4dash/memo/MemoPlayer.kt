@@ -101,7 +101,8 @@ object MemoPlayer {
             val mask = if (channels >= 2) android.media.AudioFormat.CHANNEL_OUT_STEREO else android.media.AudioFormat.CHANNEL_OUT_MONO
             val min = android.media.AudioTrack.getMinBufferSize(rate, mask, android.media.AudioFormat.ENCODING_PCM_16BIT)
             return android.media.AudioTrack.Builder()
-                .setAudioAttributes(AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_MEDIA).setContentType(AudioAttributes.CONTENT_TYPE_SPEECH).build())
+                // The channel the car's alerts are heard on (FxSound): plain media from an app stayed silent (25/11)
+                .setAudioAttributes(AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_ASSISTANCE_SONIFICATION).setContentType(AudioAttributes.CONTENT_TYPE_SPEECH).build())
                 .setAudioFormat(android.media.AudioFormat.Builder().setEncoding(android.media.AudioFormat.ENCODING_PCM_16BIT).setSampleRate(rate).setChannelMask(mask).build())
                 .setBufferSizeInBytes(maxOf(min, 8192) * 2).setTransferMode(android.media.AudioTrack.MODE_STREAM).build()
         }
@@ -112,6 +113,7 @@ object MemoPlayer {
             var channels = 1
             var written = 0L
             var finished = false
+            var loudest = 0
             try {
                 while (running) {
                     val t = track
@@ -135,6 +137,8 @@ object MemoPlayer {
                             val ob = c.getOutputBuffer(oi)!!
                             val pcm = ByteArray(info.size)
                             ob.position(info.offset); ob.get(pcm)
+                            var i = 0
+                            while (i + 1 < pcm.size) { val v = kotlin.math.abs(((pcm[i + 1].toInt() shl 8) or (pcm[i].toInt() and 0xFF)).toShort().toInt()); if (v > loudest) loudest = v; i += 2 }
                             tr.write(pcm, 0, pcm.size)
                             written += pcm.size / (2 * channels)
                         }
@@ -151,6 +155,7 @@ object MemoPlayer {
             } catch (e: Exception) {
                 Log.w("Memo", "play ${file.name}: ${e.javaClass.simpleName}: ${e.message}")
             } finally {
+                Log.i("Memo", "played ${file.name}: $written samples at $rate Hz, loudest sample $loudest / 32767")
                 close()
                 if (running) { running = false; ended() }
             }

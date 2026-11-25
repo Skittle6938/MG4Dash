@@ -19,6 +19,9 @@ internal class AdtsRecorder(private val file: File, private val rate: Int, priva
     @Volatile private var running = false
     @Volatile private var paused = false
     @Volatile private var peak = 0
+    /** The loudest sample of the whole recording and the frames written, for the log (a silent microphone shows 0). */
+    @Volatile var loudest = 0; private set
+    @Volatile var frames = 0; private set
     private var record: AudioRecord? = null
     private var codec: MediaCodec? = null
     private var out: FileOutputStream? = null
@@ -84,6 +87,7 @@ internal class AdtsRecorder(private val file: File, private val rate: Int, priva
                         var i = 0
                         while (i + 1 < n) { val v = abs(((pcm[i + 1].toInt() shl 8) or (pcm[i].toInt() and 0xFF)).toShort().toInt()); if (v > p) p = v; i += 2 }
                         if (p > peak) peak = p
+                        if (p > loudest) loudest = p
                     }
                     val ending = !running
                     if ((n > 0 && !paused) || ending) {
@@ -110,7 +114,7 @@ internal class AdtsRecorder(private val file: File, private val rate: Int, priva
                         val ob = c.getOutputBuffer(oi)!!
                         val frame = ByteArray(info.size)
                         ob.position(info.offset); ob.get(frame)
-                        o.write(header(info.size + 7, rate)); o.write(frame)
+                        o.write(header(info.size + 7, rate)); o.write(frame); frames++
                     }
                     c.releaseOutputBuffer(oi, false)
                     if (info.flags and MediaCodec.BUFFER_FLAG_END_OF_STREAM != 0) return
@@ -119,6 +123,7 @@ internal class AdtsRecorder(private val file: File, private val rate: Int, priva
         } catch (e: Exception) {
             app.mg4dash.system.Log.w("Memo", "recorder: ${e.javaClass.simpleName}: ${e.message}")
         } finally {
+            app.mg4dash.system.Log.i("Memo", "recorded ${file.name}: $frames frames, loudest sample $loudest / 32767")
             runCatching { o.flush() }
             release()
         }
