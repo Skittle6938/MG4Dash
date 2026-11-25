@@ -158,8 +158,11 @@ object Rows {
      * not scroll); left as it is when it scrolls by itself already. Faded edges say there is more.
      */
     fun scrolling(c: Context, content: View, maxPx: Int): View {
-        if (content is android.widget.ScrollView) return content
         (content.parent as? ViewGroup)?.removeView(content)
+        // A content that scrolls by itself still gets the bound (25/11: long release notes pushed Install off screen)
+        if (content is android.widget.ScrollView) return object : android.widget.FrameLayout(c) {
+            override fun onMeasure(w: Int, h: Int) = super.onMeasure(w, View.MeasureSpec.makeMeasureSpec(maxPx, View.MeasureSpec.AT_MOST))
+        }.apply { addView(content, android.widget.FrameLayout.LayoutParams(-1, -2)) }
         return object : android.widget.ScrollView(c) {
             override fun onMeasure(w: Int, h: Int) = super.onMeasure(w, View.MeasureSpec.makeMeasureSpec(maxPx, View.MeasureSpec.AT_MOST))
         }.apply {
