@@ -1993,9 +1993,11 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
      */
     internal fun panelOver(): Boolean {
         val content = findViewById<android.view.ViewGroup>(android.R.id.content) ?: return false
+        // The Simple home has no card binding (25/11: every touch with a menu open crashed it)
+        val home: View? = if (simpleMode) simple?.root else b.root
         for (i in content.childCount - 1 downTo 0) {
             val v = content.getChildAt(i)
-            if (v === b.root) return false
+            if (v === home) return false
             if (v.visibility == View.VISIBLE && v.getTag(R.id.home_panel) == true) return true
         }
         return false
