@@ -91,4 +91,22 @@ class MemoTest {
         assertEquals(0, MemoRecorder.toLevel(0)); assertEquals(100, MemoRecorder.toLevel(32767))
         assertTrue(MemoRecorder.toLevel(1000) in 1..99)
     }
+
+    /** The in-process recorder's frames (25/11) read back as the ones MediaRecorder wrote: rate, mono, length. */
+    @Test
+    fun adtsRecorderHeadersParse() {
+        for (rate in listOf(16000, 44100)) {
+            val out = java.io.ByteArrayOutputStream()
+            val sizes = listOf(5, 120, 371, 2000)
+            sizes.forEach { n -> out.write(app.mg4dash.memo.AdtsRecorder.header(n + 7, rate)); out.write(ByteArray(n) { it.toByte() }) }
+            val frames = app.mg4dash.memo.MemoFiles.frames(out.toByteArray())
+            org.junit.Assert.assertEquals(sizes.size, frames.size)
+            frames.zip(sizes).forEach { (f, n) ->
+                org.junit.Assert.assertEquals(n, f.end - f.start)
+                org.junit.Assert.assertEquals(2, f.profile)
+                org.junit.Assert.assertEquals(1, f.channels)
+                org.junit.Assert.assertEquals(rate, app.mg4dash.memo.MemoFiles.RATES[f.rateIndex])
+            }
+        }
+    }
 }

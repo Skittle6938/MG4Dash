@@ -11,7 +11,6 @@ import android.content.IntentFilter
 import android.media.AudioAttributes
 import android.media.AudioFocusRequest
 import android.media.AudioManager
-import android.media.MediaRecorder
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
@@ -170,7 +169,7 @@ class MemoService : Service() {
         private const val SILENT_CALL_MS = 4_000L
     }
 
-    private var recorder: MediaRecorder? = null
+    private var recorder: AdtsRecorder? = null
     private var file: File? = null
     private val all = ArrayList<Int>()
     private val main = Handler(Looper.getMainLooper())
@@ -206,19 +205,13 @@ class MemoService : Service() {
         startForeground(41, notification())
         val high = MemoRecorder.high(this)
         val f = File(MemoFiles.dir(this), MemoFiles.stamp(System.currentTimeMillis()) + "." + MemoFiles.RECORDING_EXT)
-        val r = MediaRecorder()
+        // Voice: about 15 MB an hour; high: 44.1 kHz, 96 kbit/s. Recorded in this process (AdtsRecorder: the media
+        // server may not write a platform app's files)
+        val r = AdtsRecorder(f, if (high) 44100 else 16000, if (high) 96_000 else 32_000)
         try {
-            r.setAudioSource(MediaRecorder.AudioSource.MIC)
-            r.setOutputFormat(MediaRecorder.OutputFormat.AAC_ADTS)
-            r.setAudioEncoder(MediaRecorder.AudioEncoder.AAC)
-            r.setAudioChannels(1)
-            // Voice: about 15 MB an hour; high: 44.1 kHz, 96 kbit/s
-            r.setAudioSamplingRate(if (high) 44100 else 16000)
-            r.setAudioEncodingBitRate(if (high) 96_000 else 32_000)
-            r.setOutputFile(f.absolutePath)
-            r.prepare(); r.start()
+            r.start()
         } catch (e: Exception) {
-            Log.w(TAG, "microphone refused: ${e.message}")
+            Log.w(TAG, "microphone refused: ${e.javaClass.simpleName}: ${e.message}")
             runCatching { r.release() }; f.delete()
             MemoRecorder.failed(when {
                 !MemoRecorder.allowed(this) -> MemoRecorder.Note.Kind.NO_MIC
@@ -271,7 +264,7 @@ class MemoService : Service() {
     }
 
     /** Once a second: a call (pause, or silence while recording a call), the storage, the car switched off. */
-    private fun checks(r: MediaRecorder, lvl: Int, now: Long) {
+    private fun checks(r: AdtsRecorder, lvl: Int, now: Long) {
         val call = MemoRecorder.inCall(this)
         val keep = MemoRecorder.calls(this)
         if (call && !keep && !pausedForCall) pauseForCall(r, true)
@@ -284,7 +277,7 @@ class MemoService : Service() {
         if (!BuildConfig.MOCK && tick % 20 == 0) Thread { if (ReadyState.ready() == false) main.post { Log.i(TAG, "READY off"); finish(carOff = true) } }.start()
     }
 
-    private fun pauseForCall(r: MediaRecorder, on: Boolean) {
+    private fun pauseForCall(r: AdtsRecorder, on: Boolean) {
         runCatching { if (on) r.pause() else r.resume() }.onFailure { Log.w(TAG, "pause: ${it.message}") }
         pausedForCall = on; silentSince = 0L
         MemoRecorder.pause(on)
