@@ -176,11 +176,13 @@ class LyricsCardTest {
         assertTrue("options probing must not start a repository request", activeConnectionCount() == 0)
     }
 
-    @Test fun overlayCanReachTheExactRightEdgeAtSeventyPercentScale() {
+    @Test fun overlayUsesRealDisplayWidthAndCanReachRightEdgeAtSeventyPercentScale() {
+        assertEquals("1920 - the 142 px app inset remains reachable", 1172, LyricsOverlay.maxX(1920, 748))
         val screenWidth = 1920
         val pillWidthAtSeventyPercent = LyricsOverlay.pillWidth(screenWidth, .70f, 1f)
         val maxX = LyricsOverlay.maxX(screenWidth, pillWidthAtSeventyPercent)
         assertEquals(screenWidth, maxX + pillWidthAtSeventyPercent)
+        assertTrue("overlay window can extend through system insets", LyricsOverlay.windowFlags and android.view.WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS != 0)
         assertEquals(0, LyricsOverlay.maxX(800, 900))
     }
 

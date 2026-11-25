@@ -75,10 +75,14 @@ object LyricsOverlay {
     }
     private fun screenSize(context: Context): Pair<Int, Int> {
         val manager = wm
-        if (android.os.Build.VERSION.SDK_INT >= 30 && manager != null) {
+        if (manager != null) {
             try {
-                val bounds = manager.currentWindowMetrics.bounds
-                if (bounds.width() > 0 && bounds.height() > 0) return bounds.width() to bounds.height()
+                // App/window bounds can omit the MG head unit's 142 px left system inset.
+                // Overlay coordinates and maxX must use the physical display dimensions.
+                val metrics = android.util.DisplayMetrics()
+                @Suppress("DEPRECATION")
+                manager.defaultDisplay.getRealMetrics(metrics)
+                if (metrics.widthPixels > 0 && metrics.heightPixels > 0) return metrics.widthPixels to metrics.heightPixels
             } catch (_: Exception) { }
         }
         return context.resources.displayMetrics.widthPixels to context.resources.displayMetrics.heightPixels
@@ -95,11 +99,16 @@ object LyricsOverlay {
 
     internal fun maxX(screenWidth: Int, pillWidth: Int): Int = (screenWidth - pillWidth).coerceAtLeast(0)
 
+    internal val windowFlags: Int
+        get() = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
+            WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or
+            WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
+
     private fun clampPosition(screenHeight: Int = app?.let { screenSize(it).second } ?: 0) {
         val v=rootView ?: return; val lp=params ?: return
         if(v.width<=0 || v.height<=0) return
         val sw=app?.let { screenSize(it).first } ?: return
-        val nx=lp.x.coerceIn(0,maxX(sw,v.width))
+        val nx=lp.x.coerceIn(0,maxX(sw,lp.width.takeIf { it > 0 } ?: v.width))
         val maxY=(screenHeight-v.height).coerceAtLeast(0)
         val ny=lp.y.coerceIn(0,maxY)
         if(nx!=lp.x || ny!=lp.y) { lp.x=nx; lp.y=ny; try { wm?.updateViewLayout(v,lp) } catch (_:Exception){} }
@@ -162,7 +171,7 @@ object LyricsOverlay {
         root.addView(texts, LinearLayout.LayoutParams((pillWidth - dp(74)).coerceAtLeast(dp(100)), -2))
         root.addView(TextView(c).apply { text = "×"; gravity = Gravity.CENTER; setTextColor(Themes.color(c, R.color.text_value)); setTextSize(TypedValue.COMPLEX_UNIT_SP, 34f); setOnClickListener { stop() } }, LinearLayout.LayoutParams(dp(42), dp(42)))
         val lp = WindowManager.LayoutParams(pillWidth, -2, WindowManager.LayoutParams.TYPE_SYSTEM_ERROR,
-            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN,
+            windowFlags,
             PixelFormat.TRANSLUCENT).apply {
             gravity = Gravity.TOP or Gravity.START
             x = if (p.overlayX >= 0) p.overlayX else 80
