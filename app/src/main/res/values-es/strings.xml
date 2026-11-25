@@ -1342,6 +1342,8 @@
     <string name="mm_saved">Nota guardada · %1$s</string>
     <string name="mm_car_off">La última nota se detuvo al apagar el coche. Se ha guardado: %1$s</string>
     <string name="mm_mic_busy">Micrófono ocupado por una llamada</string>
+    <string name="mm_no_mic">Micrófono no permitido: permítelo para MG4Dash en los ajustes de Android, Aplicaciones</string>
+    <string name="mm_failed">No se pudo iniciar la grabación</string>
     <string name="mm_stats">%1$s · %2$d min · %3$s MB</string>
     <string name="mm_rename">Renombrar</string>
     <string name="mm_keep">Conservar</string>

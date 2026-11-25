@@ -1342,6 +1342,8 @@
     <string name="mm_saved">Memo saved · %1$s</string>
     <string name="mm_car_off">The last memo stopped when the car switched off. It is kept: %1$s</string>
     <string name="mm_mic_busy">Microphone busy with a call</string>
+    <string name="mm_no_mic">Microphone not allowed: allow it for MG4Dash in Android\'s settings, Apps</string>
+    <string name="mm_failed">The recording could not start</string>
     <string name="mm_stats">%1$s · %2$d min · %3$s MB</string>
     <string name="mm_rename">Rename</string>
     <string name="mm_keep">Keep</string>

@@ -1342,6 +1342,8 @@
     <string name="mm_saved">Promemoria salvato · %1$s</string>
     <string name="mm_car_off">L\'ultimo promemoria si è fermato allo spegnimento dell\'auto. È conservato: %1$s</string>
     <string name="mm_mic_busy">Microfono occupato da una chiamata</string>
+    <string name="mm_no_mic">Microfono non consentito: consentilo a MG4Dash nelle impostazioni Android, App</string>
+    <string name="mm_failed">Impossibile avviare la registrazione</string>
     <string name="mm_stats">%1$s · %2$d min · %3$s MB</string>
     <string name="mm_rename">Rinomina</string>
     <string name="mm_keep">Tieni</string>

@@ -1342,6 +1342,8 @@
     <string name="mm_saved">Mémo enregistré · %1$s</string>
     <string name="mm_car_off">Le dernier mémo s\'est arrêté à l\'extinction de la voiture. Il est gardé : %1$s</string>
     <string name="mm_mic_busy">Micro occupé par un appel</string>
+    <string name="mm_no_mic">Micro non autorisé : autorise-le pour MG4Dash dans les paramètres Android, Applications</string>
+    <string name="mm_failed">L\'enregistrement n\'a pas pu démarrer</string>
     <string name="mm_stats">%1$s · %2$d min · %3$s Mo</string>
     <string name="mm_rename">Renommer</string>
     <string name="mm_keep">Garder</string>

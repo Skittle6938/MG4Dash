@@ -1342,6 +1342,8 @@
     <string name="mm_saved">Notiz gespeichert · %1$s</string>
     <string name="mm_car_off">Die letzte Notiz endete beim Ausschalten des Autos. Sie ist gespeichert: %1$s</string>
     <string name="mm_mic_busy">Mikrofon durch Anruf belegt</string>
+    <string name="mm_no_mic">Mikrofon nicht erlaubt: in den Android-Einstellungen unter Apps für MG4Dash erlauben</string>
+    <string name="mm_failed">Die Aufnahme konnte nicht starten</string>
     <string name="mm_stats">%1$s · %2$d Min. · %3$s MB</string>
     <string name="mm_rename">Umbenennen</string>
     <string name="mm_keep">Behalten</string>

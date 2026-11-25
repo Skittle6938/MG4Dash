@@ -137,7 +137,8 @@ class MemoCard(context: Context) : View(context), HomeCard {
             k.text(cv, ellipsize(context.getString(R.string.mm_last, MemoFiles.whenText(context, last.at).replaceFirstChar { it.lowercase() }, MemoFiles.clock(last.durationMs)), left.width(), 17 * s), left.left, y, 17 * s, k.value)
         } else { k.text(cv, ellipsize(context.getString(R.string.mm_none), left.width(), 16 * s), left.left, y, 16 * s, k.sub) }
         val n = note
-        val fresh = n != null && now - n.at < (if (n.kind == MemoRecorder.Note.Kind.CAR_OFF) 30_000 else 4_500)
+        val problem = n?.kind in setOf(MemoRecorder.Note.Kind.MIC_BUSY, MemoRecorder.Note.Kind.NO_MIC, MemoRecorder.Note.Kind.FAILED)
+        val fresh = n != null && now - n.at < (if (n.kind == MemoRecorder.Note.Kind.CAR_OFF) 30_000 else if (problem) 8_000 else 4_500)
         if (fresh) postInvalidateDelayed(500)
         val inCall = MemoRecorder.inCall(context) && !MemoRecorder.calls(context)
         when {
@@ -147,6 +148,16 @@ class MemoCard(context: Context) : View(context), HomeCard {
                 for (line in wrap(context.getString(R.string.mm_car_off, MemoFiles.clock(n.ms)), left.width(), 15 * s).take(3)) {
                     k.text(cv, line, left.left, y, 15 * s, k.sub); y += 21 * s * d
                 }
+            }
+            // Why the recording did not start, in the record button's red
+            fresh && problem -> {
+                y += 28 * s * d
+                val text = context.getString(when (n!!.kind) {
+                    MemoRecorder.Note.Kind.NO_MIC -> R.string.mm_no_mic
+                    MemoRecorder.Note.Kind.MIC_BUSY -> R.string.mm_mic_busy
+                    else -> R.string.mm_failed
+                })
+                for (line in wrap(text, left.width(), 15 * s).take(3)) { k.text(cv, line, left.left, y, 15 * s, red); y += 21 * s * d }
             }
             usb && memos.isNotEmpty() -> { y += 28 * s * d; k.text(cv, ellipsize(context.getString(R.string.mm_usb_hint), left.width(), 15 * s), left.left, y, 15 * s, k.sub) }
         }

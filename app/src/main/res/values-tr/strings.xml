@@ -1342,6 +1342,8 @@
     <string name="mm_saved">Not kaydedildi · %1$s</string>
     <string name="mm_car_off">Son not araç kapanınca durdu. Kaydedildi: %1$s</string>
     <string name="mm_mic_busy">Mikrofon arama ile meşgul</string>
+    <string name="mm_no_mic">Mikrofona izin yok: Android ayarları, Uygulamalar\'dan MG4Dash için izin verin</string>
+    <string name="mm_failed">Kayıt başlatılamadı</string>
     <string name="mm_stats">%1$s · %2$d dk · %3$s MB</string>
     <string name="mm_rename">Yeniden adlandır</string>
     <string name="mm_keep">Sakla</string>

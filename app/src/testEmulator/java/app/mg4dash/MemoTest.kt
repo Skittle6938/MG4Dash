@@ -63,6 +63,24 @@ class MemoTest {
     }
 
     @Test
+    fun microphoneAskedThenRefusalSaid() {
+        val a = org.robolectric.Robolectric.buildActivity(android.app.Activity::class.java).setup().get()
+        val shadow = org.robolectric.Shadows.shadowOf(a)
+        // Not allowed yet: the first press asks for it with Android's dialog, nothing silently lost (25/11)
+        MemoRecorder.start(a)
+        assertEquals(android.Manifest.permission.RECORD_AUDIO, shadow.lastRequestedPermission.requestedPermissions.single())
+        assertEquals(MemoRecorder.PERMISSION_REQUEST, shadow.lastRequestedPermission.requestCode)
+        // Refused: the card says why
+        MemoRecorder.permissionResult(a, false)
+        assertEquals(MemoRecorder.Note.Kind.NO_MIC, MemoRecorder.note.value?.kind)
+        // Allowed: no more asking, the recording service is started
+        shadow.grantPermissions(android.Manifest.permission.RECORD_AUDIO)
+        MemoRecorder.permissionResult(a, true)
+        val started = org.robolectric.Shadows.shadowOf(a.application).nextStartedService
+        assertEquals(app.mg4dash.memo.MemoService::class.java.name, started?.component?.className)
+    }
+
+    @Test
     fun waveformAndClock() {
         val levels = List(480) { if (it in 100..110) 90 else 10 }
         val w = MemoFiles.downsample(levels)

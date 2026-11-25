@@ -52,8 +52,11 @@ object MemoRecorder {
     private val _levels = MutableStateFlow<List<Int>>(emptyList())
     val levels: StateFlow<List<Int>> = _levels
 
-    /** What the card says once: a memo kept, or kept when the car switched off, with its length. */
-    data class Note(val kind: Kind, val ms: Long, val at: Long) { enum class Kind { SAVED, CAR_OFF, MIC_BUSY } }
+    /**
+     * What the card says once: a memo kept, or kept when the car switched off, with its length; or why a recording
+     * could not start (microphone taken by a call, not allowed, refused).
+     */
+    data class Note(val kind: Kind, val ms: Long, val at: Long) { enum class Kind { SAVED, CAR_OFF, MIC_BUSY, NO_MIC, FAILED } }
     private val _note = MutableStateFlow<Note?>(null)
     val note: StateFlow<Note?> = _note
 
@@ -75,12 +78,40 @@ object MemoRecorder {
     fun high(c: Context) = prefs(c).bool("high", false)
     fun prefs(c: Context) = CardPrefs(c, HomeSlots.Card.MEMO)
 
+    /** The request code of the microphone permission asked from the card. */
+    const val PERMISSION_REQUEST = 4107
+
+    fun allowed(c: Context) = c.checkSelfPermission(android.Manifest.permission.RECORD_AUDIO) == android.content.pm.PackageManager.PERMISSION_GRANTED
+
+    /** [c] is the screen the card is on: the microphone permission is asked there the first time. */
     fun start(c: Context) {
         if (recording) return
         val ctx = c.applicationContext
-        if (inCall(ctx) && !calls(ctx)) { _note.value = Note(Note.Kind.MIC_BUSY, 0, SystemClock.elapsedRealtime()); return }
-        ctx.startForegroundService(Intent(ctx, MemoService::class.java).setAction(MemoService.START))
+        if (inCall(ctx) && !calls(ctx)) { say(Note.Kind.MIC_BUSY); return }
+        if (!allowed(ctx)) {
+            val a = activity(c)
+            if (a == null) { say(Note.Kind.NO_MIC); return }
+            Log.i(TAG, "asking for the microphone")
+            a.requestPermissions(arrayOf(android.Manifest.permission.RECORD_AUDIO), PERMISSION_REQUEST)
+            return
+        }
+        try { ctx.startForegroundService(Intent(ctx, MemoService::class.java).setAction(MemoService.START)) }
+        catch (e: Exception) { Log.w(TAG, "service refused: ${e.message}"); say(Note.Kind.FAILED) }
     }
+
+    /** The driver's answer to the microphone permission: recording starts when allowed, the card says so otherwise. */
+    fun permissionResult(c: Context, granted: Boolean) {
+        Log.i(TAG, "microphone ${if (granted) "allowed" else "refused"}")
+        if (granted) start(c) else say(Note.Kind.NO_MIC)
+    }
+
+    private fun activity(c: Context): android.app.Activity? {
+        var x: Context? = c
+        while (x is android.content.ContextWrapper) { if (x is android.app.Activity) return x; x = x.baseContext }
+        return null
+    }
+
+    private fun say(kind: Note.Kind) { _note.value = Note(kind, 0, SystemClock.elapsedRealtime()) }
 
     fun stop(c: Context) {
         if (!recording) return
@@ -122,7 +153,7 @@ object MemoRecorder {
             else if (!on && r.pausedSince != null) r.copy(pausedMs = r.pausedMs + (now - r.pausedSince), pausedSince = null) else r
     }
     internal fun ended(note: Note?) { _rec.value = null; note?.let { _note.value = it }; touched(); MemoPill.update() }
-    internal fun micBusy() { _rec.value = null; _note.value = Note(Note.Kind.MIC_BUSY, 0, SystemClock.elapsedRealtime()); MemoPill.update() }
+    internal fun failed(kind: Note.Kind) { _rec.value = null; say(kind); MemoPill.update() }
 
     /** The microphone's amplitude (0..32767) as a level 0..100 (−50 dB to 0 dB). */
     fun toLevel(amp: Int): Int = if (amp <= 0) 0 else ((20 * log10(amp / 32767.0) + 50) * 2).toInt().coerceIn(0, 100)
@@ -189,7 +220,12 @@ class MemoService : Service() {
         } catch (e: Exception) {
             Log.w(TAG, "microphone refused: ${e.message}")
             runCatching { r.release() }; f.delete()
-            MemoRecorder.micBusy(); stopForeground(true); stopSelf(); return
+            MemoRecorder.failed(when {
+                !MemoRecorder.allowed(this) -> MemoRecorder.Note.Kind.NO_MIC
+                MemoRecorder.inCall(this) -> MemoRecorder.Note.Kind.MIC_BUSY
+                else -> MemoRecorder.Note.Kind.FAILED
+            })
+            stopForeground(true); stopSelf(); return
         }
         recorder = r; file = f; all.clear(); ending = false
         Log.i(TAG, "recording ${f.name}, ${if (high) "high" else "voice"}")

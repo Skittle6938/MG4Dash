@@ -1342,6 +1342,8 @@
     <string name="mm_saved">Memo bewaard · %1$s</string>
     <string name="mm_car_off">Het laatste memo stopte toen de auto uitging. Het is bewaard: %1$s</string>
     <string name="mm_mic_busy">Microfoon bezet door een gesprek</string>
+    <string name="mm_no_mic">Microfoon niet toegestaan: sta hem toe voor MG4Dash in de Android-instellingen, Apps</string>
+    <string name="mm_failed">De opname kon niet starten</string>
     <string name="mm_stats">%1$s · %2$d min · %3$s MB</string>
     <string name="mm_rename">Hernoemen</string>
     <string name="mm_keep">Bewaren</string>

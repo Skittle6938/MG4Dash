@@ -1015,6 +1015,13 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
         super.onStop()
     }
 
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        // The microphone asked by the voice memos card on its first recording
+        if (requestCode == app.mg4dash.memo.MemoRecorder.PERMISSION_REQUEST)
+            app.mg4dash.memo.MemoRecorder.permissionResult(this, grantResults.firstOrNull() == android.content.pm.PackageManager.PERMISSION_GRANTED)
+    }
+
     /** HOME pressed while already home: nothing is recreated, the map goes back to its widget size. */
     override fun onNewIntent(intent: Intent?) {
         if (closedForMaintenance) { super.onNewIntent(intent); return }
