@@ -22,14 +22,38 @@ object MemoPlayer {
     private val _playing = MutableStateFlow(false)
     val playing: StateFlow<Boolean> = _playing
 
+    /**
+     * The car plays only the sound that has the audio focus (25/11: a memo played silent): taken while a memo plays
+     * (the other sounds pause), given back on pause and at the end.
+     */
+    private var focus: android.media.AudioFocusRequest? = null
+
+    private fun takeFocus() {
+        if (focus != null) return
+        val am = app.mg4dash.Tr.app.getSystemService(android.media.AudioManager::class.java) ?: return
+        val req = android.media.AudioFocusRequest.Builder(android.media.AudioManager.AUDIOFOCUS_GAIN_TRANSIENT)
+            .setAudioAttributes(AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_MEDIA).setContentType(AudioAttributes.CONTENT_TYPE_SPEECH).build())
+            .setOnAudioFocusChangeListener { }.build()
+        Log.i("Memo", "playback focus: ${runCatching { am.requestAudioFocus(req) }.getOrDefault(-1)}")
+        focus = req
+    }
+
+    private fun dropFocus() {
+        val req = focus ?: return
+        focus = null
+        runCatching { app.mg4dash.Tr.app.getSystemService(android.media.AudioManager::class.java)?.abandonAudioFocusRequest(req) }
+    }
+
     fun toggle(f: File) {
         val p = playback
         if (p != null && _file.value == f) {
             p.paused = !p.paused
             _playing.value = !p.paused
+            if (p.paused) dropFocus() else takeFocus()
             return
         }
         stop()
+        takeFocus()
         try {
             lateinit var pb: Playback
             pb = Playback(f) { main.post { if (playback === pb) stop() } }
@@ -45,6 +69,7 @@ object MemoPlayer {
     fun stop() {
         playback?.stop()
         playback = null; _file.value = null; _playing.value = false
+        dropFocus()
     }
 
     /** One memo decoded (MediaExtractor, MediaCodec) to an AudioTrack, on its own thread. */
