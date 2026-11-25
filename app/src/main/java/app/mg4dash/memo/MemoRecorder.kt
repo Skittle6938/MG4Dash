@@ -179,6 +179,8 @@ class MemoService : Service() {
     private var lastLevelAt = 0L
     private var tick = 0
     @Volatile private var ending = false
+    /** READY seen since the recording began: only then does losing it stop the memo. */
+    @Volatile private var readySeen = false
 
     private val carOff = object : BroadcastReceiver() {
         override fun onReceive(c: Context, i: Intent) { Log.i(TAG, "car off: ${i.action}"); finish(carOff = true) }
@@ -220,7 +222,7 @@ class MemoService : Service() {
             })
             stopForeground(true); stopSelf(); return
         }
-        recorder = r; file = f; all.clear(); ending = false
+        recorder = r; file = f; all.clear(); ending = false; readySeen = false
         Log.i(TAG, "recording ${f.name}, ${if (high) "high" else "voice"}")
         takeFocus()
         registerReceiver(carOff, IntentFilter().apply { addAction(Intent.ACTION_SCREEN_OFF); addAction(Intent.ACTION_SHUTDOWN) })
@@ -274,7 +276,15 @@ class MemoService : Service() {
             if (lvl == 0) { if (silentSince == 0L) silentSince = now else if (now - silentSince > SILENT_CALL_MS) pauseForCall(r, true) } else silentSince = 0L
         }
         if (filesDir.usableSpace < MemoRecorder.MIN_FREE) { Log.w(TAG, "storage nearly full"); finish(carOff = false); return }
-        if (!BuildConfig.MOCK && tick % 20 == 0) Thread { if (ReadyState.ready() == false) main.post { Log.i(TAG, "READY off"); finish(carOff = true) } }.start()
+        // The car switched off: READY seen during the recording, then lost (25/11: a memo started parked, not in READY,
+        // stopped at once)
+        if (!BuildConfig.MOCK && tick % 20 == 0) Thread {
+            when (ReadyState.ready()) {
+                true -> readySeen = true
+                false -> if (readySeen) main.post { Log.i(TAG, "READY off"); finish(carOff = true) }
+                null -> {}
+            }
+        }.start()
     }
 
     private fun pauseForCall(r: AdtsRecorder, on: Boolean) {
