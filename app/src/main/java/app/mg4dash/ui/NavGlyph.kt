@@ -26,13 +26,13 @@ object NavGlyph {
     }
 
     /** The shape for a manoeuvre from MG4Link ([type], [side], [exit], [angle] as in [NavRepo.Nav]). */
-    fun shape(type: Int, side: Int?, exit: Int?, angle: Int?, leftTraffic: Boolean): Shape {
+    fun shape(type: Int, side: Int?, exit: Int?, angle: Int?, leftTraffic: Boolean, direction: Int = 0): Shape {
         val sign = when (side) { 1 -> -1f; 2 -> 1f; else -> 0f }
         return when (type) {
             NavRepo.Turn.DESTINATION -> Shape.Arrival
             NavRepo.Turn.ROUNDABOUT, NavRepo.Turn.ROUNDABOUT_ENTER, NavRepo.Turn.ROUNDABOUT_EXIT ->
-                Shape.Round(NavArrowView.roundaboutHeading(side, exit, angle, leftTraffic).toFloat(),
-                    exit?.takeIf { it > 0 }, when (side) { 1 -> true; 2 -> false; else -> leftTraffic })
+                Shape.Round(NavArrowView.roundaboutHeading(side, exit, angle, leftTraffic, direction).toFloat(),
+                    exit?.takeIf { it > 0 }, NavArrowView.clockwise(side, leftTraffic, direction))
             NavRepo.Turn.U_TURN -> Shape.UTurn(side == 2 || (side != 1 && leftTraffic))
             NavRepo.Turn.FORK, NavRepo.Turn.OFF_RAMP -> Shape.Fork(side != 1)
             NavRepo.Turn.MERGE -> Shape.Merge(side == 1)
@@ -43,7 +43,7 @@ object NavGlyph {
         }
     }
 
-    fun shape(n: NavRepo.Nav, leftTraffic: Boolean): Shape = shape(n.eventType, n.side, n.exitNumber, n.angle, leftTraffic)
+    fun shape(n: NavRepo.Nav, leftTraffic: Boolean): Shape = shape(n.eventType, n.side, n.exitNumber, n.angle, leftTraffic, n.roundaboutDirection)
 
     // ── What is drawn, in the drawing's own units ──
 

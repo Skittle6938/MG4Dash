@@ -49,6 +49,11 @@ object NavRepo {
         val at: Long = System.currentTimeMillis(),
         /** The manoeuvre after this one, if MG4Link sends it (extras next2_…; none sent so far). */
         val then: Then? = null,
+        /**
+         * The roundabout's way round, sent by MG4Link (#74, 26/11): 1 clockwise (left-hand traffic), 2 anticlockwise,
+         * 0 unknown or not a roundabout. turn_angle and turn_number count from the entry in that direction.
+         */
+        val roundaboutDirection: Int = 0,
     )
 
     /** A following manoeuvre: as [Nav]'s eventType, side, exitNumber and angle, and its road. */
@@ -81,7 +86,7 @@ object NavRepo {
             val f = java.io.File(context.getExternalFilesDir(null) ?: context.filesDir, "nav_log.txt")
             if (f.length() > 64 * 1024) f.delete()
             val heading = app.mg4dash.ui.NavArrowView.roundaboutHeading(n.side, n.exitNumber, n.angle,
-                java.util.Locale.getDefault().country.uppercase() in app.mg4dash.ui.NavArrowView.LEFT_TRAFFIC)
+                java.util.Locale.getDefault().country.uppercase() in app.mg4dash.ui.NavArrowView.LEFT_TRAFFIC, n.roundaboutDirection)
             val stamp = java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", java.util.Locale.US).format(java.util.Date())
             f.appendText("$stamp\t$key\tdrawn ${heading}°\n")
         } catch (_: Exception) {}
@@ -90,12 +95,11 @@ object NavRepo {
     /** For PC screenshots. */
     fun setForTest(n: Nav?) { _nav.value = n }
 
-    private val receiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context, intent: Intent) {
-            val x = intent.extras ?: return
+    /** The guidance as MG4Link's NavigationUpdateIntent extras give it. */
+    internal fun fromExtras(x: android.os.Bundle): Nav {
             fun int(k: String) = (x.get(k) as? Number)?.toInt()
             fun str(k: String) = (x.get(k) as? CharSequence)?.toString()?.trim().orEmpty()
-            val n = Nav(
+            return Nav(
                 distanceMeters = int("distance_meters"), timeSeconds = int("time_seconds"),
                 road = str("road"), eventType = int("next_event_type") ?: 0, actionText = str("action_text"),
                 side = int("turn_side"), exitNumber = int("turn_number"), angle = int("turn_angle"),
@@ -104,7 +108,14 @@ object NavRepo {
                 then = int("next2_event_type")?.takeIf { it > 0 }?.let {
                     Then(it, int("next2_side"), int("next2_exit")?.takeIf { e -> e > 0 }, int("next2_angle")?.takeIf { a -> a >= 0 }, str("next2_road"))
                 },
+                roundaboutDirection = int("roundabout_direction")?.takeIf { it in 0..2 } ?: 0,
             )
+    }
+
+    private val receiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            val x = intent.extras ?: return
+            val n = fromExtras(x)
             if (_nav.value == null) Log.i(TAG, "guidance received (manoeuvre ${n.eventType})")
             if (n.eventType in ROUNDABOUTS) logRoundabout(context, n)
             _nav.value = n

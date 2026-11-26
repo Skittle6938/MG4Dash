@@ -108,10 +108,20 @@ class NavArrowView(context: Context) : View(context) {
          * side of the traffic (1 left = clockwise, 2 right), otherwise [leftTraffic] for the car's country. Without an
          * angle, the [exitNumber] as even exits (90° each, at most 3); without either, straight on.
          */
-        fun roundaboutHeading(side: Int?, exitNumber: Int?, angle: Int?, leftTraffic: Boolean = false): Int {
-            val clockwise = when (side) { 1 -> true; 2 -> false; else -> leftTraffic }
+        fun roundaboutHeading(side: Int?, exitNumber: Int?, angle: Int?, leftTraffic: Boolean = false, direction: Int = 0): Int {
+            val clockwise = clockwise(side, leftTraffic, direction)
             val a = angle?.takeIf { it in 1..360 } ?: exitNumber?.takeIf { it >= 1 }?.let { minOf(it, 3) * 90 } ?: return 0
             return Math.floorMod(if (clockwise) 180 + a else 180 - a, 360)
+        }
+
+        /**
+         * The roundabout's way round: MG4Link's roundabout_direction when it gives it (1 clockwise, 2 anticlockwise;
+         * #74), otherwise the side of the traffic (1 left = clockwise, 2 right), otherwise the car's country.
+         */
+        fun clockwise(side: Int?, leftTraffic: Boolean, direction: Int = 0): Boolean = when (direction) {
+            1 -> true
+            2 -> false
+            else -> when (side) { 1 -> true; 2 -> false; else -> leftTraffic }
         }
     }
 }
