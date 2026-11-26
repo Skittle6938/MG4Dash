@@ -1,8 +1,7 @@
 # --- R8 on published builds ---
-# Shrinking and optimisation only: class and member names stay as they are, so logs, crash
-# reports and everything looked up by name at runtime (hidden framework APIs, the car's
-# services, policy_control...) read the same as in debug builds.
--dontobfuscate
+# Shrunk, optimised and renamed (26/11: 1.1 MB less code). What is looked up by name stays named:
+# the manifest's and layouts' classes (aapt adds those), the rules below. A crash report is read
+# with the build's mapping.txt (kept with its workflow run).
 
 # Keep the line numbers of crash reports
 -keepattributes SourceFile, LineNumberTable, Signature, InnerClasses, EnclosingMethod, *Annotation*
@@ -17,6 +16,15 @@
 -keep class org.osmdroid.** { *; }
 -dontwarn org.osmdroid.**
 
-# Our own classes: kept whole. The size gain comes from the libraries; our code calls itself
-# by name in places (other apps' intents, enum keys, reflection on our own listeners).
--keep class app.mg4dash.** { *; }
+# Our enums: their names are saved in settings and JSON (version, chrono runs, cards...)
+-keepclassmembers enum app.mg4dash.** {
+    <fields>;
+    public static **[] values();
+    public static ** valueOf(java.lang.String);
+}
+# The SAIC classes we rebuild: sent to the car's services over binders, by their class name
+-keep class com.saicmotor.** { *; }
+# Read by name
+-keep class app.mg4dash.BuildConfig { *; }
+-keepclassmembers class app.mg4dash.** { @android.webkit.JavascriptInterface <methods>; }
+# Kotlin companion objects' names appear in reflection-free code only; nothing else of ours is looked up by name
