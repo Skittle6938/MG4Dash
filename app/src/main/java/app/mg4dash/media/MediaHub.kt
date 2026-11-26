@@ -236,6 +236,7 @@ object MediaHub {
         // SWI68 (service media): the USB state comes from the media service, not always from its browser
         if (SaicMedia.last?.playing == true) playingAt[USB] = now
         watchAaPlayers(now)
+        if (projecting) projectionSeenAt = now
         restoreAfterPrompt(now)
         // Type 70 (Android Auto) held by another app (DiAuto) while AllGo has no phone: the
         // real source is that app's player, not a "gone" Android Auto to replace. DiAuto
@@ -275,8 +276,20 @@ object MediaHub {
         // The driver's choice under way (the car not switched yet): it is not a "better source back" to switch to once more (#36)
         if (now - userPickAt < USER_PICK_MS) return
         // A better-ranked source back (the phone over Bluetooth…): it takes over in the current state, paused stays paused
-        betterSource(order, cur) { stable(it) && !(it == BT && projecting) }?.let { autoSwitch(it, "$it back", play = playingState()) }
+        betterSource(order, cur) { stable(it) && !(it == BT && !btBackAllowed(projecting, now, projectionSeenAt)) }?.let { autoSwitch(it, "$it back", play = playingState()) }
     }
+
+    /** When Android Auto last had the phone (uptime ms; 0: not since start). */
+    @Volatile private var projectionSeenAt = 0L
+
+    /**
+     * The phone back over Bluetooth may become the source again, unless it projects, or projected a short while ago
+     * (26/11: the phone's Bluetooth came back before its Android Auto; with the car on Bluetooth, its media app then
+     * paused the phone over Bluetooth every second, and with it Android Auto's music).
+     */
+    internal fun btBackAllowed(projecting: Boolean, now: Long, seenAt: Long): Boolean =
+        !projecting && (seenAt <= 0L || now - seenAt >= PROJECTION_GRACE_MS)
+    internal const val PROJECTION_GRACE_MS = 5 * 60_000L
 
     /**
      * Android Auto [cur] lost while a car source (USB, Bluetooth) was under it, Android Auto only guiding (Waze) or
