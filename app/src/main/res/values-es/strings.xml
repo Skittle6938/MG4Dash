@@ -1487,4 +1487,9 @@
     <string name="sr_fin_fun">Color imaginario, por diversión.</string>
     <string name="sr_painting">Pintando…</string>
     <string name="sr_livery_word">decoración %1$s</string>
+    <string name="sr_v2l_banner">El coche alimenta la toma exterior · parada automática al %1$d %%</string>
+    <string name="sr_v2l_before">Antes de la parada automática</string>
+    <string name="sr_v2l_usable">Batería utilizable</string>
+    <string name="sr_v2l_energy">Energía disponible</string>
+    <string name="sr_v2l_time">A esta potencia</string>
 </resources>

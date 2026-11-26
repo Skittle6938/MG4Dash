@@ -56,6 +56,9 @@ class ShowroomShots {
         while (System.currentTimeMillis() < end) { shadowOf(Looper.getMainLooper()).idleFor(200, TimeUnit.MILLISECONDS); Thread.sleep(50) }
         save(root, "x.png"); shadowOf(Looper.getMainLooper()).idleFor(1, TimeUnit.SECONDS)
         save(root, "showroom_energy.png")
+        a.render(app.mg4dash.car.VehicleState(connected = true, batteryPercent = 64, rangeKm = 230, chargeStatus = 13, dischargeCtrl = 1))
+        shadowOf(Looper.getMainLooper()).idleFor(500, TimeUnit.MILLISECONDS)
+        save(root, "x.png"); save(root, "showroom_energy_v2l.png")
     }
 
     @Test fun climatePage() {

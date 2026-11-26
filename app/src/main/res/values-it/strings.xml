@@ -1487,4 +1487,9 @@
     <string name="sr_fin_fun">Colore immaginario, per divertimento.</string>
     <string name="sr_painting">Verniciatura…</string>
     <string name="sr_livery_word">livrea %1$s</string>
+    <string name="sr_v2l_banner">L\'auto alimenta la presa esterna · arresto automatico al %1$d %%</string>
+    <string name="sr_v2l_before">Prima dell\'arresto automatico</string>
+    <string name="sr_v2l_usable">Batteria utilizzabile</string>
+    <string name="sr_v2l_energy">Energia disponibile</string>
+    <string name="sr_v2l_time">A questa potenza</string>
 </resources>

@@ -1487,4 +1487,9 @@
     <string name="sr_fin_fun">Denkbeeldige kleur, voor de lol.</string>
     <string name="sr_painting">Spuiten…</string>
     <string name="sr_livery_word">belettering %1$s</string>
+    <string name="sr_v2l_banner">De auto voedt het externe stopcontact · automatische stop bij %1$d %%</string>
+    <string name="sr_v2l_before">Voor de automatische stop</string>
+    <string name="sr_v2l_usable">Bruikbare batterij</string>
+    <string name="sr_v2l_energy">Beschikbare energie</string>
+    <string name="sr_v2l_time">Bij dit vermogen</string>
 </resources>

@@ -1487,4 +1487,9 @@
     <string name="sr_fin_fun">Fantasiefarbe, nur zum Spaß.</string>
     <string name="sr_painting">Lackieren…</string>
     <string name="sr_livery_word">Folierung %1$s</string>
+    <string name="sr_v2l_banner">Das Auto versorgt die externe Steckdose · automatischer Stopp bei %1$d %%</string>
+    <string name="sr_v2l_before">Bis zum automatischen Stopp</string>
+    <string name="sr_v2l_usable">Nutzbare Batterie</string>
+    <string name="sr_v2l_energy">Verfügbare Energie</string>
+    <string name="sr_v2l_time">Bei dieser Leistung</string>
 </resources>

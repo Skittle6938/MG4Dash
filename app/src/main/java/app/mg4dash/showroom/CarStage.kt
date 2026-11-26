@@ -60,6 +60,29 @@ class CarStage(context: Context, private val kit: Kit, private val look: CarLook
         }
     }
 
+    /** A pulsing red ring around the wheels of an axle whose tyre needs checking (the sensor reports a warning). */
+    inner class Ring : View(context) {
+        var on = false
+            set(v) { if (field != v) { field = v; invalidate() } }
+        private val p = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG).apply { style = android.graphics.Paint.Style.STROKE }
+        private val red = Themes.color(context, R.color.accent_danger)
+        init { setLayerType(LAYER_TYPE_SOFTWARE, null) }
+        override fun onDraw(c: android.graphics.Canvas) {
+            if (!on) return
+            val t = (android.os.SystemClock.uptimeMillis() % 1600L) / 1600f
+            val a = .55f + .45f * kotlin.math.cos(t * 2 * Math.PI).toFloat()
+            val inset = kit.dp(12).toFloat()
+            p.color = red; p.alpha = (a * 110).toInt(); p.strokeWidth = kit.dp(12).toFloat(); p.maskFilter = android.graphics.BlurMaskFilter(kit.dp(10).toFloat(), android.graphics.BlurMaskFilter.Blur.NORMAL)
+            c.drawOval(inset, inset, width - inset, height - inset, p)
+            p.maskFilter = null; p.alpha = (a * 255).toInt(); p.strokeWidth = kit.dp(3).toFloat()
+            c.drawOval(inset, inset, width - inset, height - inset, p)
+            postInvalidateDelayed(40)
+        }
+    }
+
+    val frontRing = Ring()
+    val rearRing = Ring()
+
     private val gestures = GestureDetector(context, object : GestureDetector.SimpleOnGestureListener() {
         override fun onDown(e: MotionEvent) = car.box.contains(e.x, e.y)
         override fun onSingleTapUp(e: MotionEvent): Boolean { look.threeQuarter = !look.threeQuarter; refresh(); return true }
@@ -69,6 +92,7 @@ class CarStage(context: Context, private val kit: Kit, private val look: CarLook
     init {
         clipChildren = true
         addView(car, LayoutParams(-1, -1))
+        addView(frontRing, LayoutParams(0, 0)); addView(rearRing, LayoutParams(0, 0))
         head.addView(title); head.addView(name, kit.lp(-2, -2, t = 5))
         addView(head, LayoutParams(-1, -2))
         addView(front.view, LayoutParams(-2, -2))
@@ -110,6 +134,13 @@ class CarStage(context: Context, private val kit: Kit, private val look: CarLook
         val gF = top + pt("front", "ground", 1) * k
         val gR = top + pt("rear", "ground", 1) * k
         car.groundY = gF
+        // The rings around the wheels (front and rear centres, radii of car.json)
+        listOf(frontRing to "front", rearRing to "rear").forEach { (ring, key) ->
+            val cxw = cx + pt(key, "c", 0) * k; val cyw = top + pt(key, "c", 1) * k
+            val rx = an.getJSONObject(key).getDouble("rx").toFloat() * k + kit.dp(21); val ry = an.getJSONObject(key).getDouble("ry").toFloat() * k + kit.dp(21)
+            ring.layoutParams = (ring.layoutParams as LayoutParams).apply { width = (2 * rx).toInt(); height = (2 * ry).toInt() }
+            ring.translationX = cxw - rx; ring.translationY = cyw - ry
+        }
         car.reflection = !q
         car.floorY = if (q) gR + 65f * s else gF - 2f * s
         car.floorH = if (q) 170f * s else 120f * s

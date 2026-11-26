@@ -1487,4 +1487,9 @@
     <string name="sr_fin_fun">Imaginary colour, for fun.</string>
     <string name="sr_painting">Painting…</string>
     <string name="sr_livery_word">livery %1$s</string>
+    <string name="sr_v2l_banner">The car powers the external socket · automatic stop at %1$d %%</string>
+    <string name="sr_v2l_before">Before the automatic stop</string>
+    <string name="sr_v2l_usable">Usable battery</string>
+    <string name="sr_v2l_energy">Energy available</string>
+    <string name="sr_v2l_time">At this power</string>
 </resources>

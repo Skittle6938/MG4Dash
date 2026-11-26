@@ -1487,4 +1487,9 @@
     <string name="sr_fin_fun">Smyšlená barva, pro radost.</string>
     <string name="sr_painting">Lakování…</string>
     <string name="sr_livery_word">polep %1$s</string>
+    <string name="sr_v2l_banner">Auto napájí vnější zásuvku · automatické zastavení na %1$d %%</string>
+    <string name="sr_v2l_before">Do automatického zastavení</string>
+    <string name="sr_v2l_usable">Využitelná baterie</string>
+    <string name="sr_v2l_energy">Dostupná energie</string>
+    <string name="sr_v2l_time">Při tomto výkonu</string>
 </resources>

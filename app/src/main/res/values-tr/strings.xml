@@ -1487,4 +1487,9 @@
     <string name="sr_fin_fun">Hayali renk, eğlence için.</string>
     <string name="sr_painting">Boyanıyor…</string>
     <string name="sr_livery_word">kaplama %1$s</string>
+    <string name="sr_v2l_banner">Araç harici prizi besliyor · %%%1$d\'de otomatik durma</string>
+    <string name="sr_v2l_before">Otomatik durmadan önce</string>
+    <string name="sr_v2l_usable">Kullanılabilir batarya</string>
+    <string name="sr_v2l_energy">Kullanılabilir enerji</string>
+    <string name="sr_v2l_time">Bu güçte</string>
 </resources>

@@ -69,6 +69,30 @@ class EnergyActivity : PageActivity() {
 
     private lateinit var energyCar: app.mg4dash.showroom.EnergyCar
     private lateinit var heatLine: android.view.View
+    private lateinit var v2lBanner: TextView
+    private lateinit var v2lBox: LinearLayout
+    private lateinit var v2lInfo: List<app.mg4dash.showroom.ShowroomKit.Tile>
+    private var v2lStopPct: Int? = null
+    private var packKw: Float? = null
+
+    /** V2L running: the banner and the three figures in place of the charge button and settings. */
+    private fun paintV2lBottom(s: VehicleState) {
+        val on = VehicleState.isDischarging(s)
+        v2lBanner.visibility = if (on) android.view.View.VISIBLE else android.view.View.GONE
+        v2lBox.visibility = if (on) android.view.View.VISIBLE else android.view.View.GONE
+        (action.parent as android.view.View).visibility = if (on) android.view.View.GONE else android.view.View.VISIBLE
+        (currentRow.parent.parent as android.view.View).visibility = if (on) android.view.View.GONE else android.view.View.VISIBLE
+        if (!on) return
+        val stop = v2lStopPct
+        v2lBanner.text = stop?.let { getString(R.string.sr_v2l_banner, it) } ?: VehicleState.chargeStatusLabel(s.chargeStatus)
+        val soc = s.batteryPercent
+        val left = if (soc != null && stop != null) (soc - stop).coerceAtLeast(0) else null
+        val kwh = left?.let { it * app.mg4dash.system.Prefs(this).batteryKwh / 100f }
+        val kw = packKw?.let { kotlin.math.abs(it) }?.takeIf { it >= .1f }
+        v2lInfo[0].value.text = left?.let { "$it %" } ?: "—"
+        v2lInfo[1].value.text = kwh?.let { String.format(Locale.getDefault(), "≈ %.0f kWh", it) } ?: "—"
+        v2lInfo[2].value.text = if (kwh != null && kw != null) (kwh / kw * 60).toInt().let { m -> String.format(Locale.getDefault(), "≈ %d h %02d", m / 60, m % 60) } else "—"
+    }
 
     private fun LinearLayout.children() = (0 until childCount).map { getChildAt(it) }
 
@@ -173,6 +197,19 @@ class EnergyActivity : PageActivity() {
         cur.addView(cRow, kit.lp(-1, kit.dp(48), t = 6))
         chips.addView(cur, kit.lp(0, -2, 1f))
         bottom.addView(chips, kit.lp(-1, -2, t = 12))
+        // During V2L (mock-up): an orange banner instead of the button, and what is left before the automatic stop
+        v2lBanner = kit.toggleTile("", heat = true) {}.apply { isSelected = true; isClickable = false; textSize = 17f; letterSpacing = .03f; visibility = android.view.View.GONE }
+        bottom.addView(v2lBanner, 0, kit.lp(-1, kit.dp(60)))
+        v2lBox = kit.column().apply { visibility = android.view.View.GONE }
+        v2lBox.addView(sk.label(getString(R.string.sr_v2l_before), 13f))
+        val infos = kit.row()
+        v2lInfo = listOf(R.string.sr_v2l_usable, R.string.sr_v2l_energy, R.string.sr_v2l_time).mapIndexed { i, l ->
+            val t = sk.Tile(true).apply { title.text = getString(l) }
+            infos.addView(t.view, kit.lp(0, -2, 1f, l = if (i > 0) 8 else 0))
+            t
+        }
+        v2lBox.addView(infos, kit.lp(-1, -2, t = 6))
+        bottom.addView(v2lBox, kit.lp(-1, -2, t = 12))
         center.addView(bottom, android.widget.FrameLayout.LayoutParams(-1, -2, Gravity.BOTTOM).apply { leftMargin = kit.dp(60); rightMargin = kit.dp(60); bottomMargin = kit.dp(10) })
 
         // ── Battery (24/11): health and settings, a line under the car ──
@@ -364,8 +401,11 @@ class EnergyActivity : PageActivity() {
             }
         }
         val v2lPct = CarProps.v2lPercent(p.v2l)
+        v2lStopPct = v2lPct
         setV2l(v2lPct?.let { listOf(20, 30, 40, 50, 60, 70, 80).indexOf(it) })
         val kw = if (p.volt != null && p.amp != null) p.volt * p.amp / 1000f else null
+        packKw = kw
+        paintV2lBottom(CarBridge.state.value)
         val s = CarBridge.state.value
         power.text = listOfNotNull(
             kw?.takeIf { kotlin.math.abs(it) >= 0.1f }?.let { getString(R.string.en_power, String.format(Locale.getDefault(), "%.1f", kotlin.math.abs(it))) },
@@ -473,6 +513,7 @@ class EnergyActivity : PageActivity() {
         energyCar.plugged = VehicleState.isPlugged(s.chargeStatus)
         energyCar.charging = VehicleState.isCharging(s.chargeStatus)
         energyCar.v2l = VehicleState.isDischarging(s)
+        paintV2lBottom(s)
         energyCar.invalidate()
     }
 
