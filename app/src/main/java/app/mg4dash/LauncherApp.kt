@@ -96,6 +96,7 @@ class LauncherApp : Application() {
         installCrashGuard()
         // Storage kept from filling up (26/11): once a day, a while after the start
         android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({ app.mg4dash.system.StorageCleaner.runIfDue(this, "start") }, 120_000)
+        app.mg4dash.system.StorageCleaner.watchCarLogs(this)
         if (!BuildConfig.MOCK && app.mg4dash.system.Maintenance.on(this)) { startMaintenance(); return }
         // Profiles, not in maintenance mode (no switch there: it would set the drive and the brightness)
         app.mg4dash.system.Profiles.onSwitch { afterProfileSwitch(it) }

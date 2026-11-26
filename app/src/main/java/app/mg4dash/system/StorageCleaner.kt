@@ -41,6 +41,24 @@ object StorageCleaner {
         Thread({ try { run(app, reason) } catch (e: Exception) { Log.w(TAG, "clean: ${e.message}") } }, "storage-clean").start()
     }
 
+    /**
+     * The car's logs grow by about 180 MB an hour: trimmed every half hour while MG4Dash runs (the daily pass would
+     * let a long drive fill the storage), unless turned off.
+     */
+    fun watchCarLogs(context: Context) {
+        val app = context.applicationContext
+        val h = android.os.Handler(android.os.Looper.getMainLooper())
+        val tick = object : Runnable {
+            override fun run() {
+                if (Prefs(app).raw.getBoolean("clean_car_logs", true)) Thread({
+                    try { val n = trimCarLogs(CAR_LOGS, CAR_LOGS_KEEP); if (n > 0) Log.i(TAG, "car logs: ${n / 1024 / 1024} MB freed") } catch (e: Exception) { Log.w(TAG, "car logs: ${e.message}") }
+                }, "car-logs").start()
+                h.postDelayed(this, 30 * 60_000L)
+            }
+        }
+        h.postDelayed(tick, 3 * 60_000L)
+    }
+
     fun run(context: Context, reason: String) {
         val before = space().first
         var freed = 0L
