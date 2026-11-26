@@ -96,6 +96,12 @@ class EnergyActivity : PageActivity() {
 
     private fun LinearLayout.children() = (0 until childCount).map { getChildAt(it) }
 
+    /** Smaller chips whose row is as tall as they are, plus room for the selected outline (26/11: cut at top and bottom). */
+    private fun fitChips(row: LinearLayout) {
+        row.setPadding(0, kit.dp(2), 0, kit.dp(2)); row.clipToPadding = false; row.clipChildren = false
+        row.children().forEach { v -> (v as TextView).textSize = 15f; v.layoutParams = (v.layoutParams as LinearLayout.LayoutParams).apply { height = kit.dp(46) } }
+    }
+
     /** As in the mock-up (a 910 px wide centre): the car under the charge, battery heating above the battery. */
     private fun placeCar(center: android.widget.FrameLayout, hint: android.view.View) {
         val w = center.width.toFloat(); if (w <= 0f) return
@@ -181,8 +187,8 @@ class EnergyActivity : PageActivity() {
                 ChargeGuard.setLimit(this, limits[i]); refreshProps()
             }
             setLimit = lSet
-            lRow.children().forEach { (it as TextView).textSize = 15f }
-            lim.addView(lRow, kit.lp(-1, kit.dp(48), t = 6))
+            fitChips(lRow)
+            lim.addView(lRow, kit.lp(-1, -2, t = 6))
             chips.addView(lim, kit.lp(0, -2, 1.25f, r = 18))
         }
         val cur = kit.column()
@@ -193,8 +199,8 @@ class EnergyActivity : PageActivity() {
         }
         setCurrent = cSet
         currentRow = cRow
-        cRow.children().forEach { (it as TextView).textSize = 15f }
-        cur.addView(cRow, kit.lp(-1, kit.dp(48), t = 6))
+        fitChips(cRow)
+        cur.addView(cRow, kit.lp(-1, -2, t = 6))
         chips.addView(cur, kit.lp(0, -2, 1f))
         bottom.addView(chips, kit.lp(-1, -2, t = 12))
         // During V2L (mock-up): an orange banner instead of the button, and what is left before the automatic stop
@@ -262,8 +268,8 @@ class EnergyActivity : PageActivity() {
             CarProps.setInt(CarProps.V2X_SP_SOC, CarProps.v2lCode(v2ls[i]), "V2L threshold ${v2ls[i]} %"); refreshProps()
         }
         setV2l = vSet
-        vRow.children().forEach { (it as TextView).textSize = 15f }
-        v2lCard.addView(vRow, kit.lp(-1, kit.dp(48), t = 6))
+        fitChips(vRow)
+        v2lCard.addView(vRow, kit.lp(-1, -2, t = 6))
         v2lAction = kit.toggleTile(getString(R.string.en_v2l_start), heat = true) {
             val s = CarBridge.state.value
             val on = !v2lShownOn(s)

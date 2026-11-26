@@ -156,7 +156,7 @@ class ProfilesTest {
             // Chrono runs and pending restore are JSON fields, not SharedPreferences settings
             "at", "kind", "mode",
             // car.json fields (PaintShop)
-            "w", "h", "cabin_",
+            "w", "h", "cabin_", "cabin_l_day",
             // the profiles' own file
             "drive_")
         val call = Regex("""(?:getString|getInt|getBoolean|getFloat|getLong|getStringSet|putString|putInt|putBoolean|putFloat|putLong|putStringSet|remove|contains)\(\s*"([A-Za-z0-9_]+)""")

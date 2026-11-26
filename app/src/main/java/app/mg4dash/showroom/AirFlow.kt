@@ -27,6 +27,9 @@ class AirFlow(context: Context) : View(context) {
     /** 0: off (nothing drawn), up to 1 at full fan. */
     var power = 0f
     var defrost = false
+    /** Day photo: drawn in normal blending with deeper colours (additive turned white on the light picture). */
+    var day = false
+        set(v) { field = v; val x = if (v) null else PorterDuffXfermode(PorterDuff.Mode.ADD); fill.xfermode = x; stroke.xfermode = x }
     var face = false
     var feet = false
     var screen = false
@@ -90,7 +93,7 @@ class AirFlow(context: Context) : View(context) {
         canvas.save()
         canvas.scale(width / CW, height / CH)
         if (rhd) { canvas.scale(-1f, 1f, CW / 2, 0f) }
-        val (r, g, b) = if (heat) Triple(255, 140, 36) else Triple(36, 200, 255)
+        val (r, g, b) = if (day) (if (heat) Triple(240, 96, 0) else Triple(0, 128, 230)) else if (heat) Triple(255, 140, 36) else Triple(36, 200, 255)
         val sp = .14f + .42f * power
         for ((k, on) in listOf("screen" to screen, "face" to face, "feet" to feet)) {
             if (!on) continue

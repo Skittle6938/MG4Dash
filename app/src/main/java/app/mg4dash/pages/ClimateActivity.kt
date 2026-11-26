@@ -24,9 +24,13 @@ class ClimateActivity : PageActivity() {
         const val BAR_DP = 18
         const val BAR_TOUCH = 14
         /** Over the dark photo, in both themes (26/11: black on the photo in the light theme). */
-        const val GLASS_VALUE = 0xFFFFFFFF.toInt()
-        const val GLASS_TITLE = 0xFF9AA4B6.toInt()
-        const val GLASS_OFF = 0xFF5A6376.toInt()
+        /** Over the night photo; the light theme has the day photo and dark texts on white glass (26/11). */
+        const val NIGHT_VALUE = 0xFFFFFFFF.toInt()
+        const val NIGHT_TITLE = 0xFF9AA4B6.toInt()
+        const val NIGHT_OFF = 0xFF5A6376.toInt()
+        const val DAY_VALUE = 0xFF111418.toInt()
+        const val DAY_TITLE = 0xFF4A5366.toInt()
+        const val DAY_OFF = 0xFF9AA4B6.toInt()
         /** The centre screen in the 2400 × 900 cabin picture (left-hand drive): top left, top right, bottom right, bottom left. */
         val SCREEN_L = floatArrayOf(1080f, 436.5f, 1350f, 440f, 1350f, 545f, 1080f, 539.5f)
     }
@@ -72,7 +76,8 @@ class ClimateActivity : PageActivity() {
         cabin = cab
         cabImage = android.widget.ImageView(this).apply { scaleType = android.widget.ImageView.ScaleType.FIT_XY }
         cab.addView(cabImage, android.widget.FrameLayout.LayoutParams(0, 0))
-        cab.addView(android.view.View(this).apply {
+        // The dark edges are for the night photo only
+        if (!day) cab.addView(android.view.View(this).apply {
             background = android.graphics.drawable.LayerDrawable(arrayOf(
                 android.graphics.drawable.GradientDrawable(android.graphics.drawable.GradientDrawable.Orientation.LEFT_RIGHT, intArrayOf(0xB805070B.toInt(), 0, 0, 0, 0xB805070B.toInt())),
                 android.graphics.drawable.GradientDrawable(android.graphics.drawable.GradientDrawable.Orientation.TOP_BOTTOM, intArrayOf(0x9405070B.toInt(), 0x5C05070B, 0, 0, 0x6B05070B))))
@@ -179,7 +184,7 @@ class ClimateActivity : PageActivity() {
 
         val hint = kit.text(getString(R.string.cl_side_hint), 15f, R.color.text_title).apply {
             setTextColor(GLASS_TITLE)
-            background = android.graphics.drawable.GradientDrawable().apply { setColor(0xB810151F.toInt()); cornerRadius = kit.dp(20).toFloat(); setStroke(1, 0x12FFFFFF) }
+            background = android.graphics.drawable.GradientDrawable().apply { setColor(if (day) 0xC8FFFFFF.toInt() else 0xB810151F.toInt()); cornerRadius = kit.dp(20).toFloat(); setStroke(1, 0x12FFFFFF) }
             setPadding(kit.dp(16), kit.dp(9), kit.dp(16), kit.dp(9))
             setOnClickListener { chooseSide() }
         }
@@ -212,6 +217,7 @@ class ClimateActivity : PageActivity() {
     private inner class ScreenMirror(c: android.content.Context) : View(c) {
         val quad = FloatArray(8)
         private var shot: android.graphics.Bitmap? = null
+        private var small: android.graphics.Bitmap? = null
         private var spare: android.graphics.Bitmap? = null
         private val paint = android.graphics.Paint(android.graphics.Paint.FILTER_BITMAP_FLAG or android.graphics.Paint.ANTI_ALIAS_FLAG).apply {
             // A screen inside the cabin: a little darker
@@ -227,18 +233,29 @@ class ClimateActivity : PageActivity() {
             val root = window?.decorView ?: return
             if (root.width <= 0) return
             val w = 480; val h = w * root.height / root.width
-            val b = spare?.takeIf { it.width == w && it.height == h } ?: android.graphics.Bitmap.createBitmap(w, h, android.graphics.Bitmap.Config.RGB_565)
+            val b = spare?.takeIf { it.width == w && it.height == h } ?: android.graphics.Bitmap.createBitmap(w, h, android.graphics.Bitmap.Config.ARGB_8888)
             val c = android.graphics.Canvas(b)
             c.scale(w / root.width.toFloat(), h / root.height.toFloat())
             try { root.draw(c) } catch (_: Exception) { return }
+            // At the size it is shown (about 200 × 80 px), filtered: no stairs on its lines (26/11)
+            val tw = (quad[2] - quad[0]).toInt().coerceAtLeast(8); val th = (quad[5] - quad[3]).toInt().coerceAtLeast(4)
+            var r = b
+            // Halved step by step with filtering down to about twice the shown size (one bilinear step skips pixels below half)
+            while (r.width / 2 >= tw * 2) r = android.graphics.Bitmap.createScaledBitmap(r, r.width / 2, r.height / 2, true)
+            r = android.graphics.Bitmap.createScaledBitmap(r, tw * 2, th * 2, true)
+            // A 1 px transparent margin: the slanted edges are smoothed by the filter
+            small = android.graphics.Bitmap.createBitmap(r.width + 2, r.height + 2, android.graphics.Bitmap.Config.ARGB_8888).also {
+                android.graphics.Canvas(it).drawBitmap(r, 1f, 1f, null); it.setHasMipMap(true); it.prepareToDraw()
+            }
             spare = shot; shot = b
             invalidate()
         }
 
         override fun onDraw(canvas: android.graphics.Canvas) {
-            val b = shot ?: return
+            val b = small ?: return
             if (quad[2] <= quad[0]) return
-            m.setPolyToPoly(floatArrayOf(0f, 0f, b.width.toFloat(), 0f, b.width.toFloat(), b.height.toFloat(), 0f, b.height.toFloat()), 0, quad, 0, 4)
+            val w = b.width - 1f; val h = b.height - 1f
+            m.setPolyToPoly(floatArrayOf(1f, 1f, w, 1f, w, h, 1f, h), 0, quad, 0, 4)
             canvas.save(); canvas.concat(m)
             paint.alpha = if (CarBridge.state.value.hvacOn == true) 235 else 150
             canvas.drawBitmap(b, 0f, 0f, paint)
@@ -246,13 +263,22 @@ class ClimateActivity : PageActivity() {
         }
     }
 
+    private val day by lazy { app.mg4dash.ui.Themes.isLight(this) && assets.list("showroom")?.contains("cabin_l_day.webp") == true }
+    private val GLASS_VALUE get() = if (day) DAY_VALUE else NIGHT_VALUE
+    private val GLASS_TITLE get() = if (day) DAY_TITLE else NIGHT_TITLE
+    private val GLASS_OFF get() = if (day) DAY_OFF else NIGHT_OFF
+
     private fun label(t: String) = kit.text(t.uppercase(), 14f, R.color.text_title).apply { letterSpacing = .1f; setTextColor(GLASS_TITLE) }
 
     /** A glass panel over the picture. */
     private fun glass() = kit.column().apply {
-        background = android.graphics.drawable.GradientDrawable().apply { setColor(0xA8090C13.toInt()); cornerRadius = kit.dp(26).toFloat(); setStroke(1, 0x1FFFFFFF) }
+        background = android.graphics.drawable.GradientDrawable().apply {
+            // Day: white glass at 55 % with dark texts; night: dark glass
+            if (day) { setColor(0x8CFFFFFF.toInt()); setStroke(1, 0x26000000) } else { setColor(0xA8090C13.toInt()); setStroke(1, 0x1FFFFFFF) }
+            cornerRadius = kit.dp(26).toFloat()
+        }
         setPadding(kit.dp(18), kit.dp(18), kit.dp(18), kit.dp(14))
-        elevation = kit.dp(10).toFloat()
+        // No elevation: the pages' outline style (FadeOutline) replaces the background of raised panels
     }
 
     /** A tag on the picture where an outlet blows: windscreen, face, feet. */
@@ -385,10 +411,12 @@ class ClimateActivity : PageActivity() {
             else -> (Math.round(t) - Math.round(VehicleState.tempFirst) + 2).coerceIn(1, 17)
         }
         val autoOn = on && s.autoOn == true
-        fanValue.text = when { !on -> "0"; autoOn -> "AUTO"; else -> s.fanSpeed?.toString() ?: "—" }
+        // In AUTO the car may give 15, no real speed (26/11)
+        val realFan = s.fanSpeed?.takeIf { it in 0..VehicleState.FAN_MAX }
+        fanValue.text = when { !on -> "0"; autoOn || s.fanSpeed != null && realFan == null -> "AUTO"; else -> realFan?.toString() ?: "—" }
         fanValue.setTextColor(when { !on -> GLASS_OFF; autoOn -> kit.color(R.color.accent_cold); else -> GLASS_VALUE })
         fanGauge.onColor = kit.color(if (autoOn) R.color.text_disabled else R.color.accent_cold)
-        fanGauge.value = if (on && !autoOn) s.fanSpeed ?: 0 else 0
+        fanGauge.value = if (on && !autoOn) realFan ?: 0 else 0
         val parts = partsOf(s.fanDirection)
         // Orange heats (set point above the outside), blue cools
         val heatMode = (t ?: 0f) > (s.outsideTemp ?: 99f)
@@ -398,12 +426,14 @@ class ClimateActivity : PageActivity() {
         rearTag.visibility = if (on && s.defrostRear == true) View.VISIBLE else View.GONE
         paintTag(rearTag, true, kit.color(R.color.accent_heat))
         air.heat = heatMode
-        air.power = if (!on) 0f else if (autoOn) .55f else .2f + .8f * (s.fanSpeed ?: 0) / VehicleState.FAN_MAX
+        air.power = if (!on) 0f else if (autoOn || realFan == null) .55f else .2f + .8f * realFan / VehicleState.FAN_MAX
+        air.day = day
         air.face = parts?.get(0) == true; air.feet = parts?.get(1) == true; air.screen = scr; air.defrost = s.defrostFront == true
         air.invalidate()
         tint.setBackgroundColor(if (on) (k and 0x00FFFFFF) or 0x14000000 else 0)
         cabImage.colorFilter = if (on) null else android.graphics.ColorMatrixColorFilter(android.graphics.ColorMatrix().apply {
-            setSaturation(.55f); postConcat(android.graphics.ColorMatrix().apply { setScale(.72f, .72f, .72f, 1f) })
+            val dim = if (day) .88f else .72f
+            setSaturation(.55f); postConcat(android.graphics.ColorMatrix().apply { setScale(dim, dim, dim, 1f) })
         })
         autoNote.text = if (autoOn && s.autoAirVolume in 0..2) getString(R.string.cl_auto_flow, getString(listOf(R.string.cl_level_high, R.string.cl_level_medium, R.string.cl_level_low)[s.autoAirVolume!!])) else ""
         auto.isSelected = s.autoOn == true

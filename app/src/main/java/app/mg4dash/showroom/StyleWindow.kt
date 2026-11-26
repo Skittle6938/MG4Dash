@@ -73,7 +73,7 @@ object StyleWindow {
         foot.addView(option(a, kit, a.getString(R.string.sr_stock), null, false) { look.original(); render() }, kit.lp(kit.dp(170), kit.dp(50), l = 10))
         val finish = kit.text("", 14f, R.color.text_title).apply { gravity = Gravity.END; maxLines = 2 }
         foot.addView(finish, kit.lp(0, -2, 1f, l = 12))
-        panel.addView(foot, kit.lp(-1, -2))
+        panel.addView(foot, kit.lp(-1, -2, t = 18))
         root.addView(panel, LinearLayout.LayoutParams(kit.dp(760), -1))
 
         render = {
