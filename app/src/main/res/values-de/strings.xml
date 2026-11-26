@@ -1492,4 +1492,9 @@
     <string name="sr_v2l_usable">Nutzbare Batterie</string>
     <string name="sr_v2l_energy">Verfügbare Energie</string>
     <string name="sr_v2l_time">Bei dieser Leistung</string>
+    <string name="st_storage">Speicher: %1$s frei von %2$s</string>
+    <string name="st_storage_low">Wenig Platz: Updates schlagen eventuell fehl. MG4Dash räumt seine eigenen Dateien einmal täglich auf.</string>
+    <string name="st_storage_clean">Jetzt aufräumen</string>
+    <string name="st_car_logs">Diagnoseprotokolle des Autos klein halten</string>
+    <string name="st_car_logs_desc">Das Radio schreibt etwa 180 MB Protokolle pro Stunde. Behält nur die neuesten 150 MB.</string>
 </resources>

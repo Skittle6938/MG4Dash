@@ -1492,4 +1492,9 @@
     <string name="sr_v2l_usable">Batteria utilizzabile</string>
     <string name="sr_v2l_energy">Energia disponibile</string>
     <string name="sr_v2l_time">A questa potenza</string>
+    <string name="st_storage">Memoria: %1$s liberi su %2$s</string>
+    <string name="st_storage_low">Poco spazio: gli aggiornamenti potrebbero non installarsi. MG4Dash pulisce i propri file una volta al giorno.</string>
+    <string name="st_storage_clean">Pulisci ora</string>
+    <string name="st_car_logs">Limitare i registri diagnostici dell\'auto</string>
+    <string name="st_car_logs_desc">La radio scrive circa 180 MB di registri all\'ora. Conserva solo i 150 MB più recenti.</string>
 </resources>

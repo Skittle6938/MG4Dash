@@ -1492,4 +1492,9 @@
     <string name="sr_v2l_usable">Využitelná baterie</string>
     <string name="sr_v2l_energy">Dostupná energie</string>
     <string name="sr_v2l_time">Při tomto výkonu</string>
+    <string name="st_storage">Úložiště: volno %1$s z %2$s</string>
+    <string name="st_storage_low">Málo místa: aktualizace se nemusí nainstalovat. MG4Dash čistí své soubory jednou denně.</string>
+    <string name="st_storage_clean">Vyčistit nyní</string>
+    <string name="st_car_logs">Omezit diagnostické záznamy vozu</string>
+    <string name="st_car_logs_desc">Rádio zapisuje asi 180 MB záznamů za hodinu. Ponechá jen nejnovějších 150 MB.</string>
 </resources>

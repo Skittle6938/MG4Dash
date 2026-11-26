@@ -443,6 +443,22 @@ class SettingsActivity : AppCompatActivity() {
             button(getString(R.string.st_compat_run)) { Thread { app.mg4dash.car.CarProps.dumpAll() }.start(); Compat.show(this) },
             button(getString(R.string.st_log)) { showLogDialog() },
         )
+        // Storage (26/11: the head unit was full): free space, a warning under 500 MB, cleaning now
+        val store = text(diag, "", 18f, R.color.text_value)
+        val storeLow = text(diag, getString(R.string.st_storage_low), 16f, R.color.accent_heat)
+        fun showStorage() {
+            val (free, total) = app.mg4dash.system.StorageCleaner.space()
+            fun mb(b: Long) = android.text.format.Formatter.formatShortFileSize(this, b)
+            store.text = getString(R.string.st_storage, mb(free), mb(total))
+            storeLow.visibility = if (total > 0 && free < app.mg4dash.system.StorageCleaner.LOW_BYTES) View.VISIBLE else View.GONE
+        }
+        showStorage()
+        row(diag, button(getString(R.string.st_storage_clean)) {
+            Thread { app.mg4dash.system.StorageCleaner.run(this, "settings"); runOnUiThread { showStorage() } }.start()
+        })
+        toggle(diag, R.string.st_car_logs, R.string.st_car_logs_desc, { prefs.raw.getBoolean("clean_car_logs", false) }) {
+            prefs.raw.edit().putBoolean("clean_car_logs", it).apply()
+        }
         // ADB over the USB port at each start (as the adbutil app), off by default
         toggle(diag, R.string.st_adb_start, R.string.st_adb_start_desc, { prefs.adbAtStart }) {
             prefs.adbAtStart = it; if (it) app.mg4dash.system.AdbSwitch.enable(this, "setting turned on")

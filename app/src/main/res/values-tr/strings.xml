@@ -1492,4 +1492,9 @@
     <string name="sr_v2l_usable">Kullanılabilir batarya</string>
     <string name="sr_v2l_energy">Kullanılabilir enerji</string>
     <string name="sr_v2l_time">Bu güçte</string>
+    <string name="st_storage">Depolama: %2$s içinde %1$s boş</string>
+    <string name="st_storage_low">Az yer kaldı: güncellemeler yüklenemeyebilir. MG4Dash kendi dosyalarını günde bir temizler.</string>
+    <string name="st_storage_clean">Şimdi temizle</string>
+    <string name="st_car_logs">Aracın tanı kayıtlarını küçük tut</string>
+    <string name="st_car_logs_desc">Ana ünite saatte yaklaşık 180 MB kayıt yazar. Yalnızca en yeni 150 MB\'ı tutar.</string>
 </resources>

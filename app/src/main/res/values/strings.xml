@@ -1492,4 +1492,9 @@
     <string name="sr_v2l_usable">Usable battery</string>
     <string name="sr_v2l_energy">Energy available</string>
     <string name="sr_v2l_time">At this power</string>
+    <string name="st_storage">Storage: %1$s free of %2$s</string>
+    <string name="st_storage_low">Little space left: updates may not install. MG4Dash cleans its own files once a day.</string>
+    <string name="st_storage_clean">Clean now</string>
+    <string name="st_car_logs">Keep the car\'s diagnostic logs small</string>
+    <string name="st_car_logs_desc">The head unit writes about 180 MB of logs an hour. Keeps only the newest 150 MB.</string>
 </resources>

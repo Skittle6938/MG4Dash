@@ -1492,4 +1492,9 @@
     <string name="sr_v2l_usable">Bruikbare batterij</string>
     <string name="sr_v2l_energy">Beschikbare energie</string>
     <string name="sr_v2l_time">Bij dit vermogen</string>
+    <string name="st_storage">Opslag: %1$s vrij van %2$s</string>
+    <string name="st_storage_low">Weinig ruimte: updates kunnen mislukken. MG4Dash ruimt zijn eigen bestanden dagelijks op.</string>
+    <string name="st_storage_clean">Nu opruimen</string>
+    <string name="st_car_logs">Diagnoselogboeken van de auto beperken</string>
+    <string name="st_car_logs_desc">De radio schrijft ongeveer 180 MB logboeken per uur. Houdt alleen de nieuwste 150 MB.</string>
 </resources>
