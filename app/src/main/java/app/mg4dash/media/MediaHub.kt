@@ -1170,6 +1170,22 @@ object MediaHub {
     }
     private const val AA_MBS = "com.allgo.remoteui.mediabrowserservice"
 
+    /**
+     * Whether AllGo's [position] is in seconds (older firmwares, Android Auto) rather than ms (SWI69 with CarPlay,
+     * #135): its duration in seconds too, or a small position that fits a seconds scale within the duration in ms.
+     * Thanks to Geekicedev for the diagnosis.
+     */
+    internal fun allgoSeconds(position: Long, rawDuration: Long): Boolean = when {
+        position <= 0 -> false
+        rawDuration in 1 until 10_000 -> true
+        position in 1 until 10_000 && rawDuration >= 10_000 -> position * 1000 <= rawDuration
+        else -> false
+    }
+
+    /** AllGo's position in ms; other players' as they give it. */
+    internal fun allgoPosition(pkg: String, position: Long, rawDuration: Long): Long =
+        if (pkg == AA_MBS && allgoSeconds(position, rawDuration)) position * 1000 else position
+
     private fun sourceFromCarType(t: Int): String? = when (t) {
         1, 2, 3 -> "com.saicmotor.radio"
         5 -> "com.android.bluetooth"
@@ -1601,6 +1617,7 @@ object MediaHub {
         val bmp = (md?.getBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART)
             ?: md?.getBitmap(MediaMetadata.METADATA_KEY_ART)
             ?: md?.getBitmap(MediaMetadata.METADATA_KEY_DISPLAY_ICON))?.takeUnless { blank(it) }
+        val rawDuration = md?.getLong(MediaMetadata.METADATA_KEY_DURATION) ?: 0L
         val np = NowPlaying(
             available = true,
             packageName = c.packageName,
@@ -1611,13 +1628,13 @@ object MediaHub {
             art = bmp ?: _now.value.art.takeIf { lastArtKey == "$title|$artist" },
             playing = shownPlaying(c),
             // Seconds too when it is that small (a song is never under 10 s in ms terms there)
-            durationMs = (md?.getLong(MediaMetadata.METADATA_KEY_DURATION) ?: 0).let { if (c.packageName == AA_MBS && it in 1 until 10_000) it * 1000 else it },
-            // AllGo's media service (Android Auto, CarPlay) gives its position in seconds, the others in ms (25/11: the
-            // karaoke stayed on its first line)
-            positionMs = st?.let { LyricsClock.projected(if (c.packageName == AA_MBS && it.position > 0) it.position * 1000 else it.position,
+            durationMs = rawDuration.let { if (c.packageName == AA_MBS && it in 1 until 10_000) it * 1000 else it },
+            // AllGo's media service (Android Auto, CarPlay): its position in seconds on some firmwares, in ms on others
+            // (#135, SWI69 with CarPlay, found by Geekicedev): see [allgoSeconds]
+            positionMs = st?.let { LyricsClock.projected(allgoPosition(c.packageName, it.position, rawDuration),
                 it.lastPositionUpdateTime, it.playbackSpeed, it.state == PlaybackState.STATE_PLAYING, android.os.SystemClock.elapsedRealtime()) } ?: 0,
-            positionStepMs = if (c.packageName == AA_MBS) 1000 else 0,
-            positionReportedMs = st?.position?.let { if (c.packageName == AA_MBS && it > 0) it * 1000 else it } ?: -1,
+            positionStepMs = if (c.packageName == AA_MBS && st != null && allgoSeconds(st.position, rawDuration)) 1000 else 0,
+            positionReportedMs = st?.position?.let { allgoPosition(c.packageName, it, rawDuration) } ?: -1,
             analog = analog,
             radioText = if (analog) rdsText else "",
             androidAuto = androidAutoAvailable(),
