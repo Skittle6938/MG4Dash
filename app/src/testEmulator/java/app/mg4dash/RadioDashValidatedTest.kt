@@ -13,6 +13,8 @@ class RadioDashValidatedTest {
     @Test fun validatedFirmwares() {
         assertTrue(RadioDashUpdater.validatedOn("SWI69-29958-1300R70"))
         assertTrue(RadioDashUpdater.validatedOn("SWI69-12345"))
+        // Confirmed by a driver after several days (MG4Radio #7): that revision only
+        assertTrue(RadioDashUpdater.validatedOn("SWI165-29176-1100R11"))
     }
 
     @Test fun notValidatedFirmwares() {
@@ -21,6 +23,8 @@ class RadioDashValidatedTest {
         assertFalse(RadioDashUpdater.validatedOn("SWI68-29958-1300R73"))
         assertFalse(RadioDashUpdater.validatedOn("SWI68-29958"))
         assertFalse(RadioDashUpdater.validatedOn("SWI165-1-R67"))
+        assertFalse(RadioDashUpdater.validatedOn("SWI165-29176-1100R12"))
+        assertFalse(RadioDashUpdater.validatedOn("SWI165-29176"))
         assertFalse(RadioDashUpdater.validatedOn("SWI133-1"))
         assertFalse(RadioDashUpdater.validatedOn(null))
         assertFalse(RadioDashUpdater.validatedOn("?"))

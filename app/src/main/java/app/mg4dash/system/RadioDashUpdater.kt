@@ -23,7 +23,7 @@ object RadioDashUpdater {
      * the firmware it is built from), or one revision confirmed by a driver's compatibility report on GitHub after a
      * few days of use ("SWI133 R30"). One line per firmware.
      */
-    val TESTED = listOf("SWI69")
+    val TESTED = listOf("SWI69", "SWI165 R11")
     val TESTED_ON: String get() = TESTED.joinToString(", ")
 
     /**
