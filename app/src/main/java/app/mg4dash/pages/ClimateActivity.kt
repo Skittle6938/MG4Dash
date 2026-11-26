@@ -274,11 +274,14 @@ class ClimateActivity : PageActivity() {
     private fun glass() = kit.column().apply {
         background = android.graphics.drawable.GradientDrawable().apply {
             // Day: white glass at 55 % with dark texts; night: dark glass
-            if (day) { setColor(0x8CFFFFFF.toInt()); setStroke(1, 0x26000000) } else { setColor(0xA8090C13.toInt()); setStroke(1, 0x1FFFFFFF) }
+            // Day: the near-white top of the picture needs a visible edge (26/11)
+            if (day) { setColor(0x8CFFFFFF.toInt()); setStroke(kit.dp(2), 0x4D1E2633) } else { setColor(0xA8090C13.toInt()); setStroke(1, 0x1FFFFFFF) }
             cornerRadius = kit.dp(26).toFloat()
         }
         setPadding(kit.dp(18), kit.dp(18), kit.dp(18), kit.dp(14))
-        // No elevation: the pages' outline style (FadeOutline) replaces the background of raised panels
+        // No elevation: the pages' outline style (FadeOutline) replaces the background of raised panels (5.5 dp and up);
+        // a low one in the day gives a soft shadow on the light picture
+        if (day) elevation = kit.dp(4).toFloat()
     }
 
     /** A tag on the picture where an outlet blows: windscreen, face, feet. */
