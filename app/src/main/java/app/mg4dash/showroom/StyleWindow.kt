@@ -28,7 +28,7 @@ import app.mg4dash.ui.Windows
  * once and kept.
  */
 object StyleWindow {
-    fun show(a: Activity, look: CarLook, changed: () -> Unit) {
+    fun show(a: Activity, look: CarLook, startTab: Int = 0, changed: () -> Unit) {
         val kit = Kit(a)
         val sk = ShowroomKit(a, kit)
         val root = LinearLayout(a).apply { orientation = LinearLayout.HORIZONTAL; setBackgroundColor(Themes.color(a, R.color.bg_bottom)) }
@@ -63,7 +63,7 @@ object StyleWindow {
         })
         panel.addView(top, kit.lp(-1, -2))
         val content = kit.column()
-        var tab = 0
+        var tab = startTab
         lateinit var render: () -> Unit
         val (tabs, showTab) = sk.segments(listOf(a.getString(R.string.sr_tab_model), a.getString(R.string.sr_tab_colour), a.getString(R.string.sr_tab_livery))) { i -> tab = i; render() }
         panel.addView(tabs, kit.lp(-1, -2, t = 14))

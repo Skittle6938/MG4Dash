@@ -106,5 +106,11 @@ class ShowroomShots {
         val root = d.window!!.decorView
         save(root, "x.png"); waitPainted(root)
         save(root, "showroom_style_xpower.png")
+        for (tab in 1..2) {
+            look.paint = CarPaint.byId("white"); look.livery = app.mg4dash.showroom.Livery.byId("rally")
+            app.mg4dash.showroom.StyleWindow.show(a, look, tab) {}
+            val r = org.robolectric.shadows.ShadowDialog.getLatestDialog().window!!.decorView
+            save(r, "x.png"); waitPainted(r); save(r, "showroom_style_tab$tab.png")
+        }
     }
 }
