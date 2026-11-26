@@ -36,7 +36,6 @@ class EnergyActivity : PageActivity() {
     private lateinit var soc: TextView
     private lateinit var range: TextView
     private lateinit var status: TextView
-    private lateinit var socGauge: app.mg4dash.ui.SocBar
     private lateinit var power: TextView
     private lateinit var action: TextView
     private lateinit var limitNote: TextView
@@ -129,7 +128,6 @@ class EnergyActivity : PageActivity() {
         side.addView(range); side.addView(status, kit.lp(-2, -2, t = 4)); side.addView(power, kit.lp(-2, -2, t = 2))
         top.addView(side, kit.lp(-2, -2, l = 24))
         center.addView(top, android.widget.FrameLayout.LayoutParams(-1, -2, Gravity.TOP))
-        socGauge = app.mg4dash.ui.SocBar(this).apply { currentBubble = false }   // kept for its state, not shown
         // Battery heating, right above the battery
         heatLine = android.view.View(this)
         center.addView(heatLine, android.widget.FrameLayout.LayoutParams(kit.dp(2), 0))
@@ -445,13 +443,6 @@ class EnergyActivity : PageActivity() {
         range.text = s.rangeKm?.let { app.mg4dash.system.Units.distText(this, it.toFloat()) } ?: "—"
         status.text = VehicleState.chargeStatusLabel(s.chargeStatus)
         val pct = s.batteryPercent
-        socGauge.soc = pct?.toFloat() ?: 0f
-        socGauge.charging = VehicleState.isCharging(s.chargeStatus)
-        // Same bar as the home widget; no trip start marker with the cable plugged in
-        socGauge.tripStart = if (VehicleState.isPlugged(s.chargeStatus)) null else app.mg4dash.energy.EnergyMonitor.tripStartSoc.value?.toFloat()
-        // The room under the bar is only for the trip start bubble
-        val barHeight = kit.dp(if (VehicleState.isPlugged(s.chargeStatus)) 28 else 52)
-        if (socGauge.layoutParams.height != barHeight) socGauge.layoutParams = socGauge.layoutParams.apply { height = barHeight }
         val discharge = VehicleState.isDischargeMode(s.chargeStatus)
         status.setTextColor(kit.color(when {
             discharge -> R.color.accent_heat
