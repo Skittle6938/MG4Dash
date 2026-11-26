@@ -9,7 +9,7 @@ import java.io.RandomAccessFile
 /**
  * Keeps the head unit's storage from filling up (26/11: 233 MB left of 4.9 GB, an update could not install). Once a
  * day and when the car leaves READY: MG4Dash's own downloaded APKs (installed, or a day old), the old energy log
- * capped, its caches trimmed; and, only if the driver allows it, the car's own diagnostic logs (SAIC offline logger,
+ * capped, its caches trimmed; and, unless the driver turns it off, the car's own diagnostic logs (SAIC offline logger,
  * about 180 MB an hour) kept to their newest [CAR_LOGS_KEEP] bytes. Other apps and /data/local/tmp are out of reach.
  */
 object StorageCleaner {
@@ -57,7 +57,7 @@ object StorageCleaner {
             if (now - f.lastModified() > CACHE_AGE_MS) freed += deleteTree(f)
         }
         // The car's diagnostic logs, if allowed in Settings
-        if (Prefs(context).raw.getBoolean("clean_car_logs", false)) freed += trimCarLogs(CAR_LOGS, CAR_LOGS_KEEP)
+        if (Prefs(context).raw.getBoolean("clean_car_logs", true)) freed += trimCarLogs(CAR_LOGS, CAR_LOGS_KEEP)
         Log.i(TAG, "cleaned ($reason): ${freed / 1024 / 1024} MB freed, free ${before / 1024 / 1024} → ${space().first / 1024 / 1024} MB")
     }
 

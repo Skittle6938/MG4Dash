@@ -456,7 +456,7 @@ class SettingsActivity : AppCompatActivity() {
         row(diag, button(getString(R.string.st_storage_clean)) {
             Thread { app.mg4dash.system.StorageCleaner.run(this, "settings"); runOnUiThread { showStorage() } }.start()
         })
-        toggle(diag, R.string.st_car_logs, R.string.st_car_logs_desc, { prefs.raw.getBoolean("clean_car_logs", false) }) {
+        toggle(diag, R.string.st_car_logs, R.string.st_car_logs_desc, { prefs.raw.getBoolean("clean_car_logs", true) }) {
             prefs.raw.edit().putBoolean("clean_car_logs", it).apply()
         }
         // ADB over the USB port at each start (as the adbutil app), off by default
