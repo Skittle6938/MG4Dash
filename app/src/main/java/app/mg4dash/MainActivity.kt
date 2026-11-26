@@ -930,11 +930,14 @@ class MainActivity : AppCompatActivity(), app.mg4dash.ui.Tutorial.Places {
                 else app.mg4dash.ui.Windows.confirm(this, getString(R.string.st_v2l_auto), getString(R.string.st_v2l_auto_warning),
                     getString(R.string.st_v2l_auto_enable), danger = false) { prefs.v2lAuto = true; popup.refresh() }
             }
+            // Power shown in this card: there is no Power card, so its options (XPower, full-throttle effects) live here
+            .let { if (cardPower) powerOptions(it) else it }
     }
 
     /** The card is built with these two: rebuilt at once when either changed (21/11: V / A did not show until home was built again). */
     private fun energyOptionsClosed() {
         if (energyBuiltWith?.let { it != (prefs.energyCardPower to prefs.powerVa) } == true) app.mg4dash.ui.Themes.recreateSmooth(this)
+        else powerOptionsClosed()
     }
 
     /**
