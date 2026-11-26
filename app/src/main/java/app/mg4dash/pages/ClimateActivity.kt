@@ -450,7 +450,8 @@ class ClimateActivity : PageActivity() {
         // In AUTO the car may give 15, no real speed (26/11)
         val realFan = s.fanSpeed?.takeIf { it in 0..VehicleState.FAN_MAX }
         fanValue.text = when { !on -> "0"; autoOn || s.fanSpeed != null && realFan == null -> "AUTO"; else -> realFan?.toString() ?: "—" }
-        fanValue.setTextColor(when { !on -> GLASS_OFF; autoOn -> kit.color(R.color.accent_cold); else -> GLASS_VALUE })
+        // AUTO in the same colour as the temperature (26/11)
+        fanValue.setTextColor(if (!on) GLASS_OFF else GLASS_VALUE)
         fanGauge.onColor = kit.color(if (autoOn) R.color.text_disabled else R.color.accent_cold)
         fanGauge.value = if (on && !autoOn) realFan ?: 0 else 0
         // In AUTO the car gives direction 7 (its own choice), fan 15, no real speed (seen on the car 26/11): shown as
