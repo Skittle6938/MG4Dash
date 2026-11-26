@@ -218,7 +218,7 @@ Les noms des couleurs MG restent en anglais. Les noms des coloris fun, des livr�
 4. Poids : +6 Mo, à dire à Marc dans le résultat.
 5. Côté de conduite par défaut : gauche dans la maquette.
 
-## 13. Tableau de bord : version « jour » et écran central (ajout du 26/11, 13 h)
+## 13. Tableau de bord : version « jour » et écran central (ajout du 26/11, 13 h, retouché à 13 h 15)
 
 Demandé par Marc le 26/11 (retours sur la première installation) : en mode clair la photo sombre rend les textes noirs illisibles, et l'écran central doit montrer la vue Climatisation elle-même (mise en abyme).
 
@@ -227,6 +227,11 @@ Demandé par Marc le 26/11 (retours sur la première installation) : en mode cla
 - Ce qui change : derrière les vitres, le tunnel de nuit est remplacé par une route de campagne en plein jour (floue comme à vitesse réelle) ; l'habitacle est rééclairé (gris clair au lieu de noir) ; les rétroviseurs montrent un bout du même paysage. Les deux écrans gardent leur propre lumière.
 - Le paysage est entièrement calculé par `cabin.py` (aucune photo extérieure, donc aucune question de droits en plus). En conduite à droite l'image est retournée : la voiture roule alors à gauche, comme il faut.
 - Poids : +0,3 Mo dans l'APK.
+
+### Retouches du 26/11 à 13 h 15, après l'avis de Marc (« très bien dans l'ensemble »)
+- Paysage plus discret : plus flou, plus pâle, moins saturé.
+- Le combiné ne se voit plus à travers la jante du volant : seule sa partie visible garde sa lumière.
+- La barre noire brillante du tableau de bord est redressée près du volant (le rendu MG la terminait par un reflet recourbé ; « en réalité c'est vraiment une barre tout le long »). Cette retouche touche aussi les deux images de nuit : **les quatre images sont à recopier**, mêmes noms, mêmes repères.
 
 ### À adapter dans l'appli en mode clair
 - Les flux d'air sont dessinés en mode additif (`lighter`) dans la maquette : sur une image claire ils deviennent presque blancs. En mode clair, les dessiner en fusion normale avec des couleurs plus saturées.
