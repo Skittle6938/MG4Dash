@@ -284,7 +284,9 @@ Placez la carte facultative **Paroles** depuis le mode édition de l'accueil. Qu
 
 ![Page Climatisation](docs/screenshots/climate.png)
 
-Température, ventilation, diffusion de l'air combinable, AUTO, A/C, ECO, recyclage, dégivrage avant et arrière. Ouvrez-la depuis la zone de température de la carte clim.
+Le vrai tableau de bord de la voiture, avec l'air qui sort de ses bouches : orange quand ça chauffe, bleu quand ça refroidit, plus rapide quand la ventilation monte. Touchez le pare-brise, le visage ou les pieds pour choisir où va l'air. Les panneaux vitrés portent la température et la ventilation côté conducteur, et AUTO, A/C, ECO, recyclage et dégivrage de l'autre côté. Un appui long sur l'image passe de la conduite à gauche à la conduite à droite. En thème clair, c'est une image de jour. Ouvrez-la depuis la zone de température de la carte clim.
+
+![Page Climatisation, thème clair](docs/screenshots/climate_light.png)
 
 ### Clim maintenue
 
@@ -301,15 +303,17 @@ Un mode camping, pour quand vous êtes absent ou que vous dormez dans la voiture
 
 ![Page Énergie](docs/screenshots/energy.png)
 
-Charge (marche / arrêt, limite de charge là où la voiture l'applique, courant, temps restant, verrou du câble), charge programmée, V2L, chauffage de la batterie, et consommation par période avec la part de la conduite, de la clim, du chauffage de la batterie et des accessoires.
+Une voiture transparente avec sa batterie à sa vraie place, qui se remplit avec la charge. Le réchauffage de la batterie est posé juste au-dessus, la prise et le câble s'allument quand c'est branché. Autour : charge (marche / arrêt, limite de charge là où la voiture l'applique, courant, temps restant, verrou du câble), charge programmée, V2L (avec ce qui reste avant l'arrêt automatique), et consommation par période avec la part de la conduite, de la clim, du chauffage de la batterie et des accessoires.
 
-La section **batterie** estime la santé de la batterie : en roulant, MG4Dash mesure l'énergie prise à la batterie par rapport à la baisse du %, et à partir de 15 % de baisse donne une mesure datée de la capacité utile. Sa fenêtre (touchez la section batterie) règle le modèle de batterie et votre propre capacité neuve. C'est une estimation, pas une mesure officielle.
+La ligne **batterie** sous la voiture estime la santé de la batterie : en roulant, MG4Dash mesure l'énergie prise à la batterie par rapport à la baisse du %, et à partir de 15 % de baisse donne une mesure datée de la capacité utile. Sa fenêtre (touchez cette ligne) règle le modèle de batterie et votre propre capacité neuve. C'est une estimation, pas une mesure officielle.
 
 ### Véhicule
 
 ![Page Véhicule](docs/screenshots/vehicle.png)
 
-Mode de conduite (Eco, Neige et Custom selon les voitures), régénération (le niveau 6 est la conduite à une pédale), aides à la conduite, pression et température des pneus, état de la voiture, et les applis en cours de l'autoradio (touchez la section autoradio) : processeur et mémoire de chaque appli, rafraîchis toutes les 3 s.
+Votre voiture au centre, à vos couleurs : touchez-la pour l'autre vue (trois-quarts ou profil), appui long pour **Couleurs et style** (version, jantes, toit noir, couleurs MG et fun, livrées). Pression et température des pneus sous les roues, avec un anneau rouge sur un pneu à vérifier. À gauche, mode de conduite, direction et pédale de frein (mode Perso), récupération et conduite à une pédale, économie d'énergie, maintien de voie et freinage d'urgence, chacun se change d'un toucher. À droite, autonomie, trajets du jour, état de la voiture et applis en cours de l'autoradio (touchez la section autoradio).
+
+![Page Véhicule, thème clair](docs/screenshots/vehicle_light.png)
 
 ### Son
 

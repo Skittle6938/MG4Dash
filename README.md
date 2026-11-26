@@ -284,7 +284,9 @@ Place the optional **Lyrics** card from the home screen's edit mode. When a song
 
 ![Climate page](docs/screenshots/climate.png)
 
-Temperature, fan, combinable air directions, AUTO, A/C, ECO, recirculation, front and rear defrost. Open it from the temperature area of the climate card.
+The car's real dashboard, with the air flowing from its vents: orange when it heats, blue when it cools, faster as the fan goes up. Touch the windscreen, face or feet to choose where the air goes. The glass panels hold the temperature and fan on the driver's side, and AUTO, A/C, ECO, recirculation and defrost on the other. A long press on the picture switches between left- and right-hand drive. In the light theme it is a day picture. Open it from the temperature area of the climate card.
+
+![Climate page, light theme](docs/screenshots/climate_light.png)
 
 ### Keep climate on
 
@@ -301,15 +303,17 @@ A camp mode for when you are away or sleeping in the car: long press the climate
 
 ![Energy page](docs/screenshots/energy.png)
 
-Charging (start / stop, charge limit where the car applies it, current, time left, cable lock), scheduled charging, V2L, battery heating, and consumption by period with the share of driving, climate, battery heating and accessories.
+A see-through car with its battery at its real place, filling with the charge. Battery heating sits right above it, and the charge port and cable light up when plugged in. Around it: charging (start / stop, charge limit where the car applies it, current, time left, cable lock), scheduled charging, V2L (with what is left before the automatic stop), and consumption by period with the share of driving, climate, battery heating and accessories.
 
-The **battery** section estimates the battery's health: while driving, MG4Dash measures the energy taken from the battery against the drop in %, and from a 15 % drop gives a dated measurement of the usable capacity. Its window (tap the battery section) sets the battery model and your own capacity when new. This is an estimate, not an official measurement.
+The **battery** line under the car estimates the battery's health: while driving, MG4Dash measures the energy taken from the battery against the drop in %, and from a 15 % drop gives a dated measurement of the usable capacity. Its window (tap that line) sets the battery model and your own capacity when new. This is an estimate, not an official measurement.
 
 ### Vehicle
 
 ![Vehicle page](docs/screenshots/vehicle.png)
 
-Drive mode (Eco, Snow and Custom where available), regeneration (level 6 is one-pedal driving), driver assistance, tyre pressures and temperatures, the car's state, and the running apps of the head unit (tap the head unit section): each app's processor and memory use, refreshed every 3 s.
+Your car in the centre, in your colours: touch it for the other view (three-quarter or profile), long press it for **Colours and style** (version, wheels, black roof, MG and fun colours, liveries). Tyre pressures and temperatures hang under the wheels, with a red ring on a tyre to check. On the left, drive mode, steering and brake pedal (Custom mode), regeneration and one-pedal driving, energy saving, lane keeping and emergency braking, each changed with a touch. On the right, range, today's trips, the car's state, and the running apps of the head unit (tap the head unit section).
+
+![Vehicle page, light theme](docs/screenshots/vehicle_light.png)
 
 ### Sound
 
