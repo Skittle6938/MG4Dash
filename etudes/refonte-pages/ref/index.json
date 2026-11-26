@@ -1,0 +1,462 @@
+{
+ "note": "Pictures produced by the mock-up paint engine (paint.js) at scale 1. key = view|scale|body|paint index|livery index|black roof|wheel|matt sills.",
+ "font_saira_loaded": true,
+ "decal": {
+  "w": 2048,
+  "h": 757,
+  "px_per_metre": 445.21739130434787,
+  "origin": "x = (y + 2.3) × k, y = (1.7 − z) × k"
+ },
+ "pictures": [
+  {
+   "file": "side_standard_bleu.png",
+   "view": "side",
+   "body": 0,
+   "paint": "blue",
+   "liv": "none",
+   "roof": 0,
+   "wheel": "aero17",
+   "trim": 1,
+   "size": [
+    1840,
+    680
+   ],
+   "key": "side|1|0|4|0|0|aero17|1"
+  },
+  {
+   "file": "q34_standard_bleu.png",
+   "view": "q34",
+   "body": 0,
+   "paint": "blue",
+   "liv": "none",
+   "roof": 0,
+   "wheel": "aero17",
+   "trim": 1,
+   "size": [
+    1600,
+    720
+   ],
+   "key": "q34|1|0|4|0|0|aero17|1"
+  },
+  {
+   "file": "side_standard_noir_16.png",
+   "view": "side",
+   "body": 0,
+   "paint": "black",
+   "liv": "none",
+   "roof": 0,
+   "wheel": "steel16",
+   "trim": 1,
+   "size": [
+    1840,
+    680
+   ],
+   "key": "side|1|0|1|0|0|steel16|1"
+  },
+  {
+   "file": "q34_comfort_gris.png",
+   "view": "q34",
+   "body": 0,
+   "paint": "grey",
+   "liv": "none",
+   "roof": 0,
+   "wheel": "aero17",
+   "trim": 1,
+   "size": [
+    1600,
+    720
+   ],
+   "key": "q34|1|0|3|0|0|aero17|1"
+  },
+  {
+   "file": "side_luxury_rouge.png",
+   "view": "side",
+   "body": 1,
+   "paint": "red",
+   "liv": "none",
+   "roof": 0,
+   "wheel": "lux18",
+   "trim": 1,
+   "size": [
+    1840,
+    680
+   ],
+   "key": "side|1|1|5|0|0|lux18|1"
+  },
+  {
+   "file": "q34_luxury_blanc_toit_noir.png",
+   "view": "q34",
+   "body": 1,
+   "paint": "white",
+   "liv": "none",
+   "roof": 1,
+   "wheel": "lux18",
+   "trim": 1,
+   "size": [
+    1600,
+    720
+   ],
+   "key": "q34|1|1|0|0|1|lux18|1"
+  },
+  {
+   "file": "side_xpower_vert_toit_noir.png",
+   "view": "side",
+   "body": 1,
+   "paint": "green",
+   "liv": "none",
+   "roof": 1,
+   "wheel": "xp18",
+   "trim": 0,
+   "size": [
+    1840,
+    680
+   ],
+   "key": "side|1|1|7|0|1|xp18|0"
+  },
+  {
+   "file": "q34_xpower_vert_toit_noir.png",
+   "view": "q34",
+   "body": 1,
+   "paint": "green",
+   "liv": "none",
+   "roof": 1,
+   "wheel": "xp18",
+   "trim": 0,
+   "size": [
+    1600,
+    720
+   ],
+   "key": "q34|1|1|7|0|1|xp18|0"
+  },
+  {
+   "file": "q34_luxury_orange.png",
+   "view": "q34",
+   "body": 1,
+   "paint": "orange",
+   "liv": "none",
+   "roof": 0,
+   "wheel": "lux18",
+   "trim": 1,
+   "size": [
+    1600,
+    720
+   ],
+   "key": "q34|1|1|6|0|0|lux18|1"
+  },
+  {
+   "file": "side_luxury_argent.png",
+   "view": "side",
+   "body": 1,
+   "paint": "silver",
+   "liv": "none",
+   "roof": 0,
+   "wheel": "lux18",
+   "trim": 1,
+   "size": [
+    1840,
+    680
+   ],
+   "key": "side|1|1|2|0|0|lux18|1"
+  },
+  {
+   "file": "q34_or_massif.png",
+   "view": "q34",
+   "body": 1,
+   "paint": "gold",
+   "liv": "none",
+   "roof": 0,
+   "wheel": "lux18",
+   "trim": 1,
+   "size": [
+    1600,
+    720
+   ],
+   "key": "q34|1|1|8|0|0|lux18|1"
+  },
+  {
+   "file": "side_chrome.png",
+   "view": "side",
+   "body": 1,
+   "paint": "chrome",
+   "liv": "none",
+   "roof": 0,
+   "wheel": "lux18",
+   "trim": 1,
+   "size": [
+    1840,
+    680
+   ],
+   "key": "side|1|1|9|0|0|lux18|1"
+  },
+  {
+   "file": "side_arc_en_ciel.png",
+   "view": "side",
+   "body": 1,
+   "paint": "rainbow",
+   "liv": "none",
+   "roof": 0,
+   "wheel": "lux18",
+   "trim": 1,
+   "size": [
+    1840,
+    680
+   ],
+   "key": "side|1|1|10|0|0|lux18|1"
+  },
+  {
+   "file": "q34_cameleon.png",
+   "view": "q34",
+   "body": 1,
+   "paint": "cameleon",
+   "liv": "none",
+   "roof": 0,
+   "wheel": "lux18",
+   "trim": 1,
+   "size": [
+    1600,
+    720
+   ],
+   "key": "q34|1|1|11|0|0|lux18|1"
+  },
+  {
+   "file": "side_galaxie.png",
+   "view": "side",
+   "body": 1,
+   "paint": "galaxy",
+   "liv": "none",
+   "roof": 0,
+   "wheel": "lux18",
+   "trim": 1,
+   "size": [
+    1840,
+    680
+   ],
+   "key": "side|1|1|12|0|0|lux18|1"
+  },
+  {
+   "file": "q34_coucher_de_soleil.png",
+   "view": "q34",
+   "body": 1,
+   "paint": "sunset",
+   "liv": "none",
+   "roof": 0,
+   "wheel": "lux18",
+   "trim": 1,
+   "size": [
+    1600,
+    720
+   ],
+   "key": "q34|1|1|13|0|0|lux18|1"
+  },
+  {
+   "file": "side_barbe_a_papa.png",
+   "view": "side",
+   "body": 1,
+   "paint": "candy",
+   "liv": "none",
+   "roof": 0,
+   "wheel": "lux18",
+   "trim": 1,
+   "size": [
+    1840,
+    680
+   ],
+   "key": "side|1|1|14|0|0|lux18|1"
+  },
+  {
+   "file": "q34_carbone_forge.png",
+   "view": "q34",
+   "body": 1,
+   "paint": "carbon",
+   "liv": "none",
+   "roof": 0,
+   "wheel": "lux18",
+   "trim": 1,
+   "size": [
+    1600,
+    720
+   ],
+   "key": "q34|1|1|15|0|0|lux18|1"
+  },
+  {
+   "file": "side_blanc_rallye.png",
+   "view": "side",
+   "body": 0,
+   "paint": "white",
+   "liv": "rally",
+   "roof": 0,
+   "wheel": "aero17",
+   "trim": 1,
+   "size": [
+    1840,
+    680
+   ],
+   "key": "side|1|0|0|1|0|aero17|1"
+  },
+  {
+   "file": "q34_blanc_rallye.png",
+   "view": "q34",
+   "body": 0,
+   "paint": "white",
+   "liv": "rally",
+   "roof": 0,
+   "wheel": "aero17",
+   "trim": 1,
+   "size": [
+    1600,
+    720
+   ],
+   "key": "q34|1|0|0|1|0|aero17|1"
+  },
+  {
+   "file": "side_noir_flammes.png",
+   "view": "side",
+   "body": 0,
+   "paint": "black",
+   "liv": "flames",
+   "roof": 0,
+   "wheel": "aero17",
+   "trim": 1,
+   "size": [
+    1840,
+    680
+   ],
+   "key": "side|1|0|1|2|0|aero17|1"
+  },
+  {
+   "file": "side_gris_eclair.png",
+   "view": "side",
+   "body": 0,
+   "paint": "grey",
+   "liv": "bolt",
+   "roof": 0,
+   "wheel": "aero17",
+   "trim": 1,
+   "size": [
+    1840,
+    680
+   ],
+   "key": "side|1|0|3|3|0|aero17|1"
+  },
+  {
+   "file": "side_blanc_damier.png",
+   "view": "side",
+   "body": 0,
+   "paint": "white",
+   "liv": "check",
+   "roof": 0,
+   "wheel": "aero17",
+   "trim": 1,
+   "size": [
+    1840,
+    680
+   ],
+   "key": "side|1|0|0|4|0|aero17|1"
+  },
+  {
+   "file": "q34_argent_pixels.png",
+   "view": "q34",
+   "body": 0,
+   "paint": "silver",
+   "liv": "pixels",
+   "roof": 0,
+   "wheel": "aero17",
+   "trim": 1,
+   "size": [
+    1600,
+    720
+   ],
+   "key": "q34|1|0|2|5|0|aero17|1"
+  },
+  {
+   "file": "side_blanc_tricolore.png",
+   "view": "side",
+   "body": 0,
+   "paint": "white",
+   "liv": "tricolore",
+   "roof": 0,
+   "wheel": "aero17",
+   "trim": 1,
+   "size": [
+    1840,
+    680
+   ],
+   "key": "side|1|0|0|6|0|aero17|1"
+  },
+  {
+   "file": "q34_vert_camouflage.png",
+   "view": "q34",
+   "body": 0,
+   "paint": "green",
+   "liv": "camo",
+   "roof": 0,
+   "wheel": "aero17",
+   "trim": 1,
+   "size": [
+    1600,
+    720
+   ],
+   "key": "q34|1|0|7|7|0|aero17|1"
+  },
+  {
+   "file": "side_orange_leopard.png",
+   "view": "side",
+   "body": 0,
+   "paint": "orange",
+   "liv": "leopard",
+   "roof": 0,
+   "wheel": "aero17",
+   "trim": 1,
+   "size": [
+    1840,
+    680
+   ],
+   "key": "side|1|0|6|8|0|aero17|1"
+  },
+  {
+   "file": "q34_blanc_zebre.png",
+   "view": "q34",
+   "body": 0,
+   "paint": "white",
+   "liv": "zebra",
+   "roof": 0,
+   "wheel": "aero17",
+   "trim": 1,
+   "size": [
+    1600,
+    720
+   ],
+   "key": "q34|1|0|0|9|0|aero17|1"
+  },
+  {
+   "file": "side_rouge_coccinelle.png",
+   "view": "side",
+   "body": 0,
+   "paint": "red",
+   "liv": "ladybug",
+   "roof": 0,
+   "wheel": "aero17",
+   "trim": 1,
+   "size": [
+    1840,
+    680
+   ],
+   "key": "side|1|0|5|10|0|aero17|1"
+  },
+  {
+   "file": "q34_blanc_vache.png",
+   "view": "q34",
+   "body": 0,
+   "paint": "white",
+   "liv": "cow",
+   "roof": 0,
+   "wheel": "aero17",
+   "trim": 1,
+   "size": [
+    1600,
+    720
+   ],
+   "key": "q34|1|0|0|11|0|aero17|1"
+  }
+ ]
+}
