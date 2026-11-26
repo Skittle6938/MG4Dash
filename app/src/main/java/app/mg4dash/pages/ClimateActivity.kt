@@ -211,6 +211,8 @@ class ClimateActivity : PageActivity() {
     private lateinit var modesGlass: LinearLayout
     private var cabKey: String? = null
     private lateinit var mirror: ScreenMirror
+    /** For the tests, where the window never has the focus. */
+    @androidx.annotation.VisibleForTesting internal var forceShot = false
 
     /**
      * The cabin's centre screen shows this very page, its own screen showing it again, and so on (26/11): a small
@@ -244,7 +246,7 @@ class ClimateActivity : PageActivity() {
 
         fun take() {
             val root = window?.decorView ?: return
-            if (root.width <= 0 || !hasWindowFocus()) return
+            if (root.width <= 0 || !hasWindowFocus() && !forceShot) return
             val t0 = android.os.SystemClock.uptimeMillis()
             val w = 480; val h = w * root.height / root.width
             val b = spare?.takeIf { it.width == w && it.height == h } ?: android.graphics.Bitmap.createBitmap(w, h, android.graphics.Bitmap.Config.ARGB_8888)
@@ -273,7 +275,7 @@ class ClimateActivity : PageActivity() {
             val w = b.width - 1f; val h = b.height - 1f
             m.setPolyToPoly(floatArrayOf(1f, 1f, w, 1f, w, h, 1f, h), 0, quad, 0, 4)
             canvas.save(); canvas.concat(m)
-            paint.alpha = if (CarBridge.state.value.hvacOn == true) 235 else 150
+            paint.alpha = 255   // opaque: the picture's own home screen never shows through, climate on or off (26/11)
             canvas.drawBitmap(b, 0f, 0f, paint)
             canvas.restore()
         }

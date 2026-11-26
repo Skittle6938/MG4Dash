@@ -109,6 +109,31 @@ class ShowroomShots {
         app.mg4dash.showroom.AirFlow.RES = .75f
     }
 
+    /** The centre screen shows the climate page with the climate off too (26/11), dark and light. */
+    @Test fun screenWithClimateOff() {
+        val ctx = RuntimeEnvironment.getApplication()
+        for ((n, theme) in listOf("dark" to 1, "light" to 2)) {
+            app.mg4dash.system.Prefs(ctx).raw.edit().clear().putBoolean("vertical_dock", true).putInt("theme_mode", theme).commit()
+            CarLook(ctx).rhd = false
+            val a = Robolectric.buildActivity(app.mg4dash.pages.ClimateActivity::class.java).setup().visible().get()
+            val off = app.mg4dash.car.VehicleState(connected = true, hvacOn = false, fanSpeed = 3, fanDirection = 1, driverTemp = 21f, outsideTemp = 5f)
+            a.render(off)
+            val root = a.window.decorView
+            save(root, "x.png")
+            val end = System.currentTimeMillis() + 4_000
+            while (System.currentTimeMillis() < end) { shadowOf(Looper.getMainLooper()).idleFor(200, TimeUnit.MILLISECONDS); Thread.sleep(40) }
+            // Robolectric gives the window no focus: the screen is taken by hand
+            val m = app.mg4dash.pages.ClimateActivity::class.java.getDeclaredField("mirror").apply { isAccessible = true }.get(a)
+            val take = m.javaClass.getDeclaredMethod("take").apply { isAccessible = true }
+            val focus = m.javaClass.declaredFields.firstOrNull { it.name == "capturing" }
+            save(root, "x.png")
+            app.mg4dash.pages.ClimateActivity::class.java.getDeclaredField("forceShot").apply { isAccessible = true }.setBoolean(a, true)
+            take.invoke(m)
+            shadowOf(Looper.getMainLooper()).idleFor(500, TimeUnit.MILLISECONDS)
+            save(root, "x.png"); save(root, "climate_off_$n.png")
+        }
+    }
+
     @Test fun vehiclePage() {
         val ctx = RuntimeEnvironment.getApplication()
         app.mg4dash.system.Prefs(ctx).raw.edit().clear().putBoolean("vertical_dock", true).putInt("theme_mode", 1).commit()
