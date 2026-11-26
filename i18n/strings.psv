@@ -1460,3 +1460,30 @@ cl_lhd|Left-hand drive|Conduite à gauche|Linkslenker|Volante a la izquierda|Gui
 cl_rhd|Right-hand drive|Conduite à droite|Rechtslenker|Volante a la derecha|Guida a destra|Rechtsgestuurd|Sağdan direksiyon|Řízení vpravo
 cl_rear_window|Rear window|Lunette arrière|Heckscheibe|Luneta trasera|Lunotto|Achterruit|Arka cam|Zadní okno
 cl_auto_flow|AUTO air flow: %1$s|Débit d'air en AUTO : %1$s|AUTO-Luftmenge: %1$s|Caudal de aire AUTO: %1$s|Portata d'aria AUTO: %1$s|AUTO-luchtdebiet: %1$s|AUTO hava akışı: %1$s|Průtok vzduchu AUTO: %1$s
+sr_p_gold|Solid gold|Or massif|Massivgold|Oro macizo|Oro massiccio|Massief goud|Som altın|Ryzí zlato
+sr_p_chrome|Chrome|Chrome|Chrom|Cromo|Cromo|Chroom|Krom|Chrom
+sr_p_rainbow|Rainbow|Arc-en-ciel|Regenbogen|Arcoíris|Arcobaleno|Regenboog|Gökkuşağı|Duha
+sr_p_chameleon|Chameleon|Caméléon|Chamäleon|Camaleón|Camaleonte|Kameleon|Bukalemun|Chameleon
+sr_p_galaxy|Galaxy|Galaxie|Galaxie|Galaxia|Galassia|Melkweg|Galaksi|Galaxie
+sr_p_sunset|Sunset|Coucher de soleil|Sonnenuntergang|Atardecer|Tramonto|Zonsondergang|Gün batımı|Západ slunce
+sr_p_candy|Candy floss|Barbe à papa|Zuckerwatte|Algodón de azúcar|Zucchero filato|Suikerspin|Pamuk şeker|Cukrová vata
+sr_p_carbon|Forged carbon|Carbone forgé|Geschmiedeter Carbon|Carbono forjado|Carbonio forgiato|Gesmeed carbon|Dövme karbon|Kovaný karbon
+sr_l_none|None|Aucune|Keine|Ninguna|Nessuna|Geen|Yok|Žádný
+sr_l_rally|Rally|Rallye|Rallye|Rally|Rally|Rally|Ralli|Rallye
+sr_l_flames|Flames|Flammes|Flammen|Llamas|Fiamme|Vlammen|Alevler|Plameny
+sr_l_bolt|Lightning bolt|Éclair|Blitz|Rayo|Fulmine|Bliksem|Şimşek|Blesk
+sr_l_check|Chequered|Damier|Karo|Ajedrezado|Scacchi|Geblokt|Dama|Šachovnice
+sr_l_pixels|Pixels|Pixels|Pixel|Píxeles|Pixel|Pixels|Pikseller|Pixely
+sr_l_tricolore|Tricolore|Tricolore|Trikolore|Tricolor|Tricolore|Driekleur|Üç renk|Trikolóra
+sr_l_camo|Camouflage|Camouflage|Tarnmuster|Camuflaje|Mimetico|Camouflage|Kamuflaj|Maskování
+sr_l_leopard|Leopard|Léopard|Leopard|Leopardo|Leopardo|Luipaard|Leopar|Leopard
+sr_l_zebra|Zebra|Zèbre|Zebra|Cebra|Zebra|Zebra|Zebra|Zebra
+sr_l_ladybug|Ladybird|Coccinelle|Marienkäfer|Mariquita|Coccinella|Lieveheersbeestje|Uğur böceği|Beruška
+sr_l_cow|Cow|Vache|Kuh|Vaca|Mucca|Koe|İnek|Kráva
+sr_tab_livery|Livery|Livrée|Folierung|Decoración|Livrea|Belettering|Kaplama|Polep
+sr_fun_colours|Fun colours|Coloris fun|Spaßfarben|Colores divertidos|Colori fantasia|Fun-kleuren|Eğlenceli renkler|Zábavné barvy
+sr_livery_on|Livery · on %1$s|Livrée · sur %1$s|Folierung · auf %1$s|Decoración · sobre %1$s|Livrea · su %1$s|Belettering · op %1$s|Kaplama · %1$s üzerinde|Polep · na %1$s
+sr_random|Random|Au hasard|Zufällig|Al azar|A caso|Willekeurig|Rastgele|Náhodně
+sr_fin_fun|Imaginary colour, for fun.|Coloris imaginaire, pour le plaisir.|Fantasiefarbe, nur zum Spaß.|Color imaginario, por diversión.|Colore immaginario, per divertimento.|Denkbeeldige kleur, voor de lol.|Hayali renk, eğlence için.|Smyšlená barva, pro radost.
+sr_painting|Painting…|Peinture…|Lackieren…|Pintando…|Verniciatura…|Spuiten…|Boyanıyor…|Lakování…
+sr_livery_word|livery %1$s|livrée %1$s|Folierung %1$s|decoración %1$s|livrea %1$s|belettering %1$s|kaplama %1$s|polep %1$s

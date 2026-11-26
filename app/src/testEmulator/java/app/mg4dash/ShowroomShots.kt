@@ -73,6 +73,21 @@ class ShowroomShots {
         }
     }
 
+    @Test fun lightTheme() {
+        val ctx = RuntimeEnvironment.getApplication()
+        app.mg4dash.system.Prefs(ctx).raw.edit().clear().putBoolean("vertical_dock", true).putInt("theme_mode", 2).commit()
+        CarLook(ctx).stock(); CarLook(ctx).rhd = false; CarLook(ctx).threeQuarter = true
+        for ((n, cls) in listOf("climate" to app.mg4dash.pages.ClimateActivity::class.java, "vehicle" to app.mg4dash.pages.VehicleActivity::class.java)) {
+            val a = Robolectric.buildActivity(cls).setup().get()
+            val root = a.window.decorView
+            save(root, "x.png"); waitPainted(root)
+            val end = System.currentTimeMillis() + 3_000
+            while (System.currentTimeMillis() < end) { shadowOf(Looper.getMainLooper()).idleFor(200, TimeUnit.MILLISECONDS); Thread.sleep(50) }
+            save(root, "x.png"); shadowOf(Looper.getMainLooper()).idleFor(2, TimeUnit.SECONDS)
+            save(root, "showroom_light_$n.png")
+        }
+    }
+
     @Test fun vehiclePage() {
         val ctx = RuntimeEnvironment.getApplication()
         app.mg4dash.system.Prefs(ctx).raw.edit().clear().putBoolean("vertical_dock", true).putInt("theme_mode", 1).commit()

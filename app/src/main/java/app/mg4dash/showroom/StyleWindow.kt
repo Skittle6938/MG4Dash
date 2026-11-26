@@ -65,11 +65,12 @@ object StyleWindow {
         val content = kit.column()
         var tab = 0
         lateinit var render: () -> Unit
-        val (tabs, showTab) = sk.segments(listOf(a.getString(R.string.sr_tab_model), a.getString(R.string.sr_tab_colour))) { i -> tab = i; render() }
+        val (tabs, showTab) = sk.segments(listOf(a.getString(R.string.sr_tab_model), a.getString(R.string.sr_tab_colour), a.getString(R.string.sr_tab_livery))) { i -> tab = i; render() }
         panel.addView(tabs, kit.lp(-1, -2, t = 14))
         panel.addView(content, kit.lp(-1, 0, 1f, t = 16))
         val foot = kit.row()
-        foot.addView(option(a, kit, a.getString(R.string.sr_stock), null, false) { look.stock(); render() }, kit.lp(kit.dp(190), kit.dp(50)))
+        foot.addView(option(a, kit, a.getString(R.string.sr_random), null, false) { look.random(); render() }, kit.lp(kit.dp(170), kit.dp(50)))
+        foot.addView(option(a, kit, a.getString(R.string.sr_stock), null, false) { look.original(); render() }, kit.lp(kit.dp(170), kit.dp(50), l = 10))
         val finish = kit.text("", 14f, R.color.text_title).apply { gravity = Gravity.END; maxLines = 2 }
         foot.addView(finish, kit.lp(0, -2, 1f, l = 12))
         panel.addView(foot, kit.lp(-1, -2))
@@ -78,11 +79,20 @@ object StyleWindow {
         render = {
             showTab(tab); showView(if (profile) 1 else 0)
             model.text = "MG4 ${look.version.label}"
-            name.text = look.name(a.getString(R.string.sr_satin), a.getString(R.string.sr_black_roof))
+            name.text = look.name(a)
             wheelLine.text = "${a.getString(R.string.sr_wheels)} ${wheelName(a, look.wheel)} · ${wheelSub(a, look.wheel)}"
-            finish.text = a.getString(when (look.paint.finish) { PaintShop.Finish.SATIN -> R.string.sr_fin_satin; PaintShop.Finish.SOLID -> R.string.sr_fin_solid; else -> R.string.sr_fin_metal })
+            finish.text = a.getString(when {
+                look.paint.fun_ -> R.string.sr_fin_fun
+                look.paint.finish == PaintShop.Finish.SATIN -> R.string.sr_fin_satin
+                look.paint.finish == PaintShop.Finish.SOLID -> R.string.sr_fin_solid
+                else -> R.string.sr_fin_metal
+            })
             content.removeAllViews()
-            if (tab == 0) modelTab(a, kit, sk, content, look) { render() } else colourTab(a, kit, sk, content, look) { render() }
+            when (tab) {
+                0 -> modelTab(a, kit, sk, content, look) { render() }
+                1 -> colourTab(a, kit, sk, content, look) { render() }
+                else -> liveryTab(a, kit, sk, content, look) { render() }
+            }
             place(car, stage, look, profile)
             changed()
         }
@@ -145,8 +155,7 @@ object StyleWindow {
     }
 
     private fun colourTab(a: Activity, kit: Kit, sk: ShowroomKit, parent: LinearLayout, look: CarLook, redo: () -> Unit) {
-        parent.addView(sk.label(a.getString(R.string.sr_mg4_colours)))
-        CarPaint.OFFICIAL.chunked(4).forEachIndexed { r, row ->
+        fun grid(list: List<CarPaint>) = list.chunked(4).forEachIndexed { r, row ->
             val line = kit.row()
             row.forEachIndexed { i, p ->
                 val on = look.paint.id == p.id
@@ -158,12 +167,44 @@ object StyleWindow {
                     setPadding(kit.dp(10), kit.dp(8), kit.dp(8), kit.dp(8))
                     addView(Swatch(a, p), kit.lp(kit.dp(44), kit.dp(44), r = 10))
                     val label = kit.column()
-                    label.addView(kit.text(p.name, 15f, if (on) R.color.text_value else R.color.text_sub).apply { maxLines = 2 })
+                    label.addView(kit.text(p.label(a), 15f, if (on) R.color.text_value else R.color.text_sub).apply { maxLines = 2; isSingleLine = false })
                     if (p.finish == PaintShop.Finish.SATIN) label.addView(kit.text("${a.getString(R.string.sr_satin)} · XPower", 12f, R.color.text_title))
                     addView(label, kit.lp(0, -2, 1f))
                     isClickable = true; setOnClickListener { look.paint = p; redo() }
                 }
-                line.addView(tile, kit.lp(0, kit.dp(66), 1f, l = if (i > 0) 8 else 0))
+                line.addView(tile, kit.lp(0, kit.dp(62), 1f, l = if (i > 0) 8 else 0))
+            }
+            parent.addView(line, kit.lp(-1, -2, t = if (r == 0) 9 else 8))
+        }
+        parent.addView(sk.label(a.getString(R.string.sr_mg4_colours)))
+        grid(CarPaint.OFFICIAL)
+        parent.addView(sk.label(a.getString(R.string.sr_fun_colours)), kit.lp(-1, -2, t = 18))
+        grid(CarPaint.FUN)
+    }
+
+    /** Each livery on the chosen paint, a small profile painted one after the other. */
+    private fun liveryTab(a: Activity, kit: Kit, sk: ShowroomKit, parent: LinearLayout, look: CarLook, redo: () -> Unit) {
+        parent.addView(sk.label(a.getString(R.string.sr_livery_on, look.paint.label(a))))
+        Livery.ALL.chunked(4).forEachIndexed { r, row ->
+            val line = kit.row()
+            row.forEachIndexed { i, l ->
+                val on = look.livery.id == l.id
+                val tile = kit.column().apply {
+                    gravity = Gravity.CENTER_HORIZONTAL
+                    background = GradientDrawable().apply {
+                        setColor(Themes.color(a, if (on) R.color.panel_raised else R.color.panel)); cornerRadius = kit.dp(14).toFloat()
+                        setStroke(kit.dp(if (on) 2 else 1), Themes.color(a, if (on) R.color.accent_action else R.color.panel_border))
+                    }
+                    setPadding(kit.dp(4), kit.dp(6), kit.dp(4), kit.dp(6))
+                    val thumb = CarImage(a)
+                    val w = kit.dp(166); val h = w * 680 / 1840
+                    thumb.box.set(0f, 0f, w.toFloat(), h.toFloat())
+                    thumb.show(look.config(PaintShop.View.SIDE).copy(livery = l), w)
+                    addView(thumb, kit.lp(w, h))
+                    addView(kit.text(a.getString(l.nameRes), 15f, if (on) R.color.text_value else R.color.text_sub), kit.lp(-2, -2, t = 3))
+                    isClickable = true; setOnClickListener { look.livery = l; redo() }
+                }
+                line.addView(tile, kit.lp(0, -2, 1f, l = if (i > 0) 8 else 0))
             }
             parent.addView(line, kit.lp(-1, -2, t = if (r == 0) 9 else 8))
         }
@@ -174,6 +215,13 @@ object StyleWindow {
         private val paint = Paint(Paint.ANTI_ALIAS_FLAG)
         override fun onDraw(c: Canvas) {
             val r = width / 2f
+            p.swatch?.let { cols ->
+                paint.shader = android.graphics.SweepGradient(r, r, cols.map { 0xFF000000.toInt() or it }.toIntArray() + (0xFF000000.toInt() or cols[0]), null)
+                c.drawCircle(r, r, r, paint)
+                paint.shader = RadialGradient(r * .64f, r * .52f, r * .6f, 0x80FFFFFF.toInt(), 0x00FFFFFF, Shader.TileMode.CLAMP)
+                c.drawCircle(r, r, r, paint)
+                return
+            }
             val col = 0xFF000000.toInt() or p.hex
             val dark = blend(p.hex, 0x000000, .55f)
             paint.shader = RadialGradient(r, r * .9f, r, col, dark, Shader.TileMode.CLAMP)

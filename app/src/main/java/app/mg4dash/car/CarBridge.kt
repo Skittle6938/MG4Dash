@@ -618,7 +618,8 @@ object CarBridge {
             chargeCtrl = e?.let { safe { it.chargeCtrlStatus } } ?: s.chargeCtrl,
             dischargeCtrl = e?.let { safe { it.disChargeCtrl } } ?: s.dischargeCtrl,
             dischargeRemainMin = e?.let { safe { it.disChargingRemainTime } } ?: s.dischargeRemainMin,
-            enduranceMode = v?.let { safe { it.enduranceMode } } ?: s.enduranceMode,
+            // A choice waiting for the car is kept (no flicker back to the old value)
+            enduranceMode = if (pending.containsKey("enduranceMode")) s.enduranceMode else v?.let { safe { it.enduranceMode } } ?: s.enduranceMode,
             overSpeedSound = v?.let { safe { it.overSpeedSoundMode } } ?: s.overSpeedSound,
             speedLimitSound = v?.let { safe { it.speedLimitSoundMode } } ?: s.speedLimitSound,
             odometerKm = odometer(g?.let { safe { it.totalMileage } }, s.odometerKm),
@@ -993,7 +994,11 @@ object CarBridge {
 
     /** Pending choices: field → (value asked, time it is given up). */
     private val pending = java.util.concurrent.ConcurrentHashMap<String, Pair<Int, Long>>()
-    private const val PENDING_MS = 4000L
+    /** A choice is shown as made this long unless the car confirms it or reads otherwise after the command (26/11: 4 s was short). */
+    private const val PENDING_MS = 7000L
+    /** Quick taps on the same setting: only the last one is sent, this long after it. */
+    private const val DRIVE_DEBOUNCE_MS = 350L
+    private val driveJobs = HashMap<String, kotlinx.coroutines.Job>()
     private val _drivePending = MutableStateFlow<Set<String>>(emptySet())
     /** Fields whose choice the car has not confirmed yet ("driveMode", "regenLevel"…). */
     val drivePending: StateFlow<Set<String>> = _drivePending
@@ -1055,7 +1060,12 @@ object CarBridge {
         val until = System.currentTimeMillis() + PENDING_MS
         targets.forEach { (f, v) -> pending[f] = v to until }
         _drivePending.value = pending.keys.toSet()
-        scope.launch {
+        // Quick repeated taps (26/11): the previous command of the same setting is dropped, the last one is sent
+        val group = targets.keys.sorted().joinToString()
+        driveJobs[group]?.cancel()
+        driveJobs[group] = scope.launch {
+            delay(DRIVE_DEBOUNCE_MS)
+            pending.keys.filter { it in targets }.forEach { f -> pending[f]?.let { pending[f] = it.first to System.currentTimeMillis() + PENDING_MS } }
             val ok = try { action() } catch (e: Exception) { Log.w(TAG, "SET $label: ${e.message}"); false }
             Log.i(TAG, "SET $label → $ok")
             for (wait in longArrayOf(600, 900, 1500, 1200)) { delay(wait); refreshDrive(); if (targets.keys.none { pending.containsKey(it) }) break }

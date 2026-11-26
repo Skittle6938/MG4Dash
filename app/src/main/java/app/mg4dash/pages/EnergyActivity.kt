@@ -177,7 +177,7 @@ class EnergyActivity : PageActivity() {
 
         // ── Battery (24/11): health and settings, a line under the car ──
         val batteryHint = kit.text("", 15f, R.color.text_title).apply {
-            background = android.graphics.drawable.GradientDrawable().apply { setColor(0xB810151F.toInt()); cornerRadius = kit.dp(20).toFloat(); setStroke(1, 0x12FFFFFF) }
+            background = android.graphics.drawable.GradientDrawable().apply { setColor(kit.color(R.color.panel_raised)); cornerRadius = kit.dp(20).toFloat(); setStroke(1, kit.color(R.color.panel_border)) }
             setPadding(kit.dp(16), kit.dp(9), kit.dp(16), kit.dp(9))
         }
         fun showBattery() {

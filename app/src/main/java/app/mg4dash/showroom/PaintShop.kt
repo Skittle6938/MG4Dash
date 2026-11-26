@@ -34,9 +34,11 @@ object PaintShop {
     /** [body] 0: Standard / Comfort (no spoiler), 1: Luxury / XPower (double spoiler). */
     data class Config(
         val view: View, val body: Int, val paint: CarPaint, val roof: Boolean, val wheel: Wheel?, val trim: Boolean,
+        val livery: Livery = Livery.NONE,
     )
 
-    class Meta(val w: Int, val h: Int, val wheels: Map<String, RectF>, val roof: Map<Int, RectF>, val trim: RectF?, val anchors: JSONObject)
+    class Meta(val w: Int, val h: Int, val wheels: Map<String, RectF>, val roof: Map<Int, RectF>, val trim: RectF?, val anchors: JSONObject,
+        val cam: FloatArray, val lo: FloatArray, val size: FloatArray)
 
     private const val DIR = "showroom/"
     private const val WREF = .8f
@@ -58,6 +60,7 @@ object PaintShop {
     fun meta(c: Context): Map<View, Meta> = meta ?: synchronized(this) {
         meta ?: run {
             val j = JSONObject(c.assets.open(DIR + "car.json").bufferedReader().use { it.readText() })
+            fun floats(a: org.json.JSONArray) = FloatArray(a.length()) { a.getDouble(it).toFloat() }
             fun rect(a: org.json.JSONArray) = RectF(a.getDouble(0).toFloat(), a.getDouble(1).toFloat(), a.getDouble(2).toFloat(), a.getDouble(3).toFloat())
             View.values().associateWith { v ->
                 val m = j.getJSONObject(v.key)
@@ -65,7 +68,8 @@ object PaintShop {
                 Meta(m.getInt("w"), m.getInt("h"),
                     wh.keys().asSequence().associateWith { rect(wh.getJSONArray(it)) },
                     rf.keys().asSequence().associate { it.toInt() to rect(rf.getJSONArray(it)) },
-                    m.optJSONArray("trim")?.let { rect(it) }, m.getJSONObject("an"))
+                    m.optJSONArray("trim")?.let { rect(it) }, m.getJSONObject("an"),
+                    floats(m.getJSONArray("cam")), floats(j.getJSONObject("pos").getJSONArray("lo")), floats(j.getJSONObject("pos").getJSONArray("size")))
             }.also { meta = it }
         }
     }
@@ -73,6 +77,10 @@ object PaintShop {
     /** The pixels of one view, body and scale: decoded once, kept while used. */
     private class Pack(val w: Int, val h: Int) {
         var alpha: ByteArray? = null
+        /** Each pixel's 3D point (m) and normal (−127..127), valid where [valid]: only for fun paints and liveries. */
+        var pos: FloatArray? = null
+        var nrm: ByteArray? = null
+        var valid: BooleanArray? = null
         val fin = HashMap<Finish, Pair<IntArray, IntArray>>()
         var roof: ByteArray? = null
         var trim: Bitmap? = null
@@ -85,7 +93,7 @@ object PaintShop {
     }
     private val lock = Mutex()
 
-    private fun key(c: Config, scale: Float) = listOf(c.view, scale, c.body, c.paint.id, if (c.roof) 1 else 0, c.wheel?.id ?: "", if (c.trim) 1 else 0).joinToString("|")
+    private fun key(c: Config, scale: Float) = listOf(c.view, scale, c.body, c.paint.id, c.livery.id, if (c.roof) 1 else 0, c.wheel?.id ?: "", if (c.trim) 1 else 0).joinToString("|")
 
     /** Already painted: at once, else null. */
     fun cached(c: Config, scale: Float): Bitmap? = cache.get(key(c, scale))
@@ -101,7 +109,7 @@ object PaintShop {
     /** The scale whose image is at least as wide as [px] on screen. */
     fun scaleFor(ctx: Context, view: View, px: Int): Float {
         val w = meta(ctx).getValue(view).w
-        return listOf(.25f, .5f).firstOrNull { w * it >= px * .96f } ?: 1f
+        return listOf(.125f, .25f, .5f).firstOrNull { w * it >= px * .96f } ?: 1f
     }
 
     private fun decode(ctx: Context, name: String, w: Int, h: Int): Bitmap {
@@ -118,7 +126,8 @@ object PaintShop {
         val w = (m.w * scale).roundToInt(); val h = (m.h * scale).roundToInt()
         return packs.getOrPut("$view$body@$scale") {
             // One scale at a time: the others are dropped (memory)
-            packs.keys.filter { it.startsWith("$view") && !it.endsWith("@$scale") }.forEach { packs.remove(it) }
+            // (the thumbnails' small scale stays aside)
+            if (scale > .125f) packs.keys.filter { it.startsWith("$view") && !it.endsWith("@$scale") && !it.endsWith("@0.125") }.forEach { packs.remove(it) }
             Pack(w, h)
         }
     }
@@ -151,6 +160,52 @@ object PaintShop {
         ByteArray(px.size) { ((px[it] shr 16) and 0xFF).toByte() }.also { p.alpha = it }
     }
 
+    /** The full-size picture, then one pixel out of N: never smoothed, a coordinate's two bytes are in different channels. */
+    private fun nearest(ctx: Context, name: String, w: Int, h: Int): IntArray {
+        val o = BitmapFactory.Options().apply { inPreferredConfig = Bitmap.Config.ARGB_8888; inPremultiplied = false; inScaled = false }
+        val full = ctx.assets.open(DIR + name).use { BitmapFactory.decodeStream(it, null, o) } ?: error("image $name")
+        val fw = full.width; val fh = full.height
+        val src = pixels(full); full.recycle()
+        if (fw == w && fh == h) return src
+        return IntArray(w * h) { i -> val x = (i % w) * fw / w; val y = (i / w) * fh / h; src[y * fw + x] }
+    }
+
+    private fun needPos(ctx: Context, p: Pack, view: View, body: Int) {
+        if (p.pos != null) return
+        val m = meta(ctx).getValue(view)
+        val d1 = nearest(ctx, "${pre(view, body)}_p1.png", p.w, p.h)
+        val d2 = nearest(ctx, "${pre(view, body)}_p2.png", p.w, p.h)
+        val dn = nearest(ctx, "${pre(view, body)}_n.png", p.w, p.h)
+        val n = p.w * p.h
+        val P = FloatArray(n * 3); val N = ByteArray(n * 3); val V = BooleanArray(n)
+        val lo = m.lo; val sz = m.size
+        for (i in 0 until n) {
+            val q = dn[i]
+            if ((q ushr 24) < 128) continue
+            V[i] = true
+            val a = d1[i]; val b = d2[i]
+            fun r(c: Int) = (c shr 16) and 0xFF
+            fun g(c: Int) = (c shr 8) and 0xFF
+            fun bl(c: Int) = c and 0xFF
+            P[i * 3] = lo[0] + sz[0] * (((bl(a) shl 8) or bl(b)) / 65535f)
+            P[i * 3 + 1] = lo[1] + sz[1] * (((r(a) shl 8) or g(a)) / 65535f)
+            P[i * 3 + 2] = lo[2] + sz[2] * (((r(b) shl 8) or g(b)) / 65535f)
+            N[i * 3] = (r(q) - 128).toByte(); N[i * 3 + 1] = (g(q) - 128).toByte(); N[i * 3 + 2] = (bl(q) - 128).toByte()
+        }
+        p.pos = P; p.nrm = N; p.valid = V
+    }
+
+    private fun needDecals(ctx: Context, names: List<String>) {
+        val missing = names.filter { it !in Shade.decals }
+        if (missing.isEmpty()) return
+        val add = missing.associateWith { n ->
+            val o = BitmapFactory.Options().apply { inPreferredConfig = Bitmap.Config.ARGB_8888; inPremultiplied = false; inScaled = false }
+            val b = ctx.assets.open(DIR + "decal_$n.png").use { BitmapFactory.decodeStream(it, null, o) } ?: error("decal $n")
+            Shade.Decal(b.width, b.height, pixels(b)).also { b.recycle() }
+        }
+        Shade.decals = Shade.decals + add
+    }
+
     private fun needRoof(ctx: Context, p: Pack, view: View, body: Int, scale: Float): ByteArray = p.roof ?: run {
         val box = meta(ctx).getValue(view).roof[body]
         val r = ByteArray(p.w * p.h)
@@ -172,6 +227,41 @@ object PaintShop {
         return ctx.assets.open(DIR + name).use { BitmapFactory.decodeStream(it, null, o) } ?: error("image $name")
     }
 
+    /** Fun paints and liveries: each pixel's colour from its 3D point and normal ([Shade]). */
+    private fun shaded(p: Pack, m: Meta, cfg: Config, scale: Float, a: ByteArray, W: IntArray, K: IntArray, R: ByteArray?, KS: IntArray?, out: IntArray) {
+        val P = p.pos!!; val N = p.nrm!!; val V = p.valid!!
+        val c0 = cfg.paint.linear
+        val lum = .2126f * c0[0] + .7152f * c0[1] + .0722f * c0[2]
+        val s = Shade.S().apply { aa = (if (cfg.view == View.SIDE) .0026f else .0034f) / scale; k = if (lum > .30f) Shade.C_BLACK else Shade.C_WHITE }
+        val cam = m.cam
+        val pfx = cfg.paint.fx; val lfx = cfg.livery.fx
+        for (i in out.indices) {
+            val al = a[i].toInt() and 0xFF
+            if (al == 0) continue
+            var r: Float; var g: Float; var b: Float; var er = 0f; var eg = 0f; var eb = 0f
+            if (V[i]) {
+                val x = P[i * 3]; val y = P[i * 3 + 1]; val z = P[i * 3 + 2]
+                val nx = N[i * 3] / 127f; val ny = N[i * 3 + 1] / 127f; val nz = N[i * 3 + 2] / 127f
+                val vx = cam[0] - x; val vy = cam[1] - y; val vz = cam[2] - z
+                val f = (nx * vx + ny * vy + nz * vz) / kotlin.math.sqrt(vx * vx + vy * vy + vz * vz)
+                s.x = x; s.y = y; s.z = z; s.nx = nx; s.ny = ny; s.nz = nz; s.f = f.coerceIn(0f, 1f)
+                s.r = c0[0]; s.g = c0[1]; s.b = c0[2]; s.er = 0f; s.eg = 0f; s.eb = 0f
+                pfx?.invoke(s); lfx?.invoke(s)
+                r = s.r / WREF; g = s.g / WREF; b = s.b / WREF; er = s.er; eg = s.eg; eb = s.eb
+            } else { r = c0[0] / WREF; g = c0[1] / WREF; b = c0[2] / WREF }
+            val w = W[i]; val k = K[i]
+            val kr = LUT[(k shr 16) and 0xFF]; val kg = LUT[(k shr 8) and 0xFF]; val kb = LUT[k and 0xFF]
+            r = kr + r * (LUT[(w shr 16) and 0xFF] - kr) + er
+            g = kg + g * (LUT[(w shr 8) and 0xFF] - kg) + eg
+            b = kb + b * (LUT[w and 0xFF] - kb) + eb
+            if (R != null && KS != null) {
+                val t = (R[i].toInt() and 0xFF) / 255f
+                if (t > 0f) { val q = KS[i]; r += (LUT[(q shr 16) and 0xFF] - r) * t; g += (LUT[(q shr 8) and 0xFF] - g) * t; b += (LUT[q and 0xFF] - b) * t }
+            }
+            out[i] = (al shl 24) or (toByte(r) shl 16) or (toByte(g) shl 8) or toByte(b)
+        }
+    }
+
     private fun compose(ctx: Context, cfg: Config, scale: Float): Bitmap {
         val p = pack(ctx, cfg.view, cfg.body, scale)
         val m = meta(ctx).getValue(cfg.view)
@@ -182,7 +272,11 @@ object PaintShop {
         val KS = if (roofOn) needFinish(ctx, p, cfg.view, cfg.body, Finish.SOLID).second else null
         val out = IntArray(p.w * p.h)
         val cr = cfg.paint.linear[0]; val cg = cfg.paint.linear[1]; val cb = cfg.paint.linear[2]
-        for (i in out.indices) {
+        val pfx = cfg.paint.fx; val lfx = cfg.livery.fx
+        if (pfx != null || lfx != null) {
+            needPos(ctx, p, cfg.view, cfg.body); needDecals(ctx, cfg.livery.decals)
+            shaded(p, m, cfg, scale, a, W, K, R, KS, out)
+        } else for (i in out.indices) {
             val al = a[i].toInt() and 0xFF
             if (al == 0) continue
             val w = W[i]; val k = K[i]

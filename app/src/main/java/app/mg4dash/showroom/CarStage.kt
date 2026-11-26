@@ -28,7 +28,8 @@ class CarStage(context: Context, private val kit: Kit, private val look: CarLook
     val front = TyreLabel(context.getString(R.string.sr_front_tyres))
     val rear = TyreLabel(context.getString(R.string.sr_rear_tyres))
     private val hint = kit.text(context.getString(R.string.sr_touch_hint) + "   |   " + context.getString(R.string.sr_long_hint), 15f, R.color.text_sub).apply {
-        background = GradientDrawable().apply { setColor(0xB3121620.toInt()); cornerRadius = kit.dp(20).toFloat(); setStroke(1, Themes.color(context, R.color.panel_border)) }
+        // Theme colours: the light theme's text was on a background of its own colour (26/11)
+        background = GradientDrawable().apply { setColor(Themes.color(context, R.color.panel_raised)); cornerRadius = kit.dp(20).toFloat(); setStroke(1, Themes.color(context, R.color.panel_border)) }
         setPadding(kit.dp(16), kit.dp(8), kit.dp(16), kit.dp(8))
         setOnClickListener { onStyle() }
     }
@@ -81,7 +82,7 @@ class CarStage(context: Context, private val kit: Kit, private val look: CarLook
     /** The car changed (view, paint, version): placed and painted again. */
     fun refresh() {
         title.text = "MG4 ${look.version.label}".uppercase()
-        name.text = look.name(context.getString(R.string.sr_satin), context.getString(R.string.sr_black_roof))
+        name.text = look.name(context)
         requestLayout(); place()
     }
 

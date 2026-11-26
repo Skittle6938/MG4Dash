@@ -43,11 +43,15 @@ class CarImage(context: Context) : View(context) {
     private val reflPaint = Paint(Paint.FILTER_BITMAP_FLAG)
     private val maskPaint = Paint().apply { xfermode = PorterDuffXfermode(PorterDuff.Mode.DST_IN) }
     private val floorPaint = Paint(Paint.ANTI_ALIAS_FLAG)
+    private val shadowPaint = Paint(Paint.ANTI_ALIAS_FLAG)
+    private val light = app.mg4dash.ui.Themes.isLight(context)
     var onPainted: (() -> Unit)? = null
 
     fun show(cfg: PaintShop.Config, widthPx: Int) {
         val sc = PaintShop.scaleFor(context, cfg.view, widthPx)
         if (cfg == config && sc == scale && image != null) return
+        // Another view (profile / three-quarter): the old picture goes at once, never drawn at the new size (26/11)
+        if (config != null && cfg.view != config?.view) { image = null; previous = null; fadeIn = true }
         config = cfg; scale = sc
         val ready = PaintShop.cached(cfg, sc)
         if (ready != null) { set(ready, fade = image != null); return }
@@ -58,8 +62,11 @@ class CarImage(context: Context) : View(context) {
         }
     }
 
+    private var fadeIn = false
+
     private fun set(b: Bitmap, fade: Boolean) {
         previous = if (fade) image else null
+        if (image != null) fadeIn = false
         image = b
         fadeStart = android.os.SystemClock.uptimeMillis()
         invalidate()
@@ -85,9 +92,17 @@ class CarImage(context: Context) : View(context) {
         }
         val img = image ?: return
         val t = ((android.os.SystemClock.uptimeMillis() - fadeStart) / FADE_MS.toFloat()).coerceIn(0f, 1f)
+        if (t >= 1f) fadeIn = false
+        // Light theme: a soft shadow under the car, so its edge does not look cut out on the light page (26/11)
+        if (light) {
+            val g = groundY ?: box.bottom
+            shadowPaint.shader = RadialGradient(0f, 0f, 1f, intArrayOf(0x40000000, 0x00000000), null, Shader.TileMode.CLAMP)
+            canvas.save(); canvas.translate(box.centerX(), g - box.height() * .02f); canvas.scale(box.width() * .5f, box.height() * .09f)
+            canvas.drawCircle(0f, 0f, 1f, shadowPaint); canvas.restore()
+        }
         previous?.let { if (t < 1f) drawCar(canvas, it, 1f - t) else previous = null }
-        drawCar(canvas, img, if (previous != null) t else 1f)
-        if (previous != null) postInvalidateOnAnimation()
+        drawCar(canvas, img, if (previous != null || fadeIn) t else 1f)
+        if (previous != null || fadeIn) postInvalidateOnAnimation()
     }
 
     private fun drawCar(canvas: Canvas, b: Bitmap, alpha: Float) {
@@ -104,11 +119,19 @@ class CarImage(context: Context) : View(context) {
             canvas.restoreToCount(layer)
         }
         paint.alpha = (alpha * 255).toInt()
+        if (light) {
+            // Feathered edge: the car drawn once slightly larger and faint under itself
+            halo.set(box.left - 1.5f, box.top - 1.5f, box.right + 1.5f, box.bottom + 1.5f)
+            paint.alpha = (alpha * 70).toInt(); canvas.drawBitmap(b, null, halo, paint)
+            paint.alpha = (alpha * 255).toInt()
+        }
         canvas.drawBitmap(b, null, box, paint)
     }
 
     /** The ground line under the wheels, in view pixels. */
     var groundY: Float? = null
 
-    private companion object { const val FADE_MS = 260L }
+    private val halo = RectF()
+
+    private companion object { const val FADE_MS = 280L }
 }
