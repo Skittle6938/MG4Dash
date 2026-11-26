@@ -37,6 +37,10 @@ class EnergyCar(context: Context) : View(context) {
     var limitText: (Int) -> String = { "$it %" }
 
     private var ghost: Bitmap? = null
+    /** The near side's wheels, opaque, over the see-through car: the far wheels behind them no longer show (26/11). */
+    private var wheels: Bitmap? = null
+    private var wheelBox: RectF? = null
+    var wheel: PaintShop.Wheel = PaintShop.Wheel.AERO17
     private var scope: CoroutineScope? = null
     private val p = Paint(Paint.ANTI_ALIAS_FLAG)
     private val glow = Paint(Paint.ANTI_ALIAS_FLAG)
@@ -61,14 +65,23 @@ class EnergyCar(context: Context) : View(context) {
         if (ghost != null) return
         val b = body
         scope?.launch {
-            val g = withContext(Dispatchers.IO) { context.assets.open("showroom/s${b}_ghost.webp").use { BitmapFactory.decodeStream(it) } }
-            if (b == body) { ghost = g; invalidate() }
+            val w = wheel
+            val (g, wb) = withContext(Dispatchers.IO) {
+                context.assets.open("showroom/s${b}_ghost.webp").use { BitmapFactory.decodeStream(it) } to
+                    context.assets.open("showroom/s_wh_${w.id}.webp").use { BitmapFactory.decodeStream(it) }
+            }
+            if (b == body) { ghost = g; wheels = wb; wheelBox = PaintShop.meta(context).getValue(PaintShop.View.SIDE).wheels[w.id]; invalidate() }
         }
     }
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
         ghost?.let { canvas.drawBitmap(it, null, box, img) }
+        val wb = wheelBox; val wbm = wheels
+        if (wb != null && wbm != null) {
+            val kw = box.width() / 1840f
+            canvas.drawBitmap(wbm, null, RectF(box.left + wb.left * kw, box.top + wb.top * kw, box.left + wb.right * kw, box.top + wb.bottom * kw), img)
+        }
         val k = box.width() / 1840f
         if (k <= 0f) return
         canvas.save(); canvas.translate(box.left, box.top); canvas.scale(k, k)

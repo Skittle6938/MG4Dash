@@ -31,6 +31,15 @@ class PagesRenderTest {
         for (s in states) { a.render(s); shadowOf(Looper.getMainLooper()).idle() }
     }
 
+    /** AUTO as the car reports it (26/11): power 1, auto 1, fan 15, direction 7: the air still shows, at a medium speed. */
+    @Test fun climateAutoShowsTheAir() {
+        val a = Robolectric.buildActivity(app.mg4dash.pages.ClimateActivity::class.java).setup().visible().get()
+        a.render(VehicleState(connected = true, hvacOn = true, autoOn = true, fanSpeed = 15, fanDirection = 7, driverTemp = 26f, outsideTemp = 5.5f))
+        val air = app.mg4dash.pages.ClimateActivity::class.java.getDeclaredField("air").apply { isAccessible = true }.get(a) as app.mg4dash.showroom.AirFlow
+        org.junit.Assert.assertEquals(.55f, air.power, 1e-3f)
+        org.junit.Assert.assertTrue(air.face || air.feet || air.screen)
+    }
+
     @Test fun energy() = check(app.mg4dash.pages.EnergyActivity::class.java)
     @Test fun vehicle() = check(app.mg4dash.pages.VehicleActivity::class.java)
     @Test fun climate() = check(app.mg4dash.pages.ClimateActivity::class.java)

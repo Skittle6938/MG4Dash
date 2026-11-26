@@ -366,11 +366,18 @@ class ClimateActivity : PageActivity() {
             for (k in 0 until patches.length()) {
                 val p = patches.getJSONObject(k)
                 val m = assets.open("showroom/" + p.getString("file")).use { android.graphics.BitmapFactory.decodeStream(it) } ?: continue
+                // The patch seen in the rear-view mirror, in the day: darker, as a reflection (26/11)
+                paint.colorFilter = android.graphics.PorterDuffColorFilter(if (key.endsWith("_day") && p.getString("file").endsWith("_b.png")) dim(colour, .78f) else colour, android.graphics.PorterDuff.Mode.SRC_IN)
                 c.drawBitmap(m, p.getDouble("x").toFloat(), p.getDouble("y").toFloat(), paint)
                 m.recycle()
             }
         } catch (e: Exception) { app.mg4dash.system.Log.w("Clim", "cabin paint: ${e.message}") }
         return pic
+    }
+
+    private fun dim(c: Int, k: Float): Int {
+        fun ch(s: Int) = (((c shr s) and 0xFF) * k).toInt().coerceIn(0, 255)
+        return 0xFF000000.toInt() or (ch(16) shl 16) or (ch(8) shl 8) or ch(0)
     }
 
     private fun chooseSide() {
@@ -446,7 +453,9 @@ class ClimateActivity : PageActivity() {
         fanValue.setTextColor(when { !on -> GLASS_OFF; autoOn -> kit.color(R.color.accent_cold); else -> GLASS_VALUE })
         fanGauge.onColor = kit.color(if (autoOn) R.color.text_disabled else R.color.accent_cold)
         fanGauge.value = if (on && !autoOn) realFan ?: 0 else 0
-        val parts = partsOf(s.fanDirection)
+        // In AUTO the car gives direction 7 (its own choice), fan 15, no real speed (seen on the car 26/11): shown as
+        // face and feet at a medium speed
+        val parts = partsOf(s.fanDirection) ?: if (s.fanDirection != null && (on || s.autoOn == true)) booleanArrayOf(true, true, false) else null
         // Orange heats (set point above the outside), blue cools
         val heatMode = (t ?: 0f) > (s.outsideTemp ?: 99f)
         val k = kit.color(if (heatMode) R.color.accent_heat else R.color.accent_cold)
@@ -455,7 +464,7 @@ class ClimateActivity : PageActivity() {
         rearTag.visibility = if (on && s.defrostRear == true) View.VISIBLE else View.GONE
         paintTag(rearTag, true, kit.color(R.color.accent_heat))
         air.heat = heatMode
-        air.power = if (!on) 0f else if (autoOn || realFan == null) .55f else .2f + .8f * realFan / VehicleState.FAN_MAX
+        air.power = if (!on) 0f else if (autoOn || realFan == null || realFan == 0) .55f else .2f + .8f * realFan / VehicleState.FAN_MAX
         air.day = day
         air.face = parts?.get(0) == true; air.feet = parts?.get(1) == true; air.screen = scr; air.defrost = s.defrostFront == true
         air.invalidate()

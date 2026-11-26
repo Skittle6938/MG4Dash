@@ -146,7 +146,7 @@ class EnergyActivity : PageActivity() {
         // ── Centre (redesign "Showroom", 26/11): the charge, the see-through car with its battery, the actions ──
         val sk = app.mg4dash.showroom.ShowroomKit(this, kit)
         val center = android.widget.FrameLayout(this)
-        energyCar = app.mg4dash.showroom.EnergyCar(this).apply { body = app.mg4dash.showroom.CarLook(this@EnergyActivity).version.body; limitText = { getString(R.string.sr_limit_at, it) } }
+        energyCar = app.mg4dash.showroom.EnergyCar(this).apply { wheel = app.mg4dash.showroom.CarLook(this@EnergyActivity).wheel; body = app.mg4dash.showroom.CarLook(this@EnergyActivity).version.body; limitText = { getString(R.string.sr_limit_at, it) } }
         center.addView(energyCar, android.widget.FrameLayout.LayoutParams(-1, -1))
         val top = kit.row().apply { gravity = Gravity.CENTER }
         soc = kit.text("—", 84f, light = true)
