@@ -26,7 +26,7 @@ La même page en local : `maquettes.html` avec `img/` à côté, à servir en HT
 | `src-v4/car.json` | Les repères géométriques des images (roues, batterie, prise, toit…). Il est inséré dans `paint.js` à la construction (`META`). |
 | `src-v4/page.tpl.html` | Le CSS (couleurs, tailles, rayons) et le texte autour de la maquette. |
 | `src-v4/README.md` | Comment reconstruire la page, refaire les images, mesurer une jante. |
-| `src-v4/cabin.py` | Fabrique `cabin_l.webp` et `cabin_r.webp` à partir de la vue intérieure MG. |
+| `src-v4/cabin.py`, `glass.py` | Fabriquent `cabin_l.webp`, `cabin_r.webp` et leurs versions de jour `cabin_l_day.webp`, `cabin_r_day.webp` à partir de la vue intérieure MG (section 13). |
 | `ref/` | 30 voitures calculées par le moteur de la maquette, en PNG pleine taille, pour contrôler le portage (section 9), et les deux décalcomanies `decal_num.png`, `decal_bolt.png`. |
 | `rendu3d/`, `sources/` | Scripts Blender, modèle 3D, photos de Marc. Inutile pour coder, utile seulement pour refaire une image. |
 
@@ -143,6 +143,7 @@ Coordonnées en pixels de l'image source de chaque vue (`side` 1840 × 680, `q34
 | Bas de caisse mats | `{s,q}_trim.webp` | WebP avec transparence, rogné à `trim` | 13 Ko | 13 Ko |
 | Vue transparente | `s{0,1}_ghost.webp` | WebP avec transparence, pleine taille | 1 046 Ko | |
 | Tableau de bord | `cabin_{l,r}.webp` | WebP 2400 × 900 | 389 Ko | |
+| Tableau de bord de jour (mode clair, section 13) | `cabin_{l,r}_day.webp` | WebP 2400 × 900 | 314 Ko | ajout du 26/11 |
 
 `s` = profil, `q` = trois-quarts. `0` = Standard et Comfort (sans becquet), `1` = Luxury et XPower (becquet).
 Les passes de position et de normale (2,5 Mo) ne servent qu'aux six coloris fun calculés et aux livrées.
@@ -216,3 +217,40 @@ Les noms des couleurs MG restent en anglais. Les noms des coloris fun, des livr�
 3. Vitesse du calcul sur l'autoradio, surtout pour les coloris calculés : à mesurer sur la voiture.
 4. Poids : +6 Mo, à dire à Marc dans le résultat.
 5. Côté de conduite par défaut : gauche dans la maquette.
+
+## 13. Tableau de bord : version « jour » et écran central (ajout du 26/11, 13 h)
+
+Demandé par Marc le 26/11 (retours sur la première installation) : en mode clair la photo sombre rend les textes noirs illisibles, et l'écran central doit montrer la vue Climatisation elle-même (mise en abyme).
+
+### Les images de jour
+- `img/cabin_l_day.webp` (conduite à gauche) et `img/cabin_r_day.webp` (à droite) : 2400 × 900, WebP, environ 160 Ko chacune. **Même cadrage, même taille et mêmes repères** que `cabin_l.webp` et `cabin_r.webp` : on change seulement de fichier selon le thème (clair = `_day`, sombre = image actuelle). Les flux d'air, les zones tactiles et les coins de l'écran ne bougent pas.
+- Ce qui change : derrière les vitres, le tunnel de nuit est remplacé par une route de campagne en plein jour (floue comme à vitesse réelle) ; l'habitacle est rééclairé (gris clair au lieu de noir) ; les rétroviseurs montrent un bout du même paysage. Les deux écrans gardent leur propre lumière.
+- Le paysage est entièrement calculé par `cabin.py` (aucune photo extérieure, donc aucune question de droits en plus). En conduite à droite l'image est retournée : la voiture roule alors à gauche, comme il faut.
+- Poids : +0,3 Mo dans l'APK.
+
+### À adapter dans l'appli en mode clair
+- Les flux d'air sont dessinés en mode additif (`lighter`) dans la maquette : sur une image claire ils deviennent presque blancs. En mode clair, les dessiner en fusion normale avec des couleurs plus saturées.
+- Le voile sombre sur les côtés et en haut (`.cabsh`) est fait pour l'image de nuit : en mode clair, le retirer ou le remplacer par un voile blanc léger.
+- Le haut de l'image (vitres) est très clair, le bas de l'habitacle reste gris moyen. Avec des panneaux blancs à environ 55 % d'opacité, les textes noirs se lisent partout (essai fait ici) ; en dessous de 40 %, le bas des panneaux devient juste.
+- Clim arrêtée : la désaturation prévue marche aussi sur l'image de jour, mais l'assombrir moins.
+
+### Les quatre coins de l'écran central
+Pixels de l'image 2400 × 900, identiques pour la nuit et le jour. Ordre : haut gauche, haut droit, bas droit, bas gauche.
+
+| Image | Haut gauche | Haut droit | Bas droit | Bas gauche |
+|---|---|---|---|---|
+| `cabin_l`, `cabin_l_day` | (1080, 436,5) | (1350, 440) | (1350, 545) | (1080, 539,5) |
+| `cabin_r`, `cabin_r_day` | (1050, 440) | (1320, 436,5) | (1320, 539,5) | (1050, 545) |
+
+- Les mêmes valeurs sont dans `src-v4/cabin.json` (`screen.l`, `screen.r`, et `cluster` pour le combiné), écrit par `cabin.py`.
+- À l'écran : multiplier par 1808/2400 (0,7533) puis retirer 20 px en hauteur, comme pour le reste de la page.
+- Le rectangle fait environ 270 × 104 px, soit le rapport 1920 × 720 de l'écran : une capture plein écran s'y pose sans déformation, avec une transformation en perspective sur ces quatre points (`Matrix.setPolyToPoly` sur Android).
+- Multiplier les couleurs de la capture par 0,94 (`screen.gain`) : un écran dans un habitacle, pas une feuille blanche.
+- Mise en abyme : dessiner dans ce rectangle la dernière image rendue de la vue. Chaque niveau fait 11 % du précédent : au troisième niveau l'écran mesure 3 px, inutile d'aller plus loin.
+- Sans rien dessiner, l'écran montre l'accueil de MG4Dash, déjà incrusté dans les quatre images.
+
+### Refaire ces images
+`glass.py <cabin_lhd.png> <dossier>` détoure les vitres et les miroirs (`glass.png`, `mirrors.png`, `foot.npz`, déjà dans `src-v4/masques/`), puis `cabin.py <cabin_lhd.png> <capture accueil> <img> day=<dossier des masques>` écrit les quatre images. Sans `day=`, seules les images de nuit sont refaites (identiques au pixel près à celles livrées). Il faut `opencv-python-headless`.
+
+### Approximations
+Paysage de synthèse, capot non représenté au pied du pare-brise, reflets des rétroviseurs pris dans le même paysage, habitacle éclairci par une courbe de tons (pas un nouveau rendu 3D).
