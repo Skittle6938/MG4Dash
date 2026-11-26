@@ -40,6 +40,9 @@ class AirFlow(context: Context) : View(context) {
     private val fill = Paint(Paint.ANTI_ALIAS_FLAG).apply { xfermode = PorterDuffXfermode(PorterDuff.Mode.ADD) }
     private val stroke = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.STROKE; strokeWidth = 1.6f; strokeCap = Paint.Cap.ROUND; xfermode = PorterDuffXfermode(PorterDuff.Mode.ADD) }
     private val start = android.os.SystemClock.uptimeMillis()
+    // Reused each frame (26/11: the page was slow; fewer allocations per frame)
+    private val colsBuf = IntArray(N + 1); private val whitesBuf = IntArray(N + 1); private val posBuf = FloatArray(N + 1)
+    private var drawNs = 0L; private var frames = 0; private var since = 0L
 
     private fun bez(p: FloatArray, n: Int = 20): List<FloatArray> = (0..n).map { i ->
         val t = i / n.toFloat(); val u = 1 - t; val a = u * u * u; val b = 3 * u * u * t; val c = 3 * u * t * t; val d = t * t * t
@@ -89,6 +92,7 @@ class AirFlow(context: Context) : View(context) {
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
         if (power <= 0f || width == 0) return
+        val n0 = System.nanoTime()
         val t = (android.os.SystemClock.uptimeMillis() - start) / 1000f
         canvas.save()
         canvas.scale(width / CW, height / CH)
@@ -106,7 +110,7 @@ class AirFlow(context: Context) : View(context) {
             }
             for (l in lines.getValue(k)) {
                 val h = (t * sp * l.v + l.ph) % 1f
-                val cols = IntArray(N + 1); val whites = IntArray(N + 1); val pos = FloatArray(N + 1)
+                val cols = colsBuf; val whites = whitesBuf; val pos = posBuf
                 for (i in 0..N) {
                     val u = i / N.toFloat(); val e = min(1f, u / .1f) * (1 - u).pow(1.15f)
                     val d1 = (((h - u) % 1f) + 1f) % 1f; val d2 = (((h + .5f - u) % 1f) + 1f) % 1f
@@ -120,7 +124,12 @@ class AirFlow(context: Context) : View(context) {
             }
         }
         canvas.restore()
-        postInvalidateDelayed(33)   // 30 frames a second: smooth enough, lighter for the head unit
+        // Timing in the log every 30 s (to follow the page's cost on the car)
+        drawNs += System.nanoTime() - n0; frames++
+        val now = android.os.SystemClock.uptimeMillis()
+        if (since == 0L) since = now
+        if (now - since > 30_000) { app.mg4dash.system.Log.i("Perf", "airflow ${drawNs / frames / 1000} µs a frame, ${frames * 1000 / (now - since)} fps"); drawNs = 0; frames = 0; since = now }
+        postInvalidateDelayed(40)   // 25 frames a second   // 30 frames a second: smooth enough, lighter for the head unit
     }
 
     private fun argb(a: Float, r: Int, g: Int, b: Int) = ((a.coerceIn(0f, 1f) * 255).toInt() shl 24) or (r shl 16) or (g shl 8) or b
@@ -130,7 +139,7 @@ class AirFlow(context: Context) : View(context) {
         const val CH = 644f
         const val K = 1808f / 2400f
         const val OY = -20f
-        private const val N = 16
+        private const val N = 12
         private val GLOW = mapOf(
             "face" to listOf(floatArrayOf(452f, 612f, 64f), floatArrayOf(1135f, 622f, 54f), floatArrayOf(1300f, 622f, 54f), floatArrayOf(1930f, 632f, 64f)),
             "screen" to listOf(floatArrayOf(760f, 392f, 100f), floatArrayOf(1000f, 388f, 100f), floatArrayOf(1240f, 386f, 100f), floatArrayOf(1480f, 388f, 100f), floatArrayOf(1720f, 392f, 100f)),

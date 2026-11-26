@@ -23,6 +23,8 @@ class ClimateActivity : PageActivity() {
         /** Height of the temperature and fan bars (same as the climate card's), and the touch margin above and below. */
         const val BAR_DP = 18
         const val BAR_TOUCH = 14
+        /** The painted cabin of the last opening: the same side, colour and theme open at once. */
+        @Volatile var cached: Pair<String, android.graphics.Bitmap>? = null
         /** Over the dark photo, in both themes (26/11: black on the photo in the light theme). */
         /** Over the night photo; the light theme has the day photo and dark texts on white glass (26/11). */
         const val NIGHT_VALUE = 0xFFFFFFFF.toInt()
@@ -224,19 +226,23 @@ class ClimateActivity : PageActivity() {
             colorFilter = android.graphics.ColorMatrixColorFilter(android.graphics.ColorMatrix().apply { setScale(.94f, .94f, .94f, 1f) })
         }
         private val m = android.graphics.Matrix()
-        private val tick = object : Runnable { override fun run() { take(); postDelayed(this, 1500) } }
+        private val tick = object : Runnable { override fun run() { take(); postDelayed(this, 5000) } }
+        /** While the page is drawn into the snapshot: the screen keeps the picture's own (one level only, 26/11). */
+        private var capturing = false
 
-        override fun onAttachedToWindow() { super.onAttachedToWindow(); postDelayed(tick, 800) }
+        override fun onAttachedToWindow() { super.onAttachedToWindow(); postDelayed(tick, 1200) }
         override fun onDetachedFromWindow() { super.onDetachedFromWindow(); removeCallbacks(tick) }
 
         fun take() {
             val root = window?.decorView ?: return
-            if (root.width <= 0) return
+            if (root.width <= 0 || !hasWindowFocus()) return
+            val t0 = android.os.SystemClock.uptimeMillis()
             val w = 480; val h = w * root.height / root.width
             val b = spare?.takeIf { it.width == w && it.height == h } ?: android.graphics.Bitmap.createBitmap(w, h, android.graphics.Bitmap.Config.ARGB_8888)
             val c = android.graphics.Canvas(b)
             c.scale(w / root.width.toFloat(), h / root.height.toFloat())
-            try { root.draw(c) } catch (_: Exception) { return }
+            capturing = true
+            try { root.draw(c) } catch (_: Exception) { return } finally { capturing = false }
             // At the size it is shown (about 200 × 80 px), filtered: no stairs on its lines (26/11)
             val tw = (quad[2] - quad[0]).toInt().coerceAtLeast(8); val th = (quad[5] - quad[3]).toInt().coerceAtLeast(4)
             var r = b
@@ -248,12 +254,13 @@ class ClimateActivity : PageActivity() {
                 android.graphics.Canvas(it).drawBitmap(r, 1f, 1f, null); it.setHasMipMap(true); it.prepareToDraw()
             }
             spare = shot; shot = b
+            app.mg4dash.system.Log.i("Perf", "climate screen snapshot ${android.os.SystemClock.uptimeMillis() - t0} ms")
             invalidate()
         }
 
         override fun onDraw(canvas: android.graphics.Canvas) {
             val b = small ?: return
-            if (quad[2] <= quad[0]) return
+            if (capturing || quad[2] <= quad[0]) return
             val w = b.width - 1f; val h = b.height - 1f
             m.setPolyToPoly(floatArrayOf(1f, 1f, w, 1f, w, h, 1f, h), 0, quad, 0, 4)
             canvas.save(); canvas.concat(m)
@@ -335,11 +342,16 @@ class ClimateActivity : PageActivity() {
 
     private fun loadCabin() {
         val colour = 0xFF000000.toInt() or app.mg4dash.showroom.CarLook(this).paint.hex
-        val key = "$rhd|$colour"
+        val key = "$rhd|$colour|$day"
         if (cabKey == key) return
+        // Painted once, kept for the next openings of the page (26/11: the page was slow to open)
+        cached?.takeIf { it.first == key }?.let { cabKey = key; cabImage.setImageBitmap(it.second); return }
         val side = rhd
         lifecycleScope.launch {
+            val t0 = android.os.SystemClock.uptimeMillis()
             val b = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) { paintedCabin(side, colour) }
+            app.mg4dash.system.Log.i("Perf", "climate cabin painted in ${android.os.SystemClock.uptimeMillis() - t0} ms")
+            cached = key to b
             if (side == rhd) { cabKey = key; cabImage.setImageBitmap(b) }
         }
     }
