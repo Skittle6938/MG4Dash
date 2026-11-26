@@ -77,11 +77,6 @@ class EnergyCar(context: Context) : View(context) {
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
         ghost?.let { canvas.drawBitmap(it, null, box, img) }
-        val wb = wheelBox; val wbm = wheels
-        if (wb != null && wbm != null) {
-            val kw = box.width() / 1840f
-            canvas.drawBitmap(wbm, null, RectF(box.left + wb.left * kw, box.top + wb.top * kw, box.left + wb.right * kw, box.top + wb.bottom * kw), img)
-        }
         val k = box.width() / 1840f
         if (k <= 0f) return
         canvas.save(); canvas.translate(box.left, box.top); canvas.scale(k, k)
