@@ -9,6 +9,7 @@ package app.mg4dash.media
 internal class LyricsClock {
     private var key: String? = null
     private var reported = Long.MIN_VALUE
+    private var reportedRaw = Long.MIN_VALUE
     private var anchor = 0L
     private var at = 0L
     private var playing = false
@@ -19,14 +20,19 @@ internal class LyricsClock {
         val k = "${m.artist}|${m.title}"
         val pos = m.positionMs.coerceAtLeast(0L)
         val here = position(now)
+        // A new report: the player's own position changed. The same position sent again (CarPlay, #135: 0 again and
+        // again with a fresh time) is not one, the clock keeps running
+        val raw = if (m.positionReportedMs >= 0) m.positionReportedMs else pos
+        val fresh = if (m.positionReportedMs >= 0) raw != reportedRaw else pos != reported
         anchor = when {
             k != key -> { key = k; pos }
             // Within the reported second the clock is finer than the report: kept (no step back each second)
-            pos != reported && (m.positionStepMs <= 0 || here < pos || here >= pos + m.positionStepMs) -> pos
+            fresh && (m.positionStepMs <= 0 || here < pos || here >= pos + m.positionStepMs) -> pos
             else -> here
         }
         at = now
         reported = pos
+        reportedRaw = raw
         playing = m.playing
         duration = m.durationMs
     }

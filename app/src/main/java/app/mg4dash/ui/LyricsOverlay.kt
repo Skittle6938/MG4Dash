@@ -1,6 +1,7 @@
 package app.mg4dash.ui
 
 import app.mg4dash.media.LyricsClock
+import app.mg4dash.cards.LyricsScroll
 import android.content.Context
 import android.content.Intent
 import android.content.ActivityNotFoundException
@@ -335,16 +336,33 @@ object LyricsOverlay {
                 val pos = clockNow()
                 val currentTrack = track ?: break
                 renderTrackAt(pos)
-                delay(250)
+                // Woken when the next line's move starts, so it starts on time
+                delay(currentTrack.synced?.let { LyricsScroll.untilNext(it, pos) } ?: 250L)
             }
         }
     }
+    /** The line the pill shows, of [shownTrack] (-1: none yet): a move of one line scrolls (26/11). */
+    private var shownIndex = -1
+    private var shownTrack: Any? = null
+
     private fun renderTrackAt(positionMs: Long) {
         val currentTrack = track ?: return
         val synced = currentTrack.synced
         if (synced != null) {
-            val i = synced.indexOfLast { it.first <= positionMs }.coerceAtLeast(0)
+            if (shownTrack !== currentTrack) { shownTrack = currentTrack; shownIndex = -1 }
+            val i = LyricsScroll.index(synced, positionMs)
+            val moved = i != shownIndex
+            val a = activeTextView; val n = nextTextView; val prev = previousTextView
+            // Measured before the lines take their new texts
+            val shift = if (moved && shownIndex >= 0 && i == shownIndex + 1 && a != null && n != null && a.height > 0) (n.top - a.top).toFloat() else 0f
+            shownIndex = i
             update(synced.getOrNull(i)?.second.orEmpty(), synced.getOrNull(i + 1)?.second.orEmpty(), synced.getOrNull(i - 1)?.second.orEmpty())
+            if (moved) {
+                a?.alpha = 1f; n?.alpha = .72f; prev?.alpha = .8f
+                val rows = listOfNotNull(prev, a, n)
+                if (shift > 0f) LyricsScroll.slide(rows, shift, LyricsScroll.duration(synced, i), a, .72f, prev, 25f / 20f)
+                else LyricsScroll.settle(rows)
+            }
         } else {
             val plain = currentTrack.plain?.lineSequence()?.filter { it.isNotBlank() }?.toList().orEmpty()
             val i = if (plain.isEmpty()) -1 else (positionMs / 5_000L).toInt().coerceAtMost(plain.lastIndex)

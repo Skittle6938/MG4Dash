@@ -72,4 +72,17 @@ class LyricsRepoTest {
         assertEquals(null, track.synced)
         assertEquals(null, track.plain)
     }
+
+    /** CarPlay's guests and joint artists (#135): searched as given, then with the main artist only. */
+    @Test fun searchesDropGuestsAndTryTheMainArtist() {
+        assertEquals("Song", LyricsRepo.clean("Song (feat. Guest)"))
+        assertEquals("Song", LyricsRepo.clean("Song [with Guest]"))
+        assertEquals("Song", LyricsRepo.clean("Song ft. Guest"))
+        assertEquals("Song", LyricsRepo.clean("Song - 2011 Remaster"))
+        assertEquals("Malcolm X", LyricsRepo.mainArtist("Malcolm X"))
+        assertEquals("Band One", LyricsRepo.mainArtist("Band One & Band Two"))
+        assertEquals("Band One", LyricsRepo.mainArtist("Band One, Band Two"))
+        assertEquals(listOf("Band One & Band Two Song", "Band One Song"), LyricsRepo.searches("Band One & Band Two", "Song (feat. Guest)"))
+        assertEquals(listOf("Band Song"), LyricsRepo.searches("Band", "Song"))
+    }
 }

@@ -86,12 +86,15 @@ object LyricsRepo {
             missing = true
             null
         } catch (_: Exception) { return@withContext null }
-        val result = found ?: try {
-            if (!missing) return@withContext null
-            val q = listOf(artist, clean(title)).filter { it.isNotBlank() }.joinToString(" ")
-            val arr = JSONArray(request("$BASE/search?${query(mapOf("q" to q))}")?.body ?: return@withContext null)
-            best(arr, artist, title, durationMs)
-        } catch (_: Exception) { null }
+        if (found == null && !missing) return@withContext null
+        // Not found as given: searched, first with the whole artist, then with the main one only (26/11, #135:
+        // CarPlay gives "A & B" or "A, B" and titles with "(feat. C)")
+        val result = found ?: searches(artist, title).firstNotNullOfOrNull { q ->
+            try {
+                val arr = JSONArray(request("$BASE/search?${query(mapOf("q" to q))}").body)
+                best(arr, artist, title, durationMs)
+            } catch (_: Exception) { null }
+        }
         if (result == null) return@withContext null
         val track = decode(k, artist, title, result)
         val (enabled, maxMb) = contextPrefs()
@@ -105,11 +108,26 @@ object LyricsRepo {
         return p.cacheEnabled to p.cacheMaxMb
     }
 
-    private fun clean(s: String) = s
+    internal fun clean(s: String) = s
+        // Guests in the title: "(feat. C)", "[with C]", " ft. C"
+        .replace(Regex("(?i)\\s*[(\\[](feat\\.?|ft\\.?|featuring|with)\\s+[^)\\]]*[)\\]]"), " ")
+        .replace(Regex("(?i)\\s+(feat\\.?|ft\\.|featuring)\\s+.+$"), " ")
+        .replace(Regex("(?i)\\s*-\\s*(\\d{4}\\s+)?remaster(ed)?(\\s+\\d{4})?(\\s+version)?$"), " ")
         .replace(Regex("(?i)\\s*\\((official\\s+(music\\s+)?video|lyrics?|audio|visualizer|remastered[^)]*)\\)"), " ")
         .replace(Regex("(?i)\\s*\\[(official\\s+(music\\s+)?video|lyrics?|audio|remastered[^]]*)]"), " ")
         .replace(Regex("(?i)\\s*-\\s*(single|feat\\.?\\s+.+)$"), " ")
         .replace(Regex("\\s+"), " ").trim()
+
+    /** The main artist of "A & B", "A, B", "A feat. B", "A x B". */
+    internal fun mainArtist(s: String) =
+        s.split(Regex("(?i)\\s*(,|&|;|/|\\s(feat\\.?|ft\\.|featuring|x|and|with)\\s)\\s*")).first().trim().ifEmpty { s.trim() }
+
+    /** The searches tried in turn when the exact request found nothing, without repeats. */
+    internal fun searches(artist: String, title: String): List<String> {
+        val t = clean(title)
+        return listOf(artist, mainArtist(artist)).map { a -> listOf(a.trim(), t).filter { it.isNotBlank() }.joinToString(" ") }
+            .filter { it.isNotBlank() }.distinct()
+    }
 
     private fun query(values: Map<String, String>) = values.entries.joinToString("&") {
         URLEncoder.encode(it.key, "UTF-8") + "=" + URLEncoder.encode(it.value, "UTF-8")
@@ -131,11 +149,11 @@ object LyricsRepo {
     }
 
     internal fun best(arr: JSONArray, artist: String, title: String, duration: Long): JSONObject? {
-        val a = artist.lowercase(Locale.ROOT).trim()
+        val a = mainArtist(artist).lowercase(Locale.ROOT).trim()
         val t = clean(title).lowercase(Locale.ROOT).trim()
         return (0 until arr.length()).mapNotNull { arr.optJSONObject(it) }
             .sortedBy { o ->
-                val oa = o.text("artistName").lowercase(Locale.ROOT)
+                val oa = mainArtist(o.text("artistName")).lowercase(Locale.ROOT)
                 val ot = clean(o.text("trackName")).lowercase(Locale.ROOT)
                 val dur = (o.optDouble("duration", 0.0) * 1000).toLong()
                 (if (ot == t) 0 else if (ot.contains(t) || t.contains(ot)) 2 else 8) +

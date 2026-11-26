@@ -8,9 +8,22 @@ import org.junit.Test
 
 /** The lyrics' clock (25/11: the karaoke did not move on Android Auto). */
 class LyricsClockTest {
-    private fun np(pos: Long, playing: Boolean = true, title: String = "Song", duration: Long = 200_000, step: Long = 0) =
+    private fun np(pos: Long, playing: Boolean = true, title: String = "Song", duration: Long = 200_000, step: Long = 0, reported: Long = -1) =
         MediaHub.NowPlaying(available = true, packageName = "aa.player", title = title, artist = "Artist", playing = playing, positionMs = pos,
-            durationMs = duration, positionStepMs = step)
+            durationMs = duration, positionStepMs = step, positionReportedMs = reported)
+
+    /** CarPlay (#135): the same position 0 sent again and again with a fresh time is not a seek to the start. */
+    @Test fun samePositionReportedAgainWithAFreshTime() {
+        val c = LyricsClock()
+        c.update(np(0, step = 1000, reported = 0), 1_000)
+        // Each report: 0 projected from a fresh time, so a few ms
+        c.update(np(5, step = 1000, reported = 0), 20_000)
+        c.update(np(3, step = 1000, reported = 0), 40_000)
+        assertEquals(41_000, c.position(42_000))
+        // A real seek back still counts
+        c.update(np(5_000, step = 1000, reported = 5_000), 50_000)
+        assertEquals(5_000, c.position(50_000))
+    }
 
     @Test fun runsBetweenReports() {
         val c = LyricsClock()

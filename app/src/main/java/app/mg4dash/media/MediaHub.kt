@@ -48,6 +48,12 @@ object MediaHub {
         val positionMs: Long = 0,
         /** The player's position step: 1000 when it reports whole seconds (AllGo), 0 when precise. */
         val positionStepMs: Long = 0,
+        /**
+         * The position as the player last reported it, before moving it on by the time since (-1: unknown). The lyrics
+         * clock only takes a report as new when this changes (26/11, #135: CarPlay sends the same position again and
+         * again with a fresh time, which put the lyrics back to their start).
+         */
+        val positionReportedMs: Long = -1,
         /** FM or AM radio: [artist] holds the frequency, if the title is the station name. */
         val analog: Boolean = false,
         /** RDS text of the FM station, sent by Radio Dash. */
@@ -1611,6 +1617,7 @@ object MediaHub {
             positionMs = st?.let { LyricsClock.projected(if (c.packageName == AA_MBS && it.position > 0) it.position * 1000 else it.position,
                 it.lastPositionUpdateTime, it.playbackSpeed, it.state == PlaybackState.STATE_PLAYING, android.os.SystemClock.elapsedRealtime()) } ?: 0,
             positionStepMs = if (c.packageName == AA_MBS) 1000 else 0,
+            positionReportedMs = st?.position?.let { if (c.packageName == AA_MBS && it > 0) it * 1000 else it } ?: -1,
             analog = analog,
             radioText = if (analog) rdsText else "",
             androidAuto = androidAutoAvailable(),

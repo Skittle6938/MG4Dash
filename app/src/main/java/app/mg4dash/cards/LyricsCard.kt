@@ -100,13 +100,16 @@ class LyricsCard(context: Context) : LinearLayout(context), HomeCard {
     private var karaokePlain: ScrollView? = null
     private var karaokePlainText: TextView? = null
     private var karaokeActiveIndex = -1
+    /** The line the card shows (-1: none yet): a move of one line scrolls, any other change is drawn at once. */
+    private var cardIndex = -1
     private var lyricsCacheInfo = LyricsRepo.CacheInfo(0, 0)
     private val ticker = object : Runnable {
         override fun run() {
             if (!shouldRunTicker() || track?.synced == null) { tickerScheduled = false; return }
             val pos = position(latest)
             drawLines(pos); drawKaraoke(pos)
-            tickerScheduled = postDelayed(this, 250)
+            // Woken when the next line's move starts, so it starts on time
+            tickerScheduled = postDelayed(this, track?.synced?.let { LyricsScroll.untilNext(it, pos) } ?: 250L)
         }
     }
 
@@ -227,7 +230,7 @@ class LyricsCard(context: Context) : LinearLayout(context), HomeCard {
         }
         val next = LyricsRepo.key(m.artist, m.title)
         if (next != key) {
-            key = next; track = null; requestedKey = null; karaokeActiveIndex = -1
+            key = next; track = null; requestedKey = null; karaokeActiveIndex = -1; cardIndex = -1
             requestJob?.cancel(); requestJob = null
             lines.forEach { it.text = "" }
             karaokeTitle?.text = m.title
@@ -514,29 +517,35 @@ class LyricsCard(context: Context) : LinearLayout(context), HomeCard {
         karaokeSynced?.visibility = View.VISIBLE
         karaokePlain?.visibility = View.GONE
         karaokeRows.getOrNull(3)?.visibility = View.VISIBLE
-        val index = synced.indexOfLast { it.first <= position }.coerceAtLeast(0)
-        if (index != karaokeActiveIndex) {
-            karaokeActiveIndex = index
-            karaokeRows.getOrNull(3)?.let { active ->
-                active.alpha = .35f; active.scaleX = .97f; active.scaleY = .97f
-                active.animate().alpha(1f).scaleX(1f).scaleY(1f).setDuration(170).start()
-            }
-        }
-        karaokeRows.forEachIndexed { row, line ->
-            val lyric = synced.getOrNull(index + row - 3)?.second.orEmpty()
-            line.text = lyric
+        val index = LyricsScroll.index(synced, position)
+        val moved = index != karaokeActiveIndex
+        val rows = karaokeRows
+        // One line on: the rows scroll up by one line (26/11), measured before they take the new texts
+        val step = moved && karaokeActiveIndex >= 0 && index == karaokeActiveIndex + 1 && (rows.getOrNull(3)?.height ?: 0) > 0
+        val shift = if (step) (rows[NEXT].top - rows[3].top).toFloat() else 0f
+        karaokeActiveIndex = index
+        rows.forEachIndexed { row, line ->
+            line.text = synced.getOrNull(index + row - 3)?.second.orEmpty()
             line.setTextColor(Themes.color(activity, if (row == 3 || row == NEXT) R.color.text_value else R.color.text_sub))
-            if (row != 3) line.alpha = rowAlpha(row)
+            // Not while it scrolls: the ticker would cut the fades
+            if (moved) line.alpha = rowAlpha(row)
         }
+        if (step) LyricsScroll.slide(rows, shift, LyricsScroll.duration(synced, index), rows[3], NEXT_ALPHA, rows[2], 1f / .58f)
+        else if (moved) LyricsScroll.settle(rows)
     }
 
     private fun drawLines(position: Long) {
         val t = track
         val synced = t?.synced
         if (synced != null) {
-            val i = synced.indexOfLast { it.first <= position }.coerceAtLeast(0)
+            val i = LyricsScroll.index(synced, position)
             val radius = visibleLyricsRows / 2
             val activePx = activeFontSp
+            val moved = i != cardIndex
+            // One line on: the rows scroll up by one line (26/11), measured before they take the new texts
+            val step = moved && cardIndex >= 0 && i == cardIndex + 1 && lines[3].height > 0 && lines[NEXT].visibility == View.VISIBLE
+            val shift = if (step) (lines[NEXT].top - lines[3].top).toFloat() else 0f
+            cardIndex = i
             for (row in lines.indices) {
                 val distance = kotlin.math.abs(row - 3)
                 val ix = i + row - 3
@@ -546,12 +555,16 @@ class LyricsCard(context: Context) : LinearLayout(context), HomeCard {
                 lines[row].setTextSize(TypedValue.COMPLEX_UNIT_PX, if (row == 3 || row == NEXT) activePx else activeFontSp * .60f)
                 lines[row].maxLines = if (row == 3 || row == NEXT) wrapLines else 1
                 lines[row].ellipsize = android.text.TextUtils.TruncateAt.END
-                lines[row].alpha = when (row) { 3 -> 1f; NEXT -> NEXT_ALPHA; else -> .45f }
+                // Not while it scrolls: the ticker would cut the fades
+                if (moved) lines[row].alpha = when (row) { 3 -> 1f; NEXT -> NEXT_ALPHA; else -> .45f }
                 lines[row].visibility = if (distance <= radius) View.VISIBLE else View.GONE
                 lines[row].typeface = Typeface.create("sans-serif-medium", Typeface.BOLD)
             }
+            if (step) LyricsScroll.slide(lines, shift, LyricsScroll.duration(synced, i), lines[3], NEXT_ALPHA, lines[2], 1f / .60f)
+            else if (moved) LyricsScroll.settle(lines)
             return
         }
+        if (cardIndex >= 0) { cardIndex = -1; LyricsScroll.settle(lines) }
         val plain = t?.plain?.lineSequence()?.filter { it.isNotBlank() }?.toList().orEmpty()
         val ix = if (plain.isEmpty()) -1 else (position / 5000).toInt().coerceAtMost(plain.lastIndex)
         for (row in lines.indices) {
