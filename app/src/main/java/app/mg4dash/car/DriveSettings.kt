@@ -375,6 +375,15 @@ object DriveSettings {
         }
     }
 
+    /** Energy saving (Range+) can be set: MG4Control's VSM69 setEnduranceMode (SWI69/131/132), VSM setLongerEndurance (SWI68/165). */
+    val enduranceSettable: Boolean get() = route != Route.VPM_133
+
+    fun setEndurance(on: Boolean): Boolean = when (route) {
+        Route.A9 -> callVsmVoid("setEnduranceMode", if (on) 1 else 0)
+        Route.VSM_68 -> callVsmVoid("setLongerEndurance", if (on) 1 else 0)
+        Route.VPM_133 -> false
+    }
+
     /** setElkMode (l. 3053). */
     fun setLaneMode(mode: Int): Boolean = when (route) {
         Route.VPM_133 -> if (vsm() != null) { callVsm133("setLaneKeepingAsstMode", mode); true } else elkBinderSet(TX_ELK_SET_MODE, mode)

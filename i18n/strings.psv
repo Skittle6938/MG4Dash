@@ -1413,3 +1413,44 @@ mm_quality_high|High|Haute|Hoch|Alta|Alta|Hoog|Yüksek|Vysoká
 mm_today|Today|Aujourd'hui|Heute|Hoy|Oggi|Vandaag|Bugün|Dnes
 mm_mb|MB|Mo|MB|MB|MB|MB|MB|MB
 en_battery_header|Battery %1$s|Batterie %1$s|Batterie %1$s|Batería %1$s|Batteria %1$s|Batterij %1$s|Batarya %1$s|Baterie %1$s
+sr_touch_hint|Touch the car: other view|Toucher la voiture : autre vue|Auto antippen: andere Ansicht|Toca el coche: otra vista|Tocca l'auto: altra vista|Tik op de auto: andere weergave|Araca dokun: diğer görünüm|Klepnutí na auto: jiný pohled
+sr_long_hint|Long press: colours and style|Appui long : couleurs et style|Lange drücken: Farben und Stil|Pulsación larga: colores y estilo|Pressione lunga: colori e stile|Lang drukken: kleuren en stijl|Uzun bas: renkler ve stil|Dlouhé podržení: barvy a styl
+sr_tap_change|Touch to change|Toucher pour changer|Antippen zum Ändern|Toca para cambiar|Tocca per cambiare|Tik om te wijzigen|Değiştirmek için dokun|Klepnutím změníte
+sr_custom_only|Adjustable in Custom mode|Réglable en mode Perso|Im Modus Individuell einstellbar|Ajustable en modo Personal|Regolabile in modalità Personal.|Instelbaar in modus Eigen|Özel modda ayarlanabilir|Nastavitelné v režimu Vlastní
+sr_front_tyres|Front tyres|Pneus avant|Reifen vorne|Neumáticos delanteros|Pneumatici anteriori|Voorbanden|Ön lastikler|Přední pneumatiky
+sr_rear_tyres|Rear tyres|Pneus arrière|Reifen hinten|Neumáticos traseros|Pneumatici posteriori|Achterbanden|Arka lastikler|Zadní pneumatiky
+sr_left|left|gauche|links|izq.|sx|links|sol|levá
+sr_right|right|droit|rechts|der.|dx|rechts|sağ|pravá
+sr_trips|Trips ›|Trajets ›|Fahrten ›|Trayectos ›|Viaggi ›|Ritten ›|Yolculuklar ›|Jízdy ›
+sr_satin|satin|satiné|seidenmatt|satinado|satinato|satijn|saten|saténová
+sr_black_roof|black roof|toit noir|schwarzes Dach|techo negro|tetto nero|zwart dak|siyah tavan|černá střecha
+sr_style_title|Colours and style|Couleurs et style|Farben und Stil|Colores y estilo|Colori e stile|Kleuren en stijl|Renkler ve stil|Barvy a styl
+sr_my_car|My car|Ma voiture|Mein Auto|Mi coche|La mia auto|Mijn auto|Aracım|Moje auto
+sr_tab_model|Model|Modèle|Modell|Modelo|Modello|Model|Model|Model
+sr_tab_colour|Colour|Couleur|Farbe|Color|Colore|Kleur|Renk|Barva
+sr_version|Version|Version|Version|Versión|Versione|Versie|Versiyon|Verze
+sr_wheels|Wheels|Jantes|Felgen|Llantas|Cerchi|Velgen|Jantlar|Kola
+sr_roof|Roof|Toit|Dach|Techo|Tetto|Dak|Tavan|Střecha
+sr_roof_body|Body colour|Couleur carrosserie|Wagenfarbe|Color de carrocería|Colore carrozzeria|Carrosseriekleur|Gövde rengi|Barva karoserie
+sr_roof_black|Black roof|Toit noir|Schwarzes Dach|Techo negro|Tetto nero|Zwart dak|Siyah tavan|Černá střecha
+sr_roof_note|Standard on the XPower and the first Luxury (2022)|De série sur la XPower et les premières Luxury (2022)|Serie beim XPower und den ersten Luxury (2022)|De serie en el XPower y los primeros Luxury (2022)|Di serie su XPower e sulle prime Luxury (2022)|Standaard op de XPower en de eerste Luxury (2022)|XPower'da ve ilk Luxury'lerde (2022) standart|Standard u XPower a prvních Luxury (2022)
+sr_done|Done|Terminé|Fertig|Listo|Fatto|Klaar|Tamam|Hotovo
+sr_stock|Original|D'origine|Original|Original|Originale|Origineel|Orijinal|Původní
+sr_three_quarter|Three-quarter|Trois-quarts|Dreiviertel|Tres cuartos|Tre quarti|Driekwart|Üç çeyrek|Tři čtvrtě
+sr_profile|Profile|Profil|Profil|Perfil|Profilo|Profiel|Profil|Profil
+sr_mg4_colours|MG4 colours|Couleurs MG4|MG4-Farben|Colores MG4|Colori MG4|MG4-kleuren|MG4 renkleri|Barvy MG4
+sr_ver_nospoiler|No spoiler|Sans becquet|Ohne Spoiler|Sin alerón|Senza spoiler|Zonder spoiler|Rüzgarlıksız|Bez spoileru
+sr_ver_spoiler|Double spoiler|Double aileron|Doppelspoiler|Doble alerón|Doppio spoiler|Dubbele spoiler|Çift rüzgarlık|Dvojitý spoiler
+sr_wh_steel16|16″ steel|16″ tôle|16″ Stahl|16″ acero|16″ acciaio|16″ staal|16″ çelik|16″ ocel
+sr_wh_steel16_sub|Black hubcap, rare|Enjoliveur noir, rare|Schwarze Radkappe, selten|Tapacubos negro, raro|Copricerchio nero, raro|Zwarte wieldop, zeldzaam|Siyah jant kapağı, nadir|Černá poklice, vzácná
+sr_wh_aero17|17″ alloy|17″ alliage|17″ Alu|17″ aleación|17″ lega|17″ lichtmetaal|17″ alaşım|17″ slitina
+sr_wh_aero17_sub|Two-tone cover|Enjoliveur bi-ton|Zweifarbige Abdeckung|Tapacubos bicolor|Copricerchio bicolore|Tweekleurige afdekking|İki renkli kapak|Dvoubarevný kryt
+sr_wh_lux18|18″ alloy|18″ alliage|18″ Alu|18″ aleación|18″ lega|18″ lichtmetaal|18″ alaşım|18″ slitina
+sr_wh_lux18_sub|Luxury cover|Enjoliveur Luxury|Luxury-Abdeckung|Tapacubos Luxury|Copricerchio Luxury|Luxury-afdekking|Luxury kapağı|Kryt Luxury
+sr_wh_xp18|18″ XPower|18″ XPower|18″ XPower|18″ XPower|18″ XPower|18″ XPower|18″ XPower|18″ XPower
+sr_wh_xp18_sub|Orange callipers|Étriers orange|Orange Bremssättel|Pinzas naranjas|Pinze arancioni|Oranje remklauwen|Turuncu kaliperler|Oranžové třmeny
+sr_fin_solid|Solid paint from the MG4 range.|Peinture opaque du catalogue MG4.|Unilack aus dem MG4-Programm.|Pintura sólida de la gama MG4.|Vernice pastello della gamma MG4.|Effen lak uit het MG4-gamma.|MG4 serisinden düz boya.|Nemetalická barva z nabídky MG4.
+sr_fin_metal|Metallic paint from the MG4 range.|Peinture métallisée du catalogue MG4.|Metalliclack aus dem MG4-Programm.|Pintura metalizada de la gama MG4.|Vernice metallizzata della gamma MG4.|Metaallak uit het MG4-gamma.|MG4 serisinden metalik boya.|Metalická barva z nabídky MG4.
+sr_fin_satin|Satin paint, XPower only at MG.|Peinture satinée, réservée à la XPower chez MG.|Seidenmattlack, bei MG nur für den XPower.|Pintura satinada, solo XPower en MG.|Vernice satinata, solo XPower da MG.|Satijnlak, bij MG alleen op de XPower.|Saten boya, MG'de yalnızca XPower.|Saténová barva, u MG jen pro XPower.
+sr_limit_at|limit %1$d %%|limite %1$d %%|Grenze %1$d %%|límite %1$d %%|limite %1$d %%|limiet %1$d %%|sınır %%%1$d|limit %1$d %%
+sr_car_stops_at|The car stops at %1$d %%|La voiture s'arrête à %1$d %%|Das Auto stoppt bei %1$d %%|El coche se detiene al %1$d %%|L'auto si ferma al %1$d %%|De auto stopt bij %1$d %%|Araç %%%1$d'de durur|Auto se zastaví na %1$d %%

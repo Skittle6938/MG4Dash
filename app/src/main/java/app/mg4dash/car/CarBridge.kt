@@ -1003,13 +1003,13 @@ object CarBridge {
 
     private fun VehicleState.drive(field: String): Int? = when (field) {
         "driveMode" -> driveMode; "regenLevel" -> regenLevel; "onePedal" -> onePedal; "steeringMode" -> steeringMode
-        "brakePedalMode" -> brakePedalMode; "lasMode" -> lasMode; "fcwState" -> fcwState; "fcwBrakeMode" -> fcwBrakeMode; else -> null
+        "brakePedalMode" -> brakePedalMode; "lasMode" -> lasMode; "fcwState" -> fcwState; "fcwBrakeMode" -> fcwBrakeMode; "enduranceMode" -> enduranceMode; else -> null
     }
 
     private fun VehicleState.drive(field: String, v: Int?): VehicleState = when (field) {
         "driveMode" -> copy(driveMode = v); "regenLevel" -> copy(regenLevel = v); "onePedal" -> copy(onePedal = v)
         "steeringMode" -> copy(steeringMode = v); "brakePedalMode" -> copy(brakePedalMode = v); "lasMode" -> copy(lasMode = v)
-        "fcwState" -> copy(fcwState = v); "fcwBrakeMode" -> copy(fcwBrakeMode = v); else -> this
+        "fcwState" -> copy(fcwState = v); "fcwBrakeMode" -> copy(fcwBrakeMode = v); "enduranceMode" -> copy(enduranceMode = v); else -> this
     }
 
     private val driveFields = listOf("driveMode", "regenLevel", "onePedal", "steeringMode", "brakePedalMode", "lasMode", "fcwState", "fcwBrakeMode")
@@ -1088,6 +1088,9 @@ object CarBridge {
         val v = DriveSettings.customValue(DriveSettings.Custom.PEDAL, index) ?: return
         drive("brake pedal $index", mapOf("brakePedalMode" to v)) { DriveSettings.setCustom(DriveSettings.Custom.PEDAL, index) }
     }
+
+    /** Energy saving (Range+) on / off, where the car gives a command for it ([DriveSettings.enduranceSettable]). */
+    fun setEndurance(on: Boolean) = drive("energy saving $on", mapOf("enduranceMode" to if (on) 1 else 0)) { DriveSettings.setEndurance(on) }
 
     /** Lane keeping: 1 off, 2 warning, 3 assist, 5 emergency. */
     fun setLaneMode(mode: Int) = drive("lane keeping $mode", mapOf("lasMode" to mode)) { DriveSettings.setLaneMode(mode) }

@@ -105,7 +105,7 @@ class TripLogTest {
         val vehicle = Robolectric.buildActivity(app.mg4dash.pages.VehicleActivity::class.java).setup().get()
         shadowOf(Looper.getMainLooper()).idle()
         fun find(v: android.view.View): android.view.View? {
-            if (v is android.widget.TextView && v.text.toString() == vehicle.getString(R.string.tr_today)) return v.parent?.parent as? android.view.View
+            if (v is android.widget.TextView && v.text.toString().equals(vehicle.getString(R.string.tr_today), ignoreCase = true)) return v.parent?.parent as? android.view.View
             if (v is android.view.ViewGroup) for (i in 0 until v.childCount) find(v.getChildAt(i))?.let { return it }
             return null
         }

@@ -68,6 +68,28 @@ class EnergyActivity : PageActivity() {
     private lateinit var chart: LineChart
     private lateinit var chartNote: TextView
 
+    private lateinit var energyCar: app.mg4dash.showroom.EnergyCar
+    private lateinit var heatLine: android.view.View
+
+    private fun LinearLayout.children() = (0 until childCount).map { getChildAt(it) }
+
+    /** As in the mock-up (a 910 px wide centre): the car under the charge, battery heating above the battery. */
+    private fun placeCar(center: android.widget.FrameLayout, hint: android.view.View) {
+        val w = center.width.toFloat(); if (w <= 0f) return
+        val s = w / 910f
+        val cw = 880f * s; val cx = (w - cw) / 2; val top = 92f * s
+        energyCar.box.set(cx, top, cx + cw, top + cw * 680f / 1840f)
+        energyCar.invalidate()
+        val k = cw / 1840f
+        val (bx, by) = energyCar.batteryTop()
+        val py = top + 392f * k
+        heating.translationX = bx - heating.width / 2f; heating.translationY = py - heating.height / 2f
+        heatLine.translationX = bx - 1f; heatLine.translationY = py + kit.dp(26)
+        heatLine.layoutParams = heatLine.layoutParams.apply { height = (by - py - kit.dp(34)).toInt().coerceAtLeast(0) }
+        val ground = top + 641.96f * k
+        hint.translationX = bx - hint.width / 2f; hint.translationY = ground + 14f * s
+    }
+
     private var period = 0          // 0 = since the charge, 1 = current trip, 2 = last 1,000 km
     private var reser: Int? = null
     private var stH = 22; private var stM = 0; private var spH = 6; private var spM = 0
@@ -91,101 +113,92 @@ class EnergyActivity : PageActivity() {
             // Reread after 3 s, like the stock apps: the battery takes 2 to 3 s to return its new state
             heating.postDelayed({ refreshProps() }, 3000)
         }.apply { textSize = 18f; setPadding(kit.dp(20), 0, kit.dp(20), 0) }
-        header.addView(heating, header.childCount - 1, kit.lp(-2, kit.dp(52), r = 12))   // before the SAIC link
 
-        // ── Colonne 1 : recharge ──
-        val c1 = kit.panel(getString(R.string.en_charging))
-        val top = kit.row()
-        soc = kit.text("—", 72f, light = true)
+        // ── Centre (redesign "Showroom", 26/11): the charge, the see-through car with its battery, the actions ──
+        val sk = app.mg4dash.showroom.ShowroomKit(this, kit)
+        val center = android.widget.FrameLayout(this)
+        energyCar = app.mg4dash.showroom.EnergyCar(this).apply { body = app.mg4dash.showroom.CarLook(this@EnergyActivity).version.body; limitText = { getString(R.string.sr_limit_at, it) } }
+        center.addView(energyCar, android.widget.FrameLayout.LayoutParams(-1, -1))
+        val top = kit.row().apply { gravity = Gravity.CENTER }
+        soc = kit.text("—", 84f, light = true)
         top.addView(soc)
         val side = kit.column()
-        range = kit.text("—", 26f)
+        range = kit.text("—", 28f)
         status = kit.text("—", 19f, R.color.text_sub)
-        side.addView(range); side.addView(status, kit.lp(-2, -2, t = 6))
-        top.addView(side, kit.lp(0, -2, 1f, l = 22))
-        c1.addView(top, kit.lp(-1, -2, t = 6))
-        socGauge = app.mg4dash.ui.SocBar(this).apply { currentBubble = false }   // the large % is just above
-        c1.addView(socGauge, kit.lp(-1, kit.dp(52), t = 4))
-        power = kit.text("", 18f, R.color.text_sub)
-        c1.addView(power, kit.lp(-1, -2, t = 8))
-        action = kit.toggleTile("—") { onMainAction() }.apply { textSize = 20f }
-        // Main button and, with the cable plugged in, gun lock (stock launcher's button)
+        power = kit.text("", 15f, R.color.text_title)
+        side.addView(range); side.addView(status, kit.lp(-2, -2, t = 4)); side.addView(power, kit.lp(-2, -2, t = 2))
+        top.addView(side, kit.lp(-2, -2, l = 24))
+        center.addView(top, android.widget.FrameLayout.LayoutParams(-1, -2, Gravity.TOP))
+        socGauge = app.mg4dash.ui.SocBar(this).apply { currentBubble = false }   // kept for its state, not shown
+        // Battery heating, right above the battery
+        heatLine = android.view.View(this)
+        center.addView(heatLine, android.widget.FrameLayout.LayoutParams(kit.dp(2), 0))
+        center.addView(heating, android.widget.FrameLayout.LayoutParams(-2, kit.dp(52)))
+        val bottom = kit.column()
+        action = kit.toggleTile("—") { onMainAction() }.apply { textSize = 19f; letterSpacing = .08f }
         val actRow = kit.row()
-        actRow.addView(action, kit.lp(0, kit.dp(64), 1f))
+        actRow.addView(action, kit.lp(0, kit.dp(60), 1f))
         gunLock = kit.toggleTile(getString(R.string.en_gun_unlock)) {
             CarBridge.toggleChargeLock(); gunLock.postDelayed({ refreshProps() }, 1500)
-        }.apply { textSize = 18f; setPadding(kit.dp(16), 0, kit.dp(16), 0); visibility = android.view.View.GONE }
-        actRow.addView(gunLock, kit.lp(-2, kit.dp(64), l = 10))
-        c1.addView(actRow, kit.lp(-1, -2, t = 12))
+        }.apply { textSize = 16f; setPadding(kit.dp(18), 0, kit.dp(18), 0); visibility = android.view.View.GONE }
+        actRow.addView(gunLock, kit.lp(-2, kit.dp(60), l = 10))
+        bottom.addView(actRow, kit.lp(-1, -2))
+        val chips = kit.row().apply { isBaselineAligned = false }
         // Charge limit: only where the car applies it itself (old SDK). Elsewhere
         // (MG4 Standard without the stock limit), the car ignores it, and MG4Dash cannot stop
         // charging in its place: it is cut when the car is closed (found on 2026-10-18).
         if (app.mg4dash.system.Firmware.nativeChargeLimit) {
-            c1.addView(kit.title(getString(R.string.en_limit)), kit.lp(-1, -2, t = 18))
+            val lim = kit.column()
+            val lHead = kit.row()
+            lHead.addView(sk.label(getString(R.string.en_limit), 13f), kit.lp(0, -2, 1f))
+            limitNote = kit.text("", 13f, R.color.text_title)
+            lHead.addView(limitNote)
+            lim.addView(lHead, kit.lp(-1, -2))
             val limits = listOf(50, 60, 70, 80, 90, 100)
             val (lRow, lSet) = kit.segmented(limits.map { "$it %" }) { i ->
                 ChargeGuard.setLimit(this, limits[i]); refreshProps()
             }
             setLimit = lSet
-            c1.addView(lRow, kit.lp(-1, -2, t = 8))
-            limitNote = kit.text("", 16f, R.color.text_title).apply { maxLines = 2 }
-            c1.addView(limitNote, kit.lp(-1, -2, t = 8))
+            lRow.children().forEach { (it as TextView).textSize = 15f }
+            lim.addView(lRow, kit.lp(-1, kit.dp(48), t = 6))
+            chips.addView(lim, kit.lp(0, -2, 1.25f, r = 18))
         }
-        currentTitle = kit.title(getString(R.string.en_ac_current))
-        c1.addView(currentTitle, kit.lp(-1, -2, t = 14))
+        val cur = kit.column()
+        currentTitle = sk.label(getString(R.string.en_ac_current), 13f)
+        cur.addView(currentTitle)
         val (cRow, cSet) = kit.segmented(listOf("6 A", "8 A", "16 A", getString(R.string.en_max))) { i ->
             CarProps.setInt(CarProps.ALTNG_CHRG_CRNT, i + 1, "AC current"); refreshProps()
         }
         setCurrent = cSet
         currentRow = cRow
-        c1.addView(cRow, kit.lp(-1, -2, t = 8))
+        cRow.children().forEach { (it as TextView).textSize = 15f }
+        cur.addView(cRow, kit.lp(-1, kit.dp(48), t = 6))
+        chips.addView(cur, kit.lp(0, -2, 1f))
+        bottom.addView(chips, kit.lp(-1, -2, t = 12))
+        center.addView(bottom, android.widget.FrameLayout.LayoutParams(-1, -2, Gravity.BOTTOM).apply { leftMargin = kit.dp(60); rightMargin = kit.dp(60); bottomMargin = kit.dp(10) })
 
-        // ── Battery (24/11, once in Settings › Vehicle): health, capacities; its settings in the options window ──
-        if (!app.mg4dash.system.Firmware.nativeChargeLimit) c1.addView(android.view.View(this), kit.lp(-1, 0, 1f))
-        val battery = kit.column().apply { isClickable = true }
-        battery.addView(kit.title(getString(R.string.title_battery)))
-        val health = kit.text("", 44f, light = true)
-        val healthRow = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = android.view.Gravity.BOTTOM }
-        healthRow.addView(health)
-        healthRow.addView(kit.text(getString(R.string.en_health), 18f, R.color.text_sub), kit.lp(-2, -2, l = 14, b = 8))
-        battery.addView(healthRow, kit.lp(-1, -2, t = 6))
-        val caps = kit.text("", 17f, R.color.text_sub).apply { maxLines = 2 }
-        battery.addView(caps, kit.lp(-1, -2, t = 2))
+        // ── Battery (24/11): health and settings, a line under the car ──
+        val batteryHint = kit.text("", 15f, R.color.text_title).apply {
+            background = android.graphics.drawable.GradientDrawable().apply { setColor(0xB810151F.toInt()); cornerRadius = kit.dp(20).toFloat(); setStroke(1, 0x12FFFFFF) }
+            setPadding(kit.dp(16), kit.dp(9), kit.dp(16), kit.dp(9))
+        }
         fun showBattery() {
-            val f = { v: Float -> String.format(java.util.Locale.getDefault(), "%.1f", v) }
             val bc = app.mg4dash.energy.BatteryCapacity
             bc.apply(this)
-            health.text = bc.health(this)?.let { String.format(java.util.Locale.getDefault(), "%.0f %%", it.percent) } ?: "—"
-            caps.text = getString(R.string.en_battery_caps, f(app.mg4dash.system.Prefs(this).batteryKwh), f(bc.nominal(this)), app.mg4dash.system.Prefs(this).batteryModel)
+            val h = bc.health(this)?.let { String.format(java.util.Locale.getDefault(), "%.0f %%", it.percent) } ?: "—"
+            val txt = getString(R.string.en_battery_header, h) + " · " + getString(R.string.en_health) + "   |   "
+            val all = android.text.SpannableString(txt + getString(R.string.en_battery_settings) + " ›")
+            all.setSpan(android.text.style.ForegroundColorSpan(kit.color(R.color.accent_action)), txt.length, all.length, 0)
+            batteryHint.text = all
         }
         showBattery()
-        val open = { batteryOptions { showBattery() } }
-        battery.setOnLongClickListener { open(); true }
-        battery.setOnClickListener { open() }
-        val settingsBtn = kit.text(getString(R.string.en_battery_settings) + "   ›", 19f, R.color.text_value).apply {
-            gravity = android.view.Gravity.CENTER_VERTICAL; setPadding(kit.dp(22), 0, kit.dp(22), 0)
-            setBackgroundResource(R.drawable.bg_button); setOnClickListener { open() }
-        }
-        battery.addView(settingsBtn, kit.lp(-1, kit.dp(56), t = 12))
-        // With the charge limit's rows (old SDK, #123: the block was cut at the bottom) the column has no room left:
-        // the battery is a button of the page's header instead, its health on it, the same window behind
-        if (app.mg4dash.system.Firmware.nativeChargeLimit) {
-            val headerBtn = kit.text("", 19f, R.color.text_value).apply {
-                setPadding(kit.dp(20), kit.dp(12), kit.dp(20), kit.dp(12)); setBackgroundResource(R.drawable.bg_button)
-                setOnClickListener { open() }
-            }
-            fun label() { headerBtn.text = getString(R.string.en_battery_header, health.text) + "   ›" }
-            label()
-            health.addTextChangedListener(object : android.text.TextWatcher {
-                override fun afterTextChanged(e: android.text.Editable?) = label()
-                override fun beforeTextChanged(t: CharSequence?, a: Int, b: Int, c: Int) {}
-                override fun onTextChanged(t: CharSequence?, a: Int, b: Int, c: Int) {}
-            })
-            header.addView(headerBtn, header.indexOfChild(heating), kit.lp(-2, -2, r = 12))
-        } else c1.addView(battery, kit.lp(-1, -2, t = 14))
+        batteryHint.setOnClickListener { batteryOptions { showBattery() } }
+        center.addView(batteryHint, android.widget.FrameLayout.LayoutParams(-2, -2))
+        center.addOnLayoutChangeListener { _, l, t, r, b, ol, ot, or_, ob -> if (r - l != or_ - ol || b - t != ob - ot) center.post { placeCar(center, batteryHint) } }
 
         // ── Colonne 2 : programmation + V2L ──
-        val c2 = kit.panel(getString(R.string.en_scheduled))
+        val leftCol = kit.column()
+        val c2 = sk.card().apply { addView(sk.label(getString(R.string.en_scheduled))) }
         val tRow = kit.row()
         schedule = kit.toggleTile(getString(R.string.en_schedule)) {
             val on = reser == 1 || reser == 3
@@ -203,17 +216,19 @@ class EnergyActivity : PageActivity() {
         val (eRow2, eText) = kit.timeStepper(getString(R.string.en_end), { pickTime(false) }) { d -> shiftTime(false, d) }
         endTime = eText
         c2.addView(eRow2, kit.lp(-1, -2, t = 10))
-        c2.addView(kit.divider(), kit.lp(-1, 1, t = 18))
-        c2.addView(kit.title(getString(R.string.en_v2l)), kit.lp(-1, -2, t = 16))
+        leftCol.addView(c2, kit.lp(-1, -2))
+        val v2lCard = sk.card().apply { addView(sk.label(getString(R.string.en_v2l))) }
         v2lStatus = kit.text("—", 19f, R.color.text_sub)
-        c2.addView(v2lStatus, kit.lp(-1, -2, t = 8))
-        c2.addView(kit.text(getString(R.string.en_v2l_stop_at), 17f, R.color.text_title), kit.lp(-1, -2, t = 12))
+        v2lStatus.maxLines = 2; v2lStatus.isSingleLine = false
+        v2lCard.addView(v2lStatus, kit.lp(-1, -2, t = 8))
+        v2lCard.addView(kit.text(getString(R.string.en_v2l_stop_at), 16f, R.color.text_title), kit.lp(-1, -2, t = 12))
         val v2ls = listOf(20, 30, 40, 50, 60, 70, 80)
         val (vRow, vSet) = kit.segmented(v2ls.map { "$it" }) { i ->
             CarProps.setInt(CarProps.V2X_SP_SOC, CarProps.v2lCode(v2ls[i]), "V2L threshold ${v2ls[i]} %"); refreshProps()
         }
         setV2l = vSet
-        c2.addView(vRow, kit.lp(-1, -2, t = 8))
+        vRow.children().forEach { (it as TextView).textSize = 15f }
+        v2lCard.addView(vRow, kit.lp(-1, kit.dp(48), t = 6))
         v2lAction = kit.toggleTile(getString(R.string.en_v2l_start), heat = true) {
             val s = CarBridge.state.value
             val on = !v2lShownOn(s)
@@ -222,8 +237,9 @@ class EnergyActivity : PageActivity() {
             v2lWanted = on; v2lWantedUntil = android.os.SystemClock.uptimeMillis() + V2L_CONFIRM_MS
             paintV2l(s)
         }.apply { textSize = 18f }
-        c2.addView(LinearLayout(this), kit.lp(-1, 0, 1f))
-        c2.addView(v2lAction, kit.lp(-1, kit.dp(60), t = 10))
+        v2lCard.addView(LinearLayout(this), kit.lp(-1, 0, 1f))
+        v2lCard.addView(v2lAction, kit.lp(-1, kit.dp(56), t = 10))
+        leftCol.addView(v2lCard, kit.lp(-1, 0, 1f, t = 10))
 
         // ── Colonne 3 : consommation ──
         val c3 = kit.panel(getString(R.string.en_consumption))
@@ -262,9 +278,9 @@ class EnergyActivity : PageActivity() {
         chartNote = kit.text("", 15f, R.color.text_title)
         c3.addView(chartNote, kit.lp(-1, -2, t = 4))
 
-        body.addView(c1, kit.lp(0, -1, 1.05f, r = 6))
-        body.addView(c2, kit.lp(0, -1, 1f, l = 6, r = 6))
-        body.addView(c3, kit.lp(0, -1, 1f, l = 6))
+        body.addView(leftCol, kit.lp(kit.dp(400), -1))
+        body.addView(center, kit.lp(0, -1, 1f, l = 6, r = 6))
+        body.addView(c3, kit.lp(kit.dp(470), -1))
 
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -325,6 +341,8 @@ class EnergyActivity : PageActivity() {
         gunLock.visibility = if (locked != null && VehicleState.isPlugged(CarBridge.state.value.chargeStatus)) android.view.View.VISIBLE else android.view.View.GONE
         gunLock.text = getString(if (locked == false) R.string.en_gun_lock else R.string.en_gun_unlock)
         heating.isEnabled = p.heat != null
+        energyCar.heat = heating.isSelected
+        heatLine.setBackgroundColor(kit.color(if (heating.isSelected) R.color.accent_heat else R.color.panel_border))
         val carLimit = CarProps.targetSocPercent(p.target)
         renderLimit(carLimit)
         setCurrent(p.current?.minus(1))
@@ -382,9 +400,9 @@ class EnergyActivity : PageActivity() {
         // The limit set in the car (stock app, iSMART) prevails: before, the last value
         // chosen in MG4Dash was shown (100 % by default) even if the car was at 80 % (#50)
         val wanted = carLimit?.takeIf { it in 50..100 }?.also { if (it != prefs.chargeLimit) prefs.chargeLimit = it } ?: prefs.chargeLimit
+        energyCar.limit = if (wanted < 100) wanted else 0
         setLimit(listOf(50, 60, 70, 80, 90, 100).indexOf(wanted).takeIf { it >= 0 })
-        limitNote.text = if (wanted >= 100) getString(R.string.en_no_limit)
-            else getString(R.string.en_car_only) + (carLimit?.let { " ($it %)." } ?: ".")
+        limitNote.text = if (wanted >= 100) getString(R.string.en_no_limit) else getString(R.string.sr_car_stops_at, wanted)
     }
 
     private fun renderConsumption(c: FloatArray) {
@@ -460,6 +478,11 @@ class EnergyActivity : PageActivity() {
         else getString(R.string.en_plug_v2l)
         v2lAction.isEnabled = discharge
         paintV2l(s)
+        energyCar.soc = s.batteryPercent?.toFloat() ?: 0f
+        energyCar.plugged = VehicleState.isPlugged(s.chargeStatus)
+        energyCar.charging = VehicleState.isCharging(s.chargeStatus)
+        energyCar.v2l = VehicleState.isDischarging(s)
+        energyCar.invalidate()
     }
 
     /** V2L button state: the requested one until the car has confirmed it, otherwise the car's. */
