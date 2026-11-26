@@ -207,7 +207,7 @@ class ClimateActivity : PageActivity() {
     private lateinit var autoNote: TextView
     private lateinit var driverGlass: LinearLayout
     private lateinit var modesGlass: LinearLayout
-    private var cabBitmap: Pair<Boolean, android.graphics.Bitmap>? = null
+    private var cabKey: String? = null
     private lateinit var mirror: ScreenMirror
 
     /**
@@ -334,17 +334,43 @@ class ClimateActivity : PageActivity() {
     }
 
     private fun loadCabin() {
-        if (cabBitmap?.first == rhd) return
+        val colour = 0xFF000000.toInt() or app.mg4dash.showroom.CarLook(this).paint.hex
+        val key = "$rhd|$colour"
+        if (cabKey == key) return
         val side = rhd
         lifecycleScope.launch {
-            val b = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
-                // The light theme takes the day picture when there is one
-                val base = "showroom/cabin_${if (side) "r" else "l"}"
-                val day = app.mg4dash.ui.Themes.isLight(this@ClimateActivity) && (assets.list("showroom")?.contains("cabin_${if (side) "r" else "l"}_day.webp") == true)
-                assets.open(if (day) "${base}_day.webp" else "$base.webp").use { android.graphics.BitmapFactory.decodeStream(it) }
-            }
-            if (side == rhd) { cabBitmap = side to b; cabImage.setImageBitmap(b) }
+            val b = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) { paintedCabin(side, colour) }
+            if (side == rhd) { cabKey = key; cabImage.setImageBitmap(b) }
         }
+    }
+
+    /**
+     * The cabin picture with the car's body colour on its painted parts (door pillars, dashboard trims; 26/11): white
+     * patches whose alpha is the amount of paint, added tinted with the colour (picture + colour × alpha), as
+     * cabin.json places them. The light theme takes the day picture and its patches.
+     */
+    private fun paintedCabin(side: Boolean, colour: Int): android.graphics.Bitmap {
+        val s = if (side) "r" else "l"
+        val names = assets.list("showroom")?.toSet().orEmpty()
+        val key = if (day && "cabin_${s}_day.webp" in names) "${s}_day" else s
+        val o = android.graphics.BitmapFactory.Options().apply { inMutable = true; inScaled = false }
+        val pic = assets.open("showroom/cabin_$key.webp").use { android.graphics.BitmapFactory.decodeStream(it, null, o) }!!
+        try {
+            val patches = org.json.JSONObject(assets.open("showroom/cabin.json").bufferedReader().use { it.readText() })
+                .getJSONObject("paint").optJSONArray(key) ?: return pic
+            val c = android.graphics.Canvas(pic)
+            val paint = android.graphics.Paint(android.graphics.Paint.FILTER_BITMAP_FLAG).apply {
+                colorFilter = android.graphics.PorterDuffColorFilter(colour, android.graphics.PorterDuff.Mode.SRC_IN)
+                xfermode = android.graphics.PorterDuffXfermode(android.graphics.PorterDuff.Mode.ADD)
+            }
+            for (k in 0 until patches.length()) {
+                val p = patches.getJSONObject(k)
+                val m = assets.open("showroom/" + p.getString("file")).use { android.graphics.BitmapFactory.decodeStream(it) } ?: continue
+                c.drawBitmap(m, p.getDouble("x").toFloat(), p.getDouble("y").toFloat(), paint)
+                m.recycle()
+            }
+        } catch (e: Exception) { app.mg4dash.system.Log.w("Clim", "cabin paint: ${e.message}") }
+        return pic
     }
 
     private fun chooseSide() {
@@ -464,6 +490,12 @@ class ClimateActivity : PageActivity() {
             }
             true
         }
+    }
+
+    /** Back from "Colours and style": the cabin takes the new body colour. */
+    override fun onResume() {
+        super.onResume()
+        if (::cabImage.isInitialized && cabin.width > 0) loadCabin()
     }
 
     override fun onPause() {

@@ -1,0 +1,184 @@
+{
+ "note": "Pixels of the 2400x900 cabin pictures, night and day versions alike. Corners in the order top-left, top-right, bottom-right, bottom-left. On the page the picture is drawn at 1808/2400 and moved up by 20 px.",
+ "size": [
+  2400,
+  900
+ ],
+ "page": {
+  "scale": 0.7533333333333333,
+  "dy": -20
+ },
+ "screen": {
+  "l": [
+   [
+    1080,
+    436.5
+   ],
+   [
+    1350,
+    440
+   ],
+   [
+    1350,
+    545
+   ],
+   [
+    1080,
+    539.5
+   ]
+  ],
+  "r": [
+   [
+    1050,
+    440
+   ],
+   [
+    1320,
+    436.5
+   ],
+   [
+    1320,
+    539.5
+   ],
+   [
+    1050,
+    545
+   ]
+  ],
+  "gain": 0.94
+ },
+ "cluster": {
+  "l": [
+   [
+    757,
+    470
+   ],
+   [
+    917,
+    470
+   ],
+   [
+    917,
+    569
+   ],
+   [
+    752,
+    569
+   ]
+  ],
+  "r": [
+   [
+    1483,
+    470
+   ],
+   [
+    1643,
+    470
+   ],
+   [
+    1648,
+    569
+   ],
+   [
+    1483,
+    569
+   ]
+  ]
+ },
+ "paint": {
+  "note": "Body colour. Each patch is white, its alpha is the amount of paint. Draw it at (x, y) of its picture, tinted with the colour of the car, in additive blending: result = picture + colour x alpha. With #008CC8 (Brighton Blue) it gives back the picture of MG.",
+  "ref": "#008CC8",
+  "l": [
+   {
+    "file": "cabin_l_paint_a.png",
+    "x": 137,
+    "y": 147,
+    "w": 393,
+    "h": 319
+   },
+   {
+    "file": "cabin_l_paint_b.png",
+    "x": 985,
+    "y": 105,
+    "w": 45,
+    "h": 93
+   },
+   {
+    "file": "cabin_l_paint_c.png",
+    "x": 1901,
+    "y": 187,
+    "w": 373,
+    "h": 295
+   }
+  ],
+  "l_day": [
+   {
+    "file": "cabin_l_day_paint_a.png",
+    "x": 137,
+    "y": 147,
+    "w": 393,
+    "h": 319
+   },
+   {
+    "file": "cabin_l_day_paint_b.png",
+    "x": 985,
+    "y": 105,
+    "w": 45,
+    "h": 93
+   },
+   {
+    "file": "cabin_l_day_paint_c.png",
+    "x": 1901,
+    "y": 187,
+    "w": 373,
+    "h": 295
+   }
+  ],
+  "r": [
+   {
+    "file": "cabin_r_paint_a.png",
+    "x": 1870,
+    "y": 147,
+    "w": 393,
+    "h": 319
+   },
+   {
+    "file": "cabin_r_paint_b.png",
+    "x": 1370,
+    "y": 105,
+    "w": 45,
+    "h": 93
+   },
+   {
+    "file": "cabin_r_paint_c.png",
+    "x": 126,
+    "y": 187,
+    "w": 373,
+    "h": 295
+   }
+  ],
+  "r_day": [
+   {
+    "file": "cabin_r_day_paint_a.png",
+    "x": 1870,
+    "y": 147,
+    "w": 393,
+    "h": 319
+   },
+   {
+    "file": "cabin_r_day_paint_b.png",
+    "x": 1370,
+    "y": 105,
+    "w": 45,
+    "h": 93
+   },
+   {
+    "file": "cabin_r_day_paint_c.png",
+    "x": 126,
+    "y": 187,
+    "w": 373,
+    "h": 295
+   }
+  ]
+ }
+}
