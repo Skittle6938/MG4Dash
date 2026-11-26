@@ -48,7 +48,7 @@ class CarStage(context: Context, private val kit: Kit, private val look: CarLook
         private fun side(): Triple<LinearLayout, TextView, TextView> {
             val col = kit.column().apply { gravity = Gravity.CENTER_HORIZONTAL }
             val p = kit.text("—", 28f, light = true)
-            val s = kit.text("", 14f, R.color.text_sub)
+            val s = kit.text("", 20f, R.color.text_sub)   // side and temperature, readable at a glance (26/11)
             col.addView(p); col.addView(s)
             return Triple(col, p, s)
         }
@@ -147,6 +147,7 @@ class CarStage(context: Context, private val kit: Kit, private val look: CarLook
         car.show(look.config(view), cw.toInt())
         // Title: left in three-quarter view (the car's roof is on the right), centred in profile
         head.gravity = if (q) Gravity.START else Gravity.CENTER_HORIZONTAL
+        title.gravity = head.gravity   // the title fills the column: its text is placed like the name
         (head.layoutParams as LayoutParams).apply { gravity = if (q) Gravity.START or Gravity.TOP else Gravity.CENTER_HORIZONTAL or Gravity.TOP; topMargin = kit.dp(4); leftMargin = if (q) kit.dp(8) else 0 }
         listOf(front.view to (fx to gF), rear.view to (rx to gR)).forEach { (v, p) ->
             v.post { v.translationX = (p.first - v.width / 2f).coerceIn(0f, (w - v.width).coerceAtLeast(0f)); v.translationY = p.second + 40f * s - kit.dp(16) }

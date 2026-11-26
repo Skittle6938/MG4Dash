@@ -102,14 +102,40 @@ object PaintShop {
     suspend fun render(ctx: Context, cfg: Config, scale: Float): Bitmap = withContext(Dispatchers.Default) {
         val k = key(cfg, scale)
         cache.get(k) ?: lock.withLock {
-            cache.get(k) ?: run {
+            cache.get(k) ?: fromDisk(ctx, cfg.view, k)?.also { cache.put(k, it) } ?: run {
                 val t0 = android.os.SystemClock.uptimeMillis()
                 compose(ctx, cfg, scale).also {
                     cache.put(k, it)
+                    toDisk(ctx, cfg.view, k, it)
                     app.mg4dash.system.Log.i("Perf", "car painted ${cfg.view} ${it.width}×${it.height} (${cfg.paint.id}, ${cfg.livery.id}) in ${android.os.SystemClock.uptimeMillis() - t0} ms")
                 }
             }
         }
+    }
+
+    // ── The last painted car of each view kept on disk (26/11): the first page after a start shows it at once ──
+    private fun diskDir(ctx: Context) = java.io.File(ctx.filesDir, "car_paint")   // files, not cache: the storage cleaner leaves it
+    private fun diskKey(k: String) = "$k|${app.mg4dash.BuildConfig.VERSION_CODE}"
+
+    private fun fromDisk(ctx: Context, view: View, k: String): Bitmap? = try {
+        val dir = diskDir(ctx)
+        val keyFile = java.io.File(dir, "${view.key}.key"); val png = java.io.File(dir, "${view.key}.png")
+        if (keyFile.isFile && png.isFile && keyFile.readText() == diskKey(k)) {
+            val t0 = android.os.SystemClock.uptimeMillis()
+            BitmapFactory.decodeFile(png.path)?.also { app.mg4dash.system.Log.i("Perf", "car read from disk ${view} in ${android.os.SystemClock.uptimeMillis() - t0} ms") }
+        } else null
+    } catch (_: Exception) { null }
+
+    private fun toDisk(ctx: Context, view: View, k: String, b: Bitmap) {
+        Thread({
+            try {
+                val dir = diskDir(ctx).apply { mkdirs() }
+                val tmp = java.io.File(dir, "${view.key}.tmp")
+                tmp.outputStream().use { b.compress(Bitmap.CompressFormat.PNG, 100, it) }   // lossless
+                tmp.renameTo(java.io.File(dir, "${view.key}.png"))
+                java.io.File(dir, "${view.key}.key").writeText(diskKey(k))
+            } catch (e: Exception) { app.mg4dash.system.Log.w("Showroom", "car to disk: ${e.message}") }
+        }, "car-paint-save").start()
     }
 
     /** The scale whose image is at least as wide as [px] on screen. */
