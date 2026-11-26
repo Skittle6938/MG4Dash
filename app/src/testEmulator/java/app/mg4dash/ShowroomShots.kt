@@ -91,6 +91,24 @@ class ShowroomShots {
         }
     }
 
+    /** The airflow drawn at half and full resolution, to compare (26/11). */
+    @Test fun airflowResolution() {
+        val ctx = RuntimeEnvironment.getApplication()
+        for ((n, res) in listOf("half" to .5f, "full" to 1f)) {
+            app.mg4dash.showroom.AirFlow.RES = res
+            app.mg4dash.system.Prefs(ctx).raw.edit().clear().putBoolean("vertical_dock", true).putInt("theme_mode", 1).commit()
+            CarLook(ctx).rhd = false
+            val a = Robolectric.buildActivity(app.mg4dash.pages.ClimateActivity::class.java).setup().get()
+            a.render(app.mg4dash.car.VehicleState(connected = true, hvacOn = true, fanSpeed = 8, fanDirection = 5, driverTemp = 24f, outsideTemp = 5f))
+            val root = a.window.decorView
+            save(root, "x.png")
+            val end = System.currentTimeMillis() + 3_000
+            while (System.currentTimeMillis() < end) { shadowOf(Looper.getMainLooper()).idleFor(100, TimeUnit.MILLISECONDS); Thread.sleep(40) }
+            save(root, "airflow_$n.png")
+        }
+        app.mg4dash.showroom.AirFlow.RES = .75f
+    }
+
     @Test fun vehiclePage() {
         val ctx = RuntimeEnvironment.getApplication()
         app.mg4dash.system.Prefs(ctx).raw.edit().clear().putBoolean("vertical_dock", true).putInt("theme_mode", 1).commit()

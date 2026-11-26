@@ -89,13 +89,62 @@ class AirFlow(context: Context) : View(context) {
 
     private fun comet(d: Float) = if (d < .42f) (1 - d / .42f) * (1 - d / .42f) else 0f
 
+    // ── Drawn off the main thread (26/11: 9 frames a second when drawn in the page, the head unit rebuilt ~50 new
+    // gradients each frame): a picture at [RES] of the view's size, two buffers, laid on the page in one go ──
+    private var worker: android.os.HandlerThread? = null
+    private var handler: android.os.Handler? = null
+    private val buffers = arrayOfNulls<android.graphics.Bitmap>(2)
+    @Volatile private var front: android.graphics.Bitmap? = null
+    @Volatile private var running = false
+    private val layPaint = Paint(Paint.FILTER_BITMAP_FLAG)
+    private val dst = android.graphics.Rect()
+
+    private val frame = object : Runnable {
+        override fun run() {
+            if (!running) return
+            val t0 = android.os.SystemClock.uptimeMillis()
+            val w = (width * RES).toInt(); val h = (height * RES).toInt()
+            if (power > 0f && w > 0 && h > 0) {
+                val i = if (front === buffers[0]) 1 else 0
+                val b = buffers[i]?.takeIf { it.width == w && it.height == h } ?: android.graphics.Bitmap.createBitmap(w, h, android.graphics.Bitmap.Config.ARGB_8888).also { buffers[i] = it }
+                b.eraseColor(0)
+                render(Canvas(b), w, h)
+                front = b
+                postInvalidate()
+            } else if (front != null) { front = null; postInvalidate() }
+            handler?.postDelayed(this, (40L - (android.os.SystemClock.uptimeMillis() - t0)).coerceAtLeast(5L))
+        }
+    }
+
+    override fun onAttachedToWindow() {
+        super.onAttachedToWindow()
+        worker = android.os.HandlerThread("airflow").also { it.start(); handler = android.os.Handler(it.looper) }
+        running = true
+        handler?.post(frame)
+    }
+
+    override fun onDetachedFromWindow() {
+        super.onDetachedFromWindow()
+        running = false
+        worker?.quitSafely(); worker = null; handler = null
+    }
+
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        if (power <= 0f || width == 0) return
+        val b = front ?: return
+        // Night: added to the picture as the streams were; day: laid over it
+        layPaint.xfermode = if (day) null else PorterDuffXfermode(PorterDuff.Mode.ADD)
+        dst.set(0, 0, width, height)
+        canvas.drawBitmap(b, null, dst, layPaint)
+    }
+
+    /** One frame of the streams, in a [w] × [h] picture. */
+    private fun render(canvas: Canvas, w: Int, h: Int) {
+        if (power <= 0f || w == 0) return
         val n0 = System.nanoTime()
         val t = (android.os.SystemClock.uptimeMillis() - start) / 1000f
         canvas.save()
-        canvas.scale(width / CW, height / CH)
+        canvas.scale(w / CW, h / CH)
         if (rhd) { canvas.scale(-1f, 1f, CW / 2, 0f) }
         val (r, g, b) = if (day) (if (heat) Triple(240, 96, 0) else Triple(0, 128, 230)) else if (heat) Triple(255, 140, 36) else Triple(36, 200, 255)
         val sp = .14f + .42f * power
@@ -128,8 +177,7 @@ class AirFlow(context: Context) : View(context) {
         drawNs += System.nanoTime() - n0; frames++
         val now = android.os.SystemClock.uptimeMillis()
         if (since == 0L) since = now
-        if (now - since > 30_000) { app.mg4dash.system.Log.i("Perf", "airflow ${drawNs / frames / 1000} µs a frame, ${frames * 1000 / (now - since)} fps"); drawNs = 0; frames = 0; since = now }
-        postInvalidateDelayed(40)   // 25 frames a second   // 30 frames a second: smooth enough, lighter for the head unit
+        if (now - since > 30_000) { app.mg4dash.system.Log.i("Perf", "airflow ${drawNs / frames / 1000} µs a frame (drawn apart at ${(RES * 100).toInt()} %), ${frames * 1000 / (now - since)} fps"); drawNs = 0; frames = 0; since = now }
     }
 
     private fun argb(a: Float, r: Int, g: Int, b: Int) = ((a.coerceIn(0f, 1f) * 255).toInt() shl 24) or (r shl 16) or (g shl 8) or b
@@ -140,6 +188,8 @@ class AirFlow(context: Context) : View(context) {
         const val K = 1808f / 2400f
         const val OY = -20f
         private const val N = 12
+        /** The streams' picture against the view's size (three quarters: the thin bright cores stay as sharp as at full size, checked 26/11). */
+        @JvmField var RES = .75f
         private val GLOW = mapOf(
             "face" to listOf(floatArrayOf(452f, 612f, 64f), floatArrayOf(1135f, 622f, 54f), floatArrayOf(1300f, 622f, 54f), floatArrayOf(1930f, 632f, 64f)),
             "screen" to listOf(floatArrayOf(760f, 392f, 100f), floatArrayOf(1000f, 388f, 100f), floatArrayOf(1240f, 386f, 100f), floatArrayOf(1480f, 388f, 100f), floatArrayOf(1720f, 392f, 100f)),
