@@ -1,0 +1,249 @@
+<title>Karaoké MG4Dash</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap">
+<style>
+/* Layout: page de maquettes, chaque écran à l'échelle 1920×720 (ou 620×340 pour la carte), notes à côté */
+:root{
+  --page:#F3F4F7; --ink:#1D222A; --muted:#5B6475; --line:#D9DDE5; --note:#FFFFFF; --new:#2979FF;
+  /* couleurs de l'autoradio (thème nuit de MG4Dash) */
+  --car-bg:#0E0E10; --car-btn:#1B1B1F; --car-border:#2A3142; --car-text:#FFFFFF; --car-title:#8A94A6; --car-sub:#A0AEC0; --car-accent:#2979FF; --car-cold:#00D2FF; --car-raised:#16171B;
+  --font:"Roboto",system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--page:#111318;--ink:#E7EAF0;--muted:#9AA3B2;--line:#2A2F3A;--note:#181B22;--new:#5B9BFF;color-scheme:dark}}
+:root[data-theme="dark"]{--page:#111318;--ink:#E7EAF0;--muted:#9AA3B2;--line:#2A2F3A;--note:#181B22;--new:#5B9BFF;color-scheme:dark}
+body{background:var(--page);color:var(--ink);font-family:var(--font);font-size:15px;line-height:1.5}
+.wrap{max-width:1180px;margin:0 auto;padding-block:28px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;gap:40px}
+header h1{font-size:26px;margin:0 0 6px;font-weight:900;letter-spacing:-.01em}
+header p{margin:0;color:var(--muted);max-width:70ch}
+section{display:grid;gap:14px}
+section h2{font-size:18px;margin:0;font-weight:700;text-wrap:balance}
+.lbl{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.notes{background:var(--note);border:1px solid var(--line);border-radius:10px;padding:14px 18px;display:grid;gap:6px}
+.notes ul{margin:0;padding-left:18px;display:grid;gap:4px}
+.notes b{color:var(--new)}
+.pair{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+@media (max-width:760px){.pair{grid-template-columns:1fr}}
+.cap{font-size:13px;color:var(--muted);margin-top:6px}
+
+/* écran voiture à l'échelle */
+.screen{container-type:inline-size;width:100%;max-width:100%;aspect-ratio:1920/720;border-radius:10px;overflow:hidden;box-shadow:0 0 0 1px var(--line)}
+.screen.card{aspect-ratio:620/340;max-width:620px}
+.s{--u:calc(100cqw/1920);position:relative;width:100%;height:100%;background:var(--car-bg);color:var(--car-text);font-family:var(--font)}
+.card .s{--u:calc(100cqw/620)}
+.px{position:absolute}
+.title{left:calc(32*var(--u));top:calc(28*var(--u));font-weight:700;font-size:calc(30*var(--u))}
+.artist{left:calc(32*var(--u));top:calc(68*var(--u));font-size:calc(22*var(--u));color:var(--car-sub);opacity:.7}
+.btns{display:flex;gap:calc(12*var(--u));right:calc(32*var(--u));top:calc(24*var(--u))}
+.b{width:calc(var(--sz)*var(--u));height:calc(var(--sz)*var(--u));border-radius:50%;background:var(--car-btn);border:calc(1.5*var(--u)) solid var(--car-border);display:grid;place-items:center}
+.b svg{width:44%;height:44%;stroke:var(--car-text);fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.b.on{border-color:var(--car-text)}
+.b.new{box-shadow:0 0 0 calc(4*var(--u)) rgba(41,121,255,.35)}
+.reel{left:calc(240*var(--u));right:calc(240*var(--u));top:calc(150*var(--u));display:grid;gap:calc(8*var(--u));text-align:center;font-weight:700}
+.l{font-size:calc(44*var(--u));opacity:.25}
+.l.p1{opacity:.5}.l.cur{font-size:calc(76*var(--u));opacity:1}.l.nx{font-size:calc(76*var(--u));opacity:.72}.l.n2{opacity:.36}
+/* colonne de décalage */
+.shift{left:calc(40*var(--u));top:50%;transform:translateY(-50%);display:grid;justify-items:center;gap:calc(14*var(--u))}
+.chip{font-size:calc(24*var(--u));font-weight:700;padding:calc(8*var(--u)) calc(14*var(--u));border-radius:calc(20*var(--u));border:calc(1.5*var(--u)) solid var(--car-cold);color:var(--car-cold);font-variant-numeric:tabular-nums;white-space:nowrap}
+.chip.zero{border-color:var(--car-border);color:var(--car-title)}
+.mem{font-size:calc(16*var(--u));color:var(--car-title);text-align:center;line-height:1.2}
+.status{left:0;right:0;top:calc(300*var(--u));text-align:center;display:grid;gap:calc(14*var(--u));justify-items:center}
+.status .t{font-size:calc(44*var(--u));font-weight:700;color:var(--car-sub)}
+.status .s2{font-size:calc(24*var(--u));color:var(--car-title)}
+.pillbtn{font-size:calc(24*var(--u));font-weight:700;padding:calc(14*var(--u)) calc(28*var(--u));border-radius:calc(40*var(--u));background:var(--car-btn);border:calc(1.5*var(--u)) solid var(--car-border)}
+/* sélecteur */
+.dim{inset:0;background:rgba(0,0,0,.6)}
+.panel{left:calc(360*var(--u));right:calc(360*var(--u));top:calc(56*var(--u));bottom:calc(56*var(--u));background:var(--car-raised);border:calc(1.5*var(--u)) solid var(--car-border);border-radius:calc(28*var(--u));padding:calc(28*var(--u)) calc(32*var(--u));display:grid;grid-template-rows:auto 1fr auto;gap:calc(18*var(--u))}
+.ph{display:flex;justify-content:space-between;align-items:center}
+.ph .h{font-size:calc(30*var(--u));font-weight:700}
+.ph .h small{display:block;font-size:calc(20*var(--u));color:var(--car-title);font-weight:400}
+.rows{display:grid;gap:calc(10*var(--u));align-content:start}
+.row{display:grid;grid-template-columns:calc(44*var(--u)) 1fr auto;align-items:center;gap:calc(18*var(--u));padding:calc(16*var(--u)) calc(20*var(--u));border-radius:calc(18*var(--u));background:var(--car-btn);border:calc(1.5*var(--u)) solid transparent}
+.row.sel{border-color:var(--car-accent)}
+.row .ck{width:calc(36*var(--u));height:calc(36*var(--u));border-radius:50%;border:calc(2*var(--u)) solid var(--car-border)}
+.row.sel .ck{background:var(--car-accent);border-color:var(--car-accent)}
+.row .a{font-size:calc(26*var(--u));font-weight:700}
+.row .m{font-size:calc(19*var(--u));color:var(--car-sub)}
+.row .r{display:grid;justify-items:end;gap:calc(6*var(--u))}
+.tag{font-size:calc(17*var(--u));font-weight:700;padding:calc(4*var(--u)) calc(12*var(--u));border-radius:calc(12*var(--u))}
+.tag.sync{color:var(--car-cold);border:calc(1.5*var(--u)) solid var(--car-cold)}
+.tag.plain{color:var(--car-title);border:calc(1.5*var(--u)) solid var(--car-border)}
+.dur{font-size:calc(19*var(--u));color:var(--car-title);font-variant-numeric:tabular-nums}
+.pf{display:flex;justify-content:center}
+/* carte d'accueil */
+.ctitle{left:calc(20*var(--u));top:calc(30*var(--u));font-size:calc(14*var(--u));letter-spacing:.14em;color:var(--car-title);font-weight:500}
+.card .btns{right:calc(14*var(--u));top:calc(12*var(--u));gap:calc(10*var(--u))}
+.card .reel{left:calc(78*var(--u));right:calc(20*var(--u));top:calc(88*var(--u));gap:calc(4*var(--u))}
+.card .l{font-size:calc(18*var(--u))}
+.card .l.cur,.card .l.nx{font-size:calc(30*var(--u))}
+.card .shift{left:calc(12*var(--u));top:calc(205*var(--u));gap:calc(8*var(--u))}
+.card .chip{font-size:calc(15*var(--u));padding:calc(4*var(--u)) calc(6*var(--u))}
+/* réglage */
+.set{display:grid;gap:0;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--note)}
+.set .it{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:14px 18px;border-top:1px solid var(--line)}
+.set .it:first-child{border-top:0}
+.set .it small{display:block;color:var(--muted)}
+.tg{width:44px;height:26px;border-radius:13px;background:var(--new);position:relative;flex:none}
+.tg::after{content:"";position:absolute;right:3px;top:3px;width:20px;height:20px;border-radius:50%;background:#fff}
+.lnk{color:var(--new);font-weight:700;white-space:nowrap}
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-pill" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><rect x="12" y="11" width="6" height="5" rx="1" fill="currentColor"/></symbol>
+  <symbol id="i-list" viewBox="0 0 24 24"><path d="M8 6h12M8 12h12M8 18h8M4 6h.01M4 12h.01M4 18h.01"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+  <symbol id="i-up" viewBox="0 0 24 24"><path d="M6 15l6-6 6 6"/></symbol>
+  <symbol id="i-down" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></symbol>
+  <symbol id="i-rf" viewBox="0 0 24 24"><path d="M20 11a8 8 0 1 0-2.3 5.7M20 5v6h-6"/></symbol>
+</svg>
+
+<div class="wrap">
+<header>
+  <h1>Karaoké : boutons, choix des paroles, décalage</h1>
+  <p>Maquette des trois changements demandés, sur l'écran plein écran et sur la carte d'accueil. Les lignes de paroles sont des textes d'exemple. Ce qui est nouveau est entouré de bleu dans les notes.</p>
+</header>
+
+<section>
+  <span class="lbl">1 · Plein écran</span>
+  <h2>Boutons plus gros, bouton « Choisir les paroles », flèches de décalage à gauche</h2>
+  <div class="screen"><div class="s">
+    <div class="px title">Study Song</div><div class="px artist">Study Artist</div>
+    <div class="px btns">
+      <div class="b" style="--sz:76"><svg><use href="#i-pill"/></svg></div>
+      <div class="b new" style="--sz:76"><svg><use href="#i-list"/></svg></div>
+      <div class="b" style="--sz:76"><svg><use href="#i-x"/></svg></div>
+    </div>
+    <div class="px shift">
+      <div class="b" style="--sz:84"><svg><use href="#i-up"/></svg></div>
+      <div class="chip">+1,0 s</div>
+      <div class="b" style="--sz:84"><svg><use href="#i-down"/></svg></div>
+      <div class="mem">mémorisé<br>pour ce titre</div>
+    </div>
+    <div class="px reel">
+      <div class="l">Ligne d'exemple numéro 8</div>
+      <div class="l p1">Ligne d'exemple numéro 9</div>
+      <div class="l cur">Ligne d'exemple numéro 10</div>
+      <div class="l nx">Ligne d'exemple numéro 11</div>
+      <div class="l n2">Ligne d'exemple numéro 12</div>
+    </div>
+  </div></div>
+  <div class="notes">
+    <ul>
+      <li><b>Boutons en haut à droite</b> : 76 au lieu de 56, avec un espace plus large entre eux.</li>
+      <li><b>Le bouton rafraîchir devient « Choisir les paroles »</b> (icône liste). Aujourd'hui, il relance la même recherche en ignorant le cache, ce qui retombe presque toujours sur le même résultat. Il ouvrira maintenant la liste des résultats trouvés (écran 2).</li>
+      <li><b>Flèches à gauche</b> (84, bien larges pour le doigt) : ▲ fait reculer les paroles de 0,5 s (on remonte dans le texte, les lignes arrivent plus tard), ▼ les fait avancer de 0,5 s. Le compteur montre le décalage total. Un appui sur le compteur le remet à 0.</li>
+      <li>Le décalage vaut pour ce titre seulement. À la chanson suivante, il revient à 0 (ou au décalage déjà mémorisé pour ce titre-là). Si le titre revient plus tard, son décalage est repris tout seul, et la mention « mémorisé pour ce titre » s'affiche.</li>
+    </ul>
+  </div>
+</section>
+
+<section>
+  <span class="lbl">2 · Choisir les paroles</span>
+  <h2>La liste de tous les résultats trouvés pour la chanson</h2>
+  <div class="screen"><div class="s">
+    <div class="px title">Study Song</div><div class="px artist">Study Artist</div>
+    <div class="px reel" style="opacity:.6">
+      <div class="l">Ligne d'exemple numéro 8</div>
+      <div class="l cur">Ligne d'exemple numéro 10</div>
+      <div class="l nx">Ligne d'exemple numéro 11</div>
+    </div>
+    <div class="px dim"></div>
+    <div class="px panel">
+      <div class="ph">
+        <div class="h">Choisir les paroles<small>4 résultats · morceau en cours 3:39</small></div>
+        <div class="b" style="--sz:76"><svg><use href="#i-x"/></svg></div>
+      </div>
+      <div class="rows">
+        <div class="row sel"><div class="ck"></div><div><div class="a">Study Song</div><div class="m">Study Artist · Study Album</div></div><div class="r"><span class="tag sync">Synchronisées</span><span class="dur">3:39</span></div></div>
+        <div class="row"><div class="ck"></div><div><div class="a">Study Song (Radio Edit)</div><div class="m">Study Artist · Singles</div></div><div class="r"><span class="tag sync">Synchronisées</span><span class="dur">3:12</span></div></div>
+        <div class="row"><div class="ck"></div><div><div class="a">Study Song (Live)</div><div class="m">Study Artist · Live Tour</div></div><div class="r"><span class="tag sync">Synchronisées</span><span class="dur">4:05</span></div></div>
+        <div class="row"><div class="ck"></div><div><div class="a">Study Song</div><div class="m">Study Artist feat. Guest · Study Album</div></div><div class="r"><span class="tag plain">Texte seul</span><span class="dur">3:40</span></div></div>
+      </div>
+      <div class="pf"><div class="pillbtn">Rechercher à nouveau</div></div>
+    </div>
+  </div></div>
+  <div class="notes">
+    <ul>
+      <li>La recherche de paroles renvoie déjà une liste : titre, artiste, album, durée, paroles synchronisées ou texte seul. Aujourd'hui, l'appli prend automatiquement le meilleur résultat. Elle continuera à le faire, et la liste permet de corriger son choix.</li>
+      <li>Les résultats sont classés comme le choix automatique (titre, artiste, puis écart de durée). Celui qui est affiché est coché. <b>Un appui sur une ligne charge ces paroles tout de suite</b>, et le choix est mémorisé pour ce titre, comme le décalage.</li>
+      <li>« Rechercher à nouveau » fait ce que fait le bouton rafraîchir aujourd'hui. Avec un seul résultat, la liste s'ouvre quand même, avec ce résultat et ce bouton.</li>
+    </ul>
+  </div>
+</section>
+
+<section>
+  <span class="lbl">3 · Chanson non trouvée</span>
+  <h2>Les anciennes paroles disparaissent dès que la chanson change</h2>
+  <div class="screen"><div class="s">
+    <div class="px title">Autre Titre</div><div class="px artist">Autre Artiste</div>
+    <div class="px btns">
+      <div class="b" style="--sz:76"><svg><use href="#i-pill"/></svg></div>
+      <div class="b" style="--sz:76"><svg><use href="#i-list"/></svg></div>
+      <div class="b" style="--sz:76"><svg><use href="#i-x"/></svg></div>
+    </div>
+    <div class="px status">
+      <div class="t">Aucune parole trouvée</div>
+      <div class="s2">pour « Autre Titre » · Autre Artiste</div>
+      <div class="pillbtn">Rechercher à nouveau</div>
+    </div>
+  </div></div>
+  <div class="notes">
+    <ul>
+      <li>Au changement de titre, l'écran affiche « Recherche des paroles… », puis ces paroles ou « Aucune parole trouvée ». Les flèches de décalage sont masquées tant qu'il n'y a pas de paroles.</li>
+      <li>Le message rappelle le titre cherché, pour voir tout de suite si c'est le bon morceau.</li>
+      <li>La carte et le plein écran effacent déjà les lignes au changement de titre. <b>La pastille flottante, elle, garde ses dernières lignes jusqu'au prochain résultat</b> : c'est sans doute ce que tu as vu. Elle affichera aussi « Recherche… » puis « Paroles non trouvées » dès que le titre change.</li>
+    </ul>
+  </div>
+</section>
+
+<section>
+  <span class="lbl">4 · Carte d'accueil</span>
+  <h2>Mêmes changements, en version compacte</h2>
+  <div class="pair">
+    <div>
+      <div class="screen card"><div class="s">
+        <div class="px ctitle">PAROLES</div>
+        <div class="px btns">
+          <div class="b" style="--sz:60"><svg><use href="#i-pill"/></svg></div>
+          <div class="b new" style="--sz:60"><svg><use href="#i-list"/></svg></div>
+        </div>
+        <div class="px shift">
+          <div class="b" style="--sz:52"><svg><use href="#i-up"/></svg></div>
+          <div class="chip">+1,0</div>
+          <div class="b" style="--sz:52"><svg><use href="#i-down"/></svg></div>
+        </div>
+        <div class="px reel">
+          <div class="l">Ligne d'exemple 7</div>
+          <div class="l cur">Ligne d'exemple 8</div>
+          <div class="l nx">Ligne d'exemple 9</div>
+        </div>
+      </div></div>
+      <div class="cap">Proposé : boutons 60 au lieu de 48, flèches 52 dans une colonne à gauche.</div>
+    </div>
+    <div>
+      <div class="screen card"><div class="s">
+        <div class="px ctitle">PAROLES</div>
+        <div class="px btns">
+          <div class="b" style="--sz:48"><svg><use href="#i-pill"/></svg></div>
+          <div class="b" style="--sz:48"><svg><use href="#i-rf"/></svg></div>
+        </div>
+        <div class="px reel" style="left:calc(20*var(--u))">
+          <div class="l">Ligne d'exemple 7</div>
+          <div class="l cur">Ligne d'exemple 8</div>
+          <div class="l nx">Ligne d'exemple 9</div>
+        </div>
+      </div></div>
+      <div class="cap">Aujourd'hui, pour comparer.</div>
+    </div>
+  </div>
+  <div class="notes"><ul><li>La carte perd environ 60 de largeur de texte à cause des flèches. Les lignes longues passent un peu plus vite sur deux lignes.</li></ul></div>
+</section>
+
+<section>
+  <span class="lbl">5 · Réglages › Paroles</span>
+  <h2>L'option, activée par défaut</h2>
+  <div class="set">
+    <div class="it"><div>Flèches de décalage des paroles<small>Avancer ou retarder les paroles de 0,5 s pour la chanson en cours</small></div><div class="tg" role="img" aria-label="activé"></div></div>
+    <div class="it"><div>Réglages mémorisés par titre<small>12 titres (décalage ou paroles choisies)</small></div><span class="lnk">Tout effacer</span></div>
+  </div>
+</section>
+</div>
