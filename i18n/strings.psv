@@ -1454,3 +1454,9 @@ sr_fin_metal|Metallic paint from the MG4 range.|Peinture métallisée du catalog
 sr_fin_satin|Satin paint, XPower only at MG.|Peinture satinée, réservée à la XPower chez MG.|Seidenmattlack, bei MG nur für den XPower.|Pintura satinada, solo XPower en MG.|Vernice satinata, solo XPower da MG.|Satijnlak, bij MG alleen op de XPower.|Saten boya, MG'de yalnızca XPower.|Saténová barva, u MG jen pro XPower.
 sr_limit_at|limit %1$d %%|limite %1$d %%|Grenze %1$d %%|límite %1$d %%|limite %1$d %%|limiet %1$d %%|sınır %%%1$d|limit %1$d %%
 sr_car_stops_at|The car stops at %1$d %%|La voiture s'arrête à %1$d %%|Das Auto stoppt bei %1$d %%|El coche se detiene al %1$d %%|L'auto si ferma al %1$d %%|De auto stopt bij %1$d %%|Araç %%%1$d'de durur|Auto se zastaví na %1$d %%
+cl_side_hint|Long press: left- or right-hand drive|Appui long : conduite à gauche ou à droite|Lange drücken: Links- oder Rechtslenker|Pulsación larga: volante a la izquierda o a la derecha|Pressione lunga: guida a sinistra o a destra|Lang drukken: links- of rechtsgestuurd|Uzun bas: soldan veya sağdan direksiyon|Dlouhé podržení: řízení vlevo nebo vpravo
+cl_side_title|Driving position|Poste de conduite|Fahrerplatz|Puesto de conducción|Posto di guida|Bestuurdersplaats|Sürüş konumu|Místo řidiče
+cl_lhd|Left-hand drive|Conduite à gauche|Linkslenker|Volante a la izquierda|Guida a sinistra|Linksgestuurd|Soldan direksiyon|Řízení vlevo
+cl_rhd|Right-hand drive|Conduite à droite|Rechtslenker|Volante a la derecha|Guida a destra|Rechtsgestuurd|Sağdan direksiyon|Řízení vpravo
+cl_rear_window|Rear window|Lunette arrière|Heckscheibe|Luneta trasera|Lunotto|Achterruit|Arka cam|Zadní okno
+cl_auto_flow|AUTO air flow: %1$s|Débit d'air en AUTO : %1$s|AUTO-Luftmenge: %1$s|Caudal de aire AUTO: %1$s|Portata d'aria AUTO: %1$s|AUTO-luchtdebiet: %1$s|AUTO hava akışı: %1$s|Průtok vzduchu AUTO: %1$s

@@ -38,13 +38,18 @@ class CarLook(context: Context) {
         get() = sp.getBoolean("three_quarter", true)
         set(v) = sp.edit().putBoolean("three_quarter", v).apply()
 
+    /** Climate page: right-hand drive chosen by a long press (null: the car's own side). */
+    var rhd: Boolean?
+        get() = if (sp.contains("rhd")) sp.getBoolean("rhd", false) else null
+        set(v) { if (v == null) sp.edit().remove("rhd").apply() else sp.edit().putBoolean("rhd", v).apply() }
+
     /** A version chosen: its wheels and roof come with it. */
     fun choose(v: Version) {
         sp.edit().putString("version", v.name).putString("wheel", v.wheel.id).putBoolean("roof", v.roof).apply()
     }
 
     /** Back to the default car. */
-    fun stock() { sp.edit().clear().apply() }
+    fun stock() { sp.edit().remove("version").remove("paint").remove("roof").remove("wheel").apply() }
 
     fun config(view: PaintShop.View) = PaintShop.Config(view, version.body, paint, roof, wheel, version.trim)
 

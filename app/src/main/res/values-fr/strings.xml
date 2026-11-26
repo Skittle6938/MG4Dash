@@ -1454,4 +1454,10 @@
     <string name="sr_fin_satin">Peinture satinée, réservée à la XPower chez MG.</string>
     <string name="sr_limit_at">limite %1$d %%</string>
     <string name="sr_car_stops_at">La voiture s\'arrête à %1$d %%</string>
+    <string name="cl_side_hint">Appui long : conduite à gauche ou à droite</string>
+    <string name="cl_side_title">Poste de conduite</string>
+    <string name="cl_lhd">Conduite à gauche</string>
+    <string name="cl_rhd">Conduite à droite</string>
+    <string name="cl_rear_window">Lunette arrière</string>
+    <string name="cl_auto_flow">Débit d\'air en AUTO : %1$s</string>
 </resources>

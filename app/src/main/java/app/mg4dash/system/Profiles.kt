@@ -71,7 +71,7 @@ object Profiles {
     /** Shared by every profile (the car, the system, the data, the climate, the state of the moment), by name. */
     val SHARED = setOf(
         // The car
-        "version", "paint", "roof", "wheel", "three_quarter",   // its look on the pages (CarLook, own file)
+        "version", "paint", "roof", "wheel", "three_quarter", "rhd",   // its look on the pages (CarLook, own file)
         "battery_kwh", "battery_model", "battery_new_kwh", "heated_seats", "temp_offset", "charge_limit", "v2l_auto", "kwh_price", "xpower",
         "rhd_cached", "force_rhd", "heat_seen", "hvac", "manual_dir", "manual_fan", "manual_recirc", "cap_current", "cap_current_drop",
         "cap_samples", "soh_drop", "soh_km", "soh_kwh", "last_soc", "ref_km", "ref_low", "ref_soc", "power_cons_source", "power_scale_kw",

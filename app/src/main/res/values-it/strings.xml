@@ -1454,4 +1454,10 @@
     <string name="sr_fin_satin">Vernice satinata, solo XPower da MG.</string>
     <string name="sr_limit_at">limite %1$d %%</string>
     <string name="sr_car_stops_at">L\'auto si ferma al %1$d %%</string>
+    <string name="cl_side_hint">Pressione lunga: guida a sinistra o a destra</string>
+    <string name="cl_side_title">Posto di guida</string>
+    <string name="cl_lhd">Guida a sinistra</string>
+    <string name="cl_rhd">Guida a destra</string>
+    <string name="cl_rear_window">Lunotto</string>
+    <string name="cl_auto_flow">Portata d\'aria AUTO: %1$s</string>
 </resources>

@@ -1454,4 +1454,10 @@
     <string name="sr_fin_satin">Pintura satinada, solo XPower en MG.</string>
     <string name="sr_limit_at">límite %1$d %%</string>
     <string name="sr_car_stops_at">El coche se detiene al %1$d %%</string>
+    <string name="cl_side_hint">Pulsación larga: volante a la izquierda o a la derecha</string>
+    <string name="cl_side_title">Puesto de conducción</string>
+    <string name="cl_lhd">Volante a la izquierda</string>
+    <string name="cl_rhd">Volante a la derecha</string>
+    <string name="cl_rear_window">Luneta trasera</string>
+    <string name="cl_auto_flow">Caudal de aire AUTO: %1$s</string>
 </resources>

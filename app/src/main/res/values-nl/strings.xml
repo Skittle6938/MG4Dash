@@ -1454,4 +1454,10 @@
     <string name="sr_fin_satin">Satijnlak, bij MG alleen op de XPower.</string>
     <string name="sr_limit_at">limiet %1$d %%</string>
     <string name="sr_car_stops_at">De auto stopt bij %1$d %%</string>
+    <string name="cl_side_hint">Lang drukken: links- of rechtsgestuurd</string>
+    <string name="cl_side_title">Bestuurdersplaats</string>
+    <string name="cl_lhd">Linksgestuurd</string>
+    <string name="cl_rhd">Rechtsgestuurd</string>
+    <string name="cl_rear_window">Achterruit</string>
+    <string name="cl_auto_flow">AUTO-luchtdebiet: %1$s</string>
 </resources>

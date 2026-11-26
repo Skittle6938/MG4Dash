@@ -8,6 +8,8 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import android.os.Handler
 import android.os.Looper
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
 import app.mg4dash.R
 import app.mg4dash.car.CarBridge
 import app.mg4dash.car.VehicleState
@@ -54,71 +56,90 @@ class ClimateActivity : PageActivity() {
             .apply { setOnLongClickListener { if (app.mg4dash.system.Prefs(context).climateHoldEnabled) { app.mg4dash.climate.ClimateHoldPanel.show(context as android.app.Activity); true } else false } }
         header.addView(power)
 
-        // ── Temperature ──
-        val tPanel = kit.panel(getString(R.string.cl_driver_temp))
-        temp = kit.text("—", 120f, light = true).apply {
+        // ── Redesign "Showroom" (26/11): the real dashboard, the air streams from its outlets, glass panels on it ──
+        val cab = object : android.widget.FrameLayout(this) {
+            override fun onLayout(changed: Boolean, l: Int, t: Int, r: Int, b: Int) { super.onLayout(changed, l, t, r, b); if (changed) post { placeCabin() } }
+        }.apply {
+            background = android.graphics.drawable.GradientDrawable().apply { setColor(0xFF05070B.toInt()); cornerRadius = kit.dp(22).toFloat() }
+            clipToOutline = true
+        }
+        cabin = cab
+        cabImage = android.widget.ImageView(this).apply { scaleType = android.widget.ImageView.ScaleType.FIT_XY }
+        cab.addView(cabImage, android.widget.FrameLayout.LayoutParams(0, 0))
+        cab.addView(android.view.View(this).apply {
+            background = android.graphics.drawable.LayerDrawable(arrayOf(
+                android.graphics.drawable.GradientDrawable(android.graphics.drawable.GradientDrawable.Orientation.LEFT_RIGHT, intArrayOf(0xB805070B.toInt(), 0, 0, 0, 0xB805070B.toInt())),
+                android.graphics.drawable.GradientDrawable(android.graphics.drawable.GradientDrawable.Orientation.TOP_BOTTOM, intArrayOf(0x9405070B.toInt(), 0x5C05070B, 0, 0, 0x6B05070B))))
+        }, android.widget.FrameLayout.LayoutParams(-1, -1))
+        tint = android.view.View(this)
+        cab.addView(tint, android.widget.FrameLayout.LayoutParams(-1, -1))
+        air = app.mg4dash.showroom.AirFlow(this)
+        cab.addView(air, android.widget.FrameLayout.LayoutParams(0, 0))
+        // Touch zones on the picture: windscreen, face, feet
+        zones = listOf(2, 0, 1).map { k -> android.view.View(this).apply { setOnClickListener { toggleFlow(k) } }.also { cab.addView(it, android.widget.FrameLayout.LayoutParams(0, 0)) } }
+        screen = tag(cab, getString(R.string.cl_windshield), R.drawable.ic_flow_screen) { toggleFlow(2) }
+        face = tag(cab, getString(R.string.cl_face), R.drawable.ic_flow_face) { toggleFlow(0) }
+        feet = tag(cab, getString(R.string.cl_feet), R.drawable.ic_flow_feet) { toggleFlow(1) }
+        rearTag = tag(cab, getString(R.string.cl_rear_window), R.drawable.ic_sc_defrost) {}.apply { isClickable = false; textSize = 15f }
+
+        // ── Driver's glass: temperature and fan ──
+        val tPanel = glass()
+        tPanel.addView(label(getString(R.string.cl_driver_temp)))
+        temp = kit.text("—", 76f, light = true).apply {
             gravity = Gravity.CENTER
             setOnLongClickListener { app.mg4dash.ui.TempCalibration.show(this@ClimateActivity) { render(app.mg4dash.car.CarBridge.state.value) }; true }
         }
         val tRow = kit.row().apply { gravity = Gravity.CENTER }
-        val down = kit.roundButton(R.drawable.ic_minus, 96, R.color.accent_cold) {}
-        val up = kit.roundButton(R.drawable.ic_plus, 96, R.color.accent_heat) {}
+        val down = kit.roundButton(R.drawable.ic_minus, 72, R.color.accent_cold) {}
+        val up = kit.roundButton(R.drawable.ic_plus, 72, R.color.accent_heat) {}
         repeatOnHold(down) { CarBridge.stepTemp(-1) }
         repeatOnHold(up) { CarBridge.stepTemp(1) }
-        tRow.addView(down)
-        tRow.addView(temp, kit.lp(0, -2, 1f))
-        tRow.addView(up)
-        tPanel.addView(tRow, kit.lp(-1, 0, 1f))
+        tRow.addView(down); tRow.addView(temp, kit.lp(0, -2, 1f)); tRow.addView(up)
+        tPanel.addView(tRow, kit.lp(-1, -2, t = 10))
         // Touched or slid along: that set point (LO, the numbers, HI); the same bar height as the fan's, a taller touch zone
         tempGauge = SegmentedGauge(this).apply {
             segments = 17; setPadding(0, kit.dp(BAR_TOUCH), 0, kit.dp(BAR_TOUCH))
             onSegmentPick = { CarBridge.setTempSlot(it) }
         }
-        tPanel.addView(tempGauge, kit.lp(-1, kit.dp(BAR_DP + 2 * BAR_TOUCH), t = 8 - BAR_TOUCH))
+        tPanel.addView(tempGauge, kit.lp(-1, kit.dp(BAR_DP + 2 * BAR_TOUCH), t = 12 - BAR_TOUCH))
         tPanel.addView(kit.row().apply {
             // From the car's range (#107): 20 / 24 / 28 with 18 to 32, 18 / 22 / 26 with 16 to 30
             val f = VehicleState.tempFirst.toInt()
             listOf("LO", "${f + 2}°", "${f + 6}°", "${f + 10}°", "HI").forEachIndexed { i, s ->
-                addView(kit.text(s, 15f, R.color.text_title).apply {
+                addView(kit.text(s, 14f, R.color.text_title).apply {
                     gravity = when (i) { 0 -> Gravity.START; 4 -> Gravity.END; else -> Gravity.CENTER }
                 }, kit.lp(0, -2, 1f))
             }
-        }, kit.lp(-1, -2, t = 6))
-        controls += listOf(down, up)
-
-        // ── Fan and direction ──
-        val fPanel = kit.panel(getString(R.string.cl_fan))
-        fanValue = kit.text("—", 72f, light = true).apply { gravity = Gravity.CENTER }
-        fPanel.addView(fanValue, kit.lp(-1, 0, 1f))
+        }, kit.lp(-1, -2, t = 4))
+        tPanel.addView(android.view.View(this).apply { setBackgroundColor(0x1FFFFFFF) }, kit.lp(-1, 1, t = 14, b = 12))
+        tPanel.addView(label(getString(R.string.cl_fan)))
+        fanValue = kit.text("—", 56f, light = true).apply { gravity = Gravity.CENTER }
         fanGauge = SegmentedGauge(this).apply {
             segments = VehicleState.FAN_MAX; setPadding(0, kit.dp(BAR_TOUCH), 0, kit.dp(BAR_TOUCH))
             onSegmentPick = { CarBridge.setFanLevel(it + 1) }
         }
-        val fRow = kit.row()
+        val fRow = kit.row().apply { gravity = Gravity.CENTER }
         // As on home: − at the first notch turns the climate off, and does nothing with the climate off (#34)
-        val fDown = kit.roundButton(R.drawable.ic_minus, 72) {
+        val fDown = kit.roundButton(R.drawable.ic_minus, 62) {
             val s = CarBridge.state.value
             if (s.hvacOn == true) {
                 if (s.autoOn != true && (s.fanSpeed ?: 0) <= VehicleState.FAN_MIN) CarBridge.togglePower()
                 else CarBridge.stepFan(-1)
             }
         }
-        val fUp = kit.roundButton(R.drawable.ic_plus, 72) { CarBridge.stepFan(1) }
-        fRow.addView(fDown)
-        fRow.addView(fanGauge, kit.lp(0, kit.dp(BAR_DP + 2 * BAR_TOUCH), 1f, l = 16, r = 16))
-        fRow.addView(fUp)
-        fPanel.addView(fRow, kit.lp(-1, -2))
-        fPanel.addView(kit.title(getString(R.string.cl_airflow)), kit.lp(-1, -2, t = 22))
-        val dRow = kit.row()
-        face = kit.toggleTile(getString(R.string.cl_face)) { toggleFlow(0) }
-        feet = kit.toggleTile(getString(R.string.cl_feet)) { toggleFlow(1) }
-        screen = kit.toggleTile(getString(R.string.cl_windshield)) { toggleFlow(2) }
-        listOf(face, feet, screen).forEachIndexed { i, v -> dRow.addView(v, kit.lp(0, kit.dp(72), 1f, l = if (i > 0) 10 else 0)) }
-        fPanel.addView(dRow, kit.lp(-1, -2, t = 10))
-        controls += listOf(fDown, fUp, face, feet, screen)
+        val fUp = kit.roundButton(R.drawable.ic_plus, 62) { CarBridge.stepFan(1) }
+        fRow.addView(fDown); fRow.addView(fanValue, kit.lp(0, -2, 1f)); fRow.addView(fUp)
+        tPanel.addView(fRow, kit.lp(-1, -2, t = 8))
+        tPanel.addView(fanGauge, kit.lp(-1, kit.dp(BAR_DP + 2 * BAR_TOUCH), t = 10 - BAR_TOUCH))
+        autoNote = kit.text("", 14f, R.color.text_title)
+        tPanel.addView(autoNote, kit.lp(-1, -2, t = 6))
+        controls += listOf(down, up, fDown, fUp, face, feet, screen)
+        driverGlass = tPanel
+        cab.addView(tPanel, android.widget.FrameLayout.LayoutParams(kit.dp(324), -2))
 
-        // ── Modes ──
-        val mPanel = kit.panel(getString(R.string.cl_modes))
+        // ── Passenger's glass: modes ──
+        val mPanel = glass()
+        mPanel.addView(label(getString(R.string.cl_modes)))
         auto = kit.toggleTile("AUTO") { CarBridge.toggleAuto() }
         app.mg4dash.climate.AutoAirVolume.attach(this, auto)
         ac = kit.toggleTile("A/C") { CarBridge.toggleAc() }
@@ -130,23 +151,114 @@ class ClimateActivity : PageActivity() {
         // Stock climate settings (#65), hidden if the car does not give them
         defLink = kit.toggleTile(getString(R.string.cl_defrost_link)) { CarBridge.setDefrostLinked(CarBridge.state.value.defrostLinked != true) }
         ecoLink = kit.toggleTile(getString(R.string.cl_eco_link)) { CarBridge.setEcoLinked(CarBridge.state.value.ecoLinked != true) }
-        listOf(defLink, ecoLink).forEach { it.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, 15f) }
+        listOf(auto, ac, eco, recirc, defFront, defRear).forEach { it.textSize = 16f }
+        listOf(defLink, ecoLink).forEach { it.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, 13f) }
         val grid = listOf(listOf(auto, ac), listOf(eco, recirc), listOf(defFront, defRear), listOf(defLink, ecoLink))
         grid.forEach { pair ->
             val r = kit.row()
-            pair.forEachIndexed { i, v -> r.addView(v, kit.lp(0, -1, 1f, l = if (i > 0) 10 else 0)) }
-            mPanel.addView(r, kit.lp(-1, 0, 1f, t = 10))
+            pair.forEachIndexed { i, v -> r.addView(v, kit.lp(0, -1, 1f, l = if (i > 0) 9 else 0)) }
+            mPanel.addView(r, kit.lp(-1, 0, 1f, t = 9))
         }
-        val origin = kit.text(getString(R.string.cl_stock), 18f, R.color.accent_action).apply {
-            gravity = Gravity.CENTER; setPadding(0, kit.dp(14), 0, kit.dp(4))
+        val origin = kit.text(getString(R.string.cl_stock), 17f, R.color.accent_action).apply {
+            gravity = Gravity.CENTER; setPadding(0, kit.dp(11), 0, kit.dp(2))
             setOnClickListener { Apps.open(this@ClimateActivity, Apps.stock(this@ClimateActivity, Apps.HVAC, Apps.HVAC_HMI), "SAIC") }
         }
         mPanel.addView(origin, kit.lp(-1, -2))
         controls += listOf(auto, ac, eco, recirc, defFront, defRear, defLink, ecoLink, power)
+        modesGlass = mPanel
+        cab.addView(mPanel, android.widget.FrameLayout.LayoutParams(kit.dp(344), kit.dp(414)))
 
-        body.addView(tPanel, kit.lp(0, -1, 1.15f, r = 6))
-        body.addView(fPanel, kit.lp(0, -1, 1f, l = 6, r = 6))
-        body.addView(mPanel, kit.lp(0, -1, 1f, l = 6))
+        val hint = kit.text(getString(R.string.cl_side_hint), 15f, R.color.text_title).apply {
+            background = android.graphics.drawable.GradientDrawable().apply { setColor(0xB810151F.toInt()); cornerRadius = kit.dp(20).toFloat(); setStroke(1, 0x12FFFFFF) }
+            setPadding(kit.dp(16), kit.dp(9), kit.dp(16), kit.dp(9))
+            setOnClickListener { chooseSide() }
+        }
+        cab.addView(hint, android.widget.FrameLayout.LayoutParams(-2, -2, Gravity.BOTTOM or Gravity.CENTER_HORIZONTAL).apply { bottomMargin = kit.dp(12) })
+        // Long press on the picture, out of the panels and tags: left- or right-hand drive
+        cab.setOnLongClickListener { chooseSide(); true }
+        zones.forEach { it.setOnLongClickListener { chooseSide(); true } }
+        body.addView(cab, kit.lp(-1, -1))
+        rhd = look.rhd ?: (app.mg4dash.car.CarProps.rightHandDrive() ?: app.mg4dash.system.Prefs(this).raw.getBoolean("rhd_cached", false))
+    }
+
+    private val look by lazy { app.mg4dash.showroom.CarLook(this) }
+    private var rhd = false
+    private lateinit var cabin: android.widget.FrameLayout
+    private lateinit var cabImage: android.widget.ImageView
+    private lateinit var tint: View
+    private lateinit var air: app.mg4dash.showroom.AirFlow
+    private lateinit var zones: List<View>
+    private lateinit var rearTag: TextView
+    private lateinit var autoNote: TextView
+    private lateinit var driverGlass: LinearLayout
+    private lateinit var modesGlass: LinearLayout
+    private var cabBitmap: Pair<Boolean, android.graphics.Bitmap>? = null
+
+    private fun label(t: String) = kit.text(t.uppercase(), 14f, R.color.text_title).apply { letterSpacing = .1f }
+
+    /** A glass panel over the picture. */
+    private fun glass() = kit.column().apply {
+        background = android.graphics.drawable.GradientDrawable().apply { setColor(0xA8090C13.toInt()); cornerRadius = kit.dp(26).toFloat(); setStroke(1, 0x1FFFFFFF) }
+        setPadding(kit.dp(18), kit.dp(18), kit.dp(18), kit.dp(14))
+        elevation = kit.dp(10).toFloat()
+    }
+
+    /** A tag on the picture where an outlet blows: windscreen, face, feet. */
+    private fun tag(parent: android.widget.FrameLayout, text: String, icon: Int, onClick: () -> Unit): TextView = TextView(this).apply {
+        this.text = text; textSize = 18f; gravity = Gravity.CENTER_VERTICAL; maxLines = 1
+        typeface = android.graphics.Typeface.create("sans-serif-medium", android.graphics.Typeface.NORMAL)
+        val d = androidx.core.content.ContextCompat.getDrawable(context, icon)?.mutate()
+        d?.setBounds(0, 0, kit.dp(30), kit.dp(30))
+        setCompoundDrawables(d, null, null, null); compoundDrawablePadding = kit.dp(10)
+        setPadding(kit.dp(12), 0, kit.dp(20), 0)
+        isClickable = true; setOnClickListener { onClick() }
+        elevation = kit.dp(4).toFloat()
+        parent.addView(this, android.widget.FrameLayout.LayoutParams(-2, kit.dp(54)))
+    }
+
+    private fun paintTag(t: TextView, on: Boolean, color: Int) {
+        val c = if (on) color else 0xFFD5DCE8.toInt()
+        t.setTextColor(c)
+        t.compoundDrawables[0]?.setTint(c)
+        t.background = android.graphics.drawable.GradientDrawable().apply { setColor(0xB8090C12.toInt()); cornerRadius = kit.dp(27).toFloat(); setStroke(kit.dp(2), if (on) color else 0x33FFFFFF) }
+    }
+
+    /** As in the mock-up (1808 × 644): the picture raised by 20 px, the tags at x = 1196 (mirrored in right-hand drive). */
+    private fun placeCabin() {
+        val w = cabin.width.toFloat(); val h = cabin.height.toFloat(); if (w <= 0f) return
+        val s = w / 1808f
+        fun size(v: View, x: Float, y: Float, vw: Float, vh: Float) { v.layoutParams = (v.layoutParams as android.widget.FrameLayout.LayoutParams).apply { width = vw.toInt(); height = vh.toInt() }; v.translationX = x; v.translationY = y }
+        size(cabImage, 0f, -20f * s, w, 678f * s)
+        size(air, 0f, 0f, w, 644f * s)
+        // Windscreen, face, feet zones
+        size(zones[0], 340f * s, 0f, w - 680f * s, 300f * s)
+        size(zones[1], 340f * s, 392f * s, w - 680f * s, 92f * s)
+        size(zones[2], 340f * s, 500f * s, w - 680f * s, 144f * s)
+        fun x(v: Float) = (if (rhd) 1808f - v else v) * s
+        listOf(screen to 300f, face to 446f, feet to 566f).forEach { (t, y) -> t.post { t.translationX = x(1196f) - t.width / 2f; t.translationY = y * s - t.height / 2f } }
+        rearTag.post { rearTag.translationX = x(894f) - rearTag.width / 2f; rearTag.translationY = 84f * s - rearTag.height / 2f }
+        driverGlass.post { driverGlass.translationX = if (rhd) w - driverGlass.width - kit.dp(16) else kit.dp(16).toFloat(); driverGlass.translationY = (h - driverGlass.height) / 2 }
+        modesGlass.post { modesGlass.translationX = if (rhd) kit.dp(16).toFloat() else w - modesGlass.width - kit.dp(16); modesGlass.translationY = (h - modesGlass.height) / 2 }
+        air.rhd = rhd
+        loadCabin()
+    }
+
+    private fun loadCabin() {
+        if (cabBitmap?.first == rhd) return
+        val side = rhd
+        lifecycleScope.launch {
+            val b = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) { assets.open("showroom/cabin_${if (side) "r" else "l"}.webp").use { android.graphics.BitmapFactory.decodeStream(it) } }
+            if (side == rhd) { cabBitmap = side to b; cabImage.setImageBitmap(b) }
+        }
+    }
+
+    private fun chooseSide() {
+        lateinit var d: android.app.AlertDialog
+        val row = kit.row()
+        listOf(false to R.string.cl_lhd, true to R.string.cl_rhd).forEachIndexed { i, (r, label) ->
+            row.addView(kit.toggleTile(getString(label)) { look.rhd = r; rhd = r; d.dismiss(); placeCabin() }.apply { isSelected = r == rhd }, kit.lp(0, kit.dp(60), 1f, l = if (i > 0) 10 else 0))
+        }
+        d = app.mg4dash.ui.Windows.show(this, getString(R.string.cl_side_title), row, widthDp = 560)
     }
 
     // Air direction: table decoded by MG4Control (this is not a bit mask).
@@ -212,9 +324,22 @@ class ClimateActivity : PageActivity() {
         fanGauge.onColor = kit.color(if (autoOn) R.color.text_disabled else R.color.accent_cold)
         fanGauge.value = if (on && !autoOn) s.fanSpeed ?: 0 else 0
         val parts = partsOf(s.fanDirection)
-        face.isSelected = parts?.get(0) == true
-        feet.isSelected = parts?.get(1) == true
-        screen.isSelected = parts?.get(2) == true
+        // Orange heats (set point above the outside), blue cools
+        val heatMode = (t ?: 0f) > (s.outsideTemp ?: 99f)
+        val k = kit.color(if (heatMode) R.color.accent_heat else R.color.accent_cold)
+        val scr = on && (parts?.get(2) == true || s.defrostFront == true)
+        paintTag(face, on && parts?.get(0) == true, k); paintTag(feet, on && parts?.get(1) == true, k); paintTag(screen, scr, k)
+        rearTag.visibility = if (on && s.defrostRear == true) View.VISIBLE else View.GONE
+        paintTag(rearTag, true, kit.color(R.color.accent_heat))
+        air.heat = heatMode
+        air.power = if (!on) 0f else if (autoOn) .55f else .2f + .8f * (s.fanSpeed ?: 0) / VehicleState.FAN_MAX
+        air.face = parts?.get(0) == true; air.feet = parts?.get(1) == true; air.screen = scr; air.defrost = s.defrostFront == true
+        air.invalidate()
+        tint.setBackgroundColor(if (on) (k and 0x00FFFFFF) or 0x14000000 else 0)
+        cabImage.colorFilter = if (on) null else android.graphics.ColorMatrixColorFilter(android.graphics.ColorMatrix().apply {
+            setSaturation(.55f); postConcat(android.graphics.ColorMatrix().apply { setScale(.72f, .72f, .72f, 1f) })
+        })
+        autoNote.text = if (autoOn && s.autoAirVolume in 0..2) getString(R.string.cl_auto_flow, getString(listOf(R.string.cl_level_high, R.string.cl_level_medium, R.string.cl_level_low)[s.autoAirVolume!!])) else ""
         auto.isSelected = s.autoOn == true
         app.mg4dash.climate.AutoAirVolume.paint(auto, s.autoAirVolume)
         defLink.isSelected = s.defrostLinked == true

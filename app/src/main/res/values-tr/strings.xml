@@ -1454,4 +1454,10 @@
     <string name="sr_fin_satin">Saten boya, MG\'de yalnızca XPower.</string>
     <string name="sr_limit_at">sınır %%%1$d</string>
     <string name="sr_car_stops_at">Araç %%%1$d\'de durur</string>
+    <string name="cl_side_hint">Uzun bas: soldan veya sağdan direksiyon</string>
+    <string name="cl_side_title">Sürüş konumu</string>
+    <string name="cl_lhd">Soldan direksiyon</string>
+    <string name="cl_rhd">Sağdan direksiyon</string>
+    <string name="cl_rear_window">Arka cam</string>
+    <string name="cl_auto_flow">AUTO hava akışı: %1$s</string>
 </resources>

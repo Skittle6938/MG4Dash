@@ -1454,4 +1454,10 @@
     <string name="sr_fin_satin">Saténová barva, u MG jen pro XPower.</string>
     <string name="sr_limit_at">limit %1$d %%</string>
     <string name="sr_car_stops_at">Auto se zastaví na %1$d %%</string>
+    <string name="cl_side_hint">Dlouhé podržení: řízení vlevo nebo vpravo</string>
+    <string name="cl_side_title">Místo řidiče</string>
+    <string name="cl_lhd">Řízení vlevo</string>
+    <string name="cl_rhd">Řízení vpravo</string>
+    <string name="cl_rear_window">Zadní okno</string>
+    <string name="cl_auto_flow">Průtok vzduchu AUTO: %1$s</string>
 </resources>

@@ -1454,4 +1454,10 @@
     <string name="sr_fin_satin">Seidenmattlack, bei MG nur für den XPower.</string>
     <string name="sr_limit_at">Grenze %1$d %%</string>
     <string name="sr_car_stops_at">Das Auto stoppt bei %1$d %%</string>
+    <string name="cl_side_hint">Lange drücken: Links- oder Rechtslenker</string>
+    <string name="cl_side_title">Fahrerplatz</string>
+    <string name="cl_lhd">Linkslenker</string>
+    <string name="cl_rhd">Rechtslenker</string>
+    <string name="cl_rear_window">Heckscheibe</string>
+    <string name="cl_auto_flow">AUTO-Luftmenge: %1$s</string>
 </resources>

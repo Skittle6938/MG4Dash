@@ -1454,4 +1454,10 @@
     <string name="sr_fin_satin">Satin paint, XPower only at MG.</string>
     <string name="sr_limit_at">limit %1$d %%</string>
     <string name="sr_car_stops_at">The car stops at %1$d %%</string>
+    <string name="cl_side_hint">Long press: left- or right-hand drive</string>
+    <string name="cl_side_title">Driving position</string>
+    <string name="cl_lhd">Left-hand drive</string>
+    <string name="cl_rhd">Right-hand drive</string>
+    <string name="cl_rear_window">Rear window</string>
+    <string name="cl_auto_flow">AUTO air flow: %1$s</string>
 </resources>
