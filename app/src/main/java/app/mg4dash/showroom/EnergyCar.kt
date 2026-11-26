@@ -26,7 +26,7 @@ import kotlinx.coroutines.withContext
 class EnergyCar(context: Context) : View(context) {
     val box = RectF()
     var body = 0
-        set(v) { if (field != v) { field = v; ghost = null; load() } }
+        set(v) { if (field != v) { field = v; ghost = null; sized = null; load() } }
     var soc = 0f
     /** Charge limit applied by the car (0: none shown). */
     var limit = 0
@@ -37,6 +37,7 @@ class EnergyCar(context: Context) : View(context) {
     var limitText: (Int) -> String = { "$it %" }
 
     private var ghost: Bitmap? = null
+    private var sized: Bitmap? = null
     /** The near side's wheels, opaque, over the see-through car: the far wheels behind them no longer show (26/11). */
     private var wheels: Bitmap? = null
     private var wheelBox: RectF? = null
@@ -70,13 +71,18 @@ class EnergyCar(context: Context) : View(context) {
                 context.assets.open("showroom/s${b}_ghost.webp").use { BitmapFactory.decodeStream(it) } to
                     context.assets.open("showroom/s_wh_${w.id}.webp").use { BitmapFactory.decodeStream(it) }
             }
-            if (b == body) { ghost = g; wheels = wb; wheelBox = PaintShop.meta(context).getValue(PaintShop.View.SIDE).wheels[w.id]; invalidate() }
+            if (b == body) { ghost = g; sized = null; wheels = wb; wheelBox = PaintShop.meta(context).getValue(PaintShop.View.SIDE).wheels[w.id]; invalidate() }
         }
     }
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        ghost?.let { canvas.drawBitmap(it, null, box, img) }
+        ghost?.let { g ->
+            // Brought once to the size it is drawn at: the animated frames (heating, charging) no longer scale it (26/11)
+            val w = box.width().toInt(); val h = box.height().toInt()
+            if (w > 0 && h > 0 && (sized?.width != w || sized?.height != h)) sized = android.graphics.Bitmap.createScaledBitmap(g, w, h, true)
+            canvas.drawBitmap(sized ?: g, box.left, box.top, img)
+        }
         val k = box.width() / 1840f
         if (k <= 0f) return
         canvas.save(); canvas.translate(box.left, box.top); canvas.scale(k, k)

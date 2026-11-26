@@ -102,14 +102,21 @@ object PaintShop {
     suspend fun render(ctx: Context, cfg: Config, scale: Float): Bitmap = withContext(Dispatchers.Default) {
         val k = key(cfg, scale)
         cache.get(k) ?: lock.withLock {
-            cache.get(k) ?: compose(ctx, cfg, scale).also { cache.put(k, it) }
+            cache.get(k) ?: run {
+                val t0 = android.os.SystemClock.uptimeMillis()
+                compose(ctx, cfg, scale).also {
+                    cache.put(k, it)
+                    app.mg4dash.system.Log.i("Perf", "car painted ${cfg.view} ${it.width}×${it.height} (${cfg.paint.id}, ${cfg.livery.id}) in ${android.os.SystemClock.uptimeMillis() - t0} ms")
+                }
+            }
         }
     }
 
     /** The scale whose image is at least as wide as [px] on screen. */
     fun scaleFor(ctx: Context, view: View, px: Int): Float {
+        // The exact size it is shown at (in hundredths, so the cache keys stay few): no scaling at each draw (26/11)
         val w = meta(ctx).getValue(view).w
-        return listOf(.125f, .25f, .5f).firstOrNull { w * it >= px * .96f } ?: 1f
+        return (kotlin.math.ceil(px * 100.0 / w) / 100.0).toFloat().coerceIn(.1f, 1f)
     }
 
     private fun decode(ctx: Context, name: String, w: Int, h: Int): Bitmap {
