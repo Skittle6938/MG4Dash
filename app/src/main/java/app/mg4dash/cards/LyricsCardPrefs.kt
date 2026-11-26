@@ -33,6 +33,11 @@ class LyricsCardPrefs(context: Context) {
         get() = card.int("offset_tenths", -4).coerceIn(-30, 30)
         set(value) = card.setInt("offset_tenths", value.coerceIn(-30, 30))
 
+    /** The ▲▼ arrows that shift the current song's lyrics, in the karaoke and the card (on by default). */
+    var shiftArrows: Boolean
+        get() = card.bool("shift_arrows", true)
+        set(value) = card.setBool("shift_arrows", value)
+
     /** How far ahead of the song the lyrics are, in ms. */
     val leadMs: Long get() = -offsetTenths * 100L
 

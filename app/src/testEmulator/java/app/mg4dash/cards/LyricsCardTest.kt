@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import app.mg4dash.R
+import app.mg4dash.media.LyricsChoices
 import app.mg4dash.media.LyricsRepo
 import app.mg4dash.media.MediaHub
 import app.mg4dash.system.Prefs
@@ -225,6 +226,64 @@ class LyricsCardTest {
         }
         assertFalse(LyricsRepo.searchable(MediaHub.NowPlaying(available = true, packageName = "aa.player", source = "Radio FG", title = "Radio FG", artist = "Live")))
         assertTrue(LyricsRepo.searchable(trackNow()))
+        card.shown(false)
+    }
+
+    @Test fun shiftArrowsMoveTheSongsLyricsAndAreKeptForIt() {
+        app.filesDir.resolve("lyrics_choices.json").delete()
+        LyricsChoices.clear()
+        val now = trackNow()
+        writeCachedTrack(now.artist, now.title)
+        setNow(now)
+        val card = LyricsCard(activity)
+        activity.setContentView(card, ViewGroup.LayoutParams(620, 340))
+        card.shown(true); card.show(now)
+        idle(1600)
+        val shift = privateValue(card, "cardShift") as LyricsShift
+        assertEquals("arrows beside synced lyrics", View.VISIBLE, shift.visibility)
+        // ▲ moves the lyrics back half a second, ▼ moves them on
+        shift.getChildAt(0).performClick(); shift.getChildAt(0).performClick(); shift.getChildAt(2).performClick()
+        assertEquals(-500L, LyricsChoices.shiftMs(now.artist, now.title))
+        assertEquals(-500L, privateValue(card, "shiftMs"))
+        assertEquals(LyricsShift.label(-500, false), (shift.getChildAt(1) as TextView).text.toString())
+        // Kept for the song (also as "feat."), not for the next one
+        assertEquals(-500L, LyricsChoices.shiftMs(now.artist + " feat. Guest", now.title + " (feat. Guest)"))
+        val other = trackNow("Another Song"); setNow(other); card.show(other); idle(200)
+        assertEquals(0L, privateValue(card, "shiftMs"))
+        setNow(now); card.show(now); idle(1600)
+        assertEquals(-500L, privateValue(card, "shiftMs"))
+        // A touch on the count: back to 0, forgotten
+        shift.getChildAt(1).performClick()
+        assertEquals(0L, LyricsChoices.shiftMs(now.artist, now.title))
+        assertEquals(0, LyricsChoices.count())
+        // The setting hides them
+        LyricsCardPrefs(app).shiftArrows = false
+        card.show(now); idle(300)
+        assertEquals(View.GONE, shift.visibility)
+        card.shown(false)
+    }
+
+    @Test fun karaokeWithoutLyricsSaysForWhichSongAndOffersToSearchAgain() {
+        val now = trackNow("Unknown Song")
+        val key = LyricsRepo.key(now.artist, now.title)
+        val name = MessageDigest.getInstance("SHA-256").digest(key.toByteArray()).joinToString("") { "%02x".format(it) }
+        File(File(app.filesDir, "lyrics").apply { mkdirs() }, "$name.json").writeText(JSONObject().apply {
+            put("artistName", now.artist); put("trackName", now.title); put("syncedLyrics", JSONObject.NULL)
+            put("plainLyrics", JSONObject.NULL); put("instrumental", true)
+        }.toString())
+        setNow(now)
+        val card = LyricsCard(activity)
+        card.shown(true); card.show(now)
+        idle(1600)
+        card.javaClass.getDeclaredMethod("openKaraoke").apply { isAccessible = true }.invoke(card)
+        idle(300)
+        val empty = privateValue(card, "karaokeEmpty") as View
+        assertEquals(View.VISIBLE, empty.visibility)
+        assertEquals(activity.getString(R.string.ly_none), (privateValue(card, "karaokeEmptyText") as TextView).text.toString())
+        assertEquals(activity.getString(R.string.ly_for, now.title, now.artist), (privateValue(card, "karaokeEmptyFor") as TextView).text.toString())
+        assertEquals(View.VISIBLE, (privateValue(card, "karaokeEmptyButton") as View).visibility)
+        assertEquals("no arrows without synced lyrics", View.GONE, (privateValue(card, "karaokeShift") as View).visibility)
+        (privateValue(card, "karaoke") as Dialog).dismiss()
         card.shown(false)
     }
 

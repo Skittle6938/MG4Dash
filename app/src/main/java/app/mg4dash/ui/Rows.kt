@@ -139,6 +139,9 @@ object Rows {
         layoutParams = LinearLayout.LayoutParams(dp(c, 56), dp(c, 56))
     }
 
+    /** The tag of a window's subtitle (changed once what it says is known). */
+    const val TAG_SUB = "window_sub"
+
     /** A window's title bar: optional icon in the theme's colour, the name, the close button. */
     fun titleBar(c: Context, icon: Int?, title: String, sub: String? = null, onClose: () -> Unit): LinearLayout {
         val bar = LinearLayout(c).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL; minimumHeight = dp(c, 84) }
@@ -147,7 +150,7 @@ object Rows {
         }
         val texts = LinearLayout(c).apply { orientation = LinearLayout.VERTICAL }
         texts.addView(TextView(c).apply { text = title; setTextColor(col(c, R.color.text_value)); setTextSize(TypedValue.COMPLEX_UNIT_SP, 25f); typeface = medium })
-        sub?.let { texts.addView(TextView(c).apply { text = it; setTextColor(col(c, R.color.text_sub)); setTextSize(TypedValue.COMPLEX_UNIT_SP, 15f) }) }
+        sub?.let { texts.addView(TextView(c).apply { text = it; tag = TAG_SUB; setTextColor(col(c, R.color.text_sub)); setTextSize(TypedValue.COMPLEX_UNIT_SP, 15f) }) }
         bar.addView(texts, LinearLayout.LayoutParams(0, -2, 1f))
         bar.addView(closeButton(c, onClose), LinearLayout.LayoutParams(dp(c, 56), dp(c, 56)))
         return bar

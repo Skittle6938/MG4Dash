@@ -16,6 +16,7 @@ import android.widget.LinearLayout
 import android.widget.ScrollView
 import android.widget.TextView
 import app.mg4dash.R
+import app.mg4dash.media.LyricsChoices
 import app.mg4dash.media.LyricsRepo
 import app.mg4dash.media.MediaHub
 import app.mg4dash.system.Prefs
@@ -41,14 +42,16 @@ class LyricsCard(context: Context) : LinearLayout(context), HomeCard {
     private val d = resources.displayMetrics.density
     private val prefs = LyricsCardPrefs(activity)
     private val header = CardKit.title(activity, activity.getString(R.string.wc_lyrics).uppercase())
-    private val refresh = ImageButton(activity).apply {
-        setImageResource(R.drawable.ic_refresh_lyrics); imageTintList = android.content.res.ColorStateList.valueOf(Themes.color(activity, R.color.text_sub))
-        background = CardKit.buttonBackground(activity); contentDescription = activity.getString(R.string.ly_refresh)
-        setOnClickListener { request(force = true) }
+    /** "Choose the lyrics" (26/11, was "refresh"): the picker of LRCLIB's results, "search again" in it. */
+    private val choose = ImageButton(activity).apply {
+        setImageResource(R.drawable.ic_lyrics_choose); scaleType = android.widget.ImageView.ScaleType.CENTER_INSIDE
+        imageTintList = android.content.res.ColorStateList.valueOf(Themes.color(activity, R.color.text_value))
+        background = roundButton(); contentDescription = activity.getString(R.string.ly_choose)
+        setOnClickListener { openPicker() }
     }
     private val overlayButton = ImageButton(activity).apply {
         setImageResource(R.drawable.ic_lyrics_overlay); scaleType = android.widget.ImageView.ScaleType.CENTER_INSIDE
-        setPadding(dp(11), dp(11), dp(11), dp(11)); background = CardKit.buttonBackground(activity, LyricsOverlay.active)
+        setPadding(dp(14), dp(14), dp(14), dp(14)); background = roundButton(LyricsOverlay.active)
         imageTintList = android.content.res.ColorStateList.valueOf(Themes.color(activity, R.color.text_value))
         isSelected = LyricsOverlay.active
         contentDescription = activity.getString(R.string.lyrics_shortcut_short); setOnClickListener { toggleOverlay() }
@@ -70,6 +73,11 @@ class LyricsCard(context: Context) : LinearLayout(context), HomeCard {
         orientation = VERTICAL; gravity = Gravity.CENTER
         setPadding(dp(0), dp(2), dp(0), dp(2))
     }
+    /** The arrows left of the lyrics and the lyrics. */
+    private val body = LinearLayout(activity).apply { orientation = HORIZONTAL; gravity = Gravity.CENTER_VERTICAL }
+    private val cardShift = LyricsShift(activity, big = false) { setShift(it) }.apply { visibility = View.GONE }
+    /** The current song's shift of its lyrics (the arrows, kept for the song), in ms. */
+    private var shiftMs = 0L
     private var lastMeasuredW = 0
     private var lastMeasuredH = 0
     private var visibleLyricsRows = 3
@@ -105,6 +113,12 @@ class LyricsCard(context: Context) : LinearLayout(context), HomeCard {
     private val lyricsFace: Typeface = Typeface.create("sans-serif-medium", Typeface.BOLD)
     private var karaokePx = 0f
     private var karaokeReel: LyricsReel? = null
+    private var karaokeShift: LyricsShift? = null
+    private var karaokeBox: FrameLayout? = null
+    private var karaokeEmpty: View? = null
+    private var karaokeEmptyText: TextView? = null
+    private var karaokeEmptyFor: TextView? = null
+    private var karaokeEmptyButton: View? = null
     private var lyricsCacheInfo = LyricsRepo.CacheInfo(0, 0)
     private val ticker = object : Runnable {
         override fun run() {
@@ -121,8 +135,8 @@ class LyricsCard(context: Context) : LinearLayout(context), HomeCard {
         CardKit.pad(this)
         val top = LinearLayout(activity).apply { orientation = HORIZONTAL; gravity = Gravity.CENTER_VERTICAL }
         top.addView(header, LayoutParams(0, -2, 1f))
-        top.addView(overlayButton, LayoutParams(dp(48), dp(48)).apply { marginEnd = dp(8) })
-        top.addView(refresh, LayoutParams(dp(48), dp(48)))
+        top.addView(overlayButton, LayoutParams(dp(60), dp(60)).apply { marginEnd = dp(10) })
+        top.addView(choose, LayoutParams(dp(60), dp(60)))
         addView(top, LayoutParams(-1, -2))
         lines.forEachIndexed { i, line ->
             line.setTextSize(TypedValue.COMPLEX_UNIT_SP, if (i == 3) 25f else 17f)
@@ -139,7 +153,13 @@ class LyricsCard(context: Context) : LinearLayout(context), HomeCard {
         lyricsArea.addView(reel, LayoutParams(-1, 0, 1f))
         reel.position = { position(latest) }
         lyricsArea.addView(status, LayoutParams(-1, -2).apply { topMargin = dp(4) })
-        addView(lyricsArea, LayoutParams(-1, 0, 1f))
+        body.addView(cardShift, LayoutParams(-2, -2).apply { marginEnd = dp(6) })
+        body.addView(lyricsArea, LayoutParams(0, -1, 1f))
+        addView(body, LayoutParams(-1, 0, 1f))
+        // The arrows shown or hidden change the lyrics' width: their size is fitted again
+        lyricsArea.addOnLayoutChangeListener { _, l, _, r, _, ol, _, or, _ ->
+            if (r - l != or - ol && or - ol > 0) { lastMeasuredW = 0; post { applyMeasuredSize(width, height) } }
+        }
         setOnClickListener { openKaraoke() }
         isClickable = true
         drawLines(0)
@@ -236,6 +256,7 @@ class LyricsCard(context: Context) : LinearLayout(context), HomeCard {
         val next = LyricsRepo.key(m.artist, m.title)
         if (next != key) {
             key = next; track = null; requestedKey = null; karaokeActiveIndex = -1
+            refreshShift()
             requestJob?.cancel(); requestJob = null
             lines.forEach { it.text = "" }
             karaokeTitle?.text = m.title
@@ -247,7 +268,66 @@ class LyricsCard(context: Context) : LinearLayout(context), HomeCard {
     }
 
     @Suppress("UNUSED_PARAMETER")
-    private fun position(m: MediaHub.NowPlaying): Long = clock.lyricsAt(android.os.SystemClock.elapsedRealtime(), prefs.leadMs)
+    private fun position(m: MediaHub.NowPlaying): Long = clock.lyricsAt(android.os.SystemClock.elapsedRealtime(), prefs.leadMs + shiftMs)
+
+    /** The current song's kept shift, read again (a new song, everything cleared). */
+    private fun refreshShift() {
+        shiftMs = if (LyricsRepo.searchable(latest)) LyricsChoices.shiftMs(latest.artist, latest.title) else 0L
+        paintShift()
+    }
+
+    /** An arrow or the count touched: [ms] is the song's shift from now on, kept for it. */
+    private fun setShift(ms: Long) {
+        val m = latest
+        if (!LyricsRepo.searchable(m)) return
+        LyricsChoices.setShift(m.artist, m.title, ms)
+        shiftMs = LyricsChoices.shiftMs(m.artist, m.title)
+        paintShift()
+        val pos = position(m)
+        drawLines(pos); drawKaraoke(pos)
+        if (track?.synced != null && isActivelyDisplayed) startTicker()
+    }
+
+    /** The arrows: with synced lyrics only, when the setting allows them (and the card has the height for them). */
+    private fun paintShift() {
+        val on = track?.synced != null && prefs.shiftArrows
+        val cardOn = on && (body.height == 0 || body.height >= dp(160))
+        cardShift.paint(shiftMs)
+        if ((cardShift.visibility == View.VISIBLE) != cardOn) cardShift.visibility = if (cardOn) View.VISIBLE else View.GONE
+        karaokeShift?.let { k ->
+            k.paint(shiftMs)
+            if ((k.visibility == View.VISIBLE) != on) {
+                k.visibility = if (on) View.VISIBLE else View.GONE
+                // The lyrics kept in the middle, clear of the arrows on both sides
+                karaokeBox?.let { b ->
+                    val lp = b.layoutParams as FrameLayout.LayoutParams
+                    lp.marginStart = if (on) dp(208) else 0; lp.marginEnd = lp.marginStart; b.layoutParams = lp
+                }
+            }
+        }
+    }
+
+    private fun roundButton(on: Boolean = false) = CardKit.buttonBackground(activity, on).apply { cornerRadius = dp(60).toFloat() }
+
+    /** The picker of the song's lyrics (LyricsPicker); the one chosen is shown at once. */
+    private fun openPicker() {
+        val a = hostActivity() ?: return
+        val scope = liveScope ?: return
+        val m = latest
+        if (!LyricsRepo.searchable(m) || a.isFinishing) return
+        val songKey = LyricsRepo.key(m.artist, m.title)
+        LyricsPicker.open(a, scope, m, track?.id ?: 0L, onChosen = { t ->
+            if (key == songKey) {
+                requestJob?.cancel(); requestedKey = songKey
+                track = t; fitText(); fitKaraoke()
+                setStatus(when { t.instrumental -> activity.getString(R.string.ly_none); t.synced == null -> activity.getString(R.string.ly_plain); else -> "" })
+                paintShift()
+                val pos = position(latest)
+                drawLines(pos); drawKaraoke(pos)
+                if (t.synced != null && isActivelyDisplayed) startTicker()
+            }
+        }, onSearchAgain = { request(force = true, m = latest) })
+    }
 
     private fun request(force: Boolean, m: MediaHub.NowPlaying = MediaHub.now.value) {
         if (!isActivelyDisplayed) return
@@ -377,30 +457,33 @@ class LyricsCard(context: Context) : LinearLayout(context), HomeCard {
             text = "×"; gravity = Gravity.CENTER; setTextSize(TypedValue.COMPLEX_UNIT_SP, 34f); includeFontPadding = false
             setTextColor(Themes.color(activity, R.color.text_value)); background = CardKit.buttonBackground(activity)
             contentDescription = activity.getString(R.string.st_close)
-            setOnClickListener { closeKaraoke() }; setBackgroundResource(R.drawable.bg_chip)
+            setOnClickListener { closeKaraoke() }
         }
         val overlayToggle = ImageButton(activity).apply {
             setImageResource(R.drawable.ic_lyrics_overlay); scaleType = android.widget.ImageView.ScaleType.CENTER_INSIDE
-            setPadding(dp(14), dp(14), dp(14), dp(14)); background = CardKit.buttonBackground(activity, LyricsOverlay.active)
+            setPadding(dp(20), dp(20), dp(20), dp(20)); background = roundButton(LyricsOverlay.active)
             isSelected = LyricsOverlay.active
             imageTintList = android.content.res.ColorStateList.valueOf(if (isSelected) Themes.select(activity) else Themes.color(activity, R.color.text_value))
             contentDescription = activity.getString(R.string.lyrics_shortcut_short)
             setOnClickListener { toggleOverlay() }
         }
-        val refreshKaraoke = ImageButton(activity).apply {
-            setImageResource(R.drawable.ic_refresh_lyrics); scaleType = android.widget.ImageView.ScaleType.CENTER_INSIDE
-            setPadding(dp(14), dp(14), dp(14), dp(14)); background = CardKit.buttonBackground(activity)
+        val chooseKaraoke = ImageButton(activity).apply {
+            setImageResource(R.drawable.ic_lyrics_choose); scaleType = android.widget.ImageView.ScaleType.FIT_CENTER
+            setPadding(dp(22), dp(22), dp(22), dp(22)); background = roundButton()
             imageTintList = android.content.res.ColorStateList.valueOf(Themes.color(activity, R.color.text_value))
-            contentDescription = activity.getString(R.string.ly_refresh)
-            setOnClickListener { request(force = true, m = latest) }
+            contentDescription = activity.getString(R.string.ly_choose)
+            setOnClickListener { openPicker() }
         }
-        header.addView(overlayToggle, LayoutParams(dp(56), dp(56)).apply { marginEnd = dp(8) })
-        header.addView(refreshKaraoke, LayoutParams(dp(56), dp(56)).apply { marginEnd = dp(8) })
-        header.addView(close, LayoutParams(dp(56), dp(56)))
+        close.background = roundButton(); close.setTextSize(TypedValue.COMPLEX_UNIT_SP, 44f)
+        header.addView(overlayToggle, LayoutParams(dp(76), dp(76)).apply { marginEnd = dp(12) })
+        header.addView(chooseKaraoke, LayoutParams(dp(76), dp(76)).apply { marginEnd = dp(12) })
+        header.addView(close, LayoutParams(dp(76), dp(76)))
         header.setOnClickListener { closeKaraoke() }
         root.addView(header, LayoutParams(-1, -2))
 
         val content = FrameLayout(activity)
+        val box = FrameLayout(activity)
+        content.addView(box, FrameLayout.LayoutParams(-1, -1))
         val synced = LinearLayout(activity).apply { orientation = VERTICAL; gravity = Gravity.CENTER }
         val rows = (0 until 7).map { i -> TextView(activity).apply {
             gravity = Gravity.CENTER; setTextColor(if (i == 3) Themes.color(activity, R.color.text_value) else Themes.color(activity, R.color.text_sub)); includeFontPadding = false
@@ -415,9 +498,10 @@ class LyricsCard(context: Context) : LinearLayout(context), HomeCard {
             if (i == 3) { lp.topMargin = dp(18); lp.bottomMargin = dp(18) } else { lp.topMargin = dp(7); lp.bottomMargin = dp(7) }
             synced.addView(line, lp)
         }
-        content.addView(synced, FrameLayout.LayoutParams(-1, -1))
+        box.addView(synced, FrameLayout.LayoutParams(-1, -1))
+        synced.addOnLayoutChangeListener { _, l, _, r, _, ol, _, or, _ -> if (r - l != or - ol) synced.post { fitKaraoke(); drawKaraoke(position(latest)) } }
         val reelView = LyricsReel(activity).apply { visibility = View.GONE; position = { position(latest) }; setPadding(dp(12), 0, dp(12), 0) }
-        content.addView(reelView, FrameLayout.LayoutParams(-1, -1))
+        box.addView(reelView, FrameLayout.LayoutParams(-1, -1))
         karaokeReel = reelView
         val scroll = ScrollView(activity).apply { isFillViewport = true; visibility = View.GONE }
         val plain = TextView(activity).apply {
@@ -426,7 +510,28 @@ class LyricsCard(context: Context) : LinearLayout(context), HomeCard {
             setLineSpacing(dp(7).toFloat(), 1.12f); setPadding(dp(12), dp(24), dp(12), dp(32))
         }
         scroll.addView(plain, android.widget.FrameLayout.LayoutParams(-1, -2))
-        content.addView(scroll, FrameLayout.LayoutParams(-1, -1))
+        box.addView(scroll, FrameLayout.LayoutParams(-1, -1))
+        // No lyrics (yet): what is going on, for which song, and "search again" when nothing was found (26/11)
+        val empty = LinearLayout(activity).apply { orientation = VERTICAL; gravity = Gravity.CENTER; visibility = View.GONE }
+        val emptyText = TextView(activity).apply {
+            gravity = Gravity.CENTER; setTextSize(TypedValue.COMPLEX_UNIT_SP, 44f); typeface = Typeface.DEFAULT_BOLD
+            setTextColor(Themes.color(activity, R.color.text_sub))
+        }
+        val emptyFor = TextView(activity).apply {
+            gravity = Gravity.CENTER; setTextSize(TypedValue.COMPLEX_UNIT_SP, 24f); setTextColor(Themes.color(activity, R.color.text_title))
+            maxLines = 2; ellipsize = android.text.TextUtils.TruncateAt.END
+        }
+        val emptyButton = app.mg4dash.ui.Rows.actionButton(activity, activity.getString(R.string.ly_search_again)) { request(force = true, m = latest) }.apply {
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, 24f); minHeight = dp(76); setPadding(dp(40), 0, dp(40), 0)
+        }
+        empty.addView(emptyText, LayoutParams(-1, -2))
+        empty.addView(emptyFor, LayoutParams(-1, -2).apply { topMargin = dp(14) })
+        empty.addView(emptyButton, LayoutParams(-2, -2).apply { topMargin = dp(36) })
+        content.addView(empty, FrameLayout.LayoutParams(-1, -1))
+        val shiftColumn = LyricsShift(activity, big = true) { setShift(it) }.apply { visibility = View.GONE }
+        content.addView(shiftColumn, FrameLayout.LayoutParams(-2, -2, Gravity.START or Gravity.CENTER_VERTICAL).apply { marginStart = dp(8) })
+        karaokeShift = shiftColumn; karaokeBox = box
+        karaokeEmpty = empty; karaokeEmptyText = emptyText; karaokeEmptyFor = emptyFor; karaokeEmptyButton = emptyButton
         root.addView(content, LayoutParams(-1, 0, 1f).apply { topMargin = dp(12) })
 
         karaokeRows = rows; karaokeTitle = songTitle; karaokeArtist = artist
@@ -465,12 +570,14 @@ class LyricsCard(context: Context) : LinearLayout(context), HomeCard {
                         karaokeSynced?.post { fitKaraoke() }
                     }
                 }
+                paintShift()
                 root.alpha = .5f; root.scaleX = .97f; root.scaleY = .97f
                 root.animate().alpha(1f).scaleX(1f).scaleY(1f).setDuration(180).start()
                 drawKaraoke(position(latest))
             },
             onDismiss = {
                 karaokeOpen = false; karaoke = null; karaokeRows = emptyList(); karaokeRoot = null; karaokeReel?.run(false); karaokeReel = null
+                karaokeShift = null; karaokeBox = null; karaokeEmpty = null; karaokeEmptyText = null; karaokeEmptyFor = null; karaokeEmptyButton = null
                 karaokeTitle = null; karaokeArtist = null
                 karaokeOverlayButton = null
                 karaokeSynced = null; karaokePlain = null; karaokePlainText = null; karaokeActiveIndex = -1
@@ -516,14 +623,27 @@ class LyricsCard(context: Context) : LinearLayout(context), HomeCard {
         if (!karaokeOpen) return
         val t = track
         val synced = t?.synced
+        paintShift()
         if (synced == null) {
             karaokeReel?.let { it.visibility = View.GONE; it.run(false) }
-            karaokeSynced?.visibility = if (t?.plain == null) View.VISIBLE else View.GONE
-            karaokePlain?.visibility = if (t?.plain != null) View.VISIBLE else View.GONE
-            karaokePlainText?.text = t?.plain.orEmpty().ifBlank { status.text }
-            karaokeRows.getOrNull(3)?.let { center -> center.text = status.text; center.visibility = if (t?.plain == null) View.VISIBLE else View.GONE }
+            val none = t?.plain == null
+            karaokeSynced?.visibility = View.INVISIBLE
+            karaokePlain?.visibility = if (!none) View.VISIBLE else View.GONE
+            karaokePlainText?.text = t?.plain.orEmpty()
+            karaokeEmpty?.visibility = if (none) View.VISIBLE else View.GONE
+            if (none) {
+                val said = status.text.toString()
+                karaokeEmptyText?.text = said
+                val m = latest
+                karaokeEmptyFor?.text = if (LyricsRepo.searchable(m)) activity.getString(R.string.ly_for, m.title, m.artist) else ""
+                // "Search again" once a search ended without lyrics, not while one runs nor without a song
+                val ended = LyricsRepo.searchable(m) && said.isNotBlank() && said != activity.getString(R.string.ly_searching) &&
+                    said != activity.getString(R.string.ly_wifi_only)
+                karaokeEmptyButton?.visibility = if (ended) View.VISIBLE else View.GONE
+            }
             return
         }
+        karaokeEmpty?.visibility = View.GONE
         // The rows keep their place (their size fits the text), the reel draws the lines and scrolls (26/11)
         karaokeSynced?.visibility = View.INVISIBLE
         karaokePlain?.visibility = View.GONE
@@ -537,6 +657,7 @@ class LyricsCard(context: Context) : LinearLayout(context), HomeCard {
     }
 
     private fun drawLines(position: Long) {
+        paintShift()
         val t = track
         val synced = t?.synced
         if (synced != null) {
@@ -579,6 +700,13 @@ class LyricsCard(context: Context) : LinearLayout(context), HomeCard {
                 label = { offsetLabel(it) }, typedTitle = activity.getString(R.string.ly_offset),
                 parse = { t -> t.trim().removeSuffix("s").trim().replace(',', '.').toFloatOrNull()?.let { kotlin.math.round(it * 10).toInt() } },
                 get = { prefs.offsetTenths }, set = { prefs.offsetTenths = it; drawLines(position(latest)); drawKaraoke(position(latest)) }))
+            .toggle(activity.getString(R.string.ly_shift_arrows), activity.getString(R.string.ly_shift_arrows_sub), { prefs.shiftArrows }) {
+                prefs.shiftArrows = it; paintShift()
+            }
+            .action(activity.getString(R.string.ly_titles), activity.getString(R.string.ly_titles_sub, LyricsChoices.count()),
+                activity.getString(R.string.ly_titles_clear)) {
+                LyricsChoices.clear(); refreshShift(); drawLines(position(latest)); drawKaraoke(position(latest))
+            }
             .toggle(activity.getString(R.string.ly_overlay_previous), null, { prefs.overlayPrevious }) {
                 prefs.overlayPrevious = it
                 if (LyricsOverlay.active) LyricsOverlay.refreshPrevious()

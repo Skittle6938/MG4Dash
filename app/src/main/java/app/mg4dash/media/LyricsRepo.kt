@@ -18,7 +18,12 @@ import java.util.Locale
 
 /** LRCLIB lookup and size bounded LRU cache. All public disk/network operations run on IO. */
 object LyricsRepo {
-    data class Track(val key: String, val artist: String, val title: String, val synced: List<Pair<Long, String>>?, val plain: String?, val instrumental: Boolean = false)
+    data class Track(val key: String, val artist: String, val title: String, val synced: List<Pair<Long, String>>?, val plain: String?, val instrumental: Boolean = false,
+                     /** LRCLIB's id of these lyrics (0: unknown). */
+                     val id: Long = 0)
+    /** One of LRCLIB's results for a song, for the picker: its own lyrics in [json]. */
+    data class Found(val id: Long, val title: String, val artist: String, val album: String, val durationMs: Long,
+                     val synced: Boolean, val instrumental: Boolean, val json: JSONObject)
     data class CacheInfo(val bytes: Long, val tracks: Int)
     private data class HttpResponse(val body: String)
 
@@ -26,7 +31,7 @@ object LyricsRepo {
     @Volatile private var app: Context? = null
     private val memory = LinkedHashMap<String, Track>()
     private val activeConnections = java.util.concurrent.ConcurrentHashMap.newKeySet<HttpURLConnection>()
-    fun start(context: Context) { app = context.applicationContext; LyricsCardPrefs(context) }
+    fun start(context: Context) { app = context.applicationContext; LyricsCardPrefs(context); LyricsChoices.start(context) }
 
     fun cancelActiveRequest() {
         activeConnections.toList().forEach { connection -> try { connection.disconnect() } catch (_: Exception) { } }
@@ -78,6 +83,15 @@ object LyricsRepo {
         val k = key(artist, title)
         if (!force) cached(artist, title)?.let { return@withContext it }
         if (!networkAllowed(ctx)) return@withContext null
+        // Lyrics chosen in the picker for this song (26/11): those, by their id
+        LyricsChoices.lyricsId(artist, title).takeIf { it > 0 }?.let { id ->
+            try { JSONObject(request("$BASE/get/$id").body) } catch (_: Exception) { null }?.let { o ->
+                val track = decode(k, artist, title, o)
+                val (enabled, maxMb) = contextPrefs()
+                if (enabled) { synchronized(memory) { memory.clear(); memory[k] = track }; persist(k, o, maxMb) }
+                return@withContext track
+            }
+        }
         val exact = linkedMapOf("artist_name" to artist, "track_name" to title)
         if (durationMs > 0) exact["duration"] = String.format(Locale.US, "%.2f", durationMs / 1000.0)
         var missing = false
@@ -101,6 +115,44 @@ object LyricsRepo {
         if (enabled) { synchronized(memory) { memory.clear(); memory[k] = track }; persist(k, result, maxMb) }
         track
     }
+
+    /**
+     * Every result LRCLIB has for the song (the picker, 26/11), best first as [best] ranks them, without repeats and
+     * without those that have no lyrics; null when the search could not be made (no network, an error).
+     */
+    suspend fun search(artist: String, title: String, durationMs: Long): List<Found>? = withContext(Dispatchers.IO) {
+        val ctx = app ?: return@withContext null
+        if (!networkAllowed(ctx)) return@withContext null
+        val all = LinkedHashMap<Long, JSONObject>()
+        var answered = false
+        for (q in searches(artist, title)) {
+            try {
+                val arr = JSONArray(request("$BASE/search?${query(mapOf("q" to q))}").body)
+                answered = true
+                for (i in 0 until arr.length()) arr.optJSONObject(i)?.let { o -> all.getOrPut(o.optLong("id", -1L - all.size)) { o } }
+            } catch (_: Exception) { }
+        }
+        if (!answered) return@withContext null
+        ranked(all.values.toList(), artist, title, durationMs).map { o ->
+            Found(o.optLong("id", 0), o.text("trackName"), o.text("artistName"), o.text("albumName"),
+                (o.optDouble("duration", 0.0) * 1000).toLong(), o.text("syncedLyrics").isNotBlank(), o.optBoolean("instrumental", false), o)
+        }
+    }
+
+    /** [found] chosen for the song in the picker: kept for it (its id, and in the cache) and returned as its lyrics. */
+    suspend fun choose(artist: String, title: String, found: Found): Track = withContext(Dispatchers.IO) {
+        val k = key(artist, title)
+        val track = decode(k, artist, title, found.json)
+        LyricsChoices.setLyrics(artist, title, found.id)
+        val (enabled, maxMb) = contextPrefs()
+        synchronized(memory) { memory.clear(); memory[k] = track }
+        if (enabled) persist(k, found.json, maxMb)
+        chosen.tryEmit(k)
+        track
+    }
+
+    /** The key of a song whose lyrics were just chosen (the pill takes them at once). */
+    val chosen = kotlinx.coroutines.flow.MutableSharedFlow<String>(extraBufferCapacity = 4)
 
     private fun contextPrefs(): Pair<Boolean, Int> {
         val ctx = app ?: return false to 20
@@ -148,10 +200,14 @@ object LyricsRepo {
         } finally { activeConnections -= c; c.disconnect() }
     }
 
-    internal fun best(arr: JSONArray, artist: String, title: String, duration: Long): JSONObject? {
+    internal fun best(arr: JSONArray, artist: String, title: String, duration: Long): JSONObject? =
+        ranked((0 until arr.length()).mapNotNull { arr.optJSONObject(it) }, artist, title, duration).firstOrNull()
+
+    /** The results that have lyrics (or are instrumentals), the closest to the song first. */
+    internal fun ranked(list: List<JSONObject>, artist: String, title: String, duration: Long): List<JSONObject> {
         val a = mainArtist(artist).lowercase(Locale.ROOT).trim()
         val t = clean(title).lowercase(Locale.ROOT).trim()
-        return (0 until arr.length()).mapNotNull { arr.optJSONObject(it) }
+        return list
             .sortedBy { o ->
                 val oa = mainArtist(o.text("artistName")).lowercase(Locale.ROOT)
                 val ot = clean(o.text("trackName")).lowercase(Locale.ROOT)
@@ -159,13 +215,14 @@ object LyricsRepo {
                 (if (ot == t) 0 else if (ot.contains(t) || t.contains(ot)) 2 else 8) +
                     (if (oa == a) 0 else if (oa.contains(a) || a.contains(oa)) 2 else 8) +
                     if (duration > 0 && dur > 0) (kotlin.math.abs(duration - dur) / 15000).toInt().coerceAtMost(8) else 0
-            }.firstOrNull { it.optBoolean("instrumental", false) || it.text("syncedLyrics").isNotBlank() || it.text("plainLyrics").isNotBlank() }
+            }.filter { it.optBoolean("instrumental", false) || it.text("syncedLyrics").isNotBlank() || it.text("plainLyrics").isNotBlank() }
     }
 
     internal fun decode(key: String, artist: String, title: String, o: JSONObject): Track {
         val syncedText = o.text("syncedLyrics").takeIf { it.isNotBlank() }
         val synced = syncedText?.let { parse(it) }
-        return Track(key, artist, title, synced?.takeIf { it.isNotEmpty() }, o.text("plainLyrics").takeIf { it.isNotBlank() }, o.optBoolean("instrumental", false))
+        return Track(key, artist, title, synced?.takeIf { it.isNotEmpty() }, o.text("plainLyrics").takeIf { it.isNotBlank() }, o.optBoolean("instrumental", false),
+            o.optLong("id", 0))
     }
 
     private fun JSONObject.text(key: String): String = if (isNull(key)) "" else optString(key, "").takeUnless { it == "null" }.orEmpty()

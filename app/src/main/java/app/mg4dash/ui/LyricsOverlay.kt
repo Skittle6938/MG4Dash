@@ -23,6 +23,7 @@ import app.mg4dash.R
 import app.mg4dash.ui.Themes
 import app.mg4dash.media.MediaHub
 import app.mg4dash.media.LyricsRepo
+import app.mg4dash.media.LyricsChoices
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.collect
 
@@ -45,7 +46,12 @@ object LyricsOverlay {
     private var trackKey = ""
     private var latest = MediaHub.NowPlaying()
     private val clock = LyricsClock()
-    private fun clockNow() = clock.lyricsAt(android.os.SystemClock.elapsedRealtime(), (app ?: themedContext)?.let { LyricsCardPrefs(it).leadMs } ?: LyricsClock.LEAD_MS)
+    private fun clockNow() = clock.lyricsAt(android.os.SystemClock.elapsedRealtime(),
+        ((app ?: themedContext)?.let { LyricsCardPrefs(it).leadMs } ?: LyricsClock.LEAD_MS) + shiftMs)
+    /** The current song's shift of its lyrics, set with the karaoke's arrows (26/11). */
+    private var shiftMs = 0L
+    private var choicesJob: Job? = null
+    private fun readShift() { shiftMs = if (trackKey.isEmpty()) 0L else LyricsChoices.shiftMs(latest.artist, latest.title) }
     private var activeTextView: TextView? = null
     private var nextTextView: TextView? = null
     private var previousTextView: TextView? = null
@@ -237,6 +243,17 @@ object LyricsOverlay {
         previousTextView?.visibility = if (LyricsCardPrefs(c).overlayPrevious) View.VISIBLE else View.GONE
     }
     private fun observeMedia() {
+        // The song's shift changed in the karaoke, or other lyrics were chosen for it: followed at once
+        choicesJob?.cancel()
+        choicesJob = scope.launch {
+            launch { LyricsChoices.version.collect { readShift(); if (active && track != null) renderTrackAt(clockNow()) } }
+            LyricsRepo.chosen.collect { k ->
+                if (!active || k != trackKey) return@collect
+                val m = latest
+                val t = LyricsRepo.cached(m.artist, m.title) ?: LyricsRepo.lookup(m.artist, m.title, m.durationMs)
+                if (active && k == trackKey && t != null) { track = t; shownTrack = null; renderTrackAt(clockNow()); if (latest.playing) runTicker() }
+            }
+        }
         mediaJob?.cancel()
         mediaJob = scope.launch {
             MediaHub.now.collect { now ->
@@ -245,6 +262,13 @@ object LyricsOverlay {
                 val c = themedContext ?: app ?: return@collect
                 val nextKey = if (!LyricsRepo.searchable(now)) "" else LyricsRepo.key(now.artist, now.title)
                 if (nextKey.isNotEmpty()) clock.update(now, android.os.SystemClock.elapsedRealtime())
+                // Another song: the last one's lines never stay on it (26/11), also while paused or while the assistant speaks
+                if (nextKey.isNotEmpty() && trackKey.isNotEmpty() && nextKey != trackKey) {
+                    tickerJob?.cancel(); tickerJob = null
+                    fetchJob?.cancel(); fetchJob = null
+                    track = null; trackKey = ""; shownIndex = -1; shiftMs = 0L
+                    update(c.getString(R.string.ly_overlay_searching), "")
+                }
                 if (nextKey.isEmpty()) {
                     if (now.androidAutoSpeaking && trackKey.isNotEmpty()) {
                         pauseJob?.cancel(); pauseJob = null
@@ -296,7 +320,7 @@ object LyricsOverlay {
                 if (nextKey.isNotEmpty() && nextKey != trackKey) {
                     tickerJob?.cancel(); tickerJob = null
                     fetchJob?.cancel(); fetchJob = null
-                    trackKey = nextKey; track = null; update(c.getString(R.string.ly_overlay_loading), "")
+                    trackKey = nextKey; track = null; readShift(); update(c.getString(R.string.ly_overlay_searching), "")
                     fetchJob = scope.launch {
                         val cached = LyricsRepo.cached(now.artist, now.title)
                         val found = cached ?: LyricsRepo.lookup(now.artist, now.title, now.durationMs)
@@ -311,8 +335,8 @@ object LyricsOverlay {
                 } else if (track == null && fetchJob?.isActive != true) {
                     fetchJob?.cancel(); fetchJob = null
                     val resumeKey = nextKey
-                    trackKey = resumeKey
-                    update(c.getString(R.string.ly_overlay_loading), "")
+                    trackKey = resumeKey; readShift()
+                    update(c.getString(R.string.ly_overlay_searching), "")
                     fetchJob = scope.launch {
                         val cached = LyricsRepo.cached(now.artist, now.title)
                         val found = cached ?: LyricsRepo.lookup(now.artist, now.title, now.durationMs)
@@ -369,5 +393,5 @@ object LyricsOverlay {
             update(plain.getOrNull(i).orEmpty(), plain.getOrNull(i + 1).orEmpty(), plain.getOrNull(i - 1).orEmpty())
         }
     }
-    fun stop() { active=false; mediaJob?.cancel(); mediaJob=null; tickerJob?.cancel(); tickerJob=null; fetchJob?.cancel(); fetchJob=null; pauseJob?.cancel(); pauseJob=null; pauseExpired=false; track=null; trackKey=""; current=""; next=""; val v=pill; pill=null; try { if(v!=null) wm?.removeViewImmediate(v) } catch (_:Exception){}; params=null; rootView=null; activeTextView=null; nextTextView=null; previousTextView=null; previous=""; closeView=null; themedContext=null }
+    fun stop() { active=false; choicesJob?.cancel(); choicesJob=null; shiftMs=0L; mediaJob?.cancel(); mediaJob=null; tickerJob?.cancel(); tickerJob=null; fetchJob?.cancel(); fetchJob=null; pauseJob?.cancel(); pauseJob=null; pauseExpired=false; track=null; trackKey=""; current=""; next=""; val v=pill; pill=null; try { if(v!=null) wm?.removeViewImmediate(v) } catch (_:Exception){}; params=null; rootView=null; activeTextView=null; nextTextView=null; previousTextView=null; previous=""; closeView=null; themedContext=null }
 }

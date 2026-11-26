@@ -65,6 +65,9 @@ class KaraokeShots {
         val t = if (theme == 2) "light" else "dark"; val l = if (withLyrics) "lyrics" else "none"
         val title = if (withLyrics) "Study Song" else "Unknown Song"
         cache("Study Artist", title, found = withLyrics)
+        app.mg4dash.media.LyricsRepo.start(ctx)
+        app.mg4dash.media.LyricsChoices.clear()
+        if (withLyrics) app.mg4dash.media.LyricsChoices.setShift("Study Artist", title, 1000)
         val now = MediaHub.NowPlaying(available = true, packageName = "test.player", title = title, artist = "Study Artist",
             playing = true, durationMs = 180_000, positionMs = 21_000)
         setNow(now)
@@ -83,6 +86,25 @@ class KaraokeShots {
         val d = org.robolectric.shadows.ShadowDialog.getLatestDialog()
         if (d != null) save(d.window!!.decorView, "karaoke_screen_${t}_$l.png")
         d?.dismiss(); card.shown(false)
+        if (withLyrics) picker(a, now, t)
+    }
+
+    /** The picker, with made-up results (no network in tests). */
+    private fun picker(a: Activity, now: MediaHub.NowPlaying, t: String) {
+        fun o(id: Long, title: String, album: String, synced: Boolean, dur: Double) = JSONObject().apply {
+            put("id", id); put("artistName", "Study Artist"); put("trackName", title); put("albumName", album); put("duration", dur)
+            put("syncedLyrics", if (synced) "[00:01.00]Placeholder" else JSONObject.NULL); put("plainLyrics", "Placeholder")
+        }
+        val found = listOf(o(1, "Study Song", "First Album", true, 219.0), o(2, "Study Song (Live)", "Live Album", true, 241.0),
+            o(3, "Study Song", "Best Of", false, 218.0)).map { j ->
+            LyricsRepo.Found(j.getLong("id"), j.getString("trackName"), j.getString("artistName"), j.getString("albumName"),
+                (j.getDouble("duration") * 1000).toLong(), !j.isNull("syncedLyrics"), false, j)
+        }
+        val scope = kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.Main)
+        val dialog = LyricsPicker.open(a, scope, now.copy(durationMs = 219_000), 1, {}, {}, results = { found })
+        idle(800)
+        save(dialog.window!!.decorView, "karaoke_picker_$t.png", 1200, 640)
+        dialog.dismiss()
     }
 
     @Test fun karaoke() {
