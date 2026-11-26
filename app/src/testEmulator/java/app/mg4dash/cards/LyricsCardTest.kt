@@ -266,6 +266,7 @@ class LyricsCardTest {
 
     private fun cardText(view: View): List<String> = when (view) {
         is TextView -> listOf(view.text.toString())
+        is LyricsReel -> if (view.visibility == View.VISIBLE) view.shownLines() else emptyList()
         is ViewGroup -> (0 until view.childCount).flatMap { cardText(view.getChildAt(it)) }
         else -> emptyList()
     }

@@ -9,13 +9,16 @@ import android.view.animation.AccelerateDecelerateInterpolator
  * A line shorter than that gets a shorter move. Used by the card, the karaoke view and the floating pill.
  */
 internal object LyricsScroll {
-    const val TRANSITION_MS = 450L
+    const val TRANSITION_MS = 600L
     private const val MIN_MS = 150L
 
-    /** How long the move to line [i] of [synced] takes. */
-    fun duration(synced: List<Pair<Long, String>>, i: Int): Long =
-        if (i <= 0 || i > synced.lastIndex) TRANSITION_MS
-        else (synced[i].first - synced[i - 1].first).coerceIn(MIN_MS, TRANSITION_MS)
+    /** How long the move to line [i] of [synced] takes: never longer than the line before or this one, so two moves never overlap. */
+    fun duration(synced: List<Pair<Long, String>>, i: Int): Long {
+        if (i <= 0 || i > synced.lastIndex) return TRANSITION_MS
+        val before = synced[i].first - synced[i - 1].first
+        val after = if (i < synced.lastIndex) synced[i + 1].first - synced[i].first else Long.MAX_VALUE
+        return minOf(before, after).coerceIn(MIN_MS, TRANSITION_MS)
+    }
 
     /** When the move to line [i] starts. */
     fun startOf(synced: List<Pair<Long, String>>, i: Int): Long = synced[i].first - duration(synced, i) / 2
@@ -23,6 +26,20 @@ internal object LyricsScroll {
     /** The line shown at [position]: the one whose move has started. */
     fun index(synced: List<Pair<Long, String>>, position: Long): Int =
         synced.indices.lastOrNull { startOf(synced, it) <= position } ?: 0
+
+    /**
+     * Where the reel is at [position], in lines: a whole number between two moves, in between during one (eased in and
+     * out), so the reel ([LyricsReel]) never jumps.
+     */
+    fun progress(synced: List<Pair<Long, String>>, position: Long): Float {
+        if (synced.isEmpty()) return 0f
+        val j = index(synced, position)
+        if (j == 0) return 0f
+        val t = (position - startOf(synced, j)).toFloat() / duration(synced, j)
+        return if (t >= 1f) j.toFloat() else (j - 1) + ease(t.coerceIn(0f, 1f))
+    }
+
+    private fun ease(t: Float) = ((1 - kotlin.math.cos(Math.PI * t)) / 2).toFloat()
 
     /** Time until the next move starts (for the ticker to start it on time), at most [cap]. */
     fun untilNext(synced: List<Pair<Long, String>>, position: Long, cap: Long = 250L): Long {
