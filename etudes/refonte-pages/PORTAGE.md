@@ -131,7 +131,7 @@ Coordonnées en pixels de l'image source de chaque vue (`side` 1840 × 680, `q34
 
 ## 7. Les images à embarquer
 
-66 fichiers, 5,98 Mo. Ne pas embarquer `vehicle.png`, `energy.png`, `climate.png` (captures de l'appli actuelle) ni `mg4_top.png`.
+66 fichiers, 5,98 Mo (80 fichiers et environ 6,4 Mo avec le tableau de bord de jour et les pastilles de peinture de la section 13). Ne pas embarquer `vehicle.png`, `energy.png`, `climate.png` (captures de l'appli actuelle) ni `mg4_top.png`.
 
 | Rôle | Fichiers | Format | Profil | Trois-quarts |
 |---|---|---|---|---|
@@ -142,8 +142,9 @@ Coordonnées en pixels de l'image source de chaque vue (`side` 1840 × 680, `q34
 | Roues | `{s,q}_wh_{steel16,aero17,lux18,xp18}.webp` | WebP avec transparence, rogné à `wheels[type]` | 91 Ko | 65 Ko |
 | Bas de caisse mats | `{s,q}_trim.webp` | WebP avec transparence, rogné à `trim` | 13 Ko | 13 Ko |
 | Vue transparente | `s{0,1}_ghost.webp` | WebP avec transparence, pleine taille | 1 046 Ko | |
-| Tableau de bord | `cabin_{l,r}.webp` | WebP 2400 × 900 | 389 Ko | |
-| Tableau de bord de jour (mode clair, section 13) | `cabin_{l,r}_day.webp` | WebP 2400 × 900 | 314 Ko | ajout du 26/11 |
+| Tableau de bord | `cabin_{l,r}.webp` | WebP 2400 × 900 | 398 Ko | refait le 26/11 à 14 h 15 |
+| Tableau de bord de jour (mode clair, section 13) | `cabin_{l,r}_day.webp` | WebP 2400 × 900 | 311 Ko | ajout du 26/11, fond « Brume », refait à 14 h 15 |
+| Peinture des montants de porte sur le tableau de bord (section 13) | `cabin_{l,r}_paint_{a,b,c}.png`, `cabin_{l,r}_day_paint_{a,b,c}.png` | PNG blanc avec transparence, rogné | 70 Ko | 12 fichiers, ajout du 26/11 à 14 h 15 |
 
 `s` = profil, `q` = trois-quarts. `0` = Standard et Comfort (sans becquet), `1` = Luxury et XPower (becquet).
 Les passes de position et de normale (2,5 Mo) ne servent qu'aux six coloris fun calculés et aux livrées.
@@ -218,14 +219,14 @@ Les noms des couleurs MG restent en anglais. Les noms des coloris fun, des livr�
 4. Poids : +6 Mo, à dire à Marc dans le résultat.
 5. Côté de conduite par défaut : gauche dans la maquette.
 
-## 13. Tableau de bord : version « jour » et écran central (ajout du 26/11, 13 h, retouché à 13 h 15)
+## 13. Tableau de bord : version « jour » et écran central (ajout du 26/11, 13 h, retouché à 13 h 15, fond « Brume » à 13 h 25, couleur de la carrosserie et bande noire du pare-brise à 14 h 15)
 
 Demandé par Marc le 26/11 (retours sur la première installation) : en mode clair la photo sombre rend les textes noirs illisibles, et l'écran central doit montrer la vue Climatisation elle-même (mise en abyme).
 
 ### Les images de jour
-- `img/cabin_l_day.webp` (conduite à gauche) et `img/cabin_r_day.webp` (à droite) : 2400 × 900, WebP, environ 160 Ko chacune. **Même cadrage, même taille et mêmes repères** que `cabin_l.webp` et `cabin_r.webp` : on change seulement de fichier selon le thème (clair = `_day`, sombre = image actuelle). Les flux d'air, les zones tactiles et les coins de l'écran ne bougent pas.
-- Ce qui change : derrière les vitres, le tunnel de nuit est remplacé par une route de campagne en plein jour (floue comme à vitesse réelle) ; l'habitacle est rééclairé (gris clair au lieu de noir) ; les rétroviseurs montrent un bout du même paysage. Les deux écrans gardent leur propre lumière.
-- Le paysage est entièrement calculé par `cabin.py` (aucune photo extérieure, donc aucune question de droits en plus). En conduite à droite l'image est retournée : la voiture roule alors à gauche, comme il faut.
+- `img/cabin_l_day.webp` (conduite à gauche) et `img/cabin_r_day.webp` (à droite) : 2400 × 900, WebP, environ 150 Ko chacune. **Même cadrage, même taille et mêmes repères** que `cabin_l.webp` et `cabin_r.webp` : on change seulement de fichier selon le thème (clair = `_day`, sombre = image actuelle). Les flux d'air, les zones tactiles et les coins de l'écran ne bougent pas.
+- Ce qui change : derrière les vitres, le tunnel de nuit est remplacé par un fond abstrait, « Brume » : un ciel en dégradé (bleu pâle en haut, presque blanc à l'horizon), un sol clair et quelques rayons très légers, sans route ni décor ; l'habitacle est rééclairé (gris clair au lieu de noir) ; les rétroviseurs montrent le même dégradé. Les deux écrans gardent leur propre lumière.
+- Ce fond est entièrement calculé par `cabin.py` (aucune photo extérieure, donc aucune question de droits en plus). En conduite à droite l'image est simplement retournée.
 - Poids : +0,3 Mo dans l'APK.
 
 ### Retouches du 26/11 à 13 h 15, après l'avis de Marc (« très bien dans l'ensemble »)
@@ -233,10 +234,54 @@ Demandé par Marc le 26/11 (retours sur la première installation) : en mode cla
 - Le combiné ne se voit plus à travers la jante du volant : seule sa partie visible garde sa lumière.
 - La barre noire brillante du tableau de bord est redressée près du volant (le rendu MG la terminait par un reflet recourbé ; « en réalité c'est vraiment une barre tout le long »). Cette retouche touche aussi les deux images de nuit : **les quatre images sont à recopier**, mêmes noms, mêmes repères.
 
+### Fond « Brume », choisi par Marc le 26/11 à 13 h 25
+- La première version de jour montrait une route de campagne. À 13 h 10 Marc demande un paysage « plus abstrait, moins réaliste ». Trois essais lui sont montrés (`apercu/tableau-de-bord-jour-abstrait.jpg`) : Brume, Lumière (le tunnel de nuit en tons clairs), Vitesse (le paysage étiré en traînées). Il choisit **Brume**.
+- **Les deux images de jour sont à recopier** (`cabin_l_day.webp`, `cabin_r_day.webp`), mêmes noms, mêmes repères. L'habitacle est identique à la version de 13 h 15, les images de nuit ne changent pas.
+- L'ancien paysage et les essais non retenus sont gardés dans `apercu/essais-jour/` (`paysage`, `brume`, `lumiere`, `vitesse`), au cas où. Aperçu de la version en place : `apercu/tableau-de-bord-jour.jpg`.
+
+### Couleur de la carrosserie et bande noire du pare-brise (26/11, 14 h 15)
+Demandé par Marc à 13 h 28 : « on voit un peu la carrosserie à droite et à gauche, ici en bleu, ça pourrait suivre la couleur choisie ? et sur le contour du pare-brise la petite bande noire doit être continue ».
+
+**Les quatre images du tableau de bord sont refaites et à recopier**, mêmes noms, mêmes repères (zones tactiles, flux d'air et coins de l'écran inchangés) :
+- La peinture bleue des montants de porte, à gauche et à droite, et de leur reflet dans le rétroviseur intérieur est retirée des images. À ces endroits il ne reste que du noir et les reflets clairs.
+- De jour, la bande noire qui borde le pare-brise est redessinée d'un seul tenant : le long des deux montants (large en haut, fine en bas, comme sur la vue de MG) et au pied du pare-brise. De nuit rien ne change sur ce point, la bande y était déjà entière.
+- De jour aussi, un coin du ciel du tunnel resté sous le montant de la porte gauche est retiré.
+
+**Douze pastilles de peinture, nouvelles, dans `img/`** : `cabin_{l,r}_paint_{a,b,c}.png` pour les images de nuit, `cabin_{l,r}_day_paint_{a,b,c}.png` pour celles de jour. Chaque pastille est blanche, sa transparence (alpha) est la quantité de peinture. `a` et `c` sont les deux montants de porte, `b` le reflet dans le rétroviseur intérieur. Les pastilles `r` sont déjà retournées : il n'y a rien à retourner soi-même. Place de chacune dans son image 2400 × 900, en pixels (les mêmes valeurs sont dans `src-v4/cabin.json`, clé `paint`, listes `l`, `l_day`, `r`, `r_day`) :
+
+| Pastille | Dans `cabin_l` et `cabin_l_day` | Dans `cabin_r` et `cabin_r_day` | Taille |
+|---|---|---|---|
+| `a` | x 137, y 147 | x 1870, y 147 | 393 × 319 |
+| `b` | x 985, y 105 | x 1370, y 105 | 45 × 93 |
+| `c` | x 1901, y 187 | x 126, y 187 | 373 × 295 |
+
+**La règle** : image affichée = image du tableau de bord + pastille × couleur de la voiture (fusion additive, plafonnée à 255). Sans les pastilles les montants sont noirs, ce qui est aussi le rendu d'une voiture noire. Avec `#008CC8` (Brighton Blue) on retrouve le rendu de MG, un peu plus saturé.
+
+**Quelle couleur** : la teinte de base du coloris choisi dans « Couleurs et style » (pour les sept teintes MG, les valeurs de `PAINTS`, section 8 ; pour un coloris fun ou une livrée, sa couleur dominante). La même couleur de jour et de nuit : les pastilles de nuit sont déjà plus sombres.
+
+**Sur Android**, le plus sûr est de composer une fois dans un bitmap, à chaque changement de couleur, de thème ou de côté de conduite, puis de se servir de ce bitmap partout où l'image du tableau de bord servait. Ainsi la désaturation « clim arrêtée », le voile et la mise en abyme s'appliquent d'eux-mêmes à la peinture.
+
+```kotlin
+val out = cabin.copy(Bitmap.Config.ARGB_8888, true)      // cabin_l ou cabin_l_day, décodée avec inScaled = false
+val canvas = Canvas(out)
+val paint = Paint(Paint.FILTER_BITMAP_FLAG).apply {
+    colorFilter = PorterDuffColorFilter(carColor, PorterDuff.Mode.SRC_IN)   // la pastille blanche prend la couleur (opaque, 0xFFrrggbb) et garde son alpha
+    xfermode = PorterDuffXfermode(PorterDuff.Mode.ADD)                      // puis elle s'ajoute à l'image
+}
+for (p in patches) canvas.drawBitmap(p.bitmap, p.x.toFloat(), p.y.toFloat(), paint)   // x, y du tableau ci-dessus
+```
+
+En Compose, la même chose dans un calque : `drawImage(patch, topLeft = Offset(x, y), colorFilter = ColorFilter.tint(carColor, BlendMode.SrcIn), blendMode = BlendMode.Plus)`. En canvas web : teinter la pastille dans un canvas à part (`source-in`), puis la dessiner en `lighter`.
+
+**Contrôle** : `cabin_l_day` et ses trois pastilles en `#B40C12` donnent des montants rouges sans liseré bleu ; en `#101114` les montants restent noirs. Aperçu : `apercu/tableau-de-bord-couleur-carrosserie.jpg` (rouge de jour, sept teintes en vignettes, orange de nuit, bande noire avant et après).
+
+**Poids** : +70 Ko. **Maquette** : la maquette en ligne garde ses images de nuit avec les montants bleus, la teinte n'y est pas montrée.
+
 ### À adapter dans l'appli en mode clair
 - Les flux d'air sont dessinés en mode additif (`lighter`) dans la maquette : sur une image claire ils deviennent presque blancs. En mode clair, les dessiner en fusion normale avec des couleurs plus saturées.
 - Le voile sombre sur les côtés et en haut (`.cabsh`) est fait pour l'image de nuit : en mode clair, le retirer ou le remplacer par un voile blanc léger.
 - Le haut de l'image (vitres) est très clair, le bas de l'habitacle reste gris moyen. Avec des panneaux blancs à environ 55 % d'opacité, les textes noirs se lisent partout (essai fait ici) ; en dessous de 40 %, le bas des panneaux devient juste.
+- Avec le fond « Brume », le haut de l'image est presque blanc : des panneaux blancs translucides s'y détachent peu. Leur donner un fin liseré ou une ombre douce.
 - Clim arrêtée : la désaturation prévue marche aussi sur l'image de jour, mais l'assombrir moins.
 
 ### Les quatre coins de l'écran central
@@ -255,7 +300,7 @@ Pixels de l'image 2400 × 900, identiques pour la nuit et le jour. Ordre : haut 
 - Sans rien dessiner, l'écran montre l'accueil de MG4Dash, déjà incrusté dans les quatre images.
 
 ### Refaire ces images
-`glass.py <cabin_lhd.png> <dossier>` détoure les vitres et les miroirs (`glass.png`, `mirrors.png`, `foot.npz`, déjà dans `src-v4/masques/`), puis `cabin.py <cabin_lhd.png> <capture accueil> <img> day=<dossier des masques>` écrit les quatre images. Sans `day=`, seules les images de nuit sont refaites (identiques au pixel près à celles livrées). Il faut `opencv-python-headless`.
+`glass.py <cabin_lhd.png> <dossier>` détoure les vitres et les miroirs (`glass.png`, `mirrors.png`, `foot.npz`, déjà dans `src-v4/masques/`), puis `cabin.py <cabin_lhd.png> <capture accueil> <img> day=<dossier des masques>` écrit les quatre images et les douze pastilles de peinture. Sans `day=`, seules les images de nuit sont refaites, avec la peinture bleue laissée dans l'image et sans pastilles. `style=brume|paysage|lumiere|vitesse` choisit le fond de jour ; sans `style=`, c'est `brume`, celui de l'appli. Il faut `opencv-python-headless`.
 
 ### Approximations
-Paysage de synthèse, capot non représenté au pied du pare-brise, reflets des rétroviseurs pris dans le même paysage, habitacle éclairci par une courbe de tons (pas un nouveau rendu 3D).
+Fond de synthèse (un dégradé, pas un vrai paysage), capot non représenté au pied du pare-brise, rétroviseurs remplis du même dégradé, habitacle éclairci par une courbe de tons (pas un nouveau rendu 3D). Peinture des montants : une teinte unie posée par addition, sans le reflet propre à chaque peinture (métallisée, nacrée) ; le haut des montants, très éclairé dans le rendu de MG, reste clair quelle que soit la teinte. Bande noire du pare-brise : un gris anthracite uni, redessiné.

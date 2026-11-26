@@ -84,5 +84,101 @@
     569
    ]
   ]
+ },
+ "paint": {
+  "note": "Body colour. Each patch is white, its alpha is the amount of paint. Draw it at (x, y) of its picture, tinted with the colour of the car, in additive blending: result = picture + colour x alpha. With #008CC8 (Brighton Blue) it gives back the picture of MG.",
+  "ref": "#008CC8",
+  "l": [
+   {
+    "file": "cabin_l_paint_a.png",
+    "x": 137,
+    "y": 147,
+    "w": 393,
+    "h": 319
+   },
+   {
+    "file": "cabin_l_paint_b.png",
+    "x": 985,
+    "y": 105,
+    "w": 45,
+    "h": 93
+   },
+   {
+    "file": "cabin_l_paint_c.png",
+    "x": 1901,
+    "y": 187,
+    "w": 373,
+    "h": 295
+   }
+  ],
+  "l_day": [
+   {
+    "file": "cabin_l_day_paint_a.png",
+    "x": 137,
+    "y": 147,
+    "w": 393,
+    "h": 319
+   },
+   {
+    "file": "cabin_l_day_paint_b.png",
+    "x": 985,
+    "y": 105,
+    "w": 45,
+    "h": 93
+   },
+   {
+    "file": "cabin_l_day_paint_c.png",
+    "x": 1901,
+    "y": 187,
+    "w": 373,
+    "h": 295
+   }
+  ],
+  "r": [
+   {
+    "file": "cabin_r_paint_a.png",
+    "x": 1870,
+    "y": 147,
+    "w": 393,
+    "h": 319
+   },
+   {
+    "file": "cabin_r_paint_b.png",
+    "x": 1370,
+    "y": 105,
+    "w": 45,
+    "h": 93
+   },
+   {
+    "file": "cabin_r_paint_c.png",
+    "x": 126,
+    "y": 187,
+    "w": 373,
+    "h": 295
+   }
+  ],
+  "r_day": [
+   {
+    "file": "cabin_r_day_paint_a.png",
+    "x": 1870,
+    "y": 147,
+    "w": 393,
+    "h": 319
+   },
+   {
+    "file": "cabin_r_day_paint_b.png",
+    "x": 1370,
+    "y": 105,
+    "w": 45,
+    "h": 93
+   },
+   {
+    "file": "cabin_r_day_paint_c.png",
+    "x": 126,
+    "y": 187,
+    "w": 373,
+    "h": 295
+   }
+  ]
  }
 }
