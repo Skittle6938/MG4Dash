@@ -188,7 +188,7 @@ object PaintShop {
     }
 
     private fun needAlpha(ctx: Context, p: Pack, view: View, body: Int): ByteArray = p.alpha ?: run {
-        val b = decode(ctx, "${pre(view, body)}_a.png", p.w, p.h)
+        val b = decode(ctx, "${pre(view, body)}_a.webp", p.w, p.h)
         val px = pixels(b); b.recycle()
         ByteArray(px.size) { ((px[it] shr 16) and 0xFF).toByte() }.also { p.alpha = it }
     }
@@ -206,9 +206,9 @@ object PaintShop {
     private fun needPos(ctx: Context, p: Pack, view: View, body: Int) {
         if (p.pos != null) return
         val m = meta(ctx).getValue(view)
-        val d1 = nearest(ctx, "${pre(view, body)}_p1.png", p.w, p.h)
-        val d2 = nearest(ctx, "${pre(view, body)}_p2.png", p.w, p.h)
-        val dn = nearest(ctx, "${pre(view, body)}_n.png", p.w, p.h)
+        val d1 = nearest(ctx, "${pre(view, body)}_p1.webp", p.w, p.h)
+        val d2 = nearest(ctx, "${pre(view, body)}_p2.webp", p.w, p.h)
+        val dn = nearest(ctx, "${pre(view, body)}_n.webp", p.w, p.h)
         val n = p.w * p.h
         val P = FloatArray(n * 3); val N = ByteArray(n * 3); val V = BooleanArray(n)
         val lo = m.lo; val sz = m.size
@@ -245,7 +245,7 @@ object PaintShop {
         if (box != null) {
             val l = (box.left * scale).roundToInt(); val t = (box.top * scale).roundToInt()
             val bw = (box.width() * scale).roundToInt().coerceAtLeast(1); val bh = (box.height() * scale).roundToInt().coerceAtLeast(1)
-            val b = decode(ctx, "${pre(view, body)}_roof.png", bw, bh)
+            val b = decode(ctx, "${pre(view, body)}_roof.webp", bw, bh)
             val px = pixels(b); b.recycle()
             for (y in 0 until bh) for (x in 0 until bw) {
                 val X = l + x; val Y = t + y
