@@ -26,7 +26,7 @@ La même page en local : `maquettes.html` avec `img/` à côté, à servir en HT
 | `src-v4/car.json` | Les repères géométriques des images (roues, batterie, prise, toit…). Il est inséré dans `paint.js` à la construction (`META`). |
 | `src-v4/page.tpl.html` | Le CSS (couleurs, tailles, rayons) et le texte autour de la maquette. |
 | `src-v4/README.md` | Comment reconstruire la page, refaire les images, mesurer une jante. |
-| `src-v4/cabin.py`, `glass.py` | Fabriquent `cabin_l.webp`, `cabin_r.webp` et leurs versions de jour `cabin_l_day.webp`, `cabin_r_day.webp` à partir de la vue intérieure MG (section 13). |
+| `src-v4/cabin.py`, `glass.py`, `mirror_whole.py` | Fabriquent `cabin_l.webp`, `cabin_r.webp`, leurs versions de jour `cabin_l_day.webp`, `cabin_r_day.webp` et les pastilles de peinture à partir de la vue intérieure MG (section 13). |
 | `ref/` | 30 voitures calculées par le moteur de la maquette, en PNG pleine taille, pour contrôler le portage (section 9), et les deux décalcomanies `decal_num.png`, `decal_bolt.png`. |
 | `rendu3d/`, `sources/` | Scripts Blender, modèle 3D, photos de Marc. Inutile pour coder, utile seulement pour refaire une image. |
 
@@ -104,6 +104,7 @@ Point ouvert : « D'origine » revient au réglage de départ de la maquette (St
 Trois colonnes : 400 px, le reste (910 px), 470 px.
 - Gauche : « Charge programmée » (programmation, finir jusqu'à la limite, début, fin) et « V2L · prise extérieure ».
 - Centre : le pourcentage en très grand, l'autonomie et l'état de charge. Dessous, la voiture en vue transparente : `s0_ghost.webp` (Standard, Comfort) ou `s1_ghost.webp` (Luxury, XPower), large de 880 px. Cette image n'est pas repeinte.
+- Retouche du 26/11 à 15 h, demandée par Marc : les roues du côté opposé ne sont plus dans cette image. Vues à travers la voiture, leurs contours bleu clair doublaient ceux des roues proches (« il y avait deux fois les contours bleu ciel un peu transparent qui se chevauchaient »). **Les deux fichiers sont à recopier**, même taille et mêmes repères (`an.battery`, `an.port`…), rien à changer dans le code. Ne pas dessiner de roues pleines par-dessus : Marc veut garder la voiture transparente telle quelle. Avant et après : `apercu/voiture-transparente-roues.jpg`.
 - Sur cette image, un dessin vectoriel dans les coordonnées de l'image (1840 × 680) : la batterie (`an.battery`, quatre coins) en 20 cellules qui se remplissent, vertes en charge et orange en V2L, la cellule suivante qui clignote pendant la charge, le trait « limite 80 % » si la voiture a une limite. La prise (`an.port`, milieu des deux points, aile arrière gauche) s'allume quand le câble est branché, et des tirets circulent le long du câble jusqu'à la batterie (sens inverse en V2L).
 - « Réchauffage batterie » : une pastille avec interrupteur, posée au-dessus de la batterie et reliée à elle par un trait. Actif : contour orange et ondes de chaleur. Aujourd'hui c'est une tuile de l'en-tête (`DRVNG_PTC_HEAT`).
 - Sous la voiture : « Batterie 96 % · santé estimée | Réglages de la batterie › », qui ouvre la fenêtre de batterie actuelle.
@@ -141,10 +142,10 @@ Coordonnées en pixels de l'image source de chaque vue (`side` 1840 × 680, `q34
 | Masque de toit | `{s,q}{0,1}_roof.png` | PNG gris, rogné à `roof[carrosserie]` | 41 Ko | 20 Ko |
 | Roues | `{s,q}_wh_{steel16,aero17,lux18,xp18}.webp` | WebP avec transparence, rogné à `wheels[type]` | 91 Ko | 65 Ko |
 | Bas de caisse mats | `{s,q}_trim.webp` | WebP avec transparence, rogné à `trim` | 13 Ko | 13 Ko |
-| Vue transparente | `s{0,1}_ghost.webp` | WebP avec transparence, pleine taille | 1 046 Ko | |
-| Tableau de bord | `cabin_{l,r}.webp` | WebP 2400 × 900 | 398 Ko | refait le 26/11 à 14 h 15 |
-| Tableau de bord de jour (mode clair, section 13) | `cabin_{l,r}_day.webp` | WebP 2400 × 900 | 311 Ko | ajout du 26/11, fond « Brume », refait à 14 h 15 |
-| Peinture des montants de porte sur le tableau de bord (section 13) | `cabin_{l,r}_paint_{a,b,c}.png`, `cabin_{l,r}_day_paint_{a,b,c}.png` | PNG blanc avec transparence, rogné | 70 Ko | 12 fichiers, ajout du 26/11 à 14 h 15 |
+| Vue transparente | `s{0,1}_ghost.webp` | WebP avec transparence, pleine taille | 1 032 Ko | refaite le 26/11 à 15 h (sans les roues du côté opposé) |
+| Tableau de bord | `cabin_{l,r}.webp` | WebP 2400 × 900 | 398 Ko | refait le 26/11 à 15 h 30 (rétroviseurs) |
+| Tableau de bord de jour (mode clair, section 13) | `cabin_{l,r}_day.webp` | WebP 2400 × 900 | 312 Ko | ajout du 26/11, fond « Brume », refait à 15 h 30 (rétroviseurs) |
+| Peinture des montants de porte sur le tableau de bord (section 13) | `cabin_{l,r}_paint_{a,b,c}.png`, `cabin_{l,r}_day_paint_{a,b,c}.png` | PNG blanc avec transparence, rogné | 70 Ko | 12 fichiers, ajout du 26/11 à 14 h 15, refaits à 15 h 30 |
 
 `s` = profil, `q` = trois-quarts. `0` = Standard et Comfort (sans becquet), `1` = Luxury et XPower (becquet).
 Les passes de position et de normale (2,5 Mo) ne servent qu'aux six coloris fun calculés et aux livrées.
@@ -219,7 +220,7 @@ Les noms des couleurs MG restent en anglais. Les noms des coloris fun, des livr�
 4. Poids : +6 Mo, à dire à Marc dans le résultat.
 5. Côté de conduite par défaut : gauche dans la maquette.
 
-## 13. Tableau de bord : version « jour » et écran central (ajout du 26/11, 13 h, retouché à 13 h 15, fond « Brume » à 13 h 25, couleur de la carrosserie et bande noire du pare-brise à 14 h 15)
+## 13. Tableau de bord : version « jour » et écran central (ajout du 26/11, 13 h, retouché à 13 h 15, fond « Brume » à 13 h 25, couleur de la carrosserie et bande noire du pare-brise à 14 h 15, rétroviseurs à 15 h 30)
 
 Demandé par Marc le 26/11 (retours sur la première installation) : en mode clair la photo sombre rend les textes noirs illisibles, et l'écran central doit montrer la vue Climatisation elle-même (mise en abyme).
 
@@ -275,7 +276,23 @@ En Compose, la même chose dans un calque : `drawImage(patch, topLeft = Offset(x
 
 **Contrôle** : `cabin_l_day` et ses trois pastilles en `#B40C12` donnent des montants rouges sans liseré bleu ; en `#101114` les montants restent noirs. Aperçu : `apercu/tableau-de-bord-couleur-carrosserie.jpg` (rouge de jour, sept teintes en vignettes, orange de nuit, bande noire avant et après).
 
-**Poids** : +70 Ko. **Maquette** : la maquette en ligne garde ses images de nuit avec les montants bleus, la teinte n'y est pas montrée.
+**Poids** : +70 Ko. **Maquette** (version 8, 26/11 à 14 h 30) : la page Climatisation dessine les trois pastilles de nuit à la couleur choisie, voir `CABP`, `carCss` et `cabPaint` dans `maquettes.html` (un calque par pastille, masqué par le PNG, en `mix-blend-mode: plus-lighter`, dans le même bloc que l'image pour que la désaturation « clim arrêtée » s'applique au tout). Les panneaux et le voile sombre cachent une bonne partie des montants : on les voit peu, comme dans l'appli.
+
+### Rétroviseurs (26/11, 15 h 30)
+Demandé par Marc à 14 h 53 : « En vue claire le rétroviseur côté conducteur a été un peu coupé, il faut le corriger ».
+
+Trois défauts trouvés, tous corrigés dans les images. **Rien à changer dans le code.**
+- **Rétroviseur intérieur, de jour** : le bas de son cadre, du côté du conducteur, était pris pour du ciel et se perdait dans le fond clair, son petit voyant vert aussi. Le cadre est de nouveau entier, le voyant est vert, la glace va jusqu'au cadre.
+- **Rétroviseur de porte du conducteur, de nuit comme de jour** : dans la vue de MG il sort de l'image (sa pointe est 43 px au-delà du bord). Il est maintenant entier, à 7 px du bord : la partie qui manquait vient du panorama MG (`sources/interior.jpg`), et le rétroviseur est resserré vers la porte, de 30 % au plus à sa pointe et de rien à sa racine. Le reste de l'image ne bouge pas : seule la zone x 0 à 253, y 302 à 559 de `cabin_l` change (la même, retournée, dans `cabin_r`).
+- **Rétroviseurs de porte, de jour** : leur coque était aussi claire que le ciel et leur glace aussi lumineuse, on lisait mal leur forme. Coque et glace sont assombries.
+
+**À recopier : les quatre images `cabin_*.webp` et les douze pastilles**, mêmes noms, même taille, mêmes repères. `cabin.json` n'a pas changé (coins de l'écran, combiné, places des pastilles). Les pastilles `a` et `c` sont les mêmes à un niveau près ; les pastilles `b` de jour vont maintenant jusqu'au cadre retrouvé du rétroviseur intérieur.
+
+Le rétroviseur de porte du passager sort toujours de l'image, comme dans la vue de MG : sa pointe est à 102 px au-delà du bord, le resserrer autant le déformerait. Dans la page, les deux rétroviseurs de porte sont en grande partie sous les panneaux.
+
+Aperçu : `apercu/tableau-de-bord-retroviseurs.jpg` (l'image de jour entière, puis avant et après pour le rétroviseur intérieur et pour celui de la porte du conducteur).
+
+**Maquette** (version 9, 26/11 à 15 h 30) : elle reçoit les deux images de nuit, les deux pastilles `b` de nuit et la voiture transparente refaites. Elle n'a pas de mode clair : les images de jour se regardent dans l'aperçu.
 
 ### À adapter dans l'appli en mode clair
 - Les flux d'air sont dessinés en mode additif (`lighter`) dans la maquette : sur une image claire ils deviennent presque blancs. En mode clair, les dessiner en fusion normale avec des couleurs plus saturées.
@@ -300,7 +317,12 @@ Pixels de l'image 2400 × 900, identiques pour la nuit et le jour. Ordre : haut 
 - Sans rien dessiner, l'écran montre l'accueil de MG4Dash, déjà incrusté dans les quatre images.
 
 ### Refaire ces images
-`glass.py <cabin_lhd.png> <dossier>` détoure les vitres et les miroirs (`glass.png`, `mirrors.png`, `foot.npz`, déjà dans `src-v4/masques/`), puis `cabin.py <cabin_lhd.png> <capture accueil> <img> day=<dossier des masques>` écrit les quatre images et les douze pastilles de peinture. Sans `day=`, seules les images de nuit sont refaites, avec la peinture bleue laissée dans l'image et sans pastilles. `style=brume|paysage|lumiere|vitesse` choisit le fond de jour ; sans `style=`, c'est `brume`, celui de l'appli. Il faut `opencv-python-headless`.
+Trois étapes, dans `src-v4/` :
+1. `glass.py <cabin_lhd.png> masques` détoure les vitres et les miroirs de la vue de MG (`glass.png`, `mirrors.png`, `foot.npz`, déjà dans `src-v4/masques/`).
+2. `mirror_whole.py <sources/interior.jpg> <cabin_lhd.png> masques masques2` (depuis le 26/11 à 15 h 30) remet en entier le rétroviseur de porte du conducteur à partir du panorama et écrit dans `src-v4/masques2/` la vue corrigée (`cabin_lhd.png`) et ses masques. Ce dossier est déjà rempli.
+3. `cabin.py masques2/cabin_lhd.png <capture accueil> <img> day=masques2` écrit les quatre images et les douze pastilles de peinture.
+
+Avec la vue de MG d'origine et `day=masques`, on retrouve le rétroviseur de porte coupé par le bord. Sans `day=`, seules les images de nuit sont refaites, avec la peinture bleue laissée dans l'image et sans pastilles. `style=brume|paysage|lumiere|vitesse` choisit le fond de jour ; sans `style=`, c'est `brume`, celui de l'appli. Il faut `opencv-python-headless`.
 
 ### Approximations
-Fond de synthèse (un dégradé, pas un vrai paysage), capot non représenté au pied du pare-brise, rétroviseurs remplis du même dégradé, habitacle éclairci par une courbe de tons (pas un nouveau rendu 3D). Peinture des montants : une teinte unie posée par addition, sans le reflet propre à chaque peinture (métallisée, nacrée) ; le haut des montants, très éclairé dans le rendu de MG, reste clair quelle que soit la teinte. Bande noire du pare-brise : un gris anthracite uni, redessiné.
+Fond de synthèse (un dégradé, pas un vrai paysage), capot non représenté au pied du pare-brise, rétroviseurs remplis du même dégradé, habitacle éclairci par une courbe de tons (pas un nouveau rendu 3D). Peinture des montants : une teinte unie posée par addition, sans le reflet propre à chaque peinture (métallisée, nacrée) ; le haut des montants, très éclairé dans le rendu de MG, reste clair quelle que soit la teinte. Bande noire du pare-brise : un gris anthracite uni, redessiné. Rétroviseur de porte du conducteur : resserré (30 % au plus) pour tenir dans l'image ; celui du passager reste coupé par le bord, comme dans la vue de MG.
