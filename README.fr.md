@@ -311,7 +311,7 @@ La ligne **batterie** sous la voiture estime la santé de la batterie : en roula
 
 ![Page Véhicule](docs/screenshots/vehicle.png)
 
-Votre voiture au centre, à vos couleurs : touchez-la pour l'autre vue (trois-quarts ou profil), appui long pour **Couleurs et style** (version, jantes, toit noir, couleurs MG et fun, livrées). Pression et température des pneus sous les roues, avec un anneau rouge sur un pneu à vérifier. À gauche, mode de conduite, direction et pédale de frein (mode Perso), récupération et conduite à une pédale, économie d'énergie, maintien de voie et freinage d'urgence, chacun se change d'un toucher. À droite, autonomie, trajets du jour, état de la voiture et applis en cours de l'autoradio (touchez la section autoradio).
+Votre voiture au centre, à vos couleurs : touchez-la pour l'autre vue (trois-quarts ou profil), appui long pour **Couleurs et style** (version, jantes, toit noir, couleurs MG et fun, livrées). Pression et température des pneus sous les roues, avec un anneau rouge sur un pneu à vérifier. En haut à droite, le rapport engagé (P R N D), avec le témoin de frein de parking en P. Les feux de jour sont toujours doucement allumés ; feux allumés, en thème sombre, les phares, le feu arrière et la lumière sur la route devant s'allument aussi. À gauche, mode de conduite, direction et pédale de frein (mode Perso), récupération et conduite à une pédale, économie d'énergie, maintien de voie, freinage d'urgence, reconnaissance des panneaux et alerte de somnolence, chacun se change d'un toucher. À droite, autonomie, trajets du jour, état de la voiture et applis en cours de l'autoradio (touchez la section autoradio).
 
 ![Page Véhicule, thème clair](docs/screenshots/vehicle_light.png)
 
@@ -319,7 +319,7 @@ Votre voiture au centre, à vos couleurs : touchez-la pour l'autre vue (trois-qu
 
 ![Page Son](docs/screenshots/sound.png)
 
-Ouvrez-la depuis la page Véhicule ou par un appui long sur lecture / pause. Faites glisser le point sur la voiture pour la balance et le fader ; égaliseur 5 bandes avec les préréglages de la voiture ou votre propre courbe. Ce sont les réglages de la voiture elle-même.
+Ouvrez-la depuis la page Véhicule ou par un appui long sur lecture / pause. La voiture y est vue de dessus, à vos couleurs, livrée, toit et version. Faites glisser le point sur la voiture pour la balance et le fader ; égaliseur 5 bandes avec les préréglages de la voiture ou votre propre courbe. Ce sont les réglages de la voiture elle-même.
 
 ### Téléphone
 

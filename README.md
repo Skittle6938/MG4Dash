@@ -311,7 +311,7 @@ The **battery** line under the car estimates the battery's health: while driving
 
 ![Vehicle page](docs/screenshots/vehicle.png)
 
-Your car in the centre, in your colours: touch it for the other view (three-quarter or profile), long press it for **Colours and style** (version, wheels, black roof, MG and fun colours, liveries). Tyre pressures and temperatures hang under the wheels, with a red ring on a tyre to check. On the left, drive mode, steering and brake pedal (Custom mode), regeneration and one-pedal driving, energy saving, lane keeping and emergency braking, each changed with a touch. On the right, range, today's trips, the car's state, and the running apps of the head unit (tap the head unit section).
+Your car in the centre, in your colours: touch it for the other view (three-quarter or profile), long press it for **Colours and style** (version, wheels, black roof, MG and fun colours, liveries). Tyre pressures and temperatures hang under the wheels, with a red ring on a tyre to check. Top right, the gear engaged (P R N D), with the parking brake telltale in P. The daytime running lights always glow softly; with the lights on, in the dark theme, the headlights, the rear lamp and the light on the road ahead come on too. On the left, drive mode, steering and brake pedal (Custom mode), regeneration and one-pedal driving, energy saving, lane keeping, emergency braking, sign recognition and drowsiness warning, each changed with a touch. On the right, range, today's trips, the car's state, and the running apps of the head unit (tap the head unit section).
 
 ![Vehicle page, light theme](docs/screenshots/vehicle_light.png)
 
@@ -319,7 +319,7 @@ Your car in the centre, in your colours: touch it for the other view (three-quar
 
 ![Sound page](docs/screenshots/sound.png)
 
-Open it from the Vehicle page or with a long press on play / pause. Drag the dot on the car to set balance and fader; 5-band equaliser with the car's presets or your own curve. These are the car's own settings.
+Open it from the Vehicle page or with a long press on play / pause. The car is seen from above in your colours, livery, roof and version. Drag the dot on the car to set balance and fader; 5-band equaliser with the car's presets or your own curve. These are the car's own settings.
 
 ### Phone
 
