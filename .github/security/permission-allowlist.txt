@@ -1,0 +1,66 @@
+# Permissions MG4Dash and its modules (app, rescue, web, copytool, overlay) may declare.
+# A manifest permission missing here fails CI. One full permission name per line, '#'
+# starts a comment. Say why next to each group: this list is the reviewed answer to
+# "what can these apps do to the car".
+
+# --- Network: map, weather, lyrics, speed cameras, Home Assistant, updates ---
+android.permission.INTERNET
+android.permission.ACCESS_NETWORK_STATE
+android.permission.ACCESS_WIFI_STATE
+
+# --- Location: speed cameras, weather at the current position ---
+android.permission.ACCESS_FINE_LOCATION
+android.permission.ACCESS_COARSE_LOCATION
+
+# --- Phone, calls and Bluetooth (phone page, calls card, profiles linked to a phone) ---
+android.permission.BLUETOOTH
+android.permission.BLUETOOTH_CONNECT
+android.permission.READ_PHONE_STATE
+android.permission.CALL_PHONE
+android.permission.READ_CALL_LOG
+android.permission.READ_CONTACTS
+
+# --- Media and audio: music card, sources, voice memos ---
+android.permission.MEDIA_CONTENT_CONTROL
+android.permission.MODIFY_AUDIO_SETTINGS
+android.permission.RECORD_AUDIO
+
+# --- USB stick: log export, settings backup, voice memos ---
+android.permission.READ_EXTERNAL_STORAGE
+android.permission.WRITE_MEDIA_STORAGE
+# Eject the USB stick from the log window (#106).
+android.permission.MOUNT_UNMOUNT_FILESYSTEMS
+
+# --- Home screen and overlays: start at boot, gestures over other apps, shortcuts menu ---
+android.permission.RECEIVE_BOOT_COMPLETED
+android.permission.FOREGROUND_SERVICE
+android.permission.WAKE_LOCK
+android.permission.SYSTEM_ALERT_WINDOW
+android.permission.REORDER_TASKS
+# The system-UID car app reaches the Web app module in the current Android user.
+android.permission.INTERACT_ACROSS_USERS
+
+# --- High risk: system-user capabilities (car build, platform signature) ---
+# Brightness, ADB at start, the car's settings toggled from the shortcuts menu.
+android.permission.WRITE_SECURE_SETTINGS
+# Exported logs (Settings › System) include other apps' lines.
+android.permission.READ_LOGS
+# Running apps window (Vehicle page): processes, open apps and memory.
+android.permission.REAL_GET_TASKS
+android.permission.DUMP
+android.permission.PACKAGE_USAGE_STATS
+# Maintenance mode: a touch at the very top handed back to the car's pull-down.
+android.permission.INJECT_EVENTS
+# Updates of MG4Dash, MG4Radio, MG4Link and the rescue app; their uninstall.
+android.permission.INSTALL_PACKAGES
+android.permission.DELETE_PACKAGES
+# Maintenance mode, rescue: stops an app, chooses the home screen, switches components.
+android.permission.FORCE_STOP_PACKAGES
+android.permission.SET_PREFERRED_APPLICATIONS
+android.permission.CHANGE_COMPONENT_ENABLED_STATE
+
+# --- Signature-protected permissions between the project's own apps ---
+# signature: MG4Dash talks to its Web app module.
+app.mg4dash.web.permission.TALK
+# signature (MG4Link): cut Android Auto from the shortcuts menu.
+com.allgo.app.androidauto.permission.USER_DISCONNECT

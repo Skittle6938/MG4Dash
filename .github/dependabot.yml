@@ -1,0 +1,13 @@
+# Monthly update proposals. Alerts for known-vulnerable dependencies come from
+# the dependency graph submitted by .github/workflows/security.yml.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+  - package-ecosystem: gradle
+    directory: /
+    schedule:
+      interval: monthly
+    open-pull-requests-limit: 5
