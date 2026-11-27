@@ -8,6 +8,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import app.mg4dash.cards.LyricsCardPrefs
 import app.mg4dash.system.DataUsage
+import app.mg4dash.system.Download
 import app.mg4dash.system.Log
 import org.json.JSONArray
 import org.json.JSONObject
@@ -26,13 +27,17 @@ object LyricsRepo {
     data class Found(val id: Long, val title: String, val artist: String, val album: String, val durationMs: Long,
                      val synced: Boolean, val instrumental: Boolean, val json: JSONObject)
     data class CacheInfo(val bytes: Long, val tracks: Int)
-    private data class HttpResponse(val body: String)
+    private class HttpResponse(val code: Int, val body: String)
 
     private const val BASE = "https://lrclib.net/api"
     @Volatile private var app: Context? = null
     private val memory = LinkedHashMap<String, Track>()
     private val activeConnections = java.util.concurrent.ConcurrentHashMap.newKeySet<HttpURLConnection>()
-    fun start(context: Context) { app = context.applicationContext; LyricsCardPrefs(context); LyricsChoices.start(context) }
+    fun start(context: Context) {
+        val first = app == null
+        app = context.applicationContext; LyricsCardPrefs(context); LyricsChoices.start(context)
+        if (first) watchWifi(context.applicationContext)
+    }
 
     fun cancelActiveRequest() {
         activeConnections.toList().forEach { connection -> try { connection.disconnect() } catch (_: Exception) { } }
@@ -88,7 +93,40 @@ object LyricsRepo {
     suspend fun lookup(artist: String, title: String, durationMs: Long, force: Boolean = false): Track? = withContext(Dispatchers.IO) {
         if (!force) cached(artist, title)?.let { return@withContext it }
         val ctx = app ?: return@withContext null
-        patiently(online = { networkAllowed(ctx) && online(ctx) }, wait = { kotlinx.coroutines.delay(it) }) { lookupOnce(artist, title, durationMs) }
+        while (true) {
+            when (val a = patiently(online = { networkAllowed(ctx) && online(ctx) }, wait = ::waitOrWifi) { lookupOnce(artist, title, durationMs) }) {
+                is Attempt.Done -> return@withContext a.value
+                // Still nothing for this song: tried again when a Wi-Fi connects or gets its internet back (Marc, 27/11)
+                Attempt.Failed -> { Log.i(TAG, "lyrics: waiting for the Wi-Fi to come back"); awaitWifi() }
+            }
+        }
+        @Suppress("UNREACHABLE_CODE") null
+    }
+
+    /** Bumped when a Wi-Fi connects or gets a validated internet: the waits below end early. */
+    private val wifiGen = java.util.concurrent.atomic.AtomicInteger()
+
+    private suspend fun waitOrWifi(ms: Long) {
+        val g = wifiGen.get(); var left = ms
+        while (left > 0 && wifiGen.get() == g) { val s = minOf(250L, left); kotlinx.coroutines.delay(s); left -= s }
+    }
+
+    private suspend fun awaitWifi() { val g = wifiGen.get(); while (wifiGen.get() == g) kotlinx.coroutines.delay(500) }
+
+    private fun watchWifi(context: Context) {
+        val cm = context.getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager ?: return
+        try {
+            cm.registerNetworkCallback(android.net.NetworkRequest.Builder().addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
+                .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET).build(), object : ConnectivityManager.NetworkCallback() {
+                private val validated = HashSet<android.net.Network>()
+                override fun onAvailable(network: android.net.Network) { wifiGen.incrementAndGet() }
+                override fun onCapabilitiesChanged(network: android.net.Network, caps: NetworkCapabilities) {
+                    val v = caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
+                    if (v && validated.add(network)) wifiGen.incrementAndGet() else if (!v) validated.remove(network)
+                }
+                override fun onLost(network: android.net.Network) { validated.remove(network) }
+            })
+        } catch (e: Exception) { Log.w(TAG, "no Wi-Fi callback: ${e.message}") }
     }
 
     /** One try: the track, nothing found (a definite answer), or a network failure to try again. */
@@ -101,22 +139,22 @@ object LyricsRepo {
 
     /**
      * Runs [attempt] until it gives an answer: with no network it waits for one (looked at every [ONLINE_POLL_MS]), after a
-     * failure it waits [RETRY_MS]; gives up after [PATIENCE_MS] of waiting. Internal for the tests.
+     * failure it waits [RETRY_MS]; gives up after [PATIENCE_MS] of waiting ([Attempt.Failed]). Internal for the tests.
      */
-    internal suspend fun <T> patiently(online: () -> Boolean, wait: suspend (Long) -> Unit, attempt: suspend () -> Attempt<T>): T? {
+    internal suspend fun <T> patiently(online: () -> Boolean, wait: suspend (Long) -> Unit, attempt: suspend () -> Attempt<T>): Attempt<T> {
         var waited = 0L
         var logged = false
         while (true) {
             if (online()) {
                 when (val a = attempt()) {
-                    is Attempt.Done -> { if (logged) Log.i(TAG, "lyrics found after ${waited / 1000} s of waiting"); return a.value }
-                    Attempt.Failed -> if (waited + RETRY_MS > PATIENCE_MS) return null else {
+                    is Attempt.Done -> { if (logged) Log.i(TAG, "lyrics found after ${waited / 1000} s of waiting"); return a }
+                    Attempt.Failed -> if (waited + RETRY_MS > PATIENCE_MS) return Attempt.Failed else {
                         if (!logged) { logged = true; Log.i(TAG, "lyrics request failed: tried again every ${RETRY_MS / 1000} s") }
                         wait(RETRY_MS); waited += RETRY_MS
                     }
                 }
             } else {
-                if (waited + ONLINE_POLL_MS > PATIENCE_MS) { Log.i(TAG, "no network for lyrics for ${PATIENCE_MS / 1000} s: given up for this song"); return null }
+                if (waited + ONLINE_POLL_MS > PATIENCE_MS) { Log.i(TAG, "no network for lyrics for ${PATIENCE_MS / 1000} s: given up for now"); return Attempt.Failed }
                 if (!logged) { logged = true; Log.i(TAG, "no network for lyrics yet: waiting for it") }
                 wait(ONLINE_POLL_MS); waited += ONLINE_POLL_MS
             }
@@ -245,17 +283,37 @@ object LyricsRepo {
     }
 
     private class HttpFailure(val code: Int) : Exception()
+    /**
+     * One request to LRCLIB (Marc, 27/11): over the Wi-Fi when one is connected, never the mobile network then (a failure
+     * is tried again on the Wi-Fi when it reconnects or gets its internet back, see [lookup]); with no Wi-Fi, over the
+     * mobile network. An HTTP answer (404…) is an answer, not a reason to try another network.
+     */
     private fun request(address: String): HttpResponse = DataUsage.tag(DataUsage.Use.LYRICS) {
-        val c = (URL(address).openConnection() as HttpURLConnection).apply {
+        val url = URL(address)
+        val ctx = app
+        val r = if (ctx == null) once(null, url) else
+            Download.firstWorking(ctx, "lyrics", url.host, REQUEST_MS,
+                lyricsPicks(Download.picks(ctx, LyricsCardPrefs(ctx).wifiOnly))) { net -> once(net, url) }
+        if (r.code !in 200..299) throw HttpFailure(r.code)
+        r
+    }
+
+    /** The Wi-Fi ones when a Wi-Fi is connected, all of them (the mobile network, Android's default) otherwise. */
+    internal fun lyricsPicks(all: List<Download.Pick>) = all.filter { it.wifi }.ifEmpty { all }
+
+    /** All the networks of one request: past it, the waits above take over. */
+    private const val REQUEST_MS = 20_000L
+
+    private fun once(net: android.net.Network?, url: URL): HttpResponse {
+        val c = ((net?.openConnection(url) ?: url.openConnection()) as HttpURLConnection).apply {
             connectTimeout = 7000; readTimeout = 7000; requestMethod = "GET"
             setRequestProperty("User-Agent", "MG4Dash/1.7 Lyrics")
         }
         activeConnections += c
         try {
             val code = c.responseCode
-            if (code !in 200..299) throw HttpFailure(code)
-            val payload = c.inputStream.use { it.readBytes() }
-            HttpResponse(String(payload, Charsets.UTF_8))
+            val payload = if (code in 200..299) c.inputStream.use { it.readBytes() } else ByteArray(0)
+            return HttpResponse(code, String(payload, Charsets.UTF_8))
         } finally { activeConnections -= c; c.disconnect() }
     }
 

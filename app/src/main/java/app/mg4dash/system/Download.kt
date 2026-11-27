@@ -64,7 +64,7 @@ object Download {
     internal fun tryFits(attempt: Int, startedAt: Long, now: Long): Boolean = attempt <= TRIES && now + waitBefore(attempt) - startedAt < TOTAL_MS
 
     /** A network to try: [net] null for Android's default, not bound; [validated]: its internet checked by Android. */
-    internal class Pick(val net: Network?, val label: String, val validated: Boolean, val tbox: Boolean = false)
+    class Pick(val net: Network?, val label: String, val validated: Boolean, val tbox: Boolean = false, val wifi: Boolean = false)
 
     /** The T-box asked of Android at the time of the try (see [Tbox]): Android does not list it while the Wi-Fi client is on. */
     internal val TBOX = Pick(null, "T-box 4G (asked)", false, tbox = true)
@@ -81,8 +81,8 @@ object Download {
         val wifi = online.filter { (_, c) -> c.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) }
         val other = online.filter { (_, c) -> !c.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) }
         // Wi-Fi only: never the default either (it would go out on the 4G)
-        if (wifiOnly) { if (wifi.isEmpty()) throw Failure(Reason.NO_WIFI); return wifi.map { (n, c) -> Pick(n, label(n, true), ok(c)) } }
-        return wifi.map { (n, c) -> Pick(n, label(n, true), ok(c)) } +
+        if (wifiOnly) { if (wifi.isEmpty()) throw Failure(Reason.NO_WIFI); return wifi.map { (n, c) -> Pick(n, label(n, true), ok(c), wifi = true) } }
+        return wifi.map { (n, c) -> Pick(n, label(n, true), ok(c), wifi = true) } +
             (if (other.isEmpty()) listOf(TBOX) else other.map { (n, c) -> Pick(n, label(n, false), ok(c)) }) +
             Pick(null, "default (not bound)", false)
     }
@@ -193,11 +193,22 @@ object Download {
      * A short exchange (the update check) over the networks of [networks] in order, the next one when one fails:
      * the Wi-Fi first, then the T-box (not with "Updates on Wi-Fi only"). The last failure if all fail.
      */
-    fun <T> firstWorking(context: Context, what: String, host: String? = null, totalMs: Long = 0L, block: (Network?) -> T): T {
+    fun <T> firstWorking(context: Context, what: String, host: String? = null, totalMs: Long = 0L, block: (Network?) -> T): T =
+        firstWorking(context, what, host, totalMs, networks(context), block)
+
+    /** The networks in [order], with [wifiOnly] of its own (the lyrics' setting, not the updates'). */
+    fun picks(context: Context, wifiOnly: Boolean): List<Pick> {
+        val cm = context.getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager ?: return listOf(Pick(null, "default (not bound)", false))
+        @Suppress("DEPRECATION")
+        val nets = try { cm.allNetworks.mapNotNull { n -> cm.getNetworkCapabilities(n)?.let { n to it } } } catch (_: Exception) { emptyList() }
+        return try { order(nets, wifiOnly) } catch (_: Failure) { emptyList() }
+    }
+
+    fun <T> firstWorking(context: Context, what: String, host: String?, totalMs: Long, picks: List<Pick>, block: (Network?) -> T): T {
         var last: Exception? = null
         val start = System.nanoTime() / 1_000_000
         var answered = host == null
-        for (p in networks(context)) {
+        for (p in picks) {
             val left = if (totalMs > 0) totalMs - (System.nanoTime() / 1_000_000 - start) else Long.MAX_VALUE
             // A bounded check (27/11, #137: 40 s per network and per app when no name resolved, "checking" for minutes)
             if (left <= 0) { Log.w(TAG, "$what: ${totalMs / 1000} s gone, the other networks left"); break }
