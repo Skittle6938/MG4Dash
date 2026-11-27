@@ -1438,6 +1438,7 @@
     <string name="sr_long_hint">Uzun bas: renkler ve stil</string>
     <string name="sr_tap_change">Değiştirmek için dokun</string>
     <string name="sr_custom_only">Özel modda ayarlanabilir</string>
+    <string name="sr_gear">Vites</string>
     <string name="sr_front_tyres">Ön lastikler</string>
     <string name="sr_rear_tyres">Arka lastikler</string>
     <string name="sr_left">sol</string>

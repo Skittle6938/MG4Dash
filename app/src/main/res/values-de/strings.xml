@@ -1438,6 +1438,7 @@
     <string name="sr_long_hint">Lange drücken: Farben und Stil</string>
     <string name="sr_tap_change">Antippen zum Ändern</string>
     <string name="sr_custom_only">Im Modus Individuell einstellbar</string>
+    <string name="sr_gear">Gang</string>
     <string name="sr_front_tyres">Reifen vorne</string>
     <string name="sr_rear_tyres">Reifen hinten</string>
     <string name="sr_left">links</string>

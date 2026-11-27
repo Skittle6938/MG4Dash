@@ -1438,6 +1438,7 @@
     <string name="sr_long_hint">Lang drukken: kleuren en stijl</string>
     <string name="sr_tap_change">Tik om te wijzigen</string>
     <string name="sr_custom_only">Instelbaar in modus Eigen</string>
+    <string name="sr_gear">Versnelling</string>
     <string name="sr_front_tyres">Voorbanden</string>
     <string name="sr_rear_tyres">Achterbanden</string>
     <string name="sr_left">links</string>

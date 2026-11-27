@@ -22,6 +22,23 @@ import app.mg4dash.ui.Themes
 @SuppressLint("ViewConstructor")
 class CarStage(context: Context, private val kit: Kit, private val look: CarLook, private val onStyle: () -> Unit) : FrameLayout(context) {
     val car = CarImage(context)
+    /** The lamps over the car (27/11): daytime strips always, lit with the lights on in the dark theme. */
+    val lights = HeadLights(context).apply { dark = !app.mg4dash.ui.Themes.isLight(context) }
+    /** The gear engaged, top right (27/11), with the parking brake telltale in P; hidden while unreadable. */
+    private val gearView = GearView(context, kit)
+    private val gearBox = kit.column().apply {
+        gravity = Gravity.END; visibility = View.GONE
+        addView(kit.text(context.getString(R.string.sr_gear).uppercase(), 15f, R.color.text_title).apply { letterSpacing = .1f; isSingleLine = true },
+            kit.lp(-2, -2).apply { gravity = Gravity.END })
+        addView(gearView, kit.lp(-2, -2, t = 2))
+    }
+
+    /** The gear read (1 = P, 2 = R, 3 = N, 4 = D); anything else or null hides the block. */
+    fun showGear(raw: Int?) {
+        val g = raw?.takeIf { it in 1..4 }
+        gearView.gear = g
+        gearBox.visibility = if (g != null) View.VISIBLE else View.GONE
+    }
     private val title = kit.text("", 15f, R.color.text_title).apply { letterSpacing = .1f; isSingleLine = true }
     private val name = kit.text("", 20f, R.color.text_sub).apply { isSingleLine = true }
     private val head = kit.column()
@@ -92,9 +109,11 @@ class CarStage(context: Context, private val kit: Kit, private val look: CarLook
     init {
         clipChildren = true
         addView(car, LayoutParams(-1, -1))
+        addView(lights, LayoutParams(-1, -1))
         addView(frontRing, LayoutParams(0, 0)); addView(rearRing, LayoutParams(0, 0))
         head.addView(title); head.addView(name, kit.lp(-2, -2, t = 5))
         addView(head, LayoutParams(-1, -2))
+        addView(gearBox, LayoutParams(-2, -2, Gravity.TOP or Gravity.END).apply { topMargin = kit.dp(4); rightMargin = kit.dp(8) })
         addView(front.view, LayoutParams(-2, -2))
         addView(rear.view, LayoutParams(-2, -2))
         addView(hint, LayoutParams(-2, -2, Gravity.BOTTOM or Gravity.CENTER_HORIZONTAL).apply { bottomMargin = kit.dp(12) })
@@ -140,6 +159,7 @@ class CarStage(context: Context, private val kit: Kit, private val look: CarLook
         val cx = if (q) (w - 1606f * k) / 2 else (w - cw) / 2
         val top = (if (q) 42f * s - 78f * k else 58f * s) + dy
         car.box.set(cx, top, cx + cw, top + cw * m.h / m.w)
+        lights.box.set(car.box); lights.threeQuarter = q; lights.invalidate()
         val fx = cx + pt("front", "c", 0) * k
         val rx = minOf(w - 104f * s, cx + pt("rear", "c", 0) * k)
         val gF = top + pt("front", "ground", 1) * k

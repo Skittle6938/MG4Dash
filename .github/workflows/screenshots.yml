@@ -36,7 +36,7 @@ jobs:
             --tests app.mg4dash.ScreenshotTest.settingsLight \
             --tests app.mg4dash.ScreenshotTest.splashFrames \
             --tests app.mg4dash.BigDisplayShots.home             --tests app.mg4dash.PagesReadmeShots \
-            --tests app.mg4dash.BottomDockPagesShots
+            --tests app.mg4dash.BottomDockPagesShots \n            --tests app.mg4dash.GearLightsShots
       - name: Make startup animation preview
         run: |
           python -m pip install Pillow==11.3.0

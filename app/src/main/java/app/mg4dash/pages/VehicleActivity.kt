@@ -30,12 +30,21 @@ import java.util.Locale
  * press: colours and style), the driving settings on the left, set from here, and the car's state on the right.
  */
 class VehicleActivity : PageActivity() {
+    companion object {
+        private const val GEAR_POLL_MS = 750L
+        private const val SIDE_LIGHTS = 557880099   // VEH_SIDE_LGHT
+        /** The emulator's (and the screenshots') gear and lights. */
+        @JvmField var MOCK_GEAR: Int? = 1
+        @JvmField var MOCK_LIGHTS = false
+    }
+
     override val pageTitle get() = getString(R.string.title_vehicle)
     override val page = app.mg4dash.ui.Dock.Page.VEHICLE
 
     private lateinit var sk: ShowroomKit
     private lateinit var look: CarLook
     private lateinit var stage: CarStage
+    private lateinit var beamOverlay: app.mg4dash.showroom.BeamOverlay
     private lateinit var showMode: (Int?) -> Unit
     private lateinit var steering: ShowroomKit.Tile
     private lateinit var brake: ShowroomKit.Tile
@@ -83,10 +92,22 @@ class VehicleActivity : PageActivity() {
         body.addView(stage, kit.lp(0, -1, 1f, l = 6, r = 6))
         body.addView(right(), kit.lp(kit.dp(412), -1))
         stage.refresh()
+        // The headlights' pool on the floor, over the whole page (it falls on the left column)
+        beamOverlay = app.mg4dash.showroom.BeamOverlay(this, stage.lights)
+        (window.decorView.findViewById<android.view.ViewGroup>(android.R.id.content)).addView(beamOverlay, android.widget.FrameLayout.LayoutParams(-1, -1))
+        stage.addOnLayoutChangeListener { _, _, _, _, _, _, _, _, _ -> beamOverlay.post { beamOverlay.refresh() } }
 
         lifecycleScope.launch {
             repeatOnLifecycle(androidx.lifecycle.Lifecycle.State.STARTED) {
                 launch { while (true) { refreshTires(); renderTrips(); kotlinx.coroutines.delay(5_000) } }
+                // The gear and the lights (27/11), read off the main thread
+                launch {
+                    while (true) {
+                        val (gear, lightsOn) = withContext(Dispatchers.IO) { readGear() to readLights() }
+                        stage.showGear(gear); stage.lights.lightsOn = lightsOn; beamOverlay.refresh()
+                        kotlinx.coroutines.delay(GEAR_POLL_MS)
+                    }
+                }
                 while (true) {
                     val (c, m) = withContext(Dispatchers.IO) { app.mg4dash.system.HeadUnitLoad.cpuPercent() to app.mg4dash.system.HeadUnitLoad.memoryMb() }
                     cpu.first.text = c?.let { "$it %" } ?: "—"; cpu.second.progress = c ?: 0
@@ -97,6 +118,13 @@ class VehicleActivity : PageActivity() {
             }
         }
     }
+
+    private fun readGear(): Int? = if (app.mg4dash.BuildConfig.MOCK) MOCK_GEAR else try { app.mg4dash.car.ReadyState.gearRaw() } catch (_: Exception) { null }
+
+    /** VEH_SIDE_LGHT: 0 = lights off, anything else = on (parking or dipped beam, the car does not tell them apart). */
+    private fun readLights(): Boolean = if (app.mg4dash.BuildConfig.MOCK) MOCK_LIGHTS else try {
+        CarProps.readAny(SIDE_LIGHTS).let { it.isNotEmpty() && it != "0" && it != "false" }
+    } catch (_: Exception) { false }
 
     private fun headButton(label: Int, onClick: () -> Unit) = kit.text(getString(label), 19f, R.color.text_sub).apply {
         setPadding(kit.dp(16), kit.dp(12), kit.dp(16), kit.dp(12))

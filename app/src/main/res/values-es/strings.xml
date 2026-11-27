@@ -1438,6 +1438,7 @@
     <string name="sr_long_hint">Pulsación larga: colores y estilo</string>
     <string name="sr_tap_change">Toca para cambiar</string>
     <string name="sr_custom_only">Ajustable en modo Personal</string>
+    <string name="sr_gear">Marcha</string>
     <string name="sr_front_tyres">Neumáticos delanteros</string>
     <string name="sr_rear_tyres">Neumáticos traseros</string>
     <string name="sr_left">izq.</string>

@@ -1438,6 +1438,7 @@
     <string name="sr_long_hint">Pressione lunga: colori e stile</string>
     <string name="sr_tap_change">Tocca per cambiare</string>
     <string name="sr_custom_only">Regolabile in modalità Personal.</string>
+    <string name="sr_gear">Marcia</string>
     <string name="sr_front_tyres">Pneumatici anteriori</string>
     <string name="sr_rear_tyres">Pneumatici posteriori</string>
     <string name="sr_left">sx</string>

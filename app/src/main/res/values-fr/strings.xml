@@ -1438,6 +1438,7 @@
     <string name="sr_long_hint">Appui long : couleurs et style</string>
     <string name="sr_tap_change">Toucher pour changer</string>
     <string name="sr_custom_only">Réglable en mode Perso</string>
+    <string name="sr_gear">Rapport</string>
     <string name="sr_front_tyres">Pneus avant</string>
     <string name="sr_rear_tyres">Pneus arrière</string>
     <string name="sr_left">gauche</string>

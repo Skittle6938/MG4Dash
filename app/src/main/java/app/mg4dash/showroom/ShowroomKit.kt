@@ -21,8 +21,11 @@ class ShowroomKit(private val c: Context, val kit: Kit) {
     fun color(res: Int) = Themes.color(c, res)
 
     /** A raised card with rounded corners. */
+    /** A frame's background a little less see-through (Marc, 27/11): its alpha raised to [alpha] at least. */
+    private fun opaque(c: Int, alpha: Int): Int = if ((c ushr 24) >= alpha) c else (c and 0xFFFFFF) or (alpha shl 24)
+
     fun card(padH: Int = 18, padV: Int = 16): LinearLayout = kit.column().apply {
-        background = GradientDrawable().apply { setColor(color(R.color.panel)); cornerRadius = dp(18).toFloat(); setStroke(1, color(R.color.panel_border)) }
+        background = GradientDrawable().apply { setColor(opaque(color(R.color.panel), 0xF2)); cornerRadius = dp(18).toFloat(); setStroke(1, color(R.color.panel_border)) }
         setPadding(dp(padH), dp(padV), dp(padH), dp(padV))
     }
 
@@ -34,7 +37,7 @@ class ShowroomKit(private val c: Context, val kit: Kit) {
     /** A state tile: label, value, and a line under it; [dot] lights a small green dot (null: none). */
     inner class Tile(compact: Boolean = false) {
         val view: LinearLayout = kit.column().apply {
-            background = GradientDrawable().apply { setColor(color(R.color.panel_raised)); cornerRadius = dp(if (compact) 14 else 16).toFloat() }
+            background = GradientDrawable().apply { setColor(opaque(color(R.color.panel_raised), 0xF7)); cornerRadius = dp(if (compact) 14 else 16).toFloat() }
             setPadding(dp(14), dp(if (compact) 8 else 12), dp(14), dp(if (compact) 8 else 12))
         }
         private val head = kit.row()

@@ -1438,6 +1438,7 @@
     <string name="sr_long_hint">Long press: colours and style</string>
     <string name="sr_tap_change">Touch to change</string>
     <string name="sr_custom_only">Adjustable in Custom mode</string>
+    <string name="sr_gear">Gear</string>
     <string name="sr_front_tyres">Front tyres</string>
     <string name="sr_rear_tyres">Rear tyres</string>
     <string name="sr_left">left</string>
