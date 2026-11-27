@@ -77,7 +77,9 @@ class VehicleActivity : PageActivity() {
     private val modes = listOf(2 to R.string.dm_eco, 3 to R.string.dm_normal, 4 to R.string.dm_sport, 6 to R.string.dm_snow, 7 to R.string.dm_custom)
 
     override fun buildBody() {
-        sk = ShowroomKit(this, kit)
+        // The frames' backgrounds (Marc, 27/11): half see-through in the dark theme, the headlights' light passing behind them
+        val dark = !app.mg4dash.ui.Themes.isLight(this)
+        sk = ShowroomKit(this, kit, cardAlpha = if (dark) 0xBF else 0xF2, tileAlpha = if (dark) 0xBF else 0xF7)
         look = CarLook(this)
         header.addView(headButton(R.string.vh_sound) { startActivity(android.content.Intent(this, SoundActivity::class.java)) }, kit.lp(-2, -2, r = 12))
         header.addView(headButton(R.string.vh_saic) { Apps.open(this, Apps.stock(this, Apps.VEHICLE, Apps.VEHICLE_HMI), "SAIC") }, kit.lp(-2, -2, r = 12))
@@ -93,8 +95,12 @@ class VehicleActivity : PageActivity() {
         body.addView(right(), kit.lp(kit.dp(412), -1))
         stage.refresh()
         // The headlights' pool on the floor, over the whole page (it falls on the left column)
+        // Under the page's content, over its background: the light is behind the frames, their text stays sharp over it
         beamOverlay = app.mg4dash.showroom.BeamOverlay(this, stage.lights)
-        (window.decorView.findViewById<android.view.ViewGroup>(android.R.id.content)).addView(beamOverlay, android.widget.FrameLayout.LayoutParams(-1, -1))
+        val content = window.decorView.findViewById<android.view.ViewGroup>(android.R.id.content)
+        val pageRoot = content.getChildAt(0)
+        content.background = pageRoot.background; pageRoot.background = null
+        content.addView(beamOverlay, 0, android.widget.FrameLayout.LayoutParams(-1, -1))
         stage.addOnLayoutChangeListener { _, _, _, _, _, _, _, _, _ -> beamOverlay.post { beamOverlay.refresh() } }
 
         lifecycleScope.launch {

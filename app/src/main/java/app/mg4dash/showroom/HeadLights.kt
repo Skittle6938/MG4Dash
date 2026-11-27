@@ -27,7 +27,7 @@ class HeadLights(context: Context) : View(context) {
 
     // Measured on s0 / q0 (1840 × 680 and 1600 × 720); beam: centre x, y, radii x, y, rotation
     private val side = Lamps(1840f, floatArrayOf(150f, 323f, 305f, 286f), listOf(178f to 324f, 204f to 318f), 1715f to 239f,
-        floatArrayOf(-532f, 652f, 375f, 44f, 0f))
+        floatArrayOf(-532f, 636f, 375f, 76f, 0f))
     private val q34 = Lamps(1600f, floatArrayOf(372f, 370f, 545f, 340f), listOf(390f to 386f, 418f to 384f, 448f to 381f), 1421f to 233f,
         floatArrayOf(-465f, 752f, 420f, 90f, -9f))
 

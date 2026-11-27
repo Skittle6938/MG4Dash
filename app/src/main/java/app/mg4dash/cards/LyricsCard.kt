@@ -112,6 +112,8 @@ class LyricsCard(context: Context) : LinearLayout(context), HomeCard {
     private var karaokeActiveIndex = -1
     private val lyricsFace: Typeface = Typeface.create("sans-serif-medium", Typeface.BOLD)
     private var karaokePx = 0f
+    /** The plain lyrics in the karaoke, relative to the synced current line's size. */
+    private val PLAIN_SCALE = .8f
     private var karaokeReel: LyricsReel? = null
     private var karaokeShift: LyricsShift? = null
     private var karaokeBox: FrameLayout? = null
@@ -630,7 +632,12 @@ class LyricsCard(context: Context) : LinearLayout(context), HomeCard {
             val none = t?.plain == null
             karaokeSynced?.visibility = View.INVISIBLE
             karaokePlain?.visibility = if (!none) View.VISIBLE else View.GONE
-            karaokePlainText?.text = t?.plain.orEmpty()
+            karaokePlainText?.let { pt ->
+                pt.text = t?.plain.orEmpty()
+                // Near the synced karaoke's current line (27/11: the fixed 22 sp was tiny on the full screen), scrolled
+                val px = maxOf(karaokePx * PLAIN_SCALE, dp(30).toFloat())
+                if (pt.textSize != px) pt.setTextSize(TypedValue.COMPLEX_UNIT_PX, px)
+            }
             karaokeEmpty?.visibility = if (none) View.VISIBLE else View.GONE
             if (none) {
                 val said = status.text.toString()

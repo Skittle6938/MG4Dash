@@ -29,7 +29,7 @@ import java.util.concurrent.TimeUnit
 class KaraokeShots {
     private val ctx get() = RuntimeEnvironment.getApplication()
 
-    private fun cache(artist: String, title: String, found: Boolean = true) {
+    private fun cache(artist: String, title: String, found: Boolean = true, plainOnly: Boolean = false) {
         val key = LyricsRepo.key(artist, title)
         val name = MessageDigest.getInstance("SHA-256").digest(key.toByteArray()).joinToString("") { "%02x".format(it) }
         val dir = File(ctx.filesDir, "lyrics").apply { mkdirs() }
@@ -38,7 +38,8 @@ class KaraokeShots {
         File(dir, "$name.json").writeText(JSONObject().apply {
             put("artistName", artist); put("trackName", title); put("plainLyrics", JSONObject.NULL)
             // Not found: what the card shows when the search gave nothing ("No lyrics found")
-            if (found) put("syncedLyrics", lrc) else { put("syncedLyrics", JSONObject.NULL); put("instrumental", true) }
+            if (plainOnly) { put("syncedLyrics", JSONObject.NULL); put("plainLyrics", (1..16).joinToString("\n") { "Placeholder plain lyric line number $it" }) }
+            else if (found) put("syncedLyrics", lrc) else { put("syncedLyrics", JSONObject.NULL); put("instrumental", true) }
         }.toString())
     }
 
@@ -105,6 +106,29 @@ class KaraokeShots {
         idle(800)
         save(dialog.window!!.decorView, "karaoke_picker_$t.png", 1200, 640)
         dialog.dismiss()
+    }
+
+    /** Plain lyrics only (27/11): their size in the karaoke. */
+    @Test fun karaokePlain() {
+        app.mg4dash.system.Prefs(ctx).raw.edit().clear().putInt("theme_mode", 1).commit()
+        cache("Study Artist", "Plain Song", plainOnly = true)
+        LyricsRepo.start(ctx); app.mg4dash.media.LyricsChoices.clear()
+        val now = MediaHub.NowPlaying(available = true, packageName = "test.player", title = "Plain Song", artist = "Study Artist",
+            playing = true, durationMs = 180_000, positionMs = 21_000)
+        setNow(now)
+        val a = Robolectric.buildActivity(Activity::class.java).setup().get()
+        app.mg4dash.ui.Themes.apply(a)
+        val card = LyricsCard(a)
+        val holder = FrameLayout(a)
+        holder.addView(card, FrameLayout.LayoutParams(620, 340))
+        a.setContentView(holder)
+        card.shown(true); card.show(now)
+        idle(2500)
+        card.performClick()
+        idle(2500)
+        val d = org.robolectric.shadows.ShadowDialog.getLatestDialog()
+        if (d != null) save(d.window!!.decorView, "karaoke_screen_dark_plain.png")
+        d?.dismiss(); card.shown(false)
     }
 
     @Test fun karaoke() {
