@@ -12,3 +12,8 @@ paths = [
   # The MG4 firmware trusts it, which is why the car build is signed with it.
   '''^keys/platform\.(pk8|x509\.pem)$''',
 ]
+regexes = [
+  # SHA-256 fingerprint of the AOSP test key's certificate (WebEngine.kt, #98):
+  # a public certificate hash, compared against the car's WebView, not a secret.
+  '''a40da80a59d170caa950cf15c18c454d47a39b26989d8b640ecd745ba71bf5dc''',
+]
