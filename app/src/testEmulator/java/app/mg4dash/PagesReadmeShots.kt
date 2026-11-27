@@ -19,7 +19,7 @@ import java.util.concurrent.TimeUnit
 
 /**
  * The README's pictures of the redesigned pages (26/11), rendered by the "UI previews" workflow: Vehicle, Energy and
- * Climate by night, Vehicle and Climate by day (build/screenshots/readme_*.png).
+ * Climate by night, Vehicle and Climate by day, Sound (build/screenshots/readme_*.png).
  */
 @org.junit.experimental.categories.Category(Screenshot::class)
 @RunWith(RobolectricTestRunner::class)
@@ -55,10 +55,14 @@ class PagesReadmeShots {
     }
 
     @Test fun pages() {
+        // Dark theme with the lights on and the car in D: its lamps and gear shown (27/11)
+        app.mg4dash.pages.VehicleActivity.MOCK_LIGHTS = true; app.mg4dash.pages.VehicleActivity.MOCK_GEAR = 4
         shot(app.mg4dash.pages.VehicleActivity::class.java, 1, "readme_vehicle.png")
+        app.mg4dash.pages.VehicleActivity.MOCK_LIGHTS = false; app.mg4dash.pages.VehicleActivity.MOCK_GEAR = 1
         shot(app.mg4dash.pages.EnergyActivity::class.java, 1, "readme_energy.png")
         shot(app.mg4dash.pages.ClimateActivity::class.java, 1, "readme_climate.png")
         shot(app.mg4dash.pages.VehicleActivity::class.java, 2, "readme_vehicle_light.png")
         shot(app.mg4dash.pages.ClimateActivity::class.java, 2, "readme_climate_light.png")
+        shot(app.mg4dash.pages.SoundActivity::class.java, 1, "readme_sound.png")
     }
 }
