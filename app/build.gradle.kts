@@ -13,8 +13,8 @@ android {
         // Targets Android 9 like the rest of the system: no background restrictions
         // or runtime permissions to handle for an app with the system uid.
         targetSdk = 28
-        versionCode = 318
-        versionName = "1.7.4-beta25"
+        versionCode = 319
+        versionName = "1.7.4-beta26"
         // Safety net trials only (never published): -PcrashTest=once|always builds a MG4Dash whose code "does not load"
         // at start (once: until MG4Dash Rescue has recompiled this install; always: every time). Empty otherwise.
         buildConfigField("String", "CRASH_TEST", "\"${project.findProperty("crashTest") ?: ""}\"")
