@@ -237,9 +237,9 @@ class EnergyActivity : PageActivity() {
 
         // ── Battery (24/11): health and settings, a line under the car ──
         // Beside the charge current's title (#141): under the car it took the height the car now has
-        val batteryHint = kit.text("", 14f, R.color.text_title).apply {
+        val batteryHint = kit.text("", 17f, R.color.text_title).apply {   // a little bigger (27/11)
             background = android.graphics.drawable.GradientDrawable().apply { setColor(kit.color(R.color.panel_raised)); cornerRadius = kit.dp(20).toFloat(); setStroke(1, kit.color(R.color.panel_border)) }
-            setPadding(kit.dp(14), kit.dp(6), kit.dp(14), kit.dp(6)); isSingleLine = true
+            setPadding(kit.dp(16), kit.dp(8), kit.dp(16), kit.dp(8)); isSingleLine = true
         }
         fun showBattery() {
             val bc = app.mg4dash.energy.BatteryCapacity
