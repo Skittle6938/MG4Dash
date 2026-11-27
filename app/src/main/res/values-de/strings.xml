@@ -363,6 +363,7 @@
     <string name="st_update_check">Prüfen</string>
     <string name="st_update_checking">Wird geprüft…</string>
     <string name="st_update_error">GitHub nicht erreichbar oder Download fehlgeschlagen.</string>
+    <string name="st_update_no_internet">Kein Internetzugang: Das Radio erreicht keinen Server (WLAN oder mobile Daten).</string>
     <string name="st_update_busy">Ein Update läuft bereits…</string>
     <string name="upd_data_warning">Dieses Update lädt %1$s MB Daten: am besten per WLAN über einen Hotspot oder, wenn möglich, per USB.</string>
     <string name="rescue_stock">MG4Dash ist nicht gestartet: Der SAIC-Startbildschirm wurde wiederhergestellt. Einstellungen › System › SAIC-Startbildschirm ersetzen, um MG4Dash wieder zu nutzen.</string>

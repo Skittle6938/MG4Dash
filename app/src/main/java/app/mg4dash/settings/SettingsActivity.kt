@@ -329,13 +329,16 @@ class SettingsActivity : AppCompatActivity() {
             updState.text = getString(R.string.st_update_checking)
             lifecycleScope.launch {
                 var failed = false
-                val r = withContext(Dispatchers.IO) { try { app.mg4dash.system.Updater.latest(prefs.updateBeta) } catch (e: Exception) { Log.w("Update", "${e.message}"); failed = true; null } }
+                var offline = false
+                val r = withContext(Dispatchers.IO) { try { app.mg4dash.system.Updater.latest(prefs.updateBeta) } catch (e: Exception) {
+                    Log.w("Update", "${e.message}"); failed = true; offline = e is app.mg4dash.system.Download.NoInternet; null } }
                 val newer = r?.takeIf { app.mg4dash.system.Updater.isNewer(it.version) }
                 if (!failed) app.mg4dash.ui.UpdatePrompt.remember(this@SettingsActivity, app = r?.version)
                 if (newer != null) {
                     updButton.text = getString(R.string.st_upd_install_ver, newer.version)
                 }
                 updState.text = when {
+                    offline -> getString(R.string.st_update_no_internet)
                     failed -> getString(R.string.st_update_error)
                     newer != null -> updateAvailable(BuildConfig.VERSION_NAME, r.version)
                     else -> getString(R.string.st_upd_current, BuildConfig.VERSION_NAME)

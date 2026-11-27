@@ -363,6 +363,7 @@
     <string name="st_update_check">Kontrol et</string>
     <string name="st_update_checking">Kontrol ediliyor…</string>
     <string name="st_update_error">GitHub\'a ulaşılamadı veya güncelleme indirilemedi.</string>
+    <string name="st_update_no_internet">İnternet erişimi yok: multimedya sistemi hiçbir sunucuya ulaşamıyor (Wi-Fi veya mobil veri).</string>
     <string name="st_update_busy">Bir güncelleme zaten sürüyor…</string>
     <string name="upd_data_warning">Bu güncelleme %1$s MB veri indirir: tercihen bir erişim noktasından Wi-Fi ile veya mümkünse USB ile.</string>
     <string name="rescue_stock">MG4Dash başlamadı: SAIC ana ekranı geri getirildi. MG4Dash\'e dönmek için Ayarlar › Sistem › SAIC ana ekranını değiştir.</string>

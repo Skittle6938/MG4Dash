@@ -17,6 +17,8 @@ class BtBackAfterProjectionTest {
         assertTrue("no Android Auto since start: as before", MediaHub.btBackAllowed(false, 100_000, 0))
         assertFalse("Android Auto has the phone", MediaHub.btBackAllowed(true, 100_000, 100_000))
         assertFalse("Bluetooth back before Android Auto reconnects", MediaHub.btBackAllowed(false, 100_000 + grace - 1, 100_000))
+        // #138: the MG4Link session ended by hand, the phone back over Bluetooth 20 s later: the DAB radio stays the source
+        assertFalse("Bluetooth back just after a session ended", MediaHub.btBackAllowed(false, 100_000 + 20_000, 100_000))
         assertTrue("long after Android Auto", MediaHub.btBackAllowed(false, 100_000 + grace, 100_000))
     }
 }

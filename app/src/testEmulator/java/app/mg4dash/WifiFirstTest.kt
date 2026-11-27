@@ -54,8 +54,21 @@ class WifiFirstTest {
         assertNull(WifiFirst.bound)
         internet = true
         WifiFirst.recheck()
+        assertNull("one good answer after leaving it: to be confirmed (#137)", WifiFirst.bound)
+        WifiFirst.recheck()
         assertSame(w, WifiFirst.bound)
         assertEquals(listOf(w, null, w), binds)
+    }
+
+    @Test fun aWifiThatComesAndGoesIsNotLeftOnOneCheck() {
+        val w = ShadowNetwork.newInstance(10)
+        WifiFirst.wifiUp(w)
+        internet = false
+        val every = WifiFirst::class.java.getDeclaredMethod("evaluate", String::class.java).apply { isAccessible = true }
+        every.invoke(WifiFirst, "every 2 min")
+        assertSame("one failed check: kept", w, WifiFirst.bound)
+        every.invoke(WifiFirst, "every 2 min")
+        assertNull("two in a row: left", WifiFirst.bound)
     }
 
     @Test fun wifiLostBackToTheDefault() {

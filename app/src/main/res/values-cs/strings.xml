@@ -363,6 +363,7 @@
     <string name="st_update_check">Zkontrolovat</string>
     <string name="st_update_checking">Kontrola…</string>
     <string name="st_update_error">Nelze se připojit ke GitHubu nebo stáhnout aktualizaci.</string>
+    <string name="st_update_no_internet">Žádný přístup k internetu: rádio se nedostane k žádnému serveru (Wi-Fi ani mobilní data).</string>
     <string name="st_update_busy">Aktualizace již probíhá…</string>
     <string name="upd_data_warning">Tato aktualizace stáhne %1$s MB dat: lépe přes Wi-Fi z hotspotu telefonu, nebo pokud možno přes USB.</string>
     <string name="rescue_stock">MG4Dash se nespustil: byla obnovena domovská obrazovka SAIC. Pro opětovné použití MG4Dash: Nastavení › Systém › Nahradit domovskou obrazovku SAIC.</string>

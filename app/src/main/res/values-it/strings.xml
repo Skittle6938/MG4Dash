@@ -363,6 +363,7 @@
     <string name="st_update_check">Controlla</string>
     <string name="st_update_checking">Controllo…</string>
     <string name="st_update_error">Impossibile raggiungere GitHub o scaricare l\'aggiornamento.</string>
+    <string name="st_update_no_internet">Nessun accesso a internet: l\'autoradio non raggiunge nessun server (Wi-Fi o dati mobili).</string>
     <string name="st_update_busy">Un aggiornamento è già in corso…</string>
     <string name="upd_data_warning">Questo aggiornamento scarica %1$s MB di dati: meglio in Wi-Fi da un hotspot o via USB se possibile.</string>
     <string name="rescue_stock">MG4Dash non si era avviato: è stata ripristinata la schermata iniziale SAIC. Impostazioni › Sistema › Sostituisci home SAIC per tornare a MG4Dash.</string>

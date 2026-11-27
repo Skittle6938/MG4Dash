@@ -363,6 +363,7 @@
     <string name="st_update_check">Vérifier</string>
     <string name="st_update_checking">Vérification…</string>
     <string name="st_update_error">Impossible de joindre GitHub ou de télécharger la mise à jour.</string>
+    <string name="st_update_no_internet">Pas d\'accès internet : l\'autoradio ne joint aucun serveur (Wi-Fi ou données mobiles).</string>
     <string name="st_update_busy">Une mise à jour est déjà en cours…</string>
     <string name="upd_data_warning">Cette mise à jour télécharge %1$s Mo de données : de préférence en Wi-Fi depuis un partage de connexion, ou par USB si possible.</string>
     <string name="rescue_stock">MG4Dash n\'avait pas démarré : l\'accueil SAIC a été remis. Réglages › Système › Remplacer l\'accueil SAIC pour revenir à MG4Dash.</string>

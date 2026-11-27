@@ -26,6 +26,9 @@ object Updater {
     /** Latest non-beta release (GitHub ignores pre-releases and drafts). */
     private const val API_STABLE = "https://api.github.com/repos/Skittle6938/MG4Dash/releases/latest"
 
+    /** A check gives up after this, whatever the networks (27/11, #137). */
+    const val CHECK_MS = 20_000L
+
     data class Release(val version: String, val url: String, val size: Long, val notes: String)
 
     /** Latest published release (pre-releases included if [beta]), or null if none. Network: off the main thread. */
@@ -48,7 +51,8 @@ object Updater {
     fun latestStable(): Release? = parse(JSONObject(get(API_STABLE)))
 
     private fun get(api: String): String = DataUsage.tag(DataUsage.Use.UPDATES) {
-        Download.firstWorking(app.mg4dash.Tr.app, "check ${URL(api).path.substringAfter("/repos/").substringBefore("/releases")}") { getUntagged(api, it) }
+        Download.firstWorking(app.mg4dash.Tr.app, "check ${URL(api).path.substringAfter("/repos/").substringBefore("/releases")}",
+            host = URL(api).host, totalMs = CHECK_MS) { getUntagged(api, it) }
     }
     private fun getUntagged(api: String, net: android.net.Network?): String {
         val c = (if (net != null) net.openConnection(URL(api)) else URL(api).openConnection()) as HttpURLConnection

@@ -253,11 +253,14 @@ object MediaHub {
         // Car source gone (phone unplugged…) for 1 s: whatever the setting, switch,
         // otherwise the car stayed on a silent source and the steering wheel buttons no longer
         // acted (#36). 1 s is enough (owner's request): the loss comes from the connection state, not from flickering.
-        val curGone = goneSince[cur]?.let { now - it >= 1_000 } == true
+        // Android Auto gone: a while for it to come back first (27/11, #137: a wireless phone that dropped for a moment
+        // put the radio back two seconds later)
+        val curGone = goneSince[cur]?.let { now - it >= goneAfter(cur, isAndroidAuto(cur)) } == true
         val order = fallbackOrder(mode, p)
         // CarPlay or Android Auto took the phone's audio (#99): its Bluetooth source going away is expected, and
         // picking the radio then started it over CarPlay's music
-        val toProjection = curGone && cur == BT && (projecting || carPlay && AA_MBS in avail)
+        // The USB stick gone under Android Auto too: Android Auto is never paused for it (#137)
+        val toProjection = curGone && (cur == BT || cur == USB) && (projecting || carPlay && AA_MBS in avail)
         if (toProjection && !goneToProjectionLogged) { goneToProjectionLogged = true; Log.i(TAG, "$cur gone: the phone's projection has the audio, no automatic source") }
         if (!curGone) goneToProjectionLogged = false
         if (toProjection) return
@@ -278,6 +281,10 @@ object MediaHub {
         // A better-ranked source back (the phone over Bluetooth…): it takes over in the current state, paused stays paused
         betterSource(order, cur) { stable(it) && !(it == BT && !btBackAllowed(projecting, now, projectionSeenAt)) }?.let { autoSwitch(it, "$it back", play = playingState()) }
     }
+
+    /** How long a source must be gone before it is replaced: 1 s, Android Auto 15 s (it reconnects by itself). */
+    internal fun goneAfter(pkg: String, androidAuto: Boolean): Long = if (androidAuto) AA_GONE_MS else 1_000L
+    internal const val AA_GONE_MS = 15_000L
 
     /** When Android Auto last had the phone (uptime ms; 0: not since start). */
     @Volatile private var projectionSeenAt = 0L

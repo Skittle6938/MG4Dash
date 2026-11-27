@@ -193,10 +193,17 @@ object Download {
      * A short exchange (the update check) over the networks of [networks] in order, the next one when one fails:
      * the Wi-Fi first, then the T-box (not with "Updates on Wi-Fi only"). The last failure if all fail.
      */
-    fun <T> firstWorking(context: Context, what: String, block: (Network?) -> T): T {
+    fun <T> firstWorking(context: Context, what: String, host: String? = null, totalMs: Long = 0L, block: (Network?) -> T): T {
         var last: Exception? = null
+        val start = System.nanoTime() / 1_000_000
+        var answered = host == null
         for (p in networks(context)) {
+            val left = if (totalMs > 0) totalMs - (System.nanoTime() / 1_000_000 - start) else Long.MAX_VALUE
+            // A bounded check (27/11, #137: 40 s per network and per app when no name resolved, "checking" for minutes)
+            if (left <= 0) { Log.w(TAG, "$what: ${totalMs / 1000} s gone, the other networks left"); break }
             try {
+                // The name first, with a time limit: Android 9 waits about 40 s for a DNS that does not answer
+                if (host != null && !p.tbox) { resolve(p.net, host, minOf(DNS_MS, left)); answered = true }
                 val r = over(context, p, block)
                 Log.i(TAG, "$what on ${p.label}")
                 return r
@@ -205,7 +212,25 @@ object Download {
                 last = e
             }
         }
+        // No network resolved the name: no internet on any of them, said plainly
+        if (!answered) throw NoInternet(what, last)
         throw last ?: IOException("$what: no network")
+    }
+
+    /** No network could resolve a name: the head unit has no internet (DNS) at all. */
+    class NoInternet(what: String, cause: Throwable?) : IOException("$what: no network resolves names (no internet)", cause)
+
+    /** The time a name may take to resolve before the next network is tried. */
+    const val DNS_MS = 5_000L
+
+    private val dns = java.util.concurrent.Executors.newCachedThreadPool { r -> Thread(r, "dns").apply { isDaemon = true } }
+
+    /** [host] resolved over [net] (Android's default when null) within [ms], or an UnknownHostException. */
+    internal fun resolve(net: Network?, host: String, ms: Long): Array<InetAddress> {
+        val f = dns.submit<Array<InetAddress>> { net?.getAllByName(host) ?: InetAddress.getAllByName(host) }
+        return try { f.get(ms, java.util.concurrent.TimeUnit.MILLISECONDS) }
+        catch (e: java.util.concurrent.TimeoutException) { f.cancel(true); throw java.net.UnknownHostException("$host: no DNS answer in ${ms / 1000} s") }
+        catch (e: java.util.concurrent.ExecutionException) { throw (e.cause as? Exception) ?: java.net.UnknownHostException(host) }
     }
 
     /** One try: redirects followed (5 at most), the rest asked with Range, appended to [part]. */

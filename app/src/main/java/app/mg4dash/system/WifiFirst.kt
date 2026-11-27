@@ -65,7 +65,12 @@ object WifiFirst {
     }
 
     /** A request failed: the Wi-Fi checked again now (back to the 4G if it no longer gets through, or to the Wi-Fi). */
-    fun recheck() = evaluate("a request failed")
+    fun recheck() = evaluate(FAILED)
+    private const val FAILED = "a request failed"
+    /** The check again soon when a change waits for a second answer. */
+    private const val CONFIRM_MS = 30_000L
+    private var streak = 0
+    private var lastOk: Boolean? = null
 
     private fun evaluate(why: String) {
         handler.removeCallbacks(recheck)
@@ -73,9 +78,20 @@ object WifiFirst {
         async(Runnable {
             val ok = try { check(w) } catch (_: Exception) { false }
             if (wifi != w) return@Runnable
+            // Two answers alike before changing (27/11, #137: a Wi-Fi whose check came and went every 2 minutes was taken,
+            // left and taken again): a Wi-Fi just connected is taken at once, a request that failed on it leaves it at once
+            streak = if (ok == lastOk) streak + 1 else 1
+            lastOk = ok
+            val connected = why.endsWith("connected")
+            val confirm = when {
+                ok && bound != w -> connected || streak >= 2
+                !ok && bound != null -> why == FAILED || streak >= 2
+                else -> true
+            }
+            if (!confirm) { Log.i(TAG, "$why: ${if (ok) "internet" else "no internet"} through the Wi-Fi, to be confirmed"); handler.postDelayed(recheck, CONFIRM_MS); return@Runnable }
             if (ok && bound != w) use(w, "$why: internet through the Wi-Fi")
             else if (!ok && bound != null) use(null, "$why: no internet through the Wi-Fi")
-            else if (!ok) Log.i(TAG, "$why: no internet through the Wi-Fi, Android's default network kept")
+            else if (!ok && streak == 1) Log.i(TAG, "$why: no internet through the Wi-Fi, Android's default network kept")
             handler.postDelayed(recheck, RECHECK_MS)
         })
     }
@@ -121,5 +137,5 @@ object WifiFirst {
     }
 
     /** For the tests. */
-    internal fun reset() { wifi = null; bound = null }
+    internal fun reset() { wifi = null; bound = null; streak = 0; lastOk = null }
 }
