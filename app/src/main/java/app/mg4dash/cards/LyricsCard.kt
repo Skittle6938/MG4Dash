@@ -355,7 +355,8 @@ class LyricsCard(context: Context) : LinearLayout(context), HomeCard {
             if (!LyricsRepo.networkAllowed(activity)) {
                 setStatus(activity.getString(R.string.ly_wifi_only)); drawLines(0); return@launch
             }
-            if (!networkAvailable()) { setStatus(activity.getString(R.string.ly_offline)); drawLines(0); return@launch }
+            // No network yet (just started): said, and the lookup below waits for it (27/11)
+            if (!networkAvailable()) { setStatus(activity.getString(R.string.ly_offline)); drawLines(0) }
             if (!isActivelyDisplayed) return@launch
             val found = LyricsRepo.lookup(m.artist, m.title, m.durationMs, force)
             if (!isActivelyDisplayed || key != targetKey) return@launch

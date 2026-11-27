@@ -8,6 +8,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import app.mg4dash.cards.LyricsCardPrefs
 import app.mg4dash.system.DataUsage
+import app.mg4dash.system.Log
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
@@ -78,29 +79,80 @@ object LyricsRepo {
         } catch (_: Exception) { f.delete(); null }
     }
 
+    /**
+     * The song's lyrics: from the cache, else from LRCLIB. Without a network yet (the car just started, the 4G not up) or
+     * after a network error, tried again for this song (27/11: the first song after a start stayed without lyrics until
+     * the next one): as soon as the network is there, then every [RETRY_MS], for [PATIENCE_MS] at most. Cancelled with
+     * the caller's job when the song changes. Null: no lyrics found, or no network for that long.
+     */
     suspend fun lookup(artist: String, title: String, durationMs: Long, force: Boolean = false): Track? = withContext(Dispatchers.IO) {
-        val ctx = app ?: return@withContext null
-        val k = key(artist, title)
         if (!force) cached(artist, title)?.let { return@withContext it }
-        if (!networkAllowed(ctx)) return@withContext null
+        val ctx = app ?: return@withContext null
+        patiently(online = { networkAllowed(ctx) && online(ctx) }, wait = { kotlinx.coroutines.delay(it) }) { lookupOnce(artist, title, durationMs) }
+    }
+
+    /** One try: the track, nothing found (a definite answer), or a network failure to try again. */
+    internal sealed class Attempt<out T> { data class Done<T>(val value: T?) : Attempt<T>(); object Failed : Attempt<Nothing>() }
+
+    const val RETRY_MS = 10_000L
+    const val PATIENCE_MS = 60_000L
+    /** While waiting for the network: how often it is looked at. */
+    const val ONLINE_POLL_MS = 1_000L
+
+    /**
+     * Runs [attempt] until it gives an answer: with no network it waits for one (looked at every [ONLINE_POLL_MS]), after a
+     * failure it waits [RETRY_MS]; gives up after [PATIENCE_MS] of waiting. Internal for the tests.
+     */
+    internal suspend fun <T> patiently(online: () -> Boolean, wait: suspend (Long) -> Unit, attempt: suspend () -> Attempt<T>): T? {
+        var waited = 0L
+        var logged = false
+        while (true) {
+            if (online()) {
+                when (val a = attempt()) {
+                    is Attempt.Done -> { if (logged) Log.i(TAG, "lyrics found after ${waited / 1000} s of waiting"); return a.value }
+                    Attempt.Failed -> if (waited + RETRY_MS > PATIENCE_MS) return null else {
+                        if (!logged) { logged = true; Log.i(TAG, "lyrics request failed: tried again every ${RETRY_MS / 1000} s") }
+                        wait(RETRY_MS); waited += RETRY_MS
+                    }
+                }
+            } else {
+                if (waited + ONLINE_POLL_MS > PATIENCE_MS) { Log.i(TAG, "no network for lyrics for ${PATIENCE_MS / 1000} s: given up for this song"); return null }
+                if (!logged) { logged = true; Log.i(TAG, "no network for lyrics yet: waiting for it") }
+                wait(ONLINE_POLL_MS); waited += ONLINE_POLL_MS
+            }
+        }
+    }
+
+    private const val TAG = "Lyrics"
+
+    /** The active network has internet (not yet validated is enough: the lyrics' request is the real test). */
+    private fun online(context: Context): Boolean = try {
+        val cm = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        cm.getNetworkCapabilities(cm.activeNetwork)?.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) == true
+    } catch (_: Exception) { false }
+
+    private suspend fun lookupOnce(artist: String, title: String, durationMs: Long): Attempt<Track> {
+        val k = key(artist, title)
         // Lyrics chosen in the picker for this song (26/11): those, by their id
         LyricsChoices.lyricsId(artist, title).takeIf { it > 0 }?.let { id ->
             try { JSONObject(request("$BASE/get/$id").body) } catch (_: Exception) { null }?.let { o ->
                 val track = decode(k, artist, title, o)
                 val (enabled, maxMb) = contextPrefs()
                 if (enabled) { synchronized(memory) { memory.clear(); memory[k] = track }; persist(k, o, maxMb) }
-                return@withContext track
+                return Attempt.Done(track)
             }
         }
         val exact = linkedMapOf("artist_name" to artist, "track_name" to title)
         if (durationMs > 0) exact["duration"] = String.format(Locale.US, "%.2f", durationMs / 1000.0)
         var missing = false
         val found = try { request("$BASE/get?${query(exact)}")?.let { JSONObject(it.body) } } catch (e: HttpFailure) {
-            if (e.code != 404) return@withContext null
+            // A 4xx other than 404: a definite refusal; 5xx: the server, tried again
+            if (e.code != 404) return if (e.code >= 500) Attempt.Failed else Attempt.Done(null)
             missing = true
             null
-        } catch (_: Exception) { return@withContext null }
-        if (found == null && !missing) return@withContext null
+        } catch (_: java.io.IOException) { return Attempt.Failed }
+        catch (_: Exception) { return Attempt.Done(null) }
+        if (found == null && !missing) return Attempt.Done(null)
         // Not found as given: searched, first with the whole artist, then with the main one only (26/11, #135:
         // CarPlay gives "A & B" or "A, B" and titles with "(feat. C)")
         // The exact answer without synced lyrics: a synced version of the same song searched for (#135)
@@ -116,11 +168,11 @@ object LyricsRepo {
                 best(arr, artist, title, durationMs)
             } catch (_: Exception) { null }
         }
-        if (result == null) return@withContext null
+        if (result == null) return Attempt.Done(null)
         val track = decode(k, artist, title, result)
         val (enabled, maxMb) = contextPrefs()
         if (enabled) { synchronized(memory) { memory.clear(); memory[k] = track }; persist(k, result, maxMb) }
-        track
+        return Attempt.Done(track)
     }
 
     /**
