@@ -1,0 +1,254 @@
+<title>MG4Dash Refonte Pages</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Saira+Semi+Condensed:wght@500;600&display=swap">
+<style>
+/* Layout: one 1920×720 car screen is the hero; page tabs above it, notes and the paint gallery below. Single dark look: Dash's own world. */
+:root{color-scheme:dark;--bg:#07090E;--bg2:#0F141E;--panel:#12161F;--raised:#1A2030;--line:#2A3142;--btn:#1C2231;--txt:#FFFFFF;--sub:#A0AEC0;--title:#8A94A6;--off:#4A5366;--cold:#00D2FF;--energy:#00E676;--heat:#FF9100;--batt:#B388FF;--action:#2979FF;--danger:#FF5252;--gauge:#262D3D;--coldbg:#062B36;--heatbg:#3A2405;
+--disp:'Saira Semi Condensed','Roboto',system-ui,sans-serif;--body:'Roboto',system-ui,-apple-system,'Segoe UI',sans-serif}
+body{background:var(--bg);color:var(--txt);font-family:var(--body);font-size:16px;line-height:1.5}
+.wrap{max-width:1500px;margin:0 auto;padding-block:28px 64px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:22px}
+.eyebrow{font:600 13px var(--body);letter-spacing:.14em;text-transform:uppercase;color:var(--cold);margin-bottom:8px}
+h1{font:600 clamp(26px,3.4vw,40px)/1.1 var(--disp);margin:0;text-wrap:balance}
+h2{font:600 24px/1.2 var(--disp);margin:0 0 12px;text-wrap:balance}
+.lede{color:var(--sub);max-width:72ch;margin:8px 0 0}
+.bar{display:flex;flex-wrap:wrap;gap:10px 22px;align-items:center}
+.tabs{display:flex;flex-wrap:wrap;gap:6px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:5px}
+.tabs button{font:500 15px var(--body);color:var(--sub);background:none;border:0;border-radius:10px;padding:9px 14px;cursor:pointer}
+.tabs button[aria-pressed=true]{background:var(--action);color:#fff}
+.tabs button:focus-visible,.demo button:focus-visible,.gal button:focus-visible{outline:2px solid var(--cold);outline-offset:2px}
+#zoomg{display:none}
+@media (max-width:760px){#zoomg{display:flex}}
+.stagewrap{position:relative;width:100%;aspect-ratio:1920/720;border-radius:14px;overflow:hidden;border:1px solid var(--line);background:#05070B}
+.stagewrap.pan{aspect-ratio:auto;overflow-x:auto;overflow-y:hidden;overscroll-behavior-x:contain}
+.panhint{display:none;color:var(--title);font-size:13px;margin-top:-12px}
+.stagewrap.pan+.panhint{display:block}
+.demo{display:flex;flex-wrap:wrap;gap:8px 10px;align-items:center;color:var(--title);font-size:14px}
+.demo button{font:500 14px var(--body);color:var(--sub);background:var(--btn);border:1px solid var(--line);border-radius:999px;padding:7px 13px;cursor:pointer}
+.demo button[aria-pressed=true]{color:var(--cold);border-color:var(--cold);background:var(--coldbg)}
+.note{display:grid;grid-template-columns:minmax(200px,1fr) 3fr;gap:18px;border-top:1px solid var(--line);padding-top:18px}
+@media (max-width:700px){.note{grid-template-columns:1fr}}
+.note h3,.two h3,.galh h3{font:600 13px var(--body);letter-spacing:.12em;text-transform:uppercase;color:var(--title);margin:0 0 6px}
+.note ul{margin:0;color:var(--sub);padding-left:18px}
+.note .idea p{color:var(--txt);font-size:18px;margin:0}
+section{border-top:1px solid var(--line);padding-top:22px}
+.tw{overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:640px;font-size:15px}
+th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top;color:var(--sub)}
+th{color:var(--title);font-weight:500;font-size:13px;letter-spacing:.1em;text-transform:uppercase}
+td:first-child{color:var(--txt)}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:22px 34px}
+.two>*{min-width:0}
+.two p,.two li{color:var(--sub)} .two ul,.two ol{padding-left:20px;margin:0} .two p{margin:0 0 10px} .two li{margin-bottom:6px}
+.two b,.note b,td b{color:var(--txt);font-weight:500}
+.swl{display:flex;flex-wrap:wrap;gap:10px 16px;margin:12px 0}
+.swl span{display:flex;align-items:center;gap:8px;color:var(--sub);font-size:14px}
+a{color:var(--cold)}
+.src{color:var(--title);font-size:14px}
+.sec-lede{color:var(--sub);max-width:76ch;margin:-4px 0 16px}
+.galh{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 14px;margin:18px 0 10px}
+.galh h3{margin:0}.galh span{color:var(--title);font-size:14px}
+.gal{display:grid;gap:10px;grid-template-columns:repeat(4,1fr)}
+.gal.c5{grid-template-columns:repeat(5,1fr)}
+@media (max-width:1000px){.gal.c5{grid-template-columns:repeat(3,1fr)}}
+@media (max-width:620px){.gal,.gal.c5{grid-template-columns:repeat(2,1fr);gap:8px}}
+.gal button{font:500 14px var(--body);color:var(--sub);background:radial-gradient(120% 90% at 50% 100%,#17233B,#0B0F17 70%);border:1px solid var(--line);border-radius:14px;padding:8px 6px 9px;cursor:pointer;min-width:0;text-align:center}
+.gal button:hover{border-color:#3C4A66;color:#fff}
+.gal canvas{display:block;width:100%;height:auto;margin-bottom:4px;max-width:none}
+.gal .q{overflow:hidden;aspect-ratio:1340/604;margin-bottom:4px}
+.gal .q canvas{width:119.4%;margin:-4.6% 0 0 -10.45%}
+.gal small{display:block;color:var(--title);font-size:12px;font-weight:400}
+
+/* ───── the car screen (fixed 1920×720, scaled by script) ───── */
+.scr{position:absolute;left:0;top:0;width:1920px;height:720px;transform-origin:0 0;background:radial-gradient(1200px 500px at 60% 0,#0C111B,#05070B);font-family:var(--body);color:#fff;overflow:hidden;line-height:1.2;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+.scr img{max-width:none;-webkit-user-drag:none}
+.scr img.cur{width:1920px;height:720px;display:block}
+.scr *{box-sizing:border-box}
+.scr [data-a],.scr [data-lp]{cursor:pointer}
+.dock{position:absolute;left:12px;top:12px;width:72px;height:696px;border-radius:22px;background:#0D1118;border:1px solid #1D2331;display:flex;flex-direction:column;justify-content:space-around;align-items:center}
+.dock i{width:64px;height:104px;border-radius:16px;display:grid;place-items:center}
+.dock svg{width:34px;height:34px;fill:#A0AEC0}
+.dock i.on{background:#132544}.dock i.on svg{fill:var(--action)}
+.pg{position:absolute;left:98px;top:6px;width:1808px;height:706px;display:flex;flex-direction:column}
+.hd{height:62px;flex:none;display:flex;align-items:center;gap:12px;padding-left:12px}
+.hd h4{font:500 20px var(--body);letter-spacing:.16em;color:var(--sub);text-transform:uppercase;margin:0 auto 0 0}
+.hb{padding:12px 18px;background:var(--btn);border-radius:14px;font-size:19px;color:var(--sub);white-space:nowrap}
+.hb.pri{background:var(--action);color:#fff}.hb.lnk{background:none;color:var(--action)}
+.bd{flex:1;min-height:0;display:grid;gap:14px;position:relative}
+.col{display:flex;flex-direction:column;min-width:0;min-height:0}
+.row{display:flex;align-items:center;gap:10px}
+.lb{font-size:15px;letter-spacing:.15em;text-transform:uppercase;color:var(--title);font-weight:500}
+.big{font-weight:300;line-height:1}
+.sub{color:var(--sub)} .dim{color:var(--title)}
+.hr{height:1px;background:var(--line);margin:8px 0;flex:none}
+.chip{flex:1;min-width:0;height:54px;display:grid;place-items:center;text-align:center;border-radius:14px;background:var(--btn);border:2px solid transparent;font-size:18px;font-weight:500;color:var(--sub);letter-spacing:.05em;padding:0 8px}
+.chip.on{background:var(--coldbg);border-color:var(--cold);color:var(--cold)}
+.chip.heat.on{background:var(--heatbg);border-color:var(--heat);color:var(--heat)}
+.chip.dis{color:var(--off)}
+.chip.sm{font-size:15px;letter-spacing:.02em;line-height:1.15}
+.rb{width:72px;height:72px;flex:none;border-radius:18px;background:var(--btn);display:grid;place-items:center;font-size:40px;font-weight:300;line-height:1}
+.rb.c{color:var(--cold)}.rb.h{color:var(--heat)}
+.g{display:flex;gap:4px}.row>.g{flex:1}.nw{white-space:nowrap}
+.g span{flex:1;height:var(--h,18px);border-radius:4px;background:var(--gauge)}
+.g span.on{background:var(--c,var(--cold))}
+.floor{position:absolute;left:4%;right:4%;height:120px;border-radius:50%;background:radial-gradient(closest-side,rgba(64,110,190,.30),rgba(64,110,190,0));pointer-events:none}
+.fl{animation:flow 1.1s linear infinite}.fl.rev{animation-direction:reverse}
+@keyframes flow{to{stroke-dashoffset:-68}}
+@keyframes pulse{50%{opacity:.35}}
+.pulse{animation:pulse 1.6s ease-in-out infinite}
+@media (prefers-reduced-motion:reduce){.fl,.pulse{animation:none}}
+.stp{display:flex;align-items:center;gap:8px}
+.stp .rb{width:50px;height:50px;font-size:28px;border-radius:13px}
+.stp b{width:112px;height:50px;border-radius:13px;background:var(--btn);display:grid;place-items:center;font-size:26px;font-weight:400}
+.lg{display:flex;align-items:center;gap:10px;font-size:18px;padding:4px 0}
+.lg i{width:12px;height:12px;flex:none}.lg span{color:var(--sub);flex:1}
+.auto{display:inline-flex;gap:2px;align-items:flex-end;margin-left:8px}
+.auto u{width:6px;background:var(--action);display:block}
+.card{background:linear-gradient(160deg,rgba(30,38,57,.82),rgba(15,19,28,.82));border:1px solid rgba(255,255,255,.06);border-radius:22px;padding:16px 18px;flex:none}
+.seg{display:flex;gap:5px;background:#0A0E15;border-radius:16px;padding:5px}
+.seg>div{flex:1;height:50px;display:grid;place-items:center;border-radius:12px;font-size:17px;font-weight:500;color:var(--sub)}
+.seg>div.on{background:var(--action);color:#fff;box-shadow:0 4px 18px -4px var(--action)}
+.tg{width:54px;height:30px;border-radius:15px;background:var(--gauge);position:relative;flex:none;display:block}
+.tg:after{content:"";position:absolute;left:3px;top:3px;width:24px;height:24px;border-radius:50%;background:#8A94A6}
+.tg.on{background:color-mix(in srgb,var(--c) 38%,#10141D)}.tg.on:after{left:27px;background:var(--c)}
+.st{flex:1;min-width:0;background:linear-gradient(160deg,rgba(30,38,57,.82),rgba(15,19,28,.82));border:1px solid rgba(255,255,255,.06);border-radius:18px;padding:13px 15px;position:relative;display:flex;flex-direction:column;justify-content:center}
+.st.in{background:#0A0E15;border-color:transparent}
+.st .sl{font-size:14px;color:var(--title);line-height:1.2;padding-right:14px}
+.st .sv{font-size:20px;margin-top:7px}
+.st .ss{font-size:13px;color:var(--off);margin-top:4px}
+.st.dis .sv{color:var(--title)}
+.st.cp{padding:10px 14px}.st.cp .sv{margin-top:5px}
+.dot{position:absolute;right:13px;top:15px;width:9px;height:9px;border-radius:50%;background:var(--off)}
+.dot.on{background:var(--energy);box-shadow:0 0 8px var(--energy)}
+.pb{height:8px;border-radius:4px;background:var(--gauge);overflow:hidden;flex:1}.pb i{display:block;height:100%;border-radius:4px}
+.hint{display:flex;align-items:center;gap:9px;padding:9px 16px;border-radius:999px;font-size:15px;color:var(--title);background:rgba(16,21,31,.72);border:1px solid rgba(255,255,255,.07);white-space:nowrap}
+.hint svg{flex:none}
+.lp{transition:transform .45s ease-out,filter .45s ease-out}
+.lp.pressing{transform:scale(.985);filter:brightness(1.25)}
+.cab.lp.pressing{transform:none;filter:brightness(1.14)}
+.co{position:absolute;text-align:center;font-size:15px;color:var(--sub);white-space:nowrap;transform:translateX(-50%)}
+.co b{display:block;font-size:29px;font-weight:300;color:#fff;margin-bottom:2px}
+.co b small{font-size:15px;color:var(--sub)}
+.co:before{content:"";position:absolute;left:50%;bottom:100%;width:1px;height:22px;background:linear-gradient(transparent,var(--sub))}
+.co .vd{width:1px;height:38px;background:var(--line);flex:none}
+/* gear and parking brake (27/11): shown like the car's name on the other side, a small title and the value under it. An indicator, not a
+   control: no chip that looks pressable. The lit letter is bigger and underlined in the action colour, the brake telltale is the cluster's. */
+.gr{text-align:right}
+.gr .grl{display:flex;align-items:center;justify-content:flex-end;white-space:nowrap;margin:2px -6px 0 0}
+.gr b{width:38px;height:42px;display:grid;place-items:center;font-size:26px;font-weight:500;color:#566079;position:relative}
+.gr b.on{color:#fff;font-size:34px}
+.gr b.on:after{content:"";position:absolute;left:8px;right:8px;bottom:-3px;height:3px;border-radius:2px;background:var(--action);box-shadow:0 0 10px var(--action)}
+.gr .epb{display:grid;place-items:center;color:var(--danger);margin-right:12px;filter:drop-shadow(0 0 7px rgba(255,82,82,.55))}
+.tl{position:relative;height:10px;border-radius:5px;background:var(--gauge);margin-top:12px}
+.tl i{position:absolute;top:0;bottom:0;border-radius:5px;background:var(--action);min-width:6px}
+.bh{position:absolute;transform:translate(-50%,-50%);display:flex;align-items:center;gap:11px;height:52px;padding:0 12px 0 15px;border-radius:26px;background:rgba(12,16,24,.92);border:2px solid #3A4358;font-size:17px;font-weight:500;color:var(--sub);white-space:nowrap}
+.bh.on{border-color:var(--heat);color:var(--heat);background:rgba(52,32,6,.94);box-shadow:0 0 26px -6px var(--heat)}
+.hs{position:absolute;transform:translate(-50%,-50%);display:flex;align-items:center;gap:10px;height:54px;padding:0 20px 0 8px;border-radius:27px;font-size:18px;font-weight:500;letter-spacing:.03em;background:rgba(9,12,18,.72);border:2px solid rgba(255,255,255,.2);color:#D5DCE8;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);white-space:nowrap;z-index:2}
+.hs i{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.1);color:#D5DCE8}
+.hs.on{border-color:var(--k);color:var(--k);box-shadow:0 0 26px -6px var(--k)}
+.hs.on i{background:var(--k);color:#06080C}
+.scrim{position:absolute;inset:0;background:rgba(5,7,11,.62);z-index:3}
+.pop{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:4;background:#141A26;border:1px solid var(--line);border-radius:22px;padding:20px 22px;box-shadow:0 20px 60px rgba(0,0,0,.6)}
+.opt{background:var(--btn);border:2px solid transparent;border-radius:16px;padding:8px 10px;font-size:15px;color:var(--sub);min-width:0;overflow:hidden}
+.opt.on{border-color:var(--action);background:#132544;color:#fff}
+.opt small{display:block;font-size:12px;color:var(--title);margin-top:2px}
+/* v3 pieces: real renders */
+.cv{position:absolute;display:block}
+.refl{transform:scaleY(-1);opacity:.27;filter:blur(1.5px);pointer-events:none;-webkit-mask-image:linear-gradient(to top,transparent 0,#000 6%,transparent 40%);mask-image:linear-gradient(to top,transparent 0,#000 6%,transparent 40%)}
+.cvt{display:block;margin:0 auto;pointer-events:none}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.sw{display:block;border-radius:50%;flex:none;border:2px solid rgba(255,255,255,.24);box-shadow:inset 0 -5px 9px rgba(0,0,0,.4),0 2px 6px rgba(0,0,0,.4)}
+.sw.mat{box-shadow:inset 0 0 0 1px rgba(0,0,0,.25)}
+.ov{position:absolute;inset:0;z-index:5;border-radius:22px;overflow:hidden;background:radial-gradient(900px 420px at 30% 78%,#1B2C4D,#080B11 74%);display:grid;grid-template-columns:1fr 800px}
+.glass{background:rgba(9,12,19,.66);backdrop-filter:blur(22px) saturate(1.25);-webkit-backdrop-filter:blur(22px) saturate(1.25);border:1px solid rgba(255,255,255,.12);border-radius:26px;box-shadow:0 18px 50px rgba(0,0,0,.5);z-index:2}
+.glass .chip,.glass .rb{background:rgba(255,255,255,.075)}
+.glass .chip.on{background:rgba(0,210,255,.16)}.glass .chip.heat.on{background:rgba(255,145,0,.18)}
+.cab{position:absolute;inset:0;border-radius:22px;overflow:hidden;background:#05070B}
+.cabimg{position:absolute;left:0;top:-20px;width:1808px;height:678px;pointer-events:none;transition:filter .5s}
+.cabsh{position:absolute;inset:0;pointer-events:none;background:linear-gradient(90deg,rgba(5,7,11,.72),rgba(5,7,11,0) 27%,rgba(5,7,11,0) 73%,rgba(5,7,11,.72)),linear-gradient(180deg,rgba(5,7,11,.58),rgba(5,7,11,.36) 38%,rgba(5,7,11,0) 58%,rgba(5,7,11,0) 74%,rgba(5,7,11,.42))}
+.cabtint{position:absolute;inset:0;pointer-events:none;mix-blend-mode:soft-light;opacity:.2;transition:background .5s}
+#air{position:absolute;left:0;top:0;width:1808px;height:644px;pointer-events:none;z-index:1}
+.ghost{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Version 4 · direction A, corrigée d'après les photos du 26/11</div>
+    <h1>Refonte des pages Véhicule, Énergie et Climatisation</h1>
+    <p class="lede">Les trois pages réagissent comme dans la voiture. La MG4 est un rendu 3D calculé, repeint à la demande : version, jantes, toit, couleur, livrée. Pour l'appui long, garder le doigt ou la souris une demi-seconde sur la voiture, ou sur le tableau de bord de la page Climatisation.</p>
+  </header>
+
+  <div class="bar">
+    <div class="tabs" id="pages" role="group" aria-label="Page"></div>
+    <div class="tabs" id="cmp" role="group" aria-label="Comparer"></div>
+    <div class="tabs" id="zoomg" role="group" aria-label="Taille de la maquette"></div>
+  </div>
+
+  <div class="stagewrap" id="sw"><div class="scr" id="scr"></div></div>
+  <div class="panhint">Faire glisser la maquette vers la gauche ou la droite pour voir le reste de l'écran, ou tourner le téléphone à l'horizontale pour le voir en entier.</div>
+
+  <div class="demo" id="demo"></div>
+  <div class="note" id="note"></div>
+
+  <section>
+    <h2>Toutes les peintures et toutes les livrées</h2>
+    <p class="sec-lede">Chaque image ci-dessous est calculée à l'instant par la page, à partir des mêmes rendus 3D. Toucher une voiture pour la retrouver dans la maquette.</p>
+    <div class="galh"><h3>Couleurs MG4</h3><span>Les sept teintes du catalogue français, plus le vert satiné de la XPower</span></div>
+    <div class="gal" id="galA"></div>
+    <div class="galh"><h3>Coloris fun</h3><span>Pour le plaisir : rien de tout cela n'existe chez MG</span></div>
+    <div class="gal" id="galB"></div>
+    <div class="galh"><h3>Livrées</h3><span>Peintes en 3D sur la carrosserie, elles se combinent avec n'importe quelle couleur</span></div>
+    <div class="gal" id="galC"></div>
+  </section>
+
+  <section class="two">
+    <div>
+      <h2>Ce qui a été vérifié</h2>
+      <div class="tw"><table style="min-width:640px">
+        <thead><tr><th>Version</th><th>Arrière</th><th>Jantes</th><th>Toit</th><th>Bas de caisse</th></tr></thead>
+        <tbody>
+          <tr><td>Standard</td><td>Sans becquet</td><td>17″ alliage et enjoliveur bi-ton. 16″ à enjoliveur noir sur les toutes premières, rare</td><td>Couleur carrosserie</td><td>Noir mat strié</td></tr>
+          <tr><td>Comfort</td><td>Sans becquet</td><td>17″ alliage et enjoliveur bi-ton</td><td>Couleur carrosserie</td><td>Noir mat strié</td></tr>
+          <tr><td>Luxury</td><td>Double aileron</td><td>17″ (2022), puis 18″ alliage et enjoliveur (2023)</td><td><b>Noir en 2022</b>, couleur carrosserie ensuite</td><td>Noir mat strié</td></tr>
+          <tr><td>XPower</td><td>Double aileron</td><td>18″ spécifiques, étriers orange</td><td>Noir</td><td>Noir brillant et gris</td></tr>
+        </tbody>
+      </table></div>
+      <div class="swl" id="swl"></div>
+      <ul>
+        <li><b>Jantes.</b> La taille et le dessin de chaque jante sont mesurés sur les photos déposées le 26/11, puis recalculés en 3D. Elles étaient trop petites dans la version 3.</li>
+        <li><b>Hunter Green.</b> Un vert clair satiné qui prend la lumière, repris de la photo de la XPower. Il était trop sombre et trop mat.</li>
+        <li><b>Bas de caisse.</b> Noir brillant et gris sur la XPower seulement. Les autres versions ont un plastique noir mat, strié sur la porte arrière.</li>
+        <li><b>Dimensions.</b> Le modèle 3D a été recalé sur les cotes officielles : 4,287 m de long et 1,516 m de haut.</li>
+        <li><b>Tableau de bord.</b> C'est la vue intérieure à 360° du site MG, recadrée. Les bouches d'air et le volant sont donc les vrais. L'écran central montre l'accueil de MG4Dash, repris de la capture du README.</li>
+        <li><b>Cohérence avec l'appli.</b> Chaque page reprend les règles de l'appli actuelle : la limite de charge n'apparaît que sur les voitures qui la gèrent, le bouton du pistolet seulement quand le câble est branché, les réglages absents des anciennes voitures disparaissent sans laisser de trou.</li>
+      </ul>
+    </div>
+    <div>
+      <h2>Ce qui reste approximatif</h2>
+      <ul>
+        <li><b>Enjoliveur 16″ noir.</b> La seule photo est petite : il reprend l'architecture du 17″, tout en noir.</li>
+        <li><b>Arrière de la Standard.</b> Le modèle de MG n'existe qu'avec l'aileron. Je l'ai retiré et j'ai refermé le toit à la main.</li>
+        <li><b>Conduite à droite.</b> C'est l'image de gauche retournée, avec le logo du volant, le compteur et l'écran central remis à l'endroit.</li>
+        <li><b>Bas de caisse.</b> Le motif façon carbone est simplifié en fines stries.</li>
+        <li><b>Couleurs.</b> Elles restent ajustées à l'œil, sur les photos et sur les images officielles MG.</li>
+      </ul>
+      <h2 style="margin-top:22px">Droits sur les images</h2>
+      <p>Le modèle 3D et la vue intérieure viennent de MG. Accord donné par Marc le 26/11 : les images venant de MG peuvent être utilisées dans l'appli.</p>
+      <h2 style="margin-top:22px">Poids dans l'appli</h2>
+      <p>Tous les rendus pèsent environ 6 Mo : profil 2,2 Mo, trois-quarts 2,3 Mo, vue transparente 1,1 Mo, tableau de bord 0,4 Mo. L'appli fait 8,6 Mo aujourd'hui. Dans l'appli, la voiture serait repeinte une seule fois à chaque changement de réglage, puis gardée en image.</p>
+      <h2 style="margin-top:22px">Pour continuer</h2>
+      <ul>
+        <li>Les retours sur cette version corrigée.</li>
+        <li>Le poids des images : à accepter tel quel, ou à réduire en gardant une seule vue de la voiture.</li>
+        <li>Le feu vert pour passer au code de l'appli.</li>
+      </ul>
+    </div>
+  </section>
+
+  <p class="src">Sources : <a href="https://www.fiches-auto.fr/catalogues-pdf-officiels/717-MG4-18_10_2022-Brochure-MG4-au-13-09-2022-v2_compressed.pdf" target="_blank" rel="noopener">brochure MG4 de septembre 2022</a>, <a href="https://www.largus.fr/actualite-automobile/mg4-2023-plus-d-equipements-pour-le-meme-prix-30027766.html" target="_blank" rel="noopener">L'argus, MG4 2023</a>, <a href="https://www.largus.fr/actualite-automobile/essai-mg4-luxury-notre-avis-sur-la-compacte-electrique-bon-marche-11057390.html" target="_blank" rel="noopener">L'argus, essai Luxury 2022</a>, <a href="https://www.largus.fr/actualite-automobile/essai-mg4-x-power-2023-le-bonheur-est-dans-le-prix-30029424.html" target="_blank" rel="noopener">L'argus, essai XPower</a>, <a href="https://www.automobile-sportive.com/guide/mg/mg4xpower.php" target="_blank" rel="noopener">L'Automobile Sportive, XPower</a>, <a href="https://sketchfab.com/3d-models/2025-mg-mg4-glbmgmotorcommx-ee2e3b0e1a7b481cb2c08e6fc6d2ed9e" target="_blank" rel="noopener">modèle 3D du configurateur MG sur Sketchfab</a>, et les douze photos déposées par Marc le 26/11. Rien n'est modifié dans l'appli à ce stade.</p>
+</div>
+
+<script>
+/*__PAINT__*/
+/*__AIR__*/
+/*__APP__*/
+</script>
