@@ -81,13 +81,13 @@ const stepper=(l,v)=>`<div class="row" style="justify-content:space-between;marg
 const GEARS=['P','R','N','D'];
 /* The car's lamps (27/11), drawn over the car in the pixels of its picture and added to it. Daytime strips: always, light. Lights on
    (one state, VEH_SIDE_LGHT other than 0) and dark theme: the projectors, a stronger glow, the rear lamp and some light on the floor ahead. */
-const LAMPS={q34:{drl:[372,370,545,340],proj:[[390,386],[418,384],[448,381]],far:null,tail:[1421,233],beam:[-20,704,225,46,-9]},
- side:{drl:[150,323,305,286],proj:[[178,324],[204,318]],far:null,tail:[1715,239],beam:[-115,650,170,22,0]}};
+const LAMPS={q34:{drl:[372,370,545,340],proj:[[390,386],[418,384],[448,381]],far:null,tail:[1421,233],beam:[-330,752,330,56,-9]},
+ side:{drl:[150,323,305,286],proj:[[178,324],[204,318]],far:null,tail:[1715,239],beam:[-420,652,300,24,0]}};
 function lamps(view,x,y,w,h){const M=PS.META[view],L=LAMPS[view],on=S.lights,[x1,y1,x2,y2]=L.drl,[bx,by,brx,bry,ba]=L.beam,id='lg'+view,e=-x*M.w/w;
  return `<svg viewBox="0 0 ${M.w} ${M.h}" style="position:absolute;left:${x}px;top:${y}px;width:${w}px;height:${h}px;overflow:visible;pointer-events:none;mix-blend-mode:screen;mix-blend-mode:plus-lighter">
  <defs><filter id="${id}a" x="-60%" y="-300%" width="220%" height="700%"><feGaussianBlur stdDeviation="${on?13:8}"/></filter><filter id="${id}b" x="-200%" y="-200%" width="500%" height="500%"><feGaussianBlur stdDeviation="16"/></filter><filter id="${id}c" x="-200%" y="-200%" width="500%" height="500%"><feGaussianBlur stdDeviation="5"/></filter>
  <linearGradient id="${id}m" gradientUnits="userSpaceOnUse" x1="${e}" y1="0" x2="${e+50}" y2="0"><stop offset="0" stop-color="#000"/><stop offset="1" stop-color="#fff"/></linearGradient><mask id="${id}k" maskUnits="userSpaceOnUse" x="${e}" y="0" width="900" height="${M.h+200}"><rect x="${e}" y="0" width="900" height="${M.h+200}" fill="url(#${id}m)"/></mask><radialGradient id="${id}g" fx=".6" fy=".5"><stop offset="0" stop-color="#DCEBFF" stop-opacity=".78"/><stop offset=".5" stop-color="#BFD8FF" stop-opacity=".2"/><stop offset="1" stop-color="#BFD8FF" stop-opacity="0"/></radialGradient></defs>
- ${on?`<g mask="url(#${id}k)"><ellipse cx="${bx}" cy="${by}" rx="${brx}" ry="${bry}" fill="url(#${id}g)" transform="rotate(${ba} ${bx} ${by})"/></g>`:''}
+ ${on?`<g><ellipse cx="${bx}" cy="${by}" rx="${brx}" ry="${bry}" fill="url(#${id}g)" transform="rotate(${ba} ${bx} ${by})"/></g>`:''}
  <line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#DCEBFF" stroke-width="${on?22:14}" stroke-linecap="round" opacity="${on?.8:.38}" filter="url(#${id}a)"/>
  ${on?L.proj.map(([px,py])=>`<circle cx="${px}" cy="${py}" r="30" fill="#DCEBFF" opacity=".8" filter="url(#${id}b)"/><circle cx="${px}" cy="${py}" r="8" fill="#fff" filter="url(#${id}c)"/>`).join('')
   +(L.far?`<circle cx="${L.far[0]}" cy="${L.far[1]}" r="24" fill="#DCEBFF" opacity=".6" filter="url(#${id}b)"/>`:'')
@@ -130,7 +130,7 @@ function P_veh(){
    ${st('Alerte de somnolence',S.udw?'ON':'OFF',{a:'tog:udw',dot:S.udw})}
   </div>
  </div>
- <div style="position:relative;overflow:hidden">
+ <div style="position:relative;z-index:1">
   <div style="position:absolute;left:0;right:0;top:4px;text-align:${q?'left':'center'};padding-left:${q?8:0}px"><div class="lb">MG4 ${VERS[S.ver].n}</div><div class="sub" style="font-size:20px;margin-top:5px">${carName()}</div></div>
   <div class="floor" style="top:${q?gR-20*s:gF-62*s}px;height:${(q?170:120)*s}px"></div>
   ${carStage(cx,top,cw,{lp:'cfg',a:'vview',slot:q?'mainq':'main',refl:!q,view:q?'q34':'side'})}
