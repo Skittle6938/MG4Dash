@@ -296,6 +296,18 @@ public class RescueV4Test {
         assertTrue("free again", service.request(RescueService.MODE_BOOT, 0));
     }
 
+    @Test public void updateToldTwiceRelaunchesOnce() throws Exception {
+        // An update from the app tells the rescue twice (install result, then "package replaced"): one relaunch only
+        dashHomeSaicEnabled("1");
+        int[] relaunches = {0};
+        service.onRelaunch = () -> { relaunches[0]++; alive(BOOT); };
+        assertTrue(service.request(RescueService.MODE_UPDATED, 0));
+        assertFalse("the same install, ignored", service.request(RescueService.MODE_UPDATED, 0));
+        service.runAll(0, RescueService.MODE_UPDATED, -1);
+        assertEquals(1, relaunches[0]);
+        assertTrue("free again", service.request(RescueService.MODE_BOOT, 0));
+    }
+
     @Test public void updatedThenNotStartingFallsBack() throws Exception {
         dashHomeSaicEnabled("1");
         service.run(0, RescueService.MODE_UPDATED, -1);

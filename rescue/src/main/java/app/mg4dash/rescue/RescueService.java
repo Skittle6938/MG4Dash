@@ -60,14 +60,22 @@ public class RescueService extends Service {
     private boolean running;
     /** An update told while a check was running: its delay, -1 if none. Done right after the check. */
     private long pendingUpdate = -1;
+    /** The mode of the check running now. */
+    private String runningMode;
 
     /**
      * Whether a check for [mode] starts now. During a check, an update is kept for after it: MG4Dash installed
      * 38 s after the car started was otherwise never recompiled nor relaunched, its old code ran on (27/11).
+     * An update told again while that update is being handled is the same install (MG4Dash tells it both when its
+     * install ends and when Android says it was replaced): dropped, or MG4Dash was relaunched a second time a minute
+     * after each update (Rescue 11).
      */
     synchronized boolean request(String mode, long delay) {
-        if (!running) { running = true; return true; }
-        if (MODE_UPDATED.equals(mode)) { pendingUpdate = delay; Log.i(TAG, "update told during a check: handled right after it"); }
+        if (!running) { running = true; runningMode = mode; return true; }
+        if (MODE_UPDATED.equals(mode)) {
+            if (MODE_UPDATED.equals(runningMode)) Log.i(TAG, "update told again during its own handling: same install, ignored");
+            else { pendingUpdate = delay; Log.i(TAG, "update told during a check: handled right after it"); }
+        }
         return false;
     }
 
@@ -78,7 +86,8 @@ public class RescueService extends Service {
             long d;
             synchronized (this) {
                 d = pendingUpdate; pendingUpdate = -1;
-                if (d < 0) { running = false; return; }
+                if (d < 0) { running = false; runningMode = null; return; }
+                runningMode = MODE_UPDATED;
             }
             run(d, MODE_UPDATED, -1);
         }
