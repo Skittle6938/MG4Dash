@@ -31,12 +31,24 @@ class SoundFieldView(context: Context) : View(context) {
     private val car = RectF()
     private var lastTap = 0L
 
-    /** Top view photo of the MG4 (WinClose's), turned light grey and transparent. */
-    private val photo: android.graphics.Bitmap? = try {
+    /**
+     * Top view photo of the MG4 (WinClose's) in the driver's colour and roof, as chosen in "Colours and style" (27/11);
+     * repainted again when that choice changes.
+     */
+    private val source: android.graphics.Bitmap? = try {
         android.graphics.BitmapFactory.decodeResource(resources, R.drawable.mg4_top)
     } catch (_: Throwable) { null }
+    private var photo: android.graphics.Bitmap? = null
+    private var photoKey = ""
+
+    private fun painted(): android.graphics.Bitmap? {
+        val src = source ?: return null
+        val look = app.mg4dash.showroom.CarLook(context)
+        val key = "${look.paint.hex}|${look.roof}"
+        if (photo == null || key != photoKey) { photoKey = key; photo = app.mg4dash.showroom.TopPaint.paint(src, look.paint.hex, look.roof) }
+        return photo
+    }
     private val photoPaint = Paint(Paint.ANTI_ALIAS_FLAG or Paint.FILTER_BITMAP_FLAG)
-    private var photoTone = 0
     /** Body (without mirrors): area where the sound point is placed. */
     private val shell = RectF()
 
@@ -45,28 +57,11 @@ class SoundFieldView(context: Context) : View(context) {
         // Photo scaled to the available height, front at the top
         // (the photo has a transparent margin: let it overlap the front / rear labels a little)
         val ch = h - 16 * d
-        val ratio = photo?.let { it.width.toFloat() / it.height } ?: 0.63f
+        val ratio = source?.let { it.width.toFloat() / it.height } ?: 0.63f
         val cw = ch * ratio
         car.set((w - cw) / 2, 8 * d, (w + cw) / 2, 8 * d + ch)
         shell.set(car.left + cw * 0.2f, car.top + ch * 0.07f, car.left + cw * 0.81f, car.top + ch * 0.93f)
-        photo?.let { bmp ->
-            // Light grey (dark in light theme): photo luminance brought towards the text colour
-            val tone = c(R.color.text_value)
-            if (photoPaint.colorFilter == null || photoTone != tone) {
-                photoTone = tone
-                val r = android.graphics.Color.red(tone) / 255f; val g = android.graphics.Color.green(tone) / 255f; val b = android.graphics.Color.blue(tone) / 255f
-                val dark = (r + g + b) < 1.5f
-                // Grey: luminance, lightened (dark theme) or darkened (light theme), then transparency
-                val k = if (dark) 0.75f else 0.9f; val off = if (dark) 60f else 90f
-                val m = android.graphics.ColorMatrix(floatArrayOf(
-                    0.299f * k, 0.587f * k, 0.114f * k, 0f, off,
-                    0.299f * k, 0.587f * k, 0.114f * k, 0f, off,
-                    0.299f * k, 0.587f * k, 0.114f * k, 0f, off,
-                    0f, 0f, 0f, 0.6f, 0f))
-                photoPaint.colorFilter = android.graphics.ColorMatrixColorFilter(m)
-            }
-            cv.drawBitmap(bmp, null, car, photoPaint)
-        }
+        painted()?.let { bmp -> cv.drawBitmap(bmp, null, car, photoPaint) }
         // Speakers (front and rear doors)
         fill.color = c(R.color.text_title)
         for ((sx, sy) in listOf(0f to 0.4f, 1f to 0.4f, 0f to 0.64f, 1f to 0.64f))
