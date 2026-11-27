@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version, for example 1.7.4-beta15 (versionCode increases automatically)'
+        description: 'Version, for example 1.7.4-beta15, or 1.8.0 for an official release (versionCode increases automatically)'
         required: true
         type: string
       notes:
@@ -134,6 +134,8 @@ jobs:
       - name: Commit version and publish beta
         if: ${{ !inputs.dry_run }}
         run: |
+          # A version without -beta is an official release: not a pre-release, and the latest one
+          case "$VERSION" in *-beta*) KIND='--prerelease --latest=false' ;; *) KIND='--prerelease=false --latest' ;; esac
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           if ! git diff --quiet -- app/build.gradle.kts; then
@@ -151,7 +153,7 @@ jobs:
             tag_sha="$(gh api "repos/$GITHUB_REPOSITORY/git/ref/tags/v$VERSION" --jq .object.sha)"
             test "$tag_sha" = "$sha" || { echo 'Draft tag points at a different commit'; exit 1; }
           else
-            gh release create "v$VERSION" --target "$sha" --draft --prerelease --latest=false \
+            gh release create "v$VERSION" --target "$sha" --draft $KIND \
               --title "MG4Dash $VERSION" --notes-file "$RUNNER_TEMP/release-notes.md"
           fi
           gh release upload "v$VERSION" "dist/MG4Dash-$VERSION.apk" dist/SHA256SUMS --clobber
@@ -166,7 +168,7 @@ jobs:
           if len(matches) != 1:
               raise SystemExit('Uploaded APK digest verification failed; release remains a draft')
           PY
-          gh release edit "v$VERSION" --draft=false --prerelease --latest=false \
+          gh release edit "v$VERSION" --draft=false $KIND \
             --notes-file "$RUNNER_TEMP/release-notes.md"
           echo "## Published MG4Dash $VERSION" >> "$GITHUB_STEP_SUMMARY"
           gh release view "v$VERSION" --json url --jq .url >> "$GITHUB_STEP_SUMMARY"

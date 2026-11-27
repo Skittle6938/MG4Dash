@@ -15,7 +15,7 @@ MG4Dash remplace l'écran d'accueil de la **MG4** par un tableau de bord plein �
 Il fonctionne sur tous les firmwares d'autoradio de la MG4 (SWI69, SWI131/132/173, SWI68, SWI133, SWI165), en français, anglais, allemand, espagnol, italien, néerlandais, turc et tchèque, en km ou en miles. C'est un logiciel libre, fait par un propriétaire de MG4, pas par SAIC / MG.
 
 > [!NOTE]
-> Dernière version stable : **1.7.3** ([versions](https://github.com/Skittle6938/MG4Dash/releases)). Cette page décrit la version actuelle de `main`, publiée en bêtas 1.7.4. Certaines fonctions ci-dessous ne sont pas encore dans la 1.7.3 : activez *Inclure les versions bêta* dans l'appli pour les avoir ([Mises à jour](#mises-à-jour-sauvegardes-et-applis-compagnons)).
+> Dernière version stable : **1.8.0** ([versions](https://github.com/Skittle6938/MG4Dash/releases)). Cette page décrit la version actuelle de `main` ; ce qui arrive après la 1.8.0 sort d'abord en bêtas : activez *Inclure les versions bêta* dans l'appli pour les avoir ([Mises à jour](#mises-à-jour-sauvegardes-et-applis-compagnons)).
 
 ![Écran d'accueil de MG4Dash](docs/screenshots/home.png)
 
@@ -439,7 +439,7 @@ Placez la carte **Avertisseur** sur l'accueil (pincez l'accueil). Elle affiche l
 
 ## Mises à jour, sauvegardes et applis compagnons
 
-**Mises à jour** (Réglages › **Système**) : une ligne pour MG4Dash, MG4Radio et MG4Link, avec la version installée et la dernière. *Installer* affiche les notes de version et installe. *Vérification automatique* (activée par défaut) cherche une fois par semaine, ou chaque jour avec *Inclure les versions bêta*. Une nouvelle version officielle est aussi proposée sur l'accueil. Un téléchargement coupé par le réseau reprend là où il s'est arrêté. Depuis la 1.7.4, l'appli publiée est réduite avec R8 : environ 8,6 Mo au lieu de 14,9 Mo.
+**Mises à jour** (Réglages › **Système**) : une ligne pour MG4Dash, MG4Radio et MG4Link, avec la version installée et la dernière. *Installer* affiche les notes de version et installe. *Vérification automatique* (activée par défaut) cherche une fois par semaine, ou chaque jour avec *Inclure les versions bêta*. Une nouvelle version officielle est aussi proposée sur l'accueil. Un téléchargement coupé par le réseau reprend là où il s'est arrêté. Depuis la 1.8.0, l'appli publiée est réduite avec R8 : environ 8,6 Mo au lieu de 14,9 Mo.
 
 **Sauvegarde des réglages** (Réglages › **Système**) : *Sauvegarder sur la clé USB* écrit tous les réglages, les profils, le son au démarrage et les adresses web dans `mg4dash_settings_AAAAMMJJ_HHMM.json` à la racine de la clé. *Inclure l'historique* ajoute les trajets, la consommation et la santé de la batterie ; *Inclure le token Home Assistant* ajoute le token, en clair. *Restaurer…* liste les sauvegardes de la clé ; MG4Dash remplace ses réglages et redémarre.
 

@@ -15,7 +15,7 @@ MG4Dash replaces the home screen of the **MG4** with a full-screen dashboard mad
 It runs on every MG4 head unit firmware (SWI69, SWI131/132/173, SWI68, SWI133, SWI165), in English, French, German, Spanish, Italian, Dutch, Turkish and Czech, with km or miles. It is free software, made by an MG4 owner, not by SAIC / MG.
 
 > [!NOTE]
-> Latest stable version: **1.7.3** ([releases](https://github.com/Skittle6938/MG4Dash/releases)). This page describes the current version on `main`, published as the 1.7.4 betas. Some features below are not in 1.7.3 yet; turn on *Include beta versions* in the app to get them ([Updates](#updates-backups-and-companion-apps)).
+> Latest stable version: **1.8.0** ([releases](https://github.com/Skittle6938/MG4Dash/releases)). This page describes the current version on `main`; what comes after 1.8.0 is first published as betas: turn on *Include beta versions* in the app to get them ([Updates](#updates-backups-and-companion-apps)).
 
 ![MG4Dash home screen](docs/screenshots/home.png)
 
@@ -439,7 +439,7 @@ Place the **Speed cameras** card on the home screen (pinch the home screen). It 
 
 ## Updates, backups and companion apps
 
-**Updates** (Settings › **System**): one line each for MG4Dash, MG4Radio and MG4Link, with the installed and latest versions. *Install* shows the release notes and installs. *Check automatically* (on by default) looks once a week, or every day with *Include beta versions*. A new official release is also offered on the home screen. A download cut by the network goes on where it stopped. Since 1.7.4, the published app is shrunk with R8: about 8.6 MB instead of 14.9 MB.
+**Updates** (Settings › **System**): one line each for MG4Dash, MG4Radio and MG4Link, with the installed and latest versions. *Install* shows the release notes and installs. *Check automatically* (on by default) looks once a week, or every day with *Include beta versions*. A new official release is also offered on the home screen. A download cut by the network goes on where it stopped. Since 1.8.0, the published app is shrunk with R8: about 8.6 MB instead of 14.9 MB.
 
 **Settings backup** (Settings › **System**): *Save to the USB stick* writes every setting, the profiles, the startup sound and the web addresses to `mg4dash_settings_YYYYMMDD_HHMM.json` at the root of the stick. *Include the history* adds the trips, consumption and battery health; *Include the Home Assistant token* adds the token, in plain text. *Restore…* lists the backups on the stick; MG4Dash replaces its settings and restarts.
 

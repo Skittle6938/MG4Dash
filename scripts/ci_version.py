@@ -25,12 +25,15 @@ def main():
     code, name = read_version(source)
     if args.prepare_beta:
         requested = args.prepare_beta
-        if not re.fullmatch(r'\d+\.\d+\.\d+-beta[1-9]\d*', requested):
-            raise SystemExit('Expected a beta version such as 1.7.4-beta15')
+        # A beta (1.7.4-beta15) or, for an official release, a plain version (1.8.0)
+        if not re.fullmatch(r'\d+\.\d+\.\d+(?:-beta[1-9]\d*)?', requested):
+            raise SystemExit('Expected a version such as 1.7.4-beta15 or 1.8.0')
         if requested != name:
             parts = lambda v: tuple(map(int, re.findall(r'\d+', v)))
-            if '-beta' in name and parts(requested) <= parts(name):
+            if '-beta' in name and '-beta' in requested and parts(requested) <= parts(name):
                 raise SystemExit('The beta version must increase')
+            if '-beta' in name and '-beta' not in requested and parts(requested) < parts(name)[:3]:
+                raise SystemExit('An official release must not be older than the current beta')
             if '-beta' not in name and parts(requested)[:3] <= parts(name)[:3]:
                 raise SystemExit('A beta after a stable release must use a newer base version')
             source = re.sub(r'(\bversionCode\s*=\s*)\d+', rf'\g<1>{code + 1}', source)
