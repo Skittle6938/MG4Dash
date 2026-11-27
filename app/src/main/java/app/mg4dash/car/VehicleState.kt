@@ -56,6 +56,10 @@ data class VehicleState(
     val lasMode: Int? = null,
     val fcwState: Int? = null,
     val fcwBrakeMode: Int? = null,
+    /** Traffic sign recognition: 1 on, 0 off. */
+    val tsr: Int? = null,
+    /** Drowsiness warning: 1 on, 0 off. */
+    val udw: Int? = null,
     val overSpeedSound: Int? = null,
     val speedLimitSound: Int? = null,
     // General (CarGeneralClient, code 1)

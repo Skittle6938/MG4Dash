@@ -22,7 +22,7 @@ class PagesRenderTest {
         VehicleState(connected = true, batteryPercent = 50, rangeKm = 180, chargeStatus = 1, chargeCtrl = 1, chargeRemainMin = 95, hvacOn = false),
         VehicleState(connected = true, batteryPercent = 60, chargeStatus = 13, dischargeCtrl = 1, hvacOn = true, autoOn = true, fanSpeed = 4,
             fanDirection = 5, driverTemp = 22f, outsideTemp = 9f, defrostFront = true, defrostRear = true, driveMode = 7, steeringMode = 1,
-            brakePedalMode = 2, enduranceMode = 1, lasMode = 3, fcwState = 2, fcwBrakeMode = 2, regenLevel = 6, onePedal = 1),
+            brakePedalMode = 2, enduranceMode = 1, lasMode = 3, fcwState = 2, fcwBrakeMode = 2, regenLevel = 6, onePedal = 1, tsr = 1, udw = 0),
     )
 
     private fun check(cls: Class<out app.mg4dash.ui.PageActivity>) {

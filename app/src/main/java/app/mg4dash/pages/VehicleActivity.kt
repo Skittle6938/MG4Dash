@@ -47,6 +47,8 @@ class VehicleActivity : PageActivity() {
     private var savingText: TextView? = null
     private lateinit var savingRow: View
     private lateinit var lane: ShowroomKit.Tile
+    private lateinit var tsr: ShowroomKit.Tile
+    private lateinit var udw: ShowroomKit.Tile
     private lateinit var aeb: ShowroomKit.Tile
     private lateinit var range: TextView
     private lateinit var soc: TextView
@@ -154,6 +156,13 @@ class VehicleActivity : PageActivity() {
         grid.addView(lane.view, kit.lp(0, -1, 1f, r = 5))
         grid.addView(aeb.view, kit.lp(0, -1, 1f, l = 5))
         col.addView(grid, kit.lp(-1, 0, 1f, t = 8))
+        // Sign recognition and drowsiness warning, under them (27/11)
+        val grid2 = kit.row().apply { isBaselineAligned = false }
+        tsr = sk.Tile().apply { title.text = getString(R.string.vh_tsr); view.setOnClickListener { last.tsr?.let { CarBridge.setTsr(it != 1) } } }
+        udw = sk.Tile().apply { title.text = getString(R.string.vh_udw); view.setOnClickListener { last.udw?.let { CarBridge.setUdw(it != 1) } } }
+        grid2.addView(tsr.view, kit.lp(0, -1, 1f, r = 5))
+        grid2.addView(udw.view, kit.lp(0, -1, 1f, l = 5))
+        col.addView(grid2, kit.lp(-1, 0, 1f, t = 10))
         return col
     }
 
@@ -294,6 +303,8 @@ class VehicleActivity : PageActivity() {
         savingText?.text = VehicleState.onOff(s.enduranceMode)
         lane.value.text = VehicleState.lasLabel(s.lasMode); lane.dot(s.lasMode?.let { it != 1 })
         aeb.value.text = VehicleState.aebLabel(s.fcwState, s.fcwBrakeMode); aeb.dot(s.fcwState?.let { it == 2 })
+        tsr.value.text = VehicleState.onOff(s.tsr); tsr.dot(s.tsr?.let { it == 1 })
+        udw.value.text = VehicleState.onOff(s.udw); udw.dot(s.udw?.let { it == 1 })
         range.text = s.rangeKm?.let { Units.distText(this, it.toFloat()) } ?: "—"
         soc.text = VehicleState.socLabel(s) ?: ""
         socGauge.value = s.batteryPercent?.let { Math.round(it / 5f) } ?: 0

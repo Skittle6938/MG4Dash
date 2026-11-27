@@ -189,6 +189,8 @@ unit_mb|MB|Mo|MB|MB|MB|MB|MB|MB
 vh_adas|DRIVER ASSISTANCE|AIDES À LA CONDUITE|FAHRASSISTENZ|ASISTENCIA A LA CONDUCCIÓN|ASSISTENZA ALLA GUIDA|RIJHULPSYSTEMEN|SÜRÜŞ DESTEĞİ|ASISTENCE ŘIDIČE
 vh_lane|Lane keeping|Maintien de voie|Spurhalteassistent|Mantenimiento de carril|Mantenimento corsia|Rijstrookassistent|Şerit takip|Udržování v pruhu
 vh_aeb|Emergency braking|Freinage d'urgence|Notbremsung|Frenado de emergencia|Frenata di emergenza|Noodremming|Acil fren|Nouzové brzdění
+vh_tsr|Sign recognition|Reconnaissance des panneaux|Verkehrszeichenerkennung|Reconocimiento de señales|Riconoscimento segnali|Verkeersbordherkenning|Trafik işareti tanıma|Rozpoznávání značek
+vh_udw|Drowsiness warning|Alerte de somnolence|Müdigkeitswarnung|Aviso de somnolencia|Avviso di sonnolenza|Vermoeidheidswaarschuwing|Yorgunluk uyarısı|Upozornění na únavu
 vh_overspeed|Overspeed alert|Alerte de survitesse|Geschwindigkeitswarnung|Alerta de exceso de velocidad|Avviso di eccesso di velocità|Snelheidswaarschuwing|Hız aşımı uyarısı|Upozornění na rychlost
 vh_limit_beep|Speed limit beep|Bip limite de vitesse|Tempolimit-Signal|Aviso de límite de velocidad|Segnale limite di velocità|Pieptoon snelheidslimiet|Hız sınırı sesli uyarısı|Pípnutí při limitu
 vh_use_mg4control|Use MG4 Control to change these settings.|Pour modifier ces réglages, utilisez MG4 Control.|Diese Einstellungen in MG4 Control ändern.|Use MG4 Control para cambiar estos ajustes.|Usa MG4 Control per modificare queste impostazioni.|Gebruik MG4 Control om deze instellingen te wijzigen.|Bu ayarları değiştirmek için MG4 Control'ü kullanın.|Tato nastavení změňte v MG4 Control.

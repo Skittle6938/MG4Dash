@@ -191,6 +191,8 @@
     <string name="vh_adas">ASISTENCE ŘIDIČE</string>
     <string name="vh_lane">Udržování v pruhu</string>
     <string name="vh_aeb">Nouzové brzdění</string>
+    <string name="vh_tsr">Rozpoznávání značek</string>
+    <string name="vh_udw">Upozornění na únavu</string>
     <string name="vh_overspeed">Upozornění na rychlost</string>
     <string name="vh_limit_beep">Pípnutí při limitu</string>
     <string name="vh_use_mg4control">Tato nastavení změňte v MG4 Control.</string>

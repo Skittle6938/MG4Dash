@@ -191,6 +191,8 @@
     <string name="vh_adas">DRIVER ASSISTANCE</string>
     <string name="vh_lane">Lane keeping</string>
     <string name="vh_aeb">Emergency braking</string>
+    <string name="vh_tsr">Sign recognition</string>
+    <string name="vh_udw">Drowsiness warning</string>
     <string name="vh_overspeed">Overspeed alert</string>
     <string name="vh_limit_beep">Speed limit beep</string>
     <string name="vh_use_mg4control">Use MG4 Control to change these settings.</string>

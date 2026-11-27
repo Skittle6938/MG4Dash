@@ -191,6 +191,8 @@
     <string name="vh_adas">SÜRÜŞ DESTEĞİ</string>
     <string name="vh_lane">Şerit takip</string>
     <string name="vh_aeb">Acil fren</string>
+    <string name="vh_tsr">Trafik işareti tanıma</string>
+    <string name="vh_udw">Yorgunluk uyarısı</string>
     <string name="vh_overspeed">Hız aşımı uyarısı</string>
     <string name="vh_limit_beep">Hız sınırı sesli uyarısı</string>
     <string name="vh_use_mg4control">Bu ayarları değiştirmek için MG4 Control\'ü kullanın.</string>

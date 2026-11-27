@@ -191,6 +191,8 @@
     <string name="vh_adas">RIJHULPSYSTEMEN</string>
     <string name="vh_lane">Rijstrookassistent</string>
     <string name="vh_aeb">Noodremming</string>
+    <string name="vh_tsr">Verkeersbordherkenning</string>
+    <string name="vh_udw">Vermoeidheidswaarschuwing</string>
     <string name="vh_overspeed">Snelheidswaarschuwing</string>
     <string name="vh_limit_beep">Pieptoon snelheidslimiet</string>
     <string name="vh_use_mg4control">Gebruik MG4 Control om deze instellingen te wijzigen.</string>

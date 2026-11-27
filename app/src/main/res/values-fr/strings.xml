@@ -191,6 +191,8 @@
     <string name="vh_adas">AIDES À LA CONDUITE</string>
     <string name="vh_lane">Maintien de voie</string>
     <string name="vh_aeb">Freinage d\'urgence</string>
+    <string name="vh_tsr">Reconnaissance des panneaux</string>
+    <string name="vh_udw">Alerte de somnolence</string>
     <string name="vh_overspeed">Alerte de survitesse</string>
     <string name="vh_limit_beep">Bip limite de vitesse</string>
     <string name="vh_use_mg4control">Pour modifier ces réglages, utilisez MG4 Control.</string>

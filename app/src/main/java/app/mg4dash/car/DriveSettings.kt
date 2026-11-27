@@ -326,6 +326,24 @@ object DriveSettings {
     }
     private const val PROP_UDW_MAIN_SWITCH = 0x3010005
 
+    /**
+     * Traffic sign recognition (speed limit signs, SLIF warning), MG4Control's isTsrOn / setTsrMode: SWI69/131/132
+     * get/setSLIFWarningState (0 = on, 1 = off), SWI68/165 get/setSpeedAsstSlifWarning (1 = on), SWI133 VPM
+     * 0x5030049 (ID_AAD_SLIF_WARNING, > 0 = on). null if unreadable.
+     */
+    fun tsrOn(): Boolean? = when (route) {
+        Route.A9 -> (callVsm("getSLIFWarningState") as? Int)?.let { when (it) { 0 -> true; 1 -> false; else -> null } }
+        Route.VSM_68 -> (callVsm("getSpeedAsstSlifWarning") as? Int)?.let { when (it) { 1 -> true; 0 -> false; else -> null } }
+        Route.VPM_133 -> vpmInt(PROP_TSR).takeIf { it >= 0 }?.let { it > 0 }
+    }
+
+    fun setTsr(on: Boolean): Boolean = when (route) {
+        Route.A9 -> callVsmVoid("setSLIFWarningState", if (on) 0 else 1)
+        Route.VSM_68 -> callVsmVoid("setSpeedAsstSlifWarning", if (on) 1 else 0)
+        Route.VPM_133 -> setVpmRecovery(PROP_TSR, if (on) 1 else 0)
+    }
+    private const val PROP_TSR = 0x5030049
+
     /** Every setting into the vehicle state; a setting that does not answer stays null (greyed on the card). */
     fun read(s: VehicleState): VehicleState {
         val regen = regenLevel()
@@ -333,6 +351,7 @@ object DriveSettings {
             driveMode = driveMode(), regenLevel = regen, onePedal = onePedal(regen),
             steeringMode = custom(Custom.STEERING), brakePedalMode = custom(Custom.PEDAL),
             lasMode = laneMode(), fcwState = fcwState(), fcwBrakeMode = fcwMode(),
+            tsr = tsrOn()?.let { if (it) 1 else 0 }, udw = udwOn()?.let { if (it) 1 else 0 },
         )
     }
 

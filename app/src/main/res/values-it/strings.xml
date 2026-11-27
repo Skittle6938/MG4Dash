@@ -191,6 +191,8 @@
     <string name="vh_adas">ASSISTENZA ALLA GUIDA</string>
     <string name="vh_lane">Mantenimento corsia</string>
     <string name="vh_aeb">Frenata di emergenza</string>
+    <string name="vh_tsr">Riconoscimento segnali</string>
+    <string name="vh_udw">Avviso di sonnolenza</string>
     <string name="vh_overspeed">Avviso di eccesso di velocità</string>
     <string name="vh_limit_beep">Segnale limite di velocità</string>
     <string name="vh_use_mg4control">Usa MG4 Control per modificare queste impostazioni.</string>

@@ -191,6 +191,8 @@
     <string name="vh_adas">FAHRASSISTENZ</string>
     <string name="vh_lane">Spurhalteassistent</string>
     <string name="vh_aeb">Notbremsung</string>
+    <string name="vh_tsr">Verkehrszeichenerkennung</string>
+    <string name="vh_udw">Müdigkeitswarnung</string>
     <string name="vh_overspeed">Geschwindigkeitswarnung</string>
     <string name="vh_limit_beep">Tempolimit-Signal</string>
     <string name="vh_use_mg4control">Diese Einstellungen in MG4 Control ändern.</string>

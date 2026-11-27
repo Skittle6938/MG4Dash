@@ -1008,16 +1008,17 @@ object CarBridge {
 
     private fun VehicleState.drive(field: String): Int? = when (field) {
         "driveMode" -> driveMode; "regenLevel" -> regenLevel; "onePedal" -> onePedal; "steeringMode" -> steeringMode
-        "brakePedalMode" -> brakePedalMode; "lasMode" -> lasMode; "fcwState" -> fcwState; "fcwBrakeMode" -> fcwBrakeMode; "enduranceMode" -> enduranceMode; else -> null
+        "brakePedalMode" -> brakePedalMode; "lasMode" -> lasMode; "fcwState" -> fcwState; "fcwBrakeMode" -> fcwBrakeMode; "enduranceMode" -> enduranceMode; "tsr" -> tsr; "udw" -> udw; else -> null
     }
 
     private fun VehicleState.drive(field: String, v: Int?): VehicleState = when (field) {
         "driveMode" -> copy(driveMode = v); "regenLevel" -> copy(regenLevel = v); "onePedal" -> copy(onePedal = v)
         "steeringMode" -> copy(steeringMode = v); "brakePedalMode" -> copy(brakePedalMode = v); "lasMode" -> copy(lasMode = v)
-        "fcwState" -> copy(fcwState = v); "fcwBrakeMode" -> copy(fcwBrakeMode = v); "enduranceMode" -> copy(enduranceMode = v); else -> this
+        "fcwState" -> copy(fcwState = v); "fcwBrakeMode" -> copy(fcwBrakeMode = v); "enduranceMode" -> copy(enduranceMode = v)
+        "tsr" -> copy(tsr = v); "udw" -> copy(udw = v); else -> this
     }
 
-    private val driveFields = listOf("driveMode", "regenLevel", "onePedal", "steeringMode", "brakePedalMode", "lasMode", "fcwState", "fcwBrakeMode")
+    private val driveFields = listOf("driveMode", "regenLevel", "onePedal", "steeringMode", "brakePedalMode", "lasMode", "fcwState", "fcwBrakeMode", "tsr", "udw")
 
     /** Rereads the driving settings: a pending choice stays until confirmed or given up; a setting that stops answering keeps its last value. */
     private fun refreshDrive() {
@@ -1110,6 +1111,12 @@ object CarBridge {
         val cur = _state.value.fcwState
         drive("front collision $choice", if (choice == 0) mapOf("fcwState" to 1) else mapOf("fcwState" to 2, "fcwBrakeMode" to choice)) { DriveSettings.setFcw(choice, cur) }
     }
+
+    /** Traffic sign recognition on or off. */
+    fun setTsr(on: Boolean) = drive("sign recognition $on", mapOf("tsr" to if (on) 1 else 0)) { DriveSettings.setTsr(on) }
+
+    /** Drowsiness warning on or off. */
+    fun setUdw(on: Boolean) = drive("drowsiness warning $on", mapOf("udw" to if (on) 1 else 0)) { DriveSettings.setUdw(on) }
 
     fun startCharge() = evCommand("startCharge") { it.chargeCtrl(1) }
     fun stopCharge() = evCommand("stopCharge") { it.chargeCtrl(2) }
