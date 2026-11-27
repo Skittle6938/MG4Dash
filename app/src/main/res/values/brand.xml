@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Shared icon and boot-screen geometry, in a 256-unit square. -->
-    <string name="brand_outline" translatable="false">M40,70 L40,40 L130,40 C246,40 246,216 130,216 L40,216</string>
+    <string name="brand_outline" translatable="false">M51.5,70 L51.5,40 L130,40 C246,40 246,216 130,216 L40,216</string>
     <string name="brand_road" translatable="false">M40,216 C72,151 155,148 202,105 C183,155 105,170 78,216 Z</string>
     <string name="brand_accent" translatable="false">M40,143 C87,120 162,121 202,97 C182,132 92,140 40,175 Z</string>
 </resources>
