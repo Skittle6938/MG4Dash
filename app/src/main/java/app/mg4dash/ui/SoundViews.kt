@@ -69,10 +69,12 @@ class SoundFieldView(context: Context) : View(context) {
         val w = width.toFloat(); val h = height.toFloat()
         // Photo scaled to the available height, front at the top
         // (the photo has a transparent margin: let it overlap the front / rear labels a little)
-        val ch = h - 16 * d
+        // 85 % of the height left (Marc, 27/11: the render was too big), centred
+        val ch = (h - 16 * d) * .85f
         val ratio = 0.6f   // the render: 720 × 1200, nose at the top
         val cw = ch * ratio
-        car.set((w - cw) / 2, 8 * d, (w + cw) / 2, 8 * d + ch)
+        val top = (h - ch) / 2
+        car.set((w - cw) / 2, top, (w + cw) / 2, top + ch)
         // The body in the render (its trim's box, 161..559 × 49..1150 of 720 × 1200)
         shell.set(car.left + cw * 0.224f, car.top + ch * 0.041f, car.left + cw * 0.776f, car.top + ch * 0.958f)
         painted(cw.toInt())?.let { bmp -> cv.drawBitmap(bmp, null, car, photoPaint) }
