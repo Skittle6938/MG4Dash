@@ -1663,7 +1663,8 @@ object MediaHub {
         _now.value = np
         // CarPlay (#94): what its session really gives, to tell a car limit from a reading problem
         if (carPlay && isAndroidAuto(c.packageName)) {
-            val seen = "state ${st?.state}, title ${title.isNotBlank()}, cover ${bmp != null}"
+            // The track's hash too: a log then shows when AllGo stops sending track changes (#142), without the titles
+            val seen = "state ${st?.state}, title ${title.isNotBlank()}, cover ${bmp != null}, track ${Integer.toHexString("$title|$artist".hashCode())}"
             if (seen != carPlayLogged) { carPlayLogged = seen; Log.i(TAG, "CarPlay: $seen") }
         }
         val artUri = md?.getString(MediaMetadata.METADATA_KEY_ALBUM_ART_URI)
