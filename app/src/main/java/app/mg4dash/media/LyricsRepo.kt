@@ -103,7 +103,14 @@ object LyricsRepo {
         if (found == null && !missing) return@withContext null
         // Not found as given: searched, first with the whole artist, then with the main one only (26/11, #135:
         // CarPlay gives "A & B" or "A, B" and titles with "(feat. C)")
-        val result = found ?: searches(artist, title).firstNotNullOfOrNull { q ->
+        // The exact answer without synced lyrics: a synced version of the same song searched for (#135)
+        val better = found?.takeIf { !synced(it) && !it.optBoolean("instrumental", false) }?.let {
+            searches(artist, title).firstNotNullOfOrNull { q ->
+                try { best(JSONArray(request("$BASE/search?${query(mapOf("q" to q))}").body), artist, title, durationMs)?.takeIf(::synced) }
+                catch (_: Exception) { null }
+            }
+        }
+        val result = better ?: found ?: searches(artist, title).firstNotNullOfOrNull { q ->
             try {
                 val arr = JSONArray(request("$BASE/search?${query(mapOf("q" to q))}").body)
                 best(arr, artist, title, durationMs)
@@ -200,22 +207,34 @@ object LyricsRepo {
         } finally { activeConnections -= c; c.disconnect() }
     }
 
+    /** A result's closeness score (title, artist, length) up to which it is the song itself. */
+    private const val MATCH = 7
+
+    /** [o] has synced lyrics. */
+    private fun synced(o: JSONObject) = o.text("syncedLyrics").isNotBlank()
+
     internal fun best(arr: JSONArray, artist: String, title: String, duration: Long): JSONObject? =
         ranked((0 until arr.length()).mapNotNull { arr.optJSONObject(it) }, artist, title, duration).firstOrNull()
 
-    /** The results that have lyrics (or are instrumentals), the closest to the song first. */
+    /**
+     * The results that have lyrics (or are instrumentals), best first: among those that match the song (title and artist
+     * close, length within about 45 s), synced lyrics before plain text (#135, 27/11: "text only" was picked while synced
+     * ones were there); then the closest.
+     */
     internal fun ranked(list: List<JSONObject>, artist: String, title: String, duration: Long): List<JSONObject> {
         val a = mainArtist(artist).lowercase(Locale.ROOT).trim()
         val t = clean(title).lowercase(Locale.ROOT).trim()
+        fun score(o: JSONObject): Int {
+            val oa = mainArtist(o.text("artistName")).lowercase(Locale.ROOT)
+            val ot = clean(o.text("trackName")).lowercase(Locale.ROOT)
+            val dur = (o.optDouble("duration", 0.0) * 1000).toLong()
+            return (if (ot == t) 0 else if (ot.contains(t) || t.contains(ot)) 2 else 8) +
+                (if (oa == a) 0 else if (oa.contains(a) || a.contains(oa)) 2 else 8) +
+                if (duration > 0 && dur > 0) (kotlin.math.abs(duration - dur) / 15000).toInt().coerceAtMost(8) else 0
+        }
         return list
-            .sortedBy { o ->
-                val oa = mainArtist(o.text("artistName")).lowercase(Locale.ROOT)
-                val ot = clean(o.text("trackName")).lowercase(Locale.ROOT)
-                val dur = (o.optDouble("duration", 0.0) * 1000).toLong()
-                (if (ot == t) 0 else if (ot.contains(t) || t.contains(ot)) 2 else 8) +
-                    (if (oa == a) 0 else if (oa.contains(a) || a.contains(oa)) 2 else 8) +
-                    if (duration > 0 && dur > 0) (kotlin.math.abs(duration - dur) / 15000).toInt().coerceAtMost(8) else 0
-            }.filter { it.optBoolean("instrumental", false) || it.text("syncedLyrics").isNotBlank() || it.text("plainLyrics").isNotBlank() }
+            .sortedWith(compareBy<JSONObject>({ o -> if (score(o) <= MATCH) (if (o.text("syncedLyrics").isNotBlank()) 0 else 1) else 2 }, { score(it) }))
+            .filter { it.optBoolean("instrumental", false) || it.text("syncedLyrics").isNotBlank() || it.text("plainLyrics").isNotBlank() }
     }
 
     internal fun decode(key: String, artist: String, title: String, o: JSONObject): Track {

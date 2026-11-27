@@ -59,8 +59,11 @@ class LyricsChoicesTest {
         val list = listOf(o(1, "Other", "Song", "[00:01.00]x"), o(2, "Artist", "Song", null, "text"), o(3, "Artist", "Song", null),
             o(4, "Artist", "Song", "[00:01.00]y", dur = 201.0))
         val ranked = LyricsRepo.ranked(list, "Artist", "Song", 200_000)
-        assertEquals("no lyrics: left out; the closest first", listOf(2L, 4L, 1L), ranked.map { it.optLong("id") })
-        assertEquals(2L, LyricsRepo.best(JSONArray(list), "Artist", "Song", 200_000)?.optLong("id"))
+        // #135: the synced version of the song before its plain text listed first; another artist's after both
+        assertEquals("no lyrics: left out; synced first", listOf(4L, 2L, 1L), ranked.map { it.optLong("id") })
+        assertEquals(4L, LyricsRepo.best(JSONArray(list), "Artist", "Song", 200_000)?.optLong("id"))
+        // Plain text only when no synced lyrics match the song
+        assertEquals(2L, LyricsRepo.best(JSONArray(listOf(list[1], list[0])), "Artist", "Song", 200_000)?.optLong("id"))
         assertEquals(4L, LyricsRepo.decode("k", "Artist", "Song", list[3]).id)
     }
 }
