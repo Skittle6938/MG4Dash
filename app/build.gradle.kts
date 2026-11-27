@@ -1,4 +1,4 @@
-﻿plugins {
+plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
 }
@@ -91,7 +91,7 @@ dependencies {
     implementation("com.google.zxing:core:3.5.3")
     // TLS 1.3 for the speed camera alerter's OpenStreetMap downloads: overpass-api.de no longer accepts TLS 1.2,
     // the newest Android 9 has (radar/Overpass.kt)
-    implementation("org.conscrypt:conscrypt-android:2.5.2")
+    implementation("org.conscrypt:conscrypt-android:2.10.0")
 
     testImplementation("junit:junit:4.13.2")
     testImplementation("org.robolectric:robolectric:4.14.1")
