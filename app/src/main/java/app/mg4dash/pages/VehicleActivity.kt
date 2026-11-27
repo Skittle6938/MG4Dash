@@ -104,6 +104,18 @@ class VehicleActivity : PageActivity() {
         setOnClickListener { onClick() }
     }
 
+    /**
+     * With the bottom dock the columns are about 100 dp shorter: the left one is made compact (smaller tiles, no
+     * "adjustable in mode" line), else the driving assistance tiles lost their value (#141).
+     */
+    private val tight by lazy { !app.mg4dash.ui.Dock.vertical(this) }
+
+    /** A tile of the left column, compact when [tight]. */
+    private fun leftTile(title: Int, onClick: () -> Unit) = sk.Tile(compact = tight).apply {
+        this.title.text = getString(title); view.setOnClickListener { onClick() }
+        if (tight) { value.textSize = 18f; view.setPadding(kit.dp(12), kit.dp(6), kit.dp(12), kit.dp(6)); value.layoutParams = kit.lp(-1, -2, t = 2) }
+    }
+
     // ── Left: driving, set from here ──
     private fun left(): LinearLayout {
         val col = kit.column()
@@ -111,13 +123,13 @@ class VehicleActivity : PageActivity() {
         drive.addView(sk.label(getString(R.string.vh_drive_mode)))
         val (seg, show) = sk.segments(modes.map { getString(it.second) }) { i -> CarBridge.setDriveMode(modes[i].first) }
         showMode = show
-        drive.addView(seg, kit.lp(-1, -2, t = 12))
+        drive.addView(seg, kit.lp(-1, -2, t = if (tight) 8 else 12))
         customRow = kit.row()
-        steering = sk.Tile().apply { title.text = getString(R.string.vh_steering); view.setOnClickListener { cycleCustom(true) } }
-        brake = sk.Tile().apply { title.text = getString(R.string.vh_brake); view.setOnClickListener { cycleCustom(false) } }
+        steering = leftTile(R.string.vh_steering) { cycleCustom(true) }
+        brake = leftTile(R.string.vh_brake) { cycleCustom(false) }
         customRow.addView(steering.view, kit.lp(0, -2, 1f, r = 5))
         customRow.addView(brake.view, kit.lp(0, -2, 1f, l = 5))
-        drive.addView(customRow, kit.lp(-1, -2, t = 10))
+        drive.addView(customRow, kit.lp(-1, -2, t = if (tight) 6 else 10))
         col.addView(drive, kit.lp(-1, -2))
 
         val regen = sk.card()
@@ -131,7 +143,7 @@ class VehicleActivity : PageActivity() {
             setPadding(0, kit.dp(6), 0, kit.dp(6))
             onSegmentTap = { CarBridge.setRegenLevel(it) }
         }
-        regen.addView(regenGauge, kit.lp(-1, kit.dp(36), t = 10))
+        regen.addView(regenGauge, kit.lp(-1, kit.dp(if (tight) 30 else 36), t = if (tight) 6 else 10))
         val (pRow, p) = sk.switchRow(getString(R.string.vh_one_pedal)) { CarBridge.toggleOnePedal() }
         onePedal = p
         regen.addView(pRow, kit.lp(-1, -2, t = 6))
@@ -147,22 +159,22 @@ class VehicleActivity : PageActivity() {
         }
         savingRow = sRow
         regen.addView(sRow, kit.lp(-1, -2))
-        col.addView(regen, kit.lp(-1, -2, t = 10))
+        col.addView(regen, kit.lp(-1, -2, t = if (tight) 8 else 10))
 
-        col.addView(sk.label(getString(R.string.vh_adas)), kit.lp(-1, -2, l = 4, t = 12))
+        col.addView(sk.label(getString(R.string.vh_adas)), kit.lp(-1, -2, l = 4, t = if (tight) 8 else 12))
         val grid = kit.row().apply { isBaselineAligned = false }
-        lane = sk.Tile().apply { title.text = getString(R.string.vh_lane); view.setOnClickListener { nextLane() } }
-        aeb = sk.Tile().apply { title.text = getString(R.string.vh_aeb); view.setOnClickListener { nextAeb() } }
+        lane = leftTile(R.string.vh_lane) { nextLane() }
+        aeb = leftTile(R.string.vh_aeb) { nextAeb() }
         grid.addView(lane.view, kit.lp(0, -1, 1f, r = 5))
         grid.addView(aeb.view, kit.lp(0, -1, 1f, l = 5))
-        col.addView(grid, kit.lp(-1, 0, 1f, t = 8))
+        col.addView(grid, kit.lp(-1, 0, 1f, t = if (tight) 6 else 8))
         // Sign recognition and drowsiness warning, under them (27/11)
         val grid2 = kit.row().apply { isBaselineAligned = false }
-        tsr = sk.Tile().apply { title.text = getString(R.string.vh_tsr); view.setOnClickListener { last.tsr?.let { CarBridge.setTsr(it != 1) } } }
-        udw = sk.Tile().apply { title.text = getString(R.string.vh_udw); view.setOnClickListener { last.udw?.let { CarBridge.setUdw(it != 1) } } }
+        tsr = leftTile(R.string.vh_tsr) { last.tsr?.let { CarBridge.setTsr(it != 1) } }
+        udw = leftTile(R.string.vh_udw) { last.udw?.let { CarBridge.setUdw(it != 1) } }
         grid2.addView(tsr.view, kit.lp(0, -1, 1f, r = 5))
         grid2.addView(udw.view, kit.lp(0, -1, 1f, l = 5))
-        col.addView(grid2, kit.lp(-1, 0, 1f, t = 10))
+        col.addView(grid2, kit.lp(-1, 0, 1f, t = if (tight) 6 else 10))
         return col
     }
 
@@ -293,7 +305,7 @@ class VehicleActivity : PageActivity() {
         customRow.visibility = if (s.steeringMode == null && s.brakePedalMode == null) View.GONE else View.VISIBLE
         listOf(steering to VehicleState.steeringLabel(s.steeringMode), brake to VehicleState.pedalLabel(s.brakePedalMode)).forEach { (t, v) ->
             t.value.text = v; t.enabled(custom)
-            t.subText(getString(if (custom) R.string.sr_tap_change else R.string.sr_custom_only))
+            if (!tight) t.subText(getString(if (custom) R.string.sr_tap_change else R.string.sr_custom_only))   // dimmed is enough when compact
         }
         regenGauge.value = if (s.onePedal == 1) 4 else VehicleState.regenGauge(s.regenLevel)
         regenValue.text = VehicleState.regenLabel(s.regenLevel, s.onePedal)

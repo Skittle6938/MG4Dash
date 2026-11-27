@@ -103,10 +103,17 @@ class EnergyActivity : PageActivity() {
     }
 
     /** As in the mock-up (a 910 px wide centre): the car under the charge, battery heating above the battery. */
-    private fun placeCar(center: android.widget.FrameLayout, hint: android.view.View) {
+    private fun placeCar(center: android.widget.FrameLayout, hint: android.view.View, actions: android.view.View) {
         val w = center.width.toFloat(); if (w <= 0f) return
-        val s = w / 910f
-        val cw = 880f * s; val cx = (w - cw) / 2; val top = 92f * s
+        val sw = w / 910f
+        val top0 = 92f * sw
+        // Sized by the width, and by the height left above the actions as with the bottom dock, whatever the bar:
+        // with that dock the car ran under the charge button (#141). From its top to the battery line: 321 units of s.
+        // With the side bar, the height left over is shared above and below the car.
+        val room = actions.top - kit.dp(8) - hint.height - top0
+        val s = if (actions.height > 0 && room > 0) minOf(sw, (room - app.mg4dash.ui.Dock.bottomRoomPx(this)) / 321f).coerceAtLeast(sw * .5f) else sw
+        val top = top0 + if (actions.height > 0) ((room - 321f * s) / 2f).coerceAtLeast(0f) else 0f
+        val cw = 880f * s; val cx = (w - cw) / 2
         energyCar.box.set(cx, top, cx + cw, top + cw * 680f / 1840f)
         energyCar.invalidate()
         val k = cw / 1840f
@@ -235,7 +242,9 @@ class EnergyActivity : PageActivity() {
         showBattery()
         batteryHint.setOnClickListener { batteryOptions { showBattery() } }
         center.addView(batteryHint, android.widget.FrameLayout.LayoutParams(-2, -2))
-        center.addOnLayoutChangeListener { _, l, t, r, b, ol, ot, or_, ob -> if (r - l != or_ - ol || b - t != ob - ot) center.post { placeCar(center, batteryHint) } }
+        center.addOnLayoutChangeListener { _, l, t, r, b, ol, ot, or_, ob -> if (r - l != or_ - ol || b - t != ob - ot) center.post { placeCar(center, batteryHint, bottom) } }
+        // The actions change height (V2L box, limit row): the car is fitted again
+        bottom.addOnLayoutChangeListener { _, _, t, _, b, _, ot, _, ob -> if (t != ot || b - t != ob - ot) center.post { placeCar(center, batteryHint, bottom) } }
 
         // ── Colonne 2 : programmation + V2L ──
         val leftCol = kit.column()

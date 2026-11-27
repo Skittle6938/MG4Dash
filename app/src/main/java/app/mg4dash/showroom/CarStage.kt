@@ -120,15 +120,26 @@ class CarStage(context: Context, private val kit: Kit, private val look: CarLook
         val q = look.threeQuarter
         val view = if (q) PaintShop.View.Q34 else PaintShop.View.SIDE
         val m = PaintShop.meta(context).getValue(view)
-        val s = w / 956f
+        val an = m.anchors
+        fun pt(key: String, part: String, i: Int) = an.getJSONObject(key).getJSONArray(part).getDouble(i).toFloat()
+        // Sized by the width, and by the height: with the bottom dock the stage is shorter and the tyre
+        // pressures ran under the hint (#141). Everything down to the tyres' top is proportional to s.
+        val sw = w / 956f
+        val unit = if (q) 1196f / m.w else 952f / m.w
+        val groundAt1 = (if (q) 42f - 78f * unit else 58f) + maxOf(pt("front", "ground", 1), pt("rear", "ground", 1)) * unit
+        val unspec = MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED)
+        front.view.measure(unspec, unspec); hint.measure(unspec, unspec)
+        val below = front.view.measuredHeight - kit.dp(16) + kit.dp(8) + hint.measuredHeight + kit.dp(12)
+        // As with the bottom dock whatever the bar (Marc 27/11); with the side bar the car comes down by half the rest
+        val sh = (height - below - app.mg4dash.ui.Dock.bottomRoomPx(context)) / (groundAt1 + 40f)
+        val s = if (height > 0 && sh > 0f) minOf(sw, sh) else sw
+        val dy = if (height > 0) ((height - below - s * (groundAt1 + 40f)) / 2f).coerceAtLeast(0f) else 0f
         // Placed as in the mock-up (a 956 px wide stage): the three-quarter car is bigger and goes beyond the sides
         val cw = if (q) 1196f * s else 952f * s
         val k = cw / m.w
         val cx = if (q) (w - 1606f * k) / 2 else (w - cw) / 2
-        val top = if (q) 42f * s - 78f * k else 58f * s
+        val top = (if (q) 42f * s - 78f * k else 58f * s) + dy
         car.box.set(cx, top, cx + cw, top + cw * m.h / m.w)
-        val an = m.anchors
-        fun pt(key: String, part: String, i: Int) = an.getJSONObject(key).getJSONArray(part).getDouble(i).toFloat()
         val fx = cx + pt("front", "c", 0) * k
         val rx = minOf(w - 104f * s, cx + pt("rear", "c", 0) * k)
         val gF = top + pt("front", "ground", 1) * k
