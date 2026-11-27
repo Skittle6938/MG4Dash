@@ -132,7 +132,7 @@ class CarStage(context: Context, private val kit: Kit, private val look: CarLook
         val below = front.view.measuredHeight - kit.dp(16) + kit.dp(8) + hint.measuredHeight + kit.dp(12)
         // As with the bottom dock whatever the bar (Marc 27/11); with the side bar the car comes down by half the rest
         val sh = (height - below - app.mg4dash.ui.Dock.bottomRoomPx(context)) / (groundAt1 + 40f)
-        val s = if (height > 0 && sh > 0f) minOf(sw, sh) else sw
+        val s = app.mg4dash.ui.Dock.CAR_SCALE * if (height > 0 && sh > 0f) minOf(sw, sh) else sw
         val dy = if (height > 0) ((height - below - s * (groundAt1 + 40f)) / 2f).coerceAtLeast(0f) else 0f
         // Placed as in the mock-up (a 956 px wide stage): the three-quarter car is bigger and goes beyond the sides
         val cw = if (q) 1196f * s else 952f * s

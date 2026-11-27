@@ -209,6 +209,9 @@ object Dock {
      * The height the bottom dock takes from a page. The Vehicle and Energy cars are sized as with it whatever the bar
      * (#141, Marc 27/11: the smaller car looks better and leaves room around it), centred in what is left otherwise.
      */
+    /** A little smaller again than what fits (Marc 27/11). */
+    const val CAR_SCALE = .88f
+
     fun bottomRoomPx(context: android.content.Context): Int = if (vertical(context)) (96 * context.resources.displayMetrics.density).toInt() else 0
 
     /** The vertical bar's width: twice as wide with the "wide bar" setting (#67), only half as wide again in Grand affichage, not to eat the screen. */

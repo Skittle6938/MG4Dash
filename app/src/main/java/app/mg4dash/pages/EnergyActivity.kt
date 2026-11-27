@@ -111,7 +111,7 @@ class EnergyActivity : PageActivity() {
         // with that dock the car ran under the charge button (#141). From its top to the battery line: 321 units of s.
         // With the side bar, the height left over is shared above and below the car.
         val room = actions.top - kit.dp(8) - hint.height - top0
-        val s = if (actions.height > 0 && room > 0) minOf(sw, (room - app.mg4dash.ui.Dock.bottomRoomPx(this)) / 321f).coerceAtLeast(sw * .5f) else sw
+        val s = app.mg4dash.ui.Dock.CAR_SCALE * if (actions.height > 0 && room > 0) minOf(sw, (room - app.mg4dash.ui.Dock.bottomRoomPx(this)) / 321f).coerceAtLeast(sw * .5f) else sw
         val top = top0 + if (actions.height > 0) ((room - 321f * s) / 2f).coerceAtLeast(0f) else 0f
         val cw = 880f * s; val cx = (w - cw) / 2
         energyCar.box.set(cx, top, cx + cw, top + cw * 680f / 1840f)
