@@ -41,6 +41,14 @@ jobs:
         run: |
           python -m pip install Pillow==11.3.0
           python scripts/splash_gif.py
+          python - <<'PY'
+          import glob
+          from PIL import Image
+          for n in ('charge', 'v2l'):
+              frames = [Image.open(f).convert('RGB').crop((540, 180, 1420, 620)) for f in sorted(glob.glob(f'app/build/screenshots/dock141_flow_{n}_*.png'))]
+              if frames:
+                  frames[0].save(f'app/build/screenshots/dock141_flow_{n}.gif', save_all=True, append_images=frames[1:], duration=110, loop=0)
+          PY
       - name: Preview summary
         if: always()
         run: |

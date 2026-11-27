@@ -80,5 +80,14 @@ class BottomDockPagesShots {
             settle(root, 6_000); a.render(state); settle(root, 1_500)
             save(root, "dock141_${p}_light.png")
         }
+        // The battery's flow, charging and with V2L, as frames for a GIF (dark, side bar)
+        app.mg4dash.system.Prefs(ctx).raw.edit().putInt("theme_mode", 1).commit()
+        for ((n, st) in listOf("charge" to state.copy(batteryPercent = 64, socPrecise = 64f, chargeStatus = 1, chargeCtrl = 1, chargeRemainMin = 95),
+                               "v2l" to state.copy(batteryPercent = 64, socPrecise = 64f, chargeStatus = 13, dischargeCtrl = 1))) {
+            val a = Robolectric.buildActivity(app.mg4dash.pages.EnergyActivity::class.java).setup().get()
+            val root = a.window.decorView
+            settle(root, 6_000); a.render(st); settle(root, 1_000)
+            for (i in 1..12) { save(root, "dock141_flow_${n}_${"%02d".format(i)}.png"); Thread.sleep(110); shadowOf(Looper.getMainLooper()).idleFor(110, TimeUnit.MILLISECONDS) }
+        }
     }
 }

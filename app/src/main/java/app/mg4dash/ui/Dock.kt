@@ -113,7 +113,7 @@ object Dock {
                 val appIcon = custom?.let { Shortcuts.appIcon(activity, it) ?: if (it.packageName == Apps.CARPLAY.packageName) pkgIcon(activity, it.packageName) else null }
                 if (appIcon != null) setImageDrawable(appIcon) else {
                     setImageResource(item.icon)
-                    setColorFilter(color(if (selected || item.accent) R.color.accent_action else R.color.text_sub))
+                    setColorFilter(color(if (selected) R.color.accent_action else R.color.text_sub))   // only the open tab in blue (27/11)
                 }
                 if (item.label == R.string.dock_aa) markOff(activity, this)
             }, LinearLayout.LayoutParams(kit.dp(if (simple) 40 else 30), kit.dp(if (simple) 40 else 30)))
@@ -121,7 +121,7 @@ object Dock {
                 if (custom == Apps.CARPLAY) setText(R.string.dock_cp)
                 else if (custom != null) text = Shortcuts.appLabel(activity, custom) else setText(item.label)
                 setTextSize(TypedValue.COMPLEX_UNIT_SP, if (simple) 26f else 19f); maxLines = 1; ellipsize = android.text.TextUtils.TruncateAt.END
-                setTextColor(color(if (selected || item.accent) R.color.text_value else R.color.text_sub))
+                setTextColor(color(if (selected) R.color.text_value else R.color.text_sub))
                 setPadding(kit.dp(12), 0, 0, 0)
             })
             if (item.label == R.string.dock_vehicle) watchEsc(activity, cell, iconView, selected)

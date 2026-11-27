@@ -109,8 +109,8 @@ class EnergyCar(context: Context) : View(context) {
             p.color = if (over) 0xFF141A24.toInt() else 0xFF1D2636.toInt()
             canvas.drawRoundRect(cx, y0, cx + cw, y1, 4f, 4f, p)
             if (f > 0f) { p.color = col; canvas.drawRoundRect(cx, y0, cx + cw * f, y1, 4f, 4f, p) }
-            else if (charging && (lim == 0f || !over) && i == (fill * n + 1e-6f).toInt()) { p.color = col; p.alpha = (255 * pulse).toInt(); canvas.drawRoundRect(cx, y0, cx + cw, y1, 4f, 4f, p); p.alpha = 255 }
         }
+        flow(canvas, x0, y0, x1, y1, n, fill, lim, col)
         if (lim > 0f) {
             val lx = x0 + w * lim
             p.style = Paint.Style.STROKE; p.color = 0xFFFFFFFF.toInt(); p.strokeWidth = 4f; p.strokeCap = Paint.Cap.ROUND
@@ -141,20 +141,50 @@ class EnergyCar(context: Context) : View(context) {
             val ym = (y0 + y1) / 2
             val inn = Path().apply { moveTo(px, py + 17); lineTo(px, y0 - 60); quadTo(px, ym, px - 90, ym); lineTo(x1 + 9, ym) }
             p.style = Paint.Style.STROKE; p.strokeCap = Paint.Cap.ROUND
-            p.color = 0xFF0A0E15.toInt(); p.strokeWidth = 15f; canvas.drawPath(cab, p)
-            p.color = pc; p.alpha = if (live) 140 else 204; p.strokeWidth = 5f; canvas.drawPath(cab, p)
-            p.alpha = 102; p.strokeWidth = 4f; canvas.drawPath(inn, p); p.alpha = 255
+            // A little thicker (27/11)
+            p.color = 0xFF0A0E15.toInt(); p.strokeWidth = 22f; canvas.drawPath(cab, p)
+            p.color = pc; p.alpha = if (live) 140 else 204; p.strokeWidth = 8f; canvas.drawPath(cab, p)
+            p.alpha = 102; p.strokeWidth = 6f; canvas.drawPath(inn, p); p.alpha = 255
             if (live) {
                 val off = t * 68f
                 p.pathEffect = DashPathEffect(floatArrayOf(20f, 48f), if (v2l) -off else off)
-                p.strokeWidth = 7f; canvas.drawPath(cab, p)
+                p.strokeWidth = 11f; canvas.drawPath(cab, p)
                 p.pathEffect = DashPathEffect(floatArrayOf(20f, 48f), if (v2l) off else -off)
-                p.strokeWidth = 6f; canvas.drawPath(inn, p)
+                p.strokeWidth = 9f; canvas.drawPath(inn, p)
                 p.pathEffect = null
             }
         }
         canvas.restore()
         if (heat || charging || v2l) postInvalidateDelayed(33)
+    }
+
+    /**
+     * Charging: cells come in one by one from the battery's right end, where the cable arrives, and slide to the first
+     * empty cell (up to the limit). V2L: one by one the last full cell's energy slides out to the right (27/11).
+     */
+    private fun flow(canvas: Canvas, x0: Float, y0: Float, x1: Float, y1: Float, n: Int, fill: Float, lim: Float, col: Int) {
+        if (!charging && !v2l) return
+        val cellW = (x1 - x0) / n
+        val full = (fill * n + 1e-6f).toInt()
+        val target = if (charging) full else full - 1
+        if (target < 0 || target >= n || (charging && lim > 0f && target.toFloat() / n >= lim - 1e-6f)) return
+        // One cell per run; a run is shorter when the way is short
+        val cells = if (charging) n - 1 - target else n - 1 - target
+        val runMs = (420L + 70L * cells).coerceAtMost(1500L)
+        val ph = (android.os.SystemClock.uptimeMillis() % runMs) / runMs.toFloat()
+        val e = ph * ph * (3 - 2 * ph)   // smooth start and stop
+        val from = if (charging) x1 + cellW * .6f else x0 + target * cellW
+        val to = if (charging) x0 + target * cellW else x1 + cellW * .6f
+        val cx = from + (to - from) * e + 2.5f
+        val a = when { ph < .15f -> ph / .15f; ph > .85f -> (1 - ph) / .15f; else -> 1f }
+        p.style = Paint.Style.FILL; p.color = col
+        glow.color = col; glow.alpha = (110 * a).toInt(); glow.maskFilter = BlurMaskFilter(10f, BlurMaskFilter.Blur.NORMAL)
+        canvas.save(); canvas.clipRect(x0, y0 - 14, x1 + 7, y1 + 14)
+        canvas.drawRoundRect(cx - 4, y0 - 4, cx + cellW - 1, y1 + 4, 6f, 6f, glow)
+        p.alpha = (255 * a).toInt(); canvas.drawRoundRect(cx, y0, cx + cellW - 5f, y1, 4f, 4f, p); p.alpha = 255
+        canvas.restore()
+        // V2L: the cell leaving shows emptying
+        if (v2l) { p.color = 0xFF1D2636.toInt(); p.alpha = (255 * e).toInt(); val tx = x0 + target * cellW + 2.5f; canvas.drawRoundRect(tx, y0, tx + cellW - 5f, y1, 4f, 4f, p); p.alpha = 255 }
     }
 
     private companion object {

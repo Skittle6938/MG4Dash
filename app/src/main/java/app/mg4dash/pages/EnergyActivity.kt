@@ -27,7 +27,7 @@ import java.util.Locale
  * consumption. Settings written to the same properties as the SAIC Energy app (EH32 EU).
  */
 class EnergyActivity : PageActivity() {
-    private companion object { const val V2L_CONFIRM_MS = 10_000L }
+    private companion object { const val V2L_CONFIRM_MS = 10_000L; const val ACTIONS_DP = 145 }
     override val pageTitle get() = getString(R.string.title_energy)
     override val page = app.mg4dash.ui.Dock.Page.ENERGY
 
@@ -103,6 +103,9 @@ class EnergyActivity : PageActivity() {
     }
 
     /** As in the mock-up (a 910 px wide centre): the car under the charge, battery heating above the battery. */
+    /** The battery line, under the car (side bar) or null when it is beside the charge current's title (bottom bar). */
+    private var carHint: android.view.View? = null
+
     private fun placeCar(center: android.widget.FrameLayout, actions: android.view.View) {
         val w = center.width.toFloat(); if (w <= 0f) return
         val sw = w / 910f
@@ -111,9 +114,13 @@ class EnergyActivity : PageActivity() {
         // with that dock the car ran under the charge button (#141). From its top to the ground: 307 units of s.
         // With the side bar, the height left over is shared above and below the car. About the size of the
         // Vehicle page's car in profile (Marc 27/11).
-        val room = actions.top - kit.dp(8) - top0
+        // The actions' usual height (charge button and current), not their current one: the car keeps its size when
+        // V2L hides the current and the charge button
+        val room = actions.bottom - maxOf(actions.height, kit.dp(ACTIONS_DP)) - kit.dp(8) - top0
         val s = if (actions.height > 0 && room > 0) minOf(sw, (room - app.mg4dash.ui.Dock.bottomRoomPx(this)) / 307f).coerceAtLeast(sw * .5f) else sw
-        val top = top0 + if (actions.height > 0) ((room - 307f * s) / 2f).coerceAtLeast(0f) else 0f
+        val hint = carHint
+        val under = if (hint != null) 14f * s + hint.height else 0f
+        val top = top0 + if (actions.height > 0) ((room - 307f * s - under) / 2f).coerceAtLeast(0f) else 0f
         val cw = 880f * s; val cx = (w - cw) / 2
         energyCar.box.set(cx, top, cx + cw, top + cw * 680f / 1840f)
         energyCar.invalidate()
@@ -123,7 +130,9 @@ class EnergyActivity : PageActivity() {
         heating.translationX = bx - heating.width / 2f; heating.translationY = py - heating.height / 2f
         heatLine.translationX = bx - 1f; heatLine.translationY = py + kit.dp(26)
         heatLine.layoutParams = heatLine.layoutParams.apply { height = (by - py - kit.dp(34)).toInt().coerceAtLeast(0) }
+        if (hint != null) { hint.translationX = bx - hint.width / 2f; hint.translationY = top + 641.96f * k + 14f * s }
     }
+
 
     private var period = 0          // 0 = since the charge, 1 = current trip, 2 = last 1,000 km
     private var reser: Int? = null
@@ -243,8 +252,12 @@ class EnergyActivity : PageActivity() {
         }
         showBattery()
         batteryHint.setOnClickListener { batteryOptions { showBattery() } }
-        // With the charge limit's column (old SDK) the current's one is too narrow: a line of its own above both
-        if (app.mg4dash.system.Firmware.nativeChargeLimit) bottom.addView(batteryHint, bottom.indexOfChild(chips), kit.lp(-2, -2, t = 10).apply { gravity = Gravity.END })
+        // Side bar: under the car, where there is room for it. Bottom bar: beside the charge current's title, or with
+        // the charge limit's column (old SDK, the current's one then too narrow) a line of its own above both
+        if (app.mg4dash.ui.Dock.vertical(this)) {
+            center.addView(batteryHint, android.widget.FrameLayout.LayoutParams(-2, -2)); carHint = batteryHint
+            batteryHint.addOnLayoutChangeListener { _, l, _, r, _, ol, _, or_, _ -> if (r - l != or_ - ol) center.post { placeCar(center, bottom) } }
+        } else if (app.mg4dash.system.Firmware.nativeChargeLimit) bottom.addView(batteryHint, bottom.indexOfChild(chips), kit.lp(-2, -2, t = 10).apply { gravity = Gravity.END })
         else curHead.addView(batteryHint, kit.lp(-2, -2, l = 12))
         center.addOnLayoutChangeListener { _, l, t, r, b, ol, ot, or_, ob -> if (r - l != or_ - ol || b - t != ob - ot) center.post { placeCar(center, bottom) } }
         // The actions change height (V2L box, limit row): the car is fitted again
