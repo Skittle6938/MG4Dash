@@ -33,12 +33,15 @@ class SoundCarShots {
 
     @Test fun colours() {
         val ctx = RuntimeEnvironment.getApplication()
-        for ((paint, roof) in listOf("blue" to false, "white" to true, "red" to true, "green" to false, "black" to false)) {
+        for ((paint, roof, liv) in listOf(Triple("blue", false, "none"), Triple("red", true, "none"), Triple("rainbow", false, "zebra"), Triple("galaxy", true, "flames"))) {
             app.mg4dash.system.Prefs(ctx).raw.edit().clear().putBoolean("vertical_dock", true).putInt("theme_mode", 1).commit()
+            CarLook(ctx).choose(if (paint == "galaxy") CarLook.Version.XPOWER else CarLook.Version.STANDARD)
             CarLook(ctx).paint = CarPaint.byId(paint); CarLook(ctx).roof = roof
+            CarLook(ctx).livery = app.mg4dash.showroom.Livery.byId(liv)
             val a = Robolectric.buildActivity(app.mg4dash.pages.SoundActivity::class.java).setup().get()
-            shadowOf(Looper.getMainLooper()).idleFor(1, TimeUnit.SECONDS)
-            save(a.window.decorView, "sound_car_${paint}${if (roof) "_roof" else ""}.png")
+            val end = System.currentTimeMillis() + 20_000
+            while (System.currentTimeMillis() < end) { shadowOf(Looper.getMainLooper()).idleFor(200, TimeUnit.MILLISECONDS); save(a.window.decorView, "x.png"); Thread.sleep(100) }
+            save(a.window.decorView, "sound_car_${paint}_$liv${if (roof) "_roof" else ""}.png")
         }
     }
 }

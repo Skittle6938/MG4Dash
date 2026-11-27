@@ -10,6 +10,7 @@ import android.graphics.Shader
 import android.view.MotionEvent
 import android.view.View
 import app.mg4dash.R
+import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
 /**
@@ -32,22 +33,34 @@ class SoundFieldView(context: Context) : View(context) {
     private var lastTap = 0L
 
     /**
-     * Top view photo of the MG4 (WinClose's) in the driver's colour and roof, as chosen in "Colours and style" (27/11);
-     * repainted again when that choice changes.
+     * The car from above (27/11): the same 3D renders as the Vehicle page, painted by [app.mg4dash.showroom.PaintShop]
+     * as chosen in "Colours and style" (paint, fun paints, livery, black roof, double spoiler, wheels); painted again
+     * when that choice changes.
      */
-    private val source: android.graphics.Bitmap? = try {
-        android.graphics.BitmapFactory.decodeResource(resources, R.drawable.mg4_top)
-    } catch (_: Throwable) { null }
     private var photo: android.graphics.Bitmap? = null
-    private var photoKey = ""
+    private var photoKey: Any? = null
+    private var job: kotlinx.coroutines.Job? = null
 
-    private fun painted(): android.graphics.Bitmap? {
-        val src = source ?: return null
-        val look = app.mg4dash.showroom.CarLook(context)
-        val key = "${look.paint.hex}|${look.roof}"
-        if (photo == null || key != photoKey) { photoKey = key; photo = app.mg4dash.showroom.TopPaint.paint(src, look.paint.hex, look.roof) }
+    private fun painted(widthPx: Int): android.graphics.Bitmap? {
+        if (widthPx <= 0) return photo
+        val cfg = app.mg4dash.showroom.CarLook(context).config(app.mg4dash.showroom.PaintShop.View.TOP)
+        val scale = app.mg4dash.showroom.PaintShop.scaleFor(context, cfg.view, widthPx)
+        val key = cfg to scale
+        if (key != photoKey && job?.isActive != true) {
+            photoKey = key
+            app.mg4dash.showroom.PaintShop.cached(cfg, scale)?.let { photo = it; return it }
+            job = kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.Main).launch {
+                val b = try { app.mg4dash.showroom.PaintShop.render(context, cfg, scale) } catch (e: Exception) {
+                    android.util.Log.w("MG4L.Sound", "top view: ${e.message}"); return@launch
+                }
+                photo = b; invalidate()
+            }
+        }
         return photo
     }
+
+    override fun onDetachedFromWindow() { super.onDetachedFromWindow(); job?.cancel(); photoKey = null }
+
     private val photoPaint = Paint(Paint.ANTI_ALIAS_FLAG or Paint.FILTER_BITMAP_FLAG)
     /** Body (without mirrors): area where the sound point is placed. */
     private val shell = RectF()
@@ -57,11 +70,12 @@ class SoundFieldView(context: Context) : View(context) {
         // Photo scaled to the available height, front at the top
         // (the photo has a transparent margin: let it overlap the front / rear labels a little)
         val ch = h - 16 * d
-        val ratio = source?.let { it.width.toFloat() / it.height } ?: 0.63f
+        val ratio = 0.6f   // the render: 720 × 1200, nose at the top
         val cw = ch * ratio
         car.set((w - cw) / 2, 8 * d, (w + cw) / 2, 8 * d + ch)
-        shell.set(car.left + cw * 0.2f, car.top + ch * 0.07f, car.left + cw * 0.81f, car.top + ch * 0.93f)
-        painted()?.let { bmp -> cv.drawBitmap(bmp, null, car, photoPaint) }
+        // The body in the render (its trim's box, 161..559 × 49..1150 of 720 × 1200)
+        shell.set(car.left + cw * 0.224f, car.top + ch * 0.041f, car.left + cw * 0.776f, car.top + ch * 0.958f)
+        painted(cw.toInt())?.let { bmp -> cv.drawBitmap(bmp, null, car, photoPaint) }
         // Speakers (front and rear doors)
         fill.color = c(R.color.text_title)
         for ((sx, sy) in listOf(0f to 0.4f, 1f to 0.4f, 0f to 0.64f, 1f to 0.64f))

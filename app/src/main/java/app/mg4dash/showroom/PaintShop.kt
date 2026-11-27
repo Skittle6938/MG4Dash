@@ -24,7 +24,7 @@ import kotlin.math.roundToInt
  * black sills (all versions but the XPower) are separate layers. Images come from assets/showroom.
  */
 object PaintShop {
-    enum class View(val prefix: Char, val key: String) { SIDE('s', "side"), Q34('q', "q34") }
+    enum class View(val prefix: Char, val key: String) { SIDE('s', "side"), Q34('q', "q34"), TOP('t', "top") }
 
     enum class Finish(val file: String) { SOLID("solid"), METAL("metal"), MATTE("matte"), CHROME("chrome"), SATIN("satin") }
 
