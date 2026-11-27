@@ -13,8 +13,8 @@ android {
         applicationId = "app.mg4dash.rescue"
         minSdk = 28
         targetSdk = 28
-        versionCode = 9
-        versionName = "1.6"
+        versionCode = 10
+        versionName = "1.7"
     }
 
     buildTypes {

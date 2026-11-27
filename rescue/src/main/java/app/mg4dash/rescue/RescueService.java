@@ -57,24 +57,48 @@ public class RescueService extends Service {
     /** Why a check runs: the head unit's boot (or on demand), MG4Dash updated by itself, installed, or crashed. */
     static final String MODE_BOOT = "boot", MODE_UPDATED = "updated", MODE_CRASH = "crash";
 
-    private volatile boolean running;
+    private boolean running;
+    /** An update told while a check was running: its delay, -1 if none. Done right after the check. */
+    private long pendingUpdate = -1;
+
+    /**
+     * Whether a check for [mode] starts now. During a check, an update is kept for after it: MG4Dash installed
+     * 38 s after the car started was otherwise never recompiled nor relaunched, its old code ran on (27/11).
+     */
+    synchronized boolean request(String mode, long delay) {
+        if (!running) { running = true; return true; }
+        if (MODE_UPDATED.equals(mode)) { pendingUpdate = delay; Log.i(TAG, "update told during a check: handled right after it"); }
+        return false;
+    }
+
+    /** Runs the check for [mode], then any update told meanwhile; package-private for the tests. */
+    void runAll(long delay, String mode, long sinceElapsed) throws InterruptedException {
+        run(delay, mode, sinceElapsed);
+        while (true) {
+            long d;
+            synchronized (this) {
+                d = pendingUpdate; pendingUpdate = -1;
+                if (d < 0) { running = false; return; }
+            }
+            run(d, MODE_UPDATED, -1);
+        }
+    }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         foreground();
-        if (running) return START_NOT_STICKY;
-        running = true;
         long delay = intent != null ? intent.getLongExtra("delay_ms", FIRST_CHECK_MS) : FIRST_CHECK_MS;
         String m = intent != null ? intent.getStringExtra("mode") : null;
         String mode = m != null ? m : MODE_BOOT;
         long since = intent != null ? intent.getLongExtra("since_elapsed", -1) : -1;
+        if (!request(mode, delay)) return START_NOT_STICKY;
         new Thread(() -> {
             try {
-                run(delay, mode, since);
+                runAll(delay, mode, since);
             } catch (Throwable t) {
                 Log.e(TAG, "check failed", t);
             } finally {
-                running = false;
+                synchronized (this) { running = false; pendingUpdate = -1; }
                 stopForeground(true);
                 stopSelf();
             }

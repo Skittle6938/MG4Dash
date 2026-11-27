@@ -283,6 +283,19 @@ public class RescueV4Test {
         assertEquals(PackageManager.COMPONENT_ENABLED_STATE_DEFAULT, dashEnabled());
     }
 
+    @Test public void updatedDuringTheBootCheckIsHandledAfterIt() throws Exception {
+        // Installed by ADB 38 s after the car started (27/11): the update came while the boot check ran
+        dashHomeSaicEnabled("1");
+        service.onRelaunch = () -> alive(BOOT);
+        assertTrue(service.request(RescueService.MODE_BOOT, 0));
+        assertFalse("kept for after the check", service.request(RescueService.MODE_UPDATED, 0));
+        assertFalse("a second boot request is dropped", service.request(RescueService.MODE_BOOT, 0));
+        service.runAll(0, RescueService.MODE_BOOT, -1);
+        assertEquals(1, service.recompiles);
+        assertEquals(DASH_HOME, opened());
+        assertTrue("free again", service.request(RescueService.MODE_BOOT, 0));
+    }
+
     @Test public void updatedThenNotStartingFallsBack() throws Exception {
         dashHomeSaicEnabled("1");
         service.run(0, RescueService.MODE_UPDATED, -1);
