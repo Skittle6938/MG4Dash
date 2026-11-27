@@ -1293,6 +1293,9 @@ class ScreenshotTest {
         if (!sp.contains("theme_mode")) sp.edit().putInt("theme_mode", 1).commit()
         val activity = Robolectric.buildActivity(cls).setup().get()
         repeat(5) { shadowOf(Looper.getMainLooper()).idleFor(200, TimeUnit.MILLISECONDS) }
+        // Pictures decoded on a worker thread (the Energy page's car): real time for them to come, or the car was
+        // missing from energy_light.png (27/11)
+        repeat(10) { Thread.sleep(150); shadowOf(Looper.getMainLooper()).idleFor(100, TimeUnit.MILLISECONDS) }
         if (media != null) {
             val f = app.mg4dash.media.MediaHub::class.java.getDeclaredField("_now").apply { isAccessible = true }
             @Suppress("UNCHECKED_CAST")

@@ -70,5 +70,15 @@ class BottomDockPagesShots {
             settle(root, 6_000); a.render(state); settle(root, 1_500)
             save(root, "dock141_vehicle34_$n.png")
         }
+        // Light theme, side bar: the cars are drawn there too (the quick README capture can miss them)
+        app.mg4dash.system.Prefs(ctx).raw.edit().clear().putBoolean("vertical_dock", true).putInt("theme_mode", 2)
+            .putBoolean("tutorial_shortcuts_seen", true).commit()
+        CarLook(ctx).threeQuarter = false
+        for ((p, cls) in listOf("energy" to app.mg4dash.pages.EnergyActivity::class.java, "vehicle" to app.mg4dash.pages.VehicleActivity::class.java)) {
+            val a = Robolectric.buildActivity(cls).setup().get()
+            val root = a.window.decorView
+            settle(root, 6_000); a.render(state); settle(root, 1_500)
+            save(root, "dock141_${p}_light.png")
+        }
     }
 }
