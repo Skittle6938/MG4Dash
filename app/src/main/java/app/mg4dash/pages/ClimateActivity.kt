@@ -20,6 +20,9 @@ import app.mg4dash.ui.SegmentedGauge
 /** Climate page: temperature, fan, air direction and modes. */
 class ClimateActivity : PageActivity() {
     private companion object {
+        /** The dashboard picture at 80 % of the page's width, faded into the page background over 12 % of its width (27/11). */
+        const val PICTURE_SCALE = .8f
+        const val FADE = .12f
         /** Height of the temperature and fan bars (same as the climate card's), and the touch margin above and below. */
         const val BAR_DP = 18
         const val BAR_TOUCH = 14
@@ -77,19 +80,16 @@ class ClimateActivity : PageActivity() {
         }
         cabin = cab
         cabImage = android.widget.ImageView(this).apply { scaleType = android.widget.ImageView.ScaleType.FIT_XY }
-        cab.addView(cabImage, android.widget.FrameLayout.LayoutParams(0, 0))
-        // The dark edges are for the night photo only
-        if (!day) cab.addView(android.view.View(this).apply {
-            background = android.graphics.drawable.LayerDrawable(arrayOf(
-                android.graphics.drawable.GradientDrawable(android.graphics.drawable.GradientDrawable.Orientation.LEFT_RIGHT, intArrayOf(0xB805070B.toInt(), 0, 0, 0, 0xB805070B.toInt())),
-                android.graphics.drawable.GradientDrawable(android.graphics.drawable.GradientDrawable.Orientation.TOP_BOTTOM, intArrayOf(0x9405070B.toInt(), 0x5C05070B, 0, 0, 0x6B05070B))))
-        }, android.widget.FrameLayout.LayoutParams(-1, -1))
+        cab.background = null
+        val stage = FadeStage(this).also { cab.addView(it, android.widget.FrameLayout.LayoutParams(-1, -1)) }
+        fadeStage = stage
+        stage.addView(cabImage, android.widget.FrameLayout.LayoutParams(0, 0))
         tint = android.view.View(this)
-        cab.addView(tint, android.widget.FrameLayout.LayoutParams(-1, -1))
+        stage.addView(tint, android.widget.FrameLayout.LayoutParams(-1, -1))
         mirror = ScreenMirror(this)
-        cab.addView(mirror, android.widget.FrameLayout.LayoutParams(-1, -1))
+        stage.addView(mirror, android.widget.FrameLayout.LayoutParams(-1, -1))
         air = app.mg4dash.showroom.AirFlow(this)
-        cab.addView(air, android.widget.FrameLayout.LayoutParams(0, 0))
+        stage.addView(air, android.widget.FrameLayout.LayoutParams(0, 0))
         // Touch zones on the picture: windscreen, face, feet
         zones = listOf(2, 0, 1).map { k -> android.view.View(this).apply { setOnClickListener { toggleFlow(k) } }.also { cab.addView(it, android.widget.FrameLayout.LayoutParams(0, 0)) } }
         screen = tag(cab, getString(R.string.cl_windshield), R.drawable.ic_flow_screen) { toggleFlow(2) }
@@ -151,7 +151,7 @@ class ClimateActivity : PageActivity() {
         tPanel.addView(autoNote, kit.lp(-1, -2, t = 6))
         controls += listOf(down, up, fDown, fUp, face, feet, screen)
         driverGlass = tPanel
-        cab.addView(tPanel, android.widget.FrameLayout.LayoutParams(kit.dp(372), -2))
+        cab.addView(tPanel, android.widget.FrameLayout.LayoutParams(kit.dp(410), -2))
 
         // ── Passenger's glass: modes ──
         val mPanel = glass()
@@ -182,7 +182,7 @@ class ClimateActivity : PageActivity() {
         mPanel.addView(origin, kit.lp(-1, -2))
         controls += listOf(auto, ac, eco, recirc, defFront, defRear, defLink, ecoLink, power)
         modesGlass = mPanel
-        cab.addView(mPanel, android.widget.FrameLayout.LayoutParams(kit.dp(396), kit.dp(490)))
+        cab.addView(mPanel, android.widget.FrameLayout.LayoutParams(kit.dp(436), kit.dp(540)))
 
         val hint = kit.text(getString(R.string.cl_side_hint), 15f, R.color.text_title).apply {
             setTextColor(GLASS_TITLE)
@@ -203,6 +203,34 @@ class ClimateActivity : PageActivity() {
     private lateinit var cabin: android.widget.FrameLayout
     private lateinit var cabImage: android.widget.ImageView
     private lateinit var tint: View
+    private lateinit var fadeStage: FadeStage
+
+    /**
+     * The picture and its airflow, faded into the page background at the picture's edges, drawn through an offscreen
+     * layer so the page's own background shows through.
+     */
+    private class FadeStage(ctx: android.content.Context) : android.widget.FrameLayout(ctx) {
+        val rect = android.graphics.RectF()
+        private val mask = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG).apply {
+            xfermode = android.graphics.PorterDuffXfermode(android.graphics.PorterDuff.Mode.DST_IN)
+        }
+        override fun dispatchDraw(canvas: android.graphics.Canvas) {
+            if (rect.isEmpty) { super.dispatchDraw(canvas); return }
+            val n = canvas.saveLayer(0f, 0f, width.toFloat(), height.toFloat(), null)
+            super.dispatchDraw(canvas)
+            val f = FADE * rect.width()
+            val clear = 0; val full = 0xFF000000.toInt()
+            fun edge(x0: Float, y0: Float, x1: Float, y1: Float) {
+                mask.shader = android.graphics.LinearGradient(x0, y0, x1, y1, clear, full, android.graphics.Shader.TileMode.CLAMP)
+                canvas.drawRect(0f, 0f, width.toFloat(), height.toFloat(), mask)
+            }
+            val fv = minOf(f, rect.height() * .3f)
+            edge(rect.left, 0f, rect.left + f, 0f); edge(rect.right, 0f, rect.right - f, 0f)
+            edge(0f, rect.top, 0f, rect.top + fv); edge(0f, rect.bottom, 0f, rect.bottom - fv)
+            mask.shader = null
+            canvas.restoreToCount(n)
+        }
+    }
     private lateinit var air: app.mg4dash.showroom.AirFlow
     private lateinit var zones: List<View>
     private lateinit var rearTag: TextView
@@ -315,27 +343,32 @@ class ClimateActivity : PageActivity() {
         parent.addView(this, android.widget.FrameLayout.LayoutParams(-2, kit.dp(66)))
     }
 
-    private fun paintTag(t: TextView, on: Boolean, color: Int) {
-        val c = if (on) color else 0xFFD5DCE8.toInt()
+    private fun paintTag(t: TextView, on: Boolean) {
+        // On: the accent colour the user chose (27/11); off: white as before
+        val c = if (on) app.mg4dash.ui.Themes.select(this) else 0xFFD5DCE8.toInt()
         t.setTextColor(c)
         t.compoundDrawables[0]?.setTint(c)
-        t.background = android.graphics.drawable.GradientDrawable().apply { setColor(0xB8090C12.toInt()); cornerRadius = kit.dp(33).toFloat(); setStroke(kit.dp(2), if (on) color else 0x33FFFFFF) }
+        t.background = android.graphics.drawable.GradientDrawable().apply { setColor(0xB8090C12.toInt()); cornerRadius = kit.dp(33).toFloat(); setStroke(kit.dp(2), if (on) c else 0x33FFFFFF) }
     }
 
     /** As in the mock-up (1808 × 644): the picture raised by 20 px, the tags at x = 1196 (mirrored in right-hand drive). */
     private fun placeCabin() {
         val w = cabin.width.toFloat(); val h = cabin.height.toFloat(); if (w <= 0f) return
-        val s = w / 1808f
+        val s = w * PICTURE_SCALE / 1808f
+        val iw = 1808f * s
+        // The picture centred in the page
+        val ox = (w - iw) / 2f; val oy = (h - 644f * s) / 2f
         fun size(v: View, x: Float, y: Float, vw: Float, vh: Float) { v.layoutParams = (v.layoutParams as android.widget.FrameLayout.LayoutParams).apply { width = vw.toInt(); height = vh.toInt() }; v.translationX = x; v.translationY = y }
-        size(cabImage, 0f, -20f * s, w, 678f * s)
-        size(air, 0f, 0f, w, 644f * s)
+        size(cabImage, ox, oy - 20f * s, iw, 678f * s)
+        fadeStage.let { it.rect.set(ox, oy - 20f * s, ox + iw, oy + 658f * s); it.invalidate() }
+        size(air, ox, oy, iw, 644f * s)
         // Windscreen, face, feet zones
-        size(zones[0], 340f * s, 0f, w - 680f * s, 300f * s)
-        size(zones[1], 340f * s, 392f * s, w - 680f * s, 92f * s)
-        size(zones[2], 340f * s, 500f * s, w - 680f * s, 144f * s)
-        fun x(v: Float) = (if (rhd) 1808f - v else v) * s
-        listOf(screen to 300f, face to 446f, feet to 566f).forEach { (t, y) -> t.post { t.translationX = x(1196f) - t.width / 2f; t.translationY = y * s - t.height / 2f } }
-        rearTag.post { rearTag.translationX = x(894f) - rearTag.width / 2f; rearTag.translationY = 84f * s - rearTag.height / 2f }
+        size(zones[0], ox + 340f * s, oy, iw - 680f * s, 300f * s)
+        size(zones[1], ox + 340f * s, oy + 380f * s, iw - 680f * s, 106f * s)
+        size(zones[2], ox + 340f * s, oy + 500f * s, iw - 680f * s, 144f * s)
+        fun x(v: Float) = ox + (if (rhd) 1808f - v else v) * s
+        listOf(screen to 300f, face to 433f, feet to 566f).forEach { (t, y) -> t.post { t.translationX = x(1196f) - t.width / 2f; t.translationY = oy + y * s - t.height / 2f } }
+        rearTag.post { rearTag.translationX = x(894f) - rearTag.width / 2f; rearTag.translationY = oy + 84f * s - rearTag.height / 2f }
         driverGlass.post { driverGlass.translationX = if (rhd) w - driverGlass.width - kit.dp(16) else kit.dp(16).toFloat(); driverGlass.translationY = (h - driverGlass.height) / 2 }
         modesGlass.post { modesGlass.translationX = if (rhd) kit.dp(16).toFloat() else w - modesGlass.width - kit.dp(16); modesGlass.translationY = (h - modesGlass.height) / 2 }
         air.rhd = rhd
@@ -344,8 +377,8 @@ class ClimateActivity : PageActivity() {
         for (i in 0 until 4) {
             val src = if (rhd) intArrayOf(1, 0, 3, 2)[i] else i
             val sx = SCREEN_L[src * 2]; val sy = SCREEN_L[src * 2 + 1]
-            mirror.quad[i * 2] = (if (rhd) 2400f - sx else sx) * k * s
-            mirror.quad[i * 2 + 1] = sy * k * s - 20f * s
+            mirror.quad[i * 2] = ox + (if (rhd) 2400f - sx else sx) * k * s
+            mirror.quad[i * 2 + 1] = oy + sy * k * s - 20f * s
         }
         mirror.invalidate()
         loadCabin()
@@ -353,7 +386,7 @@ class ClimateActivity : PageActivity() {
 
     private fun loadCabin() {
         val colour = 0xFF000000.toInt() or app.mg4dash.showroom.CarLook(this).paint.hex
-        val tw = cabin.width; val th = (678f * tw / 1808f).toInt()
+        val tw = (cabin.width * PICTURE_SCALE).toInt(); val th = (678f * tw / 1808f).toInt()
         if (tw <= 0) return
         val key = "$rhd|$colour|$day|$tw"
         if (cabKey == key) return
@@ -490,9 +523,9 @@ class ClimateActivity : PageActivity() {
         val heatMode = (t ?: 0f) > (s.outsideTemp ?: 99f)
         val k = kit.color(if (heatMode) R.color.accent_heat else R.color.accent_cold)
         val scr = on && (parts?.get(2) == true || s.defrostFront == true)
-        paintTag(face, on && parts?.get(0) == true, k); paintTag(feet, on && parts?.get(1) == true, k); paintTag(screen, scr, k)
+        paintTag(face, on && parts?.get(0) == true); paintTag(feet, on && parts?.get(1) == true); paintTag(screen, scr)
         rearTag.visibility = if (on && s.defrostRear == true) View.VISIBLE else View.GONE
-        paintTag(rearTag, true, kit.color(R.color.accent_heat))
+        paintTag(rearTag, true)
         air.heat = heatMode
         air.power = if (!on) 0f else if (autoOn || realFan == null || realFan == 0) .55f else .2f + .8f * realFan / VehicleState.FAN_MAX
         air.day = day
