@@ -61,7 +61,7 @@ class CarStage(context: Context, private val kit: Kit, private val look: CarLook
         private var wheelX = 0f
 
         init {
-            view.addView(kit.text(t.uppercase(), 12f, R.color.text_title).apply { letterSpacing = .1f })
+            view.addView(kit.text(t.uppercase(), 12f, R.color.text_title).apply { letterSpacing = .1f }, kit.lp(-2, -2))
             val r = kit.row()
             r.addView(left.view, kit.lp(-2, -2))
             r.addView(View(context).apply { setBackgroundColor(Themes.color(context, R.color.panel_border)) }, kit.lp(1, kit.dp(38), l = 16, r = 16))
@@ -75,8 +75,9 @@ class CarStage(context: Context, private val kit: Kit, private val look: CarLook
             val pressure = kit.text("—", 28f, light = true)
             val detail = kit.text("", 20f, R.color.text_sub)
             val status = kit.text("", 15f).apply { minLines = 1; visibility = View.INVISIBLE }
-            col.addView(pressure)
-            col.addView(detail)
+            // Each reading contributes its own width even when the status is empty.
+            col.addView(pressure, kit.lp(-2, -2))
+            col.addView(detail, kit.lp(-2, -2))
             col.addView(status, kit.lp(-2, -2, t = 2))
             return TyreSide(col, pressure, detail, status)
         }
