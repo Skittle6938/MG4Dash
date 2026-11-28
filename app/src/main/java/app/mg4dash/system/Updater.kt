@@ -244,7 +244,7 @@ object Updater {
                 s.openWrite("base.apk", 0, apk.length()).use { o -> input.copyTo(o); s.fsync(o) }
             }
             val intent = Intent(context, Result::class.java)
-            val sender = PendingIntent.getBroadcast(context, id, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+            val sender = PendingIntent.getBroadcast(context, id, intent, PendingIntent.FLAG_UPDATE_CURRENT)  // mobsf-ignore: android_kotlin_pending_intent_not_immutable (the installer fills the status extras in; explicit intent)
             Log.i(TAG, "install started (session $id)")
             s.commit(sender.intentSender)
         }

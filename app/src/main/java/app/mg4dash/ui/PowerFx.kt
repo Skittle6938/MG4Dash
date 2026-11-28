@@ -106,7 +106,7 @@ class PowerFx(private val context: Context) : Drawable() {
     private var lastAbove = 0L
     private var heat = 0f; private var heatTarget = 0f   // flame intensity
     private var lastFrame = 0L
-    private val rnd = java.util.Random()
+    private val rnd = java.util.Random()  // mobsf-ignore: android_kotlin_insecure_random (drawing only)
 
     private val paint = Paint(Paint.ANTI_ALIAS_FLAG)
     private val stroke = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.STROKE; strokeCap = Paint.Cap.ROUND; strokeJoin = Paint.Join.ROUND }

@@ -109,7 +109,7 @@ object Uninstaller {
             }
             context.registerReceiver(receiver, IntentFilter(action))
             return try {
-                val pi = PendingIntent.getBroadcast(context, pkg.hashCode(), Intent(action).setPackage(context.packageName), PendingIntent.FLAG_UPDATE_CURRENT)
+                val pi = PendingIntent.getBroadcast(context, pkg.hashCode(), Intent(action).setPackage(context.packageName), PendingIntent.FLAG_UPDATE_CURRENT)  // mobsf-ignore: android_kotlin_pending_intent_not_immutable (the installer fills the status extras in; own package only)
                 context.packageManager.packageInstaller.uninstall(pkg, pi.intentSender)
                 // Its own uninstall: the process goes before any answer
                 latch.await(60, TimeUnit.SECONDS)

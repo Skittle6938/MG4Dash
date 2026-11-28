@@ -165,12 +165,12 @@ public class WebActivity extends Activity {
         if (keyboardFor != null) {
             // Android's keyboard never opens over the page: MG4Dash's types in it
             getWindow().addFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
-            web.addJavascriptInterface(new Fields(), "MG4DashFields");
+            web.addJavascriptInterface(new Fields(), "MG4DashFields");  // mobsf-ignore: webview_javascript_interface (only opens or closes MG4Dash's keyboard)
         }
         // In the card: MG4Dash says when it is shown or hidden, whether its keyboard is used or not
         if (inCardOnly()) {
             media = new WebMedia(this, web);
-            web.addJavascriptInterface(media.bridge(), "MG4DashMedia");
+            web.addJavascriptInterface(media.bridge(), "MG4DashMedia");  // mobsf-ignore: webview_javascript_interface (only reports what the page plays to the card)
             IntentFilter f = new IntentFilter(KEY);
             f.addAction(SHOWN);
             registerReceiver(fromCard, f, TALK, null);

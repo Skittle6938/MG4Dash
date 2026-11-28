@@ -224,7 +224,7 @@ object DataUsage {
 
     /** Emulator and PC screenshots: a plausible month (map most days, three updates). */
     private fun mockDay(i: Int, date: Int): Day {
-        val r = java.util.Random(i * 7919L + 13)
+        val r = java.util.Random(i * 7919L + 13)  // mobsf-ignore: android_kotlin_insecure_random (screenshot data only)
         val drive = r.nextFloat() < 0.72f
         val mb = 1_000_000L
         val upd = when (i) { 6 -> 34; 13 -> 38; 22 -> 30; 27 -> 16; else -> 0 }

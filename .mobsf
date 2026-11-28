@@ -1,0 +1,28 @@
+---
+# mobsfscan settings (reviewed 28/11/2026). Rules listed here do not apply to MG4Dash, a system home screen
+# installed by the platform on the car's head unit. Other findings reviewed one by one carry a
+# "mobsf-ignore: <rule> (reason)" comment on their line instead.
+- ignore-rules:
+    # Diagnostic logs are wanted (the in-app journal, exported logs); nothing private is logged.
+    - android_logging
+    - android_kotlin_logging
+    # Setting and broadcast names ("mg4dash_home", "trip_log"...), not secrets; gitleaks watches real ones.
+    - hardcoded_api_key
+    - android_kotlin_hardcoded
+    # Consumer-app hardening, not applicable to a platform-signed system launcher on a closed head unit.
+    - android_certificate_pinning
+    - android_ssl_pinning
+    - android_certificate_transparency
+    - android_root_detection
+    - android_safetynet
+    - android_safetynet_api
+    - android_prevent_screenshot
+    - android_tapjacking
+    - android_detect_tapjacking
+    # A home screen must be singleTask; targetSdk 28 is set by the platform; every app on the car is installed
+    # by the system.
+    - android_task_hijacking1
+    - android_task_hijacking2
+    # Home Assistant and web pages on the local network at an address the owner types: Android's network
+    # security config cannot limit cleartext to "the local network".
+    - android_manifest_usescleartext

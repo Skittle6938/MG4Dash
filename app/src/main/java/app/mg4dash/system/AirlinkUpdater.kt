@@ -62,7 +62,7 @@ object AirlinkUpdater {
             apk.inputStream().use { input ->
                 s.openWrite("base.apk", 0, apk.length()).use { o -> input.copyTo(o); s.fsync(o) }
             }
-            val sender = PendingIntent.getBroadcast(context, id, Intent(context, Result::class.java), PendingIntent.FLAG_UPDATE_CURRENT)
+            val sender = PendingIntent.getBroadcast(context, id, Intent(context, Result::class.java), PendingIntent.FLAG_UPDATE_CURRENT)  // mobsf-ignore: android_kotlin_pending_intent_not_immutable (the installer fills the status extras in; explicit intent)
             Log.i(TAG, "$NAME $version install started (session $id)")
             s.commit(sender.intentSender)
         }

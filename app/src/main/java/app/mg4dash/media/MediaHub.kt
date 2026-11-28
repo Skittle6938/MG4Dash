@@ -1708,7 +1708,7 @@ object MediaHub {
         val db = android.database.sqlite.SQLiteDatabase.openDatabase(
             "/data/data/com.saicmotor.radio/databases/RadioDatabase", null, android.database.sqlite.SQLiteDatabase.OPEN_READONLY)
         val (id, name) = db.use { d ->
-            d.rawQuery("SELECT service_id, service_name FROM dab_current_station_table LIMIT 1", null).use { cur ->
+            d.rawQuery("SELECT service_id, service_name FROM dab_current_station_table LIMIT 1", null).use { cur ->  // mobsf-ignore: android_kotlin_sql_raw_query (constant query, no input)
                 if (cur.moveToFirst()) cur.getLong(0) to (cur.getString(1) ?: "") else null
             }
         } ?: return null

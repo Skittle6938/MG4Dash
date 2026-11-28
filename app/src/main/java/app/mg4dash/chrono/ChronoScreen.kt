@@ -69,7 +69,7 @@ object ChronoScreen {
         private val started = SystemClock.uptimeMillis()
         private var doneAt = 0L
         private val cancelBox = RectF(); private val rearmBox = RectF(); private val closeBox = RectF()
-        private val rnd = java.util.Random(7)
+        private val rnd = java.util.Random(7)  // mobsf-ignore: android_kotlin_insecure_random (drawing only)
         private val lines = List(30) { floatArrayOf(rnd.nextFloat(), 0.08f + rnd.nextFloat() * 0.84f, 0.05f + rnd.nextFloat() * 0.18f, 0.6f + rnd.nextFloat() * 0.8f) }
         private val dots = List(28) { floatArrayOf((rnd.nextFloat() * Math.PI * 2).toFloat(), 0.5f + rnd.nextFloat()) }
 
