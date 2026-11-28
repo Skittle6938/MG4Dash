@@ -32,10 +32,10 @@ jobs:
       NOTES: ${{ inputs.notes }}
       GH_TOKEN: ${{ github.token }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v6
         with:
           distribution: temurin
           java-version: '17'
@@ -96,14 +96,14 @@ jobs:
           script: sh scripts/r8_smoke.sh
       # R8's mapping, to read a crash report of this build; kept with the run, never attached to the release
       - name: Keep the R8 mapping
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: r8-mapping-${{ inputs.version }}
           path: app/build/outputs/mapping/carRelease/mapping.txt
           retention-days: 90
       - name: Upload validation reports
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: beta-validation
           path: |
@@ -173,7 +173,7 @@ jobs:
           echo "## Published MG4Dash $VERSION" >> "$GITHUB_STEP_SUMMARY"
           gh release view "v$VERSION" --json url --jq .url >> "$GITHUB_STEP_SUMMARY"
       - name: Upload signed APK
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: beta-apk
           path: dist/*
