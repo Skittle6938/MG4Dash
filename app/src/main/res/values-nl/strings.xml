@@ -449,7 +449,9 @@
     <string name="vh_tire_fr">Rechtsvoor</string>
     <string name="vh_tire_rl">Linksachter</string>
     <string name="vh_tire_rr">Rechtsachter</string>
-    <string name="vh_tire_check">Controleren</string>
+    <string name="vh_tire_check">TPMS · Controleren</string>
+    <string name="vh_tire_watch">In de gaten houden</string>
+    <string name="vh_tire_low">Waarschuwing lage druk</string>
     <string name="en_ac_input">AC-ingang %1$d V · %2$s A</string>
     <string name="en_stop_reason">laden gestopt: %1$s</string>
     <string name="sr_fault">storing</string>

@@ -15,6 +15,7 @@ import app.mg4dash.showroom.CarStage
 import app.mg4dash.showroom.MiniSwitch
 import app.mg4dash.showroom.ShowroomKit
 import app.mg4dash.showroom.StyleWindow
+import app.mg4dash.showroom.TyreStatus
 import app.mg4dash.system.Apps
 import app.mg4dash.system.Units
 import app.mg4dash.ui.PageActivity
@@ -319,15 +320,12 @@ class VehicleActivity : PageActivity() {
         val data = withContext(Dispatchers.IO) {
             (0..3).map { i -> Triple(CarProps.getInt(0x21401553 + i), CarProps.getInt(0x2140155b + i), CarProps.getInt(0x21401557 + i)) }
         }
-        // Only a real warning from a sensor lights the ring (26/11)
-        stage.frontRing.on = data.take(2).any { it.third.let { st -> st != null && st != 0 } }
-        stage.rearRing.on = data.drop(2).any { it.third.let { st -> st != null && st != 0 } }
         data.forEachIndexed { i, (kpa, temp, state) ->
-            val alert = state != null && state != 0
-            val p = kpa?.takeIf { it in 50..600 }?.let { Units.pressureText(this, it) } ?: "—"
+            val pressure = kpa?.takeIf { it in 50..600 }
+            val p = pressure?.let { Units.pressureText(this, it) } ?: "—"
             val side = getString(if (i % 2 == 0) R.string.sr_left else R.string.sr_right)
-            val sub = listOfNotNull(side, if (alert) getString(R.string.vh_tire_check) else temp?.takeIf { it in -40..150 }?.let { "$it °C" }).joinToString(" · ")
-            (if (i < 2) stage.front else stage.rear).set(i % 2 == 0, p, sub, alert)
+            val sub = temp?.takeIf { it in -40..150 }?.let { "$side · $it °C" } ?: side
+            (if (i < 2) stage.front else stage.rear).set(i % 2 == 0, p, sub, TyreStatus.from(pressure, state))
         }
     }
 

@@ -449,7 +449,9 @@
     <string name="vh_tire_fr">Anteriore dx</string>
     <string name="vh_tire_rl">Posteriore sx</string>
     <string name="vh_tire_rr">Posteriore dx</string>
-    <string name="vh_tire_check">Controllare</string>
+    <string name="vh_tire_check">TPMS · Controllare</string>
+    <string name="vh_tire_watch">Da monitorare</string>
+    <string name="vh_tire_low">Allarme pressione bassa</string>
     <string name="en_ac_input">Ingresso CA %1$d V · %2$s A</string>
     <string name="en_stop_reason">ricarica interrotta: %1$s</string>
     <string name="sr_fault">guasto</string>

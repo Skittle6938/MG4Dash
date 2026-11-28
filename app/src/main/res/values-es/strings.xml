@@ -449,7 +449,9 @@
     <string name="vh_tire_fr">Delantero der.</string>
     <string name="vh_tire_rl">Trasero izq.</string>
     <string name="vh_tire_rr">Trasero der.</string>
-    <string name="vh_tire_check">Revisar</string>
+    <string name="vh_tire_check">TPMS · Revisar</string>
+    <string name="vh_tire_watch">Vigilar</string>
+    <string name="vh_tire_low">Alerta de baja presión</string>
     <string name="en_ac_input">Entrada CA %1$d V · %2$s A</string>
     <string name="en_stop_reason">carga detenida: %1$s</string>
     <string name="sr_fault">avería</string>

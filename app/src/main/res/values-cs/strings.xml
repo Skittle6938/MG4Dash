@@ -449,7 +449,9 @@
     <string name="vh_tire_fr">Přední pravá</string>
     <string name="vh_tire_rl">Zadní levá</string>
     <string name="vh_tire_rr">Zadní pravá</string>
-    <string name="vh_tire_check">Zkontrolovat</string>
+    <string name="vh_tire_check">TPMS · Zkontrolovat</string>
+    <string name="vh_tire_watch">Sledovat</string>
+    <string name="vh_tire_low">Výstraha nízkého tlaku</string>
     <string name="en_ac_input">Vstup AC %1$d V · %2$s A</string>
     <string name="en_stop_reason">nabíjení zastaveno: %1$s</string>
     <string name="sr_fault">porucha</string>

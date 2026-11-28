@@ -449,7 +449,9 @@
     <string name="vh_tire_fr">Ön sağ</string>
     <string name="vh_tire_rl">Arka sol</string>
     <string name="vh_tire_rr">Arka sağ</string>
-    <string name="vh_tire_check">Kontrol edin</string>
+    <string name="vh_tire_check">TPMS · Kontrol edin</string>
+    <string name="vh_tire_watch">Takip edin</string>
+    <string name="vh_tire_low">Düşük basınç uyarısı</string>
     <string name="en_ac_input">AC giriş %1$d V · %2$s A</string>
     <string name="en_stop_reason">şarj durdu: %1$s</string>
     <string name="sr_fault">arıza</string>

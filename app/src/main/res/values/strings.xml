@@ -449,7 +449,9 @@
     <string name="vh_tire_fr">Front right</string>
     <string name="vh_tire_rl">Rear left</string>
     <string name="vh_tire_rr">Rear right</string>
-    <string name="vh_tire_check">Check</string>
+    <string name="vh_tire_check">TPMS · Check</string>
+    <string name="vh_tire_watch">Monitor</string>
+    <string name="vh_tire_low">Low pressure alert</string>
     <string name="en_ac_input">AC input %1$d V · %2$s A</string>
     <string name="en_stop_reason">charge stopped: %1$s</string>
     <string name="sr_fault">fault</string>

@@ -449,7 +449,9 @@
     <string name="vh_tire_fr">Avant droit</string>
     <string name="vh_tire_rl">Arrière gauche</string>
     <string name="vh_tire_rr">Arrière droit</string>
-    <string name="vh_tire_check">À vérifier</string>
+    <string name="vh_tire_check">TPMS · À vérifier</string>
+    <string name="vh_tire_watch">À surveiller</string>
+    <string name="vh_tire_low">Alerte pression basse</string>
     <string name="en_ac_input">Entrée AC %1$d V · %2$s A</string>
     <string name="en_stop_reason">charge arrêtée : %1$s</string>
     <string name="sr_fault">défaut</string>

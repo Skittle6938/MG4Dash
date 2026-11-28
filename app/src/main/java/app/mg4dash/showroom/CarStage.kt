@@ -13,6 +13,7 @@ import android.widget.TextView
 import app.mg4dash.R
 import app.mg4dash.ui.Kit
 import app.mg4dash.ui.Themes
+import app.mg4dash.ui.put
 
 /**
  * The Vehicle page's centre (redesign "Showroom", 26/11): the driver's car, in three-quarter view or in profile with
@@ -51,54 +52,63 @@ class CarStage(context: Context, private val kit: Kit, private val look: CarLook
         setOnClickListener { onStyle() }
     }
 
+    private class TyreSide(val view: LinearLayout, val pressure: TextView, val detail: TextView, val status: TextView)
+
     inner class TyreLabel(t: String) {
         val view: LinearLayout = kit.column().apply { gravity = Gravity.CENTER_HORIZONTAL }
-        val left = side(); val right = side()
+        private val left = side()
+        private val right = side()
+        private var wheelX = 0f
+
         init {
             view.addView(kit.text(t.uppercase(), 12f, R.color.text_title).apply { letterSpacing = .1f })
             val r = kit.row()
-            r.addView(left.first, kit.lp(-2, -2))
+            r.addView(left.view, kit.lp(-2, -2))
             r.addView(View(context).apply { setBackgroundColor(Themes.color(context, R.color.panel_border)) }, kit.lp(1, kit.dp(38), l = 16, r = 16))
-            r.addView(right.first, kit.lp(-2, -2))
+            r.addView(right.view, kit.lp(-2, -2))
             view.addView(r, kit.lp(-2, -2, t = 5))
+            view.addOnLayoutChangeListener { _, _, _, _, _, _, _, _, _ -> alignUnderWheel() }
         }
-        private fun side(): Triple<LinearLayout, TextView, TextView> {
+
+        private fun side(): TyreSide {
             val col = kit.column().apply { gravity = Gravity.CENTER_HORIZONTAL }
-            val p = kit.text("—", 28f, light = true)
-            val s = kit.text("", 20f, R.color.text_sub)   // side and temperature, readable at a glance (26/11)
-            col.addView(p); col.addView(s)
-            return Triple(col, p, s)
+            val pressure = kit.text("—", 28f, light = true)
+            val detail = kit.text("", 20f, R.color.text_sub)
+            val status = kit.text("", 15f).apply { minLines = 1; visibility = View.INVISIBLE }
+            col.addView(pressure)
+            col.addView(detail)
+            col.addView(status, kit.lp(-2, -2, t = 2))
+            return TyreSide(col, pressure, detail, status)
         }
-        fun set(leftSide: Boolean, pressure: String, sub: String, alert: Boolean) {
-            val (_, p, s) = if (leftSide) left else right
-            p.text = pressure; s.text = sub
-            val c = Themes.color(context, if (alert) R.color.accent_danger else R.color.text_value)
-            p.setTextColor(c); s.setTextColor(if (alert) c else Themes.color(context, R.color.text_sub))
+
+        internal fun set(leftSide: Boolean, pressure: String, detail: String, status: TyreStatus) {
+            val tyre = if (leftSide) left else right
+            tyre.pressure.put(pressure)
+            tyre.detail.put(detail)
+            tyre.status.put(status.label?.let(context::getString))
+            tyre.status.visibility = if (status.label == null) View.INVISIBLE else View.VISIBLE
+            val light = Themes.isLight(context)
+            val color = when (status) {
+                TyreStatus.NORMAL -> Themes.color(context, R.color.text_value)
+                TyreStatus.WATCH -> if (light) 0xFF855300.toInt() else 0xFFFFC070.toInt()
+                TyreStatus.LOW_PRESSURE, TyreStatus.SENSOR_WARNING ->
+                    if (light) 0xFFAB2438.toInt() else Themes.color(context, R.color.accent_danger)
+            }
+            tyre.pressure.setTextColor(color)
+            tyre.status.setTextColor(color)
+        }
+
+        fun place(x: Float, y: Float) {
+            wheelX = x
+            view.translationY = y
+            alignUnderWheel()
+        }
+
+        private fun alignUnderWheel() {
+            val maxX = (this@CarStage.width - view.width).coerceAtLeast(0).toFloat()
+            view.translationX = (wheelX - view.width / 2f).coerceIn(0f, maxX)
         }
     }
-
-    /** A pulsing red ring around the wheels of an axle whose tyre needs checking (the sensor reports a warning). */
-    inner class Ring : View(context) {
-        var on = false
-            set(v) { if (field != v) { field = v; invalidate() } }
-        private val p = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG).apply { style = android.graphics.Paint.Style.STROKE }
-        private val red = Themes.color(context, R.color.accent_danger)
-        init { setLayerType(LAYER_TYPE_SOFTWARE, null) }
-        override fun onDraw(c: android.graphics.Canvas) {
-            if (!on) return
-            val t = (android.os.SystemClock.uptimeMillis() % 1600L) / 1600f
-            val a = .55f + .45f * kotlin.math.cos(t * 2 * Math.PI).toFloat()
-            val inset = kit.dp(12).toFloat()
-            p.color = red; p.alpha = (a * 110).toInt(); p.strokeWidth = kit.dp(12).toFloat(); p.maskFilter = android.graphics.BlurMaskFilter(kit.dp(10).toFloat(), android.graphics.BlurMaskFilter.Blur.NORMAL)
-            c.drawOval(inset, inset, width - inset, height - inset, p)
-            p.maskFilter = null; p.alpha = (a * 255).toInt(); p.strokeWidth = kit.dp(3).toFloat()
-            c.drawOval(inset, inset, width - inset, height - inset, p)
-            postInvalidateDelayed(40)
-        }
-    }
-
-    val frontRing = Ring()
-    val rearRing = Ring()
 
     private val gestures = GestureDetector(context, object : GestureDetector.SimpleOnGestureListener() {
         override fun onDown(e: MotionEvent) = car.box.contains(e.x, e.y)
@@ -110,7 +120,6 @@ class CarStage(context: Context, private val kit: Kit, private val look: CarLook
         clipChildren = true
         addView(car, LayoutParams(-1, -1))
         addView(lights, LayoutParams(-1, -1))
-        addView(frontRing, LayoutParams(0, 0)); addView(rearRing, LayoutParams(0, 0))
         head.addView(title); head.addView(name, kit.lp(-2, -2, t = 5))
         addView(head, LayoutParams(-1, -2))
         addView(gearBox, LayoutParams(-2, -2, Gravity.TOP or Gravity.END).apply { topMargin = kit.dp(4); rightMargin = kit.dp(8) })
@@ -165,13 +174,6 @@ class CarStage(context: Context, private val kit: Kit, private val look: CarLook
         val gF = top + pt("front", "ground", 1) * k
         val gR = top + pt("rear", "ground", 1) * k
         car.groundY = gF
-        // The rings around the wheels (front and rear centres, radii of car.json)
-        listOf(frontRing to "front", rearRing to "rear").forEach { (ring, key) ->
-            val cxw = cx + pt(key, "c", 0) * k; val cyw = top + pt(key, "c", 1) * k
-            val rx = an.getJSONObject(key).getDouble("rx").toFloat() * k + kit.dp(21); val ry = an.getJSONObject(key).getDouble("ry").toFloat() * k + kit.dp(21)
-            ring.layoutParams = (ring.layoutParams as LayoutParams).apply { width = (2 * rx).toInt(); height = (2 * ry).toInt() }
-            ring.translationX = cxw - rx; ring.translationY = cyw - ry
-        }
         car.reflection = !q
         car.floorY = if (q) gR + 65f * s else gF - 2f * s
         car.floorH = if (q) 170f * s else 120f * s
@@ -180,9 +182,9 @@ class CarStage(context: Context, private val kit: Kit, private val look: CarLook
         head.gravity = if (q) Gravity.START else Gravity.CENTER_HORIZONTAL
         title.gravity = head.gravity   // the title fills the column: its text is placed like the name
         (head.layoutParams as LayoutParams).apply { gravity = if (q) Gravity.START or Gravity.TOP else Gravity.CENTER_HORIZONTAL or Gravity.TOP; topMargin = kit.dp(4); leftMargin = if (q) kit.dp(8) else 0 }
-        listOf(front.view to (fx to gF), rear.view to (rx to gR)).forEach { (v, p) ->
-            v.post { v.translationX = (p.first - v.width / 2f).coerceIn(0f, (w - v.width).coerceAtLeast(0f)); v.translationY = p.second + 40f * s - kit.dp(16) }
-        }
+        val labelOffset = 40f * s - kit.dp(16)
+        front.place(fx, gF + labelOffset)
+        rear.place(rx, gR + labelOffset)
         car.invalidate()
     }
 }

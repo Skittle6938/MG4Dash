@@ -447,7 +447,9 @@ vh_tire_fl|Front left|Avant gauche|Vorne links|Delantero izq.|Anteriore sx|Links
 vh_tire_fr|Front right|Avant droit|Vorne rechts|Delantero der.|Anteriore dx|Rechtsvoor|Ön sağ|Přední pravá
 vh_tire_rl|Rear left|Arrière gauche|Hinten links|Trasero izq.|Posteriore sx|Linksachter|Arka sol|Zadní levá
 vh_tire_rr|Rear right|Arrière droit|Hinten rechts|Trasero der.|Posteriore dx|Rechtsachter|Arka sağ|Zadní pravá
-vh_tire_check|Check|À vérifier|Prüfen|Revisar|Controllare|Controleren|Kontrol edin|Zkontrolovat
+vh_tire_check|TPMS · Check|TPMS · À vérifier|RDKS · Prüfen|TPMS · Revisar|TPMS · Controllare|TPMS · Controleren|TPMS · Kontrol edin|TPMS · Zkontrolovat
+vh_tire_watch|Monitor|À surveiller|Beobachten|Vigilar|Da monitorare|In de gaten houden|Takip edin|Sledovat
+vh_tire_low|Low pressure alert|Alerte pression basse|Reifendruck zu niedrig|Alerta de baja presión|Allarme pressione bassa|Waarschuwing lage druk|Düşük basınç uyarısı|Výstraha nízkého tlaku
 en_ac_input|AC input %1$d V · %2$s A|Entrée AC %1$d V · %2$s A|AC-Eingang %1$d V · %2$s A|Entrada CA %1$d V · %2$s A|Ingresso CA %1$d V · %2$s A|AC-ingang %1$d V · %2$s A|AC giriş %1$d V · %2$s A|Vstup AC %1$d V · %2$s A
 en_stop_reason|charge stopped: %1$s|charge arrêtée : %1$s|Laden gestoppt: %1$s|carga detenida: %1$s|ricarica interrotta: %1$s|laden gestopt: %1$s|şarj durdu: %1$s|nabíjení zastaveno: %1$s
 sr_fault|fault|défaut|Störung|avería|guasto|storing|arıza|porucha

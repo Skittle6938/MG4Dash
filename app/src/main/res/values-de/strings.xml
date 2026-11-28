@@ -449,7 +449,9 @@
     <string name="vh_tire_fr">Vorne rechts</string>
     <string name="vh_tire_rl">Hinten links</string>
     <string name="vh_tire_rr">Hinten rechts</string>
-    <string name="vh_tire_check">Prüfen</string>
+    <string name="vh_tire_check">RDKS · Prüfen</string>
+    <string name="vh_tire_watch">Beobachten</string>
+    <string name="vh_tire_low">Reifendruck zu niedrig</string>
     <string name="en_ac_input">AC-Eingang %1$d V · %2$s A</string>
     <string name="en_stop_reason">Laden gestoppt: %1$s</string>
     <string name="sr_fault">Störung</string>
