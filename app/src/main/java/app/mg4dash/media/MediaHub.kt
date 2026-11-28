@@ -919,7 +919,7 @@ object MediaHub {
     internal fun wheelSilenceEndsIn(src: String?): Long? = if (src == RADIO) null else WHEEL_SILENCE_TAIL_MS
 
     fun wheelPressed(forward: Boolean?, playPause: Boolean = false) {
-        if (forward != null) userAction("wheel ${if (forward) "next" else "previous"}")
+        if (forward != null) { userAction("wheel ${if (forward) "next" else "previous"}"); watchCarPlaySkip(if (forward) "wheel next" else "wheel previous") }
         // A press during the silence: the volume back before the car applies this key's step, which would be lost
         else endWheelSilence(if (playPause) "play / pause key" else "volume key")
         val app = current?.packageName?.takeIf { otherAppShown() } ?: recentBack() ?: return
@@ -1506,7 +1506,9 @@ object MediaHub {
         fun bestFor(pkg: String): MediaController? {
             if (gone(pkg)) return null
             val all = candidates.filter { it.packageName == pkg }
-            return all.firstOrNull { it.metadata != null } ?: all.firstOrNull { it.playbackState != null }
+            // #142: the playing one with a title first, so a session left behind by the player never hides the live one
+            return all.firstOrNull { it.metadata != null && it.playbackState?.state == PlaybackState.STATE_PLAYING }
+                ?: all.firstOrNull { it.metadata != null } ?: all.firstOrNull { it.playbackState != null }
                 ?: browserControllers[pkg] ?: all.firstOrNull()
         }
         val pinned = pinnedPkg?.let { bestFor(it) }
@@ -1566,7 +1568,7 @@ object MediaHub {
 
     private val callback = object : MediaController.Callback() {
         override fun onPlaybackStateChanged(state: PlaybackState?) = reevaluate()
-        override fun onMetadataChanged(metadata: MediaMetadata?) = publish()
+        override fun onMetadataChanged(metadata: MediaMetadata?) { metadataCallbacks++; publish() }
         override fun onSessionDestroyed() {
             // The callback does not say which player: restart browsers whose session disappeared.
             browserControllers.toMap().filterKeys { it == RADIO }.forEach { (pkg, c) ->
@@ -2037,7 +2039,7 @@ object MediaHub {
         if (radioShown) { radioCommand { SaicRadio.next() }; return }
         if (usbShown) { usbCommand { SaicMedia.usbNext() }; return }
         val c = current ?: return
-        if (isAndroidAuto(c.packageName)) aaControl(c, AA_NEXT, KeyEvent.KEYCODE_MEDIA_NEXT) else c.transportControls.skipToNext()
+        if (isAndroidAuto(c.packageName)) { aaControl(c, AA_NEXT, KeyEvent.KEYCODE_MEDIA_NEXT); watchCarPlaySkip("next") } else c.transportControls.skipToNext()
     }
 
     fun previous() {
@@ -2045,7 +2047,7 @@ object MediaHub {
         if (radioShown) { radioCommand { SaicRadio.previous() }; return }
         if (usbShown) { usbCommand { SaicMedia.usbPrevious() }; return }
         val c = current ?: return
-        if (isAndroidAuto(c.packageName)) aaControl(c, AA_PREVIOUS, KeyEvent.KEYCODE_MEDIA_PREVIOUS) else c.transportControls.skipToPrevious()
+        if (isAndroidAuto(c.packageName)) { aaControl(c, AA_PREVIOUS, KeyEvent.KEYCODE_MEDIA_PREVIOUS); watchCarPlaySkip("previous") } else c.transportControls.skipToPrevious()
     }
 
     // ── Android Auto: playback commands through the allgo service (as SAIC RemoteUI does) ──
@@ -2077,7 +2079,73 @@ object MediaHub {
      * keys, those of the wheel, go to the active session.
      */
     @Volatile private var carPlay = false
+        set(v) {
+            field = v
+            // #142: bound as soon as CarPlay is the source, so the first skip goes through its service like the
+            // next ones, never through the system media key while the binding is still on its way
+            if (v && cpService == null && !cpBinding) main.post { bindCarPlay() }
+        }
     private var carPlayLogged: String? = null
+    @Volatile private var cpBinding = false
+
+    /** Metadata callbacks received (any player): the #142 log tells a silent player from a missed callback. */
+    @Volatile private var metadataCallbacks = 0
+    /** Lyrics card on screen / karaoke open (#142 log only: the issue happens with them). */
+    @Volatile var lyricsCardShown = false
+    @Volatile var karaokeShown = false
+    private var lastSkipRepairAt = 0L
+    private var skipWatchAt = 0L
+
+    /**
+     * #142, 4 s after a skip on CarPlay: "ok" when the song shown changed; "other" when another session of the same
+     * player has a new song (MG4Dash reads the wrong one); "stuck" when no session of it changed (the player is silent).
+     */
+    internal fun skipCheck(before: String, shown: String, sessions: List<String?>): String = when {
+        shown != before -> "ok"
+        sessions.any { it != null && it != before } -> "other"
+        else -> "stuck"
+    }
+
+    private fun trackOf(c: MediaController): String? = try { c.metadata }  catch (_: Exception) { null }?.let {
+        "${it.getString(MediaMetadata.METADATA_KEY_TITLE) ?: it.getString(MediaMetadata.METADATA_KEY_DISPLAY_TITLE) ?: ""}|" +
+            (it.getString(MediaMetadata.METADATA_KEY_ARTIST) ?: it.getString(MediaMetadata.METADATA_KEY_DISPLAY_SUBTITLE) ?: "")
+    }
+
+    private fun hash(s: String?) = s?.let { Integer.toHexString(it.hashCode()) }
+
+    /**
+     * #142: CarPlay's song not changed 4 s after a skip, while the music goes on. Logged with every session of the
+     * player, the lyrics card's state and whether a lyrics request is running; then MG4Dash's link to AllGo's player
+     * is rebuilt (sessions watched again, its media browser reconnected), once a minute at most.
+     */
+    private fun watchCarPlaySkip(what: String) {
+        if (!carPlay || current?.let { isAndroidAuto(it.packageName) } != true) return
+        // One check per press: the wheel reaches both wheelPressed and next()
+        val at = android.os.SystemClock.uptimeMillis()
+        if (at - skipWatchAt < 1_000) return
+        skipWatchAt = at
+        val before = "${_now.value.title}|${_now.value.artist}"
+        val callbacks = metadataCallbacks
+        main.postDelayed({
+            val c = current?.takeIf { carPlay && isAndroidAuto(it.packageName) } ?: return@postDelayed
+            val all = (lastCandidates.filter { it.packageName == c.packageName } + listOfNotNull(browserControllers[c.packageName]))
+                .distinctBy { it.sessionToken }
+            val sessions = all.map { trackOf(it) }
+            val shown = "${_now.value.title}|${_now.value.artist}"
+            val verdict = skipCheck(before, shown, sessions)
+            Log.i(TAG, "CarPlay $what after 4 s: $verdict (track ${hash(before)} → shown ${hash(shown)}; sessions " +
+                all.joinToString { "${hash(trackOf(it))}/${it.playbackState?.state}${if (it.sessionToken == c.sessionToken) "*" else ""}" } +
+                "), metadata callbacks +${metadataCallbacks - callbacks}, lyrics card $lyricsCardShown, karaoke $karaokeShown, " +
+                "lyrics request ${LyricsRepo.busy}, CarPlay service ${cpService != null}")
+            if (verdict == "ok") return@postDelayed
+            val now = android.os.SystemClock.uptimeMillis()
+            if (now - lastSkipRepairAt < 60_000) return@postDelayed
+            lastSkipRepairAt = now
+            watched.clear()
+            if (browserControllers[c.packageName] != null) reconnectBrowser(c.packageName, "#142: same song 4 s after a skip ($verdict)")
+            reevaluate()
+        }, 4_000)
+    }
 
     /**
      * allgo's CarPlay service (ICarPlayService, found in AllgoCarplay_EH32):
@@ -2088,14 +2156,16 @@ object MediaHub {
     @Volatile private var cpService: android.os.IBinder? = null
     private val cpConnection = object : android.content.ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, service: android.os.IBinder?) { cpService = service; Log.i(TAG, "CarPlay service connected") }
-        override fun onServiceDisconnected(name: ComponentName?) { cpService = null }
+        override fun onServiceDisconnected(name: ComponentName?) { cpService = null; Log.i(TAG, "CarPlay service disconnected") }
     }
 
     private fun bindCarPlay() {
         val ctx = appContext ?: return
+        if (cpService != null || cpBinding) return
         try {
             val ok = ctx.bindService(Intent().setComponent(ComponentName("com.allgo.carplay.service", "com.allgo.carplay.service.CarPlayService")),
                 cpConnection, android.content.Context.BIND_AUTO_CREATE)
+            cpBinding = ok
             Log.i(TAG, "binding CarPlay service: $ok")
         } catch (e: Exception) { Log.w(TAG, "CarPlay service: ${e.message}") }
     }

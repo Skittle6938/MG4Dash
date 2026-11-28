@@ -1,6 +1,7 @@
 package app.mg4dash
 
 import app.mg4dash.media.MediaHub
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -18,6 +19,15 @@ class CarPlayHandoverTest {
     @Test fun rescueOnceWhenTheRadioStillPlays() {
         assertTrue(MediaHub.handoverRetry(taken = false, fromRadio = true, radioPlaying = true, attempt = 0))
         assertFalse("once only", MediaHub.handoverRetry(taken = false, fromRadio = true, radioPlaying = true, attempt = 1))
+    }
+
+    /** #142: 4 s after a skip, the song shown changed, or another session of the player has it, or none changed. */
+    @Test fun skipCheckTellsAnotherSessionFromAStuckPlayer() {
+        assertEquals("ok", MediaHub.skipCheck("A|x", "B|y", listOf("B|y")))
+        assertEquals("other", MediaHub.skipCheck("A|x", "A|x", listOf("A|x", "B|y")))
+        assertEquals("stuck", MediaHub.skipCheck("A|x", "A|x", listOf("A|x")))
+        assertEquals("stuck", MediaHub.skipCheck("A|x", "A|x", listOf(null)))
+        assertEquals("stuck", MediaHub.skipCheck("A|x", "A|x", emptyList()))
     }
 
     @Test fun noRescueWhenTaken() = assertFalse(MediaHub.handoverRetry(taken = true, fromRadio = true, radioPlaying = true, attempt = 0))

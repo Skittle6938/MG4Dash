@@ -39,6 +39,9 @@ object LyricsRepo {
         if (first) watchWifi(context.applicationContext)
     }
 
+    /** A lyrics request on the network right now (#142 log). */
+    val busy: Boolean get() = activeConnections.isNotEmpty()
+
     fun cancelActiveRequest() {
         activeConnections.toList().forEach { connection -> try { connection.disconnect() } catch (_: Exception) { } }
     }

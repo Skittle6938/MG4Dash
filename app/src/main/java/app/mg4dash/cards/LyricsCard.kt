@@ -401,10 +401,12 @@ class LyricsCard(context: Context) : LinearLayout(context), HomeCard {
             if (!LyricsOverlay.active) LyricsRepo.cancelActiveRequest()
             liveScope = null
             live.set(false) {}
+            MediaHub.lyricsCardShown = false
             return
         }
         live.set(true) {
             liveScope = this
+            MediaHub.lyricsCardShown = true
             isActivelyDisplayed = true
             LyricsRepo.start(activity)
             launch { MediaHub.now.collect { show(it) } }
@@ -540,6 +542,7 @@ class LyricsCard(context: Context) : LinearLayout(context), HomeCard {
         karaokeRows = rows; karaokeTitle = songTitle; karaokeArtist = artist
         karaokeSynced = synced; karaokePlain = scroll; karaokePlainText = plain; karaokeRoot = root
         karaokeOpen = true
+        MediaHub.karaokeShown = true
         karaokeOverlayButton = overlayToggle
         karaoke = Windows.fullscreen(activity, root,
             prepare = { dialog ->
@@ -579,7 +582,7 @@ class LyricsCard(context: Context) : LinearLayout(context), HomeCard {
                 drawKaraoke(position(latest))
             },
             onDismiss = {
-                karaokeOpen = false; karaoke = null; karaokeRows = emptyList(); karaokeRoot = null; karaokeReel?.run(false); karaokeReel = null
+                karaokeOpen = false; MediaHub.karaokeShown = false; karaoke = null; karaokeRows = emptyList(); karaokeRoot = null; karaokeReel?.run(false); karaokeReel = null
                 karaokeShift = null; karaokeBox = null; karaokeEmpty = null; karaokeEmptyText = null; karaokeEmptyFor = null; karaokeEmptyButton = null
                 karaokeTitle = null; karaokeArtist = null
                 karaokeOverlayButton = null
